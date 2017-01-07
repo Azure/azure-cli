@@ -1,0 +1,82 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]"
+    },
+    "vmName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_DS1",
+      "metadata": {
+        "description": "The VM Size that should be created.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info."
+      }
+    },
+    "adminUserName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "adminPassword": {
+      "type": "securestring"
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": { }
+    }
+  },
+  "variables": {
+  },
+  "resources": [
+      {
+          "name": "[parameters('vmName')]",
+          "type": "Microsoft.Compute/virtualMachines",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+              "[concat('Microsoft.Storage/storageAccounts/', parameters('storageAccount'))]",
+              "[concat('Microsoft.Network/networkInterfaces/', parameters('nicName'))]"
+          ],
+          "tags": "[parameters('tags')]",
+          "properties": {
+              "hardwareProfile": {
+                  "vmSize": "[parameters('vmSize')]"
+              },
+              "osProfile": {
+                  "computerName": "[parameters('vmName')]",
+                  "adminUsername": "[parameters('adminUsername')]",
+                  "adminPassword": "[parameters('adminPassword')]"
+              },
+              "storageProfile": {
+                  "imageReference": {
+                      "publisher": "[variables('vmImagePublisher')]",
+                      "offer": "[variables('vmImageOffer')]",
+                      "sku": "[parameters('vmUbuntuOSVersion')]",
+                      "version": "latest"
+                  },
+                  "osDisk": {
+                      "name": "vmOSDisk",
+                      "vhd": {
+                          "uri": "[concat('http://', parameters('storageAccount'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmOSDiskName'), '.vhd')]"
+                      },
+                      "caching": "ReadWrite",
+                      "createOption": "FromImage"
+                  }
+              },
+              "networkProfile": {
+                  "networkInterfaces": [
+                      {
+                          "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('nicName'))]"
+                      }
+                  ]
+              }
+          }
+      }
+  ],
+  "outputs": {
+  }
+}

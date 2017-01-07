@@ -67,25 +67,9 @@ class VMImageListThruServiceScenarioTest(VCRTestBase):
         assert result.index('15.04') >= 0
 
 
-class VMCombinedListTest(VCRTestBase):
-
-    def __init__(self, test_method):
-        super(VMCombinedListTest, self).__init__(__file__, test_method)
-        if not self.playback:
-            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
-
-    def test_vm_combined_list(self):
-        self.execute()
-
-    def body(self):
-        all_vms = self.cmd('vm list')
-        some_vms = self.cmd('vm list -g travistestresourcegroup')
-        assert len(all_vms) > len(some_vms)
-
-
 class VMOpenPortTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(VMOpenPortTest, self).__init__(__file__, test_method, resource_group='open_port_test_rg1')
+        super(VMOpenPortTest, self).__init__(__file__, test_method, resource_group='cli_test_open_port')
         self.vm_name = 'vm1'
 
     def set_up(self):
@@ -94,8 +78,8 @@ class VMOpenPortTest(ResourceGroupVCRTestBase):
         vm = self.vm_name
         self.cmd('vm create -g {0} -l westus -n {1} --admin-username ubuntu '
                  '--image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password PasswordPassword1! '
-                 '--public-ip-address-allocation dynamic --public-ip-address-type new '
-                 '--authentication-type password'.format(rg, vm))
+                 '--public-ip-address-allocation dynamic '
+                 '--authentication-type password --use-native-disk'.format(rg, vm))
 
     def test_vm_open_port(self):
         self.execute()
@@ -117,29 +101,10 @@ class VMOpenPortTest(ResourceGroupVCRTestBase):
                  checks=JMESPathCheck("length(securityRules[?name == 'open-port-cmd'])", 1))
 
 
-class VMResizeTest(VCRTestBase):
-    def __init__(self, test_method):
-        super(VMResizeTest, self).__init__(__file__, test_method)
-        if not self.playback:
-            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
-
-    def test_vm_resize(self):
-        self.execute()
-
-    def body(self):
-        group = 'yugangw4'
-        vm_name = 'yugangw4-1'
-        vm = self.cmd('vm show -g {} -n {}'.format(group, vm_name))
-        new_size = 'Standard_A4' if vm['hardwareProfile']['vmSize'] == 'Standard_A3' else 'Standard_A3'
-        self.cmd('vm resize -g {} -n {} --size {}'.format(group, vm_name, new_size),
-                 checks=JMESPathCheck('hardwareProfile.vmSize', new_size))
-
-
 class VMShowListSizesListIPAddressesScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(VMShowListSizesListIPAddressesScenarioTest, self).__init__(__file__, test_method, resource_group='cliTestRg_VmListIpAddresses')
-        self.deployment_name = 'azurecli-test-deployment-vm-list-ips'
+        super(VMShowListSizesListIPAddressesScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_vm_list_ip')
         self.location = 'westus'
         self.vm_name = 'vm-with-public-ip'
         self.ip_allocation_method = 'dynamic'
@@ -152,17 +117,15 @@ class VMShowListSizesListIPAddressesScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('vm list-ip-addresses --resource-group {}'.format(self.resource_group), checks=NoneCheck())
         self.cmd('vm create --resource-group {0} --location {1} -n {2} --admin-username ubuntu '
                  '--image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password testPassword0 '
-                 '--deployment-name {3} --public-ip-address-allocation {4} '
-                 '--authentication-type password'.format(
-                     self.resource_group, self.location, self.vm_name, self.deployment_name,
-                     self.ip_allocation_method))
-
-        result = self.cmd('vm show --resource-group {} --name {} -d'.format(self.resource_group, self.vm_name), checks=[
-            JMESPathCheck('type(@)', 'object'),
-            JMESPathCheck('name', self.vm_name),
-            JMESPathCheck('location', self.location),
-            JMESPathCheck('resourceGroup', self.resource_group),
-            JMESPathCheck('powerState', 'VM running')
+                 '--public-ip-address-allocation {3} '
+                 '--authentication-type password --use-native-disk'.format(
+                     self.resource_group, self.location, self.vm_name, self.ip_allocation_method))
+        self.cmd('vm show --resource-group {} --name {} --expand instanceView'.format(
+            self.resource_group, self.vm_name), checks=[
+                JMESPathCheck('type(@)', 'object'),
+                JMESPathCheck('name', self.vm_name),
+                JMESPathCheck('location', self.location),
+                JMESPathCheck('resourceGroup', self.resource_group),
         ])
         self.assertEqual(4, len(result['publicIps'].split('.')))
 
@@ -285,16 +248,15 @@ class VMImageShowScenarioTest(VCRTestBase):
 class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(VMGeneralizeScenarioTest, self).__init__(__file__, test_method, resource_group='cliTestRg_VmGeneralize')
-        self.deployment_name = 'azurecli-test-deployment-vm-generalize'
+        super(VMGeneralizeScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_generalize_vm')
         self.location = 'westus'
         self.vm_name = 'vm-generalize'
 
     def body(self):
         self.cmd('vm create --resource-group {0} --location {1} --name {2} --admin-username ubuntu '
                  '--image UbuntuLTS --admin-password testPassword0 --authentication-type password '
-                 '--deployment-name {3}'.format(
-                     self.resource_group, self.location, self.vm_name, self.deployment_name))
+                 '--use-native-disk'.format(
+                     self.resource_group, self.location, self.vm_name))
         self.cmd('vm stop --resource-group {} --name {}'.format(self.resource_group, self.vm_name))
         # Should be able to generalize the VM after it has been stopped
         self.cmd('vm generalize --resource-group {} --name {}'.format(self.resource_group, self.vm_name),
@@ -310,13 +272,12 @@ class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
 class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # pylint:disable=too-many-instance-attributes
 
     def __init__(self, test_method):
-        super(VMCreateAndStateModificationsScenarioTest, self).__init__(__file__, test_method, resource_group='cliTestRg_VmStateMod2')
-        self.deployment_name = 'azurecli-test-deployment-vm-state-mod2'
+        super(VMCreateAndStateModificationsScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_vm_state_mod', debug=True)
         self.location = 'eastus'
         self.vm_name = 'vm-state-mod'
         self.nsg_name = 'mynsg'
         self.ip_name = 'mypubip'
-        self.storage_name = 'mystorage010101abcd'
+        self.storage_name = 'ab394fvkdj34'
         self.vnet_name = 'myvnet'
 
     def test_vm_create_state_modifications(self):
@@ -338,11 +299,11 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # py
         self.cmd('vm list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
         self.cmd('vm create --resource-group {0} --location {1} --name {2} --admin-username ubuntu '
                  '--image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password testPassword0 '
-                 '--deployment-name {3} --authentication-type password '
-                 '--tags firsttag=1 secondtag=2 thirdtag --nsg {4} --public-ip-address {5} '
-                 '--storage-account {6} --vnet {7}'.format(
-                     self.resource_group, self.location, self.vm_name, self.deployment_name,
-                     self.nsg_name, self.ip_name, self.storage_name, self.vnet_name))
+                 '--authentication-type password '
+                 '--tags firsttag=1 secondtag=2 thirdtag --nsg {3} --public-ip-address {4} '
+                 '--vnet-name {5} --storage-account {6} --use-native-disk'.format(
+                     self.resource_group, self.location, self.vm_name,
+                     self.nsg_name, self.ip_name, self.vnet_name, self.storage_name))
 
         # Expecting one result, the one we created
         self.cmd('vm list --resource-group {}'.format(self.resource_group), [
@@ -360,6 +321,11 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # py
                 JMESPathCheck('tags.secondtag', '2'),
                 JMESPathCheck('tags.thirdtag', ''),
         ])
+        self._check_vm_power_state('PowerState/running')
+
+        self.cmd('vm access set-linux-user -g {} -n {} -u foouser1 -p Foo12345 '.format(self.resource_group, self.vm_name))
+        self.cmd('vm access delete-linux-user -g {} -n {} -u foouser1'.format(self.resource_group, self.vm_name))
+
         self.cmd('network nsg show --resource-group {} --name {}'.format(
             self.resource_group, self.nsg_name), checks=[
                 JMESPathCheck('tags.firsttag', '1'),
@@ -385,7 +351,6 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # py
                 JMESPathCheck('tags.thirdtag', ''),
         ])
 
-        self._check_vm_power_state('PowerState/running')
         self.cmd('vm stop --resource-group {} --name {}'.format(
             self.resource_group, self.vm_name))
         self._check_vm_power_state('PowerState/stopped')
@@ -398,7 +363,10 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # py
         self.cmd('vm deallocate --resource-group {} --name {}'.format(
             self.resource_group, self.vm_name))
         self._check_vm_power_state('PowerState/deallocated')
-        self.cmd('vm delete --resource-group {} --name {} --force'.format(
+        self.cmd('vm resize -g {} -n {} --size {}'.format(
+            self.resource_group, self.vm_name, 'Standard_A4'),
+                checks=JMESPathCheck('hardwareProfile.vmSize', 'Standard_A4'))
+        self.cmd('vm delete --resource-group {} --name {}'.format(
             self.resource_group, self.vm_name))
         # Expecting no results
         self.cmd('vm list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
@@ -406,7 +374,7 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # py
 
 class VMNoWaitScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(VMNoWaitScenarioTest, self).__init__(__file__, test_method, resource_group='cli_rg_vm_no_wait2')
+        super(VMNoWaitScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_vm_no_wait')
         self.location = 'westus'
         self.name = 'vmnowait2'
 
@@ -414,7 +382,7 @@ class VMNoWaitScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
     def body(self):
-        self.cmd('vm create -g {} -n {} --admin-username user12 --admin-password VerySecret! --authentication-type password --image UbuntuLTS --no-wait'.format(self.resource_group, self.name), checks=NoneCheck())
+        self.cmd('vm create -g {} -n {} --admin-username user12 --admin-password VerySecret! --authentication-type password --image UbuntuLTS --no-wait --use-native-disk'.format(self.resource_group, self.name), checks=NoneCheck())
         self.cmd('vm wait -g {} -n {} --custom "{}"'.format(self.resource_group, self.name, "instanceView.statuses[?code=='PowerState/running']"), checks=NoneCheck())
         self.cmd('vm get-instance-view -g {} -n {}'.format(self.resource_group, self.name), checks=[
             JMESPathCheck("length(instanceView.statuses[?code=='PowerState/running'])", 1)
@@ -464,56 +432,41 @@ class VMAvailSetScenarioTest(VCRTestBase):
             self.resource_group), checks=NoneCheck())
 
 
-class VMExtensionAutoUpgradeTest(ResourceGroupVCRTestBase):
+class VMExtensionScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(VMExtensionAutoUpgradeTest, self).__init__(__file__, test_method, resource_group='clitest_upgrade_vmext')
-        self.vm_name = 'autoupgradevm1'
+        super(VMExtensionScenarioTest, self).__init__(__file__, test_method)
+        self.vm_name = 'myvm'
 
     def set_up(self):
-        self.cmd('vm create -n {} -g {} --image UbuntuLTS'.format(self.vm_name, self.resource_group))
-
-    def test_vm_extension_autoupgrade(self):
-        self.execute()
-
-    def body(self):
-        _, protected_settings = tempfile.mkstemp()
-        with open(protected_settings, 'w') as settings:
-            settings.write(json.dumps({'username': 'user1', 'password': 'Test12345'}))
-        protected_settings = protected_settings.replace('\\', '\\\\')
-
-        # install 1.2 and auto upgrade should install 1.4. Note the 'set' still returns 1.2 which appears a service bug
-        self.cmd('vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.2 --vm-name {} -g {} --protected-settings {}'
-                 .format(self.vm_name, self.resource_group, protected_settings))
-        self.cmd('vm get-instance-view -n {} -g {}'.format(self.vm_name, self.resource_group), checks=[
-            JMESPathCheck('*.extensions[0].name', ['VMAccessForLinux']),
-            JMESPathCheck('*.extensions[0].typeHandlerVersion', ['1.4.1.0']),
-        ])
-
-
-class VMExtensionsScenarioTest(VCRTestBase):
-
-    def __init__(self, test_method):
-        super(VMExtensionsScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cliTestRg_VMExtensions'
-        self.location = 'westus'
-        self.vm_name = 'windows-ext'
-        self.extension_name = 'IaaSDiagnostics'
-        if not self.playback:
-            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
+        super(VMExtensionScenarioTest, self).set_up()
+        self.cmd('vm create -n {} -g {} --image UbuntuLTS --authentication-type password --admin-password TestPass1@ --use-native-disk'.format(self.vm_name, self.resource_group))
 
     def test_vm_extension(self):
         self.execute()
 
     def body(self):
-        self.cmd('vm extension show --resource-group {} --vm-name {} --name {}'.format(
-            self.resource_group, self.vm_name, self.extension_name), checks=[
+        publisher = 'Microsoft.OSTCExtensions'
+        extension_name = 'VMAccessForLinux'
+        user_name = 'foouser1'
+        config_file = _write_config_file(user_name)
+
+        try:
+            self.cmd('vm extension set -n {} --publisher {} --version 1.2  --vm-name {} --resource-group {} --protected-settings "{}"'
+                     .format(extension_name, publisher, self.vm_name, self.resource_group, config_file))
+            self.cmd('vm get-instance-view -n {} -g {}'.format(self.vm_name, self.resource_group), checks=[
+                JMESPathCheck('*.extensions[0].name', ['VMAccessForLinux']),
+                JMESPathCheck('*.extensions[0].typeHandlerVersion', ['1.4.6.0']),
+            ])
+            self.cmd('vm extension show --resource-group {} --vm-name {} --name {}'.format(self.resource_group, self.vm_name, extension_name), checks=[
                 JMESPathCheck('type(@)', 'object'),
-                JMESPathCheck('name', self.extension_name),
+                JMESPathCheck('name', extension_name),
                 JMESPathCheck('resourceGroup', self.resource_group)
-        ])
-        self.cmd('vm extension delete --resource-group {} --vm-name {} --name {}'.format(
-            self.resource_group, self.vm_name, self.extension_name), checks=NoneCheck())
+            ])
+            self.cmd('vm extension delete --resource-group {} --vm-name {} --name {}'.format(
+                self.resource_group, self.vm_name, extension_name), checks=NoneCheck())
+        finally:
+            os.remove(config_file)
 
 
 class VMMachineExtensionImageScenarioTest(VCRTestBase):
@@ -893,28 +846,10 @@ class VMScaleSetNicScenarioTest(ResourceGroupVCRTestBase):
         ])
 
 
-class VMAccessAddRemoveLinuxUser(VCRTestBase):
-
-    def __init__(self, test_method):
-        super(VMAccessAddRemoveLinuxUser, self).__init__(__file__, test_method)
-        if not self.playback:
-            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
-
-    def test_vm_add_remove_linux_user(self):
-        self.execute()
-
-    def body(self):
-        # It is rather hard for the automation test to verify we can log uers in
-        # but at least we tested the command was wired up and ran.
-        common_part = '-g yugangw9 -n yugangw9-1 -u foouser1'
-        self.cmd('vm access set-linux-user {} -p Foo12345 '.format(common_part), checks=None)
-        self.cmd('vm access delete-linux-user {}'.format(common_part), checks=None)
-
-
 class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, test_method):
-        super(VMCreateUbuntuScenarioTest, self).__init__(__file__, test_method, resource_group='cliTestRg_VMCreate_Ubuntu2')
+        super(VMCreateUbuntuScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_create_vm_ubuntu')
         self.deployment_name = 'azurecli-test-deployment-vm-create-ubuntu2'
         self.admin_username = 'ubuntu'
         self.location = 'westus'
@@ -934,7 +869,7 @@ class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=t
         self.pub_ssh_filename = pathname
 
     def body(self):
-        self.cmd('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' --location {location}'.format(
+        self.cmd('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' --location {location} --use-native-disk'.format(
             rg=self.resource_group,
             admin=self.admin_username,
             vm_name=self.vm_names[0],
@@ -975,7 +910,7 @@ class VMMultiNicScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-m
         rg = self.resource_group
         vm_name = self.vm_name
 
-        self.cmd('vm create -g {} -n {} --image UbuntuLTS --nics nic1 nic2 nic3 nic4 --size Standard_DS3 --ssh-key-value \'{}\''.format(rg, vm_name, TEST_SSH_KEY_PUB))
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --nics nic1 nic2 nic3 nic4 --size Standard_DS3 --ssh-key-value \'{}\' --use-native-disk'.format(rg, vm_name, TEST_SSH_KEY_PUB))
         self.cmd('vm show -g {} -n {}'.format(rg, vm_name), checks=[
             JMESPathCheck("networkProfile.networkInterfaces[0].id.ends_with(@, 'nic1')", True),
             JMESPathCheck("networkProfile.networkInterfaces[1].id.ends_with(@, 'nic2')", True),
@@ -1011,20 +946,19 @@ class VMMultiNicScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-m
 class VMCreateNoneOptionsTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, test_method):
-        super(VMCreateNoneOptionsTest, self).__init__(__file__, test_method, resource_group='cliTestRg_VMCreate_none_options')  # create resource group in westus...
+        super(VMCreateNoneOptionsTest, self).__init__(__file__, test_method, resource_group='cli_test_vm_create_none_options') # create resource group in westus...
 
     def test_vm_create_none_options(self):
         self.execute()
 
     def body(self):
-        deployment_name = 'azurecli-test-deployment-vm-none-options-create'
         vm_name = 'nooptvm'
         self.location = 'eastus'  # ...but create resources in eastus
 
         self.cmd('vm create -n {vm_name} -g {resource_group} --image Debian --availability-set {quotes} --nsg {quotes}'
-                 ' --ssh-key-value \'{ssh_key}\' --deployment-name {deployment_name} --public-ip-address {quotes} --tags {quotes} --location {loc}'
+                 ' --ssh-key-value \'{ssh_key}\' --public-ip-address {quotes} --tags {quotes} --location {loc} --use-native-disk'
                  .format(vm_name=vm_name, resource_group=self.resource_group,
-                         ssh_key=TEST_SSH_KEY_PUB, deployment_name=deployment_name,
+                         ssh_key=TEST_SSH_KEY_PUB,
                          quotes='""' if platform.system() == 'Windows' else "''", loc=self.location))
 
         self.cmd('vm show -n {vm_name} -g {resource_group}'.format(vm_name=vm_name, resource_group=self.resource_group), [
@@ -1037,61 +971,34 @@ class VMCreateNoneOptionsTest(ResourceGroupVCRTestBase):  # pylint: disable=too-
         ], allowed_exceptions='was not found')
 
 
-class VMBootDiagnostics(VCRTestBase):
+class VMBootDiagnostics(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(VMBootDiagnostics, self).__init__(__file__, test_method)
-        if not self.playback:
-            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
+        super(VMBootDiagnostics, self).__init__(__file__, test_method, resource_group='cli_test_vm_diagnostics')
+        self.vm_name = 'myvm'
+        self.storage_name = 'ae94nvfl1k1'
 
-    def test_vm_enable_disable_boot_diagnostic(self):
+    def test_vm_boot_diagnostics(self):
         self.execute()
 
+    def set_up(self):
+        super(VMBootDiagnostics, self).set_up()
+        self.cmd('storage account create -g {} -n {} --sku Standard_LRS -l westus'.format(self.resource_group, self.storage_name))
+        self.cmd('vm create -n {} -g {} --image UbuntuLTS --authentication-type password --admin-password TestPass1@ --use-native-disk'.format(self.vm_name, self.resource_group))
+
     def body(self):
-        common_part = '-g yugangwtest -n yugangwtest-1'
-        storage_account = 'yugangwstorage'
-        storage_uri = 'https://{}.blob.core.windows.net/'.format(storage_account)
-        self.cmd('vm boot-diagnostics enable {} --storage {}'.format(common_part, storage_account))
-        self.cmd('vm show {}'.format(common_part), checks=[
+        storage_uri = 'https://{}.blob.core.windows.net/'.format(self.storage_name)
+        self.cmd('vm boot-diagnostics enable -g {} -n {} --storage {}'.format(self.resource_group, self.vm_name, self.storage_name))
+        self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name), checks=[
             JMESPathCheck('diagnosticsProfile.bootDiagnostics.enabled', True),
             JMESPathCheck('diagnosticsProfile.bootDiagnostics.storageUri', storage_uri)
         ])
 
         # will uncomment after #302 gets addressed
         # self.run('vm boot-diagnostics get-boot-log {}'.format(common_part))
-        self.cmd('vm boot-diagnostics disable {}'.format(common_part))
-        self.cmd('vm show {}'.format(common_part),
+        self.cmd('vm boot-diagnostics disable -g {} -n {}'.format(self.resource_group, self.vm_name))
+        self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name),
                  checks=JMESPathCheck('diagnosticsProfile.bootDiagnostics.enabled', False))
-
-
-class VMExtensionInstallTest(VCRTestBase):
-
-    def __init__(self, test_method):
-        super(VMExtensionInstallTest, self).__init__(__file__, test_method)
-        if not self.playback:
-            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
-
-    def test_vm_extension_install(self):
-        self.execute()
-
-    def body(self):
-        publisher = 'Microsoft.OSTCExtensions'
-        extension_name = 'VMAccessForLinux'
-        vm_name = 'yugangw8-1'
-        resource_group = 'yugangw8'
-        user_name = 'yugangw'
-        config_file = _write_config_file(user_name)
-
-        try:
-            self.cmd('vm extension set -n {} --publisher {} --version 1.4  --vm-name {} --resource-group {} --protected-settings "{}"'
-                     .format(extension_name, publisher, vm_name, resource_group, config_file))
-            self.cmd('vm extension show --resource-group {} --vm-name {} --name {}'.format(resource_group, vm_name, extension_name), checks=[
-                JMESPathCheck('type(@)', 'object'),
-                JMESPathCheck('name', extension_name),
-                JMESPathCheck('resourceGroup', resource_group)
-            ])
-        finally:
-            os.remove(config_file)
 
 
 class VMSSExtensionInstallTest(VCRTestBase):
@@ -1203,56 +1110,63 @@ class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
 
 
 class VMCreateExistingOptions(ResourceGroupVCRTestBase):
+
     def __init__(self, test_method):
-        super(VMCreateExistingOptions, self).__init__(__file__, test_method, resource_group='vm_create_existing_options_rg')
+        super(VMCreateExistingOptions, self).__init__(__file__, test_method, resource_group='cli_test_vm_create_existing')
+        self.availset_name = 'vrfavailset'
+        self.pubip_name = 'vrfpubip'
+        self.storage_name = 'azureclivrfstorage0011'
+        self.vnet_name = 'vrfvnet'
+        self.subnet_name = 'vrfsubnet'
+        self.nsg_name = 'vrfnsg'
+        self.vm_name = 'vrfvm'
+        self.disk_name = 'vrfosdisk'
+        self.container_name = 'vrfcontainer'
 
     def test_vm_create_existing_options(self):
         self.execute()
 
-    def body(self):
-        availset_name = 'vrfavailset'
-        pubip_name = 'vrfpubip'
-        storage_name = 'azureclivrfstorage0011'
-        vnet_name = 'vrfvnet'
-        subnet_name = 'vrfsubnet'
-        nsg_name = 'vrfnsg'
-        vm_name = 'vrfvm'
-        disk_name = 'vrfosdisk'
-        container_name = 'vrfcontainer'
+    def set_up(self):
+        super(VMCreateExistingOptions, self).set_up()
+        rg = self.resource_group
 
-        self.cmd('vm availability-set create --name {} -g {}'.format(availset_name, self.resource_group))
-        self.cmd('network public-ip create --name {} -g {}'.format(pubip_name, self.resource_group))
-        self.cmd('storage account create --name {} -g {} -l westus --sku Standard_LRS'.format(storage_name, self.resource_group))
-        self.cmd('network vnet create --name {} -g {} --subnet-name {}'.format(vnet_name, self.resource_group, subnet_name))
-        self.cmd('network nsg create --name {} -g {}'.format(nsg_name, self.resource_group))
+        self.cmd('vm availability-set create --name {} -g {}'.format(self.availset_name, self.resource_group))
+        self.cmd('network public-ip create --name {} -g {}'.format(self.pubip_name, self.resource_group))
+        self.cmd('storage account create --name {} -g {} -l westus --sku Standard_LRS'.format(self.storage_name, self.resource_group))
+        self.cmd('network vnet create --name {} -g {} --subnet-name {}'.format(self.vnet_name, self.resource_group, self.subnet_name))
+        self.cmd('network nsg create --name {} -g {}'.format(self.nsg_name, self.resource_group))
+
+    def body(self):
 
         self.cmd('vm create --image UbuntuLTS --os-disk-name {disk_name}'
-                 ' --vnet {vnet_name} --subnet-name {subnet_name}'
+                 ' --vnet-name {vnet_name} --subnet {subnet_name}'
                  ' --availability-set {availset_name}'
                  ' --public-ip-address {pubip_name} -l "West US"'
                  ' --nsg {nsg_name}'
                  ' --size Standard_DS2'
                  ' --storage-account {storage_name} --storage-container-name {container_name} -g {resource_group}'
-                 ' --name {vm_name} --ssh-key-value \'{key_value}\''
-                 .format(vnet_name=vnet_name, subnet_name=subnet_name, availset_name=availset_name,
-                         pubip_name=pubip_name, resource_group=self.resource_group, nsg_name=nsg_name,
-                         vm_name=vm_name, disk_name=disk_name, container_name=container_name,
-                         storage_name=storage_name, key_value=TEST_SSH_KEY_PUB))
+                 ' --name {vm_name} --ssh-key-value \'{key_value}\' --use-native-disk'
+                 .format(vnet_name=self.vnet_name, subnet_name=self.subnet_name,
+                         availset_name=self.availset_name, pubip_name=self.pubip_name,
+                         resource_group=self.resource_group, nsg_name=self.nsg_name,
+                         vm_name=self.vm_name, disk_name=self.disk_name,
+                         container_name=self.container_name, storage_name=self.storage_name,
+                         key_value=TEST_SSH_KEY_PUB))
 
-        self.cmd('vm availability-set show -n {availset_name} -g {resource_group}'.format(availset_name=availset_name, resource_group=self.resource_group),
-                 checks=JMESPathCheck('virtualMachines[0].id.ends_with(@, \'{}\')'.format(vm_name.upper()), True))
-        self.cmd('network nsg show -n {nsg_name} -g {resource_group}'.format(nsg_name=nsg_name, resource_group=self.resource_group),
-                 checks=JMESPathCheck('networkInterfaces[0].id.ends_with(@, \'{}\')'.format(vm_name + 'VMNic'), True))
-        self.cmd('network nic show -n {vm_name}VMNic -g {resource_group}'.format(vm_name=vm_name, resource_group=self.resource_group),
-                 checks=JMESPathCheck('ipConfigurations[0].publicIpAddress.id.ends_with(@, \'{}\')'.format(pubip_name), True))
-        self.cmd('vm show -n {vm_name} -g {resource_group}'.format(vm_name=vm_name, resource_group=self.resource_group),
-                 checks=JMESPathCheck('storageProfile.osDisk.vhd.uri', 'https://{storage_name}.blob.core.windows.net/{container_name}/{disk_name}.vhd'.format(storage_name=storage_name, container_name=container_name, disk_name=disk_name)))
+        self.cmd('vm availability-set show -n {} -g {}'.format(self.availset_name, self.resource_group),
+            checks=JMESPathCheck('virtualMachines[0].id.ends_with(@, \'{}\')'.format(self.vm_name.upper()), True))
+        self.cmd('network nsg show -n {} -g {}'.format(self.nsg_name, self.resource_group),
+            checks=JMESPathCheck('networkInterfaces[0].id.ends_with(@, \'{}\')'.format(self.vm_name + 'VMNic'), True))
+        self.cmd('network nic show -n {}VMNic -g {}'.format(self.vm_name, self.resource_group),
+            checks=JMESPathCheck('ipConfigurations[0].publicIpAddress.id.ends_with(@, \'{}\')'.format(self.pubip_name), True))
+        self.cmd('vm show -n {} -g {}'.format(self.vm_name, self.resource_group),
+            checks=JMESPathCheck('storageProfile.osDisk.vhd.uri', 'https://{}.blob.core.windows.net/{}/{}.vhd'.format(self.storage_name, self.container_name, self.disk_name)))
 
 
 class VMCreateCustomIP(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(VMCreateCustomIP, self).__init__(__file__, test_method, resource_group='vm_create_custom_ip_rg3')
+        super(VMCreateCustomIP, self).__init__(__file__, test_method, resource_group='cli_test_vm_custom_ip')
 
     def test_vm_create_custom_ip(self):
         self.execute()
@@ -1261,9 +1175,9 @@ class VMCreateCustomIP(ResourceGroupVCRTestBase):
         vm_name = 'vrfvmz'
         dns_name = 'vrfmyvm00110011z'
 
-        self.cmd('vm create -n {vm_name} -g {resource_group} --image openSUSE --private-ip-address-allocation static'
+        self.cmd('vm create -n {vm_name} -g {resource_group} --image openSUSE'
                  ' --private-ip-address 10.0.0.5 --public-ip-address-allocation static'
-                 ' --public-ip-address-dns-name {dns_name} --ssh-key-value \'{key_value}\''
+                 ' --public-ip-address-dns-name {dns_name} --ssh-key-value \'{key_value}\' --use-native-disk'
                  .format(vm_name=vm_name, resource_group=self.resource_group, dns_name=dns_name, key_value=TEST_SSH_KEY_PUB))
 
         self.cmd('network public-ip show -n {vm_name}PublicIP -g {resource_group}'.format(vm_name=vm_name, resource_group=self.resource_group), checks=[
@@ -1277,8 +1191,7 @@ class VMCreateCustomIP(ResourceGroupVCRTestBase):
 class VMDataDiskVCRTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(VMDataDiskVCRTest, self).__init__(__file__, test_method, resource_group='cliTestRg_datadisk')
-        self.deployment_name = 'azurecli-test-datadisk'
+        super(VMDataDiskVCRTest, self).__init__(__file__, test_method, resource_group='cli_test_vm_data_disk', debug=True)
         self.location = 'westus'
         self.vm_name = 'vm-datadisk-test'
 
@@ -1288,8 +1201,8 @@ class VMDataDiskVCRTest(ResourceGroupVCRTestBase):
     def body(self):
         self.cmd('vm create -g {} --location {} -n {} --admin-username ubuntu '
                  '--image UbuntuLTS --admin-password testPassword0 '
-                 '--deployment-name {} --authentication-type password'.format(
-                     self.resource_group, self.location, self.vm_name, self.deployment_name))
+                 '--authentication-type password --use-native-disk'.format(
+                     self.resource_group, self.location, self.vm_name))
 
         # check we have no data disk
         result = self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name))

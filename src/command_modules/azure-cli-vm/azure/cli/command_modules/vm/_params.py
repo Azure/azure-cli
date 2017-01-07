@@ -5,7 +5,6 @@
 
 # pylint: disable=line-too-long
 import argparse
-import getpass
 
 from argcomplete.completers import FilesCompleter
 
@@ -21,12 +20,10 @@ from azure.cli.core.commands.parameters import \
     (location_type, get_location_completion_list, get_one_of_subscription_locations,
      get_resource_name_completion_list, tags_type, file_type, enum_choice_list, ignore_type)
 from azure.cli.command_modules.vm._actions import \
-    (VMImageFieldAction, VMSSHFieldAction, VMDNSNameAction, load_images_from_aliases_doc,
+    (VMDNSNameAction, load_images_from_aliases_doc,
      get_vm_sizes, PrivateIpAction, _resource_not_exists)
 from azure.cli.command_modules.vm._validators import \
-    (validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_create_nics,
-     validate_default_os_disk, validate_default_vnet, validate_default_storage_account,
-     validate_storage_suffix)
+    (validate_nsg_name, validate_vm_nics, validate_vm_nic, process_vm_create_namespace)
 
 
 def get_urn_aliases_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
@@ -47,7 +44,6 @@ def get_vm_size_completion_list(prefix, action, parsed_args, **kwargs):  # pylin
 
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 multi_ids_type = CliArgumentType(nargs='+')
-admin_username_type = CliArgumentType(options_list=('--admin-username',), default=getpass.getuser(), required=False)
 existing_vm_name = CliArgumentType(overrides=name_arg_type, help='The name of the virtual machine', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'), id_part='name')
 vmss_name_type = CliArgumentType(name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), help='Scale set name.', id_part='name')
 
@@ -155,11 +151,7 @@ register_cli_argument('network nic scale-set list', 'virtual_machine_scale_set_n
 
 # VM CREATE PARAMETER CONFIGURATION
 
-authentication_type = CliArgumentType(
-    default=None,
-    help='Password or SSH public key authentication. Defaults to password for Windows and SSH public key for Linux.',
-    **enum_choice_list(['ssh', 'password'])
-)
+
 
 nsg_rule_type = CliArgumentType(
     default=None,
@@ -167,18 +159,15 @@ nsg_rule_type = CliArgumentType(
     **enum_choice_list(['RDP', 'SSH'])
 )
 
-register_cli_argument('vm create', 'network_interface_type', help=argparse.SUPPRESS)
-register_cli_argument('vm create', 'network_interface_ids', options_list=('--nics',), nargs='+', help='Names or IDs of existing NICs to reference.  The first NIC will be the primary NIC.', type=lambda val: val if ('/' not in val or is_valid_resource_id(val, ValueError)) else '', validator=validate_vm_create_nics)
 register_cli_argument('vm create', 'name', name_arg_type, validator=_resource_not_exists('Microsoft.Compute/virtualMachines'))
 
 register_cli_argument('vmss create', 'name', name_arg_type)
 register_cli_argument('vmss create', 'nat_backend_port', default=None, help='Backend port to open with NAT rules.  Defaults to 22 on Linux and 3389 on Windows.')
 
-for scope in ['vm create', 'vmss create']:
+for scope in ['vmss create']:
     register_cli_argument(scope, 'location', completer=get_location_completion_list, help='Location in which to create the VM and related resources. If not specified, defaults to the resource group\'s location.')
     register_cli_argument(scope, 'custom_os_disk_uri', help=argparse.SUPPRESS)
     register_cli_argument(scope, 'os_disk_type', help=argparse.SUPPRESS)
-    register_cli_argument(scope, 'os_disk_name', validator=validate_default_os_disk)
     register_cli_argument(scope, 'overprovision', action='store_false', default=None, options_list=('--disable-overprovision',))
     register_cli_argument(scope, 'upgrade_policy_mode', help=None, **enum_choice_list(UpgradeMode))
     register_cli_argument(scope, 'os_disk_uri', help=argparse.SUPPRESS)
@@ -188,14 +177,8 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'os_type', help=argparse.SUPPRESS)
     register_cli_argument(scope, 'os_version', help=argparse.SUPPRESS)
     register_cli_argument(scope, 'dns_name_type', help=argparse.SUPPRESS)
-    register_cli_argument(scope, 'admin_username', admin_username_type)
-    register_cli_argument(scope, 'storage_type', help='The VM storage type.', **enum_choice_list(SkuName))
-    register_cli_argument(scope, 'storage_suffix', ignore_type, validator=validate_storage_suffix)
     register_cli_argument(scope, 'subnet_name', help='The subnet name.  Creates if creating a new VNet, references if referencing an existing VNet.')
-    register_cli_argument(scope, 'admin_password', help='Password for the Virtual Machine if Authentication Type is Password.')
-    register_cli_argument(scope, 'ssh_key_value', action=VMSSHFieldAction)
     register_cli_argument(scope, 'dns_name_for_public_ip', action=VMDNSNameAction, options_list=('--public-ip-address-dns-name',), help='Globally unique DNS Name for the Public IP.')
-    register_cli_argument(scope, 'authentication_type', authentication_type)
     register_folded_cli_argument(scope, 'availability_set', 'Microsoft.Compute/availabilitySets', new_flag_value=None, default_value_flag='none')
     register_cli_argument(scope, 'private_ip_address_allocation', help=argparse.SUPPRESS)
     register_cli_argument(scope, 'virtual_network_ip_address_prefix', options_list=('--vnet-ip-address-prefix',))
@@ -203,9 +186,48 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'private_ip_address', help='Static private IP address (e.g. 10.0.0.5).', options_list=('--private-ip-address',), action=PrivateIpAction)
     register_cli_argument(scope, 'public_ip_address_allocation', help='', default='dynamic', **enum_choice_list(['dynamic', 'static']))
     register_folded_cli_argument(scope, 'public_ip_address', 'Microsoft.Network/publicIPAddresses')
-    register_folded_cli_argument(scope, 'storage_account', 'Microsoft.Storage/storageAccounts', validator=validate_default_storage_account, none_flag_value=None, default_value_flag='existingId')
-    register_folded_cli_argument(scope, 'virtual_network', 'Microsoft.Network/virtualNetworks', options_list=('--vnet',), validator=validate_default_vnet, none_flag_value=None, default_value_flag='existingId')
     register_folded_cli_argument(scope, 'network_security_group', 'Microsoft.Network/networkSecurityGroups', options_list=('--nsg',))
-    register_folded_cli_argument(scope, 'load_balancer', 'Microsoft.Network/loadBalancers')
     register_cli_argument(scope, 'network_security_group_rule', nsg_rule_type, options_list=('--nsg-rule',))
-    register_extra_cli_argument(scope, 'image', options_list=('--image',), action=VMImageFieldAction, completer=get_urn_aliases_completion_list, required=True)
+    register_extra_cli_argument(scope, 'image')
+
+register_cli_argument('vm create', 'vm_name', name_arg_type, id_part=None, help='Name of the virtual machine.', validator=process_vm_create_namespace)
+register_cli_argument('vm create', 'location', location_type, help='Location in which to create VM resources. Defaults to the resource group\'s location.')
+register_cli_argument('vm create', 'tags', tags_type)
+
+register_cli_argument('vm create', 'admin_username', help='Username for the Virutal Machine.', arg_group='Authentication')
+register_cli_argument('vm create', 'admin_password', help='Password for the Virtual Machine if Authentication Type is Password.', arg_group='Authentication')
+register_cli_argument('vm create', 'ssh_key_value', help='SSH public key or public key file path.', arg_group='Authentication')
+register_cli_argument('vm create', 'ssh_dest_key_path', help='Destination file path on the Virtual Machine for the SSH key.', completer=FilesCompleter(), arg_group='Authentication')
+register_cli_argument('vm create', 'authentication_type', help='Type of authentication to use with the Virtual Machine. Defaults to password for Windows and SSH public key for Linux.', arg_group='Authentication', **enum_choice_list(['ssh', 'password']))
+
+register_cli_argument('vm create', 'image', completer=get_urn_aliases_completion_list, arg_group='Storage')
+register_cli_argument('vm create', 'managed_disk', help='Name or ID of an existing managed disk to attach.', arg_group='Storage')
+register_cli_argument('vm create', 'os_disk_name', help='The name of the OS disk to be created.', arg_group='Storage')
+register_cli_argument('vm create', 'os_type', help='Type of OS installed on a custom VHD or existing managed disk.', arg_group='Storage', **enum_choice_list(['windows', 'linux']))
+register_cli_argument('vm create', 'storage_account', help="Name or ID of existing storage account to use when supplying a VHD image. Must supply the '--use-native-disk' flag", arg_group='Storage')
+register_cli_argument('vm create', 'storage_caching', help='Storage caching type for the Virtual Machine OS disk', arg_group='Storage', **enum_choice_list(['ReadWrite']))
+register_cli_argument('vm create', 'storage_sku', help='The storage SKU for the Virutal Machine storage.', arg_group='Storage', **enum_choice_list(SkuName))
+register_cli_argument('vm create', 'storage_container_name', help='Name of the storage container for the Virtual Machine OS disk when using a VHD disk.', arg_group='Storage')
+register_cli_argument('vm create', 'use_native_disk', help='Create the OS on a native disk (VHD) instead of a managed disk.', action='store_true', arg_group='Storage')
+
+register_cli_argument('vm create', 'os_publisher', ignore_type)
+register_cli_argument('vm create', 'os_offer', ignore_type)
+register_cli_argument('vm create', 'os_sku', ignore_type)
+register_cli_argument('vm create', 'os_version', ignore_type)
+register_cli_argument('vm create', 'storage_profile', ignore_type)
+
+for item in ['storage_account', 'public_ip', 'nsg', 'nic', 'vnet']:
+    register_cli_argument('vm create', '{}_type'.format(item), ignore_type)
+
+register_cli_argument('vm create', 'vnet_name', arg_group='Network')
+register_cli_argument('vm create', 'vnet_address_prefix', arg_group='Network')
+register_cli_argument('vm create', 'subnet', arg_group='Network')
+register_cli_argument('vm create', 'subnet_address_prefix', arg_group='Network')
+register_cli_argument('vm create', 'nics', nargs='+', arg_group='Network')
+register_cli_argument('vm create', 'nsg', arg_group='Network')
+register_cli_argument('vm create', 'nsg_rule', arg_group='Network')
+register_cli_argument('vm create', 'private_ip_address', arg_group='Network')
+register_cli_argument('vm create', 'public_ip_address', arg_group='Network')
+register_cli_argument('vm create', 'public_ip_address_allocation', arg_group='Network')
+register_cli_argument('vm create', 'public_ip_address_dns_name', arg_group='Network')
+register_cli_argument('vm create', 'validate', options_list=('--validate', '-v'), action='store_true')

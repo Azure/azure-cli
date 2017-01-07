@@ -2,31 +2,29 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "storageAccountName": {
-      "type": "string"
+    "storageAccount": {
+      "type": "string",
+      "metadata": {
+        "description": "Name or ID of storage account for the VM OS disk."
+      }
     },
-    "location": {
-      "type": "string"
-    },
-    "tags": {
-      "type": "object"
-    },
-    "vhdStorageType": {
-      "type": "string"
+    "storageType": {
+      "type": "string",
+      "defaultValue": "Premium_LRS"
     }
   },
   "variables": {
-    
   },
   "resources": [
     {
+      "name": "[parameters('storageAccount')]",
       "type": "Microsoft.Storage/storageAccounts",
-      "name": "[parameters('storageAccountName')]",
-      "apiVersion": "2015-06-15",
       "location": "[parameters('location')]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [ ],
       "tags": "[parameters('tags')]",
       "properties": {
-        "accountType": "[parameters('vhdStorageType')]"
+        "accountType": "[parameters('storageType')]"
       }
     }
   ],

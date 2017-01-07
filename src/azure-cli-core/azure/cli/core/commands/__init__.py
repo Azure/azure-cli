@@ -141,9 +141,14 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 # pylint: disable=too-few-public-methods
 class DeploymentOutputLongRunningOperation(LongRunningOperation):
     def __call__(self, poller):
-        result = super(DeploymentOutputLongRunningOperation, self).__call__(poller)
-        outputs = result.properties.outputs
-        return {key: val['value'] for key, val in outputs.items()} if outputs else {}
+        try:
+            result = super(DeploymentOutputLongRunningOperation, self).__call__(poller)
+            outputs = result.properties.outputs
+            return {key: val['value'] for key, val in outputs.items()} if outputs else {}
+        except AttributeError:
+            # in the event of an AttributeError, this is likely just the result
+            from msrest.pipeline import ClientRawResponse
+            return None if isinstance(poller, ClientRawResponse) else poller
 
 
 class CommandTable(dict):

@@ -5,7 +5,7 @@
 
 # pylint: disable=no-self-use,too-many-arguments,too-many-lines
 from __future__ import print_function
-
+import getpass
 import json
 import os
 import re
@@ -24,7 +24,7 @@ from azure.mgmt.compute.models import (DataDisk,
                                        VirtualMachineScaleSetExtensionProfile)
 from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.commands.arm import parse_resource_id
+from azure.cli.core.commands.arm import parse_resource_id, resource_id
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core._util import CLIError
 import azure.cli.core.azlogging as azlogging
@@ -1138,3 +1138,152 @@ def list_container_services(client, resource_group_name=None):
     svc_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
         if resource_group_name else client.list()
     return list(svc_list)
+
+# pylint: disable=too-many-locals
+def create_vm_experimental(
+        vm_name, resource_group_name, image=None,
+        size='Standard_DS1', location=None, tags=None, no_wait=False,
+        authentication_type=None,
+        admin_password=None, admin_username=getpass.getuser(),
+        ssh_dest_key_path=None, ssh_key_value=None,
+        availability_set=None,
+        nics=None, nsg=None, nsg_rule=None,
+        private_ip_address=None,
+        public_ip_address=None, public_ip_address_allocation='dynamic',
+        public_ip_address_dns_name=None,
+        os_disk_name=None, os_type=None, storage_account=None,
+        storage_caching='ReadWrite', storage_container_name='vhds', storage_sku='Premium_LRS',
+        use_native_disk=False, managed_disk=None,
+        vnet_name=None, vnet_address_prefix='10.0.0.0/16',
+        subnet=None, subnet_address_prefix='10.0.0.0/24', storage_profile=None,
+        os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
+        storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_type=None,
+        nic_type=None, validate=False
+    ):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.command_modules.vm._vm_utils import random_string
+    from azure.cli.command_modules.vm._experimental import (
+        ArmTemplateBuilder, build_vm_resource, build_storage_account_resource, build_nic_resource,
+        build_vnet_resource, build_nsg_resource, build_public_ip_resource,
+        build_output_deployment_resource, build_deployment_resource, StorageProfile)
+
+    from azure.cli.core._profile import CLOUD
+    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
+    
+    # determine final defaults and calculated values
+    tags = tags or {}
+    os_disk_name = os_disk_name or 'osdisk_{}'.format(random_string(10))
+
+    # Build up the ARM template
+    master_template = ArmTemplateBuilder()
+
+    vm_dependencies = []
+    if storage_account_type == 'new':
+        storage_account = storage_account or 'vhdstorage{}'.format(random_string(14, force_lower=True))
+        vm_dependencies.append('Microsoft.Storage/storageAccounts/{}'.format(storage_account))
+        master_template.add_resource(build_storage_account_resource(storage_account, location, tags, storage_sku))
+
+    nic_name = None
+    if nic_type == 'new':
+        nic_name = '{}VMNic'.format(vm_name)
+        vm_dependencies.append('Microsoft.Network/networkInterfaces/{}'.format(nic_name))
+
+        # TODO: Add logic to reject VNET/NSG/PublicIP parameters if existing NIC chosen...
+        nic_dependencies = []
+        if vnet_type == 'new':
+            vnet_name = vnet_name or '{}VNET'.format(vm_name)
+            subnet = subnet or '{}Subnet'.format(vm_name)
+            nic_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
+            master_template.add_resource(build_vnet_resource(vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix))
+
+        if nsg_type == 'new':
+            # TODO: Fix NSG rule type
+            nsg_rule_type = 'ssh'
+            nsg = nsg or '{}NSG'.format(vm_name)
+            nic_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg))
+            master_template.add_resource(build_nsg_resource(nsg, location, tags, nsg_rule_type))
+
+        if public_ip_type == 'new':
+            public_ip_address = public_ip_address or '{}PublicIP'.format(vm_name)
+            nic_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
+            master_template.add_resource(build_public_ip_resource(public_ip_address, location, tags,
+                                                                  public_ip_address_allocation,
+                                                                  public_ip_address_dns_name))
+
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        id_template = resource_id(subscription=get_subscription_id(), resource_group=resource_group_name, namespace='Microsoft.Network')
+        subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(id_template, vnet_name, subnet)
+        nsg_id = '{}/networkSecurityGroups/{}'.format(id_template, nsg) if nsg else None
+        public_ip_address_id = '{}/publicIPAddresses/{}'.format(id_template, public_ip_address) if public_ip_address else None
+        nics = [
+            {'id': '{}/networkInterfaces/{}'.format(id_template, nic_name)}
+        ]
+        nic_resource = build_nic_resource(nic_name, location, tags, vm_name, subnet_id, private_ip_address, nsg_id, public_ip_address_id)
+        nic_resource['dependsOn'] = nic_dependencies
+        master_template.add_resource(nic_resource)
+
+    if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
+        os_vhd_uri = 'https://{}.blob.{}/{}/{}.vhd'.format(
+            storage_account, CLOUD.suffixes.storage_endpoint, storage_container_name, os_disk_name)
+
+    vm_resource = build_vm_resource(
+        vm_name, location, tags, size, storage_profile, nics, admin_username, availability_set,
+        admin_password, ssh_key_value, ssh_dest_key_path, image or managed_disk, os_disk_name,
+        os_type, storage_caching, storage_sku, os_publisher, os_offer, os_sku, os_version,
+        os_vhd_uri)
+    vm_resource['dependsOn'] = vm_dependencies
+
+    master_template.add_resource(vm_resource)
+    
+    template = master_template.build()
+
+    # deploy ARM template
+    deployment_name = 'vm_deploy_' + random_string(32)
+    client = get_mgmt_service_client(ResourceManagementClient).deployments
+    properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
+    if validate:
+        return client.validate(resource_group_name, deployment_name, properties, raw=no_wait)
+
+    # creates the VM deployment
+    if no_wait:
+        return client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
+    else:
+        LongRunningOperation()(client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait))
+
+    output_template = ArmTemplateBuilder()
+    output_template.add_output('id', vm_name, 'Microsoft.Compute', 'virtualMachines', output_type='string', path='vmId')
+    if nic_name:
+        output_template.add_output('privateIpAddress', nic_name, 'Microsoft.Network', 'networkInterfaces', output_type='string', path='ipConfigurations[0].properties.privateIPAddress')
+        output_template.add_output('macAddress', nic_name, 'Microsoft.Network', 'networkInterfaces', 'string', 'macAddress')
+    if public_ip_address:
+        output_template.add_output('publicIpAddress', public_ip_address, 'Microsoft.Network', 'publicIPAddresses', output_type='string', path='ipAddress')
+    if public_ip_address_dns_name:
+        output_template.add_output('fqdn', public_ip_address, 'Microsoft.Network', 'publicIpAddresses', 'string', 'dnsSettings.fqdn')
+    #output_template.add_output('resourceGroup', vm_name, 'Microsoft.Compute', 'virtualMachines', output_type='string', path='resourceGroup')
+
+    output_deployment_name = 'vm_{}_output_{}'.format(vm_name, random_string(8))
+    properties = DeploymentProperties(template=output_template.build(), parameters={}, mode='incremental')
+    return client.create_or_update(resource_group_name, output_deployment_name, properties)
+
+# pylint: disable=too-many-locals
+def create_vmss_experimental(
+        vmss_name, resource_group_name, 
+        image=None, disable_overprovision=False, instance_count=2,
+        location=None, tags=None, upgrade_policy_mode="manual",
+        admin_username=getpass.getuser(), admin_password=None, authentication_type="password",
+        vm_sku="Standard_D1_v2",
+        ssh_dest_key_path=None, ssh_key_value=None,        
+        load_balancer=None, load_balancer_backend_pool_name=None, load_balancer_nat_pool_name=None,
+        nat_backend_port=22,
+        public_ip_address=None, public_ip_address_allocation="dynamic",
+        dns_name_for_public_ip=None,
+        custom_os_disk_type="windows", os_disk_name="osdiskimage", os_disk_type="provided",
+        storage_caching="ReadOnly", storage_container_name="vhds", storage_type="Standard_LRS",
+        vnet_name=None, vnet_address_prefix="10.0.0.0/16",
+        subnet=None, subnet_address_prefix="10.0.0.0/24",
+        os_offer="WindowsServer", os_publisher="MicrosoftWindowsServer",
+        os_sku="2012-R2-Datacenter", os_type="Win2012R2Datacenter", os_version="latest",
+        load_balancer_type=None, vnet_type=None, public_ip_address_type=None
+    ):
+    pass

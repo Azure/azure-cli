@@ -18,44 +18,10 @@ from azure.cli.core.prompting import prompt_pass, NoTTYException
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
 from ._client_factory import _compute_client_factory
-from ._vm_utils import read_content_if_is_file
 
 logger = azlogging.get_az_logger(__name__)
 
-
-class VMImageFieldAction(argparse.Action):  # pylint: disable=too-few-public-methods
-    def __call__(self, parser, namespace, values, option_string=None):
-        image = values
-        match = re.match('([^:]*):([^:]*):([^:]*):([^:]*)', image)
-
-        if image.lower().endswith('.vhd'):
-            namespace.os_disk_type = 'custom'
-            namespace.custom_os_disk_uri = image
-        elif match:
-            namespace.os_type = 'Custom'
-            namespace.os_publisher = match.group(1)
-            namespace.os_offer = match.group(2)
-            namespace.os_sku = match.group(3)
-            namespace.os_version = match.group(4)
-        else:
-            images = load_images_from_aliases_doc()
-            matched = next((x for x in images if x['urnAlias'].lower() == image.lower()), None)
-            if matched is None:
-                raise CLIError('Invalid image "{}". Please pick one from {}'
-                               .format(image, [x['urnAlias'] for x in images]))
-            namespace.os_type = 'Custom'
-            namespace.os_publisher = matched['publisher']
-            namespace.os_offer = matched['offer']
-            namespace.os_sku = matched['sku']
-            namespace.os_version = matched['version']
-
-
-class VMSSHFieldAction(argparse.Action):  # pylint: disable=too-few-public-methods
-    def __call__(self, parser, namespace, values, option_string=None):
-        namespace.ssh_key_value = read_content_if_is_file(values)
-
-
-class VMDNSNameAction(argparse.Action):  # pylint: disable=too-few-public-methods
+class VMDNSNameAction(argparse.Action): #pylint: disable=too-few-public-methods
     def __call__(self, parser, namespace, values, option_string=None):
         dns_value = values
 
@@ -84,75 +50,6 @@ def _resource_not_exists(resource_type):
                 resource_type,
                 namespace.resource_group_name))
     return _handle_resource_not_exists
-
-
-def _handle_auth_types(**kwargs):
-    if kwargs['command'] != 'vm create' and kwargs['command'] != 'vmss create':
-        return
-
-    args = kwargs['args']
-
-    is_windows = 'Windows' in args.os_offer \
-        and getattr(args, 'custom_os_disk_type', None) != 'linux'
-
-    if not args.authentication_type:
-        args.authentication_type = 'password' if is_windows else 'ssh'
-
-    if args.authentication_type == 'password':
-        if args.ssh_dest_key_path:
-            raise CLIError('SSH parameters cannot be used with password authentication type')
-        elif not args.admin_password:
-            try:
-                args.admin_password = prompt_pass('Admin Password: ', confirm=True)
-            except NoTTYException:
-                raise CLIError('Please specify both username and password in non-interactive mode.')
-    elif args.authentication_type == 'ssh':
-        if args.admin_password:
-            raise CLIError('Admin password cannot be used with SSH authentication type')
-
-        ssh_key_file = os.path.join(os.path.expanduser('~'), '.ssh/id_rsa.pub')
-        if not args.ssh_key_value:
-            if os.path.isfile(ssh_key_file):
-                with open(ssh_key_file) as f:
-                    args.ssh_key_value = f.read()
-            else:
-                raise CLIError('An RSA key file or key value must be supplied to SSH Key Value')
-
-    if hasattr(args, 'network_security_group_type'):
-        args.network_security_group_rule = 'RDP' if is_windows else 'SSH'
-
-    if hasattr(args, 'nat_backend_port') and not args.nat_backend_port:
-        args.nat_backend_port = '3389' if is_windows else '22'
-
-
-APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_auth_types)
-
-
-def load_images_from_aliases_doc(publisher=None, offer=None, sku=None):
-    target_url = ('https://raw.githubusercontent.com/Azure/azure-rest-api-specs/'
-                  'master/arm-compute/quickstart-templates/aliases.json')
-    txt = urlopen(target_url).read()
-    dic = json.loads(txt.decode())
-    try:
-        all_images = []
-        result = (dic['outputs']['aliases']['value'])
-        for v in result.values():  # loop around os
-            for alias, vv in v.items():  # loop around distros
-                all_images.append({
-                    'urnAlias': alias,
-                    'publisher': vv['publisher'],
-                    'offer': vv['offer'],
-                    'sku': vv['sku'],
-                    'version': vv['version']
-                })
-
-        all_images = [i for i in all_images if (_partial_matched(publisher, i['publisher']) and
-                                                _partial_matched(offer, i['offer']) and
-                                                _partial_matched(sku, i['sku']))]
-        return all_images
-    except KeyError:
-        raise CLIError('Could not retrieve image list from {}'.format(target_url))
-
 
 def load_images_thru_services(publisher, offer, sku, location):
     from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -193,6 +90,30 @@ def load_images_thru_services(publisher, offer, sku, location):
 
     return all_images
 
+def load_images_from_aliases_doc(publisher=None, offer=None, sku=None):
+    target_url = ('https://raw.githubusercontent.com/Azure/azure-rest-api-specs/'
+                  'master/arm-compute/quickstart-templates/aliases.json')
+    txt = urlopen(target_url).read()
+    dic = json.loads(txt.decode())
+    try:
+        all_images = []
+        result = (dic['outputs']['aliases']['value'])
+        for v in result.values(): #loop around os
+            for alias, vv in v.items(): #loop around distros
+                all_images.append({
+                    'urnAlias': alias,
+                    'publisher': vv['publisher'],
+                    'offer': vv['offer'],
+                    'sku': vv['sku'],
+                    'version': vv['version']
+                    })
+
+        all_images = [i for i in all_images if (_partial_matched(publisher, i['publisher']) and
+                                                _partial_matched(offer, i['offer']) and
+                                                _partial_matched(sku, i['sku']))]
+        return all_images
+    except KeyError:
+        raise CLIError('Could not retrieve image list from {}'.format(target_url))
 
 def load_extension_images_thru_services(publisher, name, version, location, show_latest=False):
     from concurrent.futures import ThreadPoolExecutor, as_completed

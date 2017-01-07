@@ -50,12 +50,11 @@ def transform_vm_list(vm_list):
     return [transform_vm(v) for v in vm_list]
 
 
-cli_command(__name__, 'vm create', 'azure.cli.command_modules.vm.mgmt_vm.lib.operations.vm_operations#VmOperations.create_or_update', cf_vm_create,
-            transform=DeploymentOutputLongRunningOperation('Starting vm create'), no_wait_param='raw')
 
 op_var = 'virtual_machines_operations'
 op_class = 'VirtualMachinesOperations'
-cli_command(__name__, 'vm delete', mgmt_path.format(op_var, op_class, 'delete'), cf_vm, confirmation=True)
+cli_command(__name__, 'vm create', custom_path.format('create_vm_experimental'), transform=DeploymentOutputLongRunningOperation('Starting vm create'))
+cli_command(__name__, 'vm delete', mgmt_path.format(op_var, op_class, 'delete'), cf_vm)
 cli_command(__name__, 'vm deallocate', mgmt_path.format(op_var, op_class, 'deallocate'), cf_vm)
 cli_command(__name__, 'vm generalize', mgmt_path.format(op_var, op_class, 'generalize'), cf_vm)
 cli_command(__name__, 'vm show', custom_path.format('show_vm'), table_transformer=transform_vm)

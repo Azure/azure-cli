@@ -33,7 +33,10 @@ class ComplexEncoder(json.JSONEncoder):
     def default(self, obj):  # pylint: disable=method-hidden
         if isinstance(obj, bytes) and not isinstance(obj, str):
             return obj.decode()
-        return json.JSONEncoder.default(self, obj)
+        try:
+            return json.JSONEncoder.default(self, obj)
+        except TypeError:
+            return
 
 
 def format_json(obj):
