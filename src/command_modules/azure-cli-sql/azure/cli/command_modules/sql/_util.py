@@ -123,7 +123,7 @@ class ParametersContext(object):
         from azure.cli.core.commands._introspection import \
             (extract_args_from_signature, _option_descriptions)
 
-        from .validators import get_expension_validator
+        from .validators import get_complex_argument_processor
 
         if not patches:
             patches = dict()
@@ -151,4 +151,4 @@ class ParametersContext(object):
 
         self.argument(argument_name,
                       arg_type=ignore_type,
-                      validator=get_expension_validator(expanded_arguments, model_type))
+                      validator=get_complex_argument_processor(expanded_arguments, model_type))
