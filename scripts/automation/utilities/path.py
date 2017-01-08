@@ -38,8 +38,8 @@ def get_core_modules_paths():
     def _get_path(name):
         return os.path.join(get_repo_root(), 'src', name)
 
-    yield 'azure-cli', _get_path('azure-cli')
-    yield 'azure-cli-core', _get_path('azure-cli-core')
+    yield 'main', _get_path('azure-cli')
+    yield 'core', _get_path('azure-cli-core')
 
 
 def get_core_modules_paths_with_tests():
