@@ -13,32 +13,40 @@ from ..utilities.path import get_command_modules_paths, get_core_modules_paths, 
 
 
 def run_pylint(modules):
+    print('\n\nRun pylint')
+    print('Modules: {}'.format(', '.join(name for name, _ in modules)))
+
     modules_list = ' '.join(os.path.join(path, 'azure') for _, path in modules)
     arguments = '{} --rcfile={} -j {} -r n -d I0013'.format(
         modules_list,
         os.path.join(get_repo_root(), 'pylintrc'),
         multiprocessing.cpu_count())
 
-    print('pylint arguments: ' + arguments)
+    return_code = call(('python -m pylint ' + arguments).split())
 
-    check_call(('python -m pylint ' + arguments).split())
+    if return_code:
+        print('Pylint failed')
+    else:
+        print('Pylint passed')
 
-    print('Pylint done')
+    return return_code
 
 
 def run_pep8(modules):
-    print('Run flake8 for PEP8 compliance')
+    print('\n\nRun flake8 for PEP8 compliance')
     print('Modules: {}'.format(', '.join(name for name, _ in modules)))
 
-    command = 'flake8 --statistics --benchmark --append-config={} {}'.format(
+    command = 'flake8 --statistics --append-config={} {}'.format(
         os.path.join(get_repo_root(), '.flake8'),
         ' '.join(path for _, path in modules))
-    return_code = call(command)
 
+    return_code = call(command)
     if return_code:
-        sys.exit(1)
+        print('Flake8 failed')
     else:
-        sys.exit(0)
+        print('Flake8 passed')
+
+    return return_code
 
 
 if __name__ == '__main__':
@@ -54,6 +62,8 @@ if __name__ == '__main__':
                             'Use "main" for the azure-cli package and "core" for the '
                             'azure-cli-core')
     args = parse.parse_args()
+
+    print(args.suites)
 
     existing_modules = list(chain(get_command_modules_paths(), get_core_modules_paths()))
 
@@ -72,8 +82,11 @@ if __name__ == '__main__':
     if not args.suites or not any(args.suites):
         run_pylint(selected_modules)
     else:
+        return_code_sum = 0
         if 'pep8' in args.suites:
-            run_pep8(selected_modules)
+            return_code_sum += run_pep8(selected_modules)
 
         if 'pylint' in args.suites:
-            run_pylint(selected_modules)
+            return_code_sum += run_pylint(selected_modules)
+
+    sys.exit(return_code_sum)
