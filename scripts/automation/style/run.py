@@ -63,8 +63,6 @@ if __name__ == '__main__':
                             'azure-cli-core')
     args = parse.parse_args()
 
-    print(args.suites)
-
     existing_modules = list(chain(get_command_modules_paths(), get_core_modules_paths()))
 
     if args.modules:
