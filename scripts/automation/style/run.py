@@ -80,7 +80,7 @@ if __name__ == '__main__':
         selected_modules = existing_modules
 
     if not args.suites or not any(args.suites):
-        run_pylint(selected_modules)
+        return_code_sum = run_pylint(selected_modules)
     else:
         return_code_sum = 0
         if 'pep8' in args.suites:
