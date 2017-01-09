@@ -1202,12 +1202,64 @@ helps['network public-ip update'] = """
 
 helps['network route-table'] = """
     type: group
-    short-summary: Manage route tables
+    short-summary: Commands to manage route tables.
 """
+
+helps['network route-table create'] = """
+    type: command
+    short-summary: Create a new route table.
+"""
+
+helps['network route-table delete'] = """
+    type: command
+    short-summary: Delete a route table.
+"""
+
+helps['network route-table list'] = """
+    type: command
+    short-summary: List route tables in a resource group or subscription.
+"""
+
+helps['network route-table show'] = """
+    type: command
+    short-summary: Show details of a route table.
+"""
+
+helps['network route-table update'] = """
+    type: command
+    short-summary: Update a route table.
+"""
+
 helps['network route-table route'] = """
     type: group
-    short-summary: Manage route table routes
+    short-summary: Commands to manage route table routes.
 """
+
+helps['network route-table route create'] = """
+    type: command
+    short-summary: Create a new route in a route table.
+"""
+
+helps['network route-table route delete'] = """
+    type: command
+    short-summary: Delete a route from a route table.
+"""
+
+helps['network route-table route list'] = """
+    type: command
+    short-summary: List routes in a route table.
+"""
+
+helps['network route-table route show'] = """
+    type: command
+    short-summary: Show details of a route in a route table.
+"""
+
+helps['network route-table route update'] = """
+    type: command
+    short-summary: Update a route in a route table.
+"""
+
 #endregion
 
 # region Traffic Manager

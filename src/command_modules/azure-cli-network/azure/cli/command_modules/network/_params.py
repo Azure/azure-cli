@@ -34,7 +34,7 @@ from azure.cli.command_modules.network._validators import \
      process_lb_frontend_ip_namespace, process_local_gateway_create_namespace,
      process_tm_endpoint_create_namespace, process_vnet_create_namespace,
      process_vnet_gateway_create_namespace, process_vpn_connection_create_namespace,
-     process_ag_ssl_policy_set_namespace,
+     process_ag_ssl_policy_set_namespace, process_route_table_create_namespace,
      validate_auth_cert, validate_cert, validate_inbound_nat_rule_id_list,
      validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
      validate_address_pool_name_or_id, validate_servers, load_cert_file, validate_metadata,
@@ -354,13 +354,20 @@ for item in ['create', 'update']:
     register_cli_argument('network public-ip {}'.format(item), 'allocation_method', help='IP address allocation method', **enum_choice_list(IPAllocationMethod))
     register_cli_argument('network public-ip {}'.format(item), 'version', help='IP address type.', **enum_choice_list(IPVersion))
 
+# Route table
+register_cli_argument('network route-table', 'route_table_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/routeTables'), id_part='name')
+register_extra_cli_argument('network route-table create', 'tags')
+register_extra_cli_argument('network route-table create', 'location')
+
+register_cli_argument('network route-table create', 'location', location_type, validator=process_route_table_create_namespace)
+register_cli_argument('network route-table create', 'parameters', ignore_type)
+
 # Route Operation
 register_cli_argument('network route-table route', 'route_name', name_arg_type, id_part='child_name', help='Route name')
 register_cli_argument('network route-table route', 'route_table_name', options_list=('--route-table-name',), help='Route table name')
-register_cli_argument('network route-table route', 'next_hop_type', **enum_choice_list(RouteNextHopType))
-
-# Route table
-register_cli_argument('network route-table', 'route_table_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/routeTables'), id_part='name')
+register_cli_argument('network route-table route', 'next_hop_type', help='The type of Azure hop the packet should be sent to.', **enum_choice_list(RouteNextHopType))
+register_cli_argument('network route-table route', 'next_hop_ip_address', help='The IP address packets should be forwarded to when using the VirtualAppliance hop type.')
+register_cli_argument('network route-table route', 'address_prefix', help='The destination CIDR to which the route applies.')
 
 # VNET
 register_cli_argument('network vnet', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), id_part='name')

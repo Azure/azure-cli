@@ -853,7 +853,7 @@ class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
 class NetworkRouteTableOperationScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkRouteTableOperationScenarioTest, self).__init__(__file__, test_method, resource_group='cli_route_table_test1')
+        super(NetworkRouteTableOperationScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_route_table')
         self.route_table_name = 'cli-test-route-table'
         self.route_name = 'my-route'
         self.resource_type = 'Microsoft.Network/routeTables'
