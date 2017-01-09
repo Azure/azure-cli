@@ -890,9 +890,8 @@ update_nsg_rule.__doc__ = SecurityRule.__doc__
 
 # endregion
 
-def update_vpn_connection(instance, resource_group_name, routing_weight=None, shared_key=None,
-                          tags=None, enable_bgp=None):
-
+def update_vpn_connection(instance, routing_weight=None, shared_key=None, tags=None,
+                          enable_bgp=None):
     ncf = _network_client_factory()
 
     if routing_weight is not None:
@@ -908,16 +907,19 @@ def update_vpn_connection(instance, resource_group_name, routing_weight=None, sh
         instance.enable_bgp = enable_bgp
 
     # TODO: Remove these when issue #1615 is fixed
+    gateway1_id = parse_resource_id(instance.virtual_network_gateway1.id)
     instance.virtual_network_gateway1 = ncf.virtual_network_gateways.get(
-        resource_group_name, instance.virtual_network_gateway1.id.rsplit('/')[-1])
+        gateway1_id['resource_group'], gateway1_id['name'])
 
     if instance.virtual_network_gateway2:
+        gateway2_id = parse_resource_id(instance.virtual_network_gateway2.id)
         instance.virtual_network_gateway2 = ncf.virtual_network_gateways.get(
-            resource_group_name, instance.virtual_network_gateway2.id.rsplit('/')[-1])
+            gateway2_id['resource_group'], gateway2_id['name'])
 
     if instance.local_network_gateway2:
+        gateway2_id = parse_resource_id(instance.local_network_gateway2.id)
         instance.local_network_gateway2 = ncf.local_network_gateways.get(
-            resource_group_name, instance.local_network_gateway2.id.rsplit('/')[-1])
+            gateway2_id['resource_group'], gateway2_id['name'])
 
     return instance
 
