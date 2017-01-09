@@ -26,9 +26,9 @@ A list of common install issues and their resolutions are available at `install 
 Interactive install script
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-On Linux, see our `prerequisites <https://github.com/Azure/azure-cli/blob/master/doc/install_linux_prerequisites.md>`__.
-
 On Windows, install via `pip <#pip>`__.
+
+On Linux, see our `prerequisites <https://github.com/Azure/azure-cli/blob/master/doc/install_linux_prerequisites.md>`__ then install as follows:
 
 .. code-block:: console
 
