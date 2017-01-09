@@ -8,6 +8,7 @@ from azure.cli.core.help_files import helps
 helps['iot'] = """
     type: group
     short-summary: Commands to connect, monitor, and control millions of IoT assets
+    long-summary: To install the iot component, use `az component update --add iot`
 """
 
 helps['iot device'] = """
