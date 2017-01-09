@@ -40,6 +40,7 @@ def get_core_modules_paths():
 
     yield 'azure-cli', _get_path('azure-cli')
     yield 'azure-cli-core', _get_path('azure-cli-core')
+    yield 'azure-cli-nspkg', _get_path('azure-cli-nspkg')
 
 
 def get_core_modules_paths_with_tests():
