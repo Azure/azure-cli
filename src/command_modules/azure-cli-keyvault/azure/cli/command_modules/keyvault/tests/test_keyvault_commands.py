@@ -15,8 +15,8 @@ from azure.cli.core._util import CLIError
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck,
                                                      NoneCheck, VCRTestBase)
 
-from azure.cli.command_modules.keyvault.keyvaultclient import HttpBearerChallenge
-from azure.cli.command_modules.keyvault.keyvaultclient.key_vault_authentication import \
+from azure.keyvault import HttpBearerChallenge
+from azure.keyvault.key_vault_authentication import \
     (KeyVaultAuthBase)
 from azure.cli.command_modules.keyvault._params import secret_encoding_values
 

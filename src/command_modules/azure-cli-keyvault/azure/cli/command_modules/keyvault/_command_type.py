@@ -46,11 +46,11 @@ def _create_key_vault_command(module_name, name, operation, transform_result, ta
         from msrest.exceptions import ValidationError, ClientRequestError
         from msrestazure.azure_operation import AzureOperationPoller
         from azure.cli.core._profile import Profile
-        from azure.cli.command_modules.keyvault.keyvaultclient import \
+        from azure.keyvault import \
             (KeyVaultClient, KeyVaultAuthentication)
-        from azure.cli.command_modules.keyvault.keyvaultclient.generated import \
+        from azure.keyvault.generated import \
             (KeyVaultClient as BaseKeyVaultClient)
-        from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
+        from azure.keyvault.generated.models import \
             (KeyVaultErrorException)
 
         try:
