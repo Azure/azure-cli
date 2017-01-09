@@ -28,7 +28,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-mgmt-keyvault==0.30.0',
-    'azure-keyvault',
+    'azure-keyvault==0.1.0',
     'azure-cli-core',
     'pyOpenSSL'
 ]
