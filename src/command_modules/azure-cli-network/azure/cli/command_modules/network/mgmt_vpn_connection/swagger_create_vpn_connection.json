@@ -145,7 +145,7 @@
           "type": "string",
           "description": "URI referencing the template.",
           "enum": [
-            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVpnConnection_2016-11-16/azuredeploy.json"
+            "https://azuresdkci.blob.core.windows.net/templatehost/CreateVpnConnection_2017-1-5/azuredeploy.json"
           ]
         },
         "contentVersion": {
@@ -160,9 +160,19 @@
     },
     "VpnConnectionParameters": {
       "properties": {
+        "authorizationKey": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_authorizationKey",
+          "x-ms-client-flatten": true
+        },
         "connectionType": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_connectionType",
+          "x-ms-client-flatten": true
+        },
+        "enableBgp": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_enableBgp",
           "x-ms-client-flatten": true
         },
         "expressRouteCircuit2Id": {
@@ -190,6 +200,11 @@
           "$ref": "#/definitions/DeploymentParameter_sharedKey",
           "x-ms-client-flatten": true
         },
+        "tags": {
+          "type": "object",
+          "$ref": "#/definitions/DeploymentParameter_tags",
+          "x-ms-client-flatten": true
+        },
         "virtualNetworkGatewayConnectionName": {
           "type": "object",
           "$ref": "#/definitions/DeploymentParameter_virtualNetworkGatewayConnectionName",
@@ -207,10 +222,20 @@
         }
       },
       "required": [
+        "enableBgp",
+        "connectionType",
         "virtualNetworkGatewayConnectionName",
-        "vnetGateway1Id",
-        "connectionType"
+        "vnetGateway1Id"
       ]
+    },
+    "DeploymentParameter_authorizationKey": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The authorization key for the VPN connection.",
+          "x-ms-client-name": "authorizationKey"
+        }
+      }
     },
     "DeploymentParameter_connectionType": {
       "properties": {
@@ -227,6 +252,19 @@
             "name": "connectionType",
             "modelAsString": false
           }
+        }
+      },
+      "required": [
+        "value"
+      ]
+    },
+    "DeploymentParameter_enableBgp": {
+      "properties": {
+        "value": {
+          "type": "boolean",
+          "description": "Enable BGP for this VPN connection.",
+          "x-ms-client-name": "enableBgp",
+          "default": "False"
         }
       },
       "required": [
@@ -277,6 +315,15 @@
           "description": "IPSec shared key.",
           "x-ms-client-name": "sharedKey",
           "default": "none"
+        }
+      }
+    },
+    "DeploymentParameter_tags": {
+      "properties": {
+        "value": {
+          "type": "object",
+          "description": "Tags object.",
+          "x-ms-client-name": "tags"
         }
       }
     },
