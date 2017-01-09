@@ -26,6 +26,8 @@ A list of common install issues and their resolutions are available at `install 
 Interactive install script
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Not supported on Windows. For Windows, install via `pip <#pip>`__.
+
 On Linux, see our `prerequisites <https://github.com/Azure/azure-cli/blob/master/doc/install_linux_prerequisites.md>`__.
 
 .. code-block:: console
@@ -65,7 +67,7 @@ You may need to modify your PATH:
 
     **Windows**
 
-    Add ``%APPDATA%\Python\PythonXY\Scripts`` to your PATH.
+    Add ``%APPDATA%\PythonXY\Scripts`` to your PATH.
 
     Where X, Y is your Python version.
 
