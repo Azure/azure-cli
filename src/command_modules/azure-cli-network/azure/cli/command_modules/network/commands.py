@@ -90,7 +90,8 @@ cli_command(__name__, 'network express-route peering list', 'azure.mgmt.network.
 cli_generic_update_command(__name__, 'network express-route peering update',
                            'azure.mgmt.network.operations.express_route_circuit_peerings_operations#ExpressRouteCircuitPeeringsOperations.get',
                            'azure.mgmt.network.operations.express_route_circuit_peerings_operations#ExpressRouteCircuitPeeringsOperations.create_or_update',
-                           cf_express_route_circuit_peerings, setter_arg_name='peering_parameters')
+                           cf_express_route_circuit_peerings, setter_arg_name='peering_parameters',
+                           custom_function_op=custom_path.format('update_express_route_peering'))
 cli_command(__name__, 'network express-route peering create', custom_path.format('create_express_route_peering'), cf_express_route_circuit_peerings)
 
 # ExpressRouteCircuitsOperations
@@ -103,7 +104,8 @@ cli_command(__name__, 'network express-route list', custom_path.format('list_exp
 cli_generic_update_command(__name__, 'network express-route update',
                            'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.get',
                            'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.create_or_update',
-                           cf_express_route_circuits)
+                           cf_express_route_circuits,
+                           custom_function_op=custom_path.format('update_express_route'))
 
 cli_command(__name__, 'network express-route create', 'azure.cli.command_modules.network.mgmt_express_route_circuit.lib.operations.express_route_circuit_operations#ExpressRouteCircuitOperations.create_or_update', cf_express_route_circuit_create, transform=DeploymentOutputLongRunningOperation('Starting network express-route create'))
 
