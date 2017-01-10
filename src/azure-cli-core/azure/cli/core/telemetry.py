@@ -18,11 +18,10 @@ import traceback
 import re
 from functools import wraps
 
-
 __all__ = ['set_application', 'log_telemetry', 'flush_telemetry']
 
 
-# decorators
+# internal decorators
 
 def _suppress_one_exception(expected_exception, raise_in_debug=False, fallback_return=None):
     def _decorator(func):
@@ -35,7 +34,9 @@ def _suppress_one_exception(expected_exception, raise_in_debug=False, fallback_r
                     raise the_exception
                 else:
                     return fallback_return
+
         return _wrapped_func
+
     return _decorator
 
 
@@ -52,11 +53,13 @@ def _suppress_all_exceptions(raise_in_debug=False, fallback_return=None):
                     return fallback_return
                 else:
                     pass
+
         return _wrapped_func
+
     return _decorator
 
 
-# exposed methods and classes
+# exposed methods
 
 def set_application(application, arg_complete_env_name):
     if not _user_agrees_to_telemetry() or not telemetry_service:
@@ -80,7 +83,9 @@ def flush_telemetry():
     return telemetry_service.flush()
 
 
-class TelemetryService(object):
+# internal utility functions and classes
+
+class _TelemetryService(object):
     TELEMETRY_VERSION = '0.0.1.4'
     DEBUG_TELEMETRY = 'AZURE_CLI_DEBUG_TELEMETRY'
 
@@ -202,8 +207,6 @@ class TelemetryService(object):
             print(json.dumps(data_to_save, indent=2, sort_keys=True))
             print('telemetry upload complete')
 
-
-# internal utility methods and decorators
 
 def _user_agrees_to_telemetry():
     return _get_azure_cli_config().getboolean('core', 'collect_telemetry', fallback=True)
@@ -355,18 +358,17 @@ def _debugging():
     return _in_ci() or telemetry_service.DEBUG_TELEMETRY in os.environ
 
 
-# module global variables and initialization the module
-
-if _user_agrees_to_telemetry():
-    telemetry_service = TelemetryService()
-else:
-    telemetry_service = None
-
-
 @_suppress_all_exceptions(raise_in_debug=True)
-def upload_telemetry(data):
+def _upload_telemetry(data):
     telemetry_service.upload(data)
 
 
+# module global variables and initialization the module
+
+if _user_agrees_to_telemetry():
+    telemetry_service = _TelemetryService()
+else:
+    telemetry_service = None
+
 if __name__ == '__main__':
-    upload_telemetry(sys.argv[1])
+    _upload_telemetry(sys.argv[1])
