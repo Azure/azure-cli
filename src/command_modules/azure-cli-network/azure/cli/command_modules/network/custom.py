@@ -1165,6 +1165,17 @@ def update_express_route_peering(instance, peer_asn=None, primary_peer_address_p
     return instance
 update_express_route_peering.__doc__ = create_express_route_peering.__doc__
 
+#endregion
+
+#region Route Table commands
+
+def update_route_table(instance, tags=None):
+    if tags == '':
+        instance.tags = None
+    elif tags is not None:
+        instance.tags = tags
+    return instance
+
 def create_route(resource_group_name, route_table_name, route_name, next_hop_type, address_prefix,
                  next_hop_ip_address=None):
     route = Route(next_hop_type, None, address_prefix, next_hop_ip_address, None, route_name)
