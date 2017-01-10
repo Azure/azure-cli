@@ -20,7 +20,7 @@ import azure.cli.core.telemetry as telemetry
 
 logger = _logging.get_az_logger(__name__)
 
-_arg_complete_env_name = '_ARGCOMPLETE'
+ARGCOMPLETE_ENV_NAME = '_ARGCOMPLETE'
 
 class Configuration(object): # pylint: disable=too-few-public-methods
     """The configuration object tracks session specific data such
@@ -55,7 +55,7 @@ class Application(object):
                 'x-ms-client-request-id': str(uuid.uuid1())
                 },
             'command': 'unknown',
-            'completer_active': _arg_complete_env_name in os.environ,
+            'completer_active': ARGCOMPLETE_ENV_NAME in os.environ,
             'query_active': False
             }
 
@@ -299,4 +299,4 @@ class IterateValue(list):
 
 APPLICATION = Application()
 
-telemetry.set_application(APPLICATION, _arg_complete_env_name)
+telemetry.set_application(APPLICATION, ARGCOMPLETE_ENV_NAME)
