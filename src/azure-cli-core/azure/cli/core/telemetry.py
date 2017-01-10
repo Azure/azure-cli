@@ -18,24 +18,20 @@ import traceback
 import re
 from functools import wraps
 
-try:
-    from azure.cli.core._util import CLIError
-except:  # pylint: disable=bare-except
-    CLIError = Exception
 
 __all__ = ['set_application', 'log_telemetry', 'flush_telemetry']
 
 
 # decorators
 
-def _suppress_one_exception(expected_exception, raies_in_debug=False, fallback_return=None):
+def _suppress_one_exception(expected_exception, raise_in_debug=False, fallback_return=None):
     def _decorator(func):
         @wraps(func)
         def _wrapped_func(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
             except expected_exception as the_exception:
-                if raies_in_debug and _debugging():
+                if raise_in_debug and _debugging():
                     raise the_exception
                 else:
                     return fallback_return
@@ -43,14 +39,14 @@ def _suppress_one_exception(expected_exception, raies_in_debug=False, fallback_r
     return _decorator
 
 
-def _suppress_all_exceptions(raies_in_debug=False, fallback_return=None):
+def _suppress_all_exceptions(raise_in_debug=False, fallback_return=None):
     def _decorator(func):
         @wraps(func)
         def _wrapped_func(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
             except:  # nopa, pylint: disable=bare-except
-                if raies_in_debug and _debugging():
+                if raise_in_debug and _debugging():
                     raise Exception()
                 elif fallback_return:
                     return fallback_return
@@ -115,7 +111,7 @@ class TelemetryService(object):
             if _debugging():
                 raise ex
 
-    @_suppress_all_exceptions(raies_in_debug=True)
+    @_suppress_all_exceptions(raise_in_debug=True)
     def log(self, name, log_type='event', **kwargs):
         """
         IMPORTANT: do not log events with quotes in the name, properties or measurements;
@@ -225,7 +221,7 @@ def _get_core_version():
     return core_version
 
 
-@_suppress_all_exceptions(raies_in_debug=True)
+@_suppress_all_exceptions(raise_in_debug=True)
 def _safe_exec(props, key, fn):
     props[key] = fn()
 
@@ -255,6 +251,11 @@ def _get_user_machine_id():
 
 def _get_user_azure_id(profile):
     try:
+        from azure.cli.core._util import CLIError
+    except ImportError:
+        CLIError = Exception
+
+    try:
         return _get_hash(profile.get_current_account_user())
     except (AttributeError, CLIError):  # pylint: disable=broad-except
         return None
@@ -266,6 +267,11 @@ def _get_hash(s):
 
 
 def _get_azure_subscription_id(profile):
+    try:
+        from azure.cli.core._util import CLIError
+    except ImportError:
+        CLIError = Exception
+
     try:
         return profile.get_login_credentials()[1]
     except (AttributeError, CLIError):  # pylint: disable=broad-except
@@ -357,7 +363,7 @@ else:
     telemetry_service = None
 
 
-@_suppress_all_exceptions(raies_in_debug=True)
+@_suppress_all_exceptions(raise_in_debug=True)
 def upload_telemetry(data):
     telemetry_service.upload(data)
 
