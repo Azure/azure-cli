@@ -38,3 +38,19 @@ $ export TWINE_USERNAME=<user>
 $ export TWINE_PASSWORD=<pass>
 $ python -m automation.release.run -c azure-cli-core -r https://pypi.python.org/pypi
 ```
+
+
+Examples of checking for component changes since git tag
+========================================================
+
+List changes for all components since all-v0.1.0b11
+---------------------------------------------------
+```
+$ python -m automation.release.check -s all-v0.1.0b11
+```
+
+List changes for azure-cli-core since all-v0.1.0b11
+---------------------------------------------------
+```
+$ python -m automation.release.check -c azure-cli-core -s all-v0.1.0b11
+```
