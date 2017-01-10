@@ -241,10 +241,11 @@ for item in ['ssl-policy', 'waf-config']:
 
 # ExpressRoutes
 register_cli_argument('network express-route', 'circuit_name', circuit_name_type, options_list=('--name', '-n'))
-register_cli_argument('network express-route', 'sku_family', **enum_choice_list(ExpressRouteCircuitSkuFamily))
-register_cli_argument('network express-route', 'sku_tier', **enum_choice_list(ExpressRouteCircuitSkuTier))
-register_cli_argument('network express-route', 'bandwidth_in_mbps', options_list=('--bandwidth',))
-register_cli_argument('network express-route', 'service_provider_name', options_list=('--provider',))
+register_cli_argument('network express-route', 'sku_family', help='Chosen SKU family of ExpressRoute circuit.', **enum_choice_list(ExpressRouteCircuitSkuFamily))
+register_cli_argument('network express-route', 'sku_tier', help='SKU Tier of ExpressRoute circuit.', **enum_choice_list(ExpressRouteCircuitSkuTier))
+register_cli_argument('network express-route', 'bandwidth_in_mbps', options_list=('--bandwidth',), help="Bandwidth in Mbps of the circuit. It must exactly match one of the available bandwidth offers from the 'list-service-providers' command.")
+register_cli_argument('network express-route', 'service_provider_name', options_list=('--provider',), help="Name of the ExpressRoute Service Provider. It must exactly match one of the Service Providers from the 'list-service-providers' command.")
+register_cli_argument('network express-route', 'peering_location', help="Name of the peering location. It must exactly match one of the available peering locations from the 'list-service-providers' command.")
 register_cli_argument('network express-route', 'device_path', options_list=('--path',), **enum_choice_list(device_path_values))
 register_cli_argument('network express-route', 'vlan_id', type=int)
 

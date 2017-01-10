@@ -1057,6 +1057,28 @@ def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None
 
 # region Express Route commands
 
+def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None,
+                         service_provider_name=None, sku_family=None, sku_tier=None, tags=None):
+    if bandwidth_in_mbps is not None:
+        instance.service_provider_properties.bandwith = bandwidth_in_mbps
+
+    if peering_location is not None:
+        instance.service_provider_properties.peering_location = peering_location
+
+    if service_provider_name is not None:
+        instance.service_provider_properties.provider = service_provider_name
+
+    if sku_family is not None:
+        instance.sku.family = sku_family
+
+    if sku_tier is not None:
+        instance.sku.tier = sku_tier
+
+    if tags is not None:
+        instance.tags = tags
+
+    return instance
+
 def create_express_route_peering(
         client, resource_group_name, circuit_name, peering_type, peer_asn, vlan_id,
         primary_peer_address_prefix, secondary_peer_address_prefix, shared_key=None,
@@ -1106,6 +1128,42 @@ def create_express_route_peering(
 
     return client.create_or_update(
         resource_group_name, circuit_name, peering_type, peering)
+
+def update_express_route_peering(instance, peer_asn=None, primary_peer_address_prefix=None,
+                                 secondary_peer_address_prefix=None, vlan_id=None, shared_key=None,
+                                 advertised_public_prefixes=None, customer_asn=None,
+                                 routing_registry_name=None):
+    if peer_asn is not None:
+        instance.peer_asn = peer_asn
+
+    if primary_peer_address_prefix is not None:
+        instance.primary_peer_address_prefix = primary_peer_address_prefix
+
+    if secondary_peer_address_prefix is not None:
+        instance.secondary_peer_address_prefix = secondary_peer_address_prefix
+
+    if vlan_id is not None:
+        instance.vlan_id = vlan_id
+
+    if shared_key is not None:
+        instance.shared_key = shared_key
+
+    try:
+        if advertised_public_prefixes is not None:
+            instance.microsoft_peering_config.advertised_public_prefixes = \
+                advertised_public_prefixes
+
+        if customer_asn is not None:
+            instance.microsoft_peering_config.customer_asn = customer_asn
+
+        if routing_registry_name is not None:
+            instance.routing_registry_name = routing_registry_name
+    except AttributeError:
+        raise CLIError("--advertised-public-prefixes, --customer-asn and "
+                       "--routing-registry-name are only applicable for 'MicrosoftPeering'")
+
+    return instance
+update_express_route_peering.__doc__ = create_express_route_peering.__doc__
 
 #endregion
 
