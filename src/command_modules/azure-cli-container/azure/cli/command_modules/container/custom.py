@@ -14,7 +14,7 @@ import yaml
 
 import azure.cli.core._logging as _logging
 from azure.cli.core._config import az_config
-from azure.cli.core._profile import Profile, CredsCache
+from azure.cli.core._profile import Profile, CredsCache, _SERVICE_PRINCIPAL
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long
 from azure.cli.core._util import CLIError
 
@@ -380,10 +380,15 @@ def _get_service_token():
     profile = Profile()
     credsCache = CredsCache()
     account = profile.get_subscription()
+
     user_name = account['user']['name']
     tenant = account['tenantId']
-    scheme, token = credsCache.retrieve_token_for_user(user_name, tenant, SERVICE_RESOURCE_ID)
-    service_token = "{} {}".format(scheme, token)
 
+    if account['user']['type'] == _SERVICE_PRINCIPAL:
+        scheme, token = credsCache.retrieve_token_for_service_principal(user_name, SERVICE_RESOURCE_ID)
+    else:
+        scheme, token = credsCache.retrieve_token_for_user(user_name, tenant, SERVICE_RESOURCE_ID)
+
+    service_token = "{} {}".format(scheme, token)
     return service_token
     
