@@ -137,7 +137,7 @@ helps['iot hub policy create'] = """
     examples:
         - name: Create a new shared access policy
           text: >
-            az iot hub policy create --hub-name my-iot-hub --name new-policy --permissions "RegistryWrite, ServiceConnect, DeviceConnect"
+            az iot hub policy create --hub-name my-iot-hub --name new-policy --permissions RegistryWrite ServiceConnect DeviceConnect
 """
 
 helps['iot hub policy delete'] = """

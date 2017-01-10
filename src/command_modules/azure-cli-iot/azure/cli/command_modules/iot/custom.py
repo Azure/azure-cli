@@ -2,14 +2,14 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=no-self-use,too-many-arguments,no-member,line-too-long
+# pylint: disable=no-self-use,too-many-arguments,no-member,line-too-long,too-few-public-methods
 
 from __future__ import print_function
 from os.path import exists
 from enum import Enum
 from azure.cli.core._util import CLIError
 from azure.cli.core.commands import LongRunningOperation
-from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku
+from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku, AccessRights
 from azure.mgmt.iothub.models.iot_hub_description import IotHubDescription
 from azure.mgmt.iothub.models.iot_hub_sku_info import IotHubSkuInfo
 from azure.mgmt.iothub.models.shared_access_signature_authorization_rule import SharedAccessSignatureAuthorizationRule
@@ -23,9 +23,22 @@ from ._utils import create_self_signed_certificate
 
 
 # CUSTOM TYPE
-class KeyType(Enum):  # pylint: disable=too-few-public-methods
+class KeyType(Enum):
     primary = 'primary'
     secondary = 'secondary'
+
+
+# This is a work around to simplify the permission parameter for access policy creation, and also align with the other
+# command modules.
+# The original AccessRights enum is a combination of below four basic access rights.
+# In order to avoid asking for comma & space separated string from user, a space separated list is supported for
+# assigning multiple permissions.
+# The underlying IoT SDK should handle this. However it isn't right now. Remove this after it is fixed in IoT SDK.
+class SimpleAccessRights(Enum):
+    registry_read = AccessRights.registry_read.value
+    registry_write = AccessRights.registry_write.value
+    service_connect = AccessRights.service_connect.value
+    device_connect = AccessRights.device_connect.value
 
 
 # CUSTOM METHODS
@@ -70,7 +83,7 @@ def iot_hub_delete(client, hub_name, resource_group_name=None):
 # Deleting IoT Hub is a long running operation. Due to API implementation issue, 404 error will be thrown during
 # deletion of an IoT Hub.
 # This is a work around to suppress the 404 error. It should be removed after API is fixed.
-class HubDeleteResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
+class HubDeleteResultTransform(LongRunningOperation):
     def __call__(self, poller):
         try:
             super(HubDeleteResultTransform, self).__call__(poller)
@@ -139,13 +152,14 @@ def iot_hub_policy_get(client, hub_name, policy_name, resource_group_name=None):
 
 
 def iot_hub_policy_create(client, hub_name, policy_name, permissions, resource_group_name=None):
+    rights = _convert_perms_to_access_rights(permissions)
     hub = iot_hub_get(client, hub_name, resource_group_name)
     policies = iot_hub_policy_list(client, hub_name, hub.resourcegroup)
     if _is_policy_existed(policies, policy_name):
         raise CLIError('Policy {0} already existed.'.format(policy_name))
     updated_policies = []
     updated_policies.extend(policies)
-    updated_policies.append(SharedAccessSignatureAuthorizationRule(policy_name, permissions))
+    updated_policies.append(SharedAccessSignatureAuthorizationRule(policy_name, rights))
     hub.properties.authorization_policies = updated_policies
     return client.create_or_update(hub.resourcegroup, hub_name, hub, {'IF-MATCH': hub.etag})
 
@@ -161,7 +175,8 @@ def iot_hub_policy_delete(client, hub_name, policy_name, resource_group_name=Non
 
 
 def _is_policy_existed(policies, policy_name):
-    return any(p for p in policies if p.key_name.lower() == policy_name.lower())
+    policy_set = set([p.key_name.lower() for p in policies])
+    return policy_name.lower() in policy_set
 
 
 class PolicyUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
@@ -366,3 +381,28 @@ def _ensure_resource_group_name(client, resource_group_name, hub_name):
         return _get_iot_hub_by_name(client, hub_name).resourcegroup
     else:
         return resource_group_name
+
+
+# Convert permission list to AccessRights from IoT SDK.
+def _convert_perms_to_access_rights(perm_list):
+    perm_set = set(perm_list)  # remove duplicate
+    sorted_perm_list = sorted(perm_set)
+    perm_key = '_'.join(sorted_perm_list)
+    access_rights_mapping = {
+        'registryread': AccessRights.registry_read,
+        'registrywrite': AccessRights.registry_write,
+        'serviceconnect': AccessRights.service_connect,
+        'deviceconnect': AccessRights.device_connect,
+        'registryread_registrywrite': AccessRights.registry_read_registry_write,
+        'registryread_serviceconnect': AccessRights.registry_read_service_connect,
+        'deviceconnect_registryread': AccessRights.registry_read_device_connect,
+        'registrywrite_serviceconnect': AccessRights.registry_write_service_connect,
+        'deviceconnect_registrywrite': AccessRights.registry_write_device_connect,
+        'deviceconnect_serviceconnect': AccessRights.service_connect_device_connect,
+        'registryread_registrywrite_serviceconnect': AccessRights.registry_read_registry_write_service_connect,
+        'deviceconnect_registryread_registrywrite': AccessRights.registry_read_registry_write_device_connect,
+        'deviceconnect_registryread_serviceconnect': AccessRights.registry_read_service_connect_device_connect,
+        'deviceconnect_registrywrite_serviceconnect': AccessRights.registry_write_service_connect_device_connect,
+        'deviceconnect_registryread_registrywrite_serviceconnect': AccessRights.registry_read_registry_write_service_connect_device_connect
+    }
+    return access_rights_mapping[perm_key]

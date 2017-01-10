@@ -84,8 +84,8 @@ class IoTHubTest(ResourceGroupVCRTestBase):
 
         # Test 'az iot hub policy create'
         policy_name = 'test_policy'
-        permissions = 'RegistryWrite, ServiceConnect, DeviceConnect'
-        self.cmd('iot hub policy create --hub-name {0} -n {1} --permissions "{2}"'.format(hub, policy_name, permissions),
+        permissions = 'RegistryWrite ServiceConnect DeviceConnect'
+        self.cmd('iot hub policy create --hub-name {0} -n {1} --permissions {2}'.format(hub, policy_name, permissions),
                  checks=NoneCheck())
 
         # Test 'az iot hub policy list'
@@ -96,7 +96,7 @@ class IoTHubTest(ResourceGroupVCRTestBase):
         # Test 'az iot hub policy show'
         self.cmd('iot hub policy show --hub-name {0} -n {1}'.format(hub, policy_name), checks=[
             JMESPathCheck('keyName', policy_name),
-            JMESPathCheck('rights', permissions)
+            JMESPathCheck('rights', 'RegistryWrite, ServiceConnect, DeviceConnect')
         ])
 
         # Test 'az iot hub policy delete'

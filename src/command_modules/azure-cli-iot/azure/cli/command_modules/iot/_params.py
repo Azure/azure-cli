@@ -7,9 +7,10 @@
 from azure.cli.core.commands.parameters import \
     location_type, enum_choice_list, get_resource_name_completion_list, CliArgumentType
 from azure.cli.core.commands import register_cli_argument
-from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku, AccessRights
+from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku
 from ._factory import iot_hub_service_factory
-from .custom import iot_device_list, KeyType
+from .custom import iot_device_list, KeyType, SimpleAccessRights
+from ._validators import validate_policy_permissions
 
 
 def get_device_id_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
@@ -37,8 +38,11 @@ register_cli_argument('iot hub consumer-group', 'event_hub_name', id_part='child
 # Arguments for 'iot hub policy' group
 register_cli_argument('iot hub policy', 'policy_name', options_list=('--name', '-n'), id_part='child_name',
                       help='Shared access policy name.')
-register_cli_argument('iot hub policy', 'permissions', help='Permissions of shared access policy.',
-                      **enum_choice_list(AccessRights))
+
+permission_values = ', '.join([x.value for x in SimpleAccessRights])
+register_cli_argument('iot hub policy', 'permissions', nargs='*', validator=validate_policy_permissions, type=str.lower,
+                      help='Permissions of shared access policy. Use space separated list for multiple permissions.'
+                           'Possible values: {}'.format(permission_values))
 
 # Arguments for 'iot hub job' group
 register_cli_argument('iot hub job', 'job_id', id_part='child_name', help='Job Id.')

@@ -186,12 +186,8 @@ def _print_groups(help_file):
         _print_items(subcommands)
 
 def _get_choices_defaults_sources_str(p):
-    # Convert each choice item to string and add double quotes if string contains white space
-    def _stringify(item):
-        item_str = str(item)
-        return '"{0}"'.format(item_str) if ' ' in item_str else item_str
-    choice_str = '  Allowed values: {0}.'.format(
-        ', '.join(sorted([_stringify(x) for x in p.choices]))) if p.choices else ''
+    choice_str = '  Allowed values: {0}.'.format(', '.join(sorted([str(x) for x in p.choices]))) \
+        if p.choices else ''
     default_str = '  Default: {0}.'.format(p.default) \
         if p.default and p.default != argparse.SUPPRESS else ''
     value_sources_str = '  Values from: {0}.'.format(', '.join(p.value_sources)) \
