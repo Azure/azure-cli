@@ -10,6 +10,11 @@ def _network_client_factory(**_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(NetworkManagementClient)
 
+def resource_client_factory(**_):
+    from azure.mgmt.resource import ResourceManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(ResourceManagementClient)
+
 def cf_application_gateways(_):
     return _network_client_factory().application_gateways
 
@@ -77,11 +82,6 @@ def cf_public_ip_create(_):
 
 def cf_route_tables(_):
     return _network_client_factory().route_tables
-
-def cf_route_table_create(_):
-    from azure.cli.command_modules.network.mgmt_route_table.lib import RouteTableCreationClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(RouteTableCreationClient).route_table
 
 def cf_routes(_):
     return _network_client_factory().routes

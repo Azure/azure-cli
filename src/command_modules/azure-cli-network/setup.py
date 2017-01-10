@@ -27,6 +27,7 @@ DEPENDENCIES = [
     'azure-mgmt-network==0.30.0',
     'azure-mgmt-trafficmanager==0.30.0rc6',
     'azure-mgmt-dns==0.30.0rc6',
+    'azure-mgmt-resource==0.30.2',
     'azure-cli-core'
 ]
 
@@ -78,10 +79,6 @@ setup(
         'azure.cli.command_modules.network.mgmt_local_gateway.lib',
         'azure.cli.command_modules.network.mgmt_local_gateway.lib.models',
         'azure.cli.command_modules.network.mgmt_local_gateway.lib.operations',
-        'azure.cli.command_modules.network.mgmt_route_table',
-        'azure.cli.command_modules.network.mgmt_route_table.lib',
-        'azure.cli.command_modules.network.mgmt_route_table.lib.models',
-        'azure.cli.command_modules.network.mgmt_route_table.lib.operations',
         'azure.cli.command_modules.network.mgmt_vnet_gateway',
         'azure.cli.command_modules.network.mgmt_vnet_gateway.lib',
         'azure.cli.command_modules.network.mgmt_vnet_gateway.lib.models',
@@ -94,10 +91,6 @@ setup(
         'azure.cli.command_modules.network.mgmt_vnet_gateway.lib',
         'azure.cli.command_modules.network.mgmt_vnet_gateway.lib.models',
         'azure.cli.command_modules.network.mgmt_vnet_gateway.lib.operations',
-        'azure.cli.command_modules.network.mgmt_route_table',
-        'azure.cli.command_modules.network.mgmt_route_table.lib',
-        'azure.cli.command_modules.network.mgmt_route_table.lib.models',
-        'azure.cli.command_modules.network.mgmt_route_table.lib.operations',
         'azure.cli.command_modules.network.mgmt_express_route_circuit',
         'azure.cli.command_modules.network.mgmt_express_route_circuit.lib',
         'azure.cli.command_modules.network.mgmt_express_route_circuit.lib.models',

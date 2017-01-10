@@ -1107,6 +1107,17 @@ def create_express_route_peering(
     return client.create_or_update(
         resource_group_name, circuit_name, peering_type, peering)
 
+#endregion
+
+#region Route Table commands
+
+def update_route_table(instance, tags=None):
+    if tags == '':
+        instance.tags = None
+    elif tags is not None:
+        instance.tags = tags
+    return instance
+
 def create_route(resource_group_name, route_table_name, route_name, next_hop_type, address_prefix,
                  next_hop_ip_address=None):
     route = Route(next_hop_type, None, address_prefix, next_hop_ip_address, None, route_name)
@@ -1114,6 +1125,19 @@ def create_route(resource_group_name, route_table_name, route_name, next_hop_typ
     return ncf.routes.create_or_update(resource_group_name, route_table_name, route_name, route)
 
 create_route.__doc__ = Route.__doc__
+
+def update_route(instance, address_prefix=None, next_hop_type=None, next_hop_ip_address=None):
+    if address_prefix is not None:
+        instance.address_prefix = address_prefix
+
+    if next_hop_type is not None:
+        instance.next_hop_type = next_hop_type
+
+    if next_hop_ip_address is not None:
+        instance.next_hop_ip_address = next_hop_ip_address
+    return instance
+
+update_route.__doc__ = Route.__doc__
 
 #endregion
 
