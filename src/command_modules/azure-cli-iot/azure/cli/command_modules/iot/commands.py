@@ -4,17 +4,20 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-from azure.cli.core.commands import cli_command, LongRunningOperation
+from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
 from ._factory import iot_hub_service_factory as factory
+from .custom import PolicyUpdateResultTransform, HubDeleteResultTransform
 
 custom_path = 'azure.cli.command_modules.iot.custom#{0}'
 
 # iot hub commands
-cli_command(__name__, 'iot hub create', custom_path.format('iot_hub_create'), factory, transform=LongRunningOperation('creating IoT Hub...', '', 10000.0))
+cli_command(__name__, 'iot hub create', custom_path.format('iot_hub_create'), factory)
 cli_command(__name__, 'iot hub list', custom_path.format('iot_hub_list'), factory)
 cli_command(__name__, 'iot hub show-connection-string', custom_path.format('iot_hub_show_connection_string'), factory)
 cli_command(__name__, 'iot hub show', custom_path.format('iot_hub_get'), factory)
+cli_generic_update_command(__name__, 'iot hub update', custom_path.format('iot_hub_get'), custom_path.format('iot_hub_update'), factory)
+cli_command(__name__, 'iot hub delete', custom_path.format('iot_hub_delete'), factory, transform=HubDeleteResultTransform())
 cli_command(__name__, 'iot hub list-skus', custom_path.format('iot_hub_sku_list'), factory)
 cli_command(__name__, 'iot hub consumer-group create', custom_path.format('iot_hub_consumer_group_create'), factory)
 cli_command(__name__, 'iot hub consumer-group list', custom_path.format('iot_hub_consumer_group_list'), factory)
@@ -22,6 +25,8 @@ cli_command(__name__, 'iot hub consumer-group show', custom_path.format('iot_hub
 cli_command(__name__, 'iot hub consumer-group delete', custom_path.format('iot_hub_consumer_group_delete'), factory)
 cli_command(__name__, 'iot hub policy list', custom_path.format('iot_hub_policy_list'), factory)
 cli_command(__name__, 'iot hub policy show', custom_path.format('iot_hub_policy_get'), factory)
+cli_command(__name__, 'iot hub policy create', custom_path.format('iot_hub_policy_create'), factory, transform=PolicyUpdateResultTransform())
+cli_command(__name__, 'iot hub policy delete', custom_path.format('iot_hub_policy_delete'), factory, transform=PolicyUpdateResultTransform())
 cli_command(__name__, 'iot hub job list', custom_path.format('iot_hub_job_list'), factory)
 cli_command(__name__, 'iot hub job show', custom_path.format('iot_hub_job_get'), factory)
 cli_command(__name__, 'iot hub job cancel', custom_path.format('iot_hub_job_cancel'), factory)
@@ -40,3 +45,5 @@ cli_command(__name__, 'iot device message receive', custom_path.format('iot_devi
 cli_command(__name__, 'iot device message complete', custom_path.format('iot_device_complete_message'), factory)
 cli_command(__name__, 'iot device message reject', custom_path.format('iot_device_reject_message'), factory)
 cli_command(__name__, 'iot device message abandon', custom_path.format('iot_device_abandon_message'), factory)
+cli_command(__name__, 'iot device export', custom_path.format('iot_device_export'), factory)
+cli_command(__name__, 'iot device import', custom_path.format('iot_device_import'), factory)

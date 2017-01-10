@@ -41,6 +41,16 @@ helps['iot hub show'] = """
     short-summary: Show non-security metadata of an IoT Hub.
 """
 
+helps['iot hub update'] = """
+    type: command
+    short-summary: Update non-security metadata of an IoT Hub.
+    examples:
+        - name: Add a new IP filter rule.
+          text: >
+            az iot hub update --name my-iot-hub --add properties.ipFilterRules filter_name=test-rule action=Accept ip_mask=127.0.0.0/31
+            az iot hub update --name my-iot-hub --add properties.ipFilterRules filter_name=test-rule action=Reject ip_mask=127.0.0.0/31
+"""
+
 helps['iot hub list'] = """
     type: command
     short-summary: List IoT Hubs in your subscription or resource group.
@@ -67,6 +77,11 @@ helps['iot hub show-connection-string'] = """
         - name: Show connection strings of all IoT Hubs in current subscription.
           text: >
             az iot hub show-connection-string
+"""
+
+helps['iot hub delete'] = """
+    type: command
+    short-summary: Delete an IoT Hub.
 """
 
 helps['iot hub consumer-group'] = """
@@ -116,6 +131,20 @@ helps['iot hub policy show'] = """
     short-summary: Get a shared access policy of an IoT Hub.
 """
 
+helps['iot hub policy create'] = """
+    type: command
+    short-summary: Create a new shared access policy in an IoT Hub.
+    examples:
+        - name: Create a new shared access policy
+          text: >
+            az iot hub policy create --hub-name my-iot-hub --name new-policy --permissions RegistryWrite ServiceConnect DeviceConnect
+"""
+
+helps['iot hub policy delete'] = """
+    type: command
+    short-summary: Delete a shared access policy from an IoT Hub.
+"""
+
 helps['iot hub list-skus'] = """
     type: command
     short-summary: List all valid pricing tiers.
@@ -149,11 +178,6 @@ helps['iot hub show-quota-metrics'] = """
 helps['iot hub show-stats'] = """
     type: command
     short-summary: Show stats of an IoT Hub.
-"""
-
-helps['iot device'] = """
-    type: group
-    short-summary: Manage devices attached to an IoT Hub.
 """
 
 helps['iot device create'] = """
@@ -265,4 +289,16 @@ helps['iot device message reject'] = """
 helps['iot device message abandon'] = """
     type: command
     short-summary: Abandon a cloud-to-device message.
+"""
+
+helps['iot device export'] = """
+    type: command
+    short-summary: Exports all the device identities in the IoT hub identity registry to an Azure Storage blob container.
+    long-summary: For more information, see https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities.
+"""
+
+helps['iot device import'] = """
+    type: command
+    short-summary: Import, update, or delete device identities in the IoT hub identity registry from a blob.
+    long-summary: For more information, see https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities.
 """
