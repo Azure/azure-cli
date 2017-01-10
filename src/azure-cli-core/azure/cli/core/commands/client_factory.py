@@ -23,7 +23,7 @@ def get_subscription_service_client(client_type):
     return _get_mgmt_service_client(client_type, False)
 
 def configure_common_settings(client):
-    _debug.allow_debug_connection(client)
+    client = _debug.allow_debug_connection(client)
 
     client.config.add_user_agent(UA_AGENT)
 
