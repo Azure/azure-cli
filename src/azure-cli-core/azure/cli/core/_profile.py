@@ -96,6 +96,8 @@ class Profile(object):
                                     password,
                                     is_service_principal,
                                     tenant):
+        from azure.cli.core._debug import allow_debug_adal_connection
+        allow_debug_adal_connection()
         subscriptions = []
         if interactive:
             subscriptions = self._subscription_finder.find_through_interactive_flow(
@@ -295,12 +297,13 @@ class SubscriptionFinder(object):
     '''finds all subscriptions for a user or service principal'''
     def __init__(self, auth_context_factory, adal_token_cache, arm_client_factory=None):
         from azure.mgmt.resource.subscriptions import SubscriptionClient
+        from azure.cli.core._debug import allow_debug_connection
 
         self._adal_token_cache = adal_token_cache
         self._auth_context_factory = auth_context_factory
         self.user_id = None # will figure out after log user in
         self._arm_client_factory = arm_client_factory or \
-             (lambda config: SubscriptionClient(config, base_url=CLOUD.endpoints.resource_manager)) #pylint: disable=unnecessary-lambda
+             (lambda config: allow_debug_connection(SubscriptionClient(config, base_url=CLOUD.endpoints.resource_manager))) #pylint: disable=unnecessary-lambda,line-too-long
 
     def find_from_user_account(self, username, password, resource):
         context = self._create_auth_context(_COMMON_TENANT)
