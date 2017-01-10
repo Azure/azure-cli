@@ -520,6 +520,18 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
 def k8s_get_credentials(name=None, resource_group_name=None, dns_prefix=None, location=None, user=None,
                         path=os.path.join(os.path.expanduser('~'), '.kube', 'config'), acs_info=None,
                         ssh_key_file=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa')):
+    """Create a new Acs.
+    :param name: The name of the cluster.
+    :type name: str
+    :param resource_group_name: The name of the resource group. The name
+     is case insensitive.
+    :type resource_group_name: str
+    :param dns_prefix: Deprecated, do not use.
+    :type dns_prefix: str
+    :param location: Deprecated, do not use.
+    :type location: str
+    :param path: Path to a kubectl config file (optional)
+    """
     if not dns_prefix or not location:
         if not acs_info:
             acs_info = _get_acs_info(name, resource_group_name)
