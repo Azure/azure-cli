@@ -16,9 +16,9 @@ from importlib import import_module
 from six import string_types
 
 import azure.cli.core._logging as _logging
+import azure.cli.core.telemetry as telemetry
 from azure.cli.core._util import CLIError
 from azure.cli.core.application import APPLICATION
-from azure.cli.core.telemetry import log_telemetry
 
 from ._introspection import (extract_args_from_signature,
                              extract_full_summary_from_signature)
@@ -111,7 +111,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         try:
             result = poller.result()
         except ClientException as client_exception:
-            log_telemetry('client exception', log_type='trace')
+            telemetry.set_exception('client exception', client_exception)
             message = getattr(client_exception, 'message', client_exception)
 
             try:
@@ -230,11 +230,11 @@ def get_command_table():
             elapsed_time = timeit.default_timer() - start_time
             logger.debug("Loaded module '%s' in %.3f seconds.", mod, elapsed_time)
             cumulative_elapsed_time += elapsed_time
-        except Exception:  # pylint: disable=broad-except
+        except Exception as ex:  # pylint: disable=broad-except
             # Changing this error message requires updating CI script that checks for failed
             # module loading.
-            logger.error("Error loading command module '%s'", mod)
-            log_telemetry('Error loading module', module=mod)
+            logger.error("Error loading command module '%s'E", mod)
+            telemetry.set_exception(exception=ex, summary='Error loading module: {}'.format(mod))
             logger.debug(traceback.format_exc())
     logger.debug("Loaded all modules in %.3f seconds. "
                  "(note: there's always an overhead with the first module loaded)",
@@ -309,15 +309,15 @@ def create_command(module_name, name, operation,
             else:
                 return result
         except ClientException as client_exception:
-            log_telemetry('client exception', log_type='trace')
+            telemetry.set_exception(client_exception, 'client exception')
             message = getattr(client_exception, 'message', client_exception)
             raise _polish_rp_not_registerd_error(CLIError(message))
         except AzureException as azure_exception:
-            log_telemetry('azure exception', log_type='trace')
+            telemetry.set_exception(azure_exception, 'azure exception')
             message = re.search(r"([A-Za-z\t .])+", str(azure_exception))
             raise CLIError('\n{}'.format(message.group(0) if message else str(azure_exception)))
         except ValueError as value_error:
-            log_telemetry('value exception', log_type='trace')
+            telemetry.set_exception(value_error, 'value exception')
             raise CLIError(value_error)
         except CLIError as cli_error:
             raise _polish_rp_not_registerd_error(cli_error)

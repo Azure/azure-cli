@@ -22,7 +22,7 @@ from azure.mgmt.keyvault.models import (VaultCreateOrUpdateParameters,
                                         SkuName)
 from azure.graphrbac import GraphRbacManagementClient
 
-from azure.cli.core.telemetry import log_telemetry
+import azure.cli.core.telemetry as telemetry
 from azure.cli.core._util import CLIError
 import azure.cli.core._logging as _logging
 
@@ -362,7 +362,7 @@ def create_certificate(client, vault_base_url, certificate_name, certificate_pol
             logger.info("Long running operation wait cancelled.")
             raise
         except Exception as client_exception:
-            log_telemetry('client exception', log_type='trace')
+            telemetry.set_exception(exception=client_exception, summary='client exception')
             message = getattr(client_exception, 'message', client_exception)
 
             try:

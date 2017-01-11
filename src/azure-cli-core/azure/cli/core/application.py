@@ -91,7 +91,11 @@ class Application(object):
             enable_autocomplete(self.parser)
             az_subparser = self.parser.subparsers[tuple()]
             _help.show_welcome(az_subparser)
-            telemetry.log_telemetry('welcome')
+
+            # TODO: Question, is this needed?
+            telemetry.set_command_details('az')
+            telemetry.set_success(summary='welcome')
+
             return None
 
         if argv[0].lower() == 'help':
@@ -139,9 +143,10 @@ class Application(object):
             params.pop('subcommand', None)
             params.pop('func', None)
             params.pop('command', None)
-            telemetry.log_telemetry(expanded_arg.command, log_type='pageview',
-                                    output_type=self.configuration.output_format,
-                                    parameters=[p for p in unexpanded_argv if p.startswith('-')])
+
+            telemetry.set_command_details(expanded_arg.command,
+                                          self.configuration.output_format,
+                                          [p for p in unexpanded_argv if p.startswith('-')])
 
             result = expanded_arg.func(params)
             result = todict(result)
@@ -153,6 +158,7 @@ class Application(object):
         event_data = {'result': results}
         self.raise_event(self.TRANSFORM_RESULT, event_data=event_data)
         self.raise_event(self.FILTER_RESULT, event_data=event_data)
+
         return CommandResultItem(event_data['result'],
                                  table_transformer=command_table[args.command].table_transformer,
                                  is_query_active=self.session['query_active'])
