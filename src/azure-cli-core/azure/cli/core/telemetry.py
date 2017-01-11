@@ -340,7 +340,7 @@ def _remove_symbols(s):
 
 def _in_diagnostic_mode():
     """
-    When the telemetry runs in hte diagnostic mode, exception are not suppressed and telemetry
+    When the telemetry runs in the diagnostic mode, exception are not suppressed and telemetry
     traces are dumped to the stdout.
     """
     return bool(os.environ.get(DIAGNOSTICS_TELEMETRY_ENV_NAME, False))
