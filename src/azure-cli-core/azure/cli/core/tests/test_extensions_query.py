@@ -7,6 +7,7 @@ import unittest
 
 from azure.cli.core.extensions.query import jmespath_type
 
+
 class TestQuery(unittest.TestCase):
     '''Tests for the values that can be passed to the --query parameter.
     These tests ensure that we are handling invalid queries correctly and raising appropriate errors
@@ -14,12 +15,12 @@ class TestQuery(unittest.TestCase):
     (We are not testing JMESPath itself here.)
     '''
 
-    def test_query_valid_1(self): # pylint: disable=no-self-use
+    def test_query_valid_1(self):  # pylint: disable=no-self-use
         query = 'length(@)'
         # Should not raise any exception as it is valid
         jmespath_type(query)
 
-    def test_query_valid_2(self): # pylint: disable=no-self-use
+    def test_query_valid_2(self):  # pylint: disable=no-self-use
         query = "[?storageProfile.osDisk.osType=='Linux'].[resourceGroup,name]"
         # Should not raise any exception as it is valid
         jmespath_type(query)
@@ -53,6 +54,7 @@ class TestQuery(unittest.TestCase):
         query = "length([?contains('id', 'Publishers'])"
         with self.assertRaises(ValueError):
             jmespath_type(query)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -15,6 +15,7 @@ import azure.cli.core._debug as _debug
 
 
 class Test_argparse(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls):
         # Ensure initialization has occurred correctly

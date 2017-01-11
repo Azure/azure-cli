@@ -3,18 +3,21 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=wrong-import-order
+
 from __future__ import print_function
 
+import collections
 import json
 import os
-import collections
-import shlex
-from random import choice
 import re
-from string import digits, ascii_lowercase
+import shlex
 import sys
-from six.moves.urllib.parse import urlparse, parse_qs # pylint: disable=import-error
 import tempfile
+from random import choice
+from string import digits, ascii_lowercase
+
+from six.moves.urllib.parse import urlparse, parse_qs  # pylint: disable=import-error
 
 import unittest
 try:
@@ -35,13 +38,14 @@ import azure.cli.core._debug as _debug
 from azure.cli.core._profile import Profile
 from azure.cli.core._util import CLIError
 
-
 COMMAND_COVERAGE_CONTROL_ENV = 'AZURE_CLI_TEST_COMMAND_COVERAGE'
 MOCKED_SUBSCRIPTION_ID = '00000000-0000-0000-0000-000000000000'
 MOCKED_TENANT_ID = '00000000-0000-0000-0000-000000000000'
 MOCKED_STORAGE_ACCOUNT = 'dummystorage'
 
+
 # MOCK METHODS
+
 
 def _mock_get_mgmt_service_client(client_type, subscription_bound=True, subscription_id=None,
                                   api_version=None):
@@ -61,36 +65,42 @@ def _mock_get_mgmt_service_client(client_type, subscription_bound=True, subscrip
 
     return (client, subscription_id)
 
+
 def _mock_generate_deployment_name(namespace):
     if not namespace.deployment_name:
         namespace.deployment_name = 'mock-deployment'
 
+
 def _mock_handle_exceptions(ex):
     raise ex
 
-def _mock_subscriptions(self): #pylint: disable=unused-argument
+
+def _mock_subscriptions(self):  # pylint: disable=unused-argument
     return [{
         "id": MOCKED_SUBSCRIPTION_ID,
         "user": {
             "name": "example@example.com",
             "type": "user"
-            },
+        },
         "state": "Enabled",
         "name": "Example",
         "tenantId": MOCKED_TENANT_ID,
         "isDefault": True}]
 
-def _mock_user_access_token(_, _1, _2, _3): #pylint: disable=unused-argument
+
+def _mock_user_access_token(_, _1, _2, _3):  # pylint: disable=unused-argument
     return ('Bearer', 'top-secret-token-for-you')
+
 
 def _mock_operation_delay(_):
     # don't run time.sleep()
     return
 
+
 # TEST CHECKS
 
-class JMESPathCheckAssertionError(AssertionError):
 
+class JMESPathCheckAssertionError(AssertionError):
     def __init__(self, comparator, actual_result, json_data):
         message = "Actual value '{}' != Expected value '{}'. ".format(
             actual_result,
@@ -98,7 +108,8 @@ class JMESPathCheckAssertionError(AssertionError):
         message += "Query '{}' used on json data '{}'".format(comparator.query, json_data)
         super(JMESPathCheckAssertionError, self).__init__(message)
 
-class JMESPathCheck(object): # pylint: disable=too-few-public-methods
+
+class JMESPathCheck(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, query, expected_result):
         self.query = query
@@ -109,7 +120,8 @@ class JMESPathCheck(object): # pylint: disable=too-few-public-methods
         if not actual_result == self.expected_result:
             raise JMESPathCheckAssertionError(self, actual_result, json_data)
 
-class JMESPathPatternCheck(object): # pylint: disable=too-few-public-methods
+
+class JMESPathPatternCheck(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, query, expected_result):
         self.query = query
@@ -120,7 +132,8 @@ class JMESPathPatternCheck(object): # pylint: disable=too-few-public-methods
         if not re.match(self.expected_result, str(actual_result), re.IGNORECASE):
             raise JMESPathCheckAssertionError(self, actual_result, json_data)
 
-class BooleanCheck(object): # pylint: disable=too-few-public-methods
+
+class BooleanCheck(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, expected_result):
         self.expected_result = expected_result
@@ -133,19 +146,21 @@ class BooleanCheck(object): # pylint: disable=too-few-public-methods
             raise AssertionError("Actual value '{}' != Expected value {}".format(
                 result, self.expected_result))
 
-class NoneCheck(object): # pylint: disable=too-few-public-methods
+
+class NoneCheck(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self):
         pass
 
-    def compare(self, data): # pylint: disable=no-self-use
+    def compare(self, data):  # pylint: disable=no-self-use
         try:
             assert not data
         except AssertionError:
             raise AssertionError("Actual value '{}' != Expected value falsy (None, '', [])".format(
                 data))
 
-class StringCheck(object): # pylint: disable=too-few-public-methods
+
+class StringCheck(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, expected_result):
         self.expected_result = expected_result
@@ -158,10 +173,13 @@ class StringCheck(object): # pylint: disable=too-few-public-methods
             raise AssertionError("Actual value '{}' != Expected value {}".format(
                 data, self.expected_result))
 
+
 # HELPER METHODS
+
 
 def _scrub_deployment_name(uri):
     return re.sub('/deployments/([^/?]+)', '/deployments/mock-deployment', uri)
+
 
 def _search_result_by_jmespath(json_data, query):
     if not json_data:
@@ -171,6 +189,7 @@ def _search_result_by_jmespath(json_data, query):
         query,
         json_val,
         jmespath.Options(collections.OrderedDict))
+
 
 def _custom_request_matcher(r1, r2):
     """ Ensure method, path, and query parameters match. """
@@ -196,9 +215,11 @@ def _custom_request_matcher(r1, r2):
 
     return True
 
+
 # MAIN CLASS
 
-class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attributes
+
+class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attributes
 
     FILTER_HEADERS = [
         'authorization',
@@ -269,11 +290,11 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
         request.uri = re.sub('/', '//', request.uri, count=1)
         # do not record requests sent for token refresh'
         if (request.body and 'grant-type=refresh_token' in str(request.body)) or \
-            '/oauth2/token' in request.uri:
+                ('/oauth2/token' in request.uri):
             request = None
         return request
 
-    def _before_record_response(self, response): # pylint: disable=no-self-use
+    def _before_record_response(self, response):  # pylint: disable=no-self-use
         for key in VCRTestBase.FILTER_HEADERS:
             if key in response['headers']:
                 del response['headers'][key]
@@ -294,9 +315,10 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
         return response
 
     @mock.patch('azure.cli.main.handle_exception', _mock_handle_exceptions)
-    @mock.patch('azure.cli.core.commands.client_factory._get_mgmt_service_client', _mock_get_mgmt_service_client) # pylint: disable=line-too-long
+    @mock.patch('azure.cli.core.commands.client_factory._get_mgmt_service_client',
+                _mock_get_mgmt_service_client)  # pylint: disable=line-too-long
     def _execute_live_or_recording(self):
-        #pylint: disable=no-member
+        # pylint: disable=no-member
         try:
             set_up = getattr(self, "set_up", None)
             if callable(set_up) and not self.skip_setup:
@@ -316,9 +338,11 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
                 self.tear_down()
 
     @mock.patch('azure.cli.core._profile.Profile.load_cached_subscriptions', _mock_subscriptions)
-    @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', _mock_user_access_token) # pylint: disable=line-too-long
+    @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user',
+                _mock_user_access_token)  # pylint: disable=line-too-long
     @mock.patch('azure.cli.main.handle_exception', _mock_handle_exceptions)
-    @mock.patch('azure.cli.core.commands.client_factory._get_mgmt_service_client', _mock_get_mgmt_service_client) # pylint: disable=line-too-long
+    @mock.patch('azure.cli.core.commands.client_factory._get_mgmt_service_client',
+                _mock_get_mgmt_service_client)  # pylint: disable=line-too-long
     @mock.patch('msrestazure.azure_operation.AzureOperationPoller._delay', _mock_operation_delay)
     @mock.patch('time.sleep', _mock_operation_delay)
     @mock.patch('azure.cli.core.commands.LongRunningOperation._delay', _mock_operation_delay)
@@ -354,7 +378,8 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
 
     # COMMAND METHODS
 
-    def cmd(self, command, checks=None, allowed_exceptions=None, debug=False): #pylint: disable=no-self-use
+    def cmd(self, command, checks=None, allowed_exceptions=None,
+            debug=False):  # pylint: disable=no-self-use
         allowed_exceptions = allowed_exceptions or []
         if not isinstance(allowed_exceptions, list):
             allowed_exceptions = [allowed_exceptions]
@@ -365,7 +390,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
         output = StringIO()
         try:
             cli_main(command_list, file=output)
-        except Exception as ex: # pylint: disable=broad-except
+        except Exception as ex:  # pylint: disable=broad-except
             ex_msg = str(ex)
             if not next((x for x in allowed_exceptions if x in ex_msg), None):
                 raise ex
@@ -384,13 +409,13 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
         result = result or '{}'
         try:
             return json.loads(result)
-        except Exception: # pylint: disable=broad-except
+        except Exception:  # pylint: disable=broad-except
             return result
 
-    def set_env(self, key, val): #pylint: disable=no-self-use
+    def set_env(self, key, val):  # pylint: disable=no-self-use
         os.environ[key] = val
 
-    def pop_env(self, key): #pylint: disable=no-self-use
+    def pop_env(self, key):  # pylint: disable=no-self-use
         return os.environ.pop(key, None)
 
     def execute(self):
@@ -415,11 +440,13 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             elif self.success and not self.playback and os.path.isfile(self.cassette_path):
                 try:
                     self._post_recording_scrub()
-                except Exception: # pylint: disable=broad-except
+                except Exception:  # pylint: disable=broad-except
                     os.remove(self.cassette_path)
+
 
 class ResourceGroupVCRTestBase(VCRTestBase):
     # pylint: disable=too-many-arguments
+
     def __init__(self, test_file, test_name, resource_group='vcr_resource_group', run_live=False,
                  debug=False, debug_vcr=False, skip_setup=False, skip_teardown=False):
         super(ResourceGroupVCRTestBase, self).__init__(test_file, test_name, run_live=run_live,
@@ -438,8 +465,10 @@ class ResourceGroupVCRTestBase(VCRTestBase):
     def tear_down(self):
         self.cmd('group delete --name {} --no-wait'.format(self.resource_group))
 
+
 class StorageAccountVCRTestBase(VCRTestBase):
     # pylint: disable=too-many-arguments
+
     def __init__(self, test_file, test_name, resource_group='vcr_resource_group', run_live=False,
                  debug=False, debug_vcr=False, skip_setup=False, skip_teardown=False):
         super(StorageAccountVCRTestBase, self).__init__(test_file, test_name, run_live=run_live,

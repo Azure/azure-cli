@@ -17,6 +17,7 @@ COMPONENT_PREFIX = 'azure-cli-'
 
 logger = _logging.get_az_logger(__name__)
 
+
 class CLIError(Exception):
     """Base class for exceptions that occur during
     normal operation of the application.
@@ -24,8 +25,9 @@ class CLIError(Exception):
     """
     pass
 
+
 def handle_exception(ex):
-    #For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
+    # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from msrestazure.azure_exceptions import CloudError
     if isinstance(ex, CLIError) or isinstance(ex, CloudError):
         logger.error(ex.args[0])
@@ -36,8 +38,10 @@ def handle_exception(ex):
         logger.exception(ex)
         return 1
 
+
 def normalize_newlines(str_to_normalize):
     return str_to_normalize.replace('\r\n', '\n')
+
 
 def show_version_info_exit(out_file):
     import platform
@@ -66,6 +70,7 @@ def show_version_info_exit(out_file):
     print('Python ({}) {}'.format(platform.system(), sys.version), file=out_file)
     sys.exit(0)
 
+
 def get_json_object(json_string):
     """ Loads a JSON string as an object and converts all keys to snake case """
     def _convert_to_snake_case(item):
@@ -80,9 +85,10 @@ def get_json_object(json_string):
             return item
     return _convert_to_snake_case(json.loads(json_string))
 
+
 def get_file_json(file_path, throw_on_empty=True):
     from codecs import open as codecs_open
-    #always try 'utf-8-sig' first, so that BOM in WinOS won't cause trouble.
+    # always try 'utf-8-sig' first, so that BOM in WinOS won't cause trouble.
     for encoding in ('utf-8-sig', 'utf-8', 'utf-16', 'utf-16le', 'utf-16be'):
         try:
             with codecs_open(file_path, encoding=encoding) as f:
@@ -99,7 +105,8 @@ def get_file_json(file_path, throw_on_empty=True):
 
     raise CLIError('Failed to decode file {} - unknown decoding'.format(file_path))
 
-def todict(obj): #pylint: disable=too-many-return-statements
+
+def todict(obj):  # pylint: disable=too-many-return-statements
 
     if isinstance(obj, dict):
         return {k: todict(v) for (k, v) in obj.items()}
@@ -120,9 +127,13 @@ def todict(obj): #pylint: disable=too-many-return-statements
     else:
         return obj
 
+
 KEYS_CAMELCASE_PATTERN = re.compile('(?!^)_([a-zA-Z])')
+
+
 def to_camel_case(s):
     return re.sub(KEYS_CAMELCASE_PATTERN, lambda x: x.group(1).upper(), s)
+
 
 def to_snake_case(s):
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', s)

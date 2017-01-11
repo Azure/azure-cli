@@ -7,6 +7,7 @@
 import os
 import unittest
 
+
 class Test_vcr_security(unittest.TestCase):
 
     @classmethod
@@ -38,10 +39,11 @@ class Test_vcr_security(unittest.TestCase):
                         lower_line = line.lower()
                         if 'grant_type=refresh_token' in lower_line or \
                             '/oauth2/token' in lower_line or \
-                            'authorization:' in lower_line:
+                                'authorization:' in lower_line:
                             insecure_cassettes.append(name)
                             break
-        self.assertFalse(insecure_cassettes, 'The following cassettes contain tokens: {}'.format(insecure_cassettes))
+        self.assertFalse(insecure_cassettes,
+                         'The following cassettes contain tokens: {}'.format(insecure_cassettes))
 
     def test_deployment_name_scrub(self):
         from azure.cli.core.test_utils.vcr_test_base import _scrub_deployment_name as scrub_deployment_name
@@ -51,8 +53,10 @@ class Test_vcr_security(unittest.TestCase):
         uri1 = scrub_deployment_name(uri1)
         uri2 = scrub_deployment_name(uri2)
 
-        self.assertEqual(uri1, 'https://www.contoso.com/deployments/mock-deployment?api-version=2015-11-01')
+        self.assertEqual(
+            uri1, 'https://www.contoso.com/deployments/mock-deployment?api-version=2015-11-01')
         self.assertEqual(uri2, 'https://www.contoso.com/deployments/mock-deployment/more')
+
 
 if __name__ == '__main__':
     unittest.main()

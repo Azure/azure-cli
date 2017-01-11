@@ -7,6 +7,7 @@ import unittest
 from six import StringIO
 from azure.cli.core.extensions.transform import _parse_id, _add_resource_group
 
+
 class TestResourceGroupTransform(unittest.TestCase):
 
     @classmethod
@@ -23,17 +24,17 @@ class TestResourceGroupTransform(unittest.TestCase):
     def tearDown(self):
         self.io.close()
 
-    CORRECT_ID = "/subscriptions/00000000-0000-0000-0000-0000000000000/resourceGroups/REsourceGROUPname/providers/Microsoft.Compute/virtualMachines/vMName" # pylint: disable=line-too-long
-    NON_RG_ID = "/subscriptions/00000000-0000-0000-0000-0000000000000/somethingElse/REsourceGROUPname/providers/Microsoft.Compute/virtualMachines/vMName" # pylint: disable=line-too-long
+    CORRECT_ID = "/subscriptions/00000000-0000-0000-0000-0000000000000/resourceGroups/REsourceGROUPname/providers/Microsoft.Compute/virtualMachines/vMName"  # pylint: disable=line-too-long
+    NON_RG_ID = "/subscriptions/00000000-0000-0000-0000-0000000000000/somethingElse/REsourceGROUPname/providers/Microsoft.Compute/virtualMachines/vMName"  # pylint: disable=line-too-long
     BOGUS_ID = "|completely-bogus-id|"
-    DICT_ID = {'value': "/subscriptions/00000000-0000-0000-0000-0000000000000/resourceGroups/REsourceGROUPname/providers/Microsoft.Compute/virtualMachines/vMName"} # pylint: disable=line-too-long
+    DICT_ID = {'value': "/subscriptions/00000000-0000-0000-0000-0000000000000/resourceGroups/REsourceGROUPname/providers/Microsoft.Compute/virtualMachines/vMName"}  # pylint: disable=line-too-long
 
     def test_split_correct_id(self):
         result = _parse_id(TestResourceGroupTransform.CORRECT_ID)
         self.assertDictEqual(result, {
             'resource-group': 'REsourceGROUPname',
             'name': 'vMName'
-            })
+        })
 
     def test_split_non_resourcegroup_id(self):
         with self.assertRaises(KeyError):
@@ -51,37 +52,37 @@ class TestResourceGroupTransform(unittest.TestCase):
         instance = {
             'id': TestResourceGroupTransform.CORRECT_ID,
             'name': 'A name'
-            }
+        }
         _add_resource_group(instance)
         self.assertDictEqual(instance, {
             'id': TestResourceGroupTransform.CORRECT_ID,
             'resourceGroup': 'REsourceGROUPname',
             'name': 'A name'
-            })
+        })
 
     def test_dont_add_invalid_resourcegroup_id(self):
         instance = {
             'id': TestResourceGroupTransform.BOGUS_ID,
             'name': 'A name'
-            }
+        }
         _add_resource_group(instance)
         self.assertDictEqual(instance, {
             'id': TestResourceGroupTransform.BOGUS_ID,
             'name': 'A name'
-            })
+        })
 
     def test_dont_stomp_on_existing_resourcegroup_id(self):
         instance = {
             'id': TestResourceGroupTransform.CORRECT_ID,
             'resourceGroup': 'SomethingElse',
             'name': 'A name'
-            }
+        }
         _add_resource_group(instance)
         self.assertDictEqual(instance, {
             'id': TestResourceGroupTransform.CORRECT_ID,
             'resourceGroup': 'SomethingElse',
             'name': 'A name'
-            })
+        })
 
 
 if __name__ == '__main__':

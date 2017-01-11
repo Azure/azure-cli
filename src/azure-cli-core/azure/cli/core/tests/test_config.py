@@ -9,6 +9,7 @@ import mock
 from six.moves import configparser
 from azure.cli.core._config import AzConfig
 
+
 class TestAzConfig(unittest.TestCase):
 
     def setUp(self):
@@ -116,6 +117,7 @@ class TestAzConfig(unittest.TestCase):
         self.az_config.config_parser.set(section, option, value)
         with self.assertRaises(ValueError):
             self.az_config.getboolean(section, option)
+
 
 if __name__ == '__main__':
     unittest.main()

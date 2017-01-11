@@ -14,13 +14,16 @@ logger = _logging.get_az_logger(__name__)
 
 UA_AGENT = "AZURECLI/{}".format(core_version)
 
+
 def get_mgmt_service_client(client_type, subscription_id=None, api_version=None):
     client, _ = _get_mgmt_service_client(client_type, subscription_id=subscription_id,
                                          api_version=api_version)
     return client
 
+
 def get_subscription_service_client(client_type):
     return _get_mgmt_service_client(client_type, False)
+
 
 def configure_common_settings(client):
     client = _debug.allow_debug_connection(client)
@@ -31,13 +34,14 @@ def configure_common_settings(client):
         # We are working with the autorest team to expose the add_header
         # functionality of the generated client to avoid having to access
         # private members
-        client._client.add_header(header, value) #pylint: disable=protected-access
+        client._client.add_header(header, value)  # pylint: disable=protected-access
 
     command_name_suffix = ';completer-request' if APPLICATION.session['completer_active'] else ''
-    client._client.add_header('CommandName', #pylint: disable=protected-access
+    client._client.add_header('CommandName',  # pylint: disable=protected-access
                               "{}{}".format(APPLICATION.session['command'], command_name_suffix))
     client.config.generate_client_request_id = \
         'x-ms-client-request-id' not in APPLICATION.session['headers']
+
 
 def _get_mgmt_service_client(client_type, subscription_bound=True, subscription_id=None,
                              api_version=None):
@@ -56,7 +60,8 @@ def _get_mgmt_service_client(client_type, subscription_bound=True, subscription_
 
     return (client, subscription_id)
 
-def get_data_service_client(service_type, account_name, account_key, connection_string=None, #pylint: disable=too-many-arguments
+
+def get_data_service_client(service_type, account_name, account_key, connection_string=None,  # pylint: disable=too-many-arguments
                             sas_token=None, endpoint_suffix=None):
     logger.info('Getting data service client service_type=%s', service_type.__name__)
     try:
@@ -73,10 +78,12 @@ def get_data_service_client(service_type, account_name, account_key, connection_
     client.request_callback = _add_headers
     return client
 
+
 def get_subscription_id():
     profile = Profile()
     _, subscription_id, _ = profile.get_login_credentials()
     return subscription_id
+
 
 def _add_headers(request):
     request.headers['User-Agent'] = ' '.join((request.headers['User-Agent'], UA_AGENT))

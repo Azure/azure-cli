@@ -16,7 +16,9 @@ from azure.cli.core.commands import (
     register_cli_argument,
     register_extra_cli_argument)
 
+
 class Test_command_registration(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls):
         # Ensure initialization has occurred correctly
@@ -28,7 +30,7 @@ class Test_command_registration(unittest.TestCase):
         logging.shutdown()
 
     @staticmethod
-    def sample_vm_get(resource_group_name, vm_name, opt_param=None, expand=None, custom_headers={}, # pylint: disable=dangerous-default-value, too-many-arguments
+    def sample_vm_get(resource_group_name, vm_name, opt_param=None, expand=None, custom_headers={},  # pylint: disable=dangerous-default-value, too-many-arguments
                       raw=False, **operation_config):
         """
         The operation to get a virtual machine.
@@ -94,7 +96,7 @@ class Test_command_registration(unittest.TestCase):
                                        required=True,
                                        help='The name of the virtual machine.'),
             'opt_param': CliArgumentType(required=False,
-                                         help='Used to verify reflection correctly identifies optional params.'), # pylint: disable=line-too-long
+                                         help='Used to verify reflection correctly identifies optional params.'),  # pylint: disable=line-too-long
             'expand': CliArgumentType(required=False,
                                       help='The expand expression to apply on the operation.')
         }
@@ -173,7 +175,7 @@ class Test_command_registration(unittest.TestCase):
         command_table.clear()
 
     def test_command_build_argument_help_text(self):
-        def sample_sdk_method_with_weird_docstring(param_a, param_b, param_c): # pylint: disable=unused-argument
+        def sample_sdk_method_with_weird_docstring(param_a, param_b, param_c):  # pylint: disable=unused-argument
             """
             An operation with nothing good.
 
@@ -187,8 +189,10 @@ class Test_command_registration(unittest.TestCase):
             nothing2.
             """
         command_table.clear()
-        setattr(sys.modules[__name__], sample_sdk_method_with_weird_docstring.__name__, sample_sdk_method_with_weird_docstring) #pylint: disable=line-too-long
-        cli_command(None, 'test command foo', '{}#{}'.format(__name__, sample_sdk_method_with_weird_docstring.__name__), None) #pylint: disable=line-too-long
+        setattr(sys.modules[__name__], sample_sdk_method_with_weird_docstring.__name__,
+                sample_sdk_method_with_weird_docstring)  # pylint: disable=line-too-long
+        cli_command(None, 'test command foo', '{}#{}'.format(
+            __name__, sample_sdk_method_with_weird_docstring.__name__), None)  # pylint: disable=line-too-long
 
         command_table['test command foo'].load_arguments()
         _update_command_definitions(command_table)
@@ -229,7 +233,7 @@ class Test_command_registration(unittest.TestCase):
         self.assertIsNone(arg.settings['validator'])
 
     def test_override_using_register_cli_argument(self):
-        def sample_sdk_method(param_a): # pylint: disable=unused-argument
+        def sample_sdk_method(param_a):  # pylint: disable=unused-argument
             pass
 
         def test_validator_completer():
@@ -277,6 +281,7 @@ class Test_command_registration(unittest.TestCase):
                                      help=CliArgumentType.REMOVE)
         self.assertFalse('required' in cmd_arg.options)
         self.assertFalse('help' in cmd_arg.options)
+
 
 if __name__ == '__main__':
     unittest.main()

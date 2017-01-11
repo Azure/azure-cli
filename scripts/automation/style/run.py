@@ -40,7 +40,7 @@ def run_pep8(modules):
         os.path.join(get_repo_root(), '.flake8'),
         ' '.join(path for _, path in modules))
 
-    return_code = call(command)
+    return_code = call(command.split())
     if return_code:
         print('Flake8 failed')
     else:
