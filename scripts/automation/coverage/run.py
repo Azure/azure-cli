@@ -85,9 +85,6 @@ def run_code_coverage(modules):
 
 
 def coverage_command_rundown(log_file_path):
-    from azure.cli.core.application import APPLICATION
-    APPLICATION.configuration
-
     import azure.cli.core.application
 
     config = azure.cli.core.application.Configuration([])
