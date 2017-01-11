@@ -18,6 +18,29 @@ from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase, ResourceGroupV
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
+class NetworkMultiIdsShowScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(NetworkMultiIdsShowScenarioTest, self).__init__(__file__, test_method, resource_group='test_multi_id')
+
+    def test_multi_id_show(self):
+        self.execute()
+
+    def set_up(self):
+        super(NetworkMultiIdsShowScenarioTest, self).set_up()
+        rg = self.resource_group
+
+        self.cmd('network public-ip create -g {} -n pip1'.format(rg))
+        self.cmd('network public-ip create -g {} -n pip2'.format(rg))
+
+    def body(self):
+        rg = self.resource_group
+
+        pip1 = self.cmd('network public-ip show -g {} -n pip1'.format(rg))
+        pip2 = self.cmd('network public-ip show -g {} -n pip2'.format(rg))
+        self.cmd('network public-ip show --ids {} {}'.format(pip1['id'], pip2['id']),
+            checks=JMESPathCheck('length(@)', 2))
+
 class NetworkUsageListScenarioTest(VCRTestBase):
 
     def __init__(self, test_method):
