@@ -10,11 +10,12 @@ import azure.cli.core._logging as _logging
 
 logger = _logging.get_az_logger(__name__)
 
+
 def handle_module_not_installed(module_name):
     try:
         import xmlrpclib
     except ImportError:
-        import xmlrpc.client as xmlrpclib #pylint: disable=import-error
+        import xmlrpc.client as xmlrpclib  # pylint: disable=import-error
     query = {'author': 'Microsoft Corporation', 'author_email': 'azpycli'}
     logger.debug("Checking PyPI for modules using query '%s'", query)
     client = xmlrpclib.ServerProxy('https://pypi.python.org/pypi')

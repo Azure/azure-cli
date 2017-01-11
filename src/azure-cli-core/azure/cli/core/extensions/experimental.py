@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+
 def register(event_dispatcher):
     def _enable_experimental_handlers(_, event_data):
         """The user can opt in to experimental event handlers by
@@ -36,7 +37,7 @@ def register(event_dispatcher):
             except TypeError:
                 pass
 
-    def generate_skeleton(_, event_data): #pylint: disable=unused-variable
+    def generate_skeleton(_, event_data):  # pylint: disable=unused-variable
         try:
             def switcheroo(_, event_data):
                 """We replace the handler for the command
@@ -59,9 +60,9 @@ def register(event_dispatcher):
         try:
             args = event_data['args']
             skeleton_index = args.index('--use-skeleton')
-            skeleton_value = args[skeleton_index + 1] # pylint: disable=unused-variable
+            skeleton_value = args[skeleton_index + 1]  # pylint: disable=unused-variable
 
-            def overlay_arguments(_, event_data): # pylint: disable=unused-argument
+            def overlay_arguments(_, event_data):  # pylint: disable=unused-argument
                 # TODO: overlay the arguments with the data in the skeleton file
                 # passed to us...
                 pass

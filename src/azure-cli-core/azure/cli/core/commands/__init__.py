@@ -4,30 +4,32 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
+
 import json
+import pkgutil
 import re
 import time
-import traceback
-import pkgutil
 import timeit
-from importlib import import_module
+import traceback
 from collections import OrderedDict, defaultdict
+from importlib import import_module
 from six import string_types
 
-from azure.cli.core._util import CLIError
 import azure.cli.core._logging as _logging
-from azure.cli.core.telemetry import log_telemetry
+from azure.cli.core._util import CLIError
 from azure.cli.core.application import APPLICATION
+from azure.cli.core.telemetry import log_telemetry
 
 from ._introspection import (extract_args_from_signature,
                              extract_full_summary_from_signature)
 
 logger = _logging.get_az_logger(__name__)
 
+
 # pylint: disable=too-many-arguments,too-few-public-methods
 
-class CliArgumentType(object):
 
+class CliArgumentType(object):
     REMOVE = '---REMOVE---'
 
     def __init__(self, overrides=None, **kwargs):
@@ -41,8 +43,8 @@ class CliArgumentType(object):
             self.settings.update(**other.settings)
         self.settings.update(**kwargs)
 
-class CliCommandArgument(object):
 
+class CliCommandArgument(object):
     _NAMED_ARGUMENTS = ('options_list', 'validator', 'completer', 'id_part', 'arg_group')
 
     def __init__(self, dest=None, argtype=None, **kwargs):
@@ -52,11 +54,11 @@ class CliCommandArgument(object):
 
         # We'll do an early fault detection to find any instances where we have inconsistent
         # set of parameters for argparse
-        if not self.options_list and 'required' in self.options: # pylint: disable=access-member-before-definition
+        if not self.options_list and 'required' in self.options:  # pylint: disable=access-member-before-definition
             raise ValueError(message="You can't specify both required and an options_list")
         if not self.options.get('dest', False):
             raise ValueError('Missing dest')
-        if not self.options_list: # pylint: disable=access-member-before-definition
+        if not self.options_list:  # pylint: disable=access-member-before-definition
             self.options_list = ('--{}'.format(self.options['dest'].replace('_', '-')),)
 
     def __getattr__(self, name):
@@ -66,8 +68,8 @@ class CliCommandArgument(object):
             return self.type.settings.get('dest', None)
         elif name == 'options':
             return {key: value for key, value in self.type.settings.items()
-                    if key != 'options' and not key in self._NAMED_ARGUMENTS
-                    and not value == CliArgumentType.REMOVE}
+                    if key != 'options' and key not in self._NAMED_ARGUMENTS and
+                    not value == CliArgumentType.REMOVE}
         else:
             raise AttributeError(message=name)
 
@@ -76,7 +78,8 @@ class CliCommandArgument(object):
             return super(CliCommandArgument, self).__setattr__(name, value)
         self.type.settings[name] = value
 
-class LongRunningOperation(object): #pylint: disable=too-few-public-methods
+
+class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, start_msg='', finish_msg='', poller_done_interval_ms=1000.0):
         self.start_msg = start_msg
@@ -92,10 +95,12 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
         correlation_message = ''
         while not poller.done():
             try:
-                correlation_message = 'Correlation ID: {}' \
-                    .format(json.loads(poller._response.__dict__['_content']) #pylint: disable=protected-access
-                            ['properties']['correlationId'])
-            except: #pylint: disable=bare-except
+                # pylint: disable=protected-access
+                correlation_id = json.loads(
+                    poller._response.__dict__['_content'])['properties']['correlationId']
+
+                correlation_message = 'Correlation ID: {}'.format(correlation_id)
+            except:  # pylint: disable=bare-except
                 pass
 
             try:
@@ -110,13 +115,14 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
             message = getattr(client_exception, 'message', client_exception)
 
             try:
-                message = str(message) + ' ' + json.loads(client_exception.response.text) \
-                    ['error']['details'][0]['message']
-            except: #pylint: disable=bare-except
+                message = '{} {}'.format(
+                    str(message),
+                    json.loads(client_exception.response.text)['error']['details'][0]['message'])
+            except:  # pylint: disable=bare-except
                 pass
 
             cli_error = CLIError('{}  {}'.format(message, correlation_message))
-            #capture response for downstream commands (webapp) to dig out more details
+            # capture response for downstream commands (webapp) to dig out more details
             setattr(cli_error, 'response', getattr(client_exception, 'response', None))
             raise cli_error
 
@@ -124,11 +130,14 @@ class LongRunningOperation(object): #pylint: disable=too-few-public-methods
                     self.start_msg, result)
         return result
 
-class DeploymentOutputLongRunningOperation(LongRunningOperation): #pylint: disable=too-few-public-methods
+
+# pylint: disable=too-few-public-methods
+class DeploymentOutputLongRunningOperation(LongRunningOperation):
     def __call__(self, poller):
         result = super(DeploymentOutputLongRunningOperation, self).__call__(poller)
         outputs = result.properties.outputs
         return {key: val['value'] for key, val in outputs.items()} if outputs else {}
+
 
 class CommandTable(dict):
     """A command table is a dictionary of name -> CliCommand
@@ -141,9 +150,11 @@ class CommandTable(dict):
         def wrapped(func):
             cli_command(self, name, func)
             return func
+
         return wrapped
 
-class CliCommand(object): #pylint:disable=too-many-instance-attributes
+
+class CliCommand(object):  # pylint:disable=too-many-instance-attributes
 
     def __init__(self, name, handler, description=None, table_transformer=None,
                  arguments_loader=None, description_loader=None):
@@ -151,8 +162,8 @@ class CliCommand(object): #pylint:disable=too-many-instance-attributes
         self.handler = handler
         self.help = None
         self.description = description_loader() \
-                           if description_loader and CliCommand._should_load_description() \
-                           else description
+            if description_loader and CliCommand._should_load_description() \
+            else description
         self.arguments = {}
         self.arguments_loader = arguments_loader
         self.table_transformer = table_transformer
@@ -178,10 +189,12 @@ class CliCommand(object): #pylint:disable=too-many-instance-attributes
     def execute(self, **kwargs):
         return self.handler(**kwargs)
 
+
 command_table = CommandTable()
 
 # Map to determine what module a command was registered in
 command_module_map = {}
+
 
 def load_params(command):
     try:
@@ -190,11 +203,13 @@ def load_params(command):
         return
     command_module = command_module_map.get(command, None)
     if not command_module:
-        logger.debug("Unable to load commands for '%s'. No module in command module map found.", command) #pylint: disable=line-too-long
+        logger.debug("Unable to load commands for '%s'. No module in command module map found.",
+                     command)  # pylint: disable=line-too-long
         return
     module_to_load = command_module[:command_module.rfind('.')]
     import_module(module_to_load).load_params(command)
     _update_command_definitions(command_table)
+
 
 def get_command_table():
     '''Loads command table(s)
@@ -202,8 +217,8 @@ def get_command_table():
     installed_command_modules = []
     try:
         mods_ns_pkg = import_module('azure.cli.command_modules')
-        installed_command_modules = [modname for _, modname, _ in \
-                                    pkgutil.iter_modules(mods_ns_pkg.__path__)]
+        installed_command_modules = [modname for _, modname, _ in
+                                     pkgutil.iter_modules(mods_ns_pkg.__path__)]
     except ImportError:
         pass
     logger.info('Installed command modules %s', installed_command_modules)
@@ -215,23 +230,25 @@ def get_command_table():
             elapsed_time = timeit.default_timer() - start_time
             logger.debug("Loaded module '%s' in %.3f seconds.", mod, elapsed_time)
             cumulative_elapsed_time += elapsed_time
-        except Exception: #pylint: disable=broad-except
+        except Exception:  # pylint: disable=broad-except
             # Changing this error message requires updating CI script that checks for failed
             # module loading.
             logger.error("Error loading command module '%s'", mod)
             log_telemetry('Error loading module', module=mod)
             logger.debug(traceback.format_exc())
-    logger.debug("Loaded all modules in %.3f seconds. "\
+    logger.debug("Loaded all modules in %.3f seconds. "
                  "(note: there's always an overhead with the first module loaded)",
                  cumulative_elapsed_time)
     _update_command_definitions(command_table)
     ordered_commands = OrderedDict(command_table)
     return ordered_commands
 
+
 def register_cli_argument(scope, dest, arg_type=None, **kwargs):
     '''Specify CLI specific metadata for a given argument for a given scope.
     '''
     _cli_argument_registry.register_cli_argument(scope, dest, arg_type, **kwargs)
+
 
 def register_extra_cli_argument(command, dest, **kwargs):
     '''Register extra parameters for the given command. Typically used to augment auto-command built
@@ -239,12 +256,14 @@ def register_extra_cli_argument(command, dest, **kwargs):
     '''
     _cli_extra_argument_registry[command][dest] = CliCommandArgument(dest, **kwargs)
 
+
 def cli_command(module_name, name, operation,
                 client_factory=None, transform=None, table_transformer=None,
                 no_wait_param=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
     command_table[name] = create_command(module_name, name, operation, transform, table_transformer,
                                          client_factory, no_wait_param)
+
 
 def get_op_handler(operation):
     """ Import and load the operation handler """
@@ -256,6 +275,7 @@ def get_op_handler(operation):
         return op
     except (ValueError, AttributeError):
         raise ValueError("The operation '{}' is invalid.".format(operation))
+
 
 def create_command(module_name, name, operation,
                    transform_result, table_transformer, client_factory,
@@ -275,7 +295,7 @@ def create_command(module_name, name, operation,
             result = op(client, **kwargs) if client else op(**kwargs)
 
             if no_wait_param and kwargs.get(no_wait_param, None):
-                return None #return None for 'no-wait'
+                return None  # return None for 'no-wait'
 
             # apply results transform if specified
             if transform_result:
@@ -304,38 +324,49 @@ def create_command(module_name, name, operation,
 
     command_module_map[name] = module_name
     name = ' '.join(name.split())
-    arguments_loader = lambda: extract_args_from_signature(get_op_handler(operation),
-                                                           no_wait_param=no_wait_param)
-    description_loader = lambda: extract_full_summary_from_signature(get_op_handler(operation))
+
+    def arguments_loader():
+        return extract_args_from_signature(get_op_handler(operation), no_wait_param=no_wait_param)
+
+    def description_loader():
+        return extract_full_summary_from_signature(get_op_handler(operation))
+
     cmd = CliCommand(name, _execute_command, table_transformer=table_transformer,
                      arguments_loader=arguments_loader, description_loader=description_loader)
     return cmd
+
 
 def _polish_rp_not_registerd_error(cli_error):
     msg = str(cli_error)
     pertinent_text_namespace = 'The subscription must be registered to use namespace'
     pertinent_text_feature = 'is not registered for feature'
-    #pylint: disable=line-too-long
+    # pylint: disable=line-too-long
     if pertinent_text_namespace in msg:
         reg = r".*{} '(.*)'".format(pertinent_text_namespace)
         match = re.match(reg, msg)
-        cli_error = CLIError("Run 'az provider register -n {}' to register the namespace first".format(match.group(1)))
+        cli_error = CLIError(
+            "Run 'az provider register -n {}' to register the namespace first".format(
+                match.group(1)))
     elif pertinent_text_feature in msg:
         reg = r".*{}\s+([^\s]+)\s+".format(pertinent_text_feature)
         match = re.match(reg, msg)
         parts = match.group(1).split('/')
         if len(parts) == 2:
-            cli_error = CLIError("Run 'az feature register --namespace {} -n {}' to enable the feature first".format(parts[0], parts[1]))
+            cli_error = CLIError(
+                "Run 'az feature register --namespace {} -n {}' to enable the feature first".format(
+                    parts[0], parts[1]))
     return cli_error
+
 
 def _get_cli_argument(command, argname):
     return _cli_argument_registry.get_cli_argument(command, argname)
 
+
 def _get_cli_extra_arguments(command):
     return _cli_extra_argument_registry[command].items()
 
-class _ArgumentRegistry(object):
 
+class _ArgumentRegistry(object):
     def __init__(self):
         self.arguments = defaultdict(lambda: {})
 
@@ -354,8 +385,10 @@ class _ArgumentRegistry(object):
                 result.update(override)
         return result
 
+
 _cli_argument_registry = _ArgumentRegistry()
 _cli_extra_argument_registry = defaultdict(lambda: {})
+
 
 def _update_command_definitions(command_table_to_update):
     for command_name, command in command_table_to_update.items():

@@ -49,6 +49,7 @@ CONSOLE_LOG_FORMAT = {
     }
 }
 
+
 def _determine_verbose_level(argv):
     # Get verbose level by reading the arguments.
     # Remove any consumed args.
@@ -64,13 +65,16 @@ def _determine_verbose_level(argv):
             argv.pop(i)
         else:
             i += 1
+
     # Use max verbose level if too much verbosity specified.
-    return verbose_level if verbose_level < len(CONSOLE_LOG_CONFIGS) else len(CONSOLE_LOG_CONFIGS)-1
+    return min(verbose_level, len(CONSOLE_LOG_CONFIGS) - 1)
+
 
 def _color_wrapper(color_marker):
     def wrap_msg_with_color(msg):
         return color_marker + msg + colorama.Style.RESET_ALL
     return wrap_msg_with_color
+
 
 class CustomStreamHandler(logging.StreamHandler):
     COLOR_MAP = {
@@ -108,11 +112,13 @@ class CustomStreamHandler(logging.StreamHandler):
                 pass
         return msg
 
+
 def _init_console_handlers(root_logger, az_logger, log_level_config):
     root_logger.addHandler(CustomStreamHandler(log_level_config['root'],
                                                CONSOLE_LOG_FORMAT['root']))
     az_logger.addHandler(CustomStreamHandler(log_level_config['az'],
                                              CONSOLE_LOG_FORMAT['az']))
+
 
 def _get_log_file_path():
     log_dir = LOG_DIR or DEFAULT_LOG_DIR
@@ -120,16 +126,18 @@ def _get_log_file_path():
         os.makedirs(log_dir)
     return os.path.join(log_dir, AZ_LOGFILE_NAME)
 
+
 def _init_logfile_handlers(root_logger, az_logger):
     if not ENABLE_LOG_FILE:
         return
     log_file_path = _get_log_file_path()
-    logfile_handler = RotatingFileHandler(log_file_path, maxBytes=10*1024*1024, backupCount=5)
+    logfile_handler = RotatingFileHandler(log_file_path, maxBytes=10 * 1024 * 1024, backupCount=5)
     lfmt = logging.Formatter('%(process)d : %(asctime)s : %(levelname)s : %(name)s : %(message)s')
     logfile_handler.setFormatter(lfmt)
     logfile_handler.setLevel(logging.DEBUG)
     root_logger.addHandler(logfile_handler)
     az_logger.addHandler(logfile_handler)
+
 
 def configure_logging(argv):
     verbose_level = _determine_verbose_level(argv)
@@ -148,6 +156,7 @@ def configure_logging(argv):
         return
     _init_console_handlers(root_logger, az_logger, log_level_config)
     _init_logfile_handlers(root_logger, az_logger)
+
 
 def get_az_logger(module_name=None):
     return logging.getLogger('az.' + module_name if module_name else 'az')
