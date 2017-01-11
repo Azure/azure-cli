@@ -437,7 +437,7 @@ def _resolve_service_principal(client, identifier):
 def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint:disable=too-many-arguments,too-many-statements,too-many-locals
                                       scopes=None, role='Contributor', expanded_view=None):
     '''create a service principal and configure its access to Azure resources
-    :param str name: an unique uri. If missing, the command will generate one.
+    :param str name: a display name or an app id uri. Command will generate one if missing.
     :param str password: the password used to login. If missing, command will generate one.
     :param str years: Years the password will be valid.
     :param str scopes: space separated scopes the service principal's role assignment applies to.
@@ -451,6 +451,12 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
     sp_oid = None
     sp_created = False
     _RETRY_TIMES = 24
+
+    app_display_name = None
+    if name and not '://' in name:
+        app_display_name = name
+        name = "http://" + name #normalize be a valid graph service principal name
+
     if name:
         query_exp = 'servicePrincipalNames/any(x:x eq \'{}\')'.format(name)
         aad_sps = list(graph_client.service_principals.list(filter=query_exp))
@@ -461,7 +467,8 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
     #pylint: disable=protected-access
     if not sp_oid:
         start_date = datetime.datetime.utcnow()
-        app_display_name = 'azure-cli-' + start_date.strftime('%Y-%m-%d-%H-%M-%S')
+        app_display_name = app_display_name or ('azure-cli-' +
+                                                start_date.strftime('%Y-%m-%d-%H-%M-%S'))
         if name is None:
             name = 'http://' + app_display_name # just a valid uri, no need to exist
 
@@ -523,6 +530,7 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
             'appId': app_id,
             'password': password,
             'name': name,
+            'displayName': app_display_name,
             'tenant': graph_client.config.tenant_id
             }
     return result
@@ -530,7 +538,7 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
 def reset_service_principal_credential(name, password=None, years=1):
     '''reset credential, on expiration or you forget it.
 
-    :param str name: the uri representing the name of the service principal
+    :param str name: the name, can be the app id uri, app id guid, or display name
     :param str password: the password used to login. If missing, command will generate one.
     :param str years: Years the password will be valid.
     '''
@@ -539,18 +547,13 @@ def reset_service_principal_credential(name, password=None, years=1):
     #pylint: disable=no-member
 
     #look for the existing application
-    query_exp = 'identifierUris/any(x:x eq \'{}\')'.format(name)
-    aad_apps = list(client.applications.list(filter=query_exp))
-    if not aad_apps:
-        raise CLIError('can\'t find an application matching \'{}\''.format(name))
-    #no need to check 2+ matches, as app id uri is unique
-    app = aad_apps[0]
-
-    #look for the existing service principal
-    query_exp = 'servicePrincipalNames/any(x:x eq \'{}\')'.format(name)
+    query_exp = "servicePrincipalNames/any(x:x eq \'{0}\') or displayName eq '{0}'".format(name)
     aad_sps = list(client.service_principals.list(filter=query_exp))
     if not aad_sps:
-        raise CLIError('can\'t find a service principal matching \'{}\''.format(name))
+        raise CLIError("can't find a service principal matching '{}'".format(name))
+    if len(aad_sps) > 1:
+        raise CLIError('more than one entry matches the name, please provide unique names like app id guid, or app id uri')#pylint: disable=line-too-long
+    app = show_application(client.applications, aad_sps[0].app_id)
 
     #build a new password credential and patch it
     password = password or str(uuid.uuid4())

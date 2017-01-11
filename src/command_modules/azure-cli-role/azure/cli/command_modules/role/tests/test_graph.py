@@ -13,11 +13,15 @@ class ServicePrincipalExpressCreateScenarioTest(VCRTestBase):
     def test_sp_create_scenario(self):
         if self.playback:
             return #live-only test, will enable playback once resolve #635
+        else:
+            self.execute()
 
     def body(self):
-        app_id_uri = "http://azureclitest-graph"
+        app_id_uri = 'http://azureclitest-graph'
         #create app through express option
-        self.cmd('ad sp create-for-rbac -n {}'.format(app_id_uri), None)
+        self.cmd('ad sp create-for-rbac -n {}'.format(app_id_uri), checks=[
+            JMESPathCheck('name', app_id_uri)
+            ])
 
         #show/list app
         self.cmd('ad app show --id {}'.format(app_id_uri), checks=[
@@ -36,7 +40,9 @@ class ServicePrincipalExpressCreateScenarioTest(VCRTestBase):
             JMESPathCheck('[0].servicePrincipalNames[0]', app_id_uri),
             JMESPathCheck('length([*])', 1),
             ])
-
+        self.cmd('ad sp reset-credentials -n {}'.format(app_id_uri), checks=[
+            JMESPathCheck('name', app_id_uri)
+            ])
         #cleanup        
         self.cmd('ad sp delete --id {}'.format(app_id_uri), None)
         self.cmd('ad sp list --spn {}'.format(app_id_uri), checks=NoneCheck())
