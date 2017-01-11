@@ -15,11 +15,11 @@ from azure.cli.core.commands.parameters import (
     tags_type, ignore_type, enum_choice_list)
 from azure.cli.core._profile import Profile
 from azure.cli.core._util import get_json_object
-from azure.cli.command_modules.keyvault.keyvaultclient import KeyVaultClient, KeyVaultAuthentication
+from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
 
-from azure.cli.command_modules.keyvault.keyvaultclient.generated.models.key_vault_client_enums import \
+from azure.keyvault.generated.models.key_vault_client_enums import \
     (JsonWebKeyOperation)
-from azure.cli.command_modules.keyvault.keyvaultclient.generated.models import \
+from azure.keyvault.generated.models import \
     (KeyAttributes, SecretAttributes, CertificateAttributes)
 from azure.cli.command_modules.keyvault._validators import \
     (datetime_type, base64_encoded_certificate_type,

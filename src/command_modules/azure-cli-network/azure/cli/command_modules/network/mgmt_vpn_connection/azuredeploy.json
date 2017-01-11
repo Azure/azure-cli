@@ -2,10 +2,11 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "virtualNetworkGatewayConnectionName": {
+    "authorizationKey": {
       "type": "string",
+      "defaultValue": "",
       "metadata": {
-        "description": "Connection name."
+        "description": "The authorization key for the VPN connection."
       }
     },
     "connectionType": {
@@ -19,11 +20,11 @@
         "description": "Connection type."
       }
     },
-    "localGateway2Id": {
-      "type": "string",
-      "defaultValue": "",
+    "enableBgp": {
+      "type": "bool",
+      "defaultValue": false,
       "metadata": {
-        "description": "Connect to this local gateway from vnet gateway 1 using connection type IPSec."
+        "description": "Enable BGP for this VPN connection."
       }
     },
     "expressRouteCircuit2Id": {
@@ -31,6 +32,13 @@
       "defaultValue": "",
       "metadata": {
         "description": "Connect to this express route circuit from vnet gateway 1 using connection type ExpressRoute."
+      }
+    },
+    "localGateway2Id": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Connect to this local gateway from vnet gateway 1 using connection type IPSec."
       }
     },
     "location": {
@@ -52,6 +60,19 @@
       "defaultValue": "none",
       "metadata": {
         "description": "IPSec shared key."
+      }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": { },
+      "metadata": {
+        "description": "Tags object."
+      }
+    },
+    "virtualNetworkGatewayConnectionName": {
+      "type": "string",
+      "metadata": {
+        "description": "Connection name."
       }
     },
     "vnetGateway1Id": {
@@ -77,6 +98,8 @@
         "localNetworkGateway2": {
           "id": "[parameters('localGateway2Id')]"
         },
+        "authorizationKey": "[parameters('authorizationKey')]",
+        "enableBgp": "[parameters('enableBgp')]",
         "connectionType": "[parameters('connectionType')]",
         "routingWeight": "[parameters('routingWeight')]",
         "sharedKey": "[parameters('sharedKey')]"
@@ -88,8 +111,11 @@
         "virtualNetworkGateway2": {
           "id": "[parameters('vnetGateway2Id')]"
         },
+        "authorizationKey": "[parameters('authorizationKey')]",
+        "enableBgp": "[parameters('enableBgp')]",
         "connectionType": "[parameters('connectionType')]",
-        "routingWeight": "[parameters('routingWeight')]"
+        "routingWeight": "[parameters('routingWeight')]",
+        "sharedKey": "[parameters('sharedKey')]"
       },
       "ExpressRoute": {
         "virtualNetworkGateway1": {
@@ -98,6 +124,8 @@
         "peer": {
           "id": "[parameters('expressRouteCircuit2Id')]"
         },
+        "authorizationKey": "[parameters('authorizationKey')]",
+        "enableBgp": "[parameters('enableBgp')]",
         "connectionType": "[parameters('connectionType')]",
         "routingWeight": "[parameters('routingWeight')]"
       },
@@ -112,6 +140,7 @@
       "location": "[parameters('location')]",
       "dependsOn": [
       ],
+      "tags": "[parameters('tags')]",
       "properties": "[variables('connectionProperties')[parameters('connectionType')]]"
     }
   ]

@@ -7,7 +7,7 @@
 
 from setuptools import setup
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -25,6 +25,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'autopep8==1.2.4',
     'coverage==4.2',
+    'flake8==3.2.1',
     'pycodestyle==2.2.0'
 ]
 
@@ -38,6 +39,10 @@ setup(
     author_email='azpycli@microsoft.com',
     url='https://github.com/Azure/azure-cli',
     namespace_packages=[
+    ],
+    scripts=[
+        "check_style",
+        "check_style.bat"
     ],
     packages=[
         'automation',

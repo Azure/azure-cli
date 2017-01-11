@@ -34,7 +34,7 @@ from azure.cli.command_modules.network._validators import \
      process_lb_frontend_ip_namespace, process_local_gateway_create_namespace,
      process_tm_endpoint_create_namespace, process_vnet_create_namespace,
      process_vnet_gateway_create_namespace, process_vpn_connection_create_namespace,
-     process_ag_ssl_policy_set_namespace,
+     process_ag_ssl_policy_set_namespace, process_route_table_create_namespace,
      validate_auth_cert, validate_cert, validate_inbound_nat_rule_id_list,
      validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
      validate_address_pool_name_or_id, validate_servers, load_cert_file, validate_metadata,
@@ -241,10 +241,11 @@ for item in ['ssl-policy', 'waf-config']:
 
 # ExpressRoutes
 register_cli_argument('network express-route', 'circuit_name', circuit_name_type, options_list=('--name', '-n'))
-register_cli_argument('network express-route', 'sku_family', **enum_choice_list(ExpressRouteCircuitSkuFamily))
-register_cli_argument('network express-route', 'sku_tier', **enum_choice_list(ExpressRouteCircuitSkuTier))
-register_cli_argument('network express-route', 'bandwidth_in_mbps', options_list=('--bandwidth',))
-register_cli_argument('network express-route', 'service_provider_name', options_list=('--provider',))
+register_cli_argument('network express-route', 'sku_family', help='Chosen SKU family of ExpressRoute circuit.', **enum_choice_list(ExpressRouteCircuitSkuFamily))
+register_cli_argument('network express-route', 'sku_tier', help='SKU Tier of ExpressRoute circuit.', **enum_choice_list(ExpressRouteCircuitSkuTier))
+register_cli_argument('network express-route', 'bandwidth_in_mbps', options_list=('--bandwidth',), help="Bandwidth in Mbps of the circuit. It must exactly match one of the available bandwidth offers from the 'list-service-providers' command.")
+register_cli_argument('network express-route', 'service_provider_name', options_list=('--provider',), help="Name of the ExpressRoute Service Provider. It must exactly match one of the Service Providers from the 'list-service-providers' command.")
+register_cli_argument('network express-route', 'peering_location', help="Name of the peering location. It must exactly match one of the available peering locations from the 'list-service-providers' command.")
 register_cli_argument('network express-route', 'device_path', options_list=('--path',), **enum_choice_list(device_path_values))
 register_cli_argument('network express-route', 'vlan_id', type=int)
 
@@ -354,13 +355,20 @@ for item in ['create', 'update']:
     register_cli_argument('network public-ip {}'.format(item), 'allocation_method', help='IP address allocation method', **enum_choice_list(IPAllocationMethod))
     register_cli_argument('network public-ip {}'.format(item), 'version', help='IP address type.', **enum_choice_list(IPVersion))
 
+# Route table
+register_cli_argument('network route-table', 'route_table_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/routeTables'), id_part='name')
+register_extra_cli_argument('network route-table create', 'tags')
+register_extra_cli_argument('network route-table create', 'location')
+
+register_cli_argument('network route-table create', 'location', location_type, validator=process_route_table_create_namespace)
+register_cli_argument('network route-table create', 'parameters', ignore_type)
+
 # Route Operation
 register_cli_argument('network route-table route', 'route_name', name_arg_type, id_part='child_name', help='Route name')
 register_cli_argument('network route-table route', 'route_table_name', options_list=('--route-table-name',), help='Route table name')
-register_cli_argument('network route-table route', 'next_hop_type', **enum_choice_list(RouteNextHopType))
-
-# Route table
-register_cli_argument('network route-table', 'route_table_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/routeTables'), id_part='name')
+register_cli_argument('network route-table route', 'next_hop_type', help='The type of Azure hop the packet should be sent to.', **enum_choice_list(RouteNextHopType))
+register_cli_argument('network route-table route', 'next_hop_ip_address', help='The IP address packets should be forwarded to when using the VirtualAppliance hop type.')
+register_cli_argument('network route-table route', 'address_prefix', help='The destination CIDR to which the route applies.')
 
 # VNET
 register_cli_argument('network vnet', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), id_part='name')
@@ -481,15 +489,16 @@ register_extra_cli_argument('network vnet-gateway update', 'address_prefixes', o
 
 # VPN connection
 register_cli_argument('network vpn-connection', 'virtual_network_gateway_connection_name', options_list=('--name', '-n'), metavar='NAME', id_part='name')
+register_cli_argument('network vpn-connection', 'shared_key', validator=load_cert_file('shared_key'), help='Shared IPSec key, base64 contents of the certificate file or file path.')
 
 register_cli_argument('network vpn-connection create', 'vnet_gateway1_id', options_list=('--vnet-gateway1',), validator=process_vpn_connection_create_namespace)
 register_cli_argument('network vpn-connection create', 'vnet_gateway2_id', options_list=('--vnet-gateway2',))
 register_cli_argument('network vpn-connection create', 'express_route_circuit2_id', options_list=('--express-route-circuit2',))
 register_cli_argument('network vpn-connection create', 'local_gateway2_id', options_list=('--local-gateway2',))
-register_cli_argument('network vpn-connection create', 'shared_key', validator=load_cert_file('shared_key'), help='Shared IPSec key, base64 contents of the certificate file or file path.')
 register_cli_argument('network vpn-connection create', 'connection_type', ignore_type)
 
 register_cli_argument('network vpn-connection update', 'routing_weight', type=int, help='Connection routing weight')
+register_cli_argument('network vpn-connection update', 'enable_bgp', help='Enable BGP (Border Gateway Protocol)', **enum_choice_list(['true', 'false']))
 
 # VPN connection shared key
 register_cli_argument('network vpn-connection shared-key', 'connection_shared_key_name', options_list=('--name', '-n'), id_part='name')

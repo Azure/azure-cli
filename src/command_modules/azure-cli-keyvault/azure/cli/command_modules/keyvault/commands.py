@@ -12,8 +12,8 @@ from azure.cli.core.commands.arm import cli_generic_update_command
 from ._client_factory import keyvault_client_factory
 from ._command_type import cli_keyvault_data_plane_command
 
-convenience_path = 'azure.cli.command_modules.keyvault.keyvaultclient.key_vault_client#{}'
-base_client_path = 'azure.cli.command_modules.keyvault.keyvaultclient.generated.key_vault_client#{}'
+convenience_path = 'azure.keyvault.key_vault_client#{}'
+base_client_path = 'azure.keyvault.generated.key_vault_client#{}'
 custom_path = 'azure.cli.command_modules.keyvault.custom#{}'
 mgmt_path = 'azure.mgmt.keyvault.operations.vaults_operations#{}'
 

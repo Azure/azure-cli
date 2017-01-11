@@ -16,11 +16,16 @@ def get_repo_root():
     return current_dir
 
 
-def get_command_modules_paths():
-    """List all the command modules and returns those have tests folder"""
+def get_all_module_paths():
+    """List all core and command modules"""
+    return list(get_core_modules_paths()) + get_command_modules_paths(include_prefix=True)
+
+def get_command_modules_paths(include_prefix=False):
+    """List all the command modules"""
     root = os.path.join(get_repo_root(), 'src', 'command_modules')
 
-    modules_paths = ((name[len(COMMAND_MODULE_PREFIX):], os.path.join(root, name))
+    modules_paths = ((name if include_prefix else name[len(COMMAND_MODULE_PREFIX):],
+                      os.path.join(root, name))
                      for name in os.listdir(root) if name.startswith(COMMAND_MODULE_PREFIX))
 
     return list(modules_paths)
@@ -40,6 +45,7 @@ def get_core_modules_paths():
 
     yield 'azure-cli', _get_path('azure-cli')
     yield 'azure-cli-core', _get_path('azure-cli-core')
+    yield 'azure-cli-nspkg', _get_path('azure-cli-nspkg')
 
 
 def get_core_modules_paths_with_tests():

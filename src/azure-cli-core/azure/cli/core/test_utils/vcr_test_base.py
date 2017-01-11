@@ -35,8 +35,8 @@ import azure.cli.core._debug as _debug
 from azure.cli.core._profile import Profile
 from azure.cli.core._util import CLIError
 
-TRACK_COMMANDS = os.environ.get('AZURE_CLI_TEST_TRACK_COMMANDS')
-COMMAND_COVERAGE_FILENAME = 'command_coverage.txt'
+
+COMMAND_COVERAGE_CONTROL_ENV = 'AZURE_CLI_TEST_COMMAND_COVERAGE'
 MOCKED_SUBSCRIPTION_ID = '00000000-0000-0000-0000-000000000000'
 MOCKED_TENANT_ID = '00000000-0000-0000-0000-000000000000'
 MOCKED_STORAGE_ACCOUNT = 'dummystorage'
@@ -55,7 +55,7 @@ def _mock_get_mgmt_service_client(client_type, subscription_bound=True, subscrip
         client = client_type(cred, api_version=api_version) \
             if api_version else client_type(cred)
 
-    _debug.allow_debug_connection(client)
+    client = _debug.allow_debug_connection(client)
 
     client.config.add_user_agent("AZURECLI/TEST/{}".format(core_version))
 
@@ -226,7 +226,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
         self.skip_teardown = skip_teardown
         self.success = False
         self.exception = None
-        self.track_commands = False
+        self.track_commands = os.environ.get(COMMAND_COVERAGE_CONTROL_ENV, None)
         self._debug = debug
 
         if not self.playback and ('--buffer' in sys.argv) and not run_live:
@@ -247,14 +247,12 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
         self.my_vcr.match_on = ['custom']
 
     def _track_executed_commands(self, command):
-        if not self.track_commands:
-            return
-        filename = COMMAND_COVERAGE_FILENAME
-        with open(filename, 'a+') as f:
-            f.write(' '.join(command))
-            f.write('\n')
+        if self.track_commands:
+            with open(self.track_commands, 'a+') as f:
+                f.write(' '.join(command))
+                f.write('\n')
 
-    def _before_record_request(self, request): # pylint: disable=no-self-use
+    def _before_record_request(self, request):  # pylint: disable=no-self-use
         # scrub subscription from the uri
         request.uri = re.sub('/subscriptions/([^/]+)/',
                              '/subscriptions/{}/'.format(MOCKED_SUBSCRIPTION_ID), request.uri)

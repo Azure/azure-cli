@@ -15,7 +15,8 @@ import azure.cli.core._help as _help
 import azure.cli.core._logging as _logging
 from azure.cli.core._util import todict, CLIError
 from azure.cli.core._config import az_config
-from azure.cli.core.telemetry import log_telemetry, set_application
+
+import azure.cli.core.telemetry as telemetry
 
 logger = _logging.get_az_logger(__name__)
 
@@ -87,7 +88,7 @@ class Application(object):
             enable_autocomplete(self.parser)
             az_subparser = self.parser.subparsers[tuple()]
             _help.show_welcome(az_subparser)
-            log_telemetry('welcome')
+            telemetry.log_telemetry('welcome')
             return None
 
         if argv[0].lower() == 'help':
@@ -135,9 +136,9 @@ class Application(object):
             params.pop('subcommand', None)
             params.pop('func', None)
             params.pop('command', None)
-            log_telemetry(expanded_arg.command, log_type='pageview',
-                          output_type=self.configuration.output_format,
-                          parameters=[p for p in unexpanded_argv if p.startswith('-')])
+            telemetry.log_telemetry(expanded_arg.command, log_type='pageview',
+                                    output_type=self.configuration.output_format,
+                                    parameters=[p for p in unexpanded_argv if p.startswith('-')])
 
             result = expanded_arg.func(params)
             result = todict(result)
@@ -298,4 +299,4 @@ class IterateValue(list):
 
 APPLICATION = Application()
 
-set_application(APPLICATION, ARGCOMPLETE_ENV_NAME)
+telemetry.set_application(APPLICATION, ARGCOMPLETE_ENV_NAME)

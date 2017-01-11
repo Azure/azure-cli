@@ -9,10 +9,12 @@ import socket
 import os
 
 from azure.cli.core.commands.arm import is_valid_resource_id, resource_id
+from azure.cli.core.commands.validators import validate_tags
 from azure.cli.core._util import CLIError
 from azure.cli.core.commands.template_create import get_folded_parameter_validator
 from azure.cli.core.commands.validators import SPECIFIED_SENTINEL
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.command_modules.network._client_factory import resource_client_factory
 
 # PARAMETER VALIDATORS
 
@@ -423,6 +425,21 @@ def process_public_ip_create_namespace(namespace):
     if namespace.dns_name:
         namespace.dns_name_type = 'new'
 
+def process_route_table_create_namespace(namespace):
+    from azure.mgmt.network.models import RouteTable
+    namespace.parameters = RouteTable()
+
+    if namespace.location:
+        namespace.parameters.location = namespace.location
+    else:
+        resource_group = resource_client_factory().resource_groups.get(
+            namespace.resource_group_name)
+        namespace.parameters.location = resource_group.location # pylint: disable=no-member
+
+    validate_tags(namespace)
+    if hasattr(namespace, 'tags'):
+        namespace.parameters.tags = namespace.tags
+
 def process_tm_endpoint_create_namespace(namespace):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
@@ -519,6 +536,12 @@ def process_vpn_connection_create_namespace(namespace):
                 type=resource_type,
                 name=value)
         return value
+
+    if namespace.local_gateway2_id or namespace.vnet_gateway2_id and not namespace.shared_key:
+        raise CLIError('--shared-key is required for VNET-to-VNET or Site-to-Site connections.')
+
+    if namespace.express_route_circuit2_id and namespace.shared_key:
+        raise CLIError('--shared-key cannot be used with an ExpressRoute connection.')
 
     namespace.vnet_gateway1_id = \
         _validate_name_or_id(namespace, namespace.vnet_gateway1_id, 'virtualNetworkGateways')

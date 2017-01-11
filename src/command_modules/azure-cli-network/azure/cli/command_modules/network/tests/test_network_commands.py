@@ -853,7 +853,7 @@ class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
 class NetworkRouteTableOperationScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkRouteTableOperationScenarioTest, self).__init__(__file__, test_method, resource_group='cli_route_table_test1')
+        super(NetworkRouteTableOperationScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_route_table')
         self.route_table_name = 'cli-test-route-table'
         self.route_name = 'my-route'
         self.resource_type = 'Microsoft.Network/routeTables'
@@ -1125,9 +1125,8 @@ class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase): # pylint: disable
 
         gateway1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworkGateways/{}'.format(subscription_id, rg, self.gateway1_name)
         self.cmd('network vpn-connection create -n myconnection -g {} --shared-key 123 --vnet-gateway1 {} --vnet-gateway2 {}'.format(rg, gateway1_id, self.gateway2_name))
-        # TODO: Re-enable
-        #self.cmd('network vpn-connection update -n myconnection -g {} --routing-weight 25'.format(rg),
-        #    checks=JMESPathCheck('routingWeight', 25))
+        self.cmd('network vpn-connection update -n myconnection -g {} --routing-weight 25'.format(rg),
+            checks=JMESPathCheck('routingWeight', 25))
 
 class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
 
