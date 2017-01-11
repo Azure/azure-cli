@@ -552,7 +552,7 @@ def reset_service_principal_credential(name, password=None, years=1):
     if not aad_sps:
         raise CLIError("can't find a service principal matching '{}'".format(name))
     if len(aad_sps) > 1:
-        raise CLIError('more than one entry matches the name, please use unique value like app id guid, or app id uri')#pylint: disable=line-too-long
+        raise CLIError('more than one entry matches the name, please provide unique names like app id guid, or app id uri')#pylint: disable=line-too-long
     app = show_application(client.applications, aad_sps[0].app_id)
 
     #build a new password credential and patch it
