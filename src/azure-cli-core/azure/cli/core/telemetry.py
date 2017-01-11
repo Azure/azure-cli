@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
-
 import getpass
 import datetime
 import subprocess
@@ -20,6 +18,9 @@ from functools import wraps
 
 __all__ = ['set_application', 'log_telemetry', 'flush_telemetry']
 
+DIAGNOSTICS_TELEMETRY_ENV_NAME = 'AZURE_CLI_DIAGNOSTICS_TELEMETRY'
+INSTRUMENTATION_KEY = '02b91c82-6729-4241-befc-e6d02ca4fbba'
+
 
 # internal decorators
 
@@ -30,7 +31,7 @@ def _suppress_one_exception(expected_exception, raise_in_debug=False, fallback_r
             try:
                 return func(*args, **kwargs)
             except expected_exception as the_exception:
-                if raise_in_debug and _debugging():
+                if raise_in_debug and _in_diagnostic_mode():
                     raise the_exception
                 else:
                     return fallback_return
@@ -46,9 +47,9 @@ def _suppress_all_exceptions(raise_in_debug=False, fallback_return=None):
         def _wrapped_func(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
-            except:  # nopa, pylint: disable=bare-except
-                if raise_in_debug and _debugging():
-                    raise Exception()
+            except Exception as ex:  # nopa, pylint: disable=broad-except
+                if raise_in_debug and _in_diagnostic_mode():
+                    raise ex
                 elif fallback_return:
                     return fallback_return
                 else:
@@ -87,8 +88,8 @@ def flush_telemetry():
 
 class _TelemetryService(object):
     TELEMETRY_VERSION = '0.0.1.4'
-    DEBUG_TELEMETRY = 'AZURE_CLI_DEBUG_TELEMETRY'
 
+    @_suppress_all_exceptions(raise_in_debug=True)
     def __init__(self):
         from applicationinsights import TelemetryClient
         from applicationinsights.exceptions import enable
@@ -100,21 +101,13 @@ class _TelemetryService(object):
         self.az_config = _get_azure_cli_config()
         self.core_version = _get_core_version()
 
-        try:
-            instrumentation_key = '02b91c82-6729-4241-befc-e6d02ca4fbba'
+        self.client = TelemetryClient(INSTRUMENTATION_KEY)
+        self.client.context.application.id = 'Azure CLI'
+        self.client.context.application.ver = self.core_version
+        self.client.context.user.id = _get_user_machine_id()
+        self.client.context.device.type = 'az'
 
-            self.client = TelemetryClient(instrumentation_key)
-
-            self.client.context.application.id = 'Azure CLI'
-            self.client.context.application.ver = self.core_version
-            self.client.context.user.id = _get_user_machine_id()
-            self.client.context.device.type = 'az'
-
-            enable(instrumentation_key)
-        except Exception as ex:  # pylint: disable=broad-except
-            # Never fail the command because of telemetry, unless debugging
-            if _debugging():
-                raise ex
+        enable(INSTRUMENTATION_KEY)
 
     @_suppress_all_exceptions(raise_in_debug=True)
     def log(self, name, log_type='event', **kwargs):
@@ -132,11 +125,7 @@ class _TelemetryService(object):
         name = _remove_cmd_chars(name)
         _sanitize_inputs(kwargs)
 
-        source = 'az'
-        if _in_ci():
-            source = 'CI'
-        elif self.arg_complete_env_name in os.environ:
-            source = 'completer'
+        source = 'completer' if self.arg_complete_env_name in os.environ else 'az'
 
         types = ['event', 'pageview', 'trace']
         if log_type not in types:
@@ -177,19 +166,16 @@ class _TelemetryService(object):
             'properties': props
         })
 
+    @_suppress_all_exceptions(raise_in_debug=True)
     def flush(self):
-        try:
-            self.client.flush()
-            if not self.records:
-                return
-            subprocess.Popen([sys.executable,
-                              os.path.realpath(__file__),
-                              _remove_symbols(json.dumps(self.records))])
-        except Exception as ex:  # pylint: disable=broad-except
-            #  Never fail the command because of telemetry, unless debugging
-            if _debugging():
-                raise ex
+        self.client.flush()
+        if not self.records:
+            return
 
+        data = _remove_symbols(json.dumps(self.records))
+        subprocess.Popen([sys.executable, os.path.realpath(__file__), data])
+
+    @_suppress_all_exceptions(raise_in_debug=True)
     def upload(self, data_to_save):
         data_to_save = json.loads(data_to_save.replace("'", '"'))
 
@@ -203,9 +189,11 @@ class _TelemetryService(object):
                                         record['properties'])
 
         self.client.flush()
-        if _debugging():
-            print(json.dumps(data_to_save, indent=2, sort_keys=True))
-            print('telemetry upload complete')
+
+        if _in_diagnostic_mode():
+            sys.stdout.write('Telemetry upload begins\n')
+            json.dump(data_to_save, sys.stdout, indent=2, sort_keys=True)
+            sys.stdout.write('\nTelemetry upload completes\n')
 
 
 def _user_agrees_to_telemetry():
@@ -350,15 +338,14 @@ def _remove_symbols(s):
     return s
 
 
-def _in_ci():
-    return os.environ.get('CONTINUOUS_INTEGRATION') and os.environ.get('TRAVIS')
+def _in_diagnostic_mode():
+    """
+    When the telemetry runs in the diagnostic mode, exception are not suppressed and telemetry
+    traces are dumped to the stdout.
+    """
+    return bool(os.environ.get(DIAGNOSTICS_TELEMETRY_ENV_NAME, False))
 
 
-def _debugging():
-    return _in_ci() or telemetry_service.DEBUG_TELEMETRY in os.environ
-
-
-@_suppress_all_exceptions(raise_in_debug=True)
 def _upload_telemetry(data):
     telemetry_service.upload(data)
 
@@ -371,4 +358,5 @@ else:
     telemetry_service = None
 
 if __name__ == '__main__':
-    _upload_telemetry(sys.argv[1])
+    if _user_agrees_to_telemetry():
+        telemetry_service.upload(sys.argv[1])
