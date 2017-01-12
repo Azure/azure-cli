@@ -8,7 +8,7 @@ from azure.cli.core.help_files import helps
 helps['iot'] = """
     type: group
     short-summary: Commands to connect, monitor, and control millions of IoT assets
-    long-summary: If you don't have the keyvault component installed, add it with `az component update --add iot`
+    long-summary: If you don't have the iot component installed, add it with `az component update --add iot`
 """
 
 helps['iot device'] = """
