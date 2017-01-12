@@ -31,12 +31,14 @@ DEPENDENCIES = [
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
+with open('HISTORY.rst', 'r', encoding='utf-8') as f:
+    HISTORY = f.read()
 
 setup(
     name='azure-cli-storage',
     version=VERSION,
     description='Microsoft Azure Command-Line Tools Storage Command Module',
-    long_description=README,
+    long_description=README + '\n\n' + HISTORY,
     license='MIT',
     author='Microsoft Corporation',
     author_email='azpycli@microsoft.com',
