@@ -7,7 +7,6 @@ import collections
 import os
 import os.path
 import sys
-import itertools
 
 from azure.cli.core.test_utils.vcr_test_base import COMMAND_COVERAGE_CONTROL_ENV
 import automation.utilities.path as automation_path
@@ -117,21 +116,10 @@ def main():
                         help='Analyze a command coverage test result.')
     args = parser.parse_args()
 
-    existing_modules = list(itertools.chain(
-        automation_path.get_core_modules_paths_with_tests(),
-        automation_path.get_command_modules_paths_with_tests()))
-
-    if args.modules:
-        selected_modules = set(args.modules)
-        extra = selected_modules - set([name for name, _, _ in existing_modules])
-        if any(extra):
-            print('ERROR: These modules do not exist: {}.'.format(', '.join(extra)))
-            sys.exit(1)
-
-        selected_modules = list((name, test_path) for name, _, test_path in existing_modules
-                                if name in selected_modules)
-    else:
-        selected_modules = list((name, test_path) for name, _, test_path in existing_modules)
+    selected_modules = automation_path.filter_user_selected_modules(args.modules)
+    if not selected_modules:
+        parser.print_help()
+        sys.exit(1)
 
     if not args.code_coverage and not args.command_coverage and not args.command_rundown:
         parser.print_help()
