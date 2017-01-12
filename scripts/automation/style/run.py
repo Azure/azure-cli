@@ -52,15 +52,14 @@ def run_pep8(modules):
 if __name__ == '__main__':
     import argparse
 
-    parse = argparse.ArgumentParser('Code styple tools')
+    parse = argparse.ArgumentParser('Code style tools')
     parse.add_argument('--pep8', dest='suites', action='append_const', const='pep8',
                        help='Run flake8 to check PEP8')
     parse.add_argument('--pylint', dest='suites', action='append_const', const='pylint',
                        help='Run pylint')
     parse.add_argument('--module', dest='modules', action='append',
-                       help='The modules on which the style check should run. Accept short names. '
-                            'Use "main" for the azure-cli package and "core" for the '
-                            'azure-cli-core')
+                       help='The modules on which the style check should run. Accept short names, '
+                            'except azure-cli, azure-cli-core and azure-cli-nspkg')
     args = parse.parse_args()
 
     existing_modules = list(chain(get_command_modules_paths(), get_core_modules_paths()))

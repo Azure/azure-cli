@@ -12,8 +12,8 @@ scripts_root=$(cd $(dirname $0); pwd)
 export PYTHONPATH=$PATHONPATH:./src
 python -m azure.cli -h
 
-$scripts_root/run_pylint.sh
-$scripts_root/run_tests.sh
+check_style
+run_tests
 $scripts_root/package_verify.sh
 
 python $scripts_root/license/verify.py
