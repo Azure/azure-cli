@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from __future__ import print_function
+
 
 def get_print_format(records):
     """Find the best format to display the given list of records in table format"""
@@ -45,3 +47,7 @@ def print_records(records, print_format=None, title=None, foot_notes=None):
     if foot_notes:
         for each in foot_notes:
             print('* ' + each)
+
+
+def print_heading(heading, f=None):
+    print('{0}\n{1}\n{0}'.format('=' * len(heading), heading), file=f)
