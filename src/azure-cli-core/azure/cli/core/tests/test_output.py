@@ -4,14 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
- # pylint: disable=protected-access, bad-continuation, too-many-public-methods, trailing-whitespace
+# pylint: disable=protected-access, bad-continuation, too-many-public-methods, trailing-whitespace
 import unittest
 from collections import OrderedDict
 from six import StringIO
 
 from azure.cli.core._output import (OutputProducer, format_json, format_table, format_list,
-                               format_tsv, ListOutput, CommandResultItem)
+                                    format_tsv, ListOutput, CommandResultItem)
 import azure.cli.core._util as util
+
 
 class TestOutput(unittest.TestCase):
 
@@ -36,12 +37,12 @@ class TestOutput(unittest.TestCase):
         output_producer = OutputProducer(formatter=format_json, file=self.io)
         output_producer.out(CommandResultItem({'active': True, 'id': '0b1f6472'}))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-"""{
+            """{
   "active": true,
   "id": "0b1f6472"
 }
 """))
-   
+
     def test_out_json_from_ordered_dict(self):
         """
         The JSON output when the input is OrderedDict should be serialized to JSON
@@ -49,7 +50,7 @@ class TestOutput(unittest.TestCase):
         output_producer = OutputProducer(formatter=format_json, file=self.io)
         output_producer.out(CommandResultItem(OrderedDict({'active': True, 'id': '0b1f6472'})))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-"""{
+            """{
   "active": true,
   "id": "0b1f6472"
 }
@@ -59,7 +60,7 @@ class TestOutput(unittest.TestCase):
         output_producer = OutputProducer(formatter=format_json, file=self.io)
         output_producer.out(CommandResultItem({'active': True, 'contents': b'0b1f6472'}))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-"""{
+            """{
   "active": true,
   "contents": "0b1f6472"
 }
@@ -69,7 +70,7 @@ class TestOutput(unittest.TestCase):
         output_producer = OutputProducer(formatter=format_json, file=self.io)
         output_producer.out(CommandResultItem({'active': True, 'contents': b''}))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-"""{
+            """{
   "active": true,
   "contents": ""
 }
@@ -90,7 +91,7 @@ class TestOutput(unittest.TestCase):
         obj['val'] = '0b1f6472'
         output_producer.out(CommandResultItem(obj))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-"""  Active  Val
+            """  Active  Val
 --------  --------
        1  0b1f6472
 """))
@@ -100,7 +101,7 @@ class TestOutput(unittest.TestCase):
         obj = [['a', 'b'], ['c', 'd']]
         output_producer.out(CommandResultItem(obj))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-"""Column1    Column2
+            """Column1    Column2
 ---------  ---------
 a          b
 c          d
@@ -115,7 +116,7 @@ c          d
         result_item = CommandResultItem(obj)
         output_producer.out(result_item)
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-"""Name    Val
+            """Name    Val
 ------  --------------
 qwerty  0b1f6472qwerty
 """))
@@ -126,7 +127,7 @@ qwerty  0b1f6472qwerty
         output_producer = OutputProducer(formatter=format_list, file=self.io)
         output_producer.out(CommandResultItem({'active': True, 'id': '0b1f6472'}))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-"""Active : True
+            """Active : True
 Id     : 0b1f6472
 
 
@@ -136,7 +137,7 @@ Id     : 0b1f6472
         output_producer = OutputProducer(formatter=format_list, file=self.io)
         output_producer.out(CommandResultItem({'active': True, 'TESTStuff': 'blah'}))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-"""Test Stuff : blah
+            """Test Stuff : blah
 Active     : True
 
 
@@ -146,7 +147,7 @@ Active     : True
         output_producer = OutputProducer(formatter=format_list, file=self.io)
         output_producer.out(CommandResultItem({'active': None, 'id': '0b1f6472'}))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-"""Active : None
+            """Active : None
 Id     : 0b1f6472
 
 
@@ -156,7 +157,7 @@ Id     : 0b1f6472
         output_producer = OutputProducer(formatter=format_list, file=self.io)
         output_producer.out(CommandResultItem({'active': None, 'id': '0b1f6472', 'hosts': []}))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-"""Active : None
+            """Active : None
 Id     : 0b1f6472
 Hosts  :
    None
@@ -167,11 +168,11 @@ Hosts  :
     def test_out_list_valid_array_complex(self):
         output_producer = OutputProducer(formatter=format_list, file=self.io)
         output_producer.out(CommandResultItem([
-                             {'active': True, 'id': '783yesdf'},
-                             {'active': False, 'id': '3hjnme32'},
-                             {'active': False, 'id': '23hiujbs'}]))
+            {'active': True, 'id': '783yesdf'},
+            {'active': False, 'id': '3hjnme32'},
+            {'active': False, 'id': '23hiujbs'}]))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-"""Active : True
+            """Active : True
 Id     : 783yesdf
 
 Active : False
@@ -187,7 +188,7 @@ Id     : 23hiujbs
         output_producer = OutputProducer(formatter=format_list, file=self.io)
         output_producer.out(CommandResultItem(['location', 'id', 'host', 'server']))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-"""location
+            """location
 
 id
 
@@ -201,9 +202,9 @@ server
     def test_out_list_valid_complex_array(self):
         output_producer = OutputProducer(formatter=format_list, file=self.io)
         output_producer.out(CommandResultItem({'active': True, 'id': '0b1f6472',
-                                        'myarray': ['1', '2', '3', '4']}))
+                                               'myarray': ['1', '2', '3', '4']}))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-"""Active  : True
+            """Active  : True
 Id      : 0b1f6472
 Myarray :
    1
@@ -270,6 +271,7 @@ Myarray :
         obj2['B'] = 4
         result = format_tsv(CommandResultItem([obj1, obj2]))
         self.assertEqual(result, '1\t2\n3\t4\n')
+
 
 if __name__ == '__main__':
     unittest.main()

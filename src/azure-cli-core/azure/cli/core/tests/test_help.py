@@ -4,23 +4,26 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
+
+import logging
 import sys
 import unittest
-import logging
 import mock
 from six import StringIO
 
+import azure.cli.core._help as _help
+import azure.cli.core.help_files
+from azure.cli.core._help import ArgumentGroupRegistry
 from azure.cli.core.application import Application, Configuration
 from azure.cli.core.commands import \
     (CliCommand, cli_command, _update_command_definitions, command_table)
-import azure.cli.core.help_files
-import azure.cli.core._help as _help
-from azure.cli.core._help import ArgumentGroupRegistry
 
 io = {}
+
+
 def redirect_io(func):
     def wrapper(self):
-        global io # pylint: disable=global-statement
+        global io  # pylint: disable=global-statement
         old_stdout = sys.stdout
         old_stderr = sys.stderr
         sys.stdout = sys.stderr = io = StringIO()
@@ -28,7 +31,9 @@ def redirect_io(func):
         io.close()
         sys.stdout = old_stdout
         sys.stderr = old_stderr
+
     return wrapper
+
 
 class HelpArgumentGroupRegistryTest(unittest.TestCase):
     def test_help_argument_group_registry(self):
@@ -49,12 +54,13 @@ class HelpArgumentGroupRegistryTest(unittest.TestCase):
         self.assertEqual(group_registry.get_group_priority('Generic Update Arguments'), '000998')
         self.assertEqual(group_registry.get_group_priority('Global Arguments'), '001000')
 
+
 class HelpObjectTest(unittest.TestCase):
     def test_short_summary_no_fullstop(self):
         obj = _help.HelpObject()
         original_summary = 'This summary has no fullstop'
         obj.short_summary = original_summary
-        self.assertEqual(obj.short_summary, original_summary+'.')
+        self.assertEqual(obj.short_summary, original_summary + '.')
 
     def test_short_summary_fullstop(self):
         obj = _help.HelpObject()
@@ -68,11 +74,11 @@ class HelpObjectTest(unittest.TestCase):
         obj.short_summary = original_summary
         self.assertEqual(obj.short_summary, original_summary)
 
+
 class HelpTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Ensure initialization has occurred correctly
-        import azure.cli.main # pylint: disable=redefined-outer-name
         logging.basicConfig(level=logging.DEBUG)
 
     @classmethod
@@ -151,7 +157,8 @@ class HelpTest(unittest.TestCase):
 
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
-        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    az n1\n        Long description.')) # pylint: disable=line-too-long
+        self.assertEqual(True, io.getvalue().startswith(
+            '\nCommand\n    az n1\n        Long description.'))  # pylint: disable=line-too-long
 
     @redirect_io
     def test_help_long_description_from_docstring(self):
@@ -173,7 +180,8 @@ class HelpTest(unittest.TestCase):
 
         with self.assertRaises(SystemExit):
             app.execute('test -h'.split())
-        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    az test: Short Description.\n        Long description with line break.')) # pylint: disable=line-too-long
+        self.assertEqual(True, io.getvalue().startswith(
+            '\nCommand\n    az test: Short Description.\n        Long description with line break.'))  # pylint: disable=line-too-long
 
     @redirect_io
     def test_help_long_description_and_short_description(self):
@@ -192,7 +200,8 @@ class HelpTest(unittest.TestCase):
 
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
-        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    az n1: Short description.\n        Long description.')) # pylint: disable=line-too-long
+        self.assertEqual(True, io.getvalue().startswith(
+            '\nCommand\n    az n1: Short description.\n        Long description.'))  # pylint: disable=line-too-long
 
     @redirect_io
     def test_help_docstring_description_overrides_short_description(self):
@@ -235,12 +244,14 @@ class HelpTest(unittest.TestCase):
         with self.assertRaises(SystemExit):
             app.execute('n1 -h'.split())
 
-        self.assertEqual(True, io.getvalue().startswith('\nCommand\n    az n1\n        Line1\n        line2.')) # pylint: disable=line-too-long
+        self.assertEqual(True, io.getvalue().startswith(
+            '\nCommand\n    az n1\n        Line1\n        line2.'))  # pylint: disable=line-too-long
 
     @redirect_io
     @mock.patch('azure.cli.core.application.Application.register', return_value=None)
     def test_help_params_documentations(self, _):
         app = Application(Configuration([]))
+
         def test_handler():
             pass
 
@@ -249,13 +260,13 @@ class HelpTest(unittest.TestCase):
         command.add_argument('foobar2', '--foobar2', '-fb2', required=True)
         command.add_argument('foobar3', '--foobar3', '-fb3', required=False, help='the foobar3')
         command.help = """
-            parameters: 
+            parameters:
                 - name: --foobar -fb
                   type: string
                   required: false
                   short-summary: one line partial sentence
                   long-summary: text, markdown, etc.
-                  populator-commands: 
+                  populator-commands:
                     - az vm list
                     - default
                 - name: --foobar2 -fb2
@@ -292,6 +303,7 @@ Global Arguments
     @mock.patch('azure.cli.core.application.Application.register', return_value=None)
     def test_help_full_documentations(self, _):
         app = Application(Configuration([]))
+
         def test_handler():
             pass
 
@@ -303,13 +315,13 @@ Global Arguments
                 long-summary: |
                     this module.... kjsdflkj... klsfkj paragraph1
                     this module.... kjsdflkj... klsfkj paragraph2
-                parameters: 
+                parameters:
                     - name: --foobar -fb
                       type: string
                       required: false
                       short-summary: one line partial sentence
                       long-summary: text, markdown, etc.
-                      populator-commands: 
+                      populator-commands:
                         - az vm list
                         - default
                     - name: --foobar2 -fb2
@@ -354,6 +366,7 @@ Examples
     @mock.patch('azure.cli.core.application.Application.register', return_value=None)
     def test_help_with_param_specified(self, _):
         app = Application(Configuration([]))
+
         def test_handler():
             pass
 
@@ -386,8 +399,10 @@ Global Arguments
     @redirect_io
     def test_help_group_children(self):
         app = Application(Configuration([]))
+
         def test_handler():
             pass
+
         def test_handler2():
             pass
 
@@ -413,7 +428,8 @@ Global Arguments
     @redirect_io
     def test_help_extra_missing_params(self):
         app = Application(Configuration([]))
-        def test_handler(foobar2, foobar=None): # pylint: disable=unused-argument
+
+        def test_handler(foobar2, foobar=None):  # pylint: disable=unused-argument
             pass
 
         command = CliCommand('n1', test_handler)
@@ -443,14 +459,15 @@ Global Arguments
             with self.assertRaises(SystemExit):
                 app.execute('n1 -fb a --foobar2 value --foobar3 extra'.split())
 
-            self.assertTrue('required' in io.getvalue()
-                            and '--foobar/-fb' not in io.getvalue()
-                            and '--foobar2/-fb2' in io.getvalue()
-                            and 'unrecognized arguments: --foobar3 extra' in io.getvalue())
+            self.assertTrue('required' in io.getvalue() and
+                            '--foobar/-fb' not in io.getvalue() and
+                            '--foobar2/-fb2' in io.getvalue() and
+                            'unrecognized arguments: --foobar3 extra' in io.getvalue())
 
     @redirect_io
     def test_help_group_help(self):
         app = Application(Configuration([]))
+
         def test_handler():
             pass
 
@@ -473,13 +490,13 @@ Global Arguments
             long-summary: |
                 this module.... kjsdflkj... klsfkj paragraph1
                 this module.... kjsdflkj... klsfkj paragraph2
-            parameters: 
+            parameters:
                 - name: --foobar -fb
                   type: string
                   required: false
                   short-summary: one line partial sentence
                   long-summary: text, markdown, etc.
-                  populator-commands: 
+                  populator-commands:
                     - az vm list
                     - default
                 - name: --foobar2 -fb2
@@ -489,7 +506,7 @@ Global Arguments
                   long-summary: paragraph(s)
             examples:
                 - name: foo example
-                  text: example details        
+                  text: example details
         """
         cmd_table = {'test_group1 test_group2 n1': command}
 
@@ -524,11 +541,15 @@ Examples
         def register_globals(global_group):
             global_group.add_argument('--query2', dest='_jmespath_query', metavar='JMESPATH',
                                       help='JMESPath query string. See http://jmespath.org/ '
-                                      'for more information and examples.')
+                                           'for more information and examples.')
 
         mock_register_extensions.return_value = None
-        mock_register_extensions.side_effect = lambda app: \
-            app._event_handlers[app.GLOBAL_PARSER_CREATED].append(register_globals) # pylint: disable=protected-access
+
+        def _register_global_parser(appl):
+            # noqa pylint: disable=protected-access
+            appl._event_handlers[appl.GLOBAL_PARSER_CREATED].append(register_globals)
+
+        mock_register_extensions.side_effect = _register_global_parser
 
         def test_handler():
             pass
@@ -595,7 +616,8 @@ Global Arguments
 
             extras = [k for k in azure.cli.core.help_files.helps.keys() if k not in parser_dict]
             self.assertTrue(len(extras) == 0,
-                            'Found help files that don\'t map to a command: '+ str(extras))
+                            'Found help files that don\'t map to a command: ' + str(extras))
+
 
 def _store_parsers(parser, d):
     for s in parser.subparsers.values():
@@ -605,11 +627,15 @@ def _store_parsers(parser, d):
                 d[_get_parser_name(c)] = c
                 _store_parsers(c, d)
 
+
 def _is_group(parser):
     return getattr(parser, 'choices', None) is not None
 
+
 def _get_parser_name(parser):
-    return (parser._prog_prefix if hasattr(parser, '_prog_prefix') else parser.prog)[len('az '):] #pylint:disable=protected-access
+    # pylint:disable=protected-access
+    return (parser._prog_prefix if hasattr(parser, '_prog_prefix') else parser.prog)[len('az '):]
+
 
 if __name__ == '__main__':
     unittest.main()

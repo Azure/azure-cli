@@ -4,29 +4,28 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
+
 import collections
+import errno
 import json
 import os.path
-import errno
-
 from enum import Enum
 
 import adal
+import azure.cli.core._logging as _logging
+from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core._util import CLIError, get_file_json
 from azure.cli.core.adal_authentication import AdalAuthentication
-
 from azure.cli.core.cloud import get_cloud
 from azure.cli.core.context import get_active_context
-from azure.cli.core._environment import get_config_dir
 
-import azure.cli.core._logging as _logging
 logger = _logging.get_az_logger(__name__)
 
-#Names below are used by azure-xplat-cli to persist account information into
-#~/.azure/azureProfile.json or osx/keychainer or windows secure storage,
-#which azure-cli will share.
-#Please do not rename them unless you know what you are doing.
+# Names below are used by azure-xplat-cli to persist account information into
+# ~/.azure/azureProfile.json or osx/keychainer or windows secure storage,
+# which azure-cli will share.
+# Please do not rename them unless you know what you are doing.
 _IS_DEFAULT_SUBSCRIPTION = 'isDefault'
 _SUBSCRIPTION_ID = 'id'
 _SUBSCRIPTION_NAME = 'name'
@@ -44,8 +43,8 @@ _SERVICE_PRINCIPAL_ID = 'servicePrincipalId'
 _SERVICE_PRINCIPAL_TENANT = 'servicePrincipalTenant'
 _TOKEN_ENTRY_USER_ID = 'userId'
 _TOKEN_ENTRY_TOKEN_TYPE = 'tokenType'
-#This could mean either real access token, or client secret of a service principal
-#This naming is no good, but can't change because xplat-cli does so.
+# This could mean either real access token, or client secret of a service principal
+# This naming is no good, but can't change because xplat-cli does so.
 _ACCESS_TOKEN = 'accessToken'
 
 TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE = ['familyName',
@@ -56,20 +55,26 @@ TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE = ['familyName',
 _CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 _COMMON_TENANT = 'common'
 
-_AUTH_CTX_FACTORY = lambda authority, cache: adal.AuthenticationContext(authority,
-                                                                        cache=cache,
-                                                                        api_version=None)
+
+def _authentication_context_factory(authority, cache):
+    return adal.AuthenticationContext(authority, cache=cache, api_version=None)
+
+
+_AUTH_CTX_FACTORY = _authentication_context_factory
 
 CLOUD = get_cloud(get_active_context()['cloud'])
 
+
 def get_authority_url(tenant=None):
     return CLOUD.endpoints.active_directory + '/' + (tenant or _COMMON_TENANT)
+
 
 def _load_tokens_from_file(file_path):
     all_entries = []
     if os.path.isfile(file_path):
         all_entries = get_file_json(file_path, throw_on_empty=False) or []
     return all_entries
+
 
 def _delete_file(file_path):
     try:
@@ -78,9 +83,11 @@ def _delete_file(file_path):
         if e.errno != errno.ENOENT:
             raise
 
-class CredentialType(Enum): # pylint: disable=too-few-public-methods
+
+class CredentialType(Enum):  # pylint: disable=too-few-public-methods
     management = CLOUD.endpoints.management
     rbac = CLOUD.endpoints.active_directory_graph_resource_id
+
 
 class Profile(object):
     def __init__(self, storage=None, auth_ctx_factory=None):
@@ -90,7 +97,7 @@ class Profile(object):
         self._subscription_finder = SubscriptionFinder(factory, self._creds_cache.adal_token_cache)
         self._management_resource_uri = CLOUD.endpoints.management
 
-    def find_subscriptions_on_login(self, #pylint: disable=too-many-arguments
+    def find_subscriptions_on_login(self,  # pylint: disable=too-many-arguments
                                     interactive,
                                     username,
                                     password,
@@ -139,11 +146,11 @@ class Profile(object):
                 _USER_ENTITY: {
                     _USER_NAME: user,
                     _USER_TYPE: _SERVICE_PRINCIPAL if is_service_principal else _USER
-                    },
+                },
                 _IS_DEFAULT_SUBSCRIPTION: False,
                 _TENANT_ID: s.tenant_id,
                 _ENVIRONMENT_NAME: CLOUD.name
-                })
+            })
         return consolidated
 
     def _set_subscriptions(self, new_subscriptions):
@@ -151,7 +158,7 @@ class Profile(object):
         active_one = next((x for x in existing_ones if x.get(_IS_DEFAULT_SUBSCRIPTION)), None)
         active_subscription_id = active_one[_SUBSCRIPTION_ID] if active_one else None
 
-        #merge with existing ones
+        # merge with existing ones
         dic = collections.OrderedDict((x[_SUBSCRIPTION_ID], x) for x in existing_ones)
         dic.update((x[_SUBSCRIPTION_ID], x) for x in new_subscriptions)
         subscriptions = list(dic.values())
@@ -172,7 +179,7 @@ class Profile(object):
 
         self._cache_subscriptions_to_local_storage(subscriptions)
 
-    def set_active_subscription(self, subscription): #take id or name
+    def set_active_subscription(self, subscription):  # take id or name
         subscriptions = self.load_cached_subscriptions()
 
         subscription = subscription.lower()
@@ -195,7 +202,7 @@ class Profile(object):
                   if user_or_sp.lower() == x[_USER_ENTITY][_USER_NAME].lower()]
         subscriptions = [x for x in subscriptions if x not in result]
 
-        #reset the active subscription if needed
+        # reset the active subscription if needed
         result = [x for x in subscriptions if x.get(_IS_DEFAULT_SUBSCRIPTION)]
         if not result and subscriptions:
             subscriptions[0][_IS_DEFAULT_SUBSCRIPTION] = True
@@ -222,14 +229,15 @@ class Profile(object):
 
         return active_account[_USER_ENTITY][_USER_NAME]
 
-    def get_subscription(self, subscription=None):#take id or name
+    def get_subscription(self, subscription=None):  # take id or name
         subscriptions = self.load_cached_subscriptions()
         if not subscriptions:
             raise CLIError("Please run 'az login' to setup account.")
 
         result = [x for x in subscriptions if (
             not subscription and x.get(_IS_DEFAULT_SUBSCRIPTION) or
-            subscription and subscription.lower() in [x[_SUBSCRIPTION_ID].lower(), x[_SUBSCRIPTION_NAME].lower()])] #pylint: disable=line-too-long
+            subscription and subscription.lower() in [x[_SUBSCRIPTION_ID].lower(), x[
+                _SUBSCRIPTION_NAME].lower()])]  # pylint: disable=line-too-long
         if len(result) != 1:
             raise CLIError("Please run 'az account set' to select active account.")
         return result[0]
@@ -239,20 +247,22 @@ class Profile(object):
         account = self.get_subscription(subscription_id)
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
-        if user_type == _USER:
-            token_retriever = lambda: self._creds_cache.retrieve_token_for_user(
-                username_or_sp_id, account[_TENANT_ID], resource)
-            auth_object = AdalAuthentication(token_retriever)
-        else:
-            token_retriever = lambda: self._creds_cache.retrieve_token_for_service_principal(
-                username_or_sp_id, resource)
-            auth_object = AdalAuthentication(token_retriever)
+
+        def _retrieve_token():
+            if user_type == _USER:
+                return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
+                                                                 account[_TENANT_ID], resource)
+            else:
+                return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
+                                                                              resource)
+
+        auth_object = AdalAuthentication(_retrieve_token)
 
         return (auth_object,
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
-    #per ask from java sdk
+    # per ask from java sdk
     def get_expanded_subscription_info(self, subscription_id=None, name=None, password=None):
         account = self.get_subscription(subscription_id)
 
@@ -265,7 +275,7 @@ class Profile(object):
             result[_TENANT_ID] = account[_TENANT_ID]
             result[_ENVIRONMENT_NAME] = CLOUD.name
             result['subscriptionName'] = account[_SUBSCRIPTION_NAME]
-        else: #has logged in through cli
+        else:  # has logged in through cli
             from copy import deepcopy
             result = deepcopy(account)
             user_type = account[_USER_ENTITY].get(_USER_TYPE)
@@ -293,17 +303,26 @@ class Profile(object):
             self._storage[_INSTALLATION_ID] = installation_id
         return installation_id
 
+
 class SubscriptionFinder(object):
     '''finds all subscriptions for a user or service principal'''
+
     def __init__(self, auth_context_factory, adal_token_cache, arm_client_factory=None):
         from azure.mgmt.resource.subscriptions import SubscriptionClient
         from azure.cli.core._debug import allow_debug_connection
 
         self._adal_token_cache = adal_token_cache
         self._auth_context_factory = auth_context_factory
-        self.user_id = None # will figure out after log user in
-        self._arm_client_factory = arm_client_factory or \
-             (lambda config: allow_debug_connection(SubscriptionClient(config, base_url=CLOUD.endpoints.resource_manager))) #pylint: disable=unnecessary-lambda,line-too-long
+        self.user_id = None  # will figure out after log user in
+
+        def create_arm_client_factory(config):
+            if arm_client_factory:
+                return arm_client_factory(config)
+            else:
+                return allow_debug_connection(SubscriptionClient(
+                    config, base_url=CLOUD.endpoints.resource_manager))
+
+        self._arm_client_factory = create_arm_client_factory
 
     def find_from_user_account(self, username, password, resource):
         context = self._create_auth_context(_COMMON_TENANT)
@@ -370,10 +389,12 @@ class SubscriptionFinder(object):
             all_subscriptions.append(s)
         return all_subscriptions
 
+
 class CredsCache(object):
     '''Caches AAD tokena and service principal secrets, and persistence will
     also be handled
     '''
+
     def __init__(self, auth_ctx_factory=None):
         self._token_file = os.path.join(get_config_dir(), 'accessTokens.json')
         self._service_principal_creds = []
@@ -382,12 +403,12 @@ class CredsCache(object):
         self._load_creds()
 
     def persist_cached_creds(self):
-        with os.fdopen(os.open(self._token_file, os.O_RDWR|os.O_CREAT|os.O_TRUNC, 0o600),
+        with os.fdopen(os.open(self._token_file, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600),
                        'w+') as cred_file:
             items = self.adal_token_cache.read_items()
             all_creds = [entry for _, entry in items]
 
-            #trim away useless fields (needed for cred sharing with xplat)
+            # trim away useless fields (needed for cred sharing with xplat)
             for i in all_creds:
                 for key in TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE:
                     i.pop(key, None)
@@ -441,7 +462,7 @@ class CredsCache(object):
             _SERVICE_PRINCIPAL_ID: service_principal_id,
             _SERVICE_PRINCIPAL_TENANT: tenant,
             _ACCESS_TOKEN: secret
-            }
+        }
 
         matched = [x for x in self._service_principal_creds
                    if service_principal_id == x[_SERVICE_PRINCIPAL_ID] and
@@ -466,13 +487,13 @@ class CredsCache(object):
 
     def remove_cached_creds(self, user_or_sp):
         state_changed = False
-        #clear AAD tokens
+        # clear AAD tokens
         tokens = self.adal_token_cache.find({_TOKEN_ENTRY_USER_ID: user_or_sp})
         if tokens:
             state_changed = True
             self.adal_token_cache.remove(tokens)
 
-        #clear service principal creds
+        # clear service principal creds
         matched = [x for x in self._service_principal_creds
                    if x[_SERVICE_PRINCIPAL_ID] == user_or_sp]
         if matched:
@@ -484,5 +505,5 @@ class CredsCache(object):
             self.persist_cached_creds()
 
     def remove_all_cached_creds(self):
-        #we can clear file contents, but deleting it is simpler
+        # we can clear file contents, but deleting it is simpler
         _delete_file(self._token_file)

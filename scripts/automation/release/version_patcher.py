@@ -3,11 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-#pylint: disable=line-too-long
-
+import fileinput
 import os
 import sys
-import fileinput
 
 
 class VersionPatcher(object):
@@ -24,11 +22,11 @@ class VersionPatcher(object):
         if self.component_name == 'azure-cli':
             self.init_py_path = os.path.join(self.component_path, 'azure', 'cli', '__init__.py')
         elif self.component_name == 'azure-cli-core':
-            self.init_py_path = os.path.join(self.component_path, 'azure', 'cli', 'core', '__init__.py')
+            self.init_py_path = os.path.join(self.component_path, 'azure', 'cli', 'core',
+                                             '__init__.py')
         else:
             self.init_py_path = None
         self.backup_init_version = None
-
 
     def _patch_setup_py(self):
         for _, line in enumerate(fileinput.input(self.setup_py, inplace=1)):
@@ -39,7 +37,6 @@ class VersionPatcher(object):
             else:
                 sys.stdout.write(line)
 
-
     def _unpatch_setup_py(self):
         for _, line in enumerate(fileinput.input(self.setup_py, inplace=1)):
             if line.startswith('VERSION'):
@@ -47,7 +44,6 @@ class VersionPatcher(object):
                 sys.stdout.write(self.backup_setup_py_version)
             else:
                 sys.stdout.write(line)
-
 
     def _patch_init_py(self):
         for _, line in enumerate(fileinput.input(self.init_py_path, inplace=1)):
@@ -58,7 +54,6 @@ class VersionPatcher(object):
             else:
                 sys.stdout.write(line)
 
-
     def _unpatch_init_py(self):
         for _, line in enumerate(fileinput.input(self.init_py_path, inplace=1)):
             if line.startswith('__version__'):
@@ -67,14 +62,12 @@ class VersionPatcher(object):
             else:
                 sys.stdout.write(line)
 
-
     def patch(self):
         if not self.use_version_patch:
             return
         self._patch_setup_py()
         if self.init_py_path:
             self._patch_init_py()
-
 
     def unpatch(self):
         if not self.use_version_patch:

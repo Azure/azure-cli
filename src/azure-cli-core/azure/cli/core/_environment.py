@@ -5,6 +5,7 @@
 
 import os
 
+
 def get_config_dir():
     if os.getenv('AZURE_CONFIG_DIR'):
         return os.getenv('AZURE_CONFIG_DIR')

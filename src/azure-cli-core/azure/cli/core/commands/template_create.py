@@ -17,7 +17,8 @@ from azure.cli.core.commands.arm import (
     resource_exists,
     make_camel_case)
 
-def register_folded_cli_argument(scope, base_name, resource_type, parent_name=None, # pylint: disable=too-many-arguments
+
+def register_folded_cli_argument(scope, base_name, resource_type, parent_name=None,  # pylint: disable=too-many-arguments
                                  parent_option_flag=None, parent_type=None, type_field=None,
                                  existing_id_flag_value='existingId', new_flag_value='new',
                                  none_flag_value='none', default_value_flag='new',
@@ -62,7 +63,8 @@ def register_folded_cli_argument(scope, base_name, resource_type, parent_name=No
     register_cli_argument(scope, base_name, validator=validator, help=help_text, **kwargs)
     register_cli_argument(scope, type_field_name, help=argparse.SUPPRESS, default=None)
 
-def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-many-arguments
+
+def _name_id_fold(base_name, resource_type, type_field,  # pylint: disable=too-many-arguments
                   existing_id_flag_value, new_flag_value, none_flag_value,
                   parent_name=None, parent_option_flag=None, parent_type=None, base_required=True):
     def handle_folding(namespace):
@@ -125,6 +127,8 @@ def _name_id_fold(base_name, resource_type, type_field, #pylint: disable=too-man
 # NEW STYLE
 
 # pylint: disable=line-too-long
+
+
 def get_folded_parameter_help_string(
         display_name, allow_none=False, allow_new=False, default_none=False,
         other_required_option=None):
@@ -139,18 +143,22 @@ def get_folded_parameter_help_string(
     elif not allow_new and allow_none and not default_none:
         help_text = 'Name or ID of an existing {}, or {} for none.'.format(display_name, quotes)
     elif allow_new and not allow_none and not default_none:
-        help_text = 'Name or ID of the {}. Will create resource if it does not exist.'.format(display_name)
+        help_text = 'Name or ID of the {}. Will create resource if it does not exist.'.format(
+            display_name)
     elif allow_new and allow_none and not default_none:
-        help_text = 'Name or ID of the {}, or {} for none. Uses existing resource if available or will create a new resource with defaults if omitted.'.format(display_name, quotes)
+        help_text = 'Name or ID of the {}, or {} for none. Uses existing resource if available or will create a new resource with defaults if omitted.'.format(
+            display_name, quotes)
     elif not allow_new and allow_none and default_none:
         help_text = 'Name or ID of an existing {}, or none by default.'.format(display_name)
     elif allow_new and allow_none and default_none:
-        help_text = 'Name or ID of a {}. Uses existing resource or creates new if specified, or none if omitted.'.format(display_name)
+        help_text = 'Name or ID of a {}. Uses existing resource or creates new if specified, or none if omitted.'.format(
+            display_name)
 
     # add parent name option string (if applicable)
     if other_required_option:
         help_text = '{} If name specified, also specify {}'.format(help_text, other_required_option)
     return help_text
+
 
 def _validate_name_or_id(
         resource_group_name, property_value, property_type, parent_value, parent_type):
@@ -179,7 +187,8 @@ def _validate_name_or_id(
         value_supplied_was_id = False
     return (resource_id_parts, value_supplied_was_id)
 
-def get_folded_parameter_validator( # pylint: disable=too-many-arguments
+
+def get_folded_parameter_validator(  # pylint: disable=too-many-arguments
         property_name, property_type, property_option,
         parent_name=None, parent_type=None, parent_option=None,
         allow_none=False, allow_new=False, default_none=False):
@@ -210,7 +219,7 @@ def get_folded_parameter_validator( # pylint: disable=too-many-arguments
                 logger = _logging.get_az_logger(__name__)
                 logger.warning('Ignoring: %s %s', parent_option, parent_val)
                 setattr(namespace, parent_name, None)
-            return # SUCCESS
+            return  # SUCCESS
 
         # Create a resource ID we can check for existence.
         (resource_id_parts, value_was_id) = _validate_name_or_id(
@@ -225,7 +234,7 @@ def get_folded_parameter_validator( # pylint: disable=too-many-arguments
                     logger = _logging.get_az_logger(__name__)
                     logger.warning('Ignoring: %s %s', parent_option, parent_val)
                 setattr(namespace, parent_name, None)
-            return # SUCCESS
+            return  # SUCCESS
 
         # if a parent name was required but not specified, raise a usage error
         if has_parent and not value_was_id and not parent_val and not allow_new:

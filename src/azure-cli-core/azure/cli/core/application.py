@@ -22,21 +22,24 @@ logger = _logging.get_az_logger(__name__)
 
 ARGCOMPLETE_ENV_NAME = '_ARGCOMPLETE'
 
-class Configuration(object): # pylint: disable=too-few-public-methods
+
+class Configuration(object):  # pylint: disable=too-few-public-methods
     """The configuration object tracks session specific data such
     as output formats, available commands etc.
     """
+
     def __init__(self, argv):
         self.argv = argv or sys.argv[1:]
         self.output_format = None
 
-    def get_command_table(self): # pylint: disable=no-self-use
+    def get_command_table(self):  # pylint: disable=no-self-use
         import azure.cli.core.commands as commands
         return commands.get_command_table()
 
-    def load_params(self, command): # pylint: disable=no-self-use
+    def load_params(self, command):  # pylint: disable=no-self-use
         import azure.cli.core.commands as commands
         commands.load_params(command)
+
 
 class Application(object):
 
@@ -53,11 +56,11 @@ class Application(object):
         self.session = {
             'headers': {
                 'x-ms-client-request-id': str(uuid.uuid1())
-                },
+            },
             'command': 'unknown',
             'completer_active': ARGCOMPLETE_ENV_NAME in os.environ,
             'query_active': False
-            }
+        }
 
         # Register presence of and handlers for global parameters
         self.register(self.GLOBAL_PARSER_CREATED, Application._register_builtin_arguments)
@@ -77,7 +80,7 @@ class Application(object):
     def initialize(self, configuration):
         self.configuration = configuration
 
-    def execute(self, unexpanded_argv): # pylint: disable=too-many-statements
+    def execute(self, unexpanded_argv):  # pylint: disable=too-many-statements
         argv = Application._expand_file_prefixed_files(unexpanded_argv)
         command_table = self.configuration.get_command_table()
         self.raise_event(self.COMMAND_TABLE_LOADED, command_table=command_table)
@@ -123,7 +126,7 @@ class Application(object):
                 _validate_arguments(expanded_arg)
             except CLIError:
                 raise
-            except: # pylint: disable=bare-except
+            except:  # pylint: disable=bare-except
                 err = sys.exc_info()[1]
                 getattr(expanded_arg, '_parser', self.parser).validation_error(str(err))
 
@@ -151,15 +154,14 @@ class Application(object):
         self.raise_event(self.TRANSFORM_RESULT, event_data=event_data)
         self.raise_event(self.FILTER_RESULT, event_data=event_data)
         return CommandResultItem(event_data['result'],
-                                 table_transformer=
-                                 command_table[args.command].table_transformer,
+                                 table_transformer=command_table[args.command].table_transformer,
                                  is_query_active=self.session['query_active'])
 
     def raise_event(self, name, **kwargs):
         '''Raise the event `name`.
         '''
         logger.info("Application event '%s' with event data %s", name, kwargs)
-        for func in list(self._event_handlers[name]): # Make copy in case handler modifies the list
+        for func in list(self._event_handlers[name]):  # Make copy in case handler modifies the list
             func(**kwargs)
 
     def register(self, name, handler):
@@ -196,22 +198,22 @@ class Application(object):
                                   type=str.lower)
         # The arguments for verbosity don't get parsed by argparse but we add it here for help.
         global_group.add_argument('--verbose', dest='_log_verbosity_verbose', action='store_true',
-                                  help='Increase logging verbosity. Use --debug for full debug logs.') #pylint: disable=line-too-long
+                                  help='Increase logging verbosity. Use --debug for full debug logs.')  # pylint: disable=line-too-long
         global_group.add_argument('--debug', dest='_log_verbosity_debug', action='store_true',
                                   help='Increase logging verbosity to show all debug logs.')
 
     @staticmethod
     def _maybe_load_file(arg):
         ix = arg.find('@')
-        if ix == -1: # no @ found
+        if ix == -1:  # no @ found
             return arg
 
         poss_file = arg[ix + 1:]
-        if not poss_file: # if nothing after @ then it can't be a file
+        if not poss_file:  # if nothing after @ then it can't be a file
             return arg
         elif ix == 0:
             return Application._load_file(poss_file)
-        else: # if @ not at the start it can't be a file
+        else:  # if @ not at the start it can't be a file
             return arg
 
     @staticmethod
@@ -244,8 +246,9 @@ class Application(object):
 
     def _handle_builtin_arguments(self, **kwargs):
         args = kwargs['args']
-        self.configuration.output_format = args._output_format #pylint: disable=protected-access
+        self.configuration.output_format = args._output_format  # pylint: disable=protected-access
         del args._output_format
+
 
 def _validate_arguments(args, **_):
     for validator in getattr(args, '_validators', []):
@@ -255,6 +258,7 @@ def _validate_arguments(args, **_):
     except AttributeError:
         pass
 
+
 def _explode_list_args(args):
     '''Iterate through each attribute member of args and create a copy with
     the IterateValues 'flattened' to only contain a single value
@@ -262,7 +266,7 @@ def _explode_list_args(args):
     Ex.
         { a1:'x', a2:IterateValue(['y', 'z']) } => [{ a1:'x', a2:'y'),{ a1:'x', a2:'z'}]
     '''
-    list_args = {argname:argvalue for argname, argvalue in vars(args).items()
+    list_args = {argname: argvalue for argname, argvalue in vars(args).items()
                  if isinstance(argvalue, IterateValue)}
     if not list_args:
         yield args
@@ -278,7 +282,7 @@ def _explode_list_args(args):
             yield new_ns
 
 
-class IterateAction(argparse.Action): # pylint: disable=too-few-public-methods
+class IterateAction(argparse.Action):  # pylint: disable=too-few-public-methods
     '''Action used to collect argument values in an IterateValue list
     The application will loop through each value in the IterateValue
     and execeute the associated handler for each
@@ -296,6 +300,7 @@ class IterateValue(list):
     Typical use is to allow multiple ID parameter to a show command etc.
     '''
     pass
+
 
 APPLICATION = Application()
 

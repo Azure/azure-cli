@@ -35,7 +35,7 @@ exec_command('pip install -e ./scripts')
 # command modules have dependency on azure-cli-core so install this first
 exec_command('pip install -e src/azure-cli-nspkg')
 exec_command('pip install -e src/azure-cli-core')
-exec_command('python scripts/command_modules/install.py')
+exec_command('python -m automation.setup.install_modules')
 
 # azure cli has dependencies on the above packages so install this one last
 exec_command('pip install -e src/azure-cli')

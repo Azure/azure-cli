@@ -3,17 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import getpass
 import datetime
-import subprocess
-import json
-import os
-import sys
-import platform
-import locale
+import getpass
 import hashlib
-import traceback
+import json
+import locale
+import os
+import platform
 import re
+import subprocess
+import sys
+import traceback
 from functools import wraps
 
 __all__ = ['set_application', 'log_telemetry', 'flush_telemetry']
@@ -356,6 +356,7 @@ if _user_agrees_to_telemetry():
     telemetry_service = _TelemetryService()
 else:
     telemetry_service = None
+
 
 if __name__ == '__main__':
     if _user_agrees_to_telemetry():

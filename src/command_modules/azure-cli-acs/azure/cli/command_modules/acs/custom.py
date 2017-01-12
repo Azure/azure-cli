@@ -279,9 +279,10 @@ def _build_service_principal(client, name, url, client_secret):
     print('done')
     return service_principal
 
-def _add_role_assignment(role, service_principal):
+def _add_role_assignment(role, service_principal, delay=2, output=True):
     # AAD can have delays in propagating data, so sleep and retry
-    sys.stdout.write('waiting for AAD role to propagate.')
+    if output:
+        sys.stdout.write('waiting for AAD role to propagate.')
     for x in range(0, 10):
         from azure.cli.command_modules.role.custom import create_role_assignment
         try:
@@ -291,13 +292,17 @@ def _add_role_assignment(role, service_principal):
         except CloudError as ex:
             if ex.message == 'The role assignment already exists.':
                 break
-            sys.stdout.write('.')
             logger.info('%s', ex.message)
-            time.sleep(2 + 2 * x)
         except: #pylint: disable=bare-except
+            pass
+        if output:
             sys.stdout.write('.')
-            time.sleep(2 + 2 * x)
-    print('done')
+            time.sleep(delay + delay * x)
+    else:
+        return False
+    if output:
+        print('done')
+    return True
 
 def _get_subscription_id():
     _, sub_id, _ = Profile().get_login_credentials(subscription_id=None)
@@ -393,7 +398,8 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                 logger.info('Created a service principal: %s', service_principal)
                 store_acs_service_principal(subscription_id, client_secret, service_principal)
             # Either way, update the role assignment, this fixes things if we fail part-way through
-            _add_role_assignment('Owner', service_principal)
+            if not _add_role_assignment('Owner', service_principal):
+                raise CLIError('Could not create a service principal with the right permissions. Are you an Owner on this project?')
         else:
             # --service-principal specfied, validate --client-secret was too
             if not client_secret:

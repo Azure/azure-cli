@@ -12,7 +12,8 @@ from azure.mgmt.resource.subscriptions.models import (SubscriptionState, Subscri
 from azure.cli.core._profile import Profile, CredsCache, SubscriptionFinder, CLOUD
 from azure.cli.core._util import CLIError
 
-class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
+
+class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     @classmethod
     def setUpClass(cls):
@@ -59,22 +60,21 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
             'name': self.display_name1,
             'state': self.state1.value,
             'user': {
-                'name':self.user1,
-                'type':'user'
-                },
+                'name': self.user1,
+                'type': 'user'
+            },
             'isDefault': False,
             'tenantId': self.tenant_id
-            }
+        }
         self.assertEqual(expected, consolidated[0])
-        #verify serialization works
+        # verify serialization works
         self.assertIsNotNone(json.dumps(consolidated[0]))
-
 
     def test_update_add_two_different_subscriptions(self):
         storage_mock = {'subscriptions': None}
         profile = Profile(storage_mock)
 
-        #add the first and verify
+        # add the first and verify
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
                                                      False)
@@ -90,12 +90,12 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
             'user': {
                 'name': self.user1,
                 'type': 'user'
-                },
+            },
             'isDefault': True,
             'tenantId': self.tenant_id
-            })
+        })
 
-        #add the second and verify
+        # add the second and verify
         consolidated = Profile._normalize_properties(self.user2,
                                                      [self.subscription2],
                                                      False)
@@ -111,12 +111,12 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
             'user': {
                 'name': self.user2,
                 'type': 'user'
-                },
+            },
             'isDefault': True,
             'tenantId': self.tenant_id
-            })
+        })
 
-        #verify the old one stays, but no longer active
+        # verify the old one stays, but no longer active
         self.assertEqual(storage_mock['subscriptions'][0]['name'],
                          subscription1['name'])
         self.assertFalse(storage_mock['subscriptions'][0]['isDefault'])
@@ -125,7 +125,7 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
         storage_mock = {'subscriptions': None}
         profile = Profile(storage_mock)
 
-        #add one twice and verify we will have one but with new token
+        # add one twice and verify we will have one but with new token
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
                                                      False)
@@ -193,7 +193,7 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
         profile._set_subscriptions(consolidated)
         sub_id = self.id1.split('/')[-1]
 
-        #testing dump of existing logged in account
+        # testing dump of existing logged in account
         extended_info = profile.get_expanded_subscription_info()
         self.assertEqual(self.user1, extended_info['userName'])
         self.assertEqual(sub_id, extended_info['subscriptionId'])
@@ -201,7 +201,7 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
         self.assertEqual('https://login.microsoftonline.com',
                          extended_info['endpoints'].active_directory)
 
-        #testing dump of service principal by 'create-for-rbac'
+        # testing dump of service principal by 'create-for-rbac'
         extended_info = profile.get_expanded_subscription_info(name='great-sp',
                                                                password='verySecret-')
         self.assertEqual(sub_id, extended_info['subscriptionId'])
@@ -225,19 +225,18 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
         profile._management_resource_uri = 'https://management.core.windows.net/'
         profile._subscription_finder = finder
         profile.find_subscriptions_on_login(False, '1234', 'my-secret', True, self.tenant_id)
-        #action
+        # action
         extended_info = profile.get_expanded_subscription_info()
-        #assert
+        # assert
         self.assertEqual(self.id1.split('/')[-1], extended_info['subscriptionId'])
         self.assertEqual(self.display_name1, extended_info['subscriptionName'])
         self.assertEqual('1234', extended_info['client'])
         self.assertEqual('https://login.microsoftonline.com',
                          extended_info['endpoints'].active_directory)
 
-
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     def test_get_current_account_user(self, mock_read_cred_file):
-        #setup
+        # setup
         mock_read_cred_file.return_value = [Test_Profile.token_entry1]
 
         storage_mock = {'subscriptions': None}
@@ -246,10 +245,10 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
                                                      [self.subscription1],
                                                      False)
         profile._set_subscriptions(consolidated)
-        #action
+        # action
         user = profile.get_current_account_user()
 
-        #verify
+        # verify
         self.assertEqual(user, self.user1)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', return_value=None)
@@ -269,7 +268,7 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
             "_authority": "https://login.microsoftonline.com/common",
             "_clientId": "04b07795-8ddb-461a-bbee-02f9e1bf7b46",
             "userId": self.user1
-            })
+        })
         self.assertEqual(len(matched), 1)
         self.assertEqual(matched[0]['accessToken'], self.raw_token1)
 
@@ -279,20 +278,20 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
         some_token_type = 'Bearer'
         mock_read_cred_file.return_value = [Test_Profile.token_entry1]
         mock_get_token.return_value = (some_token_type, Test_Profile.raw_token1)
-        #setup
+        # setup
         storage_mock = {'subscriptions': None}
         profile = Profile(storage_mock)
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
                                                      False)
         profile._set_subscriptions(consolidated)
-        #action
+        # action
         cred, subscription_id, _ = profile.get_login_credentials()
 
-        #verify
+        # verify
         self.assertEqual(subscription_id, '1')
 
-        #verify the cred._tokenRetriever is a working lambda
+        # verify the cred._tokenRetriever is a working lambda
         token_type, token = cred._token_retriever()
         self.assertEqual(token, self.raw_token1)
         self.assertEqual(some_token_type, token_type)
@@ -307,17 +306,17 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
         some_token_type = 'Bearer'
         mock_read_cred_file.return_value = [Test_Profile.token_entry1]
         mock_get_token.return_value = (some_token_type, Test_Profile.raw_token1)
-        #setup
+        # setup
         storage_mock = {'subscriptions': None}
         profile = Profile(storage_mock)
         consolidated = Profile._normalize_properties(self.user1, [self.subscription1],
                                                      False)
         profile._set_subscriptions(consolidated)
-        #action
+        # action
         cred, _, tenant_id = profile.get_login_credentials(
             resource=CLOUD.endpoints.active_directory_graph_resource_id)
         _, _ = cred._token_retriever()
-        #verify
+        # verify
         mock_get_token.assert_called_once_with(mock.ANY, self.user1, self.tenant_id,
                                                'https://graph.windows.net/')
         self.assertEqual(tenant_id, self.tenant_id)
@@ -325,7 +324,7 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.persist_cached_creds', autospec=True)
     def test_logout(self, mock_persist_creds, mock_read_cred_file):
-        #setup
+        # setup
         mock_read_cred_file.return_value = [Test_Profile.token_entry1]
 
         storage_mock = {'subscriptions': None}
@@ -335,17 +334,17 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
                                                      False)
         profile._set_subscriptions(consolidated)
         self.assertEqual(1, len(storage_mock['subscriptions']))
-        #action
+        # action
         profile.logout(self.user1)
 
-        #verify
+        # verify
         self.assertEqual(0, len(storage_mock['subscriptions']))
         self.assertEqual(mock_read_cred_file.call_count, 1)
         self.assertEqual(mock_persist_creds.call_count, 1)
 
     @mock.patch('azure.cli.core._profile._delete_file', autospec=True)
     def test_logout_all(self, mock_delete_cred_file):
-        #setup
+        # setup
         storage_mock = {'subscriptions': None}
         profile = Profile(storage_mock)
         consolidated = Profile._normalize_properties(self.user1,
@@ -357,10 +356,10 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
         profile._set_subscriptions(consolidated + consolidated2)
 
         self.assertEqual(2, len(storage_mock['subscriptions']))
-        #action
+        # action
         profile.logout_all()
 
-        #verify
+        # verify
         self.assertEqual([], storage_mock['subscriptions'])
         self.assertEqual(mock_delete_cred_file.call_count, 1)
 
@@ -375,10 +374,10 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
                                     None,
                                     lambda _: mock_arm_client)
         mgmt_resource = 'https://management.core.windows.net/'
-        #action
+        # action
         subs = finder.find_from_user_account(self.user1, 'bar', mgmt_resource)
 
-        #assert
+        # assert
         self.assertEqual([self.subscription1], subs)
         mock_auth_context.acquire_token_with_username_password.assert_called_once_with(
             mgmt_resource, self.user1, 'bar', mock.ANY)
@@ -387,7 +386,7 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_find_subscriptions_through_interactive_flow(self, mock_auth_context):
-        test_nonsense_code = {'message':'magic code for you'}
+        test_nonsense_code = {'message': 'magic code for you'}
         mock_auth_context.acquire_user_code.return_value = test_nonsense_code
         mock_auth_context.acquire_token_with_device_code.return_value = self.token_entry1
         mock_arm_client = mock.MagicMock()
@@ -397,10 +396,10 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
                                     None,
                                     lambda _: mock_arm_client)
         mgmt_resource = 'https://management.core.windows.net/'
-        #action
+        # action
         subs = finder.find_through_interactive_flow(mgmt_resource)
 
-        #assert
+        # assert
         self.assertEqual([self.subscription1], subs)
         mock_auth_context.acquire_user_code.assert_called_once_with(
             mgmt_resource, mock.ANY)
@@ -418,11 +417,11 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
                                     None,
                                     lambda _: mock_arm_client)
         mgmt_resource = 'https://management.core.windows.net/'
-        #action
+        # action
         subs = finder.find_from_service_principal_id('my app', 'my secret',
                                                      self.tenant_id, mgmt_resource)
 
-        #assert
+        # assert
         self.assertEqual([self.subscription1], subs)
         mock_arm_client.tenants.list.assert_not_called()
         mock_auth_context.acquire_token.assert_not_called()
@@ -438,10 +437,10 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
         }
         mock_read_file.return_value = [self.token_entry1, test_sp]
 
-        #action
+        # action
         creds_cache = CredsCache()
 
-        #assert
+        # assert
         token_entries = [entry for _, entry in creds_cache.adal_token_cache.read_items()]
         self.assertEqual(token_entries, [self.token_entry1])
         self.assertEqual(creds_cache._service_principal_creds, [test_sp])
@@ -464,13 +463,13 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
         mock_read_file.return_value = [self.token_entry1, test_sp]
         creds_cache = CredsCache()
 
-        #action
+        # action
         creds_cache.save_service_principal_cred(
             test_sp2['servicePrincipalId'],
             test_sp2['accessToken'],
             test_sp2['servicePrincipalTenant'])
 
-        #assert
+        # assert
         token_entries = [entry for _, entry in creds_cache.adal_token_cache.read_items()]
         self.assertEqual(token_entries, [self.token_entry1])
         self.assertEqual(creds_cache._service_principal_creds, [test_sp, test_sp2])
@@ -489,17 +488,17 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
         mock_read_file.return_value = [self.token_entry1, test_sp]
         creds_cache = CredsCache()
 
-        #action #1, logout a user
+        # action #1, logout a user
         creds_cache.remove_cached_creds(self.user1)
 
-        #assert #1
+        # assert #1
         token_entries = [entry for _, entry in creds_cache.adal_token_cache.read_items()]
         self.assertEqual(token_entries, [])
 
-        #action #2 logout a service principal
+        # action #2 logout a service principal
         creds_cache.remove_cached_creds('myapp')
 
-        #assert #2
+        # assert #2
         self.assertEqual(creds_cache._service_principal_creds, [])
 
         mock_open_for_write.assert_called_with(mock.ANY, 'w+')
@@ -509,16 +508,18 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
     @mock.patch('os.fdopen', autospec=True)
     @mock.patch('os.open', autospec=True)
     @mock.patch('adal.AuthenticationContext', autospec=True)
-    def test_credscache_new_token_added_by_adal(self, mock_adal_auth_context, _, mock_open_for_write, mock_read_file): # pylint: disable=line-too-long
+    def test_credscache_new_token_added_by_adal(self, mock_adal_auth_context, _, mock_open_for_write, mock_read_file):  # pylint: disable=line-too-long
         token_entry2 = {
             "accessToken": "new token",
             "tokenType": "Bearer",
             "userId": self.user1
         }
-        def acquire_token_side_effect(*args): # pylint: disable=unused-argument
+
+        def acquire_token_side_effect(*args):  # pylint: disable=unused-argument
             creds_cache.adal_token_cache.has_state_changed = True
             return token_entry2
-        def get_auth_context(authority, **kwargs): # pylint: disable=unused-argument
+
+        def get_auth_context(authority, **kwargs):  # pylint: disable=unused-argument
             mock_adal_auth_context.cache = kwargs['cache']
             return mock_adal_auth_context
 
@@ -527,7 +528,7 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
         mock_read_file.return_value = [self.token_entry1]
         creds_cache = CredsCache(auth_ctx_factory=get_auth_context)
 
-        #action
+        # action
         mgmt_resource = 'https://management.core.windows.net/'
         token_type, token = creds_cache.retrieve_token_for_user(self.user1, self.tenant_id,
                                                                 mgmt_resource)
@@ -536,21 +537,27 @@ class Test_Profile(unittest.TestCase): #pylint: disable=too-many-public-methods
             self.user1,
             mock.ANY)
 
-        #assert
+        # assert
         mock_open_for_write.assert_called_with(mock.ANY, 'w+')
         self.assertEqual(token, 'new token')
         self.assertEqual(token_type, token_entry2['tokenType'])
 
-class FileHandleStub(object): # pylint: disable=too-few-public-methods
+
+class FileHandleStub(object):  # pylint: disable=too-few-public-methods
+
     def write(self, content):
         pass
+
     def __enter__(self):
         return self
+
     def __exit__(self, _2, _3, _4):
         pass
 
-class SubscriptionStub(Subscription): # pylint: disable=too-few-public-methods
-    def __init__(self, id, display_name, state, tenant_id): # pylint: disable=redefined-builtin,
+
+class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
+
+    def __init__(self, id, display_name, state, tenant_id):  # pylint: disable=redefined-builtin,
         policies = SubscriptionPolicies()
         policies.spending_limit = spendingLimit.current_period_off
         policies.quota_id = 'some quota'
@@ -560,9 +567,12 @@ class SubscriptionStub(Subscription): # pylint: disable=too-few-public-methods
         self.state = state
         self.tenant_id = tenant_id
 
-class TenantStub(object): # pylint: disable=too-few-public-methods
+
+class TenantStub(object):  # pylint: disable=too-few-public-methods
+
     def __init__(self, tenant_id):
         self.tenant_id = tenant_id
+
 
 if __name__ == '__main__':
     unittest.main()

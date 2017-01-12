@@ -10,15 +10,18 @@ GLOBAL_CONFIG_DIR = get_config_dir()
 GLOBAL_CONFIG_PATH = os.path.join(GLOBAL_CONFIG_DIR, 'config')
 ENV_VAR_PREFIX = 'AZURE_'
 
+
 def active_context():
     from azure.cli.core.context import get_active_context_name
     return get_active_context_name()
+
 
 CONTEXT_CONFIG_DIR = os.path.expanduser(os.path.join(GLOBAL_CONFIG_DIR, 'context_config'))
 ACTIVE_CONTEXT_CONFIG_PATH = os.path.join(CONTEXT_CONFIG_DIR, active_context())
 
 _UNSET = object()
-_ENV_VAR_FORMAT = ENV_VAR_PREFIX+'{section}_{option}'
+_ENV_VAR_FORMAT = ENV_VAR_PREFIX + '{section}_{option}'
+
 
 class AzConfig(object):
     _BOOLEAN_STATES = {'1': True, 'yes': True, 'true': True, 'on': True,
@@ -55,9 +58,10 @@ class AzConfig(object):
 
     def getboolean(self, section, option, fallback=_UNSET):
         val = str(self.get(section, option, fallback))
-        if val.lower() not in AzConfig._BOOLEAN_STATES: #pylint: disable=E1101
+        if val.lower() not in AzConfig._BOOLEAN_STATES:  # pylint: disable=E1101
             raise ValueError('Not a boolean: {}'.format(val))
-        return AzConfig._BOOLEAN_STATES[val.lower()] #pylint: disable=E1101
+        return AzConfig._BOOLEAN_STATES[val.lower()]  # pylint: disable=E1101
+
 
 az_config = AzConfig()
 az_config.config_parser.read([GLOBAL_CONFIG_PATH, ACTIVE_CONTEXT_CONFIG_PATH])

@@ -9,6 +9,7 @@ from azure.cli.core.parser import AzCliCommandParser
 from azure.cli.core.commands import CliCommand
 from azure.cli.core.commands.parameters import enum_choice_list
 
+
 class TestParser(unittest.TestCase):
 
     def setUp(self):
@@ -41,7 +42,7 @@ class TestParser(unittest.TestCase):
         self.assertTrue(AzCliCommandParser.error.called)
 
     def test_required_parameter(self):
-        def test_handler(args): # pylint: disable=unused-argument
+        def test_handler(args):  # pylint: disable=unused-argument
             pass
 
         command = CliCommand('test command', test_handler)
@@ -79,7 +80,7 @@ class TestParser(unittest.TestCase):
     def test_case_insensitive_enum_choices(self):
         from enum import Enum
 
-        class TestEnum(Enum): # pylint: disable=too-few-public-methods
+        class TestEnum(Enum):  # pylint: disable=too-few-public-methods
 
             opt1 = "ALL_CAPS"
             opt2 = "camelCase"
@@ -104,7 +105,8 @@ class TestParser(unittest.TestCase):
         args = parser.parse_args('test command --opt sNake_CASE'.split())
         self.assertEqual(args.opt, 'snake_case')
 
-class VerifyError(object): # pylint: disable=too-few-public-methods
+
+class VerifyError(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, test, substr=None):
         self.test = test
@@ -115,6 +117,7 @@ class VerifyError(object): # pylint: disable=too-few-public-methods
         if self.substr:
             self.test.assertTrue(message.find(self.substr) >= 0)
         self.called = True
+
 
 if __name__ == '__main__':
     unittest.main()
