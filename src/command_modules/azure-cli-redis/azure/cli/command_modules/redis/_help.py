@@ -10,6 +10,7 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 helps['redis'] = """
     type: group
     short-summary: Access to a secure, dedicated cache for your Azure applications
+    long-summary: If you don't have the redis component installed, add it with `az component update --add redis`
 """
 
 helps['redis export'] = """
