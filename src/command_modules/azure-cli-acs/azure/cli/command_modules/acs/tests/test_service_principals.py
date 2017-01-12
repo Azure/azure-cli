@@ -64,11 +64,8 @@ class AcsServicePrincipalTest(unittest.TestCase):
         self.assertIsNotNone(obj, 'expected non-None for {}'.format(principals[0][0]))
         self.assertEqual(obj.get('service_principal'), new_principal)
         self.assertEqual(obj.get('client_secret'), new_secret)
-        
 
         os.remove(store_file.name)
-
-
 
     def test_validate_service_principal_ok(self):
         client = mock.MagicMock()
