@@ -9,10 +9,12 @@ import os.path
 import sys
 
 from azure.cli.core.test_utils.vcr_test_base import COMMAND_COVERAGE_CONTROL_ENV
-import automation.utilities.path as automation_path
+
 import automation.tests.nose_helper as automation_tests
+import automation.utilities.path as automation_path
 
 
+# pylint: disable=too-few-public-methods
 class CommandCoverageContext(object):
     FILE_NAME = 'command_coverage.txt'
 
@@ -53,6 +55,7 @@ def run_command_coverage(modules):
         print('END: Full executed commands list')
 
 
+# pylint: disable=too-few-public-methods
 class CoverageContext(object):
     def __init__(self):
         from coverage import Coverage
@@ -75,7 +78,7 @@ def run_code_coverage(modules):
         test_results_folder, code_coverage=True, parallel=False)
 
     # run code coverage on each project
-    for index, (name, _, test_path) in enumerate(modules):
+    for name, _, test_path in modules:
         with CoverageContext():
             run_nose(name, test_path)
 
@@ -112,7 +115,7 @@ def main():
     parser.add_argument('--code-coverage', action='store_true', help='Run code coverage')
     parser.add_argument('--module', action='append', dest='modules',
                         help='The modules to run coverage. Multiple modules can be fed.')
-    parser.add_argument('--command-rundown', action='store', 
+    parser.add_argument('--command-rundown', action='store',
                         help='Analyze a command coverage test result.')
     args = parser.parse_args()
 

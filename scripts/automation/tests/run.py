@@ -3,19 +3,18 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import itertools
+import argparse
 import sys
 
-from .nose_helper import get_nose_runner
-from ..utilities.display import print_records
-from ..utilities.path import get_command_modules_paths_with_tests, \
-                             get_core_modules_paths_with_tests,\
-                             get_test_results_dir
+from automation.utilities.path import filter_user_selected_modules
+from automation.tests.nose_helper import get_nose_runner
+from automation.utilities.display import print_records
+from automation.utilities.path import get_test_results_dir
 
 
 def run_tests(modules, parallel):
     print('\n\nRun automation')
-    print('Modules: {}'.format(', '.join(name for name, _ in modules)))
+    print('Modules: {}'.format(', '.join(name for name, _, _ in modules)))
 
     # create test results folder
     test_results_folder = get_test_results_dir(with_timestamp=True, prefix='tests')
@@ -27,8 +26,8 @@ def run_tests(modules, parallel):
     # run tests
     passed = True
     module_results = []
-    for name, test_path in modules:
-        result, start, end, log_file = run_nose(name, test_path)
+    for name, _, test_path in modules:
+        result, start, end, _ = run_nose(name, test_path)
         passed &= result
         record = (name, start.strftime('%H:%M:%D'), str((end - start).total_seconds()),
                   'Pass' if result else 'Fail')
@@ -39,12 +38,8 @@ def run_tests(modules, parallel):
 
     return passed
 
-if __name__ == '__main__':
-    import argparse
-    from itertools import chain
-    from automation.utilities.path import (get_command_modules_paths_with_tests,
-                                           get_core_modules_paths_with_tests)
 
+if __name__ == '__main__':
     parse = argparse.ArgumentParser('Test tools')
     parse.add_argument('--module', dest='modules', action='append',
                        help='The modules of which the test to be run. Accept short names, except '
@@ -53,20 +48,10 @@ if __name__ == '__main__':
                        help='Not to run the tests in parallel.')
     args = parse.parse_args()
 
-    existing_modules = list(chain(get_core_modules_paths_with_tests(),
-                                  get_command_modules_paths_with_tests()))
-
-    if args.modules:
-        selected_modules = set(args.modules)
-        extra = selected_modules - set([name for name, _, _ in existing_modules])
-        if any(extra):
-            print('ERROR: These modules do not exist: {}.'.format(', '.join(extra)))
-            sys.exit(1)
-
-        selected_modules = list((name, path) for name, _, path in existing_modules
-                                if name in selected_modules)
-    else:
-        selected_modules = list((name, path) for name, _, path in existing_modules)
+    selected_modules = filter_user_selected_modules(args.modules)
+    if not selected_modules:
+        parse.print_help()
+        sys.exit(1)
 
     retval = run_tests(selected_modules, not args.non_parallel)
 

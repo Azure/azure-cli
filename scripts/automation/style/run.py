@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import argparse
 import multiprocessing
 import os.path
 import sys
@@ -49,8 +50,6 @@ def run_pep8(modules):
 
 
 if __name__ == '__main__':
-    import argparse
-
     parse = argparse.ArgumentParser('Code style tools')
     parse.add_argument('--pep8', dest='suites', action='append_const', const='pep8',
                        help='Run flake8 to check PEP8')

@@ -61,7 +61,6 @@ def get_core_modules_paths_with_tests():
 def make_dirs(path):
     """Create a directories recursively"""
     import errno
-    import os
     try:
         os.makedirs(path)
     except OSError as exc:  # Python <= 2.5
@@ -72,7 +71,8 @@ def make_dirs(path):
 
 
 def get_test_results_dir(with_timestamp=None, prefix=None):
-    """Returns the folder where test results should be saved to. If the folder doesn't exist, it will be created."""
+    """Returns the folder where test results should be saved to. If the folder doesn't exist,
+    it will be created."""
     result = os.path.join(get_repo_root(), 'test_results')
 
     if isinstance(with_timestamp, bool):
