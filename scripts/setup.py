@@ -42,7 +42,9 @@ setup(
     ],
     scripts=[
         "check_style",
-        "check_style.bat"
+        "check_style.bat",
+        "run_tests",
+        "run_tests.bat"
     ],
     packages=[
         'automation',

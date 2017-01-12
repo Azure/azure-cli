@@ -4,7 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import os.path
-from .const import COMMAND_MODULE_PREFIX
+
+from automation.utilities.const import COMMAND_MODULE_PREFIX
 
 
 def get_repo_root():
@@ -19,6 +20,7 @@ def get_repo_root():
 def get_all_module_paths():
     """List all core and command modules"""
     return list(get_core_modules_paths()) + get_command_modules_paths(include_prefix=True)
+
 
 def get_command_modules_paths(include_prefix=False):
     """List all the command modules"""
@@ -59,7 +61,6 @@ def get_core_modules_paths_with_tests():
 def make_dirs(path):
     """Create a directories recursively"""
     import errno
-    import os
     try:
         os.makedirs(path)
     except OSError as exc:  # Python <= 2.5
@@ -70,7 +71,8 @@ def make_dirs(path):
 
 
 def get_test_results_dir(with_timestamp=None, prefix=None):
-    """Returns the folder where test results should be saved to. If the folder doesn't exist, it will be created."""
+    """Returns the folder where test results should be saved to. If the folder doesn't exist,
+    it will be created."""
     result = os.path.join(get_repo_root(), 'test_results')
 
     if isinstance(with_timestamp, bool):
@@ -90,3 +92,22 @@ def get_test_results_dir(with_timestamp=None, prefix=None):
         raise Exception('Failed to create test result dir {}'.format(result))
 
     return result
+
+
+def filter_user_selected_modules(user_input_modules):
+    import itertools
+
+    existing_modules = list(itertools.chain(get_core_modules_paths_with_tests(),
+                                            get_command_modules_paths_with_tests()))
+
+    if user_input_modules:
+        selected_modules = set(user_input_modules)
+        extra = selected_modules - set([name for name, _, _ in existing_modules])
+        if any(extra):
+            print('ERROR: These modules do not exist: {}.'.format(', '.join(extra)))
+            return None
+
+        return list((name, module, test) for name, module, test in existing_modules
+                    if name in selected_modules)
+    else:
+        return list((name, module, test) for name, module, test in existing_modules)

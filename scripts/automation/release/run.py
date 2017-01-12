@@ -3,13 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
-
 from __future__ import print_function
 
+import argparse
 import os
 import tempfile
-import argparse
 from subprocess import check_call
 
 from .version_patcher import VersionPatcher
@@ -51,19 +49,23 @@ def run_build_release(component_name, repo, use_version_patch=True):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Automated build and release of a component. "\
-                        "To only build, don't specify the repo parameter. "\
-                        "The environment variables TWINE_USERNAME and TWINE_PASSWORD are required if releasing.")
+    parser = argparse.ArgumentParser(
+        description="Automated build and release of a component. To only build, don't specify the"
+                    " repo parameter. The environment variables TWINE_USERNAME and TWINE_PASSWORD "
+                    "are required if releasing.")
     parser.add_argument('--component', '-c', required=True,
                         help='Component name (e.g. azure-cli, azure-cli-vm, etc.)')
     parser.add_argument('--no-version-patch', action='store_false',
-                        help="By default, we patch the version number of the package to remove '+dev' if it exists.")
+                        help="By default, we patch the version number of the package to remove "
+                             "'+dev' if it exists.")
     parser.add_argument('--repo', '-r',
-                        help='Repository URL for release (e.g. https://pypi.python.org/pypi, https://testpypi.python.org/pypi)')
+                        help='Repository URL for release (e.g. https://pypi.python.org/pypi, '
+                             'https://testpypi.python.org/pypi)')
     args = parser.parse_args()
     if args.repo:
         assert os.environ.get('TWINE_USERNAME') and os.environ.get('TWINE_PASSWORD'), \
-            "Set TWINE_USERNAME and TWINE_PASSWORD environment variables to authentication with PyPI repository."
+            "Set TWINE_USERNAME and TWINE_PASSWORD environment variables to authentication with " \
+            "PyPI repository."
     run_build_release(args.component,
                       args.repo,
                       args.no_version_patch)
