@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
+#---------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+#---------------------------------------------------------------------------------------------
+
 set -ex
 
-# Create the debian/ directory for building the azure-cli Debian package - this acts as a cookie cutter.
+# Create the debian/ directory for building the azure-cli Debian package
 
 # This script takes an argument of the empty directory where the files will be placed.
 
@@ -10,6 +15,8 @@ if [ -z "$1" ]
     echo "No argument supplied"
     exit 1
 fi
+
+TAB=$'\t'
 
 debian_dir=$1
 mkdir $debian_dir/source
@@ -100,7 +107,6 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 EOM
 
-TAB=$'\t'
 cat > $debian_dir/rules << EOM
 export DH_VIRTUALENV_INSTALL_ROOT=/opt/
 #!/usr/bin/make -f
