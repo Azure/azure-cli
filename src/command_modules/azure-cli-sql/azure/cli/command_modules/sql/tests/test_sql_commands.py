@@ -72,12 +72,6 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
         self.location = "westus"
         self.administrator_login = 'admin123'
         self.administrator_login_password = 'SecretPassword123'
-        self.firewall_rule_1 = 'rule1'
-        self.start_ip_address_1 = '0.0.0.0'
-        self.end_ip_address_1 = '255.255.255.255'
-        self.firewall_rule_2 = 'rule2'
-        self.start_ip_address_2 = '123.123.123.123'
-        self.end_ip_address_2 = '123.123.123.124'
 
     def test_sql_firewall_mgmt(self):
         self.execute()
@@ -87,6 +81,12 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
         loc = self.location
         user = self.administrator_login
         password = self.administrator_login_password
+        firewall_rule_1 = 'rule1'
+        start_ip_address_1 = '0.0.0.0'
+        end_ip_address_1 = '255.255.255.255'
+        firewall_rule_2 = 'rule2'
+        start_ip_address_2 = '123.123.123.123'
+        end_ip_address_2 = '123.123.123.124'
 
         # test create sql server with minimal required parameters
         self.cmd('sql server create -g {} --server-name {} -l {} '
@@ -99,40 +99,40 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
         # test sql server firewall create
         self.cmd('sql server firewall create --firewall-rule-name {} -g {} --server-name {} '
                  '--start-ip-address {} --end-ip-address {}'
-                 .format(self.firewall_rule_1, rg, self.sql_server_name,
-                         self.start_ip_address_1, self.end_ip_address_1), checks=[
-                             JMESPathCheck('name', self.firewall_rule_1),
+                 .format(firewall_rule_1, rg, self.sql_server_name,
+                         start_ip_address_1, end_ip_address_1), checks=[
+                             JMESPathCheck('name', firewall_rule_1),
                              JMESPathCheck('resourceGroup', rg),
-                             JMESPathCheck('startIpAddress', self.start_ip_address_1),
-                             JMESPathCheck('endIpAddress', self.end_ip_address_1)])
+                             JMESPathCheck('startIpAddress', start_ip_address_1),
+                             JMESPathCheck('endIpAddress', end_ip_address_1)])
 
         # test sql server firewall show
         self.cmd('sql server firewall show --firewall-rule-name {} -g {} --server-name {}'
-                 .format(self.firewall_rule_1, rg, self.sql_server_name), checks=[
-                     JMESPathCheck('name', self.firewall_rule_1),
+                 .format(firewall_rule_1, rg, self.sql_server_name), checks=[
+                     JMESPathCheck('name', firewall_rule_1),
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('startIpAddress', self.start_ip_address_1),
-                     JMESPathCheck('endIpAddress', self.end_ip_address_1)])
+                     JMESPathCheck('startIpAddress', start_ip_address_1),
+                     JMESPathCheck('endIpAddress', end_ip_address_1)])
 
         # test sql server firewall update
         self.cmd('sql server firewall update --firewall-rule-name {} -g {} --server-name {} '
                  '--start-ip-address {} --end-ip-address {}'
-                 .format(self.firewall_rule_1, rg, self.sql_server_name,
-                         self.start_ip_address_2, self.end_ip_address_2), checks=[
-                             JMESPathCheck('name', self.firewall_rule_1),
+                 .format(firewall_rule_1, rg, self.sql_server_name,
+                         start_ip_address_2, end_ip_address_2), checks=[
+                             JMESPathCheck('name', firewall_rule_1),
                              JMESPathCheck('resourceGroup', rg),
-                             JMESPathCheck('startIpAddress', self.start_ip_address_2),
-                             JMESPathCheck('endIpAddress', self.end_ip_address_2)])
+                             JMESPathCheck('startIpAddress', start_ip_address_2),
+                             JMESPathCheck('endIpAddress', end_ip_address_2)])
 
         # test sql server firewall create another rule
         self.cmd('sql server firewall create --firewall-rule-name {} -g {} --server-name {} '
                  '--start-ip-address {} --end-ip-address {}'
-                 .format(self.firewall_rule_2, rg, self.sql_server_name,
-                         self.start_ip_address_2, self.end_ip_address_2), checks=[
-                             JMESPathCheck('name', self.firewall_rule_2),
+                 .format(firewall_rule_2, rg, self.sql_server_name,
+                         start_ip_address_2, end_ip_address_2), checks=[
+                             JMESPathCheck('name', firewall_rule_2),
                              JMESPathCheck('resourceGroup', rg),
-                             JMESPathCheck('startIpAddress', self.start_ip_address_2),
-                             JMESPathCheck('endIpAddress', self.end_ip_address_2)])
+                             JMESPathCheck('startIpAddress', start_ip_address_2),
+                             JMESPathCheck('endIpAddress', end_ip_address_2)])
 
         # test sql server firewall list
         self.cmd('sql server firewall list -g {} --server-name {}'
@@ -140,11 +140,11 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # test sql server firewall delete
         self.cmd('sql server firewall delete --firewall-rule-name {} -g {} --server-name {}'
-                 .format(self.firewall_rule_1, rg, self.sql_server_name), checks=NoneCheck())
+                 .format(firewall_rule_1, rg, self.sql_server_name), checks=NoneCheck())
         self.cmd('sql server firewall list -g {} --server-name {}'
                  .format(rg, self.sql_server_name), checks=[JMESPathCheck('length(@)', 1)])
         self.cmd('sql server firewall delete --firewall-rule-name {} -g {} --server-name {}'
-                 .format(self.firewall_rule_2, rg, self.sql_server_name), checks=NoneCheck())
+                 .format(firewall_rule_2, rg, self.sql_server_name), checks=NoneCheck())
         self.cmd('sql server firewall list -g {} --server-name {}'
                  .format(rg, self.sql_server_name), checks=[JMESPathCheck('length(@)', 0)])
 
