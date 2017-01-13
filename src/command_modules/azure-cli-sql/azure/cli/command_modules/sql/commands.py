@@ -95,4 +95,3 @@ with ServiceGroup(__name__, get_sql_recommended_elastic_pools_operations,
     with s.group('sql elastic-pools recommended database') as c:
         c.command('show', 'get_databases')
         c.command('list', 'list_databases')
-
