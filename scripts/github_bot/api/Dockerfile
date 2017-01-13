@@ -3,13 +3,15 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-FROM python:3.5
+FROM python:3.5.2-alpine
 
-RUN pip install gunicorn Flask
-RUN pip install wheel twine
+RUN apk update && apk upgrade && \
+    apk add --no-cache bash git openssh
+
+RUN pip install --upgrade pip gunicorn Flask wheel twine requests
 
 ADD app.py /
 
 ENV FLASK_APP app.py
 
-CMD gunicorn --log-level DEBUG -w 10 -b 0.0.0.0:5000 app:app
+CMD gunicorn --log-level DEBUG -w 10 -b 0.0.0.0:80 app:app
