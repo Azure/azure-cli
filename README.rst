@@ -19,6 +19,7 @@ A list of common install issues and their resolutions are available at `install 
 - `Interactive install script <#interactive-install-script>`__
 - `Pip <#pip>`__
 - `Apt-get <#apt-get>`__
+- `Homebrew <#homebrew>`__
 - `Docker <#docker-versioned>`__
 - `Nightly Builds <#nightly-builds>`__
 - `Developer Setup <#developer-setup>`__
@@ -93,6 +94,17 @@ Run the following:
     $ sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
     $ sudo apt-get install apt-transport-https
     $ sudo apt-get update && sudo apt-get install azure-cli
+
+Homebrew
+^^^^^^^^
+
+(Pending merge of https://github.com/Homebrew/homebrew-core/pull/8669)
+
+For macOS systems.
+
+.. code-block:: console
+
+    $ brew install azure-cli-2
 
 Docker (versioned)
 ^^^^^^^^^^^^^^^^^^
