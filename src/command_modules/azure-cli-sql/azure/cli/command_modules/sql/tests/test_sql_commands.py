@@ -6,6 +6,7 @@
 from azure.cli.core.test_utils.vcr_test_base import (
     ResourceGroupVCRTestBase, JMESPathCheck, NoneCheck)
 
+
 class SqlServerMgmtScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
@@ -62,6 +63,7 @@ class SqlServerMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # test list sql server should be 0
         self.cmd('sql server list -g {}'.format(rg), checks=[JMESPathCheck('length(@)', 0)])
+
 
 class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
 
@@ -151,6 +153,7 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
         # test delete sql server
         self.cmd('sql server delete -g {} --server-name {}'
                  .format(rg, self.sql_server_name), checks=NoneCheck())
+
 
 class SqlServerServiceObjectiveMgmtScenarioTest(ResourceGroupVCRTestBase):
 
