@@ -13,8 +13,9 @@ import requests
 from hashlib import sha1
 from flask import Flask, jsonify, request, Response
 from subprocess import check_call, CalledProcessError
+from uritemplate import URITemplate, expand
 
-VERSION = '0.0.7'
+VERSION = '0.1.0'
 
 # GitHub API constants
 GITHUB_UA_PREFIX = 'GitHub-Hookshot/'
@@ -41,6 +42,7 @@ GITHUB_API_AUTH = (ENV_GITHUB_API_USER, ENV_GITHUB_API_USER_TOKEN)
 GITHUB_API_HEADERS = {'Accept': 'application/vnd.github.v3+json', 'user-agent': 'azure-cli-bot/{}'.format(VERSION)}
 
 RELEASE_LABEL = 'Release'
+SOURCE_ARCHIVE_NAME = 'source.tar.gz'
 
 OPENED_RELEASE_PR_COMMENT = """
 Reviewers, please verify the following for this PR:
@@ -91,12 +93,12 @@ def _parse_pr_title(title):
     assert component_name.lower().startswith('azure-cli')
     return component_name, version
 
-def create_release(component_name):
+def create_release(component_name, release_assets_dir):
     working_dir = tempfile.mkdtemp()
     check_call(['git', 'clone', 'https://github.com/{}'.format(ENV_REPO_NAME), working_dir])
     check_call(['pip', 'install', '-e', 'scripts'], cwd=working_dir)
     check_call(['python', '-m', 'scripts.automation.release.run', '-c', component_name,
-                '-r', ENV_PYPI_REPO], cwd=working_dir)
+                '-r', ENV_PYPI_REPO, '--dest', release_assets_dir], cwd=working_dir)
     shutil.rmtree(working_dir, ignore_errors=True)
 
 def apply_release_label(issue_url):
@@ -109,12 +111,34 @@ def comment_on_pr(comments_url, comment_body):
     r = requests.post(comments_url, json=payload, auth=GITHUB_API_AUTH, headers=GITHUB_API_HEADERS)
     return True if r.status_code == 201 else False
 
-def create_github_release(component_name, component_version, released_pypi_url):
+def upload_asset(upload_uri_tmpl, filepath, label):
+    filename = os.path.basename(filepath)
+    upload_url = URITemplate(upload_uri_tmpl).expand(name=filename, label=label)
+    headers = GITHUB_API_HEADERS
+    headers['Content-Type'] = 'application/octet-stream'
+    with open(filepath, 'rb') as payload:
+        requests.post(upload_url, data=payload, auth=GITHUB_API_AUTH, headers=headers)
+
+def upload_assets_for_github_release(upload_uri_tmpl, component_name, component_version, release_assets_dir):
+    for filename in os.listdir(release_assets_dir):
+        fullpath = os.path.join(release_assets_dir, filename)
+        if filename == SOURCE_ARCHIVE_NAME:
+            upload_asset(upload_uri_tmpl, fullpath, '{} {} source code (.tar.gz)'.format(component_name, component_version))
+        elif filename.endswith('.tar.gz'):
+            upload_asset(upload_uri_tmpl, fullpath, '{} {} Source Distribution (.tar.gz)'.format(component_name, component_version))
+        elif filename.endswith('.whl'):
+            upload_asset(upload_uri_tmpl, fullpath, '{} {} Python Wheel (.whl)'.format(component_name, component_version))
+
+def create_github_release(component_name, component_version, released_pypi_url, release_assets_dir):
     tag_name = '{}-{}'.format(component_name, component_version)
     release_name = "{} {}".format(component_name, component_version)
     payload = {'tag_name': tag_name, "target_commitish": "master", "name": release_name, "body": GITHUB_RELEASE_BODY_TMPL.format(released_pypi_url), "prerelease": True}
     r = requests.post('https://api.github.com/repos/{}/releases'.format(ENV_REPO_NAME), json=payload, auth=GITHUB_API_AUTH, headers=GITHUB_API_HEADERS)
-    return True if r.status_code == 201 else False
+    if r.status_code == 201:
+        upload_url = r.json()['upload_url']
+        upload_assets_for_github_release(upload_url, component_name, component_version, release_assets_dir)
+        return True
+    return False
 
 def _handle_pr_event(payload):
     pr_action = payload['action']
@@ -136,11 +160,12 @@ def _handle_pr_event(payload):
         else:
             # Merged PR
             try:
-                create_release(component_name)
+                release_assets_dir = tempfile.mkdtemp()
+                create_release(component_name, release_assets_dir)
                 released_pypi_url = '{}/{}/{}'.format(ENV_PYPI_REPO, component_name, component_version)
                 msg = "Release of '{}' with version '{}' successful. View at {}.".format(component_name, component_version, released_pypi_url)
                 comment_on_pr(comment_url, msg)
-                success = create_github_release(component_name, component_version, released_pypi_url)
+                success = create_github_release(component_name, component_version, released_pypi_url, release_assets_dir)
                 if success:
                     comment_on_pr(comment_url, 'GitHub release created. https://github.com/{}/releases.'.format(ENV_REPO_NAME))
                 else:
