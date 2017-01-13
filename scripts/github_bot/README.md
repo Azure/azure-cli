@@ -29,6 +29,10 @@ The following environment variables are required for the server to run:
 `TWINE_USERNAME` - Username to authenticate with PyPI.  
 `TWINE_PASSWORD` - Password to authenticate with PyPI.
 
+The `GITHUB_USER` should have the following GitHub OAuth scopes:  
+- repo_deployment (to create GitHub releases)
+- public_repo (to post comments on the repo)
+
 For example:
 
 ```
