@@ -151,3 +151,46 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
         # test delete sql server
         self.cmd('sql server delete -g {} --server-name {}'
                  .format(rg, self.sql_server_name), checks=NoneCheck())
+
+class SqlServerServiceObjectiveMgmtScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(SqlServerServiceObjectiveMgmtScenarioTest, self).__init__(
+            __file__, test_method, resource_group='cli-test-sql-mgmt')
+        self.sql_server_name = 'cliautomation04'
+        self.location = "westus"
+        self.administrator_login = 'admin123'
+        self.administrator_login_password = 'SecretPassword123'
+
+    def test_sql_service_objective_mgmt(self):
+        self.execute()
+
+    def body(self):
+        rg = self.resource_group
+        loc = self.location
+        user = self.administrator_login
+        password = self.administrator_login_password
+
+        # test create sql server with minimal required parameters
+        self.cmd('sql server create -g {} --server-name {} -l {} '
+                 '--administrator-login {} --administrator-login-password {}'
+                 .format(rg, self.sql_server_name, loc, user, password), checks=[
+                     JMESPathCheck('name', self.sql_server_name),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('administratorLogin', user)])
+
+        # test sql server service-objective list
+        service_objectives = self.cmd('sql server service-objective list -g {} --server-name {}'
+                                      .format(rg, self.sql_server_name), checks=[
+                                          JMESPathCheck('length(@)', 42)])
+
+        # test sql server service-objective show
+        self.cmd('sql server service-objective show -g {} --server-name {} '
+                 '--service-objective-name {}'
+                 .format(rg, self.sql_server_name, service_objectives[0]['name']), checks=[
+                     JMESPathCheck('name', service_objectives[0]['name']),
+                     JMESPathCheck('resourceGroup', rg)])
+
+        # test delete sql server
+        self.cmd('sql server delete -g {} --server-name {}'
+                 .format(rg, self.sql_server_name), checks=NoneCheck())
