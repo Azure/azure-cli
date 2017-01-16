@@ -70,7 +70,7 @@ if __name__ == '__main__':
 
         # Run flake8 on white-listed modules
         pep8_ready_modules = automation_path.filter_user_selected_modules(
-            ['azure-cli', 'azure-cli-core'])
+            ['azure-cli', 'azure-cli-core', 'sql'])
 
         return_code_sum += run_pep8(pep8_ready_modules)
 
