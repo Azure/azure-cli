@@ -50,19 +50,35 @@ def run_pep8(modules):
 
 
 if __name__ == '__main__':
-    parse = argparse.ArgumentParser('Code style tools')
-    parse.add_argument('--pep8', dest='suites', action='append_const', const='pep8',
-                       help='Run flake8 to check PEP8')
-    parse.add_argument('--pylint', dest='suites', action='append_const', const='pylint',
-                       help='Run pylint')
-    parse.add_argument('--module', dest='modules', action='append',
-                       help='The modules on which the style check should run. Accept short names, '
+    parser = argparse.ArgumentParser('Code style tools')
+    parser.add_argument('--ci', action='store_true', help='Run in CI mode')
+    parser.add_argument('--pep8', dest='suites', action='append_const', const='pep8',
+                        help='Run flake8 to check PEP8')
+    parser.add_argument('--pylint', dest='suites', action='append_const', const='pylint',
+                        help='Run pylint')
+    parser.add_argument('--module', dest='modules', action='append',
+                        help='The modules on which the style check should run. Accept short names, '
                             'except azure-cli, azure-cli-core and azure-cli-nspkg')
-    args = parse.parse_args()
+    args = parser.parse_args()
+
+    if args.ci:
+        # When the command is run in CI mode all the other parameters are ignored
+        selected_modules = automation_path.filter_user_selected_modules(None)
+
+        # Run pylint on all modules
+        return_code_sum = run_pylint(selected_modules)
+
+        # Run flake8 on white-listed modules
+        pep8_ready_modules = automation_path.filter_user_selected_modules(
+            ['azure-cli', 'azure-cli-core'])
+
+        return_code_sum += run_pep8(pep8_ready_modules)
+
+        sys.exit(return_code_sum)
 
     selected_modules = automation_path.filter_user_selected_modules(args.modules)
     if not selected_modules:
-        parse.print_help()
+        parser.print_help()
         sys.exit(1)
 
     if not args.suites or not any(args.suites):
