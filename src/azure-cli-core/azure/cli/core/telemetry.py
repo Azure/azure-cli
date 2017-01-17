@@ -105,18 +105,20 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
             'Reserved.DataModel.FeatureName': self.feature_name,
             'Reserved.DataModel.EntityName': self.command_name,
             'Reserved.DataModel.CorrelationId': self.correlation_id,
+
             'Context.Default.VS.Core.ExeName': PRODUCT_NAME,
             'Context.Default.VS.Core.ExeVersion': platform.python_version(),
             'Context.Default.VS.Core.MacAddressHash': _get_hash_mac_address(),
             'Context.Default.VS.Core.Machine.Id': _get_hash_machine_id(),
             'Context.Default.VS.Core.OS.Type': platform.system().lower(),  # eg. darwin, windows
             'Context.Default.VS.Core.OS.Version': platform.version().lower(),  # eg. 10.0.14942
-            'Context.Default.VS.Core.TelemetryApi.ProductVersion': _get_core_version(),
             'Context.Default.VS.Core.User.Id': _get_installation_id(),
             'Context.Default.VS.Core.User.IsMicrosoftInternal': 'False',
             'Context.Default.VS.Core.User.IdOptedIn': 'True',
-            'Context.Default.VS.Core.BuildNumber': '{}@{}'.format(self.product_version,
-                                                                  self.module_version)
+            'Context.Default.VS.Core.BuildNumber': '{}@{}'.format(
+                self.product_version, self.module_version),
+            'Context.Default.VS.Core.TelemetryApi.ProductVersion': '{}@{}'.format(
+                PRODUCT_NAME, _get_core_version()),
         }
 
     def _get_user_task_properties(self):
