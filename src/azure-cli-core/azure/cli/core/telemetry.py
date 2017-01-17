@@ -56,7 +56,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
     def __init__(self):
         pass
 
-    def add_exception(self, exception, description=None, message=None):
+    def add_exception(self, exception, description='', message=''):
         details = {
             'Reserved.DataModel.EntityType': 'Fault',
             'Reserved.DataModel.Fault.Description': description,
