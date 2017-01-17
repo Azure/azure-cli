@@ -168,8 +168,11 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
 
     @property
     def feature_name(self):
-        # 'model-name-to-be-implemented'
-        return 'none'
+        # The feature name is used to created the event name. The feature name should be eventually
+        # the module name. However, it takes time to resolve the actual module name using pip
+        # module. Therefore, a hard coded replacement is used before a better solution is
+        # implemented
+        return 'commands'
 
     @property
     def module_version(self):
