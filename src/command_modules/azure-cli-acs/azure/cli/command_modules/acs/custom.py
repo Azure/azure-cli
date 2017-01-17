@@ -26,6 +26,7 @@ from msrestazure.azure_exceptions import CloudError
 
 import azure.cli.core._logging as _logging
 from azure.cli.command_modules.acs import acs_client, proxy
+from azure.cli.command_modules.vm._actions import _is_valid_ssh_rsa_public_key
 from azure.cli.command_modules.vm.mgmt_acs.lib import \
     AcsCreationClient as ACSClient
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,line-too-long
@@ -366,6 +367,9 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
      if raw=true
     :raises: :class:`CloudError<msrestazure.azure_exceptions.CloudError>`
     """
+    if ssh_key_value is not None and not _is_valid_ssh_rsa_public_key(ssh_key_value):
+        raise CLIError('Provided ssh key ({}) is invalid or non-existent'.format(ssh_key_value))
+
     subscription_id = _get_subscription_id()
     if not dns_name_prefix:
         # Use subscription id to provide uniqueness and prevent DNS name clashes
