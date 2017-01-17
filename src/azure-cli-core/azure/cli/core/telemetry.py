@@ -19,7 +19,7 @@ import azure.cli.core.telemetry_upload as telemetry_core
 
 PRODUCT_NAME = 'azurecli'
 TELEMETRY_VERSION = '0.0.1.4'
-AZURE_CLI_PREFIX = 'Context.AzureCLI.'
+AZURE_CLI_PREFIX = 'Context.Default.AzureCLI.'
 
 decorators.is_diagnostics_mode = telemetry_core.in_diagnostic_mode
 
