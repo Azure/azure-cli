@@ -66,9 +66,9 @@ class AcsCustomCommandTest(unittest.TestCase):
         
         with mock.patch('azure.cli.command_modules.acs.custom._get_acs_info', return_value=acs_info) as get_acs_info:
             with mock.patch('azure.cli.command_modules.acs.custom._k8s_browse_internal') as k8s_browse:
-                _acs_browse_internal(acs_info, 'resource-group', 'name', False, '')
+                _acs_browse_internal(acs_info, 'resource-group', 'name', False, 'ssh/key/file')
                 get_acs_info.assert_called_with('name', 'resource-group')
-                k8s_browse.assert_called_with(acs_info, False)
+                k8s_browse.assert_called_with('name', acs_info, False, 'ssh/key/file')
 
     @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
     def test_browse_dcos(self, get_subscription_id):
