@@ -6,14 +6,59 @@
 #pylint: skip-file
 import mock
 import os
+import requests
 import tempfile
 import unittest
 import yaml
 
-from azure.cli.command_modules.acs.custom import merge_kubernetes_configurations, _acs_browse_internal
+from msrestazure.azure_exceptions import CloudError
+
+from azure.cli.command_modules.acs.custom import merge_kubernetes_configurations, _acs_browse_internal, _add_role_assignment
 from azure.mgmt.compute.models import ContainerServiceOchestratorTypes, ContainerService, ContainerServiceOrchestratorProfile
 
 class AcsCustomCommandTest(unittest.TestCase):
+    
+    def test_add_role_assignment_basic(self):
+        role = 'Owner'
+        sp = '1234567'
+
+        with mock.patch('azure.cli.command_modules.role.custom.create_role_assignment') as create_role_assignment:
+            ok = _add_role_assignment(role, sp, delay=0, output=False)
+            create_role_assignment.assert_called_with(role, sp)
+            self.assertTrue(ok, 'Expected _add_role_assignment to succeed')
+
+    def test_add_role_assignment_exists(self):
+        role = 'Owner'
+        sp = '1234567'
+
+        with mock.patch('azure.cli.command_modules.role.custom.create_role_assignment') as create_role_assignment:
+            resp = mock.Mock()
+            resp.status_code = 409
+            resp.content = 'Conflict'
+            err = CloudError(resp)
+            err.message = 'The role assignment already exists.'
+            create_role_assignment.side_effect = err
+            ok = _add_role_assignment(role, sp, delay=0, output=False)
+
+            create_role_assignment.assert_called_with(role, sp)
+            self.assertTrue(ok, 'Expected _add_role_assignment to succeed')
+
+    def test_add_role_assignment_fails(self):
+        role = 'Owner'
+        sp = '1234567'
+
+        with mock.patch('azure.cli.command_modules.role.custom.create_role_assignment') as create_role_assignment:
+            resp = mock.Mock()
+            resp.status_code = 500
+            resp.content = 'Internal Error'
+            err = CloudError(resp)
+            err.message = 'Internal Error'
+            create_role_assignment.side_effect = err
+            ok = _add_role_assignment(role, sp, delay=0, output=False)
+            
+            create_role_assignment.assert_called_with(role, sp)
+            self.assertFalse(ok, 'Expected _add_role_assignment to fail')
+
     @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
     def test_browse_k8s(self, get_subscription_id):
         acs_info = ContainerService("location", {}, {}, {})

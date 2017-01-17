@@ -9,7 +9,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup
 
-VERSION = "0.1.0b11+dev"
+VERSION = "0.1.1b1+dev"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -19,7 +19,8 @@ try:
 except OSError:
     pass
 else:
-    import re, sys
+    import re
+    import sys
     m = re.search(r'__version__\s*=\s*[\'"](.+?)[\'"]', content)
     if not m:
         print('Could not find __version__ in azure/cli/core/__init__.py')
@@ -71,12 +72,14 @@ if sys.version_info < (2, 7, 9):
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
+with open('HISTORY.rst', 'r', encoding='utf-8') as f:
+    HISTORY = f.read()
 
 setup(
     name='azure-cli-core',
     version=VERSION,
     description='Microsoft Azure Command-Line Tools Core Module',
-    long_description=README,
+    long_description=README + '\n\n' + HISTORY,
     license='MIT',
     author='Microsoft Corporation',
     author_email='azpycli@microsoft.com',

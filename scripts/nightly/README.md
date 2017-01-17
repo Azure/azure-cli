@@ -8,6 +8,10 @@ This README provides instructions on this build script, not how to install night
 Usage
 -----
 
+Copy nightly-build.sh and nightly-build.py from GitHub repo into /home/ubuntu/build directory.
+
+chmod +x nightly-build.sh to make the script executable.
+
 Environment variables that should be set:  
 TZ
 AZURE_STORAGE_CONNECTION_STRING

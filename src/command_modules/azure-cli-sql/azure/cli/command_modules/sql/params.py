@@ -23,4 +23,3 @@ with ParametersContext(command='sql database create') as c:
     from azure.mgmt.sql.models.database import Database
 
     c.expand('parameters', Database, group_name='Creating')
-

@@ -9,7 +9,8 @@ from azure.cli.core.commands.parameters import \
 from azure.cli.core.commands import register_cli_argument
 from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku
 from ._factory import iot_hub_service_factory
-from .custom import iot_device_list, KeyType
+from .custom import iot_device_list, KeyType, SimpleAccessRights
+from ._validators import validate_policy_permissions
 
 
 def get_device_id_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
@@ -37,6 +38,11 @@ register_cli_argument('iot hub consumer-group', 'event_hub_name', id_part='child
 # Arguments for 'iot hub policy' group
 register_cli_argument('iot hub policy', 'policy_name', options_list=('--name', '-n'), id_part='child_name',
                       help='Shared access policy name.')
+
+permission_values = ', '.join([x.value for x in SimpleAccessRights])
+register_cli_argument('iot hub policy', 'permissions', nargs='*', validator=validate_policy_permissions, type=str.lower,
+                      help='Permissions of shared access policy. Use space separated list for multiple permissions.'
+                           'Possible values: {}'.format(permission_values))
 
 # Arguments for 'iot hub job' group
 register_cli_argument('iot hub job', 'job_id', id_part='child_name', help='Job Id.')
@@ -103,3 +109,18 @@ register_cli_argument('iot device message send', 'user_id', help='Device-to-clou
 register_cli_argument('iot device message receive', 'lock_timeout', type=int,
                       help='In case a message returned to this call, this specifies the amount of time in seconds, '
                            'the message will be invisible to other receive calls.')
+
+# Arguments for 'iot device export'
+register_cli_argument('iot device export', 'blob_container_uri',
+                      help='Blob Shared Access Signature URI with write access to a blob container.'
+                           'This is used to output the status of the job and the results.')
+register_cli_argument('iot device export', 'include_keys', action='store_true',
+                      help='If set, keys are exported normally. Otherwise, keys are set to null in export output.')
+
+# Arguments for 'iot device import'
+register_cli_argument('iot device import', 'input_blob_container_uri',
+                      help='Blob Shared Access Signature URI with read access to a blob container.'
+                           'This blob contains the operations to be performed on the identity registry ')
+register_cli_argument('iot device import', 'output_blob_container_uri',
+                      help='Blob Shared Access Signature URI with write access to a blob container.'
+                           'This is used to output the status of the job and the results.')

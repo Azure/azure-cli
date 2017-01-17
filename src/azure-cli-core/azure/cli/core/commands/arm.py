@@ -25,6 +25,7 @@ regex = re.compile('/subscriptions/(?P<subscription>[^/]*)/resourceGroups/(?P<re
                    '(/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?'
                    '(/(?P<grandchild_type>[^/]*)/(?P<grandchild_name>[^/]*))?')
 
+
 def resource_id(**kwargs):
     '''Create a valid resource id string from the given parts
     The method accepts the following keyword arguments:
@@ -49,6 +50,7 @@ def resource_id(**kwargs):
         pass
     return rid
 
+
 def parse_resource_id(rid):
     '''Build a dictionary with the following key/value pairs (if found)
 
@@ -68,7 +70,8 @@ def parse_resource_id(rid):
     else:
         result = dict(name=rid)
 
-    return {key:value for key, value in result.items() if value is not None}
+    return {key: value for key, value in result.items() if value is not None}
+
 
 def is_valid_resource_id(rid, exception_type=None):
     is_valid = False
@@ -80,6 +83,7 @@ def is_valid_resource_id(rid, exception_type=None):
         raise exception_type()
     return is_valid
 
+
 class ResourceId(str):
 
     def __new__(cls, val):
@@ -87,7 +91,8 @@ class ResourceId(str):
             raise ValueError()
         return str.__new__(cls, val)
 
-def resource_exists(resource_group, name, namespace, type, **_): # pylint: disable=redefined-builtin
+
+def resource_exists(resource_group, name, namespace, type, **_):  # pylint: disable=redefined-builtin
     '''Checks if the given resource exists.
     '''
     from azure.mgmt.resource.resources import ResourceManagementClient
@@ -98,10 +103,11 @@ def resource_exists(resource_group, name, namespace, type, **_): # pylint: disab
     existing = len(list(client.list(filter=odata_filter))) == 1
     return existing
 
+
 def add_id_parameters(command_table):
 
     def split_action(arguments):
-        class SplitAction(argparse.Action): #pylint: disable=too-few-public-methods
+        class SplitAction(argparse.Action):  # pylint: disable=too-few-public-methods
 
             def __call__(self, parser, namespace, values, option_string=None):
                 ''' The SplitAction will take the given ID parameter and spread the parsed
@@ -118,12 +124,13 @@ def add_id_parameters(command_table):
                             if existing_values is None:
                                 existing_values = IterateValue()
                                 existing_values.append(parts[arg.id_part])
-                            elif isinstance(existing_values, str):
-                                logger.warning(
-                                    "Property '%s=%s' being overriden by value '%s' from IDs parameter.", # pylint: disable=line-too-long
-                                    arg.name, existing_values, parts[arg.id_part]
-                                )
-                                existing_values = IterateValue()
+                            else:
+                                if isinstance(existing_values, str):
+                                    logger.warning(
+                                        "Property '%s=%s' being overriden by value '%s' from IDs parameter.",  # pylint: disable=line-too-long
+                                        arg.name, existing_values, parts[arg.id_part]
+                                    )
+                                    existing_values = IterateValue()
                                 existing_values.append(parts[arg.id_part])
                             setattr(namespace, arg.name, existing_values)
                 except Exception as ex:
@@ -132,7 +139,7 @@ def add_id_parameters(command_table):
         return SplitAction
 
     def command_loaded_handler(command):
-        if not 'name' in [arg.id_part for arg in command.arguments.values() if arg.id_part]:
+        if 'name' not in [arg.id_part for arg in command.arguments.values() if arg.id_part]:
             # Only commands with a resource name are candidates for an id parameter
             return
         if command.name.split()[-1] == 'create':
@@ -177,6 +184,7 @@ def add_id_parameters(command_table):
     for command in command_table.values():
         command_loaded_handler(command)
 
+
 APPLICATION.register(APPLICATION.COMMAND_TABLE_PARAMS_LOADED, add_id_parameters)
 
 APPLICATION.register(APPLICATION.COMMAND_TABLE_LOADED, add_id_parameters)
@@ -185,43 +193,55 @@ add_usage = '--add property.listProperty <key=value, string or JSON string>'
 set_usage = '--set property1.property2=<value>'
 remove_usage = '--remove property.list <indexToRemove> OR --remove propertyToRemove'
 
+
 def _get_child(parent, collection_name, item_name, collection_key):
     items = getattr(parent, collection_name)
-    result = next((x for x in items if getattr(x, collection_key, '').lower() == item_name.lower()), None) # pylint: disable=line-too-long
+    result = next((x for x in items if getattr(x, collection_key, '').lower() ==
+                   item_name.lower()), None)
     if not result:
         raise CLIError("Property '{}' does not exist for key '{}'.".format(
             item_name, collection_key))
     else:
         return result
 
-def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=None, setter_arg_name='parameters', # pylint: disable=too-many-arguments, line-too-long
-                               table_transformer=None, child_collection_prop_name=None,
-                               child_collection_key='name', child_arg_name='item_name',
-                               custom_function_op=None, no_wait_param=None, transform=None):
+
+# pylint: disable=too-many-arguments
+def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=None,
+                               setter_arg_name='parameters', table_transformer=None,
+                               child_collection_prop_name=None, child_collection_key='name',
+                               child_arg_name='item_name', custom_function_op=None,
+                               no_wait_param=None, transform=None):
     if not isinstance(getter_op, string_types):
         raise ValueError("Getter operation must be a string. Got '{}'".format(getter_op))
     if not isinstance(setter_op, string_types):
         raise ValueError("Setter operation must be a string. Got '{}'".format(setter_op))
     if custom_function_op and not isinstance(custom_function_op, string_types):
-        raise ValueError("Custom function operation must be a string. Got '{}'".format(custom_function_op)) #pylint: disable=line-too-long
+        raise ValueError("Custom function operation must be a string. Got '{}'".format(
+            custom_function_op))
 
-    get_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(getter_op)))
-    set_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(setter_op),
-                                                                    no_wait_param=no_wait_param)) #pylint: disable=line-too-long
-    function_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(custom_function_op))) if custom_function_op else {} #pylint: disable=line-too-long
+    def get_arguments_loader():
+        return dict(extract_args_from_signature(get_op_handler(getter_op)))
+
+    def set_arguments_loader():
+        return dict(extract_args_from_signature(get_op_handler(setter_op),
+                                                no_wait_param=no_wait_param))
+
+    def function_arguments_loader():
+        return dict(extract_args_from_signature(get_op_handler(custom_function_op))) \
+            if custom_function_op else {}
 
     def arguments_loader():
         arguments = {}
         arguments.update(set_arguments_loader())
         arguments.update(get_arguments_loader())
         arguments.update(function_arguments_loader())
-        arguments.pop('instance', None) # inherited from custom_function(instance, ...)
+        arguments.pop('instance', None)  # inherited from custom_function(instance, ...)
         arguments.pop('parent', None)
-        arguments.pop('expand', None) # possibly inherited from the getter
+        arguments.pop('expand', None)  # possibly inherited from the getter
         arguments.pop(setter_arg_name, None)
         return arguments
 
-    def handler(args):#pylint: disable=too-many-branches,too-many-statements
+    def handler(args):  # pylint: disable=too-many-branches,too-many-statements
         from msrestazure.azure_operation import AzureOperationPoller
 
         ordered_arguments = args.pop('ordered_arguments') if 'ordered_arguments' in args else []
@@ -259,7 +279,7 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
         setterargs = set_arguments_loader()
         for k in args.copy().keys():
             if k in get_arguments_loader() or k in setterargs \
-                or k in ('properties_to_add', 'properties_to_remove', 'properties_to_set'):
+                    or k in ('properties_to_add', 'properties_to_remove', 'properties_to_set'):
                 args.pop(k)
         for key, val in args.items():
             ordered_arguments.append((key, val))
@@ -310,7 +330,8 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
 
         return result
 
-    class OrderedArgsAction(argparse.Action): #pylint:disable=too-few-public-methods
+    class OrderedArgsAction(argparse.Action):  # pylint:disable=too-few-public-methods
+
         def __call__(self, parser, namespace, values, option_string=None):
             if not getattr(namespace, 'ordered_arguments', None):
                 setattr(namespace, 'ordered_arguments', [])
@@ -334,11 +355,14 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
     main_command_table[name] = cmd
     main_command_module_map[name] = module_name
 
+
 def cli_generic_wait_command(module_name, name, getter_op, factory=None):
 
     if not isinstance(getter_op, string_types):
         raise ValueError("Getter operation must be a string. Got '{}'".format(type(getter_op)))
-    get_arguments_loader = lambda: dict(extract_args_from_signature(get_op_handler(getter_op)))
+
+    def get_arguments_loader():
+        return dict(extract_args_from_signature(get_op_handler(getter_op)))
 
     def arguments_loader():
         arguments = {}
@@ -348,7 +372,7 @@ def cli_generic_wait_command(module_name, name, getter_op, factory=None):
     def get_provisioning_state(instance):
         provisioning_state = getattr(instance, 'provisioning_state', None)
         if not provisioning_state:
-            #some SDK, like resource-group, has 'provisioning_state' under 'properties'
+            # some SDK, like resource-group, has 'provisioning_state' under 'properties'
             properties = getattr(instance, 'properties', None)
             if properties:
                 provisioning_state = getattr(properties, 'provisioning_state', None)
@@ -376,7 +400,8 @@ def cli_generic_wait_command(module_name, name, getter_op, factory=None):
         custom_condition = args.pop('custom')
         if not any([wait_for_created, wait_for_updated, wait_for_deleted,
                     wait_for_exists, custom_condition]):
-            raise CLIError("incorrect usage: --created | --updated | --deleted | --exists | --custom JMESPATH")#pylint: disable=line-too-long
+            raise CLIError(
+                "incorrect usage: --created | --updated | --deleted | --exists | --custom JMESPATH")  # pylint: disable=line-too-long
 
         for _ in range(0, timeout, interval):
             try:
@@ -384,7 +409,7 @@ def cli_generic_wait_command(module_name, name, getter_op, factory=None):
                 if wait_for_exists:
                     return
                 provisioning_state = get_provisioning_state(instance)
-                #until we have any needs to wait for 'Failed', let us bail out on this
+                # until we have any needs to wait for 'Failed', let us bail out on this
                 if provisioning_state == 'Failed':
                     raise CLIError('The operation failed')
                 if wait_for_created or wait_for_updated:
@@ -426,6 +451,7 @@ def cli_generic_wait_command(module_name, name, getter_op, factory=None):
     main_command_table[name] = cmd
     main_command_module_map[name] = module_name
 
+
 def verify_property(instance, condition):
     from jmespath import compile as compile_jmespath
     result = todict(instance)
@@ -433,13 +459,16 @@ def verify_property(instance, condition):
     value = jmes_query.search(result)
     return value
 
+
 index_or_filter_regex = re.compile(r'\[(.*)\]')
+
+
 def set_properties(instance, expression):
     key, value = expression.rsplit('=', 1)
 
     try:
         value = json.loads(value)
-    except: #pylint:disable=bare-except
+    except:  # pylint:disable=bare-except
         pass
 
     # name should be the raw casing as it could refer to a property OR a dictionary key
@@ -472,6 +501,7 @@ def set_properties(instance, expression):
         raise CLIError('index {} doesn\'t exist on {}'.format(index_value, name))
     except (AttributeError, KeyError):
         show_options(instance, name, key.split('.'))
+
 
 def add_properties(instance, argument_values):
     # The first argument indicates the path to the collection to add to.
@@ -511,6 +541,7 @@ def add_properties(instance, argument_values):
     if dict_entry:
         list_to_add_to.append(dict_entry)
 
+
 def remove_properties(instance, argument_values):
     # The first argument indicates the path to the collection to add to.
     argument_values = argument_values if isinstance(argument_values, list) else [argument_values]
@@ -539,6 +570,7 @@ def remove_properties(instance, argument_values):
             raise CLIError('index {} doesn\'t exist on {}'
                            .format(list_index, list_attribute_path[-1]))
 
+
 def show_options(instance, part, path):
     options = instance.__dict__ if hasattr(instance, '__dict__') else instance
     parent = '.'.join(path[:-1]).replace('.[', '[')
@@ -554,13 +586,17 @@ def show_options(instance, part, path):
         error_message = "{} '{}' does not support further indexing.".format(error_message, parent)
     raise CLIError(error_message)
 
+
 snake_regex_1 = re.compile('(.)([A-Z][a-z]+)')
 snake_regex_2 = re.compile('([a-z0-9])([A-Z])')
+
+
 def make_snake_case(s):
     if isinstance(s, str):
         s1 = re.sub(snake_regex_1, r'\1_\2', s)
         return re.sub(snake_regex_2, r'\1_\2', s1).lower()
     return s
+
 
 def make_camel_case(s):
     if isinstance(s, str):
@@ -568,7 +604,10 @@ def make_camel_case(s):
         return parts[0].lower() + ''.join(p.capitalize() for p in parts[1:])
     return s
 
+
 internal_path_regex = re.compile(r'(\[.*?\])|([^.]+)')
+
+
 def _get_internal_path(path):
     # to handle indexing in the same way as other dot qualifiers,
     # we split paths like foo[0][1] into foo.[0].[1]
@@ -581,12 +620,14 @@ def _get_internal_path(path):
         final_paths.append(segment)
     return final_paths
 
+
 def _get_name_path(path):
     pathlist = _get_internal_path(path)
     return pathlist.pop(), pathlist
 
+
 def _update_instance(instance, part, path):
-    try: # pylint: disable=too-many-nested-blocks
+    try:  # pylint: disable=too-many-nested-blocks
         index = index_or_filter_regex.match(part)
         if index:
             # indexing on anything but a list is not allowed
@@ -627,8 +668,8 @@ def _update_instance(instance, part, path):
         show_options(instance, part, path)
     return instance
 
+
 def _find_property(instance, path):
     for part in path:
         instance = _update_instance(instance, part, path)
     return instance
-

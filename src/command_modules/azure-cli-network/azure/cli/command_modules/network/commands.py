@@ -7,7 +7,7 @@
 
 from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_wait_command
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
-from ._client_factory import * #pylint: disable=wildcard-import
+from ._client_factory import * # pylint: disable=wildcard-import, unused-wildcard-import
 
 from ._util import (list_network_resource_property,
                     get_network_resource_property_entry,
@@ -90,7 +90,8 @@ cli_command(__name__, 'network express-route peering list', 'azure.mgmt.network.
 cli_generic_update_command(__name__, 'network express-route peering update',
                            'azure.mgmt.network.operations.express_route_circuit_peerings_operations#ExpressRouteCircuitPeeringsOperations.get',
                            'azure.mgmt.network.operations.express_route_circuit_peerings_operations#ExpressRouteCircuitPeeringsOperations.create_or_update',
-                           cf_express_route_circuit_peerings, setter_arg_name='peering_parameters')
+                           cf_express_route_circuit_peerings, setter_arg_name='peering_parameters',
+                           custom_function_op=custom_path.format('update_express_route_peering'))
 cli_command(__name__, 'network express-route peering create', custom_path.format('create_express_route_peering'), cf_express_route_circuit_peerings)
 
 # ExpressRouteCircuitsOperations
@@ -103,7 +104,8 @@ cli_command(__name__, 'network express-route list', custom_path.format('list_exp
 cli_generic_update_command(__name__, 'network express-route update',
                            'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.get',
                            'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.create_or_update',
-                           cf_express_route_circuits)
+                           cf_express_route_circuits,
+                           custom_function_op=custom_path.format('update_express_route'))
 
 cli_command(__name__, 'network express-route create', 'azure.cli.command_modules.network.mgmt_express_route_circuit.lib.operations.express_route_circuit_operations#ExpressRouteCircuitOperations.create_or_update', cf_express_route_circuit_create, transform=DeploymentOutputLongRunningOperation('Starting network express-route create'))
 
@@ -254,18 +256,15 @@ cli_command(__name__, 'network public-ip create',
             transform=DeploymentOutputLongRunningOperation('Starting network public-ip create'))
 
 # RouteTablesOperations
+cli_command(__name__, 'network route-table create', 'azure.mgmt.network.operations.route_tables_operations#RouteTablesOperations.create_or_update', cf_route_tables)
 cli_command(__name__, 'network route-table delete', 'azure.mgmt.network.operations.route_tables_operations#RouteTablesOperations.delete', cf_route_tables)
 cli_command(__name__, 'network route-table show', 'azure.mgmt.network.operations.route_tables_operations#RouteTablesOperations.get', cf_route_tables)
 cli_command(__name__, 'network route-table list', custom_path.format('list_route_tables'))
 cli_generic_update_command(__name__, 'network route-table update',
                            'azure.mgmt.network.operations.route_tables_operations#RouteTablesOperations.get',
                            'azure.mgmt.network.operations.route_tables_operations#RouteTablesOperations.create_or_update',
-                           cf_route_tables)
-
-cli_command(__name__, 'network route-table create',
-            'azure.cli.command_modules.network.mgmt_route_table.lib.operations.route_table_operations#RouteTableOperations.create_or_update',
-            cf_route_table_create,
-            transform=DeploymentOutputLongRunningOperation('Starting network route-table create'))
+                           cf_route_tables,
+                           custom_function_op=custom_path.format('update_route_table'))
 
 # RoutesOperations
 cli_command(__name__, 'network route-table route delete', 'azure.mgmt.network.operations.routes_operations#RoutesOperations.delete', cf_routes)
@@ -274,7 +273,9 @@ cli_command(__name__, 'network route-table route list', 'azure.mgmt.network.oper
 cli_generic_update_command(__name__, 'network route-table route update',
                            'azure.mgmt.network.operations.routes_operations#RoutesOperations.get',
                            'azure.mgmt.network.operations.routes_operations#RoutesOperations.create_or_update',
-                           cf_routes)
+                           cf_routes,
+                           custom_function_op=custom_path.format('update_route'),
+                           setter_arg_name='route_parameters')
 cli_command(__name__, 'network route-table route create', custom_path.format('create_route'))
 
 # SecurityRulesOperations

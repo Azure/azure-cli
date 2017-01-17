@@ -61,7 +61,6 @@ Command modules should have the following structure:
 |           |-- __init__.py
 |           `-- <MODULE_NAME>
 |               `-- __init__.py
-|-- requirements.txt
 `-- setup.py
 ```
 
