@@ -40,23 +40,16 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
     end_time = None
     application = None
     arg_complete_env_name = None
-
     correlation_id = str(uuid.uuid4())
     command = 'unknown'
     output_type = 'none'
     parameters = []
-
     result = 'None'
     result_summary = None
-
     payload_properties = None
-
     exceptions = []
 
-    def __init__(self):
-        pass
-
-    def add_exception(self, exception, description='', message=''):
+    def add_exception(self, exception, fault_type='general-exception', description='', message=''):
         details = {
             'Reserved.DataModel.EntityType': 'Fault',
             'Reserved.DataModel.Fault.Description': description,
@@ -67,7 +60,10 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
             'Reserved.DataModel.Fault.Exception.StackTrace': _remove_cmd_chars(_get_stack_trace()),
             'Reserved.DataModel.Fault.Exception.ErrorCode': _remove_cmd_chars(_get_error_hash())
         }
-        self.exceptions.append(details)
+        fault_type = _remove_symbols(fault_type).replace('"', '').replace("'", '').replace(' ', '-')
+        fault_name = '{}/faults/{}'.format(PRODUCT_NAME, fault_type.lower())
+
+        self.exceptions.append((fault_name, details))
 
     @decorators.suppress_all_exceptions(raise_in_diagnostics=True, fallback_return=None)
     def generate_payload(self):
@@ -81,11 +77,11 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
 
         events.append({'name': self.event_name, 'properties': user_task})
 
-        for f in self.exceptions:
-            f.update(base)
-            f.update(cli)
-            f.update({'Reserved.DataModel.CorrelationId': str(uuid.uuid4())})
-            events.append({'name': self.event_name, 'properties': f})
+        for name, props in self.exceptions:
+            props.update(base)
+            props.update(cli)
+            props.update({'Reserved.DataModel.CorrelationId': str(uuid.uuid4())})
+            events.append({'name': name, 'properties': props})
 
         payload = json.dumps(events)
         return _remove_symbols(payload)
@@ -107,18 +103,17 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
             'Reserved.DataModel.CorrelationId': self.correlation_id,
 
             'Context.Default.VS.Core.ExeName': PRODUCT_NAME,
-            'Context.Default.VS.Core.ExeVersion': platform.python_version(),
+            'Context.Default.VS.Core.ExeVersion': '{}@{}'.format(
+                self.product_version, self.module_version),
             'Context.Default.VS.Core.MacAddressHash': _get_hash_mac_address(),
             'Context.Default.VS.Core.Machine.Id': _get_hash_machine_id(),
             'Context.Default.VS.Core.OS.Type': platform.system().lower(),  # eg. darwin, windows
             'Context.Default.VS.Core.OS.Version': platform.version().lower(),  # eg. 10.0.14942
             'Context.Default.VS.Core.User.Id': _get_installation_id(),
             'Context.Default.VS.Core.User.IsMicrosoftInternal': 'False',
-            'Context.Default.VS.Core.User.IdOptedIn': 'True',
-            'Context.Default.VS.Core.BuildNumber': '{}@{}'.format(
-                self.product_version, self.module_version),
+            'Context.Default.VS.Core.User.IsOptedIn': 'True',
             'Context.Default.VS.Core.TelemetryApi.ProductVersion': '{}@{}'.format(
-                PRODUCT_NAME, _get_core_version()),
+                PRODUCT_NAME, _get_core_version())
         }
 
     def _get_user_task_properties(self):
@@ -156,7 +151,8 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         self.set_custom_properties(result, 'StartTime', str(self.start_time))
         self.set_custom_properties(result, 'EndTime', str(self.end_time))
         self.set_custom_properties(result, 'OutputType', self.output_type)
-        self.set_custom_properties(result, 'Parameters', self.parameters)
+        self.set_custom_properties(result, 'Parameters', self.parameters),
+        self.set_custom_properties(result, 'PythonVersion', platform.python_version())
 
         return result
 
