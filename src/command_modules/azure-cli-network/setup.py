@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.1.0b11+dev'
+VERSION = '0.1.1b1+dev'
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -27,17 +27,20 @@ DEPENDENCIES = [
     'azure-mgmt-network==0.30.0',
     'azure-mgmt-trafficmanager==0.30.0rc6',
     'azure-mgmt-dns==0.30.0rc6',
+    'azure-mgmt-resource==0.30.2',
     'azure-cli-core'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
+with open('HISTORY.rst', 'r', encoding='utf-8') as f:
+    HISTORY = f.read()
 
 setup(
     name='azure-cli-network',
     version=VERSION,
     description='Microsoft Azure Command-Line Tools Network Command Module',
-    long_description=README,
+    long_description=README + '\n\n' + HISTORY,
     license='MIT',
     author='Microsoft Corporation',
     author_email='azpycli@microsoft.com',
@@ -78,10 +81,6 @@ setup(
         'azure.cli.command_modules.network.mgmt_local_gateway.lib',
         'azure.cli.command_modules.network.mgmt_local_gateway.lib.models',
         'azure.cli.command_modules.network.mgmt_local_gateway.lib.operations',
-        'azure.cli.command_modules.network.mgmt_route_table',
-        'azure.cli.command_modules.network.mgmt_route_table.lib',
-        'azure.cli.command_modules.network.mgmt_route_table.lib.models',
-        'azure.cli.command_modules.network.mgmt_route_table.lib.operations',
         'azure.cli.command_modules.network.mgmt_vnet_gateway',
         'azure.cli.command_modules.network.mgmt_vnet_gateway.lib',
         'azure.cli.command_modules.network.mgmt_vnet_gateway.lib.models',
@@ -94,10 +93,6 @@ setup(
         'azure.cli.command_modules.network.mgmt_vnet_gateway.lib',
         'azure.cli.command_modules.network.mgmt_vnet_gateway.lib.models',
         'azure.cli.command_modules.network.mgmt_vnet_gateway.lib.operations',
-        'azure.cli.command_modules.network.mgmt_route_table',
-        'azure.cli.command_modules.network.mgmt_route_table.lib',
-        'azure.cli.command_modules.network.mgmt_route_table.lib.models',
-        'azure.cli.command_modules.network.mgmt_route_table.lib.operations',
         'azure.cli.command_modules.network.mgmt_express_route_circuit',
         'azure.cli.command_modules.network.mgmt_express_route_circuit.lib',
         'azure.cli.command_modules.network.mgmt_express_route_circuit.lib.models',

@@ -6,6 +6,7 @@
 import inspect
 import re
 
+
 def extract_full_summary_from_signature(operation):
     """ Extract the summary from the doccomments of the command. """
     lines = inspect.getdoc(operation)
@@ -19,6 +20,7 @@ def extract_full_summary_from_signature(operation):
             summary = lines
     summary = summary.replace('\n', ' ').replace('\r', '')
     return summary
+
 
 def _option_descriptions(operation):
     """ Extract parameter help from doccomments of the command. """
@@ -36,7 +38,7 @@ def _option_descriptions(operation):
                 # 'arg name' portion might have type info, we don't need it
                 arg_name = str.split(match.group(2))[-1]
                 arg_desc = match.group(3).strip()
-                #look for more descriptions on subsequent lines
+                # look for more descriptions on subsequent lines
                 index += 1
                 while index < len(lines):
                     temp = lines[index].strip()
@@ -52,8 +54,10 @@ def _option_descriptions(operation):
                 index += 1
     return option_descs
 
+
 EXCLUDED_PARAMS = frozenset(['self', 'raw', 'custom_headers', 'operation_config',
                              'content_version', 'kwargs', 'client'])
+
 
 def extract_args_from_signature(operation, no_wait_param=None):
     """ Extracts basic argument data from an operation's signature and docstring
@@ -66,7 +70,7 @@ def extract_args_from_signature(operation, no_wait_param=None):
         sig = inspect.signature(operation)
         args = sig.parameters
     except AttributeError:
-        sig = inspect.getargspec(operation) #pylint: disable=deprecated-method
+        sig = inspect.getargspec(operation)  # pylint: disable=deprecated-method
         args = sig.args
 
     arg_docstring_help = _option_descriptions(operation)
@@ -75,11 +79,11 @@ def extract_args_from_signature(operation, no_wait_param=None):
         excluded_params.remove(no_wait_param)
     found_no_wait_param = False
 
-    for arg_name in [a for a in args if not a in excluded_params]:
+    for arg_name in [a for a in args if a not in excluded_params]:
         try:
             # this works in python3
             default = args[arg_name].default
-            required = default == inspect.Parameter.empty #pylint: disable=no-member
+            required = default == inspect.Parameter.empty  # pylint: disable=no-member
         except TypeError:
             arg_defaults = (dict(zip(sig.args[-len(sig.defaults):], sig.defaults))
                             if sig.defaults
@@ -91,15 +95,16 @@ def extract_args_from_signature(operation, no_wait_param=None):
 
         try:
             default = (default
-                       if default != inspect._empty #pylint: disable=protected-access, no-member
+                       if default != inspect._empty  # pylint: disable=protected-access, no-member
                        else None)
         except AttributeError:
             pass
 
-        #improve the naming to 'no_wait'
+        # improve the naming to 'no_wait'
         if arg_name == no_wait_param:
             if not isinstance(default, bool):
-                raise ValueError("The type of '{}' must be boolean to enable no_wait".format(no_wait_param))#pylint: disable=line-too-long
+                raise ValueError("The type of '{}' must be boolean to enable no_wait".format(
+                    no_wait_param))  # pylint: disable=line-too-long
             found_no_wait_param = True
             options_list = ['--no-wait']
             help_str = 'do not wait for the long running operation to finish'
@@ -114,4 +119,5 @@ def extract_args_from_signature(operation, no_wait_param=None):
                                             help=help_str,
                                             action=action))
     if no_wait_param and not found_no_wait_param:
-        raise ValueError("Command authoring error: unable to enable no-wait option. Operation '{}' does not have a '{}' parameter.".format(operation, no_wait_param))#pylint: disable=line-too-long
+        raise ValueError("Command authoring error: unable to enable no-wait option. Operation '{}' "
+                         "does not have a '{}' parameter.".format(operation, no_wait_param))

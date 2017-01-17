@@ -5,4 +5,4 @@
 import pkg_resources
 pkg_resources.declare_namespace(__name__)
 
-__version__ = "0.1.0b11+dev"
+__version__ = "0.1.1b1+dev"

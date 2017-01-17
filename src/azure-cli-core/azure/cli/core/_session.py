@@ -14,6 +14,7 @@ except ImportError:
 
 from codecs import open as codecs_open
 
+
 class Session(collections.MutableMapping):
     '''A simple dict-like class that is backed by a JSON file.
 
@@ -73,6 +74,7 @@ class Session(collections.MutableMapping):
 
     def __len__(self):
         return len(self.data)
+
 
 # ACCOUNT contains subscriptions information
 ACCOUNT = Session()

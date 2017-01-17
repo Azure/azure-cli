@@ -21,27 +21,32 @@ import azure.cli.core._logging as _logging
 
 logger = _logging.get_az_logger(__name__)
 
+
 def _decode_str(output):
     if not isinstance(output, text_type):
         output = u(str(output))
     return output
 
+
 class ComplexEncoder(json.JSONEncoder):
-    def default(self, obj): #pylint: disable=method-hidden
+
+    def default(self, obj):  # pylint: disable=method-hidden
         if isinstance(obj, bytes) and not isinstance(obj, str):
             return obj.decode()
         return json.JSONEncoder.default(self, obj)
 
+
 def format_json(obj):
     result = obj.result
-    #OrderedDict.__dict__ is always '{}', to persist the data, convert to dict first.
+    # OrderedDict.__dict__ is always '{}', to persist the data, convert to dict first.
     input_dict = dict(result) if hasattr(result, '__dict__') else result
     return json.dumps(input_dict, indent=2, sort_keys=True, cls=ComplexEncoder,
                       separators=(',', ': ')) + '\n'
 
+
 def format_json_color(obj):
     from pygments import highlight, lexers, formatters
-    return highlight(format_json(obj), lexers.JsonLexer(), formatters.TerminalFormatter()) # pylint: disable=no-member
+    return highlight(format_json(obj), lexers.JsonLexer(), formatters.TerminalFormatter())  # pylint: disable=no-member
 
 
 def format_text(obj):
@@ -56,6 +61,7 @@ def format_text(obj):
     except TypeError:
         return ''
 
+
 def format_table(obj):
     result = obj.result
     try:
@@ -65,9 +71,10 @@ def format_table(obj):
         return TableOutput.dump(result_list)
     except:
         logger.debug(traceback.format_exc())
-        raise CLIError("Table output unavailable. "\
-                       "Use the --query option to specify an appropriate query. "\
+        raise CLIError("Table output unavailable. "
+                       "Use the --query option to specify an appropriate query. "
                        "Use --debug for more info.")
+
 
 def format_list(obj):
     result = obj.result
@@ -75,19 +82,22 @@ def format_list(obj):
     lo = ListOutput()
     return lo.dump(result_list)
 
+
 def format_tsv(obj):
     result = obj.result
     result_list = result if isinstance(result, list) else [result]
     return TsvOutput.dump(result_list)
 
-class CommandResultItem(object): #pylint: disable=too-few-public-methods
+
+class CommandResultItem(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, result, table_transformer=None, is_query_active=False):
         self.result = result
         self.table_transformer = table_transformer
         self.is_query_active = is_query_active
 
-class OutputProducer(object): #pylint: disable=too-few-public-methods
+
+class OutputProducer(object):  # pylint: disable=too-few-public-methods
 
     format_dict = {
         'json': format_json,
@@ -98,7 +108,7 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
         'tsv': format_tsv,
     }
 
-    def __init__(self, formatter=format_list, file=sys.stdout): #pylint: disable=redefined-builtin
+    def __init__(self, formatter=format_list, file=sys.stdout):  # pylint: disable=redefined-builtin
         self.formatter = formatter
         self.file = file
 
@@ -121,7 +131,8 @@ class OutputProducer(object): #pylint: disable=too-few-public-methods
     def get_formatter(format_type):
         return OutputProducer.format_dict.get(format_type, format_list)
 
-class TableOutput(object): #pylint: disable=too-few-public-methods
+
+class TableOutput(object):  # pylint: disable=too-few-public-methods
 
     SKIP_KEYS = ['id', 'type']
 
@@ -165,7 +176,8 @@ class TableOutput(object): #pylint: disable=too-few-public-methods
             raise ValueError('Unable to extract fields for table.')
         return table_str + '\n'
 
-class ListOutput(object): #pylint: disable=too-few-public-methods
+
+class ListOutput(object):  # pylint: disable=too-few-public-methods
 
     # Match the capital letters in a camel case string
     FORMAT_KEYS_PATTERN = re.compile('([A-Z]+(?![a-z])|[A-Z]{1}[a-z]+)')
@@ -182,9 +194,9 @@ class ListOutput(object): #pylint: disable=too-few-public-methods
         # We want dictionaries to be last so use ASCII char 126 ~ to
         # prefix dictionary and list key names.
         if isinstance(item[key], dict):
-            return '~~'+key
+            return '~~' + key
         elif isinstance(item[key], list):
-            return '~'+key
+            return '~' + key
         else:
             return key
 
@@ -217,7 +229,7 @@ class ListOutput(object): #pylint: disable=too-few-public-methods
                     # complex object
                     line = '%s :' % (self._get_formatted_key(key).ljust(key_width))
                     ListOutput._dump_line(io, line, indent)
-                    self._dump_object(io, obj[key] if obj[key] else 'None', indent+1)
+                    self._dump_object(io, obj[key] if obj[key] else 'None', indent + 1)
                 else:
                     # non-complex so write it
                     line = '%s : %s' % (self._get_formatted_key(key).ljust(key_width),
@@ -235,6 +247,7 @@ class ListOutput(object): #pylint: disable=too-few-public-methods
         result = io.getvalue()
         io.close()
         return result
+
 
 class TextOutput(object):
 
@@ -264,7 +277,8 @@ class TextOutput(object):
         io.close()
         return result
 
-class TsvOutput(object): #pylint: disable=too-few-public-methods
+
+class TsvOutput(object):  # pylint: disable=too-few-public-methods
 
     @staticmethod
     def _dump_obj(data, stream):

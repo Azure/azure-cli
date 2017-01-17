@@ -15,6 +15,7 @@ import azure.cli.core._debug as _debug
 
 
 class Test_argparse(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls):
         # Ensure initialization has occurred correctly
@@ -34,7 +35,7 @@ class Test_argparse(unittest.TestCase):
 
         clientMock = MagicMock()
         clientMock.config.connection.verify = True
-        _debug.allow_debug_connection(clientMock)
+        clientMock = _debug.allow_debug_connection(clientMock)
         self.assertFalse(clientMock.config.connection.verify)
 
 

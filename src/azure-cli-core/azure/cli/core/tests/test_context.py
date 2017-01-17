@@ -8,7 +8,7 @@ import os
 # Determine the correct patch target for open
 try:
     # python 3
-    import builtins #pylint: disable=unused-import
+    import builtins  # pylint: disable=unused-import
     OPEN_PATCH_TARGET = 'builtins.open'
 except ImportError:
     OPEN_PATCH_TARGET = '__builtin__.open'
@@ -17,11 +17,12 @@ import unittest
 import mock
 
 # Need to import config before we can import context
-import azure.cli.core._config #pylint: disable=unused-import
+import azure.cli.core._config  # pylint: disable=unused-import
 
 from azure.cli.core.context import (get_active_context_name,
                                     set_active_context,
                                     ContextNotFoundException)
+
 
 class TestContext(unittest.TestCase):
 
@@ -48,6 +49,7 @@ class TestContext(unittest.TestCase):
         # We haven't created the context yet so it doesn't exist
         with self.assertRaises(ContextNotFoundException):
             set_active_context(context_name, skip_set_active_subsciption=True)
+
 
 if __name__ == '__main__':
     unittest.main()
