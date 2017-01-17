@@ -151,7 +151,7 @@ def dcos_browse(name, resource_group, disable_browser=False,
     :type resource_group_name: String
     :param disable_browser: If true, don't launch a web browser after estabilishing the proxy
     :type disable_browser: bool
-    :param ssh_key_file: Path to the SSH key to use [optional]
+    :param ssh_key_file: Path to the SSH key to use
     :type ssh_key_file: string
     """
     acs_info = _get_acs_info(name, resource_group)
