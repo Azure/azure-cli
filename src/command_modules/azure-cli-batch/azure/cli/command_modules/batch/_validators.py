@@ -94,14 +94,15 @@ def validate_file_destination(namespace):
         file_dir = os.path.dirname(path)
         if os.path.isdir(path):
             file_name = os.path.basename(namespace.file_name)
-            file_path = os.path.join(file_name, path)
+            file_path = os.path.join(path, file_name)
         elif not os.path.isdir(file_dir):
             try:
                 os.mkdir(file_dir)
             except EnvironmentError as exp:
                 raise ValueError("Directory {} does not exist, and cannot be created: {}".format(file_dir, exp))
         if os.path.isfile(file_path):
-            raise ValueError("File {} already exists.".format(file_path)
+            raise ValueError("File {} already exists.".format(file_path))
+        namespace.destination = file_path
 
 
 def validate_client_parameters(namespace):

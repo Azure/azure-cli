@@ -263,7 +263,7 @@ class AzureDataPlaneCommand(object):
 
                 # File download
                 if stream_output:
-                    with open(stream_output, "rb") as file_handle:
+                    with open(stream_output, "wb") as file_handle:
                         for data in result:
                             file_handle.write(data)
                     return
