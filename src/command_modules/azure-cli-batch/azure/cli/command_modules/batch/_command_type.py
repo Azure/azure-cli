@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
+import json
 import os
 import re
 
@@ -148,7 +149,7 @@ class BatchArgumentTree(object):
         # Search for the :type param_name: in the docstring
         pattern = r":type {}:(.*?)\n(\s*:param |\s*:rtype:|\s*:raises:|\"\"\")".format(param)
         param_type = re.search(pattern, model.__doc__, re.DOTALL)
-        return re.sub(r"\n\s*", "", param_type.group(1))
+        return re.sub(r"\n\s*", "", param_type.group(1).strip())
 
     def find_param_help(self, model, param):
         """Parse the parameter help info from the model docstring.
@@ -159,7 +160,7 @@ class BatchArgumentTree(object):
         # Search for :param param_name: in the docstring
         pattern = r":param {}:(.*?)\n\s*:type ".format(param)
         param_doc = re.search(pattern, model.__doc__, re.DOTALL)
-        return re.sub(r"\n\s*", "", param_doc.group(1))
+        return re.sub(r"\n\s*", "", param_doc.group(1).strip())
 
     def find_return_type(self, model):
         """Parse the parameter help info from the model docstring.
@@ -179,6 +180,17 @@ class BatchArgumentTree(object):
         :param namespace: The namespace object.
         :raises: ValueError if a require argument was not set.
         """
+        try:
+            if namespace.json_file:
+                if not os.path.isfile(namespace.json_file):
+                    raise ValueError("Cannot access JSON request file: " + namespace.json_file)
+                for name in self._arg_tree:
+                    if getattr(namespace, name):
+                        raise ValueError("--json-file cannot be combined with " + self.arg_name(name))
+                return
+        except AttributeError:
+            pass
+
         for name, details in self._arg_tree.items():
             if not getattr(namespace, name):
                 continue
@@ -231,6 +243,8 @@ class AzureDataPlaneCommand(object):
         self._options_attrs = []
         # The loaded options model to populate for the request
         self._options_model = None
+        # The parameter and model of the request body
+        self._request_body = None
 
         def _execute_command(kwargs):
             from msrest.paging import Paged
@@ -241,21 +255,32 @@ class AzureDataPlaneCommand(object):
                 self._build_options(kwargs)
 
                 stream_output = kwargs.pop('destination', None)
+                json_file = kwargs.pop('json_file', None)
 
                 # Build the request parameters from command line arguments
-                for arg, details in self.parser:
-                    try:
-                        param_value = kwargs.pop(arg)
-                        if param_value is None:
+                if json_file:
+                    with open(json_file) as file_handle:
+                        json_obj = json.load(file_handle)
+                        kwargs[self._request_body['name']] = client._deserialize( #pylint:disable=W0212
+                            self._request_body['model'], json_obj)
+                        if kwargs[self._request_body['name']] is None:
+                            raise ValueError("JSON file '{}' is not in correct format.".format(json_file))
+                    for arg, _ in self.parser:
+                        del kwargs[arg]
+                else:
+                    for arg, details in self.parser:
+                        try:
+                            param_value = kwargs.pop(arg)
+                            if param_value is None:
+                                continue
+                            else:
+                                self._build_parameters(
+                                    details['path'], 
+                                    kwargs,
+                                    details['root'],
+                                    param_value)
+                        except KeyError:
                             continue
-                        else:
-                            self._build_parameters(
-                                details['path'], 
-                                kwargs,
-                                details['root'],
-                                param_value)
-                    except KeyError:
-                        continue
 
                 # Make request
                 op = get_op_handler(operation)
@@ -356,16 +381,6 @@ class AzureDataPlaneCommand(object):
         self._options_model = self._load_model(option_type)()
         self._options_attrs =  list(self._options_model.__dict__.keys())
 
-    #def _inspect(self, func):
-    #    """Inspect a model signature to extract parameter information."""
-    #    try:
-    #        # only supported in python3 - falling back to argspec if not available
-    #        sig = inspect.signature(operation)
-    #        return sig.parameters
-    #    except AttributeError:
-    #        sig = inspect.getargspec(operation) #pylint: disable=deprecated-method
-    #        return sig.args
-
     def _format_options_name(self, operation):
         """Format the name of the request options parameter from the
         operation name and path.
@@ -390,15 +405,13 @@ class AzureDataPlaneCommand(object):
         :param str path: Request parameter namespace.
         """
         for attr, details in model._attribute_map.items(): #pylint: disable=W0212
-            if model._validation.get(attr, {}).get('readonly'): #pylint: disable=W0212
-                continue
-            elif model._validation.get(attr, {}).get('constant'): #pylint: disable=W0212
-                continue
-            elif '.'.join([path, attr]) in self.ignore:
-                continue
-            elif details['type'][0] in ['[', '{']: # TODO: Add support for lists.
-                continue
-            yield attr, details
+            conditions = []
+            conditions.append(model._validation.get(attr, {}).get('readonly')) #pylint: disable=W0212
+            conditions.append(model._validation.get(attr, {}).get('constant')) #pylint: disable=W0212
+            conditions.append('.'.join([path, attr]) in self.ignore)
+            conditions.append(details['type'][0] in ['[', '{']) # TODO: Add support for lists.
+            if not any(conditions):
+                yield attr, details
 
     def _build_prefix(self, arg, param, path):
         """Recursively build a command line argument prefix from the request
@@ -464,11 +477,10 @@ class AzureDataPlaneCommand(object):
         else:
             self.parser.queue_argument(arg, path, param, options, dependencies)
 
-    def _flatten_object(self, path, param_model, required, conflict_names=[]): #pylint: disable=W0102
+    def _flatten_object(self, path, param_model, conflict_names=[]): #pylint: disable=W0102
         """Flatten a complex parameter object into command line arguments.
         :param str path: The complex parameter namespace.
         :param class param_model: The complex parameter class.
-        :param bool required: Whether the parameter is required.
         :param list conflict_name: List of argument names that conflict.
         """
         if self._should_flatten(path):
@@ -478,7 +490,7 @@ class AzureDataPlaneCommand(object):
             for param_attr, details in self._get_attrs(param_model, path):
                 options = {}
                 options['options_list'] = [self.parser.arg_name(param_attr)]
-                options['required'] = (required and param_attr in required_attrs)
+                options['required'] = False
                 options['arg_group'] = self.parser.group_title(path)
                 options['help'] = self.parser.find_param_help(param_model, param_attr)
                 options['validator'] = lambda ns: validate_required_parameter(ns, self.parser)
@@ -497,8 +509,7 @@ class AzureDataPlaneCommand(object):
                         self._resolve_conflict(param_attr, param_attr, path, options,
                                                required_attrs, conflict_names)
                     else:
-                        self._flatten_object('.'.join([path, param_attr]),
-                                             attr_model, options['required'])
+                        self._flatten_object('.'.join([path, param_attr]), attr_model)
 
     def _load_transformed_arguments(self, operation, handler):
         """Load all the command line arguments from the request parameters.
@@ -511,12 +522,24 @@ class AzureDataPlaneCommand(object):
             if arg[0] == self._options_param:
                 for option_arg in self._process_options():
                     yield option_arg
-            elif arg_type.startswith(":class:"):
+            elif arg_type.startswith(":class:"):  # TODO: could add handling for enums
                 param_type = self.parser.class_name(arg_type)
+                self._request_body = {'name': arg[0], 'model': param_type.split('.')[-1]}
                 param_model = self._load_model(param_type)
-                self._flatten_object(arg[0], param_model, True)
+                self._flatten_object(arg[0], param_model)
                 for flattened_arg in self.parser.compile_args():
                     yield flattened_arg
+                param = 'json_file'
+                json_class = self.parser.class_name(arg_type).split('.')[-1]
+                docstring = "A file containing the {} object in JSON format, " \
+                            "if this parameter is specified, all other parameters" \
+                            " are ignored.".format(json_class)
+                yield (param, CliCommandArgument(param,
+                                                 options_list=[self.parser.arg_name(param)],
+                                                 required=False,
+                                                 default=None,
+                                                 completer=FilesCompleter(),
+                                                 help=docstring))
             elif arg[0] not in self.ignore:
                 yield arg
         if self.parser.find_return_type(handler) == 'Generator':
