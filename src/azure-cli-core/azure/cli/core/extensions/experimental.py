@@ -60,7 +60,7 @@ def register(event_dispatcher):
         try:
             args = event_data['args']
             skeleton_index = args.index('--use-skeleton')
-            skeleton_value = args[skeleton_index + 1]  # pylint: disable=unused-variable
+            skeleton_value = args[skeleton_index + 1]  # noqa, pylint: disable=unused-variable
 
             def overlay_arguments(_, event_data):  # pylint: disable=unused-argument
                 # TODO: overlay the arguments with the data in the skeleton file

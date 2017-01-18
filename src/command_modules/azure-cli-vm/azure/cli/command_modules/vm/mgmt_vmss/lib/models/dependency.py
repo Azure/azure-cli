@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-#pylint: skip-file
+# pylint: skip-file
 
 # coding=utf-8
 # --------------------------------------------------------------------------
@@ -26,7 +26,7 @@ class Dependency(Model):
     :type resource_type: str
     :param resource_name: Gets or sets the dependency resource name.
     :type resource_name: str
-    """ 
+    """
 
     _attribute_map = {
         'depends_on': {'key': 'dependsOn', 'type': '[BasicDependency]'},
