@@ -9,7 +9,7 @@ import json
 import azure.cli.core.decorators as decorators
 
 DIAGNOSTICS_TELEMETRY_ENV_NAME = 'AZURE_CLI_DIAGNOSTICS_TELEMETRY'
-INSTRUMENTATION_KEY = '02b91c82-6729-4241-befc-e6d02ca4fbba'
+INSTRUMENTATION_KEY = 'c4395b75-49cc-422c-bc95-c7d51aef5d46'
 
 
 def in_diagnostic_mode():
