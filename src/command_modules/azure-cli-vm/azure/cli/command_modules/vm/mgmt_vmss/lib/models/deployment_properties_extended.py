@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-#pylint: skip-file
+# pylint: skip-file
 
 # coding=utf-8
 # --------------------------------------------------------------------------
@@ -48,7 +48,7 @@ class DeploymentPropertiesExtended(Model):
     :param mode: Gets or sets the deployment mode. Possible values include:
      'Incremental', 'Complete'
     :type mode: str or :class:`DeploymentMode <Default.models.DeploymentMode>`
-    """ 
+    """
 
     _attribute_map = {
         'provisioning_state': {'key': 'provisioningState', 'type': 'str'},

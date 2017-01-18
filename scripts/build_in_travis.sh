@@ -12,7 +12,7 @@ scripts_root=$(cd $(dirname $0); pwd)
 export PYTHONPATH=$PATHONPATH:./src
 python -m azure.cli -h
 
-check_style
+check_style --ci
 run_tests
 $scripts_root/package_verify.sh
 

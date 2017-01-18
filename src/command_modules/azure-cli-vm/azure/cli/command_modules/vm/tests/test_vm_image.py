@@ -9,6 +9,7 @@ import mock
 
 import azure.cli.core.application as application
 
+
 class TestVMImage(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.vm.custom.urlopen', autospec=True)
     def test_read_images_from_alias_doc(self, mock_urlopen):
@@ -25,10 +26,10 @@ class TestVMImage(unittest.TestCase):
         mock_read.read.return_value = test_data
         mock_urlopen.return_value = mock_read
 
-        #action
+        # action
         images = list_vm_images()
 
-        #assert
+        # assert
         win_images = [i for i in images if i['publisher'] == 'MicrosoftWindowsServer']
         self.assertTrue(len(win_images) > 0)
         ubuntu_image = next(i for i in images if i['publisher'] == 'Canonical')
@@ -40,6 +41,7 @@ class TestVMImage(unittest.TestCase):
         self.assertEqual(parts[1], ubuntu_image['offer'])
         self.assertEqual(parts[2], ubuntu_image['sku'])
         self.assertEqual(parts[3], ubuntu_image['version'])
+
 
 if __name__ == '__main__':
     unittest.main()

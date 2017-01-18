@@ -22,6 +22,7 @@ from azure.cli.command_modules.vm._validators import \
 # pylint: disable=bad-continuation
 # pylint: disable=too-many-lines
 
+
 def _mock_resource_client(client_class):
     client = mock.MagicMock()
     if client_class is NetworkManagementClient:
@@ -76,6 +77,7 @@ def _mock_resource_client(client_class):
         client.storage_accounts.list_by_resource_group = _mock_list_by_resource_group
     return client
 
+
 class TestVMCreateDefaultVnet(unittest.TestCase):
 
     def _set_ns(self, rg, location=None):
@@ -115,8 +117,6 @@ class TestVMCreateDefaultVnet(unittest.TestCase):
         self.assertEqual(self.ns.subnet_name, 'vnet1subnet')
         self.assertEqual(self.ns.virtual_network_type, 'existingName')
 
-if __name__ == '__main__':
-    unittest.main()
 
 class TestVMCreateDefaultStorageAccount(unittest.TestCase):
 
@@ -127,7 +127,7 @@ class TestVMCreateDefaultStorageAccount(unittest.TestCase):
         ns.storage_type = tier
         ns.storage_account = None
         ns.storage_account_type = None
-        self.ns = ns # pylint: disable=attribute-defined-outside-init
+        self.ns = ns  # pylint: disable=attribute-defined-outside-init
 
     def setUp(self):
         self.ns = None
@@ -142,7 +142,7 @@ class TestVMCreateDefaultStorageAccount(unittest.TestCase):
         try:
             self.assertRegex(self.ns.storage_account, '^vhd.*')
         except AttributeError:
-            self.assertRegexpMatches(self.ns.storage_account, '^vhd.*') # pylint: disable=deprecated-method
+            self.assertRegexpMatches(self.ns.storage_account, '^vhd.*')  # pylint: disable=deprecated-method
         self.assertIsNone(self.ns.storage_account_type)
 
     @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_resource_client)
@@ -157,7 +157,6 @@ class TestVMCreateDefaultStorageAccount(unittest.TestCase):
         self.assertEqual(self.ns.storage_account, 'sa4')
         self.assertEqual(self.ns.storage_account_type, 'existingName')
 
-
     @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_resource_client)
     def test_matching_storage_account_specified_location(self):
         self._set_ns('rg1', 'eastus')
@@ -169,6 +168,7 @@ class TestVMCreateDefaultStorageAccount(unittest.TestCase):
         validate_default_storage_account(self.ns)
         self.assertEqual(self.ns.storage_account, 'sa2')
         self.assertEqual(self.ns.storage_account_type, 'existingName')
+
 
 if __name__ == '__main__':
     unittest.main()

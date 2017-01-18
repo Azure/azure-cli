@@ -7,6 +7,7 @@ import unittest
 
 from azure.cli.core.application import APPLICATION, Configuration
 
+
 def mock_echo_args(command_name, parameters):
     try:
         argv = ' '.join((command_name, parameters)).split()
@@ -19,8 +20,8 @@ def mock_echo_args(command_name, parameters):
     finally:
         command_table[command_name].handler = prefunc
 
-class Test_ArgumentParser(unittest.TestCase):
 
+class Test_ArgumentParser(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         pass
@@ -30,12 +31,12 @@ class Test_ArgumentParser(unittest.TestCase):
         # If we use an ID as the positional parameter, we should
         # extract the resource group and name from it...
         args = mock_echo_args('vm show',
-                              '--id /subscriptions/00000000-0000-0000-0000-0123456789abc/resourceGroups/thisisaresourcegroup/providers/Microsoft.Compute/virtualMachines/thisisavmname') # pylint: disable=line-too-long
+                              '--id /subscriptions/00000000-0000-0000-0000-0123456789abc/resourceGroups/thisisaresourcegroup/providers/Microsoft.Compute/virtualMachines/thisisavmname')  # pylint: disable=line-too-long
         self.assertDictEqual({
             'expand': None,
             'resource_group_name': 'thisisaresourcegroup',
             'vm_name': 'thisisavmname'
-            }, args.result)
+        }, args.result)
 
         # Invalid resource ID should trigger the missing resource group
         # parameter failure
@@ -53,19 +54,19 @@ class Test_ArgumentParser(unittest.TestCase):
         args = mock_echo_args('vm list', '')
         self.assertDictEqual({
             'resource_group_name': None,
-            }, args.result)
+        }, args.result)
 
         # if resource group name is specified, however,
         # it should get passed through...
         args = mock_echo_args('vm list', '-g hullo')
         self.assertDictEqual({
             'resource_group_name': 'hullo',
-            }, args.result)
+        }, args.result)
 
     consistent_arguments = {
         'resource_group_name': ('--resource-group', '-g'),
         'virtual_machine_name': ('--vm-name',),
-        }
+    }
 
     def test_command_consistency(self):
         argv = ['vm']
@@ -82,9 +83,10 @@ class Test_ArgumentParser(unittest.TestCase):
                                      'Argument {} of command {} has inconsistent flags'.format(
                                          argument_name,
                                          command_name
-                                         ))
+                                     ))
                 except KeyError:
                     pass
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -5,14 +5,17 @@
 
 # pylint: disable=no-self-use,too-many-arguments,too-many-lines
 from __future__ import print_function
+
 import json
 import os
 import re
+
 try:
     from urllib.parse import urlparse
 except ImportError:
-    from urlparse import urlparse # pylint: disable=import-error
-from six.moves.urllib.request import urlopen #pylint: disable=import-error,unused-import
+    from urlparse import urlparse  # pylint: disable=import-error
+
+from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import
 
 from azure.mgmt.compute.models import (DataDisk,
                                        VirtualMachineScaleSet,
@@ -35,6 +38,7 @@ from ._client_factory import _compute_client_factory
 
 logger = _logging.get_az_logger(__name__)
 
+
 def _vm_get(resource_group_name, vm_name, expand=None):
     '''Retrieves a VM'''
     client = _compute_client_factory()
@@ -42,9 +46,10 @@ def _vm_get(resource_group_name, vm_name, expand=None):
                                        vm_name,
                                        expand=expand)
 
+
 def _vm_set(instance, lro_operation=None):
     '''Update the given Virtual Machine instance'''
-    instance.resources = None # Issue: https://github.com/Azure/autorest/issues/934
+    instance.resources = None  # Issue: https://github.com/Azure/autorest/issues/934
     client = _compute_client_factory()
     parsed_id = _parse_rg_name(instance.id)
     poller = client.virtual_machines.create_or_update(
@@ -56,14 +61,16 @@ def _vm_set(instance, lro_operation=None):
     else:
         return LongRunningOperation()(poller)
 
+
 def _parse_rg_name(strid):
     '''From an ID, extract the contained (resource group, name) tuple
     '''
     parts = parse_resource_id(strid)
     return (parts['resource_group'], parts['name'])
 
-#Use the same name by portal, so people can update from both cli and portal
-#(VM doesn't allow multiple handlers for the same extension)
+
+# Use the same name by portal, so people can update from both cli and portal
+# (VM doesn't allow multiple handlers for the same extension)
 _ACCESS_EXT_HANDLER_NAME = 'enablevmaccess'
 
 _LINUX_ACCESS_EXT = 'VMAccessForLinux'
@@ -74,20 +81,21 @@ extension_mappings = {
     _LINUX_ACCESS_EXT: {
         'version': '1.4',
         'publisher': 'Microsoft.OSTCExtensions'
-        },
+    },
     _WINDOWS_ACCESS_EXT: {
         'version': '2.0',
         'publisher': 'Microsoft.Compute'
-        },
-    _LINUX_DIAG_EXT:{
+    },
+    _LINUX_DIAG_EXT: {
         'version': '2.3',
         'publisher': 'Microsoft.OSTCExtensions'
-        },
-    _WINDOWS_DIAG_EXT:{
+    },
+    _WINDOWS_DIAG_EXT: {
         'version': '1.5',
         'publisher': 'Microsoft.Azure.Diagnostics'
-        }
     }
+}
+
 
 def _get_access_extension_upgrade_info(extensions, name):
     version = extension_mappings[name]['version']
@@ -97,7 +105,7 @@ def _get_access_extension_upgrade_info(extensions, name):
 
     if extensions:
         extension = next((e for e in extensions if e.name == name), None)
-        #pylint: disable=no-name-in-module,import-error
+        # pylint: disable=no-name-in-module,import-error
         from distutils.version import LooseVersion
         if extension and LooseVersion(extension.type_handler_version) < LooseVersion(version):
             auto_upgrade = True
@@ -111,19 +119,24 @@ def _get_storage_management_client():
     from azure.mgmt.storage import StorageManagementClient
     return get_mgmt_service_client(StorageManagementClient)
 
+
 def _trim_away_build_number(version):
-    #workaround a known issue: the version must only contain "major.minor", even though
-    #"extension image list" gives more detail
+    # workaround a known issue: the version must only contain "major.minor", even though
+    # "extension image list" gives more detail
     return '.'.join(version.split('.')[0:2])
 
-#Hide extension information from output as the info is not correct and unhelpful; also
-#commands using it mean to hide the extension concept from users.
-class ExtensionUpdateLongRunningOperation(LongRunningOperation): #pylint: disable=too-few-public-methods
+
+# Hide extension information from output as the info is not correct and unhelpful; also
+# commands using it mean to hide the extension concept from users.
+
+
+class ExtensionUpdateLongRunningOperation(LongRunningOperation):  # pylint: disable=too-few-public-methods
     def __call__(self, poller):
         super(ExtensionUpdateLongRunningOperation, self).__call__(poller)
-        #That said, we surppress the output. Operation failures will still
-        #be caught through the base class
+        # That said, we surppress the output. Operation failures will still
+        # be caught through the base class
         return None
+
 
 def list_vm(resource_group_name=None):
     ''' List Virtual Machines. '''
@@ -132,7 +145,9 @@ def list_vm(resource_group_name=None):
         if resource_group_name else ccf.virtual_machines.list_all()
     return list(vm_list)
 
-def list_vm_images(image_location=None, publisher=None, offer=None, sku=None, all=False): # pylint: disable=redefined-builtin
+
+def list_vm_images(image_location=None, publisher=None, offer=None, sku=None,
+                   all=False):  # pylint: disable=redefined-builtin
     '''vm image list
     :param str image_location:Image location
     :param str publisher:Image publisher name
@@ -153,6 +168,7 @@ def list_vm_images(image_location=None, publisher=None, offer=None, sku=None, al
         i['urn'] = ':'.join([i['publisher'], i['offer'], i['sku'], i['version']])
     return all_images
 
+
 def list_vm_extension_images(
         image_location=None, publisher=None, name=None, version=None, latest=False):
     '''vm extension image list
@@ -164,6 +180,7 @@ def list_vm_extension_images(
     '''
     return load_extension_images_thru_services(
         publisher, name, version, image_location, latest)
+
 
 def list_ip_addresses(resource_group_name=None, vm_name=None):
     ''' Get IP addresses from one or more Virtual Machines
@@ -190,9 +207,11 @@ def list_ip_addresses(resource_group_name=None, vm_name=None):
 
         # If provided, make sure that resource group name and vm name match the NIC we are
         # looking at before adding it to the result...
-        if ((resource_group_name is None or resource_group_name.lower() == nic_resource_group.lower()) and #pylint: disable=line-too-long
-                (vm_name is None or vm_name.lower() == nic_vm_name.lower())):
-
+        same_resource_group_name = resource_group_name is None or \
+            resource_group_name.lower() == nic_resource_group.lower()
+        same_vm_name = vm_name is None or \
+            vm_name.lower() == nic_vm_name.lower()
+        if same_resource_group_name and same_vm_name:
             network_info = {
                 'privateIpAddresses': [],
                 'publicIpAddresses': []
@@ -206,17 +225,18 @@ def list_ip_addresses(resource_group_name=None, vm_name=None):
                         'name': public_ip_address.name,
                         'ipAddress': public_ip_address.ip_address,
                         'ipAllocationMethod': public_ip_address.public_ip_allocation_method
-                        })
+                    })
 
             result.append({
                 'virtualMachine': {
                     'resourceGroup': nic_resource_group,
                     'name': nic_vm_name,
                     'network': network_info
-                    }
-                })
+                }
+            })
 
     return result
+
 
 def attach_new_disk(resource_group_name, vm_name, vhd, lun=None,
                     disk_name=None, disk_size=1023, caching=None):
@@ -224,10 +244,12 @@ def attach_new_disk(resource_group_name, vm_name, vhd, lun=None,
     return _attach_disk(resource_group_name, vm_name, vhd, DiskCreateOptionTypes.empty,
                         lun, disk_name, caching, disk_size)
 
+
 def attach_existing_disk(resource_group_name, vm_name, vhd, lun=None, disk_name=None, caching=None):
     ''' Attach an existing disk to an existing Virtual Machine '''
     return _attach_disk(resource_group_name, vm_name, vhd, DiskCreateOptionTypes.attach,
                         lun, disk_name, caching)
+
 
 def _attach_disk(resource_group_name, vm_name, vhd, create_option, lun=None,
                  disk_name=None, caching=None, disk_size=None):
@@ -235,16 +257,17 @@ def _attach_disk(resource_group_name, vm_name, vhd, create_option, lun=None,
     if disk_name is None:
         file_name = vhd.uri.split('/')[-1]
         disk_name = os.path.splitext(file_name)[0]
-    #pylint: disable=no-member
+    # pylint: disable=no-member
     if lun is None:
         lun = _get_disk_lun(vm.storage_profile.data_disks)
     disk = DataDisk(lun=lun, vhd=vhd, name=disk_name,
                     create_option=create_option,
                     caching=caching, disk_size_gb=disk_size)
-    if  vm.storage_profile.data_disks is None:
+    if vm.storage_profile.data_disks is None:
         vm.storage_profile.data_disks = []
-    vm.storage_profile.data_disks.append(disk) # pylint: disable=no-member
+    vm.storage_profile.data_disks.append(disk)  # pylint: disable=no-member
     return _vm_set(vm)
+
 
 def detach_disk(resource_group_name, vm_name, disk_name):
     ''' Detach a disk from a Virtual Machine '''
@@ -252,38 +275,44 @@ def detach_disk(resource_group_name, vm_name, disk_name):
     # Issue: https://github.com/Azure/autorest/issues/934
     vm.resources = None
     try:
-        disk = next(d for d in vm.storage_profile.data_disks if d.name.lower() == disk_name.lower()) # pylint: disable=no-member
-        vm.storage_profile.data_disks.remove(disk) # pylint: disable=no-member
+        disk = next(d for d in vm.storage_profile.data_disks if
+                    d.name.lower() == disk_name.lower())  # pylint: disable=no-member
+        vm.storage_profile.data_disks.remove(disk)  # pylint: disable=no-member
     except (StopIteration, AttributeError):
         raise CLIError("No disk with the name '{}' found".format(disk_name))
     return _vm_set(vm)
 
+
 def _get_disk_lun(data_disks):
-    #start from 0, search for unused int for lun
+    # start from 0, search for unused int for lun
     if data_disks:
         existing_luns = sorted([d.lun for d in data_disks])
-        for i in range(len(existing_luns)):#pylint: disable=consider-using-enumerate
+        for i in range(len(existing_luns)):  # pylint: disable=consider-using-enumerate
             if existing_luns[i] != i:
                 return i
         return len(existing_luns)
     else:
         return 0
 
+
 def resize_vm(resource_group_name, vm_name, size):
     '''Update vm size
     :param str size: sizes such as Standard_A4, Standard_F4s, etc
     '''
     vm = _vm_get(resource_group_name, vm_name)
-    vm.hardware_profile.vm_size = size #pylint: disable=no-member
+    vm.hardware_profile.vm_size = size  # pylint: disable=no-member
     return _vm_set(vm)
+
 
 def get_instance_view(resource_group_name, vm_name):
     return _vm_get(resource_group_name, vm_name, 'instanceView')
 
+
 def list_disks(resource_group_name, vm_name):
     ''' List disks for a Virtual Machine '''
     vm = _vm_get(resource_group_name, vm_name)
-    return vm.storage_profile.data_disks # pylint: disable=no-member
+    return vm.storage_profile.data_disks  # pylint: disable=no-member
+
 
 def capture_vm(resource_group_name, vm_name, vhd_name_prefix,
                storage_container='vhds', overwrite=True):
@@ -297,7 +326,8 @@ def capture_vm(resource_group_name, vm_name, vhd_name_prefix,
     parameter = VirtualMachineCaptureParameters(vhd_name_prefix, storage_container, overwrite)
     poller = client.virtual_machines.capture(resource_group_name, vm_name, parameter)
     result = LongRunningOperation()(poller)
-    print(json.dumps(result.output, indent=2)) # pylint: disable=no-member
+    print(json.dumps(result.output, indent=2))  # pylint: disable=no-member
+
 
 def reset_windows_admin(
         resource_group_name, vm_name, username, password):
@@ -314,7 +344,7 @@ def reset_windows_admin(
     publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
         vm.resources, extension_name)
 
-    ext = VirtualMachineExtension(vm.location,#pylint: disable=no-member
+    ext = VirtualMachineExtension(vm.location,  # pylint: disable=no-member
                                   publisher=publisher,
                                   virtual_machine_extension_type=extension_name,
                                   protected_settings={'Password': password},
@@ -325,6 +355,7 @@ def reset_windows_admin(
     poller = client.virtual_machine_extensions.create_or_update(resource_group_name, vm_name,
                                                                 _ACCESS_EXT_HANDLER_NAME, ext)
     return ExtensionUpdateLongRunningOperation('resetting admin', 'done')(poller)
+
 
 def set_linux_user(
         resource_group_name, vm_name, username, password=None, ssh_key_value=None):
@@ -343,7 +374,7 @@ def set_linux_user(
     protected_settings['username'] = username
     if password:
         protected_settings['password'] = password
-    elif not ssh_key_value and not password: #default to ssh
+    elif not ssh_key_value and not password:  # default to ssh
         ssh_key_value = os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
 
     if ssh_key_value:
@@ -353,7 +384,7 @@ def set_linux_user(
     publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
         vm.resources, extension_name)
 
-    ext = VirtualMachineExtension(vm.location,#pylint: disable=no-member
+    ext = VirtualMachineExtension(vm.location,  # pylint: disable=no-member
                                   publisher=publisher,
                                   virtual_machine_extension_type=extension_name,
                                   protected_settings=protected_settings,
@@ -364,6 +395,7 @@ def set_linux_user(
     poller = client.virtual_machine_extensions.create_or_update(
         resource_group_name, vm_name, _ACCESS_EXT_HANDLER_NAME, ext)
     return ExtensionUpdateLongRunningOperation('setting user', 'done')(poller)
+
 
 def delete_linux_user(
         resource_group_name, vm_name, username):
@@ -377,10 +409,10 @@ def delete_linux_user(
     publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
         vm.resources, extension_name)
 
-    ext = VirtualMachineExtension(vm.location,#pylint: disable=no-member
+    ext = VirtualMachineExtension(vm.location,  # pylint: disable=no-member
                                   publisher=publisher,
                                   virtual_machine_extension_type=extension_name,
-                                  protected_settings={'remove_user':username},
+                                  protected_settings={'remove_user': username},
                                   type_handler_version=version,
                                   settings={},
                                   auto_upgrade_minor_version=auto_upgrade)
@@ -388,6 +420,7 @@ def delete_linux_user(
     poller = client.virtual_machine_extensions.create_or_update(resource_group_name, vm_name,
                                                                 _ACCESS_EXT_HANDLER_NAME, ext)
     return ExtensionUpdateLongRunningOperation('deleting user', 'done')(poller)
+
 
 def disable_boot_diagnostics(resource_group_name, vm_name):
     vm = _vm_get(resource_group_name, vm_name)
@@ -402,6 +435,7 @@ def disable_boot_diagnostics(resource_group_name, vm_name):
     diag_profile.boot_diagnostics.enabled = False
     diag_profile.boot_diagnostics.storage_uri = None
     _vm_set(vm, ExtensionUpdateLongRunningOperation('disabling boot diagnostics', 'done'))
+
 
 def enable_boot_diagnostics(resource_group_name, vm_name, storage):
     '''Enable boot diagnostics
@@ -438,9 +472,9 @@ def enable_boot_diagnostics(resource_group_name, vm_name, storage):
     vm.resources = None
     _vm_set(vm, ExtensionUpdateLongRunningOperation('enabling boot diagnostics', 'done'))
 
+
 def get_boot_log(resource_group_name, vm_name):
     import sys
-    import io
     from azure.cli.core._profile import CLOUD
     from azure.storage.blob import BlockBlobService
 
@@ -482,9 +516,9 @@ def get_boot_log(resource_group_name, vm_name):
         BlockBlobService,
         storage_account.name,
         keys.keys[0].value,
-        endpoint_suffix=CLOUD.suffixes.storage_endpoint) # pylint: disable=no-member
+        endpoint_suffix=CLOUD.suffixes.storage_endpoint)  # pylint: disable=no-member
 
-    class StreamWriter(object): # pylint: disable=too-few-public-methods
+    class StreamWriter(object):  # pylint: disable=too-few-public-methods
 
         def __init__(self, out):
             self.out = out
@@ -495,14 +529,16 @@ def get_boot_log(resource_group_name, vm_name):
             else:
                 self.out.write(str_or_bytes)
 
-    #our streamwriter not seekable, so no parallel.
+    # our streamwriter not seekable, so no parallel.
     storage_client.get_blob_to_stream(container, blob, StreamWriter(sys.stdout), max_connections=1)
+
 
 def list_extensions(resource_group_name, vm_name):
     vm = _vm_get(resource_group_name, vm_name)
     extension_type = 'Microsoft.Compute/virtualMachines/extensions'
     result = [r for r in vm.resources if r.type == extension_type]
     return result
+
 
 def set_extension(
         resource_group_name, vm_name, vm_extension_name, publisher,
@@ -527,7 +563,7 @@ def set_extension(
     protected_settings = load_json(protected_settings) if protected_settings else {}
     settings = load_json(settings) if settings else None
 
-    #pylint: disable=no-member
+    # pylint: disable=no-member
     version = _normalize_extension_version(publisher, vm_extension_name, version, vm.location)
 
     ext = VirtualMachineExtension(vm.location,
@@ -539,6 +575,7 @@ def set_extension(
                                   auto_upgrade_minor_version=(not no_auto_upgrade))
     return client.virtual_machine_extensions.create_or_update(
         resource_group_name, vm_name, vm_extension_name, ext)
+
 
 def set_vmss_extension(
         resource_group_name, vmss_name, extension_name, publisher,
@@ -559,12 +596,10 @@ def set_vmss_extension(
     vmss = client.virtual_machine_scale_sets.get(resource_group_name,
                                                  vmss_name)
 
-    from azure.mgmt.compute.models import VirtualMachineExtension
-
     protected_settings = load_json(protected_settings) if protected_settings else {}
     settings = load_json(settings) if settings else None
 
-    #pylint: disable=no-member
+    # pylint: disable=no-member
     version = _normalize_extension_version(publisher, extension_name, version, vmss.location)
 
     ext = VirtualMachineScaleSetExtension(name=extension_name,
@@ -583,6 +618,7 @@ def set_vmss_extension(
                                                               vmss_name,
                                                               vmss)
 
+
 def _normalize_extension_version(publisher, vm_extension_name, version, location):
     if not version:
         result = load_extension_images_thru_services(publisher, vm_extension_name,
@@ -591,11 +627,12 @@ def _normalize_extension_version(publisher, vm_extension_name, version, location
             raise CLIError('Failed to find the latest version for the extension "{}"'
                            .format(vm_extension_name))
 
-        #with 'show_latest' enabled, we will only get one result.
+        # with 'show_latest' enabled, we will only get one result.
         version = result[0]['version']
 
     version = _trim_away_build_number(version)
     return version
+
 
 def set_diagnostics_extension(
         resource_group_name, vm_name, settings, protected_settings=None, version=None,
@@ -603,7 +640,7 @@ def set_diagnostics_extension(
     '''Enable diagnostics on a virtual machine
     '''
     vm = _vm_get(resource_group_name, vm_name)
-    #pylint: disable=no-member
+    # pylint: disable=no-member
     is_linux_os = _detect_os_type_for_diagnostics_ext(vm.os_profile)
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
     return set_extension(resource_group_name, vm_name, vm_extension_name,
@@ -613,6 +650,7 @@ def set_diagnostics_extension(
                          protected_settings,
                          no_auto_upgrade)
 
+
 def set_vmss_diagnostics_extension(
         resource_group_name, vmss_name, settings, protected_settings=None, version=None,
         no_auto_upgrade=False):
@@ -621,7 +659,7 @@ def set_vmss_diagnostics_extension(
     client = _compute_client_factory()
     vmss = client.virtual_machine_scale_sets.get(resource_group_name,
                                                  vmss_name)
-    #pylint: disable=no-member
+    # pylint: disable=no-member
     is_linux_os = _detect_os_type_for_diagnostics_ext(vmss.virtual_machine_profile.os_profile)
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
     return set_vmss_extension(resource_group_name, vmss_name, vm_extension_name,
@@ -631,7 +669,10 @@ def set_vmss_diagnostics_extension(
                               protected_settings,
                               no_auto_upgrade)
 
-#Same logic also applies on vmss
+
+# Same logic also applies on vmss
+
+
 def _detect_os_type_for_diagnostics_ext(os_profile):
     is_linux_os = bool(os_profile.linux_configuration)
     is_windows_os = bool(os_profile.windows_configuration)
@@ -639,29 +680,32 @@ def _detect_os_type_for_diagnostics_ext(os_profile):
         raise CLIError('Diagnostics extension can only be installed on Linux or Windows VM')
     return is_linux_os
 
+
 def get_vmss_extension(resource_group_name, vmss_name, extension_name):
     client = _compute_client_factory()
     vmss = client.virtual_machine_scale_sets.get(resource_group_name,
                                                  vmss_name)
-    #pylint: disable=no-member
+    # pylint: disable=no-member
     if not vmss.virtual_machine_profile.extension_profile:
         return
     return next((e for e in vmss.virtual_machine_profile.extension_profile.extensions
                  if e.name == extension_name), None)
 
+
 def list_vmss_extensions(resource_group_name, vmss_name):
     client = _compute_client_factory()
     vmss = client.virtual_machine_scale_sets.get(resource_group_name,
                                                  vmss_name)
-    #pylint: disable=no-member
+    # pylint: disable=no-member
     return None if not vmss.virtual_machine_profile.extension_profile \
         else vmss.virtual_machine_profile.extension_profile.extensions
+
 
 def delete_vmss_extension(resource_group_name, vmss_name, extension_name):
     client = _compute_client_factory()
     vmss = client.virtual_machine_scale_sets.get(resource_group_name,
                                                  vmss_name)
-    #pylint: disable=no-member
+    # pylint: disable=no-member
     if not vmss.virtual_machine_profile.extension_profile:
         raise CLIError('Scale set has no extensions to delete')
 
@@ -676,26 +720,29 @@ def delete_vmss_extension(resource_group_name, vmss_name, extension_name):
                                                               vmss_name,
                                                               vmss)
 
+
 def _get_private_config(resource_group_name, storage_account):
     storage_mgmt_client = _get_storage_management_client()
-    #pylint: disable=no-member
+    # pylint: disable=no-member
     keys = storage_mgmt_client.storage_accounts.list_keys(resource_group_name, storage_account).keys
 
     private_config = {
         'storageAccountName': storage_account,
         'storageAccountKey': keys[0].value
-        }
+    }
     return private_config
+
 
 def show_default_diagnostics_configuration(is_windows_os=False):
     '''show the default config file which defines data to be collected'''
     return get_default_diag_config(is_windows_os)
 
+
 def vm_show_nic(resource_group_name, vm_name, nic):
     ''' Show details of a network interface configuration attached to a virtual machine '''
     vm = _vm_get(resource_group_name, vm_name)
     found = next(
-        (n for n in vm.network_profile.network_interfaces if nic.lower() == n.id.lower()), None # pylint: disable=no-member
+        (n for n in vm.network_profile.network_interfaces if nic.lower() == n.id.lower()), None  # pylint: disable=no-member
     )
     if found:
         from azure.mgmt.network import NetworkManagementClient
@@ -705,10 +752,12 @@ def vm_show_nic(resource_group_name, vm_name, nic):
     else:
         raise CLIError("NIC '{}' not found on VM '{}'".format(nic, vm_name))
 
+
 def vm_list_nics(resource_group_name, vm_name):
     ''' List network interface configurations attached to a virtual machine '''
     vm = _vm_get(resource_group_name, vm_name)
-    return vm.network_profile.network_interfaces # pylint: disable=no-member
+    return vm.network_profile.network_interfaces  # pylint: disable=no-member
+
 
 def vm_add_nics(resource_group_name, vm_name, nics, primary_nic=None):
     ''' Add network interface configurations to the virtual machine
@@ -722,6 +771,7 @@ def vm_add_nics(resource_group_name, vm_name, nics, primary_nic=None):
     existing_nics = _get_existing_nics(vm)
     return _update_vm_nics(vm, existing_nics + new_nics, primary_nic)
 
+
 def vm_remove_nics(resource_group_name, vm_name, nics, primary_nic=None):
     ''' Remove network interface configurations from the virtual machine
     :param str nic_ids: NIC resource IDs
@@ -729,13 +779,16 @@ def vm_remove_nics(resource_group_name, vm_name, nics, primary_nic=None):
     :param str primary_nic: name or id of the primary NIC. If missing, the first of the
     NIC list will be the primary
     '''
+
     def to_delete(nic_id):
         return [n for n in nics_to_delete if n.id.lower() == nic_id.lower()]
+
     vm = _vm_get(resource_group_name, vm_name)
     nics_to_delete = _build_nic_list(nics)
     existing_nics = _get_existing_nics(vm)
     survived = [x for x in existing_nics if not to_delete(x.id)]
     return _update_vm_nics(vm, survived, primary_nic)
+
 
 def vm_set_nics(resource_group_name, vm_name, nics, primary_nic=None):
     ''' Replace existing network interface configurations on the virtual machine
@@ -748,7 +801,10 @@ def vm_set_nics(resource_group_name, vm_name, nics, primary_nic=None):
     nics = _build_nic_list(nics)
     return _update_vm_nics(vm, nics, primary_nic)
 
+
 # pylint: disable=no-member
+
+
 def vm_open_port(resource_group_name, vm_name, network_security_group_name=None,
                  apply_to_subnet=False):
     """ Opens a VM to all inbound traffic and protocols by adding a security rule to the network
@@ -809,7 +865,6 @@ def vm_open_port(resource_group_name, vm_name, network_security_group_name=None,
                 resource_group_name, nic.name, nic)
         )
     else:
-        from azure.mgmt.network.models import Subnet
         subnet.network_security_group = nsg
         return LongRunningOperation('Updating subnet')(
             network.subnets.create_or_update(
@@ -820,12 +875,13 @@ def vm_open_port(resource_group_name, vm_name, network_security_group_name=None,
             )
         )
 
+
 def _build_nic_list(nic_ids):
     from azure.mgmt.network import NetworkManagementClient
     from azure.mgmt.compute.models import NetworkInterfaceReference
     nic_list = []
     if nic_ids:
-        #pylint: disable=no-member
+        # pylint: disable=no-member
         network_client = get_mgmt_service_client(NetworkManagementClient)
         for nic_id in nic_ids:
             rg, name = _parse_rg_name(nic_id)
@@ -833,12 +889,14 @@ def _build_nic_list(nic_ids):
             nic_list.append(NetworkInterfaceReference(nic.id, False))
     return nic_list
 
+
 def _get_existing_nics(vm):
     network_profile = getattr(vm, 'network_profile', None)
     nics = []
     if network_profile is not None:
         nics = network_profile.network_interfaces or []
     return nics
+
 
 def _update_vm_nics(vm, nics, primary_nic):
     from azure.mgmt.compute.models import NetworkProfile
@@ -869,6 +927,7 @@ def _update_vm_nics(vm, nics, primary_nic):
 
     return _vm_set(vm).network_profile.network_interfaces
 
+
 def vmss_scale(resource_group_name, vm_scale_set_name, new_capacity):
     '''change the number of VMs in an virtual machine scale set
 
@@ -876,7 +935,7 @@ def vmss_scale(resource_group_name, vm_scale_set_name, new_capacity):
     '''
     client = _compute_client_factory()
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
-    #pylint: disable=no-member
+    # pylint: disable=no-member
     if vmss.sku.capacity == new_capacity:
         return
     else:
@@ -886,12 +945,14 @@ def vmss_scale(resource_group_name, vm_scale_set_name, new_capacity):
                                                               vm_scale_set_name,
                                                               vmss_new)
 
+
 def vmss_update_instances(resource_group_name, vm_scale_set_name, instance_ids):
     '''upgrade virtual machines in a virtual machine scale set'''
     client = _compute_client_factory()
     return client.virtual_machine_scale_sets.update_instances(resource_group_name,
                                                               vm_scale_set_name,
                                                               instance_ids)
+
 
 def vmss_get_instance_view(resource_group_name, vm_scale_set_name, instance_id=None):
     '''get instance view for a scale set or its VM instances
@@ -912,6 +973,7 @@ def vmss_get_instance_view(resource_group_name, vm_scale_set_name, instance_id=N
         return client.virtual_machine_scale_sets.get_instance_view(resource_group_name,
                                                                    vm_scale_set_name)
 
+
 def vmss_show(resource_group_name, vm_scale_set_name, instance_id=None):
     '''show scale set or its VM instance
 
@@ -926,6 +988,7 @@ def vmss_show(resource_group_name, vm_scale_set_name, instance_id=None):
         return client.virtual_machine_scale_sets.get(resource_group_name,
                                                      vm_scale_set_name)
 
+
 def vmss_list(resource_group_name=None):
     '''list scale sets'''
     client = _compute_client_factory()
@@ -934,10 +997,11 @@ def vmss_list(resource_group_name=None):
     else:
         return client.virtual_machine_scale_sets.list_all()
 
+
 def vmss_deallocate(resource_group_name, vm_scale_set_name, instance_ids=None):
     '''deallocate virtual machines in a scale set. '''
     client = _compute_client_factory()
-    if  instance_ids and len(instance_ids) == 1:
+    if instance_ids and len(instance_ids) == 1:
         return client.virtual_machine_scale_set_vms.deallocate(resource_group_name,
                                                                vm_scale_set_name,
                                                                instance_ids[0])
@@ -945,6 +1009,7 @@ def vmss_deallocate(resource_group_name, vm_scale_set_name, instance_ids=None):
         return client.virtual_machine_scale_sets.deallocate(resource_group_name,
                                                             vm_scale_set_name,
                                                             instance_ids=instance_ids)
+
 
 def vmss_delete_instances(resource_group_name, vm_scale_set_name, instance_ids):
     '''delete virtual machines in a scale set.'''
@@ -958,6 +1023,7 @@ def vmss_delete_instances(resource_group_name, vm_scale_set_name, instance_ids):
                                                                   vm_scale_set_name,
                                                                   instance_ids)
 
+
 def vmss_stop(resource_group_name, vm_scale_set_name, instance_ids=None):
     '''power off (stop) virtual machines in a virtual machine scale set.'''
     client = _compute_client_factory()
@@ -969,6 +1035,7 @@ def vmss_stop(resource_group_name, vm_scale_set_name, instance_ids=None):
         return client.virtual_machine_scale_sets.power_off(resource_group_name,
                                                            vm_scale_set_name,
                                                            instance_ids=instance_ids)
+
 
 def vmss_reimage(resource_group_name, vm_scale_set_name, instance_id=None):
     '''reimage virtual machines in a virtual machine scale set.
@@ -984,6 +1051,7 @@ def vmss_reimage(resource_group_name, vm_scale_set_name, instance_id=None):
         return client.virtual_machine_scale_sets.reimage(resource_group_name,
                                                          vm_scale_set_name)
 
+
 def vmss_restart(resource_group_name, vm_scale_set_name, instance_ids=None):
     '''restart virtual machines in a scale set.'''
     client = _compute_client_factory()
@@ -995,6 +1063,7 @@ def vmss_restart(resource_group_name, vm_scale_set_name, instance_ids=None):
         return client.virtual_machine_scale_sets.restart(resource_group_name,
                                                          vm_scale_set_name,
                                                          instance_ids=instance_ids)
+
 
 def vmss_start(resource_group_name, vm_scale_set_name, instance_ids=None):
     '''start virtual machines in a virtual machine scale set.'''
@@ -1008,17 +1077,22 @@ def vmss_start(resource_group_name, vm_scale_set_name, instance_ids=None):
                                                        vm_scale_set_name,
                                                        instance_ids=instance_ids)
 
+
 def availset_get(resource_group_name, name):
     return _compute_client_factory().availability_sets.get(resource_group_name, name)
+
 
 def availset_set(**kwargs):
     return _compute_client_factory().availability_sets.create_or_update(**kwargs)
 
+
 def vmss_get(resource_group_name, name):
     return _compute_client_factory().virtual_machine_scale_sets.get(resource_group_name, name)
 
+
 def vmss_set(**kwargs):
     return _compute_client_factory().virtual_machine_scale_sets.create_or_update(**kwargs)
+
 
 def update_acs(resource_group_name, container_service_name, new_agent_count):
     client = _compute_client_factory()
@@ -1026,6 +1100,7 @@ def update_acs(resource_group_name, container_service_name, new_agent_count):
     instance.agent_pool_profiles[0].count = new_agent_count
     return client.container_services.create_or_update(resource_group_name,
                                                       container_service_name, instance)
+
 
 def list_container_services(client, resource_group_name=None):
     ''' List Container Services. '''
