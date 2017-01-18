@@ -76,7 +76,7 @@ with ServiceGroup(__name__, get_sql_elasticpools_operations, elasticpools_ops) a
         c.command('list', 'list_by_server')
         c.generic_update_command('update', 'get', 'create_or_update')
 
-    with s.group('sql elastic-pools database') as c:
+    with s.group('sql elastic-pools db') as c:
         c.command('list', 'list_databases')
         c.command('show', 'get_database')
         c.command('show-activity', 'list_database_activity')
