@@ -66,7 +66,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         
         with mock.patch('azure.cli.command_modules.acs.custom._get_acs_info', return_value=acs_info) as get_acs_info:
             with mock.patch('azure.cli.command_modules.acs.custom._k8s_browse_internal') as k8s_browse:
-                _acs_browse_internal(acs_info, 'resource-group', 'name', False)
+                _acs_browse_internal(acs_info, 'resource-group', 'name', False, '')
                 get_acs_info.assert_called_with('name', 'resource-group')
                 k8s_browse.assert_called_with(acs_info, False)
 
@@ -76,8 +76,8 @@ class AcsCustomCommandTest(unittest.TestCase):
         acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(ContainerServiceOchestratorTypes.dcos)
         
         with mock.patch('azure.cli.command_modules.acs.custom._dcos_browse_internal') as dcos_browse:
-            _acs_browse_internal(acs_info, 'resource-group', 'name', False)
-            dcos_browse.assert_called_with(acs_info, False)
+            _acs_browse_internal(acs_info, 'resource-group', 'name', False, 'ssh/key/file')
+            dcos_browse.assert_called_with(acs_info, False, 'ssh/key/file')
 
     def test_merge_credentials(self):
         existing = tempfile.NamedTemporaryFile(delete=False)
