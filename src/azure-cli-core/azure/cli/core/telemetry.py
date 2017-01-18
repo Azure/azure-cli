@@ -211,11 +211,11 @@ def conclude():
 
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
-def set_exception(exception, summary=None):
+def set_exception(exception, fault_type, summary=None):
     if not summary:
         _session.result_summary = summary
 
-    _session.add_exception(exception)
+    _session.add_exception(exception, fault_type=fault_type)
 
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
