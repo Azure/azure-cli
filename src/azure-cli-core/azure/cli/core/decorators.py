@@ -9,9 +9,11 @@ Utility decorators
 The module variable is_diagnostics_mode can be set to a boolean or callable. It is used to determine
 if an exception should be re-raised when the suppression decorator is requested to raise in
 diagnostics mode.
-"""
 
-# NOTE: Do not import modules other than the ones of Python Standard Library.
+The later module will be executed in separate process after az process is terminated to upload
+traces, so it is preferable that it doesn't import modules other than those in the Python Standard
+Library
+"""
 
 import hashlib
 from functools import wraps
