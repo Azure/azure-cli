@@ -25,7 +25,7 @@ cli_command(__name__, 'vm create', 'azure.cli.command_modules.vm.mgmt_vm.lib.ope
 
 op_var = 'virtual_machines_operations'
 op_class = 'VirtualMachinesOperations'
-cli_command(__name__, 'vm delete', mgmt_path.format(op_var, op_class, 'delete'), cf_vm)
+cli_command(__name__, 'vm delete', mgmt_path.format(op_var, op_class, 'delete'), cf_vm, confirmation=True)
 cli_command(__name__, 'vm deallocate', mgmt_path.format(op_var, op_class, 'deallocate'), cf_vm)
 cli_command(__name__, 'vm generalize', mgmt_path.format(op_var, op_class, 'generalize'), cf_vm)
 cli_command(__name__, 'vm show', mgmt_path.format(op_var, op_class, 'get'), cf_vm)

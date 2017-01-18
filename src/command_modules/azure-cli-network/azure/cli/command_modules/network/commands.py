@@ -402,7 +402,7 @@ cli_generic_update_command(__name__, 'network traffic-manager endpoint update',
 
 # DNS ZonesOperations
 cli_command(__name__, 'network dns zone show', 'azure.mgmt.dns.operations.zones_operations#ZonesOperations.get', cf_dns_mgmt_zones)
-cli_command(__name__, 'network dns zone delete', 'azure.mgmt.dns.operations.zones_operations#ZonesOperations.delete', cf_dns_mgmt_zones)
+cli_command(__name__, 'network dns zone delete', 'azure.mgmt.dns.operations.zones_operations#ZonesOperations.delete', cf_dns_mgmt_zones, confirmation=True)
 cli_command(__name__, 'network dns zone list', custom_path.format('list_dns_zones'))
 cli_generic_update_command(__name__, 'network dns zone update',
                            'azure.mgmt.dns.operations.zones_operations#ZonesOperations.get',
