@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
+
 try:
     from urllib.parse import urlsplit
 except ImportError:
@@ -50,6 +52,7 @@ def storage_account_id(namespace):
             namespace.storage_account_id = acc.id #pylint: disable=no-member
     del namespace.storage_account_name
 
+
 def application_enabled(namespace):
     """Validates account has auto-storage enabled"""
 
@@ -60,6 +63,46 @@ def application_enabled(namespace):
     if not acc.auto_storage or not acc.auto_storage.storage_account_id: #pylint: disable=no-member
         raise ValueError("Batch account '{}' needs auto-storage enabled.".
                          format(namespace.account_name))
+
+
+def validate_options(namespace):
+    """Validate any flattened request header option arguments."""
+    try:
+        start = namespace.start_range
+        end = namespace.end_range
+    except AttributeError:
+        return
+    else:
+        namespace.ocp_range = None
+        del namespace.start_range
+        del namespace.end_range
+        if start or end:
+            start = start if start else 0
+            end = end if end else ""
+            namespace.ocp_range = "bytes={}-{}".format(start, end)
+
+
+def validate_file_destination(namespace):
+    """Validate the destination path for a file download."""
+    try:
+        path = namespace.destination
+    except AttributeError:
+        return
+    else:
+        # TODO: Need to confirm this logic...
+        file_path = path
+        file_dir = os.path.dirname(path)
+        if os.path.isdir(path):
+            file_name = os.path.basename(namespace.file_name)
+            file_path = os.path.join(file_name, path)
+        elif not os.path.isdir(file_dir):
+            try:
+                os.mkdir(file_dir)
+            except EnvironmentError as exp:
+                raise ValueError("Directory {} does not exist, and cannot be created: {}".format(file_dir, exp))
+        if os.path.isfile(file_path):
+            raise ValueError("File {} already exists.".format(file_path)
+
 
 def validate_client_parameters(namespace):
     """Retrieves Batch connection parameters from environment variables"""

@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
-import inspect
+import os
 import re
 
 from six import string_types
@@ -17,10 +17,15 @@ from azure.cli.core.commands import (
     CliCommand,
     CliCommandArgument,
     get_op_handler)
+from argcomplete.completers import (
+    FilesCompleter,
+    DirectoriesCompleter)
 from azure.cli.core.commands._introspection import (
     extract_full_summary_from_signature,
     extract_args_from_signature)
 from ._validators import (
+    validate_options,
+    validate_file_destination,
     validate_client_parameters,
     validate_required_parameter)
 
@@ -31,6 +36,11 @@ IGNORE_OPTIONS = {  # Options parameters that should not be exposed as arguments
     'timeout',
     'client_request_id',
     'return_client_request_id'
+}
+IGNORE_PARAMETERS = {'callback'}
+FLATTEN_OPTIONS = {  # Options to be flattened into multiple arguments.
+    'ocp_range': {'start_range':"The byte range to be retrieved. If not set the file will be retrieved from the beginning.",
+                  'end_range':"The byte range to be retrieved. If not set the file will be retrieved to the end."}
 }
 BASIC_TYPES = {  # Argument types that should not be flattened.
     'str',
@@ -136,9 +146,9 @@ class BatchArgumentTree(object):
         :returns: str
         """
         # Search for the :type param_name: in the docstring
-        pattern = r":type {}: (.*?)\n(\s*:param |\s*:rtype |\s*:raises |\"\"\")".format(param)
+        pattern = r":type {}:(.*?)\n(\s*:param |\s*:rtype:|\s*:raises:|\"\"\")".format(param)
         param_type = re.search(pattern, model.__doc__, re.DOTALL)
-        return re.sub("\n\\s*", "", param_type.group(1))
+        return re.sub("\n\s*", "", param_type.group(1))
 
     def find_param_help(self, model, param):
         """Parse the parameter help info from the model docstring.
@@ -147,9 +157,21 @@ class BatchArgumentTree(object):
         :returns: str
         """
         # Search for :param param_name: in the docstring
-        pattern = ":param {}: (.*?)\n\\s*:type ".format(param)
+        pattern = r":param {}:(.*?)\n\s*:type ".format(param)
         param_doc = re.search(pattern, model.__doc__, re.DOTALL)
-        return re.sub("\n\\s*", "", param_doc.group(1))
+        return re.sub("\n\s*", "", param_doc.group(1))
+
+    def find_return_type(self, model):
+        """Parse the parameter help info from the model docstring.
+        :param class model: Model class.
+        :param str param: The name of the parameter.
+        :returns: str
+        """
+        # Search for :rtype: in the docstring
+        pattern = r":rtype: (.*?)\n(\s*:rtype:|\s*:raises:|\"\"\")"
+        return_type = re.search(pattern, model.__doc__, re.DOTALL)
+        if return_type:
+            return re.sub("\n\s*", "", return_type.group(1))
 
     def parse(self, namespace):
         """Parse all arguments in the namespace to validate whether all required
@@ -196,15 +218,19 @@ class AzureDataPlaneCommand(object):
             raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
         self.flatten = flatten  # Number of object levels to flatten
-        self.ignore = ignore if ignore else []  # Parameters to ignore
+        self.ignore = list(IGNORE_PARAMETERS)  # Parameters to ignore
+        if ignore:
+            self.ignore.extend(ignore)
         self.parser = BatchArgumentTree()
 
         # The name of the request options parameter
         self._options_param = self._format_options_name(operation)
         # The name of the group for options arguments
         self._options_group = self.parser.group_title(self._options_param)
-        self._options_attrs = []  # Arguments used for request options
-        self._options_model = None  # The loaded options model to populate for the request
+        # Arguments used for request options
+        self._options_attrs = []
+        # The loaded options model to populate for the request
+        self._options_model = None
 
         def _execute_command(kwargs):
             from msrest.paging import Paged
@@ -212,16 +238,9 @@ class AzureDataPlaneCommand(object):
             from azure.batch.models import BatchErrorException
             try:
                 client = factory(kwargs)
-                kwargs[self._options_param] = self._options_model
+                self._build_options(kwargs)
 
-                # Process the request headers options object
-                for param in self._options_attrs:
-                    if param in IGNORE_OPTIONS:
-                        continue
-                    param_value = kwargs.pop(param)
-                    if param_value is None:
-                        continue
-                    setattr(kwargs[self._options_param], param, param_value)
+                stream_output = kwargs.pop('destination', None)
 
                 # Build the request parameters from command line arguments
                 for arg, details in self.parser:
@@ -230,8 +249,11 @@ class AzureDataPlaneCommand(object):
                         if param_value is None:
                             continue
                         else:
-                            self._build_parameters(details['path'],
-                                                   kwargs, details['root'], param_value)
+                            self._build_parameters(
+                                details['path'], 
+                                kwargs,
+                                details['root'],
+                                param_value)
                     except KeyError:
                         continue
 
@@ -239,13 +261,19 @@ class AzureDataPlaneCommand(object):
                 op = get_op_handler(operation)
                 result = op(client, **kwargs)
 
+                # File download
+                if stream_output:
+                    with open(stream_output, "rb") as file_handle:
+                        for data in result:
+                            file_handle.write(data)
+                    return
+
                 # Apply results transform if specified
-                if transform_result:
+                elif transform_result:
                     return transform_result(result)
 
                 # Otherwise handle based on return type of results
-                # handle stream, and also handle startrange and endrange
-                if isinstance(result, Paged):
+                elif isinstance(result, Paged):
                     return list(result)
                 else:
                     return result
@@ -266,9 +294,10 @@ class AzureDataPlaneCommand(object):
             ' '.join(name.split()),
             _execute_command,
             table_transformer=table_transformer,
-            arguments_loader=lambda: self._load_transformed_arguments(operation,
-                                                                      get_op_handler(operation)),
-            description_loader=lambda: extract_full_summary_from_signature(\
+            arguments_loader=lambda: self._load_transformed_arguments(
+                operation,
+                get_op_handler(operation)),
+            description_loader=lambda: extract_full_summary_from_signature(
                 get_op_handler(operation))
         )
 
@@ -289,6 +318,19 @@ class AzureDataPlaneCommand(object):
 
         path = param[0]
         return path.split('.')[0]
+
+    def _build_options(self, kwargs):
+        """Build request options model from command line arguments.
+        :param dict kwargs: The request arguments being built.
+        """
+        kwargs[self._options_param] = self._options_model
+        for param in self._options_attrs:
+            if param in IGNORE_OPTIONS:
+                continue
+            param_value = kwargs.pop(param)
+            if param_value is None:
+                continue
+            setattr(kwargs[self._options_param], param, param_value)
 
     def _load_model(self, name):
         """Load a model class from the SDK in order to inspect for
@@ -312,7 +354,17 @@ class AzureDataPlaneCommand(object):
         option_type = self.parser.find_param_type(func_obj, self._options_param)
         option_type = self.parser.class_name(option_type)
         self._options_model = self._load_model(option_type)()
-        self._options_attrs = self._options_model.__dict__.keys()
+        self._options_attrs =  list(self._options_model.__dict__.keys())
+
+    #def _inspect(self, func):
+    #    """Inspect a model signature to extract parameter information."""
+    #    try:
+    #        # only supported in python3 - falling back to argspec if not available
+    #        sig = inspect.signature(operation)
+    #        return sig.parameters
+    #    except AttributeError:
+    #        sig = inspect.getargspec(operation) #pylint: disable=deprecated-method
+    #        return sig.args
 
     def _format_options_name(self, operation):
         """Format the name of the request options parameter from the
@@ -369,13 +421,23 @@ class AzureDataPlaneCommand(object):
     def _process_options(self):
         """Process the request options parameter to expose as arguments."""
         for param in [o for o in self._options_attrs if o not in IGNORE_OPTIONS]:
-            docstring = self.parser.find_param_help(self._options_model, param)
-            yield (param, CliCommandArgument(param,
-                                             options_list=[self.parser.arg_name(param)],
-                                             required=False,
-                                             default=getattr(self._options_model, param),
-                                             help=docstring,
-                                             arg_group=self._options_group))
+            if param in FLATTEN_OPTIONS:
+                for f_param, f_docstring in FLATTEN_OPTIONS[param].items():
+                    yield (f_param, CliCommandArgument(f_param,
+                                                       options_list=[self.parser.arg_name(f_param)],
+                                                       required=False,
+                                                       default=None,
+                                                       help=f_docstring,
+                                                       validator=validate_options,
+                                                       arg_group=self._options_group))
+            else:
+                docstring = self.parser.find_param_help(self._options_model, param)
+                yield (param, CliCommandArgument(param,
+                                                 options_list=[self.parser.arg_name(param)],
+                                                 required=False,
+                                                 default=getattr(self._options_model, param),
+                                                 help=docstring,
+                                                 arg_group=self._options_group))
 
     def _resolve_conflict(self, arg, param, path, options, dependencies, conflicting):
         """Resolve conflicting command line arguments.
@@ -410,7 +472,6 @@ class AzureDataPlaneCommand(object):
         :param list conflict_name: List of argument names that conflict.
         """
         if self._should_flatten(path):
-            signature = inspect.signature(param_model)
             required_attrs = [key for key,
                               val in param_model._validation.items() if val.get('required')] #pylint: disable=W0212
 
@@ -421,8 +482,7 @@ class AzureDataPlaneCommand(object):
                 options['arg_group'] = self.parser.group_title(path)
                 options['help'] = self.parser.find_param_help(param_model, param_attr)
                 options['validator'] = lambda ns: validate_required_parameter(ns, self.parser)
-                if signature.parameters[param_attr].default != inspect.Parameter.empty:
-                    options['default'] = signature.parameters[param_attr].default
+                options['default'] = None  # Extract details from signature
 
                 if details['type'] == 'bool':
                     options['action'] = 'store_true'
@@ -457,8 +517,18 @@ class AzureDataPlaneCommand(object):
                 self._flatten_object(arg[0], param_model, True)
                 for flattened_arg in self.parser.compile_args():
                     yield flattened_arg
-            else:
+            elif arg[0] not in self.ignore:
                 yield arg
+        if self.parser.find_return_type(handler) == 'Generator':
+            param = 'destination'
+            docstring = "The path to the destination file or directory."
+            yield (param, CliCommandArgument(param,
+                                             options_list=[self.parser.arg_name(param)],
+                                             required=True,
+                                             default=None,
+                                             completer=DirectoriesCompleter(),
+                                             validator=validate_file_destination,
+                                             help=docstring))
 
 
 def cli_data_plane_command(name, operation, client_factory, transform=None,
@@ -468,6 +538,7 @@ def cli_data_plane_command(name, operation, client_factory, transform=None,
 
     command = AzureDataPlaneCommand(__name__, name, operation, client_factory,
                                     transform, table_transformer, flatten, ignore)
+
     # add parameters required to create a batch client
     group_name = 'Batch Account'
     command.cmd.add_argument('account_name', '--account-name', required=False, default=None,
