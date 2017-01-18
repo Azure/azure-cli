@@ -197,3 +197,71 @@ class SqlServerServiceObjectiveMgmtScenarioTest(ResourceGroupVCRTestBase):
         # test delete sql server
         self.cmd('sql server delete -g {} --server-name {}'
                  .format(rg, self.sql_server_name), checks=NoneCheck())
+
+
+class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(SqlServerDbMgmtScenarioTest, self).__init__(
+            __file__, test_method, resource_group='cli-test-sql-mgmt')
+        self.sql_server_name = 'cliautomation05'
+        self.location = "westus"
+        self.administrator_login = 'admin123'
+        self.administrator_login_password = 'SecretPassword123'
+        self.database_name = "cliautomationdb01"
+
+    def test_sql_db_mgmt(self):
+        self.execute()
+
+    def body(self):
+        rg = self.resource_group
+        loc = self.location
+        user = self.administrator_login
+        password = self.administrator_login_password
+
+        # create sql server with minimal required parameters
+        self.cmd('sql server create -g {} --server-name {} -l {} '
+                 '--administrator-login {} --administrator-login-password {}'
+                 .format(rg, self.sql_server_name, loc, user, password), checks=[
+                     JMESPathCheck('name', self.sql_server_name),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('administratorLogin', user)])
+
+        # test sql db commands
+        self.cmd('sql db create -g {} --server-name {} -l {} --database-name {}'
+                 .format(rg, self.sql_server_name, loc, self.database_name), checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('status', 'Online')])
+
+        self.cmd('sql db list -g {} --server-name {}'
+                 .format(rg, self.sql_server_name), checks=[
+                     JMESPathCheck('length(@)', 2),
+                     JMESPathCheck('[1].name', 'master'),
+                     JMESPathCheck('[1].resourceGroup', rg),
+                     JMESPathCheck('[0].name', self.database_name),
+                     JMESPathCheck('[0].resourceGroup', rg)])
+
+        self.cmd('sql db show -g {} --server-name {} --database-name {}'
+                 .format(rg, self.sql_server_name, self.database_name), checks=[
+                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('resourceGroup', rg)])
+
+        self.cmd('sql db show-usage -g {} --server-name {} --database-name {}'
+                 .format(rg, self.sql_server_name, self.database_name), checks=[
+                     JMESPathCheck('[0].resourceName', self.database_name)])
+
+        self.cmd('sql db update -g {} --server-name {} --database-name {} '
+                 '--set tags.key1=value1'
+                 .format(rg, self.sql_server_name, self.database_name), checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('tags.key1', 'value1')])
+
+        self.cmd('sql db delete -g {} --server-name {} --database-name {}'
+                 .format(rg, self.sql_server_name, self.database_name), checks=[NoneCheck()])
+
+        # delete sql server
+        self.cmd('sql server delete -g {} --server-name {}'
+                 .format(rg, self.sql_server_name), checks=NoneCheck())
