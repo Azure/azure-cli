@@ -23,3 +23,8 @@ with ParametersContext(command='sql db create') as c:
     from azure.mgmt.sql.models.database import Database
 
     c.expand('parameters', Database, group_name='Creating')
+
+with ParametersContext(command='sql elastic-pools create') as c:
+    from azure.mgmt.sql.models.elastic_pool import ElasticPool
+
+    c.expand('parameters', ElasticPool, group_name='Creating')
