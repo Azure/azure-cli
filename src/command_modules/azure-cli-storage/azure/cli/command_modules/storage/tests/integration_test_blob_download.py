@@ -82,4 +82,3 @@ class StorageBlobDownloadIntegrationTests(StorageIntegrationTestBase):
 
         cli_main(cmd.split())
         assert sum(len(f) for r, d, f in os.walk(self._test_folder)) == 4
-

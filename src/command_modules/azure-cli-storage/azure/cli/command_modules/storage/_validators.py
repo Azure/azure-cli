@@ -4,27 +4,25 @@
 # --------------------------------------------------------------------------------------------
 
 import argparse
-from collections import OrderedDict
-from datetime import datetime
 import os
 import re
+from collections import OrderedDict
+from datetime import datetime
 
 from azure.cli.core._config import az_config
+from azure.cli.core._profile import CLOUD
 from azure.cli.core._util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
-
-from azure.cli.core._profile import CLOUD
-
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.storage.models import CustomDomain
-from azure.storage.models import ResourceTypes, Services
-from azure.storage.table import TablePermissions, TablePayloadFormat
 from azure.storage.blob import Include, PublicAccess
 from azure.storage.blob.baseblobservice import BaseBlobService
 from azure.storage.blob.models import ContentSettings as BlobContentSettings
 from azure.storage.file import FileService
 from azure.storage.file.models import ContentSettings as FileContentSettings
+from azure.storage.models import ResourceTypes, Services
+from azure.storage.table import TablePermissions, TablePayloadFormat
 
 from ._factory import get_storage_data_service_client
 from .util import glob_files_locally
@@ -32,6 +30,7 @@ from .util import glob_files_locally
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
 # region PARAMETER VALIDATORS
+
 
 def validate_accept(namespace):
     if namespace.accept:
@@ -41,6 +40,7 @@ def validate_accept(namespace):
             'full': TablePayloadFormat.JSON_FULL_METADATA
         }
         namespace.accept = formats[namespace.accept.lower()]
+
 
 def validate_client_parameters(namespace):
     """ Retrieves storage connection parameters from environment variables and parses out
@@ -72,9 +72,10 @@ def validate_client_parameters(namespace):
             from azure.cli.core.commands.arm import parse_resource_id
             rg = parse_resource_id(acc.id)['resource_group']
             n.account_key = \
-                scf.storage_accounts.list_keys(rg, n.account_name).keys[0].value #pylint: disable=no-member
+                scf.storage_accounts.list_keys(rg, n.account_name).keys[0].value  # pylint: disable=no-member
         else:
             raise ValueError("Storage account '{}' not found.".format(n.account_name))
+
 
 def validate_source_uri(namespace):
     usage_string = 'invalid usage: supply only one of the following argument sets:' + \
@@ -82,7 +83,7 @@ def validate_source_uri(namespace):
                    '\n\tOR --source-container --source-blob [--source-snapshot] [--source-sas]' + \
                    '\n\tOR --source-share --source-path [--source-sas]'
     ns = vars(namespace)
-    validate_client_parameters(namespace) # must run first to resolve storage account
+    validate_client_parameters(namespace)  # must run first to resolve storage account
     storage_acc = ns.get('account_name', None) or az_config.get('storage', 'account', None)
     uri = ns.get('copy_source', None)
     container = ns.pop('source_container', None)
@@ -101,7 +102,7 @@ def validate_source_uri(namespace):
     valid_blob_source = container and blob and not share and not path
     valid_file_source = share and path and not container and not blob and not snapshot
 
-    if (not valid_blob_source and not valid_file_source) or (valid_blob_source and valid_file_source): # pylint: disable=line-too-long
+    if (not valid_blob_source and not valid_file_source) or (valid_blob_source and valid_file_source):  # pylint: disable=line-too-long
         raise ValueError(usage_string)
 
     query_params = []
@@ -121,9 +122,11 @@ def validate_source_uri(namespace):
 
     namespace.copy_source = uri
 
+
 def validate_blob_type(namespace):
     if not namespace.blob_type:
         namespace.blob_type = 'page' if namespace.file_path.endswith('.vhd') else 'block'
+
 
 def get_content_setting_validator(settings_class, update):
     def _class_name(class_type):
@@ -152,13 +155,13 @@ def get_content_setting_validator(settings_class, update):
                 container = ns.get('container_name')
                 blob = ns.get('blob_name')
                 lease_id = ns.get('lease_id')
-                props = client.get_blob_properties(container, blob, lease_id=lease_id).properties.content_settings # pylint: disable=line-too-long
+                props = client.get_blob_properties(container, blob, lease_id=lease_id).properties.content_settings  # pylint: disable=line-too-long
             elif _class_name(settings_class) == _class_name(FileContentSettings):
-                client = get_storage_data_service_client(FileService, account, key, cs, sas) # pylint: disable=redefined-variable-type
+                client = get_storage_data_service_client(FileService, account, key, cs, sas)  # pylint: disable=redefined-variable-type
                 share = ns.get('share_name')
                 directory = ns.get('directory_name')
                 filename = ns.get('file_name')
-                props = client.get_file_properties(share, directory, filename).properties.content_settings # pylint: disable=line-too-long
+                props = client.get_file_properties(share, directory, filename).properties.content_settings  # pylint: disable=line-too-long
 
         # create new properties
         new_props = settings_class(
@@ -184,12 +187,14 @@ def get_content_setting_validator(settings_class, update):
         namespace = argparse.Namespace(**ns)
     return validator
 
+
 def validate_custom_domain(namespace):
     if namespace.custom_domain:
         namespace.custom_domain = CustomDomain(namespace.custom_domain, namespace.subdomain)
     if namespace.subdomain and not namespace.custom_domain:
         raise ValueError("must specify '--custom-domain' to use the '--use-subdomain' flag")
     del namespace.subdomain
+
 
 def validate_encryption(namespace):
     ''' Builds up the encryption object for storage account operations based on the
@@ -198,6 +203,7 @@ def validate_encryption(namespace):
         from azure.mgmt.storage.models import Encryption, EncryptionServices, EncryptionService
         services = {service: EncryptionService(True) for service in namespace.encryption}
         namespace.encryption = Encryption(EncryptionServices(**services))
+
 
 def validate_entity(namespace):
     ''' Converts a list of key value pairs into a dictionary. Ensures that required
@@ -238,6 +244,7 @@ def validate_entity(namespace):
     values = {key: cast_val(key, val) for key, val in values.items()}
     namespace.entity = values
 
+
 def get_file_path_validator(default_file_param=None):
     """ Creates a namespace validator that splits out 'path' into 'directory_name' and 'file_name'.
     Allows another path-type parameter to be named which can supply a default filename. """
@@ -256,6 +263,7 @@ def get_file_path_validator(default_file_param=None):
         del namespace.path
     return validator
 
+
 def validate_included_datasets(namespace):
     if namespace.include:
         include = namespace.include
@@ -264,16 +272,20 @@ def validate_included_datasets(namespace):
             raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
         namespace.include = Include('s' in include, 'm' in include, False, 'c' in include)
 
+
 def validate_key(namespace):
     namespace.key_name = storage_account_key_options[namespace.key_name]
+
 
 def validate_metadata(namespace):
     if namespace.metadata:
         namespace.metadata = dict(x.split('=', 1) for x in namespace.metadata)
 
+
 def get_permission_help_string(permission_class):
     allowed_values = [x.lower() for x in dir(permission_class) if not x.startswith('__')]
     return ' '.join(['({}){}'.format(x[0], x[1:]) for x in allowed_values])
+
 
 def get_permission_validator(permission_class):
 
@@ -289,6 +301,7 @@ def get_permission_validator(permission_class):
             namespace.permission = permission_class(_str=namespace.permission)
     return validator
 
+
 def table_permission_validator(namespace):
     """ A special case for table because the SDK associates the QUERY permission with 'r' """
     if namespace.permission:
@@ -297,7 +310,10 @@ def table_permission_validator(namespace):
             raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
         namespace.permission = TablePermissions(_str=namespace.permission)
 
+
 public_access_types = {'off': None, 'blob': PublicAccess.Blob, 'container': PublicAccess.Container}
+
+
 def validate_public_access(namespace):
     if namespace.public_access:
         namespace.public_access = public_access_types[namespace.public_access.lower()]
@@ -315,6 +331,7 @@ def validate_public_access(namespace):
             container = ns.get('container_name')
             lease_id = ns.get('lease_id')
             ns['signed_identifiers'] = client.get_container_acl(container, lease_id=lease_id)
+
 
 def validate_select(namespace):
     if namespace.select:
@@ -386,10 +403,12 @@ def get_source_file_or_blob_service_client(namespace):
 
         from .storage_url_helpers import StorageResourceIdentifier
         identifier = StorageResourceIdentifier(source_uri)
+
+        nor_container_or_share = not identifier.container and not identifier.share
         if not identifier.is_url():
             raise ValueError('incorrect usage: --source-uri expects a URI')
-        elif identifier.blob or identifier.directory or identifier.filename or \
-             (not identifier.container and not identifier.share):
+        elif identifier.blob or identifier.directory or \
+                identifier.filename or nor_container_or_share:
             raise ValueError('incorrect usage: --source-uri has to be blob container or file share')
         elif identifier.container:
             from azure.storage.blob.blockblobservice import BlockBlobService
@@ -527,6 +546,7 @@ def process_file_download_namespace(namespace):
         namespace.file_path = os.path.join(dest, namespace.file_name) \
             if dest else namespace.file_name
 
+
 def process_logging_update_namespace(namespace):
     services = namespace.services
     if set(services) - set('bqt'):
@@ -536,6 +556,7 @@ def process_logging_update_namespace(namespace):
     if set(log) - set('rwd'):
         raise ValueError('--log: valid values are (r)ead (w)rite (d)elete '
                          'or a combination thereof (ex: rw).')
+
 
 def process_metric_update_namespace(namespace):
     namespace.hour = namespace.hour == 'enable'
@@ -552,15 +573,18 @@ def process_metric_update_namespace(namespace):
 
 # region TYPES
 
+
 def datetime_string_type(string):
     ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
     date_format = '%Y-%m-%dT%H:%MZ'
     return datetime.strptime(string, date_format).strftime(date_format)
 
+
 def datetime_type(string):
     ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
     date_format = '%Y-%m-%dT%H:%MZ'
     return datetime.strptime(string, date_format)
+
 
 def ipv4_range_type(string):
     ''' Validates an IPv4 address or address range. '''
@@ -570,12 +594,14 @@ def ipv4_range_type(string):
             raise ValueError
     return string
 
+
 def resource_type_type(string):
     ''' Validates that resource types string contains only a combination
     of (s)ervice, (c)ontainer, (o)bject '''
     if set(string) - set("sco"):
         raise ValueError
     return ResourceTypes(_str=''.join(set(string)))
+
 
 def services_type(string):
     ''' Validates that services string contains only a combination
@@ -587,6 +613,7 @@ def services_type(string):
 # endregion
 
 # region TRANSFORMS
+
 
 def transform_acl_list_output(result):
     """ Transform to convert SDK output into a form that is more readily
@@ -601,8 +628,10 @@ def transform_acl_list_output(result):
         new_result.append(new_entry)
     return new_result
 
+
 def transform_container_permission_output(result):
     return {'publicAccess': result.public_access or 'off'}
+
 
 def transform_cors_list_output(result):
     new_result = []
@@ -621,6 +650,7 @@ def transform_cors_list_output(result):
             new_result.append(new_entry)
     return new_result
 
+
 def transform_entity_query_output(result):
     new_results = []
     ignored_keys = ['etag', 'Timestamp', 'RowKey', 'PartitionKey']
@@ -634,6 +664,7 @@ def transform_entity_query_output(result):
         new_results.append(new_entry)
     return new_results
 
+
 def transform_logging_list_output(result):
     new_result = []
     for key in sorted(result.keys()):
@@ -645,6 +676,7 @@ def transform_logging_list_output(result):
         new_entry['RetentionPolicy'] = str(result[key]['retentionPolicy']['days'])
         new_result.append(new_entry)
     return new_result
+
 
 def transform_metrics_list_output(result):
     new_result = []
@@ -662,14 +694,18 @@ def transform_metrics_list_output(result):
             new_result.append(new_entry)
     return new_result
 
+
 def transform_storage_boolean_output(result):
     return {'success': result}
+
 
 def transform_storage_exists_output(result):
     return {'exists': result}
 
+
 def transform_storage_list_output(result):
     return list(result)
+
 
 def transform_url(result):
     """ Ensures the resulting URL string does not contain extra / characters """
@@ -677,4 +713,4 @@ def transform_url(result):
     result = re.sub('/', '//', result, count=1)
     return result
 
-#endregion
+# endregion

@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps #pylint: disable=unused-import
+from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
-#pylint: disable=line-too-long, too-many-lines
+# pylint: disable=line-too-long, too-many-lines
 
 helps['storage entity insert'] = """
     type: command
@@ -185,7 +185,7 @@ helps['storage file upload-batch'] = """
         - name: --destination -d
           type: string
           short-summary: The string represents the destination of this upload operation. The
-                         destination can be the file share URL or the share name. When the 
+                         destination can be the file share URL or the share name. When the
                          destination is the share URL, the storage account name will parsed
                          from the URL.
         - name: --pattern

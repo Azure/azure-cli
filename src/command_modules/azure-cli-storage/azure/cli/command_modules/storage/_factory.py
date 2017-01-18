@@ -20,11 +20,12 @@ NO_CREDENTIALS_ERROR_MESSAGE = """
 No credentials specifed to access storage service. Please provide any of the following:
     (1) account name and key (--account-name and --account-key options or
         set AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_KEY environment variables)
-    (2) connection string (--connection-string option or 
+    (2) connection string (--connection-string option or
         set AZURE_STORAGE_CONNECTION_STRING environment variable)
-    (3) account name and SAS token (--sas-token option used with either the --account-name 
+    (3) account name and SAS token (--sas-token option used with either the --account-name
         option or AZURE_STORAGE_ACCOUNT environment variable)
 """
+
 
 def get_storage_data_service_client(service, name=None, key=None, connection_string=None,
                                     sas_token=None):
@@ -34,6 +35,7 @@ def get_storage_data_service_client(service, name=None, key=None, connection_str
                                    connection_string,
                                    sas_token,
                                    endpoint_suffix=CLOUD.suffixes.storage_endpoint)
+
 
 def generic_data_service_factory(service, name=None, key=None, connection_string=None,
                                  sas_token=None):
@@ -45,8 +47,10 @@ def generic_data_service_factory(service, name=None, key=None, connection_string
             message = NO_CREDENTIALS_ERROR_MESSAGE
         raise CLIError(message)
 
+
 def storage_client_factory(**_):
     return get_mgmt_service_client(StorageManagementClient)
+
 
 def file_data_service_factory(kwargs):
     return generic_data_service_factory(
@@ -55,6 +59,7 @@ def file_data_service_factory(kwargs):
         kwargs.pop('account_key', None),
         connection_string=kwargs.pop('connection_string', None),
         sas_token=kwargs.pop('sas_token', None))
+
 
 def blob_data_service_factory(kwargs):
     from ._params import blob_types
@@ -67,6 +72,7 @@ def blob_data_service_factory(kwargs):
         connection_string=kwargs.pop('connection_string', None),
         sas_token=kwargs.pop('sas_token', None))
 
+
 def table_data_service_factory(kwargs):
     return generic_data_service_factory(
         TableService,
@@ -74,6 +80,7 @@ def table_data_service_factory(kwargs):
         kwargs.pop('account_key', None),
         connection_string=kwargs.pop('connection_string', None),
         sas_token=kwargs.pop('sas_token', None))
+
 
 def queue_data_service_factory(kwargs):
     return generic_data_service_factory(
@@ -83,9 +90,10 @@ def queue_data_service_factory(kwargs):
         connection_string=kwargs.pop('connection_string', None),
         sas_token=kwargs.pop('sas_token', None))
 
+
 def cloud_storage_account_service_factory(kwargs):
     account_name = kwargs.pop('account_name', None)
     account_key = kwargs.pop('account_key', None)
     sas_token = kwargs.pop('sas_token', None)
-    connection_string = kwargs.pop('connection_string', None) # pylint: disable=unused-variable
+    kwargs.pop('connection_string', None)  # pylint: disable=unused-variable
     return CloudStorageAccount(account_name, account_key, sas_token)
