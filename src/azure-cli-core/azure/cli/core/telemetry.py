@@ -174,7 +174,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
 
     @property
     def module_version(self):
-        # 'model-version-to-be-implemented'
+        # TODO: find a efficient solution to retrieve module version
         return 'none'
 
     @property

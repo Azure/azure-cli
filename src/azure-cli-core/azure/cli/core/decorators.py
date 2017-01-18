@@ -45,8 +45,8 @@ def _should_raise(raise_in_diagnostics):
 
 def call_once(factory_func):
     """"
-    When a is annotated by this decorator, it will be only executed once. The result will be
-    cached and return for following invocations.
+    When a function is annotated by this decorator, it will be only executed once. The result will
+    be cached and return for following invocations.
     """
     factory_func.executed = False
     factory_func.cached_result = None

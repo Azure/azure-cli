@@ -233,7 +233,7 @@ def get_command_table():
         except Exception as ex:  # pylint: disable=broad-except
             # Changing this error message requires updating CI script that checks for failed
             # module loading.
-            logger.error("Error loading command module '%s'E", mod)
+            logger.error("Error loading command module '%s'", mod)
             telemetry.set_exception(exception=ex, summary='Error loading module: {}'.format(mod))
             logger.debug(traceback.format_exc())
     logger.debug("Loaded all modules in %.3f seconds. "
