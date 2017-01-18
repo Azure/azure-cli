@@ -5,7 +5,8 @@
 
 from azure.cli.core.commands import cli_command
 
-from ._client_factory import batch_client_factory
+from ._client_factory import batch_client_factory, batch_data_service_factory
+from ._command_type import cli_data_plane_command, cli_custom_data_plane_command
 
 data_path = 'azure.batch.operations.{}_operations#{}'
 custom_path = 'azure.cli.command_modules.batch.custom#{}'
@@ -25,7 +26,6 @@ cli_command(__name__, 'batch account autostorage-keys sync', mgmt_path.format('b
 cli_command(__name__, 'batch account keys list', mgmt_path.format('batch_account', 'BatchAccountOperations.get_keys'), factory)
 cli_command(__name__, 'batch account keys renew', mgmt_path.format('batch_account', 'BatchAccountOperations.regenerate_key'), factory)
 
-
 factory = lambda args: batch_client_factory(**args).application
 cli_command(__name__, 'batch application list', mgmt_path.format('application', 'ApplicationOperations.list'), factory)
 cli_command(__name__, 'batch application show', mgmt_path.format('application', 'ApplicationOperations.get'), factory)
@@ -33,13 +33,115 @@ cli_command(__name__, 'batch application create', mgmt_path.format('application'
 cli_command(__name__, 'batch application set', custom_path.format('update_application'), factory)
 cli_command(__name__, 'batch application delete', mgmt_path.format('application', 'ApplicationOperations.delete'), factory)
 
-
 factory = lambda args: batch_client_factory(**args).application_package
 cli_command(__name__, 'batch application package create', custom_path.format('create_application_package'), factory)
 cli_command(__name__, 'batch application package delete', mgmt_path.format('application_package', 'ApplicationPackageOperations.delete'), factory)
 cli_command(__name__, 'batch application package show', mgmt_path.format('application_package', 'ApplicationPackageOperations.get'), factory)
 cli_command(__name__, 'batch application package activate', mgmt_path.format('application_package', 'ApplicationPackageOperations.activate'), factory)
 
-
 factory = lambda args: batch_client_factory(**args).location
 cli_command(__name__, 'batch location quotas show', mgmt_path.format('location', 'LocationOperations.get_quotas'), factory)
+
+# Data Plane Commands
+
+factory = lambda args: batch_data_service_factory(**args).application
+cli_data_plane_command('batch application summary list', data_path.format('application', 'ApplicationOperations.list'), factory)
+cli_data_plane_command('batch application summary show', data_path.format('application', 'ApplicationOperations.get'), factory)
+
+factory = lambda args: batch_data_service_factory(**args).account
+cli_data_plane_command('batch pool node-agent-skus list', data_path.format('account', 'AccountOperations.list_node_agent_skus'), factory)
+
+factory = lambda args: batch_data_service_factory(**args).certificate
+#cli_data_plane_command('batch certificate create', data_path.format('certificate', 'CertificateOperations.add'), factory)
+#cli_data_plane_command('batch certificate delete', data_path.format('certificate', 'CertificateOperations.delete'), factory)
+cli_custom_data_plane_command('batch certificate create', custom_path.format('create_certificate'), factory)
+cli_custom_data_plane_command('batch certificate delete', custom_path.format('delete_certificate'), factory)
+cli_data_plane_command('batch certificate show', data_path.format('certificate', 'CertificateOperations.get'), factory)
+cli_data_plane_command('batch certificate list', data_path.format('certificate', 'CertificateOperations.list'), factory)
+
+factory = lambda args: batch_data_service_factory(**args).pool
+cli_data_plane_command('batch pool usage-metrics list', data_path.format('pool', 'PoolOperations.list_pool_usage_metrics'), factory)
+cli_data_plane_command('batch pool all-stats show', data_path.format('pool', 'PoolOperations.get_all_pools_lifetime_statistics'), factory)
+#cli_data_plane_command('batch pool create', data_path.format('pool', 'PoolOperations.add'), factory)
+cli_custom_data_plane_command('batch pool create', custom_path.format('create_pool'), factory)
+cli_data_plane_command('batch pool list', data_path.format('pool', 'PoolOperations.list'), factory)
+cli_data_plane_command('batch pool delete', data_path.format('pool', 'PoolOperations.delete'), factory)
+cli_data_plane_command('batch pool show', data_path.format('pool', 'PoolOperations.get'), factory)
+#cli_data_plane_command('batch pool set', data_path.format('pool', 'PoolOperations.patch'), factory)
+cli_custom_data_plane_command('batch pool set', custom_path.format('patch_pool'), factory)
+#cli_data_plane_command('batch pool reset', data_path.format('pool', 'PoolOperations.update_properties'), factory)
+cli_custom_data_plane_command('batch pool reset', custom_path.format('update_pool'), factory)
+cli_data_plane_command('batch pool autoscale disable', data_path.format('pool', 'PoolOperations.disable_auto_scale'), factory)
+cli_data_plane_command('batch pool autoscale enable', data_path.format('pool', 'PoolOperations.enable_auto_scale'), factory)
+cli_data_plane_command('batch pool autoscale evaluate', data_path.format('pool', 'PoolOperations.evaluate_auto_scale'), factory)
+#cli_data_plane_command('batch pool resize', data_path.format('pool', 'PoolOperations.resize'), factory)
+cli_custom_data_plane_command('batch pool resize', custom_path.format('resize_pool'), factory)
+cli_data_plane_command('batch pool os upgrade', data_path.format('pool', 'PoolOperations.upgrade_os'), factory)
+cli_data_plane_command('batch node delete', data_path.format('pool', 'PoolOperations.remove_nodes'), factory)
+
+factory = lambda args: batch_data_service_factory(**args).job
+cli_data_plane_command('batch job all-stats show', data_path.format('job', 'JobOperations.get_all_jobs_lifetime_statistics'), factory)
+#cli_data_plane_command('batch job create', data_path.format('job', 'JobOperations.add'), factory)#, ignore=["job.job_release_task", "job.job_preparation_task", "job.job_manager_task"])
+#cli_data_plane_command('batch job list', data_path.format('job', 'JobOperations.list'), factory)
+cli_data_plane_command('batch job delete', data_path.format('job', 'JobOperations.delete'), factory)
+cli_data_plane_command('batch job show', data_path.format('job', 'JobOperations.get'), factory)
+#cli_data_plane_command('batch job set', data_path.format('job', 'JobOperations.patch'), factory)
+#cli_data_plane_command('batch job reset', data_path.format('job', 'JobOperations.update'), factory)
+cli_custom_data_plane_command('batch job create', custom_path.format('create_job'), factory)
+cli_custom_data_plane_command('batch job list', custom_path.format('list_job'), factory)
+cli_custom_data_plane_command('batch job set', custom_path.format('patch_job'), factory)
+cli_custom_data_plane_command('batch job reset', custom_path.format('update_job'), factory)
+cli_data_plane_command('batch job disable', data_path.format('job', 'JobOperations.disable'), factory)
+cli_data_plane_command('batch job enable', data_path.format('job', 'JobOperations.enable'), factory)
+cli_data_plane_command('batch job stop', data_path.format('job', 'JobOperations.terminate'), factory)
+cli_data_plane_command('batch job prep-release-status list', data_path.format('job', 'JobOperations.list_preparation_and_release_task_status'), factory)
+
+factory = lambda args: batch_data_service_factory(**args).job_schedule
+#cli_data_plane_command('batch job-schedule create', data_path.format('job_schedule', 'JobScheduleOperations.add'), factory)
+cli_custom_data_plane_command('batch job-schedule create', custom_path.format('create_job_schedule'), factory)
+cli_data_plane_command('batch job-schedule delete', data_path.format('job_schedule', 'JobScheduleOperations.delete'), factory)
+cli_data_plane_command('batch job-schedule show', data_path.format('job_schedule', 'JobScheduleOperations.get'), factory)
+#cli_data_plane_command('batch job-schedule set', data_path.format('job_schedule', 'JobScheduleOperations.patch'), factory)
+#cli_data_plane_command('batch job-schedule reset', data_path.format('job_schedule', 'JobScheduleOperations.update'), factory)
+cli_custom_data_plane_command('batch job-schedule set', custom_path.format('patch_job_schedule'), factory)
+cli_custom_data_plane_command('batch job-schedule reset', custom_path.format('update_job_schedule'), factory)
+cli_data_plane_command('batch job-schedule disable', data_path.format('job_schedule', 'JobScheduleOperations.disable'), factory)
+cli_data_plane_command('batch job-schedule enable', data_path.format('job_schedule', 'JobScheduleOperations.enable'), factory)
+cli_data_plane_command('batch job-schedule stop', data_path.format('job_schedule', 'JobScheduleOperations.terminate'), factory)
+cli_data_plane_command('batch job-schedule list', data_path.format('job_schedule', 'JobScheduleOperations.list'), factory)
+
+factory = lambda args: batch_data_service_factory(**args).task
+#cli_data_plane_command('batch task create', data_path.format('task', 'TaskOperations.add'), factory)
+cli_custom_data_plane_command('batch task create', custom_path.format('create_task'), factory)
+cli_data_plane_command('batch task list', data_path.format('task', 'TaskOperations.list'), factory)
+cli_data_plane_command('batch task delete', data_path.format('task', 'TaskOperations.delete'), factory)
+cli_data_plane_command('batch task show', data_path.format('task', 'TaskOperations.get'), factory)
+cli_data_plane_command('batch task reset', data_path.format('task', 'TaskOperations.update'), factory)
+cli_data_plane_command('batch task reactivate', data_path.format('task', 'TaskOperations.reactivate'), factory)
+cli_data_plane_command('batch task stop', data_path.format('task', 'TaskOperations.terminate'), factory)
+cli_data_plane_command('batch task subtask list', data_path.format('task', 'TaskOperations.list_subtasks'), factory)
+
+factory = lambda args: batch_data_service_factory(**args).file
+cli_data_plane_command('batch task file delete', data_path.format('file', 'FileOperations.delete_from_task'), factory)
+cli_data_plane_command('batch task file download', data_path.format('file', 'FileOperations.get_from_task'), factory)
+cli_data_plane_command('batch task file show', data_path.format('file', 'FileOperations.get_node_file_properties_from_task'), factory)
+cli_data_plane_command('batch task file list', data_path.format('file', 'FileOperations.list_from_task'), factory)
+
+factory = lambda args: batch_data_service_factory(**args).compute_node
+cli_data_plane_command('batch node-user create', data_path.format('compute_node', 'ComputeNodeOperations.add_user'), factory)
+cli_data_plane_command('batch node-user delete', data_path.format('compute_node', 'ComputeNodeOperations.delete_user'), factory)
+cli_data_plane_command('batch node-user set', data_path.format('compute_node', 'ComputeNodeOperations.update_user'), factory)
+cli_data_plane_command('batch node show', data_path.format('compute_node', 'ComputeNodeOperations.get'), factory)
+cli_data_plane_command('batch node list', data_path.format('compute_node', 'ComputeNodeOperations.list'), factory)
+cli_data_plane_command('batch node reboot', data_path.format('compute_node', 'ComputeNodeOperations.reboot'), factory)
+cli_data_plane_command('batch node reimage', data_path.format('compute_node', 'ComputeNodeOperations.reimage'), factory)
+cli_data_plane_command('batch node scheduling disable', data_path.format('compute_node', 'ComputeNodeOperations.disable_scheduling'), factory)
+cli_data_plane_command('batch node scheduling enable', data_path.format('compute_node', 'ComputeNodeOperations.enable_scheduling'), factory)
+cli_data_plane_command('batch node remote-login-settings show', data_path.format('compute_node', 'ComputeNodeOperations.get_remote_login_settings'), factory)
+cli_data_plane_command('batch node remote-desktop show', data_path.format('compute_node', 'ComputeNodeOperations.get_remote_desktop'), factory)
+
+factory = lambda args: batch_data_service_factory(**args).file
+cli_data_plane_command('batch node file delete', data_path.format('file', 'FileOperations.delete_from_compute_node'), factory)
+cli_data_plane_command('batch node file download', data_path.format('file', 'FileOperations.get_from_compute_node'), factory)
+cli_data_plane_command('batch node file show', data_path.format('file', 'FileOperations.get_node_file_properties_from_compute_node'), factory)
+cli_data_plane_command('batch node file list', data_path.format('file', 'FileOperations.list_from_compute_node'), factory)

@@ -54,8 +54,8 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('resourceGroup', rg)
         ])
 
-        self.cmd('batch account set -g {} -n {} --storage-account-id {}'.
-                 format(rg, name, sid),
+        self.cmd('batch account set -g {} -n {} --storage-account-name {}'.
+                 format(rg, name, self.storage_account_name),
                  checks=[
                      JMESPathCheck('name', name),
                      JMESPathCheck('location', loc),
@@ -165,7 +165,7 @@ class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('id', aname),
                      JMESPathCheck('storageUrl != null', True),
                      JMESPathCheck('version', ver),
-                     JMESPathCheck('state', 'pending')
+                     JMESPathCheck('state', 'active')
                  ])
 
         self.cmd('batch application package activate -g {} -n {} --application-id {} --version {} --format zip'.format(rg, name, aname, ver)) #pylint: disable=line-too-long
