@@ -5,7 +5,7 @@
 
 from azure.cli.core.help_files import helps
 
-#pylint: disable=line-too-long
+# pylint: disable=line-too-long
 
 image_long_summary = """                      URN aliases: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS, Win2008SP1, Win2012Datacenter, Win2012R2Datacenter.
                       Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest.
@@ -16,13 +16,13 @@ helps['vm create'] = """
             type: command
             short-summary: Create an Azure Virtual Machine
             long-summary: See https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-quick-create-cli/ for an end-to-end tutorial
-            parameters: 
+            parameters:
                 - name: --image
                   type: string
                   short-summary: 'OS image (URN alias, URN or URI).'
                   long-summary: |
 {0}
-                  populator-commands: 
+                  populator-commands:
                   - az vm image list
                   - az vm image show
                 - name: --ssh-key-value
@@ -38,7 +38,7 @@ helps['vm create'] = """
                     --ssh-key-value "<ssh-rsa-key, key-file-path or not specified for default-key-path>"
                 - name: Create a simple Windows Server VM with private IP address only
                   text: >
-                    az vm create -n my_vm_name -g myrg --admin-username myadmin --admin-password Password@1234 
+                    az vm create -n my_vm_name -g myrg --admin-username myadmin --admin-password Password@1234
                      --public-ip-address "" --image Win2012R2Datacenter
                 - name: Create a simple Windows Server VM with public IP address and DNS entry
                   text: >
@@ -50,7 +50,7 @@ helps['vmss create'] = """
             type: command
             short-summary: Create an Azure Virtual Machine Scale Set
             long-summary: See https://azure.microsoft.com/en-us/blog/azure-virtual-machine-scale-sets-ga/ for an introduction to scale sets.
-            parameters: 
+            parameters:
                 - name: --image
                   type: string
                   short-summary: 'OS image (URN alias, URN or URI).'
@@ -83,7 +83,7 @@ helps['vm extension set'] = """
             type: command
             examples:
                 - name: Add a new linux user
-                  text: 
+                  text:
                     az vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.4 --vm-name myvm --resource-group mygroup --protected-settings '{"username":"user1", "ssh_key":"ssh_rsa ..."}'
             """
 
@@ -125,21 +125,21 @@ helps['vm update'] = """
 
 helps['vmss get-instance-view'] = """
     type: command
-    parameters: 
+    parameters:
         - name: --ids
           short-summary: "One or more scale set or specific VM instance IDs. If provided, no other 'Resource Id' arguments should be specified."
 """
 
 helps['vmss reimage'] = """
     type: command
-    parameters: 
+    parameters:
         - name: --ids
           short-summary: "One or more scale set or specific VM instance IDs. If provided, no other 'Resource Id' arguments should be specified."
 """
 
 helps['vmss show'] = """
     type: command
-    parameters: 
+    parameters:
         - name: --ids
           short-summary: "One or more scale set or specific VM instance IDs. If provided, no other 'Resource Id' arguments should be specified."
 """
@@ -167,11 +167,11 @@ helps['vm boot-diagnostics'] = """
 """
 helps['vm boot-diagnostics disable'] = """
     type: command
-    short-summary: Disable boot diagnostics 
+    short-summary: Disable boot diagnostics
 """
 helps['vm boot-diagnostics get-boot-log'] = """
     type: command
-    short-summary: Get the boot diagnostics log 
+    short-summary: Get the boot diagnostics log
 """
 helps['acs'] = """
     type: group

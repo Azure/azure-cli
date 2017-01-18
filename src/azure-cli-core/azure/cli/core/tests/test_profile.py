@@ -470,7 +470,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
             test_sp2['servicePrincipalTenant'])
 
         # assert
-        token_entries = [entry for _, entry in creds_cache.adal_token_cache.read_items()]
+        token_entries = [e for _, e in creds_cache.adal_token_cache.read_items()]  # noqa: F812
         self.assertEqual(token_entries, [self.token_entry1])
         self.assertEqual(creds_cache._service_principal_creds, [test_sp, test_sp2])
         mock_open_for_write.assert_called_with(mock.ANY, 'w+')
@@ -492,7 +492,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         creds_cache.remove_cached_creds(self.user1)
 
         # assert #1
-        token_entries = [entry for _, entry in creds_cache.adal_token_cache.read_items()]
+        token_entries = [e for _, e in creds_cache.adal_token_cache.read_items()]  # noqa: F812
         self.assertEqual(token_entries, [])
 
         # action #2 logout a service principal

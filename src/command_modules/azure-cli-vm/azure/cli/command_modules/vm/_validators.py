@@ -9,12 +9,15 @@ import time
 
 from azure.cli.core.commands.arm import resource_id
 
+
 def generate_guid():
     return '{}{}'.format(str(int(math.ceil(time.time())))[:9], str(random.randint(1, 100000)))
+
 
 def validate_nsg_name(namespace):
     namespace.network_security_group_name = namespace.network_security_group_name \
         or '{}NSG{}'.format(namespace.vm_name, random.randint(1, 999))
+
 
 def validate_vm_create_nics(namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -47,6 +50,7 @@ def validate_vm_create_nics(namespace):
 
     namespace.public_ip_address_type = 'none'
 
+
 def _get_nic_id(val, resource_group, subscription):
     from azure.cli.core.commands.arm import is_valid_resource_id
     if is_valid_resource_id(val):
@@ -59,9 +63,11 @@ def _get_nic_id(val, resource_group, subscription):
             type='networkInterfaces',
             subscription=subscription)
 
+
 def validate_vm_nic(namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
     namespace.nic = _get_nic_id(namespace.nic, namespace.resource_group_name, get_subscription_id())
+
 
 def validate_vm_nics(namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -77,6 +83,7 @@ def validate_vm_nics(namespace):
     if hasattr(namespace, 'primary_nic') and namespace.primary_nic:
         namespace.primary_nic = _get_nic_id(namespace.primary_nic, rg, subscription)
 
+
 def validate_default_vnet(namespace):
     ns = namespace
     if not ns.virtual_network and not ns.virtual_network_type:
@@ -88,10 +95,10 @@ def validate_default_vnet(namespace):
         vnet_client = get_mgmt_service_client(NetworkManagementClient).virtual_networks
 
         rg = resource_client.resource_groups.get(ns.resource_group_name)
-        location = ns.location or rg.location # pylint: disable=no-member
+        location = ns.location or rg.location  # pylint: disable=no-member
 
         # find VNET in target resource group that matches the VM's location
-        vnet = next((v for v in vnet_client.list(rg.name) if v.location == location), None) # pylint: disable=no-member
+        vnet = next((v for v in vnet_client.list(rg.name) if v.location == location), None)  # pylint: disable=no-member
 
         if vnet:
             try:
@@ -100,6 +107,7 @@ def validate_default_vnet(namespace):
                 ns.virtual_network_type = 'existingName'
             except KeyError:
                 pass
+
 
 def validate_default_storage_account(namespace):
     ns = namespace
@@ -112,7 +120,7 @@ def validate_default_storage_account(namespace):
         storage_client = get_mgmt_service_client(StorageManagementClient).storage_accounts
 
         rg = resource_client.resource_groups.get(ns.resource_group_name)
-        location = ns.location or rg.location # pylint: disable=no-member
+        location = ns.location or rg.location  # pylint: disable=no-member
 
         sku_tier = 'Premium' if 'Premium' in ns.storage_type else 'Standard'
         # find storage account in target resource group that matches the VM's location
@@ -125,9 +133,11 @@ def validate_default_storage_account(namespace):
         else:
             ns.storage_account = 'vhd{}'.format(generate_guid())
 
+
 def validate_default_os_disk(namespace):
     if not namespace.os_disk_name:
         namespace.os_disk_name = 'osdisk{}'.format(generate_guid())
+
 
 def validate_storage_suffix(namespace):
     from azure.cli.core._profile import CLOUD
