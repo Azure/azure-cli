@@ -7,6 +7,7 @@ import argparse
 
 import argcomplete
 
+import azure.cli.core.telemetry as telemetry
 import azure.cli.core._help as _help
 from azure.cli.core._util import CLIError
 from azure.cli.core._pkg_util import handle_module_not_installed
@@ -141,20 +142,20 @@ class AzCliCommandParser(argparse.ArgumentParser):
                 pass
 
     def validation_error(self, message):
-        from azure.cli.core.telemetry import log_telemetry
-        log_telemetry('validation error', log_type='trace', prog=self.prog)
+        telemetry.set_user_fault('validation error')
         return super(AzCliCommandParser, self).error(message)
 
     def error(self, message):
-        from azure.cli.core.telemetry import log_telemetry
-        log_telemetry('parse error', message=message, prog=self.prog)
+        telemetry.set_user_fault('parse error: {}'.format(message))
         self._handle_command_package_error(message)
         return super(AzCliCommandParser, self).error(message)
 
     def format_help(self):
-        from azure.cli.core.telemetry import log_telemetry
         is_group = self.is_group()
-        log_telemetry('show help', prog=self.prog)
+
+        telemetry.set_command_details(command=self.prog[3:])
+        telemetry.set_success(summary='show help')
+
         _help.show_help(self.prog.split()[1:],
                         self._actions[-1] if is_group else self,
                         is_group)

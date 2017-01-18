@@ -33,7 +33,7 @@ from azure.cli.command_modules.configure._utils import (prompt_y_n,
                                                         prompt_choice_list,
                                                         get_default_from_config)
 import azure.cli.command_modules.configure._help # pylint: disable=unused-import
-from azure.cli.core.telemetry import log_telemetry
+import azure.cli.core.telemetry as telemetry
 
 logger = _logging.get_az_logger(__name__)
 
@@ -201,6 +201,6 @@ def handle_configure():
         # TODO: uncomment when implemented
         # _handle_context_configuration()
         print(MSG_CLOSING)
-        log_telemetry('configure', **answers)
+        # TODO: log_telemetry('configure', **answers)
     except (EOFError, KeyboardInterrupt):
         print()
