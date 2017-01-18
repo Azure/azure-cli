@@ -7,6 +7,7 @@
 
 from collections import OrderedDict
 
+
 def build_table_output(result, projection):
 
     if not isinstance(result, list):
@@ -16,7 +17,7 @@ def build_table_output(result, projection):
 
     for item in result:
         def _value_from_path(path):
-            obj = item # pylint: disable=cell-var-from-loop
+            obj = item  # pylint: disable=cell-var-from-loop
             try:
                 for part in path.split('.'):
                     obj = obj.get(part, None)
@@ -30,6 +31,7 @@ def build_table_output(result, projection):
         final_list.append(item_dict)
     return final_list
 
+
 def transform_container_list(result):
     return build_table_output(result, [
         ('Name', 'name'),
@@ -37,12 +39,14 @@ def transform_container_list(result):
         ('Last Modified', 'properties.lastModified')
     ])
 
+
 def transform_container_show(result):
     return build_table_output(result, [
         ('Name', 'name'),
         ('Lease Status', 'properties.lease.status'),
         ('Last Modified', 'properties.lastModified')
     ])
+
 
 def transform_blob_output(result):
     return build_table_output(result, [
@@ -53,12 +57,14 @@ def transform_blob_output(result):
         ('Last Modified', 'properties.lastModified')
     ])
 
+
 def transform_share_list(result):
     return build_table_output(result, [
         ('Name', 'name'),
         ('Quota', 'properties.quota'),
         ('Last Modified', 'properties.lastModified')
     ])
+
 
 def transform_file_output(result):
     """ Transform to convert SDK file/dir list output to something that
@@ -69,7 +75,7 @@ def transform_file_output(result):
         new_entry = OrderedDict()
         item_name = item['name']
         try:
-            _ = item['properties']['contentLength']
+            item['properties']['contentLength']  # pylint: disable=pointless-statement
             is_dir = False
         except KeyError:
             item_name = '{}/'.format(item_name)
@@ -80,6 +86,7 @@ def transform_file_output(result):
         new_entry['Last Modified'] = item['properties']['lastModified'] or ' '
         new_result.append(new_entry)
     return sorted(new_result, key=lambda k: k['Name'])
+
 
 def transform_entity_show(result):
     timestamp = result.pop('Timestamp')
@@ -94,6 +101,7 @@ def transform_entity_show(result):
     new_result['Timestamp'] = timestamp
     return new_result
 
+
 def transform_message_show(result):
     ordered_result = []
     for item in result:
@@ -106,6 +114,7 @@ def transform_message_show(result):
             new_result[key] = item[key]
         ordered_result.append(new_result)
     return ordered_result
+
 
 def transform_boolean_for_table(result):
     for key in result:

@@ -11,7 +11,7 @@ from six import u as unicode_string
 from azure.cli.core._config import az_config
 from azure.cli.core.commands.parameters import \
     (ignore_type, tags_type, get_resource_name_completion_list, enum_choice_list)
-import azure.cli.core.commands.arm # pylint: disable=unused-import
+import azure.cli.core.commands.arm  # pylint: disable=unused-import
 from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
 
 from azure.common import AzureMissingResourceHttpError
@@ -88,6 +88,7 @@ class ArgumentGroupContext(CommandContext):
 
 # COMPLETERS
 
+
 def _get_client(service, parsed_args):
     account_name = parsed_args.account_name or az_config.get('storage', 'account', None)
     account_key = parsed_args.account_key or az_config.get('storage', 'key', None)
@@ -99,8 +100,9 @@ def _get_client(service, parsed_args):
                                            connection_string,
                                            sas_token)
 
+
 def get_storage_name_completion_list(service, func, parent=None):
-    def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
+    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
         client = _get_client(service, parsed_args)
         if parent:
             parent_name = getattr(parsed_args, parent)
@@ -111,14 +113,16 @@ def get_storage_name_completion_list(service, func, parent=None):
         return items
     return completer
 
+
 def get_storage_acl_name_completion_list(service, container_param, func):
-    def completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
+    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
         client = _get_client(service, parsed_args)
         container_name = getattr(parsed_args, container_param)
         return list(getattr(client, func)(container_name))
     return completer
 
-def dir_path_completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
+
+def dir_path_completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
     client = _get_client(FileService, parsed_args)
     share_name = parsed_args.share_name
     directory_name = prefix or ''
@@ -136,7 +140,8 @@ def dir_path_completer(prefix, action, parsed_args, **kwargs): # pylint: disable
         names.append(name)
     return sorted(names)
 
-def file_path_completer(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
+
+def file_path_completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
     client = _get_client(FileService, parsed_args)
     share_name = parsed_args.share_name
     directory_name = prefix or ''
@@ -157,6 +162,7 @@ def file_path_completer(prefix, action, parsed_args, **kwargs): # pylint: disabl
 
 # PATH REGISTRATION
 
+
 def register_path_argument(scope, default_file_param=None, options_list=None):
     path_help = 'The path to the file within the file share.'
     if default_file_param:
@@ -167,6 +173,7 @@ def register_path_argument(scope, default_file_param=None, options_list=None):
 
 # EXTRA PARAMETER SET REGISTRATION
 
+
 def register_content_settings_argument(scope, settings_class, update, arg_group=None):
     register_cli_argument(scope, 'content_settings', ignore_type, validator=get_content_setting_validator(settings_class, update), arg_group=arg_group)
     register_extra_cli_argument(scope, 'content_type', default=None, help='The content MIME type.', arg_group=arg_group)
@@ -176,6 +183,7 @@ def register_content_settings_argument(scope, settings_class, update, arg_group=
     register_extra_cli_argument(scope, 'content_cache_control', default=None, help='The cache control string.', arg_group=arg_group)
     register_extra_cli_argument(scope, 'content_md5', default=None, help='The content\'s MD5 hash.', arg_group=arg_group)
 
+
 def register_source_uri_arguments(scope):
     register_cli_argument(scope, 'copy_source', options_list=('--source-uri', '-u'), validator=validate_source_uri, required=False, arg_group='Copy Source')
     register_extra_cli_argument(scope, 'source_sas', default=None, help='The shared access signature for the source storage account.', arg_group='Copy Source')
@@ -184,6 +192,7 @@ def register_source_uri_arguments(scope):
     register_extra_cli_argument(scope, 'source_container', default=None, help='The container name for the source storage account.', arg_group='Copy Source')
     register_extra_cli_argument(scope, 'source_blob', default=None, help='The blob name for the source storage account.', arg_group='Copy Source')
     register_extra_cli_argument(scope, 'source_snapshot', default=None, help='The blob snapshot for the source storage account.', arg_group='Copy Source')
+
 
 # CUSTOM CHOICE LISTS
 
@@ -235,7 +244,7 @@ register_cli_argument('storage account create', 'tags', tags_type)
 
 for item in ['create', 'update']:
     register_cli_argument('storage account {}'.format(item), 'sku', help='The storage account SKU.', **enum_choice_list(SkuName))
-    register_cli_argument('storage account {}'.format(item), 'encryption', nargs='+', help='Specifies which service(s) to encrypt.', validator=validate_encryption, **enum_choice_list(list(EncryptionServices._attribute_map.keys()))) # pylint: disable=protected-access
+    register_cli_argument('storage account {}'.format(item), 'encryption', nargs='+', help='Specifies which service(s) to encrypt.', validator=validate_encryption, **enum_choice_list(list(EncryptionServices._attribute_map.keys())))  # pylint: disable=protected-access
 
 register_cli_argument('storage account create', 'access_tier', help='Required for StandardBlob accounts. The access tier used for billing. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types.', **enum_choice_list(AccessTier))
 register_cli_argument('storage account update', 'access_tier', help='The access tier used for billing StandardBlob accounts. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types.', **enum_choice_list(AccessTier))
@@ -409,7 +418,7 @@ register_path_argument('storage file copy cancel', options_list=('--destination-
 register_path_argument('storage file delete')
 
 register_cli_argument('storage file download', 'file_path', options_list=('--dest',), help='Path of the file to write to. The source filename will be used if not specified.', required=False, validator=process_file_download_namespace, completer=FilesCompleter())
-register_cli_argument('storage file download', 'path', validator=None) # validator called manually from process_file_download_namespace so remove the automatic one
+register_cli_argument('storage file download', 'path', validator=None)  # validator called manually from process_file_download_namespace so remove the automatic one
 register_cli_argument('storage file download', 'progress_callback', ignore_type)
 register_path_argument('storage file download')
 

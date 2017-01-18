@@ -3,33 +3,36 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-#pylint: skip-file
+# pylint: skip-file
 import unittest
-from six import StringIO
-from collections import namedtuple
 
-from azure.cli.command_modules.storage._validators import *
+from six import StringIO
+
+from azure.cli.command_modules.storage._validators import (get_permission_validator,
+                                                           datetime_string_type, datetime_type, datetime, ipv4_range_type, resource_type_type,
+                                                           services_type)
+
 
 class Test_storage_validators(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
         pass
-        
+
     @classmethod
     def tearDownClass(cls):
         pass
 
     def setUp(self):
         self.io = StringIO()
-        
+
     def tearDown(self):
         self.io.close()
 
     def test_permission_validator(self):
         from azure.storage.blob.models import ContainerPermissions
         from argparse import Namespace
-        
+
         ns1 = Namespace(permission='rwdl')
         ns2 = Namespace(permission='abc')
         get_permission_validator(ContainerPermissions)(ns1)
@@ -69,9 +72,9 @@ class Test_storage_validators(unittest.TestCase):
         self.assertEqual(actual, expected)
 
         input = "111.22"
-        with self.assertRaises(ValueError):        
+        with self.assertRaises(ValueError):
             actual = ipv4_range_type(input)
-    
+
         input = "111.22.33.44-"
         with self.assertRaises(ValueError):
             actual = ipv4_range_type(input)
@@ -95,6 +98,7 @@ class Test_storage_validators(unittest.TestCase):
         input = "everything"
         with self.assertRaises(ValueError):
             actual = services_type(input)
+
 
 if __name__ == '__main__':
     unittest.main()
