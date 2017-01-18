@@ -148,7 +148,7 @@ class BatchArgumentTree(object):
         # Search for the :type param_name: in the docstring
         pattern = r":type {}:(.*?)\n(\s*:param |\s*:rtype:|\s*:raises:|\"\"\")".format(param)
         param_type = re.search(pattern, model.__doc__, re.DOTALL)
-        return re.sub("\n\s*", "", param_type.group(1))
+        return re.sub(r"\n\s*", "", param_type.group(1))
 
     def find_param_help(self, model, param):
         """Parse the parameter help info from the model docstring.
@@ -159,7 +159,7 @@ class BatchArgumentTree(object):
         # Search for :param param_name: in the docstring
         pattern = r":param {}:(.*?)\n\s*:type ".format(param)
         param_doc = re.search(pattern, model.__doc__, re.DOTALL)
-        return re.sub("\n\s*", "", param_doc.group(1))
+        return re.sub(r"\n\s*", "", param_doc.group(1))
 
     def find_return_type(self, model):
         """Parse the parameter help info from the model docstring.
@@ -171,7 +171,7 @@ class BatchArgumentTree(object):
         pattern = r":rtype: (.*?)\n(\s*:rtype:|\s*:raises:|\"\"\")"
         return_type = re.search(pattern, model.__doc__, re.DOTALL)
         if return_type:
-            return re.sub("\n\s*", "", return_type.group(1))
+            return re.sub(r"\n\s*", "", return_type.group(1))
 
     def parse(self, namespace):
         """Parse all arguments in the namespace to validate whether all required
