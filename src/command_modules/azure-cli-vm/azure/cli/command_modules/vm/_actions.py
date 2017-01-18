@@ -14,14 +14,15 @@ from azure.cli.core.commands.parameters import get_one_of_subscription_locations
 from azure.cli.core.commands.arm import resource_exists
 import azure.cli.core._logging as _logging
 
-from six.moves.urllib.request import urlopen #pylint: disable=import-error
+from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
 from ._client_factory import _compute_client_factory
 from ._vm_utils import read_content_if_is_file
 
 logger = _logging.get_az_logger(__name__)
 
-class VMImageFieldAction(argparse.Action): #pylint: disable=too-few-public-methods
+
+class VMImageFieldAction(argparse.Action):  # pylint: disable=too-few-public-methods
     def __call__(self, parser, namespace, values, option_string=None):
         image = values
         match = re.match('([^:]*):([^:]*):([^:]*):([^:]*)', image)
@@ -39,8 +40,8 @@ class VMImageFieldAction(argparse.Action): #pylint: disable=too-few-public-metho
             images = load_images_from_aliases_doc()
             matched = next((x for x in images if x['urnAlias'].lower() == image.lower()), None)
             if matched is None:
-                raise CLIError('Invalid image "{}". Please pick one from {}' \
-                    .format(image, [x['urnAlias'] for x in images]))
+                raise CLIError('Invalid image "{}". Please pick one from {}'
+                               .format(image, [x['urnAlias'] for x in images]))
             namespace.os_type = 'Custom'
             namespace.os_publisher = matched['publisher']
             namespace.os_offer = matched['offer']
@@ -48,11 +49,12 @@ class VMImageFieldAction(argparse.Action): #pylint: disable=too-few-public-metho
             namespace.os_version = matched['version']
 
 
-class VMSSHFieldAction(argparse.Action): #pylint: disable=too-few-public-methods
+class VMSSHFieldAction(argparse.Action):  # pylint: disable=too-few-public-methods
     def __call__(self, parser, namespace, values, option_string=None):
         namespace.ssh_key_value = read_content_if_is_file(values)
 
-class VMDNSNameAction(argparse.Action): #pylint: disable=too-few-public-methods
+
+class VMDNSNameAction(argparse.Action):  # pylint: disable=too-few-public-methods
     def __call__(self, parser, namespace, values, option_string=None):
         dns_value = values
 
@@ -61,13 +63,15 @@ class VMDNSNameAction(argparse.Action): #pylint: disable=too-few-public-methods
 
         namespace.dns_name_for_public_ip = dns_value
 
-class PrivateIpAction(argparse.Action): #pylint: disable=too-few-public-methods
+
+class PrivateIpAction(argparse.Action):  # pylint: disable=too-few-public-methods
     def __call__(self, parser, namespace, values, option_string=None):
         private_ip = values
         namespace.private_ip_address = private_ip
 
         if private_ip:
             namespace.private_ip_address_allocation = 'static'
+
 
 def _resource_not_exists(resource_type):
     def _handle_resource_not_exists(namespace):
@@ -79,6 +83,7 @@ def _resource_not_exists(resource_type):
                 resource_type,
                 namespace.resource_group_name))
     return _handle_resource_not_exists
+
 
 def _handle_auth_types(**kwargs):
     if kwargs['command'] != 'vm create' and kwargs['command'] != 'vmss create':
@@ -116,7 +121,9 @@ def _handle_auth_types(**kwargs):
     if hasattr(args, 'nat_backend_port') and not args.nat_backend_port:
         args.nat_backend_port = '3389' if is_windows else '22'
 
+
 APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_auth_types)
+
 
 def load_images_from_aliases_doc(publisher=None, offer=None, sku=None):
     target_url = ('https://raw.githubusercontent.com/Azure/azure-rest-api-specs/'
@@ -126,15 +133,15 @@ def load_images_from_aliases_doc(publisher=None, offer=None, sku=None):
     try:
         all_images = []
         result = (dic['outputs']['aliases']['value'])
-        for v in result.values(): #loop around os
-            for alias, vv in v.items(): #loop around distros
+        for v in result.values():  # loop around os
+            for alias, vv in v.items():  # loop around distros
                 all_images.append({
                     'urnAlias': alias,
                     'publisher': vv['publisher'],
                     'offer': vv['offer'],
                     'sku': vv['sku'],
                     'version': vv['version']
-                    })
+                })
 
         all_images = [i for i in all_images if (_partial_matched(publisher, i['publisher']) and
                                                 _partial_matched(offer, i['offer']) and
@@ -142,6 +149,7 @@ def load_images_from_aliases_doc(publisher=None, offer=None, sku=None):
         return all_images
     except KeyError:
         raise CLIError('Could not retrieve image list from {}'.format(target_url))
+
 
 def load_images_thru_services(publisher, offer, sku, location):
     from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -176,15 +184,16 @@ def load_images_thru_services(publisher, offer, sku, location):
         with ThreadPoolExecutor(max_workers=40) as executor:
             tasks = [executor.submit(_load_images_from_publisher, p.name) for p in publishers]
             for t in as_completed(tasks):
-                t.result() # don't use the result but expose exceptions from the threads
+                t.result()  # don't use the result but expose exceptions from the threads
     elif publisher_num == 1:
         _load_images_from_publisher(publishers[0].name)
 
     return all_images
 
+
 def load_extension_images_thru_services(publisher, name, version, location, show_latest=False):
     from concurrent.futures import ThreadPoolExecutor, as_completed
-    ##pylint: disable=no-name-in-module,import-error
+    # pylint: disable=no-name-in-module,import-error
     from distutils.version import LooseVersion
     all_images = []
     client = _compute_client_factory()
@@ -203,7 +212,7 @@ def load_extension_images_thru_services(publisher, name, version, location, show
                 versions = [v for v in versions if _partial_matched(version, v.name)]
 
             if show_latest:
-                #pylint: disable=no-member
+                # pylint: disable=no-member
                 versions.sort(key=lambda v: LooseVersion(v.name), reverse=True)
                 all_images.append({
                     'publisher': publisher,
@@ -226,20 +235,23 @@ def load_extension_images_thru_services(publisher, name, version, location, show
             tasks = [executor.submit(_load_extension_images_from_publisher,
                                      p.name) for p in publishers]
             for t in as_completed(tasks):
-                t.result() # don't use the result but expose exceptions from the threads
+                t.result()  # don't use the result but expose exceptions from the threads
     elif publisher_num == 1:
         _load_extension_images_from_publisher(publishers[0].name)
 
     return all_images
 
+
 def get_vm_sizes(location):
     return list(_compute_client_factory().virtual_machine_sizes.list(location))
 
+
 def _partial_matched(pattern, string):
     if not pattern:
-        return True # empty pattern means wildcard-match
+        return True  # empty pattern means wildcard-match
     pattern = r'.*' + pattern
-    return re.match(pattern, string, re.I)
+    return re.match(pattern, string, re.I)  # pylint: disable=no-member
+
 
 def _create_image_instance(publisher, offer, sku, version):
     return {
@@ -248,6 +260,7 @@ def _create_image_instance(publisher, offer, sku, version):
         'sku': sku,
         'version': version
     }
+
 
 def _handle_container_ssh_file(**kwargs):
     if kwargs['command'] != 'acs create':
@@ -261,8 +274,8 @@ def _handle_container_ssh_file(**kwargs):
         with open(string_or_file, 'r') as f:
             content = f.read()
     elif not _is_valid_ssh_rsa_public_key(content) and args.generate_ssh_keys:
-        #figure out appropriate file names:
-        #'base_name'(with private keys), and 'base_name.pub'(with public keys)
+        # figure out appropriate file names:
+        # 'base_name'(with private keys), and 'base_name.pub'(with public keys)
         public_key_filepath = string_or_file
         if public_key_filepath[-4:].lower() == '.pub':
             private_key_filepath = public_key_filepath[:-4]
@@ -271,6 +284,7 @@ def _handle_container_ssh_file(**kwargs):
         content = _generate_ssh_keys(private_key_filepath, public_key_filepath)
         logger.warning('Created SSH key files: %s,%s', private_key_filepath, public_key_filepath)
     args.ssh_key_value = content
+
 
 def _generate_ssh_keys(private_key_filepath, public_key_filepath):
     import paramiko
@@ -285,20 +299,21 @@ def _generate_ssh_keys(private_key_filepath, public_key_filepath):
     os.chmod(private_key_filepath, 0o600)
 
     with open(public_key_filepath, 'w') as public_key_file:
-        public_key = '%s %s'  % (key.get_name(), key.get_base64())
+        public_key = '%s %s' % (key.get_name(), key.get_base64())
         public_key_file.write(public_key)
     os.chmod(public_key_filepath, 0o644)
 
     return public_key
 
+
 def _is_valid_ssh_rsa_public_key(openssh_pubkey):
-    #http://stackoverflow.com/questions/2494450/ssh-rsa-public-key-validation-using-a-regular-expression #pylint: disable=line-too-long
-    #A "good enough" check is to see if the key starts with the correct header.
+    # http://stackoverflow.com/questions/2494450/ssh-rsa-public-key-validation-using-a-regular-expression # pylint: disable=line-too-long
+    # A "good enough" check is to see if the key starts with the correct header.
     import struct
     try:
         from base64 import decodebytes as base64_decode
     except ImportError:
-        #deprecated and redirected to decodebytes in Python 3
+        # deprecated and redirected to decodebytes in Python 3
         from base64 import decodestring as base64_decode
     parts = openssh_pubkey.split()
     if len(parts) < 2:
@@ -306,9 +321,10 @@ def _is_valid_ssh_rsa_public_key(openssh_pubkey):
     key_type = parts[0]
     key_string = parts[1]
 
-    data = base64_decode(key_string.encode())#pylint:disable=deprecated-method
+    data = base64_decode(key_string.encode())  # pylint:disable=deprecated-method
     int_len = 4
-    str_len = struct.unpack('>I', data[:int_len])[0] # this should return 7
-    return data[int_len:int_len+str_len] == key_type.encode()
+    str_len = struct.unpack('>I', data[:int_len])[0]  # this should return 7
+    return data[int_len:int_len + str_len] == key_type.encode()
+
 
 APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSED, _handle_container_ssh_file)

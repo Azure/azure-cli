@@ -28,11 +28,13 @@ from azure.cli.command_modules.vm._validators import \
      validate_default_os_disk, validate_default_vnet, validate_default_storage_account,
      validate_storage_suffix)
 
-def get_urn_aliases_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
+
+def get_urn_aliases_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
     images = load_images_from_aliases_doc()
     return [i['urnAlias'] for i in images]
 
-def get_vm_size_completion_list(prefix, action, parsed_args, **kwargs):#pylint: disable=unused-argument
+
+def get_vm_size_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
     try:
         location = parsed_args.location
     except AttributeError:
@@ -41,6 +43,7 @@ def get_vm_size_completion_list(prefix, action, parsed_args, **kwargs):#pylint: 
     return [r.name for r in result]
 
 # REUSABLE ARGUMENT DEFINITIONS
+
 
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 multi_ids_type = CliArgumentType(nargs='+')
@@ -72,7 +75,7 @@ register_cli_argument('vm access', 'password', options_list=('--password', '-p')
 
 register_cli_argument('acs', 'name', arg_type=name_arg_type)
 register_cli_argument('acs', 'orchestrator_type', **enum_choice_list(ContainerServiceOchestratorTypes))
-#some admin names are prohibited in acs, such as root, admin, etc. Because we have no control on the orchestrators, so default to a safe name.
+# some admin names are prohibited in acs, such as root, admin, etc. Because we have no control on the orchestrators, so default to a safe name.
 register_cli_argument('acs', 'admin_username', options_list=('--admin-username',), default='azureuser', required=False)
 register_cli_argument('acs', 'dns_name_prefix', options_list=('--dns-prefix', '-d'))
 register_extra_cli_argument('acs create', 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing')
@@ -97,12 +100,12 @@ register_cli_argument('vm extension image', 'latest', action='store_true')
 
 for dest in ['vm_scale_set_name', 'virtual_machine_scale_set_name', 'name']:
     register_cli_argument('vmss', dest, vmss_name_type)
-    register_cli_argument('vmss deallocate', dest, vmss_name_type, id_part=None) # due to instance-ids parameter
-    register_cli_argument('vmss delete-instances', dest, vmss_name_type, id_part=None) # due to instance-ids parameter
-    register_cli_argument('vmss restart', dest, vmss_name_type, id_part=None) # due to instance-ids parameter
-    register_cli_argument('vmss start', dest, vmss_name_type, id_part=None) # due to instance-ids parameter
-    register_cli_argument('vmss stop', dest, vmss_name_type, id_part=None) # due to instance-ids parameter
-    register_cli_argument('vmss update-instances', dest, vmss_name_type, id_part=None) # due to instance-ids parameter
+    register_cli_argument('vmss deallocate', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
+    register_cli_argument('vmss delete-instances', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
+    register_cli_argument('vmss restart', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
+    register_cli_argument('vmss start', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
+    register_cli_argument('vmss stop', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
+    register_cli_argument('vmss update-instances', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
 
 register_cli_argument('vmss', 'instance_id', id_part='child_name')
 register_cli_argument('vmss', 'instance_ids', multi_ids_type, help='Space separated list of IDs (ex: 1 2 3 ...) or * for all instances')
@@ -159,7 +162,7 @@ nsg_rule_type = CliArgumentType(
 )
 
 register_cli_argument('vm create', 'network_interface_type', help=argparse.SUPPRESS)
-register_cli_argument('vm create', 'network_interface_ids', options_list=('--nics',), nargs='+', help='Names or IDs of existing NICs to reference.  The first NIC will be the primary NIC.', type=lambda val: val if (not '/' in val or is_valid_resource_id(val, ValueError)) else '', validator=validate_vm_create_nics)
+register_cli_argument('vm create', 'network_interface_ids', options_list=('--nics',), nargs='+', help='Names or IDs of existing NICs to reference.  The first NIC will be the primary NIC.', type=lambda val: val if ('/' not in val or is_valid_resource_id(val, ValueError)) else '', validator=validate_vm_create_nics)
 register_cli_argument('vm create', 'name', name_arg_type, validator=_resource_not_exists('Microsoft.Compute/virtualMachines'))
 
 register_cli_argument('vmss create', 'name', name_arg_type)
@@ -201,4 +204,3 @@ for scope in ['vm create', 'vmss create']:
     register_folded_cli_argument(scope, 'load_balancer', 'Microsoft.Network/loadBalancers')
     register_cli_argument(scope, 'network_security_group_rule', nsg_rule_type, options_list=('--nsg-rule',))
     register_extra_cli_argument(scope, 'image', options_list=('--image',), action=VMImageFieldAction, completer=get_urn_aliases_completion_list, required=True)
-

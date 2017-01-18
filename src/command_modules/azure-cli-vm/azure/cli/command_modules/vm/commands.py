@@ -5,13 +5,15 @@
 
 from collections import OrderedDict
 
+from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_vm_create, cf_avail_set, cf_ni,
+                                                          cf_avail_set_create, cf_acs, cf_vm_ext,
+                                                          cf_vm_ext_image, cf_vm_image, cf_usage,
+                                                          cf_vmss_create, cf_vmss, cf_vmss_vm,
+                                                          cf_vm_sizes)
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
-
 from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_wait_command
 
-from azure.cli.command_modules.vm._client_factory import * #pylint: disable=wildcard-import,unused-wildcard-import
-
-#pylint: disable=line-too-long
+# pylint: disable=line-too-long
 
 custom_path = 'azure.cli.command_modules.vm.custom#{}'
 mgmt_path = 'azure.mgmt.compute.operations.{}#{}.{}'
@@ -86,15 +88,17 @@ cli_command(__name__, 'vm boot-diagnostics get-boot-log', custom_path.format('ge
 
 # ACS
 
+
 def transform_acs(r):
     orchestratorType = 'Unknown'
     orchestratorProfile = r.get('orchestratorProfile')
     if orchestratorProfile:
         orchestratorType = orchestratorProfile.get('orchestratorType')
-    res = OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']), \
-        ('Orchestrator', orchestratorType), ('Location', r['location']), \
-        ('ProvisioningState', r['provisioningState'])])
+    res = OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']),
+                       ('Orchestrator', orchestratorType), ('Location', r['location']),
+                       ('ProvisioningState', r['provisioningState'])])
     return res
+
 
 def transform_acs_list(result):
     transformed = []
@@ -103,11 +107,12 @@ def transform_acs_list(result):
         transformed.append(res)
     return transformed
 
-#Remove the hack after https://github.com/Azure/azure-rest-api-specs/issues/352 fixed
-from azure.mgmt.compute.models import ContainerService#pylint: disable=wrong-import-position
+
+# Remove the hack after https://github.com/Azure/azure-rest-api-specs/issues/352 fixed
+from azure.mgmt.compute.models import ContainerService  # noqa, pylint: disable=wrong-import-position
 for a in ['id', 'name', 'type', 'location']:
-    ContainerService._attribute_map[a]['type'] = 'str'#pylint: disable=protected-access
-ContainerService._attribute_map['tags']['type'] = '{str}'#pylint: disable=protected-access
+    ContainerService._attribute_map[a]['type'] = 'str'  # pylint: disable=protected-access
+ContainerService._attribute_map['tags']['type'] = '{str}'  # pylint: disable=protected-access
 ######
 op_var = 'container_services_operations'
 op_class = 'ContainerServicesOperations'
@@ -115,7 +120,7 @@ cli_command(__name__, 'acs show', mgmt_path.format(op_var, op_class, 'get'), cf_
 cli_command(__name__, 'acs list', custom_path.format('list_container_services'), cf_acs, table_transformer=transform_acs_list)
 cli_command(__name__, 'acs delete', mgmt_path.format(op_var, op_class, 'delete'), cf_acs)
 cli_command(__name__, 'acs scale', custom_path.format('update_acs'))
-#Per conversation with ACS team, hide the update till we have something meaningful to tweak
+# Per conversation with ACS team, hide the update till we have something meaningful to tweak
 # from azure.cli.command_modules.vm.custom import update_acs
 # cli_generic_update_command(__name__, 'acs update', ContainerServicesOperations.get, ContainerServicesOperations.create_or_update, cf_acs)
 
@@ -196,4 +201,3 @@ cli_command(__name__, 'vmss scale', custom_path.format('vmss_scale'))
 
 # VM Size
 cli_command(__name__, 'vm list-sizes', mgmt_path.format('virtual_machine_sizes_operations', 'VirtualMachineSizesOperations', 'list'), cf_vm_sizes)
-

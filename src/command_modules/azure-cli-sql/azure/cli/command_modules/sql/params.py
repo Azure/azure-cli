@@ -19,7 +19,7 @@ with ParametersContext(command='sql server create') as c:
         'administrator_login_password': patch_arg_make_required
     })
 
-with ParametersContext(command='sql database create') as c:
+with ParametersContext(command='sql db create') as c:
     from azure.mgmt.sql.models.database import Database
 
     c.expand('parameters', Database, group_name='Creating')

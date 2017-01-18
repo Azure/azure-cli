@@ -37,7 +37,6 @@ class CommandCoverageContext(object):
         return self._data_file_path
 
 
-# TODO: Fix track command logic in vcr_test_base.py.
 def run_command_coverage(modules):
     test_result_dir = automation_path.get_test_results_dir(with_timestamp=True, prefix='cmdcov')
     data_file = os.path.join(test_result_dir, 'cmdcov.data')
