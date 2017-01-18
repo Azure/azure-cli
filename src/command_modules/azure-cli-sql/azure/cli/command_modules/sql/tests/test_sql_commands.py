@@ -265,3 +265,90 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
         # delete sql server
         self.cmd('sql server delete -g {} --server-name {}'
                  .format(rg, self.sql_server_name), checks=NoneCheck())
+
+
+class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(SqlElasticPoolsMgmtScenarioTest, self).__init__(
+            __file__, test_method, resource_group='cli-test-sql-mgmt')
+        self.sql_server_name = 'cliautomation06'
+        self.location = "westus"
+        self.administrator_login = 'admin123'
+        self.administrator_login_password = 'SecretPassword123'
+        self.database_name = "cliautomationdb02"
+        self.pool_name = "cliautomationpool01"
+
+    def test_sql_elastic_pools_mgmt(self):
+        self.execute()
+
+    def body(self):
+        rg = self.resource_group
+        loc = self.location
+        user = self.administrator_login
+        password = self.administrator_login_password
+
+        # create sql server with minimal required parameters
+        self.cmd('sql server create -g {} --server-name {} -l {} '
+                 '--administrator-login {} --administrator-login-password {}'
+                 .format(rg, self.sql_server_name, loc, user, password), checks=[
+                     JMESPathCheck('name', self.sql_server_name),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('administratorLogin', user)])
+
+        # test sql elastic-pools commands
+        self.cmd('sql elastic-pools create -g {} --server-name {} -l {} --elastic-pool-name {}'
+                 .format(rg, self.sql_server_name, loc, self.pool_name), checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', self.pool_name),
+                     JMESPathCheck('state', 'Ready')])
+
+        self.cmd('sql elastic-pools show -g {} --server-name {} --elastic-pool-name {}'
+                 .format(rg, self.sql_server_name, self.pool_name), checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', self.pool_name),
+                     JMESPathCheck('state', 'Ready')])
+
+        self.cmd('sql elastic-pools list -g {} --server-name {}'
+                 .format(rg, self.sql_server_name), checks=[
+                     JMESPathCheck('[0].resourceGroup', rg),
+                     JMESPathCheck('[0].name', self.pool_name),
+                     JMESPathCheck('[0].state', 'Ready')])
+
+        self.cmd('sql elastic-pools update -g {} --server-name {} --elastic-pool-name {} '
+                 '--set tags.key1=value1'
+                 .format(rg, self.sql_server_name, self.pool_name), checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', self.pool_name),
+                     JMESPathCheck('state', 'Ready'),
+                     JMESPathCheck('tags.key1', 'value1')])
+
+        self.cmd('sql elastic-pools update -g {} --server-name {} --elastic-pool-name {} '
+                 '--remove tags.key1'
+                 .format(rg, self.sql_server_name, self.pool_name), checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', self.pool_name),
+                     JMESPathCheck('state', 'Ready'),
+                     JMESPathCheck('tags', {})])
+
+        # Create a database in an Azure sql elastic pool
+        self.cmd('sql db create -g {} --server-name {} -l {} --database-name {} '
+                 '--elastic-pool-name {}'
+                 .format(rg, self.sql_server_name, loc, self.database_name, self.pool_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('elasticPoolName', self.pool_name),
+                     JMESPathCheck('status', 'Online')])
+
+        # delete sql server database
+        self.cmd('sql db delete -g {} --server-name {} --database-name {}'
+                 .format(rg, self.sql_server_name, self.database_name), checks=[NoneCheck()])
+
+        # delete sql elastic pool
+        self.cmd('sql elastic-pools delete -g {} --server-name {} --elastic-pool-name {}'
+                 .format(rg, self.sql_server_name, self.pool_name), checks=[NoneCheck()])
+
+        # delete sql server
+        self.cmd('sql server delete -g {} --server-name {}'
+                 .format(rg, self.sql_server_name), checks=NoneCheck())
