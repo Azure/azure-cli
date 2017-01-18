@@ -88,6 +88,6 @@ helps['sql elastic-pools update'] = """
             short-summary: Update a database elastic pool
             """
 helps['sql elastic-pools database'] = """
-            type: command
+            type: group
             short-summary: Command to manage databases activities in database elastic pools
             """
