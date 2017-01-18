@@ -6,19 +6,18 @@
 import os.path
 import socket
 import threading
-import webbrowser
 from time import sleep
 
 import paramiko
 from sshtunnel import SSHTunnelForwarder
 from scp import SCPClient
 
-def SecureCopy(user, host, src, dest):
-    home = os.path.expanduser("~")
+def SecureCopy(user, host, src, dest,
+               key_filename=os.path.join(os.path.expanduser("~"), '.ssh', 'id_rsa')):
     ssh = paramiko.SSHClient()
     ssh.load_system_host_keys()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(host, username=user, key_filename=os.path.join(home, '.ssh', 'id_rsa'))
+    ssh.connect(host, username=user, key_filename=key_filename)
 
     scp = SCPClient(ssh.get_transport())
 
@@ -42,7 +41,8 @@ class ACSClient(object):
         if self.tunnel_server is not None:
             self.tunnel_server.close_tunnel()
 
-    def connect(self, host, username, port=2200):
+    def connect(self, host, username, port=2200,
+                key_filename=os.path.join(os.path.expanduser("~"), '.ssh', 'id_rsa')):
         """
         Creates a connection to the remote server.
 
@@ -73,7 +73,8 @@ class ACSClient(object):
             self.client.connect(
                 hostname=host,
                 port=port,
-                username=username)
+                username=username,
+                key_filename=key_filename)
 
         self.transport = self.client.get_transport()
         return self.transport is not None
@@ -134,7 +135,7 @@ class ACSClient(object):
             sftp.close()
         return result
 
-    def create_tunnel(self, remote_host, remote_port, local_port=0, open_url=None):
+    def create_tunnel(self, remote_host, remote_port, local_port=0):
         """
         Creates a tunnel to the remote host
 
@@ -144,8 +145,6 @@ class ACSClient(object):
         :type remote_port: Number
         :param local_port: Local port. If set to 0, random local port is selected
         :type local_port: Number
-        :param open_url: URL to open after tunnel is created
-        :type open_url: String
         """
         if local_port is 0:
             local_port = self.get_available_local_port()
@@ -156,8 +155,6 @@ class ACSClient(object):
             remote_bind_address=(remote_host, remote_port),
             local_bind_address=('0.0.0.0', local_port)):
             try:
-                if open_url:
-                    webbrowser.open(open_url)
                 while True:
                     sleep(1)
             except KeyboardInterrupt:
