@@ -4,231 +4,315 @@
 # --------------------------------------------------------------------------------------------
 
 import datetime
-import getpass
-import hashlib
 import json
 import locale
 import os
 import platform
 import re
-import subprocess
 import sys
 import traceback
+import uuid
 from functools import wraps
 
-__all__ = ['set_application', 'log_telemetry', 'flush_telemetry']
+import azure.cli.core.decorators as decorators
+import azure.cli.core.telemetry_upload as telemetry_core
 
-DIAGNOSTICS_TELEMETRY_ENV_NAME = 'AZURE_CLI_DIAGNOSTICS_TELEMETRY'
-INSTRUMENTATION_KEY = '02b91c82-6729-4241-befc-e6d02ca4fbba'
+PRODUCT_NAME = 'azurecli'
+TELEMETRY_VERSION = '0.0.1.4'
+AZURE_CLI_PREFIX = 'Context.Default.AzureCLI.'
 
-
-# internal decorators
-
-def _suppress_one_exception(expected_exception, raise_in_debug=False, fallback_return=None):
-    def _decorator(func):
-        @wraps(func)
-        def _wrapped_func(*args, **kwargs):
-            try:
-                return func(*args, **kwargs)
-            except expected_exception as the_exception:
-                if raise_in_debug and _in_diagnostic_mode():
-                    raise the_exception
-                else:
-                    return fallback_return
-
-        return _wrapped_func
-
-    return _decorator
+decorators.is_diagnostics_mode = telemetry_core.in_diagnostic_mode
 
 
-def _suppress_all_exceptions(raise_in_debug=False, fallback_return=None):
-    def _decorator(func):
-        @wraps(func)
-        def _wrapped_func(*args, **kwargs):
-            try:
-                return func(*args, **kwargs)
-            except Exception as ex:  # nopa, pylint: disable=broad-except
-                if raise_in_debug and _in_diagnostic_mode():
-                    raise ex
-                elif fallback_return:
-                    return fallback_return
-                else:
-                    pass
-
-        return _wrapped_func
-
-    return _decorator
-
-
-# exposed methods
-
-def set_application(application, arg_complete_env_name):
-    if not _user_agrees_to_telemetry() or not telemetry_service:
-        return
-
-    telemetry_service.application = application
-    telemetry_service.arg_complete_env_name = arg_complete_env_name
-
-
-def log_telemetry(name, log_type='event', **kwargs):
-    if not _user_agrees_to_telemetry() or not telemetry_service:
-        return
-
-    return telemetry_service.log(name, log_type=log_type, **kwargs)
-
-
-def flush_telemetry():
-    if not _user_agrees_to_telemetry() or not telemetry_service:
-        return
-
-    return telemetry_service.flush()
-
-
-# internal utility functions and classes
-
-class _TelemetryService(object):
-    TELEMETRY_VERSION = '0.0.1.4'
-
-    @_suppress_all_exceptions(raise_in_debug=True)
-    def __init__(self):
-        from applicationinsights import TelemetryClient
-        from applicationinsights.exceptions import enable
-
-        self.arg_complete_env_name = None
-        self.client = None
-        self.application = None
-        self.records = []
-        self.az_config = _get_azure_cli_config()
-        self.core_version = _get_core_version()
-
-        self.client = TelemetryClient(INSTRUMENTATION_KEY)
-        self.client.context.application.id = 'Azure CLI'
-        self.client.context.application.ver = self.core_version
-        self.client.context.user.id = _get_user_machine_id()
-        self.client.context.device.type = 'az'
-
-        enable(INSTRUMENTATION_KEY)
-
-    @_suppress_all_exceptions(raise_in_debug=True)
-    def log(self, name, log_type='event', **kwargs):
-        """
-        IMPORTANT: do not log events with quotes in the name, properties or measurements;
-        those events may fail to upload.  Also, telemetry events must be verified in
-        the backend because successful upload does not guarentee success.
-        """
-        if not _user_agrees_to_telemetry():
+def _user_agrees_to_telemetry(func):
+    @wraps(func)
+    def _wrapper(*args, **kwargs):
+        if not _get_azure_cli_config().getboolean('core', 'collect_telemetry', fallback=True):
             return
+        else:
+            return func(*args, **kwargs)
 
-        # Now we now we want to log telemetry, get the profile
-        profile = _get_profile()
+    return _wrapper
 
-        name = _remove_cmd_chars(name)
-        _sanitize_inputs(kwargs)
 
-        source = 'completer' if self.arg_complete_env_name in os.environ else 'az'
+class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
+    start_time = None
+    end_time = None
+    application = None
+    arg_complete_env_name = None
+    correlation_id = str(uuid.uuid4())
+    command = 'unknown'
+    output_type = 'none'
+    parameters = []
+    result = 'None'
+    result_summary = None
+    payload_properties = None
+    exceptions = []
 
-        types = ['event', 'pageview', 'trace']
-        if log_type not in types:
-            raise ValueError('Type {} is not supported.  Available types: {}'.format(log_type,
-                                                                                     types))
-
-        props = {
-            'telemetry-version': self.TELEMETRY_VERSION
+    def add_exception(self, exception, fault_type='general-exception', description='', message=''):
+        details = {
+            'Reserved.DataModel.EntityType': 'Fault',
+            'Reserved.DataModel.Fault.Description': description,
+            'Reserved.DataModel.Correlation.1': self.correlation_id,
+            'Reserved.DataModel.Fault.TypeString': exception.__class__.__name__,
+            'Reserved.DataModel.Fault.Exception.Message': _remove_cmd_chars(
+                message or str(exception)),
+            'Reserved.DataModel.Fault.Exception.StackTrace': _remove_cmd_chars(_get_stack_trace()),
+            'Reserved.DataModel.Fault.Exception.ErrorCode': _remove_cmd_chars(_get_error_hash())
         }
-        _safe_exec(props, 'time', lambda: str(datetime.datetime.now()))
-        _safe_exec(props, 'x-ms-client-request-id',
-                   lambda: self.application.session['headers']['x-ms-client-request-id'])
-        _safe_exec(props, 'command', lambda: self.application.session.get('command', None))
-        _safe_exec(props, 'version', lambda: self.core_version)
-        _safe_exec(props, 'source', lambda: source)
-        _safe_exec(props, 'installation-id', lambda: _get_installation_id(profile))
-        _safe_exec(props, 'python-version',
-                   lambda: _remove_symbols(str(platform.python_version())))
-        _safe_exec(props, 'shell-type', _get_shell_type)
-        _safe_exec(props, 'locale', lambda: '{},{}'.format(locale.getdefaultlocale()[0],
-                                                           locale.getdefaultlocale()[1]))
-        _safe_exec(props, 'user-machine-id', _get_user_machine_id)
-        _safe_exec(props, 'user-azure-id', lambda: _get_user_azure_id(profile))
-        _safe_exec(props, 'azure-subscription-id', lambda: _get_azure_subscription_id(profile))
-        _safe_exec(props, 'default-output-type', lambda: self.az_config.get('core', 'output',
-                                                                            fallback='unknown'))
-        _safe_exec(props, 'environment', _get_env_string)
-        if log_type == 'trace':
-            _safe_exec(props, 'trace', _get_stack_trace)
-            _safe_exec(props, 'error-hash', _get_error_hash)
+        fault_type = _remove_symbols(fault_type).replace('"', '').replace("'", '').replace(' ', '-')
+        fault_name = '{}/faults/{}'.format(PRODUCT_NAME, fault_type.lower())
 
-        if kwargs:
-            props.update(**kwargs)
+        self.exceptions.append((fault_name, details))
 
-        self.records.append({
-            'name': name,
-            'type': log_type,
-            'properties': props
-        })
+    @decorators.suppress_all_exceptions(raise_in_diagnostics=True, fallback_return=None)
+    def generate_payload(self):
+        events = []
+        base = self._get_base_properties()
+        cli = self._get_azure_cli_properties()
 
-    @_suppress_all_exceptions(raise_in_debug=True)
-    def flush(self):
-        self.client.flush()
-        if not self.records:
-            return
+        user_task = self._get_user_task_properties()
+        user_task.update(base)
+        user_task.update(cli)
 
-        data = _remove_symbols(json.dumps(self.records))
-        subprocess.Popen([sys.executable, os.path.realpath(__file__), data])
+        events.append({'name': self.event_name, 'properties': user_task})
 
-    @_suppress_all_exceptions(raise_in_debug=True)
-    def upload(self, data_to_save):
-        data_to_save = json.loads(data_to_save.replace("'", '"'))
+        for name, props in self.exceptions:
+            props.update(base)
+            props.update(cli)
+            props.update({'Reserved.DataModel.CorrelationId': str(uuid.uuid4())})
+            events.append({'name': name, 'properties': props})
 
-        for record in data_to_save:
-            if record['type'] == 'pageview':
-                self.client.track_pageview(record['name'],
-                                           url=record['name'],
-                                           properties=record['properties'])
-            else:
-                self.client.track_event(record['name'],
-                                        record['properties'])
+        payload = json.dumps(events)
+        return _remove_symbols(payload)
 
-        self.client.flush()
+    def _get_base_properties(self):
+        return {
+            'Reserved.ChannelUsed': 'AI',
+            'Reserved.EventId': str(uuid.uuid4()),
+            'Reserved.SequenceNumber': 1,
+            'Reserved.SessionId': str(uuid.uuid4()),
+            'Reserved.TimeSinceSessionStart': 0,
 
-        if _in_diagnostic_mode():
-            sys.stdout.write('Telemetry upload begins\n')
-            json.dump(data_to_save, sys.stdout, indent=2, sort_keys=True)
-            sys.stdout.write('\nTelemetry upload completes\n')
+            'Reserved.DataModel.Source': 'DataModelAPI',
+            'Reserved.DataModel.EntitySchemaVersion': 4,
+            'Reserved.DataModel.Severity': 0,
+            'Reserved.DataModel.ProductName': PRODUCT_NAME,
+            'Reserved.DataModel.FeatureName': self.feature_name,
+            'Reserved.DataModel.EntityName': self.command_name,
+            'Reserved.DataModel.CorrelationId': self.correlation_id,
+
+            'Context.Default.VS.Core.ExeName': PRODUCT_NAME,
+            'Context.Default.VS.Core.ExeVersion': '{}@{}'.format(
+                self.product_version, self.module_version),
+            'Context.Default.VS.Core.MacAddressHash': _get_hash_mac_address(),
+            'Context.Default.VS.Core.Machine.Id': _get_hash_machine_id(),
+            'Context.Default.VS.Core.OS.Type': platform.system().lower(),  # eg. darwin, windows
+            'Context.Default.VS.Core.OS.Version': platform.version().lower(),  # eg. 10.0.14942
+            'Context.Default.VS.Core.User.Id': _get_installation_id(),
+            'Context.Default.VS.Core.User.IsMicrosoftInternal': 'False',
+            'Context.Default.VS.Core.User.IsOptedIn': 'True',
+            'Context.Default.VS.Core.TelemetryApi.ProductVersion': '{}@{}'.format(
+                PRODUCT_NAME, _get_core_version())
+        }
+
+    def _get_user_task_properties(self):
+        result = {
+            'Reserved.DataModel.EntityType': 'UserTask',
+            'Reserved.DataModel.Action.Type': 'Atomic',
+            'Reserved.DataModel.Action.Result': self.result
+        }
+
+        if self.result_summary:
+            result['Reserved.DataModel.Action.ResultSummary'] = self.result_summary
+
+        return result
+
+    def _get_azure_cli_properties(self):
+        source = 'az' if self.arg_complete_env_name not in os.environ else 'completer'
+        result = {}
+        self.set_custom_properties(result, 'Source', source)
+        self.set_custom_properties(result,
+                                   'ClientRequestId',
+                                   lambda: self.application.session['headers'][
+                                       'x-ms-client-request-id'])
+        self.set_custom_properties(result, 'CoreVersion', _get_core_version)
+        self.set_custom_properties(result, 'InstallationId', _get_installation_id)
+        self.set_custom_properties(result, 'ShellType', _get_shell_type)
+        self.set_custom_properties(result, 'UserAzureId', _get_user_azure_id)
+        self.set_custom_properties(result, 'UserAzureSubscriptionId', _get_azure_subscription_id)
+        self.set_custom_properties(result, 'DefaultOutputType',
+                                   lambda: _get_azure_cli_config().get('core', 'output',
+                                                                       fallback='unknown'))
+        self.set_custom_properties(result, 'EnvironmentVariables', _get_env_string)
+        self.set_custom_properties(result, 'Locale',
+                                   lambda: '{},{}'.format(locale.getdefaultlocale()[0],
+                                                          locale.getdefaultlocale()[1]))
+        self.set_custom_properties(result, 'StartTime', str(self.start_time))
+        self.set_custom_properties(result, 'EndTime', str(self.end_time))
+        self.set_custom_properties(result, 'OutputType', self.output_type)
+        self.set_custom_properties(result, 'Parameters', self.parameters)
+        self.set_custom_properties(result, 'PythonVersion', platform.python_version())
+
+        return result
+
+    @property
+    def command_name(self):
+        return self.command.lower().replace('-', '').replace(' ', '-')
+
+    @property
+    def event_name(self):
+        return '{}/{}/{}'.format(PRODUCT_NAME, self.feature_name, self.command_name)
+
+    @property
+    def feature_name(self):
+        # The feature name is used to created the event name. The feature name should be eventually
+        # the module name. However, it takes time to resolve the actual module name using pip
+        # module. Therefore, a hard coded replacement is used before a better solution is
+        # implemented
+        return 'commands'
+
+    @property
+    def module_version(self):
+        # TODO: find a efficient solution to retrieve module version
+        return 'none'
+
+    @property
+    def product_version(self):
+        return _get_core_version()
+
+    @classmethod
+    @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+    def set_custom_properties(cls, prop, name, value):
+        actual_value = value() if hasattr(value, '__call__') else value
+        if actual_value:
+            prop[AZURE_CLI_PREFIX + name] = actual_value
 
 
-def _user_agrees_to_telemetry():
-    return _get_azure_cli_config().getboolean('core', 'collect_telemetry', fallback=True)
+_session = TelemetrySession()
 
 
-@_suppress_all_exceptions(fallback_return={})
+# public api
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def start():
+    _session.start_time = datetime.datetime.now()
+
+
+@_user_agrees_to_telemetry
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def conclude():
+    _session.end_time = datetime.datetime.now()
+
+    payload = _session.generate_payload()
+    if payload:
+        import subprocess
+        subprocess.Popen([sys.executable, os.path.realpath(telemetry_core.__file__), payload])
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def set_exception(exception, fault_type, summary=None):
+    if not summary:
+        _session.result_summary = summary
+
+    _session.add_exception(exception, fault_type=fault_type)
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def set_failure(summary=None):
+    if _session.result != 'None':
+        return
+
+    _session.result = 'Failure'
+    if summary:
+        _session.result_summary = _remove_cmd_chars(summary)
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def set_success(summary=None):
+    if _session.result != 'None':
+        return
+
+    _session.result = 'Success'
+    if summary:
+        _session.result_summary = _remove_cmd_chars(summary)
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def set_user_fault(summary=None):
+    if _session.result != 'None':
+        return
+
+    _session.result = 'UserFault'
+    if summary:
+        _session.result_summary = _remove_cmd_chars(summary)
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def set_application(application, arg_complete_env_name):
+    _session.application, _session.arg_complete_env_name = application, arg_complete_env_name
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def set_command_details(command, output_type=None, parameters=None):
+    _session.command = command
+    _session.output_type = output_type
+    _session.parameters = parameters
+
+
+# definitions
+
+@decorators.call_once
+@decorators.suppress_all_exceptions(fallback_return={})
 def _get_azure_cli_config():
     from azure.cli.core._config import az_config
     return az_config
 
 
-@_suppress_all_exceptions(fallback_return=None)
+# internal utility functions
+
+@decorators.suppress_all_exceptions(fallback_return=None)
 def _get_core_version():
     from azure.cli.core import __version__ as core_version
     return core_version
 
 
-@_suppress_all_exceptions(raise_in_debug=True)
-def _safe_exec(props, key, fn):
-    props[key] = fn()
+@decorators.suppress_all_exceptions(fallback_return=None)
+def _get_installation_id():
+    return _get_profile().get_installation_id()
 
 
-@_suppress_one_exception(expected_exception=AttributeError, fallback_return=None)
-def _get_installation_id(profile):
-    try:
-        return profile.get_installation_id()
-    except AttributeError:
-        return None
-
-
-@_suppress_all_exceptions(fallback_return=None)
+@decorators.call_once
+@decorators.suppress_all_exceptions(fallback_return=None)
 def _get_profile():
     from azure.cli.core._profile import Profile
     return Profile()
+
+
+@decorators.suppress_all_exceptions(fallback_return='')
+@decorators.hash256_result
+def _get_hash_mac_address():
+    s = ''
+    for index, c in enumerate(hex(uuid.getnode())[2:].upper()):
+        s += c
+        if index % 2:
+            s += '-'
+
+    s = s.strip('-')
+
+    return s
+
+
+@decorators.suppress_all_exceptions(fallback_return='')
+def _get_hash_machine_id():
+    # Definition: Take first 128bit of the SHA256 hashed MAC address and convert them into a GUID
+    return str(uuid.UUID(_get_hash_mac_address()[0:32]))
+
+
+@decorators.suppress_all_exceptions(fallback_return='')
+@decorators.hash256_result
+def _get_user_azure_id():
+    return _get_profile().get_current_account_user()
 
 
 def _get_env_string():
@@ -236,37 +320,9 @@ def _get_env_string():
                                                   if v.startswith('AZURE_CLI')])))
 
 
-def _get_user_machine_id():
-    return _get_hash(platform.node() + getpass.getuser())
-
-
-def _get_user_azure_id(profile):
-    try:
-        from azure.cli.core._util import CLIError
-    except ImportError:
-        CLIError = Exception
-
-    try:
-        return _get_hash(profile.get_current_account_user())
-    except (AttributeError, CLIError):  # pylint: disable=broad-except
-        return None
-
-
-def _get_hash(s):
-    hash_object = hashlib.sha256(s.encode('utf-8'))
-    return str(hash_object.hexdigest())
-
-
-def _get_azure_subscription_id(profile):
-    try:
-        from azure.cli.core._util import CLIError
-    except ImportError:
-        CLIError = Exception
-
-    try:
-        return profile.get_login_credentials()[1]
-    except (AttributeError, CLIError):  # pylint: disable=broad-except
-        pass
+@decorators.suppress_all_exceptions(fallback_return=None)
+def _get_azure_subscription_id():
+    return _get_profile().get_login_credentials()[1]
 
 
 def _get_shell_type():
@@ -282,11 +338,13 @@ def _get_shell_type():
         return _remove_cmd_chars(_remove_symbols(os.environ.get('SHELL')))
 
 
+@decorators.suppress_all_exceptions(fallback_return='')
+@decorators.hash256_result
 def _get_error_hash():
-    err = sys.exc_info()[1]
-    return _remove_cmd_chars(_remove_symbols(_get_hash(str(err))))
+    return str(sys.exc_info()[1])
 
 
+@decorators.suppress_all_exceptions(fallback_return='')
 def _get_stack_trace():
     def _get_root_path():
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -307,24 +365,6 @@ def _get_stack_trace():
     return _remove_cmd_chars(_remove_symbols(_remove_root_paths(trace)))
 
 
-def _sanitize_inputs(d):
-    for key, value in d.items():
-        if isinstance(value, str):
-            d[key] = _remove_cmd_chars(value)
-        elif isinstance(value, list):
-            d[key] = [_remove_cmd_chars(v) for v in value]
-            if next((v for v in value if isinstance(v, list) or isinstance(v, dict)),
-                    None) is not None:
-                raise ValueError('List object too complex, will fail server-side')
-        elif isinstance(value, dict):
-            d[key] = {key: _remove_cmd_chars(v) for key, v in value.items()}
-            if next((v for v in value.values() if isinstance(v, list) or isinstance(v, dict)),
-                    None) is not None:
-                raise ValueError('Dict object too complex, will fail server-side')
-        else:
-            d[key] = _remove_cmd_chars(str(value))
-
-
 def _remove_cmd_chars(s):
     if isinstance(s, str):
         return s.replace("'", '_').replace('"', '_').replace('\r\n', ' ').replace('\n', ' ')
@@ -336,28 +376,3 @@ def _remove_symbols(s):
         for c in '$%^&|':
             s = s.replace(c, '_')
     return s
-
-
-def _in_diagnostic_mode():
-    """
-    When the telemetry runs in the diagnostic mode, exception are not suppressed and telemetry
-    traces are dumped to the stdout.
-    """
-    return bool(os.environ.get(DIAGNOSTICS_TELEMETRY_ENV_NAME, False))
-
-
-def _upload_telemetry(data):
-    telemetry_service.upload(data)
-
-
-# module global variables and initialization the module
-
-if _user_agrees_to_telemetry():
-    telemetry_service = _TelemetryService()
-else:
-    telemetry_service = None
-
-
-if __name__ == '__main__':
-    if _user_agrees_to_telemetry():
-        telemetry_service.upload(sys.argv[1])
