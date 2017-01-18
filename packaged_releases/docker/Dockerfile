@@ -5,10 +5,10 @@
 
 FROM python:3.5.2-alpine
 
-ENV CLI_VERSION 0.1.5
-ENV CLI_DOWNLOAD_SHA256 cb65651530544c43343e2c80b0d96a681ad0a07367e288ef9fae261093c497f3
+ENV CLI_VERSION 0.1.6
+ENV CLI_DOWNLOAD_SHA256 bb4bd4694e044bf416941e3afdc505bde7d049bac2e66c8b3fe44c9cb3b57ff8
 ENV CLI_PATCH1_SHA256 d61ef29ace9bbdfef9a25dfbb1f475225bbca174263c8f863ee70f87d0a78bbe
-ENV CLI_PATCH2_SHA256 ea0879280dbb3074d464752c27bfe01a7673da14137a4c4315d1938a0d05a03e
+ENV CLI_PATCH2_SHA256 4b97507cb73b405c6fb2d701eb52ffa72ce547f791097fccadffc491ad6ae194
 
 # INSTALL DEPENDENCIES
 # pip wheel - required for CLI packaging
@@ -36,12 +36,12 @@ RUN src_zip=$(mktemp) \
         && rm $src_zip
 # Apply patches
 RUN patch1=$(mktemp) \
-        && wget https://azurecliprod.blob.core.windows.net/patches/patch_0.1.5_component_custom.diff -qO $patch1 \
+        && wget https://azurecliprod.blob.core.windows.net/patches/patch_2_component_custom.diff -qO $patch1 \
         && echo "$CLI_PATCH1_SHA256  $patch1" | sha256sum -c - \
         && patch -p1 /cli-src/*/src/command_modules/azure-cli-component/azure/cli/command_modules/component/custom.py $patch1 \
         && rm $patch1
 RUN patch2=$(mktemp) \
-        && wget https://azurecliprod.blob.core.windows.net/patches/patch_0.1.5_pkg_util.diff -qO $patch2 \
+        && wget https://azurecliprod.blob.core.windows.net/patches/patch_2_pkg_util.diff -qO $patch2 \
         && echo "$CLI_PATCH2_SHA256  $patch2" | sha256sum -c - \
         && patch -p1 /cli-src/*/src/azure-cli-core/azure/cli/core/_pkg_util.py $patch2 \
         && rm $patch2
