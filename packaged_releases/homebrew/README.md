@@ -16,6 +16,7 @@ Verification
 ------------
 
 ```
+$ brew create https://azurecliprod.blob.core.windows.net/releases/azure-cli_packaged_${CLI_VERSION}.tar.gz --set-name azure-cli-2
 $ brew install --build-from-source azure-cli-2
 $ brew test azure-cli-2
 $ brew audit --strict --online azure-cli-2

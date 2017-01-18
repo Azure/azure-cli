@@ -80,10 +80,10 @@ archive_extract_dir=$(mktemp -d)
 tar -xvzf $source_archive -C $archive_extract_dir
 cp -r $archive_extract_dir/azure-cli_packaged_${CLI_VERSION}/* $source_dir
 # Apply patches
-wget https://azurecliprod.blob.core.windows.net/patches/patch_0.1.5_component_custom.diff -qO $working_dir/patch1.patch
+wget https://azurecliprod.blob.core.windows.net/patches/patch_2_component_custom.diff -qO $working_dir/patch1.patch
 echo "$CLI_PATCH1_SHA256  $working_dir/patch1.patch" | sha256sum -c -
 patch -p1 $source_dir/src/command_modules/azure-cli-component/azure/cli/command_modules/component/custom.py $working_dir/patch1.patch
-wget https://azurecliprod.blob.core.windows.net/patches/patch_0.1.5_pkg_util.diff -qO $working_dir/patch2.patch
+wget https://azurecliprod.blob.core.windows.net/patches/patch_2_pkg_util.diff -qO $working_dir/patch2.patch
 echo "$CLI_PATCH2_SHA256  $working_dir/patch2.patch" | sha256sum -c -
 patch -p1 $source_dir/src/azure-cli-core/azure/cli/core/_pkg_util.py $working_dir/patch2.patch
 # Add the debian files
