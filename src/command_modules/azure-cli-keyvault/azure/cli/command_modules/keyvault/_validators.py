@@ -197,8 +197,8 @@ def base64_encoded_certificate_type(string):
     return cert_data
 
 def datetime_type(string):
-    """ Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. """
-    date_format = '%Y-%m-%dT%H:%MZ'
+    """ Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M:%S\'Z\''. """
+    date_format = '%Y-%m-%dT%H:%M:%SZ'
     return datetime.strptime(string, date_format)
 
 def vault_base_url_type(name):

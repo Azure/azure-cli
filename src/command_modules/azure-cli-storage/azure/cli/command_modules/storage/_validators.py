@@ -558,8 +558,8 @@ def datetime_string_type(string):
     return datetime.strptime(string, date_format).strftime(date_format)
 
 def datetime_type(string):
-    ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
-    date_format = '%Y-%m-%dT%H:%MZ'
+    ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M:%S\'Z\''. '''
+    date_format = '%Y-%m-%dT%H:%M:%SZ'
     return datetime.strptime(string, date_format)
 
 def ipv4_range_type(string):
