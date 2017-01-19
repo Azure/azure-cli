@@ -92,6 +92,6 @@ with ServiceGroup(__name__, get_sql_recommended_elastic_pools_operations,
         c.command('show-metrics', 'list_metrics')
         c.command('list', 'list')
 
-    with s.group('sql elastic-pools recommended database') as c:
+    with s.group('sql elastic-pools recommended db') as c:
         c.command('show', 'get_databases')
         c.command('list', 'list_databases')

@@ -91,3 +91,11 @@ helps['sql elastic-pools db'] = """
             type: group
             short-summary: Command to manage databases activities in database elastic pools
             """
+helps['sql elastic-pools recommended'] = """
+            type: group
+            short-summary: Commands to see information about an Azure SQL Recommended Elastic Pools
+            """
+helps['sql elastic-pools recommended db'] = """
+            type: group
+            short-summary: Commands to see information about an Azure SQL database inside of Recommended Elastic Pool
+            """
