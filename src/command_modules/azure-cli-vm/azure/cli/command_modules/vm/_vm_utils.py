@@ -5,7 +5,7 @@
 
 import json
 import os
-from azure.cli.core._util import get_file_json
+from azure.cli.core._util import get_file_json, CLIError
 from azure.cli.core.commands.arm import parse_resource_id
 
 def random_string(length=16, force_lower=False):
@@ -38,18 +38,19 @@ def _resolve_api_version(provider_namespace, resource_type, parent_path):
     #If available, we will use parent resource's api-version
     resource_type_str = (parent_path.split('/')[0] if parent_path else resource_type)
 
-    rt = [t for t in provider.resource_types
-            if t.resource_type.lower() == resource_type_str.lower()]
+    rt = [t for t in provider.resource_types  # pylint: disable=no-member
+          if t.resource_type.lower() == resource_type_str.lower()]
     if not rt:
-        raise IncorrectUsageError('Resource type {} not found.'.format(resource_type_str))
+        raise CLIError('Resource type {} not found.'.format(resource_type_str))
     if len(rt) == 1 and rt[0].api_versions:
         npv = [v for v in rt[0].api_versions if 'preview' not in v.lower()]
         return npv[0] if npv else rt[0].api_versions[0]
     else:
-        raise IncorrectUsageError(
+        raise CLIError(
             'API version is required and could not be resolved for resource {}'
             .format(resource_type))
 
+# pylint: disable=too-many-arguments
 def check_existence(value, resource_group, provider_namespace, resource_type,
                     parent_name=None, parent_type=None):
     # check for name or ID and set the type flags
@@ -76,5 +77,5 @@ def check_existence(value, resource_group, provider_namespace, resource_type,
     try:
         resource_client.get(rg, ns, parent_path, resource_type, resource_name, api_version)
         return True
-    except CloudError as ex:
+    except CloudError:
         return False

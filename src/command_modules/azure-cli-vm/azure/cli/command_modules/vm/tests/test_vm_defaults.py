@@ -14,8 +14,8 @@ from azure.mgmt.network import NetworkManagementClient
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.resource.resources import ResourceManagementClient
 
-from azure.cli.command_modules.vm._validators import \
-    (validate_default_vnet, validate_default_storage_account)
+from azure.cli.command_modules.vm._validators import (
+    _validate_vm_create_vnet, _validate_vm_create_storage_account)
 
 # pylint: disable=method-hidden
 # pylint: disable=line-too-long
@@ -96,7 +96,7 @@ class TestVMCreateDefaultVnet(unittest.TestCase):
     @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_resource_client)
     def test_no_matching_vnet(self):
         self._set_ns('emptyrg', 'eastus')
-        validate_default_vnet(self.ns)
+        _validate_vm_create_vnet(self.ns)
         self.assertIsNone(self.ns.virtual_network)
         self.assertIsNone(self.ns.subnet_name)
         self.assertIsNone(self.ns.virtual_network_type)
@@ -104,7 +104,7 @@ class TestVMCreateDefaultVnet(unittest.TestCase):
     @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_resource_client)
     def test_matching_vnet_default_location(self):
         self._set_ns('rg1')
-        validate_default_vnet(self.ns)
+        _validate_vm_create_vnet(self.ns)
         self.assertEqual(self.ns.virtual_network, 'vnet2')
         self.assertEqual(self.ns.subnet_name, 'vnet2subnet')
         self.assertEqual(self.ns.virtual_network_type, 'existingName')
@@ -112,7 +112,7 @@ class TestVMCreateDefaultVnet(unittest.TestCase):
     @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_resource_client)
     def test_matching_vnet_specified_location(self):
         self._set_ns('rg1', 'eastus')
-        validate_default_vnet(self.ns)
+        _validate_vm_create_vnet(self.ns)
         self.assertEqual(self.ns.virtual_network, 'vnet1')
         self.assertEqual(self.ns.subnet_name, 'vnet1subnet')
         self.assertEqual(self.ns.virtual_network_type, 'existingName')
@@ -138,7 +138,7 @@ class TestVMCreateDefaultStorageAccount(unittest.TestCase):
     @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_resource_client)
     def test_no_matching_storage_account(self):
         self._set_ns('emptyrg', 'eastus')
-        validate_default_storage_account(self.ns)
+        _validate_vm_create_storage_account(self.ns)
         try:
             self.assertRegex(self.ns.storage_account, '^vhd.*')
         except AttributeError:
@@ -148,24 +148,24 @@ class TestVMCreateDefaultStorageAccount(unittest.TestCase):
     @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_resource_client)
     def test_matching_storage_account_default_location(self):
         self._set_ns('rg1')
-        validate_default_storage_account(self.ns)
+        _validate_vm_create_storage_account(self.ns)
         self.assertEqual(self.ns.storage_account, 'sa3')
         self.assertEqual(self.ns.storage_account_type, 'existingName')
 
         self._set_ns('rg1', tier='Premium')
-        validate_default_storage_account(self.ns)
+        _validate_vm_create_storage_account(self.ns)
         self.assertEqual(self.ns.storage_account, 'sa4')
         self.assertEqual(self.ns.storage_account_type, 'existingName')
 
     @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_resource_client)
     def test_matching_storage_account_specified_location(self):
         self._set_ns('rg1', 'eastus')
-        validate_default_storage_account(self.ns)
+        _validate_vm_create_storage_account(self.ns)
         self.assertEqual(self.ns.storage_account, 'sa1')
         self.assertEqual(self.ns.storage_account_type, 'existingName')
 
         self._set_ns('rg1', 'eastus', 'Premium')
-        validate_default_storage_account(self.ns)
+        _validate_vm_create_storage_account(self.ns)
         self.assertEqual(self.ns.storage_account, 'sa2')
         self.assertEqual(self.ns.storage_account_type, 'existingName')
 

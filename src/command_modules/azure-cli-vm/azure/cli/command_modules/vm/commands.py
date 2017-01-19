@@ -5,10 +5,10 @@
 
 from collections import OrderedDict
 
-from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_vm_create, cf_avail_set, cf_ni,
+from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, cf_ni,
                                                           cf_avail_set_create, cf_acs, cf_vm_ext,
                                                           cf_vm_ext_image, cf_vm_image, cf_usage,
-                                                          cf_vmss_create, cf_vmss, cf_vmss_vm,
+                                                          cf_vmss, cf_vmss_vm,
                                                           cf_vm_sizes)
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_wait_command
@@ -53,7 +53,7 @@ def transform_vm_list(vm_list):
 
 op_var = 'virtual_machines_operations'
 op_class = 'VirtualMachinesOperations'
-cli_command(__name__, 'vm create', custom_path.format('create_vm_experimental'), transform=DeploymentOutputLongRunningOperation('Starting vm create'))
+cli_command(__name__, 'vm create', custom_path.format('create_vm'), transform=DeploymentOutputLongRunningOperation('Starting vm create'))
 cli_command(__name__, 'vm delete', mgmt_path.format(op_var, op_class, 'delete'), cf_vm)
 cli_command(__name__, 'vm deallocate', mgmt_path.format(op_var, op_class, 'deallocate'), cf_vm)
 cli_command(__name__, 'vm generalize', mgmt_path.format(op_var, op_class, 'generalize'), cf_vm)
@@ -108,8 +108,8 @@ cli_generic_update_command(__name__, 'vm availability-set update',
                            custom_path.format('availset_get'),
                            custom_path.format('availset_set'))
 cli_generic_update_command(__name__, 'vmss update',
-                           custom_path.format('vmss_get'),
-                           custom_path.format('vmss_set'))
+                           custom_path.format('get_vmss'),
+                           custom_path.format('set_vmss'))
 
 # VM Boot Diagnostics
 cli_command(__name__, 'vm boot-diagnostics disable', custom_path.format('disable_boot_diagnostics'))
@@ -203,25 +203,23 @@ cli_command(__name__, 'vm image list', custom_path.format('list_vm_images'))
 cli_command(__name__, 'vm list-usage', mgmt_path.format('usage_operations', 'UsageOperations', 'list'), cf_usage)
 
 # VMSS
-cli_command(__name__, 'vmss create', 'azure.cli.command_modules.vm.mgmt_vmss.lib.operations.vmss_operations#VmssOperations.create_or_update', cf_vmss_create,
-            transform=DeploymentOutputLongRunningOperation('Starting vmss create'))
-
-cli_command(__name__, 'vmss delete', mgmt_path.format('virtual_machine_scale_sets_operations', 'VirtualMachineScaleSetsOperations', 'delete'), cf_vmss, confirmation=True)
+cli_command(__name__, 'vmss delete', mgmt_path.format('virtual_machine_scale_sets_operations', 'VirtualMachineScaleSetsOperations', 'delete'), cf_vmss)
 cli_command(__name__, 'vmss list-skus', mgmt_path.format('virtual_machine_scale_sets_operations', 'VirtualMachineScaleSetsOperations', 'list_skus'), cf_vmss)
 
 cli_command(__name__, 'vmss list-instances', mgmt_path.format('virtual_machine_scale_set_vms_operations', 'VirtualMachineScaleSetVMsOperations', 'list'), cf_vmss_vm)
 
-cli_command(__name__, 'vmss deallocate', custom_path.format('vmss_deallocate'))
-cli_command(__name__, 'vmss delete-instances', custom_path.format('vmss_delete_instances'))
-cli_command(__name__, 'vmss get-instance-view', custom_path.format('vmss_get_instance_view'))
-cli_command(__name__, 'vmss show', custom_path.format('vmss_show'))
-cli_command(__name__, 'vmss list', custom_path.format('vmss_list'))
-cli_command(__name__, 'vmss stop', custom_path.format('vmss_stop'))
-cli_command(__name__, 'vmss restart', custom_path.format('vmss_restart'))
-cli_command(__name__, 'vmss start', custom_path.format('vmss_start'))
-cli_command(__name__, 'vmss update-instances', custom_path.format('vmss_update_instances'))
-cli_command(__name__, 'vmss reimage', custom_path.format('vmss_reimage'))
-cli_command(__name__, 'vmss scale', custom_path.format('vmss_scale'))
+cli_command(__name__, 'vmss create', custom_path.format('create_vmss'), transform=DeploymentOutputLongRunningOperation('Starting vmss create'))
+cli_command(__name__, 'vmss deallocate', custom_path.format('deallocate_vmss'))
+cli_command(__name__, 'vmss delete-instances', custom_path.format('delete_vmss_instances'))
+cli_command(__name__, 'vmss get-instance-view', custom_path.format('get_vmss_instance_view'))
+cli_command(__name__, 'vmss show', custom_path.format('show_vmss'))
+cli_command(__name__, 'vmss list', custom_path.format('list_vmss'))
+cli_command(__name__, 'vmss stop', custom_path.format('stop_vmss'))
+cli_command(__name__, 'vmss restart', custom_path.format('restart_vmss'))
+cli_command(__name__, 'vmss start', custom_path.format('start_vmss'))
+cli_command(__name__, 'vmss update-instances', custom_path.format('update_vmss_instances'))
+cli_command(__name__, 'vmss reimage', custom_path.format('reimage_vmss'))
+cli_command(__name__, 'vmss scale', custom_path.format('scale_vmss'))
 
 # VM Size
 cli_command(__name__, 'vm list-sizes', mgmt_path.format('virtual_machine_sizes_operations', 'VirtualMachineSizesOperations', 'list'), cf_vm_sizes)

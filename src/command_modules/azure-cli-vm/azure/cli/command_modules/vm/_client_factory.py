@@ -16,14 +16,6 @@ def _subscription_client_factory(**_):
     return get_subscription_service_client(SubscriptionClient)
 
 
-def cf_vm_create(_):
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.command_modules.vm.mgmt_vm.lib import VmCreationClient as VMCreateClient
-    client = get_mgmt_service_client(VMCreateClient)
-    client.config.long_running_operation_timeout = 5  # seconds
-    return client.vm
-
-
 def cf_ni(_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.network import NetworkManagementClient
@@ -47,12 +39,6 @@ def cf_acs_create(_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.command_modules.vm.mgmt_acs.lib import AcsCreationClient as AcsCreateClient
     return get_mgmt_service_client(AcsCreateClient).acs
-
-
-def cf_vmss_create(_):
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.command_modules.vm.mgmt_vmss.lib import VmssCreationClient as VmssCreateClient
-    return get_mgmt_service_client(VmssCreateClient).vmss
 
 
 def cf_vm(_):

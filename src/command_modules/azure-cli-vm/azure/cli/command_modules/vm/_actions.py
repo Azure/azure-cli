@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import argparse
 import json
 import os
 import re
@@ -20,24 +19,6 @@ from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from ._client_factory import _compute_client_factory
 
 logger = azlogging.get_az_logger(__name__)
-
-class VMDNSNameAction(argparse.Action): #pylint: disable=too-few-public-methods
-    def __call__(self, parser, namespace, values, option_string=None):
-        dns_value = values
-
-        if dns_value:
-            namespace.dns_name_type = 'new'
-
-        namespace.dns_name_for_public_ip = dns_value
-
-
-class PrivateIpAction(argparse.Action):  # pylint: disable=too-few-public-methods
-    def __call__(self, parser, namespace, values, option_string=None):
-        private_ip = values
-        namespace.private_ip_address = private_ip
-
-        if private_ip:
-            namespace.private_ip_address_allocation = 'static'
 
 
 def _resource_not_exists(resource_type):

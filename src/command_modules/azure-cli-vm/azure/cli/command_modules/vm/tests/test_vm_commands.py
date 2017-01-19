@@ -120,7 +120,7 @@ class VMShowListSizesListIPAddressesScenarioTest(ResourceGroupVCRTestBase):
                  '--public-ip-address-allocation {3} '
                  '--authentication-type password --use-native-disk'.format(
                      self.resource_group, self.location, self.vm_name, self.ip_allocation_method))
-        self.cmd('vm show --resource-group {} --name {} --expand instanceView'.format(
+        result = self.cmd('vm show --resource-group {} --name {} --expand instanceView'.format(
             self.resource_group, self.vm_name), checks=[
                 JMESPathCheck('type(@)', 'object'),
                 JMESPathCheck('name', self.vm_name),
@@ -272,7 +272,7 @@ class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
 class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # pylint:disable=too-many-instance-attributes
 
     def __init__(self, test_method):
-        super(VMCreateAndStateModificationsScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_vm_state_mod', debug=True)
+        super(VMCreateAndStateModificationsScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_vm_state_mod')
         self.location = 'eastus'
         self.vm_name = 'vm-state-mod'
         self.nsg_name = 'mynsg'
@@ -520,330 +520,6 @@ class VMExtensionImageSearchScenarioTest(VCRTestBase):
         ])
         result = self.cmd('vm extension image list -l westus -p {} --name {} --latest'.format(publisher, image_name))
         assert len(result) == 1
-
-
-class VMScaleSetGetsScenarioTest(VCRTestBase):
-
-    def __init__(self, test_method):
-        super(VMScaleSetGetsScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'CLI_TEST1'
-        self.ss_name = 'clitestvm'
-        self.location = 'westus'
-        if not self.playback:
-            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
-
-    def test_vm_scaleset_gets(self):
-        self.execute()
-
-    def body(self):
-        self.cmd('vmss list', checks=[
-            JMESPathCheck('type(@)', 'array')
-        ])
-        self.cmd('vmss list --resource-group {}'.format(self.resource_group), checks=[
-            JMESPathCheck('type(@)', 'array'),
-            JMESPathCheck('length(@)', 1),
-            JMESPathCheck('[0].name', self.ss_name),
-            JMESPathCheck('[0].location', self.location),
-            JMESPathCheck('[0].resourceGroup', self.resource_group)
-        ])
-        self.cmd('vmss list-skus --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
-                 checks=JMESPathCheck('type(@)', 'array'))
-        self.cmd('vmss show --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
-            JMESPathCheck('type(@)', 'object'),
-            JMESPathCheck('name', self.ss_name),
-            JMESPathCheck('location', self.location),
-            JMESPathCheck('resourceGroup', self.resource_group)
-        ])
-        self.cmd('vmss get-instance-view --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
-            JMESPathCheck('type(@)', 'object'),
-            JMESPathCheck('type(virtualMachine)', 'object'),
-            JMESPathCheck('type(statuses)', 'array')
-        ])
-
-
-class VMScaleSetStatesScenarioTest(VCRTestBase):
-
-    def __init__(self, test_method):
-        super(VMScaleSetStatesScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cliTestRg_ScaleSet1'
-        self.ss_name = 'scaleset1'
-        if not self.playback:
-            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
-
-    def test_vm_scaleset_states(self):
-        self.execute()
-
-    def body(self):
-        self.cmd('vmss stop --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
-        self.cmd('vmss start --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
-                 checks=NoneCheck())
-        self.cmd('vmss restart --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
-                 checks=NoneCheck())
-        self.cmd('vmss update-instances --resource-group {} --name {} --instance-ids 0'.format(self.resource_group, self.ss_name),
-                 checks=NoneCheck())
-
-
-class VMScaleSetScaleUpScenarioTest(VCRTestBase):
-
-    def __init__(self, test_method):
-        super(VMScaleSetScaleUpScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'yugangwvmss'
-        self.ss_name = 'yugangwvm'
-        if not self.playback:
-            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
-
-    def test_vm_scaleset_scaleup(self):
-        self.execute()
-
-    def body(self):
-        result = self.cmd('vmss show --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
-        capacity = result['sku']['capacity']
-        new_capacity = capacity + 1 if capacity < 3 else capacity - 1
-        self.cmd('vmss scale --resource-group {} --name {} --new-capacity {}'.format(self.resource_group, self.ss_name, new_capacity))
-        result = self.cmd('vmss show --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
-        assert result['sku']['capacity'] == new_capacity
-
-
-class VMScaleSetDeleteScenarioTest(VCRTestBase):
-
-    def __init__(self, test_method):
-        super(VMScaleSetDeleteScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'yugangwvmss'
-        self.ss_name = 'yugangwvm'
-        self.vm_count = 3
-        self.instance_id_to_delete = 2
-        if not self.playback:
-            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
-
-    def test_vm_scaleset_delete(self):
-        self.execute()
-
-    def body(self):
-        self.cmd('vmss list --resource-group {}'.format(self.resource_group), checks=[
-            JMESPathCheck('type(@)', 'array'),
-            JMESPathCheck('length(@)', 1),
-            JMESPathCheck('[0].name', self.ss_name),
-            JMESPathCheck('[0].resourceGroup', self.resource_group)
-        ])
-        self.cmd('vmss get-instance-view --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
-            JMESPathCheck('type(@)', 'object'),
-            JMESPathCheck('type(virtualMachine)', 'object'),
-            JMESPathCheck('virtualMachine.statusesSummary[0].count', self.vm_count)
-        ])
-        # Existing issues, the instance delete command has not been recorded
-        self.cmd('vmss delete-instances --resource-group {} --name {} --instance-ids {}'.format(self.resource_group, self.ss_name, self.instance_id_to_delete),
-                 checks=NoneCheck())
-        self.cmd('vmss get-instance-view --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
-            JMESPathCheck('type(@)', 'object'),
-            JMESPathCheck('type(virtualMachine)', 'object'),
-            JMESPathCheck('virtualMachine.statusesSummary[0].count', self.vm_count - 1)
-        ])
-        self.cmd('vmss deallocate --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
-                 checks=NoneCheck())
-        self.cmd('vmss delete --resource-group {} --name {} --force'.format(self.resource_group, self.ss_name),
-                 checks=NoneCheck())
-        self.cmd('vmss list --resource-group {}'.format(self.resource_group),
-                 checks=NoneCheck())
-
-
-class VMScaleSetVMsScenarioTest(VCRTestBase):
-
-    def __init__(self, test_method):
-        super(VMScaleSetVMsScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cliTestRg_ScaleSet3'
-        self.ss_name = 'scaleset3'
-        self.vm_count = 5
-        self.instance_ids = ['1', '2', '3', '6', '7']
-        if not self.playback:
-            raise Exception('TODO: modify this test to use ResourceGroupVCRTestBase')
-
-    def test_vm_scaleset_vms(self):
-        self.execute()
-
-    def _check_vms_power_state(self, expected_power_state):
-        for iid in self.instance_ids:
-            self.cmd('vmss get-instance-view --resource-group {} --name {} --instance-id {}'.format(self.resource_group, self.ss_name, iid),
-                     checks=JMESPathCheck('statuses[1].code', expected_power_state))
-
-    def body(self):
-        self.cmd('vmss show --resource-group {} --name {} --instance-id {}'.format(self.resource_group, self.ss_name, self.instance_ids[0]), checks=[
-            JMESPathCheck('type(@)', 'object'),
-            JMESPathCheck('instanceId', str(self.instance_ids[0]))
-        ])
-        self.cmd('vmss list-instances --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
-            JMESPathCheck('type(@)', 'array'),
-            JMESPathCheck('length(@)', self.vm_count),
-            JMESPathCheck("[].name.starts_with(@, '{}')".format(self.ss_name), [True] * self.vm_count)
-        ])
-        self._check_vms_power_state('PowerState/running')
-        self.cmd('vmss stop --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
-                 checks=NoneCheck())
-        self._check_vms_power_state('PowerState/stopped')
-        self.cmd('vmss start --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
-                 checks=NoneCheck())
-        self._check_vms_power_state('PowerState/running')
-        self.cmd('vmss restart --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
-                 checks=NoneCheck())
-        self._check_vms_power_state('PowerState/running')
-        self.cmd('vmss deallocate --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
-                 checks=NoneCheck())
-        self._check_vms_power_state('PowerState/deallocated')
-        self.cmd('vmss delete-instances --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
-                 checks=NoneCheck())
-        self.cmd('vmss list-instances --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
-                 checks=NoneCheck())
-
-
-class VMScaleSetCreateSimple(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(VMScaleSetCreateSimple, self).__init__(__file__, test_method, resource_group='scaleset_create_simple_rg')
-
-    def test_vm_scaleset_create_simple(self):
-        self.execute()
-
-    def body(self):
-        vmss_name = 'vrfvmss'
-        # Note: all parameters that are dynamically generated client-side must be overridden here.
-        # This includes deployment name, admin name and ssh key.
-        self.cmd('vmss create --admin-password Test1234@! --name {vmss_name} -g {resource_group} --admin-username myadmin --image Win2012R2Datacenter'
-                 .format(resource_group=self.resource_group, vmss_name=vmss_name))
-        self.cmd('vmss show --name {vmss_name} -g {resource_group}'.format(resource_group=self.resource_group, vmss_name=vmss_name),
-                 checks=JMESPathCheck('virtualMachineProfile.osProfile.windowsConfiguration.enableAutomaticUpdates', True))
-
-
-class VMScaleSetCreateOptions(ResourceGroupVCRTestBase):
-
-    def __init__(self, test_method):
-        super(VMScaleSetCreateOptions, self).__init__(__file__, test_method, resource_group='scaleset_create_options_rg')
-
-    def test_vm_scaleset_create_options(self):
-        self.execute()
-
-    def body(self):
-        vmss_name = 'vrfvmss'
-        instance_count = 4
-        caching = 'ReadWrite'
-        upgrade_policy = 'automatic'
-        ip_name = 'vrfpubip'
-
-        self.cmd('network public-ip create --name {ip_name} -g {resource_group}'.format(ip_name=ip_name, resource_group=self.resource_group))
-        self.cmd('vmss create --image Win2012R2Datacenter --admin-password Test1234@! -l westus'
-                 ' --name {vmss_name} -g {resource_group} --disable-overprovision --instance-count {instance_count}'
-                 ' --storage-caching {caching} --upgrade-policy-mode {upgrade_policy}'
-                 ' --admin-username myadmin --public-ip-address {ip_name}'
-                 .format(vmss_name=vmss_name, resource_group=self.resource_group, instance_count=instance_count,
-                         caching=caching, upgrade_policy=upgrade_policy, ip_name=ip_name))
-        self.cmd('network lb show --name {vmss_name}lb -g {resource_group}'.format(vmss_name=vmss_name, resource_group=self.resource_group),
-                 checks=JMESPathCheck('frontendIpConfigurations[0].publicIpAddress.id.ends_with(@, \'{ip_name}\')'.format(ip_name=ip_name), True))
-        self.cmd('vmss show --name {vmss_name} -g {resource_group}'.format(resource_group=self.resource_group, vmss_name=vmss_name), checks=[
-            JMESPathCheck('sku.capacity', instance_count),
-            JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.caching', caching),
-            JMESPathCheck('upgradePolicy.mode', upgrade_policy.title())
-        ])
-        self.cmd('vmss show -n {vmss_name} -g {resource_group} --instance-id 0'.format(vmss_name=vmss_name, resource_group=self.resource_group),
-                 checks=JMESPathCheck('osProfile.windowsConfiguration.provisionVmAgent', True))
-
-
-class VMSSCreateNoneOptionsTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
-    def __init__(self, test_method):
-        super(VMSSCreateNoneOptionsTest, self).__init__(__file__, test_method, resource_group='cliTestRg_VMSSCreate_none_options')
-
-    def test_vmss_create_none_options(self):
-        self.execute()
-
-    def body(self):
-        deployment_name = 'azurecli-test-deployment-vmss-none-options-create'
-        vmss_name = 'nooptvmss8'
-
-        self.cmd('vmss create -n {vmss_name} -g {resource_group} --image Debian --load-balancer {quotes}'
-                 ' --ssh-key-value \'{ssh_key}\' --deployment-name {deployment_name} --public-ip-address {quotes} --tags {quotes}'
-                 .format(vmss_name=vmss_name, resource_group=self.resource_group,
-                         ssh_key=TEST_SSH_KEY_PUB, deployment_name=deployment_name,
-                         quotes='""' if platform.system() == 'Windows' else "''"))
-
-        self.cmd('vmss show -n {vmss_name} -g {resource_group}'.format(vmss_name=vmss_name, resource_group=self.resource_group), [
-            JMESPathCheck('availabilitySet', None),
-            JMESPathCheck('tags', {}),
-            JMESPathCheck('virtualMachineProfile.networkProfile.networkInterfaceConfigurations.ipConfigurations.loadBalancerBackendAddressPools', None)
-        ])
-        self.cmd('network public-ip show -n {vmss_name}PublicIP -g {resource_group}'.format(vmss_name=vmss_name, resource_group=self.resource_group), checks=[
-            NoneCheck()
-        ], allowed_exceptions='was not found')
-
-
-class VMScaleSetCreateExistingOptions(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(VMScaleSetCreateExistingOptions, self).__init__(__file__, test_method, resource_group='scaleset_create_existing_options_rg2')
-
-    def test_vm_scaleset_create_existing_options(self):
-        self.execute()
-
-    def body(self):
-        vmss_name = 'vrfvmss'
-        vnet_name = 'vrfvnet'
-        subnet_name = 'vrfsubnet'
-        lb_name = 'vrflb'
-        os_disk_name = 'vrfosdisk'
-        container_name = 'vrfcontainer'
-        sku_name = 'Standard_A3'
-        bepool_name = 'mybepool'
-        natpool_name = 'mynatpool'
-
-        self.cmd('network vnet create -n {vnet_name} -g {resource_group} --subnet-name {subnet_name}'
-                 .format(vnet_name=vnet_name, resource_group=self.resource_group, subnet_name=subnet_name))
-        self.cmd('network lb create --name {lb_name} -g {resource_group} --backend-pool-name {bepool_name}'
-                 .format(lb_name=lb_name, resource_group=self.resource_group, bepool_name=bepool_name))
-        self.cmd('vmss create --image CentOS --os-disk-name {os_disk_name}'
-                 ' --vnet {vnet_name}'
-                 ' --subnet-name {subnet_name} -l "West US" --vm-sku {sku_name}'
-                 ' --storage-container-name {container_name} -g {resource_group} --name {vmss_name}'
-                 ' --load-balancer {lb_name}'
-                 ' --ssh-key-value \'{key_value}\' --load-balancer-backend-pool-name {bepool_name}'
-                 ' --load-balancer-nat-pool-name {natpool_name}'
-                 .format(os_disk_name=os_disk_name, vnet_name=vnet_name, subnet_name=subnet_name, lb_name=lb_name,
-                         container_name=container_name, resource_group=self.resource_group, vmss_name=vmss_name,
-                         key_value=TEST_SSH_KEY_PUB, sku_name=sku_name, bepool_name=bepool_name, natpool_name=natpool_name))
-        self.cmd('vmss show --name {vmss_name} -g {resource_group}'.format(resource_group=self.resource_group, vmss_name=vmss_name), checks=[
-            JMESPathCheck('sku.name', sku_name),
-            JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.name', os_disk_name),
-            JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.vhdContainers[0].ends_with(@, \'{container_name}\')'
-                          .format(container_name=container_name), True)
-        ])
-        self.cmd('network lb show --name {lb_name} -g {resource_group}'.format(resource_group=self.resource_group, lb_name=lb_name),
-                 checks=JMESPathCheck('backendAddressPools[0].backendIpConfigurations[0].id.contains(@, \'{vmss_name}\')'.format(vmss_name=vmss_name), True))
-        self.cmd('network vnet show --name {vnet_name} -g {resource_group}'.format(resource_group=self.resource_group, vnet_name=vnet_name),
-                 checks=JMESPathCheck('subnets[0].ipConfigurations[0].id.contains(@, \'{vmss_name}\')'.format(vmss_name=vmss_name), True))
-
-
-class VMScaleSetNicScenarioTest(ResourceGroupVCRTestBase):
-
-    def __init__(self, test_method):
-        super(VMScaleSetNicScenarioTest, self).__init__(__file__, test_method, resource_group='test_vm_scaleset_nics')
-        self.vmss_name = 'vmss1'
-        self.instance_id = 0
-
-    def test_vm_scaleset_nics(self):
-        self.execute()
-
-    def set_up(self):
-        super(VMScaleSetNicScenarioTest, self).set_up()
-        self.cmd('vmss create -g {} -n {} --authentication-type password --admin-password PasswordPassword1!  --image Win2012R2Datacenter'.format(self.resource_group, self.vmss_name))
-
-    def body(self):
-        self.cmd('vmss nic list -g {} --vmss-name {}'.format(self.resource_group, self.vmss_name), checks=[
-            JMESPathCheck('type(@)', 'array'),
-            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
-        ])
-        nic_list = self.cmd('vmss nic list-vm-nics -g {} --vmss-name {} --instance-id {}'.format(self.resource_group, self.vmss_name, self.instance_id), checks=[
-            JMESPathCheck('type(@)', 'array'),
-            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
-        ])
-        nic_name = nic_list[0].get('name')
-        self.cmd('vmss nic show --resource-group {} --vmss-name {} --instance-id {} -n {}'.format(self.resource_group, self.vmss_name, self.instance_id, nic_name), checks=[
-            JMESPathCheck('type(@)', 'object'),
-            JMESPathCheck('name', nic_name),
-            JMESPathCheck('resourceGroup', self.resource_group),
-        ])
 
 
 class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
@@ -1109,6 +785,7 @@ class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
         ])
 
 
+# pylint: disable=too-many-instance-attributes
 class VMCreateExistingOptions(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
@@ -1128,7 +805,6 @@ class VMCreateExistingOptions(ResourceGroupVCRTestBase):
 
     def set_up(self):
         super(VMCreateExistingOptions, self).set_up()
-        rg = self.resource_group
 
         self.cmd('vm availability-set create --name {} -g {}'.format(self.availset_name, self.resource_group))
         self.cmd('network public-ip create --name {} -g {}'.format(self.pubip_name, self.resource_group))
@@ -1191,7 +867,7 @@ class VMCreateCustomIP(ResourceGroupVCRTestBase):
 class VMDataDiskVCRTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(VMDataDiskVCRTest, self).__init__(__file__, test_method, resource_group='cli_test_vm_data_disk', debug=True)
+        super(VMDataDiskVCRTest, self).__init__(__file__, test_method, resource_group='cli_test_vm_data_disk')
         self.location = 'westus'
         self.vm_name = 'vm-datadisk-test'
 
@@ -1308,6 +984,260 @@ class AzureContainerServiceScenarioTest(ResourceGroupVCRTestBase):  # pylint: di
             JMESPathCheck('agentPoolProfiles[0].count', 5),
         ])
 
+# region VMSS Tests
+
+class VMSSCreateAndModify(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(VMSSCreateAndModify, self).__init__(__file__, test_method, resource_group='cli_test_vmss_create_and_modify')
+
+    def set_up(self):
+        super(VMSSCreateAndModify, self).set_up()
+
+    def test_vmss_create_and_modify(self):
+        self.execute()
+
+    def body(self):
+        vmss_name = 'vmss1'
+        instance_count = 5
+        new_instance_count = 4
+
+        self.cmd('vmss create --admin-password Test1234@! --name {} -g {} --admin-username myadmin --image Win2012R2Datacenter --use-native-disk --instance-count {}'
+                 .format(vmss_name, self.resource_group, instance_count))
+
+        self.cmd('vmss show --name {} -g {}'.format(vmss_name, self.resource_group),
+                 )
+
+        self.cmd('vmss list', checks=JMESPathCheck('type(@)', 'array'))
+
+        self.cmd('vmss list --resource-group {}'.format(self.resource_group), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', vmss_name),
+            JMESPathCheck('[0].resourceGroup', self.resource_group)
+        ])
+        self.cmd('vmss list-skus --resource-group {} --name {}'.format(self.resource_group, vmss_name),
+                 checks=JMESPathCheck('type(@)', 'array'))
+        self.cmd('vmss show --resource-group {} --name {}'.format(self.resource_group, vmss_name), checks=[
+            JMESPathCheck('type(@)', 'object'),
+            JMESPathCheck('name', vmss_name),
+            JMESPathCheck('resourceGroup', self.resource_group)
+        ])
+        self.cmd('vmss update-instances --resource-group {} --name {} --instance-ids 2 3'.format(self.resource_group, vmss_name))
+        self.cmd('vmss get-instance-view --resource-group {} --name {}'.format(self.resource_group, vmss_name), checks=[
+            JMESPathCheck('type(@)', 'object'),
+            JMESPathCheck('type(virtualMachine)', 'object'),
+            JMESPathCheck('type(statuses)', 'array')
+        ])
+
+        self.cmd('vmss stop --resource-group {} --name {}'.format(self.resource_group, vmss_name))
+        self.cmd('vmss start --resource-group {} --name {}'.format(self.resource_group, vmss_name))
+        self.cmd('vmss restart --resource-group {} --name {}'.format(self.resource_group, vmss_name))
+
+        self.cmd('vmss scale --resource-group {} --name {} --new-capacity {}'.format(self.resource_group, vmss_name, new_instance_count))
+        self.cmd('vmss show --resource-group {} --name {}'.format(self.resource_group, vmss_name), checks=[
+            JMESPathCheck('sku.capacity', new_instance_count),
+            JMESPathCheck('virtualMachineProfile.osProfile.windowsConfiguration.enableAutomaticUpdates', True)
+        ])
+
+        self.cmd('vmss delete-instances --resource-group {} --name {} --instance-ids 2 3'.format(self.resource_group, vmss_name))
+        self.cmd('vmss get-instance-view --resource-group {} --name {}'.format(self.resource_group, vmss_name), checks=[
+            JMESPathCheck('type(@)', 'object'),
+            JMESPathCheck('type(virtualMachine)', 'object'),
+            JMESPathCheck('virtualMachine.statusesSummary[0].count', new_instance_count - 2)
+        ])
+        self.cmd('vmss deallocate --resource-group {} --name {}'.format(self.resource_group, vmss_name))
+        self.cmd('vmss delete --resource-group {} --name {}'.format(self.resource_group, vmss_name))
+        self.cmd('vmss list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
+
+
+class VMSSCreateOptions(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(VMSSCreateOptions, self).__init__(__file__, test_method, resource_group='cli_test_vmss_create_options')
+        self.ip_name = 'vrfpubip'
+
+    def set_up(self):
+        super(VMSSCreateOptions, self).set_up()
+        self.cmd('network public-ip create --name {} -g {}'.format(self.ip_name, self.resource_group))
+
+    def test_vmss_create_options(self):
+        self.execute()
+
+    def body(self):
+        vmss_name = 'vrfvmss'
+        instance_count = 4
+        caching = 'ReadWrite'
+        upgrade_policy = 'automatic'
+
+        self.cmd('vmss create --image Win2012R2Datacenter --admin-password Test1234@! -l westus'
+                 ' --name {} -g {} --disable-overprovision --instance-count {}'
+                 ' --storage-caching {} --upgrade-policy-mode {}'
+                 ' --admin-username myadmin --public-ip-address {} --use-native-disk'
+                 .format(vmss_name, self.resource_group, instance_count, caching,
+                         upgrade_policy, self.ip_name))
+        self.cmd('network lb show --name {}lb -g {}'.format(vmss_name, self.resource_group),
+                 checks=JMESPathCheck('frontendIpConfigurations[0].publicIpAddress.id.ends_with(@, \'{}\')'.format(self.ip_name), True))
+        self.cmd('vmss show --name {} -g {}'.format(vmss_name, self.resource_group), checks=[
+            JMESPathCheck('sku.capacity', instance_count),
+            JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.caching', caching),
+            JMESPathCheck('upgradePolicy.mode', upgrade_policy.title())
+        ])
+        self.cmd('vmss show -n {} -g {} --instance-id 0'.format(vmss_name, self.resource_group),
+                 checks=JMESPathCheck('osProfile.windowsConfiguration.provisionVmAgent', True))
+
+
+class VMSSCreateNoneOptionsTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
+
+    def __init__(self, test_method):
+        super(VMSSCreateNoneOptionsTest, self).__init__(__file__, test_method, resource_group='cli_test_vmss_create_none_options')
+
+    def test_vmss_create_none_options(self):
+        self.execute()
+
+    def body(self):
+        vmss_name = 'vmss1'
+
+        self.cmd('vmss create -n {0} -g {1} --image Debian --load-balancer {3}'
+                 ' --ssh-key-value \'{2}\' --use-native-disk --public-ip-address {3} --tags {3}'
+                 .format(vmss_name, self.resource_group, TEST_SSH_KEY_PUB, '""' if platform.system() == 'Windows' else "''"))
+
+        self.cmd('vmss show -n {} -g {}'.format(vmss_name, self.resource_group), [
+            JMESPathCheck('availabilitySet', None),
+            JMESPathCheck('tags', {}),
+            JMESPathCheck('virtualMachineProfile.networkProfile.networkInterfaceConfigurations.ipConfigurations.loadBalancerBackendAddressPools', None)
+        ])
+        self.cmd('network public-ip show -n {}PublicIP -g {}'.format(vmss_name, self.resource_group), checks=NoneCheck(), allowed_exceptions='was not found')
+
+
+class VMSSCreateExistingOptions(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(VMSSCreateExistingOptions, self).__init__(__file__, test_method, resource_group='cli_test_vmss_create_existing_options')
+        self.vnet_name = 'vrfvnet'
+        self.subnet_name = 'vrfsubnet'
+        self.lb_name = 'vrflb'
+        self.bepool_name = 'mybepool'
+        self.natpool_name = 'mynatpool'
+
+    def set_up(self):
+        super(VMSSCreateExistingOptions, self).set_up()
+        self.cmd('network vnet create -n {} -g {} --subnet-name {}'
+                 .format(self.vnet_name, self.resource_group, self.subnet_name))
+        self.cmd('network lb create --name {} -g {} --backend-pool-name {}'
+                 .format(self.lb_name, self.resource_group, self.bepool_name))
+
+    def test_vmss_create_existing_options(self):
+        self.execute()
+
+    def body(self):
+        vmss_name = 'vrfvmss'
+        os_disk_name = 'vrfosdisk'
+        container_name = 'vrfcontainer'
+        sku_name = 'Standard_A3'
+
+        self.cmd('vmss create --image CentOS --os-disk-name {}'
+                 ' --vnet-name {} --subnet {} -l "West US" --vm-sku {}'
+                 ' --storage-container-name {} -g {} --name {} --load-balancer {}'
+                 ' --ssh-key-value \'{}\' --backend-pool-name {}'
+                 ' --nat-pool-name {} --use-native-disk'
+                 .format(os_disk_name, self.vnet_name, self.subnet_name, sku_name, container_name,
+                         self.resource_group, vmss_name, self.lb_name, TEST_SSH_KEY_PUB,
+                         self.bepool_name, self.natpool_name))
+        self.cmd('vmss show --name {} -g {}'.format(vmss_name, self.resource_group), checks=[
+            JMESPathCheck('sku.name', sku_name),
+            JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.name', os_disk_name),
+            JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.vhdContainers[0].ends_with(@, \'{}\')'
+                          .format(container_name), True)
+        ])
+        self.cmd('network lb show --name {} -g {}'.format(self.lb_name, self.resource_group),
+                 checks=JMESPathCheck('backendAddressPools[0].backendIpConfigurations[0].id.contains(@, \'{}\')'.format(vmss_name), True))
+        self.cmd('network vnet show --name {} -g {}'.format(self.vnet_name, self.resource_group),
+                 checks=JMESPathCheck('subnets[0].ipConfigurations[0].id.contains(@, \'{}\')'.format(vmss_name), True))
+
+
+class VMSSVMsScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(VMSSVMsScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_vmss_vms')
+        self.ss_name = 'vmss1'
+        self.vm_count = 2
+        self.instance_ids = []
+
+    def set_up(self):
+        super(VMSSVMsScenarioTest, self).set_up()
+        self.cmd('vmss create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-password TestTest12#$ --use-native-disk --instance-count {}'.format(self.resource_group, self.ss_name, self.vm_count))
+
+    def test_vmss_vms(self):
+        self.execute()
+
+    def _check_vms_power_state(self, expected_power_state):
+        for iid in self.instance_ids:
+            self.cmd('vmss get-instance-view --resource-group {} --name {} --instance-id {}'.format(self.resource_group, self.ss_name, iid),
+                     checks=JMESPathCheck('statuses[1].code', expected_power_state))
+
+    def body(self):
+        instance_list = self.cmd('vmss list-instances --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck('length(@)', self.vm_count),
+            JMESPathCheck("[].name.starts_with(@, '{}')".format(self.ss_name), [True] * self.vm_count)
+        ])
+
+        self.instance_ids = [x['instanceId'] for x in instance_list]
+
+        self.cmd('vmss show --resource-group {} --name {} --instance-id {}'.format(self.resource_group, self.ss_name, self.instance_ids[0]), checks=[
+            JMESPathCheck('type(@)', 'object'),
+            JMESPathCheck('instanceId', str(self.instance_ids[0]))
+        ])
+        self.cmd('vmss restart --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
+                 checks=NoneCheck())
+        self._check_vms_power_state('PowerState/running')
+        self._check_vms_power_state('PowerState/running')
+        self.cmd('vmss stop --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
+                 checks=NoneCheck())
+        self._check_vms_power_state('PowerState/stopped')
+        self.cmd('vmss start --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
+                 checks=NoneCheck())
+        self._check_vms_power_state('PowerState/running')
+        self.cmd('vmss deallocate --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
+                 checks=NoneCheck())
+        self._check_vms_power_state('PowerState/deallocated')
+        self.cmd('vmss delete-instances --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name),
+                 checks=NoneCheck())
+        self.cmd('vmss list-instances --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
+                 checks=NoneCheck())
+
+
+class VMSSNicScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(VMSSNicScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_vmss_nics')
+        self.vmss_name = 'vmss1'
+        self.instance_id = 0
+
+    def test_vmss_nics(self):
+        self.execute()
+
+    def set_up(self):
+        super(VMSSNicScenarioTest, self).set_up()
+        self.cmd('vmss create -g {} -n {} --authentication-type password --admin-password PasswordPassword1!  --image Win2012R2Datacenter --use-native-disk'.format(self.resource_group, self.vmss_name))
+
+    def body(self):
+        self.cmd('vmss nic list -g {} --vmss-name {}'.format(self.resource_group, self.vmss_name), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
+        ])
+        nic_list = self.cmd('vmss nic list-vm-nics -g {} --vmss-name {} --instance-id {}'.format(self.resource_group, self.vmss_name, self.instance_id), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck("length([?resourceGroup == '{}']) == length(@)".format(self.resource_group), True)
+        ])
+        nic_name = nic_list[0].get('name')
+        self.cmd('vmss nic show --resource-group {} --vmss-name {} --instance-id {} -n {}'.format(self.resource_group, self.vmss_name, self.instance_id, nic_name), checks=[
+            JMESPathCheck('type(@)', 'object'),
+            JMESPathCheck('name', nic_name),
+            JMESPathCheck('resourceGroup', self.resource_group),
+        ])
+
+# endregion
 
 if __name__ == '__main__':
     unittest.main()
