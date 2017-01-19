@@ -206,7 +206,7 @@ class StorageBlobScenarioTest(StorageAccountVCRTestBase):
         date = s.date
         _get_connection_string(self)
 
-        s.cmd('storage container create --name {} --fail-on-exist'.format(container), checks=JMESPathCheck('success', True))
+        s.cmd('storage container create --name {} --fail-on-exist'.format(container), checks=JMESPathCheck('created', True))
         s.cmd('storage container exists -n {}'.format(container), checks=JMESPathCheck('exists', True))
 
         s.cmd('storage container set-permission -n {} --public-access blob'.format(container))
@@ -255,7 +255,7 @@ class StorageBlobScenarioTest(StorageAccountVCRTestBase):
         ])
 
         # verify delete operation
-        s.cmd('storage container delete --name {} --fail-not-exist'.format(container), checks=JMESPathCheck('success', True))
+        s.cmd('storage container delete --name {} --fail-not-exist'.format(container), checks=JMESPathCheck('deleted', True))
         s.cmd('storage container exists -n {}'.format(container), checks=JMESPathCheck('exists', False))
 
 
@@ -331,7 +331,7 @@ class StorageFileScenarioTest(StorageAccountVCRTestBase):
         s = self
         dir = 'testdir01'
         s.cmd('storage directory create --share-name {} --name {} --fail-on-exist'.format(share, dir),
-              checks=JMESPathCheck('success', True))
+              checks=JMESPathCheck('created', True))
         s.cmd('storage directory exists --share-name {} -n {}'.format(share, dir),
               checks=JMESPathCheck('exists', True))
         s.cmd('storage directory metadata update --share-name {} -n {} --metadata a=b c=d'.format(share, dir))
@@ -348,20 +348,20 @@ class StorageFileScenarioTest(StorageAccountVCRTestBase):
               checks=NoneCheck())
         s._storage_file_in_subdir_scenario(share, dir)
         s.cmd('storage directory delete --share-name {} --name {} --fail-not-exist'.format(share, dir),
-              checks=JMESPathCheck('success', True))
+              checks=JMESPathCheck('deleted', True))
         s.cmd('storage directory exists --share-name {} --name {}'.format(share, dir),
               checks=JMESPathCheck('exists', False))
 
         # verify a directory can be created with metadata and then delete
         dir = 'testdir02'
         s.cmd('storage directory create --share-name {} --name {} --fail-on-exist --metadata foo=bar cat=hat'.format(share, dir),
-              checks=JMESPathCheck('success', True))
+              checks=JMESPathCheck('created', True))
         s.cmd('storage directory metadata show --share-name {} -n {}'.format(share, dir), checks=[
             JMESPathCheck('cat', 'hat'),
             JMESPathCheck('foo', 'bar')
         ])
         s.cmd('storage directory delete --share-name {} --name {} --fail-not-exist'.format(share, dir),
-              checks=JMESPathCheck('success', True))
+              checks=JMESPathCheck('deleted', True))
 
     def _storage_file_scenario(self, share):
         source_file = os.path.join(TEST_DIR, 'testfile.rst')
@@ -437,9 +437,9 @@ class StorageFileScenarioTest(StorageAccountVCRTestBase):
         _get_connection_string(self)
 
         s.cmd('storage share create --name {} --fail-on-exist'.format(share1),
-              checks=JMESPathCheck('success', True))
+              checks=JMESPathCheck('created', True))
         s.cmd('storage share create -n {} --fail-on-exist --metadata foo=bar cat=hat'.format(share2),
-              checks=JMESPathCheck('success', True))
+              checks=JMESPathCheck('created', True))
         s.cmd('storage share exists -n {}'.format(share1),
               checks=JMESPathCheck('exists', True))
         s.cmd('storage share metadata show --name {}'.format(share2), checks=[
@@ -601,7 +601,7 @@ class StorageTableScenarioTest(StorageAccountVCRTestBase):
         table = s.table
         _get_connection_string(self)
 
-        s.cmd('storage table create -n {} --fail-on-exist'.format(table), checks=JMESPathCheck('success', True))
+        s.cmd('storage table create -n {} --fail-on-exist'.format(table), checks=JMESPathCheck('created', True))
         s.cmd('storage table exists -n {}'.format(table), checks=JMESPathCheck('exists', True))
 
         res = s.cmd('storage table list')
@@ -612,7 +612,7 @@ class StorageTableScenarioTest(StorageAccountVCRTestBase):
         s._storage_entity_scenario(table)
 
         # verify delete operation
-        s.cmd('storage table delete --name {} --fail-not-exist'.format(table), checks=JMESPathCheck('success', True))
+        s.cmd('storage table delete --name {} --fail-not-exist'.format(table), checks=JMESPathCheck('deleted', True))
         s.cmd('storage table exists -n {}'.format(table), checks=JMESPathCheck('exists', False))
 
 
@@ -680,7 +680,7 @@ class StorageQueueScenarioTest(StorageAccountVCRTestBase):
         queue = s.queue
         _get_connection_string(self)
 
-        s.cmd('storage queue create -n {} --fail-on-exist --metadata a=b c=d'.format(queue), checks=JMESPathCheck('success', True))
+        s.cmd('storage queue create -n {} --fail-on-exist --metadata a=b c=d'.format(queue), checks=JMESPathCheck('created', True))
         s.cmd('storage queue exists -n {}'.format(queue), checks=JMESPathCheck('exists', True))
 
         res = s.cmd('storage queue list')
@@ -701,7 +701,7 @@ class StorageQueueScenarioTest(StorageAccountVCRTestBase):
         s._storage_message_scenario(queue)
 
         # verify delete operation
-        s.cmd('storage queue delete -n {} --fail-not-exist'.format(queue), checks=JMESPathCheck('success', True))
+        s.cmd('storage queue delete -n {} --fail-not-exist'.format(queue), checks=JMESPathCheck('deleted', True))
         s.cmd('storage queue exists -n {}'.format(queue), checks=JMESPathCheck('exists', False))
 
 
