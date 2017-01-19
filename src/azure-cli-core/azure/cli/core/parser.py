@@ -30,16 +30,10 @@ class CaseInsensitiveChoicesCompleter(argcomplete.completers.ChoicesCompleter): 
 argcomplete.completers.ChoicesCompleter = CaseInsensitiveChoicesCompleter
 
 
-class EmptyDefaultCompletionFinder(argcomplete.CompletionFinder):
-
-    def __init__(self, *args, **kwargs):
-        super(EmptyDefaultCompletionFinder, self).__init__(*args, default_completer=lambda _: (),
-                                                           **kwargs)
-
-
 def enable_autocomplete(parser):
-    argcomplete.autocomplete = EmptyDefaultCompletionFinder()
-    argcomplete.autocomplete(parser, validator=lambda c, p: c.lower().startswith(p.lower()))
+    argcomplete.autocomplete = argcomplete.CompletionFinder()
+    argcomplete.autocomplete(parser, validator=lambda c, p: c.lower().startswith(p.lower()),
+                             default_completer=lambda _: ())
 
 
 class AzCliCommandParser(argparse.ArgumentParser):
