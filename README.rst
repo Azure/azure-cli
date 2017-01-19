@@ -29,7 +29,7 @@ Interactive install script
 
 On Windows, install via `pip <#pip>`__.
 
-On Linux, see our `prerequisites <https://github.com/Azure/azure-cli/blob/master/doc/install_linux_prerequisites.md>`__ then install as follows:
+On Linux or Mac, see our `prerequisites <https://github.com/Azure/azure-cli/blob/master/doc/install_linux_prerequisites.md>`__ then install as follows:
 
 .. code-block:: console
 
