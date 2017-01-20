@@ -257,6 +257,7 @@ register_cli_argument('storage account update', 'tags', tags_type, default=None)
 
 register_cli_argument('storage account keys renew', 'key_name', options_list=('--key',), help='The key to regenerate.', validator=validate_key, **enum_choice_list(list(storage_account_key_options.keys())))
 register_cli_argument('storage account keys renew', 'account_name', account_name_type, id_part=None)
+register_cli_argument('storage account keys list', 'account_name', account_name_type, id_part=None)
 
 register_cli_argument('storage blob', 'blob_name', blob_name_type, options_list=('--name', '-n'))
 
