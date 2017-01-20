@@ -12,6 +12,7 @@ from argcomplete.completers import (
     FilesCompleter,
     DirectoriesCompleter)
 
+from . import _validators as validators
 from azure.cli.core.commands import (
     create_command,
     command_table,
@@ -23,13 +24,10 @@ from azure.cli.core._util import CLIError
 from azure.cli.core.commands._introspection import (
     extract_full_summary_from_signature,
     extract_args_from_signature)
-from ._validators import (
-    validate_options,
-    validate_file_destination,
-    validate_client_parameters,
-    validate_required_parameter)
 
 
+_CLASS_NAME = re.compile(r"<(.*?)>")  # Strip model name from class docstring
+_UNDERSCORE_CASE = re.compile('(?!^)([A-Z]+)')  # Convert from CamelCase to underscore_case
 FLATTEN = 3  # The level of complex object namespace to flatten.
 IGNORE_OPTIONS = {  # Options parameters that should not be exposed as arguments.
     'ocp_date',
@@ -59,11 +57,128 @@ BASIC_TYPES = {  # Argument types that should not be flattened.
 }
 
 
+def _load_model(name):
+    """Load a model class from the SDK in order to inspect for
+    parameter names and whether they're required.
+    :param str name: The model class name to load.
+    :returns: Model class
+    """
+    if name.startswith('azure.'):
+        namespace = name.split('.')
+    else:
+        namespace = ['azure', 'batch', 'models', name]
+    model = __import__(namespace[0])
+    for level in namespace[1:]:
+        model = getattr(model, level)
+    return model
+
+
+def _build_prefix(arg, param, path):
+    """Recursively build a command line argument prefix from the request
+    parameter object to avoid name conflicts.
+    :param str arg: Currenct argument name.
+    :param str param: Original request parameter name.
+    :param str path: Request parameter namespace.
+    """
+    prefix_list = path.split('.')
+    if len(prefix_list) == 1:
+        return arg
+    resolved_name = prefix_list[0] + "_" + param
+    if arg == resolved_name:
+        return arg
+    for prefix in prefix_list[1:]:
+        new_name = prefix + "_" + param
+        if new_name == arg:
+            return resolved_name
+        resolved_name = new_name
+    return resolved_name
+
+
+def find_param_type(model, param):
+    """Parse the parameter type from the model docstring.
+    :param class model: Model class.
+    :param str param: The name of the parameter.
+    :returns: str
+    """
+    # Search for the :type param_name: in the docstring
+    pattern = r":type {}:(.*?)\n(\s*:param |\s*:rtype:|\s*:raises:|\"\"\")".format(param)
+    param_type = re.search(pattern, model.__doc__, re.DOTALL)
+    return re.sub(r"\n\s*", "", param_type.group(1).strip())
+
+
+def find_param_help(model, param):
+    """Parse the parameter help info from the model docstring.
+    :param class model: Model class.
+    :param str param: The name of the parameter.
+    :returns: str
+    """
+    # Search for :param param_name: in the docstring
+    pattern = r":param {}:(.*?)\n\s*:type ".format(param)
+    param_doc = re.search(pattern, model.__doc__, re.DOTALL)
+    return re.sub(r"\n\s*", "", param_doc.group(1).strip())
+
+
+def find_return_type(model):
+    """Parse the parameter help info from the model docstring.
+    :param class model: Model class.
+    :param str param: The name of the parameter.
+    :returns: str
+    """
+    # Search for :rtype: in the docstring
+    pattern = r":rtype: (.*?)\n(\s*:rtype:|\s*:raises:|\"\"\")"
+    return_type = re.search(pattern, model.__doc__, re.DOTALL)
+    if return_type:
+        return re.sub(r"\n\s*", "", return_type.group(1))
+
+
+def class_name( type_str):
+    """Extract class name from type docstring.
+    :param str type_str: Parameter type docstring.
+    :returns: class name
+    """
+    return _CLASS_NAME.findall(type_str)[0]
+
+
+def operations_name(class_str):
+    """Convert the operations class name into Python case.
+    :param str class_str: The class name.
+    """
+    if class_str.endswith('Operations'):
+        class_str = class_str[:-10]
+    return _UNDERSCORE_CASE.sub(r'_\1', class_str).lower()
+
+
+def full_name(arg_details):
+    """Create a full path to the complex object parameter of a
+    given argument.
+    :param dict arg_details: The details of the argument.
+    :returns: str
+    """
+    return ".".join([arg_details['path'], arg_details['root']])
+
+
+def group_title(path):
+    """Create a group title from the argument path.
+    :param str path: The complex object path of the argument.
+    :returns: str
+    """
+    group_path = path.split('.')
+    title = ' : '.join(group_path)
+    for group in group_path:
+        title = title.replace(group, " ".join([n.title() for n in group.split('_')]), 1)
+    return title
+
+
+def arg_name(name):
+    """Convert snake case argument name to a command line name.
+    :param str name: The argument parameter name.
+    :returns: str
+    """
+    return "--" + name.replace('_', '-')
+
+
 class BatchArgumentTree(object):
     """Dependency tree parser for arguments of complex objects"""
-
-    _class_name = re.compile(r"<(.*?)>")  # Strip model name from class docstring
-    _underscore_case = re.compile('(?!^)([A-Z]+)')  # Convert from CamelCase to underscore_case
 
     def __init__(self, validator):
         self._arg_tree = {}
@@ -110,7 +225,7 @@ class BatchArgumentTree(object):
             if child_arg in required_args:
                 continue
             details = self._arg_tree[child_arg]
-            if '.'.join([details['path'], details['root']]) in dependencies:
+            if full_name(details) in dependencies:
                 required_args.append(child_arg)
             elif details['path'] in dependencies:
                 required_args.extend(self._parse(namespace, details['path'], True))
@@ -176,6 +291,10 @@ class BatchArgumentTree(object):
                 details['options']['action'] = 'store_true'
             elif details['type'].startswith('['):
                 details['options']['nargs'] = '+'
+            elif details['type'] in ['iso-8601', 'rfc-1123']:
+                details['options']['type'] = validators.datetime_format
+            elif details['type'] == 'duration':
+                details['options']['type'] = validators.duration_format
             yield (name, CliCommandArgument(dest=name, **details['options']))
 
     def existing(self, name):
@@ -186,86 +305,6 @@ class BatchArgumentTree(object):
         """
         return name in self._arg_tree
 
-    def class_name(self, type_str):
-        """Extract class name from type docstring.
-        :param str type_str: Parameter type docstring.
-        :returns: class name
-        """
-        return self._class_name.findall(type_str)[0]
-
-    def operations_name(self, class_str):
-        """Convert the operations class name into Python case.
-        :param str class_str: The class name.
-        """
-        return self._underscore_case.sub(r'_\1', class_str[:-10]).lower()
-
-    @staticmethod
-    def full_name(arg_details):
-        """Create a full path to the complex object parameter of a
-        given argument.
-        :param dict arg_details: The details of the argument.
-        :returns: str
-        """
-        return ".".join([arg_details['path'], arg_details['root']])
-
-    @staticmethod
-    def group_title(path):
-        """Create a group title from the argument path.
-        :param str path: The complex object path of the argument.
-        :returns: str
-        """
-        group_path = path.split('.')
-        group_title = ' : '.join(group_path)
-        for group in group_path:
-            group_title = group_title.replace(group,
-                                              " ".join([n.title() for n in group.split('_')]), 1)
-        return group_title
-
-    @staticmethod
-    def arg_name(name):
-        """Convert snake case argument name to a command line name.
-        :param str name: The argument parameter name.
-        :returns: str
-        """
-        return "--" + name.replace('_', '-')
-
-    @staticmethod
-    def find_param_type(model, param):
-        """Parse the parameter type from the model docstring.
-        :param class model: Model class.
-        :param str param: The name of the parameter.
-        :returns: str
-        """
-        # Search for the :type param_name: in the docstring
-        pattern = r":type {}:(.*?)\n(\s*:param |\s*:rtype:|\s*:raises:|\"\"\")".format(param)
-        param_type = re.search(pattern, model.__doc__, re.DOTALL)
-        return re.sub(r"\n\s*", "", param_type.group(1).strip())
-
-    @staticmethod
-    def find_param_help(model, param):
-        """Parse the parameter help info from the model docstring.
-        :param class model: Model class.
-        :param str param: The name of the parameter.
-        :returns: str
-        """
-        # Search for :param param_name: in the docstring
-        pattern = r":param {}:(.*?)\n\s*:type ".format(param)
-        param_doc = re.search(pattern, model.__doc__, re.DOTALL)
-        return re.sub(r"\n\s*", "", param_doc.group(1).strip())
-
-    @staticmethod
-    def find_return_type(model):
-        """Parse the parameter help info from the model docstring.
-        :param class model: Model class.
-        :param str param: The name of the parameter.
-        :returns: str
-        """
-        # Search for :rtype: in the docstring
-        pattern = r":rtype: (.*?)\n(\s*:rtype:|\s*:raises:|\"\"\")"
-        return_type = re.search(pattern, model.__doc__, re.DOTALL)
-        if return_type:
-            return re.sub(r"\n\s*", "", return_type.group(1))
-
     def parse_mutually_exclusive(self, namespace, required, params):
         """Validate whether two or more mutually exclusive arguments or
         argument groups have been set correctly.
@@ -274,7 +313,7 @@ class BatchArgumentTree(object):
          request properties.
         """
         argtree = self._arg_tree.items()
-        ex_arg_names = [a for a, v in argtree if self.full_name(v) in params]
+        ex_arg_names = [a for a, v in argtree if full_name(v) in params]
         ex_args = [getattr(namespace, a) for a, v in argtree if a in ex_arg_names]
         ex_args = [x for x in ex_args if x is not None]
         ex_group_names = []
@@ -282,7 +321,7 @@ class BatchArgumentTree(object):
         for arg_group in params:
             child_args = self._get_children(arg_group)
             if child_args:
-                ex_group_names.append(self.group_title(arg_group))
+                ex_group_names.append(group_title(arg_group))
                 if any([getattr(namespace, arg) for arg in child_args]):
                     ex_groups.append(ex_group_names[-1])
 
@@ -293,7 +332,7 @@ class BatchArgumentTree(object):
             message = ("The follow arguments or argument groups are mutually "
                        "exclusive and cannot be combined: \n")
         if message:
-            missing = [self.arg_name(n) for n in ex_arg_names] + ex_group_names
+            missing = [arg_name(n) for n in ex_arg_names] + ex_group_names
             message += '\n'.join(missing)
             raise ValueError(message)
 
@@ -312,10 +351,10 @@ class BatchArgumentTree(object):
                     raise ValueError("Cannot access JSON request file: " + namespace.json_file)
                 except ValueError as err:
                     raise ValueError("Invalid JSON file: {}".format(err))
-                for name in self._arg_tree:
-                    if getattr(namespace, name):
-                        raise ValueError("--json-file cannot be combined with " + \
-                            self.arg_name(name))
+                other_values = [arg_name(n) for n in self._arg_tree if getattr(namespace, n)]
+                if other_values:
+                    message = "--json-file cannot be combined with:\n"
+                    raise ValueError(message + '\n'.join(other_values))
                 return
         except AttributeError:
             pass
@@ -329,7 +368,7 @@ class BatchArgumentTree(object):
         missing_args = [n for n in required_args if not getattr(namespace, n)]
         if missing_args:
             message = "The following additional arguments are required:\n"
-            message += "\n".join([self.arg_name(m) for m in missing_args])
+            message += "\n".join([arg_name(m) for m in missing_args])
             raise ValueError(message)
         self.done = True
 
@@ -352,7 +391,7 @@ class AzureDataPlaneCommand(object):
         # The name of the request options parameter
         self._options_param = self._format_options_name(operation)
         # The name of the group for options arguments
-        self._options_group = self.parser.group_title(self._options_param)
+        self._options_group = group_title(self._options_param)
         # Arguments used for request options
         self._options_attrs = []
         # The loaded options model to populate for the request
@@ -465,30 +504,14 @@ class AzureDataPlaneCommand(object):
                 continue
             setattr(kwargs[self._options_param], param, param_value)
 
-    @staticmethod
-    def _load_model(name):
-        """Load a model class from the SDK in order to inspect for
-        parameter names and whether they're required.
-        :param str name: The model class name to load.
-        :returns: Model class
-        """
-        if name.startswith('azure.'):
-            namespace = name.split('.')
-        else:
-            namespace = ['azure', 'batch', 'models', name]
-        model = __import__(namespace[0])
-        for level in namespace[1:]:
-            model = getattr(model, level)
-        return model
-
     def _load_options_model(self, func_obj):
         """Load the request headers options model to gather arguments.
         :param func func_obj: The request function.
         """
-        option_type = self.parser.find_param_type(func_obj, self._options_param)
-        option_type = self.parser.class_name(option_type)
-        self._options_model = self._load_model(option_type)()
-        self._options_attrs = list(self._options_model.__dict__.keys())
+        option_type = find_param_type(func_obj, self._options_param)
+        option_type = class_name(option_type)
+        self._options_model = _load_model(option_type)()
+        self._options_attrs =  list(self._options_model.__dict__.keys())
 
     def _format_options_name(self, operation):
         """Format the name of the request options parameter from the
@@ -498,7 +521,7 @@ class AzureDataPlaneCommand(object):
         """
         operation = operation.split('#')[-1]
         op_class, op_function = operation.split('.')
-        op_class = self.parser.operations_name(op_class)
+        op_class = operations_name(op_class)
         return "{}_{}_options".format(op_class, op_function)
 
     def _should_flatten(self, param):
@@ -519,51 +542,30 @@ class AzureDataPlaneCommand(object):
             conditions.append(model._validation.get(attr, {}).get('readonly')) #pylint: disable=W0212
             conditions.append(model._validation.get(attr, {}).get('constant')) #pylint: disable=W0212
             conditions.append('.'.join([path, attr]) in self.ignore)
-            conditions.append(details['type'][0] in ['[', '{']) # TODO: Add support for lists.
+            conditions.append(details['type'][0] in ['{'])
             if not any(conditions):
                 yield attr, details
-
-    @staticmethod
-    def _build_prefix(arg, param, path):
-        """Recursively build a command line argument prefix from the request
-        parameter object to avoid name conflicts.
-        :param str arg: Currenct argument name.
-        :param str param: Original request parameter name.
-        :param str path: Request parameter namespace.
-        """
-        prefix_list = path.split('.')
-        if len(prefix_list) == 1:
-            return arg
-        resolved_name = prefix_list[0] + "_" + param
-        if arg == resolved_name:
-            return arg
-        for prefix in prefix_list[1:]:
-            new_name = prefix + "_" + param
-            if new_name == arg:
-                return resolved_name
-            resolved_name = new_name
-        return resolved_name
 
     def _process_options(self):
         """Process the request options parameter to expose as arguments."""
         for param in [o for o in self._options_attrs if o not in IGNORE_OPTIONS]:
+            options = {}
+            options['required'] = False
+            options['arg_group'] = self._options_group
+            if param in ['if_modified_since', 'if_unmodified_since']:
+                options['type'] = validators.datetime_format
             if param in FLATTEN_OPTIONS:
                 for f_param, f_docstring in FLATTEN_OPTIONS[param].items():
-                    yield (f_param, CliCommandArgument(f_param,
-                                                       options_list=[self.parser.arg_name(f_param)],
-                                                       required=False,
-                                                       default=None,
-                                                       help=f_docstring,
-                                                       validator=validate_options,
-                                                       arg_group=self._options_group))
+                    options['default'] = None
+                    options['help'] = f_docstring
+                    options['options_list'] = [arg_name(f_param)]
+                    options['validator'] = validators.validate_options
+                    yield (f_param, CliCommandArgument(f_param, **options))
             else:
-                docstring = self.parser.find_param_help(self._options_model, param)
-                yield (param, CliCommandArgument(param,
-                                                 options_list=[self.parser.arg_name(param)],
-                                                 required=False,
-                                                 default=getattr(self._options_model, param),
-                                                 help=docstring,
-                                                 arg_group=self._options_group))
+                options['default'] = getattr(self._options_model, param)
+                options['help'] = find_param_help(self._options_model, param)
+                options['options_list'] = [arg_name(param)]
+                yield (param, CliCommandArgument(param, **options))
 
     def _resolve_conflict(self, arg, param, path, options, typestr, dependencies, conflicting): #pylint:disable=too-many-arguments
         """Resolve conflicting command line arguments.
@@ -578,18 +580,18 @@ class AzureDataPlaneCommand(object):
         if self.parser.existing(arg):
             conflicting.append(arg)
             existing = self.parser.dequeue_argument(arg)
-            existing['name'] = self._build_prefix(arg, existing['root'], existing['path'])
-            existing['options']['options_list'] = [self.parser.arg_name(existing['name'])]
+            existing['name'] = _build_prefix(arg, existing['root'], existing['path'])
+            existing['options']['options_list'] = [arg_name(existing['name'])]
             self.parser.queue_argument(**existing)
-            new = self._build_prefix(arg, param, path)
-            options['options_list'] = [self.parser.arg_name(new)]
+            new = _build_prefix(arg, param, path)
+            options['options_list'] = [arg_name(new)]
             self._resolve_conflict(new, param, path, options, typestr, dependencies, conflicting)
         elif arg in conflicting:
-            new = self._build_prefix(arg, param, path)
+            new = _build_prefix(arg, param, path)
             if new in conflicting:
                 self.parser.queue_argument(arg, path, param, options, typestr, dependencies)
             else:
-                options['options_list'] = [self.parser.arg_name(new)]
+                options['options_list'] = [arg_name(new)]
                 self._resolve_conflict(new, param, path, options,
                                        typestr, dependencies, conflicting)
         else:
@@ -607,18 +609,35 @@ class AzureDataPlaneCommand(object):
 
             for param_attr, details in self._get_attrs(param_model, path):
                 options = {}
-                options['options_list'] = [self.parser.arg_name(param_attr)]
+                options['options_list'] = [arg_name(param_attr)]
                 options['required'] = False
-                options['arg_group'] = self.parser.group_title(path)
-                options['help'] = self.parser.find_param_help(param_model, param_attr)
-                options['validator'] = lambda ns: validate_required_parameter(ns, self.parser)
+                options['arg_group'] = group_title(path)
+                options['help'] = find_param_help(param_model, param_attr)
+                options['validator'] = \
+                    lambda ns: validators.validate_required_parameter(ns, self.parser)
                 options['default'] = None  # Extract details from signature
 
                 if details['type'] in BASIC_TYPES:
                     self._resolve_conflict(param_attr, param_attr, path, options,
                                            details['type'], required_attrs, conflict_names)
+                elif details['type'].startswith('['):
+                    # We only expose a list arg if there's a validator for it
+                    # This will fail for 2D arrays - though Batch doesn't have any yet
+                    inner_type = details['type'][1:-1]
+                    if inner_type in BASIC_TYPES:  # TODO
+                        continue
+                    else:
+                        inner_type = operations_name(inner_type)
+                        try:
+                            validator = getattr(validators, inner_type + "_format")
+                            options['type'] = validator
+                            self._resolve_conflict(
+                                param_attr, param_attr, path, options,
+                                details['type'], required_attrs, conflict_names)
+                        except AttributeError as err:
+                            continue
                 else:
-                    attr_model = self._load_model(details['type'])
+                    attr_model = _load_model(details['type'])
                     if not hasattr(attr_model, '_attribute_map'): # Must be an enum
                         self._resolve_conflict(param_attr, param_attr, path, options,
                                                details['type'], required_attrs, conflict_names)
@@ -627,44 +646,43 @@ class AzureDataPlaneCommand(object):
 
     def _load_transformed_arguments(self, handler):
         """Load all the command line arguments from the request parameters.
-        :param str operation: The operation function reference.
         :param func handler: The operation function.
         """
         self._load_options_model(handler)
         for arg in extract_args_from_signature(handler):
-            arg_type = self.parser.find_param_type(handler, arg[0])
+            arg_type = find_param_type(handler, arg[0])
             if arg[0] == self._options_param:
                 for option_arg in self._process_options():
                     yield option_arg
             elif arg_type.startswith(":class:"):  # TODO: could add handling for enums
-                param_type = self.parser.class_name(arg_type)
+                param_type = class_name(arg_type)
                 self.parser.set_request_param(arg[0], param_type)
-                param_model = self._load_model(param_type)
+                param_model = _load_model(param_type)
                 self._flatten_object(arg[0], param_model)
                 for flattened_arg in self.parser.compile_args():
                     yield flattened_arg
                 param = 'json_file'
-                json_class = self.parser.class_name(arg_type).split('.')[-1]
+                json_class = class_name(arg_type).split('.')[-1]
                 docstring = "A file containing the {} object in JSON format, " \
                             "if this parameter is specified, all other parameters" \
                             " are ignored.".format(json_class)
                 yield (param, CliCommandArgument(param,
-                                                 options_list=[self.parser.arg_name(param)],
+                                                 options_list=[arg_name(param)],
                                                  required=False,
                                                  default=None,
                                                  completer=FilesCompleter(),
                                                  help=docstring))
             elif arg[0] not in self.ignore:
                 yield arg
-        if self.parser.find_return_type(handler) == 'Generator':
+        if find_return_type(handler) == 'Generator':
             param = 'destination'
             docstring = "The path to the destination file or directory."
             yield (param, CliCommandArgument(param,
-                                             options_list=[self.parser.arg_name(param)],
+                                             options_list=[arg_name(param)],
                                              required=True,
                                              default=None,
                                              completer=DirectoriesCompleter(),
-                                             validator=validate_file_destination,
+                                             validator=validators.validate_file_destination,
                                              help=docstring))
 
 
@@ -678,7 +696,7 @@ def cli_data_plane_command(name, operation, client_factory, transform=None, #pyl
     # add parameters required to create a batch client
     group_name = 'Batch Account'
     command.cmd.add_argument('account_name', '--account-name', required=False, default=None,
-                             validator=validate_client_parameters, arg_group=group_name,
+                             validator=validators.validate_client_parameters, arg_group=group_name,
                              help='Batch account name. Environment variable: '
                              'AZURE_BATCH_ACCOUNT')
     command.cmd.add_argument('account_key', '--account-key', required=False, default=None,
@@ -702,7 +720,7 @@ def cli_custom_data_plane_command(name, operation, client_factory, transform=Non
     # add parameters required to create a batch client
     group_name = 'Batch Account'
     command.add_argument('account_name', '--account-name', required=False, default=None,
-                         validator=validate_client_parameters, arg_group=group_name,
+                         validator=validators.validate_client_parameters, arg_group=group_name,
                          help='Batch account name. Environment variable: AZURE_BATCH_ACCOUNT')
     command.add_argument('account_key', '--account-key', required=False, default=None,
                          arg_group=group_name,

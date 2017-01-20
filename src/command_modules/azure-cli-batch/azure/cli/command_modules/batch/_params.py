@@ -14,7 +14,7 @@ from azure.cli.core.commands.parameters import \
      get_resource_name_completion_list, enum_choice_list, file_type)
 
 from ._validators import \
-    (application_enabled, datetime_type, storage_account_id)
+    (application_enabled, datetime_format, storage_account_id)
 
 # pylint: disable=line-too-long
 # ARGUMENT DEFINITIONS
@@ -38,8 +38,8 @@ register_cli_argument('batch location quotas show', 'location_name', location_ty
 for command in ['list', 'show', 'create', 'set', 'delete', 'package']:
     register_cli_argument('batch application {}'.format(command), 'account_name', batch_name_type, options_list=('--name', '-n'), validator=application_enabled)
 
-register_cli_argument('batch pool resize', 'if_modified_since', help='Specify this header to perform the operation only if the resource has been modified since the specified date/time.', type=datetime_type, arg_group='Pre-condition')
-register_cli_argument('batch pool resize', 'if_unmodified_since', help='Specify this header to perform the operation only if the resource has not been modified since the specified date/time.', type=datetime_type, arg_group='Pre-condition')
+register_cli_argument('batch pool resize', 'if_modified_since', help='Specify this header to perform the operation only if the resource has been modified since the specified date/time.', type=datetime_format, arg_group='Pre-condition')
+register_cli_argument('batch pool resize', 'if_unmodified_since', help='Specify this header to perform the operation only if the resource has not been modified since the specified date/time.', type=datetime_format, arg_group='Pre-condition')
 register_cli_argument('batch pool resize', 'if_match', help='An ETag is specified. Specify this header to perform the operation only if the resource\'s ETag is an exact match as specified', arg_group='Pre-condition')
 register_cli_argument('batch pool resize', 'if_none_match', help='An ETag is specified. Specify this header to perform the operation only if the resource\'s ETag does not match the specified ETag.', arg_group='Pre-condition')
 register_cli_argument('batch pool resize', 'pool_id', help='The ID of the pool.')

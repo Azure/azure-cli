@@ -21,45 +21,63 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
 # TYPES VALIDATORS
 
-def datetime_type(string):
-    """ Validates UTC datetime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. """
+
+def datetime_format(value):
+    """Validate the correct format of a datetime string and deserialize."""
     try:
-        date_obj = Deserializer.deserialize_iso(string)
+        datetime_obj = Deserializer.deserialize_iso(value)
     except DeserializationError:
         message = "Argument {} is not a valid ISO-8601 datetime format"
-        raise ValueError(message.format(string))
+        raise ValueError(message.format(value))
     else:
-        return date_obj
+        return datetime_obj
 
 
-def validate_datetime(namespace, name, parser):
-    """Validate the correct format of a datetime string and deserialize."""
-    date_str = getattr(namespace, name)
-    if date_str and isinstance(date_str, str):
-        try:
-            date_obj = Deserializer.deserialize_iso(date_str)
-        except DeserializationError:
-            message = "Argument {} is not a valid ISO-8601 datetime format"
-            raise ValueError(message.format(name))
-        else:
-            setattr(namespace, name, date_obj)
-    validate_required_parameter(namespace, parser)
-
-
-def validate_duration(name, value):
+def duration_format(value):
     """Validate the correct format of a timespan string and deserilize."""
     try:
-        value = Deserializer.deserialize_duration(value)
+        duration_obj = Deserializer.deserialize_duration(value)
     except DeserializationError:
         message = "Argument {} is not in a valid ISO-8601 duration format"
-        raise ValueError(message.format(name))
+        raise ValueError(message.format(value))
     else:
-        return value
+        return duration_obj
 
 
-def validate_metadata(namespace):
-    if namespace.metadata:
-        namespace.metadata = dict(x.split('=', 1) for x in namespace.metadata)
+def metadata_item_format(value):
+    """Validate listed metadata arguments"""
+    try:
+        data_name, data_value = value.split('=')
+    except ValueError:
+        message = ("Incorrectly formatted metadata. "
+                   "Argmuent values should be in the format a=b c=d")
+        raise ValueError(message)
+    else:
+        return {'name': data_name, 'value': data_value}
+
+
+def environment_setting_format(value):
+    """Validate listed enviroment settings arguments"""
+    try:
+        env_name, env_value = value.split('=')
+    except ValueError:
+        message = ("Incorrectly formatted enviroment settings. "
+                   "Argmuent values should be in the format a=b c=d")
+        raise ValueError(msg)
+    else:
+        return {'name': env_name, 'value': env_value}
+
+
+def application_package_reference_format(value):
+    """Validate listed application package reference arguments"""
+    app_reference = value.split('#', 1)
+    package = {'application_id': app_reference[0]}
+    try:
+        package['version'] = app_reference[1]
+    except IndexError:  # No specified version - ignore
+        pass
+    return package
+
 
 # COMMAND NAMESPACE VALIDATORS
 
@@ -102,7 +120,7 @@ def validate_options(namespace):
         start = namespace.start_range
         end = namespace.end_range
     except AttributeError:
-        pass
+        return
     else:
         namespace.ocp_range = None
         del namespace.start_range
@@ -111,19 +129,6 @@ def validate_options(namespace):
             start = start if start else 0
             end = end if end else ""
             namespace.ocp_range = "bytes={}-{}".format(start, end)
-    # TODO: Should we also try RFC-1123?
-    for date_arg in ['if_modified_since', 'if_unmodified_since']:
-        try:
-            date_str = getattr(namespace, date_arg)
-            if date_str and isinstance(date_str, str):
-                date_obj = Deserializer.deserialize_iso(date_str)
-        except AttributeError:
-            pass
-        except DeserializationError:
-            message = "Argument {} is not a valid ISO-8601 datetime format"
-            raise ValueError(message.format(date_arg))
-        else:
-            setattr(namespace, date_arg, date_obj)
 
 
 def validate_file_destination(namespace):
@@ -143,8 +148,8 @@ def validate_file_destination(namespace):
             try:
                 os.mkdir(file_dir)
             except EnvironmentError as exp:
-                raise ValueError("Directory {} does not exist, and cannot be created: {}".\
-                    format(file_dir, exp))
+                message = "Directory {} does not exist, and cannot be created: {}"
+                raise ValueError(message.format(file_dir, exp))
         if os.path.isfile(file_path):
             raise ValueError("File {} already exists.".format(file_path))
         namespace.destination = file_path
@@ -183,9 +188,16 @@ def validate_client_parameters(namespace):
 
 # CUSTOM REQUEST VALIDATORS
 
-def validate_pool_settings(namespace, parser):
+def validate_pool_settings(ns, parser):
     """Custom parsing to enfore that either PaaS or IaaS instances are configured
     in the add pool request body.
     """
     groups = ['pool.cloud_service_configuration', 'pool.virtual_machine_configuration']
-    parser.parse_mutually_exclusive(namespace, True, groups)
+    parser.parse_mutually_exclusive(ns, True, groups)
+
+    paas_sizes = ['small', 'medium', 'large', 'extralarge']
+    if ns.vm_size and ns.vm_size.lower() in paas_sizes and not ns.os_family:
+        message = ("The selected VM size in incompatible with Virtual Machine Configuration. "
+                   "Please swap for the IaaS equivalent: Standard_A1 (small), Standard_A2 "
+                   "(medium), Standard_A3 (large), or Standard_A4 (extra large).") 
+        raise ValueError(message)

@@ -15,7 +15,7 @@ def batch_client_factory(**_):
     return get_mgmt_service_client(BatchManagementClient)
 
 
-def batch_data_service_factory(**kwargs):
+def batch_data_service_factory(kwargs):
     account_name = kwargs.pop('account_name', None)
     account_key = kwargs.pop('account_key', None)
     account_endpoint = kwargs.pop('account_endpoint', None)
