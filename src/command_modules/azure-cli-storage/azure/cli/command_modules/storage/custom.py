@@ -37,8 +37,6 @@ def _update_progress(current, total):
 
 def list_storage_accounts(resource_group_name=None):
     """ List storage accounts within a subscription or resource group. """
-    from azure.mgmt.storage.models import StorageAccount
-    from msrestazure.azure_active_directory import UserPassCredentials
     scf = storage_client_factory()
     if resource_group_name:
         accounts = scf.storage_accounts.list_by_resource_group(resource_group_name)
@@ -80,7 +78,7 @@ def create_storage_account(resource_group_name, account_name, sku, location,
                            encryption=None, access_tier=None):
     ''' Create a storage account. '''
     from azure.mgmt.storage.models import \
-        (StorageAccountCreateParameters, Sku, CustomDomain, Encryption, AccessTier)
+        (StorageAccountCreateParameters, Sku, CustomDomain, AccessTier)
     scf = storage_client_factory()
     params = StorageAccountCreateParameters(
         sku=Sku(sku),
@@ -98,7 +96,7 @@ def set_storage_account_properties(
         encryption=None, access_tier=None):
     ''' Update storage account property (only one at a time).'''
     from azure.mgmt.storage.models import \
-        (StorageAccountUpdateParameters, Sku, CustomDomain, Encryption, AccessTier)
+        (StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier)
     scf = storage_client_factory()
     params = StorageAccountUpdateParameters(
         sku=Sku(sku) if sku else None,
@@ -181,44 +179,51 @@ def _get_service_container_type(client):
 
 def _get_acl(client, container_name, **kwargs):
     container = _get_service_container_type(client)
-    get_acl = getattr(client, 'get_{}_acl'.format(container))
+    get_acl_fn = getattr(client, 'get_{}_acl'.format(container))
     lease_id = kwargs.get('lease_id', None)
-    return get_acl(container_name, lease_id=lease_id) if lease_id else get_acl(container_name)
+    return get_acl_fn(container_name, lease_id=lease_id) if lease_id else get_acl_fn(container_name)
 
 
 def _set_acl(client, container_name, acl, **kwargs):
-    container = _get_service_container_type(client)
-    set_acl = getattr(client, 'set_{}_acl'.format(container))
-    lease_id = kwargs.get('lease_id', None)
-    return set_acl(container_name, acl, lease_id=lease_id) if lease_id \
-        else set_acl(container_name, acl)
+    try:
+        method_name = 'set_{}_acl'.format(_get_service_container_type(client))
+        method = getattr(client, method_name)
+        return method(container_name, acl, **kwargs)
+    except TypeError:
+        raise CLIError("Failed to invoke SDK method {}. The installed azure SDK may not be"
+                       "compatible to this version of Azure CLI.".format(method_name))
+    except AttributeError:
+        raise CLIError("Failed to get function {} from {}. The installed azure SDK may not be "
+                       "compatible to this version of Azure CLI.".format(client.__class__.__name__,
+                                                                         method_name))
 
 
-def create_acl_policy(
-        client, container_name, policy_name, start=None, expiry=None, permission=None, **kwargs):
-    ''' Create a stored access policy on the containing object '''
+def create_acl_policy(client, container_name, policy_name, start=None, expiry=None,
+                      permission=None, **kwargs):
+    """Create a stored access policy on the containing object"""
     from azure.storage.models import AccessPolicy
     acl = _get_acl(client, container_name, **kwargs)
     acl[policy_name] = AccessPolicy(permission, expiry, start)
+    if hasattr(acl, 'public_access'):
+        kwargs['public_access'] = getattr(acl, 'public_access')
+
     return _set_acl(client, container_name, acl, **kwargs)
 
 
 def get_acl_policy(client, container_name, policy_name, **kwargs):
-    ''' Show a stored access policy on a containing object '''
-    from azure.storage.models import AccessPolicy
+    """Show a stored access policy on a containing object"""
     acl = _get_acl(client, container_name, **kwargs)
     return acl.get(policy_name)
 
 
 def list_acl_policies(client, container_name, **kwargs):
-    ''' List stored access policies on a containing object '''
+    """List stored access policies on a containing object"""
     return _get_acl(client, container_name, **kwargs)
 
 
 def set_acl_policy(client, container_name, policy_name, start=None, expiry=None, permission=None,
                    **kwargs):
-    ''' Set a stored access policy on a containing object '''
-    from azure.storage.models import AccessPolicy
+    """Set a stored access policy on a containing object"""
     if not (start or expiry or permission):
         raise CLIError('Must specify at least one property when updating an access policy.')
 
@@ -228,6 +233,9 @@ def set_acl_policy(client, container_name, policy_name, start=None, expiry=None,
         policy.start = start or policy.start
         policy.expiry = expiry or policy.expiry
         policy.permission = permission or policy.permission
+        if hasattr(acl, 'public_access'):
+            kwargs['public_access'] = getattr(acl, 'public_access')
+
     except KeyError:
         raise CLIError('ACL does not contain {}'.format(policy_name))
     return _set_acl(client, container_name, acl, **kwargs)
@@ -237,6 +245,9 @@ def delete_acl_policy(client, container_name, policy_name, **kwargs):
     ''' Delete a stored access policy on a containing object '''
     acl = _get_acl(client, container_name, **kwargs)
     del acl[policy_name]
+    if hasattr(acl, 'public_access'):
+        kwargs['public_access'] = getattr(acl, 'public_access')
+
     return _set_acl(client, container_name, acl, **kwargs)
 
 
