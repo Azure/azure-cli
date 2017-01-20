@@ -23,7 +23,7 @@ class ResourceGroupScenarioTest(VCRTestBase): # Not RG test base because it test
 
     def set_up(self):
         if self.cmd('group exists -n {}'.format(self.resource_group)):
-            self.cmd('group delete -n {}'.format(self.resource_group))
+            self.cmd('group delete -n {} --force'.format(self.resource_group))
 
     def body(self):
         s = self
@@ -41,12 +41,12 @@ class ResourceGroupScenarioTest(VCRTestBase): # Not RG test base because it test
             JMESPathCheck('[0].name', rg),
             JMESPathCheck('[0].tags', {'a':'b', 'c':''})
         ])
-        s.cmd('group delete -n {}'.format(rg))
+        s.cmd('group delete -n {} --force'.format(rg))
         s.cmd('group exists -n {}'.format(rg), checks=NoneCheck())
 
     def tear_down(self):
         if self.cmd('group exists -n {}'.format(self.resource_group)):
-            self.cmd('group delete -n {}'.format(self.resource_group))
+            self.cmd('group delete -n {} --force'.format(self.resource_group))
 
 class ResourceGroupNoWaitScenarioTest(VCRTestBase): # Not RG test base because it tests the actual deletion of a resource group
 
@@ -59,7 +59,7 @@ class ResourceGroupNoWaitScenarioTest(VCRTestBase): # Not RG test base because i
 
     def set_up(self):
         if self.cmd('group exists -n {}'.format(self.resource_group)):
-            self.cmd('group delete -n {}'.format(self.resource_group))
+            self.cmd('group delete -n {} --force'.format(self.resource_group))
 
     def body(self):
         s = self
@@ -69,7 +69,7 @@ class ResourceGroupNoWaitScenarioTest(VCRTestBase): # Not RG test base because i
         ])
         s.cmd('group exists -n {}'.format(rg), checks=BooleanCheck(True))
         s.cmd('group wait --exists -n {}'.format(rg), checks=NoneCheck())
-        s.cmd('group delete -n {} --no-wait'.format(rg), checks=NoneCheck())
+        s.cmd('group delete -n {} --no-wait --force'.format(rg), checks=NoneCheck())
         s.cmd('group wait --deleted -n {}'.format(rg), checks=NoneCheck())
         s.cmd('group exists -n {}'.format(rg), checks=NoneCheck())
 
@@ -331,8 +331,8 @@ class ResourceMoveScenarioTest(VCRTestBase): # Not RG test base because it uses 
         self.cmd('group create --location westus --name {}'.format(self.destination_group))
 
     def tear_down(self):
-        self.cmd('group delete --name {}'.format(self.source_group))
-        self.cmd('group delete --name {}'.format(self.destination_group))
+        self.cmd('group delete --name {} --force'.format(self.source_group))
+        self.cmd('group delete --name {} --force'.format(self.destination_group))
 
     def body(self):
         if self.playback:

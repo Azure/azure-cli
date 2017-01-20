@@ -25,7 +25,7 @@ def transform_resource_group_list(result):
 cli_command(__name__, 'group delete',
             'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.delete',
             cf_resource_groups,
-            no_wait_param='raw')
+            no_wait_param='raw', confirmation=True)
 cli_generic_wait_command(__name__, 'group wait', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get', cf_resource_groups)
 cli_command(__name__, 'group show', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get', cf_resource_groups)
 cli_command(__name__, 'group exists', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.check_existence', cf_resource_groups)

@@ -19,6 +19,8 @@ import azure.cli.core._logging as _logging
 import azure.cli.core.telemetry as telemetry
 from azure.cli.core._util import CLIError
 from azure.cli.core.application import APPLICATION
+from azure.cli.core._prompting import prompt_y_n, NoTTYException
+from azure.cli.core._config import az_config
 
 from ._introspection import (extract_args_from_signature,
                              extract_full_summary_from_signature)
@@ -27,6 +29,8 @@ logger = _logging.get_az_logger(__name__)
 
 
 # pylint: disable=too-many-arguments,too-few-public-methods
+
+FORCE_PARAM_NAME = 'force'
 
 
 class CliArgumentType(object):
@@ -263,10 +267,10 @@ def register_extra_cli_argument(command, dest, **kwargs):
 
 def cli_command(module_name, name, operation,
                 client_factory=None, transform=None, table_transformer=None,
-                no_wait_param=None):
+                no_wait_param=None, confirmation=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
     command_table[name] = create_command(module_name, name, operation, transform, table_transformer,
-                                         client_factory, no_wait_param)
+                                         client_factory, no_wait_param, confirmation=confirmation)
 
 
 def get_op_handler(operation):
@@ -283,7 +287,7 @@ def get_op_handler(operation):
 
 def create_command(module_name, name, operation,
                    transform_result, table_transformer, client_factory,
-                   no_wait_param=None):
+                   no_wait_param=None, confirmation=None):
     if not isinstance(operation, string_types):
         raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
@@ -292,6 +296,12 @@ def create_command(module_name, name, operation,
         from msrest.exceptions import ClientException
         from msrestazure.azure_operation import AzureOperationPoller
         from azure.common import AzureException
+
+        if confirmation \
+            and not kwargs.get(FORCE_PARAM_NAME) \
+            and not az_config.getboolean('core', 'disable_confirm_prompt', fallback=False) \
+                and not _user_confirmed(confirmation, kwargs):
+            raise CLIError('Operation cancelled.')
 
         client = client_factory(kwargs) if client_factory else None
         try:
@@ -340,7 +350,23 @@ def create_command(module_name, name, operation,
 
     cmd = CliCommand(name, _execute_command, table_transformer=table_transformer,
                      arguments_loader=arguments_loader, description_loader=description_loader)
+    if confirmation:
+        cmd.add_argument(FORCE_PARAM_NAME,
+                         action='store_true',
+                         help='Do not prompt for confirmation')
     return cmd
+
+
+def _user_confirmed(confirmation, command_args):
+    if callable(confirmation):
+        return confirmation(command_args)
+    try:
+        if isinstance(confirmation, string_types):
+            return prompt_y_n(confirmation)
+        return prompt_y_n('Are you sure you want to perform this operation?')
+    except NoTTYException:
+        logger.warning('Unable to prompt for confirmation as no tty available. Use --force.')
+        return False
 
 
 def _polish_rp_not_registerd_error(cli_error):

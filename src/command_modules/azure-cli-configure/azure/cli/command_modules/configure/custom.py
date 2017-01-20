@@ -14,7 +14,7 @@ from azure.cli.core._config import (GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH,
                                     CONTEXT_CONFIG_DIR, ACTIVE_CONTEXT_CONFIG_PATH,
                                     ENV_VAR_PREFIX)
 from azure.cli.core._util import CLIError
-
+from azure.cli.core._prompting import (prompt_y_n, prompt_choice_list, NoTTYException)
 from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, CLOUD_LIST, LOGIN_METHOD_LIST,
                                                          MSG_INTRO,
                                                          MSG_CLOSING,
@@ -29,9 +29,7 @@ from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, CLOUD_LIST
                                                          MSG_PROMPT_WHICH_CLOUD,
                                                          MSG_PROMPT_LOGIN,
                                                          MSG_PROMPT_TELEMETRY)
-from azure.cli.command_modules.configure._utils import (prompt_y_n,
-                                                        prompt_choice_list,
-                                                        get_default_from_config)
+from azure.cli.command_modules.configure._utils import get_default_from_config
 import azure.cli.command_modules.configure._help # pylint: disable=unused-import
 import azure.cli.core.telemetry as telemetry
 
@@ -202,5 +200,7 @@ def handle_configure():
         # _handle_context_configuration()
         print(MSG_CLOSING)
         # TODO: log_telemetry('configure', **answers)
+    except NoTTYException:
+        raise CLIError('This command is interactive and no tty available.')
     except (EOFError, KeyboardInterrupt):
         print()
