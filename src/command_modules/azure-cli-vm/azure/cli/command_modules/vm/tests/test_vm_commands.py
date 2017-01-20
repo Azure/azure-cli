@@ -387,7 +387,7 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # py
         self.cmd('vm deallocate --resource-group {} --name {}'.format(
             self.resource_group, self.vm_name))
         self._check_vm_power_state('PowerState/deallocated')
-        self.cmd('vm delete --resource-group {} --name {}'.format(
+        self.cmd('vm delete --resource-group {} --name {} --force'.format(
             self.resource_group, self.vm_name))
         # Expecting no results
         self.cmd('vm list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
