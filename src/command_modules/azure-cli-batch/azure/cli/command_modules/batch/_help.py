@@ -62,12 +62,12 @@ helps['batch certificate'] = """
     short-summary: Commands to manage your Batch certificate.
 """
 
-helps['batch task-file'] = """
+helps['batch task file'] = """
     type: group
     short-summary: Commands to manage your Batch task files.
 """
 
-helps['batch node-file'] = """
+helps['batch node file'] = """
     type: group
     short-summary: Commands to manage your Batch compute node files.
 """

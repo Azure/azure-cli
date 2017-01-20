@@ -5,12 +5,13 @@
 
 
 import json
-import os
 import re
 
 from six import string_types
+from argcomplete.completers import (
+    FilesCompleter,
+    DirectoriesCompleter)
 
-from azure.cli.core._util import CLIError
 from azure.cli.core.commands import (
     create_command,
     command_table,
@@ -18,16 +19,12 @@ from azure.cli.core.commands import (
     CliCommand,
     CliCommandArgument,
     get_op_handler)
-from argcomplete.completers import (
-    FilesCompleter,
-    DirectoriesCompleter)
+from azure.cli.core._util import CLIError
 from azure.cli.core.commands._introspection import (
     extract_full_summary_from_signature,
     extract_args_from_signature)
 from ._validators import (
     validate_options,
-    validate_datetime,
-    validate_duration,
     validate_file_destination,
     validate_client_parameters,
     validate_required_parameter)
@@ -42,8 +39,10 @@ IGNORE_OPTIONS = {  # Options parameters that should not be exposed as arguments
 }
 IGNORE_PARAMETERS = {'callback'}
 FLATTEN_OPTIONS = {  # Options to be flattened into multiple arguments.
-    'ocp_range': {'start_range':"The byte range to be retrieved. If not set the file will be retrieved from the beginning.",
-                  'end_range':"The byte range to be retrieved. If not set the file will be retrieved to the end."}
+    'ocp_range': {'start_range':"The byte range to be retrieved. "
+                                "If not set the file will be retrieved from the beginning.",
+                  'end_range':"The byte range to be retrieved. "
+                              "If not set the file will be retrieved to the end."}
 }
 BASIC_TYPES = {  # Argument types that should not be flattened.
     'str',
@@ -143,7 +142,8 @@ class BatchArgumentTree(object):
             message = "Failed to deserialized JSON file into object {}"
             raise ValueError(message.format(self._request_param['model']))
 
-    def queue_argument(self, name=None, path=None, root=None, options=None, type=None, dependencies=None):
+    def queue_argument(self, name=None, path=None, root=None, #pylint:disable=too-many-arguments
+                       options=None, type=None, dependencies=None): #pylint:disable=W0622
         """Add pending command line argument
         :param str name: The name of the command line argument.
         :param str path: The complex object path to the parameter.
@@ -199,7 +199,8 @@ class BatchArgumentTree(object):
         """
         return self._underscore_case.sub(r'_\1', class_str[:-10]).lower()
 
-    def full_name(self, arg_details):
+    @staticmethod
+    def full_name(arg_details):
         """Create a full path to the complex object parameter of a
         given argument.
         :param dict arg_details: The details of the argument.
@@ -207,7 +208,8 @@ class BatchArgumentTree(object):
         """
         return ".".join([arg_details['path'], arg_details['root']])
 
-    def group_title(self, path):
+    @staticmethod
+    def group_title(path):
         """Create a group title from the argument path.
         :param str path: The complex object path of the argument.
         :returns: str
@@ -215,17 +217,20 @@ class BatchArgumentTree(object):
         group_path = path.split('.')
         group_title = ' : '.join(group_path)
         for group in group_path:
-            group_title = group_title.replace(group, " ".join([n.title() for n in group.split('_')]), 1)
+            group_title = group_title.replace(group,
+                                              " ".join([n.title() for n in group.split('_')]), 1)
         return group_title
 
-    def arg_name(self, name):
+    @staticmethod
+    def arg_name(name):
         """Convert snake case argument name to a command line name.
         :param str name: The argument parameter name.
         :returns: str
         """
         return "--" + name.replace('_', '-')
 
-    def find_param_type(self, model, param):
+    @staticmethod
+    def find_param_type(model, param):
         """Parse the parameter type from the model docstring.
         :param class model: Model class.
         :param str param: The name of the parameter.
@@ -236,7 +241,8 @@ class BatchArgumentTree(object):
         param_type = re.search(pattern, model.__doc__, re.DOTALL)
         return re.sub(r"\n\s*", "", param_type.group(1).strip())
 
-    def find_param_help(self, model, param):
+    @staticmethod
+    def find_param_help(model, param):
         """Parse the parameter help info from the model docstring.
         :param class model: Model class.
         :param str param: The name of the parameter.
@@ -247,7 +253,8 @@ class BatchArgumentTree(object):
         param_doc = re.search(pattern, model.__doc__, re.DOTALL)
         return re.sub(r"\n\s*", "", param_doc.group(1).strip())
 
-    def find_return_type(self, model):
+    @staticmethod
+    def find_return_type(model):
         """Parse the parameter help info from the model docstring.
         :param class model: Model class.
         :param str param: The name of the parameter.
@@ -269,7 +276,7 @@ class BatchArgumentTree(object):
         argtree = self._arg_tree.items()
         ex_arg_names = [a for a, v in argtree if self.full_name(v) in params]
         ex_args = [getattr(namespace, a) for a, v in argtree if a in ex_arg_names]
-        ex_args = list(filter(None, ex_args))
+        ex_args = [x for x in ex_args if x is not None]
         ex_group_names = []
         ex_groups = []
         for arg_group in params:
@@ -284,7 +291,7 @@ class BatchArgumentTree(object):
             message = "One of the following arguments, or argument groups are required: \n"
         elif len(ex_groups) > 1 or len(ex_args) > 1 or (ex_groups and ex_args):
             message = ("The follow arguments or argument groups are mutually "
-                        "exclusive and cannot be combined: \n")
+                       "exclusive and cannot be combined: \n")
         if message:
             missing = [self.arg_name(n) for n in ex_arg_names] + ex_group_names
             message += '\n'.join(missing)
@@ -307,7 +314,8 @@ class BatchArgumentTree(object):
                     raise ValueError("Invalid JSON file: {}".format(err))
                 for name in self._arg_tree:
                     if getattr(namespace, name):
-                        raise ValueError("--json-file cannot be combined with " + self.arg_name(name))
+                        raise ValueError("--json-file cannot be combined with " + \
+                            self.arg_name(name))
                 return
         except AttributeError:
             pass
@@ -316,7 +324,7 @@ class BatchArgumentTree(object):
                 self._custom_validator(namespace, self)
             except TypeError:
                 raise ValueError("Custom validator must be a function that takes two arguments.")
-        
+
         required_args = self._parse(namespace, self._request_param['name'], True)
         missing_args = [n for n in required_args if not getattr(namespace, n)]
         if missing_args:
@@ -327,6 +335,7 @@ class BatchArgumentTree(object):
 
 
 class AzureDataPlaneCommand(object):
+    #pylint:disable=too-many-instance-attributes, too-few-public-methods
 
     def __init__(self, module_name, name, operation, factory, transform_result, #pylint:disable=too-many-arguments
                  table_transformer, flatten, ignore, validator):
@@ -375,7 +384,7 @@ class AzureDataPlaneCommand(object):
                                 continue
                             else:
                                 self._build_parameters(
-                                    details['path'], 
+                                    details['path'],
                                     kwargs,
                                     details['root'],
                                     param_value)
@@ -420,7 +429,6 @@ class AzureDataPlaneCommand(object):
             _execute_command,
             table_transformer=table_transformer,
             arguments_loader=lambda: self._load_transformed_arguments(
-                operation,
                 get_op_handler(operation)),
             description_loader=lambda: extract_full_summary_from_signature(
                 get_op_handler(operation))
@@ -457,7 +465,8 @@ class AzureDataPlaneCommand(object):
                 continue
             setattr(kwargs[self._options_param], param, param_value)
 
-    def _load_model(self, name):
+    @staticmethod
+    def _load_model(name):
         """Load a model class from the SDK in order to inspect for
         parameter names and whether they're required.
         :param str name: The model class name to load.
@@ -479,7 +488,7 @@ class AzureDataPlaneCommand(object):
         option_type = self.parser.find_param_type(func_obj, self._options_param)
         option_type = self.parser.class_name(option_type)
         self._options_model = self._load_model(option_type)()
-        self._options_attrs =  list(self._options_model.__dict__.keys())
+        self._options_attrs = list(self._options_model.__dict__.keys())
 
     def _format_options_name(self, operation):
         """Format the name of the request options parameter from the
@@ -514,7 +523,8 @@ class AzureDataPlaneCommand(object):
             if not any(conditions):
                 yield attr, details
 
-    def _build_prefix(self, arg, param, path):
+    @staticmethod
+    def _build_prefix(arg, param, path):
         """Recursively build a command line argument prefix from the request
         parameter object to avoid name conflicts.
         :param str arg: Currenct argument name.
@@ -555,7 +565,7 @@ class AzureDataPlaneCommand(object):
                                                  help=docstring,
                                                  arg_group=self._options_group))
 
-    def _resolve_conflict(self, arg, param, path, options, typestr, dependencies, conflicting):
+    def _resolve_conflict(self, arg, param, path, options, typestr, dependencies, conflicting): #pylint:disable=too-many-arguments
         """Resolve conflicting command line arguments.
         :param str arg: Name of the command line argument.
         :param str param: Original request parameter name.
@@ -580,7 +590,8 @@ class AzureDataPlaneCommand(object):
                 self.parser.queue_argument(arg, path, param, options, typestr, dependencies)
             else:
                 options['options_list'] = [self.parser.arg_name(new)]
-                self._resolve_conflict(new, param, path, options, typestr, dependencies, conflicting)
+                self._resolve_conflict(new, param, path, options,
+                                       typestr, dependencies, conflicting)
         else:
             self.parser.queue_argument(arg, path, param, options, typestr, dependencies)
 
@@ -614,7 +625,7 @@ class AzureDataPlaneCommand(object):
                     else:
                         self._flatten_object('.'.join([path, param_attr]), attr_model)
 
-    def _load_transformed_arguments(self, operation, handler):
+    def _load_transformed_arguments(self, handler):
         """Load all the command line arguments from the request parameters.
         :param str operation: The operation function reference.
         :param func handler: The operation function.
@@ -657,7 +668,7 @@ class AzureDataPlaneCommand(object):
                                              help=docstring))
 
 
-def cli_data_plane_command(name, operation, client_factory, transform=None,
+def cli_data_plane_command(name, operation, client_factory, transform=None, #pylint:disable=too-many-arguments
                            table_transformer=None, flatten=FLATTEN, ignore=None, validator=None):
     """ Registers an Azure CLI Batch Data Plane command. These commands must respond to a
     challenge from the service when they make requests. """
@@ -680,6 +691,7 @@ def cli_data_plane_command(name, operation, client_factory, transform=None,
                              help='Batch service endpoint. Environment variable: '
                              'AZURE_BATCH_ENDPOINT')
     command_table[command.cmd.name] = command.cmd
+
 
 def cli_custom_data_plane_command(name, operation, client_factory, transform=None,
                                   table_transformer=None):

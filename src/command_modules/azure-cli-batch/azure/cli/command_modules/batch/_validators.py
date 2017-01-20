@@ -9,7 +9,6 @@ try:
     from urllib.parse import urlsplit
 except ImportError:
     from urlparse import urlsplit # pylint: disable=import-error
-from datetime import datetime
 
 from msrest.serialization import Deserializer
 from msrest.exceptions import DeserializationError
@@ -24,9 +23,13 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
 def datetime_type(string):
     """ Validates UTC datetime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. """
-    # Here is a bug, need use external libary: isodate, dateutil, etc.
-    date_format = '%Y-%m-%dT%H:%MZ'
-    return datetime.strptime(string, date_format)
+    try:
+        date_obj = Deserializer.deserialize_iso(string)
+    except DeserializationError:
+        message = "Argument {} is not a valid ISO-8601 datetime format"
+        raise ValueError(message.format(string))
+    else:
+        return date_obj
 
 
 def validate_datetime(namespace, name, parser):
@@ -108,7 +111,8 @@ def validate_options(namespace):
             start = start if start else 0
             end = end if end else ""
             namespace.ocp_range = "bytes={}-{}".format(start, end)
-    for date_arg in ['if_modified_since', 'if_unmodified_since']:  # TODO: Should we also try RFC-1123?
+    # TODO: Should we also try RFC-1123?
+    for date_arg in ['if_modified_since', 'if_unmodified_since']:
         try:
             date_str = getattr(namespace, date_arg)
             if date_str and isinstance(date_str, str):
@@ -119,7 +123,7 @@ def validate_options(namespace):
             message = "Argument {} is not a valid ISO-8601 datetime format"
             raise ValueError(message.format(date_arg))
         else:
-            setattr(namespace, name, date_obj)
+            setattr(namespace, date_arg, date_obj)
 
 
 def validate_file_destination(namespace):
@@ -139,7 +143,8 @@ def validate_file_destination(namespace):
             try:
                 os.mkdir(file_dir)
             except EnvironmentError as exp:
-                raise ValueError("Directory {} does not exist, and cannot be created: {}".format(file_dir, exp))
+                raise ValueError("Directory {} does not exist, and cannot be created: {}".\
+                    format(file_dir, exp))
         if os.path.isfile(file_path):
             raise ValueError("File {} already exists.".format(file_path))
         namespace.destination = file_path
