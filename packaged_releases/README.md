@@ -22,6 +22,7 @@ $ mkdir azure-cli_packaged_{VERSION}
 Expected folder structure inside of `azure-cli_packaged_{VERSION}`:
 ```
 .
+|-- az.completion
 |-- src
 |   |-- azure-cli
 |       |-- setup.py
@@ -43,6 +44,9 @@ Expected folder structure inside of `azure-cli_packaged_{VERSION}`:
 Notes:  
 - Only the packages that will be in the CLI should be included here; leave out 'optional' components unless there's a specific reason to include any extra components.
 - Make sure the versions of components don't include the `+dev` suffix. Remove these if this is the case.
+
+APPLY ANY PATCHES:  
+Modify the file in question in the directory created from  (You can use the `patch_*` files in `patches` subdirectory for this).  
 
 
 2 - Create release archive
@@ -78,32 +82,13 @@ $ az storage blob url -c releases -n azure-cli_packaged_{VERSION}.tar.gz
 An example URL is `https://azurecliprod.blob.core.windows.net/releases/azure-cli_packaged_{VERSION}.tar.gz`.
 
 
-4 - Modify and publish any updates to patches
----------------------------------------------
-
-This step is only required if there are changes to a patch / or a new patch.  
-If a change is not required, you can use the same patch from the previous version and so there's no need to change the patch URLs.  
-You can determine if a change is required by running `git diff` on the original files to be patched. If they are the same, the previous patch will work fine.
-
-
-To create a new patch do the following:  
-1. Change directory into the git repo.  
-2. Modify the file in question (You can use the `patch_*` files in `patches` subdirectory for this).  
-3. Run git diff to get the patch. (e.g. `git diff src/command_modules/azure-cli-component/azure/cli/command_modules/component/custom.py > patch_{VERSION}_component_custom.diff`)  
-4. Publish the patch publicly. 
-    (e.g.: `az storage blob upload -c patches -f <patch-diff> -n <patch-diff>`)  
-
-Notes:
-- If a patch needs modification, `debian`, `docker` and `homebrew` builds will all need to be modified.
-
-
-5 - Build/Release for Debian, Docker, Homebrew
+4 - Build/Release for Debian, Docker, Homebrew
 ----------------------------------------------
 
 Follow the instructions in the `debian`, `docker` and `homebrew` subdirectories to create these releases.
 
 
-6 - Modify HISTORY.md
+5 - Modify HISTORY.md
 ---------------------
 
 Modify the packaged release history with release notes on this release and create a PR for this change.

@@ -8,8 +8,6 @@ set -ex
 
 : "${CLI_VERSION:?CLI_VERSION environment variable not set.}"
 : "${CLI_DOWNLOAD_SHA256:?CLI_DOWNLOAD_SHA256 environment variable not set.}"
-: "${CLI_PATCH1_SHA256:?CLI_PATCH1_SHA256 environment variable not set.}"
-: "${CLI_PATCH2_SHA256:?CLI_PATCH2_SHA256 environment variable not set.}"
 
 if [ -z "$1" ]
   then
@@ -20,10 +18,6 @@ fi
 sudo apt-get update
 
 debian_directory_creator=$1
-
-# Create temp dir for the debian/ directory used for CLI build.
-cli_debian_dir_tmp=$(mktemp -d)
-$debian_directory_creator $cli_debian_dir_tmp
 
 # Modify dh-virtualenv/debian/control to not include the virtualenv or python-virtualenv
 # dependencies as we don't use python-virtualenv but our own.
@@ -79,15 +73,11 @@ mkdir $source_dir
 archive_extract_dir=$(mktemp -d)
 tar -xvzf $source_archive -C $archive_extract_dir
 cp -r $archive_extract_dir/azure-cli_packaged_${CLI_VERSION}/* $source_dir
-# Apply patches
-wget https://azurecliprod.blob.core.windows.net/patches/patch_2_component_custom.diff -qO $working_dir/patch1.patch
-echo "$CLI_PATCH1_SHA256  $working_dir/patch1.patch" | sha256sum -c -
-patch -p1 $source_dir/src/command_modules/azure-cli-component/azure/cli/command_modules/component/custom.py $working_dir/patch1.patch
-wget https://azurecliprod.blob.core.windows.net/patches/patch_2_pkg_util.diff -qO $working_dir/patch2.patch
-echo "$CLI_PATCH2_SHA256  $working_dir/patch2.patch" | sha256sum -c -
-patch -p1 $source_dir/src/azure-cli-core/azure/cli/core/_pkg_util.py $working_dir/patch2.patch
 # Add the debian files
 mkdir $source_dir/debian
+# Create temp dir for the debian/ directory used for CLI build.
+cli_debian_dir_tmp=$(mktemp -d)
+$debian_directory_creator $cli_debian_dir_tmp $source_dir/az.completion
 cp -r $cli_debian_dir_tmp/* $source_dir/debian
 cd $source_dir
 dpkg-buildpackage -us -uc

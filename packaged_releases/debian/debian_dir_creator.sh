@@ -12,19 +12,32 @@ set -ex
 
 if [ -z "$1" ]
   then
-    echo "No argument supplied"
+    echo "No argument supplied for debian directory."
+    exit 1
+fi
+
+if [ -z "$2" ]
+  then
+    echo "No argument supplied for completion script."
     exit 1
 fi
 
 TAB=$'\t'
 
 debian_dir=$1
+completion_script=$2
 mkdir $debian_dir/source
 
 echo '1.0' > $debian_dir/source/format
 echo '9' > $debian_dir/compat
 
 cat > $debian_dir/changelog <<- EOM
+azure-cli (0.1.7-1) unstable; urgency=low
+
+  * Packaged release 0.1.7.
+
+ -- Azure Python CLI Team <azpycli@microsoft.com>  Thu, 19 Jan 2017 20:00:00 +0000
+
 azure-cli (0.1.6-1) unstable; urgency=low
 
   * Packaged release 0.1.6.
@@ -129,7 +142,7 @@ ${TAB}mkdir -p debian/azure-cli/usr/bin/
 ${TAB}echo "\043!/usr/bin/env bash\n/opt/az/bin/python -m azure.cli \"\044\100\"" > debian/azure-cli/usr/bin/az
 ${TAB}chmod 0755 debian/azure-cli/usr/bin/az
 ${TAB}mkdir -p debian/azure-cli/etc/bash_completion.d/
-${TAB}echo "_python_argcomplete() {\n    local IFS='\v'\n    COMPREPLY=( \044(IFS=\"\044IFS\"                   COMP_LINE=\"\044COMP_LINE\"                   COMP_POINT=\"\044COMP_POINT\"                   _ARGCOMPLETE_COMP_WORDBREAKS=\"\044COMP_WORDBREAKS\"                   _ARGCOMPLETE=1                   \"\044\061\" 8>&1 9>&2 1>/dev/null 2>/dev/null) )\n    if [[ \044? != 0 ]]; then\n        unset COMPREPLY\n    fi\n}\ncomplete -o nospace -F _python_argcomplete "az"" > debian/azure-cli/etc/bash_completion.d/azure-cli
+${TAB}cat ${completion_script} > debian/azure-cli/etc/bash_completion.d/azure-cli
 
 override_dh_strip:
 ${TAB}dh_strip --exclude=_cffi_backend
