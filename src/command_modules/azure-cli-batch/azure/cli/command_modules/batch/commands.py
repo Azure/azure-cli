@@ -7,6 +7,8 @@ from azure.cli.core.commands import cli_command
 
 from ._client_factory import batch_client_factory, batch_data_service_factory
 from ._command_type import cli_data_plane_command, cli_custom_data_plane_command
+from ._validators import (
+    validate_pool_settings)
 
 data_path = 'azure.batch.operations.{}_operations#{}'
 custom_path = 'azure.cli.command_modules.batch.custom#{}'
@@ -62,8 +64,8 @@ cli_data_plane_command('batch certificate list', data_path.format('certificate',
 factory = lambda args: batch_data_service_factory(**args).pool
 cli_data_plane_command('batch pool usage-metrics list', data_path.format('pool', 'PoolOperations.list_pool_usage_metrics'), factory)
 cli_data_plane_command('batch pool all-stats show', data_path.format('pool', 'PoolOperations.get_all_pools_lifetime_statistics'), factory)
-#cli_data_plane_command('batch pool create', data_path.format('pool', 'PoolOperations.add'), factory)
-cli_custom_data_plane_command('batch pool create', custom_path.format('create_pool'), factory)
+cli_data_plane_command('batch pool create', data_path.format('pool', 'PoolOperations.add'), factory, validator=validate_pool_settings)
+#cli_custom_data_plane_command('batch pool create', custom_path.format('create_pool'), factory)
 cli_data_plane_command('batch pool list', data_path.format('pool', 'PoolOperations.list'), factory)
 cli_data_plane_command('batch pool delete', data_path.format('pool', 'PoolOperations.delete'), factory)
 cli_data_plane_command('batch pool show', data_path.format('pool', 'PoolOperations.get'), factory)
@@ -81,13 +83,13 @@ cli_data_plane_command('batch node delete', data_path.format('pool', 'PoolOperat
 
 factory = lambda args: batch_data_service_factory(**args).job
 cli_data_plane_command('batch job all-stats show', data_path.format('job', 'JobOperations.get_all_jobs_lifetime_statistics'), factory)
-#cli_data_plane_command('batch job create', data_path.format('job', 'JobOperations.add'), factory)#, ignore=["job.job_release_task", "job.job_preparation_task", "job.job_manager_task"])
+cli_data_plane_command('batch job create', data_path.format('job', 'JobOperations.add'), factory)#, ignore=["job.job_release_task", "job.job_preparation_task", "job.job_manager_task"])
 #cli_data_plane_command('batch job list', data_path.format('job', 'JobOperations.list'), factory)
 cli_data_plane_command('batch job delete', data_path.format('job', 'JobOperations.delete'), factory)
 cli_data_plane_command('batch job show', data_path.format('job', 'JobOperations.get'), factory)
 #cli_data_plane_command('batch job set', data_path.format('job', 'JobOperations.patch'), factory)
 #cli_data_plane_command('batch job reset', data_path.format('job', 'JobOperations.update'), factory)
-cli_custom_data_plane_command('batch job create', custom_path.format('create_job'), factory)
+#cli_custom_data_plane_command('batch job create', custom_path.format('create_job'), factory)
 cli_custom_data_plane_command('batch job list', custom_path.format('list_job'), factory)
 cli_custom_data_plane_command('batch job set', custom_path.format('patch_job'), factory)
 cli_custom_data_plane_command('batch job reset', custom_path.format('update_job'), factory)
@@ -97,8 +99,8 @@ cli_data_plane_command('batch job stop', data_path.format('job', 'JobOperations.
 cli_data_plane_command('batch job prep-release-status list', data_path.format('job', 'JobOperations.list_preparation_and_release_task_status'), factory)
 
 factory = lambda args: batch_data_service_factory(**args).job_schedule
-#cli_data_plane_command('batch job-schedule create', data_path.format('job_schedule', 'JobScheduleOperations.add'), factory)
-cli_custom_data_plane_command('batch job-schedule create', custom_path.format('create_job_schedule'), factory)
+cli_data_plane_command('batch job-schedule create', data_path.format('job_schedule', 'JobScheduleOperations.add'), factory)
+#cli_custom_data_plane_command('batch job-schedule create', custom_path.format('create_job_schedule'), factory)
 cli_data_plane_command('batch job-schedule delete', data_path.format('job_schedule', 'JobScheduleOperations.delete'), factory)
 cli_data_plane_command('batch job-schedule show', data_path.format('job_schedule', 'JobScheduleOperations.get'), factory)
 #cli_data_plane_command('batch job-schedule set', data_path.format('job_schedule', 'JobScheduleOperations.patch'), factory)

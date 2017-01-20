@@ -11,6 +11,9 @@ except ImportError:
     from urlparse import urlsplit # pylint: disable=import-error
 from datetime import datetime
 
+from msrest.serialization import Deserializer
+from msrest.exceptions import DeserializationError
+
 from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.storage import StorageManagementClient
 
@@ -25,12 +28,37 @@ def datetime_type(string):
     date_format = '%Y-%m-%dT%H:%MZ'
     return datetime.strptime(string, date_format)
 
+
+def validate_datetime(namespace, name, parser):
+    """Validate the correct format of a datetime string and deserialize."""
+    date_str = getattr(namespace, name)
+    if date_str and isinstance(date_str, str):
+        try:
+            date_obj = Deserializer.deserialize_iso(date_str)
+        except DeserializationError:
+            message = "Argument {} is not a valid ISO-8601 datetime format"
+            raise ValueError(message.format(name))
+        else:
+            setattr(namespace, name, date_obj)
+    validate_required_parameter(namespace, parser)
+
+
+def validate_duration(name, value):
+    """Validate the correct format of a timespan string and deserilize."""
+    try:
+        value = Deserializer.deserialize_duration(value)
+    except DeserializationError:
+        message = "Argument {} is not in a valid ISO-8601 duration format"
+        raise ValueError(message.format(name))
+    else:
+        return value
+
+
 def validate_metadata(namespace):
     if namespace.metadata:
         namespace.metadata = dict(x.split('=', 1) for x in namespace.metadata)
 
 # COMMAND NAMESPACE VALIDATORS
-
 
 def validate_required_parameter(ns, parser):
     """Validates required parameters in Batch complex objects"""
@@ -71,7 +99,7 @@ def validate_options(namespace):
         start = namespace.start_range
         end = namespace.end_range
     except AttributeError:
-        return
+        pass
     else:
         namespace.ocp_range = None
         del namespace.start_range
@@ -80,6 +108,18 @@ def validate_options(namespace):
             start = start if start else 0
             end = end if end else ""
             namespace.ocp_range = "bytes={}-{}".format(start, end)
+    for date_arg in ['if_modified_since', 'if_unmodified_since']:  # TODO: Should we also try RFC-1123?
+        try:
+            date_str = getattr(namespace, date_arg)
+            if date_str and isinstance(date_str, str):
+                date_obj = Deserializer.deserialize_iso(date_str)
+        except AttributeError:
+            pass
+        except DeserializationError:
+            message = "Argument {} is not a valid ISO-8601 datetime format"
+            raise ValueError(message.format(date_arg))
+        else:
+            setattr(namespace, name, date_obj)
 
 
 def validate_file_destination(namespace):
@@ -135,3 +175,12 @@ def validate_client_parameters(namespace):
             raise ValueError("Need specifiy batch account in command line or enviroment variable.")
         if not namespace.account_endpoint:
             raise ValueError("Need specifiy batch endpoint in command line or enviroment variable.")
+
+# CUSTOM REQUEST VALIDATORS
+
+def validate_pool_settings(namespace, parser):
+    """Custom parsing to enfore that either PaaS or IaaS instances are configured
+    in the add pool request body.
+    """
+    groups = ['pool.cloud_service_configuration', 'pool.virtual_machine_configuration']
+    parser.parse_mutually_exclusive(namespace, True, groups)
