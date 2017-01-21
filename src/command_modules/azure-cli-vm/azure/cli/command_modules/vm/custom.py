@@ -146,23 +146,23 @@ def list_vm(resource_group_name=None):
     return list(vm_list)
 
 
-def list_vm_images(image_location=None, publisher=None, offer=None, sku=None,
+def list_vm_images(image_location=None, publisher_name=None, offer=None, sku=None,
                    all=False):  # pylint: disable=redefined-builtin
     '''vm image list
     :param str image_location:Image location
-    :param str publisher:Image publisher name
+    :param str publisher_name:Image publisher name
     :param str offer:Image offer name
     :param str sku:Image sku name
-    :param bool all:Retrieve all versions of images from all publishers
+    :param bool all:Retrieve image list from live Azure service rather using an offline image list
     '''
     load_thru_services = all
 
     if load_thru_services:
-        all_images = load_images_thru_services(publisher, offer, sku, image_location)
+        all_images = load_images_thru_services(publisher_name, offer, sku, image_location)
     else:
         logger.warning(
             'You are viewing an offline list of images, use --all to retrieve an up-to-date list')
-        all_images = load_images_from_aliases_doc(publisher, offer, sku)
+        all_images = load_images_from_aliases_doc(publisher_name, offer, sku)
 
     for i in all_images:
         i['urn'] = ':'.join([i['publisher'], i['offer'], i['sku'], i['version']])
@@ -170,16 +170,16 @@ def list_vm_images(image_location=None, publisher=None, offer=None, sku=None,
 
 
 def list_vm_extension_images(
-        image_location=None, publisher=None, name=None, version=None, latest=False):
+        image_location=None, publisher_name=None, name=None, version=None, latest=False):
     '''vm extension image list
     :param str image_location:Image location
-    :param str publisher:Image publisher name
+    :param str publisher_name:Image publisher name
     :param str name:Image name
     :param str version:Image version
     :param bool latest: Show the latest version only.
     '''
     return load_extension_images_thru_services(
-        publisher, name, version, image_location, latest)
+        publisher_name, name, version, image_location, latest)
 
 
 def list_ip_addresses(resource_group_name=None, vm_name=None):
@@ -549,8 +549,9 @@ def set_extension(
     :param vm_extension_name: the name of the extension
     :param publisher: the name of extension publisher
     :param version: the version of extension.
-    :param settings: public settings or a file path with such contents
-    :param protected_settings: protected settings or a file path with such contents
+    :param settings: extension settings in json format. A json file path is also eccepted
+    :param protected_settings: protected settings in json format for sensitive information like
+    credentials. A json file path is also accepted.
     :param no_auto_upgrade: by doing this, extension system will not pick the highest minor version
     for the specified version number, and will not auto update to the latest build/revision number
     on any VM updates in future.

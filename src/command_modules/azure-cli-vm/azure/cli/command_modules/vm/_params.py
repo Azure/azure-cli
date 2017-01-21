@@ -94,7 +94,7 @@ register_cli_argument('vm extension', 'vm_extension_name', name_arg_type, comple
 register_cli_argument('vm extension', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',), id_part='name')
 
 register_cli_argument('vm extension image', 'image_location', options_list=('--location', '-l'))
-register_cli_argument('vm extension image', 'publisher_name', options_list=('--publisher',))
+register_cli_argument('vm extension image', 'publisher_name', options_list=('--publisher', '-p'), help='Image publisher name')
 register_cli_argument('vm extension image', 'type', options_list=('--name', '-n'))
 register_cli_argument('vm extension image', 'latest', action='store_true')
 
@@ -115,7 +115,7 @@ register_cli_argument('vmss extension', 'extension_name', name_arg_type, help='N
 register_cli_argument('vmss extension', 'vmss_name', id_part=None)
 register_cli_argument('vmss diagnostics', 'vmss_name', id_part=None, help='Scale set name')
 
-register_cli_argument('vmss extension image', 'publisher_name', options_list=('--publisher',), help='Image publisher name')
+register_cli_argument('vmss extension image', 'publisher_name', options_list=('--publisher', '-p'), help='Image publisher name')
 register_cli_argument('vmss extension image', 'type', options_list=('--name', '-n'), help='Extension name')
 register_cli_argument('vmss extension image', 'latest', action='store_true')
 register_cli_argument('vmss extension image', 'image_name', help='Image name')
@@ -132,6 +132,9 @@ for scope in ['vm', 'vmss']:
     register_cli_argument(scope, 'no_auto_upgrade', action='store_true', help='by doing this, extension system will not pick the highest minor version for the specified version number, and will not auto update to the latest build/revision number on any scale set updates in future.')
 
 register_cli_argument('vm image list', 'image_location', location_type)
+register_cli_argument('vm image', 'publisher_name', options_list=('--publisher', '-p'))
+register_cli_argument('vm image', 'offer', options_list=('--offer', '-f'))
+register_cli_argument('vm image', 'sku', options_list=('--sku', '-s'))
 
 register_cli_argument('vm open-port', 'vm_name', name_arg_type, help='The name of the virtual machine to open inbound traffic on.')
 register_cli_argument('vm open-port', 'network_security_group_name', options_list=('--nsg-name',), help='The name of the network security group to create if one does not exist. Ignored if an NSG already exists.', validator=validate_nsg_name)
