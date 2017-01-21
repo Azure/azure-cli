@@ -378,6 +378,7 @@ def set_linux_user(
                                             protected_settings)
     return ExtensionUpdateLongRunningOperation('setting user', 'done')(poller)
 
+
 def delete_linux_user(
         resource_group_name, vm_name, username):
     '''Remove the user '''
@@ -385,11 +386,13 @@ def delete_linux_user(
                                             {'remove_user': username})
     return ExtensionUpdateLongRunningOperation('deleting user', 'done')(poller)
 
+
 def reset_linux_ssh(resource_group_name, vm_name):
     '''Reset the SSH configuration'''
     poller = _update_linux_access_extension(resource_group_name, vm_name,
                                             {'reset_ssh': True})
     return ExtensionUpdateLongRunningOperation('resetting SSH', 'done')(poller)
+
 
 def _update_linux_access_extension(resource_group_name, vm_name, protected_settings):
     vm = _vm_get(resource_group_name, vm_name, 'instanceView')
@@ -412,6 +415,7 @@ def _update_linux_access_extension(resource_group_name, vm_name, protected_setti
     poller = client.virtual_machine_extensions.create_or_update(resource_group_name, vm_name,
                                                                 _ACCESS_EXT_HANDLER_NAME, ext)
     return poller
+
 
 def disable_boot_diagnostics(resource_group_name, vm_name):
     vm = _vm_get(resource_group_name, vm_name)
