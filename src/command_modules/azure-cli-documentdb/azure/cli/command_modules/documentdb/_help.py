@@ -12,23 +12,3 @@ helps['documentdb'] = """
     short-summary: Managed NoSQL Database 
     long-summary: 
 """
-
-# helps['documentdb export'] = """
-#     type: command
-#     short-summary: Export data stored in a documentdb cache. 
-# """
-
-# helps['documentdb import-method'] = """
-#     type: command
-#     short-summary: Import data into a documentdb cache.
-# """
-
-# helps['documentdb update-settings'] = """
-#     type: command
-#     short-summary: Update the settings of a documentdb cache.
-# """
-
-# helps['documentdb patch-schedule'] = """
-#     type: group
-#     short-summary: Commands to manage documentdb patch schedules
-# """

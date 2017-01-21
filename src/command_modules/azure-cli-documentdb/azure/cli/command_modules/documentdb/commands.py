@@ -18,14 +18,4 @@ cli_command(__name__, 'documentdb regenerate-key', 'azure.cli.command_modules.do
 cli_command(__name__, 'documentdb check-name-exists', 'azure.cli.command_modules.documentdb.sdk.operations.database_accounts_operations#DatabaseAccountsOperations.check_name_exists', cf_documentdb)
 cli_command(__name__, 'documentdb delete', 'azure.cli.command_modules.documentdb.sdk.operations.database_accounts_operations#DatabaseAccountsOperations.delete', cf_documentdb)
 cli_command(__name__, 'documentdb failover-priority-change', 'azure.cli.command_modules.documentdb.sdk.operations.database_accounts_operations#DatabaseAccountsOperations.failover_priority_change', cf_documentdb)
-cli_command(__name__, 'documentdb create', 'azure.cli.command_modules.documentdb.sdk.operations.database_accounts_operations#DatabaseAccountsOperations.create_or_update', cf_documentdb)
-
-#createOrUpdate remember to add laurents fix
-#failoverpriorityChange
-
-# cli_command(__name__, 'documentdb create', 'azure.cli.command_modules.documentdb.custom#cli_documentdb_create', cf_documentdb)
-# cli_command(__name__, 'documentdb export', 'azure.cli.command_modules.documentdb.custom#cli_documentdb_export', cf_documentdb)
-# cli_command(__name__, 'documentdb force-reboot', 'azure.cli.command_modules.documentdb.sdk.operations.documentdb_operations#documentdbOperations.force_reboot', cf_documentdb)
-# cli_command(__name__, 'documentdb import-method', 'azure.cli.command_modules.documentdb.custom#cli_documentdb_import_method', cf_documentdb)
-# cli_command(__name__, 'documentdb regenerate-keys', 'azure.cli.command_modules.documentdb.sdk.operations.documentdb_operations#documentdbOperations.regenerate_key', cf_documentdb)
-# cli_command(__name__, 'documentdb update-settings', 'azure.cli.command_modules.documentdb.custom#cli_documentdb_update_settings', cf_documentdb)
+cli_command(__name__, 'documentdb create', 'azure.cli.command_modules.documentdb.custom#cli_documentdb_create', cf_documentdb)
