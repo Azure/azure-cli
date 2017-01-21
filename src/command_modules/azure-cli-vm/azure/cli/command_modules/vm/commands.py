@@ -30,8 +30,8 @@ def transform_ip_addresses(result):
         private = network.get('privateIpAddresses')
         private_ip_addresses = ','.join(private) if private else None
         entry = OrderedDict([('virtualMachine', r['virtualMachine']['name']),
-                             ('PublicIPAddresses', public_ip_addresses),
-                             ('PrivateIPAddresses', private_ip_addresses)])
+                             ('publicIPAddresses', public_ip_addresses),
+                             ('privateIPAddresses', private_ip_addresses)])
         transformed.append(entry)
 
     return transformed
