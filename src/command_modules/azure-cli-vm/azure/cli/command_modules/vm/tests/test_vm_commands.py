@@ -63,7 +63,7 @@ class VMImageListThruServiceScenarioTest(VCRTestBase):
         result = self.cmd('vm image list -l westus --publisher Canonical --offer Ubuntu_Snappy_Core -o tsv --all')
         assert result.index('15.04') >= 0
 
-        result = self.cmd('vm image list --publisher Canonical --offer Ubuntu_Snappy_Core -o tsv --all')
+        result = self.cmd('vm image list -p Canonical -f Ubuntu_Snappy_Core -o tsv --all')
         assert result.index('15.04') >= 0
 
 
@@ -202,7 +202,7 @@ class VMImageListOffersScenarioTest(VCRTestBase):
         self.execute()
 
     def body(self):
-        self.cmd('vm image list-offers --location {} --publisher-name {}'.format(
+        self.cmd('vm image list-offers --location {} --publisher {}'.format(
             self.location, self.publisher_name), checks=[
                 JMESPathCheck('type(@)', 'array'),
                 JMESPathCheck("length([?location == '{}']) == length(@)".format(self.location), True),
@@ -238,7 +238,7 @@ class VMImageListSkusScenarioTest(VCRTestBase):
         self.execute()
 
     def body(self):
-        self.cmd('vm image list-skus --location {} --publisher-name {} --offer {}'.format(
+        self.cmd('vm image list-skus --location {} -p {} --offer {}'.format(
             self.location, self.publisher_name, self.offer), checks=[
                 JMESPathCheck('type(@)', 'array'),
                 JMESPathCheck("length([?location == '{}']) == length(@)".format(self.location), True),
@@ -261,7 +261,7 @@ class VMImageShowScenarioTest(VCRTestBase):
         self.execute()
 
     def body(self):
-        self.cmd('vm image show --location {} --publisher-name {} --offer {} --skus {} --version {}'.format(
+        self.cmd('vm image show --location {} --publisher {} --offer {} --skus {} --version {}'.format(
             self.location, self.publisher_name, self.offer, self.skus, self.version), checks=[
                 JMESPathCheck('type(@)', 'object'),
                 JMESPathCheck('location', self.location),
@@ -523,12 +523,12 @@ class VMMachineExtensionImageScenarioTest(VCRTestBase):
                 JMESPathCheck('type(@)', 'array'),
                 JMESPathCheck("length([?location == '{}']) == length(@)".format(self.location), True),
         ])
-        self.cmd('vm extension image list-versions --location {} --publisher {} --name {}'.format(
+        self.cmd('vm extension image list-versions --location {} -p {} --name {}'.format(
             self.location, self.publisher, self.name), checks=[
                 JMESPathCheck('type(@)', 'array'),
                 JMESPathCheck("length([?location == '{}']) == length(@)".format(self.location), True),
         ])
-        self.cmd('vm extension image show --location {} --publisher {} --name {} --version {}'.format(
+        self.cmd('vm extension image show --location {} -p {} --name {} --version {}'.format(
             self.location, self.publisher, self.name, self.version), checks=[
                 JMESPathCheck('type(@)', 'object'),
                 JMESPathCheck('location', self.location),
@@ -554,7 +554,7 @@ class VMExtensionImageSearchScenarioTest(VCRTestBase):
             JMESPathCheck('type(@)', 'array'),
             JMESPathCheck("length([?name == '{}']) == length(@)".format(image_name), True)
         ])
-        result = self.cmd('vm extension image list -l westus --publisher {} --name {} --latest'.format(publisher, image_name))
+        result = self.cmd('vm extension image list -l westus -p {} --name {} --latest'.format(publisher, image_name))
         assert len(result) == 1
 
 

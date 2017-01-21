@@ -20,6 +20,18 @@ mgmt_path = 'azure.mgmt.compute.operations.{}#{}.{}'
 
 # VM
 
+def transform_ip_addresses(result):
+    transformed = []
+    for r in result:
+        network = r['virtualMachine']['network']
+        public = network.get('publicIpAddresses')
+        public_ip_addresses = ','.join([p['ipAddress'] for p in public]) if public else None
+        entry = OrderedDict([('virtualMachine', r['virtualMachine']['name']),
+                             ('PublicIPAddress', public_ip_addresses)])
+        transformed.append(entry)
+
+    return transformed
+
 cli_command(__name__, 'vm create', 'azure.cli.command_modules.vm.mgmt_vm.lib.operations.vm_operations#VmOperations.create_or_update', cf_vm_create,
             transform=DeploymentOutputLongRunningOperation('Starting vm create'), no_wait_param='raw')
 
@@ -34,7 +46,7 @@ cli_command(__name__, 'vm stop', mgmt_path.format(op_var, op_class, 'power_off')
 cli_command(__name__, 'vm restart', mgmt_path.format(op_var, op_class, 'restart'), cf_vm)
 cli_command(__name__, 'vm start', mgmt_path.format(op_var, op_class, 'start'), cf_vm)
 cli_command(__name__, 'vm redeploy', mgmt_path.format(op_var, op_class, 'redeploy'), cf_vm)
-cli_command(__name__, 'vm list-ip-addresses', custom_path.format('list_ip_addresses'))
+cli_command(__name__, 'vm list-ip-addresses', custom_path.format('list_ip_addresses'), table_transformer=transform_ip_addresses)
 cli_command(__name__, 'vm get-instance-view', custom_path.format('get_instance_view'))
 cli_command(__name__, 'vm list', custom_path.format('list_vm'))
 cli_command(__name__, 'vm resize', custom_path.format('resize_vm'))
@@ -107,13 +119,6 @@ def transform_acs_list(result):
         transformed.append(res)
     return transformed
 
-
-# Remove the hack after https://github.com/Azure/azure-rest-api-specs/issues/352 fixed
-from azure.mgmt.compute.models import ContainerService  # noqa, pylint: disable=wrong-import-position
-for a in ['id', 'name', 'type', 'location']:
-    ContainerService._attribute_map[a]['type'] = 'str'  # pylint: disable=protected-access
-ContainerService._attribute_map['tags']['type'] = '{str}'  # pylint: disable=protected-access
-######
 op_var = 'container_services_operations'
 op_class = 'ContainerServicesOperations'
 cli_command(__name__, 'acs show', mgmt_path.format(op_var, op_class, 'get'), cf_acs, table_transformer=transform_acs)
