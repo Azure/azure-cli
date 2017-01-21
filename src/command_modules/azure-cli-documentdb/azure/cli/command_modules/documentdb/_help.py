@@ -7,11 +7,11 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 #pylint: disable=line-too-long
 
-# helps['documentdb'] = """
-#     type: group
-#     short-summary: Access to a secure, dedicated cache for your Azure applications
-#     long-summary: If you don't have the documentdb component installed, add it with `az component update --add documentdb`
-# """
+helps['documentdb'] = """
+    type: group
+    short-summary: Managed NoSQL Database 
+    long-summary: 
+"""
 
 # helps['documentdb export'] = """
 #     type: command

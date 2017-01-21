@@ -27,7 +27,6 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-documentdb==1.0.0',
     'azure-cli-core',
 ]
 
@@ -39,7 +38,7 @@ with open('HISTORY.rst', 'r', encoding='utf-8') as f:
 setup(
     name='azure-cli-documentdb',
     version=VERSION,
-    description='Microsoft Azure Command-Line Tools documentdb Command Module',
+    description='Microsoft Azure Command-Line Tools DocumentDB Command Module',
     long_description=README + '\n\n' + HISTORY,
     license='MIT',
     author='Microsoft Corporation',
