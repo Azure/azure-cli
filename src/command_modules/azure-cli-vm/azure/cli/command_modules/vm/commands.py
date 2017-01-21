@@ -20,17 +20,22 @@ mgmt_path = 'azure.mgmt.compute.operations.{}#{}.{}'
 
 # VM
 
+
 def transform_ip_addresses(result):
     transformed = []
     for r in result:
         network = r['virtualMachine']['network']
         public = network.get('publicIpAddresses')
-        public_ip_addresses = ','.join([p['ipAddress'] for p in public]) if public else None
+        public_ip_addresses = ','.join([p['ipAddress'] for p in public if p['ipAddress']]) if public else None
+        private = network.get('privateIpAddresses')
+        private_ip_addresses = ','.join(private) if private else None
         entry = OrderedDict([('virtualMachine', r['virtualMachine']['name']),
-                             ('PublicIPAddress', public_ip_addresses)])
+                             ('PublicIPAddresses', public_ip_addresses),
+                             ('PrivateIPAddresses', private_ip_addresses)])
         transformed.append(entry)
 
     return transformed
+
 
 cli_command(__name__, 'vm create', 'azure.cli.command_modules.vm.mgmt_vm.lib.operations.vm_operations#VmOperations.create_or_update', cf_vm_create,
             transform=DeploymentOutputLongRunningOperation('Starting vm create'), no_wait_param='raw')
@@ -118,6 +123,7 @@ def transform_acs_list(result):
         res = transform_acs(r)
         transformed.append(res)
     return transformed
+
 
 op_var = 'container_services_operations'
 op_class = 'ContainerServicesOperations'
