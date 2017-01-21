@@ -553,13 +553,13 @@ def process_metric_update_namespace(namespace):
 # region TYPES
 
 def datetime_string_type(string):
-    ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M:%S\'Z\'' or 
+    ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M:%S\'Z\'' or
      '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
     date_format = '%Y-%m-%dT%H:%M:%SZ' if len(string) is 20 else '%Y-%m-%dT%H:%MZ'
     return datetime.strptime(string, date_format).strftime(date_format)
 
 def datetime_type(string):
-    ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M:%S\'Z\'' or  
+    ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M:%S\'Z\'' or
     '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
     date_format = '%Y-%m-%dT%H:%M:%SZ' if len(string) is 20 else '%Y-%m-%dT%H:%MZ'
     return datetime.strptime(string, date_format)
