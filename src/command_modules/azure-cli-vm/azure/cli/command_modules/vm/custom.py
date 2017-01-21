@@ -364,13 +364,7 @@ def set_linux_user(
     :param password: user password.
     :param ssh_key_value: SSH key file value or key file path
     '''
-    vm = _vm_get(resource_group_name, vm_name, 'instanceView')
-    client = _compute_client_factory()
-
-    from azure.mgmt.compute.models import VirtualMachineExtension
-
     protected_settings = {}
-
     protected_settings['username'] = username
     if password:
         protected_settings['password'] = password
@@ -379,6 +373,29 @@ def set_linux_user(
 
     if ssh_key_value:
         protected_settings['ssh_key'] = read_content_if_is_file(ssh_key_value)
+
+    poller = _update_linux_access_extension(resource_group_name, vm_name,
+                                            protected_settings)
+    return ExtensionUpdateLongRunningOperation('setting user', 'done')(poller)
+
+def delete_linux_user(
+        resource_group_name, vm_name, username):
+    '''Remove the user '''
+    poller = _update_linux_access_extension(resource_group_name, vm_name,
+                                            {'remove_user': username})
+    return ExtensionUpdateLongRunningOperation('deleting user', 'done')(poller)
+
+def reset_linux_ssh(resource_group_name, vm_name):
+    '''Reset the SSH configuration'''
+    poller = _update_linux_access_extension(resource_group_name, vm_name,
+                                            {'reset_ssh': True})
+    return ExtensionUpdateLongRunningOperation('resetting SSH', 'done')(poller)
+
+def _update_linux_access_extension(resource_group_name, vm_name, protected_settings):
+    vm = _vm_get(resource_group_name, vm_name, 'instanceView')
+    client = _compute_client_factory()
+
+    from azure.mgmt.compute.models import VirtualMachineExtension
 
     extension_name = _LINUX_ACCESS_EXT
     publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
@@ -392,35 +409,9 @@ def set_linux_user(
                                   settings={},
                                   auto_upgrade_minor_version=auto_upgrade)
 
-    poller = client.virtual_machine_extensions.create_or_update(
-        resource_group_name, vm_name, _ACCESS_EXT_HANDLER_NAME, ext)
-    return ExtensionUpdateLongRunningOperation('setting user', 'done')(poller)
-
-
-def delete_linux_user(
-        resource_group_name, vm_name, username):
-    '''Remove the user '''
-    vm = _vm_get(resource_group_name, vm_name, 'instanceView')
-    client = _compute_client_factory()
-
-    from azure.mgmt.compute.models import VirtualMachineExtension
-
-    extension_name = _LINUX_ACCESS_EXT
-    publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
-        vm.resources, extension_name)
-
-    ext = VirtualMachineExtension(vm.location,  # pylint: disable=no-member
-                                  publisher=publisher,
-                                  virtual_machine_extension_type=extension_name,
-                                  protected_settings={'remove_user': username},
-                                  type_handler_version=version,
-                                  settings={},
-                                  auto_upgrade_minor_version=auto_upgrade)
-
     poller = client.virtual_machine_extensions.create_or_update(resource_group_name, vm_name,
                                                                 _ACCESS_EXT_HANDLER_NAME, ext)
-    return ExtensionUpdateLongRunningOperation('deleting user', 'done')(poller)
-
+    return poller
 
 def disable_boot_diagnostics(resource_group_name, vm_name):
     vm = _vm_get(resource_group_name, vm_name)

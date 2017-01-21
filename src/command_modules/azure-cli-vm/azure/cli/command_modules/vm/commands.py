@@ -62,6 +62,7 @@ cli_command(__name__, 'vmss nic show', 'azure.mgmt.network.operations.network_in
 # VM Access
 cli_command(__name__, 'vm access set-linux-user', custom_path.format('set_linux_user'))
 cli_command(__name__, 'vm access delete-linux-user', custom_path.format('delete_linux_user'))
+cli_command(__name__, 'vm access reset-linux-ssh', custom_path.format('reset_linux_ssh'))
 cli_command(__name__, 'vm access reset-windows-admin', custom_path.format('reset_windows_admin'))
 
 # # VM Availability Set
