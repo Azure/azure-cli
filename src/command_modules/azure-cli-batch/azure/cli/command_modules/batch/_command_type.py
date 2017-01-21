@@ -131,7 +131,7 @@ def find_return_type(model):
         return re.sub(r"\n\s*", "", return_type.group(1))
 
 
-def class_name( type_str):
+def class_name(type_str):
     """Extract class name from type docstring.
     :param str type_str: Parameter type docstring.
     :returns: class name
@@ -176,6 +176,16 @@ def arg_name(name):
     """
     return "--" + name.replace('_', '-')
 
+def format_options_name(operation):
+    """Format the name of the request options parameter from the
+    operation name and path.
+    :param str operation: Operation path
+    :returns: str - options parameter name.
+    """
+    operation = operation.split('#')[-1]
+    op_class, op_function = operation.split('.')
+    op_class = operations_name(op_class)
+    return "{}_{}_options".format(op_class, op_function)
 
 class BatchArgumentTree(object):
     """Dependency tree parser for arguments of complex objects"""
@@ -389,7 +399,7 @@ class AzureDataPlaneCommand(object):
         self.parser = BatchArgumentTree(validator)
 
         # The name of the request options parameter
-        self._options_param = self._format_options_name(operation)
+        self._options_param = format_options_name(operation)
         # The name of the group for options arguments
         self._options_group = group_title(self._options_param)
         # Arguments used for request options
@@ -511,18 +521,7 @@ class AzureDataPlaneCommand(object):
         option_type = find_param_type(func_obj, self._options_param)
         option_type = class_name(option_type)
         self._options_model = _load_model(option_type)()
-        self._options_attrs =  list(self._options_model.__dict__.keys())
-
-    def _format_options_name(self, operation):
-        """Format the name of the request options parameter from the
-        operation name and path.
-        :param str operation: Operation path
-        :returns: str - options parameter name.
-        """
-        operation = operation.split('#')[-1]
-        op_class, op_function = operation.split('.')
-        op_class = operations_name(op_class)
-        return "{}_{}_options".format(op_class, op_function)
+        self._options_attrs = list(self._options_model.__dict__.keys())
 
     def _should_flatten(self, param):
         """Check whether the current parameter object should be flattened.
@@ -634,7 +633,7 @@ class AzureDataPlaneCommand(object):
                             self._resolve_conflict(
                                 param_attr, param_attr, path, options,
                                 details['type'], required_attrs, conflict_names)
-                        except AttributeError as err:
+                        except AttributeError:
                             continue
                 else:
                     attr_model = _load_model(details['type'])

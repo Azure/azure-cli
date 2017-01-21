@@ -63,7 +63,7 @@ def environment_setting_format(value):
     except ValueError:
         message = ("Incorrectly formatted enviroment settings. "
                    "Argmuent values should be in the format a=b c=d")
-        raise ValueError(msg)
+        raise ValueError(message)
     else:
         return {'name': env_name, 'value': env_value}
 
@@ -199,5 +199,5 @@ def validate_pool_settings(ns, parser):
     if ns.vm_size and ns.vm_size.lower() in paas_sizes and not ns.os_family:
         message = ("The selected VM size in incompatible with Virtual Machine Configuration. "
                    "Please swap for the IaaS equivalent: Standard_A1 (small), Standard_A2 "
-                   "(medium), Standard_A3 (large), or Standard_A4 (extra large).") 
+                   "(medium), Standard_A3 (large), or Standard_A4 (extra large).")
         raise ValueError(message)

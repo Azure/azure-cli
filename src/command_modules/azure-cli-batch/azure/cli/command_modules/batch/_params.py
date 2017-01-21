@@ -14,7 +14,7 @@ from azure.cli.core.commands.parameters import \
      get_resource_name_completion_list, enum_choice_list, file_type)
 
 from ._validators import \
-    (application_enabled, datetime_format, storage_account_id)
+    (application_enabled, datetime_format, storage_account_id, application_package_reference_format)
 
 # pylint: disable=line-too-long
 # ARGUMENT DEFINITIONS
@@ -57,6 +57,6 @@ register_cli_argument('batch certificate', 'cert_file', help='The certificate fi
 register_cli_argument('batch certificate delete', 'abort', action='store_true', help='Cancel the certificate deletion operation.')
 
 register_cli_argument('batch task add', 'json_file', help='The file containing the task(s) to create in JSON format, if this parameter is specified, all other parameters are ignored.', completer=FilesCompleter())
-register_cli_argument('batch task add', 'application_package_references', nargs='+', help='The space separated list of ids specifying the application packages to be installed.')
+register_cli_argument('batch task add', 'application_package_references', nargs='+', help='The space separated list of ids specifying the application packages to be installed.', type=application_package_reference_format)
 register_cli_argument('batch task add', 'job_id', help='The ID of the job containing the task.')
 register_cli_argument('batch task add', 'task_id', help='The ID of the task.')

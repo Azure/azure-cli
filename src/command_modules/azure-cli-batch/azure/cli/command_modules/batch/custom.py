@@ -130,7 +130,7 @@ create_application_package.__doc__ = ApplicationPackageOperations.create.__doc__
 
 # Data plane custom commands
 
-def create_certificate(client, cert_file, thumbprint, thumbprint_algorithm, password=None, **kwarg): #pylint:disable=W0613
+def create_certificate(client, cert_file, thumbprint, thumbprint_algorithm, password=None):
     if password:
         certificate_format = 'pfx'
     else:
@@ -147,17 +147,17 @@ def create_certificate(client, cert_file, thumbprint, thumbprint_algorithm, pass
 create_application_package.__doc__ = CertificateAddParameter.__doc__
 
 
-def delete_certificate(client, thumbprint, thumbprint_algorithm, abort=None, **kwarg): #pylint:disable=W0613
+def delete_certificate(client, thumbprint, thumbprint_algorithm, abort=None):
     if abort:
         client.cancel_deletion(thumbprint_algorithm, thumbprint)
     else:
         client.delete(thumbprint_algorithm, thumbprint)
 
 
-def resize_pool(client, pool_id, target_dedicated=None, #pylint:disable=too-many-arguments, W0613
+def resize_pool(client, pool_id, target_dedicated=None, #pylint:disable=too-many-arguments
                 resize_timeout=None, node_deallocation_option=None,
                 if_match=None, if_none_match=None, if_modified_since=None,
-                if_unmodified_since=None, abort=None, **kwarg):
+                if_unmodified_since=None, abort=None):
     if abort:
         stop_resize_option = PoolStopResizeOptions(if_match=if_match,
                                                    if_none_match=if_none_match,
@@ -178,7 +178,7 @@ def resize_pool(client, pool_id, target_dedicated=None, #pylint:disable=too-many
 resize_pool.__doc__ = PoolResizeParameter.__doc__
 
 
-def list_job(client, job_schedule_id=None, filter=None, select=None, expand=None, **kwarg): #pylint:disable= W0613, W0622
+def list_job(client, job_schedule_id=None, filter=None, select=None, expand=None): #pylint:disable=W0622
     if job_schedule_id:
         option1 = JobListFromJobScheduleOptions(filter=filter,
                                                 select=select,
@@ -192,10 +192,10 @@ def list_job(client, job_schedule_id=None, filter=None, select=None, expand=None
         return client.list(job_list_options=option2)
 
 
-def create_task(client, job_id, json_file=None, task_id=None, command_line=None,  #pylint:disable=too-many-arguments, W0613
+def create_task(client, job_id, json_file=None, task_id=None, command_line=None,  #pylint:disable=too-many-arguments
                 resource_files=None, environment_settings=None, affinity_info=None,
                 max_wall_clock_time=None, retention_time=None, max_task_retry_count=None,
-                run_elevated=None, application_package_references=None, **kwarg):
+                run_elevated=None, application_package_references=None):
     if json_file:
         with open(json_file) as f:
             json_obj = json.load(f)
