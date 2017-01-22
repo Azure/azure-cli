@@ -13,9 +13,11 @@ from azure.cli.core.commands.parameters import \
     (ignore_type, tags_type, get_resource_name_completion_list, enum_choice_list)
 import azure.cli.core.commands.arm  # pylint: disable=unused-import
 from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
+from azure.cli.core.commands.paramutil import ParametersContext
 
 from azure.common import AzureMissingResourceHttpError
-from azure.mgmt.storage.models import SkuName, AccessTier, Kind, EncryptionServices
+from azure.mgmt.storage.models import (SkuName, AccessTier, Kind, EncryptionServices,
+                                       AccountSasParameters, ServiceSasParameters)
 from azure.storage.models import AccountPermissions
 from azure.storage.blob import DeleteSnapshot, BlockBlobService, PageBlobService, AppendBlobService
 from azure.storage.blob.baseblobservice import BaseBlobService
@@ -40,6 +42,7 @@ from ._validators import \
      process_file_download_namespace, process_logging_update_namespace,
      process_metric_update_namespace, process_blob_copy_batch_namespace,
      get_source_file_or_blob_service_client)
+
 
 # UTILITY
 
@@ -230,6 +233,29 @@ register_cli_argument('storage', 'container_name', container_name_type)
 
 for item in ['check-name', 'delete', 'list', 'show', 'show-usage', 'update', 'keys']:
     register_cli_argument('storage account {}'.format(item), 'account_name', account_name_type, options_list=('--name', '-n'))
+
+
+def replace_the_first(target, replacement):
+    def _wrap(arg):
+        arg.type.settings['help'] = arg.type.settings['help'].replace(target, replacement, 1)
+
+    return _wrap
+
+
+# Issue https://github.com/Azure/azure-cli/issues/1809 causes the parameter to be truncated at key
+# word 'Possible values include'. However the a few example of accept options in this command are
+# helpful.
+with ParametersContext('storage account list-account-sas') as c:
+    c.expand('parameters', AccountSasParameters, 'Account SAS', patches={
+        'permissions': replace_the_first('Possible values include', 'Choices include'),
+        'services': replace_the_first('Possible values include', 'Choices include')
+    })
+
+with ParametersContext('storage account list-service-sas') as c:
+    c.expand('parameters', ServiceSasParameters, 'Service SAS', patches={
+        'permissions': replace_the_first('Possible values include', 'Choices include'),
+        'resource': replace_the_first('Possible values include', 'Choices include')
+    })
 
 register_cli_argument('storage account show-connection-string', 'account_name', account_name_type, options_list=('--name', '-n'))
 register_cli_argument('storage account show-connection-string', 'protocol', help='The default endpoint protocol.', **enum_choice_list(['http', 'https']))

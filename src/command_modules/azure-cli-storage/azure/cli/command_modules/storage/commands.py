@@ -32,6 +32,8 @@ cli_command(__name__, 'storage account delete', 'azure.mgmt.storage.operations.s
 cli_command(__name__, 'storage account show', 'azure.mgmt.storage.operations.storage_accounts_operations#StorageAccountsOperations.get_properties', factory)
 cli_command(__name__, 'storage account create', 'azure.cli.command_modules.storage.custom#create_storage_account')
 cli_command(__name__, 'storage account list', 'azure.cli.command_modules.storage.custom#list_storage_accounts')
+cli_command(__name__, 'storage account list-account-sas', 'azure.mgmt.storage.operations.storage_accounts_operations#StorageAccountsOperations.list_account_sas', factory)
+cli_command(__name__, 'storage account list-service-sas', 'azure.mgmt.storage.operations.storage_accounts_operations#StorageAccountsOperations.list_service_sas', factory)
 cli_command(__name__, 'storage account show-usage', 'azure.cli.command_modules.storage.custom#show_storage_account_usage')
 cli_command(__name__, 'storage account update', 'azure.cli.command_modules.storage.custom#set_storage_account_properties')
 cli_command(__name__, 'storage account show-connection-string', 'azure.cli.command_modules.storage.custom#show_storage_account_connection_string')
