@@ -143,10 +143,10 @@ def list_vm(resource_group_name=None, show_details=False):
     ccf = _compute_client_factory()
     vm_list = ccf.virtual_machines.list(resource_group_name=resource_group_name) \
         if resource_group_name else ccf.virtual_machines.list_all()
-    if not show_details:
-        return list(vm_list)
-    else:
+    if show_details:
         return [_vm_get_details(_parse_rg_name(v.id)[0], v.name) for v in vm_list]
+    else:
+        return list(vm_list)
 
 
 def show_vm(resource_group_name, vm_name, show_details=False):
