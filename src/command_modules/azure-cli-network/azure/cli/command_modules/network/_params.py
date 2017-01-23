@@ -563,3 +563,4 @@ for item in ['list', 'show']:
 
 for item in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
     register_cli_argument('network dns record {} add'.format(item), 'record_set_name', options_list=('--record-set-name',), help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
+    register_cli_argument('network dns record {} remove'.format(item), 'record_set_name', options_list=('--record-set-name',), help='The name of the record set relative to the zone.')

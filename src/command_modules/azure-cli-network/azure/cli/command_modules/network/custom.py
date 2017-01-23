@@ -1587,7 +1587,7 @@ def _add_save_record(record, record_type, record_set_name, resource_group_name, 
     try:
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     except CloudError:
-        record_set = RecordSet(name=record_set_name, type=record_type, ttl=3600)
+        record_set = RecordSet(name=record_set_name, type=record_type, ttl=3600)  # pylint: disable=redefined-variable-type
 
     _add_record(record_set, record, record_type, property_name, is_list)
 
