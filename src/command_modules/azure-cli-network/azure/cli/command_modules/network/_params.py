@@ -551,8 +551,6 @@ register_cli_argument('network dns zone import', 'file_name', help='Path to the 
 register_cli_argument('network dns zone export', 'file_name', help='Path to the DNS zone file to save')
 register_cli_argument('network dns zone update', 'if_none_match', ignore_type)
 
-register_cli_argument('network dns record', 'record_set_name', options_list=('--record-set-name',))
-
 register_cli_argument('network dns record txt add', 'value', nargs='+')
 register_cli_argument('network dns record txt remove', 'value', nargs='+')
 
@@ -562,3 +560,6 @@ register_cli_argument('network dns record-set create', 'if_none_match', help='Cr
 
 for item in ['list', 'show']:
     register_cli_argument('network dns record-set {}'.format(item), 'record_type', options_list=('--type', '-t'), **enum_choice_list(RecordType))
+
+for item in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
+    register_cli_argument('network dns record {} add'.format(item), 'record_set_name', options_list=('--record-set-name',), help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')

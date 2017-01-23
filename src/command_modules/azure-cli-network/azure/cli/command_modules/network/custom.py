@@ -1584,7 +1584,10 @@ def _add_record(record_set, record, record_type, property_name=None, is_list=Fal
 def _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name,
                      property_name=None, is_list=True):
     ncf = get_mgmt_service_client(DnsManagementClient).record_sets
-    record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
+    try:
+        record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
+    except CloudError:
+        record_set = RecordSet(name=record_set_name, type=record_type, ttl=3600)
 
     _add_record(record_set, record, record_type, property_name, is_list)
 
