@@ -58,6 +58,9 @@ register_cli_argument('vm', 'size', completer=get_vm_size_completion_list)
 register_cli_argument('vm', 'tags', tags_type)
 register_cli_argument('vm', 'name', arg_type=name_arg_type)
 
+for item in ['show', 'list']:
+    register_cli_argument('vm {}'.format(item), 'show_details', action='store_true', options_list=('--show-details', '-d'), help='show public ip address, FQDN, and power states. command will run slow')
+
 register_cli_argument('vm disk', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',))
 register_cli_argument('vm disk', 'disk_name', options_list=('--name', '-n'), help='The data disk name. If missing, will retrieve from vhd uri')
 register_cli_argument('vm disk', 'disk_size', help='Size of disk (GiB)', default=1023, type=int)

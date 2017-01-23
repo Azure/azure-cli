@@ -138,12 +138,47 @@ class ExtensionUpdateLongRunningOperation(LongRunningOperation):  # pylint: disa
         return None
 
 
-def list_vm(resource_group_name=None):
+def list_vm(resource_group_name=None, show_details=False):
     ''' List Virtual Machines. '''
     ccf = _compute_client_factory()
     vm_list = ccf.virtual_machines.list(resource_group_name=resource_group_name) \
         if resource_group_name else ccf.virtual_machines.list_all()
-    return list(vm_list)
+    if show_details:
+        return [_vm_get_details(_parse_rg_name(v.id)[0], v.name) for v in vm_list]
+    else:
+        return list(vm_list)
+
+
+def show_vm(resource_group_name, vm_name, show_details=False):
+    if show_details:
+        return _vm_get_details(resource_group_name, vm_name)
+    else:
+        return _vm_get(resource_group_name, vm_name)
+
+
+def _vm_get_details(resource_group_name, vm_name):
+    from azure.mgmt.network import NetworkManagementClient
+    result = get_instance_view(resource_group_name, vm_name)
+    network_client = get_mgmt_service_client(NetworkManagementClient)
+    public_ips = []
+    fqdns = []
+    # pylint: disable=line-too-long,no-member
+    for nic_ref in result.network_profile.network_interfaces:
+        nic = network_client.network_interfaces.get(resource_group_name, nic_ref.id.split('/')[-1])
+        for ip_configuration in nic.ip_configurations:
+            if ip_configuration.public_ip_address:
+                public_ip_info = network_client.public_ip_addresses.get(resource_group_name,
+                                                                        ip_configuration.public_ip_address.id.split('/')[-1])
+                if public_ip_info.ip_address:
+                    public_ips.append(public_ip_info.ip_address)
+                if public_ip_info.dns_settings:
+                    fqdns.append(public_ip_info.dns_settings.fqdn)
+
+    setattr(result, 'power_state', ','.join([s.display_status for s in result.instance_view.statuses if s.code.startswith('PowerState/')]))
+    setattr(result, 'public_ips', ','.join(public_ips))
+    setattr(result, 'fqdns', ','.join(fqdns))
+    del result.instance_view  # we don't need other instance_view info as people won't care
+    return result
 
 
 def list_vm_images(image_location=None, publisher_name=None, offer=None, sku=None,

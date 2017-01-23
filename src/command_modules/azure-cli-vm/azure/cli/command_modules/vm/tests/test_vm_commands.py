@@ -156,13 +156,24 @@ class VMShowListSizesListIPAddressesScenarioTest(ResourceGroupVCRTestBase):
                  '--authentication-type password'.format(
                      self.resource_group, self.location, self.vm_name, self.deployment_name,
                      self.ip_allocation_method))
-        self.cmd('vm show --resource-group {} --name {} --expand instanceView'.format(
-            self.resource_group, self.vm_name), checks=[
-                JMESPathCheck('type(@)', 'object'),
-                JMESPathCheck('name', self.vm_name),
-                JMESPathCheck('location', self.location),
-                JMESPathCheck('resourceGroup', self.resource_group),
+
+        result = self.cmd('vm show --resource-group {} --name {} -d'.format(self.resource_group, self.vm_name), checks=[
+            JMESPathCheck('type(@)', 'object'),
+            JMESPathCheck('name', self.vm_name),
+            JMESPathCheck('location', self.location),
+            JMESPathCheck('resourceGroup', self.resource_group),
+            JMESPathCheck('powerState', 'VM running')
         ])
+        self.assertEqual(4, len(result['publicIps'].split('.')))
+
+        result = self.cmd('vm list --resource-group {} -d'.format(self.resource_group), checks=[
+            JMESPathCheck('[0].name', self.vm_name),
+            JMESPathCheck('[0].location', self.location),
+            JMESPathCheck('[0].resourceGroup', self.resource_group),
+            JMESPathCheck('[0].powerState', 'VM running')
+        ])
+        self.assertEqual(4, len(result[0]['publicIps'].split('.')))
+
         self.cmd('vm list-vm-resize-options --resource-group {} --name {}'.format(
             self.resource_group, self.vm_name), checks=JMESPathCheck('type(@)', 'array'))
 
@@ -312,7 +323,7 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # py
         self.execute()
 
     def _check_vm_power_state(self, expected_power_state):
-        self.cmd('vm show --resource-group {} --name {} --expand instanceView'.format(
+        self.cmd('vm get-instance-view --resource-group {} --name {}'.format(
             self.resource_group, self.vm_name), checks=[
                 JMESPathCheck('type(@)', 'object'),
                 JMESPathCheck('name', self.vm_name),
