@@ -33,9 +33,9 @@ class Test_ArgumentParser(unittest.TestCase):
         args = mock_echo_args('vm show',
                               '--id /subscriptions/00000000-0000-0000-0000-0123456789abc/resourceGroups/thisisaresourcegroup/providers/Microsoft.Compute/virtualMachines/thisisavmname')  # pylint: disable=line-too-long
         self.assertDictEqual({
-            'expand': None,
             'resource_group_name': 'thisisaresourcegroup',
-            'vm_name': 'thisisavmname'
+            'vm_name': 'thisisavmname',
+            'show_details': False
         }, args.result)
 
         # Invalid resource ID should trigger the missing resource group
@@ -54,6 +54,7 @@ class Test_ArgumentParser(unittest.TestCase):
         args = mock_echo_args('vm list', '')
         self.assertDictEqual({
             'resource_group_name': None,
+            'show_details': False
         }, args.result)
 
         # if resource group name is specified, however,
@@ -61,6 +62,7 @@ class Test_ArgumentParser(unittest.TestCase):
         args = mock_echo_args('vm list', '-g hullo')
         self.assertDictEqual({
             'resource_group_name': 'hullo',
+            'show_details': False
         }, args.result)
 
     consistent_arguments = {
