@@ -341,6 +341,33 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('elasticPoolName', self.pool_name),
                      JMESPathCheck('status', 'Online')])
 
+        # test sql elastic-pools db sub-group commands
+        self.cmd('sql elastic-pools db list -g {} --server-name {} --elastic-pool-name {}'
+                 .format(rg, self.sql_server_name, self.pool_name),
+                 checks=[
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].resourceGroup', rg),
+                     JMESPathCheck('[0].name', self.database_name),
+                     JMESPathCheck('[0].elasticPoolName', self.pool_name),
+                     JMESPathCheck('[0].status', 'Online')])
+
+        self.cmd('sql elastic-pools db show -g {} --server-name {} --elastic-pool-name {} '
+                 '--database-name {}'
+                 .format(rg, self.sql_server_name, self.pool_name, self.database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('elasticPoolName', self.pool_name),
+                     JMESPathCheck('status', 'Online')])
+
+        self.cmd('sql elastic-pools db show-activity -g {} --server-name {} --elastic-pool-name {}'
+                 .format(rg, self.sql_server_name, self.pool_name),
+                 checks=[
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].resourceGroup', rg),
+                     JMESPathCheck('[0].serverName', self.sql_server_name),
+                     JMESPathCheck('[0].currentElasticPoolName', self.pool_name)])
+
         # delete sql server database
         self.cmd('sql db delete -g {} --server-name {} --database-name {}'
                  .format(rg, self.sql_server_name, self.database_name), checks=[NoneCheck()])
