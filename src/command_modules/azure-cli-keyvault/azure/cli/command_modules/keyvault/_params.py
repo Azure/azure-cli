@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+from argcomplete.completers import FilesCompleter
 
 from azure.mgmt.keyvault.models.key_vault_management_client_enums import \
     (SkuName, KeyPermissions, SecretPermissions, CertificatePermissions)
@@ -124,13 +125,13 @@ for item in ['create', 'import']:
     register_cli_argument('keyvault key {}'.format(item), 'expires', default=None, help='Expiration UTC datetime  (Y-m-d\'T\'H:M\'Z\').', type=datetime_type)
     register_cli_argument('keyvault key {}'.format(item), 'not_before', default=None, help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M\'Z\').', type=datetime_type)
 
-register_cli_argument('keyvault key import', 'pem_file', help='PEM file containing the key to be imported.', arg_group='Key Source', validator=validate_key_import_source)
+register_cli_argument('keyvault key import', 'pem_file', help='PEM file containing the key to be imported.', arg_group='Key Source', completer=FilesCompleter(), validator=validate_key_import_source)
 register_cli_argument('keyvault key import', 'pem_password', help='Password of PEM file.', arg_group='Key Source')
-register_cli_argument('keyvault key import', 'byok_file', help='BYOK file containing the key to be imported. Must not be password protected.', arg_group='Key Source')
+register_cli_argument('keyvault key import', 'byok_file', help='BYOK file containing the key to be imported. Must not be password protected.', completer=FilesCompleter(), arg_group='Key Source')
 
-register_cli_argument('keyvault key backup', 'file_path', options_list=('--file', '-f'), help='Local file path in which to store key backup.')
+register_cli_argument('keyvault key backup', 'file_path', options_list=('--file', '-f'), completer=FilesCompleter(), help='Local file path in which to store key backup.')
 
-register_cli_argument('keyvault key restore', 'file_path', options_list=('--file', '-f'), help='Local key backup from which to restore key.')
+register_cli_argument('keyvault key restore', 'file_path', options_list=('--file', '-f'), completer=FilesCompleter(), help='Local key backup from which to restore key.')
 
 register_attributes_argument('keyvault key set-attributes', 'key', KeyAttributes)
 
@@ -139,12 +140,12 @@ register_cli_argument('keyvault secret', 'secret_version', options_list=('--vers
 register_cli_argument('keyvault secret set', 'content_type', options_list=('--description',), help='Description of the secret contents (e.g. password, connection string, etc)')
 register_attributes_argument('keyvault secret set', 'secret', SecretAttributes, create=True)
 register_cli_argument('keyvault secret set', 'value', options_list=('--value',), help="Plain text secret value. Cannot be used with '--file' or '--encoding'", required=False, arg_group='Content Source')
-register_extra_cli_argument('keyvault secret set', 'file_path', options_list=('--file', '-f'), help="Source file for secret. Use in conjunction with '--encoding'", arg_group='Content Source')
+register_extra_cli_argument('keyvault secret set', 'file_path', options_list=('--file', '-f'), help="Source file for secret. Use in conjunction with '--encoding'", completer=FilesCompleter(), arg_group='Content Source')
 register_extra_cli_argument('keyvault secret set', 'encoding', options_list=('--encoding', '-e'), help='Source file encoding. The value is saved as a tag (file-encoding=<val>) and used during download to automtically encode the resulting file.', default='utf-8', validator=process_secret_set_namespace, arg_group='Content Source', **enum_choice_list(secret_encoding_values))
 
 register_attributes_argument('keyvault secret set-attributes', 'secret', SecretAttributes)
 
-register_cli_argument('keyvault secret download', 'file_path', options_list=('--file', '-f'), help='File to receive the secret contents.')
+register_cli_argument('keyvault secret download', 'file_path', options_list=('--file', '-f'), completer=FilesCompleter(), help='File to receive the secret contents.')
 register_cli_argument('keyvault secret download', 'encoding', options_list=('--encoding', '-e'), help="Encoding of the destination file. By default, will look for the 'file-encoding' tag on the secret. Otherwise will assume 'utf-8'.", default=None, **enum_choice_list(secret_encoding_values))
 
 register_cli_argument('keyvault certificate', 'certificate_version', options_list=('--version', '-v'), help='The certificate version. If omitted, uses the latest version.', default='', required=False, completer=get_keyvault_version_completion_list('certificate'))
@@ -154,12 +155,12 @@ register_attributes_argument('keyvault certificate set-attributes', 'certificate
 for item in ['create', 'set-attributes', 'import']:
     register_cli_argument('keyvault certificate {}'.format(item), 'certificate_policy', options_list=('--policy', '-p'), help='JSON encoded policy defintion. Use @{file} to load from a file.', type=get_json_object)
 
-register_cli_argument('keyvault certificate import', 'base64_encoded_certificate', options_list=('--file', '-f'), help='PKCS12 file or PEM file containing the certificate and private key.', type=base64_encoded_certificate_type)
+register_cli_argument('keyvault certificate import', 'base64_encoded_certificate', options_list=('--file', '-f'), completer=FilesCompleter(), help='PKCS12 file or PEM file containing the certificate and private key.', type=base64_encoded_certificate_type)
 
-register_cli_argument('keyvault certificate download', 'file_path', options_list=('--file', '-f'), help='File to receive the binary certificate contents.')
+register_cli_argument('keyvault certificate download', 'file_path', options_list=('--file', '-f'), completer=FilesCompleter(), help='File to receive the binary certificate contents.')
 register_cli_argument('keyvault certificate download', 'encoding', options_list=('--encoding', '-e'), help='How to store base64 certificate contents in file.', **enum_choice_list(certificate_file_encoding_values))
 
-register_cli_argument('keyvault certificate pending merge', 'x509_certificates', options_list=('--file', '-f'), help='File containing the certificate or certificate chain to merge.', validator=validate_x509_certificate_chain)
+register_cli_argument('keyvault certificate pending merge', 'x509_certificates', options_list=('--file', '-f'), completer=FilesCompleter(), help='File containing the certificate or certificate chain to merge.', validator=validate_x509_certificate_chain)
 register_attributes_argument('keyvault certificate pending merge', 'certificate', CertificateAttributes, True)
 
 register_cli_argument('keyvault certificate pending cancel', 'cancellation_requested', ignore_type, validator=process_certificate_cancel_namespace)
