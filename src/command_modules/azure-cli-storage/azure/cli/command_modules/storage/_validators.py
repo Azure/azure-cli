@@ -695,12 +695,11 @@ def transform_metrics_list_output(result):
     return new_result
 
 
-def transform_storage_boolean_output(result):
-    return {'success': result}
+def create_boolean_result_output_transformer(property_name):
+    def _transformer(result):
+        return {property_name: result}
 
-
-def transform_storage_exists_output(result):
-    return {'exists': result}
+    return _transformer
 
 
 def transform_storage_list_output(result):
