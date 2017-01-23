@@ -93,7 +93,7 @@ helps['sql elastic-pools db'] = """
             """
 helps['sql elastic-pools recommended'] = """
             type: group
-            short-summary: Commands to see information about an Azure SQL Recommended Elastic Pools
+            short-summary: Commands to see information about an Azure SQL Recommended Elastic Pool
             """
 helps['sql elastic-pools recommended db'] = """
             type: group
