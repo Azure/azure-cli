@@ -33,7 +33,8 @@ IGNORE_OPTIONS = {  # Options parameters that should not be exposed as arguments
     'ocp_date',
     'timeout',
     'client_request_id',
-    'return_client_request_id'
+    'return_client_request_id',
+    'max_results'
 }
 IGNORE_PARAMETERS = {'callback'}
 FLATTEN_OPTIONS = {  # Options to be flattened into multiple arguments.
@@ -103,7 +104,7 @@ def find_param_type(model, param):
     # Search for the :type param_name: in the docstring
     pattern = r":type {}:(.*?)\n(\s*:param |\s*:rtype:|\s*:raises:|\"\"\")".format(param)
     param_type = re.search(pattern, model.__doc__, re.DOTALL)
-    return re.sub(r"\n\s*", "", param_type.group(1).strip())
+    return re.sub(r"\n\s*", " ", param_type.group(1).strip())
 
 
 def find_param_help(model, param):
@@ -352,6 +353,11 @@ class BatchArgumentTree(object):
         :param namespace: The namespace object.
         :raises: ValueError if a require argument was not set.
         """
+        if self._custom_validator:
+            try:
+                self._custom_validator(namespace, self)
+            except TypeError:
+                raise ValueError("Custom validator must be a function that takes two arguments.")
         try:
             if namespace.json_file:
                 try:
@@ -365,15 +371,10 @@ class BatchArgumentTree(object):
                 if other_values:
                     message = "--json-file cannot be combined with:\n"
                     raise ValueError(message + '\n'.join(other_values))
+                self.done = True
                 return
         except AttributeError:
             pass
-        if self._custom_validator:
-            try:
-                self._custom_validator(namespace, self)
-            except TypeError:
-                raise ValueError("Custom validator must be a function that takes two arguments.")
-
         required_args = self._parse(namespace, self._request_param['name'], True)
         missing_args = [n for n in required_args if not getattr(namespace, n)]
         if missing_args:
@@ -396,7 +397,8 @@ class AzureDataPlaneCommand(object):
         self.ignore = list(IGNORE_PARAMETERS)  # Parameters to ignore
         if ignore:
             self.ignore.extend(ignore)
-        self.parser = BatchArgumentTree(validator)
+        self.parser = None
+        self.validator = validator
 
         # The name of the request options parameter
         self._options_param = format_options_name(operation)
@@ -420,9 +422,7 @@ class AzureDataPlaneCommand(object):
 
                 # Build the request parameters from command line arguments
                 if json_file:
-                    with open(json_file) as file_handle:
-                        json_obj = json.load(file_handle)
-                        self.parser.deserialize_json(client, kwargs, json_obj)
+                    self.parser.deserialize_json(client, kwargs, json_file)
                     for arg, _ in self.parser:
                         del kwargs[arg]
                 else:
@@ -647,6 +647,7 @@ class AzureDataPlaneCommand(object):
         """Load all the command line arguments from the request parameters.
         :param func handler: The operation function.
         """
+        self.parser = BatchArgumentTree(self.validator)
         self._load_options_model(handler)
         for arg in extract_args_from_signature(handler):
             arg_type = find_param_type(handler, arg[0])

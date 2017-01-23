@@ -192,12 +192,13 @@ def validate_pool_settings(ns, parser):
     """Custom parsing to enfore that either PaaS or IaaS instances are configured
     in the add pool request body.
     """
-    groups = ['pool.cloud_service_configuration', 'pool.virtual_machine_configuration']
-    parser.parse_mutually_exclusive(ns, True, groups)
+    if not ns.json_file:
+        groups = ['pool.cloud_service_configuration', 'pool.virtual_machine_configuration']
+        parser.parse_mutually_exclusive(ns, True, groups)
 
-    paas_sizes = ['small', 'medium', 'large', 'extralarge']
-    if ns.vm_size and ns.vm_size.lower() in paas_sizes and not ns.os_family:
-        message = ("The selected VM size in incompatible with Virtual Machine Configuration. "
-                   "Please swap for the IaaS equivalent: Standard_A1 (small), Standard_A2 "
-                   "(medium), Standard_A3 (large), or Standard_A4 (extra large).")
-        raise ValueError(message)
+        paas_sizes = ['small', 'medium', 'large', 'extralarge']
+        if ns.vm_size and ns.vm_size.lower() in paas_sizes and not ns.os_family:
+            message = ("The selected VM size in incompatible with Virtual Machine Configuration. "
+                       "Please swap for the IaaS equivalent: Standard_A1 (small), Standard_A2 "
+                       "(medium), Standard_A3 (large), or Standard_A4 (extra large).")
+            raise ValueError(message)
