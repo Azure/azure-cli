@@ -1324,6 +1324,12 @@ def create_dns_record_set(resource_group_name, zone_name, record_set_name, recor
                                 if_none_match='*' if if_none_match else None)
 create_dns_record_set.__doc__ = RecordSetsOperations.create_or_update.__doc__
 
+def list_dns_record_set(client, resource_group_name, zone_name, record_type=None):
+    if record_type:
+        return client.list_by_type(resource_group_name, zone_name, record_type)
+    else:
+        return client.list_all_in_resource_group(resource_group_name, zone_name)
+
 def update_dns_record_set(instance, metadata=None):
     if metadata is not None:
         instance.metadata = metadata

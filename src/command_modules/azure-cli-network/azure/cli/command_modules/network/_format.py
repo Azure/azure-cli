@@ -23,6 +23,18 @@ def transform_dns_record_set_output(result):
 
     return result
 
+def transform_dns_record_set_table_output(result):
+    table_output = []
+    for item in result:
+        table_row = OrderedDict()
+        table_row['Name'] = item['name']
+        table_row['ResourceGroup'] = item['resourceGroup']
+        table_row['Ttl'] = item['ttl']
+        table_row['Type'] = item['type'].rsplit('/', 1)[1]
+        table_row['Metadata'] = item['metadata'] or ' '
+        table_output.append(table_row)
+    return table_output
+
 def transform_local_gateway_table_output(result):
     final_result = []
     for item in result:
