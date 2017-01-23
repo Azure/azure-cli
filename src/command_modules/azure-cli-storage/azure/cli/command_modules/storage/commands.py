@@ -14,8 +14,8 @@ from azure.cli.command_modules.storage._factory import \
 from azure.cli.command_modules.storage._validators import \
     (transform_acl_list_output, transform_cors_list_output, transform_entity_query_output,
      transform_logging_list_output, transform_metrics_list_output,
-     transform_url, transform_storage_list_output, transform_storage_exists_output,
-     transform_container_permission_output, create_boolean_result_output_transformer)
+     transform_url, transform_storage_list_output, transform_container_permission_output,
+     create_boolean_result_output_transformer)
 from azure.cli.command_modules.storage._format import \
     (transform_container_list, transform_container_show,
      transform_blob_output,
@@ -53,7 +53,7 @@ cli_storage_data_plane_command('storage container lease renew', 'azure.storage.b
 cli_storage_data_plane_command('storage container lease release', 'azure.storage.blob.blockblobservice#BlockBlobService.release_container_lease', factory)
 cli_storage_data_plane_command('storage container lease change', 'azure.storage.blob.blockblobservice#BlockBlobService.change_container_lease', factory)
 cli_storage_data_plane_command('storage container lease break', 'azure.storage.blob.blockblobservice#BlockBlobService.break_container_lease', factory)
-cli_storage_data_plane_command('storage container exists', 'azure.storage.blob.baseblobservice#BaseBlobService.exists', factory, transform=transform_storage_exists_output, table_transformer=transform_boolean_for_table)
+cli_storage_data_plane_command('storage container exists', 'azure.storage.blob.baseblobservice#BaseBlobService.exists', factory, transform=create_boolean_result_output_transformer('exists'), table_transformer=transform_boolean_for_table)
 cli_storage_data_plane_command('storage container set-permission', 'azure.storage.blob.baseblobservice#BaseBlobService.set_container_acl', factory)
 cli_storage_data_plane_command('storage container show-permission', 'azure.storage.blob.baseblobservice#BaseBlobService.get_container_acl', factory, transform=transform_container_permission_output)
 cli_storage_data_plane_command('storage container policy create', 'azure.cli.command_modules.storage.custom#create_acl_policy', factory)
@@ -70,7 +70,7 @@ cli_storage_data_plane_command('storage blob url', 'azure.storage.blob.blockblob
 cli_storage_data_plane_command('storage blob snapshot', 'azure.storage.blob.blockblobservice#BlockBlobService.snapshot_blob', factory)
 cli_storage_data_plane_command('storage blob show', 'azure.storage.blob.blockblobservice#BlockBlobService.get_blob_properties', factory, table_transformer=transform_blob_output)
 cli_storage_data_plane_command('storage blob update', 'azure.storage.blob.blockblobservice#BlockBlobService.set_blob_properties', factory)
-cli_storage_data_plane_command('storage blob exists', 'azure.storage.blob.baseblobservice#BaseBlobService.exists', factory, transform=transform_storage_exists_output)
+cli_storage_data_plane_command('storage blob exists', 'azure.storage.blob.baseblobservice#BaseBlobService.exists', factory, transform=create_boolean_result_output_transformer('exists'))
 cli_storage_data_plane_command('storage blob download', 'azure.storage.blob.baseblobservice#BaseBlobService.get_blob_to_path', factory)
 cli_storage_data_plane_command('storage blob upload', 'azure.cli.command_modules.storage.custom#upload_blob', factory)
 cli_storage_data_plane_command('storage blob metadata show', 'azure.storage.blob.blockblobservice#BlockBlobService.get_blob_metadata', factory)
@@ -104,7 +104,7 @@ cli_storage_data_plane_command('storage share show', 'azure.storage.file.fileser
 cli_storage_data_plane_command('storage share update', 'azure.storage.file.fileservice#FileService.set_share_properties', factory)
 cli_storage_data_plane_command('storage share metadata show', 'azure.storage.file.fileservice#FileService.get_share_metadata', factory)
 cli_storage_data_plane_command('storage share metadata update', 'azure.storage.file.fileservice#FileService.set_share_metadata', factory)
-cli_storage_data_plane_command('storage share exists', 'azure.storage.file.fileservice#FileService.exists', factory, transform=transform_storage_exists_output)
+cli_storage_data_plane_command('storage share exists', 'azure.storage.file.fileservice#FileService.exists', factory, transform=create_boolean_result_output_transformer('exists'))
 cli_storage_data_plane_command('storage share policy create', 'azure.cli.command_modules.storage.custom#create_acl_policy', factory)
 cli_storage_data_plane_command('storage share policy delete', 'azure.cli.command_modules.storage.custom#delete_acl_policy', factory)
 cli_storage_data_plane_command('storage share policy show', 'azure.cli.command_modules.storage.custom#get_acl_policy', factory)
@@ -115,7 +115,7 @@ cli_storage_data_plane_command('storage share policy update', 'azure.cli.command
 cli_storage_data_plane_command('storage directory create', 'azure.storage.file.fileservice#FileService.create_directory', factory, transform=create_boolean_result_output_transformer('created'), table_transformer=transform_boolean_for_table)
 cli_storage_data_plane_command('storage directory delete', 'azure.storage.file.fileservice#FileService.delete_directory', factory, transform=create_boolean_result_output_transformer('deleted'), table_transformer=transform_boolean_for_table)
 cli_storage_data_plane_command('storage directory show', 'azure.storage.file.fileservice#FileService.get_directory_properties', factory, table_transformer=transform_file_output)
-cli_storage_data_plane_command('storage directory exists', 'azure.storage.file.fileservice#FileService.exists', factory, transform=transform_storage_exists_output)
+cli_storage_data_plane_command('storage directory exists', 'azure.storage.file.fileservice#FileService.exists', factory, transform=create_boolean_result_output_transformer('exists'))
 cli_storage_data_plane_command('storage directory metadata show', 'azure.storage.file.fileservice#FileService.get_directory_metadata', factory)
 cli_storage_data_plane_command('storage directory metadata update', 'azure.storage.file.fileservice#FileService.set_directory_metadata', factory)
 
@@ -127,7 +127,7 @@ cli_storage_data_plane_command('storage file url', 'azure.storage.file.fileservi
 cli_storage_data_plane_command('storage file generate-sas', 'azure.storage.file.fileservice#FileService.generate_file_shared_access_signature', factory)
 cli_storage_data_plane_command('storage file show', 'azure.storage.file.fileservice#FileService.get_file_properties', factory, table_transformer=transform_file_output)
 cli_storage_data_plane_command('storage file update', 'azure.storage.file.fileservice#FileService.set_file_properties', factory)
-cli_storage_data_plane_command('storage file exists', 'azure.storage.file.fileservice#FileService.exists', factory, transform=transform_storage_exists_output)
+cli_storage_data_plane_command('storage file exists', 'azure.storage.file.fileservice#FileService.exists', factory, transform=create_boolean_result_output_transformer('exists'))
 cli_storage_data_plane_command('storage file download', 'azure.storage.file.fileservice#FileService.get_file_to_path', factory)
 cli_storage_data_plane_command('storage file upload', 'azure.storage.file.fileservice#FileService.create_file_from_path', factory)
 cli_storage_data_plane_command('storage file metadata show', 'azure.storage.file.fileservice#FileService.get_file_metadata', factory)
@@ -153,7 +153,7 @@ cli_storage_data_plane_command('storage table generate-sas', 'azure.storage.tabl
 cli_storage_data_plane_command('storage table stats', 'azure.storage.table.tableservice#TableService.get_table_service_stats', factory)
 cli_storage_data_plane_command('storage table list', 'azure.storage.table.tableservice#TableService.list_tables', factory, transform=transform_storage_list_output)
 cli_storage_data_plane_command('storage table create', 'azure.storage.table.tableservice#TableService.create_table', factory, transform=create_boolean_result_output_transformer('created'), table_transformer=transform_boolean_for_table)
-cli_storage_data_plane_command('storage table exists', 'azure.storage.table.tableservice#TableService.exists', factory, transform=transform_storage_exists_output)
+cli_storage_data_plane_command('storage table exists', 'azure.storage.table.tableservice#TableService.exists', factory, transform=create_boolean_result_output_transformer('exists'))
 cli_storage_data_plane_command('storage table delete', 'azure.storage.table.tableservice#TableService.delete_table', factory, transform=create_boolean_result_output_transformer('deleted'), table_transformer=transform_boolean_for_table)
 cli_storage_data_plane_command('storage table policy create', 'azure.cli.command_modules.storage.custom#create_acl_policy', factory)
 cli_storage_data_plane_command('storage table policy delete', 'azure.cli.command_modules.storage.custom#delete_acl_policy', factory)
@@ -178,7 +178,7 @@ cli_storage_data_plane_command('storage queue create', 'azure.storage.queue.queu
 cli_storage_data_plane_command('storage queue delete', 'azure.storage.queue.queueservice#QueueService.delete_queue', factory, transform=create_boolean_result_output_transformer('deleted'), table_transformer=transform_boolean_for_table)
 cli_storage_data_plane_command('storage queue metadata show', 'azure.storage.queue.queueservice#QueueService.get_queue_metadata', factory)
 cli_storage_data_plane_command('storage queue metadata update', 'azure.storage.queue.queueservice#QueueService.set_queue_metadata', factory)
-cli_storage_data_plane_command('storage queue exists', 'azure.storage.queue.queueservice#QueueService.exists', factory, transform=transform_storage_exists_output)
+cli_storage_data_plane_command('storage queue exists', 'azure.storage.queue.queueservice#QueueService.exists', factory, transform=create_boolean_result_output_transformer('exists'))
 cli_storage_data_plane_command('storage queue policy create', 'azure.cli.command_modules.storage.custom#create_acl_policy', factory)
 cli_storage_data_plane_command('storage queue policy delete', 'azure.cli.command_modules.storage.custom#delete_acl_policy', factory)
 cli_storage_data_plane_command('storage queue policy show', 'azure.cli.command_modules.storage.custom#get_acl_policy', factory)

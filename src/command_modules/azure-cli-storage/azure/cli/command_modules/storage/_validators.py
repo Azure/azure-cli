@@ -702,14 +702,6 @@ def create_boolean_result_output_transformer(property_name):
     return _transformer
 
 
-def transform_storage_boolean_output(result):
-    return {'success': result}
-
-
-def transform_storage_exists_output(result):
-    return {'exists': result}
-
-
 def transform_storage_list_output(result):
     return list(result)
 
