@@ -20,7 +20,7 @@ from azure.cli.core._util import CLIError
 
 logger = _logging.get_az_logger(__name__)
 
-BASE_URL = az_config.get('container', 'service_url', fallback='https://westus.mindaro.microsoft.io')
+BASE_URL = az_config.get('container', 'service_url', fallback='https://api.mindaro.microsoft.io')
 SUBSCRIPTION_URL = "/subscriptions/{subscription_id}"
 RESOURCE_BASE_URL = SUBSCRIPTION_URL + "/resourceGroups/{resource_group_name}"
 CONTAINER_SERVICE_PROVIDER = "/providers/Microsoft.ContainerService"
