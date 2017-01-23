@@ -5,10 +5,8 @@
 
 FROM python:3.5.2-alpine
 
-ENV CLI_VERSION 0.1.6
-ENV CLI_DOWNLOAD_SHA256 bb4bd4694e044bf416941e3afdc505bde7d049bac2e66c8b3fe44c9cb3b57ff8
-ENV CLI_PATCH1_SHA256 d61ef29ace9bbdfef9a25dfbb1f475225bbca174263c8f863ee70f87d0a78bbe
-ENV CLI_PATCH2_SHA256 4b97507cb73b405c6fb2d701eb52ffa72ce547f791097fccadffc491ad6ae194
+ENV CLI_VERSION 0.1.7
+ENV CLI_DOWNLOAD_SHA256 9e29ac619cc43afa071e155601da2e3adf3095b1c40c28bed5d3d226052587ac
 
 # INSTALL DEPENDENCIES
 # pip wheel - required for CLI packaging
@@ -34,36 +32,16 @@ RUN src_zip=$(mktemp) \
         && echo "$CLI_DOWNLOAD_SHA256  $src_zip" | sha256sum -c - \
         && tar -xvzf $src_zip -C /cli-src \
         && rm $src_zip
-# Apply patches
-RUN patch1=$(mktemp) \
-        && wget https://azurecliprod.blob.core.windows.net/patches/patch_2_component_custom.diff -qO $patch1 \
-        && echo "$CLI_PATCH1_SHA256  $patch1" | sha256sum -c - \
-        && patch -p1 /cli-src/*/src/command_modules/azure-cli-component/azure/cli/command_modules/component/custom.py $patch1 \
-        && rm $patch1
-RUN patch2=$(mktemp) \
-        && wget https://azurecliprod.blob.core.windows.net/patches/patch_2_pkg_util.diff -qO $patch2 \
-        && echo "$CLI_PATCH2_SHA256  $patch2" | sha256sum -c - \
-        && patch -p1 /cli-src/*/src/azure-cli-core/azure/cli/core/_pkg_util.py $patch2 \
-        && rm $patch2
 # Build and install
 RUN /bin/bash -c 'cd /cli-src/*; tmp_pkg_dir=$(mktemp -d); \
     for d in src/azure-cli src/azure-cli-core src/azure-cli-nspkg src/command_modules/azure-cli-*/; \
     do cd $d; python setup.py bdist_wheel -d $tmp_pkg_dir; cd -; \
     done; \
     pip install azure-cli -f $tmp_pkg_dir;'
-RUN rm -rf /cli-src
-
 # Tab completion
-RUN echo -e "\
-_python_argcomplete() {\n\
-    local IFS='\v'\n\
-    COMPREPLY=( \$(IFS=\"\$IFS\"                   COMP_LINE=\"\$COMP_LINE\"                   COMP_POINT=\"\$COMP_POINT\"                   _ARGCOMPLETE_COMP_WORDBREAKS=\"\$COMP_WORDBREAKS\"                   _ARGCOMPLETE=1                   \"\$1\" 8>&1 9>&2 1>/dev/null 2>/dev/null) )\n\
-    if [[ \$? != 0 ]]; then\n\
-        unset COMPREPLY\n\
-    fi\n\
-}\n\
-complete -o nospace -F _python_argcomplete \"az\"\n\
-" > ~/.bashrc
+RUN cat /cli-src/*/az.completion >> ~/.bashrc
+
+RUN rm -rf /cli-src
 
 WORKDIR /
 
