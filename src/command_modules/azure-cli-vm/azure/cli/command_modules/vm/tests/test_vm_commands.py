@@ -158,19 +158,19 @@ class VMShowListSizesListIPAddressesScenarioTest(ResourceGroupVCRTestBase):
                      self.ip_allocation_method))
 
         result = self.cmd('vm show --resource-group {} --name {} -d'.format(self.resource_group, self.vm_name), checks=[
-                JMESPathCheck('type(@)', 'object'),
-                JMESPathCheck('name', self.vm_name),
-                JMESPathCheck('location', self.location),
-                JMESPathCheck('resourceGroup', self.resource_group),
-                JMESPathCheck('powerState', 'VM running')
+            JMESPathCheck('type(@)', 'object'),
+            JMESPathCheck('name', self.vm_name),
+            JMESPathCheck('location', self.location),
+            JMESPathCheck('resourceGroup', self.resource_group),
+            JMESPathCheck('powerState', 'VM running')
         ])
         self.assertEqual(4, len(result['publicIps'].split('.')))
 
         result = self.cmd('vm list --resource-group {} -d'.format(self.resource_group), checks=[
-                JMESPathCheck('[0].name', self.vm_name),
-                JMESPathCheck('[0].location', self.location),
-                JMESPathCheck('[0].resourceGroup', self.resource_group),
-                JMESPathCheck('[0].powerState', 'VM running')
+            JMESPathCheck('[0].name', self.vm_name),
+            JMESPathCheck('[0].location', self.location),
+            JMESPathCheck('[0].resourceGroup', self.resource_group),
+            JMESPathCheck('[0].powerState', 'VM running')
         ])
         self.assertEqual(4, len(result[0]['publicIps'].split('.')))
 
