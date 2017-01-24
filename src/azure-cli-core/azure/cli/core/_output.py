@@ -68,7 +68,9 @@ def format_table(obj):
         if obj.table_transformer and not obj.is_query_active:
             result = obj.table_transformer(result)
         result_list = result if isinstance(result, list) else [result]
-        return TableOutput.dump(result_list)
+        should_sort_keys = not obj.is_query_active and not obj.table_transformer
+        to = TableOutput(should_sort_keys)
+        return to.dump(result_list)
     except:
         logger.debug(traceback.format_exc())
         raise CLIError("Table output unavailable. "
@@ -136,15 +138,18 @@ class TableOutput(object):  # pylint: disable=too-few-public-methods
 
     SKIP_KEYS = ['id', 'type']
 
+    def __init__(self, should_sort_keys=False):
+        self.should_sort_keys = should_sort_keys
+
     @staticmethod
     def _capitalize_first_char(x):
         return x[0].upper() + x[1:] if x and len(x) > 0 else x
 
-    @staticmethod
-    def _auto_table_item(item):
+    def _auto_table_item(self, item):
         new_entry = OrderedDict()
         try:
-            for k in item.keys():
+            keys = sorted(item) if self.should_sort_keys and isinstance(item, dict) else item.keys()
+            for k in keys:
                 if k in TableOutput.SKIP_KEYS:
                     continue
                 if item[k] and not isinstance(item[k], (list, dict, set)):
@@ -158,19 +163,17 @@ class TableOutput(object):  # pylint: disable=too-few-public-methods
                 new_entry['Result'] = item
         return new_entry
 
-    @staticmethod
-    def _auto_table(result):
+    def _auto_table(self, result):
         if isinstance(result, list):
             new_result = []
             for item in result:
-                new_result.append(TableOutput._auto_table_item(item))
+                new_result.append(self._auto_table_item(item))
             return new_result
         else:
-            return TableOutput._auto_table_item(result)
+            return self._auto_table_item(result)
 
-    @staticmethod
-    def dump(data):
-        table_data = TableOutput._auto_table(data)
+    def dump(self, data):
+        table_data = self._auto_table(data)
         table_str = tabulate(table_data, headers="keys", tablefmt="simple") if table_data else ''
         if table_str == '\n':
             raise ValueError('Unable to extract fields for table.')
