@@ -450,8 +450,8 @@ register_path_argument('storage file upload', default_file_param='local_file_pat
 register_path_argument('storage file url')
 
 for item in ['container', 'share', 'table', 'queue']:
-    register_cli_argument('storage {} policy'.format(item), 'start', type=datetime_string_type, help='start UTC datetime (Y-m-d\'T\'H:M\'Z\'). Defaults to time of request.')
-    register_cli_argument('storage {} policy'.format(item), 'expiry', type=datetime_string_type, help='expiration UTC datetime in (Y-m-d\'T\'H:M\'Z\')')
+    register_cli_argument('storage {} policy'.format(item), 'start', type=datetime_string_type, help='start UTC datetime (Y-m-d\'T\'H:M:S\'Z\'). Defaults to time of request.')
+    register_cli_argument('storage {} policy'.format(item), 'expiry', type=datetime_string_type, help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
 
 register_cli_argument('storage table', 'table_name', table_name_type, options_list=('--name', '-n'))
 
