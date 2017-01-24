@@ -7,7 +7,6 @@
 
 from __future__ import print_function
 from sys import stderr
-from functools import wraps
 
 from azure.mgmt.storage.models import Kind
 from azure.storage.models import Logging, Metrics, CorsRule, RetentionPolicy
@@ -18,6 +17,7 @@ from azure.storage.file.models import FileProperties, DirectoryProperties
 from azure.storage.table import TableService
 from azure.storage.queue import QueueService
 
+from azure.cli.core.decorators import transfer_doc
 from azure.cli.core._util import CLIError
 
 from azure.cli.command_modules.storage._factory import \
@@ -37,7 +37,7 @@ def _update_progress(current, total):
 
 # CUSTOM METHODS
 
-@wraps(FileService.list_directories_and_files)
+@transfer_doc(FileService.list_directories_and_files)
 def list_share_files(client, share_name, directory_name=None, num_results=None, marker=None,
                      timeout=None, files_only=False):
     generator = client.list_directories_and_files(share_name, directory_name, num_results, marker,
@@ -48,7 +48,7 @@ def list_share_files(client, share_name, directory_name=None, num_results=None, 
         return generator
 
 
-@wraps(FileService.list_directories_and_files)
+@transfer_doc(FileService.list_directories_and_files)
 def list_share_directories(client, share_name, directory_name=None, num_results=None, marker=None,
                            timeout=None):
     generator = client.list_directories_and_files(share_name, directory_name, num_results, marker,
@@ -126,6 +126,7 @@ def set_storage_account_properties(
     return scf.storage_accounts.update(resource_group_name, account_name, params)
 
 
+@transfer_doc(BlockBlobService.create_blob_from_path)
 def upload_blob(  # pylint: disable=too-many-locals
         client, container_name, blob_name, file_path, blob_type=None,
         content_settings=None, metadata=None, validate_content=False, maxsize_condition=None,
@@ -178,9 +179,6 @@ def upload_blob(  # pylint: disable=too-many-locals
         'page': upload_block_blob  # same implementation
     }
     return type_func[blob_type]()
-
-
-upload_blob.__doc__ = BlockBlobService.create_blob_from_path.__doc__
 
 
 def _get_service_container_type(client):
