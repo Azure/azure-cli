@@ -228,7 +228,7 @@ def get_command_table():
                                      pkgutil.iter_modules(mods_ns_pkg.__path__)]
     except ImportError:
         pass
-    logger.info('Installed command modules %s', installed_command_modules)
+    logger.debug('Installed command modules %s', installed_command_modules)
     cumulative_elapsed_time = 0
     for mod in installed_command_modules:
         try:
