@@ -5,17 +5,10 @@
 
 # pylint: disable=line-too-long
 
-from azure.cli.core.commands import cli_command
 from azure.cli.command_modules.storage._command_type import cli_storage_data_plane_command
-
 from azure.cli.command_modules.storage._factory import \
     (storage_client_factory, blob_data_service_factory, file_data_service_factory,
      table_data_service_factory, queue_data_service_factory, cloud_storage_account_service_factory)
-from azure.cli.command_modules.storage._validators import \
-    (transform_acl_list_output, transform_cors_list_output, transform_entity_query_output,
-     transform_logging_list_output, transform_metrics_list_output,
-     transform_url, transform_storage_list_output, transform_container_permission_output,
-     create_boolean_result_output_transformer)
 from azure.cli.command_modules.storage._format import \
     (transform_container_list, transform_container_show,
      transform_blob_output,
@@ -24,6 +17,12 @@ from azure.cli.command_modules.storage._format import \
      transform_entity_show,
      transform_message_show,
      transform_boolean_for_table)
+from azure.cli.command_modules.storage._validators import \
+    (transform_acl_list_output, transform_cors_list_output, transform_entity_query_output,
+     transform_logging_list_output, transform_metrics_list_output,
+     transform_url, transform_storage_list_output, transform_container_permission_output,
+     create_boolean_result_output_transformer)
+from azure.cli.core.commands import cli_command
 
 # storage account commands
 factory = lambda kwargs: storage_client_factory().storage_accounts  # noqa: E731 lambda vs def
@@ -35,8 +34,8 @@ cli_command(__name__, 'storage account list', 'azure.cli.command_modules.storage
 cli_command(__name__, 'storage account show-usage', 'azure.cli.command_modules.storage.custom#show_storage_account_usage')
 cli_command(__name__, 'storage account update', 'azure.cli.command_modules.storage.custom#set_storage_account_properties')
 cli_command(__name__, 'storage account show-connection-string', 'azure.cli.command_modules.storage.custom#show_storage_account_connection_string')
-cli_command(__name__, 'storage account keys renew', 'azure.mgmt.storage.operations.storage_accounts_operations#StorageAccountsOperations.regenerate_key', factory)
-cli_command(__name__, 'storage account keys list', 'azure.mgmt.storage.operations.storage_accounts_operations#StorageAccountsOperations.list_keys', factory)
+cli_command(__name__, 'storage account keys renew', 'azure.mgmt.storage.operations.storage_accounts_operations#StorageAccountsOperations.regenerate_key', factory, transform=lambda x: x.keys)
+cli_command(__name__, 'storage account keys list', 'azure.mgmt.storage.operations.storage_accounts_operations#StorageAccountsOperations.list_keys', factory, transform=lambda x: x.keys)
 cli_storage_data_plane_command('storage account generate-sas', 'azure.storage.cloudstorageaccount#CloudStorageAccount.generate_shared_access_signature', cloud_storage_account_service_factory)
 
 # container commands

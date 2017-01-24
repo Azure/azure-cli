@@ -74,18 +74,18 @@ class StorageAccountScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck("contains(connectionString, '{}')".format(account), True)
         ])
         keys_result = s.cmd('storage account keys list -g {} -n {}'.format(rg, account))
-        key1 = keys_result['keys'][0]
-        key2 = keys_result['keys'][1]
+        key1 = keys_result[0]
+        key2 = keys_result[1]
         assert key1 and key2
         keys_result = s.cmd('storage account keys renew -g {} -n {} --key primary'.format(rg, account))
-        renewed_key1 = keys_result['keys'][0]
-        renewed_key2 = keys_result['keys'][1]
+        renewed_key1 = keys_result[0]
+        renewed_key2 = keys_result[1]
         assert key1 != renewed_key1
         assert key2 == renewed_key2
         key1 = renewed_key1
         keys_result = s.cmd('storage account keys renew -g {} -n {} --key secondary'.format(rg, account))
-        assert key1 == keys_result['keys'][0]
-        assert key2 != keys_result['keys'][1]
+        assert key1 == keys_result[0]
+        assert key2 != keys_result[1]
         s.cmd('storage account update -g {} -n {} --tags foo=bar cat'.format(rg, account),
               checks=JMESPathCheck('tags', {'cat': '', 'foo': 'bar'}))
         s.cmd('storage account update -g {} -n {} --tags'.format(rg, account),
