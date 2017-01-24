@@ -25,6 +25,11 @@ def get_location_completion_list(prefix, **kwargs):  # pylint: disable=unused-ar
     return [l.name for l in result]
 
 
+def file_type(path):
+    import os
+    return os.path.expanduser(path)
+
+
 def location_name_type(name):
     if ' ' in name:
         # if display name is provided, attempt to convert to short form name
