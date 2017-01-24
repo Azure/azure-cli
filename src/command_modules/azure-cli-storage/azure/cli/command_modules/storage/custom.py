@@ -38,21 +38,20 @@ def _update_progress(current, total):
 # CUSTOM METHODS
 
 @transfer_doc(FileService.list_directories_and_files)
-def list_share_files(client, share_name, directory_name=None, num_results=None, marker=None,
-                     timeout=None, files_only=False):
-    generator = client.list_directories_and_files(share_name, directory_name, num_results, marker,
-                                                  timeout)
-    if files_only:
+def list_share_files(client, share_name, directory_name=None, timeout=None,
+                     exclude_dir=False):
+    generator = client.list_directories_and_files(share_name, directory_name,
+                                                  timeout=timeout)
+    if exclude_dir:
         return list(f for f in generator if isinstance(f.properties, FileProperties))
     else:
         return generator
 
 
 @transfer_doc(FileService.list_directories_and_files)
-def list_share_directories(client, share_name, directory_name=None, num_results=None, marker=None,
-                           timeout=None):
-    generator = client.list_directories_and_files(share_name, directory_name, num_results, marker,
-                                                  timeout)
+def list_share_directories(client, share_name, directory_name=None, timeout=None):
+    generator = client.list_directories_and_files(share_name, directory_name,
+                                                  timeout=timeout)
     return list(f for f in generator if isinstance(f.properties, DirectoryProperties))
 
 

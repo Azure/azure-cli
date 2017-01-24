@@ -142,11 +142,6 @@ helps['storage directory metadata'] = """
 helps['storage directory list'] = """
     type: command
     short-summary: List directories in the specified share.
-    parameters:
-        - name: --num-results
-          type: integer
-          short-summary: Specifies the maximum number of directories to return. The default value is
-                         5000. The value cannot be less or equal to zero.
 """
 
 helps['storage entity'] = """
@@ -174,7 +169,7 @@ helps['storage file list'] = """
     type: command
     short-summary: List files and directories in the specified share.
     parameters:
-        - name: --files-only
+        - name: --exclude-dir
           type: bool
           short-summary: List only files in the specified share.
 """
