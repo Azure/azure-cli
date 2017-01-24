@@ -57,7 +57,7 @@ with ParametersContext(command='sql server create') as c:
     # - Both administrator_login and administrator_login_password are required for server creation.
     # However these two parameters are given default value in the create_or_update function
     # signature, therefore, they can't be automatically converted to requirement arguments.
-    c.expand('parameters', Server, group_name='Creating', patches={
+    c.expand('parameters', Server, group_name='Authentication', patches={
         'administrator_login': patch_arg_make_required,
         'administrator_login_password': patch_arg_make_required
     })
@@ -65,9 +65,9 @@ with ParametersContext(command='sql server create') as c:
 with ParametersContext(command='sql db create') as c:
     from azure.mgmt.sql.models.database import Database
 
-    c.expand('parameters', Database, group_name='Creating')
+    c.expand('parameters', Database)
 
 with ParametersContext(command='sql elastic-pools create') as c:
     from azure.mgmt.sql.models.elastic_pool import ElasticPool
 
-    c.expand('parameters', ElasticPool, group_name='Creating')
+    c.expand('parameters', ElasticPool)
