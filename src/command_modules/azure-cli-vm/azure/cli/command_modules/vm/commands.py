@@ -207,7 +207,7 @@ cli_command(__name__, 'vm list-usage', mgmt_path.format('usage_operations', 'Usa
 cli_command(__name__, 'vmss create', 'azure.cli.command_modules.vm.mgmt_vmss.lib.operations.vmss_operations#VmssOperations.create_or_update', cf_vmss_create,
             transform=DeploymentOutputLongRunningOperation('Starting vmss create'))
 
-cli_command(__name__, 'vmss delete', mgmt_path.format('virtual_machine_scale_sets_operations', 'VirtualMachineScaleSetsOperations', 'delete'), cf_vmss)
+cli_command(__name__, 'vmss delete', mgmt_path.format('virtual_machine_scale_sets_operations', 'VirtualMachineScaleSetsOperations', 'delete'), cf_vmss, confirmation=True)
 cli_command(__name__, 'vmss list-skus', mgmt_path.format('virtual_machine_scale_sets_operations', 'VirtualMachineScaleSetsOperations', 'list_skus'), cf_vmss)
 
 cli_command(__name__, 'vmss list-instances', mgmt_path.format('virtual_machine_scale_set_vms_operations', 'VirtualMachineScaleSetVMsOperations', 'list'), cf_vmss_vm)

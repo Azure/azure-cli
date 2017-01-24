@@ -687,7 +687,7 @@ class VMScaleSetDeleteScenarioTest(VCRTestBase):
         ])
         self.cmd('vmss deallocate --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
                  checks=NoneCheck())
-        self.cmd('vmss delete --resource-group {} --name {}'.format(self.resource_group, self.ss_name),
+        self.cmd('vmss delete --resource-group {} --name {} --force'.format(self.resource_group, self.ss_name),
                  checks=NoneCheck())
         self.cmd('vmss list --resource-group {}'.format(self.resource_group),
                  checks=NoneCheck())
