@@ -43,6 +43,13 @@ def normalize_newlines(str_to_normalize):
     return str_to_normalize.replace('\r\n', '\n')
 
 
+def truncate_text(str_to_shorten, width=70, placeholder=' [...]'):
+    if width <= 0:
+        raise ValueError('width must be greater than 0.')
+    s_len = width - len(placeholder)
+    return str_to_shorten[:s_len] + (str_to_shorten[s_len:] and placeholder)
+
+
 def show_version_info_exit(out_file):
     import platform
     from pip import get_installed_distributions
