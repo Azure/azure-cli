@@ -14,7 +14,7 @@ from azure.storage.models import Logging, Metrics, CorsRule, RetentionPolicy
 from azure.storage.blob import BlockBlobService
 from azure.storage.blob.baseblobservice import BaseBlobService
 from azure.storage.file import FileService
-from azure.storage.file.models import FileProperties
+from azure.storage.file.models import FileProperties, DirectoryProperties
 from azure.storage.table import TableService
 from azure.storage.queue import QueueService
 
@@ -46,6 +46,14 @@ def list_share_files(client, share_name, directory_name=None, num_results=None, 
         return list(f for f in generator if isinstance(f.properties, FileProperties))
     else:
         return generator
+
+
+@wraps(FileService.list_directories_and_files)
+def list_share_directories(client, share_name, directory_name=None, num_results=None, marker=None,
+                           timeout=None):
+    generator = client.list_directories_and_files(share_name, directory_name, num_results, marker,
+                                                  timeout)
+    return list(f for f in generator if isinstance(f.properties, DirectoryProperties))
 
 
 def list_storage_accounts(resource_group_name=None):

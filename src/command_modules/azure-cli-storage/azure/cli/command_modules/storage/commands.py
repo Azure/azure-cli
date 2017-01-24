@@ -115,6 +115,7 @@ cli_storage_data_plane_command('storage share policy update', 'azure.cli.command
 cli_storage_data_plane_command('storage directory create', 'azure.storage.file.fileservice#FileService.create_directory', factory, transform=create_boolean_result_output_transformer('created'), table_transformer=transform_boolean_for_table)
 cli_storage_data_plane_command('storage directory delete', 'azure.storage.file.fileservice#FileService.delete_directory', factory, transform=create_boolean_result_output_transformer('deleted'), table_transformer=transform_boolean_for_table)
 cli_storage_data_plane_command('storage directory show', 'azure.storage.file.fileservice#FileService.get_directory_properties', factory, table_transformer=transform_file_output)
+cli_storage_data_plane_command('storage directory list', 'azure.cli.command_modules.storage.custom#list_share_directories', factory, table_transformer=transform_file_output)
 cli_storage_data_plane_command('storage directory exists', 'azure.storage.file.fileservice#FileService.exists', factory, transform=create_boolean_result_output_transformer('exists'))
 cli_storage_data_plane_command('storage directory metadata show', 'azure.storage.file.fileservice#FileService.get_directory_metadata', factory)
 cli_storage_data_plane_command('storage directory metadata update', 'azure.storage.file.fileservice#FileService.set_directory_metadata', factory)

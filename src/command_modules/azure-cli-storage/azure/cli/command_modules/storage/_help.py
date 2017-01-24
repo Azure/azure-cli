@@ -139,6 +139,16 @@ helps['storage directory metadata'] = """
     short-summary: Manage file storage directory metadata.
 """
 
+helps['storage directory list'] = """
+    type: command
+    short-summary: List directories in the specified share.
+    parameters:
+        - name: --num-results
+          type: integer
+          short-summary: Specifies the maximum number of directories to return. The default value is
+                         5000. The value cannot be less or equal to zero.
+"""
+
 helps['storage entity'] = """
     type: group
     short-summary: Manage table storage entities.
