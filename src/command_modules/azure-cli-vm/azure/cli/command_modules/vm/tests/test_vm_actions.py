@@ -8,11 +8,13 @@ import tempfile
 import unittest
 import mock
 
-from azure.cli.command_modules.vm._actions import (_handle_container_ssh_file,
-                                                   _is_valid_ssh_rsa_public_key)
+from azure.cli.core._util import CLIError
+
+from azure.cli.command_modules.vm._validators import (_validator_ssh_key,
+                                                      _is_valid_ssh_rsa_public_key)
 
 
-class TestAcsActions(unittest.TestCase):
+class TestActions(unittest.TestCase):
     def test_generate_specfied_ssh_key_files(self):
         _, private_key_file = tempfile.mkstemp()
         public_key_file = private_key_file + '.pub'
@@ -21,7 +23,7 @@ class TestAcsActions(unittest.TestCase):
         args.generate_ssh_keys = True
 
         # 1 verify we generate key files if not existing
-        _handle_container_ssh_file(command='acs create', args=args)
+        _validator_ssh_key(args)
 
         generated_public_key_string = args.ssh_key_value
         self.assertTrue(bool(args.ssh_key_value))
@@ -33,7 +35,7 @@ class TestAcsActions(unittest.TestCase):
         args2 = mock.MagicMock()
         args2.ssh_key_value = generated_public_key_string
         args2.generate_ssh_keys = False
-        _handle_container_ssh_file(command='acs create', args=args2)
+        _validator_ssh_key(args2)
         # we didn't regenerate
         self.assertEqual(generated_public_key_string, args.ssh_key_value)
 
@@ -43,9 +45,8 @@ class TestAcsActions(unittest.TestCase):
         args3 = mock.MagicMock()
         args3.ssh_key_value = public_key_file2
         args3.generate_ssh_keys = False
-        _handle_container_ssh_file(command='acs create', args=args3)
-        # still a file name
-        self.assertEqual(args3.ssh_key_value, public_key_file2)
+        with self.assertRaises(CLIError):
+            _validator_ssh_key(args3)
 
         # 4 verify file naming if the pub file doesn't end with .pub
         _, public_key_file4 = tempfile.mkstemp()
@@ -53,6 +54,6 @@ class TestAcsActions(unittest.TestCase):
         args4 = mock.MagicMock()
         args4.ssh_key_value = public_key_file4
         args4.generate_ssh_keys = True
-        _handle_container_ssh_file(command='acs create', args=args4)
+        _validator_ssh_key(args4)
         self.assertTrue(os.path.isfile(public_key_file4 + '.private'))
         self.assertTrue(os.path.isfile(public_key_file4))
