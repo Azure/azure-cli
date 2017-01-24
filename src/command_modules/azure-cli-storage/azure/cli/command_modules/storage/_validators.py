@@ -554,15 +554,24 @@ def process_metric_update_namespace(namespace):
 
 def datetime_string_type(string):
     ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M:%S\'Z\'' or
-     '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
-    date_format = '%Y-%m-%dT%H:%M:%SZ' if len(string) is 20 else '%Y-%m-%dT%H:%MZ'
-    return datetime.strptime(string, date_format).strftime(date_format)
-
+    '%Y-%m-%d\'T\'%H:%M\'Z\'' or %Y-%m-%d\'T\'%H:%M\'Z\'' but pads it into
+    the first format. '''
+    return datetime_type(string).strftime('%Y-%m-%dT%H:%M:%SZ')          
+        
 def datetime_type(string):
     ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M:%S\'Z\'' or
-    '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
-    date_format = '%Y-%m-%dT%H:%M:%SZ' if len(string) is 20 else '%Y-%m-%dT%H:%MZ'
-    return datetime.strptime(string, date_format)
+    '%Y-%m-%d\'T\'%H:%M\'Z\'' or %Y-%m-%d\'T\'%H:%M\'Z\'' but pads it into
+    the first format. '''
+    try:
+        date_format = '%Y-%m-%dT%H:%M:%SZ'
+        return datetime.strptime(string, date_format)
+    except ValueError:
+        try:
+            padded_string = string[:-1] + ":00Z"
+            return datetime.strptime(padded_string, date_format)
+        except ValueError:
+            padded_string = string[:-1] + ":00:00Z"
+            return datetime.strptime(padded_string, date_format)     
 
 def ipv4_range_type(string):
     ''' Validates an IPv4 address or address range. '''

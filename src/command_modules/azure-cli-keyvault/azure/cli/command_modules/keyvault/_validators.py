@@ -197,9 +197,19 @@ def base64_encoded_certificate_type(string):
     return cert_data
 
 def datetime_type(string):
-    ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M:%S\'Z\''
-        or  '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
-    date_format = '%Y-%m-%dT%H:%M:%SZ' if len(string) is 20 else '%Y-%m-%dT%H:%MZ'
+    ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M:%S\'Z\'' or
+    '%Y-%m-%d\'T\'%H:%M\'Z\'' or %Y-%m-%d\'T\'%H:%M\'Z\'' but pads it into
+    the first format. '''
+    try:
+        date_format = '%Y-%m-%dT%H:%M:%SZ'
+        return datetime.strptime(string, date_format)
+    except ValueError:
+        try:
+            padded_string = string[:-1] + ":00Z"
+            return datetime.strptime(padded_string, date_format)
+        except ValueError:
+            padded_string = string[:-1] + ":00:00Z"
+            return datetime.strptime(padded_string, date_format)   
     return datetime.strptime(string, date_format)
 
 def vault_base_url_type(name):
