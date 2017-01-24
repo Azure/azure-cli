@@ -71,7 +71,8 @@ def transform_file_output(result):
     more clearly distinguishes between files and directories. """
     new_result = []
 
-    for item in result.get('items', [result]):
+    iterable = result if isinstance(result, list) else result.get('items', result)
+    for item in iterable:
         new_entry = OrderedDict()
         item_name = item['name']
         try:

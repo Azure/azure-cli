@@ -139,6 +139,11 @@ helps['storage directory metadata'] = """
     short-summary: Manage file storage directory metadata.
 """
 
+helps['storage directory list'] = """
+    type: command
+    short-summary: List directories in the specified share.
+"""
+
 helps['storage entity'] = """
     type: group
     short-summary: Manage table storage entities.
@@ -163,6 +168,10 @@ helps['storage file exists'] = """
 helps['storage file list'] = """
     type: command
     short-summary: List files and directories in the specified share.
+    parameters:
+        - name: --exclude-dir
+          type: bool
+          short-summary: List only files in the specified share.
 """
 
 helps['storage file copy'] = """
