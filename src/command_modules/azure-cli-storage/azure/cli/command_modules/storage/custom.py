@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=no-self-use,too-many-arguments
+# pylint: disable=no-self-use,too-many-arguments,line-too-long
 
 from __future__ import print_function
 from sys import stderr
@@ -13,9 +13,11 @@ from azure.storage.models import Logging, Metrics, CorsRule, RetentionPolicy
 from azure.storage.blob import BlockBlobService
 from azure.storage.blob.baseblobservice import BaseBlobService
 from azure.storage.file import FileService
+from azure.storage.file.models import FileProperties, DirectoryProperties
 from azure.storage.table import TableService
 from azure.storage.queue import QueueService
 
+from azure.cli.core.decorators import transfer_doc
 from azure.cli.core._util import CLIError
 
 from azure.cli.command_modules.storage._factory import \
@@ -32,7 +34,25 @@ def _update_progress(current, total):
         if current == total:
             print('', file=stderr)
 
+
 # CUSTOM METHODS
+
+@transfer_doc(FileService.list_directories_and_files)
+def list_share_files(client, share_name, directory_name=None, timeout=None,
+                     exclude_dir=False):
+    generator = client.list_directories_and_files(share_name, directory_name,
+                                                  timeout=timeout)
+    if exclude_dir:
+        return list(f for f in generator if isinstance(f.properties, FileProperties))
+    else:
+        return generator
+
+
+@transfer_doc(FileService.list_directories_and_files)
+def list_share_directories(client, share_name, directory_name=None, timeout=None):
+    generator = client.list_directories_and_files(share_name, directory_name,
+                                                  timeout=timeout)
+    return list(f for f in generator if isinstance(f.properties, DirectoryProperties))
 
 
 def list_storage_accounts(resource_group_name=None):
@@ -49,8 +69,6 @@ def show_storage_account_usage():
     """ Show the current count and limit of the storage accounts under the subscription. """
     scf = storage_client_factory()
     return next((x for x in scf.usage.list() if x.name.value == 'StorageAccounts'), None)  # pylint: disable=no-member
-
-# pylint: disable=line-too-long
 
 
 def show_storage_account_connection_string(
@@ -107,6 +125,7 @@ def set_storage_account_properties(
     return scf.storage_accounts.update(resource_group_name, account_name, params)
 
 
+@transfer_doc(BlockBlobService.create_blob_from_path)
 def upload_blob(  # pylint: disable=too-many-locals
         client, container_name, blob_name, file_path, blob_type=None,
         content_settings=None, metadata=None, validate_content=False, maxsize_condition=None,
@@ -159,9 +178,6 @@ def upload_blob(  # pylint: disable=too-many-locals
         'page': upload_block_blob  # same implementation
     }
     return type_func[blob_type]()
-
-
-upload_blob.__doc__ = BlockBlobService.create_blob_from_path.__doc__
 
 
 def _get_service_container_type(client):
