@@ -19,7 +19,7 @@ from azure.cli.core.commands.arm import is_valid_resource_id
 from azure.cli.core.commands.template_create import register_folded_cli_argument
 from azure.cli.core.commands.parameters import \
     (location_type, get_location_completion_list, get_one_of_subscription_locations,
-     get_resource_name_completion_list, tags_type, enum_choice_list, ignore_type)
+     get_resource_name_completion_list, tags_type, file_type, enum_choice_list, ignore_type)
 from azure.cli.command_modules.vm._actions import \
     (VMImageFieldAction, VMSSHFieldAction, VMDNSNameAction, load_images_from_aliases_doc,
      get_vm_sizes, PrivateIpAction, _resource_not_exists)
@@ -128,8 +128,8 @@ register_cli_argument('vmss extension image', 'version', help='Extension version
 
 for scope in ['vm diagnostics', 'vmss diagnostics']:
     register_cli_argument(scope, 'version', help='version of the diagnostics extension. Will use the latest if not specfied')
-    register_cli_argument(scope, 'settings', help='json string or a file path, which defines data to be collected.')
-    register_cli_argument(scope, 'protected_settings', help='json string or a file path containing private configurations such as storage account keys, etc.')
+    register_cli_argument(scope, 'settings', help='json string or a file path, which defines data to be collected.', type=file_type)
+    register_cli_argument(scope, 'protected_settings', help='json string or a file path containing private configurations such as storage account keys, etc.', type=file_type)
 
 for scope in ['vm', 'vmss']:
     register_cli_argument(scope, 'no_auto_upgrade', action='store_true', help='by doing this, extension system will not pick the highest minor version for the specified version number, and will not auto update to the latest build/revision number on any scale set updates in future.')
@@ -194,7 +194,7 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'subnet_name', help='The subnet name.  Creates if creating a new VNet, references if referencing an existing VNet.')
     register_cli_argument(scope, 'admin_password', help='Password for the Virtual Machine if Authentication Type is Password.')
     register_cli_argument(scope, 'ssh_key_value', action=VMSSHFieldAction)
-    register_cli_argument(scope, 'ssh_dest_key_path', completer=FilesCompleter())
+    register_cli_argument(scope, 'ssh_dest_key_path', completer=FilesCompleter(), type=file_type)
     register_cli_argument(scope, 'dns_name_for_public_ip', action=VMDNSNameAction, options_list=('--public-ip-address-dns-name',), help='Globally unique DNS Name for the Public IP.')
     register_cli_argument(scope, 'authentication_type', authentication_type)
     register_folded_cli_argument(scope, 'availability_set', 'Microsoft.Compute/availabilitySets', new_flag_value=None, default_value_flag='none')
