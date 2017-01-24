@@ -6,9 +6,8 @@
 from azure.cli.core.commands import cli_command
 
 from ._client_factory import batch_client_factory, batch_data_service_factory
-from ._command_type import cli_data_plane_command, cli_custom_data_plane_command
-from ._validators import (
-    validate_pool_settings)
+from ._command_type import cli_data_plane_command
+from ._validators import validate_pool_settings
 
 data_path = 'azure.batch.operations.{}_operations#{}'
 custom_path = 'azure.cli.command_modules.batch.custom#{}'
@@ -22,7 +21,7 @@ cli_command(__name__, 'batch account list', custom_path.format('list_accounts'),
 cli_command(__name__, 'batch account show', mgmt_path.format('batch_account', 'BatchAccountOperations.get'), factory)
 cli_command(__name__, 'batch account create', custom_path.format('create_account'), factory)
 cli_command(__name__, 'batch account set', custom_path.format('update_account'), factory)
-cli_command(__name__, 'batch account delete', mgmt_path.format('batch_account', 'BatchAccountOperations.delete'), factory)
+cli_command(__name__, 'batch account delete', mgmt_path.format('batch_account', 'BatchAccountOperations.delete'), factory, confirmation=True)
 cli_command(__name__, 'batch account autostorage-keys sync', mgmt_path.format('batch_account', 'BatchAccountOperations.synchronize_auto_storage_keys'), factory)
 
 cli_command(__name__, 'batch account keys list', mgmt_path.format('batch_account', 'BatchAccountOperations.get_keys'), factory)
@@ -54,8 +53,8 @@ factory = lambda args: batch_data_service_factory(args).account
 cli_data_plane_command('batch pool node-agent-skus list', data_path.format('account', 'AccountOperations.list_node_agent_skus'), factory)
 
 factory = lambda args: batch_data_service_factory(args).certificate
-cli_custom_data_plane_command('batch certificate create', custom_path.format('create_certificate'), factory)
-cli_custom_data_plane_command('batch certificate delete', custom_path.format('delete_certificate'), factory)
+cli_command(__name__, 'batch certificate create', custom_path.format('create_certificate'), factory)
+cli_command(__name__, 'batch certificate delete', custom_path.format('delete_certificate'), factory, confirmation=True)
 cli_data_plane_command('batch certificate show', data_path.format('certificate', 'CertificateOperations.get'), factory)
 cli_data_plane_command('batch certificate list', data_path.format('certificate', 'CertificateOperations.list'), factory)
 
@@ -67,11 +66,11 @@ cli_data_plane_command('batch pool list', data_path.format('pool', 'PoolOperatio
 cli_data_plane_command('batch pool delete', data_path.format('pool', 'PoolOperations.delete'), factory)
 cli_data_plane_command('batch pool show', data_path.format('pool', 'PoolOperations.get'), factory)
 cli_data_plane_command('batch pool set', data_path.format('pool', 'PoolOperations.patch'), factory)
-cli_data_plane_command('batch pool reset', data_path.format('pool', 'PoolOperations.update_properties'), factory)
+cli_command(__name__, 'batch pool reset', custom_path.format('update_pool'), factory)
 cli_data_plane_command('batch pool autoscale disable', data_path.format('pool', 'PoolOperations.disable_auto_scale'), factory)
 cli_data_plane_command('batch pool autoscale enable', data_path.format('pool', 'PoolOperations.enable_auto_scale'), factory)
 cli_data_plane_command('batch pool autoscale evaluate', data_path.format('pool', 'PoolOperations.evaluate_auto_scale'), factory)
-cli_custom_data_plane_command('batch pool resize', custom_path.format('resize_pool'), factory)
+cli_command(__name__, 'batch pool resize', custom_path.format('resize_pool'), factory)
 cli_data_plane_command('batch pool os upgrade', data_path.format('pool', 'PoolOperations.upgrade_os'), factory)
 cli_data_plane_command('batch node delete', data_path.format('pool', 'PoolOperations.remove_nodes'), factory)
 
@@ -82,7 +81,7 @@ cli_data_plane_command('batch job delete', data_path.format('job', 'JobOperation
 cli_data_plane_command('batch job show', data_path.format('job', 'JobOperations.get'), factory)
 cli_data_plane_command('batch job set', data_path.format('job', 'JobOperations.patch'), factory)
 cli_data_plane_command('batch job reset', data_path.format('job', 'JobOperations.update'), factory)
-cli_custom_data_plane_command('batch job list', custom_path.format('list_job'), factory)
+cli_command(__name__, 'batch job list', custom_path.format('list_job'), factory)
 cli_data_plane_command('batch job disable', data_path.format('job', 'JobOperations.disable'), factory)
 cli_data_plane_command('batch job enable', data_path.format('job', 'JobOperations.enable'), factory)
 cli_data_plane_command('batch job stop', data_path.format('job', 'JobOperations.terminate'), factory)
@@ -100,7 +99,7 @@ cli_data_plane_command('batch job-schedule stop', data_path.format('job_schedule
 cli_data_plane_command('batch job-schedule list', data_path.format('job_schedule', 'JobScheduleOperations.list'), factory)
 
 factory = lambda args: batch_data_service_factory(args).task
-cli_custom_data_plane_command('batch task create', custom_path.format('create_task'), factory)
+cli_command(__name__, 'batch task create', custom_path.format('create_task'), factory)
 cli_data_plane_command('batch task list', data_path.format('task', 'TaskOperations.list'), factory)
 cli_data_plane_command('batch task delete', data_path.format('task', 'TaskOperations.delete'), factory)
 cli_data_plane_command('batch task show', data_path.format('task', 'TaskOperations.get'), factory)

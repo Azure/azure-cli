@@ -14,7 +14,9 @@ from azure.cli.core.commands.parameters import \
      get_resource_name_completion_list, enum_choice_list, file_type)
 
 from ._validators import \
-    (application_enabled, datetime_format, storage_account_id, application_package_reference_format)
+    (application_enabled, datetime_format, storage_account_id, application_package_reference_format,
+     validate_client_parameters, validate_pool_resize_parameters, metadata_item_format,
+     certificate_reference_format)
 
 # pylint: disable=line-too-long
 # ARGUMENT DEFINITIONS
@@ -43,7 +45,13 @@ register_cli_argument('batch pool resize', 'if_unmodified_since', help='Specify 
 register_cli_argument('batch pool resize', 'if_match', help='An ETag is specified. Specify this header to perform the operation only if the resource\'s ETag is an exact match as specified', arg_group='Pre-condition')
 register_cli_argument('batch pool resize', 'if_none_match', help='An ETag is specified. Specify this header to perform the operation only if the resource\'s ETag does not match the specified ETag.', arg_group='Pre-condition')
 register_cli_argument('batch pool resize', 'pool_id', help='The ID of the pool.')
-register_cli_argument('batch pool resize', 'abort', action='store_true', help='Stop the pool resize operation.')
+register_cli_argument('batch pool resize', 'abort', action='store_true', help='Stop the pool resize operation.', validator=validate_pool_resize_parameters)
+
+register_cli_argument('batch pool reset', 'json_file', help='The file containing PoolUpdatePropertiesParameter object in JSON format, if this parameter is specified, all other parameters are ignored.', completer=FilesCompleter())
+register_cli_argument('batch pool reset', 'pool_id', help='The ID of the pool to be updated.')
+register_cli_argument('batch pool reset', 'application_package_references', nargs='+', type=application_package_reference_format)
+register_cli_argument('batch pool reset', 'certificate_references', nargs='+', type=certificate_reference_format)
+register_cli_argument('batch pool reset', 'metadata', nargs='+', type=metadata_item_format)
 
 register_cli_argument('batch job list', 'filter', help=' An OData $filter clause.', arg_group='OData')
 register_cli_argument('batch job list', 'select', help=' An OData $select clause.', arg_group='OData')
@@ -54,9 +62,18 @@ register_cli_argument('batch certificate', 'thumbprint', help='The certificate t
 register_cli_argument('batch certificate', 'thumbprint_algorithm', help='The certificate thumbprint algorithm.')
 register_cli_argument('batch certificate', 'password', help='The password to access the certificate\'s private key.')
 register_cli_argument('batch certificate', 'cert_file', help='The certificate file: cer file or pfx file.', completer=FilesCompleter())
-register_cli_argument('batch certificate delete', 'abort', action='store_true', help='Cancel the certificate deletion operation.')
+register_cli_argument('batch certificate delete', 'abort', action='store_true', help='Cancel the failed certificate deletion operation.')
 
-register_cli_argument('batch task add', 'json_file', help='The file containing the task(s) to create in JSON format, if this parameter is specified, all other parameters are ignored.', completer=FilesCompleter())
-register_cli_argument('batch task add', 'application_package_references', nargs='+', help='The space separated list of ids specifying the application packages to be installed.', type=application_package_reference_format)
-register_cli_argument('batch task add', 'job_id', help='The ID of the job containing the task.')
-register_cli_argument('batch task add', 'task_id', help='The ID of the task.')
+register_cli_argument('batch task create', 'json_file', help='The file containing the task(s) to create in JSON format, if this parameter is specified, all other parameters are ignored.', completer=FilesCompleter())
+register_cli_argument('batch task create', 'application_package_references', nargs='+', help='The space separated list of ids specifying the application packages to be installed.', type=application_package_reference_format)
+register_cli_argument('batch task create', 'job_id', help='The ID of the job containing the task.')
+register_cli_argument('batch task create', 'task_id', help='The ID of the task.')
+
+for item in ['batch certificate delete', 'batch certificate create', 'batch pool resize', 'batch pool reset', 'batch job list', 'batch task create']:
+    register_extra_cli_argument(item, 'account_name', arg_group='Batch Account',
+                                validator=validate_client_parameters,
+                                help='Batch account name. Environment variable: AZURE_BATCH_ACCOUNT')
+    register_extra_cli_argument(item, 'account_key', arg_group='Batch Account',
+                                help='Batch account key. Must be used in conjunction with Batch account name and endpoint. Environment variable: AZURE_BATCH_ACCESS_KEY')
+    register_extra_cli_argument(item, 'account_endpoint', arg_group='Batch Account',
+                                help='Batch service endpoint. Environment variable: AZURE_BATCH_ENDPOINT')

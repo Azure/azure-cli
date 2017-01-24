@@ -709,24 +709,3 @@ def cli_data_plane_command(name, operation, client_factory, transform=None, #pyl
                              help='Batch service endpoint. Environment variable: '
                              'AZURE_BATCH_ENDPOINT')
     command_table[command.cmd.name] = command.cmd
-
-
-def cli_custom_data_plane_command(name, operation, client_factory, transform=None,
-                                  table_transformer=None):
-    """ Registers an Azure CLI Batch Data Plane custom command. """
-
-    command = create_command(__name__, name, operation,
-                             transform, table_transformer, client_factory)
-    # add parameters required to create a batch client
-    group_name = 'Batch Account'
-    command.add_argument('account_name', '--account-name', required=False, default=None,
-                         validator=validators.validate_client_parameters, arg_group=group_name,
-                         help='Batch account name. Environment variable: AZURE_BATCH_ACCOUNT')
-    command.add_argument('account_key', '--account-key', required=False, default=None,
-                         arg_group=group_name,
-                         help='Batch account key. Must be used in conjunction with Batch '
-                         'account name and endpoint. Environment variable: AZURE_BATCH_ACCESS_KEY')
-    command.add_argument('account_endpoint', '--account-endpoint', required=False, default=None,
-                         arg_group=group_name,
-                         help='Batch service endpoint. Environment variable: AZURE_BATCH_ENDPOINT')
-    command_table[command.name] = command

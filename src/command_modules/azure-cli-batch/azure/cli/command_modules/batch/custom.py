@@ -18,7 +18,8 @@ from azure.mgmt.batch.operations import (ApplicationPackageOperations)
 
 from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, PoolResizeParameter,
                                 PoolResizeOptions, JobListOptions, JobListFromJobScheduleOptions,
-                                TaskAddParameter, TaskConstraints)
+                                TaskAddParameter, TaskConstraints, PoolUpdatePropertiesParameter,
+                                StartTask)
 
 from azure.storage.blob import BlockBlobService
 
@@ -176,6 +177,41 @@ def resize_pool(client, pool_id, target_dedicated=None, #pylint:disable=too-many
         return client.resize(pool_id, param, pool_resize_options=resize_option)
 
 resize_pool.__doc__ = PoolResizeParameter.__doc__
+
+
+def update_pool(client, pool_id, json_file=None, command_line=None, #pylint:disable=too-many-arguments, W0613
+                certificate_references=None, application_package_references=None, metadata=None):
+    if json_file:
+        with open(json_file) as f:
+            json_obj = json.load(f)
+            param = client._deserialize('PoolUpdatePropertiesParameter', json_obj) #pylint:disable=W0212
+            if param is None:
+                raise ValueError("JSON file '{}' is not in correct format.".format(json_file))
+            if param.certificate_references is None:
+                param.certificate_references = []
+            if param.metadata is None:
+                param.metadata = []
+            if param.application_package_references is None:
+                param.application_package_references = []
+    else:
+        if certificate_references is None:
+            certificate_references = []
+        if metadata is None:
+            metadata = []
+        if application_package_references is None:
+            application_package_references = []
+        param = PoolUpdatePropertiesParameter(pool_id,
+                                              certificate_references,
+                                              application_package_references,
+                                              metadata)
+
+        if command_line:
+            param.start_task = StartTask(command_line)
+
+    client.update_properties(pool_id=pool_id, pool_update_properties_parameter=param)
+    return client.get(pool_id)
+
+update_pool.__doc__ = PoolUpdatePropertiesParameter.__doc__ + "\n" + StartTask.__doc__
 
 
 def list_job(client, job_schedule_id=None, filter=None, select=None, expand=None): #pylint:disable=W0622

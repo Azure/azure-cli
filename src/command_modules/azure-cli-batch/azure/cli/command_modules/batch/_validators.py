@@ -79,6 +79,11 @@ def application_package_reference_format(value):
     return package
 
 
+def certificate_reference_format(value):
+    """Validate listed certificate reference arguments"""
+    cert = {'thumbprint': value, 'thumbprint_algorithm': 'sha1'}
+    return cert
+
 # COMMAND NAMESPACE VALIDATORS
 
 def validate_required_parameter(ns, parser):
@@ -202,3 +207,8 @@ def validate_pool_settings(ns, parser):
                        "Please swap for the IaaS equivalent: Standard_A1 (small), Standard_A2 "
                        "(medium), Standard_A3 (large), or Standard_A4 (extra large).")
             raise ValueError(message)
+
+def validate_pool_resize_parameters(namespace):
+    if not namespace.abort:
+        if not namespace.target_dedicated:
+            raise ValueError("The target-dedicated parameter is required to resize the pool.")

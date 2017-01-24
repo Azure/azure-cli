@@ -12,6 +12,7 @@ class BatchCertificateScenarioTest(VCRTestBase):
     def __init__(self, test_method):
         super(BatchCertificateScenarioTest, self).__init__(__file__, test_method)
         self.create_cert_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                                  'data',
                                                   'batchtest.cer')
         self.cert_thumbprint = '59833fd835f827e9ec693a4c82435a6360cc6271'
         self.account_name = 'test1'
@@ -41,7 +42,7 @@ class BatchCertificateScenarioTest(VCRTestBase):
             JMESPathCheck('[0].thumbprint', self.cert_thumbprint),
         ])
 
-        self.cmd("batch certificate delete --thumbprint {} --thumbprint-algorithm sha1".
+        self.cmd("batch certificate delete --thumbprint {} --thumbprint-algorithm sha1 --force".
                  format(self.cert_thumbprint))
 
         self.cmd('batch certificate show --thumbprint {} --thumbprint-algorithm sha1'.
