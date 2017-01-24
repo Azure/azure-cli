@@ -134,7 +134,7 @@ class OutputProducer(object):  # pylint: disable=too-few-public-methods
 
 class TableOutput(object):  # pylint: disable=too-few-public-methods
 
-    SKIP_KEYS = ['id', 'type']
+    SKIP_KEYS = ['id', 'type', 'etag']
 
     @staticmethod
     def _capitalize_first_char(x):
