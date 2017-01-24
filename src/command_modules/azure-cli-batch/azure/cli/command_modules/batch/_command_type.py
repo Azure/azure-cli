@@ -14,7 +14,6 @@ from argcomplete.completers import (
 
 from . import _validators as validators
 from azure.cli.core.commands import (
-    create_command,
     command_table,
     command_module_map,
     CliCommand,
@@ -262,6 +261,7 @@ class BatchArgumentTree(object):
         :param dict kwargs: The request kwargs
         :param dict json_obj: The loaded JSON content
         """
+        #TODO: catch exception
         kwargs[self._request_param['name']] = client._deserialize( #pylint:disable=W0212
             self._request_param['model'], json_obj)
         if kwargs[self._request_param['name']] is None:

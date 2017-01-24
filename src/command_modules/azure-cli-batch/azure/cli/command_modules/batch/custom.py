@@ -10,6 +10,7 @@ except ImportError:
 import json
 import base64
 
+from msrest.exceptions import DeserializationError
 from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.batch.models import (BatchAccountCreateParameters,
                                      AutoStorageBaseProperties,
@@ -184,9 +185,14 @@ def update_pool(client, pool_id, json_file=None, command_line=None, #pylint:disa
     if json_file:
         with open(json_file) as f:
             json_obj = json.load(f)
-            param = client._deserialize('PoolUpdatePropertiesParameter', json_obj) #pylint:disable=W0212
-            if param is None:
+            param = None
+            try:
+                param = client._deserialize('PoolUpdatePropertiesParameter', json_obj) #pylint:disable=W0212
+            except DeserializationError:
+                pass
+            if not param:
                 raise ValueError("JSON file '{}' is not in correct format.".format(json_file))
+
             if param.certificate_references is None:
                 param.certificate_references = []
             if param.metadata is None:
@@ -200,8 +206,7 @@ def update_pool(client, pool_id, json_file=None, command_line=None, #pylint:disa
             metadata = []
         if application_package_references is None:
             application_package_references = []
-        param = PoolUpdatePropertiesParameter(pool_id,
-                                              certificate_references,
+        param = PoolUpdatePropertiesParameter(certificate_references,
                                               application_package_references,
                                               metadata)
 
@@ -232,14 +237,17 @@ def create_task(client, job_id, json_file=None, task_id=None, command_line=None,
                 resource_files=None, environment_settings=None, affinity_info=None,
                 max_wall_clock_time=None, retention_time=None, max_task_retry_count=None,
                 run_elevated=None, application_package_references=None):
+    task = None
     if json_file:
         with open(json_file) as f:
             json_obj = json.load(f)
-            task = client._deserialize('TaskAddParameter', json_obj) #pylint:disable=W0212
-            if task is None:
-                tasks = client._deserialize('TaskAddCollectionParameter', json_obj) #pylint:disable=W0212
-            if task is None and tasks is None:
-                raise ValueError("JSON file '{}' is not in reqired format.".format(json_file))
+            try:
+                task = client._deserialize('TaskAddParameter', json_obj) #pylint:disable=W0212
+            except DeserializationError:
+                try:
+                    tasks = client._deserialize('[TaskAddParameter]', json_obj) #pylint:disable=W0212
+                except DeserializationError:
+                    raise ValueError("JSON file '{}' is not in reqired format.".format(json_file))
     else:
         task = TaskAddParameter(task_id, command_line,
                                 resource_files=resource_files,
@@ -254,10 +262,11 @@ def create_task(client, job_id, json_file=None, task_id=None, command_line=None,
                                                max_task_retry_count=max_task_retry_count)
 
     if task is not None:
-        return client.add(job_id=job_id,
-                          task=task)
+        client.add(job_id=job_id, task=task)
+        return client.get(job_id=job_id, task_id=task.id)
     else:
-        return client.add_collection(job_id=job_id,
-                                     value=tasks)
+        result = client.add_collection(job_id=job_id,
+                                       value=tasks)
+        return [{'taskId': r.task_id, 'status': r.status, 'error': r.error} for r in result.value]
 
 create_task.__doc__ = TaskAddParameter.__doc__ + "\n" + TaskConstraints.__doc__

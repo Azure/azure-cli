@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-
+import json
 try:
     from urllib.parse import urlsplit
 except ImportError:
@@ -84,6 +84,7 @@ def certificate_reference_format(value):
     cert = {'thumbprint': value, 'thumbprint_algorithm': 'sha1'}
     return cert
 
+
 # COMMAND NAMESPACE VALIDATORS
 
 def validate_required_parameter(ns, parser):
@@ -94,7 +95,6 @@ def validate_required_parameter(ns, parser):
 
 def storage_account_id(namespace):
     """Validate storage account name"""
-
     if namespace.storage_account_name:
         if not namespace.storage_account_id:
             storage_client = get_mgmt_service_client(StorageManagementClient)
@@ -109,7 +109,6 @@ def storage_account_id(namespace):
 
 def application_enabled(namespace):
     """Validates account has auto-storage enabled"""
-
     client = get_mgmt_service_client(BatchManagementClient)
     acc = client.batch_account.get(namespace.resource_group_name, namespace.account_name)
     if not acc:
@@ -117,6 +116,33 @@ def application_enabled(namespace):
     if not acc.auto_storage or not acc.auto_storage.storage_account_id: #pylint: disable=no-member
         raise ValueError("Batch account '{}' needs auto-storage enabled.".
                          format(namespace.account_name))
+
+
+def validate_pool_resize_parameters(namespace):
+    """Validate pool resize parameters correct"""
+    if not namespace.abort:
+        if not namespace.target_dedicated:
+            raise ValueError("The target-dedicated parameter is required to resize the pool.")
+
+
+def validate_json_file(namespace):
+    """Validate the give json file existing"""
+    try:
+        with open(namespace.json_file) as file_handle:
+            json.load(file_handle)
+    except EnvironmentError:
+        raise ValueError("Cannot access JSON request file: " + namespace.json_file)
+    except ValueError as err:
+        raise ValueError("Invalid JSON file: {}".format(err))
+
+
+def validate_cert_file(namespace):
+    """Validate the give cert file existing"""
+    try:
+        with open(namespace.cert_file, "rb") as file_handle:
+            pass
+    except EnvironmentError:
+        raise ValueError("Cannot access certificate file: " + namespace.cert_file)
 
 
 def validate_options(namespace):
@@ -207,8 +233,3 @@ def validate_pool_settings(ns, parser):
                        "Please swap for the IaaS equivalent: Standard_A1 (small), Standard_A2 "
                        "(medium), Standard_A3 (large), or Standard_A4 (extra large).")
             raise ValueError(message)
-
-def validate_pool_resize_parameters(namespace):
-    if not namespace.abort:
-        if not namespace.target_dedicated:
-            raise ValueError("The target-dedicated parameter is required to resize the pool.")

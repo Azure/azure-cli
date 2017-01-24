@@ -86,7 +86,7 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
         self.assertTrue(keys['primary'] != keys2['primary'])
 
         # test batch account delete
-        self.cmd('batch account delete -g {} -n {}'.format(rg, name))
+        self.cmd('batch account delete -g {} -n {} --force'.format(rg, name))
         self.cmd('batch account list -g {}'.format(rg), checks=NoneCheck())
 
         self.cmd('batch location quotas show -l {}'.format(loc), checks=[
@@ -125,7 +125,7 @@ class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
         sname = self.storage_account_name
         name = self.account_name
         self.cmd('storage account delete -g {} -n {} --force'.format(rg, sname))
-        self.cmd('batch account delete -g {} -n {}'.format(rg, name))
+        self.cmd('batch account delete -g {} -n {} --force'.format(rg, name))
 
     def __init__(self, test_method):
         super(BatchMgmtApplicationScenarioTest, self).__init__(__file__, test_method)
@@ -193,3 +193,7 @@ class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
                  format(rg, name, aname, ver))
         self.cmd('batch application delete -g {} -n {} --application-id {}'.format(rg, name, aname))
         self.cmd('batch application list -g {} -n {}'.format(rg, name), checks=NoneCheck())
+
+        if os.path.exists(self.package_file_name):
+            os.remove(self.package_file_name)
+
