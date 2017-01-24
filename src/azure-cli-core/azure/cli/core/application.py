@@ -13,7 +13,7 @@ from azure.cli.core._output import CommandResultItem
 import azure.cli.core.extensions
 import azure.cli.core._help as _help
 import azure.cli.core._logging as _logging
-from azure.cli.core._util import todict, CLIError
+from azure.cli.core._util import todict, truncate_text, CLIError
 from azure.cli.core._config import az_config
 
 import azure.cli.core.telemetry as telemetry
@@ -166,7 +166,8 @@ class Application(object):
     def raise_event(self, name, **kwargs):
         '''Raise the event `name`.
         '''
-        logger.info("Application event '%s' with event data %s", name, kwargs)
+        data = truncate_text(str(kwargs), width=500)
+        logger.debug("Application event '%s' with event data %s", name, data)
         for func in list(self._event_handlers[name]):  # Make copy in case handler modifies the list
             func(**kwargs)
 
@@ -180,7 +181,7 @@ class Application(object):
           event_data: `dict` with event specific data.
         '''
         self._event_handlers[name].append(handler)
-        logger.info("Registered application event handler '%s' at %s", name, handler)
+        logger.debug("Registered application event handler '%s' at %s", name, handler)
 
     def remove(self, name, handler):
         '''Remove a callable that is registered to be called when the
@@ -192,7 +193,7 @@ class Application(object):
           event_data: `dict` with event specific data.
         '''
         self._event_handlers[name].remove(handler)
-        logger.info("Removed application event handler '%s' at %s", name, handler)
+        logger.debug("Removed application event handler '%s' at %s", name, handler)
 
     @staticmethod
     def _register_builtin_arguments(**kwargs):

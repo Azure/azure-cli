@@ -8,7 +8,7 @@ from collections import namedtuple
 import unittest
 import tempfile
 
-from azure.cli.core._util import get_file_json, todict, to_snake_case
+from azure.cli.core._util import get_file_json, todict, to_snake_case, truncate_text
 
 
 class TestUtils(unittest.TestCase):
@@ -88,6 +88,24 @@ class TestUtils(unittest.TestCase):
         expected = 'this_is_snake_cased'
         actual = to_snake_case(the_input)
         self.assertEqual(expected, actual)
+
+    def test_truncate_text(self):
+        expected = 'stri [...]'
+        actual = truncate_text('string to shorten', width=10)
+        self.assertEqual(expected, actual)
+
+    def test_truncate_text_not_needed(self):
+        expected = 'string to shorten'
+        actual = truncate_text('string to shorten', width=100)
+        self.assertEqual(expected, actual)
+
+    def test_truncate_text_zero_width(self):
+        with self.assertRaises(ValueError):
+            truncate_text('string to shorten', width=0)
+
+    def test_truncate_text_negative_width(self):
+        with self.assertRaises(ValueError):
+            truncate_text('string to shorten', width=-1)
 
 
 if __name__ == '__main__':
