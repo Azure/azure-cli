@@ -1324,6 +1324,12 @@ def create_dns_record_set(resource_group_name, zone_name, record_set_name, recor
                                 if_none_match='*' if if_none_match else None)
 create_dns_record_set.__doc__ = RecordSetsOperations.create_or_update.__doc__
 
+def list_dns_record_set(client, resource_group_name, zone_name, record_type=None):
+    if record_type:
+        return client.list_by_type(resource_group_name, zone_name, record_type)
+    else:
+        return client.list_all_in_resource_group(resource_group_name, zone_name)
+
 def update_dns_record_set(instance, metadata=None):
     if metadata is not None:
         instance.metadata = metadata
@@ -1584,7 +1590,10 @@ def _add_record(record_set, record, record_type, property_name=None, is_list=Fal
 def _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name,
                      property_name=None, is_list=True):
     ncf = get_mgmt_service_client(DnsManagementClient).record_sets
-    record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
+    try:
+        record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
+    except CloudError:
+        record_set = RecordSet(name=record_set_name, type=record_type, ttl=3600)  # pylint: disable=redefined-variable-type
 
     _add_record(record_set, record, record_type, property_name, is_list)
 
