@@ -19,11 +19,11 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
 from azure.cli.core.commands import LongRunningOperation
 
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 from azure.cli.core._util import CLIError
 from ._params import web_client_factory, _generic_site_operation
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 #pylint:disable=no-member
 

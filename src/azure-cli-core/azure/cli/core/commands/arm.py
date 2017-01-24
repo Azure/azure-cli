@@ -15,10 +15,10 @@ from azure.cli.core.commands import (CliCommand,
 from azure.cli.core.commands._introspection import extract_args_from_signature
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.application import APPLICATION, IterateValue
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 from azure.cli.core._util import CLIError, todict
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 regex = re.compile('/subscriptions/(?P<subscription>[^/]*)/resourceGroups/(?P<resource_group>[^/]*)'
                    '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)'

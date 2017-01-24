@@ -19,8 +19,8 @@ from ._utils import (
     random_storage_account_name
 )
 
-import azure.cli.core._logging as _logging
-logger = _logging.get_az_logger(__name__)
+import azure.cli.core.azlogging as azlogging
+logger = azlogging.get_az_logger(__name__)
 
 def acr_check_name(registry_name):
     '''Checks whether the container registry name is available for use.

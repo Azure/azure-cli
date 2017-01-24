@@ -7,7 +7,7 @@ from __future__ import print_function
 import argparse
 import platform
 
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 from azure.cli.core._util import CLIError
 from azure.cli.core.commands import register_cli_argument
 from azure.cli.core.commands.arm import (
@@ -216,7 +216,7 @@ def get_folded_parameter_validator(  # pylint: disable=too-many-arguments
             setattr(namespace, type_field_name, 'none')
             setattr(namespace, property_name, None)
             if parent_name and parent_val:
-                logger = _logging.get_az_logger(__name__)
+                logger = azlogging.get_az_logger(__name__)
                 logger.warning('Ignoring: %s %s', parent_option, parent_val)
                 setattr(namespace, parent_name, None)
             return  # SUCCESS
@@ -231,7 +231,7 @@ def get_folded_parameter_validator(  # pylint: disable=too-many-arguments
             setattr(namespace, property_name, resource_id(**resource_id_parts))
             if parent_val:
                 if value_was_id:
-                    logger = _logging.get_az_logger(__name__)
+                    logger = azlogging.get_az_logger(__name__)
                     logger.warning('Ignoring: %s %s', parent_option, parent_val)
                 setattr(namespace, parent_name, None)
             return  # SUCCESS

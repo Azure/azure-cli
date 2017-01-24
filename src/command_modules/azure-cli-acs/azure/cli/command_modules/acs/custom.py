@@ -24,7 +24,7 @@ import yaml
 
 from msrestazure.azure_exceptions import CloudError
 
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.vm._actions import _is_valid_ssh_rsa_public_key
 from azure.cli.command_modules.vm.mgmt_acs.lib import \
@@ -37,7 +37,7 @@ from azure.mgmt.compute import ComputeManagementClient
 from azure.mgmt.compute.models import ContainerServiceOchestratorTypes
 from azure.cli.core._environment import get_config_dir
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 def which(binary):
     pathVar = os.getenv('PATH')

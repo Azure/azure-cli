@@ -15,7 +15,7 @@ from collections import OrderedDict, defaultdict
 from importlib import import_module
 from six import string_types
 
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 import azure.cli.core.telemetry as telemetry
 from azure.cli.core._util import CLIError
 from azure.cli.core.application import APPLICATION
@@ -25,7 +25,7 @@ from azure.cli.core._config import az_config
 from ._introspection import (extract_args_from_signature,
                              extract_full_summary_from_signature)
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 
 # pylint: disable=too-many-arguments,too-few-public-methods

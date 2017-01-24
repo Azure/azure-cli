@@ -10,12 +10,12 @@ import json
 from datetime import datetime, timedelta
 from enum import Enum
 
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 
 CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 
 class CLIError(Exception):

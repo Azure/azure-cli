@@ -18,13 +18,13 @@ from azure.mgmt.resource.policy.models import (PolicyAssignment, PolicyDefinitio
 
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core._util import CLIError, get_file_json
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
 
 from ._client_factory import _resource_client_factory, _resource_policy_client_factory
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 def list_resource_groups(tag=None): # pylint: disable=no-self-use
     ''' List resource groups, optionally filtered by a tag.

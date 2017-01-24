@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 
 
 class TestLogging(unittest.TestCase):
@@ -14,28 +14,28 @@ class TestLogging(unittest.TestCase):
 
     def test_determine_verbose_level_default(self):
         argv = []
-        actual_level = _logging._determine_verbose_level(argv)  # pylint: disable=protected-access
+        actual_level = azlogging._determine_verbose_level(argv)  # pylint: disable=protected-access
         expected_level = 0
         self.assertEqual(actual_level, expected_level)
         self.assertFalse(argv)
 
     def test_determine_verbose_level_verbose(self):
         argv = ['--verbose']
-        actual_level = _logging._determine_verbose_level(argv)  # pylint: disable=protected-access
+        actual_level = azlogging._determine_verbose_level(argv)  # pylint: disable=protected-access
         expected_level = 1
         self.assertEqual(actual_level, expected_level)
         self.assertFalse(argv)
 
     def test_determine_verbose_level_debug(self):
         argv = ['--debug']
-        actual_level = _logging._determine_verbose_level(argv)  # pylint: disable=protected-access
+        actual_level = azlogging._determine_verbose_level(argv)  # pylint: disable=protected-access
         expected_level = 2
         self.assertEqual(actual_level, expected_level)
         self.assertFalse(argv)
 
     def test_determine_verbose_level_v_v_v_default(self):
         argv = ['--verbose', '--debug']
-        actual_level = _logging._determine_verbose_level(argv)  # pylint: disable=protected-access
+        actual_level = azlogging._determine_verbose_level(argv)  # pylint: disable=protected-access
         expected_level = 2
         self.assertEqual(actual_level, expected_level)
         # We still consumed the arguments
@@ -43,7 +43,7 @@ class TestLogging(unittest.TestCase):
 
     def test_determine_verbose_level_other_args_verbose(self):
         argv = ['account', '--verbose']
-        actual_level = _logging._determine_verbose_level(argv)  # pylint: disable=protected-access
+        actual_level = azlogging._determine_verbose_level(argv)  # pylint: disable=protected-access
         expected_level = 1
         self.assertEqual(actual_level, expected_level)
         # We consumed 1 argument
@@ -51,18 +51,18 @@ class TestLogging(unittest.TestCase):
 
     def test_determine_verbose_level_other_args_debug(self):
         argv = ['account', '--debug']
-        actual_level = _logging._determine_verbose_level(argv)  # pylint: disable=protected-access
+        actual_level = azlogging._determine_verbose_level(argv)  # pylint: disable=protected-access
         expected_level = 2
         self.assertEqual(actual_level, expected_level)
         # We consumed 1 argument
         self.assertEqual(argv, ['account'])
 
     def test_get_az_logger(self):
-        az_logger = _logging.get_az_logger()
+        az_logger = azlogging.get_az_logger()
         self.assertEqual(az_logger.name, 'az')
 
     def test_get_az_logger_module(self):
-        az_module_logger = _logging.get_az_logger('azure.cli.module')
+        az_module_logger = azlogging.get_az_logger('azure.cli.module')
         self.assertEqual(az_module_logger.name, 'az.azure.cli.module')
 
 

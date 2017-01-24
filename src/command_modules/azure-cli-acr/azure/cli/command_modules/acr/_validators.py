@@ -10,8 +10,8 @@ from ._factory import (
     get_acr_service_client
 )
 
-import azure.cli.core._logging as _logging
-logger = _logging.get_az_logger(__name__)
+import azure.cli.core.azlogging as azlogging
+logger = azlogging.get_az_logger(__name__)
 
 def validate_registry_name(namespace):
     if namespace.registry_name:

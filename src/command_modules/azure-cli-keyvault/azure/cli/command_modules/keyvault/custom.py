@@ -24,12 +24,12 @@ from azure.graphrbac import GraphRbacManagementClient
 
 import azure.cli.core.telemetry as telemetry
 from azure.cli.core._util import CLIError
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 
 from azure.keyvault import KeyVaultClient
 from azure.cli.command_modules.keyvault._validators import secret_text_encoding_values
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 def list_keyvault(client, resource_group_name=None):
     vault_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
