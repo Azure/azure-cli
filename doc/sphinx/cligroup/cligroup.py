@@ -38,7 +38,11 @@ class CliGroupDirective(CliBaseDirective):
     )
 
 class CliCommandDirective(CliBaseDirective):
-    doc_field_types = cli_field_types
+    doc_field_types = copy.copy(cli_field_types)
+    doc_field_types.append(
+        Field('docsource', label='Doc Source', has_arg=False,
+                   names=('docsource', 'documentsource'))
+    )
 
 class CliArgumentDirective(CliBaseDirective):
     doc_field_types = copy.copy(cli_field_types)

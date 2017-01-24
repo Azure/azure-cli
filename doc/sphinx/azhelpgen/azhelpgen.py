@@ -44,6 +44,10 @@ class AzHelpGenDirective(Directive):
             if not is_command:
                 top_group_name = help_file.command.split()[0] if help_file.command else 'az' 
                 yield '{}:docsource: {}'.format(INDENT, doc_source_map[top_group_name] if top_group_name in doc_source_map else '')
+            else:
+                top_command_name = help_file.command.split()[0] if help_file.command else ''
+                if top_command_name in doc_source_map:
+                    yield '{}:docsource: {}'.format(INDENT, doc_source_map[top_command_name])
             yield ''
 
             if is_command and help_file.parameters:
