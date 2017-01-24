@@ -28,7 +28,7 @@ from azure.cli.command_modules.storage._format import \
 # storage account commands
 factory = lambda kwargs: storage_client_factory().storage_accounts  # noqa: E731 lambda vs def
 cli_command(__name__, 'storage account check-name', 'azure.mgmt.storage.operations.storage_accounts_operations#StorageAccountsOperations.check_name_availability', factory)
-cli_command(__name__, 'storage account delete', 'azure.mgmt.storage.operations.storage_accounts_operations#StorageAccountsOperations.delete', factory)
+cli_command(__name__, 'storage account delete', 'azure.mgmt.storage.operations.storage_accounts_operations#StorageAccountsOperations.delete', factory, confirmation=True)
 cli_command(__name__, 'storage account show', 'azure.mgmt.storage.operations.storage_accounts_operations#StorageAccountsOperations.get_properties', factory)
 cli_command(__name__, 'storage account create', 'azure.cli.command_modules.storage.custom#create_storage_account')
 cli_command(__name__, 'storage account list', 'azure.cli.command_modules.storage.custom#list_storage_accounts')
