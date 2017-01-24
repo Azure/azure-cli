@@ -10,7 +10,7 @@ from six import u as unicode_string
 
 from azure.cli.core._config import az_config
 from azure.cli.core.commands.parameters import \
-    (ignore_type, tags_type, get_resource_name_completion_list, enum_choice_list)
+    (ignore_type, tags_type, file_type, get_resource_name_completion_list, enum_choice_list)
 import azure.cli.core.commands.arm  # pylint: disable=unused-import
 from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
 
@@ -287,7 +287,7 @@ register_cli_argument('storage blob exists', 'blob_name', required=True)
 register_cli_argument('storage blob list', 'include', help='Specifies additional datasets to include: (c)opy-info, (m)etadata, (s)napshots. Can be combined.', validator=validate_included_datasets)
 
 for item in ['download', 'upload']:
-    register_cli_argument('storage blob {}'.format(item), 'file_path', options_list=('--file', '-f'), completer=FilesCompleter())
+    register_cli_argument('storage blob {}'.format(item), 'file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter())
     register_cli_argument('storage blob {}'.format(item), 'max_connections', type=int)
     register_cli_argument('storage blob {}'.format(item), 'validate_content', action='store_true')
 
@@ -418,7 +418,7 @@ register_path_argument('storage file copy cancel', options_list=('--destination-
 
 register_path_argument('storage file delete')
 
-register_cli_argument('storage file download', 'file_path', options_list=('--dest',), help='Path of the file to write to. The source filename will be used if not specified.', required=False, validator=process_file_download_namespace, completer=FilesCompleter())
+register_cli_argument('storage file download', 'file_path', options_list=('--dest',), type=file_type, help='Path of the file to write to. The source filename will be used if not specified.', required=False, validator=process_file_download_namespace, completer=FilesCompleter())
 register_cli_argument('storage file download', 'path', validator=None)  # validator called manually from process_file_download_namespace so remove the automatic one
 register_cli_argument('storage file download', 'progress_callback', ignore_type)
 register_path_argument('storage file download')
@@ -444,7 +444,7 @@ for item in ['update', 'upload']:
 register_path_argument('storage file update')
 
 register_cli_argument('storage file upload', 'progress_callback', ignore_type)
-register_cli_argument('storage file upload', 'local_file_path', options_list=('--source',), completer=FilesCompleter())
+register_cli_argument('storage file upload', 'local_file_path', options_list=('--source',), type=file_type, completer=FilesCompleter())
 register_path_argument('storage file upload', default_file_param='local_file_path')
 
 register_path_argument('storage file url')

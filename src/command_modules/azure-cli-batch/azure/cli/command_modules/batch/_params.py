@@ -11,7 +11,7 @@ from azure.cli.core.commands import \
     (register_cli_argument, CliArgumentType)
 from azure.cli.core.commands.parameters import \
     (tags_type, location_type, resource_group_name_type,
-     get_resource_name_completion_list, enum_choice_list)
+     get_resource_name_completion_list, enum_choice_list, file_type)
 
 from ._validators import \
     (application_enabled)
@@ -31,5 +31,5 @@ register_cli_argument('batch account create', 'tags', tags_type)
 register_cli_argument('batch account set', 'tags', tags_type)
 register_cli_argument('batch account keys renew', 'key_name', **enum_choice_list(AccountKeyType))
 register_cli_argument('batch application', 'account_name', batch_name_type, options_list=('--name', '-n'), validator=application_enabled)
-register_cli_argument('batch application package create', 'package_file', help='The path of the application package in zip format', completer=FilesCompleter())
+register_cli_argument('batch application package create', 'package_file', type=file_type, help='The path of the application package in zip format', completer=FilesCompleter())
 register_cli_argument('batch location quotas show', 'location_name', location_type)
