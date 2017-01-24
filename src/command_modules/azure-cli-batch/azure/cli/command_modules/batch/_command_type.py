@@ -12,17 +12,25 @@ from argcomplete.completers import (
     FilesCompleter,
     DirectoriesCompleter)
 
+from msrest.exceptions import DeserializationError
+
 from . import _validators as validators
 from azure.cli.core.commands import (
+    FORCE_PARAM_NAME,
     command_table,
     command_module_map,
     CliCommand,
     CliCommandArgument,
-    get_op_handler)
+    get_op_handler,
+    _user_confirmed)
 from azure.cli.core._util import CLIError
+from azure.cli.core._config import az_config
 from azure.cli.core.commands._introspection import (
     extract_full_summary_from_signature,
     extract_args_from_signature)
+from azure.cli.core.commands.parameters import file_type
+
+# TODO: Enum choice lists
 
 
 _CLASS_NAME = re.compile(r"<(.*?)>")  # Strip model name from class docstring
@@ -101,9 +109,9 @@ def find_param_type(model, param):
     :returns: str
     """
     # Search for the :type param_name: in the docstring
-    pattern = r":type {}:(.*?)\n(\s*:param |\s*:rtype:|\s*:raises:|\"\"\")".format(param)
+    pattern = r":type {}:(.*?)\n(\s*:param |\s*:rtype:|\s*:raises:|\s*\"{{3}})".format(param)
     param_type = re.search(pattern, model.__doc__, re.DOTALL)
-    return re.sub(r"\n\s*", " ", param_type.group(1).strip())
+    return re.sub(r"\n\s*", "", param_type.group(1).strip())
 
 
 def find_param_help(model, param):
@@ -115,7 +123,7 @@ def find_param_help(model, param):
     # Search for :param param_name: in the docstring
     pattern = r":param {}:(.*?)\n\s*:type ".format(param)
     param_doc = re.search(pattern, model.__doc__, re.DOTALL)
-    return re.sub(r"\n\s*", "", param_doc.group(1).strip())
+    return re.sub(r"\n\s*", " ", param_doc.group(1).strip())
 
 
 def find_return_type(model):
@@ -261,12 +269,16 @@ class BatchArgumentTree(object):
         :param dict kwargs: The request kwargs
         :param dict json_obj: The loaded JSON content
         """
-        #TODO: catch exception
-        kwargs[self._request_param['name']] = client._deserialize( #pylint:disable=W0212
-            self._request_param['model'], json_obj)
-        if kwargs[self._request_param['name']] is None:
-            message = "Failed to deserialized JSON file into object {}"
+        message = "Failed to deserialized JSON file into object {}"
+        try:
+            kwargs[self._request_param['name']] = client._deserialize( #pylint:disable=W0212
+                self._request_param['model'], json_obj)
+        except DeserializationError as error:
+            message += ": {}".format(error)
             raise ValueError(message.format(self._request_param['model']))
+        else:
+            if kwargs[self._request_param['name']] is None:
+                raise ValueError(message.format(self._request_param['model']))
 
     def queue_argument(self, name=None, path=None, root=None, #pylint:disable=too-many-arguments
                        options=None, type=None, dependencies=None): #pylint:disable=W0622
@@ -399,6 +411,7 @@ class AzureDataPlaneCommand(object):
             self.ignore.extend(ignore)
         self.parser = None
         self.validator = validator
+        self.confirmation = 'delete' in operation
 
         # The name of the request options parameter
         self._options_param = format_options_name(operation)
@@ -413,6 +426,9 @@ class AzureDataPlaneCommand(object):
             from msrest.paging import Paged
             from msrest.exceptions import ValidationError, ClientRequestError
             from azure.batch.models import BatchErrorException
+            if self._cancel_operation(kwargs):
+                raise CLIError('Operation cancelled.')
+
             try:
                 client = factory(kwargs)
                 self._build_options(kwargs)
@@ -482,6 +498,17 @@ class AzureDataPlaneCommand(object):
             description_loader=lambda: extract_full_summary_from_signature(
                 get_op_handler(operation))
         )
+
+    def _cancel_operation(self, kwargs):
+        """Whether to cancel the current operation because user
+        declined the confirmation prompt.
+        :param dict kwargs: The request arguments.
+        :returns: bool
+        """
+        return self.confirmation \
+            and not kwargs.get(FORCE_PARAM_NAME) \
+            and not az_config.getboolean('core', 'disable_confirm_prompt', fallback=False) \
+            and not _user_confirmed(self.confirmation, kwargs)
 
     def _build_parameters(self, path, kwargs, param, value):
         """Recursively build request parameter dictionary from command line args.
@@ -670,6 +697,7 @@ class AzureDataPlaneCommand(object):
                                                  options_list=[arg_name(param)],
                                                  required=False,
                                                  default=None,
+                                                 type=file_type,
                                                  completer=FilesCompleter(),
                                                  help=docstring))
             elif arg[0] not in self.ignore:
@@ -682,7 +710,16 @@ class AzureDataPlaneCommand(object):
                                              required=True,
                                              default=None,
                                              completer=DirectoriesCompleter(),
+                                             type=file_type,
                                              validator=validators.validate_file_destination,
+                                             help=docstring))
+        if self.confirmation:
+            param = FORCE_PARAM_NAME
+            docstring = 'Do not prompt for confirmation.'
+            yield (param, CliCommandArgument(param,
+                                             options_list=[arg_name(param)],
+                                             required=False,
+                                             action='store_true',
                                              help=docstring))
 
 

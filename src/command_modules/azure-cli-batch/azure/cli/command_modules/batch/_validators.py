@@ -127,19 +127,20 @@ def validate_pool_resize_parameters(namespace):
 
 def validate_json_file(namespace):
     """Validate the give json file existing"""
-    try:
-        with open(namespace.json_file) as file_handle:
-            json.load(file_handle)
-    except EnvironmentError:
-        raise ValueError("Cannot access JSON request file: " + namespace.json_file)
-    except ValueError as err:
-        raise ValueError("Invalid JSON file: {}".format(err))
+    if namespace.json_file:
+        try:
+            with open(namespace.json_file) as file_handle:
+                json.load(file_handle)
+        except EnvironmentError:
+            raise ValueError("Cannot access JSON request file: " + namespace.json_file)
+        except ValueError as err:
+            raise ValueError("Invalid JSON file: {}".format(err))
 
 
 def validate_cert_file(namespace):
     """Validate the give cert file existing"""
     try:
-        with open(namespace.cert_file, "rb") as file_handle:
+        with open(namespace.cert_file, "rb"):
             pass
     except EnvironmentError:
         raise ValueError("Cannot access certificate file: " + namespace.cert_file)
