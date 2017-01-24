@@ -115,6 +115,9 @@ class ParametersContext(object):
     def argument(self, argument_name, arg_type=None, **kwargs):
         register_cli_argument(self._commmand, argument_name, arg_type=arg_type, **kwargs)
 
+    def register_alias(self, argument_name, options_list):
+        register_cli_argument(self._commmand, argument_name, options_list=options_list)
+
     def expand(self, argument_name, model_type, group_name=None, patches=None):
         # TODO:
         # two privates symbols are imported here. they should be made public or this utility class
