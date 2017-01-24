@@ -55,7 +55,7 @@ cli_command(__name__, 'appservice web deployment user show', 'azure.mgmt.web.ope
 
 factory = lambda _: web_client_factory().server_farms
 cli_command(__name__, 'appservice plan create', 'azure.cli.command_modules.appservice.custom#create_app_service_plan')
-cli_command(__name__, 'appservice plan delete', 'azure.mgmt.web.operations.server_farms_operations#ServerFarmsOperations.delete_server_farm', factory)
+cli_command(__name__, 'appservice plan delete', 'azure.mgmt.web.operations.server_farms_operations#ServerFarmsOperations.delete_server_farm', factory, confirmation=True)
 cli_generic_update_command(__name__, 'appservice plan update', 'azure.mgmt.web.operations.server_farms_operations#ServerFarmsOperations.get_server_farm',
                            'azure.mgmt.web.operations.server_farms_operations#ServerFarmsOperations.create_or_update_server_farm',
                            custom_function_op='azure.cli.command_modules.appservice.custom#update_app_service_plan',
