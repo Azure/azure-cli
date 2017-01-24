@@ -139,6 +139,8 @@ class AzCliCommandParser(argparse.ArgumentParser):
                 handle_module_not_installed(possible_module)
             except AttributeError:
                 pass
+            except Exception as e:  # pylint: disable=broad-except
+                logger.debug('Unable to handle module not installed: %s', str(e))
 
     def validation_error(self, message):
         telemetry.set_user_fault('validation error')
