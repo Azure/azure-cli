@@ -163,6 +163,10 @@ helps['storage file exists'] = """
 helps['storage file list'] = """
     type: command
     short-summary: List files and directories in the specified share.
+    parameters:
+        - name: --files-only
+          type: bool
+          short-summary: List only files in the specified share.
 """
 
 helps['storage file copy'] = """

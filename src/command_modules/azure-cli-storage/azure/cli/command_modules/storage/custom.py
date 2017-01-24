@@ -3,16 +3,18 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=no-self-use,too-many-arguments
+# pylint: disable=no-self-use,too-many-arguments,line-too-long
 
 from __future__ import print_function
 from sys import stderr
+from functools import wraps
 
 from azure.mgmt.storage.models import Kind
 from azure.storage.models import Logging, Metrics, CorsRule, RetentionPolicy
 from azure.storage.blob import BlockBlobService
 from azure.storage.blob.baseblobservice import BaseBlobService
 from azure.storage.file import FileService
+from azure.storage.file.models import FileProperties
 from azure.storage.table import TableService
 from azure.storage.queue import QueueService
 
@@ -32,7 +34,18 @@ def _update_progress(current, total):
         if current == total:
             print('', file=stderr)
 
+
 # CUSTOM METHODS
+
+@wraps(FileService.list_directories_and_files)
+def list_share_files(client, share_name, directory_name=None, num_results=None, marker=None,
+                     timeout=None, files_only=False):
+    generator = client.list_directories_and_files(share_name, directory_name, num_results, marker,
+                                                  timeout)
+    if files_only:
+        return list(f for f in generator if isinstance(f.properties, FileProperties))
+    else:
+        return generator
 
 
 def list_storage_accounts(resource_group_name=None):
@@ -49,8 +62,6 @@ def show_storage_account_usage():
     """ Show the current count and limit of the storage accounts under the subscription. """
     scf = storage_client_factory()
     return next((x for x in scf.usage.list() if x.name.value == 'StorageAccounts'), None)  # pylint: disable=no-member
-
-# pylint: disable=line-too-long
 
 
 def show_storage_account_connection_string(

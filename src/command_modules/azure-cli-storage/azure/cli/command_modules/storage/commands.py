@@ -120,7 +120,7 @@ cli_storage_data_plane_command('storage directory metadata show', 'azure.storage
 cli_storage_data_plane_command('storage directory metadata update', 'azure.storage.file.fileservice#FileService.set_directory_metadata', factory)
 
 # file commands
-cli_storage_data_plane_command('storage file list', 'azure.storage.file.fileservice#FileService.list_directories_and_files', factory, table_transformer=transform_file_output)
+cli_storage_data_plane_command('storage file list', 'azure.cli.command_modules.storage.custom#list_share_files', factory, table_transformer=transform_file_output)
 cli_storage_data_plane_command('storage file delete', 'azure.storage.file.fileservice#FileService.delete_file', factory, transform=create_boolean_result_output_transformer('deleted'), table_transformer=transform_boolean_for_table)
 cli_storage_data_plane_command('storage file resize', 'azure.storage.file.fileservice#FileService.resize_file', factory)
 cli_storage_data_plane_command('storage file url', 'azure.storage.file.fileservice#FileService.make_file_url', factory, transform=transform_url)
