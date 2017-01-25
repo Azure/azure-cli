@@ -5,8 +5,10 @@
 
 from __future__ import print_function
 import sys
-from six.moves import input #pylint: disable=redefined-builtin
+
 from azure.cli.core import __version__ as core_version
+from azure.cli.core._util import CLIError
+from azure.cli.core.prompting import prompt, NoTTYException
 import azure.cli.core.azlogging as azlogging
 
 import azure.cli.command_modules.feedback._help # pylint: disable=unused-import
@@ -35,7 +37,7 @@ COMPONENT_PREFIX = 'azure-cli-'
 def _prompt_net_promoter_score():
     while True:
         try:
-            score = int(input(MESSAGES['prompt_how_likely']))
+            score = int(prompt(MESSAGES['prompt_how_likely']))
             if 0 <= score <= 10:
                 return score
             raise ValueError
@@ -75,11 +77,13 @@ def handle_feedback():
         response_do_well = None
         response_what_changes = None
         if score == 10:
-            response_do_well = input(MESSAGES['prompt_do_well'])
+            response_do_well = prompt(MESSAGES['prompt_do_well'])
         else:
-            response_what_changes = input(MESSAGES['prompt_what_changes'])
-        email_address = input(MESSAGES['prompt_email_addr'])
+            response_what_changes = prompt(MESSAGES['prompt_what_changes'])
+        email_address = prompt(MESSAGES['prompt_email_addr'])
         _send_feedback(score, response_what_changes, response_do_well, email_address)
         print(MESSAGES['thanks'])
+    except NoTTYException:
+        raise CLIError('This command is interactive and no tty available.')
     except (EOFError, KeyboardInterrupt):
         print()

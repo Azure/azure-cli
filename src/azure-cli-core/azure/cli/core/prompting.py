@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import sys
+import getpass
 from six.moves import input  # pylint: disable=redefined-builtin
 
 import azure.cli.core.azlogging as azlogging
@@ -19,6 +20,20 @@ def _verify_is_a_tty():
     if not sys.stdin.isatty():
         logger.debug('No tty available.')
         raise NoTTYException()
+
+
+def prompt(msg):
+    _verify_is_a_tty()
+    return input(msg)
+
+
+def prompt_pass(msg='Password: ', confirm=False):
+    _verify_is_a_tty()
+    password = getpass.getpass(msg)
+    if confirm:
+        password2 = getpass.getpass('Confirm ' + msg)
+        assert password == password2, 'Passwords do not match.'
+    return password
 
 
 def prompt_y_n(msg, default=None):
