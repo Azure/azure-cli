@@ -398,7 +398,7 @@ class StorageFileScenarioTest(StorageAccountVCRTestBase):
         s.cmd('storage file url --share-name {} -p "{}"'.format(share, filename),
               checks=StringCheck(file_url))
 
-        for res in s.cmd('storage file list -s {}'.format(share))['items']:
+        for res in s.cmd('storage file list -s {}'.format(share)):
             assert filename in res['name']
 
         s.cmd('storage file delete --share-name {} -p "{}"'.format(share, filename))
@@ -421,7 +421,7 @@ class StorageFileScenarioTest(StorageAccountVCRTestBase):
         else:
             raise CLIError('\nDownload failed. Test failed!')
 
-        for res in s.cmd('storage file list -s {} -p {}'.format(share, dir))['items']:
+        for res in s.cmd('storage file list -s {} -p {}'.format(share, dir)):
             assert filename in res['name']
 
         s.cmd('storage share stats --name {}'.format(share),

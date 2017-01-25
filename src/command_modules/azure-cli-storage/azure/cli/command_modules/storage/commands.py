@@ -16,7 +16,8 @@ from azure.cli.command_modules.storage._format import \
      transform_file_output,
      transform_entity_show,
      transform_message_show,
-     transform_boolean_for_table)
+     transform_boolean_for_table,
+     transform_file_directory_result)
 from azure.cli.command_modules.storage._validators import \
     (transform_acl_list_output, transform_cors_list_output, transform_entity_query_output,
      transform_logging_list_output, transform_metrics_list_output,
@@ -114,13 +115,13 @@ cli_storage_data_plane_command('storage share policy update', 'azure.cli.command
 cli_storage_data_plane_command('storage directory create', 'azure.storage.file.fileservice#FileService.create_directory', factory, transform=create_boolean_result_output_transformer('created'), table_transformer=transform_boolean_for_table)
 cli_storage_data_plane_command('storage directory delete', 'azure.storage.file.fileservice#FileService.delete_directory', factory, transform=create_boolean_result_output_transformer('deleted'), table_transformer=transform_boolean_for_table)
 cli_storage_data_plane_command('storage directory show', 'azure.storage.file.fileservice#FileService.get_directory_properties', factory, table_transformer=transform_file_output)
-cli_storage_data_plane_command('storage directory list', 'azure.cli.command_modules.storage.custom#list_share_directories', factory, table_transformer=transform_file_output)
+cli_storage_data_plane_command('storage directory list', 'azure.cli.command_modules.storage.custom#list_share_directories', factory, transform=transform_file_directory_result, table_transformer=transform_file_output)
 cli_storage_data_plane_command('storage directory exists', 'azure.storage.file.fileservice#FileService.exists', factory, transform=create_boolean_result_output_transformer('exists'))
 cli_storage_data_plane_command('storage directory metadata show', 'azure.storage.file.fileservice#FileService.get_directory_metadata', factory)
 cli_storage_data_plane_command('storage directory metadata update', 'azure.storage.file.fileservice#FileService.set_directory_metadata', factory)
 
 # file commands
-cli_storage_data_plane_command('storage file list', 'azure.cli.command_modules.storage.custom#list_share_files', factory, table_transformer=transform_file_output)
+cli_storage_data_plane_command('storage file list', 'azure.cli.command_modules.storage.custom#list_share_files', factory, transform=transform_file_directory_result, table_transformer=transform_file_output)
 cli_storage_data_plane_command('storage file delete', 'azure.storage.file.fileservice#FileService.delete_file', factory, transform=create_boolean_result_output_transformer('deleted'), table_transformer=transform_boolean_for_table)
 cli_storage_data_plane_command('storage file resize', 'azure.storage.file.fileservice#FileService.resize_file', factory)
 cli_storage_data_plane_command('storage file url', 'azure.storage.file.fileservice#FileService.make_file_url', factory, transform=transform_url)
