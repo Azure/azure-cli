@@ -12,14 +12,14 @@ from azure.cli.core._util import CLIError
 from azure.cli.core.application import APPLICATION
 from azure.cli.core.commands.parameters import get_one_of_subscription_locations
 from azure.cli.core.commands.arm import resource_exists
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
 from ._client_factory import _compute_client_factory
 from ._vm_utils import read_content_if_is_file
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 
 class VMImageFieldAction(argparse.Action):  # pylint: disable=too-few-public-methods

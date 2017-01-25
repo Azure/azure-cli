@@ -12,13 +12,13 @@ from azure.cli.core.parser import AzCliCommandParser, enable_autocomplete
 from azure.cli.core._output import CommandResultItem
 import azure.cli.core.extensions
 import azure.cli.core._help as _help
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 from azure.cli.core._util import todict, truncate_text, CLIError
 from azure.cli.core._config import az_config
 
 import azure.cli.core.telemetry as telemetry
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 ARGCOMPLETE_ENV_NAME = '_ARGCOMPLETE'
 

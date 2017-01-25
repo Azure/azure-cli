@@ -12,13 +12,13 @@ from subprocess import CalledProcessError, check_output
 import requests
 import yaml
 
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 from azure.cli.core._config import az_config
 from azure.cli.core._profile import Profile, CredsCache, _SERVICE_PRINCIPAL
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long
 from azure.cli.core._util import CLIError
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 BASE_URL = az_config.get('container', 'service_url', fallback='https://api.mindaro.microsoft.io')
 SUBSCRIPTION_URL = "/subscriptions/{subscription_id}"

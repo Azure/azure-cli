@@ -6,8 +6,8 @@
 from ._factory import get_acr_service_client
 from ._utils import get_resource_group_name_by_registry_name
 
-import azure.cli.core._logging as _logging
-logger = _logging.get_az_logger(__name__)
+import azure.cli.core.azlogging as azlogging
+logger = azlogging.get_az_logger(__name__)
 
 def acr_credential_show(registry_name, resource_group_name=None):
     '''Gets the administrator login credentials for the specified container registry.

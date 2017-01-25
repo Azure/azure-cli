@@ -11,7 +11,7 @@ from dateutil.relativedelta import relativedelta
 import dateutil.parser
 
 from azure.cli.core._util import CLIError, todict, get_file_json
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 
 from azure.mgmt.authorization.models import (RoleAssignmentProperties, Permission, RoleDefinition,
                                              RoleDefinitionProperties)
@@ -26,7 +26,7 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
 
 from ._client_factory import _auth_client_factory, _graph_client_factory
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 _CUSTOM_RULE = 'CustomRole'
 

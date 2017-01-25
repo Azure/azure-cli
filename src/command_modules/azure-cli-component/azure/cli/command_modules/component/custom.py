@@ -8,9 +8,9 @@ from six import StringIO
 
 from azure.cli.core._util import CLIError
 from azure.cli.core._config import az_config
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
