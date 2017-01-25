@@ -157,7 +157,7 @@ helps['batch task'] = """
     short-summary: Commands to manage your Batch tasks.
 """
 
-helps['batch task subtasks'] = """
+helps['batch task subtask'] = """
     type: group
     short-summary: Commands to manage subtask information of your Batch task.
 """

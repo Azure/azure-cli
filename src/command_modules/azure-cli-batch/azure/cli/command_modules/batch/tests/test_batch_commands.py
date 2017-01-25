@@ -1,15 +1,21 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
 import os
 import unittest
 import datetime
 import isodate
 import mock
-from .. import _validators
-from .. import _command_type
 
+from msrest.exceptions import ValidationError, ClientRequestError
 from azure.batch import models, operations, BatchServiceClient
 from azure.batch.batch_auth import SharedKeyCredentials
-from msrest.exceptions import ValidationError, ClientRequestError
 from azure.cli.core._util import CLIError
+
+from .. import _validators
+from .. import _command_type
 
 class TestObj(object):
     #pylint: disable=too-many-instance-attributes,too-few-public-methods
@@ -397,7 +403,7 @@ class TestBatchLoader(unittest.TestCase):
     #pylint: disable=attribute-defined-outside-init,protected-access
 
     def setUp(self):
-        def get_client(*args):
+        def get_client(*args): #pylint: disable=unused-argument
             creds = SharedKeyCredentials('test1', 'ZmFrZV9hY29jdW50X2tleQ==')
             return BatchServiceClient(creds, 'https://test1.westus.batch.azure.com/')
 
@@ -527,57 +533,57 @@ class TestBatchLoader(unittest.TestCase):
         handler = operations.pool_operations.PoolOperations.add
         args = list(self.command_pool._load_transformed_arguments(handler))
         self.assertEqual(len(args), 30)
-        self.assertFalse('force' in [a for a, v in args])
-        self.assertTrue('json_file' in [a for a, v in args])
-        self.assertFalse('destination' in [a for a, v in args])
-        self.assertTrue('application_package_references' in [a for a, v in args])
-        self.assertTrue('environment_settings' in [a for a, v in args])
-        self.assertTrue('certificate_references' in [a for a, v in args])
-        self.assertTrue('metadata' in [a for a, v in args])
+        self.assertFalse('force' in [a for a, _ in args])
+        self.assertTrue('json_file' in [a for a, _ in args])
+        self.assertFalse('destination' in [a for a, _ in args])
+        self.assertTrue('application_package_references' in [a for a, _ in args])
+        self.assertTrue('environment_settings' in [a for a, _ in args])
+        self.assertTrue('certificate_references' in [a for a, _ in args])
+        self.assertTrue('metadata' in [a for a, _ in args])
         handler = operations.job_operations.JobOperations.add
         args = list(self.command_job._load_transformed_arguments(handler))
         self.assertEqual(len(args), 15)
-        self.assertFalse('force' in [a for a, v in args])
-        self.assertTrue('json_file' in [a for a, v in args])
-        self.assertFalse('destination' in [a for a, v in args])
+        self.assertFalse('force' in [a for a, _ in args])
+        self.assertTrue('json_file' in [a for a, _ in args])
+        self.assertFalse('destination' in [a for a, _ in args])
         handler = operations.task_operations.TaskOperations.add
         args = list(self.command_task._load_transformed_arguments(handler))
         self.assertEqual(len(args), 8)
-        self.assertFalse('force' in [a for a, v in args])
-        self.assertTrue('json_file' in [a for a, v in args])
-        self.assertFalse('destination' in [a for a, v in args])
+        self.assertFalse('force' in [a for a, _ in args])
+        self.assertTrue('json_file' in [a for a, _ in args])
+        self.assertFalse('destination' in [a for a, _ in args])
         handler = operations.file_operations.FileOperations.get_from_task
         args = list(self.command_file._load_transformed_arguments(handler))
         self.assertEqual(len(args), 8)
-        self.assertFalse('force' in [a for a, v in args])
-        self.assertFalse('json_file' in [a for a, v in args])
-        self.assertTrue('destination' in [a for a, v in args])
+        self.assertFalse('force' in [a for a, _ in args])
+        self.assertFalse('json_file' in [a for a, _ in args])
+        self.assertTrue('destination' in [a for a, _ in args])
         handler = operations.job_operations.JobOperations.list
         args = list(self.command_list._load_transformed_arguments(handler))
         self.assertEqual(len(args), 3)
-        self.assertFalse('force' in [a for a, v in args])
-        self.assertFalse('json_file' in [a for a, v in args])
-        self.assertFalse('destination' in [a for a, v in args])
+        self.assertFalse('force' in [a for a, _ in args])
+        self.assertFalse('json_file' in [a for a, _ in args])
+        self.assertFalse('destination' in [a for a, _ in args])
         handler = operations.pool_operations.PoolOperations.delete
         args = list(self.command_delete._load_transformed_arguments(handler))
         self.assertEqual(len(args), 6)
-        self.assertTrue('force' in [a for a, v in args])
-        self.assertFalse('json_file' in [a for a, v in args])
-        self.assertFalse('destination' in [a for a, v in args])
+        self.assertTrue('force' in [a for a, _ in args])
+        self.assertFalse('json_file' in [a for a, _ in args])
+        self.assertFalse('destination' in [a for a, _ in args])
         handler = operations.job_schedule_operations.JobScheduleOperations.add
         args = list(self.command_conflicts._load_transformed_arguments(handler))
         self.assertEqual(len(args), 45)
-        self.assertTrue('id' in [a for a, v in args])
-        self.assertTrue('job_manager_task_id' in [a for a, v in args])
-        self.assertTrue('job_preparation_task_id' in [a for a, v in args])
-        self.assertTrue('job_release_task_id' in [a for a, v in args])
-        self.assertTrue('job_manager_task_max_wall_clock_time' in [a for a, v in args])
-        self.assertTrue('job_preparation_task_max_wall_clock_time' in [a for a, v in args])
-        self.assertTrue('job_release_task_max_wall_clock_time' in [a for a, v in args])
-        self.assertTrue('job_specification_max_wall_clock_time' in [a for a, v in args])
-        self.assertFalse('force' in [a for a, v in args])
-        self.assertTrue('json_file' in [a for a, v in args])
-        self.assertFalse('destination' in [a for a, v in args])
+        self.assertTrue('id' in [a for a, _ in args])
+        self.assertTrue('job_manager_task_id' in [a for a, _ in args])
+        self.assertTrue('job_preparation_task_id' in [a for a, _ in args])
+        self.assertTrue('job_release_task_id' in [a for a, _ in args])
+        self.assertTrue('job_manager_task_max_wall_clock_time' in [a for a, _ in args])
+        self.assertTrue('job_preparation_task_max_wall_clock_time' in [a for a, _ in args])
+        self.assertTrue('job_release_task_max_wall_clock_time' in [a for a, _ in args])
+        self.assertTrue('job_specification_max_wall_clock_time' in [a for a, _ in args])
+        self.assertFalse('force' in [a for a, _ in args])
+        self.assertTrue('json_file' in [a for a, _ in args])
+        self.assertFalse('destination' in [a for a, _ in args])
 
     def test_batch_execute_command(self):
         def function_result(client, **kwargs):
@@ -629,7 +635,7 @@ class TestBatchLoader(unittest.TestCase):
             return "Pool Created"
 
         json_file = {'id': 'pool_id', 'vmSize': 'small', 'startTask': {'commandLine': 'cmd'}}
-        kwargs = {a: None for a, v in args}
+        kwargs = {a: None for a, _ in args}
         kwargs['json_file'] = json_file
         with mock.patch.object(_command_type, 'get_op_handler', get_op_handler):
             result = self.command_pool.cmd.execute(kwargs=kwargs)

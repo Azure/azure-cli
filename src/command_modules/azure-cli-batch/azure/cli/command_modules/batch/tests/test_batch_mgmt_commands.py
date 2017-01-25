@@ -27,7 +27,7 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
         self.resource_group = 'vcr_resource_group'
         self.account_name = 'clibatchtest4'
         self.location = 'brazilsouth'
-        self.storage_account_name = 'clibatchteststorage2'
+        self.storage_account_name = 'clibatchteststorage3'
 
     def test_batch_account_mgmt(self):
         self.execute()
@@ -193,7 +193,3 @@ class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
                  format(rg, name, aname, ver))
         self.cmd('batch application delete -g {} -n {} --application-id {}'.format(rg, name, aname))
         self.cmd('batch application list -g {} -n {}'.format(rg, name), checks=NoneCheck())
-
-        if os.path.exists(self.package_file_name):
-            os.remove(self.package_file_name)
-

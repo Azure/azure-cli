@@ -10,7 +10,7 @@ except ImportError:
 import json
 import base64
 
-from msrest.exceptions import DeserializationError
+from msrest.exceptions import DeserializationError, ValidationError, ClientRequestError
 from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.batch.models import (BatchAccountCreateParameters,
                                      AutoStorageBaseProperties,
@@ -20,10 +20,11 @@ from azure.mgmt.batch.operations import (ApplicationPackageOperations)
 from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, PoolResizeParameter,
                                 PoolResizeOptions, JobListOptions, JobListFromJobScheduleOptions,
                                 TaskAddParameter, TaskConstraints, PoolUpdatePropertiesParameter,
-                                StartTask)
+                                StartTask, BatchErrorException)
 
 from azure.storage.blob import BlockBlobService
 
+from azure.cli.core._util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 import azure.cli.core.azlogging as azlogging
 
@@ -143,17 +144,41 @@ def create_certificate(client, cert_file, thumbprint, thumbprint_algorithm, pass
     cert = CertificateAddParameter(thumbprint, thumbprint_algorithm, data,
                                    certificate_format=certificate_format,
                                    password=password)
-    client.add(cert)
-    return client.get(thumbprint_algorithm, thumbprint)
+    try:
+        client.add(cert)
+        return client.get(thumbprint_algorithm, thumbprint)
+    except BatchErrorException as ex:
+        try:
+            message = ex.error.message.value
+            if ex.error.values:
+                for detail in ex.error.values:
+                    message += "\n{}: {}".format(detail.key, detail.value)
+            raise CLIError(message)
+        except AttributeError:
+            raise CLIError(ex)
+    except (ValidationError, ClientRequestError) as ex:
+        raise CLIError(ex)
 
 create_application_package.__doc__ = CertificateAddParameter.__doc__
 
 
 def delete_certificate(client, thumbprint, thumbprint_algorithm, abort=None):
-    if abort:
-        client.cancel_deletion(thumbprint_algorithm, thumbprint)
-    else:
-        client.delete(thumbprint_algorithm, thumbprint)
+    try:
+        if abort:
+            client.cancel_deletion(thumbprint_algorithm, thumbprint)
+        else:
+            client.delete(thumbprint_algorithm, thumbprint)
+    except BatchErrorException as ex:
+        try:
+            message = ex.error.message.value
+            if ex.error.values:
+                for detail in ex.error.values:
+                    message += "\n{}: {}".format(detail.key, detail.value)
+            raise CLIError(message)
+        except AttributeError:
+            raise CLIError(ex)
+    except (ValidationError, ClientRequestError) as ex:
+        raise CLIError(ex)
 
 
 def resize_pool(client, pool_id, target_dedicated=None, #pylint:disable=too-many-arguments
@@ -175,7 +200,19 @@ def resize_pool(client, pool_id, target_dedicated=None, #pylint:disable=too-many
                                           if_modified_since=if_modified_since,
                                           if_unmodified_since=if_unmodified_since)
 
+    try:
         return client.resize(pool_id, param, pool_resize_options=resize_option)
+    except BatchErrorException as ex:
+        try:
+            message = ex.error.message.value
+            if ex.error.values:
+                for detail in ex.error.values:
+                    message += "\n{}: {}".format(detail.key, detail.value)
+            raise CLIError(message)
+        except AttributeError:
+            raise CLIError(ex)
+    except (ValidationError, ClientRequestError) as ex:
+        raise CLIError(ex)
 
 resize_pool.__doc__ = PoolResizeParameter.__doc__
 
@@ -213,24 +250,48 @@ def update_pool(client, pool_id, json_file=None, command_line=None, #pylint:disa
         if command_line:
             param.start_task = StartTask(command_line)
 
-    client.update_properties(pool_id=pool_id, pool_update_properties_parameter=param)
-    return client.get(pool_id)
+    try:
+        client.update_properties(pool_id=pool_id, pool_update_properties_parameter=param)
+        return client.get(pool_id)
+    except BatchErrorException as ex:
+        try:
+            message = ex.error.message.value
+            if ex.error.values:
+                for detail in ex.error.values:
+                    message += "\n{}: {}".format(detail.key, detail.value)
+            raise CLIError(message)
+        except AttributeError:
+            raise CLIError(ex)
+    except (ValidationError, ClientRequestError) as ex:
+        raise CLIError(ex)
 
 update_pool.__doc__ = PoolUpdatePropertiesParameter.__doc__ + "\n" + StartTask.__doc__
 
 
 def list_job(client, job_schedule_id=None, filter=None, select=None, expand=None): #pylint:disable=W0622
-    if job_schedule_id:
-        option1 = JobListFromJobScheduleOptions(filter=filter,
-                                                select=select,
-                                                expand=expand)
-        return client.list_from_job_schedule(job_schedule_id=job_schedule_id,
-                                             job_list_from_job_schedule_options=option1)
-    else:
-        option2 = JobListOptions(filter=filter,
-                                 select=select,
-                                 expand=expand)
-        return client.list(job_list_options=option2)
+    try:
+        if job_schedule_id:
+            option1 = JobListFromJobScheduleOptions(filter=filter,
+                                                    select=select,
+                                                    expand=expand)
+            return list(client.list_from_job_schedule(job_schedule_id=job_schedule_id,
+                                                      job_list_from_job_schedule_options=option1))
+        else:
+            option2 = JobListOptions(filter=filter,
+                                     select=select,
+                                     expand=expand)
+            return list(client.list(job_list_options=option2))
+    except BatchErrorException as ex:
+        try:
+            message = ex.error.message.value
+            if ex.error.values:
+                for detail in ex.error.values:
+                    message += "\n{}: {}".format(detail.key, detail.value)
+            raise CLIError(message)
+        except AttributeError:
+            raise CLIError(ex)
+    except (ValidationError, ClientRequestError) as ex:
+        raise CLIError(ex)
 
 
 def create_task(client, job_id, json_file=None, task_id=None, command_line=None,  #pylint:disable=too-many-arguments
@@ -261,12 +322,23 @@ def create_task(client, job_id, json_file=None, task_id=None, command_line=None,
                                                retention_time=retention_time,
                                                max_task_retry_count=max_task_retry_count)
 
-    if task is not None:
-        client.add(job_id=job_id, task=task)
-        return client.get(job_id=job_id, task_id=task.id)
-    else:
-        result = client.add_collection(job_id=job_id,
-                                       value=tasks)
-        return [{'taskId': r.task_id, 'status': r.status, 'error': r.error} for r in result.value]
+    try:
+        if task is not None:
+            client.add(job_id=job_id, task=task)
+            return client.get(job_id=job_id, task_id=task.id)
+        else:
+            result = client.add_collection(job_id=job_id, value=tasks)
+            return result.value
+    except BatchErrorException as ex:
+        try:
+            message = ex.error.message.value
+            if ex.error.values:
+                for detail in ex.error.values:
+                    message += "\n{}: {}".format(detail.key, detail.value)
+            raise CLIError(message)
+        except AttributeError:
+            raise CLIError(ex)
+    except (ValidationError, ClientRequestError) as ex:
+        raise CLIError(ex)
 
 create_task.__doc__ = TaskAddParameter.__doc__ + "\n" + TaskConstraints.__doc__
