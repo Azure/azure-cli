@@ -12,10 +12,9 @@ import json
 import re
 import traceback
 from collections import OrderedDict
-from six import StringIO, text_type, u
+from six import StringIO, text_type, u, string_types
 import colorama
 from tabulate import tabulate
-from six import string_types
 
 from azure.cli.core._util import CLIError
 import azure.cli.core.azlogging as azlogging
