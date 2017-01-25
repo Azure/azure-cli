@@ -28,7 +28,8 @@ from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, CLOUD_LIST
                                                          MSG_PROMPT_WHICH_CONTEXT,
                                                          MSG_PROMPT_WHICH_CLOUD,
                                                          MSG_PROMPT_LOGIN,
-                                                         MSG_PROMPT_TELEMETRY)
+                                                         MSG_PROMPT_TELEMETRY,
+                                                         MSG_PROMPT_FILE_LOGGING)
 from azure.cli.command_modules.configure._utils import get_default_from_config
 import azure.cli.command_modules.configure._help # pylint: disable=unused-import
 import azure.cli.core.telemetry as telemetry
@@ -160,13 +161,19 @@ def _handle_global_configuration():
         answers['output_type_options'] = str(OUTPUT_LIST)
         allow_telemetry = prompt_y_n(MSG_PROMPT_TELEMETRY, default='y')
         answers['telemetry_prompt'] = allow_telemetry
+        enable_file_logging = prompt_y_n(MSG_PROMPT_FILE_LOGGING, default='n')
         # save the global config
         try:
             global_config.add_section('core')
         except configparser.DuplicateSectionError:
             pass
+        try:
+            global_config.add_section('logging')
+        except configparser.DuplicateSectionError:
+            pass
         global_config.set('core', 'output', OUTPUT_LIST[output_index]['name'])
         global_config.set('core', 'collect_telemetry', 'yes' if allow_telemetry else 'no')
+        global_config.set('logging', 'enable_log_file', 'yes' if enable_file_logging else 'no')
         if not os.path.isdir(GLOBAL_CONFIG_DIR):
             os.makedirs(GLOBAL_CONFIG_DIR)
         with open(GLOBAL_CONFIG_PATH, 'w') as configfile:

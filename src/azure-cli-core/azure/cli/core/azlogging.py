@@ -11,12 +11,13 @@ from logging.handlers import RotatingFileHandler
 import colorama
 
 from azure.cli.core._environment import get_config_dir
+from azure.cli.core._config import az_config
 
 AZ_LOGFILE_NAME = 'az.log'
 DEFAULT_LOG_DIR = os.path.join(get_config_dir(), 'logs')
 
-ENABLE_LOG_FILE = os.environ.get('AZURE_CLI_ENABLE_LOG_FILE')
-LOG_DIR = os.environ.get('AZURE_CLI_LOG_DIR')
+ENABLE_LOG_FILE = az_config.getboolean('logging', 'enable_log_file', fallback=False)
+LOG_DIR = os.path.expanduser(az_config.get('logging', 'log_dir', fallback=DEFAULT_LOG_DIR))
 
 CONSOLE_LOG_CONFIGS = [
     # (default)
@@ -121,10 +122,9 @@ def _init_console_handlers(root_logger, az_logger, log_level_config):
 
 
 def _get_log_file_path():
-    log_dir = LOG_DIR or DEFAULT_LOG_DIR
-    if not os.path.isdir(log_dir):
-        os.makedirs(log_dir)
-    return os.path.join(log_dir, AZ_LOGFILE_NAME)
+    if not os.path.isdir(LOG_DIR):
+        os.makedirs(LOG_DIR)
+    return os.path.join(LOG_DIR, AZ_LOGFILE_NAME)
 
 
 def _init_logfile_handlers(root_logger, az_logger):
@@ -156,6 +156,8 @@ def configure_logging(argv):
         return
     _init_console_handlers(root_logger, az_logger, log_level_config)
     _init_logfile_handlers(root_logger, az_logger)
+    if ENABLE_LOG_FILE:
+        get_az_logger(__name__).debug("File logging enabled - Writing logs to '%s'.", LOG_DIR)
 
 
 def get_az_logger(module_name=None):
