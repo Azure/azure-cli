@@ -562,16 +562,16 @@ def datetime_type(string):
     ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M:%S\'Z\'' or
     '%Y-%m-%d\'T\'%H:%M\'Z\'' or %Y-%m-%d\'T\'%H:%M\'Z\'' but pads it into
     the first format. '''
-    try:
-        date_format = '%Y-%m-%dT%H:%M:%SZ'
-        return datetime.strptime(string, date_format)
-    except ValueError:
+    if string[-1:] != 'Z' and string[-1:] != 'z':
+        raise ValueError
+    padded_string = string[:-1]
+    for x in range(3):
         try:
-            padded_string = string[:-1] + ":00Z"
-            return datetime.strptime(padded_string, date_format)
+            date_format = '%Y-%m-%dT%H:%M:%SZ'
+            return datetime.strptime(padded_string + "Z", date_format)
         except ValueError:
-            padded_string = string[:-1] + ":00:00Z"
-            return datetime.strptime(padded_string, date_format)     
+            padded_string = padded_string + ":00"
+    raise ValueError
 
 def ipv4_range_type(string):
     ''' Validates an IPv4 address or address range. '''
