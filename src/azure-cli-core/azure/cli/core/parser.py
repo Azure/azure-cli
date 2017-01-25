@@ -138,7 +138,10 @@ class AzCliCommandParser(argparse.ArgumentParser):
                                             err_msg).group(1)
                 handle_module_not_installed(possible_module)
             except AttributeError:
+                # regular expression pattern match failed so unable to retrieve module name
                 pass
+            except Exception as e:  # pylint: disable=broad-except
+                logger.debug('Unable to handle module not installed: %s', str(e))
 
     def validation_error(self, message):
         telemetry.set_user_fault('validation error')
