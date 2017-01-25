@@ -476,7 +476,7 @@ class AzureDataPlaneCommand(object):
                     return list(result)
                 else:
                     return result
-            except (ValidationError, BatchErrorException) as ex:
+            except BatchErrorException as ex:
                 try:
                     message = ex.error.message.value
                     if ex.error.values:
@@ -485,7 +485,7 @@ class AzureDataPlaneCommand(object):
                     raise CLIError(message)
                 except AttributeError:
                     raise CLIError(ex)
-            except ClientRequestError as ex:
+            except (ValidationError, ClientRequestError) as ex:
                 raise CLIError(ex)
 
         command_module_map[name] = module_name
@@ -614,7 +614,7 @@ class AzureDataPlaneCommand(object):
             self._resolve_conflict(new, param, path, options, typestr, dependencies, conflicting)
         elif arg in conflicting:
             new = _build_prefix(arg, param, path)
-            if new in conflicting:
+            if new in conflicting and '.' not in path:
                 self.parser.queue_argument(arg, path, param, options, typestr, dependencies)
             else:
                 options['options_list'] = [arg_name(new)]

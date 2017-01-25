@@ -2,8 +2,14 @@ import os
 import unittest
 import datetime
 import isodate
+import mock
 from .. import _validators
 from .. import _command_type
+
+from azure.batch import models, operations, BatchServiceClient
+from azure.batch.batch_auth import SharedKeyCredentials
+from msrest.exceptions import ValidationError, ClientRequestError
+from azure.cli.core._util import CLIError
 
 class TestObj(object):
     #pylint: disable=too-many-instance-attributes,too-few-public-methods
@@ -56,11 +62,10 @@ class TestBatchValidators(unittest.TestCase):
         ref = _validators.application_package_reference_format("app#1#RC")
         self.assertEqual(ref, {'application_id': 'app', 'version': '1#RC'})
 
-    #def test_batch_certificate_reference_format(self):
-
-    #    cert = _validators.certificate_reference_format("thumbprint_lkjsahakjg")
-    #    self.assertEqual(ref, {'thumbprint': 'thumbprint_lkjsahakjg',
-    #                           'thumbprint_algorithm': 'sha1'})
+    def test_batch_certificate_reference_format(self):
+        cert = _validators.certificate_reference_format("thumbprint_lkjsahakjg")
+        self.assertEqual(cert, {'thumbprint': 'thumbprint_lkjsahakjg',
+                                'thumbprint_algorithm': 'sha1'})
 
     def test_batch_validate_options(self):
         ns = TestObj()
@@ -387,3 +392,245 @@ class TestBatchParser(unittest.TestCase):
         tree.dequeue_argument('node_agent_sku_id')
         self.assertEqual(len(list(tree)), 11)
 
+
+class TestBatchLoader(unittest.TestCase):
+    #pylint: disable=attribute-defined-outside-init,protected-access
+
+    def setUp(self):
+        def get_client(*args):
+            creds = SharedKeyCredentials('test1', 'ZmFrZV9hY29jdW50X2tleQ==')
+            return BatchServiceClient(creds, 'https://test1.westus.batch.azure.com/')
+
+        self.command_pool = _command_type.AzureDataPlaneCommand(
+            'batch_unit_tests',
+            'batch_tests_pool',
+            'azure.batch.operations.pool_operations#PoolOperations.add',
+            get_client, None, None, 3, None, None)
+        self.command_job = _command_type.AzureDataPlaneCommand(
+            'batch_unit_tests',
+            'batch_tests_job',
+            'azure.batch.operations.job_operations#JobOperations.add',
+            get_client, None, None, 3,
+            ['job.job_manager_task', 'job.job_preparation_task', 'job.job_release_task'], None)
+        self.command_task = _command_type.AzureDataPlaneCommand(
+            'batch_unit_tests',
+            'batch_tests_task',
+            'azure.batch.operations.task_operations#TaskOperations.add',
+            get_client, None, None, 1, None, None)
+        self.command_file = _command_type.AzureDataPlaneCommand(
+            'batch_unit_tests',
+            'batch_tests_file',
+            'azure.batch.operations.file_operations#FileOperations.get_from_task',
+            get_client, None, None, 3, None, None)
+        self.command_list = _command_type.AzureDataPlaneCommand(
+            'batch_unit_tests',
+            'batch_tests_list',
+            'azure.batch.operations.job_operations#JobOperations.list',
+            get_client, None, None, 3, None, None)
+        self.command_delete = _command_type.AzureDataPlaneCommand(
+            'batch_unit_tests',
+            'batch_tests_delete',
+            'azure.batch.operations.pool_operations#PoolOperations.delete',
+            get_client, None, None, 3, None, None)
+        self.command_conflicts = _command_type.AzureDataPlaneCommand(
+            'batch_unit_tests',
+            'batch_tests_conflicts',
+            'azure.batch.operations.job_schedule_operations#JobScheduleOperations.add',
+            get_client, None, None, 4, None, None)
+        return super(TestBatchLoader, self).setUp()
+
+    def test_batch_build_parameters(self):
+        kwargs = {
+            'id': 'poolid',
+            'vm_size': 'small',
+            'os_family': '4',
+            'run_elevated': True,
+            'command_line': 'cmd',
+            'wait_for_success': None
+        }
+        params = {
+            'id': {'path': 'pool', 'root':'id'},
+            'vm_size': {'path': 'pool', 'root':'vm_size'},
+            'os_family': {'path': 'pool.cloud_service_configuration', 'root': 'os_family'},
+            'run_elevated': {'path': 'pool.start_task', 'root': 'run_elevated'},
+            'command_line': {'path': 'pool.start_task', 'root': 'command_line'},
+            'wait_for_success': {'path': 'pool.start_task', 'root': 'wait_for_success'}
+        }
+        for arg, details in params.items():
+            value = kwargs.pop(arg)
+            if value is None:
+                continue
+            params = self.command_pool._build_parameters(
+                details['path'],
+                kwargs,
+                details['root'],
+                value)
+
+        request = {'pool': {'id': 'poolid', 'vm_size': 'small',
+                            'cloud_service_configuration': {'os_family': '4'},
+                            'start_task': {'run_elevated': True, 'command_line': 'cmd'}}}
+        self.assertEqual(kwargs, request)
+
+    def test_batch_options(self):
+        self.command_delete._load_options_model(
+            operations.pool_operations.PoolOperations.delete)
+        self.assertIsInstance(self.command_delete._options_model, models.PoolDeleteOptions)
+        self.assertEqual(sorted(self.command_delete._options_attrs),
+                         ['client_request_id',
+                          'if_match',
+                          'if_modified_since',
+                          'if_none_match',
+                          'if_unmodified_since',
+                          'ocp_date',
+                          'return_client_request_id',
+                          'timeout'])
+        kwargs = {
+            'if_match': None,
+            'if_modified_since': 'abc',
+            'if_none_match': None,
+            'if_unmodified_since': 'def',
+            'client_request_id': 'ignored'
+        }
+        self.command_delete._build_options(kwargs)
+        self.assertIsInstance(kwargs['pool_delete_options'], models.PoolDeleteOptions)
+        self.assertEqual(kwargs['pool_delete_options'].if_modified_since, 'abc')
+        self.assertEqual(kwargs['pool_delete_options'].if_unmodified_since, 'def')
+        self.assertIsNone(kwargs['pool_delete_options'].client_request_id)
+        self.assertEqual(kwargs['pool_delete_options'].timeout, 30)
+        self.assertIsNone(kwargs['pool_delete_options'].ocp_date)
+        options = list(self.command_delete._process_options())
+        self.assertEqual(len(options), 4)
+
+    def test_batch_cancel_operation(self):
+        self.assertFalse(self.command_job._cancel_operation({}))
+        self.assertFalse(self.command_job._cancel_operation({'force': True}))
+        self.assertFalse(self.command_delete._cancel_operation({'force': True}))
+        self.assertTrue(self.command_delete._cancel_operation({'force': None}))
+
+    def test_batch_should_flatten(self):
+        self.assertFalse(self.command_task._should_flatten('task.depends_on'))
+        self.assertTrue(self.command_task._should_flatten('task'))
+        self.assertFalse(self.command_job._should_flatten(
+            'job.job_manager_task.constraints.something'))
+        self.assertTrue(self.command_job._should_flatten('job.job_manager_task.constraints'))
+
+    def test_batch_get_model_attrs(self):
+        attrs = list(self.command_job._get_attrs(models.ResourceFile, 'task.resource_files'))
+        self.assertEqual(len(attrs), 3)
+        attrs = list(self.command_job._get_attrs(models.JobManagerTask, 'job.job_manager_task'))
+        self.assertEqual(len(attrs), 10)
+        attrs = list(self.command_job._get_attrs(models.JobAddParameter, 'job'))
+        self.assertEqual(len(attrs), 10)
+
+    def test_batch_load_arguments(self):
+        #pylint: disable=too-many-statements
+        handler = operations.pool_operations.PoolOperations.add
+        args = list(self.command_pool._load_transformed_arguments(handler))
+        self.assertEqual(len(args), 30)
+        self.assertFalse('force' in [a for a, v in args])
+        self.assertTrue('json_file' in [a for a, v in args])
+        self.assertFalse('destination' in [a for a, v in args])
+        self.assertTrue('application_package_references' in [a for a, v in args])
+        self.assertTrue('environment_settings' in [a for a, v in args])
+        self.assertTrue('certificate_references' in [a for a, v in args])
+        self.assertTrue('metadata' in [a for a, v in args])
+        handler = operations.job_operations.JobOperations.add
+        args = list(self.command_job._load_transformed_arguments(handler))
+        self.assertEqual(len(args), 15)
+        self.assertFalse('force' in [a for a, v in args])
+        self.assertTrue('json_file' in [a for a, v in args])
+        self.assertFalse('destination' in [a for a, v in args])
+        handler = operations.task_operations.TaskOperations.add
+        args = list(self.command_task._load_transformed_arguments(handler))
+        self.assertEqual(len(args), 8)
+        self.assertFalse('force' in [a for a, v in args])
+        self.assertTrue('json_file' in [a for a, v in args])
+        self.assertFalse('destination' in [a for a, v in args])
+        handler = operations.file_operations.FileOperations.get_from_task
+        args = list(self.command_file._load_transformed_arguments(handler))
+        self.assertEqual(len(args), 8)
+        self.assertFalse('force' in [a for a, v in args])
+        self.assertFalse('json_file' in [a for a, v in args])
+        self.assertTrue('destination' in [a for a, v in args])
+        handler = operations.job_operations.JobOperations.list
+        args = list(self.command_list._load_transformed_arguments(handler))
+        self.assertEqual(len(args), 3)
+        self.assertFalse('force' in [a for a, v in args])
+        self.assertFalse('json_file' in [a for a, v in args])
+        self.assertFalse('destination' in [a for a, v in args])
+        handler = operations.pool_operations.PoolOperations.delete
+        args = list(self.command_delete._load_transformed_arguments(handler))
+        self.assertEqual(len(args), 6)
+        self.assertTrue('force' in [a for a, v in args])
+        self.assertFalse('json_file' in [a for a, v in args])
+        self.assertFalse('destination' in [a for a, v in args])
+        handler = operations.job_schedule_operations.JobScheduleOperations.add
+        args = list(self.command_conflicts._load_transformed_arguments(handler))
+        self.assertEqual(len(args), 45)
+        self.assertTrue('id' in [a for a, v in args])
+        self.assertTrue('job_manager_task_id' in [a for a, v in args])
+        self.assertTrue('job_preparation_task_id' in [a for a, v in args])
+        self.assertTrue('job_release_task_id' in [a for a, v in args])
+        self.assertTrue('job_manager_task_max_wall_clock_time' in [a for a, v in args])
+        self.assertTrue('job_preparation_task_max_wall_clock_time' in [a for a, v in args])
+        self.assertTrue('job_release_task_max_wall_clock_time' in [a for a, v in args])
+        self.assertTrue('job_specification_max_wall_clock_time' in [a for a, v in args])
+        self.assertFalse('force' in [a for a, v in args])
+        self.assertTrue('json_file' in [a for a, v in args])
+        self.assertFalse('destination' in [a for a, v in args])
+
+    def test_batch_execute_command(self):
+        def function_result(client, **kwargs):
+            #pylint: disable=unused-argument
+            raise ValidationError('maximum', 'id', '100')
+
+        def get_op_handler(operation):
+            #pylint: disable=unused-argument
+            return function_result
+
+        handler = operations.pool_operations.PoolOperations.add
+        args = list(self.command_pool._load_transformed_arguments(handler))
+        with mock.patch.object(_command_type, 'get_op_handler', get_op_handler):
+            with self.assertRaises(CLIError):
+                self.command_pool.cmd.execute(kwargs={'id': 'pool_test', 'vm_size': 'small'})
+
+        def function_result(client, **kwargs):
+            #pylint: disable=function-redefined,unused-argument
+            raise ClientRequestError('Bad Response')
+
+        with mock.patch.object(_command_type, 'get_op_handler', get_op_handler):
+            with self.assertRaises(CLIError):
+                self.command_pool.cmd.execute(kwargs={'id': 'pool_test', 'vm_size': 'small'})
+
+        def function_result(client, **kwargs):
+            #pylint: disable=function-redefined,unused-argument
+            error = models.BatchError()
+            error.code = 'InvalidHeaderValue'
+            error.message = models.ErrorMessage('en-US', 'The value for one of the HTTP '
+                                                'headers is not in the correct format')
+            error.values = [
+                models.BatchErrorDetail('HeaderName', 'Content-Type'),
+                models.BatchErrorDetail('HeaderValue', 'application/json')
+            ]
+            exp = models.BatchErrorException(lambda x, y: error, None)
+            raise exp
+
+        with mock.patch.object(_command_type, 'get_op_handler', get_op_handler):
+            with self.assertRaises(CLIError):
+                self.command_pool.cmd.execute(kwargs={'id': 'pool_test', 'vm_size': 'small'})
+
+        def function_result(client, **kwargs):
+            #pylint: disable=function-redefined,unused-argument
+            self.assertIsInstance(kwargs['pool'], models.PoolAddParameter)
+            self.assertEqual(kwargs['pool'].id, 'pool_id')
+            self.assertEqual(kwargs['pool'].vm_size, 'small')
+            self.assertEqual(kwargs['pool'].start_task.command_line, 'cmd')
+            self.assertTrue('id' not in kwargs)
+            return "Pool Created"
+
+        json_file = {'id': 'pool_id', 'vmSize': 'small', 'startTask': {'commandLine': 'cmd'}}
+        kwargs = {a: None for a, v in args}
+        kwargs['json_file'] = json_file
+        with mock.patch.object(_command_type, 'get_op_handler', get_op_handler):
+            result = self.command_pool.cmd.execute(kwargs=kwargs)
+            self.assertEqual(result, "Pool Created")
