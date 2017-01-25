@@ -12,7 +12,7 @@ import json
 import re
 import traceback
 from collections import OrderedDict
-from six import StringIO, text_type, u
+from six import StringIO, text_type, u, string_types
 import colorama
 from tabulate import tabulate
 
@@ -293,7 +293,8 @@ class TsvOutput(object):  # pylint: disable=too-few-public-methods
             # and a dictionary value in other...
             stream.write('')
         else:
-            stream.write(str(data))
+            to_write = data if isinstance(data, string_types) else str(data)
+            stream.write(to_write)
 
     @staticmethod
     def _dump_row(data, stream):
