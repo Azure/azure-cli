@@ -111,29 +111,30 @@ def _acs_browse_internal(acs_info, resource_group, name, disable_browser, ssh_ke
     orchestrator_type = acs_info.orchestrator_profile.orchestrator_type # pylint: disable=no-member
 
     if  orchestrator_type == 'kubernetes' or orchestrator_type == ContainerServiceOchestratorTypes.kubernetes or (acs_info.custom_profile and acs_info.custom_profile.orchestrator == 'kubernetes'): # pylint: disable=no-member
-        return k8s_browse(name, resource_group, disable_browser)
+        return k8s_browse(name, resource_group, disable_browser, ssh_key_file=ssh_key_file)
     elif orchestrator_type == 'dcos' or orchestrator_type == ContainerServiceOchestratorTypes.dcos:
         return _dcos_browse_internal(acs_info, disable_browser, ssh_key_file)
     else:
         raise CLIError('Unsupported orchestrator type {} for browse'.format(orchestrator_type))
 
-def k8s_browse(name, resource_group, disable_browser=False):
+def k8s_browse(name, resource_group, disable_browser=False,
+               ssh_key_file=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa')):
     """
     Wrapper on the 'kubectl proxy' command, for consistency with 'az dcos browse'
     :param disable_browser: If true, don't launch a web browser after estabilishing the proxy
     :type disable_browser: bool
     """
     acs_info = _get_acs_info(name, resource_group)
-    _k8s_browse_internal(acs_info, disable_browser)
+    _k8s_browse_internal(name, acs_info, disable_browser, ssh_key_file)
 
-def _k8s_browse_internal(acs_info, disable_browser):
+def _k8s_browse_internal(name, acs_info, disable_browser, ssh_key_file):
     if not which('kubectl'):
         raise CLIError('Can not find kubectl executable in PATH')
     browse_path = os.path.join(get_config_dir(), 'acsBrowseConfig.yaml')
     if os.path.exists(browse_path):
         os.remove(browse_path)
 
-    k8s_get_credentials(acs_info=acs_info, path=browse_path)
+    _k8s_get_credentials_internal(name, acs_info, browse_path, ssh_key_file)
 
     logger.warning('Proxy running on 127.0.0.1:8001/ui')
     logger.warning('Press CTRL+C to close the tunnel...')
@@ -517,20 +518,26 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
     smc = _resource_client_factory()
     return smc.deployments.create_or_update(resource_group_name, deployment_name, properties)
 
-def k8s_get_credentials(name=None, resource_group_name=None, dns_prefix=None, location=None, user=None,
-                        path=os.path.join(os.path.expanduser('~'), '.kube', 'config'), acs_info=None,
+def k8s_get_credentials(name, resource_group_name,
+                        path=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
                         ssh_key_file=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa')):
-    if not dns_prefix or not location:
-        if not acs_info:
-            acs_info = _get_acs_info(name, resource_group_name)
+    """Create a new Acs.
+    :param name: The name of the cluster.
+    :type name: str
+    :param resource_group_name: The name of the resource group.
+    :type resource_group_name: str
+    :param path: Where to install the kubectl config file
+    :type path: str
+    :param ssh_key_file: Path to an SSH key file to use
+    :type ssh_key_file: str
+    """
+    acs_info = _get_acs_info(name, resource_group_name)
+    _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file)
 
-        if not dns_prefix:
-            dns_prefix = acs_info.master_profile.dns_prefix # pylint: disable=no-member
-        if not location:
-            location = acs_info.location # pylint: disable=no-member
-        if not user:
-            user = acs_info.linux_profile.admin_username # pylint: disable=no-member
-
+def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file):
+    dns_prefix = acs_info.master_profile.dns_prefix # pylint: disable=no-member
+    location = acs_info.location # pylint: disable=no-member
+    user = acs_info.linux_profile.admin_username # pylint: disable=no-member
     _mkdir_p(os.path.dirname(path))
 
     path_candidate = path
