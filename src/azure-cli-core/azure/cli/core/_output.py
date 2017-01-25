@@ -136,7 +136,7 @@ class OutputProducer(object):  # pylint: disable=too-few-public-methods
 
 class TableOutput(object):  # pylint: disable=too-few-public-methods
 
-    SKIP_KEYS = ['id', 'type']
+    SKIP_KEYS = ['id', 'type', 'etag']
 
     def __init__(self, should_sort_keys=False):
         self.should_sort_keys = should_sort_keys
