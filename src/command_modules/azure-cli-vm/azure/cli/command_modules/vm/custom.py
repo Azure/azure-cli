@@ -1141,7 +1141,7 @@ def list_container_services(client, resource_group_name=None):
 
 # pylint: disable=too-many-locals, unused-argument, too-many-statements
 def create_vm(
-        vm_name, resource_group_name, image=None,
+        vm_name, resource_group_name, image,
         size='Standard_DS1', location=None, tags=None, no_wait=False,
         authentication_type=None,
         admin_password=None, admin_username=getpass.getuser(),
@@ -1289,7 +1289,7 @@ def create_vm(
 
 # pylint: disable=too-many-locals, too-many-statements
 def create_vmss(
-        vmss_name, resource_group_name,
+        vmss_name, resource_group_name, image,
         disable_overprovision=False, instance_count=2,
         location=None, tags=None, upgrade_policy_mode='manual', validate=False, no_wait=False,
         admin_username=getpass.getuser(), admin_password=None, authentication_type=None,
@@ -1298,7 +1298,7 @@ def create_vmss(
         load_balancer=None, backend_pool_name=None, nat_pool_name=None, backend_port=None,
         public_ip_address=None, public_ip_address_allocation='dynamic',
         public_ip_address_dns_name=None,
-        image=None, storage_caching='ReadOnly',
+        storage_caching='ReadOnly',
         storage_container_name='vhds', storage_sku='Standard_LRS',
         os_type=None, os_disk_name='osdiskimage',
         vnet_name=None, vnet_address_prefix='10.0.0.0/16',
