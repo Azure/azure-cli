@@ -157,11 +157,12 @@ class NoneCheck(object):  # pylint: disable=too-few-public-methods
         pass
 
     def compare(self, data):  # pylint: disable=no-self-use
+        none_strings = ['[]', '{}', 'null', 'false']
         try:
-            assert not data
+            assert not data or data in none_strings
         except AssertionError:
-            raise AssertionError("Actual value '{}' != Expected value falsy (None, '', [])".format(
-                data))
+            raise AssertionError("Actual value '{}' != Expected value falsy (None, '', []) or "
+                                 "string in {}".format(data, none_strings))
 
 
 class StringCheck(object):  # pylint: disable=too-few-public-methods
