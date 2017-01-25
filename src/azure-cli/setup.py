@@ -47,6 +47,7 @@ DEPENDENCIES = [
     'azure-cli-acr',
     'azure-cli-acs',
     'azure-cli-appservice',
+    'azure-cli-container',
     'azure-cli-core',
     'azure-cli-component',
     'azure-cli-container',
