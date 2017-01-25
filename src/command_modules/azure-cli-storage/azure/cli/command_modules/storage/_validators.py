@@ -564,13 +564,13 @@ def datetime_type(string):
     the first format. '''
     if string[-1:] != 'Z' and string[-1:] != 'z':
         raise ValueError
+    date_format = '%Y-%m-%dT%H:%M:%SZ'
     padded_string = string[:-1]
     for x in range(3):
         try:
-            date_format = '%Y-%m-%dT%H:%M:%SZ'
             return datetime.strptime(padded_string + "Z", date_format)
         except ValueError:
-            padded_string = padded_string + ":00"
+            padded_string += ":00"
     raise ValueError
 
 def ipv4_range_type(string):
