@@ -13,6 +13,7 @@ from azure.cli.core.application import APPLICATION
 from azure.cli.core.commands.parameters import get_one_of_subscription_locations
 from azure.cli.core.commands.arm import resource_exists
 import azure.cli.core.azlogging as azlogging
+from azure.cli.core.prompting import prompt_pass, NoTTYException
 
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
@@ -101,8 +102,10 @@ def _handle_auth_types(**kwargs):
         if args.ssh_dest_key_path:
             raise CLIError('SSH parameters cannot be used with password authentication type')
         elif not args.admin_password:
-            import getpass
-            args.admin_password = getpass.getpass('Admin Password: ')
+            try:
+                args.admin_password = prompt_pass('Admin Password: ', confirm=True)
+            except NoTTYException:
+                raise CLIError('Please specify both username and password in non-interactive mode.')
     elif args.authentication_type == 'ssh':
         if args.admin_password:
             raise CLIError('Admin password cannot be used with SSH authentication type')

@@ -19,6 +19,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
 from azure.cli.core.commands import LongRunningOperation
 
+from azure.cli.core.prompting import prompt_pass, NoTTYException
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._util import CLIError
 from ._params import web_client_factory, _generic_site_operation
@@ -344,8 +345,10 @@ def set_deployment_user(user_name, password=None):
     user = User(location='not-really-needed') #TODO: open bug for this one is not needed
     user.publishing_user_name = user_name
     if password is None:
-        import getpass
-        password = getpass.getpass('Password: ')
+        try:
+            password = prompt_pass(msg='Password: ', confirm=True)
+        except NoTTYException:
+            raise CLIError('Please specify both username and password in non-interactive mode.')
 
     user.publishing_password = password
     result = client.provider.update_publishing_user(user)

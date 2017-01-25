@@ -14,7 +14,11 @@ from azure.cli.core._config import (GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH,
                                     CONTEXT_CONFIG_DIR, ACTIVE_CONTEXT_CONFIG_PATH,
                                     ENV_VAR_PREFIX)
 from azure.cli.core._util import CLIError
-from azure.cli.core.prompting import (prompt, prompt_y_n, prompt_choice_list, NoTTYException)
+from azure.cli.core.prompting import (prompt,
+                                      prompt_y_n,
+                                      prompt_choice_list,
+                                      prompt_pass,
+                                      NoTTYException)
 from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, CLOUD_LIST, LOGIN_METHOD_LIST,
                                                          MSG_INTRO,
                                                          MSG_CLOSING,
@@ -64,7 +68,6 @@ def _config_env_public_azure(_):
         list(get_mgmt_service_client(ResourceManagementClient).resources.list())
     except CLIError:
         # Not logged in
-        import getpass
         login_successful = False
         while not login_successful:
             method_index = prompt_choice_list(MSG_PROMPT_LOGIN, LOGIN_METHOD_LIST)
@@ -80,12 +83,12 @@ def _config_env_public_azure(_):
                 interactive = True
             elif method_index == 1: # username and password
                 username = prompt('Username: ')
-                password = getpass.getpass('Password: ')
+                password = prompt_pass(msg='Password: ')
             elif method_index == 2: # service principal with secret
                 service_principal = True
                 username = prompt('Service principal: ')
                 tenant = prompt('Tenant: ')
-                password = getpass.getpass('Client secret: ')
+                password = prompt_pass(msg='Client secret: ')
             elif method_index == 3: # skip
                 return
             try:

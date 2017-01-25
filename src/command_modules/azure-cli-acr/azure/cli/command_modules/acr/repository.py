@@ -3,10 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import sys
 import requests
 
-from azure.cli.core.prompting import prompt, NoTTYException
+from azure.cli.core.prompting import prompt, prompt_pass, NoTTYException
 from azure.cli.core._util import CLIError
 
 from ._utils import (
@@ -50,10 +49,10 @@ def _validate_user_credentials(registry_name, path, resultIndex, username=None, 
 
     if username:
         if not password:
-            if not sys.stdin.isatty():
+            try:
+                password = prompt_pass(msg='Password: ')
+            except NoTTYException:
                 raise CLIError('Please specify both username and password in non-interactive mode.')
-            import getpass
-            password = getpass.getpass('Password: ')
         return _obtain_data_from_registry(login_server, path, resultIndex, username, password)
 
     try:
@@ -64,10 +63,9 @@ def _validate_user_credentials(registry_name, path, resultIndex, username=None, 
     except: #pylint: disable=bare-except
         pass
 
-    import getpass
     try:
-        username = prompt("Username: ")
-        password = getpass.getpass('Password: ')
+        username = prompt('Username: ')
+        password = prompt_pass(msg='Password: ')
     except NoTTYException:
         raise CLIError(
             'Unable to authenticate using admin login credentials or admin is not enabled. ' +
