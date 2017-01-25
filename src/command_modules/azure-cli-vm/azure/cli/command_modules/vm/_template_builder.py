@@ -6,9 +6,9 @@
 # pylint: disable=too-many-arguments
 
 from collections import OrderedDict
-from enum import Enum
 import json
-import os
+
+from enum import Enum
 
 from azure.cli.core._util import CLIError
 
@@ -63,20 +63,10 @@ class ArmTemplateBuilder(object):
         self.template['outputs'].update(new_output)
 
     def build(self):
-
-        # TODO: Remove before merge
-        test_path = os.path.abspath(os.path.join(os.path.abspath(__file__), '..', 'generated.json'))
-        try:
-            os.remove(test_path)
-        except:  # pylint: disable=bare-except
-            pass
-        test_file = open(test_path, 'w')
-        test_file.write(json.dumps(self.template))
-        test_file.close()
-
         return json.loads(json.dumps(self.template))
 
 
+# pylint: disable=too-few-public-methods
 class StorageProfile(Enum):
     SAPirImage = 1
     SACustomImage = 2

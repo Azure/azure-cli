@@ -272,16 +272,11 @@ def _validate_vm_create_auth(namespace):
 
         if not namespace.admin_password:
             # prompt for admin password if not supplied
-            import getpass
-            while True:
-                password_1 = getpass.getpass('Admin Password: ')
-                password_2 = getpass.getpass('Confirm Password: ')
-                if password_1 == password_2:
-                    namespace.admin_password = password_1
-                    break
-                else:
-                    # TODO: print error message
-                    pass
+            from azure.cli.core.prompting import prompt_pass, NoTTYException
+            try:
+                namespace.admin_password = prompt_pass('Admin Password: ', confirm=True)
+            except NoTTYException:
+                raise CLIError('Please specify both username and password in non-interactive mode.')
 
     elif namespace.authentication_type == 'ssh':
 

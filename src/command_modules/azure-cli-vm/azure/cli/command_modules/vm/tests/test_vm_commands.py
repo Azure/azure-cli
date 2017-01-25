@@ -377,7 +377,7 @@ class VMNoWaitScenarioTest(ResourceGroupVCRTestBase):
         self.location = 'westus'
         self.name = 'vmnowait2'
 
-    def test_create_vm_no_wait(self):
+    def test_vm_create_no_wait(self):
         self.execute()
 
     def body(self):
@@ -569,7 +569,7 @@ class VMMultiNicScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-m
         super(VMMultiNicScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_multi_nic_vm')
         self.vm_name = 'multinicvm1'
 
-    def test_vm_multi_nic_scenario(self):
+    def test_vm_create_multi_nics(self):
         self.execute()
 
     def set_up(self):
@@ -679,7 +679,7 @@ class VMBootDiagnostics(ResourceGroupVCRTestBase):
 class VMSSExtensionInstallTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(VMSSExtensionInstallTest, self).__init__(__file__, test_method, resource_group='cli_test_vmss_extension', debug=True)
+        super(VMSSExtensionInstallTest, self).__init__(__file__, test_method, resource_group='cli_test_vmss_extension')
         self.vmss_name = 'vmss1'
 
     def set_up(self):
@@ -727,22 +727,21 @@ def _write_config_file(user_name):
 class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(DiagnosticsExtensionInstallTest, self).__init__(__file__, test_method, resource_group='clitestdiagext')
-        self.storage_account = 'diagextstorage'
+        super(DiagnosticsExtensionInstallTest, self).__init__(__file__, test_method, resource_group='cli_test_vm_vmss_diagnostics_extension')
+        self.storage_account = 'diagextensionsa'
         self.vm = 'testdiagvm'
         self.vmss = 'testdiagvmss'
 
     def set_up(self):
         super(DiagnosticsExtensionInstallTest, self).set_up()
-        self.cmd('vmss create -g {} -n {} --image UbuntuLTS'.format(self.resource_group, self.vmss))
-        self.cmd('vm create -g {} -n {} --image UbuntuLTS'.format(self.resource_group, self.vm))
         self.cmd('storage account create -g {} -n {} -l westus --sku Standard_LRS'.format(self.resource_group, self.storage_account))
+        self.cmd('vmss create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-password TestTest12#$'.format(self.resource_group, self.vmss))
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-password TestTest12#$'.format(self.resource_group, self.vm))
 
     def test_diagnostics_extension_install(self):
         self.execute()
 
     def body(self):
-        # self.cmd('storage account keys list -g {} -n {}'.format(self.resource_group, self.storage_account)) #
         storage_key = '123'  # use junk keys, do not retrieve real keys which will get into the recording
         _, protected_settings = tempfile.mkstemp()
         with open(protected_settings, 'w') as outfile:
@@ -991,9 +990,6 @@ class VMSSCreateAndModify(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(VMSSCreateAndModify, self).__init__(__file__, test_method, resource_group='cli_test_vmss_create_and_modify')
-
-    def set_up(self):
-        super(VMSSCreateAndModify, self).set_up()
 
     def test_vmss_create_and_modify(self):
         self.execute()

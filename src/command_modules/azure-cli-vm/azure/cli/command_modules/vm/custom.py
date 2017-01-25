@@ -1375,7 +1375,9 @@ def create_vmss(vmss_name, resource_group_name, image,
     else:
         raise CLIError('Unsupported storage profile.')
 
-    naming_prefix = '{}{}'.format(vmss_name[:5], random_string(4, force_lower=True))
+    scrubbed_name = vmss_name.replace('-', '').lower()[:5]
+    naming_prefix = '{}{}'.format(scrubbed_name,
+                                  random_string(9 - len(scrubbed_name), force_lower=True))
     backend_address_pool_id = '{}/loadBalancers/{}/backendAddressPools/{}'.format(
         network_id_template, load_balancer, backend_pool_name) if load_balancer_type else None
     inbound_nat_pool_id = '{}/loadBalancers/{}/inboundNatPools/{}'.format(
