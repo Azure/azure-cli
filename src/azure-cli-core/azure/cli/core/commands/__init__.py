@@ -19,7 +19,7 @@ import azure.cli.core.azlogging as azlogging
 import azure.cli.core.telemetry as telemetry
 from azure.cli.core._util import CLIError
 from azure.cli.core.application import APPLICATION
-from azure.cli.core._prompting import prompt_y_n, NoTTYException
+from azure.cli.core.prompting import prompt_y_n, NoTTYException
 from azure.cli.core._config import az_config
 
 from ._introspection import (extract_args_from_signature,
