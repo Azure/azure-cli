@@ -975,7 +975,7 @@ helps['network lb probe update'] = """
 
 helps['network lb rule'] = """
     type: group
-    short-summary: Gather information, such as utilization, to be evaluated by rules
+    short-summary: Commands to manage load balancing rules.
 """
 
 helps['network lb rule create'] = """
