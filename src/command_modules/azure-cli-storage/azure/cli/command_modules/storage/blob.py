@@ -8,7 +8,7 @@ from collections import namedtuple
 from datetime import datetime
 from azure.storage.blob import BlockBlobService
 from azure.storage.blob.models import Include
-from azure.cli.core._logging import get_az_logger
+from azure.cli.core.azlogging import get_az_logger
 
 
 BlobCopyResult = namedtuple('BlobCopyResult', ['name', 'copy_id'])

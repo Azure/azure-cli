@@ -27,7 +27,7 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.arm import parse_resource_id
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core._util import CLIError
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 from ._vm_utils import read_content_if_is_file, load_json
 from ._vm_diagnostics_templates import get_default_diag_config
 
@@ -36,7 +36,7 @@ from ._actions import (load_images_from_aliases_doc,
                        load_images_thru_services)
 from ._client_factory import _compute_client_factory
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 
 def _vm_get(resource_group_name, vm_name, expand=None):

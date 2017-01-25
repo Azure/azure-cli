@@ -7,11 +7,11 @@ from __future__ import print_function
 import sys
 from six.moves import input #pylint: disable=redefined-builtin
 from azure.cli.core import __version__ as core_version
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 
 import azure.cli.command_modules.feedback._help # pylint: disable=unused-import
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 MESSAGES = {
     'intro': 'We appreciate your feedback! This survey is only two questions and should take less '\

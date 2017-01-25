@@ -9,7 +9,7 @@ import sys
 from six.moves import input, configparser #pylint: disable=redefined-builtin
 from adal.adal_error import AdalError
 
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 from azure.cli.core._config import (GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH,
                                     CONTEXT_CONFIG_DIR, ACTIVE_CONTEXT_CONFIG_PATH,
                                     ENV_VAR_PREFIX)
@@ -33,7 +33,7 @@ from azure.cli.command_modules.configure._utils import get_default_from_config
 import azure.cli.command_modules.configure._help # pylint: disable=unused-import
 import azure.cli.core.telemetry as telemetry
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 answers = {}
 

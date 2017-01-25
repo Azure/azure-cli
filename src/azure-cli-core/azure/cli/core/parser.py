@@ -13,9 +13,9 @@ import azure.cli.core._help as _help
 from azure.cli.core._util import CLIError
 from azure.cli.core._pkg_util import handle_module_not_installed
 
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 
 class IncorrectUsageError(CLIError):

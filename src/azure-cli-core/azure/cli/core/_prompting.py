@@ -6,9 +6,9 @@
 import sys
 from six.moves import input  # pylint: disable=redefined-builtin
 
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 
 class NoTTYException(Exception):
