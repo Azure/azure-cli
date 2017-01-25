@@ -140,15 +140,21 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
 # pylint: disable=too-few-public-methods
 class DeploymentOutputLongRunningOperation(LongRunningOperation):
-    def __call__(self, poller):
-        try:
-            result = super(DeploymentOutputLongRunningOperation, self).__call__(poller)
+    def __call__(self, result):
+        from msrest.pipeline import ClientRawResponse
+        from msrestazure.azure_operation import AzureOperationPoller
+
+        if isinstance(result, AzureOperationPoller):
+            # most deployment operations return a poller
+            result = super(DeploymentOutputLongRunningOperation, self).__call__(result)
             outputs = result.properties.outputs
             return {key: val['value'] for key, val in outputs.items()} if outputs else {}
-        except AttributeError:
-            # in the event of an AttributeError, this is likely just the result
-            from msrest.pipeline import ClientRawResponse
-            return None if isinstance(poller, ClientRawResponse) else poller
+        elif isinstance(result, ClientRawResponse):
+            # --no-wait returns a ClientRawResponse
+            return None
+        else:
+            # --validate returns a 'normal' response
+            return result
 
 
 class CommandTable(dict):

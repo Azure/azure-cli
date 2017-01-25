@@ -12,6 +12,7 @@ import os
 
 from azure.cli.core._util import CLIError
 
+
 class ArmTemplateBuilder(object):
 
     def __init__(self):
@@ -67,7 +68,7 @@ class ArmTemplateBuilder(object):
         test_path = os.path.abspath(os.path.join(os.path.abspath(__file__), '..', 'generated.json'))
         try:
             os.remove(test_path)
-        except: # pylint: disable=bare-except
+        except:  # pylint: disable=bare-except
             pass
         test_file = open(test_path, 'w')
         test_file.write(json.dumps(self.template))
@@ -75,9 +76,11 @@ class ArmTemplateBuilder(object):
 
         return json.loads(json.dumps(self.template))
 
+
 class StorageProfile(Enum):
     SAPirImage = 1
     SACustomImage = 2
+
 
 def build_deployment_resource(name, template, dependencies=None):
     from azure.cli.command_modules.vm._vm_utils import random_string
@@ -93,6 +96,7 @@ def build_deployment_resource(name, template, dependencies=None):
         }
     }
     return deployment
+
 
 def build_output_deployment_resource(key, property_name, property_provider, property_type,
                                      parent_name=None, output_type='object', path=None):
@@ -117,6 +121,7 @@ def build_output_deployment_resource(key, property_name, property_provider, prop
 
     return deployment
 
+
 def build_storage_account_resource(name, location, tags, sku):
     storage_account = {
         'type': 'Microsoft.Storage/storageAccounts',
@@ -128,6 +133,7 @@ def build_storage_account_resource(name, location, tags, sku):
         'properties': {'accountType': sku}
     }
     return storage_account
+
 
 def build_public_ip_resource(name, location, tags, address_allocation, dns_name=None):
 
@@ -146,6 +152,7 @@ def build_public_ip_resource(name, location, tags, address_allocation, dns_name=
         'properties': public_ip_properties
     }
     return public_ip
+
 
 def build_nic_resource(name, location, tags, vm_name, subnet_id, private_ip_address=None,
                        nsg_id=None, public_ip_id=None):
@@ -185,6 +192,7 @@ def build_nic_resource(name, location, tags, vm_name, subnet_id, private_ip_addr
     }
     return nic
 
+
 def build_nsg_resource(name, location, tags, nsg_rule_type):
 
     rule_name = 'rdp' if nsg_rule_type == 'rdp' else 'default-allow-ssh'
@@ -219,6 +227,7 @@ def build_nsg_resource(name, location, tags, nsg_rule_type):
     }
     return nsg
 
+
 def build_vnet_resource(name, location, tags, vnet_prefix=None, subnet=None,
                         subnet_prefix=None, dns_servers=None):
     vnet = {
@@ -244,6 +253,7 @@ def build_vnet_resource(name, location, tags, vnet_prefix=None, subnet=None,
             }
         }]
     return vnet
+
 
 def build_vm_resource(
         name, location, tags, size, storage_profile, nics, admin_username,
@@ -330,6 +340,7 @@ def build_vm_resource(
     }
     return vm
 
+
 def build_load_balancer_inbound_nat_rules_resource(lb_name, location, backend_port, instance_count,
                                                    frontend_ip_name):
 
@@ -359,6 +370,7 @@ def build_load_balancer_inbound_nat_rules_resource(lb_name, location, backend_po
         'properties': nat_rule_properties
     }
     return nat_rules
+
 
 def build_load_balancer_resource(name, location, tags, backend_pool_name, nat_pool_name,
                                  backend_port, frontend_ip_name, public_ip_id, subnet_id,
@@ -423,6 +435,7 @@ def build_load_balancer_resource(name, location, tags, backend_pool_name, nat_po
     }
     return lb
 
+
 def build_vmss_storage_account_pool_resource(loop_name, location, tags, storage_sku):
 
     storage_resource = {
@@ -440,6 +453,7 @@ def build_vmss_storage_account_pool_resource(loop_name, location, tags, storage_
         }
     }
     return storage_resource
+
 
 # pylint: disable=too-many-locals
 def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgrade_policy_mode,

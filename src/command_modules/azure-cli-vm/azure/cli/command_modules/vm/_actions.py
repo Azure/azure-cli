@@ -32,6 +32,7 @@ def _resource_not_exists(resource_type):
                 namespace.resource_group_name))
     return _handle_resource_not_exists
 
+
 def load_images_thru_services(publisher, offer, sku, location):
     from concurrent.futures import ThreadPoolExecutor, as_completed
     all_images = []
@@ -71,6 +72,7 @@ def load_images_thru_services(publisher, offer, sku, location):
 
     return all_images
 
+
 def load_images_from_aliases_doc(publisher=None, offer=None, sku=None):
     target_url = ('https://raw.githubusercontent.com/Azure/azure-rest-api-specs/'
                   'master/arm-compute/quickstart-templates/aliases.json')
@@ -79,15 +81,15 @@ def load_images_from_aliases_doc(publisher=None, offer=None, sku=None):
     try:
         all_images = []
         result = (dic['outputs']['aliases']['value'])
-        for v in result.values(): #loop around os
-            for alias, vv in v.items(): #loop around distros
+        for v in result.values():  # loop around os
+            for alias, vv in v.items():  # loop around distros
                 all_images.append({
                     'urnAlias': alias,
                     'publisher': vv['publisher'],
                     'offer': vv['offer'],
                     'sku': vv['sku'],
                     'version': vv['version']
-                    })
+                })
 
         all_images = [i for i in all_images if (_partial_matched(publisher, i['publisher']) and
                                                 _partial_matched(offer, i['offer']) and
@@ -95,6 +97,7 @@ def load_images_from_aliases_doc(publisher=None, offer=None, sku=None):
         return all_images
     except KeyError:
         raise CLIError('Could not retrieve image list from {}'.format(target_url))
+
 
 def load_extension_images_thru_services(publisher, name, version, location, show_latest=False):
     from concurrent.futures import ThreadPoolExecutor, as_completed

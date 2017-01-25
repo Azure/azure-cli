@@ -502,5 +502,5 @@ class StorageAccountVCRTestBase(VCRTestBase):
             self.account, self.resource_group))
 
     def tear_down(self):
-        self.cmd('storage account delete -g {} -n {}'.format(self.resource_group, self.account))
+        self.cmd('storage account delete -g {} -n {} --force'.format(self.resource_group, self.account))
         self.cmd('group delete --name {} --no-wait --force'.format(self.resource_group))

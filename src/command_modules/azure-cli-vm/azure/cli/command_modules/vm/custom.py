@@ -1117,7 +1117,7 @@ def availset_set(**kwargs):
     return _compute_client_factory().availability_sets.create_or_update(**kwargs)
 
 
-def get_vmss(resource_group_name, name):
+def vmss_get(resource_group_name, name):
     return _compute_client_factory().virtual_machine_scale_sets.get(resource_group_name, name)
 
 
@@ -1139,26 +1139,23 @@ def list_container_services(client, resource_group_name=None):
         if resource_group_name else client.list()
     return list(svc_list)
 
+
 # pylint: disable=too-many-locals, unused-argument, too-many-statements
-def create_vm(
-        vm_name, resource_group_name, image,
-        size='Standard_DS1', location=None, tags=None, no_wait=False,
-        authentication_type=None,
-        admin_password=None, admin_username=getpass.getuser(),
-        ssh_dest_key_path=None, ssh_key_value=None,
-        availability_set=None,
-        nics=None, nsg=None, nsg_rule=None,
-        private_ip_address=None,
-        public_ip_address=None, public_ip_address_allocation='dynamic',
-        public_ip_address_dns_name=None,
-        os_disk_name=None, os_type=None, storage_account=None,
-        storage_caching='ReadWrite', storage_container_name='vhds', storage_sku='Premium_LRS',
-        vnet_name=None, vnet_address_prefix='10.0.0.0/16',
-        subnet=None, subnet_address_prefix='10.0.0.0/24', storage_profile=None,
-        os_publisher=None, os_offer=None, os_sku=None, os_version=None,
-        storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_type=None,
-        nic_type=None, validate=False
-    ):
+def create_vm(vm_name, resource_group_name, image,
+              size='Standard_DS1', location=None, tags=None, no_wait=False,
+              authentication_type=None, admin_password=None, admin_username=getpass.getuser(),
+              ssh_dest_key_path=None, ssh_key_value=None, availability_set=None,
+              nics=None, nsg=None, nsg_rule=None,
+              private_ip_address=None,
+              public_ip_address=None, public_ip_address_allocation='dynamic',
+              public_ip_address_dns_name=None,
+              os_disk_name=None, os_type=None, storage_account=None,
+              storage_caching='ReadWrite', storage_container_name='vhds', storage_sku='Premium_LRS',
+              vnet_name=None, vnet_address_prefix='10.0.0.0/16',
+              subnet=None, subnet_address_prefix='10.0.0.0/24', storage_profile=None,
+              os_publisher=None, os_offer=None, os_sku=None, os_version=None,
+              storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_type=None,
+              nic_type=None, validate=False):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.command_modules.vm._vm_utils import random_string
     from azure.cli.command_modules.vm._template_builder import (
@@ -1194,7 +1191,6 @@ def create_vm(
         nic_name = '{}VMNic'.format(vm_name)
         vm_dependencies.append('Microsoft.Network/networkInterfaces/{}'.format(nic_name))
 
-        # TODO: Fix #1659 Add logic to reject VNET/NSG/PublicIP parameters if existing NIC chosen...
         nic_dependencies = []
         if vnet_type == 'new':
             vnet_name = vnet_name or '{}VNET'.format(vm_name)
@@ -1232,6 +1228,12 @@ def create_vm(
             public_ip_address_id)
         nic_resource['dependsOn'] = nic_dependencies
         master_template.add_resource(nic_resource)
+    else:
+        # Using an existing NIC
+        invalid_parameters = [nsg, public_ip_address, subnet, vnet_name]
+        if any(invalid_parameters):
+            raise CLIError('When specifying an existing NIC, do not specify NSG, '
+                           'public IP, VNet or subnet.')
 
     if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
         os_vhd_uri = 'https://{}.blob.{}/{}/{}.vhd'.format(
@@ -1279,7 +1281,7 @@ def create_vm(
         output_template.add_output('fqdn', public_ip_address, 'Microsoft.Network',
                                    'publicIpAddresses', 'string', 'dnsSettings.fqdn')
     # TODO: Re-enable resource group output
-    #output_template.add_output('resourceGroup', vm_name, 'Microsoft.Compute', 'virtualMachines',
+    # output_template.add_output('resourceGroup', vm_name, 'Microsoft.Compute', 'virtualMachines',
     #                           output_type='string', path='resourceGroup')
 
     output_deployment_name = 'vm_{}_output_{}'.format(vm_name, random_string(8))
@@ -1287,25 +1289,24 @@ def create_vm(
         template=output_template.build(), parameters={}, mode='incremental')
     return client.create_or_update(resource_group_name, output_deployment_name, properties)
 
+
 # pylint: disable=too-many-locals, too-many-statements
-def create_vmss(
-        vmss_name, resource_group_name, image,
-        disable_overprovision=False, instance_count=2,
-        location=None, tags=None, upgrade_policy_mode='manual', validate=False, no_wait=False,
-        admin_username=getpass.getuser(), admin_password=None, authentication_type=None,
-        vm_sku="Standard_D1_v2",
-        ssh_dest_key_path=None, ssh_key_value=None,
-        load_balancer=None, backend_pool_name=None, nat_pool_name=None, backend_port=None,
-        public_ip_address=None, public_ip_address_allocation='dynamic',
-        public_ip_address_dns_name=None,
-        storage_caching='ReadOnly',
-        storage_container_name='vhds', storage_sku='Standard_LRS',
-        os_type=None, os_disk_name='osdiskimage',
-        vnet_name=None, vnet_address_prefix='10.0.0.0/16',
-        subnet=None, subnet_address_prefix='10.0.0.0/24',
-        os_offer=None, os_publisher=None, os_sku=None, os_version=None,
-        load_balancer_type=None, vnet_type=None, public_ip_type=None, storage_profile=None
-    ):
+def create_vmss(vmss_name, resource_group_name, image,
+                disable_overprovision=False, instance_count=2,
+                location=None, tags=None, upgrade_policy_mode='manual', validate=False,
+                admin_username=getpass.getuser(), admin_password=None, authentication_type=None,
+                vm_sku="Standard_D1_v2", no_wait=False,
+                ssh_dest_key_path=None, ssh_key_value=None,
+                load_balancer=None, backend_pool_name=None, nat_pool_name=None, backend_port=None,
+                public_ip_address=None, public_ip_address_allocation='dynamic',
+                public_ip_address_dns_name=None,
+                storage_caching='ReadOnly',
+                storage_container_name='vhds', storage_sku='Standard_LRS',
+                os_type=None, os_disk_name='osdiskimage',
+                vnet_name=None, vnet_address_prefix='10.0.0.0/16',
+                subnet=None, subnet_address_prefix='10.0.0.0/24',
+                os_offer=None, os_publisher=None, os_sku=None, os_version=None,
+                load_balancer_type=None, vnet_type=None, public_ip_type=None, storage_profile=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.command_modules.vm._vm_utils import random_string
     from azure.cli.command_modules.vm._template_builder import (
@@ -1358,8 +1359,8 @@ def create_vmss(
         if not backend_port:
             backend_port = 3389 if os_type == 'windows' else 22
 
-        master_template.add_resource(build_load_balancer_inbound_nat_rules_resource(  # pylint: disable=too-many-function-args
-            load_balancer, location, tags, backend_port, instance_count, 'loadBalancerFrontEnd'))
+        master_template.add_resource(build_load_balancer_inbound_nat_rules_resource(
+            load_balancer, location, backend_port, instance_count, 'loadBalancerFrontEnd'))
 
         lb_resource = build_load_balancer_resource(
             load_balancer, location, tags, backend_pool_name, nat_pool_name, backend_port,

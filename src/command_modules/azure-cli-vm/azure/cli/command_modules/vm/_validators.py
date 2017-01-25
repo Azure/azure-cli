@@ -11,9 +11,11 @@ from azure.cli.command_modules.vm._vm_utils import (
     read_content_if_is_file, random_string, check_existence)
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 
+
 def validate_nsg_name(namespace):
     namespace.network_security_group_name = namespace.network_security_group_name \
         or '{}_NSG_{}'.format(namespace.vm_name, random_string(8))
+
 
 def _get_nic_id(val, resource_group, subscription):
     if is_valid_resource_id(val):
@@ -46,6 +48,7 @@ def validate_vm_nics(namespace):
     if hasattr(namespace, 'primary_nic') and namespace.primary_nic:
         namespace.primary_nic = _get_nic_id(namespace.primary_nic, rg, subscription)
 
+
 def validate_location(namespace):
     if not namespace.location:
         from azure.mgmt.resource.resources import ResourceManagementClient
@@ -53,6 +56,7 @@ def validate_location(namespace):
         resource_client = get_mgmt_service_client(ResourceManagementClient)
         rg = resource_client.resource_groups.get(namespace.resource_group_name)
         namespace.location = rg.location  # pylint: disable=no-member
+
 
 # region VM Create Validators
 
@@ -80,8 +84,8 @@ def _validate_vm_create_storage_profile(namespace):
         images = load_images_from_aliases_doc()
         matched = next((x for x in images if x['urnAlias'].lower() == image.lower()), None)
         if matched is None:
-            raise CLIError('Invalid image "{}". Please pick one from {}' \
-                .format(image, [x['urnAlias'] for x in images]))
+            raise CLIError('Invalid image "{}". Please pick one from {}'.format(
+                image, [x['urnAlias'] for x in images]))
         namespace.os_publisher = matched['publisher']
         namespace.os_offer = matched['offer']
         namespace.os_sku = matched['sku']
@@ -91,6 +95,7 @@ def _validate_vm_create_storage_profile(namespace):
 
     # 2 - Create native disk from PIR image
     namespace.storage_profile = StorageProfile.SAPirImage  # pylint: disable=redefined-variable-type
+
 
 def _validate_vm_create_storage_account(namespace):
 
@@ -122,6 +127,7 @@ def _validate_vm_create_storage_account(namespace):
             # 4 - nothing specified - create a new storage account
             namespace.storage_account_type = 'new'
 
+
 def _validate_vm_create_availability_set(namespace):
 
     if namespace.availability_set:
@@ -140,14 +146,16 @@ def _validate_vm_create_availability_set(namespace):
             type='availabilitySets',
             name=name)
 
+
 def _validate_vm_create_vnet(namespace):
 
     vnet = namespace.vnet_name
     subnet = namespace.subnet
     rg = namespace.resource_group_name
     location = namespace.location
+    nics = getattr(namespace, 'nics', None)
 
-    if not vnet and not subnet:
+    if not vnet and not subnet and not nics:
         # if nothing specified, try to find an existing vnet and subnet in the target resource group
         from azure.mgmt.network import NetworkManagementClient
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -158,11 +166,11 @@ def _validate_vm_create_vnet(namespace):
 
             # 1 - find a suitable existing vnet/subnet
             subnet_match = next(
-                (s.name for s in vnet_match.subnets if s.name != 'GatewaySubnet'), None
+                (s.name for s in vnet_match.subnets if s.name.lower() != 'gatewaysubnet'), None
             )
             if not subnet_match:
                 continue
-            namespace.subnet = subnet_match.name
+            namespace.subnet = subnet_match
             namespace.vnet_name = vnet_match.name
             namespace.vnet_type = 'existing'
             return
@@ -186,6 +194,7 @@ def _validate_vm_create_vnet(namespace):
     # 3 - create a new vnet/subnet
     namespace.vnet_type = 'new'
 
+
 def _validate_vm_create_nsg(namespace):
 
     if namespace.nsg:
@@ -199,6 +208,7 @@ def _validate_vm_create_nsg(namespace):
     elif namespace.nsg is None:
         namespace.nsg_type = 'new'
 
+
 def _validate_vm_create_public_ip(namespace):
     if namespace.public_ip_address:
         if check_existence(namespace.public_ip_address, namespace.resource_group_name,
@@ -210,6 +220,7 @@ def _validate_vm_create_public_ip(namespace):
         namespace.public_ip_type = None
     elif namespace.public_ip_address is None:
         namespace.public_ip_type = 'new'
+
 
 def _validate_vm_create_nics(namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -238,6 +249,7 @@ def _validate_vm_create_nics(namespace):
     namespace.nics = nics
     namespace.nic_type = 'existing'
     namespace.public_ip_type = None
+
 
 def _validate_vm_create_auth(namespace):
 
@@ -293,6 +305,7 @@ def _validate_vm_create_auth(namespace):
             namespace.ssh_dest_key_path = \
                 '/home/{}/.ssh/authorized_keys'.format(namespace.admin_username)
 
+
 def process_vm_create_namespace(namespace):
     validate_location(namespace)
     _validate_vm_create_storage_profile(namespace)
@@ -304,9 +317,11 @@ def process_vm_create_namespace(namespace):
     _validate_vm_create_nics(namespace)
     _validate_vm_create_auth(namespace)
 
+
 # endregion
 
 # region VMSS Create Validators
+
 
 def _validate_vmss_create_load_balancer(namespace):
     if namespace.load_balancer:
@@ -319,6 +334,7 @@ def _validate_vmss_create_load_balancer(namespace):
         namespace.load_balancer_type = None
     elif namespace.load_balancer is None:
         namespace.load_balancer_type = 'new'
+
 
 def process_vmss_create_namespace(namespace):
     validate_location(namespace)

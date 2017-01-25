@@ -50,7 +50,6 @@ def transform_vm_list(vm_list):
     return [transform_vm(v) for v in vm_list]
 
 
-
 op_var = 'virtual_machines_operations'
 op_class = 'VirtualMachinesOperations'
 cli_command(__name__, 'vm create', custom_path.format('create_vm'), transform=DeploymentOutputLongRunningOperation('Starting vm create'))
@@ -108,8 +107,8 @@ cli_generic_update_command(__name__, 'vm availability-set update',
                            custom_path.format('availset_get'),
                            custom_path.format('availset_set'))
 cli_generic_update_command(__name__, 'vmss update',
-                           custom_path.format('get_vmss'),
-                           custom_path.format('set_vmss'))
+                           custom_path.format('vmss_get'),
+                           custom_path.format('vmss_set'))
 
 # VM Boot Diagnostics
 cli_command(__name__, 'vm boot-diagnostics disable', custom_path.format('disable_boot_diagnostics'))

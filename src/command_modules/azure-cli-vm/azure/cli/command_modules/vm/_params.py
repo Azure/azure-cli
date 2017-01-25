@@ -35,6 +35,7 @@ def get_vm_size_completion_list(prefix, action, parsed_args, **kwargs):  # pylin
     result = get_vm_sizes(location)
     return [r.name for r in result]
 
+
 # REUSABLE ARGUMENT DEFINITIONS
 
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')

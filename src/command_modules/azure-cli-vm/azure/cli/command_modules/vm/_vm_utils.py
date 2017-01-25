@@ -8,6 +8,7 @@ import os
 from azure.cli.core._util import get_file_json, CLIError
 from azure.cli.core.commands.arm import parse_resource_id
 
+
 def random_string(length=16, force_lower=False):
     from string import ascii_letters, digits, ascii_lowercase
     from random import choice
@@ -29,13 +30,14 @@ def load_json(string_or_file_path):
     else:
         return json.loads(string_or_file_path)
 
+
 def _resolve_api_version(provider_namespace, resource_type, parent_path):
     from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     client = get_mgmt_service_client(ResourceManagementClient)
     provider = client.providers.get(provider_namespace)
 
-    #If available, we will use parent resource's api-version
+    # If available, we will use parent resource's api-version
     resource_type_str = (parent_path.split('/')[0] if parent_path else resource_type)
 
     rt = [t for t in provider.resource_types  # pylint: disable=no-member
@@ -49,6 +51,7 @@ def _resolve_api_version(provider_namespace, resource_type, parent_path):
         raise CLIError(
             'API version is required and could not be resolved for resource {}'
             .format(resource_type))
+
 
 # pylint: disable=too-many-arguments
 def check_existence(value, resource_group, provider_namespace, resource_type,
