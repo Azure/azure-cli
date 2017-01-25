@@ -6,7 +6,7 @@
 from __future__ import print_function
 import os
 import sys
-from six.moves import input, configparser #pylint: disable=redefined-builtin
+from six.moves import configparser  # pylint: disable=redefined-builtin
 from adal.adal_error import AdalError
 
 import azure.cli.core.azlogging as azlogging
@@ -14,7 +14,7 @@ from azure.cli.core._config import (GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH,
                                     CONTEXT_CONFIG_DIR, ACTIVE_CONTEXT_CONFIG_PATH,
                                     ENV_VAR_PREFIX)
 from azure.cli.core._util import CLIError
-from azure.cli.core._prompting import (prompt_y_n, prompt_choice_list, NoTTYException)
+from azure.cli.core.prompting import (prompt, prompt_y_n, prompt_choice_list, NoTTYException)
 from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, CLOUD_LIST, LOGIN_METHOD_LIST,
                                                          MSG_INTRO,
                                                          MSG_CLOSING,
@@ -31,8 +31,7 @@ from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, CLOUD_LIST
                                                          MSG_PROMPT_TELEMETRY,
                                                          MSG_PROMPT_FILE_LOGGING)
 from azure.cli.command_modules.configure._utils import get_default_from_config
-import azure.cli.command_modules.configure._help # pylint: disable=unused-import
-import azure.cli.core.telemetry as telemetry
+import azure.cli.command_modules.configure._help  # pylint: disable=unused-import
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -80,12 +79,12 @@ def _config_env_public_azure(_):
             if method_index == 0: # device auth
                 interactive = True
             elif method_index == 1: # username and password
-                username = input('Username: ')
+                username = prompt('Username: ')
                 password = getpass.getpass('Password: ')
             elif method_index == 2: # service principal with secret
                 service_principal = True
-                username = input('Service principal: ')
-                tenant = input('Tenant: ')
+                username = prompt('Service principal: ')
+                tenant = prompt('Tenant: ')
                 password = getpass.getpass('Client secret: ')
             elif method_index == 3: # skip
                 return

@@ -21,6 +21,11 @@ def _verify_is_a_tty():
         raise NoTTYException()
 
 
+def prompt(msg):
+    _verify_is_a_tty()
+    return input(msg)
+
+
 def prompt_y_n(msg, default=None):
     _verify_is_a_tty()
     if default not in [None, 'y', 'n']:
