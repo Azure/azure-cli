@@ -40,7 +40,7 @@ class Test_storage_validators(unittest.TestCase):
     def test_datetime_string_type(self):
         input = "2017-01-01T12:30Z"
         actual = datetime_string_type(input)
-        expected = "2017-01-01T12:30:00Z"
+        expected = "2017-01-01T12:30Z"
         self.assertEqual(actual, expected)
 
         input = "2017-01-01 12:30"

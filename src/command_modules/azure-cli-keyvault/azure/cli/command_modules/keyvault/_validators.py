@@ -198,18 +198,16 @@ def base64_encoded_certificate_type(string):
        
 def datetime_type(string):
     ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M:%S\'Z\'' or
-    '%Y-%m-%d\'T\'%H:%M\'Z\'' or %Y-%m-%d\'T\'%H:%M\'Z\'' but pads it into
-    the first format. '''
-    if string[-1:] != 'Z' and string[-1:] != 'z':
-        raise ValueError
-    date_format = '%Y-%m-%dT%H:%M:%SZ'
-    padded_string = string[:-1]
-    for x in range(3):
+    '%Y-%m-%d\'T\'%H:%M\'Z\'' or '%Y-%m-%d\'T\'%H\'Z\'' or  '%Y-%m-%d'''
+    accepted_date_formats = ['%Y-%m-%dT%H:%M:%SZ', '%Y-%m-%dT%H:%MZ', 
+                             '%Y-%m-%dT%HZ', '%Y-%m-%d']
+    for form in accepted_date_formats:
         try:
-            return datetime.strptime(padded_string + "Z", date_format)
+            return datetime.strptime(string, form)
         except ValueError:
-            padded_string += ":00"
-    raise ValueError
+            pass
+    else:
+        raise ValueError
 
 def vault_base_url_type(name):
     from azure.cli.core._profile import CLOUD
