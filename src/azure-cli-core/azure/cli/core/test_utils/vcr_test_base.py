@@ -48,7 +48,14 @@ MOCKED_STORAGE_ACCOUNT = 'dummystorage'
 
 # Workaround until https://github.com/kevin1024/vcrpy/issues/293 is fixed.
 vcr_connection_request = vcr.stubs.VCRConnection.request
-vcr.stubs.VCRConnection.request = lambda *args, **kwargs: vcr_connection_request(*args)
+
+
+def patch_vcr_connection_request(*args, **kwargs):
+    kwargs.pop('encode_chunked', None)
+    vcr_connection_request(*args, **kwargs)
+
+
+vcr.stubs.VCRConnection.request = patch_vcr_connection_request
 
 
 def _mock_get_mgmt_service_client(client_type, subscription_bound=True, subscription_id=None,
