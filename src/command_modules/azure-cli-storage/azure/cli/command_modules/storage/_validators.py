@@ -582,7 +582,7 @@ def datetime_string_type(string):
     for form in accepted_date_formats:
         try:
             return datetime.strptime(string, form).strftime(form)
-        except ValueError: # checks next format
+        except ValueError:  # checks next format
             pass
     else:
         raise ValueError("Not Valid Date Format")
@@ -596,7 +596,7 @@ def datetime_type(string):
     for form in accepted_date_formats:
         try:
             return datetime.strptime(string, form)
-        except ValueError: # checks next format
+        except ValueError:  # checks next format
             pass
     else:
         raise ValueError("Not Valid Date Format")
