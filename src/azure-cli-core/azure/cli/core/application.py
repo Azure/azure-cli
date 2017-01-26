@@ -243,6 +243,7 @@ class Application(object):
             else:
                 from codecs import open as codecs_open
                 file_path = os.path.expanduser(path)
+                content = None
                 for encoding in ENCODINGS_TO_TRY:
                     try:
                         with codecs_open(file_path, encoding=encoding, mode='r') as input_file:
