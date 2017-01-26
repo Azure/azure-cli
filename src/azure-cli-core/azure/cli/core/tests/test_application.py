@@ -93,7 +93,8 @@ class TestApplication(unittest.TestCase):
         with open(f.name, 'w+') as stream:
             stream.write('foo')
 
-        with open(f_with_bom.name, 'w+', encoding='utf-8-sig') as stream:
+        from codecs import open as codecs_open
+        with codecs_open(f_with_bom.name, encoding='utf-8-sig', mode='w+') as stream:
             stream.write('foo')
 
         cases = [
