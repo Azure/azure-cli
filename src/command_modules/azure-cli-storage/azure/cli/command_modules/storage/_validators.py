@@ -584,8 +584,7 @@ def datetime_string_type(string):
             return datetime.strptime(string, form).strftime(form)
         except ValueError:  # checks next format
             pass
-    else:
-        raise ValueError("Not Valid Date Format")
+    raise ValueError("Not Valid Date Format")
 
 
 def datetime_type(string):
@@ -598,8 +597,7 @@ def datetime_type(string):
             return datetime.strptime(string, form)
         except ValueError:  # checks next format
             pass
-    else:
-        raise ValueError("Not Valid Date Format")
+    raise ValueError("Not Valid Date Format")
 
 
 def ipv4_range_type(string):

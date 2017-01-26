@@ -206,8 +206,7 @@ def datetime_type(string):
             return datetime.strptime(string, form)
         except ValueError: # checks next format
             pass
-    else:
-        raise ValueError("Not Valid Date Format")
+    raise ValueError("Not Valid Date Format")
 
 def vault_base_url_type(name):
     from azure.cli.core._profile import CLOUD
