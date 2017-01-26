@@ -362,7 +362,7 @@ def create_certificate(client, vault_base_url, certificate_name, certificate_pol
             logger.info("Long running operation wait cancelled.")
             raise
         except Exception as client_exception:
-            telemetry.set_exception(exception=client_exception, fault_type='client-exception',
+            telemetry.set_exception(exception=client_exception, fault_type='cert-create-error',
                                     summary='Unexpected client exception during cert creation')
             message = getattr(client_exception, 'message', client_exception)
 

@@ -46,7 +46,7 @@ def main(args, file=sys.stdout):  # pylint: disable=redefined-builtin
     except Exception as ex:  # pylint: disable=broad-except
 
         # TODO: include additional details of the exception in telemetry
-        telemetry.set_exception(ex, 'main-exception',
+        telemetry.set_exception(ex, 'outer-exception',
                                 'Unexpected exception caught during application execution.')
         telemetry.set_failure()
 
