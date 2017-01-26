@@ -13,7 +13,7 @@ from azure.cli.core._output import CommandResultItem
 import azure.cli.core.extensions
 import azure.cli.core._help as _help
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._util import todict, truncate_text, CLIError
+from azure.cli.core._util import todict, truncate_text, CLIError, ENCODINGS_TO_TRY
 from azure.cli.core._config import az_config
 
 import azure.cli.core.telemetry as telemetry
@@ -241,12 +241,21 @@ class Application(object):
             if path == '-':
                 content = sys.stdin.read()
             else:
-                try:
-                    with open(os.path.expanduser(path), 'r') as input_file:
-                        content = input_file.read()
-                except UnicodeDecodeError:
-                    with open(os.path.expanduser(path), 'rb') as input_file:
-                        content = input_file.read()
+                from codecs import open as codecs_open
+                file_path = os.path.expanduser(path)
+                for encoding in ENCODINGS_TO_TRY:
+                    try:
+                        with codecs_open(file_path, encoding=encoding, mode='r') as input_file:
+                            content = input_file.read()
+                    except UnicodeError:  # file encoding issues such as utf-16 w/o bom
+                        continue
+                    except UnicodeDecodeError:  # only surface from Python 3.0 on binary files
+                        with open(file_path, 'rb') as input_file:
+                            content = input_file.read()
+                    break
+                if content is None:
+                    raise CLIError('{} has unrecognized encoding'.format(f))
+
             return content[0:-1] if content[-1] == '\n' else content
         except:
             raise CLIError('Failed to open file {}'.format(path))
