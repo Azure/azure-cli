@@ -14,15 +14,15 @@ from azure.batch import models, operations, BatchServiceClient
 from azure.batch.batch_auth import SharedKeyCredentials
 from azure.cli.core._util import CLIError
 
-from .. import _validators
-from .. import _command_type
+from azure.cli.command_modules.batch import _validators
+from azure.cli.command_modules.batch import _command_type
 
 class TestObj(object):
-    #pylint: disable=too-many-instance-attributes,too-few-public-methods
+    # pylint: disable=too-many-instance-attributes,too-few-public-methods
     pass
 
 class TestBatchValidators(unittest.TestCase):
-    #pylint: disable=attribute-defined-outside-init,no-member
+    # pylint: disable=attribute-defined-outside-init,no-member
 
     def test_batch_datetime_format(self):
         obj = _validators.datetime_format("2017-01-24T15:47:24Z")
@@ -94,7 +94,7 @@ class TestBatchValidators(unittest.TestCase):
         self.assertEqual(ns.ocp_range, "bytes=0-150")
 
         del ns.ocp_range
-        ns.start_range = 11 #pylint: disable=redefined-variable-type
+        ns.start_range = 11  # pylint: disable=redefined-variable-type
         ns.end_range = 22
         _validators.validate_options(ns)
         self.assertFalse(hasattr(ns, 'start_range'))
@@ -125,7 +125,7 @@ class TestBatchValidators(unittest.TestCase):
 
 
 class TestBatchParser(unittest.TestCase):
-    #pylint: disable=attribute-defined-outside-init,protected-access
+    # pylint: disable=attribute-defined-outside-init,protected-access
 
     def test_batch_build_prefix(self):
         resolved = _command_type._build_prefix('id', 'id', 'pool')
@@ -275,7 +275,7 @@ class TestBatchParser(unittest.TestCase):
         self.assertEqual(_command_type.format_options_name(op), "job_schedule_get_options")
 
     def test_batch_argument_tree(self):
-        #pylint: disable=too-many-statements
+        # pylint: disable=too-many-statements
         tree = _command_type.BatchArgumentTree(None)
         self.assertEqual(list(tree), [])
 
@@ -400,10 +400,10 @@ class TestBatchParser(unittest.TestCase):
 
 
 class TestBatchLoader(unittest.TestCase):
-    #pylint: disable=attribute-defined-outside-init,protected-access
+    # pylint: disable=attribute-defined-outside-init,protected-access
 
     def setUp(self):
-        def get_client(*args): #pylint: disable=unused-argument
+        def get_client(*args):  # pylint: disable=unused-argument
             creds = SharedKeyCredentials('test1', 'ZmFrZV9hY29jdW50X2tleQ==')
             return BatchServiceClient(creds, 'https://test1.westus.batch.azure.com/')
 
@@ -529,7 +529,7 @@ class TestBatchLoader(unittest.TestCase):
         self.assertEqual(len(attrs), 10)
 
     def test_batch_load_arguments(self):
-        #pylint: disable=too-many-statements
+        # pylint: disable=too-many-statements
         handler = operations.pool_operations.PoolOperations.add
         args = list(self.command_pool._load_transformed_arguments(handler))
         self.assertEqual(len(args), 30)
@@ -587,11 +587,11 @@ class TestBatchLoader(unittest.TestCase):
 
     def test_batch_execute_command(self):
         def function_result(client, **kwargs):
-            #pylint: disable=unused-argument
+            # pylint: disable=unused-argument
             raise ValidationError('maximum', 'id', '100')
 
         def get_op_handler(operation):
-            #pylint: disable=unused-argument
+            # pylint: disable=unused-argument
             return function_result
 
         handler = operations.pool_operations.PoolOperations.add
@@ -601,7 +601,7 @@ class TestBatchLoader(unittest.TestCase):
                 self.command_pool.cmd.execute(kwargs={'id': 'pool_test', 'vm_size': 'small'})
 
         def function_result(client, **kwargs):
-            #pylint: disable=function-redefined,unused-argument
+            # pylint: disable=function-redefined,unused-argument
             raise ClientRequestError('Bad Response')
 
         with mock.patch.object(_command_type, 'get_op_handler', get_op_handler):
@@ -609,7 +609,7 @@ class TestBatchLoader(unittest.TestCase):
                 self.command_pool.cmd.execute(kwargs={'id': 'pool_test', 'vm_size': 'small'})
 
         def function_result(client, **kwargs):
-            #pylint: disable=function-redefined,unused-argument
+            # pylint: disable=function-redefined,unused-argument
             error = models.BatchError()
             error.code = 'InvalidHeaderValue'
             error.message = models.ErrorMessage('en-US', 'The value for one of the HTTP '
@@ -626,7 +626,7 @@ class TestBatchLoader(unittest.TestCase):
                 self.command_pool.cmd.execute(kwargs={'id': 'pool_test', 'vm_size': 'small'})
 
         def function_result(client, **kwargs):
-            #pylint: disable=function-redefined,unused-argument
+            # pylint: disable=function-redefined,unused-argument
             self.assertIsInstance(kwargs['pool'], models.PoolAddParameter)
             self.assertEqual(kwargs['pool'].id, 'pool_id')
             self.assertEqual(kwargs['pool'].vm_size, 'small')

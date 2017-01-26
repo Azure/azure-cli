@@ -38,7 +38,7 @@ def list_accounts(client, resource_group_name=None):
     return list(acct_list)
 
 
-def create_account(client, resource_group_name, account_name, location, #pylint:disable=too-many-arguments
+def create_account(client, resource_group_name, account_name, location,  # pylint:disable=too-many-arguments
                    tags=None, storage_account_id=None):
     if storage_account_id:
         properties = AutoStorageBaseProperties(storage_account_id=storage_account_id)
@@ -56,7 +56,7 @@ def create_account(client, resource_group_name, account_name, location, #pylint:
 create_account.__doc__ = AutoStorageBaseProperties.__doc__
 
 
-def update_account(client, resource_group_name, account_name,  #pylint:disable=too-many-arguments
+def update_account(client, resource_group_name, account_name,  # pylint:disable=too-many-arguments
                    tags=None, storage_account_id=None):
     if storage_account_id:
         properties = AutoStorageBaseProperties(storage_account_id=storage_account_id)
@@ -71,7 +71,7 @@ def update_account(client, resource_group_name, account_name,  #pylint:disable=t
 update_account.__doc__ = AutoStorageBaseProperties.__doc__
 
 
-def update_application(client, resource_group_name, account_name, application_id, #pylint:disable=too-many-arguments
+def update_application(client, resource_group_name, account_name, application_id, # pylint:disable=too-many-arguments
                        allow_updates=None, display_name=None, default_version=None):
     parameters = UpdateApplicationParameters(allow_updates=allow_updates,
                                              display_name=display_name,
@@ -108,14 +108,14 @@ def _upload_package_blob(package_file, url):
     )
 
 
-def create_application_package(client, resource_group_name, account_name, #pylint:disable=too-many-arguments
+def create_application_package(client, resource_group_name, account_name, # pylint:disable=too-many-arguments
                                application_id, version, package_file):
 
     # create application if not exist
     mgmt_client = get_mgmt_service_client(BatchManagementClient)
     try:
         mgmt_client.application.get(resource_group_name, account_name, application_id)
-    except: #pylint:disable=W0702
+    except:  # pylint:disable=W0702
         mgmt_client.application.create(resource_group_name, account_name, application_id)
 
     result = client.create(resource_group_name, account_name, application_id, version)
@@ -181,7 +181,7 @@ def delete_certificate(client, thumbprint, thumbprint_algorithm, abort=None):
         raise CLIError(ex)
 
 
-def resize_pool(client, pool_id, target_dedicated=None, #pylint:disable=too-many-arguments
+def resize_pool(client, pool_id, target_dedicated=None,  # pylint:disable=too-many-arguments
                 resize_timeout=None, node_deallocation_option=None,
                 if_match=None, if_none_match=None, if_modified_since=None,
                 if_unmodified_since=None, abort=None):
@@ -217,14 +217,14 @@ def resize_pool(client, pool_id, target_dedicated=None, #pylint:disable=too-many
 resize_pool.__doc__ = PoolResizeParameter.__doc__
 
 
-def update_pool(client, pool_id, json_file=None, command_line=None, #pylint:disable=too-many-arguments, W0613
+def update_pool(client, pool_id, json_file=None, command_line=None,  # pylint:disable=too-many-arguments, W0613
                 certificate_references=None, application_package_references=None, metadata=None):
     if json_file:
         with open(json_file) as f:
             json_obj = json.load(f)
             param = None
             try:
-                param = client._deserialize('PoolUpdatePropertiesParameter', json_obj) #pylint:disable=W0212
+                param = client._deserialize('PoolUpdatePropertiesParameter', json_obj)  # pylint:disable=W0212
             except DeserializationError:
                 pass
             if not param:
@@ -268,7 +268,7 @@ def update_pool(client, pool_id, json_file=None, command_line=None, #pylint:disa
 update_pool.__doc__ = PoolUpdatePropertiesParameter.__doc__ + "\n" + StartTask.__doc__
 
 
-def list_job(client, job_schedule_id=None, filter=None, select=None, expand=None): #pylint:disable=W0622
+def list_job(client, job_schedule_id=None, filter=None, select=None, expand=None):  # pylint:disable=W0622
     try:
         if job_schedule_id:
             option1 = JobListFromJobScheduleOptions(filter=filter,
@@ -294,7 +294,7 @@ def list_job(client, job_schedule_id=None, filter=None, select=None, expand=None
         raise CLIError(ex)
 
 
-def create_task(client, job_id, json_file=None, task_id=None, command_line=None,  #pylint:disable=too-many-arguments
+def create_task(client, job_id, json_file=None, task_id=None, command_line=None,  # pylint:disable=too-many-arguments
                 resource_files=None, environment_settings=None, affinity_info=None,
                 max_wall_clock_time=None, retention_time=None, max_task_retry_count=None,
                 run_elevated=None, application_package_references=None):
@@ -303,10 +303,10 @@ def create_task(client, job_id, json_file=None, task_id=None, command_line=None,
         with open(json_file) as f:
             json_obj = json.load(f)
             try:
-                task = client._deserialize('TaskAddParameter', json_obj) #pylint:disable=W0212
+                task = client._deserialize('TaskAddParameter', json_obj)  # pylint:disable=W0212
             except DeserializationError:
                 try:
-                    tasks = client._deserialize('[TaskAddParameter]', json_obj) #pylint:disable=W0212
+                    tasks = client._deserialize('[TaskAddParameter]', json_obj)  # pylint:disable=W0212
                 except DeserializationError:
                     raise ValueError("JSON file '{}' is not in reqired format.".format(json_file))
     else:

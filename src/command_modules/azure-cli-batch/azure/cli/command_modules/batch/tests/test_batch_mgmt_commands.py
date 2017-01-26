@@ -160,7 +160,7 @@ class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('[0].id', aname),
         ])
 
-        self.cmd('batch application package create -g {} -n {} --application-id {} --version {} --package-file "{}"'. #pylint: disable=line-too-long
+        self.cmd('batch application package create -g {} -n {} --application-id {} --version {} --package-file "{}"'.  # pylint: disable=line-too-long
                  format(rg, name, aname, ver, self.package_file_name), checks=[
                      JMESPathCheck('id', aname),
                      JMESPathCheck('storageUrl != null', True),
@@ -178,7 +178,7 @@ class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('state', 'active')
                  ])
 
-        self.cmd('batch application set -g {} -n {} --application-id {} --default-version {}'.format(rg, name, aname, ver)) #pylint: disable=line-too-long
+        self.cmd('batch application set -g {} -n {} --application-id {} --default-version {}'.format(rg, name, aname, ver))  # pylint: disable=line-too-long
 
         self.cmd('batch application show -g {} -n {} --application-id {}'.format(rg, name, aname),
                  checks=[

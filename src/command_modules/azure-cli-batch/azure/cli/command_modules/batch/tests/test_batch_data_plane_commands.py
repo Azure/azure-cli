@@ -6,7 +6,8 @@
 import os
 
 from azure.cli.core.test_utils.vcr_test_base import (JMESPathCheck)
-from .test_batch_data_plane_command_base import BatchDataPlaneTestBase
+from azure.cli.command_modules.batch.tests.test_batch_data_plane_command_base import (
+    BatchDataPlaneTestBase)
 
 class BatchCertificateScenarioTest(BatchDataPlaneTestBase):
 
@@ -173,7 +174,7 @@ class BatchJobListScenarioTest(BatchDataPlaneTestBase):
 
 
 class BatchTaskAddScenarioTest(BatchDataPlaneTestBase):
-    #pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-instance-attributes
     def set_up(self):
         self.cmd('batch job create --json-file "{}"'.format(self.create_job_file_path))
 

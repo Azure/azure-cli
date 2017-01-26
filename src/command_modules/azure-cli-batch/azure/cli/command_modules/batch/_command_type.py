@@ -14,7 +14,7 @@ from argcomplete.completers import (
 
 from msrest.exceptions import DeserializationError
 
-from . import _validators as validators
+from azure.cli.command_modules.batch import _validators as validators
 from azure.cli.core.commands import (
     FORCE_PARAM_NAME,
     command_table,
@@ -271,7 +271,7 @@ class BatchArgumentTree(object):
         """
         message = "Failed to deserialized JSON file into object {}"
         try:
-            kwargs[self._request_param['name']] = client._deserialize( #pylint:disable=W0212
+            kwargs[self._request_param['name']] = client._deserialize(  # pylint:disable=W0212
                 self._request_param['model'], json_obj)
         except DeserializationError as error:
             message += ": {}".format(error)
@@ -280,8 +280,8 @@ class BatchArgumentTree(object):
             if kwargs[self._request_param['name']] is None:
                 raise ValueError(message.format(self._request_param['model']))
 
-    def queue_argument(self, name=None, path=None, root=None, #pylint:disable=too-many-arguments
-                       options=None, type=None, dependencies=None): #pylint:disable=W0622
+    def queue_argument(self, name=None, path=None, root=None,  # pylint:disable=too-many-arguments
+                       options=None, type=None, dependencies=None):  # pylint:disable=W0622
         """Add pending command line argument
         :param str name: The name of the command line argument.
         :param str path: The complex object path to the parameter.
@@ -397,9 +397,9 @@ class BatchArgumentTree(object):
 
 
 class AzureDataPlaneCommand(object):
-    #pylint:disable=too-many-instance-attributes, too-few-public-methods
+    # pylint:disable=too-many-instance-attributes, too-few-public-methods
 
-    def __init__(self, module_name, name, operation, factory, transform_result, #pylint:disable=too-many-arguments
+    def __init__(self, module_name, name, operation, factory, transform_result,  # pylint:disable=too-many-arguments
                  table_transformer, flatten, ignore, validator):
 
         if not isinstance(operation, string_types):
@@ -563,10 +563,10 @@ class AzureDataPlaneCommand(object):
         :param class model: The parameter model class.
         :param str path: Request parameter namespace.
         """
-        for attr, details in model._attribute_map.items(): #pylint: disable=W0212
+        for attr, details in model._attribute_map.items():  # pylint: disable=W0212
             conditions = []
-            conditions.append(model._validation.get(attr, {}).get('readonly')) #pylint: disable=W0212
-            conditions.append(model._validation.get(attr, {}).get('constant')) #pylint: disable=W0212
+            conditions.append(model._validation.get(attr, {}).get('readonly'))  # pylint: disable=W0212
+            conditions.append(model._validation.get(attr, {}).get('constant'))  # pylint: disable=W0212
             conditions.append('.'.join([path, attr]) in self.ignore)
             conditions.append(details['type'][0] in ['{'])
             if not any(conditions):
@@ -593,7 +593,7 @@ class AzureDataPlaneCommand(object):
                 options['options_list'] = [arg_name(param)]
                 yield (param, CliCommandArgument(param, **options))
 
-    def _resolve_conflict(self, arg, param, path, options, typestr, dependencies, conflicting): #pylint:disable=too-many-arguments
+    def _resolve_conflict(self, arg, param, path, options, typestr, dependencies, conflicting):  # pylint:disable=too-many-arguments
         """Resolve conflicting command line arguments.
         :param str arg: Name of the command line argument.
         :param str param: Original request parameter name.
@@ -623,7 +623,7 @@ class AzureDataPlaneCommand(object):
         else:
             self.parser.queue_argument(arg, path, param, options, typestr, dependencies)
 
-    def _flatten_object(self, path, param_model, conflict_names=[]): #pylint: disable=W0102
+    def _flatten_object(self, path, param_model, conflict_names=[]):  # pylint: disable=W0102
         """Flatten a complex parameter object into command line arguments.
         :param str path: The complex parameter namespace.
         :param class param_model: The complex parameter class.
@@ -631,7 +631,7 @@ class AzureDataPlaneCommand(object):
         """
         if self._should_flatten(path):
             required_attrs = [key for key,
-                              val in param_model._validation.items() if val.get('required')] #pylint: disable=W0212
+                              val in param_model._validation.items() if val.get('required')]  # pylint: disable=W0212
 
             for param_attr, details in self._get_attrs(param_model, path):
                 options = {}
@@ -664,7 +664,7 @@ class AzureDataPlaneCommand(object):
                             continue
                 else:
                     attr_model = _load_model(details['type'])
-                    if not hasattr(attr_model, '_attribute_map'): # Must be an enum
+                    if not hasattr(attr_model, '_attribute_map'):  # Must be an enum
                         self._resolve_conflict(param_attr, param_attr, path, options,
                                                details['type'], required_attrs, conflict_names)
                     else:
@@ -723,7 +723,7 @@ class AzureDataPlaneCommand(object):
                                              help=docstring))
 
 
-def cli_data_plane_command(name, operation, client_factory, transform=None, #pylint:disable=too-many-arguments
+def cli_data_plane_command(name, operation, client_factory, transform=None,  # pylint:disable=too-many-arguments
                            table_transformer=None, flatten=FLATTEN, ignore=None, validator=None):
     """ Registers an Azure CLI Batch Data Plane command. These commands must respond to a
     challenge from the service when they make requests. """

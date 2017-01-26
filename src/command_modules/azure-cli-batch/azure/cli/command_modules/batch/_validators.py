@@ -8,7 +8,7 @@ import json
 try:
     from urllib.parse import urlsplit
 except ImportError:
-    from urlparse import urlsplit # pylint: disable=import-error
+    from urlparse import urlsplit  # pylint: disable=import-error
 
 from msrest.serialization import Deserializer
 from msrest.exceptions import DeserializationError
@@ -103,7 +103,7 @@ def storage_account_id(namespace):
             if not acc:
                 raise ValueError("Batch account '{}' not found in the resource group '{}'.". \
                     format(namespace.storage_account_name, namespace.resource_group_name))
-            namespace.storage_account_id = acc.id #pylint: disable=no-member
+            namespace.storage_account_id = acc.id  # pylint: disable=no-member
     del namespace.storage_account_name
 
 
@@ -113,7 +113,7 @@ def application_enabled(namespace):
     acc = client.batch_account.get(namespace.resource_group_name, namespace.account_name)
     if not acc:
         raise ValueError("Batch account '{}' not found.".format(namespace.account_name))
-    if not acc.auto_storage or not acc.auto_storage.storage_account_id: #pylint: disable=no-member
+    if not acc.auto_storage or not acc.auto_storage.storage_account_id:  # pylint: disable=no-member
         raise ValueError("Batch account '{}' needs auto-storage enabled.".
                          format(namespace.account_name))
 
@@ -209,7 +209,7 @@ def validate_client_parameters(namespace):
             from azure.cli.core.commands.arm import parse_resource_id
             rg = parse_resource_id(acc.id)['resource_group']
             namespace.account_key = \
-                client.batch_account.get_keys(rg, namespace.account_name).primary #pylint: disable=no-member
+                client.batch_account.get_keys(rg, namespace.account_name).primary  # pylint: disable=no-member
         else:
             raise ValueError("Batch account '{}' not found.".format(namespace.account_name))
     else:

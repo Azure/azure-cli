@@ -6,7 +6,8 @@
 import os
 
 from azure.cli.core._util import CLIError
-from .test_batch_data_plane_command_base import BatchDataPlaneTestBase
+from azure.cli.command_modules.batch.tests.test_batch_data_plane_command_base import (
+    BatchDataPlaneTestBase)
 
 class BatchPoolScenarioTest(BatchDataPlaneTestBase):
 
@@ -23,14 +24,14 @@ class BatchPoolScenarioTest(BatchDataPlaneTestBase):
         for pool in [self.pool_iaas, self.pool_paas, self.pool_json]:
             try:
                 self.cmd('batch pool delete --pool-id {} --force'.format(pool))
-            except Exception: #pylint: disable=broad-except
+            except Exception:  # pylint: disable=broad-except
                 pass
 
     def test_batch_pools(self):
         self.execute()
 
     def body(self):
-        #pylint: disable=too-many-statements
+        # pylint: disable=too-many-statements
         # test create paas pool using parameters
         self.cmd('batch pool create --id {} --vm-size small --os-family 4'.format(
             self.pool_paas))
@@ -165,7 +166,7 @@ class BatchPoolScenarioTest(BatchDataPlaneTestBase):
             self.pool_iaas))
         self.assertEqual(pool_result['state'], 'deleting')
 
-        ## test app package reference
+        # test app package reference
         try:
             self.cmd('batch pool create --id app_package_test --vm-size small --os-family 4 ' +
                      '--application-package-references does-not-exist')

@@ -5,9 +5,10 @@
 
 from azure.cli.core.commands import cli_command
 
-from ._client_factory import batch_client_factory, batch_data_service_factory
-from ._command_type import cli_data_plane_command
-from ._validators import validate_pool_settings
+from azure.cli.command_modules.batch._client_factory import (
+    batch_client_factory, batch_data_service_factory)
+from azure.cli.command_modules.batch._command_type import cli_data_plane_command
+from azure.cli.command_modules.batch._validators import validate_pool_settings
 
 data_path = 'azure.batch.operations.{}_operations#{}'
 custom_path = 'azure.cli.command_modules.batch.custom#{}'
