@@ -94,21 +94,27 @@ def get_json_object(json_string):
 
 
 def get_file_json(file_path, throw_on_empty=True):
+    content = read_file_content(file_path)
+    if not content and not throw_on_empty:
+        return None
+    return json.loads(content)
+
+
+def read_file_content(file_path, allow_binary=False):
     from codecs import open as codecs_open
-    # always try 'utf-8-sig' first, so that BOM in WinOS won't cause trouble.
-    for encoding in ('utf-8-sig', 'utf-8', 'utf-16', 'utf-16le', 'utf-16be'):
+    # Note, always put 'utf-8-sig' first, so that BOM in WinOS won't cause trouble.
+    for encoding in ['utf-8-sig', 'utf-8', 'utf-16', 'utf-16le', 'utf-16be']:
         try:
             with codecs_open(file_path, encoding=encoding) as f:
-                text = f.read()
-
-            if not text and not throw_on_empty:
-                return None
-
-            return json.loads(text)
+                return f.read()
+        except UnicodeDecodeError:
+            if allow_binary:
+                with open(file_path, 'rb') as input_file:
+                    return input_file.read()
+            else:
+                raise
         except UnicodeError:
             pass
-        except Exception as ex:
-            raise CLIError("File '{}' contains error: {}".format(file_path, str(ex)))
 
     raise CLIError('Failed to decode file {} - unknown decoding'.format(file_path))
 

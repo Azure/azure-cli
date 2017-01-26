@@ -87,13 +87,21 @@ class TestApplication(unittest.TestCase):
         f = tempfile.NamedTemporaryFile(delete=False)
         f.close()
 
+        f_with_bom = tempfile.NamedTemporaryFile(delete=False)
+        f_with_bom.close()
+
         with open(f.name, 'w+') as stream:
+            stream.write('foo')
+
+        from codecs import open as codecs_open
+        with codecs_open(f_with_bom.name, encoding='utf-8-sig', mode='w+') as stream:
             stream.write('foo')
 
         cases = [
             [['bar=baz'], ['bar=baz']],
             [['bar', 'baz'], ['bar', 'baz']],
             [['bar=@{}'.format(f.name)], ['bar=foo']],
+            [['bar=@{}'.format(f_with_bom.name)], ['bar=foo']],
             [['bar', '@{}'.format(f.name)], ['bar', 'foo']],
             [['bar', f.name], ['bar', f.name]],
             [['bar=name@company.com'], ['bar=name@company.com']],
