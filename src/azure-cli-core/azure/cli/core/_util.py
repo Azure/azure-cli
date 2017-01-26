@@ -17,9 +17,10 @@ COMPONENT_PREFIX = 'azure-cli-'
 
 logger = azlogging.get_az_logger(__name__)
 
-#the list we will ever try to open a file(feel free to update it)
-#Note, always put 'utf-8-sig' first, so that BOM in WinOS won't cause trouble.
+# the list we will ever try to open a file(feel free to update it)
+# Note, always put 'utf-8-sig' first, so that BOM in WinOS won't cause trouble.
 ENCODINGS_TO_TRY = ['utf-8-sig', 'utf-8', 'utf-16', 'utf-16le', 'utf-16be']
+
 
 class CLIError(Exception):
     """Base class for exceptions that occur during

@@ -247,14 +247,14 @@ class Application(object):
                     try:
                         with codecs_open(file_path, encoding=encoding, mode='r') as input_file:
                             content = input_file.read()
-                    except UnicodeError:  # file encoding issues such as utf-16 w/o BOM
-                        continue
                     except UnicodeDecodeError:  # only surface from Python 3 on binary files
                         with open(file_path, 'rb') as input_file:
                             content = input_file.read()
+                    except UnicodeError:  # file encoding issues such as utf-16 w/o BOM
+                        continue
                     break
                 if content is None:
-                    raise CLIError('{} has unrecognized encoding'.format(f))
+                    raise CLIError('{} has unrecognized encoding'.format(file_path))
 
             return content[0:-1] if content[-1] == '\n' else content
         except:
