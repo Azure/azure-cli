@@ -48,14 +48,18 @@ def transform_vm(result):
 
 def transform_vm_create_output(result):
     from azure.cli.core.commands.arm import parse_resource_id
-    return OrderedDict([('id', result.id),
-                        ('resourceGroup', getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']),
-                        ('powerState', result.power_state),
-                        ('publicIpAddress', result.public_ips),
-                        ('fqdns', result.fqdns),
-                        ('privateIpAddress', result.private_ips),
-                        ('macAddress', result.mac_addresses),
-                        ('location', result.location)])
+    try:
+        return OrderedDict([('id', result.id),
+                            ('resourceGroup', getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']),
+                            ('powerState', result.power_state),
+                            ('publicIpAddress', result.public_ips),
+                            ('fqdns', result.fqdns),
+                            ('privateIpAddress', result.private_ips),
+                            ('macAddress', result.mac_addresses),
+                            ('location', result.location)])
+    except AttributeError:
+        # ClientRawResponse (when using --no-wait) will not have this info
+        return None
 
 
 def transform_vm_list(vm_list):
