@@ -241,7 +241,7 @@ class Application(object):
             content = sys.stdin.read()
         else:
             content = read_file_content(os.path.expanduser(path),
-                                        allow_bianry=True)
+                                        allow_binary=True)
 
         return content[0:-1] if content and content[-1] == '\n' else content
 

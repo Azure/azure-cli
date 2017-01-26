@@ -100,7 +100,7 @@ def get_file_json(file_path, throw_on_empty=True):
     return json.loads(content)
 
 
-def read_file_content(file_path, allow_bianry=False):
+def read_file_content(file_path, allow_binary=False):
     from codecs import open as codecs_open
     # Note, always put 'utf-8-sig' first, so that BOM in WinOS won't cause trouble.
     for encoding in ['utf-8-sig', 'utf-8', 'utf-16', 'utf-16le', 'utf-16be']:
@@ -108,7 +108,7 @@ def read_file_content(file_path, allow_bianry=False):
             with codecs_open(file_path, encoding=encoding) as f:
                 return f.read()
         except UnicodeDecodeError:
-            if allow_bianry:
+            if allow_binary:
                 with open(file_path, 'rb') as input_file:
                     return input_file.read()
             else:
