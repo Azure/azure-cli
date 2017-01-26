@@ -9,6 +9,7 @@ from azure.cli.core._util import CLIError
 from azure.cli.command_modules.batch.tests.test_batch_data_plane_command_base import (
     BatchDataPlaneTestBase)
 
+
 class BatchPoolScenarioTest(BatchDataPlaneTestBase):
 
     def __init__(self, test_method):
@@ -160,7 +161,7 @@ class BatchPoolScenarioTest(BatchDataPlaneTestBase):
         # test list node agent skus
         self.cmd('batch pool node-agent-skus list')
 
-        ## test delete iaas pool
+        # test delete iaas pool
         self.cmd('batch pool delete --pool-id {} --force'.format(self.pool_iaas))
         pool_result = self.cmd('batch pool show --pool-id {} --select "state"'.format(
             self.pool_iaas))

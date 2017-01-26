@@ -45,10 +45,10 @@ IGNORE_OPTIONS = {  # Options parameters that should not be exposed as arguments
 }
 IGNORE_PARAMETERS = {'callback'}
 FLATTEN_OPTIONS = {  # Options to be flattened into multiple arguments.
-    'ocp_range': {'start_range':"The byte range to be retrieved. "
-                                "If not set the file will be retrieved from the beginning.",
-                  'end_range':"The byte range to be retrieved. "
-                              "If not set the file will be retrieved to the end."}
+    'ocp_range': {'start_range': "The byte range to be retrieved. "
+                                 "If not set the file will be retrieved from the beginning.",
+                  'end_range': "The byte range to be retrieved. "
+                               "If not set the file will be retrieved to the end."}
 }
 BASIC_TYPES = {  # Argument types that should not be flattened.
     'str',
@@ -184,6 +184,7 @@ def arg_name(name):
     """
     return "--" + name.replace('_', '-')
 
+
 def format_options_name(operation):
     """Format the name of the request options parameter from the
     operation name and path.
@@ -194,6 +195,7 @@ def format_options_name(operation):
     op_class, op_function = operation.split('.')
     op_class = operations_name(op_class)
     return "{}_{}_options".format(op_class, op_function)
+
 
 class BatchArgumentTree(object):
     """Dependency tree parser for arguments of complex objects"""

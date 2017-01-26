@@ -101,8 +101,9 @@ def storage_account_id(namespace):
             acc = storage_client.storage_accounts.get_properties(namespace.resource_group_name,
                                                                  namespace.storage_account_name)
             if not acc:
-                raise ValueError("Batch account '{}' not found in the resource group '{}'.". \
-                    format(namespace.storage_account_name, namespace.resource_group_name))
+                raise ValueError("Batch account '{}' not found in the resource group '{}'.".
+                                 format(namespace.storage_account_name,
+                                        namespace.resource_group_name))
             namespace.storage_account_id = acc.id  # pylint: disable=no-member
     del namespace.storage_account_name
 
@@ -203,8 +204,8 @@ def validate_client_parameters(namespace):
         endpoint = urlsplit(namespace.account_endpoint)
         host = endpoint.netloc
         client = get_mgmt_service_client(BatchManagementClient)
-        acc = next((x for x in client.batch_account.list() \
-            if x.name == namespace.account_name and x.account_endpoint == host), None)
+        acc = next((x for x in client.batch_account.list()
+                    if x.name == namespace.account_name and x.account_endpoint == host), None)
         if acc:
             from azure.cli.core.commands.arm import parse_resource_id
             rg = parse_resource_id(acc.id)['resource_group']
@@ -219,6 +220,7 @@ def validate_client_parameters(namespace):
             raise ValueError("Need specifiy batch endpoint in command line or enviroment variable.")
 
 # CUSTOM REQUEST VALIDATORS
+
 
 def validate_pool_settings(ns, parser):
     """Custom parsing to enfore that either PaaS or IaaS instances are configured

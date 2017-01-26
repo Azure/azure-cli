@@ -17,9 +17,11 @@ from azure.cli.core._util import CLIError
 from azure.cli.command_modules.batch import _validators
 from azure.cli.command_modules.batch import _command_type
 
+
 class TestObj(object):
     # pylint: disable=too-many-instance-attributes,too-few-public-methods
     pass
+
 
 class TestBatchValidators(unittest.TestCase):
     # pylint: disable=attribute-defined-outside-init,no-member
@@ -455,8 +457,8 @@ class TestBatchLoader(unittest.TestCase):
             'wait_for_success': None
         }
         params = {
-            'id': {'path': 'pool', 'root':'id'},
-            'vm_size': {'path': 'pool', 'root':'vm_size'},
+            'id': {'path': 'pool', 'root': 'id'},
+            'vm_size': {'path': 'pool', 'root': 'vm_size'},
             'os_family': {'path': 'pool.cloud_service_configuration', 'root': 'os_family'},
             'run_elevated': {'path': 'pool.start_task', 'root': 'run_elevated'},
             'command_line': {'path': 'pool.start_task', 'root': 'command_line'},

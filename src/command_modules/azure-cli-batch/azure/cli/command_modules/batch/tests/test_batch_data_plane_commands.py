@@ -9,6 +9,7 @@ from azure.cli.core.test_utils.vcr_test_base import (JMESPathCheck)
 from azure.cli.command_modules.batch.tests.test_batch_data_plane_command_base import (
     BatchDataPlaneTestBase)
 
+
 class BatchCertificateScenarioTest(BatchDataPlaneTestBase):
 
     def __init__(self, test_method):
@@ -30,7 +31,7 @@ class BatchCertificateScenarioTest(BatchDataPlaneTestBase):
                      JMESPathCheck('thumbprint', self.cert_thumbprint),
                      JMESPathCheck('thumbprintAlgorithm', 'sha1'),
                      JMESPathCheck('state', 'active')
-                     ])
+                 ])
 
         # test create account with default set
         self.cmd('batch certificate list', checks=[
@@ -47,7 +48,7 @@ class BatchCertificateScenarioTest(BatchDataPlaneTestBase):
                      JMESPathCheck('thumbprint', self.cert_thumbprint),
                      JMESPathCheck('thumbprintAlgorithm', 'sha1'),
                      JMESPathCheck('state', 'deleting')
-                     ])
+                 ])
 
 
 class BatchPoolScenarioTest(BatchDataPlaneTestBase):
@@ -68,20 +69,16 @@ class BatchPoolScenarioTest(BatchDataPlaneTestBase):
 
     def body(self):
         result = self.cmd('batch pool show --pool-id {}'.format(self.share_pool_id),
-                          checks=[
-                              JMESPathCheck('allocationState', 'steady'),
-                              JMESPathCheck('id', self.share_pool_id)
-                              ])
+                          checks=[JMESPathCheck('allocationState', 'steady'),
+                                  JMESPathCheck('id', self.share_pool_id)])
         target = result['currentDedicated']
 
         self.cmd('batch pool resize --pool-id {} --target-dedicated 5'.format(self.share_pool_id))
 
         self.cmd('batch pool show --pool-id {}'.format(self.share_pool_id),
-                 checks=[
-                     JMESPathCheck('allocationState', 'resizing'),
-                     JMESPathCheck('targetDedicated', 5),
-                     JMESPathCheck('id', self.share_pool_id)
-                     ])
+                 checks=[JMESPathCheck('allocationState', 'resizing'),
+                         JMESPathCheck('targetDedicated', 5),
+                         JMESPathCheck('id', self.share_pool_id)])
 
         self.cmd('batch pool resize --pool-id {} --abort'.format(self.share_pool_id))
 
@@ -90,40 +87,32 @@ class BatchPoolScenarioTest(BatchDataPlaneTestBase):
             time.sleep(60)
 
         self.cmd('batch pool show --pool-id {}'.format(self.share_pool_id),
-                 checks=[
-                     JMESPathCheck('allocationState', 'steady'),
-                     JMESPathCheck('id', self.share_pool_id),
-                     JMESPathCheck('currentDedicated', target),
-                     JMESPathCheck('targetDedicated', 5)
-                     ])
+                 checks=[JMESPathCheck('allocationState', 'steady'),
+                         JMESPathCheck('id', self.share_pool_id),
+                         JMESPathCheck('currentDedicated', target),
+                         JMESPathCheck('targetDedicated', 5)])
 
         self.cmd('batch pool create --json-file "{}"'.format(self.create_pool_file_path))
 
         self.cmd('batch pool show --pool-id {}'.format(self.create_pool_id),
-                 checks=[
-                     JMESPathCheck('allocationState', 'steady'),
-                     JMESPathCheck('id', self.create_pool_id),
-                     JMESPathCheck('startTask.commandLine', "cmd /c echo test")
-                     ])
+                 checks=[JMESPathCheck('allocationState', 'steady'),
+                         JMESPathCheck('id', self.create_pool_id),
+                         JMESPathCheck('startTask.commandLine', "cmd /c echo test")])
 
         self.cmd('batch pool reset --pool-id {} --json-file "{}"'.
                  format(self.create_pool_id, self.update_pool_file_path),
-                 checks=[
-                     JMESPathCheck('allocationState', 'steady'),
-                     JMESPathCheck('id', self.create_pool_id),
-                     JMESPathCheck('startTask.commandLine', "cmd /c echo updated")
-                     ])
+                 checks=[JMESPathCheck('allocationState', 'steady'),
+                         JMESPathCheck('id', self.create_pool_id),
+                         JMESPathCheck('startTask.commandLine', "cmd /c echo updated")])
 
         self.cmd('batch pool reset --pool-id {} --command-line hostname --metadata a=b c=d'.
                  format(self.create_pool_id),
-                 checks=[
-                     JMESPathCheck('allocationState', 'steady'),
-                     JMESPathCheck('id', self.create_pool_id),
-                     JMESPathCheck('startTask.commandLine', "hostname"),
-                     JMESPathCheck('length(metadata)', 2),
-                     JMESPathCheck('metadata[0].name', 'a'),
-                     JMESPathCheck('metadata[1].value', 'd')
-                     ])
+                 checks=[JMESPathCheck('allocationState', 'steady'),
+                         JMESPathCheck('id', self.create_pool_id),
+                         JMESPathCheck('startTask.commandLine', "hostname"),
+                         JMESPathCheck('length(metadata)', 2),
+                         JMESPathCheck('metadata[0].name', 'a'),
+                         JMESPathCheck('metadata[1].value', 'd')])
 
         self.cmd('batch pool delete --pool-id {} --force'.format(self.create_pool_id))
 
@@ -157,15 +146,11 @@ class BatchJobListScenarioTest(BatchDataPlaneTestBase):
         self.cmd('batch job create --json-file "{}"'.format(self.create_job_file_path))
 
         self.cmd('batch job list --job-schedule-id {}'.format(self.job_schedule_id),
-                 checks=[
-                     JMESPathCheck('length(@)', 1),
-                     JMESPathCheck('[0].id', '{}:job-1'.format(self.job_schedule_id))
-                     ])
+                 checks=[JMESPathCheck('length(@)', 1),
+                         JMESPathCheck('[0].id', '{}:job-1'.format(self.job_schedule_id))])
 
         result = self.cmd('batch job list',
-                          checks=[
-                              JMESPathCheck('length(@)', 2)
-                              ])
+                          checks=[JMESPathCheck('length(@)', 2)])
         self.assertIsNotNone(
             [i for i in result if i['id'] == '{}:job-1'.format(self.job_schedule_id)])
         self.assertIsNotNone([i for i in result if i['id'] == self.create_job_id])
@@ -201,26 +186,20 @@ class BatchTaskAddScenarioTest(BatchDataPlaneTestBase):
     def body(self):
         self.cmd('batch task create --job-id {} --json-file "{}"'.
                  format(self.job_id, self.create_task_file_path),
-                 checks=[
-                     JMESPathCheck('id', self.task_id),
-                     JMESPathCheck('commandLine', 'cmd /c dir /s')
-                     ])
+                 checks=[JMESPathCheck('id', self.task_id),
+                         JMESPathCheck('commandLine', 'cmd /c dir /s')])
 
         self.cmd('batch task delete --job-id {} --task-id {} --force'.
                  format(self.job_id, self.task_id))
 
         self.cmd('batch task create --job-id {} --task-id aaa --command-line "echo hello"'.
                  format(self.job_id),
-                 checks=[
-                     JMESPathCheck('id', 'aaa'),
-                     JMESPathCheck('commandLine', 'echo hello')
-                     ])
+                 checks=[JMESPathCheck('id', 'aaa'),
+                         JMESPathCheck('commandLine', 'echo hello')])
 
         self.cmd('batch task delete --job-id {} --task-id aaa --force'.format(self.job_id))
 
         result = self.cmd('batch task create --job-id {} --json-file "{}"'.
                           format(self.job_id, self.create_tasks_file_path),
-                          checks=[
-                              JMESPathCheck('length(@)', 3)
-                              ])
+                          checks=[JMESPathCheck('length(@)', 3)])
         self.assertIsNotNone([i for i in result if i['taskId'] == 'xplatTask1'])

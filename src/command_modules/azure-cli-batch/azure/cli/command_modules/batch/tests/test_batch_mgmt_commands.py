@@ -8,6 +8,7 @@ import tempfile
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck,
                                                      NoneCheck)
 
+
 def _before_record_response(response):
     # ignore any 401 responses during playback
     if response['status']['code'] == 401:
@@ -40,11 +41,9 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
         # test create storage account with default set
         result = self.cmd('storage account create -g {} -n {} -l {} --sku Standard_LRS'.
                           format(rg, self.storage_account_name, loc),
-                          checks=[
-                              JMESPathCheck('name', self.storage_account_name),
-                              JMESPathCheck('location', loc),
-                              JMESPathCheck('resourceGroup', rg)
-                              ])
+                          checks=[JMESPathCheck('name', self.storage_account_name),
+                                  JMESPathCheck('location', loc),
+                                  JMESPathCheck('resourceGroup', rg)])
         sid = result['id']
 
         # test create account with default set
@@ -56,32 +55,26 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('batch account set -g {} -n {} --storage-account-name {}'.
                  format(rg, name, self.storage_account_name),
-                 checks=[
-                     JMESPathCheck('name', name),
-                     JMESPathCheck('location', loc),
-                     JMESPathCheck('resourceGroup', rg)
-                     ])
+                 checks=[JMESPathCheck('name', name),
+                         JMESPathCheck('location', loc),
+                         JMESPathCheck('resourceGroup', rg)])
 
-        self.cmd('batch account show -g {} -n {}'.format(rg, name), checks=[
-            JMESPathCheck('name', name),
-            JMESPathCheck('location', loc),
-            JMESPathCheck('resourceGroup', rg),
-            JMESPathCheck('autoStorage.storageAccountId', sid)
-        ])
+        self.cmd('batch account show -g {} -n {}'.format(rg, name),
+                 checks=[JMESPathCheck('name', name),
+                         JMESPathCheck('location', loc),
+                         JMESPathCheck('resourceGroup', rg),
+                         JMESPathCheck('autoStorage.storageAccountId', sid)])
 
         self.cmd('batch account autostorage-keys sync -g {} -n {}'.format(rg, name))
 
-        keys = self.cmd('batch account keys list -g {} -n {}'.format(rg, name), checks=[
-            JMESPathCheck('primary != null', True),
-            JMESPathCheck('secondary != null', True)
-        ])
+        keys = self.cmd('batch account keys list -g {} -n {}'.format(rg, name),
+                        checks=[JMESPathCheck('primary != null', True),
+                                JMESPathCheck('secondary != null', True)])
 
         keys2 = self.cmd('batch account keys renew -g {} -n {} --key-name primary'.
                          format(rg, name),
-                         checks=[
-                             JMESPathCheck('primary != null', True),
-                             JMESPathCheck('secondary', keys['secondary'])
-                         ])
+                         checks=[JMESPathCheck('primary != null', True),
+                                 JMESPathCheck('secondary', keys['secondary'])])
 
         self.assertTrue(keys['primary'] != keys2['primary'])
 
@@ -89,9 +82,8 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('batch account delete -g {} -n {} --force'.format(rg, name))
         self.cmd('batch account list -g {}'.format(rg), checks=NoneCheck())
 
-        self.cmd('batch location quotas show -l {}'.format(loc), checks=[
-            JMESPathCheck('accountQuota', 1)
-        ])
+        self.cmd('batch location quotas show -l {}'.format(loc),
+                 checks=[JMESPathCheck('accountQuota', 1)])
 
 
 class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
@@ -118,7 +110,6 @@ class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('location', loc),
                      JMESPathCheck('resourceGroup', rg)
                  ])
-
 
     def tear_down(self):
         rg = self.resource_group
@@ -160,7 +151,8 @@ class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('[0].id', aname),
         ])
 
-        self.cmd('batch application package create -g {} -n {} --application-id {} --version {} --package-file "{}"'.  # pylint: disable=line-too-long
+        self.cmd('batch application package create -g {} -n {} --application-id {}'
+                 ' --version {} --package-file "{}"'.
                  format(rg, name, aname, ver, self.package_file_name), checks=[
                      JMESPathCheck('id', aname),
                      JMESPathCheck('storageUrl != null', True),
@@ -168,7 +160,8 @@ class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('state', 'active')
                  ])
 
-        self.cmd('batch application package activate -g {} -n {} --application-id {} --version {} --format zip'.format(rg, name, aname, ver)) #pylint: disable=line-too-long
+        self.cmd('batch application package activate -g {} -n {} --application-id {}'
+                 ' --version {} --format zip'.format(rg, name, aname, ver))
 
         self.cmd('batch application package show -g {} -n {} --application-id {} --version {}'.
                  format(rg, name, aname, ver), checks=[
@@ -181,12 +174,10 @@ class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('batch application set -g {} -n {} --application-id {} --default-version {}'.format(rg, name, aname, ver))  # pylint: disable=line-too-long
 
         self.cmd('batch application show -g {} -n {} --application-id {}'.format(rg, name, aname),
-                 checks=[
-                     JMESPathCheck('id', aname),
-                     JMESPathCheck('defaultVersion', ver),
-                     JMESPathCheck('packages[0].format', 'zip'),
-                     JMESPathCheck('packages[0].state', 'active')
-                 ])
+                 checks=[JMESPathCheck('id', aname),
+                         JMESPathCheck('defaultVersion', ver),
+                         JMESPathCheck('packages[0].format', 'zip'),
+                         JMESPathCheck('packages[0].state', 'active')])
 
         # test batch applcation delete
         self.cmd('batch application package delete -g {} -n {} --application-id {} --version {}'.

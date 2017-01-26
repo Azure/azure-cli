@@ -6,7 +6,7 @@
 try:
     from urllib.parse import urlsplit
 except ImportError:
-    from urlparse import urlsplit # pylint: disable=import-error
+    from urlparse import urlsplit  # pylint: disable=import-error
 import json
 import base64
 
@@ -30,6 +30,16 @@ import azure.cli.core.azlogging as azlogging
 
 logger = azlogging.get_az_logger(__name__)
 
+
+def transfer_doc(source_func, *additional_source_funcs):
+    def _decorator(func):
+        func.__doc__ = source_func.__doc__
+        for f in additional_source_funcs:
+            func.__doc__ += "\n" + f.__doc__
+        return func
+    return _decorator
+
+
 # Mgmt custom commands
 
 def list_accounts(client, resource_group_name=None):
@@ -38,6 +48,7 @@ def list_accounts(client, resource_group_name=None):
     return list(acct_list)
 
 
+@transfer_doc(AutoStorageBaseProperties)
 def create_account(client, resource_group_name, account_name, location,  # pylint:disable=too-many-arguments
                    tags=None, storage_account_id=None):
     if storage_account_id:
@@ -53,9 +64,8 @@ def create_account(client, resource_group_name, account_name, location,  # pylin
                          account_name=account_name,
                          parameters=parameters)
 
-create_account.__doc__ = AutoStorageBaseProperties.__doc__
 
-
+@transfer_doc(AutoStorageBaseProperties)
 def update_account(client, resource_group_name, account_name,  # pylint:disable=too-many-arguments
                    tags=None, storage_account_id=None):
     if storage_account_id:
@@ -68,10 +78,9 @@ def update_account(client, resource_group_name, account_name,  # pylint:disable=
                          tags=tags,
                          auto_storage=properties)
 
-update_account.__doc__ = AutoStorageBaseProperties.__doc__
 
-
-def update_application(client, resource_group_name, account_name, application_id, # pylint:disable=too-many-arguments
+@transfer_doc(UpdateApplicationParameters)
+def update_application(client, resource_group_name, account_name, application_id,  # pylint:disable=too-many-arguments
                        allow_updates=None, display_name=None, default_version=None):
     parameters = UpdateApplicationParameters(allow_updates=allow_updates,
                                              display_name=display_name,
@@ -80,8 +89,6 @@ def update_application(client, resource_group_name, account_name, application_id
                          account_name=account_name,
                          application_id=application_id,
                          parameters=parameters)
-
-update_application.__doc__ = UpdateApplicationParameters.__doc__
 
 
 def _upload_package_blob(package_file, url):
@@ -108,7 +115,8 @@ def _upload_package_blob(package_file, url):
     )
 
 
-def create_application_package(client, resource_group_name, account_name, # pylint:disable=too-many-arguments
+@transfer_doc(ApplicationPackageOperations.create)
+def create_application_package(client, resource_group_name, account_name,  # pylint:disable=too-many-arguments
                                application_id, version, package_file):
 
     # create application if not exist
@@ -128,11 +136,10 @@ def create_application_package(client, resource_group_name, account_name, # pyli
     client.activate(resource_group_name, account_name, application_id, version, "zip")
     return client.get(resource_group_name, account_name, application_id, version)
 
-create_application_package.__doc__ = ApplicationPackageOperations.create.__doc__
-
 
 # Data plane custom commands
 
+@transfer_doc(CertificateAddParameter)
 def create_certificate(client, cert_file, thumbprint, thumbprint_algorithm, password=None):
     if password:
         certificate_format = 'pfx'
@@ -159,8 +166,6 @@ def create_certificate(client, cert_file, thumbprint, thumbprint_algorithm, pass
     except (ValidationError, ClientRequestError) as ex:
         raise CLIError(ex)
 
-create_application_package.__doc__ = CertificateAddParameter.__doc__
-
 
 def delete_certificate(client, thumbprint, thumbprint_algorithm, abort=None):
     try:
@@ -181,6 +186,7 @@ def delete_certificate(client, thumbprint, thumbprint_algorithm, abort=None):
         raise CLIError(ex)
 
 
+@transfer_doc(PoolResizeParameter)
 def resize_pool(client, pool_id, target_dedicated=None,  # pylint:disable=too-many-arguments
                 resize_timeout=None, node_deallocation_option=None,
                 if_match=None, if_none_match=None, if_modified_since=None,
@@ -214,9 +220,8 @@ def resize_pool(client, pool_id, target_dedicated=None,  # pylint:disable=too-ma
     except (ValidationError, ClientRequestError) as ex:
         raise CLIError(ex)
 
-resize_pool.__doc__ = PoolResizeParameter.__doc__
 
-
+@transfer_doc(PoolUpdatePropertiesParameter, StartTask)
 def update_pool(client, pool_id, json_file=None, command_line=None,  # pylint:disable=too-many-arguments, W0613
                 certificate_references=None, application_package_references=None, metadata=None):
     if json_file:
@@ -265,8 +270,6 @@ def update_pool(client, pool_id, json_file=None, command_line=None,  # pylint:di
     except (ValidationError, ClientRequestError) as ex:
         raise CLIError(ex)
 
-update_pool.__doc__ = PoolUpdatePropertiesParameter.__doc__ + "\n" + StartTask.__doc__
-
 
 def list_job(client, job_schedule_id=None, filter=None, select=None, expand=None):  # pylint:disable=W0622
     try:
@@ -294,6 +297,7 @@ def list_job(client, job_schedule_id=None, filter=None, select=None, expand=None
         raise CLIError(ex)
 
 
+@transfer_doc(TaskAddParameter, TaskConstraints)
 def create_task(client, job_id, json_file=None, task_id=None, command_line=None,  # pylint:disable=too-many-arguments
                 resource_files=None, environment_settings=None, affinity_info=None,
                 max_wall_clock_time=None, retention_time=None, max_task_retry_count=None,
@@ -317,7 +321,7 @@ def create_task(client, job_id, json_file=None, task_id=None, command_line=None,
                                 run_elevated=run_elevated,
                                 application_package_references=application_package_references)
         if max_wall_clock_time is not None or retention_time is not None \
-            or max_task_retry_count is not None:
+                or max_task_retry_count is not None:
             task.constraints = TaskConstraints(max_wall_clock_time=max_wall_clock_time,
                                                retention_time=retention_time,
                                                max_task_retry_count=max_task_retry_count)
@@ -340,5 +344,3 @@ def create_task(client, job_id, json_file=None, task_id=None, command_line=None,
             raise CLIError(ex)
     except (ValidationError, ClientRequestError) as ex:
         raise CLIError(ex)
-
-create_task.__doc__ = TaskAddParameter.__doc__ + "\n" + TaskConstraints.__doc__
