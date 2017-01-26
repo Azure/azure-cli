@@ -27,6 +27,7 @@
   <ItemGroup>
     <Compile Include="azure-cli-core\azure\cli\core\adal_authentication.py" />
     <Compile Include="azure-cli-core\azure\cli\core\application.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\azlogging.py" />
     <Compile Include="azure-cli-core\azure\cli\core\cloud.py" />
     <Compile Include="azure-cli-core\azure\cli\core\commands\arm.py" />
     <Compile Include="azure-cli-core\azure\cli\core\commands\client_factory.py" />
@@ -36,12 +37,15 @@
     <Compile Include="azure-cli-core\azure\cli\core\commands\_introspection.py" />
     <Compile Include="azure-cli-core\azure\cli\core\commands\__init__.py" />
     <Compile Include="azure-cli-core\azure\cli\core\context.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\decorators.py" />
     <Compile Include="azure-cli-core\azure\cli\core\extensions\experimental.py" />
     <Compile Include="azure-cli-core\azure\cli\core\extensions\query.py" />
     <Compile Include="azure-cli-core\azure\cli\core\extensions\transform.py" />
     <Compile Include="azure-cli-core\azure\cli\core\extensions\__init__.py" />
     <Compile Include="azure-cli-core\azure\cli\core\help_files.py" />
     <Compile Include="azure-cli-core\azure\cli\core\parser.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\prompting.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\telemetry_upload.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_add_resourcegroup_transform.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_application.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_cloud.py" />
@@ -65,8 +69,8 @@
     <Compile Include="azure-cli-core\azure\cli\core\test_utils\__init__.py" />
     <Compile Include="azure-cli-core\azure\cli\core\_config.py" />
     <Compile Include="azure-cli-core\azure\cli\core\_debug.py" />
+    <Compile Include="azure-cli-core\azure\cli\core\_environment.py" />
     <Compile Include="azure-cli-core\azure\cli\core\_help.py" />
-    <Compile Include="azure-cli-core\azure\cli\core\_logging.py" />
     <Compile Include="azure-cli-core\azure\cli\core\_output.py" />
     <Compile Include="azure-cli-core\azure\cli\core\_pkg_util.py" />
     <Compile Include="azure-cli-core\azure\cli\core\_profile.py" />
@@ -536,43 +540,6 @@
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\lib\operations\__init__.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\lib\version.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\credentials.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\exceptions.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\models\basic_dependency.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\models\dependency.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\models\deployment_extended.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\models\deployment_properties_extended.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\models\deployment_vmss.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\models\parameters_link.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\models\provider.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\models\provider_resource_type.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\models\template_link.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\models\vmss_creation_client_enums.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\models\__init__.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\operations\vmss_operations.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\operations\__init__.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\version.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\vmss_creation_client.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\__init__.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\credentials.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\exceptions.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\basic_dependency.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\dependency.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\deployment_extended.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\deployment_properties_extended.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\deployment_vm.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\parameters_link.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\provider.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\provider_resource_type.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\template_link.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\vm_create_creation_client_enums.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\vm_creation_client_enums.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\__init__.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\operations\vm_operations.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\operations\__init__.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\version.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\vm_creation_client.py" />
-    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\__init__.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\tests\test_custom_vm_commands.py" />
     <Compile Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\test_resource_list_odata_filter.py" />
     <Compile Include="command_modules\azure-cli-resource\azure\cli\command_modules\resource\tests\test_api_check.py">
@@ -611,6 +578,7 @@
     </Compile>
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\_client_factory.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\_help.py" />
+    <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\_template_builder.py" />
     <Compile Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\_validators.py">
       <SubType>Code</SubType>
     </Compile>
@@ -809,16 +777,6 @@
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\lib\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\lib\models\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\lib\operations\" />
-    <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\" />
-    <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\" />
-    <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\models\" />
-    <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\lib\operations\" />
-    <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\nested_templates\" />
-    <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\" />
-    <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\" />
-    <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\models\" />
-    <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\lib\operations\" />
-    <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\" />
     <Folder Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\tests\" />
   </ItemGroup>
@@ -880,34 +838,6 @@
     <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\azuredeploy.json" />
     <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\azuredeploy_empty.json" />
     <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_avail_set\swagger_create_avail_set.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\azuredeploy.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\azuredeploy_test.md" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\nested_templates\load_balancer_empty.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\nested_templates\load_balancer_new.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\azuredeploy_test.md" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vmss\swagger_create_vmss.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\azuredeploy.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\ExistingStorageAccount.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\NewStorageAccount.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\nic_existing.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\nic_ip_existing_dns_none.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\nic_ip_new_dns_new.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\nic_ip_new_dns_none.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\nic_ip_none_dns_none.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\nsg_existing_or_none.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\nsg_new.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\output_fqdn_new.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\output_fqdn_none.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\output_ip_existing.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\output_ip_new.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\output_ip_none.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\output_mac_none.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\output_mac_new.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\vm_existing_password.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\vm_existing_sshkey.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\vm_none_password.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\nested_templates\vm_none_sshkey.json" />
-    <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\mgmt_vm\swagger_create_vm.json" />
     <Content Include="command_modules\azure-cli-vm\azure\cli\command_modules\vm\tests\aliases.json" />
   </ItemGroup>
   <ItemGroup>
