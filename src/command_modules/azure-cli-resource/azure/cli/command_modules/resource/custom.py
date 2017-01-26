@@ -22,7 +22,9 @@ import azure.cli.core._logging as _logging
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
 
-from ._client_factory import _resource_client_factory, _resource_policy_client_factory
+from ._client_factory import (_resource_client_factory,
+                              _resource_policy_client_factory,
+                              _resource_lock_client_factory)
 
 logger = _logging.get_az_logger(__name__)
 
@@ -399,6 +401,35 @@ def get_policy_assignment_completion_list(prefix, **kwargs):#pylint: disable=unu
     policy_client = _resource_policy_client_factory()
     result = policy_client.policy_assignments.list()
     return [i.name for i in result]
+
+def list_locks(resource_group_name=None, resource_provider_namespace=None,
+               parent_resource_path=None, resource_type=None, resource_name=None,
+               filter_string=None):
+    '''
+    :param resource_provider_namespace: Name of a resource provider.
+    :type resource_provider_namespace: str
+    :param parent_resource_path: Path to a parent resource
+    :type parent_resource_path: str
+    :param resource_type: The type for the resource with the lock.
+    :type resource_type: str
+    :param resource_name: Name of a resource that has a lock.
+    :type resource_name: str
+    :param filter_string: A query filter to use to restrict the results.
+    :type filter_string: str
+    '''
+    lock_client = _resource_lock_client_factory()
+    if resource_group_name is None:
+        return lock_client.management_locks.list_at_subscription_level(filter=filter_string)
+    if resource_name is None:
+        return lock_client.management_locks.list_at_resource_group_level(
+            resource_group_name, filter=filter_string)
+    if resource_provider_namespace is None:
+        raise CLIError('--resource-provider-namespace is required if --resource-name is present')
+    if resource_type is None:
+        raise CLIError('--resource-type is required if --resource-name is present')
+    return lock_client.management_locks.list_at_resource_level(
+        resource_group_name, resource_provider_namespace, parent_resource_path, resource_type,
+        resource_name, filter=filter_string)
 
 class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
     def __init__(self, resource_group_name=None, resource_provider_namespace=None,
