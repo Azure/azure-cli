@@ -574,30 +574,24 @@ def process_metric_update_namespace(namespace):
 # region TYPES
 
 
-def datetime_string_type(string):
-    """ Validates UTC datettime in accepted format. Examples: 2017-12-31T01:11:59Z,
-    2017-12-31T01:11Z or 2017-12-31T01Z or 2017-12-31 """
-    return get_datetime_type(True, string)
-
-def get_datetime_type(to_string, string):
-    """ Abstracted datetime UTC validator. Examples of accepted forms:
+def get_datetime_type(to_string):
+    """ Validates UTC datetime. Examples of accepted forms:
     2017-12-31T01:11:59Z,2017-12-31T01:11Z or 2017-12-31T01Z or 2017-12-31 """
-    accepted_date_formats = ['%Y-%m-%dT%H:%M:%SZ', '%Y-%m-%dT%H:%MZ',
-                             '%Y-%m-%dT%HZ', '%Y-%m-%d']
-    for form in accepted_date_formats:
-        try:
-            if to_string:
-                return datetime.strptime(string, form).strftime(form)
-            else:
-                return datetime.strptime(string, form)
-        except ValueError:
-            continue
-    raise ValueError("Input not of valid format. Valid format: 2000-12-31T12:59:59Z")
-
-def datetime_type(string):
-    """ Validates UTC datettime in accepted format. Examples: 2017-12-31T01:11:59Z,
-    2017-12-31T01:11Z or 2017-12-31T01Z or 2017-12-31 """
-    return get_datetime_type(False, string)
+    def datetime_type(string):
+        """ Validates UTC datetime. Examples of accepted forms:
+        2017-12-31T01:11:59Z,2017-12-31T01:11Z or 2017-12-31T01Z or 2017-12-31 """
+        accepted_date_formats = ['%Y-%m-%dT%H:%M:%SZ', '%Y-%m-%dT%H:%MZ',
+                                 '%Y-%m-%dT%HZ', '%Y-%m-%d']
+        for form in accepted_date_formats:
+            try:
+                if to_string:
+                    return datetime.strptime(string, form).strftime(form)
+                else:
+                    return datetime.strptime(string, form)
+            except ValueError:
+                continue
+        raise ValueError("Input not of valid format. Valid format: 2000-12-31T12:59:59Z")
+    return datetime_type
 
 
 def ipv4_range_type(string):
