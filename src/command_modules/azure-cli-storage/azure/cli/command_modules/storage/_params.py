@@ -170,7 +170,7 @@ def register_path_argument(scope, default_file_param=None, options_list=None):
     register_extra_cli_argument(scope, 'path', options_list=options_list or ('--path', '-p'), required=default_file_param is None, help=path_help, validator=get_file_path_validator(default_file_param=default_file_param), completer=file_path_completer)
     register_cli_argument(scope, 'file_name', ignore_type)
     register_cli_argument(scope, 'directory_name', ignore_type)
-ƒ
+
 # EXTRA PARAMETER SET REGISTRATION
 
 
