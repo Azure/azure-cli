@@ -162,10 +162,14 @@ def get_vm_details(resource_group_name, vm_name):
     network_client = get_mgmt_service_client(NetworkManagementClient)
     public_ips = []
     fqdns = []
+    private_ips = []
+    mac_addresses = []
     # pylint: disable=line-too-long,no-member
     for nic_ref in result.network_profile.network_interfaces:
         nic = network_client.network_interfaces.get(resource_group_name, nic_ref.id.split('/')[-1])
+        mac_addresses.append(nic.mac_address)
         for ip_configuration in nic.ip_configurations:
+            private_ips.append(ip_configuration.private_ip_address)
             if ip_configuration.public_ip_address:
                 public_ip_info = network_client.public_ip_addresses.get(resource_group_name,
                                                                         ip_configuration.public_ip_address.id.split('/')[-1])
@@ -177,6 +181,8 @@ def get_vm_details(resource_group_name, vm_name):
     setattr(result, 'power_state', ','.join([s.display_status for s in result.instance_view.statuses if s.code.startswith('PowerState/')]))
     setattr(result, 'public_ips', ','.join(public_ips))
     setattr(result, 'fqdns', ','.join(fqdns))
+    setattr(result, 'private_ips', ','.join(private_ips))
+    setattr(result, 'mac_addresses', ','.join(mac_addresses))
     del result.instance_view  # we don't need other instance_view info as people won't care
     return result
 
@@ -1264,30 +1270,7 @@ def create_vm(vm_name, resource_group_name, image,
     else:
         LongRunningOperation()(client.create_or_update(
             resource_group_name, deployment_name, properties, raw=no_wait))
-
-    output_template = ArmTemplateBuilder()
-    output_template.add_output('id', vm_name, 'Microsoft.Compute', 'virtualMachines',
-                               output_type='string', path='vmId')
-    if nic_name:
-        output_template.add_output('privateIpAddress', nic_name, 'Microsoft.Network',
-                                   'networkInterfaces', output_type='string',
-                                   path='ipConfigurations[0].properties.privateIPAddress')
-        output_template.add_output('macAddress', nic_name, 'Microsoft.Network',
-                                   'networkInterfaces', 'string', 'macAddress')
-    if public_ip_address:
-        output_template.add_output('publicIpAddress', public_ip_address, 'Microsoft.Network',
-                                   'publicIPAddresses', output_type='string', path='ipAddress')
-    if public_ip_address_dns_name:
-        output_template.add_output('fqdn', public_ip_address, 'Microsoft.Network',
-                                   'publicIpAddresses', 'string', 'dnsSettings.fqdn')
-    # TODO: Re-enable resource group output
-    # output_template.add_output('resourceGroup', vm_name, 'Microsoft.Compute', 'virtualMachines',
-    #                           output_type='string', path='resourceGroup')
-
-    output_deployment_name = 'vm_{}_output_{}'.format(vm_name, random_string(8))
-    properties = DeploymentProperties(
-        template=output_template.build(), parameters={}, mode='incremental')
-    return client.create_or_update(resource_group_name, output_deployment_name, properties)
+    return get_vm_details(resource_group_name, vm_name)
 
 
 # pylint: disable=too-many-locals, too-many-statements

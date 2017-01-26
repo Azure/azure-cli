@@ -46,13 +46,25 @@ def transform_vm(result):
                         ('location', result['location'])])
 
 
+def transform_vm_create_output(result):
+    from azure.cli.core.commands.arm import parse_resource_id
+    return OrderedDict([('id', result.id),
+                        ('resourceGroup', getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']),
+                        ('powerState', result.power_state),
+                        ('publicIpAddress', result.public_ips),
+                        ('fqdns', result.fqdns),
+                        ('privateIpAddress', result.private_ips),
+                        ('macAddress', result.mac_addresses),
+                        ('location', result.location)])
+
+
 def transform_vm_list(vm_list):
     return [transform_vm(v) for v in vm_list]
 
 
 op_var = 'virtual_machines_operations'
 op_class = 'VirtualMachinesOperations'
-cli_command(__name__, 'vm create', custom_path.format('create_vm'), transform=DeploymentOutputLongRunningOperation('Starting vm create'))
+cli_command(__name__, 'vm create', custom_path.format('create_vm'), transform=transform_vm_create_output)
 cli_command(__name__, 'vm delete', mgmt_path.format(op_var, op_class, 'delete'), cf_vm)
 cli_command(__name__, 'vm deallocate', mgmt_path.format(op_var, op_class, 'deallocate'), cf_vm)
 cli_command(__name__, 'vm generalize', mgmt_path.format(op_var, op_class, 'generalize'), cf_vm)
