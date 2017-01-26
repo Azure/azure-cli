@@ -245,7 +245,6 @@ class Application(object):
 
         return content[0:-1] if content and content[-1] == '\n' else content
 
-
     def _handle_builtin_arguments(self, **kwargs):
         args = kwargs['args']
         self.configuration.output_format = args._output_format  # pylint: disable=protected-access
