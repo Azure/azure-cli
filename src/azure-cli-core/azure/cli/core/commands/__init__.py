@@ -117,7 +117,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         except ClientException as client_exception:
             telemetry.set_exception(
                 client_exception,
-                fault_type='client-exception',
+                fault_type='failed-long-running-operation',
                 summary='Unexpected client exception in {}.'.format(LongRunningOperation.__name__))
             message = getattr(client_exception, 'message', client_exception)
 
@@ -241,7 +241,7 @@ def get_command_table():
             # Changing this error message requires updating CI script that checks for failed
             # module loading.
             logger.error("Error loading command module '%s'", mod)
-            telemetry.set_exception(exception=ex, fault_type='module-load-error',
+            telemetry.set_exception(exception=ex, fault_type='module-load-error-' + mod,
                                     summary='Error loading module: {}'.format(mod))
             logger.debug(traceback.format_exc())
     logger.debug("Loaded all modules in %.3f seconds. "
@@ -323,17 +323,20 @@ def create_command(module_name, name, operation,
             else:
                 return result
         except ClientException as client_exception:
-            telemetry.set_exception(client_exception, fault_type='client-exception',
+            fault_type = name.replace(' ', '-') + '-client-error'
+            telemetry.set_exception(client_exception, fault_type=fault_type,
                                     summary='Unexpected client exception during command creation')
             message = getattr(client_exception, 'message', client_exception)
             raise _polish_rp_not_registerd_error(CLIError(message))
         except AzureException as azure_exception:
-            telemetry.set_exception(azure_exception, fault_type='azure-exception',
+            fault_type = name.replace(' ', '-') + '-service-error'
+            telemetry.set_exception(azure_exception, fault_type=fault_type,
                                     summary='Unexpected azure exception during command creation')
             message = re.search(r"([A-Za-z\t .])+", str(azure_exception))
             raise CLIError('\n{}'.format(message.group(0) if message else str(azure_exception)))
         except ValueError as value_error:
-            telemetry.set_exception(value_error, fault_type='value-exception',
+            fault_type = name.replace(' ', '-') + '-value-error'
+            telemetry.set_exception(value_error, fault_type=fault_type,
                                     summary='Unexpected value exception during command creation')
             raise CLIError(value_error)
         except CLIError as cli_error:
