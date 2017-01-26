@@ -81,8 +81,8 @@ def register_attributes_argument(scope, name, attr_class, create=False):
         register_extra_cli_argument(scope, 'disabled', action='store_true', help='Create {} in disabled state.'.format(name))
     else:
         register_extra_cli_argument(scope, 'enabled', default=None, choices=['true', 'false'], help='Enable the {}.'.format(name))
-    register_extra_cli_argument(scope, 'expires', default=None, help='Expiration UTC datetime  (Y-m-d\'T\'H:M\'Z\').', type=datetime_type)
-    register_extra_cli_argument(scope, 'not_before', default=None, help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M\'Z\').', type=datetime_type)
+    register_extra_cli_argument(scope, 'expires', default=None, help='Expiration UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
+    register_extra_cli_argument(scope, 'not_before', default=None, help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
 
 # ARGUMENT DEFINITIONS
 
@@ -122,8 +122,8 @@ for item in ['create', 'import']:
     register_cli_argument('keyvault key {}'.format(item), 'destination', options_list=('--protection', '-p'), choices=['software', 'hsm'], help='Specifies the type of key protection.', validator=validate_key_type, type=str.lower)
     register_cli_argument('keyvault key {}'.format(item), 'disabled', action='store_true', help='Create key in disabled state.')
     register_cli_argument('keyvault key {}'.format(item), 'key_size', options_list=('--size',), type=int)
-    register_cli_argument('keyvault key {}'.format(item), 'expires', default=None, help='Expiration UTC datetime  (Y-m-d\'T\'H:M\'Z\').', type=datetime_type)
-    register_cli_argument('keyvault key {}'.format(item), 'not_before', default=None, help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M\'Z\').', type=datetime_type)
+    register_cli_argument('keyvault key {}'.format(item), 'expires', default=None, help='Expiration UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
+    register_cli_argument('keyvault key {}'.format(item), 'not_before', default=None, help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
 
 register_cli_argument('keyvault key import', 'pem_file', type=file_type, help='PEM file containing the key to be imported.', arg_group='Key Source', completer=FilesCompleter(), validator=validate_key_import_source)
 register_cli_argument('keyvault key import', 'pem_password', help='Password of PEM file.', arg_group='Key Source')

@@ -575,15 +575,31 @@ def process_metric_update_namespace(namespace):
 
 
 def datetime_string_type(string):
-    ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
-    date_format = '%Y-%m-%dT%H:%MZ'
-    return datetime.strptime(string, date_format).strftime(date_format)
+    """ Validates UTC datettime in accepted format. Examples: 2017-12-31T01:11:59Z,
+    2017-12-31T01:11Z or 2017-12-31T01Z or 2017-12-31 """
+    accepted_date_formats = ['%Y-%m-%dT%H:%M:%SZ', '%Y-%m-%dT%H:%MZ',
+                             '%Y-%m-%dT%HZ', '%Y-%m-%d']
+    for form in accepted_date_formats:
+        try:
+            return datetime.strptime(string, form).strftime(form)
+        except ValueError: # checks next format
+            pass
+    else:
+        raise ValueError("Not Valid Date Format")
 
 
 def datetime_type(string):
-    ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
-    date_format = '%Y-%m-%dT%H:%MZ'
-    return datetime.strptime(string, date_format)
+    """ Validates UTC datettime in accepted format. Examples: 2017-12-31T01:11:59Z,
+    2017-12-31T01:11Z or 2017-12-31T01Z or 2017-12-31 """
+    accepted_date_formats = ['%Y-%m-%dT%H:%M:%SZ', '%Y-%m-%dT%H:%MZ',
+                             '%Y-%m-%dT%HZ', '%Y-%m-%d']
+    for form in accepted_date_formats:
+        try:
+            return datetime.strptime(string, form)
+        except ValueError: # checks next format
+            pass
+    else:
+        raise ValueError("Not Valid Date Format")
 
 
 def ipv4_range_type(string):
