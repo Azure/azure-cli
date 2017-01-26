@@ -13,7 +13,7 @@ from azure.cli.core._output import CommandResultItem
 import azure.cli.core.extensions
 import azure.cli.core._help as _help
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._util import todict, truncate_text, CLIError
+from azure.cli.core._util import todict, truncate_text, CLIError, read_file_content
 from azure.cli.core._config import az_config
 
 import azure.cli.core.telemetry as telemetry
@@ -237,19 +237,13 @@ class Application(object):
 
     @staticmethod
     def _load_file(path):
-        try:
-            if path == '-':
-                content = sys.stdin.read()
-            else:
-                try:
-                    with open(os.path.expanduser(path), 'r') as input_file:
-                        content = input_file.read()
-                except UnicodeDecodeError:
-                    with open(os.path.expanduser(path), 'rb') as input_file:
-                        content = input_file.read()
-            return content[0:-1] if content[-1] == '\n' else content
-        except:
-            raise CLIError('Failed to open file {}'.format(path))
+        if path == '-':
+            content = sys.stdin.read()
+        else:
+            content = read_file_content(os.path.expanduser(path),
+                                        allow_binary=True)
+
+        return content[0:-1] if content and content[-1] == '\n' else content
 
     def _handle_builtin_arguments(self, **kwargs):
         args = kwargs['args']
