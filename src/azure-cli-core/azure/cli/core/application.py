@@ -247,9 +247,9 @@ class Application(object):
                     try:
                         with codecs_open(file_path, encoding=encoding, mode='r') as input_file:
                             content = input_file.read()
-                    except UnicodeError:  # file encoding issues such as utf-16 w/o bom
+                    except UnicodeError:  # file encoding issues such as utf-16 w/o BOM
                         continue
-                    except UnicodeDecodeError:  # only surface from Python 3.0 on binary files
+                    except UnicodeDecodeError:  # only surface from Python 3 on binary files
                         with open(file_path, 'rb') as input_file:
                             content = input_file.read()
                     break
