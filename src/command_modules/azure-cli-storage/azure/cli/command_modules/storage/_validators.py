@@ -590,7 +590,7 @@ def get_datetime_type(to_string):
                     return datetime.strptime(string, form)
             except ValueError:
                 continue
-        raise ValueError("Input not of valid format. Valid format: 2000-12-31T12:59:59Z")
+        raise ValueError("Input '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(string))
     return datetime_type
 
 
