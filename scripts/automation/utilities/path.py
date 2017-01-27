@@ -97,6 +97,25 @@ def get_test_results_dir(with_timestamp=None, prefix=None):
 def filter_user_selected_modules(user_input_modules):
     import itertools
 
+    existing_modules = list(itertools.chain(get_core_modules_paths(),
+                                            get_command_modules_paths()))
+
+    if user_input_modules:
+        selected_modules = set(user_input_modules)
+        extra = selected_modules - set([name for name, _ in existing_modules])
+        if any(extra):
+            print('ERROR: These modules do not exist: {}.'.format(', '.join(extra)))
+            return None
+
+        return list((name, module) for name, module in existing_modules
+                    if name in selected_modules)
+    else:
+        return list((name, module) for name, module in existing_modules)
+
+
+def filter_user_selected_modules_with_tests(user_input_modules):
+    import itertools
+
     existing_modules = list(itertools.chain(get_core_modules_paths_with_tests(),
                                             get_command_modules_paths_with_tests()))
 
