@@ -8,7 +8,7 @@
 # Changes may cause incorrect behavior and will be lost if the code is
 # regenerated.
 # --------------------------------------------------------------------------
-
+# pylint: skip-file
 from .resource import Resource
 from .scale_capacity import ScaleCapacity
 from .metric_trigger import MetricTrigger

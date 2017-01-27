@@ -8,7 +8,7 @@
 # Changes may cause incorrect behavior and will be lost if the code is
 # regenerated.
 # --------------------------------------------------------------------------
-
+# pylint: skip-file
 from .autoscale_settings_operations import AutoscaleSettingsOperations
 from .service_diagnostic_settings_operations import ServiceDiagnosticSettingsOperations
 from .alert_rules_operations import AlertRulesOperations

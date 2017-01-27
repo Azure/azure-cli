@@ -8,7 +8,62 @@ from azure.cli.core.commands.parameters import ignore_type
 from azure.cli.core.commands.arm import cli_generic_update_command
 
 
-# CLIENT FACTORIES
+# MANAGEMENT CLIENT FACTORIES
+def get_monitor_management_client(_):
+    from azure.cli.command_modules.monitor.sdk import InsightsManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(InsightsManagementClient)
+
+
+def get_monitor_autoscale_settings_operation(kwargs):
+    return get_monitor_management_client(kwargs).autoscale_settings
+
+
+def get_monitor_service_diagnostic_settings_operation(kwargs):
+    return get_monitor_management_client(kwargs).service_diagnostic_settings
+
+
+def get_monitor_alert_rules_operation(kwargs):
+    return get_monitor_management_client(kwargs).alert_rules
+
+
+def get_monitor_alert_rule_incidents_operation(kwargs):
+    return get_monitor_management_client(kwargs).alert_rule_incidents
+
+
+def get_monitor_log_profiles_operation(kwargs):
+    return get_monitor_management_client(kwargs).log_profiles
+
+
+# DATA CLIENT FACTORIES
+def get_monitor_client(_):
+    from azure.monitor import InsightsClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(InsightsClient)
+
+
+def get_monitor_usage_metrics_operation(kwargs):
+    return get_monitor_client(kwargs).usage_metrics
+
+
+def get_monitor_event_categories_operation(kwargs):
+    return get_monitor_client(kwargs).event_categories
+
+
+def get_monitor_events_operation(kwargs):
+    return get_monitor_client(kwargs).events
+
+
+def get_monitor_tenant_events_operation(kwargs):
+    return get_monitor_client(kwargs).tenant_events
+
+
+def get_monitor_metric_definitions_operation(kwargs):
+    return get_monitor_client(kwargs).metric_definitions
+
+
+def get_monitor_metrics_operation(kwargs):
+    return get_monitor_client(kwargs).metrics
 
 
 # COMMANDS UTILITIES
@@ -97,6 +152,9 @@ class ParametersContext(object):
     def register_alias(self, argument_name, options_list):
         register_cli_argument(self._commmand, argument_name, options_list=options_list)
 
+    def register(self, argument_name, options_list, **kwargs):
+        register_cli_argument(self._commmand, argument_name, options_list=options_list, **kwargs)
+
     def expand(self, argument_name, model_type, group_name=None, patches=None):
         # TODO:
         # two privates symbols are imported here. they should be made public or this utility class
@@ -105,7 +163,7 @@ class ParametersContext(object):
         from azure.cli.core.commands._introspection import \
             (extract_args_from_signature, _option_descriptions)
 
-        from .validators import get_complex_argument_processor
+        from azure.cli.command_modules.monitor.validators import get_complex_argument_processor
 
         if not patches:
             patches = dict()

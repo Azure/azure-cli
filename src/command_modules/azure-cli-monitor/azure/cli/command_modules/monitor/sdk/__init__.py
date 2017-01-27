@@ -8,11 +8,10 @@
 # Changes may cause incorrect behavior and will be lost if the code is
 # regenerated.
 # --------------------------------------------------------------------------
-
+# pylint: skip-file
 from .insights_management_client import InsightsManagementClient
 from .version import VERSION
 
 __all__ = ['InsightsManagementClient']
 
 __version__ = VERSION
-

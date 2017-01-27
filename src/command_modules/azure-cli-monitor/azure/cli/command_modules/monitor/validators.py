@@ -8,7 +8,7 @@ def get_complex_argument_processor(expanded_arguments, model_type):
     """
     Return a validator which will aggregate multiple arguments to one complex argument.
     """
-    def _expension_valiator_impl(namespace):
+    def _expansion_validator_impl(namespace):
         """
         The validator create a argument of a given type from a sepecific set of arguments from CLI
         command.
@@ -20,4 +20,4 @@ def get_complex_argument_processor(expanded_arguments, model_type):
 
         namespace.parameters = model_type(**kwargs)
 
-    return _expension_valiator_impl
+    return _expansion_validator_impl

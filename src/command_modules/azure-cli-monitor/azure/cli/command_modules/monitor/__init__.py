@@ -5,8 +5,6 @@
 
 import azure.cli.command_modules.monitor.help  # pylint: disable=unused-import
 
-__all__ = ['load_params', 'load_commands']
-
 
 def load_params(_):
     import azure.cli.command_modules.monitor.params  # pylint: disable=redefined-outer-name
