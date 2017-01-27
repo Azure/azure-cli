@@ -3,13 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 import re
 
 from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid_resource_id
 from azure.cli.core._util import CLIError
-from azure.cli.command_modules.vm._vm_utils import (
-    read_content_if_is_file, random_string, check_existence)
+from azure.cli.command_modules.vm._vm_utils import random_string, check_existence
 from azure.cli.command_modules.vm._template_builder import StorageProfile
+import azure.cli.core.azlogging as azlogging
+
+logger = azlogging.get_az_logger(__name__)
 
 
 def validate_nsg_name(namespace):
@@ -280,25 +283,81 @@ def _validate_vm_create_auth(namespace):
 
     elif namespace.authentication_type == 'ssh':
 
-        if not namespace.ssh_key_value or namespace.admin_password:
-            raise ValueError(
-                "incorrect usage for authentication-type 'ssh': "
-                "--ssh-key-value VALUE_OR_PATH [--ssh-dest-key-path PATH]")
+        if namespace.admin_password:
+            raise ValueError('Admin password cannot be used with SSH authentication type')
 
-        # load the SSH key and set the dest key path if not supplied
-        namespace.ssh_key_value = read_content_if_is_file(namespace.ssh_key_value)
-        if not namespace.ssh_key_value:
-            import os
-            ssh_key_file = os.path.join(os.path.expanduser('~'), '.ssh/id_rsa.pub')
-            if os.path.isfile(ssh_key_file):
-                with open(ssh_key_file) as f:
-                    namespace.ssh_key_value = f.read()
-            else:
-                raise CLIError('An RSA key file or key value must be supplied to SSH Key Value')
+        validate_ssh_key(namespace)
 
         if not namespace.ssh_dest_key_path:
             namespace.ssh_dest_key_path = \
                 '/home/{}/.ssh/authorized_keys'.format(namespace.admin_username)
+
+
+def validate_ssh_key(namespace):
+    string_or_file = (namespace.ssh_key_value or
+                      os.path.join(os.path.expanduser('~'), '.ssh/id_rsa.pub'))
+    content = string_or_file
+    if os.path.exists(string_or_file):
+        logger.info('Use existing SSH public key file: %s', string_or_file)
+        with open(string_or_file, 'r') as f:
+            content = f.read()
+    elif not _is_valid_ssh_rsa_public_key(content):
+        if namespace.generate_ssh_keys:
+            # figure out appropriate file names:
+            # 'base_name'(with private keys), and 'base_name.pub'(with public keys)
+            public_key_filepath = string_or_file
+            if public_key_filepath[-4:].lower() == '.pub':
+                private_key_filepath = public_key_filepath[:-4]
+            else:
+                private_key_filepath = public_key_filepath + '.private'
+            content = _generate_ssh_keys(private_key_filepath, public_key_filepath)
+            logger.warning('Created SSH key files: %s,%s',
+                           private_key_filepath, public_key_filepath)
+        else:
+            raise CLIError('An RSA key file or key value must be supplied to SSH Key Value. '
+                           'You can use --generate-ssh-keys to let CLI generate one for you')
+    namespace.ssh_key_value = content
+
+
+def _generate_ssh_keys(private_key_filepath, public_key_filepath):
+    import paramiko
+
+    ssh_dir, _ = os.path.split(private_key_filepath)
+    if not os.path.exists(ssh_dir):
+        os.makedirs(ssh_dir)
+        os.chmod(ssh_dir, 0o700)
+
+    key = paramiko.RSAKey.generate(2048)
+    key.write_private_key_file(private_key_filepath)
+    os.chmod(private_key_filepath, 0o600)
+
+    with open(public_key_filepath, 'w') as public_key_file:
+        public_key = '%s %s' % (key.get_name(), key.get_base64())
+        public_key_file.write(public_key)
+    os.chmod(public_key_filepath, 0o644)
+
+    return public_key
+
+
+def _is_valid_ssh_rsa_public_key(openssh_pubkey):
+    # http://stackoverflow.com/questions/2494450/ssh-rsa-public-key-validation-using-a-regular-expression # pylint: disable=line-too-long
+    # A "good enough" check is to see if the key starts with the correct header.
+    import struct
+    try:
+        from base64 import decodebytes as base64_decode
+    except ImportError:
+        # deprecated and redirected to decodebytes in Python 3
+        from base64 import decodestring as base64_decode
+    parts = openssh_pubkey.split()
+    if len(parts) < 2:
+        return False
+    key_type = parts[0]
+    key_string = parts[1]
+
+    data = base64_decode(key_string.encode())  # pylint:disable=deprecated-method
+    int_len = 4
+    str_len = struct.unpack('>I', data[:int_len])[0]  # this should return 7
+    return data[int_len:int_len + str_len] == key_type.encode()
 
 
 def process_vm_create_namespace(namespace):
