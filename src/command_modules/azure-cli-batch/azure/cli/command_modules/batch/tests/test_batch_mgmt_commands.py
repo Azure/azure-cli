@@ -53,7 +53,7 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('resourceGroup', rg)
         ])
 
-        self.cmd('batch account set -g {} -n {} --storage-account-name {}'.
+        self.cmd('batch account set -g {} -n {} --storage-account {}'.
                  format(rg, name, self.storage_account_name),
                  checks=[JMESPathCheck('name', name),
                          JMESPathCheck('location', loc),
@@ -104,7 +104,7 @@ class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
                               JMESPathCheck('resourceGroup', rg)
                           ])
 
-        self.cmd('batch account create -g {} -n {} -l {} --storage-account-id {}'.
+        self.cmd('batch account create -g {} -n {} -l {} --storage-account {}'.
                  format(rg, name, loc, result['id']), checks=[
                      JMESPathCheck('name', name),
                      JMESPathCheck('location', loc),

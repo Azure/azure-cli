@@ -90,17 +90,18 @@ def storage_account_id(namespace):
     from azure.mgmt.storage import StorageManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
-    if namespace.storage_account_name:
-        if not namespace.storage_account_id:
-            storage_client = get_mgmt_service_client(StorageManagementClient)
-            acc = storage_client.storage_accounts.get_properties(namespace.resource_group_name,
-                                                                 namespace.storage_account_name)
-            if not acc:
-                raise ValueError("Batch account '{}' not found in the resource group '{}'.".
-                                 format(namespace.storage_account_name,
-                                        namespace.resource_group_name))
-            namespace.storage_account_id = acc.id  # pylint: disable=no-member
-    del namespace.storage_account_name
+    if (namespace.storage_account
+            and not
+            ('/providers/Microsoft.ClassicStorage/storageAccounts/' in namespace.storage_account
+             or
+             '/providers/Microsoft.Storage/storageAccounts/' in namespace.storage_account)):
+        storage_client = get_mgmt_service_client(StorageManagementClient)
+        acc = storage_client.storage_accounts.get_properties(namespace.resource_group_name,
+                                                             namespace.storage_account)
+        if not acc:
+            raise ValueError("Batch account named '{}' not found in the resource group '{}'.".
+                             format(namespace.storage_account, namespace.resource_group_name))
+        namespace.storage_account = acc.id  # pylint: disable=no-member
 
 
 def application_enabled(namespace):

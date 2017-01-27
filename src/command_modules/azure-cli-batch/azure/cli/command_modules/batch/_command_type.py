@@ -737,15 +737,15 @@ def cli_batch_data_plane_command(name, operation, client_factory, transform=None
     group_name = 'Batch Account'
     command.cmd.add_argument('account_name', '--account-name', required=False, default=None,
                              validator=validators.validate_client_parameters, arg_group=group_name,
-                             help='Batch account name. Environment variable: '
+                             help='Batch account name. Or set by environment variable: '
                              'AZURE_BATCH_ACCOUNT')
     command.cmd.add_argument('account_key', '--account-key', required=False, default=None,
                              arg_group=group_name,
                              help='Batch account key. Must be used in conjunction with Batch '
-                             'account name and endpoint. Environment variable: '
+                             'account name and endpoint. Or set by environment variable: '
                              'AZURE_BATCH_ACCESS_KEY')
     command.cmd.add_argument('account_endpoint', '--account-endpoint', required=False, default=None,
                              arg_group=group_name,
-                             help='Batch service endpoint. Environment variable: '
+                             help='Batch service endpoint. Or set by environment variable: '
                              'AZURE_BATCH_ENDPOINT')
     command_table[command.cmd.name] = command.cmd

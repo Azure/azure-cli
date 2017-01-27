@@ -47,12 +47,9 @@ def list_accounts(client, resource_group_name=None):
 
 @transfer_doc(AutoStorageBaseProperties)
 def create_account(client, resource_group_name, account_name, location,  # pylint:disable=too-many-arguments
-                   tags=None, storage_account_id=None):
-    if storage_account_id:
-        properties = AutoStorageBaseProperties(storage_account_id=storage_account_id)
-    else:
-        properties = None
-
+                   tags=None, storage_account=None):
+    properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
+        if storage_account else None
     parameters = BatchAccountCreateParameters(location=location,
                                               tags=tags,
                                               auto_storage=properties)
@@ -64,11 +61,9 @@ def create_account(client, resource_group_name, account_name, location,  # pylin
 
 @transfer_doc(AutoStorageBaseProperties)
 def update_account(client, resource_group_name, account_name,  # pylint:disable=too-many-arguments
-                   tags=None, storage_account_id=None):
-    if storage_account_id:
-        properties = AutoStorageBaseProperties(storage_account_id=storage_account_id)
-    else:
-        properties = None
+                   tags=None, storage_account=None):
+    properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
+        if storage_account else None
 
     return client.update(resource_group_name=resource_group_name,
                          account_name=account_name,
