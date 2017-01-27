@@ -9,7 +9,7 @@ import unittest
 from six import StringIO
 
 from azure.cli.command_modules.storage._validators import (get_permission_validator,
-                                                           get_datetime_type, datetime_type, datetime, ipv4_range_type, resource_type_type,
+                                                           get_datetime_type, datetime, ipv4_range_type, resource_type_type,
                                                            services_type)
 
 
