@@ -18,13 +18,15 @@ from azure.cli.command_modules.documentdb.sdk.models import (
 
 def cli_documentdb_create(client,
                           resource_group_name,
-                          name,
+                          account_name,
                           locations,
                           default_consistency_level=None,
                           max_staleness_prefix=100,
-                          max_interval_in_seconds=5,
+                          max_interval=5,
                           ip_range_filter=None):
     # pylint:disable=line-too-long
+    """Create a new Azure DocumentDB database account.
+    """
 
     consistency_policy = None
     if default_consistency_level is not None:
