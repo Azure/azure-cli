@@ -574,16 +574,24 @@ def process_metric_update_namespace(namespace):
 # region TYPES
 
 
-def datetime_string_type(string):
-    ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
-    date_format = '%Y-%m-%dT%H:%MZ'
-    return datetime.strptime(string, date_format).strftime(date_format)
-
-
-def datetime_type(string):
-    ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
-    date_format = '%Y-%m-%dT%H:%MZ'
-    return datetime.strptime(string, date_format)
+def get_datetime_type(to_string):
+    """ Validates UTC datetime. Examples of accepted forms:
+    2017-12-31T01:11:59Z,2017-12-31T01:11Z or 2017-12-31T01Z or 2017-12-31 """
+    def datetime_type(string):
+        """ Validates UTC datetime. Examples of accepted forms:
+        2017-12-31T01:11:59Z,2017-12-31T01:11Z or 2017-12-31T01Z or 2017-12-31 """
+        accepted_date_formats = ['%Y-%m-%dT%H:%M:%SZ', '%Y-%m-%dT%H:%MZ',
+                                 '%Y-%m-%dT%HZ', '%Y-%m-%d']
+        for form in accepted_date_formats:
+            try:
+                if to_string:
+                    return datetime.strptime(string, form).strftime(form)
+                else:
+                    return datetime.strptime(string, form)
+            except ValueError:
+                continue
+        raise ValueError("Input '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(string))
+    return datetime_type
 
 
 def ipv4_range_type(string):
