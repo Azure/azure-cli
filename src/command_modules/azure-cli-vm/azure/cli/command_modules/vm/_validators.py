@@ -14,6 +14,7 @@ import azure.cli.core.azlogging as azlogging
 
 logger = azlogging.get_az_logger(__name__)
 
+
 def validate_nsg_name(namespace):
     namespace.network_security_group_name = namespace.network_security_group_name \
         or '{}_NSG_{}'.format(namespace.vm_name, random_string(8))

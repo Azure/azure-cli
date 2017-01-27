@@ -19,7 +19,7 @@ from azure.cli.command_modules.vm._actions import \
     (load_images_from_aliases_doc, get_vm_sizes, _resource_not_exists)
 from azure.cli.command_modules.vm._validators import \
     (validate_nsg_name, validate_vm_nics, validate_vm_nic, process_vm_create_namespace,
-     process_vmss_create_namespace, _validator_ssh_key)
+     process_vmss_create_namespace)
 
 
 def get_urn_aliases_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
@@ -73,7 +73,7 @@ register_cli_argument('acs', 'orchestrator_type', **enum_choice_list(ContainerSe
 # some admin names are prohibited in acs, such as root, admin, etc. Because we have no control on the orchestrators, so default to a safe name.
 register_cli_argument('acs', 'admin_username', options_list=('--admin-username',), default='azureuser', required=False)
 register_cli_argument('acs', 'dns_name_prefix', options_list=('--dns-prefix', '-d'))
-register_extra_cli_argument('acs create', 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing', validator=_validator_ssh_key)
+register_extra_cli_argument('acs create', 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing')
 register_cli_argument('acs', 'container_service_name', options_list=('--name', '-n'), help='The name of the container service', completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'))
 register_cli_argument('acs create', 'agent_vm_size', completer=get_vm_size_completion_list)
 register_cli_argument('acs scale', 'new_agent_count', type=int, help='The number of agents for the cluster')
