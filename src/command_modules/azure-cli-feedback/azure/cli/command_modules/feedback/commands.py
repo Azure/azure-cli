@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-#pylint: disable=line-too-long
-
 from azure.cli.core.commands import cli_command
 
 cli_command(__name__, 'feedback', 'azure.cli.command_modules.feedback.custom#handle_feedback')
