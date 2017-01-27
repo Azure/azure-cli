@@ -9,6 +9,7 @@ import azure.cli.core._debug as _debug
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._util import CLIError
 from azure.cli.core.application import APPLICATION
+from azure.storage._error import _ERROR_STORAGE_MISSING_INFO
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -72,8 +73,11 @@ def get_data_service_client(service_type, account_name, account_key, connection_
         if endpoint_suffix:
             client_kwargs['endpoint_suffix'] = endpoint_suffix
         client = service_type(**client_kwargs)
-    except ValueError:
-        raise CLIError('Unable to obtain data client. Check your connection parameters.')
+    except ValueError as exc:
+        if _ERROR_STORAGE_MISSING_INFO in str(exc):
+            raise ValueError(exc)
+        else:
+            raise CLIError('Unable to obtain data client. Check your connection parameters.')
     # TODO: enable Fiddler
     client.request_callback = _add_headers
     return client
