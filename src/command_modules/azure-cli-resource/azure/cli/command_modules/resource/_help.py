@@ -161,6 +161,10 @@ helps['group update'] = """
     type: group
     short-summary: Update a resource group
 """
+helps['group wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the resource group is met.
+"""
 helps['group deployment'] = """
     type: group
     short-summary: Commands to execute or manage ARM deployments
@@ -183,6 +187,10 @@ helps['group deployment export'] = """
 helps['group deployment validate'] = """
     type: command
     short-summary: Validates whether the specified template is syntactically correct and will be accepted by Azure Resource Manager
+"""
+helps['group deployment wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the deployment is met.
 """
 helps['group deployment operation'] = """
     type: group
