@@ -8,10 +8,6 @@ import json
 import re
 
 from six import string_types
-from argcomplete.completers import (
-    FilesCompleter,
-    DirectoriesCompleter)
-
 from msrest.exceptions import DeserializationError
 
 from azure.cli.command_modules.batch import _validators as validators
@@ -21,14 +17,11 @@ from azure.cli.core.commands import (
     command_module_map,
     CliCommand,
     CliCommandArgument,
-    get_op_handler,
-    _user_confirmed)
-from azure.cli.core._util import CLIError
-from azure.cli.core._config import az_config
+    get_op_handler)
 from azure.cli.core.commands._introspection import (
     extract_full_summary_from_signature,
     extract_args_from_signature)
-from azure.cli.core.commands.parameters import file_type
+
 
 # TODO: Enum choice lists
 
@@ -398,7 +391,7 @@ class BatchArgumentTree(object):
         self.done = True
 
 
-class AzureDataPlaneCommand(object):
+class AzureBatchDataPlaneCommand(object):
     # pylint:disable=too-many-instance-attributes, too-few-public-methods
 
     def __init__(self, module_name, name, operation, factory, transform_result,  # pylint:disable=too-many-arguments
@@ -428,7 +421,11 @@ class AzureDataPlaneCommand(object):
             from msrest.paging import Paged
             from msrest.exceptions import ValidationError, ClientRequestError
             from azure.batch.models import BatchErrorException
-            if self._cancel_operation(kwargs):
+            from azure.cli.core._util import CLIError
+            from azure.cli.core._config import az_config
+            from azure.cli.core.commands import _user_confirmed
+
+            if self._cancel_operation(kwargs, az_config, _user_confirmed):
                 raise CLIError('Operation cancelled.')
 
             try:
@@ -501,7 +498,7 @@ class AzureDataPlaneCommand(object):
                 get_op_handler(operation))
         )
 
-    def _cancel_operation(self, kwargs):
+    def _cancel_operation(self, kwargs, config, user):
         """Whether to cancel the current operation because user
         declined the confirmation prompt.
         :param dict kwargs: The request arguments.
@@ -509,8 +506,8 @@ class AzureDataPlaneCommand(object):
         """
         return self.confirmation \
             and not kwargs.get(FORCE_PARAM_NAME) \
-            and not az_config.getboolean('core', 'disable_confirm_prompt', fallback=False) \
-            and not _user_confirmed(self.confirmation, kwargs)
+            and not config.getboolean('core', 'disable_confirm_prompt', fallback=False) \
+            and not user(self.confirmation, kwargs)
 
     def _build_parameters(self, path, kwargs, param, value):
         """Recursively build request parameter dictionary from command line args.
@@ -676,6 +673,9 @@ class AzureDataPlaneCommand(object):
         """Load all the command line arguments from the request parameters.
         :param func handler: The operation function.
         """
+        from azure.cli.core.commands.parameters import file_type
+        from argcomplete.completers import FilesCompleter, DirectoriesCompleter
+
         self.parser = BatchArgumentTree(self.validator)
         self._load_options_model(handler)
         for arg in extract_args_from_signature(handler):
@@ -725,11 +725,11 @@ class AzureDataPlaneCommand(object):
                                              help=docstring))
 
 
-def cli_data_plane_command(name, operation, client_factory, transform=None,  # pylint:disable=too-many-arguments
+def cli_batch_data_plane_command(name, operation, client_factory, transform=None,  # pylint:disable=too-many-arguments
                            table_transformer=None, flatten=FLATTEN, ignore=None, validator=None):
     """ Registers an Azure CLI Batch Data Plane command. These commands must respond to a
     challenge from the service when they make requests. """
-    command = AzureDataPlaneCommand(__name__, name, operation, client_factory,
+    command = AzureBatchDataPlaneCommand(__name__, name, operation, client_factory,
                                     transform, table_transformer, flatten, ignore, validator)
 
     # add parameters required to create a batch client

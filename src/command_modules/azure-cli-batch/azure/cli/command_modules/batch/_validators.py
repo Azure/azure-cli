@@ -5,19 +5,11 @@
 
 import os
 import json
-try:
-    from urllib.parse import urlsplit
-except ImportError:
-    from urlparse import urlsplit  # pylint: disable=import-error
+
+from six.moves.urllib.parse import urlsplit
 
 from msrest.serialization import Deserializer
 from msrest.exceptions import DeserializationError
-
-from azure.mgmt.batch import BatchManagementClient
-from azure.mgmt.storage import StorageManagementClient
-
-from azure.cli.core._config import az_config
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
 # TYPES VALIDATORS
 
@@ -95,6 +87,9 @@ def validate_required_parameter(ns, parser):
 
 def storage_account_id(namespace):
     """Validate storage account name"""
+    from azure.mgmt.storage import StorageManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
     if namespace.storage_account_name:
         if not namespace.storage_account_id:
             storage_client = get_mgmt_service_client(StorageManagementClient)
@@ -110,6 +105,9 @@ def storage_account_id(namespace):
 
 def application_enabled(namespace):
     """Validates account has auto-storage enabled"""
+    from azure.mgmt.batch import BatchManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
     client = get_mgmt_service_client(BatchManagementClient)
     acc = client.batch_account.get(namespace.resource_group_name, namespace.account_name)
     if not acc:
@@ -190,6 +188,9 @@ def validate_file_destination(namespace):
 
 def validate_client_parameters(namespace):
     """Retrieves Batch connection parameters from environment variables"""
+    from azure.mgmt.batch import BatchManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core._config import az_config
 
     # simply try to retrieve the remaining variables from environment variables
     if not namespace.account_name:

@@ -409,38 +409,38 @@ class TestBatchLoader(unittest.TestCase):
             creds = SharedKeyCredentials('test1', 'ZmFrZV9hY29jdW50X2tleQ==')
             return BatchServiceClient(creds, 'https://test1.westus.batch.azure.com/')
 
-        self.command_pool = _command_type.AzureDataPlaneCommand(
+        self.command_pool = _command_type.AzureBatchDataPlaneCommand(
             'batch_unit_tests',
             'batch_tests_pool',
             'azure.batch.operations.pool_operations#PoolOperations.add',
             get_client, None, None, 3, None, None)
-        self.command_job = _command_type.AzureDataPlaneCommand(
+        self.command_job = _command_type.AzureBatchDataPlaneCommand(
             'batch_unit_tests',
             'batch_tests_job',
             'azure.batch.operations.job_operations#JobOperations.add',
             get_client, None, None, 3,
             ['job.job_manager_task', 'job.job_preparation_task', 'job.job_release_task'], None)
-        self.command_task = _command_type.AzureDataPlaneCommand(
+        self.command_task = _command_type.AzureBatchDataPlaneCommand(
             'batch_unit_tests',
             'batch_tests_task',
             'azure.batch.operations.task_operations#TaskOperations.add',
             get_client, None, None, 1, None, None)
-        self.command_file = _command_type.AzureDataPlaneCommand(
+        self.command_file = _command_type.AzureBatchDataPlaneCommand(
             'batch_unit_tests',
             'batch_tests_file',
             'azure.batch.operations.file_operations#FileOperations.get_from_task',
             get_client, None, None, 3, None, None)
-        self.command_list = _command_type.AzureDataPlaneCommand(
+        self.command_list = _command_type.AzureBatchDataPlaneCommand(
             'batch_unit_tests',
             'batch_tests_list',
             'azure.batch.operations.job_operations#JobOperations.list',
             get_client, None, None, 3, None, None)
-        self.command_delete = _command_type.AzureDataPlaneCommand(
+        self.command_delete = _command_type.AzureBatchDataPlaneCommand(
             'batch_unit_tests',
             'batch_tests_delete',
             'azure.batch.operations.pool_operations#PoolOperations.delete',
             get_client, None, None, 3, None, None)
-        self.command_conflicts = _command_type.AzureDataPlaneCommand(
+        self.command_conflicts = _command_type.AzureBatchDataPlaneCommand(
             'batch_unit_tests',
             'batch_tests_conflicts',
             'azure.batch.operations.job_schedule_operations#JobScheduleOperations.add',
@@ -510,10 +510,13 @@ class TestBatchLoader(unittest.TestCase):
         self.assertEqual(len(options), 4)
 
     def test_batch_cancel_operation(self):
-        self.assertFalse(self.command_job._cancel_operation({}))
-        self.assertFalse(self.command_job._cancel_operation({'force': True}))
-        self.assertFalse(self.command_delete._cancel_operation({'force': True}))
-        self.assertTrue(self.command_delete._cancel_operation({'force': None}))
+        from azure.cli.core._config import az_config as config
+        from azure.cli.core.commands import _user_confirmed as user
+
+        self.assertFalse(self.command_job._cancel_operation({}, config, user))
+        self.assertFalse(self.command_job._cancel_operation({'force': True}, config, user))
+        self.assertFalse(self.command_delete._cancel_operation({'force': True}, config, user))
+        self.assertTrue(self.command_delete._cancel_operation({'force': None}, config, user))
 
     def test_batch_should_flatten(self):
         self.assertFalse(self.command_task._should_flatten('task.depends_on'))
@@ -589,7 +592,7 @@ class TestBatchLoader(unittest.TestCase):
 
     def test_batch_execute_command(self):
         def function_result(client, **kwargs):
-            # pylint: disable=unused-argument
+            # pylint: disable=function-redefined,unused-argument
             raise ValidationError('maximum', 'id', '100')
 
         def get_op_handler(operation):

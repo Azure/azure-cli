@@ -9,6 +9,8 @@ from azure.cli.core.test_utils.vcr_test_base import VCRTestBase
 
 
 class BatchDataPlaneTestBase(VCRTestBase):
+    # pylint:disable=too-few-public-methods
+
     def __init__(self, test_file, test_method):
         super(BatchDataPlaneTestBase, self).__init__(test_file, test_method)
         self.account_name = 'test1'
