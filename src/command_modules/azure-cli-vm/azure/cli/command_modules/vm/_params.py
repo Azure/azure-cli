@@ -125,6 +125,8 @@ for scope in ['vm diagnostics', 'vmss diagnostics']:
 
 for scope in ['vm', 'vmss']:
     register_cli_argument(scope, 'no_auto_upgrade', action='store_true', help='by doing this, extension system will not pick the highest minor version for the specified version number, and will not auto update to the latest build/revision number on any scale set updates in future.')
+    register_cli_argument('{} create'.format(scope), 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing')
+
 
 register_cli_argument('vm image list', 'image_location', location_type)
 register_cli_argument('vm image', 'publisher_name', options_list=('--publisher', '-p'))

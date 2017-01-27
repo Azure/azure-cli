@@ -531,17 +531,12 @@ class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=t
         self.vm_names = ['cli-test-vm2']
         self.vm_image = 'UbuntuLTS'
         self.auth_type = 'ssh'
-        self.pub_ssh_filename = None
 
     def test_vm_create_ubuntu(self):
         self.execute()
 
     def set_up(self):
         super(VMCreateUbuntuScenarioTest, self).set_up()
-        _, pathname = tempfile.mkstemp()
-        with open(pathname, 'w') as key_file:
-            key_file.write(TEST_SSH_KEY_PUB)
-        self.pub_ssh_filename = pathname
 
     def body(self):
         self.cmd('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' --location {location}'.format(
@@ -550,7 +545,7 @@ class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=t
             vm_name=self.vm_names[0],
             image=self.vm_image,
             auth_type=self.auth_type,
-            ssh_key=self.pub_ssh_filename,
+            ssh_key=TEST_SSH_KEY_PUB,
             location=self.location
         ))
 
