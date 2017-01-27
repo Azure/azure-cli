@@ -6,7 +6,7 @@
 import os
 import json
 
-from six.moves.urllib.parse import urlsplit
+from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
 
 from msrest.serialization import Deserializer
 from msrest.exceptions import DeserializationError

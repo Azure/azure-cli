@@ -40,10 +40,10 @@ register_cli_argument('batch location quotas show', 'location_name', location_ty
 for command in ['list', 'show', 'create', 'set', 'delete', 'package']:
     register_cli_argument('batch application {}'.format(command), 'account_name', batch_name_type, options_list=('--name', '-n'), validator=application_enabled)
 
-register_cli_argument('batch pool resize', 'if_modified_since', help='Specify this header to perform the operation only if the resource has been modified since the specified date/time.', type=datetime_format, arg_group='Pre-condition')
-register_cli_argument('batch pool resize', 'if_unmodified_since', help='Specify this header to perform the operation only if the resource has not been modified since the specified date/time.', type=datetime_format, arg_group='Pre-condition')
-register_cli_argument('batch pool resize', 'if_match', help='An ETag is specified. Specify this header to perform the operation only if the resource\'s ETag is an exact match as specified', arg_group='Pre-condition')
-register_cli_argument('batch pool resize', 'if_none_match', help='An ETag is specified. Specify this header to perform the operation only if the resource\'s ETag does not match the specified ETag.', arg_group='Pre-condition')
+register_cli_argument('batch pool resize', 'if_modified_since', help='The operation will be performed only if the resource has been modified since the specified timestamp.', type=datetime_format, arg_group='Pre-condition')
+register_cli_argument('batch pool resize', 'if_unmodified_since', help='The operation will not be performed only if the resource has been modified since the specified timestamp.', type=datetime_format, arg_group='Pre-condition')
+register_cli_argument('batch pool resize', 'if_match', help='The operation will be performed only if the resource\'s current ETag exactly matches the specified value.', arg_group='Pre-condition')
+register_cli_argument('batch pool resize', 'if_none_match', help='The operation will not be performed only if the resource\'s current ETag exactly matches the specified value.', arg_group='Pre-condition')
 register_cli_argument('batch pool resize', 'pool_id', help='The ID of the pool.')
 register_cli_argument('batch pool resize', 'abort', action='store_true', help='Stop the pool resize operation.', validator=validate_pool_resize_parameters)
 
@@ -72,8 +72,8 @@ register_cli_argument('batch task create', 'task_id', help='The ID of the task.'
 for item in ['batch certificate delete', 'batch certificate create', 'batch pool resize', 'batch pool reset', 'batch job list', 'batch task create']:
     register_extra_cli_argument(item, 'account_name', arg_group='Batch Account',
                                 validator=validate_client_parameters,
-                                help='Batch account name. Environment variable: AZURE_BATCH_ACCOUNT')
+                                help='The Batch account name. Or specify at environment variable: AZURE_BATCH_ACCOUNT')
     register_extra_cli_argument(item, 'account_key', arg_group='Batch Account',
-                                help='Batch account key. Must be used in conjunction with Batch account name and endpoint. Environment variable: AZURE_BATCH_ACCESS_KEY')
+                                help='The Batch account key. Or specify at environment variable: AZURE_BATCH_ACCESS_KEY')
     register_extra_cli_argument(item, 'account_endpoint', arg_group='Batch Account',
-                                help='Batch service endpoint. Environment variable: AZURE_BATCH_ENDPOINT')
+                                help='Batch service endpoint. Or specify at environment variable: AZURE_BATCH_ENDPOINT')

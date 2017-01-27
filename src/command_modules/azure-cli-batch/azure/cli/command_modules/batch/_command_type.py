@@ -266,7 +266,7 @@ class BatchArgumentTree(object):
         """
         message = "Failed to deserialized JSON file into object {}"
         try:
-            kwargs[self._request_param['name']] = client._deserialize(  # pylint:disable=W0212
+            kwargs[self._request_param['name']] = client._deserialize(  # pylint: disable=protected-access
                 self._request_param['model'], json_obj)
         except DeserializationError as error:
             message += ": {}".format(error)
@@ -276,7 +276,7 @@ class BatchArgumentTree(object):
                 raise ValueError(message.format(self._request_param['model']))
 
     def queue_argument(self, name=None, path=None, root=None,  # pylint:disable=too-many-arguments
-                       options=None, type=None, dependencies=None):  # pylint:disable=W0622
+                       options=None, type=None, dependencies=None):  # pylint: disable=redefined-builtin
         """Add pending command line argument
         :param str name: The name of the command line argument.
         :param str path: The complex object path to the parameter.
@@ -562,10 +562,10 @@ class AzureBatchDataPlaneCommand(object):
         :param class model: The parameter model class.
         :param str path: Request parameter namespace.
         """
-        for attr, details in model._attribute_map.items():  # pylint: disable=W0212
+        for attr, details in model._attribute_map.items():  # pylint: disable=protected-access
             conditions = []
-            conditions.append(model._validation.get(attr, {}).get('readonly'))  # pylint: disable=W0212
-            conditions.append(model._validation.get(attr, {}).get('constant'))  # pylint: disable=W0212
+            conditions.append(model._validation.get(attr, {}).get('readonly'))  # pylint: disable=protected-access
+            conditions.append(model._validation.get(attr, {}).get('constant'))  # pylint: disable=protected-access
             conditions.append('.'.join([path, attr]) in self.ignore)
             conditions.append(details['type'][0] in ['{'])
             if not any(conditions):
@@ -622,7 +622,7 @@ class AzureBatchDataPlaneCommand(object):
         else:
             self.parser.queue_argument(arg, path, param, options, typestr, dependencies)
 
-    def _flatten_object(self, path, param_model, conflict_names=[]):  # pylint: disable=W0102
+    def _flatten_object(self, path, param_model, conflict_names=[]):  # pylint: disable=dangerous-default-value
         """Flatten a complex parameter object into command line arguments.
         :param str path: The complex parameter namespace.
         :param class param_model: The complex parameter class.
@@ -630,7 +630,7 @@ class AzureBatchDataPlaneCommand(object):
         """
         if self._should_flatten(path):
             required_attrs = [key for key,
-                              val in param_model._validation.items() if val.get('required')]  # pylint: disable=W0212
+                              val in param_model._validation.items() if val.get('required')]  # pylint: disable=protected-access
 
             for param_attr, details in self._get_attrs(param_model, path):
                 options = {}
@@ -726,11 +726,12 @@ class AzureBatchDataPlaneCommand(object):
 
 
 def cli_batch_data_plane_command(name, operation, client_factory, transform=None,  # pylint:disable=too-many-arguments
-                           table_transformer=None, flatten=FLATTEN, ignore=None, validator=None):
+                                 table_transformer=None, flatten=FLATTEN,
+                                 ignore=None, validator=None):
     """ Registers an Azure CLI Batch Data Plane command. These commands must respond to a
     challenge from the service when they make requests. """
     command = AzureBatchDataPlaneCommand(__name__, name, operation, client_factory,
-                                    transform, table_transformer, flatten, ignore, validator)
+                                         transform, table_transformer, flatten, ignore, validator)
 
     # add parameters required to create a batch client
     group_name = 'Batch Account'

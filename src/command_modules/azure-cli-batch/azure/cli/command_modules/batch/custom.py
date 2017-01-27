@@ -3,12 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-try:
-    from urllib.parse import urlsplit
-except ImportError:
-    from urlparse import urlsplit  # pylint: disable=import-error
 import json
 import base64
+from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
 
 from msrest.exceptions import DeserializationError, ValidationError, ClientRequestError
 from azure.mgmt.batch import BatchManagementClient
@@ -123,7 +120,7 @@ def create_application_package(client, resource_group_name, account_name,  # pyl
     mgmt_client = get_mgmt_service_client(BatchManagementClient)
     try:
         mgmt_client.application.get(resource_group_name, account_name, application_id)
-    except:  # pylint:disable=W0702
+    except Exception:  # pylint:disable=broad-except
         mgmt_client.application.create(resource_group_name, account_name, application_id)
 
     result = client.create(resource_group_name, account_name, application_id, version)
@@ -139,97 +136,86 @@ def create_application_package(client, resource_group_name, account_name,  # pyl
 
 # Data plane custom commands
 
+def _handle_batch_exception(action):
+    try:
+        return action()
+    except BatchErrorException as ex:
+        try:
+            message = ex.error.message.value
+            if ex.error.values:
+                for detail in ex.error.values:
+                    message += "\n{}: {}".format(detail.key, detail.value)
+            raise CLIError(message)
+        except AttributeError:
+            raise CLIError(ex)
+    except (ValidationError, ClientRequestError) as ex:
+        raise CLIError(ex)
+
+
 @transfer_doc(CertificateAddParameter)
 def create_certificate(client, cert_file, thumbprint, thumbprint_algorithm, password=None):
-    if password:
-        certificate_format = 'pfx'
-    else:
-        certificate_format = 'cer'
+    def action():
+        client.add(cert)
+        return client.get(thumbprint_algorithm, thumbprint)
+
+    certificate_format = 'pfx' if password else 'cer'
     with open(cert_file, "rb") as f:
         data_bytes = f.read()
     data = base64.b64encode(data_bytes).decode('utf-8')
     cert = CertificateAddParameter(thumbprint, thumbprint_algorithm, data,
                                    certificate_format=certificate_format,
                                    password=password)
-    try:
-        client.add(cert)
-        return client.get(thumbprint_algorithm, thumbprint)
-    except BatchErrorException as ex:
-        try:
-            message = ex.error.message.value
-            if ex.error.values:
-                for detail in ex.error.values:
-                    message += "\n{}: {}".format(detail.key, detail.value)
-            raise CLIError(message)
-        except AttributeError:
-            raise CLIError(ex)
-    except (ValidationError, ClientRequestError) as ex:
-        raise CLIError(ex)
+    return _handle_batch_exception(action)
 
 
-def delete_certificate(client, thumbprint, thumbprint_algorithm, abort=None):
-    try:
+def delete_certificate(client, thumbprint, thumbprint_algorithm, abort=False):
+    def action():
         if abort:
             client.cancel_deletion(thumbprint_algorithm, thumbprint)
         else:
             client.delete(thumbprint_algorithm, thumbprint)
-    except BatchErrorException as ex:
-        try:
-            message = ex.error.message.value
-            if ex.error.values:
-                for detail in ex.error.values:
-                    message += "\n{}: {}".format(detail.key, detail.value)
-            raise CLIError(message)
-        except AttributeError:
-            raise CLIError(ex)
-    except (ValidationError, ClientRequestError) as ex:
-        raise CLIError(ex)
+
+    return _handle_batch_exception(action)
 
 
 @transfer_doc(PoolResizeParameter)
 def resize_pool(client, pool_id, target_dedicated=None,  # pylint:disable=too-many-arguments
                 resize_timeout=None, node_deallocation_option=None,
                 if_match=None, if_none_match=None, if_modified_since=None,
-                if_unmodified_since=None, abort=None):
-    if abort:
-        stop_resize_option = PoolStopResizeOptions(if_match=if_match,
-                                                   if_none_match=if_none_match,
-                                                   if_modified_since=if_modified_since,
-                                                   if_unmodified_since=if_unmodified_since)
-        return client.stop_resize(pool_id, pool_stop_resize_options=stop_resize_option)
-    else:
-        param = PoolResizeParameter(target_dedicated,
-                                    resize_timeout=resize_timeout,
-                                    node_deallocation_option=node_deallocation_option)
-        resize_option = PoolResizeOptions(if_match=if_match,
-                                          if_none_match=if_none_match,
-                                          if_modified_since=if_modified_since,
-                                          if_unmodified_since=if_unmodified_since)
+                if_unmodified_since=None, abort=False):
+    def action():
+        if abort:
+            stop_resize_option = PoolStopResizeOptions(if_match=if_match,
+                                                       if_none_match=if_none_match,
+                                                       if_modified_since=if_modified_since,
+                                                       if_unmodified_since=if_unmodified_since)
+            return client.stop_resize(pool_id, pool_stop_resize_options=stop_resize_option)
+        else:
+            param = PoolResizeParameter(target_dedicated,
+                                        resize_timeout=resize_timeout,
+                                        node_deallocation_option=node_deallocation_option)
+            resize_option = PoolResizeOptions(if_match=if_match,
+                                              if_none_match=if_none_match,
+                                              if_modified_since=if_modified_since,
+                                              if_unmodified_since=if_unmodified_since)
+            return client.resize(pool_id, param, pool_resize_options=resize_option)
 
-    try:
-        return client.resize(pool_id, param, pool_resize_options=resize_option)
-    except BatchErrorException as ex:
-        try:
-            message = ex.error.message.value
-            if ex.error.values:
-                for detail in ex.error.values:
-                    message += "\n{}: {}".format(detail.key, detail.value)
-            raise CLIError(message)
-        except AttributeError:
-            raise CLIError(ex)
-    except (ValidationError, ClientRequestError) as ex:
-        raise CLIError(ex)
+    return _handle_batch_exception(action)
 
 
 @transfer_doc(PoolUpdatePropertiesParameter, StartTask)
-def update_pool(client, pool_id, json_file=None, command_line=None,  # pylint:disable=too-many-arguments, W0613
+def update_pool(client, pool_id, json_file=None, command_line=None,  # pylint:disable=too-many-arguments
                 certificate_references=None, application_package_references=None, metadata=None):
+    def action():
+        client.update_properties(pool_id=pool_id, pool_update_properties_parameter=param)
+        return client.get(pool_id)
+
     if json_file:
         with open(json_file) as f:
             json_obj = json.load(f)
             param = None
             try:
-                param = client._deserialize('PoolUpdatePropertiesParameter', json_obj)  # pylint:disable=W0212
+                param = client._deserialize('PoolUpdatePropertiesParameter', json_obj)  # pylint: disable=protected-access
             except DeserializationError:
                 pass
             if not param:
@@ -254,25 +240,11 @@ def update_pool(client, pool_id, json_file=None, command_line=None,  # pylint:di
 
         if command_line:
             param.start_task = StartTask(command_line)
-
-    try:
-        client.update_properties(pool_id=pool_id, pool_update_properties_parameter=param)
-        return client.get(pool_id)
-    except BatchErrorException as ex:
-        try:
-            message = ex.error.message.value
-            if ex.error.values:
-                for detail in ex.error.values:
-                    message += "\n{}: {}".format(detail.key, detail.value)
-            raise CLIError(message)
-        except AttributeError:
-            raise CLIError(ex)
-    except (ValidationError, ClientRequestError) as ex:
-        raise CLIError(ex)
+    return _handle_batch_exception(action)
 
 
-def list_job(client, job_schedule_id=None, filter=None, select=None, expand=None):  # pylint:disable=W0622
-    try:
+def list_job(client, job_schedule_id=None, filter=None, select=None, expand=None):  # pylint: disable=redefined-builtin
+    def action():
         if job_schedule_id:
             option1 = JobListFromJobScheduleOptions(filter=filter,
                                                     select=select,
@@ -284,17 +256,8 @@ def list_job(client, job_schedule_id=None, filter=None, select=None, expand=None
                                      select=select,
                                      expand=expand)
             return list(client.list(job_list_options=option2))
-    except BatchErrorException as ex:
-        try:
-            message = ex.error.message.value
-            if ex.error.values:
-                for detail in ex.error.values:
-                    message += "\n{}: {}".format(detail.key, detail.value)
-            raise CLIError(message)
-        except AttributeError:
-            raise CLIError(ex)
-    except (ValidationError, ClientRequestError) as ex:
-        raise CLIError(ex)
+
+    return _handle_batch_exception(action)
 
 
 @transfer_doc(TaskAddParameter, TaskConstraints)
@@ -302,15 +265,23 @@ def create_task(client, job_id, json_file=None, task_id=None, command_line=None,
                 resource_files=None, environment_settings=None, affinity_info=None,
                 max_wall_clock_time=None, retention_time=None, max_task_retry_count=None,
                 run_elevated=None, application_package_references=None):
+    def action():
+        if task is not None:
+            client.add(job_id=job_id, task=task)
+            return client.get(job_id=job_id, task_id=task.id)
+        else:
+            result = client.add_collection(job_id=job_id, value=tasks)
+            return result.value
+
     task = None
     if json_file:
         with open(json_file) as f:
             json_obj = json.load(f)
             try:
-                task = client._deserialize('TaskAddParameter', json_obj)  # pylint:disable=W0212
+                task = client._deserialize('TaskAddParameter', json_obj)  # pylint: disable=protected-access
             except DeserializationError:
                 try:
-                    tasks = client._deserialize('[TaskAddParameter]', json_obj)  # pylint:disable=W0212
+                    tasks = client._deserialize('[TaskAddParameter]', json_obj)  # pylint: disable=protected-access
                 except DeserializationError:
                     raise ValueError("JSON file '{}' is not in reqired format.".format(json_file))
     else:
@@ -325,22 +296,4 @@ def create_task(client, job_id, json_file=None, task_id=None, command_line=None,
             task.constraints = TaskConstraints(max_wall_clock_time=max_wall_clock_time,
                                                retention_time=retention_time,
                                                max_task_retry_count=max_task_retry_count)
-
-    try:
-        if task is not None:
-            client.add(job_id=job_id, task=task)
-            return client.get(job_id=job_id, task_id=task.id)
-        else:
-            result = client.add_collection(job_id=job_id, value=tasks)
-            return result.value
-    except BatchErrorException as ex:
-        try:
-            message = ex.error.message.value
-            if ex.error.values:
-                for detail in ex.error.values:
-                    message += "\n{}: {}".format(detail.key, detail.value)
-            raise CLIError(message)
-        except AttributeError:
-            raise CLIError(ex)
-    except (ValidationError, ClientRequestError) as ex:
-        raise CLIError(ex)
+    return _handle_batch_exception(action)
