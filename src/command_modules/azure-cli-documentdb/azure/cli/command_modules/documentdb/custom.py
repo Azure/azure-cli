@@ -23,21 +23,23 @@ from azure.cli.command_modules.documentdb.sdk.models import (
 def cli_documentdb_create(client,
                           resource_group_name,
                           name,
-                          resource_group_location,
                           locations,
                           default_consistency_level=None,
                           max_staleness_prefix=100,
                           max_interval_in_seconds=5,
                           ip_range_filter=None):
     # pylint:disable=line-too-long
-    """Create new DocumentDB Database Account
-    :param resource_group_name: Name of resource group
-    :param name: Name of DocumentDB Database Account
-    :param location: Resource group location
-    """
+
     consistency_policy = None
-    if not default_consistency_level is None:
+    if default_consistency_level is not None:
         consistency_policy = ConsistencyPolicy(default_consistency_level, max_staleness_prefix, max_interval_in_seconds)
+
+    resource_client = get_mgmt_service_client(ResourceManagementClient)
+    
+    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    rg = resource_client.resource_groups.get(resource_group_name)
+    resource_group_location = rg.location  # pylint: disable=no-member
 
     params = DatabaseAccountCreateUpdateParameters(
         resource_group_location,
