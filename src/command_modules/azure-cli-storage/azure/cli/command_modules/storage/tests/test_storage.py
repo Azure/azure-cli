@@ -6,19 +6,15 @@
 # AZURE CLI STORAGE TEST DEFINITIONS
 # pylint: skip-file
 
-import collections
-import json
 import os
-import sys
 import time
+import re
 
-from six import StringIO
-
+from azure.cli.command_modules.storage._factory import NO_CREDENTIALS_ERROR_MESSAGE
 from azure.cli.core.test_utils.vcr_test_base import \
     (VCRTestBase, ResourceGroupVCRTestBase, StorageAccountVCRTestBase,
      JMESPathCheck, NoneCheck, BooleanCheck, StringCheck)
 from azure.cli.core._util import CLIError
-from azure.common import AzureHttpError
 
 MOCK_ACCOUNT_KEY = '00000000'
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -782,3 +778,15 @@ class StorageFileACLScenarioTest(StorageAccountVCRTestBase):
 
     def body(self):
         _acl_body(self)
+
+
+class StorageBlobNoCredentialsScenarioTest(VCRTestBase):
+    def __init__(self, test_method):
+        super(StorageBlobNoCredentialsScenarioTest, self).__init__(__file__, test_method)
+
+    def test_storage_blob_no_credentials_scenario(self):
+        self.execute()
+
+    def body(self):
+        with self.assertRaisesRegexp(CLIError, re.escape(NO_CREDENTIALS_ERROR_MESSAGE)):
+            self.cmd('storage blob upload -c foo -n bar -f file_0')
