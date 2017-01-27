@@ -286,14 +286,14 @@ def _validate_vm_create_auth(namespace):
         if namespace.admin_password:
             raise ValueError('Admin password cannot be used with SSH authentication type')
 
-        _validator_ssh_key(namespace)
+        _validate_ssh_key(namespace)
 
         if not namespace.ssh_dest_key_path:
             namespace.ssh_dest_key_path = \
                 '/home/{}/.ssh/authorized_keys'.format(namespace.admin_username)
 
 
-def _validator_ssh_key(namespace):
+def _validate_ssh_key(namespace):
     string_or_file = (namespace.ssh_key_value or
                       os.path.join(os.path.expanduser('~'), '.ssh/id_rsa.pub'))
     content = string_or_file
