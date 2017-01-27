@@ -16,6 +16,7 @@ from azure.mgmt.resource.resources.models import GenericResource
 
 from azure.mgmt.resource.policy.models import (PolicyAssignment, PolicyDefinition)
 from azure.mgmt.resource.locks.models import ManagementLockObject
+from azure.mgmt.resource.links.models import ResourceLinkProperties
 
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core._util import CLIError, get_file_json
@@ -25,7 +26,8 @@ from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
 
 from ._client_factory import (_resource_client_factory,
                               _resource_policy_client_factory,
-                              _resource_lock_client_factory)
+                              _resource_lock_client_factory,
+                              _resource_links_client_factory)
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -509,6 +511,42 @@ def update_lock(name, resource_group_name=None,
     return lock_client.management_locks.create_or_update_at_resource_group_level(
         resource_group_name, name, params)
 
+def create_resource_link(link_id, target_id, notes=None):
+    '''
+    :param target_id: The id of the resource link target.
+    :type target_id: str
+    :param notes: Notes for this link.
+    :type notes: str
+    '''
+    links_client = _resource_links_client_factory().resource_links
+    properties = ResourceLinkProperties(target_id, notes)
+    links_client.create_or_update(link_id, properties)
+
+def update_resource_link(link_id, target_id=None, notes=None):
+    '''
+    :param target_id: The id of the resource link target.
+    :type target_id: str
+    :param notes: Notes for this link.
+    :type notes: str
+    '''
+    links_client = _resource_links_client_factory().resource_links
+    params = links_client.get(link_id)
+    properties = ResourceLinkProperties(
+        target_id if target_id is not None else params.properties.target_id, #pylint: disable=no-member
+        notes=notes if notes is not None else params.properties.notes) #pylint: disable=no-member
+    links_client.create_or_update(link_id, properties)
+
+def list_resource_links(scope=None, filter_string=None):
+    '''
+    :param scope: The scope for the links
+    :type scope: str
+    :param filter_string: A filter for restricting the results
+    :type filter_string: str
+    '''
+    links_client = _resource_links_client_factory().resource_links
+    if scope is not None:
+        return links_client.list_at_source_scope(scope, filter=filter_string)
+    return links_client.list_at_subscription(filter=filter_string)
 
 class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
     def __init__(self, resource_group_name=None, resource_provider_namespace=None,
