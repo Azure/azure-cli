@@ -30,7 +30,7 @@ def cli_documentdb_create(client,
 
     consistency_policy = None
     if default_consistency_level is not None:
-        consistency_policy = ConsistencyPolicy(default_consistency_level, max_staleness_prefix, max_interval_in_seconds)
+        consistency_policy = ConsistencyPolicy(default_consistency_level, max_staleness_prefix, max_interval)
 
 
     from azure.mgmt.resource.resources import ResourceManagementClient
@@ -45,4 +45,4 @@ def cli_documentdb_create(client,
         consistency_policy=consistency_policy,
         ip_range_filter=ip_range_filter)
 
-    return client.database_accounts.create_or_update(resource_group_name, name, params)
+    return client.database_accounts.create_or_update(resource_group_name, account_name, params)
