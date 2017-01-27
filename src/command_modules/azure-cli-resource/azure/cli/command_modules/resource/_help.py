@@ -157,6 +157,10 @@ helps['group'] = """
     type: group
     short-summary: Commands to manage resource groups
 """
+helps['group update'] = """
+    type: group
+    short-summary: Update a resource group
+"""
 helps['group deployment'] = """
     type: group
     short-summary: Commands to execute or manage ARM deployments
@@ -171,6 +175,14 @@ helps['group deployment create'] = """
         - name: create a deployment from a local template file and use parameter values in string 
           text: >
             az group deployment create -g mygroup --template-file azuredeploy.json --parameters "{\\"location\\": {\\"value\\": \\"westus\\"}}"
+"""
+helps['group deployment export'] = """
+    type: command
+    short-summary: Exports the template used for specified deployment
+"""
+helps['group deployment validate'] = """
+    type: command
+    short-summary: Validates whether the specified template is syntactically correct and will be accepted by Azure Resource Manager
 """
 helps['group deployment operation'] = """
     type: group
