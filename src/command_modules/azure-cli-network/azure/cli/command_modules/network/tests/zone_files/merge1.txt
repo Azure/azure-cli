@@ -1,0 +1,74 @@
+; This zone file assumes the zone name is 'example.com'
+
+$ORIGIN example.com.
+
+; Note, first record must be SOA.
+
+@ IN SOA ns1.example.com. hostmaster (
+
+2003080800 ; se = serial number
+
+12h ; ref = refresh
+
+15m ; ret = update retry
+
+3w ; ex = expiry
+
+3h ; min = minimum
+
+)
+
+; Create record set of each type
+
+test-a IN A 1.2.3.4
+
+test-aaaa IN AAAA 2001:cafe:130::100
+
+test-cname IN CNAME target.com.
+test-mx IN MX 10 mail.com.
+
+test-ns IN NS ns1.com.
+
+_sip._tcp.test-srv IN SRV 1 2 3 target.com.
+
+test-txt IN TXT "string 1" ; Note, text is enclosed in quotes
+
+; Create record set with multiple records
+
+test-a2 IN A 1.2.3.4
+
+IN A 2.3.4.5
+
+test-aaaa2 IN AAAA 2001:cafe:130::100
+
+IN AAAA 2001:cafe:130::101
+
+test-mx2 IN MX 10 mail.com.
+
+IN MX 10 mail2.com.
+
+test-ns2 IN NS ns1.com.
+
+IN NS ns2.com.
+
+_sip._tcp.test-srv2 IN SRV 1 2 3 target.com.
+
+IN SRV 1 2 3 target2.com.
+
+test-txt2 IN TXT "string 1"
+
+IN TXT "string 2"
+
+; CNAME conflicts
+
+conflict-a IN A 1.2.3.4
+
+conflict-cname IN CNAME test2.com.
+
+conflict-ca IN CNAME gottherefirst.com.
+
+; TTL conflicts
+
+ttl-low 100 IN A 1.2.3.4
+
+ttl-high 1000 IN A 2.3.4.5

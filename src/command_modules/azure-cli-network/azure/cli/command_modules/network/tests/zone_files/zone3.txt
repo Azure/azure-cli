@@ -1,0 +1,11 @@
+; This zone file assumes the zone name is 'example.com'
+$ORIGIN example.com.
+
+; Note, first record must be SOA. Override default TTL
+@ 1d IN SOA ns1.example.com. hostmaster (
+			2003080800 ; se = serial number
+			12h ; ref = refresh
+			15m ; ret = update retry
+			3w ; ex = expiry
+			3h ; min = minimum
+			) ; Should have default TTL of 3600

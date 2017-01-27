@@ -1262,14 +1262,14 @@ class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
 class NetworkZoneImportExportTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkZoneImportExportTest, self).__init__(__file__, test_method, resource_group='cli_dns_zone_import_export')
+        super(NetworkZoneImportExportTest, self).__init__(__file__, test_method, resource_group='cli_dns_zone_import_export', debug=True)
 
     def test_network_dns_zone_import_export(self):
         self.execute()
 
     def body(self):
         zone_name = 'myzone.com'
-        zone_file_path = os.path.join(TEST_DIR, 'zone.txt')
+        zone_file_path = os.path.join(TEST_DIR, 'zone_files', 'zone1.txt')
 
         self.cmd('network dns zone import -n {} -g {} --file-name "{}"'
                  .format(zone_name, self.resource_group, zone_file_path))

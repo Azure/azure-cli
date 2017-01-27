@@ -1,0 +1,57 @@
+; Missing class
+noclass A 1.2.3.4
+	A 2.3.4.5
+
+noclass CNAME bar.com
+
+; Multi-string TXT records
+txt1 TXT "string 1 only"
+txt2 TXT "string1" "string2" ; Concatenate to “string1string2” (no separator)
+txt3 TXT ("this is a very long string with lots of text, in fact is has 74 characters"
+	  "this is a very long string with lots of text, in fact is has 74 characters"
+ 	  "this is a very long string with lots of text, in fact is has 74 characters"
+	  "this is a very long string with lots of text, in fact is has 74 characters"
+	 ) ; Concatentate, and divide into 255 character strings
+
+txt3 TXT "string;string;string" ; String with ';' inside
+
+;SPF
+spf 100 SPF "this is an SPF record! Convert to TXT on import"
+@ 200 TXT "this is another SPF, this time as TXT..."
+
+; PTR
+160.1 3600 PTR foo.com.
+	   PTR bar.com. ; another record in the same record set
+
+160.2 PTR foo.com.
+160.2 PTR bar.com. ; another record in the same record set
+
+160.3 PTR foo.com.
+      PTR bar.com.
+
+; semicolon and string tests
+; single string, foobar
+t1 TXT foobar
+t2 TXT "foobar"
+
+; two strings
+t3 TXT "foo" "bar"
+
+; semicolon in string value
+t4 TXT "foo;bar"
+t5 TXT foo\;bar
+t6 TXT "foo\;bar"
+
+; string with quotes
+t7 TXT "\"quoted string\""
+
+; error
+t8 TXT foo bar
+
+; multi-line
+t9 TXT ( "foo"
+	 "barr" )
+
+; with comments
+t10 TXT "foo bar" ; comment
+t11 TXT foobar ; comment
