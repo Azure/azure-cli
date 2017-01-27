@@ -10,7 +10,7 @@ import mock
 
 from azure.cli.core._util import CLIError
 
-from azure.cli.command_modules.vm._validators import (_validate_ssh_key,
+from azure.cli.command_modules.vm._validators import (validate_ssh_key,
                                                       _is_valid_ssh_rsa_public_key)
 
 
@@ -23,7 +23,7 @@ class TestActions(unittest.TestCase):
         args.generate_ssh_keys = True
 
         # 1 verify we generate key files if not existing
-        _validate_ssh_key(args)
+        validate_ssh_key(args)
 
         generated_public_key_string = args.ssh_key_value
         self.assertTrue(bool(args.ssh_key_value))
@@ -35,7 +35,7 @@ class TestActions(unittest.TestCase):
         args2 = mock.MagicMock()
         args2.ssh_key_value = generated_public_key_string
         args2.generate_ssh_keys = False
-        _validate_ssh_key(args2)
+        validate_ssh_key(args2)
         # we didn't regenerate
         self.assertEqual(generated_public_key_string, args.ssh_key_value)
 
@@ -46,7 +46,7 @@ class TestActions(unittest.TestCase):
         args3.ssh_key_value = public_key_file2
         args3.generate_ssh_keys = False
         with self.assertRaises(CLIError):
-            _validate_ssh_key(args3)
+            validate_ssh_key(args3)
 
         # 4 verify file naming if the pub file doesn't end with .pub
         _, public_key_file4 = tempfile.mkstemp()
@@ -54,6 +54,6 @@ class TestActions(unittest.TestCase):
         args4 = mock.MagicMock()
         args4.ssh_key_value = public_key_file4
         args4.generate_ssh_keys = True
-        _validate_ssh_key(args4)
+        validate_ssh_key(args4)
         self.assertTrue(os.path.isfile(public_key_file4 + '.private'))
         self.assertTrue(os.path.isfile(public_key_file4))
