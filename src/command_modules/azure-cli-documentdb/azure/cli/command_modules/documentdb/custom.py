@@ -14,10 +14,6 @@
 from azure.cli.command_modules.documentdb.sdk.models import (
     ConsistencyPolicy,
     DatabaseAccountCreateUpdateParameters,
-    DatabaseAccountKind,
-    DatabaseAccountOfferType,
-    DefaultConsistencyLevel,
-    Location
 )
 
 def cli_documentdb_create(client,

@@ -11,7 +11,6 @@ from azure.cli.core.commands.parameters import (
     ignore_type)
 from azure.cli.core.commands import register_cli_argument
 import azure.cli.core.commands.arm # pylint: disable=unused-import
-from azure.cli.core.commands import CliArgumentType
 from azure.cli.command_modules.documentdb.sdk.models.document_db_enums import KeyKind
 from azure.cli.command_modules.documentdb.sdk.models.document_db_enums import DefaultConsistencyLevel
 from azure.cli.command_modules.documentdb.sdk.models.failover_policy import FailoverPolicy

@@ -6,7 +6,6 @@
 #pylint: disable=line-too-long
 
 from azure.cli.core.commands import cli_command
-import azure.cli.command_modules.documentdb
 from azure.cli.command_modules.documentdb._client_factory import (cf_documentdb)
 
 custom_path = 'azure.cli.command_modules.documentdb.sdk.operations.database_accounts_operations#{}'
