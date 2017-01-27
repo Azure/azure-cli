@@ -110,4 +110,10 @@ cli_command(__name__, 'policy definition list', 'azure.mgmt.resource.policy.oper
 cli_command(__name__, 'policy definition show', 'azure.mgmt.resource.policy.operations#PolicyDefinitionsOperations.get', cf_policy_definitions)
 cli_command(__name__, 'policy definition update', 'azure.cli.command_modules.resource.custom#update_policy_definition')
 
+cli_command(__name__, 'lock create', 'azure.cli.command_modules.resource.custom#create_lock')
+cli_command(__name__, 'lock delete', 'azure.cli.command_modules.resource.custom#delete_lock')
 cli_command(__name__, 'lock list', 'azure.cli.command_modules.resource.custom#list_locks')
+cli_command(__name__, 'lock show', 'azure.cli.command_modules.resource.custom#get_lock')
+cli_command(__name__, 'lock update', 'azure.cli.command_modules.resource.custom#update_lock')
+
+

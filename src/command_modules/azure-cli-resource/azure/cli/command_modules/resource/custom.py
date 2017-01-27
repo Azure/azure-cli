@@ -15,6 +15,7 @@ from azure.mgmt.resource.resources.models.resource_group import ResourceGroup
 from azure.mgmt.resource.resources.models import GenericResource
 
 from azure.mgmt.resource.policy.models import (PolicyAssignment, PolicyDefinition)
+from azure.mgmt.resource.locks.models import ManagementLockObject
 
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core._util import CLIError, get_file_json
@@ -430,6 +431,86 @@ def list_locks(resource_group_name=None, resource_provider_namespace=None,
     return lock_client.management_locks.list_at_resource_level(
         resource_group_name, resource_provider_namespace, parent_resource_path, resource_type,
         resource_name, filter=filter_string)
+
+def get_lock(name, resource_group_name=None):
+    '''
+    :param name: Name of the lock.
+    :type name: str
+    '''
+    lock_client = _resource_lock_client_factory()
+    if resource_group_name is None:
+        return lock_client.management_locks.get(name)
+    return lock_client.management_locks.get_at_resource_group_level(resource_group_name, name)
+
+def delete_lock(name, resource_group_name=None, resource_provider_namespace=None,
+                parent_resource_path=None, resource_type=None, resource_name=None):
+    '''
+    :param name: The name of the lock.
+    :type name: str
+    :param resource_provider_namespace: Name of a resource provider.
+    :type resource_provider_namespace: str
+    :param parent_resource_path: Path to a parent resource
+    :type parent_resource_path: str
+    :param resource_type: The type for the resource with the lock.
+    :type resource_type: str
+    :param resource_name: Name of a resource that has a lock.
+    :type resource_name: str
+    '''
+    lock_client = _resource_lock_client_factory()
+    if resource_group_name is None:
+        return lock_client.management_locks.delete_at_subscription_level(name)
+    if resource_name is None:
+        return lock_client.management_locks.delete_at_resource_group_level(
+            resource_group_name, name)
+    if resource_provider_namespace is None:
+        raise CLIError('--resource-provider-namespace is required if --resource-name is present')
+    if resource_type is None:
+        raise CLIError('--resource-type is required if --resource-name is present')
+    return lock_client.management_locks.delete_at_resource_level(
+        resource_group_name, resource_provider_namespace, parent_resource_path, resource_type,
+        resource_name, name)
+
+def create_lock(name, resource_group_name=None, resource_provider_namespace=None,
+                parent_resource_path=None, resource_type=None, resource_name=None,
+                level=None, notes=None, lock_id=None, lock_type=None):
+    parameters = ManagementLockObject(
+        level=level, notes=notes, id=lock_id, type=lock_type, name=name)
+    lock_client = _resource_lock_client_factory()
+    if resource_group_name is None:
+        return lock_client.management_locks.create_or_update_at_subscription_level(name, parameters)
+    if resource_name is None:
+        return lock_client.management_locks.create_or_update_at_resource_group_level(
+            resource_group_name, name, parameters)
+    if resource_provider_namespace is None:
+        raise CLIError('--resource-provider-namespace is required if --resource-name is present')
+    if resource_type is None:
+        raise CLIError('--resource-type is required if --resource-name is present')
+    return lock_client.management_locks.create_or_update_at_resource_level(
+        resource_group_name, resource_provider_namespace, parent_resource_path, resource_type,
+        resource_name, name, parameters)
+
+def _update_lock_parameters(parameters, level, notes, lock_id, lock_type):
+    if level is not None:
+        parameters.level = level
+    if notes is not None:
+        parameters.nodes = notes
+    if lock_id is not None:
+        parameters.id = lock_id
+    if lock_type is not None:
+        parameters.type = lock_type
+
+def update_lock(name, resource_group_name=None,
+                level=None, notes=None, lock_id=None, lock_type=None):
+    lock_client = _resource_lock_client_factory()
+    if resource_group_name is None:
+        params = lock_client.management_locks.get(name)
+        _update_lock_parameters(params, level, notes, lock_id, lock_type)
+        return lock_client.management_locks.create_or_update_at_subscription_level(name, params)
+    params = lock_client.management_locks.get_at_resource_group_level(resource_group_name, name)
+    _update_lock_parameters(params, level, notes, lock_id, lock_type)
+    return lock_client.management_locks.create_or_update_at_resource_group_level(
+        resource_group_name, name, params)
+
 
 class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
     def __init__(self, resource_group_name=None, resource_provider_namespace=None,
