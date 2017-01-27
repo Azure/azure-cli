@@ -6,7 +6,7 @@
 import argparse
 import sys
 
-from automation.utilities.path import filter_user_selected_modules
+from automation.utilities.path import filter_user_selected_modules_with_tests
 from automation.tests.nose_helper import get_nose_runner
 from automation.utilities.display import print_records
 from automation.utilities.path import get_test_results_dir
@@ -48,7 +48,7 @@ if __name__ == '__main__':
                        help='Not to run the tests in parallel.')
     args = parse.parse_args()
 
-    selected_modules = filter_user_selected_modules(args.modules)
+    selected_modules = filter_user_selected_modules_with_tests(args.modules)
     if not selected_modules:
         parse.print_help()
         sys.exit(1)
