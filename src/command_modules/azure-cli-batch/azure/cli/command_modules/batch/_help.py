@@ -27,6 +27,11 @@ helps['batch account create'] = """
     short-summary: Creates a new Batch account with the specified parameters.
 """
 
+helps['batch account set'] = """
+    type: command
+    short-summary: Updates the properties of the specified Batch account.
+"""
+
 helps['batch account autostorage-keys'] = """
     type: group
     short-summary: Commands to manage the access keys for the auto storage account configured for your Batch account.
@@ -42,9 +47,19 @@ helps['batch application'] = """
     short-summary: Commands to manage your Batch applications.
 """
 
+helps['batch application set'] = """
+    type: command
+    short-summary: Updates the properties of the specified application.
+"""
+
 helps['batch application package'] = """
     type: group
     short-summary: Commands to manage your Batch application packages.
+"""
+
+helps['batch application summary'] = """
+    type: group
+    short-summary: Commands to view a summary of your Batch application packages.
 """
 
 helps['batch location'] = """
@@ -59,12 +74,17 @@ helps['batch location quotas'] = """
 
 helps['batch certificate'] = """
     type: group
-    short-summary: Commands to manage your Batch certificate.
+    short-summary: Commands to manage your Batch certificates.
 """
 
 helps['batch task file'] = """
     type: group
     short-summary: Commands to manage your Batch task files.
+"""
+
+helps['batch task file download'] = """
+    type: command
+    short-summary: Downloads the content of the specified task file.
 """
 
 helps['batch node file'] = """
@@ -79,7 +99,12 @@ helps['batch job'] = """
 
 helps['batch job all-stats'] = """
     type: group
-    short-summary: Commands to manage all the jobs under your Batch account.
+    short-summary: Commands to manage the statistics of all the jobs under your Batch account
+"""
+
+helps['batch job all-stats show'] = """
+    type: command
+    short-summary: Gets lifetime summary statistics for all of the jobs in the specified account. Statistics are aggregated across all jobs that have ever existed in the account, from account creation to the last update time of the statistics.
 """
 
 helps['batch job prep-release-status'] = """
@@ -92,14 +117,19 @@ helps['batch job-schedule'] = """
     short-summary: Commands to manage your Batch job schedules.
 """
 
-helps['batch node-user'] = """
+helps['batch node user'] = """
     type: group
     short-summary: Commands to manage your Batch compute node users.
 """
 
-helps['batch node-user create'] = """
+helps['batch node user create'] = """
     type: command
     short-summary: Adds a user account to the specified compute node.
+"""
+
+helps['batch node user set'] = """
+    type: command
+    short-summary: Updates the properties of a user account on the specified compute node.
 """
 
 helps['batch node'] = """
@@ -109,12 +139,12 @@ helps['batch node'] = """
 
 helps['batch node remote-login-settings'] = """
     type: group
-    short-summary: The remote login settings for a Batch compute node.
+    short-summary: Commands to manage the remote login settings for a Batch compute node.
 """
 
 helps['batch node remote-desktop'] = """
     type: group
-    short-summary: The remote desktop protocol for a Batch compute node.
+    short-summary: Commands to manage the remote desktop protocol for a Batch compute node.
 """
 
 helps['batch node scheduling'] = """
@@ -129,27 +159,32 @@ helps['batch pool'] = """
 
 helps['batch pool os'] = """
     type: group
-    short-summary: Commands to manage operationg system of your Batch pools.
+    short-summary: Commands to manage the operating system of your Batch pools.
 """
 
 helps['batch pool autoscale'] = """
     type: group
-    short-summary: Commands to manage autoscale of your Batch pools.
+    short-summary: Commands to manage automatic scaling of your Batch pools.
 """
 
 helps['batch pool all-stats'] = """
     type: group
-    short-summary: Commands to manage all the pools under your Batch account.
+    short-summary: Commands to manage statistics of all pools under your Batch account.
+"""
+
+helps['batch pool all-stats show'] = """
+    type: command
+    short-summary: Gets lifetime summary statistics for all of the pools in the specified account. Statistics are aggregated across all pools that have ever existed in the account, from account creation to the last update time of the statistics.
 """
 
 helps['batch pool usage-metrics'] = """
     type: group
-    short-summary: Commands to manage usage metrics of your Batch pools'.
+    short-summary: Commands to manage usage metrics of your Batch pools.
 """
 
 helps['batch pool node-agent-skus'] = """
     type: group
-    short-summary: Commands to manage node agent skus of IaaS pools'.
+    short-summary: Commands to manage node agent skus of pools using a Virtual Machine Configuration.
 """
 
 helps['batch task'] = """
@@ -179,12 +214,12 @@ helps['batch pool create'] = """
 
 helps['batch pool set'] = """
     type: command
-    short-summary: Patch the properties of the specified Batch pool.
+    short-summary: Updates the properties of the specified pool. Properties that are not specified remain unchanged.
 """
 
 helps['batch pool reset'] = """
     type: command
-    short-summary: Update the properties of the specified Batch pool.
+    short-summary: Updates the properties of the specified pool. All updatable properties are replaced with the values specified or cleared if unspecified.
 """
 
 helps['batch pool resize'] = """

@@ -25,17 +25,21 @@ batch_name_type = CliArgumentType(help='Name of the Batch account.', options_lis
 
 # PARAMETER REGISTRATIONS
 
-register_cli_argument('batch', 'resource_group_name', resource_group_name_type, completer=None, validator=None)
+register_cli_argument('batch', 'resource_group_name', resource_group_name_type, help='Name of the resource group', completer=None, validator=None)
 register_cli_argument('batch account', 'account_name', batch_name_type, options_list=('--name', '-n'))
-register_cli_argument('batch account create', 'location', location_type)
-register_cli_argument('batch account create', 'tags', tags_type)
-register_extra_cli_argument('batch account create', 'storage_account', help='The storage account name or resource id to be used for auto storage account.', validator=storage_account_id)
+register_cli_argument('batch account create', 'location', location_type, help='The region in which to create the account.')
+register_cli_argument('batch account create', 'tags', tags_type, help="Space separated tags in 'key[=value]' format.")
+register_extra_cli_argument('batch account create', 'storage_account', help='The storage account name or resource id to be used for auto storage.', validator=storage_account_id)
 register_cli_argument('batch account set', 'tags', tags_type)
-register_extra_cli_argument('batch account set', 'storage_account', help='The storage account name or resource id to be used for auto storage account.', validator=storage_account_id)
+register_extra_cli_argument('batch account set', 'storage_account', help='The storage account name or resource id to be used for auto storage.', validator=storage_account_id)
 register_cli_argument('batch account keys renew', 'key_name', **enum_choice_list(AccountKeyType))
-register_cli_argument('batch application', 'account_name', batch_name_type, options_list=('--name', '-n'), validator=application_enabled)
+register_cli_argument('batch application set', 'application_id', options_list=('--application-id',), help="The ID of the application.")
+register_cli_argument('batch application set', 'allow_updates', options_list=('--allow-updates',), action="store_true", help="A value indicating whether packages within the application may be overwritten using the same version string. True if flag present.")
+register_cli_argument('batch application create', 'allow_updates', options_list=('--allow-updates',), action="store_true", help="A value indicating whether packages within the application may be overwritten using the same version string. True if flag present.")
 register_cli_argument('batch application package create', 'package_file', type=file_type, help='The path of the application package in zip format', completer=FilesCompleter())
-register_cli_argument('batch location quotas show', 'location_name', location_type)
+register_cli_argument('batch application package create', 'application_id', options_list=('--application-id',), help="The ID of the application.")
+register_cli_argument('batch application package create', 'version', options_list=('--version',), help="The version of the application.")
+register_cli_argument('batch location quotas show', 'location_name', location_type, help='The region from which to display the Batch service quotas.')
 
 for command in ['list', 'show', 'create', 'set', 'delete', 'package']:
     register_cli_argument('batch application {}'.format(command), 'account_name', batch_name_type, options_list=('--name', '-n'), validator=application_enabled)
@@ -72,8 +76,8 @@ register_cli_argument('batch task create', 'task_id', help='The ID of the task.'
 for item in ['batch certificate delete', 'batch certificate create', 'batch pool resize', 'batch pool reset', 'batch job list', 'batch task create']:
     register_extra_cli_argument(item, 'account_name', arg_group='Batch Account',
                                 validator=validate_client_parameters,
-                                help='The Batch account name. Or set by environment variable: AZURE_BATCH_ACCOUNT')
+                                help='The Batch account name. Alternatively, set by environment variable: AZURE_BATCH_ACCOUNT')
     register_extra_cli_argument(item, 'account_key', arg_group='Batch Account',
-                                help='The Batch account key. Or set by environment variable: AZURE_BATCH_ACCESS_KEY')
+                                help='The Batch account key. Alternatively, set by environment variable: AZURE_BATCH_ACCESS_KEY')
     register_extra_cli_argument(item, 'account_endpoint', arg_group='Batch Account',
-                                help='Batch service endpoint. Or set by environment variable: AZURE_BATCH_ENDPOINT')
+                                help='Batch service endpoint. Alternatively, set by environment variable: AZURE_BATCH_ENDPOINT')

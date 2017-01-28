@@ -66,7 +66,7 @@ cli_batch_data_plane_command('batch certificate list', data_path.format('certifi
 
 cli_batch_data_plane_command('batch pool usage-metrics list', data_path.format('pool', 'PoolOperations.list_pool_usage_metrics'), pool_client_factory)
 cli_batch_data_plane_command('batch pool all-stats show', data_path.format('pool', 'PoolOperations.get_all_pools_lifetime_statistics'), pool_client_factory)
-cli_batch_data_plane_command('batch pool create', data_path.format('pool', 'PoolOperations.add'), pool_client_factory, validator=validate_pool_settings)
+cli_batch_data_plane_command('batch pool create', data_path.format('pool', 'PoolOperations.add'), pool_client_factory, validator=validate_pool_settings, ignore=['pool.cloud_service_configuration.current_os_version'])
 cli_batch_data_plane_command('batch pool list', data_path.format('pool', 'PoolOperations.list'), pool_client_factory)
 cli_batch_data_plane_command('batch pool delete', data_path.format('pool', 'PoolOperations.delete'), pool_client_factory)
 cli_batch_data_plane_command('batch pool show', data_path.format('pool', 'PoolOperations.get'), pool_client_factory)
@@ -115,9 +115,9 @@ cli_batch_data_plane_command('batch task file download', data_path.format('file'
 cli_batch_data_plane_command('batch task file show', data_path.format('file', 'FileOperations.get_node_file_properties_from_task'), file_client_factory)
 cli_batch_data_plane_command('batch task file list', data_path.format('file', 'FileOperations.list_from_task'), file_client_factory)
 
-cli_batch_data_plane_command('batch node-user create', data_path.format('compute_node', 'ComputeNodeOperations.add_user'), compute_node_client_factory)
-cli_batch_data_plane_command('batch node-user delete', data_path.format('compute_node', 'ComputeNodeOperations.delete_user'), compute_node_client_factory)
-cli_batch_data_plane_command('batch node-user set', data_path.format('compute_node', 'ComputeNodeOperations.update_user'), compute_node_client_factory)
+cli_batch_data_plane_command('batch node user create', data_path.format('compute_node', 'ComputeNodeOperations.add_user'), compute_node_client_factory)
+cli_batch_data_plane_command('batch node user delete', data_path.format('compute_node', 'ComputeNodeOperations.delete_user'), compute_node_client_factory)
+cli_batch_data_plane_command('batch node user set', data_path.format('compute_node', 'ComputeNodeOperations.update_user'), compute_node_client_factory)
 cli_batch_data_plane_command('batch node show', data_path.format('compute_node', 'ComputeNodeOperations.get'), compute_node_client_factory)
 cli_batch_data_plane_command('batch node list', data_path.format('compute_node', 'ComputeNodeOperations.list'), compute_node_client_factory)
 cli_batch_data_plane_command('batch node reboot', data_path.format('compute_node', 'ComputeNodeOperations.reboot'), compute_node_client_factory)
@@ -125,7 +125,7 @@ cli_batch_data_plane_command('batch node reimage', data_path.format('compute_nod
 cli_batch_data_plane_command('batch node scheduling disable', data_path.format('compute_node', 'ComputeNodeOperations.disable_scheduling'), compute_node_client_factory)
 cli_batch_data_plane_command('batch node scheduling enable', data_path.format('compute_node', 'ComputeNodeOperations.enable_scheduling'), compute_node_client_factory)
 cli_batch_data_plane_command('batch node remote-login-settings show', data_path.format('compute_node', 'ComputeNodeOperations.get_remote_login_settings'), compute_node_client_factory)
-cli_batch_data_plane_command('batch node remote-desktop show', data_path.format('compute_node', 'ComputeNodeOperations.get_remote_desktop'), compute_node_client_factory)
+cli_batch_data_plane_command('batch node remote-desktop download', data_path.format('compute_node', 'ComputeNodeOperations.get_remote_desktop'), compute_node_client_factory)
 
 cli_batch_data_plane_command('batch node file delete', data_path.format('file', 'FileOperations.delete_from_compute_node'), file_client_factory)
 cli_batch_data_plane_command('batch node file download', data_path.format('file', 'FileOperations.get_from_compute_node'), file_client_factory)

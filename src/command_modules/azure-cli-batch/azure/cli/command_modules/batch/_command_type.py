@@ -23,9 +23,6 @@ from azure.cli.core.commands._introspection import (
     extract_args_from_signature)
 
 
-# TODO: Enum choice lists
-
-
 _CLASS_NAME = re.compile(r"<(.*?)>")  # Strip model name from class docstring
 _UNDERSCORE_CASE = re.compile('(?!^)([A-Z]+)')  # Convert from CamelCase to underscore_case
 FLATTEN = 3  # The level of complex object namespace to flatten.
@@ -307,6 +304,8 @@ class BatchArgumentTree(object):
         for name, details in self._arg_tree.items():
             if details['type'] == 'bool':
                 details['options']['action'] = 'store_true'
+                details['options']['help'] += \
+                    ' True if flag present, otherwise default will be used.'
             elif details['type'].startswith('['):
                 details['options']['nargs'] = '+'
             elif details['type'] in ['iso-8601', 'rfc-1123']:
@@ -649,12 +648,16 @@ class AzureBatchDataPlaneCommand(object):
                     # We only expose a list arg if there's a validator for it
                     # This will fail for 2D arrays - though Batch doesn't have any yet
                     inner_type = details['type'][1:-1]
-                    if inner_type in BASIC_TYPES:  # TODO
-                        continue
+                    if inner_type in BASIC_TYPES:
+                        options['help'] += " Space separated values."
+                        self._resolve_conflict(
+                            param_attr, param_attr, path, options,
+                            details['type'], required_attrs, conflict_names)
                     else:
                         inner_type = operations_name(inner_type)
                         try:
                             validator = getattr(validators, inner_type + "_format")
+                            options['help'] += ' ' + validator.__doc__
                             options['type'] = validator
                             self._resolve_conflict(
                                 param_attr, param_attr, path, options,
@@ -664,6 +667,11 @@ class AzureBatchDataPlaneCommand(object):
                 else:
                     attr_model = _load_model(details['type'])
                     if not hasattr(attr_model, '_attribute_map'):  # Must be an enum
+                        values_index = options['help'].find(' Possible values include')
+                        if values_index >= 0:
+                            choices = options['help'][values_index + 25:].split(', ')
+                            options['choices'] = [c for c in choices if c != "'unmapped'"]
+                            options['help'] = options['help'][0:values_index]
                         self._resolve_conflict(param_attr, param_attr, path, options,
                                                details['type'], required_attrs, conflict_names)
                     else:
@@ -692,9 +700,9 @@ class AzureBatchDataPlaneCommand(object):
                     yield flattened_arg
                 param = 'json_file'
                 json_class = class_name(arg_type).split('.')[-1]
-                docstring = "A file containing the {} object in JSON format, " \
-                            "if this parameter is specified, all other parameters" \
-                            " are ignored.".format(json_class)
+                docstring = "A file containing the {} object in JSON format. " \
+                            "If this parameter is specified, all {} arguments" \
+                            " are ignored.".format(json_class, group_title(arg[0]))
                 yield (param, CliCommandArgument(param,
                                                  options_list=[arg_name(param)],
                                                  required=False,
@@ -737,15 +745,14 @@ def cli_batch_data_plane_command(name, operation, client_factory, transform=None
     group_name = 'Batch Account'
     command.cmd.add_argument('account_name', '--account-name', required=False, default=None,
                              validator=validators.validate_client_parameters, arg_group=group_name,
-                             help='Batch account name. Or set by environment variable: '
+                             help='Batch account name. Alternatively, set by environment variable: '
                              'AZURE_BATCH_ACCOUNT')
     command.cmd.add_argument('account_key', '--account-key', required=False, default=None,
                              arg_group=group_name,
-                             help='Batch account key. Must be used in conjunction with Batch '
-                             'account name and endpoint. Or set by environment variable: '
-                             'AZURE_BATCH_ACCESS_KEY')
+                             help='Batch account key. Alternatively, set by environment'
+                             ' variable: AZURE_BATCH_ACCESS_KEY')
     command.cmd.add_argument('account_endpoint', '--account-endpoint', required=False, default=None,
                              arg_group=group_name,
-                             help='Batch service endpoint. Or set by environment variable: '
-                             'AZURE_BATCH_ENDPOINT')
+                             help='Batch service endpoint. Alternatively, set by environment'
+                             'variable: AZURE_BATCH_ENDPOINT')
     command_table[command.cmd.name] = command.cmd

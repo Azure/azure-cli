@@ -37,7 +37,7 @@ def duration_format(value):
 
 
 def metadata_item_format(value):
-    """Validate listed metadata arguments"""
+    """Space separated values in 'key=value' format."""
     try:
         data_name, data_value = value.split('=')
     except ValueError:
@@ -49,7 +49,7 @@ def metadata_item_format(value):
 
 
 def environment_setting_format(value):
-    """Validate listed enviroment settings arguments"""
+    """Space separated values in 'key=value' format."""
     try:
         env_name, env_value = value.split('=')
     except ValueError:
@@ -61,7 +61,7 @@ def environment_setting_format(value):
 
 
 def application_package_reference_format(value):
-    """Validate listed application package reference arguments"""
+    """Space separated application IDs with optional version in 'id[#version]' format."""
     app_reference = value.split('#', 1)
     package = {'application_id': app_reference[0]}
     try:
@@ -72,7 +72,7 @@ def application_package_reference_format(value):
 
 
 def certificate_reference_format(value):
-    """Validate listed certificate reference arguments"""
+    """Space separated certificate thumbprints."""
     cert = {'thumbprint': value, 'thumbprint_algorithm': 'sha1'}
     return cert
 
@@ -90,10 +90,8 @@ def storage_account_id(namespace):
     from azure.mgmt.storage import StorageManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
-    if (namespace.storage_account
-            and not
-            ('/providers/Microsoft.ClassicStorage/storageAccounts/' in namespace.storage_account
-             or
+    if (namespace.storage_account and not
+            ('/providers/Microsoft.ClassicStorage/storageAccounts/' in namespace.storage_account or
              '/providers/Microsoft.Storage/storageAccounts/' in namespace.storage_account)):
         storage_client = get_mgmt_service_client(StorageManagementClient)
         acc = storage_client.storage_accounts.get_properties(namespace.resource_group_name,
@@ -234,7 +232,7 @@ def validate_pool_settings(ns, parser):
 
         paas_sizes = ['small', 'medium', 'large', 'extralarge']
         if ns.vm_size and ns.vm_size.lower() in paas_sizes and not ns.os_family:
-            message = ("The selected VM size in incompatible with Virtual Machine Configuration. "
-                       "Please swap for the IaaS equivalent: Standard_A1 (small), Standard_A2 "
+            message = ("The selected VM size is incompatible with Virtual Machine Configuration. "
+                       "Please swap for the equivalent: Standard_A1 (small), Standard_A2 "
                        "(medium), Standard_A3 (large), or Standard_A4 (extra large).")
             raise ValueError(message)

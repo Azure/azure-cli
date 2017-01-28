@@ -140,7 +140,7 @@ class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
         aname = self.application_name
         ver = self.application_package_name
         # test create application with default set
-        self.cmd('batch application create -g {} -n {} --application-id {} --allow-updates true'.
+        self.cmd('batch application create -g {} -n {} --application-id {} --allow-updates'.
                  format(rg, name, aname), checks=[
                      JMESPathCheck('id', aname),
                      JMESPathCheck('allowUpdates', True)
