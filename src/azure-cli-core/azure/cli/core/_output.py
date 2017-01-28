@@ -319,6 +319,8 @@ class TsvOutput(object):  # pylint: disable=too-few-public-methods
                 stream.write(separator)
                 TsvOutput._dump_obj(value, stream)
                 separator = '\t'
+        elif isinstance(data, bool):
+            TsvOutput._dump_obj(str(data).lower(), stream)
         else:
             TsvOutput._dump_obj(data, stream)
         stream.write('\n')
