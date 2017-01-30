@@ -418,11 +418,14 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
             for check in checks:
                 check.compare(result)
 
-        result = result or '{}'
-        try:
-            return json.loads(result)
-        except Exception:  # pylint: disable=broad-except
+        if '-o' in command_list and 'tsv' in command_list:
             return result
+        else:
+            try:
+                result = result or '{}'
+                return json.loads(result)
+            except Exception:  # pylint: disable=broad-except
+                return result
 
     def set_env(self, key, val):  # pylint: disable=no-self-use
         os.environ[key] = val
