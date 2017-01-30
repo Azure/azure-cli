@@ -36,7 +36,7 @@ def transform_ip_addresses(result):
 
     return transformed
 
- 
+
 def transform_vm(result):
     return OrderedDict([('name', result['name']),
                         ('resourceGroup', result['resourceGroup']),
