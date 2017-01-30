@@ -229,35 +229,48 @@ def load_params(command):
     _update_command_definitions(command_table)
 
 
-def get_command_table():
+def get_command_table(module_name=None):
     '''Loads command table(s)
+    When `module_name` is specified, only commands from that module will be loaded.
+    If the module is not found, all commands are loaded.
     '''
-    installed_command_modules = []
-    try:
-        mods_ns_pkg = import_module('azure.cli.command_modules')
-        installed_command_modules = [modname for _, modname, _ in
-                                     pkgutil.iter_modules(mods_ns_pkg.__path__)]
-    except ImportError:
-        pass
-    logger.debug('Installed command modules %s', installed_command_modules)
-    cumulative_elapsed_time = 0
-    for mod in installed_command_modules:
+    loaded = False
+    if module_name and module_name != 'acs':
         try:
-            start_time = timeit.default_timer()
-            import_module('azure.cli.command_modules.' + mod).load_commands()
-            elapsed_time = timeit.default_timer() - start_time
-            logger.debug("Loaded module '%s' in %.3f seconds.", mod, elapsed_time)
-            cumulative_elapsed_time += elapsed_time
-        except Exception as ex:  # pylint: disable=broad-except
-            # Changing this error message requires updating CI script that checks for failed
-            # module loading.
-            logger.error("Error loading command module '%s'", mod)
-            telemetry.set_exception(exception=ex, fault_type='module-load-error-' + mod,
-                                    summary='Error loading module: {}'.format(mod))
-            logger.debug(traceback.format_exc())
-    logger.debug("Loaded all modules in %.3f seconds. "
-                 "(note: there's always an overhead with the first module loaded)",
-                 cumulative_elapsed_time)
+            import_module('azure.cli.command_modules.' + module_name).load_commands()
+            logger.debug("Successfully loaded command table from module '%s'.", module_name)
+            loaded = True
+        except ImportError:
+            logger.debug("Loading all installed modules as module with name '%s' not found.", module_name)  # pylint: disable=line-too-long
+        except Exception:  # pylint: disable=broad-except
+            pass
+    if not loaded:
+        installed_command_modules = []
+        try:
+            mods_ns_pkg = import_module('azure.cli.command_modules')
+            installed_command_modules = [modname for _, modname, _ in
+                                         pkgutil.iter_modules(mods_ns_pkg.__path__)]
+        except ImportError:
+            pass
+        logger.debug('Installed command modules %s', installed_command_modules)
+        cumulative_elapsed_time = 0
+        for mod in installed_command_modules:
+            try:
+                start_time = timeit.default_timer()
+                import_module('azure.cli.command_modules.' + mod).load_commands()
+                elapsed_time = timeit.default_timer() - start_time
+                logger.debug("Loaded module '%s' in %.3f seconds.", mod, elapsed_time)
+                cumulative_elapsed_time += elapsed_time
+            except Exception as ex:  # pylint: disable=broad-except
+                # Changing this error message requires updating CI script that checks for failed
+                # module loading.
+                logger.error("Error loading command module '%s'", mod)
+                telemetry.set_exception(exception=ex, fault_type='module-load-error-' + mod,
+                                        summary='Error loading module: {}'.format(mod))
+                logger.debug(traceback.format_exc())
+        logger.debug("Loaded all modules in %.3f seconds. "
+                     "(note: there's always an overhead with the first module loaded)",
+                     cumulative_elapsed_time)
     _update_command_definitions(command_table)
     ordered_commands = OrderedDict(command_table)
     return ordered_commands
