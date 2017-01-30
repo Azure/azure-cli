@@ -34,7 +34,8 @@ def validate_locations(ns):
     ns.locations = loc_dict
 
 def validate_ip_range_filter(ns):
-    ns.ip_range_filter = ",".join(ns.ip_range_filter.split())
+    if ns.ip_range_filter:
+        ns.ip_range_filter = ",".join(ns.ip_range_filter.split())
 
 register_cli_argument('documentdb', 'account_name', arg_type=name_type, help='Name of the DocumentDB Database Account', completer=get_resource_name_completion_list('Microsoft.DocumentDb/databaseAccounts'), id_part="name")
 
