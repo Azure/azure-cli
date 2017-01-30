@@ -38,7 +38,7 @@ def main(args, file=sys.stdout):  # pylint: disable=redefined-builtin
 
         # Commands can return a dictionary/list of results
         # If they do, we print the results.
-        if cmd_result:
+        if cmd_result and cmd_result.result is not None:
             from azure.cli.core._output import OutputProducer
             formatter = OutputProducer.get_formatter(APPLICATION.configuration.output_format)
             OutputProducer(formatter=formatter, file=file).out(cmd_result)
