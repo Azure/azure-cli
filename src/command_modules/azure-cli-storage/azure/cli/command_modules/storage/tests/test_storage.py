@@ -44,6 +44,8 @@ class StorageAccountScenarioTest(ResourceGroupVCRTestBase):
         rg = self.resource_group
         s = self
         s.cmd('storage account check-name --name teststorageomega', checks=JMESPathCheck('nameAvailable', True))
+        result = s.cmd('storage account check-name --name teststorageomega --query "nameAvailable" -o tsv')
+        assert result == 'true'
         s.cmd('storage account create --sku Standard_LRS -l westus -n {} -g {}'.format(account, rg), checks=[
             JMESPathCheck('location', 'westus'),
             JMESPathCheck('sku.name', 'Standard_LRS')
@@ -90,6 +92,8 @@ class StorageAccountScenarioTest(ResourceGroupVCRTestBase):
               checks=JMESPathCheck('sku.name', 'Standard_GRS'))
         s.cmd('storage account delete -g {} -n {} --force'.format(rg, account))
         s.cmd('storage account check-name --name {}'.format(account), checks=JMESPathCheck('nameAvailable', True))
+        result = s.cmd('storage account check-name --name teststorageomega --query "nameAvailable" -o tsv')
+        assert result == 'false'
 
 
 class StorageBlobScenarioTest(StorageAccountVCRTestBase):
