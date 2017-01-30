@@ -3,6 +3,16 @@
 Release History
 ===============
 
+0.1.1b2 (2017-01-30)
++++++++++++++++++++++
+
+* Generate ssh key file if needed.
+* Add help text for get credentials command.
+* Add path expansion to file type parameters.
+* Fix the double-browser problem with dcos browse.
+* Add validation for SSH key format.
+* Support Python 3.6.
+
 0.1.1b1 (2017-01-17)
 +++++++++++++++++++++
 
