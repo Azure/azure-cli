@@ -1,5 +1,5 @@
 Microsoft Azure CLI Namespace Package
-==================================
+=====================================
 
 This is the Microsoft Azure CLI namespace package.
 
