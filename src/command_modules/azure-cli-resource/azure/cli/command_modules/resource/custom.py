@@ -51,8 +51,6 @@ def create_resource_group(resource_group_name, location, tags=None):
     '''
     rcf = _resource_client_factory()
 
-    if rcf.resource_groups.check_existence(resource_group_name):
-        raise CLIError('resource group {} already exists'.format(resource_group_name))
     parameters = ResourceGroup(
         location=location,
         tags=tags
