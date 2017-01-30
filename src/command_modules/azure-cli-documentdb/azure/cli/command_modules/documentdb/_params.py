@@ -35,7 +35,7 @@ def validate_locations(ns):
 
 def validate_ip_range_filter(ns):
     if ns.ip_range_filter:
-        ns.ip_range_filter = ",".join(ns.ip_range_filter.split())
+        ns.ip_range_filter = ",".join(ns.ip_range_filter)
 
 register_cli_argument('documentdb', 'account_name', arg_type=name_type, help='Name of the DocumentDB Database Account', completer=get_resource_name_completion_list('Microsoft.DocumentDb/databaseAccounts'), id_part="name")
 
@@ -49,4 +49,4 @@ register_cli_argument('documentdb create', 'locations', validator=validate_locat
 register_cli_argument('documentdb create', 'default_consistency_level', help="default consistency level of the DocumentDB Database account", **enum_choice_list(DefaultConsistencyLevel))
 register_cli_argument('documentdb create', 'max_staleness_prefix', help="when used with Bounded Staleness consistency, this value represents the number of stale requests tolerated. Accepted range for this value is 1 - 2,147,483,647", type=int)
 register_cli_argument('documentdb create', 'max_interval', help="when used with Bounded Staleness consistency, this value represents the time amount of staleness (in seconds) tolerated. Accepted range for this value is 1 - 100", type=int)
-register_cli_argument('documentdb create', 'ip_range_filter', validator=validate_ip_range_filter, help="firewall support. Specifies the set of IP addresses or IP address ranges in CIDR form to be included as the allowed list of client IPs for a given database account. IP addresses/ranges must be comma separated and must not contain any spaces")
+register_cli_argument('documentdb create', 'ip_range_filter', validator=validate_ip_range_filter, help="firewall support. Specifies the set of IP addresses or IP address ranges in CIDR form to be included as the allowed list of client IPs for a given database account. IP addresses/ranges must be comma separated and must not contain any spaces", nargs='+')
