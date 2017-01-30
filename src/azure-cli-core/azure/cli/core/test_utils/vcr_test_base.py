@@ -164,7 +164,7 @@ class NoneCheck(object):  # pylint: disable=too-few-public-methods
         pass
 
     def compare(self, data):  # pylint: disable=no-self-use
-        none_strings = ['[]', '{}', 'null', 'false']
+        none_strings = ['[]', '{}', 'false']
         try:
             assert not data or data in none_strings
         except AssertionError:
