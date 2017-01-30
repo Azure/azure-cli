@@ -36,7 +36,7 @@ def transform_ip_addresses(result):
 
     return transformed
 
-
+ 
 def transform_vm(result):
     return OrderedDict([('name', result['name']),
                         ('resourceGroup', result['resourceGroup']),
@@ -69,7 +69,7 @@ def transform_vm_list(vm_list):
 op_var = 'virtual_machines_operations'
 op_class = 'VirtualMachinesOperations'
 cli_command(__name__, 'vm create', custom_path.format('create_vm'), transform=transform_vm_create_output)
-cli_command(__name__, 'vm delete', mgmt_path.format(op_var, op_class, 'delete'), cf_vm)
+cli_command(__name__, 'vm delete', mgmt_path.format(op_var, op_class, 'delete'), cf_vm, confirmation=True)
 cli_command(__name__, 'vm deallocate', mgmt_path.format(op_var, op_class, 'deallocate'), cf_vm)
 cli_command(__name__, 'vm generalize', mgmt_path.format(op_var, op_class, 'generalize'), cf_vm)
 cli_command(__name__, 'vm show', custom_path.format('show_vm'), table_transformer=transform_vm)
