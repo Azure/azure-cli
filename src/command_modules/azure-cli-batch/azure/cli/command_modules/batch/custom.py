@@ -148,7 +148,7 @@ def _handle_batch_exception(action):
 
 
 @transfer_doc(CertificateAddParameter)
-def create_certificate(client, file, thumbprint, password=None):
+def create_certificate(client, certificate_file, thumbprint, password=None):
     thumbprint_algorithm = 'sha1'
 
     def action():
@@ -156,7 +156,7 @@ def create_certificate(client, file, thumbprint, password=None):
         return client.get(thumbprint_algorithm, thumbprint)
 
     certificate_format = 'pfx' if password else 'cer'
-    with open(file, "rb") as f:
+    with open(certificate_file, "rb") as f:
         data_bytes = f.read()
     data = base64.b64encode(data_bytes).decode('utf-8')
     cert = CertificateAddParameter(thumbprint, thumbprint_algorithm, data,
@@ -205,8 +205,8 @@ def resize_pool(client, pool_id, target_dedicated=None,  # pylint:disable=too-ma
 @transfer_doc(PoolUpdatePropertiesParameter, StartTask)
 def update_pool(client, pool_id, json_file=None, start_task_command_line=None,  # pylint:disable=too-many-arguments
                 certificate_references=None, application_package_references=None, metadata=None,
-                start_task_run_elevated=None, start_task_environment_settings=None, start_task_wait_for_success=None,
-                start_task_max_task_retry_count=None):
+                start_task_run_elevated=None, start_task_environment_settings=None,
+                start_task_wait_for_success=None, start_task_max_task_retry_count=None):
     def action():
         client.update_properties(pool_id=pool_id, pool_update_properties_parameter=param)
         return client.get(pool_id)

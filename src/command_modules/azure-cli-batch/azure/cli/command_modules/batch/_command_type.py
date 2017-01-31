@@ -195,13 +195,13 @@ def group_title(path):
     :param str path: The complex object path of the argument.
     :returns: str
     """
-    def filter(group):
+    def filter_group(group):
         for suffix in ["_patch_parameter", "_update_parameter", "_parameter"]:
             if group.endswith(suffix):
                 group = group[:0 - len(suffix)]
         return group
     group_path = path.split('.')
-    group_path = list(map(filter, group_path))
+    group_path = list(map(filter_group, group_path))  # pylint: disable=bad-builtin
     title = ': '.join(group_path)
     for group in group_path:
         title = title.replace(group, " ".join([n.title() for n in group.split('_')]), 1)
@@ -830,5 +830,5 @@ def cli_batch_data_plane_command(name, operation, client_factory, transform=None
     command.cmd.add_argument('account_endpoint', '--account-endpoint', required=False, default=None,
                              arg_group=group_name,
                              help='Batch service endpoint. Alternatively, set by environment'
-                             'variable: AZURE_BATCH_ENDPOINT')
+                             ' variable: AZURE_BATCH_ENDPOINT')
     command_table[command.cmd.name] = command.cmd

@@ -80,10 +80,12 @@ register_cli_argument('batch job list', 'job_schedule_id', help='The ID of the j
 for command in ['job create', 'job set', 'job reset', 'job-schedule create', 'job-schedule set', 'job-schedule reset']:
     register_cli_argument('batch {}'.format(command), 'pool_id', options_list=('--pool-id',), help='The id of an existing pool. All the tasks of the job will run on the specified pool.')
 
+register_cli_argument('batch pool create', 'os_family', **enum_choice_list(['2', '3', '4', '5']))
+
 register_cli_argument('batch certificate', 'thumbprint', help='The certificate thumbprint.')
 register_cli_argument('batch certificate show', 'thumbprint', help='The certificate thumbprint.', validator=validate_cert_settings)
 register_cli_argument('batch certificate', 'password', help='The password to access the certificate\'s private key.')
-register_cli_argument('batch certificate', 'file', type=file_type, help='The certificate file: cer file or pfx file.', validator=validate_cert_file, completer=FilesCompleter())
+register_cli_argument('batch certificate', 'certificate_file', type=file_type, help='The certificate file: cer file or pfx file.', validator=validate_cert_file, completer=FilesCompleter())
 register_cli_argument('batch certificate delete', 'abort', action='store_true', help='Cancel the failed certificate deletion operation.')
 
 register_cli_argument('batch task create', 'json_file', type=file_type, help='The file containing the task(s) to create in JSON format, if this parameter is specified, all other parameters are ignored.', validator=validate_json_file, completer=FilesCompleter())

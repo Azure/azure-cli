@@ -162,10 +162,10 @@ def validate_json_file(namespace):
 def validate_cert_file(namespace):
     """Validate the give cert file existing"""
     try:
-        with open(namespace.file, "rb"):
+        with open(namespace.certificate_file, "rb"):
             pass
     except EnvironmentError:
-        raise ValueError("Cannot access certificate file: " + namespace.file)
+        raise ValueError("Cannot access certificate file: " + namespace.certificate_file)
 
 
 def validate_options(namespace):

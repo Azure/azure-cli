@@ -6,7 +6,8 @@
 from azure.cli.core.commands import cli_command
 
 from azure.cli.command_modules.batch._command_type import cli_batch_data_plane_command
-from azure.cli.command_modules.batch._validators import validate_pool_settings, validate_cert_settings
+from azure.cli.command_modules.batch._validators import (
+    validate_pool_settings, validate_cert_settings)
 from azure.cli.command_modules.batch._client_factory import (
     account_mgmt_client_factory,
     account_client_factory,

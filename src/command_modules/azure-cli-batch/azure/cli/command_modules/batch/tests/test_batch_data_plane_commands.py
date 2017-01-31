@@ -24,7 +24,7 @@ class BatchCertificateScenarioTest(BatchDataPlaneTestBase):
 
     def body(self):
         # test create certificate with default set
-        self.cmd('batch certificate create --thumbprint {} --file "{}"'.
+        self.cmd('batch certificate create --thumbprint {} --certificate-file "{}"'.
                  format(self.cert_thumbprint, self.create_cert_file_path),
                  checks=[
                      JMESPathCheck('thumbprint', self.cert_thumbprint),
@@ -104,8 +104,8 @@ class BatchPoolScenarioTest(BatchDataPlaneTestBase):
                          JMESPathCheck('id', self.create_pool_id),
                          JMESPathCheck('startTask.commandLine', "cmd /c echo updated")])
 
-        self.cmd('batch pool reset --pool-id {} --start-task-command-line hostname --metadata a=b c=d'.
-                 format(self.create_pool_id),
+        self.cmd('batch pool reset --pool-id {} --start-task-command-line '
+                 'hostname --metadata a=b c=d'.format(self.create_pool_id),
                  checks=[JMESPathCheck('allocationState', 'steady'),
                          JMESPathCheck('id', self.create_pool_id),
                          JMESPathCheck('startTask.commandLine', "hostname"),
