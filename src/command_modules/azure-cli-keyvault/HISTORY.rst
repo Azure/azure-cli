@@ -3,6 +3,14 @@
 Release History
 ===============
 
+0.1.1b3 (2017-01-30)
++++++++++++++++++++++
+
+* Add KeyVault file completers.
+* Add path expansion to file type parameters.
+* Support UTC datettime with seconds as accepted format. (e.g. 2017-12-31T01:11:59Z).
+* Support Python 3.6.
+
 0.1.1b2 (2017-01-19)
 +++++++++++++++++++++
 
