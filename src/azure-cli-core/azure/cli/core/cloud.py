@@ -6,9 +6,13 @@
 import os
 from six.moves import configparser
 
-from azure.cli.core._config import GLOBAL_CONFIG_DIR
+import azure.cli.core.azlogging as azlogging
+from azure.cli.core._config import GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH, AzConfig, az_config
+from azure.cli.core._util import CLIError
 
-CUSTOM_CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
+CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
+
+logger = azlogging.get_az_logger(__name__)
 
 
 class CloudNotRegisteredException(Exception):
@@ -33,11 +37,11 @@ class CannotUnregisterCloudException(Exception):
     pass
 
 
-class CloudEndpointNotSetException(Exception):
+class CloudEndpointNotSetException(CLIError):
     pass
 
 
-class CloudSuffixNotSetException(Exception):
+class CloudSuffixNotSetException(CLIError):
     pass
 
 
@@ -64,7 +68,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods
         val = object.__getattribute__(self, name)
         if val is None:
             raise CloudEndpointNotSetException("The endpoint '{}' for this cloud "
-                                               "is not set but is used".format(name))
+                                               "is not set but is used.".format(name))
         return val
 
 
@@ -87,17 +91,25 @@ class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
         val = object.__getattribute__(self, name)
         if val is None:
             raise CloudSuffixNotSetException("The suffix '{}' for this cloud "
-                                             "is not set but is used".format(name))
+                                             "is not set but is used.".format(name))
         return val
 
 
 class Cloud(object):  # pylint: disable=too-few-public-methods
     """ Represents an Azure Cloud instance """
 
-    def __init__(self, name, endpoints=None, suffixes=None):
+    # pylint: disable=too-many-arguments
+    def __init__(self,
+                 name,
+                 endpoints=None,
+                 suffixes=None,
+                 default_subscription=None,
+                 is_active=False):
         self.name = name
         self.endpoints = endpoints or CloudEndpoints()
         self.suffixes = suffixes or CloudSuffixes()
+        self.default_subscription = default_subscription
+        self.is_active = is_active
 
 
 AZURE_PUBLIC_CLOUD = Cloud(
@@ -162,7 +174,12 @@ AZURE_GERMAN_CLOUD = Cloud(
         keyvault_dns='.vault.microsoftazure.de',
         sql_server_hostname='.database.cloudapi.de'))
 
+
 KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
+
+
+def get_active_cloud_name():
+    return az_config.get('cloud', 'name', fallback=AZURE_PUBLIC_CLOUD.name)
 
 
 def _get_cloud(cloud_name):
@@ -170,9 +187,17 @@ def _get_cloud(cloud_name):
 
 
 def get_custom_clouds():
+    known_cloud_names = [c.name for c in KNOWN_CLOUDS]
+    return [c for c in get_clouds() if c.name not in known_cloud_names]
+
+
+def get_clouds():
+    if not os.path.isfile(CLOUD_CONFIG_FILE):
+        for c in KNOWN_CLOUDS:
+            _save_cloud(c)
     clouds = []
     config = configparser.SafeConfigParser()
-    config.read(CUSTOM_CLOUD_CONFIG_FILE)
+    config.read(CLOUD_CONFIG_FILE)
     for section in config.sections():
         c = Cloud(section)
         for option in config.options(section):
@@ -180,13 +205,14 @@ def get_custom_clouds():
                 setattr(c.endpoints, option.replace('endpoint_', ''), config.get(section, option))
             elif option.startswith('suffix_'):
                 setattr(c.suffixes, option.replace('suffix_', ''), config.get(section, option))
+            elif option == 'default_subscription':
+                c.default_subscription = config.get(section, option)
         clouds.append(c)
-    return clouds
-
-
-def get_clouds():
-    clouds = KNOWN_CLOUDS[:]
-    clouds.extend(get_custom_clouds())
+    active_cloud_name = get_active_cloud_name()
+    for c in clouds:
+        if c.name == active_cloud_name:
+            c.is_active = True
+            break
     return clouds
 
 
@@ -197,47 +223,100 @@ def get_cloud(cloud_name):
     return cloud
 
 
-def add_cloud(cloud):
-    if _get_cloud(cloud.name):
-        raise CloudAlreadyRegisteredException(cloud.name)
+def get_active_cloud():
+    return get_cloud(get_active_cloud_name())
+
+
+def _set_active_subscription(cloud):
+    from azure.cli.core._profile import Profile, _ENVIRONMENT_NAME, _SUBSCRIPTION_ID, _STATE
+    profile = Profile()
+    subscription_to_use = cloud.default_subscription or \
+                          next((s[_SUBSCRIPTION_ID] for s in profile.load_cached_subscriptions()  # noqa: E127 # pylint: disable=line-too-long
+                                if s[_ENVIRONMENT_NAME] == cloud.name and s[_STATE] == 'Enabled'),
+                               None)
+    if subscription_to_use:
+        try:
+            profile.set_active_subscription(subscription_to_use)
+            logger.warning("Active subscription switched to '%s'.", subscription_to_use)
+        except CLIError as e:
+            logger.error(e)
+            logger.warning("Unable to automatically switch the active subscription. "
+                           "Use 'az account set'.")
+    else:
+        logger.warning("Use 'az login' if not logged in to this cloud.")
+        logger.warning("Use 'az account set' to switch the active subscription.")
+
+
+def set_active_cloud(cloud_name):
+    if get_active_cloud_name() == cloud_name:
+        return
+    if not _get_cloud(cloud_name):
+        raise CloudNotRegisteredException(cloud_name)
     config = configparser.SafeConfigParser()
-    config.read(CUSTOM_CLOUD_CONFIG_FILE)
+    config.read(GLOBAL_CONFIG_PATH)
+    try:
+        config.add_section('cloud')
+    except configparser.DuplicateSectionError:
+        pass
+    config.set('cloud', 'name', cloud_name)
+    if not os.path.isdir(GLOBAL_CONFIG_DIR):
+        os.makedirs(GLOBAL_CONFIG_DIR)
+    with open(GLOBAL_CONFIG_PATH, 'w') as configfile:
+        config.write(configfile)
+    if os.environ.get(AzConfig.env_var_name('cloud', 'name')):
+        logger.warning('Active cloud has been set. '
+                       'However, it is overridden by environment variable AZURE_CLOUD_NAME.')
+    else:
+        logger.warning('Switched active cloud to %s.', cloud_name)
+        _set_active_subscription(get_cloud(cloud_name))
+
+
+def _save_cloud(cloud, overwrite=False):
+    config = configparser.SafeConfigParser()
+    config.read(CLOUD_CONFIG_FILE)
     try:
         config.add_section(cloud.name)
     except configparser.DuplicateSectionError:
-        raise CloudAlreadyRegisteredException(cloud.name)
+        if not overwrite:
+            raise CloudAlreadyRegisteredException(cloud.name)
     for k, v in cloud.endpoints.__dict__.items():
-        if v:
+        if v is not None:
             config.set(cloud.name, 'endpoint_{}'.format(k), v)
     for k, v in cloud.suffixes.__dict__.items():
-        if v:
+        if v is not None:
             config.set(cloud.name, 'suffix_{}'.format(k), v)
+    if cloud.default_subscription is not None:
+        config.set(cloud.name, 'default_subscription', cloud.default_subscription)
     if not os.path.isdir(GLOBAL_CONFIG_DIR):
         os.makedirs(GLOBAL_CONFIG_DIR)
-    with open(CUSTOM_CLOUD_CONFIG_FILE, 'w') as configfile:
+    with open(CLOUD_CONFIG_FILE, 'w') as configfile:
         config.write(configfile)
 
 
+def add_cloud(cloud):
+    if _get_cloud(cloud.name):
+        raise CloudAlreadyRegisteredException(cloud.name)
+    _save_cloud(cloud)
+
+
+def update_cloud(cloud):
+    if not _get_cloud(cloud.name):
+        raise CloudNotRegisteredException(cloud.name)
+    _save_cloud(cloud, overwrite=True)
+
+
 def remove_cloud(cloud_name):
-    from azure.cli.core.context import get_contexts
     if not _get_cloud(cloud_name):
         raise CloudNotRegisteredException(cloud_name)
+    if cloud_name == get_active_cloud_name():
+        raise CannotUnregisterCloudException("The cloud '{}' cannot be unregistered "
+                                             "as it's currently active.".format(cloud_name))
     is_known_cloud = next((x for x in KNOWN_CLOUDS if x.name == cloud_name), None)
     if is_known_cloud:
         raise CannotUnregisterCloudException("The cloud '{}' cannot be unregistered "
                                              "as it's not a custom cloud.".format(cloud_name))
-    contexts_using_cloud = [context for context in get_contexts() if context.get(
-        'cloud', None) == cloud_name]  # pylint: disable=line-too-long
-    if contexts_using_cloud:
-        context_names = [context['name'] for context in contexts_using_cloud]
-        many_contexts = len(context_names) > 1
-        raise CannotUnregisterCloudException(
-            "The cloud '{0}' is in use by the following context{1} '{2}'.".format(
-                cloud_name,
-                's' if many_contexts else '',
-                ', '.join(context_names)))
     config = configparser.SafeConfigParser()
-    config.read(CUSTOM_CLOUD_CONFIG_FILE)
+    config.read(CLOUD_CONFIG_FILE)
     config.remove_section(cloud_name)
-    with open(CUSTOM_CLOUD_CONFIG_FILE, 'w') as configfile:
+    with open(CLOUD_CONFIG_FILE, 'w') as configfile:
         config.write(configfile)
