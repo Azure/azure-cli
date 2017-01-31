@@ -3,6 +3,18 @@
 Release History
 ===============
 
+0.1.1b2 (2017-01-30)
++++++++++++++++++++++
+
+* VM: generate ssh key file if needed (#1842)
+* New VM/VMSS Create (#1849)
+* Fix vm doc bug #621, #519 (#1839)
+* Add path expansion to file type parameters (#1827)
+* Expose flags to show vm ip-address, power state (#1820)
+* [ACS] Add validation for SSH key format (#1699)
+* Add confirmation prompt to 'vm delete'.
+* Support Python 3.6.
+
 0.1.1b1 (2017-01-17)
 +++++++++++++++++++++
 
