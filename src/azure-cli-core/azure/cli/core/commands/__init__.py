@@ -32,6 +32,8 @@ logger = azlogging.get_az_logger(__name__)
 
 FORCE_PARAM_NAME = 'force'
 
+BLACKLISTED_MODS = ['context']
+
 
 class CliArgumentType(object):
     REMOVE = '---REMOVE---'
@@ -235,7 +237,7 @@ def get_command_table(module_name=None):
     If the module is not found, all commands are loaded.
     '''
     loaded = False
-    if module_name and module_name != 'acs':
+    if module_name and module_name != 'acs' and module_name not in BLACKLISTED_MODS:
         try:
             import_module('azure.cli.command_modules.' + module_name).load_commands()
             logger.debug("Successfully loaded command table from module '%s'.", module_name)
@@ -249,7 +251,8 @@ def get_command_table(module_name=None):
         try:
             mods_ns_pkg = import_module('azure.cli.command_modules')
             installed_command_modules = [modname for _, modname, _ in
-                                         pkgutil.iter_modules(mods_ns_pkg.__path__)]
+                                         pkgutil.iter_modules(mods_ns_pkg.__path__)
+                                         if modname not in BLACKLISTED_MODS]
         except ImportError:
             pass
         logger.debug('Installed command modules %s', installed_command_modules)

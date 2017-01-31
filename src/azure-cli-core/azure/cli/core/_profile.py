@@ -17,8 +17,7 @@ from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core._util import CLIError, get_file_json
 from azure.cli.core.adal_authentication import AdalAuthentication
-from azure.cli.core.cloud import get_cloud
-from azure.cli.core.context import get_active_context
+from azure.cli.core.cloud import get_active_cloud
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -62,7 +61,17 @@ def _authentication_context_factory(authority, cache):
 
 _AUTH_CTX_FACTORY = _authentication_context_factory
 
-CLOUD = get_cloud(get_active_context()['cloud'])
+CLOUD = get_active_cloud()
+
+
+def _log_cloud_info():
+    from pprint import pformat
+    logger.debug("Current active cloud '%s'", CLOUD.name)
+    logger.debug(pformat(vars(CLOUD.endpoints)))
+    logger.debug(pformat(vars(CLOUD.suffixes)))
+
+
+_log_cloud_info()
 
 
 def get_authority_url(tenant=None):

@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 import tempfile
 import unittest
 import mock
@@ -13,6 +14,8 @@ from azure.cli.core.cloud import (Cloud,
                                   add_cloud,
                                   get_custom_clouds,
                                   remove_cloud,
+                                  get_active_cloud_name,
+                                  AZURE_PUBLIC_CLOUD,
                                   CloudEndpointNotSetException)
 from azure.cli.core._profile import Profile
 
@@ -33,7 +36,7 @@ class TestCloud(unittest.TestCase):
         expected_config_file_result = '[MyOwnCloud]\nendpoint_management = ' \
                                       'http://management.contoso.com\nsuffix_storage_endpoint = ' \
                                       'core.contoso.com\n\n'
-        with mock.patch('azure.cli.core.cloud.CUSTOM_CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
+        with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
                 config_file:
             with mock.patch('azure.cli.core.cloud.get_custom_clouds', lambda: []):
                 add_cloud(c)
@@ -49,6 +52,17 @@ class TestCloud(unittest.TestCase):
                 remove_cloud(c.name)
             custom_clouds = get_custom_clouds()
             self.assertEqual(len(custom_clouds), 0)
+
+    def test_get_active_cloud_name_envvar(self):
+        expected = 'MyCloud'
+        with mock.patch.dict(os.environ, {'AZURE_CLOUD_NAME': expected}):
+            actual = get_active_cloud_name()
+            self.assertEqual(expected, actual)
+
+    def test_get_active_cloud_name_default(self):
+        expected = AZURE_PUBLIC_CLOUD.name
+        actual = get_active_cloud_name()
+        self.assertEqual(expected, actual)
 
 
 if __name__ == '__main__':
