@@ -18,7 +18,7 @@ from azure.cli.command_modules.documentdb.sdk.models.location import Location
 
 
 def validate_failover_policies(ns):
-    ''' Extracts multiple space-separated failoverPolcies in region=failoverPriority format '''
+    ''' Extracts multiple space-separated failoverPolicies in regionName=failoverPriority format '''
     fp_dict = []
     for item in ns.failover_policies:
         comps = item.split('=', 1)

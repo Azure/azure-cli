@@ -8,6 +8,7 @@
 # Changes may cause incorrect behavior and will be lost if the code is
 # regenerated.
 # --------------------------------------------------------------------------
+# pylint: skip-file
 
 from msrest.service_client import ServiceClient
 from msrest import Serializer, Deserializer

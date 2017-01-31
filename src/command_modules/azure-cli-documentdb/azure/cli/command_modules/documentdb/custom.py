@@ -16,6 +16,7 @@ from azure.cli.command_modules.documentdb.sdk.models import (
     DatabaseAccountCreateUpdateParameters,
 )
 
+# pylint:disable=too-many-arguments
 def cli_documentdb_create(client,
                           resource_group_name,
                           account_name,
