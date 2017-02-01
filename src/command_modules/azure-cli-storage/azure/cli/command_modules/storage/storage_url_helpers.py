@@ -34,7 +34,7 @@ class StorageResourceIdentifier(object):
 
         from azure.cli.core._profile import CLOUD
         self.account_name, type_name = url.netloc[:0 - len(CLOUD.suffixes.storage_endpoint) - 1]\
-            .split('.', maxsplit=2)
+            .split('.', 2)
 
         if type_name == 'blob':
             self.container, self.blob = self._separate_path_l(url.path)
