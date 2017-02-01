@@ -1106,7 +1106,8 @@ def create_express_route_peering(
     # region Issue #1574 workaround
     circuit = _network_client_factory().express_route_circuits.get(
         resource_group_name, circuit_name)
-    if peering_type == PeeringType.microsoft_peering and circuit.sku.tier == SkuTier.standard:
+    if peering_type == PeeringType.microsoft_peering.value and \
+        circuit.sku.tier == SkuTier.standard.value:
         raise CLIError("MicrosoftPeering cannot be created on a 'Standard' SKU circuit")
     for peering in circuit.peerings:
         if peering.vlan_id == vlan_id:
@@ -1118,7 +1119,7 @@ def create_express_route_peering(
         advertised_public_prefixes=advertised_public_prefixes,
         customer_asn=customer_asn,
         routing_registry_name=routing_registry_name) \
-            if peering_type == PeeringType.microsoft_peering else None
+            if peering_type == PeeringType.microsoft_peering.value else None
     peering = ExpressRouteCircuitPeering(
         peering_type=peering_type, peer_asn=peer_asn, vlan_id=vlan_id,
         primary_peer_address_prefix=primary_peer_address_prefix,
