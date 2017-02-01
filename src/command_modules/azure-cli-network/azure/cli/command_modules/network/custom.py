@@ -12,7 +12,8 @@ from azure.mgmt.network.models import \
      FrontendIPConfiguration, BackendAddressPool, Probe, LoadBalancingRule,
      NetworkInterfaceIPConfiguration, Route, VpnClientRootCertificate, VpnClientConfiguration,
      AddressSpace, VpnClientRevokedCertificate, SubResource, VirtualNetworkPeering,
-     ApplicationGatewayFirewallMode)
+     ApplicationGatewayFirewallMode, SecurityRuleAccess, SecurityRuleDirection,
+     SecurityRuleProtocol)
 
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 from azure.cli.core._util import CLIError
@@ -737,9 +738,12 @@ def remove_nic_ip_config_inbound_nat_rule(
 #region Network Security Group commands
 
 def create_nsg_rule(resource_group_name, network_security_group_name, security_rule_name,
-                    protocol, source_address_prefix, destination_address_prefix,
-                    access, direction, source_port_range, destination_port_range,
-                    description=None, priority=None):
+                    priority, description=None, protocol=SecurityRuleProtocol.asterisk.value,
+                    access=SecurityRuleAccess.allow.value,
+                    direction=SecurityRuleDirection.inbound.value,
+                    source_port_range='*', source_address_prefix='*',
+                    destination_port_range=80, destination_address_prefix='*',
+                   ):
     settings = SecurityRule(protocol=protocol, source_address_prefix=source_address_prefix,
                             destination_address_prefix=destination_address_prefix, access=access,
                             direction=direction,

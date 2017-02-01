@@ -798,7 +798,7 @@ class NetworkNicConvenienceCommandsScenarioTest(ResourceGroupVCRTestBase):
 class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkSecurityGroupScenarioTest, self).__init__(__file__, test_method, resource_group='cli_nsg_test1')
+        super(NetworkSecurityGroupScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_nsg')
         self.nsg_name = 'test-nsg1'
         self.nsg_rule_name = 'web'
         self.resource_type = 'Microsoft.Network/networkSecurityGroups'
@@ -813,7 +813,7 @@ class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
         rt = self.resource_type
 
         self.cmd('network nsg create --name {} -g {}'.format(nsg, rg))
-        self.cmd('network nsg rule create --access allow --destination-address-prefix 1234 --direction inbound --nsg-name {} --protocol * -g {} --source-address-prefix 789 -n {} --source-port-range * --destination-port-range 4444'.format(nsg, rg, nrn))
+        self.cmd('network nsg rule create --access allow --destination-address-prefix 1234 --direction inbound --nsg-name {} --protocol * -g {} --source-address-prefix 789 -n {} --source-port-range * --destination-port-range 4444 --priority 1000'.format(nsg, rg, nrn))
 
         self.cmd('network nsg list', checks=[
             JMESPathCheck('type(@)', 'array'),
@@ -846,7 +846,7 @@ class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
         new_access = 'DENY'
         new_addr_prefix = '111'
         new_direction = 'Outbound'
-        new_protocol = 'tcp'
+        new_protocol = 'Tcp'
         new_port_range = '1234-1235'
         description = 'greatrule'
         priority = 888
