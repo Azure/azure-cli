@@ -15,12 +15,15 @@ from azure.mgmt.documentdb.models import (
     ConsistencyPolicy,
     DatabaseAccountCreateUpdateParameters,
 )
+from azure.mgmt.documentdb.models.document_db_enums import DatabaseAccountKind
+
 
 # pylint:disable=too-many-arguments
 def cli_documentdb_create(client,
                           resource_group_name,
                           account_name,
                           locations,
+                          kind=DatabaseAccountKind.global_document_db.value,
                           default_consistency_level=None,
                           max_staleness_prefix=100,
                           max_interval=5,
@@ -43,6 +46,7 @@ def cli_documentdb_create(client,
     params = DatabaseAccountCreateUpdateParameters(
         resource_group_location,
         locations,
+        kind=kind,
         consistency_policy=consistency_policy,
         ip_range_filter=ip_range_filter)
 
