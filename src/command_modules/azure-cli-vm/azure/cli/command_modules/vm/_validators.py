@@ -6,6 +6,7 @@
 import os
 import re
 
+from azure.cli.core.azlogging import get_az_logger
 from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid_resource_id
 from azure.cli.core._util import CLIError
 from azure.cli.command_modules.vm._vm_utils import random_string, check_existence
@@ -254,7 +255,7 @@ def _validate_vm_create_nics(namespace):
     namespace.public_ip_type = None
 
 
-def _validate_vm_create_auth(namespace):
+def _validate_vm_create_auth(namespace, is_vmss=False):
 
     if not namespace.os_type:
         raise CLIError("Unable to resolve OS type. Specify '--os-type' argument.")
@@ -278,6 +279,9 @@ def _validate_vm_create_auth(namespace):
             from azure.cli.core.prompting import prompt_pass, NoTTYException
             try:
                 namespace.admin_password = prompt_pass('Admin Password: ', confirm=True)
+                logger = get_az_logger(__name__)
+                message = 'Starting {} create...'.format('VMSS' if is_vmss else 'VM')
+                logger.warning(message)
             except NoTTYException:
                 raise CLIError('Please specify both username and password in non-interactive mode.')
 
@@ -396,6 +400,6 @@ def process_vmss_create_namespace(namespace):
     _validate_vmss_create_load_balancer(namespace)
     _validate_vm_create_vnet(namespace)
     _validate_vm_create_public_ip(namespace)
-    _validate_vm_create_auth(namespace)
+    _validate_vm_create_auth(namespace, is_vmss=True)
 
 # endregion
