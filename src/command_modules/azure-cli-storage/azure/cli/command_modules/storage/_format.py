@@ -71,18 +71,16 @@ def transform_file_output(result):
     more clearly distinguishes between files and directories. """
     new_result = []
 
-    for item in result.get('items', [result]):
+    iterable = result if isinstance(result, list) else result.get('items', result)
+    for item in iterable:
         new_entry = OrderedDict()
-        item_name = item['name']
-        try:
-            item['properties']['contentLength']  # pylint: disable=pointless-statement
-            is_dir = False
-        except KeyError:
-            item_name = '{}/'.format(item_name)
-            is_dir = True
-        new_entry['Name'] = item_name
+
+        entity_type = item['type']  # type property is added by transform_file_directory_result
+        is_dir = entity_type == 'dir'
+
+        new_entry['Name'] = item['name'] + '/' if is_dir else item['name']
         new_entry['Content Length'] = ' ' if is_dir else item['properties']['contentLength']
-        new_entry['Type'] = 'dir' if is_dir else 'file'
+        new_entry['Type'] = item['type']
         new_entry['Last Modified'] = item['properties']['lastModified'] or ' '
         new_result.append(new_entry)
     return sorted(new_result, key=lambda k: k['Name'])
@@ -120,3 +118,25 @@ def transform_boolean_for_table(result):
     for key in result:
         result[key] = str(result[key])
     return result
+
+
+def transform_file_directory_result(result):
+    """
+    Transform a the result returned from file and directory listing API.
+
+    This transformer add and remove properties from File and Directory objects in the given list
+    in order to align the object's properties so as to offer a better view to the file and dir
+    list.
+    """
+    from azure.storage.file.models import File, Directory
+    return_list = []
+    for each in result:
+        if isinstance(each, File):
+            delattr(each, 'content')
+            setattr(each, 'type', 'file')
+        elif isinstance(each, Directory):
+            setattr(each, 'type', 'dir')
+
+        return_list.append(each)
+
+    return return_list

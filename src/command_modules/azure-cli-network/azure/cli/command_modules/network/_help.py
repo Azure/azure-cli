@@ -975,7 +975,7 @@ helps['network lb probe update'] = """
 
 helps['network lb rule'] = """
     type: group
-    short-summary: Gather information, such as utilization, to be evaluated by rules
+    short-summary: Commands to manage load balancing rules.
 """
 
 helps['network lb rule create'] = """
@@ -1159,10 +1159,38 @@ helps['network nsg'] = """
     type: group
     short-summary: Manage Network Security Groups (NSG)
 """
+
 helps['network nsg rule'] = """
     type: group
     short-summary: Manage NSG rules
 """
+
+helps['network nsg rule create'] = """
+    type: command
+    short-summary: Create a new NSG rule.
+"""
+
+helps['network nsg rule delete'] = """
+    type: command
+    short-summary: Delete an NSG rule.
+"""
+
+helps['network nsg rule list'] = """
+    type: command
+    short-summary: List all rules in an NSG.
+"""
+
+helps['network nsg rule show'] = """
+    type: command
+    short-summary: Show details of an NSG rule.
+"""
+
+helps['network nsg rule update'] = """
+    type: command
+    short-summary: Update an NSG rule.
+"""
+
+
 #endregion
 
 # region Public IP

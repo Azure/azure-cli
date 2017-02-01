@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.1.1b1+dev'
+VERSION = '0.1.1b2+dev'
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -20,13 +20,14 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
     'License :: OSI Approved :: MIT License',
 ]
 
 DEPENDENCIES = [
     'azure-cli-core',
     'azure-mgmt-resource==0.30.2',
-    'azure-mgmt-storage==0.30.0rc6',
+    'azure-mgmt-storage==0.31.0',
     'azure-mgmt-containerregistry==0.1.1',
 ]
 

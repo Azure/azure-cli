@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os
+import tempfile
 
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck,
                                                      NoneCheck)
@@ -20,7 +20,7 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
     def tear_down(self):
         rg = self.resource_group
         name = self.storage_account_name
-        self.cmd('storage account delete -g {} -n {}'.format(rg, name))
+        self.cmd('storage account delete -g {} -n {} --force'.format(rg, name))
 
     def __init__(self, test_method):
         super(BatchMgmtAccountScenarioTest, self).__init__(__file__, test_method)
@@ -124,10 +124,8 @@ class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
         rg = self.resource_group
         sname = self.storage_account_name
         name = self.account_name
-        self.cmd('storage account delete -g {} -n {}'.format(rg, sname))
+        self.cmd('storage account delete -g {} -n {} --force'.format(rg, sname))
         self.cmd('batch account delete -g {} -n {}'.format(rg, name))
-        if os.path.exists(self.package_file_name):
-            os.remove(self.package_file_name)
 
     def __init__(self, test_method):
         super(BatchMgmtApplicationScenarioTest, self).__init__(__file__, test_method)
@@ -137,7 +135,7 @@ class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
         self.storage_account_name = 'clibatchteststorage7'
         self.application_name = 'testapp'
         self.application_package_name = '1.0'
-        self.package_file_name = os.path.join(os.getcwd(), 'samplepackage.zip')
+        _, self.package_file_name = tempfile.mkstemp()
 
     def test_batch_application_mgmt(self):
         self.execute()

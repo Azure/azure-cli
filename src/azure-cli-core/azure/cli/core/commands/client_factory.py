@@ -6,11 +6,12 @@
 from azure.cli.core import __version__ as core_version
 from azure.cli.core._profile import Profile, CLOUD
 import azure.cli.core._debug as _debug
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 from azure.cli.core._util import CLIError
 from azure.cli.core.application import APPLICATION
+from azure.storage._error import _ERROR_STORAGE_MISSING_INFO
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 UA_AGENT = "AZURECLI/{}".format(core_version)
 
@@ -45,7 +46,7 @@ def configure_common_settings(client):
 
 def _get_mgmt_service_client(client_type, subscription_bound=True, subscription_id=None,
                              api_version=None):
-    logger.info('Getting management service client client_type=%s', client_type.__name__)
+    logger.debug('Getting management service client client_type=%s', client_type.__name__)
     profile = Profile()
     cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id)
     client_kwargs = {'base_url': CLOUD.endpoints.resource_manager}
@@ -63,7 +64,7 @@ def _get_mgmt_service_client(client_type, subscription_bound=True, subscription_
 
 def get_data_service_client(service_type, account_name, account_key, connection_string=None,  # pylint: disable=too-many-arguments
                             sas_token=None, endpoint_suffix=None):
-    logger.info('Getting data service client service_type=%s', service_type.__name__)
+    logger.debug('Getting data service client service_type=%s', service_type.__name__)
     try:
         client_kwargs = {'account_name': account_name,
                          'account_key': account_key,
@@ -72,8 +73,11 @@ def get_data_service_client(service_type, account_name, account_key, connection_
         if endpoint_suffix:
             client_kwargs['endpoint_suffix'] = endpoint_suffix
         client = service_type(**client_kwargs)
-    except ValueError:
-        raise CLIError('Unable to obtain data client. Check your connection parameters.')
+    except ValueError as exc:
+        if _ERROR_STORAGE_MISSING_INFO in str(exc):
+            raise ValueError(exc)
+        else:
+            raise CLIError('Unable to obtain data client. Check your connection parameters.')
     # TODO: enable Fiddler
     client.request_callback = _add_headers
     return client

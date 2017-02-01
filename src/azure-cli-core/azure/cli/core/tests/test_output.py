@@ -121,6 +121,35 @@ c          d
 qwerty  0b1f6472qwerty
 """))
 
+    def test_out_table_no_query_no_transformer_order(self):
+        output_producer = OutputProducer(formatter=format_table, file=self.io)
+        obj = {'name': 'qwerty', 'val': '0b1f6472qwerty', 'active': True, 'sub': '0b1f6472'}
+        result_item = CommandResultItem(obj, table_transformer=None, is_query_active=False)
+        output_producer.out(result_item)
+        # Should be alphabetical order as no table transformer and query is not active.
+        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
+            """  Active  Name    Sub       Val
+--------  ------  --------  --------------
+       1  qwerty  0b1f6472  0b1f6472qwerty
+"""))
+
+    def test_out_table_no_query_yes_transformer_order(self):
+        output_producer = OutputProducer(formatter=format_table, file=self.io)
+        obj = {'name': 'qwerty', 'val': '0b1f6472qwerty', 'active': True, 'sub': '0b1f6472'}
+
+        def transformer(r):
+            return OrderedDict([('Name', r['name']), ('Val', r['val']),
+                                ('Active', r['active']), ('Sub', r['sub'])])
+
+        result_item = CommandResultItem(obj, table_transformer=transformer, is_query_active=False)
+        output_producer.out(result_item)
+        # Should be table transformer order
+        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
+            """Name    Val               Active  Sub
+------  --------------  --------  --------
+qwerty  0b1f6472qwerty         1  0b1f6472
+"""))
+
     # LIST output tests
 
     def test_out_list_valid(self):

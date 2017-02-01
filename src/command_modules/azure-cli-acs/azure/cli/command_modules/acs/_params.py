@@ -12,10 +12,13 @@ from argcomplete.completers import FilesCompleter
 from azure.cli.core.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
 from azure.cli.core.commands.parameters import (
     enum_choice_list,
+    file_type,
     resource_group_name_type,
     get_one_of_subscription_locations,
     get_resource_name_completion_list)
 from azure.mgmt.compute.models import ContainerServiceOchestratorTypes
+from azure.cli.command_modules.vm._validators import validate_ssh_key
+
 
 def _compute_client_factory(**_):
     from azure.mgmt.compute import ComputeManagementClient
@@ -57,7 +60,8 @@ register_cli_argument('acs', 'admin_username', options_list=('--admin-username',
 register_cli_argument('acs', 'dns_name_prefix', options_list=('--dns-prefix', '-d'))
 register_cli_argument('acs', 'container_service_name', options_list=('--name', '-n'), help='The name of the container service', completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'))
 
-register_cli_argument('acs', 'ssh_key_value', required=False, help='SSH key file value or key file path.', default=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'), completer=FilesCompleter())
+register_cli_argument('acs', 'ssh_key_value', required=False, help='SSH key file value or key file path.', type=file_type, default=os.path.join('~', '.ssh', 'id_rsa.pub'), completer=FilesCompleter())
+register_cli_argument('acs create', 'name', arg_type=name_arg_type, validator=validate_ssh_key)
 
 register_extra_cli_argument('acs create', 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing')
 register_cli_argument('acs create', 'agent_vm_size', completer=get_vm_size_completion_list)
@@ -82,4 +86,5 @@ register_cli_argument('acs kubernetes get-credentials', 'location')
 register_cli_argument('acs kubernetes get-credentials', 'path',
                       options_list=('--file', '-f',),
                       default=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
+                      type=file_type,
                       completer=FilesCompleter())

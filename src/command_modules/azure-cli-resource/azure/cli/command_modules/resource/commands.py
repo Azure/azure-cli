@@ -25,7 +25,7 @@ def transform_resource_group_list(result):
 cli_command(__name__, 'group delete',
             'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.delete',
             cf_resource_groups,
-            no_wait_param='raw')
+            no_wait_param='raw', confirmation=True)
 cli_generic_wait_command(__name__, 'group wait', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get', cf_resource_groups)
 cli_command(__name__, 'group show', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get', cf_resource_groups)
 cli_command(__name__, 'group exists', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.check_existence', cf_resource_groups)
@@ -109,3 +109,11 @@ cli_command(__name__, 'policy definition delete', 'azure.mgmt.resource.policy.op
 cli_command(__name__, 'policy definition list', 'azure.mgmt.resource.policy.operations#PolicyDefinitionsOperations.list', cf_policy_definitions)
 cli_command(__name__, 'policy definition show', 'azure.mgmt.resource.policy.operations#PolicyDefinitionsOperations.get', cf_policy_definitions)
 cli_command(__name__, 'policy definition update', 'azure.cli.command_modules.resource.custom#update_policy_definition')
+
+cli_command(__name__, 'lock create', 'azure.cli.command_modules.resource.custom#create_lock')
+cli_command(__name__, 'lock delete', 'azure.cli.command_modules.resource.custom#delete_lock')
+cli_command(__name__, 'lock list', 'azure.cli.command_modules.resource.custom#list_locks')
+cli_command(__name__, 'lock show', 'azure.cli.command_modules.resource.custom#get_lock')
+cli_command(__name__, 'lock update', 'azure.cli.command_modules.resource.custom#update_lock')
+
+

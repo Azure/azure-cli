@@ -14,9 +14,9 @@ from azure.mgmt.batch.models import (BatchAccountCreateParameters,
 from azure.mgmt.batch.operations import (ApplicationPackageOperations)
 from azure.storage.blob import BlockBlobService
 
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 def list_accounts(client, resource_group_name=None):
     acct_list = client.list_by_resource_group(resource_group_name=resource_group_name) \

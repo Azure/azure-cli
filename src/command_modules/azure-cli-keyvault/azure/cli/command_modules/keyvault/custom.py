@@ -24,12 +24,12 @@ from azure.graphrbac import GraphRbacManagementClient
 
 import azure.cli.core.telemetry as telemetry
 from azure.cli.core._util import CLIError
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 
 from azure.keyvault import KeyVaultClient
 from azure.cli.command_modules.keyvault._validators import secret_text_encoding_values
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 def list_keyvault(client, resource_group_name=None):
     vault_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
@@ -362,7 +362,7 @@ def create_certificate(client, vault_base_url, certificate_name, certificate_pol
             logger.info("Long running operation wait cancelled.")
             raise
         except Exception as client_exception:
-            telemetry.set_exception(exception=client_exception, fault_type='client-exception',
+            telemetry.set_exception(exception=client_exception, fault_type='cert-create-error',
                                     summary='Unexpected client exception during cert creation')
             message = getattr(client_exception, 'message', client_exception)
 

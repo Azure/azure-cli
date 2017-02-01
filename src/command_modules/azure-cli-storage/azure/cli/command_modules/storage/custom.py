@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=no-self-use,too-many-arguments
+# pylint: disable=no-self-use,too-many-arguments,line-too-long
 
 from __future__ import print_function
 from sys import stderr
@@ -13,9 +13,11 @@ from azure.storage.models import Logging, Metrics, CorsRule, RetentionPolicy
 from azure.storage.blob import BlockBlobService
 from azure.storage.blob.baseblobservice import BaseBlobService
 from azure.storage.file import FileService
+from azure.storage.file.models import FileProperties, DirectoryProperties
 from azure.storage.table import TableService
 from azure.storage.queue import QueueService
 
+from azure.cli.core.decorators import transfer_doc
 from azure.cli.core._util import CLIError
 
 from azure.cli.command_modules.storage._factory import \
@@ -32,13 +34,29 @@ def _update_progress(current, total):
         if current == total:
             print('', file=stderr)
 
+
 # CUSTOM METHODS
+
+@transfer_doc(FileService.list_directories_and_files)
+def list_share_files(client, share_name, directory_name=None, timeout=None,
+                     exclude_dir=False):
+    generator = client.list_directories_and_files(share_name, directory_name,
+                                                  timeout=timeout)
+    if exclude_dir:
+        return list(f for f in generator if isinstance(f.properties, FileProperties))
+    else:
+        return generator
+
+
+@transfer_doc(FileService.list_directories_and_files)
+def list_share_directories(client, share_name, directory_name=None, timeout=None):
+    generator = client.list_directories_and_files(share_name, directory_name,
+                                                  timeout=timeout)
+    return list(f for f in generator if isinstance(f.properties, DirectoryProperties))
 
 
 def list_storage_accounts(resource_group_name=None):
     """ List storage accounts within a subscription or resource group. """
-    from azure.mgmt.storage.models import StorageAccount
-    from msrestazure.azure_active_directory import UserPassCredentials
     scf = storage_client_factory()
     if resource_group_name:
         accounts = scf.storage_accounts.list_by_resource_group(resource_group_name)
@@ -51,8 +69,6 @@ def show_storage_account_usage():
     """ Show the current count and limit of the storage accounts under the subscription. """
     scf = storage_client_factory()
     return next((x for x in scf.usage.list() if x.name.value == 'StorageAccounts'), None)  # pylint: disable=no-member
-
-# pylint: disable=line-too-long
 
 
 def show_storage_account_connection_string(
@@ -80,7 +96,7 @@ def create_storage_account(resource_group_name, account_name, sku, location,
                            encryption=None, access_tier=None):
     ''' Create a storage account. '''
     from azure.mgmt.storage.models import \
-        (StorageAccountCreateParameters, Sku, CustomDomain, Encryption, AccessTier)
+        (StorageAccountCreateParameters, Sku, CustomDomain, AccessTier)
     scf = storage_client_factory()
     params = StorageAccountCreateParameters(
         sku=Sku(sku),
@@ -98,7 +114,7 @@ def set_storage_account_properties(
         encryption=None, access_tier=None):
     ''' Update storage account property (only one at a time).'''
     from azure.mgmt.storage.models import \
-        (StorageAccountUpdateParameters, Sku, CustomDomain, Encryption, AccessTier)
+        (StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier)
     scf = storage_client_factory()
     params = StorageAccountUpdateParameters(
         sku=Sku(sku) if sku else None,
@@ -109,6 +125,7 @@ def set_storage_account_properties(
     return scf.storage_accounts.update(resource_group_name, account_name, params)
 
 
+@transfer_doc(BlockBlobService.create_blob_from_path)
 def upload_blob(  # pylint: disable=too-many-locals
         client, container_name, blob_name, file_path, blob_type=None,
         content_settings=None, metadata=None, validate_content=False, maxsize_condition=None,
@@ -163,9 +180,6 @@ def upload_blob(  # pylint: disable=too-many-locals
     return type_func[blob_type]()
 
 
-upload_blob.__doc__ = BlockBlobService.create_blob_from_path.__doc__
-
-
 def _get_service_container_type(client):
     if isinstance(client, BlockBlobService):
         return 'container'
@@ -181,44 +195,51 @@ def _get_service_container_type(client):
 
 def _get_acl(client, container_name, **kwargs):
     container = _get_service_container_type(client)
-    get_acl = getattr(client, 'get_{}_acl'.format(container))
+    get_acl_fn = getattr(client, 'get_{}_acl'.format(container))
     lease_id = kwargs.get('lease_id', None)
-    return get_acl(container_name, lease_id=lease_id) if lease_id else get_acl(container_name)
+    return get_acl_fn(container_name, lease_id=lease_id) if lease_id else get_acl_fn(container_name)
 
 
 def _set_acl(client, container_name, acl, **kwargs):
-    container = _get_service_container_type(client)
-    set_acl = getattr(client, 'set_{}_acl'.format(container))
-    lease_id = kwargs.get('lease_id', None)
-    return set_acl(container_name, acl, lease_id=lease_id) if lease_id \
-        else set_acl(container_name, acl)
+    try:
+        method_name = 'set_{}_acl'.format(_get_service_container_type(client))
+        method = getattr(client, method_name)
+        return method(container_name, acl, **kwargs)
+    except TypeError:
+        raise CLIError("Failed to invoke SDK method {}. The installed azure SDK may not be"
+                       "compatible to this version of Azure CLI.".format(method_name))
+    except AttributeError:
+        raise CLIError("Failed to get function {} from {}. The installed azure SDK may not be "
+                       "compatible to this version of Azure CLI.".format(client.__class__.__name__,
+                                                                         method_name))
 
 
-def create_acl_policy(
-        client, container_name, policy_name, start=None, expiry=None, permission=None, **kwargs):
-    ''' Create a stored access policy on the containing object '''
+def create_acl_policy(client, container_name, policy_name, start=None, expiry=None,
+                      permission=None, **kwargs):
+    """Create a stored access policy on the containing object"""
     from azure.storage.models import AccessPolicy
     acl = _get_acl(client, container_name, **kwargs)
     acl[policy_name] = AccessPolicy(permission, expiry, start)
+    if hasattr(acl, 'public_access'):
+        kwargs['public_access'] = getattr(acl, 'public_access')
+
     return _set_acl(client, container_name, acl, **kwargs)
 
 
 def get_acl_policy(client, container_name, policy_name, **kwargs):
-    ''' Show a stored access policy on a containing object '''
-    from azure.storage.models import AccessPolicy
+    """Show a stored access policy on a containing object"""
     acl = _get_acl(client, container_name, **kwargs)
     return acl.get(policy_name)
 
 
 def list_acl_policies(client, container_name, **kwargs):
-    ''' List stored access policies on a containing object '''
+    """List stored access policies on a containing object"""
     return _get_acl(client, container_name, **kwargs)
 
 
 def set_acl_policy(client, container_name, policy_name, start=None, expiry=None, permission=None,
                    **kwargs):
-    ''' Set a stored access policy on a containing object '''
-    from azure.storage.models import AccessPolicy
+    """Set a stored access policy on a containing object"""
     if not (start or expiry or permission):
         raise CLIError('Must specify at least one property when updating an access policy.')
 
@@ -228,6 +249,9 @@ def set_acl_policy(client, container_name, policy_name, start=None, expiry=None,
         policy.start = start or policy.start
         policy.expiry = expiry or policy.expiry
         policy.permission = permission or policy.permission
+        if hasattr(acl, 'public_access'):
+            kwargs['public_access'] = getattr(acl, 'public_access')
+
     except KeyError:
         raise CLIError('ACL does not contain {}'.format(policy_name))
     return _set_acl(client, container_name, acl, **kwargs)
@@ -237,6 +261,9 @@ def delete_acl_policy(client, container_name, policy_name, **kwargs):
     ''' Delete a stored access policy on a containing object '''
     acl = _get_acl(client, container_name, **kwargs)
     del acl[policy_name]
+    if hasattr(acl, 'public_access'):
+        kwargs['public_access'] = getattr(acl, 'public_access')
+
     return _set_acl(client, container_name, acl, **kwargs)
 
 

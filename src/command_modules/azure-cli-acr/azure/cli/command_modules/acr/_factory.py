@@ -10,8 +10,8 @@ from azure.mgmt.containerregistry import ContainerRegistryManagementClient
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
-import azure.cli.core._logging as _logging
-logger = _logging.get_az_logger(__name__)
+import azure.cli.core.azlogging as azlogging
+logger = azlogging.get_az_logger(__name__)
 
 def get_arm_service_client():
     '''Returns the client for managing ARM resources.

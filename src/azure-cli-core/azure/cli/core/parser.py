@@ -3,14 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import argparse
+import sys
 
+import argparse
 import argcomplete
 
 import azure.cli.core.telemetry as telemetry
 import azure.cli.core._help as _help
 from azure.cli.core._util import CLIError
 from azure.cli.core._pkg_util import handle_module_not_installed
+
+import azure.cli.core.azlogging as azlogging
+
+logger = azlogging.get_az_logger(__name__)
 
 
 class IncorrectUsageError(CLIError):
@@ -133,7 +138,10 @@ class AzCliCommandParser(argparse.ArgumentParser):
                                             err_msg).group(1)
                 handle_module_not_installed(possible_module)
             except AttributeError:
+                # regular expression pattern match failed so unable to retrieve module name
                 pass
+            except Exception as e:  # pylint: disable=broad-except
+                logger.debug('Unable to handle module not installed: %s', str(e))
 
     def validation_error(self, message):
         telemetry.set_user_fault('validation error')
@@ -142,7 +150,11 @@ class AzCliCommandParser(argparse.ArgumentParser):
     def error(self, message):
         telemetry.set_user_fault('parse error: {}'.format(message))
         self._handle_command_package_error(message)
-        return super(AzCliCommandParser, self).error(message)
+
+        args = {'prog': self.prog, 'message': message}
+        logger.error('%(prog)s: error: %(message)s', args)
+        self.print_usage(sys.stderr)
+        self.exit(2)
 
     def format_help(self):
         is_group = self.is_group()

@@ -12,6 +12,8 @@ A great cloud needs great tools; we're excited to introduce *Azure CLI 2.0 - Pre
 Installation
 ===============
 
+Please refer to the `install guide <https://docs.microsoft.com/en-us/cli/azure/install-az-cli2>`__ for in-depth install instructions.
+
 A list of common install issues and their resolutions are available at `install troubleshooting <https://github.com/Azure/azure-cli/blob/master/doc/install_troubleshooting.md>`__.
 
 **How would you like to install?**
@@ -19,7 +21,6 @@ A list of common install issues and their resolutions are available at `install 
 - `Interactive install script <#interactive-install-script>`__
 - `Pip <#pip>`__
 - `Apt-get <#apt-get>`__
-- `Homebrew <#homebrew>`__
 - `Docker <#docker-versioned>`__
 - `Nightly Builds <#nightly-builds>`__
 - `Developer Setup <#developer-setup>`__
@@ -94,17 +95,6 @@ Run the following:
     $ sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
     $ sudo apt-get install apt-transport-https
     $ sudo apt-get update && sudo apt-get install azure-cli
-
-Homebrew
-^^^^^^^^
-
-(Pending merge of https://github.com/Homebrew/homebrew-core/pull/8669)
-
-For macOS systems.
-
-.. code-block:: console
-
-    $ brew install azure-cli-2
 
 Docker (versioned)
 ^^^^^^^^^^^^^^^^^^

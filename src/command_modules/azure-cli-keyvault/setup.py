@@ -9,7 +9,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.1.1b2+dev'
+VERSION = '0.1.1b3+dev'
 
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -23,6 +23,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
     'License :: OSI Approved :: MIT License',
 ]
 

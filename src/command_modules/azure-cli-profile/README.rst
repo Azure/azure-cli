@@ -1,5 +1,5 @@
 Microsoft Azure CLI 'profile' Command Module
-==================================
+============================================
 
 This package is for the 'profile' module.
 e.g. 'az account'

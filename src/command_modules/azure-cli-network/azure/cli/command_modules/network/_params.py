@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long
 import argparse
+from argcomplete.completers import FilesCompleter
 
 from azure.mgmt.network.models import \
     (IPAllocationMethod, RouteNextHopType)
@@ -13,14 +14,15 @@ from azure.mgmt.network.models.network_management_client_enums import \
      ApplicationGatewayFirewallMode, ApplicationGatewayProtocol,
      ApplicationGatewayRequestRoutingRuleType, ExpressRouteCircuitSkuFamily,
      ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType, IPVersion, LoadDistribution,
-     ProbeProtocol, TransportProtocol)
+     ProbeProtocol, TransportProtocol, SecurityRuleAccess, SecurityRuleProtocol,
+     SecurityRuleDirection)
 from azure.mgmt.dns.models.dns_management_client_enums import RecordType
 
 from azure.cli.core.commands import \
     (CliArgumentType, register_cli_argument, register_extra_cli_argument)
 from azure.cli.core.commands.parameters import (location_type, get_resource_name_completion_list,
                                                 enum_choice_list, tags_type, ignore_type,
-                                                get_generic_completion_list)
+                                                get_generic_completion_list, file_type)
 from azure.cli.core.commands.validators import MarkSpecifiedAction
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
 from azure.cli.command_modules.network._client_factory import _network_client_factory
@@ -147,7 +149,7 @@ register_cli_argument('network application-gateway', 'virtual_network_type', ign
 register_cli_argument('network application-gateway', 'private_ip_address_allocation', ignore_type)
 
 register_cli_argument('network application-gateway create', 'routing_rule_type', validator=process_ag_create_namespace, **enum_choice_list(ApplicationGatewayRequestRoutingRuleType))
-register_cli_argument('network application-gateway create', 'cert_data', options_list=('--cert-file',), help='The path to the PFX certificate file.')
+register_cli_argument('network application-gateway create', 'cert_data', options_list=('--cert-file',), type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.')
 register_cli_argument('network application-gateway create', 'frontend_type', ignore_type)
 register_cli_argument('network application-gateway create', 'http_listener_protocol', ignore_type)
 
@@ -178,7 +180,7 @@ for item in ag_subresources:
     register_cli_argument('network application-gateway {}'.format(item['name']), 'application_gateway_name', options_list=('--gateway-name',), help='The name of the application gateway.')
     register_cli_argument('network application-gateway {} list'.format(item['name']), 'resource_name', options_list=('--gateway-name',))
 
-register_cli_argument('network application-gateway auth-cert', 'cert_data', options_list=('--cert-file',), validator=validate_auth_cert)
+register_cli_argument('network application-gateway auth-cert', 'cert_data', options_list=('--cert-file',), type=file_type, completer=FilesCompleter(), validator=validate_auth_cert)
 
 register_cli_argument('network application-gateway frontend-ip', 'subnet', validator=get_subnet_validator())
 register_cli_argument('network application-gateway frontend-ip', 'public_ip_address', validator=get_public_ip_validator(), help='The name or ID of the public IP address.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
@@ -211,7 +213,7 @@ register_cli_argument('network application-gateway rule', 'http_settings', help=
 register_cli_argument('network application-gateway rule', 'rule_type', help='The rule type (Basic, PathBasedRouting).')
 register_cli_argument('network application-gateway rule', 'url_path_map', help='The name or ID of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'))
 
-register_cli_argument('network application-gateway ssl-cert', 'cert_data', options_list=('--cert-file',), help='The path to the PFX certificate file.', validator=validate_cert)
+register_cli_argument('network application-gateway ssl-cert', 'cert_data', options_list=('--cert-file',), type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', validator=validate_cert)
 
 register_cli_argument('network application-gateway ssl-policy', 'clear', action='store_true', help='Clear SSL policy.', validator=process_ag_ssl_policy_set_namespace)
 register_cli_argument('network application-gateway ssl-policy', 'disabled_ssl_protocols', nargs='+', help='Space separated list of protocols to disable.', **enum_choice_list(ApplicationGatewaySslProtocol))
@@ -338,7 +340,19 @@ register_cli_argument('network nsg create', 'name', name_arg_type)
 # NSG Rule
 register_cli_argument('network nsg rule', 'security_rule_name', name_arg_type, id_part='child_name', help='Name of the network security group rule')
 register_cli_argument('network nsg rule', 'network_security_group_name', options_list=('--nsg-name',), metavar='NSGNAME', help='Name of the network security group', id_part='name')
-register_cli_argument('network nsg rule create', 'priority', default=1000, type=int)
+
+for item in ['create', 'update']:
+    register_cli_argument('network nsg rule {}'.format(item), 'priority', help='Rule priority, between 100 (highest priority) and 4096 (lowest priority). Must be unique for each rule in the collection.', type=int)
+    register_cli_argument('network nsg rule {}'.format(item), 'description', help='Rule description')
+    register_cli_argument('network nsg rule {}'.format(item), 'access', help=None, **enum_choice_list(SecurityRuleAccess))
+    register_cli_argument('network nsg rule {}'.format(item), 'protocol', help='Network protocol this rule applies to.', **enum_choice_list(SecurityRuleProtocol))
+    register_cli_argument('network nsg rule {}'.format(item), 'direction', help=None, **enum_choice_list(SecurityRuleDirection))
+    register_cli_argument('network nsg rule {}'.format(item), 'source_port_range', help="Port or port range between 0-65535. Use '*' to match all ports.", arg_group='Source')
+    register_cli_argument('network nsg rule {}'.format(item), 'source_address_prefix', help="CIDR prefix or IP range. Use '*' to match all IPs. Can also use 'VirtualNetwork', 'AzureLoadBalancer', and 'Internet'.", arg_group='Source')
+    register_cli_argument('network nsg rule {}'.format(item), 'destination_port_range', help="Port or port range between 0-65535. Use '*' to match all ports.", arg_group='Destination')
+    register_cli_argument('network nsg rule {}'.format(item), 'destination_address_prefix', help="CIDR prefix or IP range. Use '*' to match all IPs. Can also use 'VirtualNetwork', 'AzureLoadBalancer', and 'Internet'.", arg_group='Destination')
+
+register_cli_argument('network nsg rule create', 'network_security_group_name', options_list=('--nsg-name',), metavar='NSGNAME', help='Name of the network security group', id_part=None)
 
 # Public IP
 register_cli_argument('network public-ip', 'public_ip_address_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), id_part='name', help='The name of the public IP address.')
@@ -374,7 +388,7 @@ register_cli_argument('network route-table route', 'address_prefix', help='The d
 register_cli_argument('network vnet', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), id_part='name')
 
 register_cli_argument('network vnet create', 'location', location_type)
-register_cli_argument('network vnet create', 'subnet_prefix', help='IP address prefix for the new subnet. If omitted, automatically reserves a portion of the VNet address space.')
+register_cli_argument('network vnet create', 'subnet_prefix', help='IP address prefix for the new subnet. If omitted, automatically reserves a /24 (or as large as available) block within the VNet address space.')
 register_cli_argument('network vnet create', 'subnet_name', help='Name of a new subnet to create within the VNet.')
 register_cli_argument('network vnet create', 'virtual_network_prefix', options_list=('--address-prefix',), metavar='PREFIX')
 register_cli_argument('network vnet create', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), required=True, completer=None)
@@ -478,7 +492,7 @@ vnet_help = "Name or ID of an existing virtual network which has a subnet named 
 register_cli_argument('network vnet-gateway create', 'virtual_network', options_list=('--vnet',), help=vnet_help, validator=get_virtual_network_validator(has_type_field=True))
 register_cli_argument('network vnet-gateway create', 'virtual_network_type', ignore_type)
 
-register_cli_argument('network vnet-gateway root-cert create', 'public_cert_data', help='Base64 contents of the root certificate file or file path.', validator=load_cert_file('public_cert_data'))
+register_cli_argument('network vnet-gateway root-cert create', 'public_cert_data', help='Base64 contents of the root certificate file or file path.', type=file_type, completer=FilesCompleter(), validator=load_cert_file('public_cert_data'))
 register_cli_argument('network vnet-gateway root-cert create', 'cert_name', help='Root certificate name', options_list=('--name', '-n'))
 register_cli_argument('network vnet-gateway root-cert create', 'gateway_name', help='Virtual network gateway name')
 
@@ -489,7 +503,7 @@ register_extra_cli_argument('network vnet-gateway update', 'address_prefixes', o
 
 # VPN connection
 register_cli_argument('network vpn-connection', 'virtual_network_gateway_connection_name', options_list=('--name', '-n'), metavar='NAME', id_part='name')
-register_cli_argument('network vpn-connection', 'shared_key', validator=load_cert_file('shared_key'), help='Shared IPSec key, base64 contents of the certificate file or file path.')
+register_cli_argument('network vpn-connection', 'shared_key', validator=load_cert_file('shared_key'), type=file_type, completer=FilesCompleter(), help='Shared IPSec key, base64 contents of the certificate file or file path.')
 
 register_cli_argument('network vpn-connection create', 'vnet_gateway1_id', options_list=('--vnet-gateway1',), validator=process_vpn_connection_create_namespace)
 register_cli_argument('network vpn-connection create', 'vnet_gateway2_id', options_list=('--vnet-gateway2',))
@@ -547,11 +561,9 @@ register_cli_argument('network dns', 'location', help=argparse.SUPPRESS, default
 
 register_cli_argument('network dns zone', 'zone_name', name_arg_type)
 
-register_cli_argument('network dns zone import', 'file_name', help='Path to the DNS zone file to import')
-register_cli_argument('network dns zone export', 'file_name', help='Path to the DNS zone file to save')
+register_cli_argument('network dns zone import', 'file_name', type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to import')
+register_cli_argument('network dns zone export', 'file_name', type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to save')
 register_cli_argument('network dns zone update', 'if_none_match', ignore_type)
-
-register_cli_argument('network dns record', 'record_set_name', options_list=('--record-set-name',))
 
 register_cli_argument('network dns record txt add', 'value', nargs='+')
 register_cli_argument('network dns record txt remove', 'value', nargs='+')
@@ -562,3 +574,7 @@ register_cli_argument('network dns record-set create', 'if_none_match', help='Cr
 
 for item in ['list', 'show']:
     register_cli_argument('network dns record-set {}'.format(item), 'record_type', options_list=('--type', '-t'), **enum_choice_list(RecordType))
+
+for item in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
+    register_cli_argument('network dns record {} add'.format(item), 'record_set_name', options_list=('--record-set-name',), help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
+    register_cli_argument('network dns record {} remove'.format(item), 'record_set_name', options_list=('--record-set-name',), help='The name of the record set relative to the zone.')

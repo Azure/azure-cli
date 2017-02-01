@@ -2,10 +2,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+
+from argcomplete.completers import FilesCompleter
+
 from azure.cli.core.commands import register_cli_argument
 
 from azure.cli.core.commands.parameters import (resource_group_name_type, location_type,
-                                                get_resource_name_completion_list,
+                                                get_resource_name_completion_list, file_type,
                                                 CliArgumentType, ignore_type, enum_choice_list)
 
 from ._client_factory import web_client_factory
@@ -77,7 +80,7 @@ server_log_switch_options = ['off', 'storage', 'filesystem']
 register_cli_argument('appservice web log config', 'web_server_logging', help='configure Web server logging', **enum_choice_list(server_log_switch_options))
 
 register_cli_argument('appservice web log tail', 'provider', help="scope the live traces to certain providers/folders, for example:'application', 'http' for server log, 'kudu/trace', etc")
-register_cli_argument('appservice web log download', 'log_file', default='webapp_logs.zip', help='the downloaded zipped log file path')
+register_cli_argument('appservice web log download', 'log_file', default='webapp_logs.zip', type=file_type, completer=FilesCompleter(), help='the downloaded zipped log file path')
 
 register_cli_argument('appservice web config appsettings', 'settings', nargs='+', help="space separated app settings in a format of <name>=<value>")
 register_cli_argument('appservice web config appsettings', 'setting_names', nargs='+', help="space separated app setting names")

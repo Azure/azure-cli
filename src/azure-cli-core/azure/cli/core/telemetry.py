@@ -41,7 +41,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
     application = None
     arg_complete_env_name = None
     correlation_id = str(uuid.uuid4())
-    command = 'unknown'
+    command = 'execute-unknown-command'
     output_type = 'none'
     parameters = []
     result = 'None'
@@ -49,19 +49,18 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
     payload_properties = None
     exceptions = []
 
-    def add_exception(self, exception, fault_type='general-exception', description='', message=''):
+    def add_exception(self, exception, fault_type, description=None, message=''):
         details = {
             'Reserved.DataModel.EntityType': 'Fault',
-            'Reserved.DataModel.Fault.Description': description,
+            'Reserved.DataModel.Fault.Description': description or fault_type,
             'Reserved.DataModel.Correlation.1': self.correlation_id,
             'Reserved.DataModel.Fault.TypeString': exception.__class__.__name__,
             'Reserved.DataModel.Fault.Exception.Message': _remove_cmd_chars(
                 message or str(exception)),
-            'Reserved.DataModel.Fault.Exception.StackTrace': _remove_cmd_chars(_get_stack_trace()),
-            'Reserved.DataModel.Fault.Exception.ErrorCode': _remove_cmd_chars(_get_error_hash())
+            'Reserved.DataModel.Fault.Exception.StackTrace': _remove_cmd_chars(_get_stack_trace())
         }
         fault_type = _remove_symbols(fault_type).replace('"', '').replace("'", '').replace(' ', '-')
-        fault_name = '{}/faults/{}'.format(PRODUCT_NAME, fault_type.lower())
+        fault_name = '{}/commands/{}'.format(PRODUCT_NAME, fault_type.lower())
 
         self.exceptions.append((fault_name, details))
 
@@ -215,7 +214,7 @@ def set_exception(exception, fault_type, summary=None):
     if not summary:
         _session.result_summary = summary
 
-    _session.add_exception(exception, fault_type=fault_type)
+    _session.add_exception(exception, fault_type=fault_type, description=summary)
 
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)

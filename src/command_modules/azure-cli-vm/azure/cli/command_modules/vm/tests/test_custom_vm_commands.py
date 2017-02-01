@@ -58,8 +58,8 @@ class Test_Vm_Custom(unittest.TestCase):
         self.assertEqual('1.4', version)
         self.assertEqual(True, auto_upgrade)
 
-    @mock.patch('azure.cli.command_modules.vm.custom._vm_get', autospec=True)
-    @mock.patch('azure.cli.command_modules.vm.custom._vm_set', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.custom.get_vm', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
     def test_enable_boot_diagnostics_on_vm_never_enabled(self, mock_vm_set, mock_vm_get):
         vm_fake = mock.MagicMock()
         mock_vm_get.return_value = vm_fake
@@ -70,8 +70,8 @@ class Test_Vm_Custom(unittest.TestCase):
         self.assertTrue(mock_vm_get.called)
         mock_vm_set.assert_called_once_with(vm_fake, mock.ANY)
 
-    @mock.patch('azure.cli.command_modules.vm.custom._vm_get', autospec=True)
-    @mock.patch('azure.cli.command_modules.vm.custom._vm_set', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.custom.get_vm', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
     def test_enable_boot_diagnostics_skip_when_enabled_already(self, mock_vm_set, mock_vm_get):
         vm_fake = mock.MagicMock()
         mock_vm_get.return_value = vm_fake
@@ -81,8 +81,8 @@ class Test_Vm_Custom(unittest.TestCase):
         self.assertTrue(mock_vm_get.called)
         self.assertFalse(mock_vm_set.called)
 
-    @mock.patch('azure.cli.command_modules.vm.custom._vm_get', autospec=True)
-    @mock.patch('azure.cli.command_modules.vm.custom._vm_set', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.custom.get_vm', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
     def test_disable_boot_diagnostics_on_vm(self, mock_vm_set, mock_vm_get):
         vm_fake = mock.MagicMock()
         mock_vm_get.return_value = vm_fake
@@ -94,8 +94,8 @@ class Test_Vm_Custom(unittest.TestCase):
         self.assertTrue(mock_vm_get.called)
         mock_vm_set.assert_called_once_with(vm_fake, mock.ANY)
 
-    @mock.patch('azure.cli.command_modules.vm.custom._vm_get', autospec=True)
-    @mock.patch('azure.cli.command_modules.vm.custom._vm_set', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.custom.get_vm', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
     def test_attach_new_datadisk_default_on_vm(self, mock_vm_set, mock_vm_get):
         # pylint: disable=line-too-long
         faked_vhd_uri = 'https://your_stoage_account_name.blob.core.windows.net/vhds/d1.vhd'
@@ -119,8 +119,8 @@ class Test_Vm_Custom(unittest.TestCase):
         self.assertEqual(data_disk.name, 'd1')
         self.assertEqual(data_disk.vhd.uri, faked_vhd_uri)
 
-    @mock.patch('azure.cli.command_modules.vm.custom._vm_get', autospec=True)
-    @mock.patch('azure.cli.command_modules.vm.custom._vm_set', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.custom.get_vm', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
     def test_attach_new_datadisk_custom_on_vm(self, mock_vm_set, mock_vm_get):
         # pylint: disable=line-too-long
         faked_vhd_uri = 'https://your_stoage_account_name.blob.core.windows.net/vhds/d1.vhd'
@@ -146,8 +146,8 @@ class Test_Vm_Custom(unittest.TestCase):
         self.assertEqual(data_disk.lun, 0)  # the existing disk has '1', so it verifes the second one be picked as '0'
         self.assertEqual(data_disk.vhd.uri, faked_vhd_uri2)
 
-    @mock.patch('azure.cli.command_modules.vm.custom._vm_get', autospec=True)
-    @mock.patch('azure.cli.command_modules.vm.custom._vm_set', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.custom.get_vm', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
     def test_attach_existing_datadisk_on_vm(self, mock_vm_set, mock_vm_get):
         # pylint: disable=line-too-long
         faked_vhd_uri = 'https://your_stoage_account_name.blob.core.windows.net/vhds/d1.vhd'
@@ -172,8 +172,8 @@ class Test_Vm_Custom(unittest.TestCase):
         self.assertEqual(data_disk.name, 'd1')
         self.assertEqual(data_disk.vhd.uri, faked_vhd_uri)
 
-    @mock.patch('azure.cli.command_modules.vm.custom._vm_get', autospec=True)
-    @mock.patch('azure.cli.command_modules.vm.custom._vm_set', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.custom.get_vm', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
     def test_deattach_disk_on_vm(self, mock_vm_set, mock_vm_get):
         # pylint: disable=line-too-long
         # stub to get the vm which has no datadisks

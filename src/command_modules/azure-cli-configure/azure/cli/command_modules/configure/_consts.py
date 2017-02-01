@@ -48,3 +48,4 @@ MSG_PROMPT_TELEMETRY = '\nMicrosoft would like to collect anonymous Azure CLI us
     ' participate, your device automatically sends information to Microsoft about'\
     ' how you use Azure CLI.  To update your choice, run "az configure" again.'\
     '\nSelect y to enable data collection.'
+MSG_PROMPT_FILE_LOGGING = '\nWould you like to enable logging to file?'

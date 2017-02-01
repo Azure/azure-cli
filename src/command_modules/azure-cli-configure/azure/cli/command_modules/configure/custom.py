@@ -6,15 +6,19 @@
 from __future__ import print_function
 import os
 import sys
-from six.moves import input, configparser #pylint: disable=redefined-builtin
+from six.moves import configparser  # pylint: disable=redefined-builtin
 from adal.adal_error import AdalError
 
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 from azure.cli.core._config import (GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH,
                                     CONTEXT_CONFIG_DIR, ACTIVE_CONTEXT_CONFIG_PATH,
                                     ENV_VAR_PREFIX)
 from azure.cli.core._util import CLIError
-
+from azure.cli.core.prompting import (prompt,
+                                      prompt_y_n,
+                                      prompt_choice_list,
+                                      prompt_pass,
+                                      NoTTYException)
 from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, CLOUD_LIST, LOGIN_METHOD_LIST,
                                                          MSG_INTRO,
                                                          MSG_CLOSING,
@@ -28,14 +32,12 @@ from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, CLOUD_LIST
                                                          MSG_PROMPT_WHICH_CONTEXT,
                                                          MSG_PROMPT_WHICH_CLOUD,
                                                          MSG_PROMPT_LOGIN,
-                                                         MSG_PROMPT_TELEMETRY)
-from azure.cli.command_modules.configure._utils import (prompt_y_n,
-                                                        prompt_choice_list,
-                                                        get_default_from_config)
-import azure.cli.command_modules.configure._help # pylint: disable=unused-import
-import azure.cli.core.telemetry as telemetry
+                                                         MSG_PROMPT_TELEMETRY,
+                                                         MSG_PROMPT_FILE_LOGGING)
+from azure.cli.command_modules.configure._utils import get_default_from_config
+import azure.cli.command_modules.configure._help  # pylint: disable=unused-import
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 answers = {}
 
@@ -66,7 +68,6 @@ def _config_env_public_azure(_):
         list(get_mgmt_service_client(ResourceManagementClient).resources.list())
     except CLIError:
         # Not logged in
-        import getpass
         login_successful = False
         while not login_successful:
             method_index = prompt_choice_list(MSG_PROMPT_LOGIN, LOGIN_METHOD_LIST)
@@ -81,13 +82,13 @@ def _config_env_public_azure(_):
             if method_index == 0: # device auth
                 interactive = True
             elif method_index == 1: # username and password
-                username = input('Username: ')
-                password = getpass.getpass('Password: ')
+                username = prompt('Username: ')
+                password = prompt_pass(msg='Password: ')
             elif method_index == 2: # service principal with secret
                 service_principal = True
-                username = input('Service principal: ')
-                tenant = input('Tenant: ')
-                password = getpass.getpass('Client secret: ')
+                username = prompt('Service principal: ')
+                tenant = prompt('Tenant: ')
+                password = prompt_pass(msg='Client secret: ')
             elif method_index == 3: # skip
                 return
             try:
@@ -162,13 +163,19 @@ def _handle_global_configuration():
         answers['output_type_options'] = str(OUTPUT_LIST)
         allow_telemetry = prompt_y_n(MSG_PROMPT_TELEMETRY, default='y')
         answers['telemetry_prompt'] = allow_telemetry
+        enable_file_logging = prompt_y_n(MSG_PROMPT_FILE_LOGGING, default='n')
         # save the global config
         try:
             global_config.add_section('core')
         except configparser.DuplicateSectionError:
             pass
+        try:
+            global_config.add_section('logging')
+        except configparser.DuplicateSectionError:
+            pass
         global_config.set('core', 'output', OUTPUT_LIST[output_index]['name'])
         global_config.set('core', 'collect_telemetry', 'yes' if allow_telemetry else 'no')
+        global_config.set('logging', 'enable_log_file', 'yes' if enable_file_logging else 'no')
         if not os.path.isdir(GLOBAL_CONFIG_DIR):
             os.makedirs(GLOBAL_CONFIG_DIR)
         with open(GLOBAL_CONFIG_PATH, 'w') as configfile:
@@ -202,5 +209,7 @@ def handle_configure():
         # _handle_context_configuration()
         print(MSG_CLOSING)
         # TODO: log_telemetry('configure', **answers)
+    except NoTTYException:
+        raise CLIError('This command is interactive and no tty available.')
     except (EOFError, KeyboardInterrupt):
         print()

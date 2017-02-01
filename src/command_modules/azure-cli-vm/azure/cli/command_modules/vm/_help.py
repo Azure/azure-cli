@@ -7,9 +7,9 @@ from azure.cli.core.help_files import helps
 
 # pylint: disable=line-too-long
 
-image_long_summary = """                      URN aliases: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS, Win2008SP1, Win2012Datacenter, Win2012R2Datacenter.
-                      Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest.
-                      Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd.
+image_long_summary = """                      URN aliases: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS, Win2008R2SP1, Win2012Datacenter, Win2012R2Datacenter.
+                      Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest
+                      Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd
 """
 
 helps['vm create'] = """
@@ -31,8 +31,7 @@ helps['vm create'] = """
                 - name: Create a Linux VM with SSH key authentication, add a public DNS entry and add to an existing Virtual Network and Availability Set.
                   text: >
                     az vm create -n my_vm_name -g myrg --image <linux image from 'az vm image list'>
-                    --authentication-type ssh
-                    --vnet my_existing_vnet --subnet-name subnet1
+                    --vnet-name my_existing_vnet --subnet subnet1
                     --availability-set my_existing_availability_set
                     --public-ip-address-dns-name my_globally_unique_vm_dns_name
                     --ssh-key-value "<ssh-rsa-key, key-file-path or not specified for default-key-path>"
@@ -63,9 +62,8 @@ helps['vmss create'] = """
                 - name: Linux scaleset with SSH authentication, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network
                   text: >
                     az vmss create  -n myName -g myResourceGroup --dns-name-for-public-ip myGloballyUniqueDnsName
-                    --load-balancer-type existing --load-balancer-name myLoadBalancer
-                    --virtual-network-type existing --virtual-network-name myVNET --subnet-name mySubnet --image <linux image from 'az vm image list'>
-                    --authentication-type ssh --ssh-key-value "<ssh-key-value or ssh-key-file-path>"
+                    --load-balancer myLoadBalancer --vnet-name myVNET --subnet mySubnet --image <linux image from 'az vm image list'>
+                    --ssh-key-value "<ssh-key-value or ssh-key-file-path>"
 """.format(image_long_summary)
 
 helps['vm availability-set create'] = """

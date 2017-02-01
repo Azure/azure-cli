@@ -15,18 +15,22 @@ from collections import OrderedDict, defaultdict
 from importlib import import_module
 from six import string_types
 
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 import azure.cli.core.telemetry as telemetry
 from azure.cli.core._util import CLIError
 from azure.cli.core.application import APPLICATION
+from azure.cli.core.prompting import prompt_y_n, NoTTYException
+from azure.cli.core._config import az_config
 
 from ._introspection import (extract_args_from_signature,
                              extract_full_summary_from_signature)
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 
 # pylint: disable=too-many-arguments,too-few-public-methods
+
+FORCE_PARAM_NAME = 'force'
 
 
 class CliArgumentType(object):
@@ -113,7 +117,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         except ClientException as client_exception:
             telemetry.set_exception(
                 client_exception,
-                fault_type='client-exception',
+                fault_type='failed-long-running-operation',
                 summary='Unexpected client exception in {}.'.format(LongRunningOperation.__name__))
             message = getattr(client_exception, 'message', client_exception)
 
@@ -136,10 +140,21 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
 # pylint: disable=too-few-public-methods
 class DeploymentOutputLongRunningOperation(LongRunningOperation):
-    def __call__(self, poller):
-        result = super(DeploymentOutputLongRunningOperation, self).__call__(poller)
-        outputs = result.properties.outputs
-        return {key: val['value'] for key, val in outputs.items()} if outputs else {}
+    def __call__(self, result):
+        from msrest.pipeline import ClientRawResponse
+        from msrestazure.azure_operation import AzureOperationPoller
+
+        if isinstance(result, AzureOperationPoller):
+            # most deployment operations return a poller
+            result = super(DeploymentOutputLongRunningOperation, self).__call__(result)
+            outputs = result.properties.outputs
+            return {key: val['value'] for key, val in outputs.items()} if outputs else {}
+        elif isinstance(result, ClientRawResponse):
+            # --no-wait returns a ClientRawResponse
+            return None
+        else:
+            # --validate returns a 'normal' response
+            return result
 
 
 class CommandTable(dict):
@@ -214,35 +229,48 @@ def load_params(command):
     _update_command_definitions(command_table)
 
 
-def get_command_table():
+def get_command_table(module_name=None):
     '''Loads command table(s)
+    When `module_name` is specified, only commands from that module will be loaded.
+    If the module is not found, all commands are loaded.
     '''
-    installed_command_modules = []
-    try:
-        mods_ns_pkg = import_module('azure.cli.command_modules')
-        installed_command_modules = [modname for _, modname, _ in
-                                     pkgutil.iter_modules(mods_ns_pkg.__path__)]
-    except ImportError:
-        pass
-    logger.info('Installed command modules %s', installed_command_modules)
-    cumulative_elapsed_time = 0
-    for mod in installed_command_modules:
+    loaded = False
+    if module_name and module_name != 'acs':
         try:
-            start_time = timeit.default_timer()
-            import_module('azure.cli.command_modules.' + mod).load_commands()
-            elapsed_time = timeit.default_timer() - start_time
-            logger.debug("Loaded module '%s' in %.3f seconds.", mod, elapsed_time)
-            cumulative_elapsed_time += elapsed_time
-        except Exception as ex:  # pylint: disable=broad-except
-            # Changing this error message requires updating CI script that checks for failed
-            # module loading.
-            logger.error("Error loading command module '%s'", mod)
-            telemetry.set_exception(exception=ex, fault_type='module-load-error',
-                                    summary='Error loading module: {}'.format(mod))
-            logger.debug(traceback.format_exc())
-    logger.debug("Loaded all modules in %.3f seconds. "
-                 "(note: there's always an overhead with the first module loaded)",
-                 cumulative_elapsed_time)
+            import_module('azure.cli.command_modules.' + module_name).load_commands()
+            logger.debug("Successfully loaded command table from module '%s'.", module_name)
+            loaded = True
+        except ImportError:
+            logger.debug("Loading all installed modules as module with name '%s' not found.", module_name)  # pylint: disable=line-too-long
+        except Exception:  # pylint: disable=broad-except
+            pass
+    if not loaded:
+        installed_command_modules = []
+        try:
+            mods_ns_pkg = import_module('azure.cli.command_modules')
+            installed_command_modules = [modname for _, modname, _ in
+                                         pkgutil.iter_modules(mods_ns_pkg.__path__)]
+        except ImportError:
+            pass
+        logger.debug('Installed command modules %s', installed_command_modules)
+        cumulative_elapsed_time = 0
+        for mod in installed_command_modules:
+            try:
+                start_time = timeit.default_timer()
+                import_module('azure.cli.command_modules.' + mod).load_commands()
+                elapsed_time = timeit.default_timer() - start_time
+                logger.debug("Loaded module '%s' in %.3f seconds.", mod, elapsed_time)
+                cumulative_elapsed_time += elapsed_time
+            except Exception as ex:  # pylint: disable=broad-except
+                # Changing this error message requires updating CI script that checks for failed
+                # module loading.
+                logger.error("Error loading command module '%s'", mod)
+                telemetry.set_exception(exception=ex, fault_type='module-load-error-' + mod,
+                                        summary='Error loading module: {}'.format(mod))
+                logger.debug(traceback.format_exc())
+        logger.debug("Loaded all modules in %.3f seconds. "
+                     "(note: there's always an overhead with the first module loaded)",
+                     cumulative_elapsed_time)
     _update_command_definitions(command_table)
     ordered_commands = OrderedDict(command_table)
     return ordered_commands
@@ -263,10 +291,10 @@ def register_extra_cli_argument(command, dest, **kwargs):
 
 def cli_command(module_name, name, operation,
                 client_factory=None, transform=None, table_transformer=None,
-                no_wait_param=None):
+                no_wait_param=None, confirmation=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
     command_table[name] = create_command(module_name, name, operation, transform, table_transformer,
-                                         client_factory, no_wait_param)
+                                         client_factory, no_wait_param, confirmation=confirmation)
 
 
 def get_op_handler(operation):
@@ -283,7 +311,7 @@ def get_op_handler(operation):
 
 def create_command(module_name, name, operation,
                    transform_result, table_transformer, client_factory,
-                   no_wait_param=None):
+                   no_wait_param=None, confirmation=None):
     if not isinstance(operation, string_types):
         raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
@@ -292,6 +320,12 @@ def create_command(module_name, name, operation,
         from msrest.exceptions import ClientException
         from msrestazure.azure_operation import AzureOperationPoller
         from azure.common import AzureException
+
+        if confirmation \
+            and not kwargs.get(FORCE_PARAM_NAME) \
+            and not az_config.getboolean('core', 'disable_confirm_prompt', fallback=False) \
+                and not _user_confirmed(confirmation, kwargs):
+            raise CLIError('Operation cancelled.')
 
         client = client_factory(kwargs) if client_factory else None
         try:
@@ -313,17 +347,20 @@ def create_command(module_name, name, operation,
             else:
                 return result
         except ClientException as client_exception:
-            telemetry.set_exception(client_exception, fault_type='client-exception',
+            fault_type = name.replace(' ', '-') + '-client-error'
+            telemetry.set_exception(client_exception, fault_type=fault_type,
                                     summary='Unexpected client exception during command creation')
             message = getattr(client_exception, 'message', client_exception)
             raise _polish_rp_not_registerd_error(CLIError(message))
         except AzureException as azure_exception:
-            telemetry.set_exception(azure_exception, fault_type='azure-exception',
+            fault_type = name.replace(' ', '-') + '-service-error'
+            telemetry.set_exception(azure_exception, fault_type=fault_type,
                                     summary='Unexpected azure exception during command creation')
             message = re.search(r"([A-Za-z\t .])+", str(azure_exception))
             raise CLIError('\n{}'.format(message.group(0) if message else str(azure_exception)))
         except ValueError as value_error:
-            telemetry.set_exception(value_error, fault_type='value-exception',
+            fault_type = name.replace(' ', '-') + '-value-error'
+            telemetry.set_exception(value_error, fault_type=fault_type,
                                     summary='Unexpected value exception during command creation')
             raise CLIError(value_error)
         except CLIError as cli_error:
@@ -340,7 +377,23 @@ def create_command(module_name, name, operation,
 
     cmd = CliCommand(name, _execute_command, table_transformer=table_transformer,
                      arguments_loader=arguments_loader, description_loader=description_loader)
+    if confirmation:
+        cmd.add_argument(FORCE_PARAM_NAME,
+                         action='store_true',
+                         help='Do not prompt for confirmation')
     return cmd
+
+
+def _user_confirmed(confirmation, command_args):
+    if callable(confirmation):
+        return confirmation(command_args)
+    try:
+        if isinstance(confirmation, string_types):
+            return prompt_y_n(confirmation)
+        return prompt_y_n('Are you sure you want to perform this operation?')
+    except NoTTYException:
+        logger.warning('Unable to prompt for confirmation as no tty available. Use --force.')
+        return False
 
 
 def _polish_rp_not_registerd_error(cli_error):

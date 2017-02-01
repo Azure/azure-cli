@@ -46,6 +46,17 @@ MOCKED_STORAGE_ACCOUNT = 'dummystorage'
 
 # MOCK METHODS
 
+# Workaround until https://github.com/kevin1024/vcrpy/issues/293 is fixed.
+vcr_connection_request = vcr.stubs.VCRConnection.request
+
+
+def patch_vcr_connection_request(*args, **kwargs):
+    kwargs.pop('encode_chunked', None)
+    vcr_connection_request(*args, **kwargs)
+
+
+vcr.stubs.VCRConnection.request = patch_vcr_connection_request
+
 
 def _mock_get_mgmt_service_client(client_type, subscription_bound=True, subscription_id=None,
                                   api_version=None):
@@ -153,11 +164,12 @@ class NoneCheck(object):  # pylint: disable=too-few-public-methods
         pass
 
     def compare(self, data):  # pylint: disable=no-self-use
+        none_strings = ['[]', '{}', 'false']
         try:
-            assert not data
+            assert not data or data in none_strings
         except AssertionError:
-            raise AssertionError("Actual value '{}' != Expected value falsy (None, '', [])".format(
-                data))
+            raise AssertionError("Actual value '{}' != Expected value falsy (None, '', []) or "
+                                 "string in {}".format(data, none_strings))
 
 
 class StringCheck(object):  # pylint: disable=too-few-public-methods
@@ -406,11 +418,14 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
             for check in checks:
                 check.compare(result)
 
-        result = result or '{}'
-        try:
-            return json.loads(result)
-        except Exception:  # pylint: disable=broad-except
+        if '-o' in command_list and 'tsv' in command_list:
             return result
+        else:
+            try:
+                result = result or '{}'
+                return json.loads(result)
+            except Exception:  # pylint: disable=broad-except
+                return result
 
     def set_env(self, key, val):  # pylint: disable=no-self-use
         os.environ[key] = val
@@ -463,7 +478,7 @@ class ResourceGroupVCRTestBase(VCRTestBase):
             self.location, self.resource_group))
 
     def tear_down(self):
-        self.cmd('group delete --name {} --no-wait'.format(self.resource_group))
+        self.cmd('group delete --name {} --no-wait --force'.format(self.resource_group))
 
 
 class StorageAccountVCRTestBase(VCRTestBase):
@@ -490,5 +505,6 @@ class StorageAccountVCRTestBase(VCRTestBase):
             self.account, self.resource_group))
 
     def tear_down(self):
-        self.cmd('storage account delete -g {} -n {}'.format(self.resource_group, self.account))
-        self.cmd('group delete --name {} --no-wait'.format(self.resource_group))
+        self.cmd('storage account delete -g {} -n {} --force'.format(
+            self.resource_group, self.account))
+        self.cmd('group delete --name {} --no-wait --force'.format(self.resource_group))

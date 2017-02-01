@@ -9,7 +9,7 @@ import unittest
 from six import StringIO
 
 from azure.cli.command_modules.storage._validators import (get_permission_validator,
-                                                           datetime_string_type, datetime_type, datetime, ipv4_range_type, resource_type_type,
+                                                           get_datetime_type, datetime, ipv4_range_type, resource_type_type,
                                                            services_type)
 
 
@@ -42,23 +42,23 @@ class Test_storage_validators(unittest.TestCase):
 
     def test_datetime_string_type(self):
         input = "2017-01-01T12:30Z"
-        actual = datetime_string_type(input)
+        actual = get_datetime_type(True)(input)
         expected = "2017-01-01T12:30Z"
         self.assertEqual(actual, expected)
 
         input = "2017-01-01 12:30"
         with self.assertRaises(ValueError):
-            actual = datetime_string_type(input)
+            actual = get_datetime_type(True)(input)
 
     def test_datetime_type(self):
         input = "2017-01-01T12:30Z"
-        actual = datetime_type(input)
+        actual = get_datetime_type(False)(input)
         expected = datetime(2017, 1, 1, 12, 30, 0)
         self.assertEqual(actual, expected)
 
         input = "2017-01-01 12:30"
         with self.assertRaises(ValueError):
-            actual = datetime_type(input)
+            actual = get_datetime_type(False)(input)
 
     def test_ipv4_range_type(self):
         input = "111.22.3.111"

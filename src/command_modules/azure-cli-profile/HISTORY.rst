@@ -3,6 +3,12 @@
 Release History
 ===============
 
+0.1.1b2 (2017-01-30)
++++++++++++++++++++++
+
+* Add subscription id to ‘az account list’ table format.
+* Support Python 3.6.
+
 0.1.1b1 (2017-01-17)
 +++++++++++++++++++++
 

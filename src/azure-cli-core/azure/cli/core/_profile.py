@@ -12,7 +12,7 @@ import os.path
 from enum import Enum
 
 import adal
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core._util import CLIError, get_file_json
@@ -20,7 +20,7 @@ from azure.cli.core.adal_authentication import AdalAuthentication
 from azure.cli.core.cloud import get_cloud
 from azure.cli.core.context import get_active_context
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 # Names below are used by azure-xplat-cli to persist account information into
 # ~/.azure/azureProfile.json or osx/keychainer or windows secure storage,

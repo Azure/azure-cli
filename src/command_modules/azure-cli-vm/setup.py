@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.1.1b1+dev'
+VERSION = '0.1.1b2+dev'
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -20,6 +20,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
     'License :: OSI Approved :: MIT License',
 ]
 
@@ -54,14 +55,6 @@ setup(
     ],
     packages=[
         'azure.cli.command_modules.vm',
-        'azure.cli.command_modules.vm.mgmt_vm',
-        'azure.cli.command_modules.vm.mgmt_vm.lib',
-        'azure.cli.command_modules.vm.mgmt_vm.lib.models',
-        'azure.cli.command_modules.vm.mgmt_vm.lib.operations',
-        'azure.cli.command_modules.vm.mgmt_vmss',
-        'azure.cli.command_modules.vm.mgmt_vmss.lib',
-        'azure.cli.command_modules.vm.mgmt_vmss.lib.models',
-        'azure.cli.command_modules.vm.mgmt_vmss.lib.operations',
         'azure.cli.command_modules.vm.mgmt_avail_set',
         'azure.cli.command_modules.vm.mgmt_avail_set.lib',
         'azure.cli.command_modules.vm.mgmt_avail_set.lib.models',

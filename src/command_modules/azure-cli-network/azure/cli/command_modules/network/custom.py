@@ -12,7 +12,8 @@ from azure.mgmt.network.models import \
      FrontendIPConfiguration, BackendAddressPool, Probe, LoadBalancingRule,
      NetworkInterfaceIPConfiguration, Route, VpnClientRootCertificate, VpnClientConfiguration,
      AddressSpace, VpnClientRevokedCertificate, SubResource, VirtualNetworkPeering,
-     ApplicationGatewayFirewallMode)
+     ApplicationGatewayFirewallMode, SecurityRuleAccess, SecurityRuleDirection,
+     SecurityRuleProtocol)
 
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 from azure.cli.core._util import CLIError
@@ -737,9 +738,12 @@ def remove_nic_ip_config_inbound_nat_rule(
 #region Network Security Group commands
 
 def create_nsg_rule(resource_group_name, network_security_group_name, security_rule_name,
-                    protocol, source_address_prefix, destination_address_prefix,
-                    access, direction, source_port_range, destination_port_range,
-                    description=None, priority=None):
+                    priority, description=None, protocol=SecurityRuleProtocol.asterisk.value,
+                    access=SecurityRuleAccess.allow.value,
+                    direction=SecurityRuleDirection.inbound.value,
+                    source_port_range='*', source_address_prefix='*',
+                    destination_port_range=80, destination_address_prefix='*',
+                   ):
     settings = SecurityRule(protocol=protocol, source_address_prefix=source_address_prefix,
                             destination_address_prefix=destination_address_prefix, access=access,
                             direction=direction,
@@ -1106,7 +1110,8 @@ def create_express_route_peering(
     # region Issue #1574 workaround
     circuit = _network_client_factory().express_route_circuits.get(
         resource_group_name, circuit_name)
-    if peering_type == PeeringType.microsoft_peering and circuit.sku.tier == SkuTier.standard:
+    if peering_type == PeeringType.microsoft_peering.value and \
+        circuit.sku.tier == SkuTier.standard.value:
         raise CLIError("MicrosoftPeering cannot be created on a 'Standard' SKU circuit")
     for peering in circuit.peerings:
         if peering.vlan_id == vlan_id:
@@ -1118,7 +1123,7 @@ def create_express_route_peering(
         advertised_public_prefixes=advertised_public_prefixes,
         customer_asn=customer_asn,
         routing_registry_name=routing_registry_name) \
-            if peering_type == PeeringType.microsoft_peering else None
+            if peering_type == PeeringType.microsoft_peering.value else None
     peering = ExpressRouteCircuitPeering(
         peering_type=peering_type, peer_asn=peer_asn, vlan_id=vlan_id,
         primary_peer_address_prefix=primary_peer_address_prefix,
@@ -1323,6 +1328,12 @@ def create_dns_record_set(resource_group_name, zone_name, record_set_name, recor
                                 record_set_type, record_set, if_match=if_match,
                                 if_none_match='*' if if_none_match else None)
 create_dns_record_set.__doc__ = RecordSetsOperations.create_or_update.__doc__
+
+def list_dns_record_set(client, resource_group_name, zone_name, record_type=None):
+    if record_type:
+        return client.list_by_type(resource_group_name, zone_name, record_type)
+    else:
+        return client.list_all_in_resource_group(resource_group_name, zone_name)
 
 def update_dns_record_set(instance, metadata=None):
     if metadata is not None:
@@ -1584,7 +1595,10 @@ def _add_record(record_set, record, record_type, property_name=None, is_list=Fal
 def _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name,
                      property_name=None, is_list=True):
     ncf = get_mgmt_service_client(DnsManagementClient).record_sets
-    record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
+    try:
+        record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
+    except CloudError:
+        record_set = RecordSet(name=record_set_name, type=record_type, ttl=3600)  # pylint: disable=redefined-variable-type
 
     _add_record(record_set, record, record_type, property_name, is_list)
 

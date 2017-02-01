@@ -7,11 +7,12 @@
 import requests
 from adal.adal_error import AdalError
 
+from azure.cli.core.prompting import prompt_pass, NoTTYException
+import azure.cli.core.azlogging as azlogging
 from azure.cli.core._profile import Profile, CLOUD
 from azure.cli.core._util import CLIError
-import azure.cli.core._logging as _logging
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 def load_subscriptions():
     profile = Profile()
@@ -52,8 +53,10 @@ def login(username=None, password=None, service_principal=None, tenant=None):
 
     if username:
         if not password:
-            import getpass
-            password = getpass.getpass('Password: ')
+            try:
+                password = prompt_pass('Password: ')
+            except NoTTYException:
+                raise CLIError('Please specify both username and password in non-interactive mode.')
     else:
         interactive = True
 

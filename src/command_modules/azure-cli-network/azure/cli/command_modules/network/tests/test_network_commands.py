@@ -90,7 +90,7 @@ class NetworkAppGatewayDefaultScenarioTest(ResourceGroupVCRTestBase):
 class NetworkAppGatewayExistingSubnetScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkAppGatewayExistingSubnetScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_ag_existing_subnet', debug=True)
+        super(NetworkAppGatewayExistingSubnetScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_ag_existing_subnet')
 
     def test_network_app_gateway_with_existing_subnet(self):
         self.execute()
@@ -798,7 +798,7 @@ class NetworkNicConvenienceCommandsScenarioTest(ResourceGroupVCRTestBase):
 class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkSecurityGroupScenarioTest, self).__init__(__file__, test_method, resource_group='cli_nsg_test1')
+        super(NetworkSecurityGroupScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_nsg')
         self.nsg_name = 'test-nsg1'
         self.nsg_rule_name = 'web'
         self.resource_type = 'Microsoft.Network/networkSecurityGroups'
@@ -813,7 +813,7 @@ class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
         rt = self.resource_type
 
         self.cmd('network nsg create --name {} -g {}'.format(nsg, rg))
-        self.cmd('network nsg rule create --access allow --destination-address-prefix 1234 --direction inbound --nsg-name {} --protocol * -g {} --source-address-prefix 789 -n {} --source-port-range * --destination-port-range 4444'.format(nsg, rg, nrn))
+        self.cmd('network nsg rule create --access allow --destination-address-prefix 1234 --direction inbound --nsg-name {} --protocol * -g {} --source-address-prefix 789 -n {} --source-port-range * --destination-port-range 4444 --priority 1000'.format(nsg, rg, nrn))
 
         self.cmd('network nsg list', checks=[
             JMESPathCheck('type(@)', 'array'),
@@ -846,7 +846,7 @@ class NetworkSecurityGroupScenarioTest(ResourceGroupVCRTestBase):
         new_access = 'DENY'
         new_addr_prefix = '111'
         new_direction = 'Outbound'
-        new_protocol = 'tcp'
+        new_protocol = 'Tcp'
         new_port_range = '1234-1235'
         description = 'greatrule'
         priority = 888
@@ -1178,7 +1178,7 @@ class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
 class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkDnsScenarioTest, self).__init__(__file__, test_method, resource_group='cli_dns_test1')
+        super(NetworkDnsScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_dns')
 
     def test_network_dns(self):
         self.execute()
@@ -1209,16 +1209,21 @@ class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
         record_types = ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']
 
         for t in record_types:
+            # test creating the record set and then adding records
             self.cmd('network dns record-set create -n myrs{0} -g {1} --zone-name {2} --type {0}'
                      .format(t, rg, zone_name))
             self.cmd('network dns record {0} add -g {1} --zone-name {2} --record-set-name myrs{0} {3}'
                      .format(t, rg, zone_name, args[t]))
+            # test creating the record set at the same time you add records
+            self.cmd('network dns record {0} add -g {1} --zone-name {2} --record-set-name myrs{0}alt {3}'
+                     .format(t, rg, zone_name, args[t]))
+
         self.cmd('network dns record {0} add -g {1} --zone-name {2} --record-set-name myrs{0} {3}'
                  .format('a', rg, zone_name, '--ipv4-address 10.0.0.11'))
         self.cmd('network dns record update-soa -g {0} --zone-name {1} {2}'
                      .format(rg, zone_name, args['soa']))
 
-        typed_record_sets = len(record_types)
+        typed_record_sets = 2 * len(record_types)
         self.cmd('network dns zone show -n {} -g {}'.format(zone_name, rg), checks=[
             JMESPathCheck('numberOfRecordSets', base_record_sets + typed_record_sets)
             ])
@@ -1226,6 +1231,13 @@ class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
                  .format('a', rg, zone_name), checks=[
                      JMESPathCheck('length(arecords)', 2)
                      ])
+
+        # test list vs. list type
+        self.cmd('network dns record-set list -g {} -z {}'.format(rg, zone_name),
+            checks=JMESPathCheck('length(@)', base_record_sets + typed_record_sets))
+
+        self.cmd('network dns record-set list -g {} -z {} --type txt'.format(rg, zone_name),
+            checks=JMESPathCheck('length(@)', 2))
 
         for t in record_types:
             self.cmd('network dns record {0} remove -g {1} --zone-name {2} --record-set-name myrs{0} {3}'
