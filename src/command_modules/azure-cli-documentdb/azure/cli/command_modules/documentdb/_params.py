@@ -13,6 +13,7 @@ from azure.cli.core.commands import register_cli_argument
 import azure.cli.core.commands.arm # pylint: disable=unused-import
 from azure.mgmt.documentdb.models.document_db_enums import KeyKind
 from azure.mgmt.documentdb.models.document_db_enums import DefaultConsistencyLevel
+from azure.mgmt.documentdb.models.document_db_enums import DatabaseAccountKind
 from azure.mgmt.documentdb.models.failover_policy import FailoverPolicy
 from azure.mgmt.documentdb.models.location import Location
 
@@ -50,3 +51,4 @@ register_cli_argument('documentdb create', 'default_consistency_level', help="de
 register_cli_argument('documentdb create', 'max_staleness_prefix', help="when used with Bounded Staleness consistency, this value represents the number of stale requests tolerated. Accepted range for this value is 1 - 2,147,483,647", type=int)
 register_cli_argument('documentdb create', 'max_interval', help="when used with Bounded Staleness consistency, this value represents the time amount of staleness (in seconds) tolerated. Accepted range for this value is 1 - 100", type=int)
 register_cli_argument('documentdb create', 'ip_range_filter', validator=validate_ip_range_filter, help="firewall support. Specifies the set of IP addresses or IP address ranges in CIDR form to be included as the allowed list of client IPs for a given database account. IP addresses/ranges must be comma separated and must not contain any spaces", nargs='+')
+register_cli_argument('documentdb create', 'kind', help='Indicates the type of database account', **enum_choice_list(DatabaseAccountKind))
