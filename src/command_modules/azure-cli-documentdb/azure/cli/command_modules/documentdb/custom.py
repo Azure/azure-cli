@@ -46,4 +46,7 @@ def cli_documentdb_create(client,
         consistency_policy=consistency_policy,
         ip_range_filter=ip_range_filter)
 
-    return client.database_accounts.create_or_update(resource_group_name, account_name, params)
+    async_docdb_create = client.database_accounts.create_or_update(resource_group_name, account_name, params)
+    docdb_account = async_docdb_create.result() # Will be empty, shouldn't
+    docdb_account = client.database_accounts.get(resource_group_name, account_name) # Workaround
+    return docdb_account
