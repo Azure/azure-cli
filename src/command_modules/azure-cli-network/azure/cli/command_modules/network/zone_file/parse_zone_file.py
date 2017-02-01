@@ -43,7 +43,7 @@ import time
 import argparse
 from collections import defaultdict
 
-from .configs import SUPPORTED_RECORDS, DEFAULT_TEMPLATE
+from .configs import SUPPORTED_RECORDS
 from .exceptions import InvalidLineException
 
 

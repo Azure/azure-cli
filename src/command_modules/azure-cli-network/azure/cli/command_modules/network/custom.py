@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from collections import Counter
+from collections import Counter, OrderedDict
 from itertools import groupby
 from msrestazure.azure_exceptions import CloudError
 
@@ -1359,65 +1359,79 @@ def update_dns_record_set(instance, metadata=None):
         instance.metadata = metadata
     return instance
 
-def export_zone(resource_group_name, zone_name, file_name):
+
+def export_zone(resource_group_name, zone_name, file_name=None):
+    from time import localtime, strftime
+
     client = get_mgmt_service_client(DnsManagementClient)
     record_sets = client.record_sets.list_all_in_resource_group(resource_group_name, zone_name)
 
-    record_property_types = {
-        'arecords': 'a',
-        'aaaa_records': 'aaaa',
-        'cname_record': 'cname',
-        'mx_records': 'mx',
-        'ns_records': 'ns',
-        'ptr_records': 'ptr',
-        'soa_record': 'soa',
-        'srv_records': 'srv',
-        'txt_records': 'txt'
-        }
-
-    zone_obj = {
-        '$origin': zone_name.rstrip('.') + '.'
-        }
+    zone_obj = OrderedDict({
+        '$origin': zone_name.rstrip('.') + '.',
+        'resource-group': resource_group_name,
+        'zone-name': zone_name.rstrip('.'),
+        'datetime': strftime('%a, %d %b %Y %X %z', localtime())
+    })
 
     for record_set in record_sets:
-        for property_name, record_type in record_property_types.items():
-            record_data = getattr(record_set, property_name, None)
-            if not record_data:
-                continue
-            if not isinstance(record_data, list):
-                record_data = [record_data]
-            if record_type not in zone_obj:
-                zone_obj[record_type] = []
-            for record in record_data:
-                record_obj = {'ip': record.ipv6_address} if record_type == 'aaaa' \
-                    else {'ip': record.ipv4_address} if record_type == 'a' \
-                    else {'alias': record.cname} if record_type == 'cname' \
-                    else {'preference': record.preference, 'host': record.exchange} \
-                    if record_type == 'mx' \
-                    else {'host': record.nsdname} if record_type == 'ns' \
-                    else {'host': record.ptrdname} if record_type == 'ptr' \
-                    else {'mname': record.host, 'rname': record.email,
-                          'serial': record.serial_number, 'refresh': record.refresh_time,
-                          'retry': record.retry_time, 'expire': record.expire_time,
-                          'minimum': record.minimum_ttl} if record_type == 'soa' \
-                    else {'priority': record.priority, 'weight': record.weight,
-                          'port': record.port, 'target': record.target} if record_type == 'srv' \
-                    else {'txt': ' '.join(record.value)} if record_type == 'txt' \
-                    else None
-                record_obj['name'] = record_set.name
-                record_obj['ttl'] = record_set.ttl
-                zone_obj[record_type].append(record_obj)
+        record_type = record_set.type.rsplit('/', 1)[1].lower()
+        record_set_name = record_set.name
+        record_data = getattr(record_set, _type_to_property_name(record_type), None)
 
-    if 'soa' in zone_obj:
-        # there is only 1 soa record allowed, so it shouldn't be a list, take the first element
-        zone_obj['soa'] = zone_obj['soa'][0]
-        zone_obj['soa']['mname'] = zone_obj['soa']['mname'].rstrip('.') + '.'
-        zone_obj['soa']['rname'] = zone_obj['soa']['rname'].rstrip('.') + '.'
+        # ignore empty record sets
+        if not record_data:
+            continue
+
+        if not isinstance(record_data, list):
+            record_data = [record_data]
+
+        if record_set_name not in zone_obj:
+            zone_obj[record_set_name] = OrderedDict()
+
+        for record in record_data:
+
+            record_obj = {'ttl': record_set.ttl}
+
+            if record_type not in zone_obj[record_set_name]:
+                zone_obj[record_set_name][record_type] = []
+
+            if record_type == 'aaaa':
+                record_obj.update({'ip': record.ipv6_address})
+            elif record_type == 'a':
+                record_obj.update({'ip': record.ipv4_address})
+            elif record_type == 'cname':
+                record_obj.update({'alias': record.cname})
+            elif record_type == 'mx':
+                record_obj.update({'preference': record.preference, 'host': record.exchange})
+            elif record_type == 'ns':
+                record_obj.update({'host': record.nsdname})
+            elif record_type == 'ptr':
+                record_obj.update({'host': record.ptrdname})
+            elif record_type == 'soa':
+                record_obj.update({
+                    'mname': record.host.rstrip('.') + '.',
+                    'rname': record.email.rstrip('.') + '.',
+                    'serial': record.serial_number, 'refresh': record.refresh_time,
+                    'retry': record.retry_time, 'expire': record.expire_time,
+                    'minimum': record.minimum_ttl
+                })
+                zone_obj['$ttl'] = record.minimum_ttl
+            elif record_type == 'srv':
+                record_obj.update({'priority': record.priority, 'weight': record.weight,
+                                   'port': record.port, 'target': record.target})
+            elif record_type == 'txt':
+                record_obj.update({'txt': ' '.join(record.value)})
+
+            zone_obj[record_set_name][record_type].append(record_obj)
 
     zone_file_text = make_zone_file(zone_obj)
 
-    with open(file_name, 'w') as f:
-        f.write(zone_file_text)
+    if file_name:
+        with open(file_name, 'w') as f:
+            f.write(zone_file_text)
+            return
+    else:
+        print(zone_file_text)
 
 def _type_to_property_name(key):
 
