@@ -792,5 +792,6 @@ class StorageBlobNoCredentialsScenarioTest(VCRTestBase):
         self.execute()
 
     def body(self):
+        self.pop_env('AZURE_STORAGE_CONNECTION_STRING')
         with self.assertRaisesRegexp(CLIError, re.escape(NO_CREDENTIALS_ERROR_MESSAGE)):
             self.cmd('storage blob upload -c foo -n bar -f file_0')
