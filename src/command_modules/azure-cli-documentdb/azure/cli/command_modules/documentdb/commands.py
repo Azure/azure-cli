@@ -8,7 +8,7 @@
 from azure.cli.core.commands import cli_command
 from azure.cli.command_modules.documentdb._client_factory import (cf_documentdb)
 
-custom_path = 'azure.cli.command_modules.documentdb.sdk.operations.database_accounts_operations#{}'
+custom_path = 'azure.mgmt.documentdb.operations.database_accounts_operations#{}'
 
 cli_command(__name__, 'documentdb show', custom_path.format('DatabaseAccountsOperations.get'), cf_documentdb)
 cli_command(__name__, 'documentdb list', custom_path.format('DatabaseAccountsOperations.list_by_resource_group'), cf_documentdb)

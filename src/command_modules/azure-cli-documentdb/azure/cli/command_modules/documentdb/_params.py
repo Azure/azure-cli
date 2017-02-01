@@ -11,10 +11,10 @@ from azure.cli.core.commands.parameters import (
     ignore_type)
 from azure.cli.core.commands import register_cli_argument
 import azure.cli.core.commands.arm # pylint: disable=unused-import
-from azure.cli.command_modules.documentdb.sdk.models.document_db_enums import KeyKind
-from azure.cli.command_modules.documentdb.sdk.models.document_db_enums import DefaultConsistencyLevel
-from azure.cli.command_modules.documentdb.sdk.models.failover_policy import FailoverPolicy
-from azure.cli.command_modules.documentdb.sdk.models.location import Location
+from azure.mgmt.documentdb.models.document_db_enums import KeyKind
+from azure.mgmt.documentdb.models.document_db_enums import DefaultConsistencyLevel
+from azure.mgmt.documentdb.models.failover_policy import FailoverPolicy
+from azure.mgmt.documentdb.models.location import Location
 
 
 def validate_failover_policies(ns):

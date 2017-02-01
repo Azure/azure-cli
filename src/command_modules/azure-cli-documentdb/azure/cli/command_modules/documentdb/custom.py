@@ -11,7 +11,7 @@
 # - resource-group-location
 # -Kind
 
-from azure.cli.command_modules.documentdb.sdk.models import (
+from azure.mgmt.documentdb.models import (
     ConsistencyPolicy,
     DatabaseAccountCreateUpdateParameters,
 )
