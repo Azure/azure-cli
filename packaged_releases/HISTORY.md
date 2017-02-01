@@ -1,6 +1,43 @@
 Release History
 ===============
 
+0.1.8 (2017-01-30)
+------------------
+
+* See the `HISTORY.rst` files in each module for a changelog.  
+
+Source download:  
+https://azurecliprod.blob.core.windows.net/releases/azure-cli_packaged_0.1.8.tar.gz  
+sha256 0fbce9ab85caabd679cdb8dcebad65706d701bd11c36c7e8ef89979cfbdb079f
+
+
+---
+
+<details>
+  <summary>List of component versions in this release (click to expand)</summary><p>
+$ az --version  
+azure-cli (0.1.1b3)  
+
+acr (0.1.1b2)  
+acs (0.1.1b2)  
+appservice (0.1.1b2)  
+cloud (0.1.1b2)  
+component (0.1.0rc2)  
+configure (0.1.1b3)  
+container (0.1.1b2)  
+context (0.1.1b2)  
+core (0.1.1b3)  
+feedback (0.1.1b2)  
+network (0.1.1b2)  
+nspkg (0.1.2)  
+profile (0.1.1b2)  
+resource (0.1.1b2)  
+role (0.1.1b2)  
+storage (0.1.1b2)  
+vm (0.1.1b2)  
+</p></details>
+
+
 0.1.7 (2017-01-19)
 ------------------
 
