@@ -291,10 +291,11 @@ def register_extra_cli_argument(command, dest, **kwargs):
 
 def cli_command(module_name, name, operation,
                 client_factory=None, transform=None, table_transformer=None,
-                no_wait_param=None, confirmation=None):
+                no_wait_param=None, confirmation=None, exception_handler=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
     command_table[name] = create_command(module_name, name, operation, transform, table_transformer,
-                                         client_factory, no_wait_param, confirmation=confirmation)
+                                         client_factory, no_wait_param, confirmation=confirmation,
+                                         exception_handler=exception_handler)
 
 
 def get_op_handler(operation):
@@ -311,7 +312,7 @@ def get_op_handler(operation):
 
 def create_command(module_name, name, operation,
                    transform_result, table_transformer, client_factory,
-                   no_wait_param=None, confirmation=None):
+                   no_wait_param=None, confirmation=None, exception_handler=None):
     if not isinstance(operation, string_types):
         raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
@@ -330,7 +331,13 @@ def create_command(module_name, name, operation,
         client = client_factory(kwargs) if client_factory else None
         try:
             op = get_op_handler(operation)
-            result = op(client, **kwargs) if client else op(**kwargs)
+            try:
+                result = op(client, **kwargs) if client else op(**kwargs)
+            except Exception as ex:
+                if exception_handler:
+                    result = exception_handler(ex)
+                else:
+                    raise ex
 
             if no_wait_param and kwargs.get(no_wait_param, None):
                 return None  # return None for 'no-wait'
