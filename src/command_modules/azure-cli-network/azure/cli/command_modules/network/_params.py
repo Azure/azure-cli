@@ -14,7 +14,8 @@ from azure.mgmt.network.models.network_management_client_enums import \
      ApplicationGatewayFirewallMode, ApplicationGatewayProtocol,
      ApplicationGatewayRequestRoutingRuleType, ExpressRouteCircuitSkuFamily,
      ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType, IPVersion, LoadDistribution,
-     ProbeProtocol, TransportProtocol)
+     ProbeProtocol, TransportProtocol, SecurityRuleAccess, SecurityRuleProtocol,
+     SecurityRuleDirection)
 from azure.mgmt.dns.models.dns_management_client_enums import RecordType
 
 from azure.cli.core.commands import \
@@ -339,7 +340,19 @@ register_cli_argument('network nsg create', 'name', name_arg_type)
 # NSG Rule
 register_cli_argument('network nsg rule', 'security_rule_name', name_arg_type, id_part='child_name', help='Name of the network security group rule')
 register_cli_argument('network nsg rule', 'network_security_group_name', options_list=('--nsg-name',), metavar='NSGNAME', help='Name of the network security group', id_part='name')
-register_cli_argument('network nsg rule create', 'priority', default=1000, type=int)
+
+for item in ['create', 'update']:
+    register_cli_argument('network nsg rule {}'.format(item), 'priority', help='Rule priority, between 100 (highest priority) and 4096 (lowest priority). Must be unique for each rule in the collection.', type=int)
+    register_cli_argument('network nsg rule {}'.format(item), 'description', help='Rule description')
+    register_cli_argument('network nsg rule {}'.format(item), 'access', help=None, **enum_choice_list(SecurityRuleAccess))
+    register_cli_argument('network nsg rule {}'.format(item), 'protocol', help='Network protocol this rule applies to.', **enum_choice_list(SecurityRuleProtocol))
+    register_cli_argument('network nsg rule {}'.format(item), 'direction', help=None, **enum_choice_list(SecurityRuleDirection))
+    register_cli_argument('network nsg rule {}'.format(item), 'source_port_range', help="Port or port range between 0-65535. Use '*' to match all ports.", arg_group='Source')
+    register_cli_argument('network nsg rule {}'.format(item), 'source_address_prefix', help="CIDR prefix or IP range. Use '*' to match all IPs. Can also use 'VirtualNetwork', 'AzureLoadBalancer', and 'Internet'.", arg_group='Source')
+    register_cli_argument('network nsg rule {}'.format(item), 'destination_port_range', help="Port or port range between 0-65535. Use '*' to match all ports.", arg_group='Destination')
+    register_cli_argument('network nsg rule {}'.format(item), 'destination_address_prefix', help="CIDR prefix or IP range. Use '*' to match all IPs. Can also use 'VirtualNetwork', 'AzureLoadBalancer', and 'Internet'.", arg_group='Destination')
+
+register_cli_argument('network nsg rule create', 'network_security_group_name', options_list=('--nsg-name',), metavar='NSGNAME', help='Name of the network security group', id_part=None)
 
 # Public IP
 register_cli_argument('network public-ip', 'public_ip_address_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), id_part='name', help='The name of the public IP address.')
