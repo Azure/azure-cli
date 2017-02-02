@@ -151,7 +151,7 @@ class BatchPoolScenarioTest(BatchDataPlaneTestBase):
         # test patch pool using parameters
         current = self.cmd('batch pool show --pool-id {} --select "startTask"'.format(
             self.pool_json))
-        self.cmd('batch pool set --pool-id {} --command-line new_value'.format(
+        self.cmd('batch pool set --pool-id {} --start-task-command-line new_value'.format(
             self.pool_json))
         updated = self.cmd('batch pool show --pool-id {} --select "startTask"'.format(
             self.pool_json))

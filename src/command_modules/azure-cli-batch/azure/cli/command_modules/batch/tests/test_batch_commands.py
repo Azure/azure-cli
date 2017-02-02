@@ -75,6 +75,35 @@ class TestBatchValidators(unittest.TestCase):
         self.assertEqual(cert, {'thumbprint': 'thumbprint_lkjsahakjg',
                                 'thumbprint_algorithm': 'sha1'})
 
+    def test_batch_task_id_ranges_format(self):
+        id_range = _validators.task_id_ranges_format("5-10")
+        self.assertEqual(id_range, {'start': 5, 'end': 10})
+
+        with self.assertRaises(ValueError):
+            _validators.task_id_ranges_format("5")
+
+        with self.assertRaises(ValueError):
+            _validators.task_id_ranges_format("test")
+
+        with self.assertRaises(ValueError):
+            _validators.environment_setting_format("5-")
+
+        with self.assertRaises(ValueError):
+            _validators.environment_setting_format("5-test")
+
+        with self.assertRaises(ValueError):
+            _validators.environment_setting_format("start-end")
+
+    def test_batch_resource_file_format(self):
+        meta = _validators.resource_file_format("file=source")
+        self.assertEqual(meta, {'file_path': 'file', 'blob_source': 'source'})
+
+        with self.assertRaises(ValueError):
+            _validators.resource_file_format("file")
+
+        with self.assertRaises(ValueError):
+            _validators.resource_file_format("file=source=mode")
+
     def test_batch_validate_options(self):
         ns = TestObj()
         _validators.validate_options(ns)
@@ -135,6 +164,9 @@ class TestBatchParser(unittest.TestCase):
 
         resolved = _command_type._build_prefix('id', 'id', 'pool.start_task')
         self.assertEqual(resolved, 'start_task_id')
+
+        resolved = _command_type._build_prefix('id', 'id', 'job_schedule.job_specification')
+        self.assertEqual(resolved, 'job_id')
 
         resolved = _command_type._build_prefix('properties_id', 'id', 'pool.start_task.properties')
         self.assertEqual(resolved, 'start_task_id')
@@ -255,11 +287,20 @@ class TestBatchParser(unittest.TestCase):
         path = "pool"
         self.assertEqual(_command_type.group_title(path), "Pool")
 
+        path = "pool_patch_parameter"
+        self.assertEqual(_command_type.group_title(path), "Pool")
+
+        path = "pool_update_parameter"
+        self.assertEqual(_command_type.group_title(path), "Pool")
+
+        path = "pool_update_properties_parameter"
+        self.assertEqual(_command_type.group_title(path), "Pool Update Properties")
+
         path = "pool.start_task"
-        self.assertEqual(_command_type.group_title(path), "Pool : Start Task")
+        self.assertEqual(_command_type.group_title(path), "Pool: Start Task")
 
         path = "pool.start_task.constraints"
-        self.assertEqual(_command_type.group_title(path), "Pool : Start Task : Constraints")
+        self.assertEqual(_command_type.group_title(path), "Pool: Start Task: Constraints")
 
     def test_batch_arg_name(self):
         self.assertEqual(_command_type.arg_name("pool_id"), "--pool-id")
@@ -537,12 +578,12 @@ class TestBatchLoader(unittest.TestCase):
         # pylint: disable=too-many-statements
         handler = operations.pool_operations.PoolOperations.add
         args = list(self.command_pool._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 30)
+        self.assertEqual(len(args), 31)
         self.assertFalse('force' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
         self.assertTrue('application_package_references' in [a for a, _ in args])
-        self.assertTrue('environment_settings' in [a for a, _ in args])
+        self.assertTrue('start_task_environment_settings' in [a for a, _ in args])
         self.assertTrue('certificate_references' in [a for a, _ in args])
         self.assertTrue('metadata' in [a for a, _ in args])
         handler = operations.job_operations.JobOperations.add
@@ -553,7 +594,7 @@ class TestBatchLoader(unittest.TestCase):
         self.assertFalse('destination' in [a for a, _ in args])
         handler = operations.task_operations.TaskOperations.add
         args = list(self.command_task._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 8)
+        self.assertEqual(len(args), 9)
         self.assertFalse('force' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
@@ -577,15 +618,11 @@ class TestBatchLoader(unittest.TestCase):
         self.assertFalse('destination' in [a for a, _ in args])
         handler = operations.job_schedule_operations.JobScheduleOperations.add
         args = list(self.command_conflicts._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 45)
+        self.assertEqual(len(args), 48)
         self.assertTrue('id' in [a for a, _ in args])
         self.assertTrue('job_manager_task_id' in [a for a, _ in args])
-        self.assertTrue('job_preparation_task_id' in [a for a, _ in args])
-        self.assertTrue('job_release_task_id' in [a for a, _ in args])
         self.assertTrue('job_manager_task_max_wall_clock_time' in [a for a, _ in args])
-        self.assertTrue('job_preparation_task_max_wall_clock_time' in [a for a, _ in args])
-        self.assertTrue('job_release_task_max_wall_clock_time' in [a for a, _ in args])
-        self.assertTrue('job_specification_max_wall_clock_time' in [a for a, _ in args])
+        self.assertTrue('job_max_wall_clock_time' in [a for a, _ in args])
         self.assertFalse('force' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])

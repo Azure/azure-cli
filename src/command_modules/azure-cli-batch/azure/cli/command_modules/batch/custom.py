@@ -148,13 +148,15 @@ def _handle_batch_exception(action):
 
 
 @transfer_doc(CertificateAddParameter)
-def create_certificate(client, cert_file, thumbprint, thumbprint_algorithm, password=None):
+def create_certificate(client, file, thumbprint, password=None):
+    thumbprint_algorithm = 'sha1'
+
     def action():
         client.add(cert)
         return client.get(thumbprint_algorithm, thumbprint)
 
     certificate_format = 'pfx' if password else 'cer'
-    with open(cert_file, "rb") as f:
+    with open(file, "rb") as f:
         data_bytes = f.read()
     data = base64.b64encode(data_bytes).decode('utf-8')
     cert = CertificateAddParameter(thumbprint, thumbprint_algorithm, data,
@@ -163,7 +165,9 @@ def create_certificate(client, cert_file, thumbprint, thumbprint_algorithm, pass
     return _handle_batch_exception(action)
 
 
-def delete_certificate(client, thumbprint, thumbprint_algorithm, abort=False):
+def delete_certificate(client, thumbprint, abort=False):
+    thumbprint_algorithm = 'sha1'
+
     def action():
         if abort:
             client.cancel_deletion(thumbprint_algorithm, thumbprint)
@@ -199,8 +203,10 @@ def resize_pool(client, pool_id, target_dedicated=None,  # pylint:disable=too-ma
 
 
 @transfer_doc(PoolUpdatePropertiesParameter, StartTask)
-def update_pool(client, pool_id, json_file=None, command_line=None,  # pylint:disable=too-many-arguments
-                certificate_references=None, application_package_references=None, metadata=None):
+def update_pool(client, pool_id, json_file=None, start_task_command_line=None,  # pylint:disable=too-many-arguments
+                certificate_references=None, application_package_references=None, metadata=None,
+                start_task_run_elevated=None, start_task_environment_settings=None, start_task_wait_for_success=None,
+                start_task_max_task_retry_count=None):
     def action():
         client.update_properties(pool_id=pool_id, pool_update_properties_parameter=param)
         return client.get(pool_id)
@@ -233,8 +239,12 @@ def update_pool(client, pool_id, json_file=None, command_line=None,  # pylint:di
                                               application_package_references,
                                               metadata)
 
-        if command_line:
-            param.start_task = StartTask(command_line)
+        if start_task_command_line:
+            param.start_task = StartTask(start_task_command_line,
+                                         environment_settings=start_task_environment_settings,
+                                         run_elevated=start_task_run_elevated,
+                                         wait_for_success=start_task_wait_for_success,
+                                         max_task_retry_count=start_task_max_task_retry_count)
     return _handle_batch_exception(action)
 
 

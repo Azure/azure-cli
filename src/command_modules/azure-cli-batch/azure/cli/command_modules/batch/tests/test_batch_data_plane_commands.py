@@ -24,8 +24,7 @@ class BatchCertificateScenarioTest(BatchDataPlaneTestBase):
 
     def body(self):
         # test create certificate with default set
-        self.cmd('batch certificate create --thumbprint {} '
-                 '--thumbprint-algorithm sha1 --cert-file "{}"'.
+        self.cmd('batch certificate create --thumbprint {} --file "{}"'.
                  format(self.cert_thumbprint, self.create_cert_file_path),
                  checks=[
                      JMESPathCheck('thumbprint', self.cert_thumbprint),
@@ -39,10 +38,10 @@ class BatchCertificateScenarioTest(BatchDataPlaneTestBase):
             JMESPathCheck('[0].thumbprint', self.cert_thumbprint),
         ])
 
-        self.cmd("batch certificate delete --thumbprint {} --thumbprint-algorithm sha1 --force".
+        self.cmd("batch certificate delete --thumbprint {} --force".
                  format(self.cert_thumbprint))
 
-        self.cmd('batch certificate show --thumbprint {} --thumbprint-algorithm sha1'.
+        self.cmd('batch certificate show --thumbprint {}'.
                  format(self.cert_thumbprint),
                  checks=[
                      JMESPathCheck('thumbprint', self.cert_thumbprint),
@@ -105,7 +104,7 @@ class BatchPoolScenarioTest(BatchDataPlaneTestBase):
                          JMESPathCheck('id', self.create_pool_id),
                          JMESPathCheck('startTask.commandLine', "cmd /c echo updated")])
 
-        self.cmd('batch pool reset --pool-id {} --command-line hostname --metadata a=b c=d'.
+        self.cmd('batch pool reset --pool-id {} --start-task-command-line hostname --metadata a=b c=d'.
                  format(self.create_pool_id),
                  checks=[JMESPathCheck('allocationState', 'steady'),
                          JMESPathCheck('id', self.create_pool_id),

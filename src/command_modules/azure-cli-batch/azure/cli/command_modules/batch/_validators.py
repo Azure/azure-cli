@@ -77,6 +77,30 @@ def certificate_reference_format(value):
     return cert
 
 
+def task_id_ranges_format(value):
+    """Space separated number ranges in 'start-end' format."""
+    try:
+        start, end = [int(i) for i in value.split('-')]
+    except ValueError:
+        message = ("Incorrectly formatted task ID range. "
+                   "Argmuent values should be numbers in the format 'start-end'")
+        raise ValueError(message)
+    else:
+        return {'start': start, 'end': end}
+
+
+def resource_file_format(value):
+    """Space separated resource references in filename=blobsource format."""
+    try:
+        file_name, blob_source = value.split('=')
+    except ValueError:
+        message = ("Incorrectly formatted resource reference. "
+                   "Argmuent values should be in the format filename=blobsource")
+        raise ValueError(message)
+    else:
+        return {'file_path': file_name, 'blob_source': blob_source}
+
+
 # COMMAND NAMESPACE VALIDATORS
 
 def validate_required_parameter(ns, parser):
@@ -138,10 +162,10 @@ def validate_json_file(namespace):
 def validate_cert_file(namespace):
     """Validate the give cert file existing"""
     try:
-        with open(namespace.cert_file, "rb"):
+        with open(namespace.file, "rb"):
             pass
     except EnvironmentError:
-        raise ValueError("Cannot access certificate file: " + namespace.cert_file)
+        raise ValueError("Cannot access certificate file: " + namespace.file)
 
 
 def validate_options(namespace):
@@ -236,3 +260,10 @@ def validate_pool_settings(ns, parser):
                        "Please swap for the equivalent: Standard_A1 (small), Standard_A2 "
                        "(medium), Standard_A3 (large), or Standard_A4 (extra large).")
             raise ValueError(message)
+
+
+def validate_cert_settings(ns):
+    """Custom parsing for certificate commands - adds default thumbprint
+    algorithm.
+    """
+    ns.thumbprint_algorithm = 'sha1'

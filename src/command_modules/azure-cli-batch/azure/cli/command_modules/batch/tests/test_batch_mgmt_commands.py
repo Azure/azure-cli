@@ -180,7 +180,8 @@ class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
                          JMESPathCheck('packages[0].state', 'active')])
 
         # test batch applcation delete
-        self.cmd('batch application package delete -g {} -n {} --application-id {} --version {}'.
+        self.cmd('batch application package delete -g {} -n {} --application-id {} --version {} --force'.  # pylint: disable=line-too-long
                  format(rg, name, aname, ver))
-        self.cmd('batch application delete -g {} -n {} --application-id {}'.format(rg, name, aname))
+        self.cmd('batch application delete -g {} -n {} --application-id {} --force'.
+                 format(rg, name, aname))
         self.cmd('batch application list -g {} -n {}'.format(rg, name), checks=NoneCheck())

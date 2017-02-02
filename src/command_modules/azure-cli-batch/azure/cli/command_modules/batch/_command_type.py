@@ -33,7 +33,10 @@ IGNORE_OPTIONS = {  # Options parameters that should not be exposed as arguments
     'return_client_request_id',
     'max_results'
 }
-IGNORE_PARAMETERS = {'callback'}
+IGNORE_PARAMETERS = [
+    'callback',
+    'thumbprint_algorithm'
+]
 FLATTEN_OPTIONS = {  # Options to be flattened into multiple arguments.
     'ocp_range': {'start_range': "The byte range to be retrieved. "
                                  "If not set the file will be retrieved from the beginning.",
@@ -53,6 +56,22 @@ BASIC_TYPES = {  # Argument types that should not be flattened.
     'decimal',
     'unix-time'
 }
+QUALIFIED_PROPERTIES = [  # Common argument names the should always be prefixed by their context
+    'id',
+    'display_name',
+    'command_line',
+    'environment_settings',
+    'run_elevated',
+    'wait_for_success',
+    'max_task_retry_count',
+    'constraints_max_task_retry_count',
+    'max_wall_clock_time',
+    'constraints_max_wall_clock_time',
+    'retention_time',
+    'constraints_retention_time',
+    'application_package_references',
+    'resource_files'
+]
 
 
 def _load_model(name):
@@ -71,6 +90,22 @@ def _load_model(name):
     return model
 
 
+def _join_prefix(prefix, name):
+    """Filter certain superflous parameter name suffixes
+    from argument names.
+    :param str prefix: The potential prefix that will be filtered.
+    :param str name: The arg name to be prefixed.
+    :returns: Combined name with prefix.
+    """
+    if prefix.endswith("_specification"):
+        return prefix[:-14] + "_" + name
+    elif prefix.endswith("_patch_parameter"):
+        return prefix[:-16] + "_" + name
+    elif prefix.endswith("_update_parameter"):
+        return prefix[:-17] + "_" + name
+    return prefix + "_" + name
+
+
 def _build_prefix(arg, param, path):
     """Recursively build a command line argument prefix from the request
     parameter object to avoid name conflicts.
@@ -81,11 +116,11 @@ def _build_prefix(arg, param, path):
     prefix_list = path.split('.')
     if len(prefix_list) == 1:
         return arg
-    resolved_name = prefix_list[0] + "_" + param
+    resolved_name = _join_prefix(prefix_list[0], param)
     if arg == resolved_name:
         return arg
     for prefix in prefix_list[1:]:
-        new_name = prefix + "_" + param
+        new_name = _join_prefix(prefix, param)
         if new_name == arg:
             return resolved_name
         resolved_name = new_name
@@ -160,8 +195,14 @@ def group_title(path):
     :param str path: The complex object path of the argument.
     :returns: str
     """
+    def filter(group):
+        for suffix in ["_patch_parameter", "_update_parameter", "_parameter"]:
+            if group.endswith(suffix):
+                group = group[:0 - len(suffix)]
+        return group
     group_path = path.split('.')
-    title = ' : '.join(group_path)
+    group_path = list(map(filter, group_path))
+    title = ': '.join(group_path)
     for group in group_path:
         title = title.replace(group, " ".join([n.title() for n in group.split('_')]), 1)
     return title
@@ -200,6 +241,26 @@ class BatchArgumentTree(object):
         """Iterate over arguments"""
         for arg, details in self._arg_tree.items():
             yield arg, details
+
+    def _is_bool(self, name):
+        """Whether argument value is a boolean"""
+        return self._arg_tree[name]['type'] == 'bool'
+
+    def _is_list(self, name):
+        """Whether argument value is a list"""
+        return self._arg_tree[name]['type'].startswith('[')
+
+    def _is_datetime(self, name):
+        """Whether argument value is a timestamp"""
+        return self._arg_tree[name]['type'] in ['iso-8601', 'rfc-1123']
+
+    def _is_duration(self, name):
+        """Whether argument is value is a duration"""
+        return self._arg_tree[name]['type'] == 'duration'
+
+    def _help(self, name, text):
+        """Append phrase to existing help text"""
+        self._arg_tree[name]['options']['help'] += ' ' + text
 
     def _get_children(self, group):
         """Find all the arguments under to a specific complex argument group.
@@ -302,16 +363,20 @@ class BatchArgumentTree(object):
         objects.
         """
         for name, details in self._arg_tree.items():
-            if details['type'] == 'bool':
-                details['options']['action'] = 'store_true'
-                details['options']['help'] += \
-                    ' True if flag present, otherwise default will be used.'
-            elif details['type'].startswith('['):
+            if self._is_bool(name):
+                if self._request_param['name'].endswith('patch_parameter'):
+                    self._help(name, "Specify either 'true' or 'false' to update the property.")
+                else:
+                    details['options']['action'] = 'store_true'
+                    self._help(name, "True if flag present, otherwise defaults to False.")
+            elif self._is_list(name):
                 details['options']['nargs'] = '+'
-            elif details['type'] in ['iso-8601', 'rfc-1123']:
+            elif self._is_datetime(name):
                 details['options']['type'] = validators.datetime_format
-            elif details['type'] == 'duration':
+                self._help(name, "Expected format is an ISO-8601 timestamp.")
+            elif self._is_duration(name):
                 details['options']['type'] = validators.duration_format
+                self._help(name, "Expected format is an ISO-8601 duration.")
             yield (name, CliCommandArgument(dest=name, **details['options']))
 
     def existing(self, name):
@@ -409,8 +474,6 @@ class AzureBatchDataPlaneCommand(object):
 
         # The name of the request options parameter
         self._options_param = format_options_name(operation)
-        # The name of the group for options arguments
-        self._options_group = group_title(self._options_param)
         # Arguments used for request options
         self._options_attrs = []
         # The loaded options model to populate for the request
@@ -575,7 +638,7 @@ class AzureBatchDataPlaneCommand(object):
         for param in [o for o in self._options_attrs if o not in IGNORE_OPTIONS]:
             options = {}
             options['required'] = False
-            options['arg_group'] = self._options_group
+            options['arg_group'] = 'Pre-condition and Query'
             if param in ['if_modified_since', 'if_unmodified_since']:
                 options['type'] = validators.datetime_format
             if param in FLATTEN_OPTIONS:
@@ -610,9 +673,9 @@ class AzureBatchDataPlaneCommand(object):
             new = _build_prefix(arg, param, path)
             options['options_list'] = [arg_name(new)]
             self._resolve_conflict(new, param, path, options, typestr, dependencies, conflicting)
-        elif arg in conflicting:
+        elif arg in conflicting or arg in QUALIFIED_PROPERTIES:
             new = _build_prefix(arg, param, path)
-            if new in conflicting and '.' not in path:
+            if new in conflicting or new in QUALIFIED_PROPERTIES and '.' not in path:
                 self.parser.queue_argument(arg, path, param, options, typestr, dependencies)
             else:
                 options['options_list'] = [arg_name(new)]
@@ -691,6 +754,20 @@ class AzureBatchDataPlaneCommand(object):
             if arg[0] == self._options_param:
                 for option_arg in self._process_options():
                     yield option_arg
+            elif arg_type.startswith("str or"):
+                docstring = find_param_help(handler, arg[0])
+                choices = []
+                values_index = docstring.find(' Possible values include')
+                if values_index >= 0:
+                    choices = docstring[values_index + 25:].split(', ')
+                    choices = [c for c in choices if c != "'unmapped'"]
+                    docstring = docstring[0:values_index]
+                yield (arg[0], CliCommandArgument(arg[0],
+                                                  options_list=[arg_name(arg[0])],
+                                                  required=False,
+                                                  default=None,
+                                                  choices=choices,
+                                                  help=docstring))
             elif arg_type.startswith(":class:"):  # TODO: could add handling for enums
                 param_type = class_name(arg_type)
                 self.parser.set_request_param(arg[0], param_type)
@@ -699,10 +776,9 @@ class AzureBatchDataPlaneCommand(object):
                 for flattened_arg in self.parser.compile_args():
                     yield flattened_arg
                 param = 'json_file'
-                json_class = class_name(arg_type).split('.')[-1]
-                docstring = "A file containing the {} object in JSON format. " \
-                            "If this parameter is specified, all {} arguments" \
-                            " are ignored.".format(json_class, group_title(arg[0]))
+                docstring = "A file containing the {} specification in JSON format. " \
+                            "If this parameter is specified, all '{} Arguments'" \
+                            " are ignored.".format(arg[0].replace('_', ' '), group_title(arg[0]))
                 yield (param, CliCommandArgument(param,
                                                  options_list=[arg_name(param)],
                                                  required=False,

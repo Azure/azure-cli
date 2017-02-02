@@ -29,7 +29,7 @@ helps['batch account create'] = """
 
 helps['batch account set'] = """
     type: command
-    short-summary: Updates the properties of the specified Batch account.
+    short-summary: Updates the properties of the specified Batch account. Properties that are not specified remain unchanged.
 """
 
 helps['batch account autostorage-keys'] = """
@@ -49,12 +49,22 @@ helps['batch application'] = """
 
 helps['batch application set'] = """
     type: command
-    short-summary: Updates the properties of the specified application.
+    short-summary: Updates the properties of the specified application. Properties that are not specified remain unchanged.
 """
 
 helps['batch application package'] = """
     type: group
     short-summary: Commands to manage your Batch application packages.
+"""
+
+helps['batch application package create'] = """
+    type: command
+    short-summary: Creates an application package record and attempts to activate it.
+"""
+
+helps['batch application package activate'] = """
+    type: command
+    short-summary: Activates the specified application package. This step is unnecessary if the package has already been successfully activated by the 'create' command.
 """
 
 helps['batch application summary'] = """
@@ -92,24 +102,29 @@ helps['batch node file'] = """
     short-summary: Commands to manage your Batch compute node files.
 """
 
+helps['batch node file download'] = """
+    type: command
+    short-summary: Downloads the content of the specified node file.
+"""
+
 helps['batch job'] = """
     type: group
     short-summary: Commands to manage your Batch jobs.
 """
 
-helps['batch job all-stats'] = """
+helps['batch job all-statistics'] = """
     type: group
-    short-summary: Commands to manage the statistics of all the jobs under your Batch account
+    short-summary: Commands to view statistics of all the jobs under your Batch account
 """
 
-helps['batch job all-stats show'] = """
+helps['batch job all-statistics show'] = """
     type: command
     short-summary: Gets lifetime summary statistics for all of the jobs in the specified account. Statistics are aggregated across all jobs that have ever existed in the account, from account creation to the last update time of the statistics.
 """
 
 helps['batch job prep-release-status'] = """
     type: group
-    short-summary: Commands to manage the status of your job preparation and release tasks.
+    short-summary: Commands to view the status of your job preparation and release tasks.
 """
 
 helps['batch job-schedule'] = """
@@ -127,9 +142,9 @@ helps['batch node user create'] = """
     short-summary: Adds a user account to the specified compute node.
 """
 
-helps['batch node user set'] = """
+helps['batch node user reset'] = """
     type: command
-    short-summary: Updates the properties of a user account on the specified compute node.
+    short-summary: Updates the properties of a user account on the specified compute node. All updatable properties are replaced with the values specified or reset if unspecified.
 """
 
 helps['batch node'] = """
@@ -139,17 +154,17 @@ helps['batch node'] = """
 
 helps['batch node remote-login-settings'] = """
     type: group
-    short-summary: Commands to manage the remote login settings for a Batch compute node.
+    short-summary: Commands to retrieve the remote login settings for a Batch compute node.
 """
 
 helps['batch node remote-desktop'] = """
     type: group
-    short-summary: Commands to manage the remote desktop protocol for a Batch compute node.
+    short-summary: Commands to retrieve the remote desktop protocol for a Batch compute node.
 """
 
 helps['batch node scheduling'] = """
     type: group
-    short-summary: Commands to manage the scheduling property for a Batch compute node.
+    short-summary: Commands to manage task scheduling for a Batch compute node.
 """
 
 helps['batch pool'] = """
@@ -167,24 +182,24 @@ helps['batch pool autoscale'] = """
     short-summary: Commands to manage automatic scaling of your Batch pools.
 """
 
-helps['batch pool all-stats'] = """
+helps['batch pool all-statistics'] = """
     type: group
-    short-summary: Commands to manage statistics of all pools under your Batch account.
+    short-summary: Commands to view statistics of all pools under your Batch account.
 """
 
-helps['batch pool all-stats show'] = """
+helps['batch pool all-statistics show'] = """
     type: command
     short-summary: Gets lifetime summary statistics for all of the pools in the specified account. Statistics are aggregated across all pools that have ever existed in the account, from account creation to the last update time of the statistics.
 """
 
 helps['batch pool usage-metrics'] = """
     type: group
-    short-summary: Commands to manage usage metrics of your Batch pools.
+    short-summary: Commands to view usage metrics of your Batch pools.
 """
 
 helps['batch pool node-agent-skus'] = """
     type: group
-    short-summary: Commands to manage node agent skus of pools using a Virtual Machine Configuration.
+    short-summary: Commands to retrieve node agent SKUs of pools using a Virtual Machine Configuration.
 """
 
 helps['batch task'] = """
@@ -199,32 +214,32 @@ helps['batch task subtask'] = """
 
 helps['batch certificate create'] = """
     type: command
-    short-summary: Add a certificate.
+    short-summary: Adds a certificate.
 """
 
 helps['batch certificate delete'] = """
     type: command
-    short-summary: Delete the specified Batch certificate.
+    short-summary: Deletes the specified Batch certificate.
 """
 
 helps['batch pool create'] = """
     type: command
-    short-summary: Create a Batch pool.
+    short-summary: Creates a pool in the specified account. When creating a pool, please chose arguments from either Cloud Services Configuration or Virtual Machine Configuration.
 """
 
 helps['batch pool set'] = """
     type: command
-    short-summary: Updates the properties of the specified pool. Properties that are not specified remain unchanged.
+    short-summary: Updates the properties of the specified pool. Properties can be updated independently, but please note that an updated property in a sub-group (i.e. 'start task') will result in all properties of that group being reset.
 """
 
 helps['batch pool reset'] = """
     type: command
-    short-summary: Updates the properties of the specified pool. All updatable properties are replaced with the values specified or cleared if unspecified.
+    short-summary: Updates the properties of the specified pool. All updatable properties are replaced with the values specified or cleared/defaulted if unspecified.
 """
 
 helps['batch pool resize'] = """
     type: command
-    short-summary: Resize (or stop resizing) the Batch pool.
+    short-summary: Resizes (or stops resizing) the Batch pool.
 """
 
 helps['batch job create'] = """
@@ -239,12 +254,12 @@ helps['batch job list'] = """
 
 helps['batch job set'] = """
     type: command
-    short-summary: Patch the properties of a job.
+    short-summary: Updates the properties of a job. Properties can be updated independently, but please note that an updated property in a sub-group (i.e. 'constraints' and 'pool info') will result in all properties of that group being reset.
 """
 
 helps['batch job reset'] = """
     type: command
-    short-summary: Update the properties of a job.
+    short-summary: Updates the properties of a job. All updatable properties are replaced with the values specified or cleared/defaulted if unspecified.
 """
 
 helps['batch job-schedule create'] = """
@@ -254,15 +269,20 @@ helps['batch job-schedule create'] = """
 
 helps['batch job-schedule set'] = """
     type: command
-    short-summary: Patch the properties of the specified job schedule.
+    short-summary: Updates the properties of the specified job schedule. You can independently update the 'schedule' and/or the 'job specification', but note that any change to either of these entities will reset all properties in that entity.
 """
 
 helps['batch job-schedule reset'] = """
     type: command
-    short-summary: Update the properties of the specified job schedule.
+    short-summary: Updates the properties of the specified job schedule. All updatable properties are replaced with the values specified or cleared if unspecified. An updated job-specification will only apply to new jobs.
 """
 
 helps['batch task create'] = """
     type: command
-    short-summary: Create a single Batch task or multiple Batch tasks.
+    short-summary: Creates a single Batch task or multiple Batch tasks.
+"""
+
+helps['batch task reset'] = """
+    type: command
+    short-summary: Updates the properties of the specified task. All updatable properties are replaced with the values specified or reset if unspecified.
 """
