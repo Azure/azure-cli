@@ -1,57 +1,50 @@
-; Missing class
-noclass A 1.2.3.4
-	A 2.3.4.5
+; This zone file assumes the zone name is 'example.com'
 
-noclass CNAME bar.com
+; Before setting $ORIGIN, create a couple of records to check the default
+; $ORIGIN matches the zone name. Note, first record must be SOA.
+@ IN SOA ns1.example.com. hostmaster (
+			2003080800 ; se = serial number
+			12h ; ref = refresh
+			15m ; ret = update retry
+			3w ; ex = expiry
+			3h ; min = minimum
+			) ; Should give email ‘hostmaster.example.com.’
 
-; Multi-string TXT records
-txt1 TXT "string 1 only"
-txt2 TXT "string1" "string2" ; Concatenate to “string1string2” (no separator)
-txt3 TXT ("this is a very long string with lots of text, in fact is has 74 characters"
-	  "this is a very long string with lots of text, in fact is has 74 characters"
- 	  "this is a very long string with lots of text, in fact is has 74 characters"
-	  "this is a very long string with lots of text, in fact is has 74 characters"
-	 ) ; Concatentate, and divide into 255 character strings
+default IN A 0.1.2.3 ; Should give default.example.com. A 0.1.2.3
+tc IN CNAME test ; Should give tc.example.com. CNAME test.example.com.
 
-txt3 TXT "string;string;string" ; String with ';' inside
+; Test that $ORIGIN is substituted into non-fully qualified names
+$ORIGIN example.com.
+@ IN A 1.2.3.4 ; fqdn = example.com.
+www IN A 2.3.4.5 ; fqdn = www.example.com.
 
-;SPF
-spf 100 SPF "this is an SPF record! Convert to TXT on import"
-@ 200 TXT "this is another SPF, this time as TXT..."
+; Check both record names and RDATA (across record types as appropriate)
+test-cname IN CNAME r1 ; Should give test-cname.example.com. CNAME r1.example.com.
+test-mx IN MX 10 m1 ; Should give test-mx.example.com MX 10 m1.example.com.
+test-ns IN NS ns1 ; Should give test-ns.example.com NS ns1.example.com.
+test-srv IN SRV 1 2 3 srv1 ; Should give test-srv.example.com SRV 1 2 3 srv1.example.com.
 
-; PTR
-160.1 3600 PTR foo.com.
-	   PTR bar.com. ; another record in the same record set
+; And repeat the above, this time with fully-qualified targets
+test-cname2 IN CNAME r1. ; Should give test-cname.example.com. CNAME r1.
+test-mx2 IN MX 10 m1. ; Should give test-mx.example.com MX 10 m1.
+test-ns2 IN NS ns1. ; Should give test-ns.example.com NS ns1.
+test-srv2 IN SRV 1 2 3 srv1. ; Should give test-srv.example.com SRV 1 2 3 srv1.
 
-160.2 PTR foo.com.
-160.2 PTR bar.com. ; another record in the same record set
+; Check that changes to $ORIGIN are picked up
+$ORIGIN subzone.example.com.
+@ IN A 3.4.5.6 ; fqdn = subzone.example.com.
+www IN A 4.5.6.7 ; fqdn = www.subzone.example.com.
+test-cname IN CNAME r1 ; Should give test-cname.subzone.example.com.
 
-160.3 PTR foo.com.
-      PTR bar.com.
+; CNAME r1.subzone.example.com.
+; Check $ORIGIN from outside zone is permitted (but not for record names)
+; Also check that $ORIGIN without ‘.’ terminator has one added (and a warning)
+$ORIGIN foo.com
+record.example.com. IN CNAME bar ; Should give record.example.com. CNAME bar.foo.com.
 
-; semicolon and string tests
-; single string, foobar
-t1 TXT foobar
-t2 TXT "foobar"
+; Fully-qualified name that doesn't match zone name should fail
+fail IN A 5.6.7.8 ; fail.foo.com. is not in the zone ‘example.com.’
+test. IN A 6.7.8.9 ; 'test.' is not in the zone ‘example.com.’
 
-; two strings
-t3 TXT "foo" "bar"
-
-; semicolon in string value
-t4 TXT "foo;bar"
-t5 TXT foo\;bar
-t6 TXT "foo\;bar"
-
-; string with quotes
-t7 TXT "\"quoted string\""
-
-; error
-t8 TXT foo bar
-
-; multi-line
-t9 TXT ( "foo"
-	 "barr" )
-
-; with comments
-t10 TXT "foo bar" ; comment
-t11 TXT foobar ; comment
+; But a fully-qualified name that is within the zone should work OK
+test.example.com. IN A 7.8.9.0 ; Should work OK

@@ -9,3 +9,101 @@ $ORIGIN example.com.
 			3w ; ex = expiry
 			3h ; min = minimum
 			) ; Should have default TTL of 3600
+
+; Override default TTL on auth NS records
+@ 1d IN NS ns1.com. ; Record RDATA should be ignored but TTL should be used
+
+; Check each type
+test-a IN A 1.2.3.4
+test-aaaa IN AAAA 2001:cafe:130::100
+test-cname IN CNAME target.com.
+test-mx IN MX 10 mail.com.
+test-ns IN NS ns1.com.
+_sip._tcp.test-srv IN SRV 1 2 3 target.com.
+test-txt IN TXT "string 1" ; Note, text is enclosed in quotes
+
+; Check that missing name means re-use previous name
+d1 IN A 12.1.2.3
+   IN A 12.2.3.4 ; Same record set 'd1.example.com.'
+   IN NS hood.com. ; New record set, same name but type == NS
+   IN TXT "fishfishfish" ; New record set, same name but type == TXT
+
+$ORIGIN d1.example.com.
+@ IN A 12.3.4.5 ; Same record set d1 as above
+  IN A 12.4.5.6 ; Same record set again
+
+; Check for non-adjacent records in same record set
+$ORIGIN example.com.
+f1 IN A 11.1.2.3
+f2 IN A 11.2.3.4
+f1 IN A 11.2.3.3 ; Same record set as f1 above
+
+$ORIGIN f2.example.com.
+@ IN A 11.5.6.7 ; Same record set as f2 above
+
+; Multi-line records (see also SOA example above)
+$ORIGIN example.com.
+_sip._tcp IN SRV ( 10
+		   20
+		   30
+		   foo.com.) ; SRV with priority 10, weight 20, port 30, target foo.com.
+mail IN MX (100
+	    mail.test.com.) ; MX record
+
+; Missing class
+noclass A 1.2.3.4
+	A 2.3.4.5
+
+noclass CNAME bar.com
+
+; Multi-string TXT records
+txt1 TXT "string 1 only"
+txt2 TXT "string1" "string2" ; Concatenate to “string1string2” (no separator)
+txt3 TXT ("this is a very long string with lots of text, in fact is has 74 characters"
+	  "this is a very long string with lots of text, in fact is has 74 characters"
+ 	  "this is a very long string with lots of text, in fact is has 74 characters"
+	  "this is a very long string with lots of text, in fact is has 74 characters"
+	 ) ; Concatentate, and divide into 255 character strings
+
+txt3 TXT "string;string;string" ; String with ';' inside
+
+;SPF
+spf 100 SPF "this is an SPF record! Convert to TXT on import"
+@ 200 TXT "this is another SPF, this time as TXT..."
+
+; PTR
+160.1 3600 PTR foo.com.
+	   PTR bar.com. ; another record in the same record set
+
+160.2 PTR foo.com.
+160.2 PTR bar.com. ; another record in the same record set
+
+160.3 PTR foo.com.
+      PTR bar.com.
+
+; semicolon and string tests
+; single string, foobar
+t1 TXT foobar
+t2 TXT "foobar"
+
+; two strings
+t3 TXT "foo" "bar"
+
+; semicolon in string value
+t4 TXT "foo;bar"
+t5 TXT foo\;bar
+t6 TXT "foo\;bar"
+
+; string with quotes
+t7 TXT "\"quoted string\""
+
+; error
+t8 TXT foo bar
+
+; multi-line
+t9 TXT ( "foo"
+	 "barr" )
+
+; with comments
+t10 TXT "foo bar" ; comment
+t11 TXT foobar ; comment

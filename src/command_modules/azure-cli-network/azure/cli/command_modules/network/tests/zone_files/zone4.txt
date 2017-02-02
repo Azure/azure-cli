@@ -1,39 +1,62 @@
-; Override default TTL on auth NS records
-@ 1d IN NS ns1.com. ; Record RDATA should be ignored but TTL should be used
+; This zone file assumes the zone name is 'example.com'
+; Note, first record must be SOA.
 
-; Check each type
-test-a IN A 1.2.3.4
-test-aaaa IN AAAA 2001:cafe:130::100
-test-cname IN CNAME target.com.
-test-mx IN MX 10 mail.com.
-test-ns IN NS ns1.com.
-_sip._tcp.test-srv IN SRV 1 2 3 target.com.
-test-txt IN TXT "string 1" ; Note, text is enclosed in quotes
+@ IN SOA ns1.example.com. hostmaster (
+			2003080800 ; se = serial number
+			12h ; ref = refresh
+			15m ; ret = update retry
+			3w ; ex = expiry
+			3h ; min = minimum
+			) ; Should have default TTL of 3600
 
-; Check that missing name means re-use previous name
-d1 IN A 12.1.2.3
-   IN A 12.2.3.4 ; Same record set 'd1.example.com.'
-   IN NS hood.com. ; New record set, same name but type == NS
-   IN TXT "fishfishfish" ; New record set, same name but type == TXT
+100 IN NS ns1 ; Auth NS record should import TTL only
 
-$ORIGIN d1.example.com.
-@ IN A 12.3.4.5 ; Same record set d1 as above
-  IN A 12.4.5.6 ; Same record set again
+; Check $TTL is observed
+$TTL 300
+ttl-300 IN A 10.1.2.3 ; Should have TTL 300
 
-; Check for non-adjacent records in same record set
-$ORIGIN example.com.
-f1 IN A 11.1.2.3
-f2 IN A 11.2.3.4
-f1 IN A 11.2.3.3 ; Same record set as f1 above
+$TTL 0
+ttl-0 IN A 10.2.3.4 ; Should have TTL 0
 
-$ORIGIN f2.example.com.
-@ IN A 11.5.6.7 ; Same record set as f2 above
+; Check $TTL can be overridden
+ttl-60 60 IN A 10.3.4.5 ; Should have TTL 60
 
-; Multi-line records (see also SOA example above)
-$ORIGIN example.com.
-_sip._tcp IN SRV ( 10
-		   20
-		   30
-		   foo.com.) ; SRV with priority 10, weight 20, port 30, target foo.com.
-mail IN MX (100
-	    mail.test.com.) ; MX record
+; Check various $TTL formats, cases
+$TTL 1w
+ttl-1w IN A 10.3.4.5 ; Should have TTL 1 week (604800)
+
+$TTL 1D
+ttl-1d IN A 10.7.8.9 ; Should have TTL 1 day (86400)
+
+$TTL 1h
+ttl-1h IN A 10.4.5.6 ; Should have TTL 1 hour (3600)
+
+$TTL 99S
+ttl-99s IN A 10.5.6.7 ; Should have TTL 99 seconds
+
+$TTL 100
+ttl-100 IN A 10.6.7.8 ; Should have TTL 100 seconds
+
+$TTL 6m
+ttl-6m IN A 10.8.9.0 ; Should have TTL 6 minutes (360)
+
+$TTL 9d ; Old value 1W2d3h4M5 (694876)
+ttl-mix IN A 10.8.9.0 ; Should have TTL of 777600
+
+; Now repeat, specifying TTL on records instead of using $TTL
+xttl-1w IN A 10.3.4.5 ; Should have TTL 1 week (604800)
+xttl-1d 1D IN A 10.7.8.9 ; Should have TTL 1 day (86400)
+xttl-1h 1h IN A 10.4.5.6 ; Should have TTL 1 hour (3600)
+xttl-99s 99s IN A 10.5.6.7 ; Should have TTL 99 seconds
+xttl-100 100 IN A 10.6.7.8 ; Should have TTL 100 seconds
+xttl-6m 6M IN A 10.8.9.0 ; Should have TTL 6 minutes (360)
+xttl-mix 9d IN A 10.9.9.9 ; Should have TTL of 777600
+
+; Check for conflicting TTLs on records with the same name
+c1 10 IN A 11.1.2.3
+c1 20 IN A 11.2.3.3 ; Same record set as c1 above, should use TTL 10 and give warning
+c2 10 IN A 11.2.3.4
+
+$ORIGIN c2.example.com.
+$TTL 5
+@ IN A 11.5.6.7 ; Same record set as c2 above, should use TTL 5 and give warning

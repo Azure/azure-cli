@@ -1360,6 +1360,23 @@ def update_dns_record_set(instance, metadata=None):
     return instance
 
 
+def _type_to_property_name(key):
+
+    type_dict = {
+        'a': 'arecords',
+        'aaaa': 'aaaa_records',
+        'cname': 'cname_record',
+        'mx': 'mx_records',
+        'ns': 'ns_records',
+        'ptr': 'ptr_records',
+        'soa': 'soa_record',
+        'spf': 'txt_records',
+        'srv': 'srv_records',
+        'txt': 'txt_records',
+    }
+    return type_dict[key.lower()]
+
+
 def export_zone(resource_group_name, zone_name, file_name=None):
     from time import localtime, strftime
 
@@ -1433,21 +1450,6 @@ def export_zone(resource_group_name, zone_name, file_name=None):
     else:
         print(zone_file_text)
 
-def _type_to_property_name(key):
-
-    type_dict = {
-        'a': 'arecords',
-        'aaaa': 'aaaa_records',
-        'cname': 'cname_record',
-        'mx': 'mx_records',
-        'ns': 'ns_records',
-        'ptr': 'ptr_records',
-        'soa': 'soa_record',
-        'spf': 'txt_records',
-        'srv': 'srv_records',
-        'txt': 'txt_records',
-    }
-    return type_dict[key]
 
 def _build_record(data):
 
@@ -1484,25 +1486,23 @@ def import_zone(resource_group_name, zone_name, file_name):
     with open(file_name) as f:
         file_text = f.read()
     zone_obj = parse_zone_file(file_text)
-    zone_origin = zone_obj.get('$origin', None)
-    default_ttl = zone_obj.get('$ttl', 3600)
     if zone_origin and zone_name != zone_origin.rstrip('.'):
         raise CLIError('Zone file origin "{}" does not match zone name "{}"'
                        .format(zone_origin, zone_name))
 
     record_sets = {}
-    for entry in zone_obj['records']:
-        record_set_type = entry['type'].lower()
-        record_set_name = entry['name']
-        record_set_ttl = entry.get('ttl', default_ttl)
-        record_set_key = '{}{}'.format(record_set_name.lower(), record_set_type)
+    for record_set_name in zone_obj:
+        for record_set_type in zone_obj[record_set_name]:
+            for entry in zone_obj[record_set_name][record_set_type]:
+                record_set_ttl = entry.get('ttl', 3600)
+                record_set_key = '{}{}'.format(record_set_name.lower(), record_set_type)
 
-        record = _build_record(entry)
-        record_set = record_sets.get(record_set_key, None)
-        if not record_set:
-            record_set = RecordSet(name=record_set_name, type=record_set_type, ttl=record_set_ttl)
-            record_sets[record_set_key] = record_set
-        _add_record(record_set, record, record_set_type, is_list=record_set_type not in ['soa', 'cname'])
+                record = _build_record(entry)
+                record_set = record_sets.get(record_set_key, None)
+                if not record_set:
+                    record_set = RecordSet(name=record_set_name, type=record_set_type, ttl=record_set_ttl)
+                    record_sets[record_set_key] = record_set
+                _add_record(record_set, record, record_set_type, is_list=record_set_type.lower() not in ['soa', 'cname'])
 
     total_records = 0
     for rs in record_sets.values():
@@ -1514,19 +1514,23 @@ def import_zone(resource_group_name, zone_name, file_name):
     print('TOTAL: {}'.format(total_records))
 
     client = get_mgmt_service_client(DnsManagementClient)
-    client.zones.create_or_update(resource_group_name, zone_name, Zone('global'))
+    zone = client.zones.create_or_update(resource_group_name, zone_name, Zone('global'))
     for rs in record_sets.values():
 
-        # special case for SPF records
-        rs.type = 'txt' if rs.type == 'spf' else rs.type
+        rs.type = rs.type.lower()
 
         try:
             record_count = len(getattr(rs, _type_to_property_name(rs.type)))
         except TypeError:
             record_count = 1
-        if rs.name == '@' and rs.type in ['soa', 'ns']:
-            print("Skipping {} records of type '{}' and name '{}'".format(record_count, rs.type, rs.name))
-            continue
+        if rs.name == '@' and rs.type == 'soa':
+            root_soa = client.record_sets.get(resource_group_name, zone_name, '@', 'SOA')
+            rs.soa_record.host = root_soa.soa_record.host
+        elif rs.name == '@' and rs.type == 'ns':
+            root_ns = client.record_sets.get(resource_group_name, zone_name, '@', 'NS')
+            root_ns.ttl = rs.ttl
+            rs = root_ns
+            rs.type = rs.type.rsplit('/', 1)[1]
         print("Importing {} records of type '{}' and name '{}'".format(record_count, rs.type, rs.name))
         try:
             client.record_sets.create_or_update(resource_group_name, zone_name, rs.name, rs.type, rs)
