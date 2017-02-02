@@ -103,6 +103,6 @@ Execute P1 scenarios if a change is made in these areas
 ## P2: ERROR CASES ##
 Be aware of the P2 behavior, execute P2s occassionally or before an important event/ship cycle
 
-**windows VM with SSH**
+**Windows VM with SSH**
 
-**linux VM, no public key generated**
+**Linux VM, no public key generated**
