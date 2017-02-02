@@ -20,3 +20,4 @@ cli_command(__name__, 'documentdb check-name-exists', custom_path.format('Databa
 cli_command(__name__, 'documentdb delete', custom_path.format('DatabaseAccountsOperations.delete'), cf_documentdb)
 cli_command(__name__, 'documentdb failover-priority-change', custom_path.format('DatabaseAccountsOperations.failover_priority_change'), cf_documentdb)
 cli_command(__name__, 'documentdb create', 'azure.cli.command_modules.documentdb.custom#cli_documentdb_create', cf_documentdb)
+cli_command(__name__, 'documentdb update', 'azure.cli.command_modules.documentdb.custom#cli_documentdb_update', cf_documentdb)
