@@ -1,0 +1,241 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
+from azure.cli.core.help_files import helps #pylint: disable=unused-import
+
+#pylint: disable=line-too-long
+# TODO: Understand the pattern for help. Is it allowed to have ADLA and ADLS in the same "command"?
+helps['datalake'] = """
+    type: group
+    short-summary: Access to Data Lake Store and Analytics management
+    long-summary: If you don't have the datalake component installed, add it with `az component update --add datalake`
+"""
+
+helps['datalake analytics'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics accounts, jobs and catalogs. 
+"""
+
+helps['datalake analytics job'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics jobs. 
+"""
+
+helps['datalake analytics job submit'] = """
+    type: command
+    short-summary: submits the specified job to the specified Data Lake analytics account. 
+    parameters:
+        - name: --job-name
+          type: string
+          short-summary: 'Job name for the job'
+        - name: --script
+          type: string
+          short-summary: 'The script to submit'
+          long-summary: This can be either the script contents or a valid file path to a file containing the script
+        - name: --runtime-version
+          short-summary: 'The runtime version to use'
+          long-summary: This parameter is used for explicitly overwriting the default runtime. It should only be done if you know what you are doing.
+        - name: --degree-of-parallelism
+          short-summary: 'The degree of parallelism for the job'
+          long-summary: Higher values equate to more parallelism and will usually yield faster running jobs, at the cost of more AUs consumed by the job.
+        - name: --priority
+          short-summary: 'The priority of the job'
+          long-summary: Lower values increase the priority, with the lowest value being 1. This determines the order jobs are run in.
+
+"""
+
+helps['datalake analytics job cancel'] = """
+    type: command
+    short-summary: cancels the specified job in the specified Data Lake analytics account. 
+"""
+
+helps['datalake analytics job show'] = """
+    type: command
+    short-summary: Retrieves the specified job in the specified Data Lake analytics account. 
+"""
+
+helps['datalake analytics job list'] = """
+    type: command
+    short-summary: lists jobs in the specified Data Lake analytics account. 
+"""
+
+helps['datalake analytics catalog'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics catalogs. 
+"""
+
+helps['datalake analytics catalog item'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics catalog items. 
+"""
+
+helps['datalake analytics catalog item show'] = """
+    type: command
+    short-summary: Retrieves the specified catalog item. 
+"""
+
+helps['datalake analytics catalog item list'] = """
+    type: command
+    short-summary: Lists the items of the specified type at the specified catalog path. 
+"""
+
+helps['datalake analytics catalog credential'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics catalog credentials. 
+"""
+
+helps['datalake analytics catalog credential create'] = """
+    type: command
+    short-summary: Creates a new catalog credential for use with external data source. 
+"""
+
+helps['datalake analytics catalog credential update'] = """
+    type: command
+    short-summary: Updates the specified catalog credential for use with external data source. 
+"""
+
+helps['datalake analytics catalog credential show'] = """
+    type: command
+    short-summary: Retrieves the specified catalog credential. 
+"""
+
+helps['datalake analytics catalog credential list'] = """
+    type: command
+    short-summary: Lists the catalog credentials. 
+"""
+
+helps['datalake analytics catalog credential delete'] = """
+    type: command
+    short-summary: deletes the specified catalog credential. 
+"""
+
+helps['datalake analytics account'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics accounts. 
+"""
+
+helps['datalake analytics account create'] = """
+    type: command
+    short-summary: Creates a Data Lake Analytics account. 
+    parameters:
+        - name: --default-datalake-store
+          type: string
+          short-summary: 'The default Data Lake Store account to associate with the Data Lake Analytics account being created'
+        - name: --max-degree-of-parallelism
+          type: int
+          short-summary: 'The maximum supported degree of parallelism for this account.'
+        - name: --max-job-count
+          type: int
+          short-summary: 'The maximum supported jobs running under the account at the same time.'
+        - name: --query-store-retention
+          type: int
+          short-summary: 'The number of days that job metadata is retained.'
+"""
+
+helps['datalake analytics account update'] = """
+    type: command
+    short-summary: Updates a Data Lake Analytics account.
+    parameters:
+        - name: --max-degree-of-parallelism
+          type: int
+          short-summary: 'The maximum supported degree of parallelism for this account.'
+        - name: --max-job-count
+          type: int
+          short-summary: 'The maximum supported jobs running under the account at the same time.'
+        - name: --query-store-retention
+          type: int
+          short-summary: 'Optionally enable/disable existing firewall rules.'
+        - name: --firewall-state
+          type: string
+          short-summary: 'The number of days that job metadata is retained.'
+        - name: --allow-azure-ips
+          type: string
+          short-summary: 'Optionally allow/block Azure originating IPs through the firewall.'
+"""
+
+helps['datalake analytics account show'] = """
+    type: command
+    short-summary: Retrieves the specified Data Lake Analytics account. 
+"""
+
+helps['datalake analytics account list'] = """
+    type: command
+    short-summary: Lists Data Lake Analytics accounts in a subscription or a specific resource group.
+"""
+
+helps['datalake analytics account delete'] = """
+    type: command
+    short-summary: Deletes the specified Data Lake Analytics account. 
+"""
+
+helps['datalake analytics account firewall'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics account firewall rules. 
+"""
+
+helps['datalake analytics account firewall create'] = """
+    type: command
+    short-summary: Creates a firewall rule in the specified Data Lake Analytics account.
+    parameters:
+        - name: --end-ip-address
+          type: string
+          short-summary: 'The end of the valid ip range for the firewall rule.'
+        - name: --start-ip-address
+          type: string
+          short-summary: 'The start of the valid ip range for the firewall rule.'
+        - name: --firewall-rule-name
+          type: string
+          short-summary: 'The name of the firewall rule.'
+"""
+
+helps['datalake analytics account firewall update'] = """
+    type: command
+    short-summary: Updates a firewall rule in the specified Data Lake Analytics account. 
+"""
+
+helps['datalake analytics account firewall show'] = """
+    type: command
+    short-summary: Retrieves a firewall rule in the specified Data Lake Analytics account. 
+"""
+
+helps['datalake analytics account firewall list'] = """
+    type: command
+    short-summary: Lists firewall rules in the specified Data Lake Analytics account. 
+"""
+
+helps['datalake analytics account firewall delete'] = """
+    type: command
+    short-summary: Deletes a firewall rule in the specified Data Lake Analytics account. 
+"""
+
+helps['datalake analytics account data source'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics account data source. 
+"""
+
+helps['datalake analytics account data source add'] = """
+    type: command
+    short-summary: Adds a data source to the specified Data Lake Analytics account. 
+"""
+
+helps['datalake analytics account data source update'] = """
+    type: command
+    short-summary: Updates a data source in the specified Data Lake Analytics account. 
+"""
+
+helps['datalake analytics account data source show'] = """
+    type: command
+    short-summary: Retrieves a data source in the specified Data Lake Analytics account. 
+"""
+
+helps['datalake analytics account data source list'] = """
+    type: command
+    short-summary: Lists data sources in the specified Data Lake Analytics account. 
+"""
+
+helps['datalake analytics account data source delete'] = """
+    type: command
+    short-summary: Deletes a data source in the specified Data Lake Analytics account. 
+"""
