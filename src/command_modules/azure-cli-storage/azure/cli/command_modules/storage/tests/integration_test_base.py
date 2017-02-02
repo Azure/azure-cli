@@ -48,11 +48,11 @@ class StorageIntegrationTestBase(TestCase):
 
     @classmethod
     def generate_new_container_name(cls):
-        return 'blob-test-{}'.format(datetime.utcnow().strftime('%Y%m%d%H%M%S'))
+        return 'blob-test-{}'.format(datetime.utcnow().strftime('%Y%m%d%H%M%S%f'))
 
     @classmethod
     def generate_new_share_name(cls):
-        return 'file-test-{}'.format(datetime.utcnow().strftime('%Y%m%d%H%M%S'))
+        return 'file-test-{}'.format(datetime.utcnow().strftime('%Y%m%d%H%M%S%f'))
 
     @classmethod
     def _get_test_resource_file(cls, file_name):
