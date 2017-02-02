@@ -14,6 +14,7 @@
 from azure.mgmt.documentdb.models import (
     ConsistencyPolicy,
     DatabaseAccountCreateUpdateParameters,
+    Location
 )
 from azure.mgmt.documentdb.models.document_db_enums import DatabaseAccountKind
 
@@ -51,6 +52,57 @@ def cli_documentdb_create(client,
         ip_range_filter=ip_range_filter)
 
     async_docdb_create = client.database_accounts.create_or_update(resource_group_name, account_name, params)
-    docdb_account = async_docdb_create.result() # Will be empty, shouldn't
+    docdb_account = async_docdb_create.result()
+    docdb_account = client.database_accounts.get(resource_group_name, account_name) # Workaround
+    return docdb_account
+
+def cli_documentdb_update(client,
+                          resource_group_name,
+                          account_name,
+                          locations=[],
+                          default_consistency_level=None,
+                          max_staleness_prefix=None,
+                          max_interval=None,
+                          ip_range_filter=None):
+    # pylint:disable=line-too-long
+    """Update an existing Azure DocumentDB database account.
+    """
+    existing = client.database_accounts.get(resource_group_name, account_name)
+
+    updateConsistencyPolicy = False
+    if max_interval is not None or max_staleness_prefix is not None or default_consistency_level is not None:
+        updateConsistencyPolicy = True
+
+    if max_staleness_prefix is None:
+        max_staleness_prefix = existing.consistency_policy.max_staleness_prefix
+
+    if max_interval is None:
+        max_interval = existing.consistency_policy.max_interval_in_seconds
+
+    if default_consistency_level is None:
+        default_consistency_level = existing.consistency_policy.default_consistency_level
+
+    consistency_policy = None
+    if updateConsistencyPolicy:
+        consistency_policy = ConsistencyPolicy(default_consistency_level, max_staleness_prefix, max_interval)
+    else:
+        consistency_policy = existing.consistency_policy
+
+    if not locations:
+        for loc in existing.read_locations:
+            locations.append(Location(location_name=loc.location_name, failover_priority=loc.failover_priority))
+
+    if ip_range_filter is None:
+        ip_range_filter = existing.ip_range_filter
+
+    params = DatabaseAccountCreateUpdateParameters(
+        existing.location,
+        locations,
+        kind=existing.kind,
+        consistency_policy=consistency_policy,
+        ip_range_filter=ip_range_filter)
+
+    async_docdb_create = client.database_accounts.create_or_update(resource_group_name, account_name, params)
+    docdb_account = async_docdb_create.result()
     docdb_account = client.database_accounts.get(resource_group_name, account_name) # Workaround
     return docdb_account
