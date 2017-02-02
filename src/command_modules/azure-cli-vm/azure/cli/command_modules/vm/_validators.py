@@ -260,7 +260,8 @@ def _validate_vm_create_auth(namespace):
         # prompt for admin username if inadequate
         from azure.cli.core.prompting import prompt, NoTTYException
         try:
-            logger.warning("Cannot use provided admin username: %s. Admin username should be at least 6 characters and cannot be 'root'", namespace.admin_username)
+            logger.warning("Cannot use provided admin username: %s. Admin username should be at "
+                           "least 6 characters and cannot be 'root'", namespace.admin_username)
             namespace.admin_username = prompt('Admin Username: ')
         except NoTTYException:
             raise CLIError('Please specify a valid admin username in non-interactive mode.')
