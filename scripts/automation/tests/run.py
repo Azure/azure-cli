@@ -48,11 +48,18 @@ if __name__ == '__main__':
     parse = argparse.ArgumentParser('Test tools')
     parse.add_argument('--module', dest='modules', action='append',
                        help='The modules of which the test to be run. Accept short names, except '
-                            'azure-cli, azure-cli-core and azure-cli-nspkg')
+                            'azure-cli, azure-cli-core and azure-cli-nspkg. The modules list can '
+                            'also be set through environment variable AZURE_CLI_TEST_MODULES. The '
+                            'value should be a string of comma separated module names. The '
+                            'environment variable will be overwritten by command line parameters.')
     parse.add_argument('--non-parallel', action='store_true',
                        help='Not to run the tests in parallel.')
     parse.add_argument('--live', action='store_true', help='Run all the tests live.')
     args = parse.parse_args()
+
+    if not args.modules and os.environ.get('AZURE_CLI_TEST_MODULES', None):
+        print('Test modules list is parsed from environment variable AZURE_CLI_TEST_MODULES.')
+        args.modules = [m.strip() for m in os.environ.get('AZURE_CLI_TEST_MODULES').split(',')]
 
     selected_modules = filter_user_selected_modules_with_tests(args.modules)
     if not selected_modules:
