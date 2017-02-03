@@ -3,11 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=line-too-long
 from azure.cli.core.commands import register_cli_argument
 from .custom import load_subscriptions
-# BASIC PARAMETER CONFIGURATION
 
-def get_subscription_id_list(prefix, **kwargs):#pylint: disable=unused-argument
+
+def get_subscription_id_list(prefix, **kwargs):  # pylint: disable=unused-argument
     subscriptions = load_subscriptions()
     result = []
     for subscription in subscriptions:
@@ -15,7 +16,7 @@ def get_subscription_id_list(prefix, **kwargs):#pylint: disable=unused-argument
         result.append(subscription['name'])
     return result
 
-# pylint: disable=line-too-long
+
 register_cli_argument('login', 'password', options_list=('--password', '-p'), help='User password or client secret. Will prompt if not given.')
 register_cli_argument('login', 'service_principal', action='store_true', help='The credential representing a service principal.')
 register_cli_argument('login', 'username', options_list=('--username', '-u'), help='Organization id or service principal')
