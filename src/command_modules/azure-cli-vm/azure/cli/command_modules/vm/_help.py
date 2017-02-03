@@ -14,7 +14,11 @@ image_long_summary = """                      URN aliases: CentOS, CoreOS, Debia
 """
 
 ids_example = """        - name: {0}
-          text: {1} --ids $(az vm list -g group_name --query "[].id" -o tsv)
+          text: az {1} --ids $(az vm list -g group_name --query "[].id" -o tsv)
+"""
+
+name_group_example = """        - name: {0} by Name and Group
+          text: az {1} -n name -g group_name
 """
 
 helps['vm create'] = """
@@ -87,15 +91,25 @@ helps['vmss create'] = """
 """.format(image_long_summary)
 
 helps['vm availability-set create'] = """
-            type: command
-            short-summary: Create an availability set
-            long-summary: For more info, see https://blogs.technet.microsoft.com/yungchou/2013/05/14/window-azure-fault-domain-and-upgrade-domain-explained-explained-reprised/
-            """
+    type: command
+    short-summary: Create an availability set
+    long-summary: For more info, see https://blogs.technet.microsoft.com/yungchou/2013/05/14/window-azure-fault-domain-and-upgrade-domain-explained-explained-reprised/
+    examples:
+        - name: Create Availability Set
+          text: az vm availability-set create -n av_set_name -g group_name
+"""
 
 helps['vm availability-set update'] = """
-            type: command
-            short-summary: Update an availability set
-            """
+    type: command
+    short-summary: Update an availability set
+    examples:
+        - name: Update Availability Set
+          text: az vm availability-set update -n av_set_name -g group_name
+        - name: Update Availability Set Tag
+          text: az vm availability-set update -n av_set_name -g group_name --set tags.foo=value
+        - name: Remove Availability Set Tag
+          text: az vm availability-set update -n av_set_name -g group_name --remove tags.foo
+"""
 
 helps['vm availability-set convert'] = """
             type: command
@@ -110,9 +124,41 @@ helps['vm extension set'] = """
                     az vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.4 --vm-name myvm --resource-group mygroup --protected-settings '{"username":"user1", "ssh_key":"ssh_rsa ..."}'
             """
 
-helps['acs create'] = """
-            type: command
-            long-summary: See https://azure.microsoft.com/en-us/documentation/articles/container-service-intro/ for an intro to Container Service.
+helps['vm availability-set delete'] = """
+    type: command
+    examples:
+        - name: Delete Availability Set
+          text: az vm availability-set delete -n av_set_name -g group_name
+"""
+
+helps['vm availability-set list'] = """
+    type: command
+    examples:
+        - name: List Availability Sets in Resource Group
+          text: az vm availability-set list -g group_name
+"""
+
+helps['vm availability-set list-sizes'] = """
+    type: command
+    examples:
+        - name: List VM sizes for an Availability Set
+          text: az vm availability-set list-sizes -n av_set_name -g group_name
+"""
+
+helps['vm availability-set show'] = """
+    type: command
+    examples:
+        - name: Retrieve information about an Availability Set
+          text: az vm availability-set show -n av_set_name -g group_name
+"""
+
+helps['vm extension set'] = """
+    type: command
+    examples:
+        - name: Add a new linux user
+          text:
+            az vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.4 --vm-name myvm
+            --resource-group mygroup --protected-settings '{"username":"user1", "ssh_key":"ssh_rsa ..."}'
 """
 
 generic_update_help = """
@@ -138,7 +184,7 @@ helps['vm update'] = """
 
 helps['vm show'] = """
     type: command
-    short-summary: Show a virtual machine.
+    short-summary: Retrieves information about a virtual machine.
 """
 
 helps['vmss get-instance-view'] = """
@@ -201,7 +247,7 @@ helps['vm access reset-linux-ssh'] = """
         - name: Reset SSH
           text: az vm access reset-linux-ssh -n vm_name -r group_name
 {0}
-""".format(ids_example.format('Reset SSH by VM Ids', 'az vm access reset-linux-ssh'))
+""".format(ids_example.format('Reset SSH by VM Ids', 'vm access reset-linux-ssh'))
 
 helps['vm access set-linux-user'] = """
     type: command
@@ -210,7 +256,7 @@ helps['vm access set-linux-user'] = """
         - name: Set Linux User Access
           text: az vm access set-linux-user -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n vm_name -r group_name
 {0}
-""".format(ids_example.format('Set Linux User Access by VM Ids', 'az vm access set-linux-user -u username '
+""".format(ids_example.format('Set Linux User Access by VM Ids', 'vm access set-linux-user -u username '
                                                                  '--ssh-key-value "$(< ~/.ssh/id_rsa.pub)"'))
 
 helps['vm access reset-windows-admin'] = """
@@ -220,54 +266,92 @@ helps['vm access reset-windows-admin'] = """
         - name: Reset Windows Admin
           text: az vm access reset-windows-admin -u username -p password -n vm_name -g resource_group_name
 {0}
-""".format(ids_example.format('Reset Windows Admin by VM Ids', 'az vm access reset-windows-admin -u '
-                                                                           'username -p password'))
-
+""".format(ids_example.format('Reset Windows Admin by VM Ids', 'vm access reset-windows-admin -u username -p '
+                                                               'password'))
 
 helps['vm availability-set'] = """
     type: group
     short-summary: Group resources into availability-sets for high-availability requirements
+    long-summary: >
+        To provide redundancy to your application, we recommend that you group two or more virtual machines in an
+        availability set. This configuration ensures that during either a planned or unplanned maintenance event,
+        at least one virtual machine will be available and meet the 99.95% Azure SLA.
 """
+
 helps['vm boot-diagnostics'] = """
     type: group
     short-summary: Troubleshoot virtual machine start-up
+    long-summary: >
+        When bringing your own image to Azure or even booting one of the platform images, there can be many reasons why
+        a Virtual Machine gets into a non-bootable state. These features enable you to easily diagnose and recover your
+        Virtual Machines from boot failures.
 """
-helps['vm boot-diagnostics disable'] = """
+vm_boot_diagnostics_disable = 'vm boot-diagnostics disable'
+helps[vm_boot_diagnostics_disable] = """
     type: command
     short-summary: Disable boot diagnostics
-"""
-helps['vm boot-diagnostics get-boot-log'] = """
+    examples:
+{0}
+{1}
+""".format(name_group_example.format('Disable boot diagnostics', vm_boot_diagnostics_disable),
+           ids_example.format('Disable boot diagnostics by VM Ids', vm_boot_diagnostics_disable))
+
+vm_boot_diagnostics_enable = 'vm boot-diagnostics enable'
+vm_boot_diagnostics_enable_cmd = "{0} --storage https://mystor.blob.core.windows.net/".format(vm_boot_diagnostics_enable)
+helps[vm_boot_diagnostics_enable] = """
+    type: command
+    short-summary: Enable boot diagnostics
+    examples:
+{0}
+{1}
+""".format(name_group_example.format('Enable boot diagnostics', vm_boot_diagnostics_enable_cmd),
+           ids_example.format('Enable boot diagnostics by VM Ids', vm_boot_diagnostics_enable_cmd))
+
+boot_diagnostics_log = 'vm boot-diagnostics get-boot-log'
+helps[boot_diagnostics_log] = """
     type: command
     short-summary: Get the boot diagnostics log
-"""
+    examples:
+{0}
+{1}
+""".format(name_group_example.format('Disable boot diagnostics', boot_diagnostics_log),
+           ids_example.format('Disable boot diagnostics by VM Ids', boot_diagnostics_log))
+
 helps['acs'] = """
     type: group
     short-summary: Commands to manage Azure container services
 """
+
 helps['acs create'] = """
     type: command
     short-summary: Create a container service with your preferred orchestrator
 """
+
 helps['acs delete'] = """
     type: command
     short-summary: delete a container service
 """
+
 helps['acs list'] = """
     type: command
     short-summary: list container services
 """
+
 helps['acs show'] = """
     type: command
     short-summary: show a container service
 """
+
 helps['acs scale'] = """
     type: command
     short-summary: change private agent count of a container service.
 """
+
 helps['vm diagnostics'] = """
     type: group
     short-summary: Configure the Azure VM diagnostics extension
 """
+
 helps['vm disk'] = """
     type: group
     short-summary: Manage VM data disks
@@ -276,78 +360,89 @@ helps['vm unmanaged-disk'] = """
     type: group
     short-summary: Manage VM unmanaged data disks
 """
+
 helps['vm extension'] = """
     type: group
     short-summary: Extend the functionality of your VMs with vm extensions
 """
+
 helps['vm extension list'] = """
     type: command
     short-summary:  List extensions attached to a VM in a resource group
 """
+
 helps['vm extension image'] = """
     type: group
     short-summary: Find VM extensions available for your subscription and region
 """
+
 helps['vm image'] = """
     type: group
     short-summary: VM images available on the Azure marketplace
 """
+
 helps['vm nic'] = """
     type: group
     short-summary: Manage VM network interfaces, see also 'az network nic'
 """
+
 helps['vmss'] = """
     type: group
     short-summary: Create highly available, auto-scalable Linux or Windows virtual machines
 """
+
 helps['vmss diagnostics'] = """
     type: group
     short-summary: Configure the Azure VMSS diagnostics extension
 """
+
 helps['vmss list_instance_connection_info'] = """
     type: group
     short-summary: Get IP address and port number used to connect to individual instances.
 """
+
 helps['vmss extension'] = """
     type: group
     short-summary: Extend the functionality of your scale-set with VM extensions
 """
+
 helps['vmss extension image'] = """
     type: group
     short-summary: Find scale-set extensions available for your subscription and region
 """
+
 helps['vm capture'] = """
-            type: command
-            long-summary: See https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/ for an end-to-end tutorial
-            examples:
-                - name: Process to deallocate, generalize, and capture a stopped virtual machine
-                  text: >
-                    az vm deallocate -g my_rg -n my_vm_name\n\r
-                    az vm generalize -g my_rg -n my_vm_name\n\r
-                    az vm capture -g my_rg -n my_vm_name --vhd-name-prefix my_prefix\n\r
-                    """
+    type: command
+    long-summary: See https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/ for an end-to-end tutorial
+    examples:
+        - name: Process to deallocate, generalize, and capture a stopped virtual machine
+          text: >
+            az vm deallocate -g my_rg -n my_vm_name\n\r
+            az vm generalize -g my_rg -n my_vm_name\n\r
+            az vm capture -g my_rg -n my_vm_name --vhd-name-prefix my_prefix\n\r
+"""
 
 helps['vm deallocate'] = """
-            type: command
-            long-summary: See https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/ for an end-to-end tutorial
-            examples:
-                - name: Process to deallocate, generalize, and capture a stopped virtual machine
-                  text: >
-                    az vm deallocate -g my_rg -n my_vm_name\n\r
-                    az vm generalize -g my_rg -n my_vm_name\n\r
-                    az vm capture -g my_rg -n my_vm_name --vhd-name-prefix my_prefix\n\r
-                    """
+    type: command
+    long-summary: See https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/ for an end-to-end tutorial
+    examples:
+        - name: Process to deallocate, generalize, and capture a stopped virtual machine
+          text: >
+            az vm deallocate -g my_rg -n my_vm_name\n\r
+            az vm generalize -g my_rg -n my_vm_name\n\r
+            az vm capture -g my_rg -n my_vm_name --vhd-name-prefix my_prefix\n\r
+"""
 
 helps['vm generalize'] = """
-            type: command
-            long-summary: See https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/ for an end-to-end tutorial
-            examples:
-                - name: Process to deallocate, generalize, and capture a stopped virtual machine
-                  text: >
-                    az vm deallocate -g my_rg -n my_vm_name\n\r
-                    az vm generalize -g my_rg -n my_vm_name\n\r
-                    az vm capture -g my_rg -n my_vm_name --vhd-name-prefix my_prefix\n\r
-                    """
+    type: command
+    long-summary: See https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/ for an end-to-end tutorial
+    examples:
+        - name: Process to deallocate, generalize, and capture a stopped virtual machine
+          text: >
+            az vm deallocate -g my_rg -n my_vm_name\n\r
+            az vm generalize -g my_rg -n my_vm_name\n\r
+            az vm capture -g my_rg -n my_vm_name --vhd-name-prefix my_prefix\n\r
+"""
 
 helps['vm wait'] = """
     type: command
