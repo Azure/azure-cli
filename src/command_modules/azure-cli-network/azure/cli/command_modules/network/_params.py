@@ -529,6 +529,7 @@ register_cli_argument('network traffic-manager profile', 'routing_method', help=
 register_cli_argument('network traffic-manager profile', 'ttl', help='DNS config time-to-live in seconds.', type=int)
 
 register_cli_argument('network traffic-manager profile create', 'status', **enum_choice_list(status))
+register_cli_argument('network traffic-manager profile create', 'location', ignore_type)
 
 register_cli_argument('network traffic-manager profile check-dns', 'name', name_arg_type, help='DNS prefix to verify availability for.', required=True)
 register_cli_argument('network traffic-manager profile check-dns', 'type', help=argparse.SUPPRESS, default='Microsoft.Network/trafficManagerProfiles')
