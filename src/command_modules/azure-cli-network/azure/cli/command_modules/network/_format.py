@@ -40,6 +40,24 @@ def transform_dns_record_set_table_output(result):
         table_output.append(table_row)
     return table_output
 
+def transform_dns_zone_table_output(result):
+    is_list = isinstance(result, list)
+
+    if not is_list:
+        result = [result]
+
+    final_result = []
+    for item in result:
+        new_item = OrderedDict([
+            ('ZoneName', item['name']),
+            ('ResourceGroup', item['resourceGroup']),
+            ('RecordSets', item['numberOfRecordSets']),
+            ('MaxRecordSets', item['maxNumberOfRecordSets'])
+        ])
+        final_result.append(new_item)
+
+    return final_result if is_list else final_result[0]
+
 def transform_local_gateway_table_output(result):
     final_result = []
     for item in result:

@@ -1243,8 +1243,12 @@ def create_vm(vm_name, resource_group_name, image,
                            'public IP, VNet or subnet.')
 
     if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
+        storage_account_name = storage_account.rsplit('/', 1)
+        storage_account_name = storage_account_name[1] if \
+            len(storage_account_name) > 1 else storage_account_name[0]
         os_vhd_uri = 'https://{}.blob.{}/{}/{}.vhd'.format(
-            storage_account, CLOUD.suffixes.storage_endpoint, storage_container_name, os_disk_name)
+            storage_account_name, CLOUD.suffixes.storage_endpoint, storage_container_name,
+            os_disk_name)
 
     vm_resource = build_vm_resource(
         vm_name, location, tags, size, storage_profile, nics, admin_username, availability_set,

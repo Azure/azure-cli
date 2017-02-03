@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import argparse
+import os
 import sys
 
 from automation.utilities.path import filter_user_selected_modules_with_tests
@@ -12,7 +13,7 @@ from automation.utilities.display import print_records
 from automation.utilities.path import get_test_results_dir
 
 
-def run_tests(modules, parallel):
+def run_tests(modules, parallel, run_live):
     print('\n\nRun automation')
     print('Modules: {}'.format(', '.join(name for name, _, _ in modules)))
 
@@ -22,6 +23,10 @@ def run_tests(modules, parallel):
     # get test runner
     run_nose = get_nose_runner(test_results_folder, xunit_report=True, exclude_integration=True,
                                parallel=parallel)
+
+    # set environment variable
+    if run_live:
+        os.environ['AZURE_CLI_TEST_RUN_LIVE'] = 'True'
 
     # run tests
     passed = True
@@ -46,6 +51,7 @@ if __name__ == '__main__':
                             'azure-cli, azure-cli-core and azure-cli-nspkg')
     parse.add_argument('--non-parallel', action='store_true',
                        help='Not to run the tests in parallel.')
+    parse.add_argument('--live', action='store_true', help='Run all the tests live.')
     args = parse.parse_args()
 
     selected_modules = filter_user_selected_modules_with_tests(args.modules)
@@ -53,6 +59,6 @@ if __name__ == '__main__':
         parse.print_help()
         sys.exit(1)
 
-    retval = run_tests(selected_modules, not args.non_parallel)
+    retval = run_tests(selected_modules, not args.non_parallel, args.live)
 
     sys.exit(0 if retval else 1)

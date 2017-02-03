@@ -38,6 +38,7 @@ import azure.cli.core._debug as _debug
 from azure.cli.core._profile import Profile
 from azure.cli.core._util import CLIError
 
+LIVE_TEST_CONTROL_ENV = 'AZURE_CLI_TEST_RUN_LIVE'
 COMMAND_COVERAGE_CONTROL_ENV = 'AZURE_CLI_TEST_COMMAND_COVERAGE'
 MOCKED_SUBSCRIPTION_ID = '00000000-0000-0000-0000-000000000000'
 MOCKED_TENANT_ID = '00000000-0000-0000-0000-000000000000'
@@ -254,7 +255,12 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
         self.recording_dir = os.path.join(os.path.dirname(test_file), 'recordings')
         self.cassette_path = os.path.join(self.recording_dir, '{}.yaml'.format(test_name))
         self.playback = os.path.isfile(self.cassette_path)
-        self.run_live = run_live
+
+        if os.environ.get(LIVE_TEST_CONTROL_ENV, None) == 'True':
+            self.run_live = True
+        else:
+            self.run_live = run_live
+
         self.skip_setup = skip_setup
         self.skip_teardown = skip_teardown
         self.success = False
