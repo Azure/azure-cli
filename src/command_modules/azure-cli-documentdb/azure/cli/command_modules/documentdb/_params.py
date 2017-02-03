@@ -28,6 +28,9 @@ def validate_failover_policies(ns):
 
 def validate_locations(ns):
     ''' Extracts multiple space-separated locations in regionName=failoverPriority format '''
+    if ns.locations is None:
+        ns.locations = []
+        return
     loc_dict = []
     for item in ns.locations:
         comps = item.split('=', 1)
@@ -41,12 +44,11 @@ def validate_ip_range_filter(ns):
 register_cli_argument('documentdb', 'account_name', arg_type=name_type, help='Name of the DocumentDB database account', completer=get_resource_name_completion_list('Microsoft.DocumentDb/databaseAccounts'), id_part="name")
 
 register_cli_argument('documentdb regenerate-key', 'key_kind', **enum_choice_list(KeyKind))
-register_cli_argument('documentdb failover-priority-change', 'failover_policies', validator=validate_failover_policies, help="space separated failover policies in 'regionName=failoverPriority' format. E.g \"East US\"=0", nargs='+')
-
+register_cli_argument('documentdb failover-priority-change', 'failover_policies', validator=validate_failover_policies, help="space separated failover policies in 'regionName=failoverPriority' format. E.g \"East US\"=0 \"West US\"=1", nargs='+')
 register_cli_argument('documentdb create', 'account_name', completer=None)
 register_cli_argument('documentdb create', 'resource_group_name', help="name of the resource group")
 register_cli_argument('documentdb create', 'resource_group_location', ignore_type)
-register_cli_argument('documentdb create', 'locations', validator=validate_locations, help="space separated locations in 'regionName=failoverPriority' format. E.g \"East US\"=0. Failover priority values are 0 for write regions and greater than 0 for read regions. A failover priority value must be unique and less than the total number of regions.", nargs='+')
+register_cli_argument('documentdb create', 'locations', validator=validate_locations, help="space separated locations in 'regionName=failoverPriority' format. E.g \"East US\"=0 \"West US\"=1. Failover priority values are 0 for write regions and greater than 0 for read regions. A failover priority value must be unique and less than the total number of regions. Default: single region account in the location of the specified resource group.", nargs='+')
 register_cli_argument('documentdb create', 'default_consistency_level', help="default consistency level of the DocumentDB database account", **enum_choice_list(DefaultConsistencyLevel))
 register_cli_argument('documentdb create', 'max_staleness_prefix', help="when used with Bounded Staleness consistency, this value represents the number of stale requests tolerated. Accepted range for this value is 1 - 2,147,483,647", type=int)
 register_cli_argument('documentdb create', 'max_interval', help="when used with Bounded Staleness consistency, this value represents the time amount of staleness (in seconds) tolerated. Accepted range for this value is 1 - 100", type=int)

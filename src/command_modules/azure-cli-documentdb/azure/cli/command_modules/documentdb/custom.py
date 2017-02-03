@@ -14,6 +14,7 @@
 from azure.mgmt.documentdb.models import (
     ConsistencyPolicy,
     DatabaseAccountCreateUpdateParameters,
+    Location
 )
 from azure.mgmt.documentdb.models.document_db_enums import DatabaseAccountKind
 
@@ -22,7 +23,7 @@ from azure.mgmt.documentdb.models.document_db_enums import DatabaseAccountKind
 def cli_documentdb_create(client,
                           resource_group_name,
                           account_name,
-                          locations,
+                          locations=None,
                           kind=DatabaseAccountKind.global_document_db.value,
                           default_consistency_level=None,
                           max_staleness_prefix=100,
@@ -36,12 +37,14 @@ def cli_documentdb_create(client,
     if default_consistency_level is not None:
         consistency_policy = ConsistencyPolicy(default_consistency_level, max_staleness_prefix, max_interval)
 
-
     from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     resource_client = get_mgmt_service_client(ResourceManagementClient)
     rg = resource_client.resource_groups.get(resource_group_name)
     resource_group_location = rg.location  # pylint: disable=no-member
+
+    if not locations:
+        locations.append(Location(location_name=resource_group_location, failover_priority=0))
 
     params = DatabaseAccountCreateUpdateParameters(
         resource_group_location,
