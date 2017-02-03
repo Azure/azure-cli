@@ -14,7 +14,7 @@ from ._util import (list_network_resource_property,
                     delete_network_resource_property_entry)
 from ._format import \
     (transform_local_gateway_table_output, transform_dns_record_set_output,
-     transform_dns_record_set_table_output)
+     transform_dns_record_set_table_output, transform_dns_zone_table_output)
 
 custom_path = 'azure.cli.command_modules.network.custom#{}'
 
@@ -402,9 +402,9 @@ cli_generic_update_command(__name__, 'network traffic-manager endpoint update',
                            custom_function_op=custom_path.format('update_traffic_manager_endpoint'))
 
 # DNS ZonesOperations
-cli_command(__name__, 'network dns zone show', 'azure.mgmt.dns.operations.zones_operations#ZonesOperations.get', cf_dns_mgmt_zones)
+cli_command(__name__, 'network dns zone show', 'azure.mgmt.dns.operations.zones_operations#ZonesOperations.get', cf_dns_mgmt_zones, table_transformer=transform_dns_zone_table_output)
 cli_command(__name__, 'network dns zone delete', 'azure.mgmt.dns.operations.zones_operations#ZonesOperations.delete', cf_dns_mgmt_zones, confirmation=True)
-cli_command(__name__, 'network dns zone list', custom_path.format('list_dns_zones'))
+cli_command(__name__, 'network dns zone list', custom_path.format('list_dns_zones'), table_transformer=transform_dns_zone_table_output)
 cli_generic_update_command(__name__, 'network dns zone update',
                            'azure.mgmt.dns.operations.zones_operations#ZonesOperations.get',
                            'azure.mgmt.dns.operations.zones_operations#ZonesOperations.create_or_update',
