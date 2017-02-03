@@ -13,6 +13,10 @@ image_long_summary = """                      URN aliases: CentOS, CoreOS, Debia
                       Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd
 """
 
+ids_example = """        - name: {0}
+          text: {1} --ids $(az vm list -g group_name --query "[].id" -o tsv)
+"""
+
 helps['vm create'] = """
             type: command
             short-summary: Create an Azure Virtual Machine
@@ -106,16 +110,6 @@ helps['vm extension set'] = """
                     az vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.4 --vm-name myvm --resource-group mygroup --protected-settings '{"username":"user1", "ssh_key":"ssh_rsa ..."}'
             """
 
-helps['vm access set-linux-user'] = """
-            type: command
-            long-summary: Note, the user will have an admin's priviledge.
-            """
-
-helps['vm access reset-windows-admin'] = """
-            type: command
-            long-summary: Note, this resets the admin's credentials. You can't add a new admin.
-            """
-
 helps['acs create'] = """
             type: command
             long-summary: See https://azure.microsoft.com/en-us/documentation/articles/container-service-intro/ for an intro to Container Service.
@@ -141,6 +135,11 @@ helps['vm update'] = """
                 - name: Remove fourth NIC
                   text: az <command> -n name -g group --remove networkProfile.networkInterfaces 3
             """.format(generic_update_help)
+
+helps['vm show'] = """
+    type: command
+    short-summary: Show a virtual machine.
+"""
 
 helps['vmss get-instance-view'] = """
     type: command
@@ -181,6 +180,50 @@ helps['vm access'] = """
     type: group
     short-summary: Manage user access
 """
+
+helps['vm access delete-linux-user'] = """
+    type: command
+    long-summary: >
+        Delete a user account without logging into to the VM directly.
+    examples:
+        - name: Delete User
+          text: az vm access delete-linux-user -u username -n vm_name -r group_name
+{0}
+""".format(ids_example.format('Delete User by VM Ids', 'az vm access delete-linux-user -u username'))
+
+helps['vm access reset-linux-ssh'] = """
+    type: command
+    short-summary: Reset the SSH configuration.
+    long-summary: >
+        The extension will restart the SSH server, open the SSH port on your VM, and reset the SSH configuration to
+        default values. The user account (name, password or SSH keys) will not be changed.
+    examples:
+        - name: Reset SSH
+          text: az vm access reset-linux-ssh -n vm_name -r group_name
+{0}
+""".format(ids_example.format('Reset SSH by VM Ids', 'az vm access reset-linux-ssh'))
+
+helps['vm access set-linux-user'] = """
+    type: command
+    long-summary: Note, the user will have an admin's privilege.
+    examples:
+        - name: Set Linux User Access
+          text: az vm access set-linux-user -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n vm_name -r group_name
+{0}
+""".format(ids_example.format('Set Linux User Access by VM Ids', 'az vm access set-linux-user -u username '
+                                                                 '--ssh-key-value "$(< ~/.ssh/id_rsa.pub)"'))
+
+helps['vm access reset-windows-admin'] = """
+    type: command
+    long-summary: Note, this resets the admin's credentials. You can't add a new admin.
+    examples:
+        - name: Reset Windows Admin
+          text: az vm access reset-windows-admin -u username -p password -n vm_name -g resource_group_name
+{0}
+""".format(ids_example.format('Reset Windows Admin by VM Ids', 'az vm access reset-windows-admin -u '
+                                                                           'username -p password'))
+
+
 helps['vm availability-set'] = """
     type: group
     short-summary: Group resources into availability-sets for high-availability requirements
