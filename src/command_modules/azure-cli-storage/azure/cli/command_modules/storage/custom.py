@@ -269,11 +269,11 @@ def delete_acl_policy(client, container_name, policy_name, **kwargs):
 
 def insert_table_entity(client, table_name, entity, if_exists='fail', timeout=None):
     if if_exists == 'fail':
-        client.insert_entity(table_name, entity, timeout)
+        return client.insert_entity(table_name, entity, timeout)
     elif if_exists == 'merge':
-        client.insert_or_merge_entity(table_name, entity, timeout)
+        return client.insert_or_merge_entity(table_name, entity, timeout)
     elif if_exists == 'replace':
-        client.insert_or_replace_entity(table_name, entity, timeout)
+        return client.insert_or_replace_entity(table_name, entity, timeout)
     else:
         raise CLIError("Unrecognized value '{}' for --if-exists".format(if_exists))
 
