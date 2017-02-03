@@ -28,6 +28,9 @@ def validate_failover_policies(ns):
 
 def validate_locations(ns):
     ''' Extracts multiple space-separated locations in regionName=failoverPriority format '''
+    if ns.locations is None:
+        ns.locations = []
+        return
     loc_dict = []
     for item in ns.locations:
         comps = item.split('=', 1)
