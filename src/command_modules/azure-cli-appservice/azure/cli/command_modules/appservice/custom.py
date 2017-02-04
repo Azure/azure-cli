@@ -13,7 +13,9 @@ except ImportError:
     from urlparse import urlparse # pylint: disable=import-error
 
 from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan,
-                                   SkuDescription, SslState, HostNameBinding)
+                                   SkuDescription, SslState, HostNameBinding, SiteSourceControl,
+                                   BackupRequest, DatabaseBackupSetting, BackupSchedule,
+                                   RestoreRequest)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
@@ -292,6 +294,64 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None,
     if admin_site_name is not None:
         instance.admin_site_name = admin_site_name
     return instance
+
+def show_backup_configuration(resource_group_name, name, slot=None):
+    return _generic_site_operation(resource_group_name, name, 'get_site_backup_configuration',
+                                   slot)
+
+def list_backups(resource_group_name, name, slot=None):
+    return _generic_site_operation(resource_group_name, name, 'list_site_backups',
+                                   slot)
+
+def create_backup(resource_group_name, name, storage_account_url,
+                  database_name=None, database_type=None,
+                  database_connection_string=None, backup_name=None, slot=None):
+    client = web_client_factory()
+    location = _get_location_from_webapp(client, resource_group_name, name)
+    db_setting = DatabaseBackupSetting(database_type, database_name,
+                                       connection_string=database_connection_string)
+    backup_request = BackupRequest(location, backup_request_name=backup_name,
+                                   storage_account_url=storage_account_url, databases=[db_setting])
+    if slot is None:
+        return client.sites.backup_site(resource_group_name, name, backup_request)
+    else:
+        return client.sites.backup_site_slot(resource_group_name, name, backup_request, slot)
+
+def update_backup_schedule(resource_group_name, name, storage_account_url,
+                           schedule_frequency, schedule_frequency_unit,
+                           keep_at_least_one_backup=None,
+                           retention_period_in_days=90, database_name=None,
+                           database_connection_string=None, database_type=None, slot=None):
+    client = web_client_factory()
+    location = _get_location_from_webapp(client, resource_group_name, name)
+    db_setting = DatabaseBackupSetting(database_type, database_name,
+                                       connection_string=database_connection_string)
+    backup_schedule = BackupSchedule(schedule_frequency_unit, schedule_frequency,
+                                     keep_at_least_one_backup, retention_period_in_days)
+    backup_request = BackupRequest(location, backup_schedule=backup_schedule, enabled=True,
+                                   storage_account_url=storage_account_url, databases=[db_setting])
+    if slot is None:
+        return client.sites.update_site_backup_configuration(resource_group_name, name,
+                                                             backup_request)
+    else:
+        return client.sites.update_site_backup_configuration_slot(resource_group_name, name,
+                                                                  backup_request, slot)
+
+def restore_backup(resource_group_name, name, storage_account_url, storage_blob_name,
+                   database_name=None, database_type=None, database_connection_string=None,
+                   target_name=None, overwrite=None, ignore_hostname_conflict=None, slot=None):
+    client = web_client_factory()
+    location = _get_location_from_webapp(client, resource_group_name, name)
+    db_setting = DatabaseBackupSetting(database_type, database_name,
+                                       connection_string=database_connection_string)
+    restore_request = RestoreRequest(location, storage_account_url=storage_account_url,
+                                     blob_name=storage_blob_name, overwrite=overwrite,
+                                     site_name=target_name, databases=[db_setting],
+                                     ignore_conflicting_host_names=ignore_hostname_conflict)
+    if slot is None:
+        return client.sites.restore_site(resource_group_name, name, 0, restore_request)
+    else:
+        return client.sites.restore_site(resource_group_name, name, 0, restore_request, slot)
 
 def _normalize_sku(sku):
     sku = sku.upper()

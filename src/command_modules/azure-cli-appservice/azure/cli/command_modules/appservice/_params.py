@@ -107,6 +107,33 @@ register_cli_argument('appservice web config update', 'app_command_line', option
 register_cli_argument('appservice web config hostname', 'webapp', help="webapp name", completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
 register_cli_argument('appservice web config hostname', 'name', arg_type=name_arg_type, completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name')
 
+database_types = ['SqlAzure', 'MySql']
+frequency_units = ['Hour', 'Day']
+
+register_cli_argument('appservice web config backup create', 'storage_account_url', help='SAS URL for the blob storage container')
+register_cli_argument('appservice web config backup create', 'backup_name', help='If specified, backup blob will be named <backup_name>.zip')
+register_cli_argument('appservice web config backup create', 'database_name', help='Name of the database to backup')
+register_cli_argument('appservice web config backup create', 'database_connection_string', help='Connection string for the database to backup')
+register_cli_argument('appservice web config backup create', 'database_type', help='Type of database being backed up', **enum_choice_list(database_types))
+
+register_cli_argument('appservice web config backup update', 'storage_account_url', help='SAS URL for the blob storage container')
+register_cli_argument('appservice web config backup update', 'schedule_frequency', help='Numerical frequency for how often to backup')
+register_cli_argument('appservice web config backup update', 'schedule_frequency_unit', help='Unit for how often to backup', **enum_choice_list(frequency_units))
+register_cli_argument('appservice web config backup update', 'keep_at_least_one_backup', help='If true, one backup will always be retained in your storage container', **enum_choice_list(two_states_switch))
+register_cli_argument('appservice web config backup update', 'retention_period_in_days', help='How long to keep a backup before automatically deleting it. Set to 0 for indefinite retention')
+register_cli_argument('appservice web config backup update', 'database_name', help='Name of the database to backup')
+register_cli_argument('appservice web config backup update', 'database_connection_string', help='Connection string for the database to backup')
+register_cli_argument('appservice web config backup update', 'database_type', help='Type of database being backed up', **enum_choice_list(database_types))
+
+register_cli_argument('appservice web config backup restore', 'storage_account_url', help='SAS URL for the blob storage container')
+register_cli_argument('appservice web config backup restore', 'storage_blob_name', help='Name of the backup blob to restore (e.g. backup.zip)')
+register_cli_argument('appservice web config backup restore', 'database_name', help='Name of the database to restore')
+register_cli_argument('appservice web config backup restore', 'database_type', help='Type of database to restore', **enum_choice_list(database_types))
+register_cli_argument('appservice web config backup restore', 'database_connection_string', help='Connection string of database server for the restored database')
+register_cli_argument('appservice web config backup restore', 'target_name', help='Name of the app which will be overwritten with the restored data')
+register_cli_argument('appservice web config backup restore', 'overwrite', help='Must be true to allow the source web app to be overwritten')
+register_cli_argument('appservice web config backup restore', 'ignore_hostname_conflict', help='If true, ignores custom hostnames stored in the backup')
+
 register_cli_argument('appservice web source-control', 'manual_integration', action='store_true', help='disable automatic sync between source control and web')
 register_cli_argument('appservice web source-control', 'repo_url', help='repository url to pull the latest source from, e.g. https://github.com/foo/foo-web')
 register_cli_argument('appservice web source-control', 'branch', help='the branch name of the repository')
