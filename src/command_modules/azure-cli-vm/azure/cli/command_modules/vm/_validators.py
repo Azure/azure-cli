@@ -22,7 +22,7 @@ def validate_nsg_name(namespace):
         or '{}_NSG_{}'.format(namespace.vm_name, random_string(8))
 
 
-def _get_ressource_id(val, resource_group, resource_type, resource_namespace):
+def _get_resource_id(val, resource_group, resource_type, resource_namespace):
     if is_valid_resource_id(val):
         return val
     else:
@@ -35,8 +35,8 @@ def _get_ressource_id(val, resource_group, resource_type, resource_namespace):
 
 
 def _get_nic_id(val, resource_group):
-    return _get_ressource_id(val, resource_group,
-                             'networkInterfaces', 'Microsoft.Network')
+    return _get_resource_id(val, resource_group,
+                            'networkInterfaces', 'Microsoft.Network')
 
 
 def validate_vm_nic(namespace):
@@ -153,8 +153,8 @@ def _validate_vm_create_storage_profile(namespace, for_scale_set=False):  # pyli
             compute_client = _compute_client_factory()
             try:
                 compute_client.images.get(namespace.resource_group_name, image)
-                image = namespace.image = _get_ressource_id(image, namespace.resource_group_name,
-                                                            'images', 'Microsoft.Compute')
+                image = namespace.image = _get_resource_id(image, namespace.resource_group_name,
+                                                           'images', 'Microsoft.Compute')
                 namespace.storage_profile = StorageProfile.ManagedCustomImage
             except CloudError:
                 err = 'Invalid image "{}". Use a custom image name, id, or pick one from {}'
@@ -526,8 +526,8 @@ def process_vmss_create_namespace(namespace):
 
 
 def validate_vm_disk(namespace):
-    namespace.disk = _get_ressource_id(namespace.disk, namespace.resource_group_name,
-                                       'disks', 'Microsoft.Compute')
+    namespace.disk = _get_resource_id(namespace.disk, namespace.resource_group_name,
+                                      'disks', 'Microsoft.Compute')
 
 
 def process_disk_or_snapshot_create_namespace(namespace):
@@ -537,13 +537,13 @@ def process_disk_or_snapshot_create_namespace(namespace):
                        '--source-blob-uri')
 
     if namespace.source_disk:
-        namespace.source_disk = _get_ressource_id(namespace.source_disk,
-                                                  namespace.resource_group_name,
-                                                  'disks', 'Microsoft.Compute')
+        namespace.source_disk = _get_resource_id(namespace.source_disk,
+                                                 namespace.resource_group_name,
+                                                 'disks', 'Microsoft.Compute')
     elif namespace.source_snapshot:
-        namespace.source_snapshot = _get_ressource_id(namespace.source_snapshot,
-                                                      namespace.resource_group_name,
-                                                      'snapshots', 'Microsoft.Compute')
+        namespace.source_snapshot = _get_resource_id(namespace.source_snapshot,
+                                                     namespace.resource_group_name,
+                                                     'snapshots', 'Microsoft.Compute')
 
 
 def process_image_create_namespace(namespace):
@@ -554,32 +554,32 @@ def process_image_create_namespace(namespace):
                        '--os-blob-uri | --source-virtual-machine')
 
     if namespace.os_disk:
-        namespace.os_disk = _get_ressource_id(namespace.os_disk, namespace.resource_group_name,
-                                              'disks', 'Microsoft.Compute')
+        namespace.os_disk = _get_resource_id(namespace.os_disk, namespace.resource_group_name,
+                                             'disks', 'Microsoft.Compute')
     if namespace.os_snapshot:
-        namespace.os_snapshot = _get_ressource_id(namespace.os_snapshot,
-                                                  namespace.resource_group_name,
-                                                  'snapshots', 'Microsoft.Compute')
+        namespace.os_snapshot = _get_resource_id(namespace.os_snapshot,
+                                                 namespace.resource_group_name,
+                                                 'snapshots', 'Microsoft.Compute')
 
     if namespace.data_disks:
         ids = []
         for d in namespace.data_disks:
-            ids.append(_get_ressource_id(d, namespace.resource_group_name,
-                                         'disks', 'Microsoft.Compute'))
+            ids.append(_get_resource_id(d, namespace.resource_group_name,
+                                        'disks', 'Microsoft.Compute'))
         namespace.data_disks = ids
 
     if namespace.data_snapshots:
         ids = []
         for d in namespace.data_snapshots:
-            ids.append(_get_ressource_id(d, namespace.resource_group_name,
-                                         'snapshots', 'Microsoft.Compute'))
+            ids.append(_get_resource_id(d, namespace.resource_group_name,
+                                        'snapshots', 'Microsoft.Compute'))
         namespace.data_snapshots = ids
 
     if namespace.source_virtual_machine:
-        namespace.source_virtual_machine = _get_ressource_id(namespace.source_virtual_machine,
-                                                             namespace.resource_group_name,
-                                                             'virtualMachines',
-                                                             'Microsoft.Compute')
+        namespace.source_virtual_machine = _get_resource_id(namespace.source_virtual_machine,
+                                                            namespace.resource_group_name,
+                                                            'virtualMachines',
+                                                            'Microsoft.Compute')
         if not namespace.os_type:
             compute_client = _compute_client_factory()
             res = parse_resource_id(namespace.source_virtual_machine)
@@ -587,7 +587,8 @@ def process_image_create_namespace(namespace):
             # pylint: disable=no-member
             namespace.os_type = vm_info.storage_profile.os_disk.os_type.value
     elif not namespace.os_type:
-        raise CLIError('Please provide --os-type')
+        raise CLIError("usage error: os type is required to create the image, "
+                       "please specify '--os-type OS_TYPE'")
 
 
 # endregion

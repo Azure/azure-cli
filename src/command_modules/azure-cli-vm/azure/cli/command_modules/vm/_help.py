@@ -9,6 +9,7 @@ from azure.cli.core.help_files import helps
 
 image_long_summary = """                      URN aliases: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS, Win2008R2SP1, Win2012Datacenter, Win2012R2Datacenter.
                       Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest
+                      Example Custom Image Resource ID or Name: /subscriptions/subscription-id/resourceGroups/myrg/providers/Microsoft.Compute/images/myImage
                       Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd
 """
 
@@ -19,7 +20,7 @@ helps['vm create'] = """
             parameters:
                 - name: --image
                   type: string
-                  short-summary: 'OS image (URN alias, URN or URI).'
+                  short-summary: 'OS image (URN alias, URN, Custom Image name or ID, VHD Blob URI).'
                   long-summary: |
 {0}
                   populator-commands:
@@ -39,10 +40,14 @@ helps['vm create'] = """
                   text: >
                     az vm create -n my_vm_name -g myrg --admin-username myadmin --admin-password Password@1234
                      --public-ip-address "" --image Win2012R2Datacenter
-                - name: Create a simple Ubuntu VM with public IP address, DNS entry and 2 data disk(10GB, 20GB)
+                - name: Create a simple Ubuntu VM with public IP address, DNS entry, 2 data disk(10GB, 20GB), and generate ssh key pairs under ~/.ssh
                   text: >
                     az vm create -n my_vm_name -g myrg --admin-username myadmin --admin-password Password@1234
-                    --public-ip-address-dns-name my_globally_unique_vm_dns_name --image ubuntults --data-disk-sizes-gb 10 20 --size Standard_DS2
+                    --public-ip-address-dns-name my_globally_unique_vm_dns_name --image ubuntults --data-disk-sizes-gb 10 20
+                    --size Standard_DS2 --generate-ssh-keys
+                - name: Create a VM from a custom managed image
+                  text: >
+                    az vm create -g myrg -n my_vm_name --image my_image_in_myrg --admin-username myadmin --admin-password Password@1234
                 - name: Create a VM with unmanaged os disk by using image blob uri
                   text: >
                     az vm create -g myrg -n my_vm_name --image https://account123.blob.core.windows.net/Images/my_vhd-osDisk.vhd
@@ -66,12 +71,15 @@ helps['vmss create'] = """
             examples:
                 - name: Windows scaleset with 5 instances, a load balancer, a public IP address and a 2GB data disk
                   text: >
-                    az vmss create -n myName -g myResourceGroup --admin-password MyPassword123 --instance-count 5 --image Win2012R2Datacenter --data-disk-sizes-gb 2
-                - name: Linux scaleset with SSH authentication, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network
+                    az vmss create -n my_vmss_name -g myrg --admin-password MyPassword123 --instance-count 5 --image Win2012R2Datacenter --data-disk-sizes-gb 2
+                - name: Linux scaleset with auto-generated ssh key pair under ~/.ssh, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network
                   text: >
-                    az vmss create  -n myName -g myResourceGroup --dns-name-for-public-ip myGloballyUniqueDnsName
-                    --load-balancer myLoadBalancer --vnet-name myVNET --subnet mySubnet --image <linux image from 'az vm image list'>
-                    --ssh-key-value "<ssh-key-value or ssh-key-file-path>"
+                    az vmss create -n my_vmss_name -g myrg --dns-name-for-public-ip myGloballyUniqueDnsName
+                    --load-balancer myLoadBalancer --vnet-name myVNET --subnet mySubnet --image UbuntuLTS
+                    --generate-ssh-keys
+                - name: Scaleset created from custom Linux image using existing ssh public key of ~/.ssh/id_rsa.pub
+                  text: >
+                    az vmss create -n my_vmss_name -g myrg --image my_linuximage_in_myrg
 """.format(image_long_summary)
 
 helps['vm availability-set create'] = """
@@ -253,6 +261,10 @@ helps['vmss diagnostics'] = """
     type: group
     short-summary: Configure the Azure VMSS diagnostics extension
 """
+helps['vmss list_instance_connection_info'] = """
+    type: group
+    short-summary: Get IP address and port number used to connect to individual instances.
+"""
 helps['vmss extension'] = """
     type: group
     short-summary: Extend the functionality of your scale-set with VM extensions
@@ -301,17 +313,17 @@ helps['vm wait'] = """
 
 helps['disk'] = """
     type: group
-    short-summary: Managed disk commands
+    short-summary: Commands to manage 'Managed Disks'
 """
 
 helps['snapshot'] = """
     type: group
-    short-summary: Snapshot commands
+    short-summary: Commands to manage snapshots
 """
 
 helps['image'] = """
     type: group
-    short-summary: Manage custom virtual machine images based on managed disks/snapshots
+    short-summary: Commands to manage custom virtual machine images based on managed disks/snapshots
 """
 
 helps['disk create'] = """
@@ -335,7 +347,7 @@ helps['disk delete'] = """
 """
 helps['disk update'] = """
     type: command
-    short-summary: update a managed disk including size and underlined storage account type
+    short-summary: update a managed disk
 """
 helps['disk grant-access'] = """
     type: command
@@ -359,7 +371,7 @@ helps['snapshot create'] = """
 """
 helps['snapshot update'] = """
     type: command
-    short-summary: update a snapshot including underlined storage account type
+    short-summary: update a snapshot
 """
 helps['snapshot list'] = """
     type: command

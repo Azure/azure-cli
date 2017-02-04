@@ -293,6 +293,36 @@ class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
 
+class VMCreateFromUnmanagedDiskTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(VMCreateFromUnmanagedDiskTest, self).__init__(__file__, test_method, resource_group='cli_test_vm_from_unmanaged_disk')
+        self.location = 'westus'
+
+    def test_create_vm_from_unmanaged_disk(self):
+        self.execute()
+
+    def body(self):
+        # create a vm with unmanaged os disk
+        vm1 = 'vm1'
+        self.cmd('vm create -g {} -n {} --image debian --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password'.format(
+            self.resource_group, vm1))
+        vm1_info = self.cmd('vm show -g {} -n {}'.format(self.resource_group, vm1))
+        self.cmd('vm stop -g {} -n {}'.format(self.resource_group, vm1))
+
+        # import the unmanaged os disk into a specialized managed disk
+        test_specialized_os_disk_vhd_uri = vm1_info['storageProfile']['osDisk']['vhd']['uri']
+        vm2 = 'vm2'
+        managed_os_disk = 'os1'
+        self.cmd('disk create -g {} -n {} --source-blob-uri {}'.format(self.resource_group, managed_os_disk, test_specialized_os_disk_vhd_uri), checks=[
+            JMESPathCheck('name', managed_os_disk)
+        ])
+        # create a vm by attaching to it
+        self.cmd('vm create -g {} -n {} --managed-os-disk {} --os-type linux'.format(self.resource_group, vm2, managed_os_disk), checks=[
+            JMESPathCheck('powerState', 'VM running')
+        ])
+
+
 class VMManagedDiskScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):

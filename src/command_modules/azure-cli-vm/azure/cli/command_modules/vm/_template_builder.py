@@ -342,28 +342,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals
             }
         }
         profile = storage_profiles[storage_profile.name]
-        if data_disk_sizes_gb is not None:
-            profile['dataDisks'] = []
-            lun = 1
-            if image_data_disks:
-                for image_data_disk in image_data_disks:
-                    profile['dataDisks'].append({
-                        'lun': image_data_disk.lun,
-                        'createOption': "fromImage",
-                    })
-                lun = max([d.lun for d in image_data_disks]) + 1
-            for size in data_disk_sizes_gb:
-                s = int(size)
-                profile['dataDisks'].append({
-                    'lun': lun,
-                    'createOption': "empty",
-                    'diskSizeGB': s,
-                    'caching': storage_caching,
-                    'managedDisk': {'storageAccountType': storage_sku}
-                })
-                lun = lun + 1
-
-        return profile
+        return _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
+                                 storage_caching, storage_sku)
 
     vm_properties = {
         'hardwareProfile': {'vmSize': size},
@@ -388,6 +368,28 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         'properties': vm_properties,
     }
     return vm
+
+
+def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
+                      storage_caching, storage_sku):
+    if data_disk_sizes_gb is not None:
+        profile['dataDisks'] = []
+        for image_data_disk in image_data_disks or []:
+            profile['dataDisks'].append({
+                'lun': image_data_disk.lun,
+                'createOption': "fromImage",
+            })
+        lun = max([d.lun for d in image_data_disks]) + 1 if image_data_disks else 1
+        for size in data_disk_sizes_gb:
+            profile['dataDisks'].append({
+                'lun': lun,
+                'createOption': "empty",
+                'diskSizeGB': int(size),
+                'caching': storage_caching,
+                'managedDisk': {'storageAccountType': storage_sku}
+            })
+            lun = lun + 1
+    return profile
 
 
 def build_load_balancer_resource(name, location, tags, backend_pool_name, nat_pool_name,
@@ -538,26 +540,9 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
             'id': image
         }
 
-    if data_disk_sizes_gb is not None:
-        storage_properties['dataDisks'] = []
-        lun = 1
-        if image_data_disks:
-            for image_data_disk in image_data_disks:
-                storage_properties['dataDisks'].append({
-                    'lun': image_data_disk.lun,
-                    'createOption': "fromImage",
-                })
-                lun = max([d.lun for d in image_data_disks]) + 1
-        for size in data_disk_sizes_gb:
-            s = int(size)
-            storage_properties['dataDisks'].append({
-                'lun': lun,
-                'createOption': "empty",
-                'diskSizeGB': s,
-                'caching': storage_caching,
-                'managedDisk': {'storageAccountType': storage_sku}
-            })
-            lun = lun + 1
+    storage_profile = _build_data_disks(storage_properties, data_disk_sizes_gb,
+                                        image_data_disks, storage_caching,
+                                        storage_sku)
 
     # Build OS Profile
     os_profile = {

@@ -303,7 +303,7 @@ def create_managed_disk(resource_group_name, disk_name, location=None,
                                  source_resource_id=source_disk or source_snapshot)
 
     if size_gb is None and option == DiskCreateOption.empty:
-        raise CLIError('Please supply size for the empty disk')
+        raise CLIError('usage error: --size-gb required to create an empty disk')
 
     disk = Disk(location, disk_size_gb=size_gb, creation_data=creation_data,
                 account_type=storage_account_type)
@@ -330,7 +330,7 @@ def attach_managed_data_disk(resource_group_name, vm_name, disk,
     lun = max(luns) + 1 if luns else 1
     if new:
         if not size_gb:
-            raise CLIError('Please provide disk size')
+            raise CLIError('usage error: --size-gb required to create an empty disk for attach')
         data_disk = DataDisk(lun, DiskCreateOptionTypes.empty,
                              name=parse_resource_id(disk)['name'],
                              disk_size_gb=size_gb)
@@ -1347,9 +1347,9 @@ def list_vmss_instance_connection_info(resource_group_name, vm_scale_set_name):
     if primary_nic_config is None:
         raise CLIError('could not find a primary nic which is needed to search to load balancer')
     ip_configs = primary_nic_config.ip_configurations
-    ip_config = next(ip for ip in ip_configs if ip.load_balancer_inbound_nat_pools)
-    if not ip_config:  # TODO test it
-        raise CLIError('Till now, the command only supports scaleset with load balancer')
+    ip_config = next((ip for ip in ip_configs if ip.load_balancer_inbound_nat_pools), None)
+    if not ip_config:
+        raise CLIError('No load-balancer exist to retrieve public ip address')
     res_id = ip_config.load_balancer_inbound_nat_pools[0].id
     lb_info = parse_resource_id(res_id)
     lb_name = lb_info['name']

@@ -78,9 +78,7 @@ def transform_av_set_output(av_set):
 def transform_av_set_collection_output(av_sets):
     # workaround till compute api version gets to 2017-04-30
     for av_set in av_sets:
-        if hasattr(av_set, 'sku') and hasattr(av_set.sku, 'name'):
-            setattr(av_set.sku, 'managed', av_set.sku.name == 'Aligned')
-            del av_set.sku.name
+        transform_av_set_output(av_set)
     return list(av_sets)  # convert SDK paged object to a plain list to display
 
 
