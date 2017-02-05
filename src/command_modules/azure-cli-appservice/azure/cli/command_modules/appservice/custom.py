@@ -173,28 +173,28 @@ def show_container_settings(resource_group_name, name, slot=None):
 def _filter_for_container_settings(settings):
     return {x: settings[x] for x in settings if x in CONTAINER_APPSETTING_NAMES}
 
-def add_hostname(resource_group_name, webapp, name, slot=None):
+def add_hostname(resource_group_name, webappName, name, slot=None):
     client = web_client_factory()
-    webapp = client.sites.get_site(resource_group_name, webapp)
-    binding = HostNameBinding(webapp.location, host_name_binding_name=name, site_name=webapp)
+    webapp = client.sites.get_site(resource_group_name, webappName)
+    binding = HostNameBinding(webapp.location, host_name_binding_name=name, site_name=webapp.name)
     if slot is None:
-        return client.sites.create_or_update_site_host_name_binding(resource_group_name, webapp,
+        return client.sites.create_or_update_site_host_name_binding(resource_group_name, webapp.name,
                                                                     name, binding)
     else:
         return client.sites.create_or_update_site_host_name_binding_slot(resource_group_name,
-                                                                         webapp, name,
+                                                                         webapp.name, name,
                                                                          binding, slot)
 
-def delete_hostname(resource_group_name, webapp, name, slot=None):
+def delete_hostname(resource_group_name, webappName, name, slot=None):
     client = web_client_factory()
     if slot is None:
-        return client.sites.delete_site_host_name_binding(resource_group_name, webapp, name)
+        return client.sites.delete_site_host_name_binding(resource_group_name, webappName, name)
     else:
         return client.sites.delete_site_host_name_binding_slot(resource_group_name,
-                                                               webapp, slot, name)
+                                                               webappName, slot, name)
 
-def list_hostnames(resource_group_name, webapp, slot=None):
-    return _generic_site_operation(resource_group_name, webapp, 'get_site_host_name_bindings',
+def list_hostnames(resource_group_name, webappName, slot=None):
+    return _generic_site_operation(resource_group_name, webappName, 'get_site_host_name_bindings',
                                    slot)
 
 #TODO: figure out the 'configuration_source' and add related param descriptions
