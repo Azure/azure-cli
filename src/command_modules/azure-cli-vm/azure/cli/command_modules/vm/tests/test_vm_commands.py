@@ -999,14 +999,36 @@ class VMUnmanagedDataDiskTest(ResourceGroupVCRTestBase):
         self.cmd('vm unmanaged-disk attach -g {} --vm-name {} -n {} --vhd {} --caching ReadOnly'.format(
             self.resource_group, self.vm_name, disk_name, vhd_uri))
 
-        # check we have a data disk
-        result = self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name), checks=[
-            JMESPathCheck('length(storageProfile.dataDisks)', 1),
-            JMESPathCheck('storageProfile.dataDisks[0].lun', 0),
-            JMESPathCheck('storageProfile.dataDisks[0].createOption', 'attach'),
-            JMESPathCheck('storageProfile.dataDisks[0].vhd.uri', vhd_uri),
-            JMESPathCheck('storageProfile.dataDisks[0].name', disk_name),
+        # make it fun, let us migrate the data disk to managed image
+        self.cmd('vm stop -g {} -n {}'.format(self.resource_group, self.vm_name))
+        self.cmd('vm generalize -g {} --n {}'.format(self.resource_group, self.vm_name), checks=NoneCheck())
+        self.cmd('vm show -g {} --n {}'.format(self.resource_group, self.vm_name))
+        self.cmd('vm capture -g {} -n {} --vhd-name-prefix vmtest'.format(self.resource_group, self.vm_name),
+                 checks=NoneCheck())
+
+        # capture to a custom image
+        image_name = 'myImage'
+        new_vm_name = 'vm2'
+        self.cmd('image create -g {} -n {} --source-virtual-machine {}'.format(self.resource_group, image_name, self.vm_name))
+
+        # use the new image to create a vm
+        self.cmd('vm create -g {0} -n {1} --admin-username ubuntu --admin-password testPassword0 --authentication-type password '
+                 '--image {2} --data-disk-sizes-gb 1 --size Standard_D2_v2'.format(self.resource_group, new_vm_name, image_name))
+        self.cmd('vm show -g {} -n {}'.format(self.resource_group, new_vm_name), checks=[
+            JMESPathCheck('length(storageProfile.dataDisks)', 2),
+            JMESPathCheck('storageProfile.dataDisks[0].diskSizeGb', 8),
+            JMESPathCheck('storageProfile.dataDisks[1].diskSizeGb', 1),
+            JMESPathCheck('storageProfile.osDisk.osType', 'Linux')
         ])
+        # use it to create a vmss
+        vmss_name = 'vmss2'
+        self.cmd('vmss create -g {0} -n {1} --admin-username ubuntu --admin-password testPassword0 --authentication-type password '
+                 '--image {2} --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2'.format(self.resource_group, vmss_name, image_name), checks=[
+                     JMESPathCheck('length(vmss.virtualMachineProfile.storageProfile.dataDisks)', 2),
+                     JMESPathCheck('vmss.virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGB', 8),
+                     JMESPathCheck('vmss.virtualMachineProfile.storageProfile.dataDisks[1].diskSizeGB', 1),
+                     JMESPathCheck('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage')
+                 ])
 
 
 class AzureContainerServiceScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
