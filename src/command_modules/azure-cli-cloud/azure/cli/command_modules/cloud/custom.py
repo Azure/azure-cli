@@ -10,7 +10,7 @@ from azure.cli.core.cloud import (Cloud,
                                   get_cloud,
                                   remove_cloud,
                                   add_cloud,
-                                  set_active_cloud,
+                                  modify_active_cloud,
                                   update_cloud,
                                   get_active_cloud_name,
                                   CloudAlreadyRegisteredException,
@@ -28,13 +28,13 @@ def show_cloud(cloud_name=None):
     except CloudNotRegisteredException as e:
         raise CLIError(e)
 
-def _build_cloud(cloud_name, cloud_config=None, cloud_args=None, default_subscription=None):
+def _build_cloud(cloud_name, cloud_config=None, cloud_args=None):
     if cloud_config:
         # Using JSON format so convert the keys to snake case
         for key in cloud_config:
             cloud_config[to_snake_case(key)] = cloud_config.pop(key)
         cloud_args = cloud_config
-    c = Cloud(cloud_name, default_subscription=default_subscription)
+    c = Cloud(cloud_name)
     for arg in cloud_args:
         if arg.startswith('endpoint_') and cloud_args[arg] is not None:
             setattr(c.endpoints, arg.replace('endpoint_', ''), cloud_args[arg])
@@ -56,10 +56,9 @@ def register_cloud(cloud_name,
                    suffix_storage_endpoint=None,
                    suffix_keyvault_dns=None,
                    suffix_azure_datalake_store_file_system_endpoint=None,
-                   suffix_azure_datalake_analytics_catalog_and_job_endpoint=None,
-                   default_subscription=None):
+                   suffix_azure_datalake_analytics_catalog_and_job_endpoint=None):
     c = _build_cloud(cloud_name, cloud_config=cloud_config,
-                     cloud_args=locals(), default_subscription=default_subscription)
+                     cloud_args=locals())
     try:
         add_cloud(c)
     except CloudAlreadyRegisteredException as e:
@@ -78,12 +77,11 @@ def modify_cloud(cloud_name=None,
                  suffix_storage_endpoint=None,
                  suffix_keyvault_dns=None,
                  suffix_azure_datalake_store_file_system_endpoint=None,
-                 suffix_azure_datalake_analytics_catalog_and_job_endpoint=None,
-                 default_subscription=None):
+                 suffix_azure_datalake_analytics_catalog_and_job_endpoint=None):
     if not cloud_name:
         cloud_name = get_active_cloud_name()
     c = _build_cloud(cloud_name, cloud_config=cloud_config,
-                     cloud_args=locals(), default_subscription=default_subscription)
+                     cloud_args=locals())
     try:
         update_cloud(c)
     except CloudNotRegisteredException as e:
@@ -99,6 +97,6 @@ def unregister_cloud(cloud_name):
 
 def set_cloud(cloud_name):
     try:
-        set_active_cloud(cloud_name)
+        modify_active_cloud(cloud_name)
     except CloudNotRegisteredException as e:
         raise CLIError(e)

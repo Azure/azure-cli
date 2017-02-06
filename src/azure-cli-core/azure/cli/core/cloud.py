@@ -7,7 +7,7 @@ import os
 from six.moves import configparser
 
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._config import GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH, AzConfig, az_config
+from azure.cli.core._config import GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH
 from azure.cli.core._util import CLIError
 
 CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
@@ -103,12 +103,10 @@ class Cloud(object):  # pylint: disable=too-few-public-methods
                  name,
                  endpoints=None,
                  suffixes=None,
-                 default_subscription=None,
                  is_active=False):
         self.name = name
         self.endpoints = endpoints or CloudEndpoints()
         self.suffixes = suffixes or CloudSuffixes()
-        self.default_subscription = default_subscription
         self.is_active = is_active
 
 
@@ -178,8 +176,28 @@ AZURE_GERMAN_CLOUD = Cloud(
 KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
 
 
+def _set_active_cloud(cloud_name):
+    global_config = configparser.SafeConfigParser()
+    global_config.read(GLOBAL_CONFIG_PATH)
+    try:
+        global_config.add_section('cloud')
+    except configparser.DuplicateSectionError:
+        pass
+    global_config.set('cloud', 'name', cloud_name)
+    if not os.path.isdir(GLOBAL_CONFIG_DIR):
+        os.makedirs(GLOBAL_CONFIG_DIR)
+    with open(GLOBAL_CONFIG_PATH, 'w') as configfile:
+        global_config.write(configfile)
+
+
 def get_active_cloud_name():
-    return az_config.get('cloud', 'name', fallback=AZURE_PUBLIC_CLOUD.name)
+    global_config = configparser.SafeConfigParser()
+    global_config.read(GLOBAL_CONFIG_PATH)
+    try:
+        return global_config.get('cloud', 'name')
+    except (configparser.NoOptionError, configparser.NoSectionError):
+        _set_active_cloud(AZURE_PUBLIC_CLOUD.name)
+        return AZURE_PUBLIC_CLOUD.name
 
 
 def _get_cloud(cloud_name):
@@ -205,8 +223,6 @@ def get_clouds():
                 setattr(c.endpoints, option.replace('endpoint_', ''), config.get(section, option))
             elif option.startswith('suffix_'):
                 setattr(c.suffixes, option.replace('suffix_', ''), config.get(section, option))
-            elif option == 'default_subscription':
-                c.default_subscription = config.get(section, option)
         clouds.append(c)
     active_cloud_name = get_active_cloud_name()
     for c in clouds:
@@ -227,48 +243,61 @@ def get_active_cloud():
     return get_cloud(get_active_cloud_name())
 
 
-def _set_active_subscription(cloud):
-    from azure.cli.core._profile import Profile, _ENVIRONMENT_NAME, _SUBSCRIPTION_ID, _STATE
+def get_cloud_subscription(cloud_name):
+    config = configparser.SafeConfigParser()
+    config.read(CLOUD_CONFIG_FILE)
+    try:
+        return config.get(cloud_name, 'subscription')
+    except configparser.NoOptionError:
+        return None
+
+
+def set_cloud_subscription(cloud_name, subscription):
+    if not _get_cloud(cloud_name):
+        raise CloudNotRegisteredException(cloud_name)
+    config = configparser.SafeConfigParser()
+    config.read(CLOUD_CONFIG_FILE)
+    if subscription:
+        config.set(cloud_name, 'subscription', subscription)
+    else:
+        config.remove_option(cloud_name, 'subscription')
+    if not os.path.isdir(GLOBAL_CONFIG_DIR):
+        os.makedirs(GLOBAL_CONFIG_DIR)
+    with open(CLOUD_CONFIG_FILE, 'w') as configfile:
+        config.write(configfile)
+
+
+def _set_active_subscription(cloud_name):
+    from azure.cli.core._profile import (Profile, _ENVIRONMENT_NAME, _SUBSCRIPTION_ID,
+                                         _STATE, _SUBSCRIPTION_NAME)
     profile = Profile()
-    subscription_to_use = cloud.default_subscription or \
-                          next((s[_SUBSCRIPTION_ID] for s in profile.load_cached_subscriptions()  # noqa: E127 # pylint: disable=line-too-long
-                                if s[_ENVIRONMENT_NAME] == cloud.name and s[_STATE] == 'Enabled'),
+    subscription_to_use = get_cloud_subscription(cloud_name) or \
+                          next((s[_SUBSCRIPTION_ID] for s in profile.load_cached_subscriptions()  # noqa # pylint: disable=line-too-long
+                                if s[_STATE] == 'Enabled'),
                                None)
     if subscription_to_use:
         try:
             profile.set_active_subscription(subscription_to_use)
-            logger.warning("Active subscription switched to '%s'.", subscription_to_use)
+            sub = profile.get_subscription(subscription_to_use)
+            logger.warning("Active subscription switched to '%s (%s)'.",
+                           sub[_SUBSCRIPTION_NAME], sub[_SUBSCRIPTION_ID])
         except CLIError as e:
             logger.error(e)
             logger.warning("Unable to automatically switch the active subscription. "
                            "Use 'az account set'.")
     else:
-        logger.warning("Use 'az login' if not logged in to this cloud.")
-        logger.warning("Use 'az account set' to switch the active subscription.")
+        logger.warning("Use 'az login' to log in to this cloud.")
+        logger.warning("Use 'az account set' to set the active subscription.")
 
 
-def set_active_cloud(cloud_name):
+def modify_active_cloud(cloud_name):
     if get_active_cloud_name() == cloud_name:
         return
     if not _get_cloud(cloud_name):
         raise CloudNotRegisteredException(cloud_name)
-    config = configparser.SafeConfigParser()
-    config.read(GLOBAL_CONFIG_PATH)
-    try:
-        config.add_section('cloud')
-    except configparser.DuplicateSectionError:
-        pass
-    config.set('cloud', 'name', cloud_name)
-    if not os.path.isdir(GLOBAL_CONFIG_DIR):
-        os.makedirs(GLOBAL_CONFIG_DIR)
-    with open(GLOBAL_CONFIG_PATH, 'w') as configfile:
-        config.write(configfile)
-    if os.environ.get(AzConfig.env_var_name('cloud', 'name')):
-        logger.warning('Active cloud has been set. '
-                       'However, it is overridden by environment variable AZURE_CLOUD_NAME.')
-    else:
-        logger.warning('Switched active cloud to %s.', cloud_name)
-        _set_active_subscription(get_cloud(cloud_name))
+    _set_active_cloud(cloud_name)
+    logger.warning("Switched active cloud to '%s'.", cloud_name)
+    _set_active_subscription(cloud_name)
 
 
 def _save_cloud(cloud, overwrite=False):
@@ -285,8 +314,6 @@ def _save_cloud(cloud, overwrite=False):
     for k, v in cloud.suffixes.__dict__.items():
         if v is not None:
             config.set(cloud.name, 'suffix_{}'.format(k), v)
-    if cloud.default_subscription is not None:
-        config.set(cloud.name, 'default_subscription', cloud.default_subscription)
     if not os.path.isdir(GLOBAL_CONFIG_DIR):
         os.makedirs(GLOBAL_CONFIG_DIR)
     with open(CLOUD_CONFIG_FILE, 'w') as configfile:

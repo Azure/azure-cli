@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os
 import tempfile
 import unittest
 import mock
@@ -52,12 +51,6 @@ class TestCloud(unittest.TestCase):
                 remove_cloud(c.name)
             custom_clouds = get_custom_clouds()
             self.assertEqual(len(custom_clouds), 0)
-
-    def test_get_active_cloud_name_envvar(self):
-        expected = 'MyCloud'
-        with mock.patch.dict(os.environ, {'AZURE_CLOUD_NAME': expected}):
-            actual = get_active_cloud_name()
-            self.assertEqual(expected, actual)
 
     def test_get_active_cloud_name_default(self):
         expected = AZURE_PUBLIC_CLOUD.name
