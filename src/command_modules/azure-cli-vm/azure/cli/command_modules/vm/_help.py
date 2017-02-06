@@ -352,6 +352,37 @@ helps['vm diagnostics'] = """
     short-summary: Configure the Azure VM diagnostics extension
 """
 
+helps['vm diagnostics get-default-config'] = """
+    type: command
+    examples:
+        - name: Get default diagnostics on a Linux VM and override the storage account key
+          text: >
+            az vm diagnostics get-default-config \\
+                --query "merge(@, {storageAccount: 'mystorageacct'})"
+        - name: Get default diagnostics on a Windows VM
+          text: >
+            az vm diagnostics get-default-config --is-windows-os
+"""
+
+helps['vm diagnostics set'] = """
+    type: command
+    short-summary: Configure the Azure VM diagnostics extension
+    examples:
+        - name: Set up default diagnostics on a Linux VM
+          text: >
+            default_config=$(az vm diagnostics get-default-config \\
+                --query "merge(@, {storageAccount: 'mystorageacct'})")
+
+            storage_key=$(az storage account keys list -g group_name -n mystorageacct \\
+                --query "[?keyName=='key1'] | [0].value" -o tsv)
+
+            settings="{'storageAccountName': 'mystorageacct', 'storageAccountKey': \\
+                '${storage_key}'}"
+
+            az vm diagnostics set --settings "${default_config}" --protected-settings "${settings}" \\
+                -n setting_name -g group_name
+"""
+
 helps['vm disk'] = """
     type: group
     short-summary: Manage VM data disks
