@@ -15,6 +15,7 @@ from azure.mgmt.network.models import \
      ApplicationGatewayFirewallMode, SecurityRuleAccess, SecurityRuleDirection,
      SecurityRuleProtocol)
 
+import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 from azure.cli.core._util import CLIError
 from azure.cli.command_modules.network._client_factory import _network_client_factory
@@ -33,6 +34,15 @@ from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CnameRecord, 
 
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
+
+logger = azlogging.get_az_logger(__name__)
+
+def _upsert(collection, obj, key_name, key_value):
+    match = next((x for x in collection if getattr(x, key_name, None) == key_value), None)
+    if match:
+        logger.warning("Item '%s' already exists. Replacing with new values.", key_value)
+        collection.remove(match)
+    collection.append(obj)
 
 #region Generic list commands
 def _generic_list(operation_name, resource_group_name):
@@ -88,7 +98,8 @@ def create_ag_authentication_certificate(resource_group_name, application_gatewa
     from azure.mgmt.network.models import ApplicationGatewayAuthenticationCertificate as AuthCert
     ncf = _network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
-    ag.authentication_certificates.append(AuthCert(data=cert_data, name=item_name))
+    new_cert = AuthCert(data=cert_data, name=item_name)
+    _upsert(ag.authentication_certificates, new_cert, 'name', item_name)
     return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 def update_ag_authentication_certificate(instance, parent, item_name, cert_data): # pylint: disable=unused-argument
@@ -100,8 +111,8 @@ def create_ag_backend_address_pool(resource_group_name, application_gateway_name
     from azure.mgmt.network.models import ApplicationGatewayBackendAddressPool
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    ag.backend_address_pools.append(ApplicationGatewayBackendAddressPool(
-        name=item_name, backend_addresses=servers))
+    new_pool = ApplicationGatewayBackendAddressPool(name=item_name, backend_addresses=servers)
+    _upsert(ag.backend_address_pools, new_pool, 'name', item_name)
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 create_ag_backend_address_pool.__doc__ = AppGatewayOperations.create_or_update.__doc__
@@ -118,12 +129,13 @@ def create_ag_frontend_ip_configuration(resource_group_name, application_gateway
     from azure.mgmt.network.models import ApplicationGatewayFrontendIPConfiguration
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    ag.frontend_ip_configurations.append(ApplicationGatewayFrontendIPConfiguration(
+    new_config = ApplicationGatewayFrontendIPConfiguration(
         name=item_name,
         private_ip_address=private_ip_address if private_ip_address else None,
         private_ip_allocation_method='static' if private_ip_address else 'dynamic',
         public_ip_address=SubResource(public_ip_address) if public_ip_address else None,
-        subnet=SubResource(subnet) if subnet else None))
+        subnet=SubResource(subnet) if subnet else None)
+    _upsert(ag.frontend_ip_configurations, new_config, 'name', item_name)
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 create_ag_frontend_ip_configuration.__doc__ = AppGatewayOperations.create_or_update.__doc__
@@ -146,7 +158,8 @@ def create_ag_frontend_port(resource_group_name, application_gateway_name, item_
     from azure.mgmt.network.models import ApplicationGatewayFrontendPort
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    ag.frontend_ports.append(ApplicationGatewayFrontendPort(name=item_name, port=port))
+    new_port = ApplicationGatewayFrontendPort(name=item_name, port=port)
+    _upsert(ag.frontend_ports, new_port, 'name', item_name)
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
@@ -160,12 +173,13 @@ def create_ag_http_listener(resource_group_name, application_gateway_name, item_
     from azure.mgmt.network.models import ApplicationGatewayHttpListener
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    ag.http_listeners.append(ApplicationGatewayHttpListener(
+    new_listener = ApplicationGatewayHttpListener(
         name=item_name,
         frontend_ip_configuration=SubResource(frontend_ip),
         frontend_port=SubResource(frontend_port),
         protocol='https' if ssl_cert else 'http',
-        ssl_certificate=SubResource(ssl_cert) if ssl_cert else None))
+        ssl_certificate=SubResource(ssl_cert) if ssl_cert else None)
+    _upsert(ag.http_listeners, new_listener, 'name', item_name)
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
@@ -188,14 +202,14 @@ def create_ag_backend_http_settings_collection(resource_group_name, application_
     from azure.mgmt.network.models import ApplicationGatewayBackendHttpSettings
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    ag.backend_http_settings_collection.append(ApplicationGatewayBackendHttpSettings(
+    new_settings = ApplicationGatewayBackendHttpSettings(
         port=port,
         protocol=protocol,
         cookie_based_affinity=cookie_based_affinity or 'Disabled',
         request_timeout=timeout,
         probe=SubResource(probe) if probe else None,
-        name=item_name
-    ))
+        name=item_name)
+    _upsert(ag.backend_http_settings_collection, new_settings, 'name', item_name)
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
@@ -219,15 +233,15 @@ def create_ag_probe(resource_group_name, application_gateway_name, item_name, pr
     from azure.mgmt.network.models import ApplicationGatewayProbe
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    ag.probes.append(ApplicationGatewayProbe(
+    new_probe = ApplicationGatewayProbe(
         name=item_name,
         protocol=protocol,
         host=host,
         path=path,
         interval=interval,
         timeout=timeout,
-        unhealthy_threshold=threshold
-    ))
+        unhealthy_threshold=threshold)
+    _upsert(ag.probes, new_probe, 'name', item_name)
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
@@ -253,14 +267,14 @@ def create_ag_request_routing_rule(resource_group_name, application_gateway_name
     from azure.mgmt.network.models import ApplicationGatewayRequestRoutingRule
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    ag.request_routing_rules.append(ApplicationGatewayRequestRoutingRule(
+    new_rule = ApplicationGatewayRequestRoutingRule(
         name=item_name,
         rule_type=rule_type,
         backend_address_pool=SubResource(address_pool),
         backend_http_settings=SubResource(http_settings),
         http_listener=SubResource(http_listener),
-        url_path_map=SubResource(url_path_map) if url_path_map else None
-    ))
+        url_path_map=SubResource(url_path_map) if url_path_map else None)
+    _upsert(ag.request_routing_rules, new_rule, 'name', item_name)
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
@@ -284,8 +298,9 @@ def create_ag_ssl_certificate(resource_group_name, application_gateway_name, ite
     from azure.mgmt.network.models import ApplicationGatewaySslCertificate
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    ag.ssl_certificates.append(ApplicationGatewaySslCertificate(
-        name=item_name, data=cert_data, password=cert_password))
+    new_cert = ApplicationGatewaySslCertificate(
+        name=item_name, data=cert_data, password=cert_password)
+    _upsert(ag.ssl_certificates, new_cert, 'name', item_name)
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 create_ag_ssl_certificate.__doc__ = AppGatewayOperations.create_or_update.__doc__
@@ -316,7 +331,7 @@ def create_ag_url_path_map(resource_group_name, application_gateway_name, item_n
     from azure.mgmt.network.models import ApplicationGatewayUrlPathMap, ApplicationGatewayPathRule
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    ag.url_path_maps.append(ApplicationGatewayUrlPathMap(
+    new_map = ApplicationGatewayUrlPathMap(
         name=item_name,
         default_backend_address_pool=SubResource(default_address_pool) \
             if default_address_pool else SubResource(address_pool),
@@ -327,8 +342,8 @@ def create_ag_url_path_map(resource_group_name, application_gateway_name, item_n
             backend_address_pool=SubResource(address_pool),
             backend_http_settings=SubResource(http_settings),
             paths=paths
-        )]
-    ))
+        )])
+    _upsert(ag.url_path_maps, new_map, 'name', item_name)
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
@@ -349,14 +364,14 @@ def create_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
     url_map = next((x for x in ag.url_path_maps if x.name == url_path_map_name), None)
     if not url_map:
         raise CLIError('URL path map "{}" not found.'.format(url_path_map_name))
-    url_map.path_rules.append(ApplicationGatewayPathRule(
+    new_rule = ApplicationGatewayPathRule(
         name=item_name,
         paths=paths,
         backend_address_pool=SubResource(address_pool) \
             if address_pool else SubResource(url_map.default_backend_address_pool.id),
         backend_http_settings=SubResource(http_settings) \
-            if http_settings else SubResource(url_map.default_backend_http_settings.id)
-    ))
+            if http_settings else SubResource(url_map.default_backend_http_settings.id))
+    _upsert(url_map.path_rules, new_rule, 'name', item_name)
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
@@ -395,12 +410,13 @@ def create_lb_inbound_nat_rule(
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     frontend_ip = _get_property(lb.frontend_ip_configurations, frontend_ip_name) # pylint: disable=no-member
-    lb.inbound_nat_rules.append(
-        InboundNatRule(name=item_name, protocol=protocol,
-                       frontend_port=frontend_port, backend_port=backend_port,
-                       frontend_ip_configuration=frontend_ip,
-                       enable_floating_ip=floating_ip == 'true',
-                       idle_timeout_in_minutes=idle_timeout))
+    new_rule = InboundNatRule(
+        name=item_name, protocol=protocol,
+        frontend_port=frontend_port, backend_port=backend_port,
+        frontend_ip_configuration=frontend_ip,
+        enable_floating_ip=floating_ip == 'true',
+        idle_timeout_in_minutes=idle_timeout)
+    _upsert(lb.inbound_nat_rules, new_rule, 'name', item_name)
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().inbound_nat_rules, item_name)
 
@@ -428,13 +444,14 @@ def create_lb_inbound_nat_pool(
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     frontend_ip = _get_property(lb.frontend_ip_configurations, frontend_ip_name) \
         if frontend_ip_name else None
-    lb.inbound_nat_pools.append(
-        InboundNatPool(name=item_name,
-                       protocol=protocol,
-                       frontend_ip_configuration=frontend_ip,
-                       frontend_port_range_start=frontend_port_range_start,
-                       frontend_port_range_end=frontend_port_range_end,
-                       backend_port=backend_port))
+    new_pool = InboundNatPool(
+        name=item_name,
+        protocol=protocol,
+        frontend_ip_configuration=frontend_ip,
+        frontend_port_range_start=frontend_port_range_start,
+        frontend_port_range_end=frontend_port_range_end,
+        backend_port=backend_port)
+    _upsert(lb.inbound_nat_pools, new_pool, 'name', item_name)
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().inbound_nat_pools, item_name)
 
@@ -461,12 +478,13 @@ def create_lb_frontend_ip_configuration(
         private_ip_address_allocation='dynamic'):
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
-    lb.frontend_ip_configurations.append(FrontendIPConfiguration(
+    new_config = FrontendIPConfiguration(
         name=item_name,
         private_ip_address=private_ip_address,
         private_ip_allocation_method=private_ip_address_allocation,
         public_ip_address=PublicIPAddress(public_ip_address) if public_ip_address else None,
-        subnet=Subnet(subnet) if subnet else None))
+        subnet=Subnet(subnet) if subnet else None)
+    _upsert(lb.frontend_ip_configurations, new_config, 'name', item_name)
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().frontend_ip_configurations, item_name)
 
@@ -497,7 +515,8 @@ def set_lb_frontend_ip_configuration(
 def create_lb_backend_address_pool(resource_group_name, load_balancer_name, item_name):
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
-    lb.backend_address_pools.append(BackendAddressPool(name=item_name))
+    new_pool = BackendAddressPool(name=item_name)
+    _upsert(lb.backend_address_pools, new_pool, 'name', item_name)
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().backend_address_pools, item_name)
 
@@ -505,9 +524,10 @@ def create_lb_probe(resource_group_name, load_balancer_name, item_name, protocol
                     path=None, interval=None, threshold=None):
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
-    lb.probes.append(
-        Probe(protocol, port, interval_in_seconds=interval, number_of_probes=threshold,
-              request_path=path, name=item_name))
+    new_probe = Probe(
+        protocol, port, interval_in_seconds=interval, number_of_probes=threshold,
+        request_path=path, name=item_name)
+    _upsert(lb.probes, new_probe, 'name', item_name)
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().probes, item_name)
 
@@ -528,20 +548,20 @@ def create_lb_rule(
         floating_ip='false', idle_timeout=None):
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
-    lb.load_balancing_rules.append(
-        LoadBalancingRule(
-            name=item_name,
-            protocol=protocol,
-            frontend_port=frontend_port,
-            backend_port=backend_port,
-            frontend_ip_configuration=_get_property(lb.frontend_ip_configurations,
-                                                    frontend_ip_name),
-            backend_address_pool=_get_property(lb.backend_address_pools,
-                                               backend_address_pool_name),
-            probe=_get_property(lb.probes, probe_name) if probe_name else None,
-            load_distribution=load_distribution,
-            enable_floating_ip=floating_ip == 'true',
-            idle_timeout_in_minutes=idle_timeout))
+    new_rule = LoadBalancingRule(
+        name=item_name,
+        protocol=protocol,
+        frontend_port=frontend_port,
+        backend_port=backend_port,
+        frontend_ip_configuration=_get_property(lb.frontend_ip_configurations,
+                                                frontend_ip_name),
+        backend_address_pool=_get_property(lb.backend_address_pools,
+                                           backend_address_pool_name),
+        probe=_get_property(lb.probes, probe_name) if probe_name else None,
+        load_distribution=load_distribution,
+        enable_floating_ip=floating_ip == 'true',
+        idle_timeout_in_minutes=idle_timeout)
+    _upsert(lb.load_balancing_rules, new_rule, 'name', item_name)
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().load_balancing_rules, item_name)
 
@@ -612,19 +632,17 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
         for config in nic.ip_configurations:
             config.primary = False
 
-    nic.ip_configurations.append(
-        NetworkInterfaceIPConfiguration(
-            name=ip_config_name,
-            subnet=Subnet(subnet) if subnet else None,
-            public_ip_address=PublicIPAddress(public_ip_address) if public_ip_address else None,
-            load_balancer_backend_address_pools=load_balancer_backend_address_pool_ids,
-            load_balancer_inbound_nat_rules=load_balancer_inbound_nat_rule_ids,
-            private_ip_address=private_ip_address,
-            private_ip_allocation_method=private_ip_address_allocation,
-            private_ip_address_version=private_ip_address_version,
-            primary=make_primary
-        )
-    )
+    new_config = NetworkInterfaceIPConfiguration(
+        name=ip_config_name,
+        subnet=Subnet(subnet) if subnet else None,
+        public_ip_address=PublicIPAddress(public_ip_address) if public_ip_address else None,
+        load_balancer_backend_address_pools=load_balancer_backend_address_pool_ids,
+        load_balancer_inbound_nat_rules=load_balancer_inbound_nat_rule_ids,
+        private_ip_address=private_ip_address,
+        private_ip_allocation_method=private_ip_address_allocation,
+        private_ip_address_version=private_ip_address_version,
+        primary=make_primary)
+    _upsert(nic.ip_configurations, new_config, 'name', ip_config_name)
     poller = ncf.network_interfaces.create_or_update(
         resource_group_name, network_interface_name, nic)
     return _get_property(poller.result().ip_configurations, ip_config_name)
@@ -682,8 +700,9 @@ def add_nic_ip_config_address_pool(
     ip_config = next(
         (x for x in nic.ip_configurations if x.name.lower() == ip_config_name.lower()), None)
     try:
-        ip_config.load_balancer_backend_address_pools.append(
-            BackendAddressPool(backend_address_pool))
+        _upsert(ip_config.load_balancer_backend_address_pools,
+                BackendAddressPool(backend_address_pool),
+                'name', backend_address_pool)
     except AttributeError:
         ip_config.load_balancer_backend_address_pools = [BackendAddressPool(backend_address_pool)]
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
@@ -713,7 +732,9 @@ def add_nic_ip_config_inbound_nat_rule(
     ip_config = next(
         (x for x in nic.ip_configurations if x.name.lower() == ip_config_name.lower()), None)
     try:
-        ip_config.load_balancer_inbound_nat_rules.append(InboundNatRule(inbound_nat_rule))
+        _upsert(ip_config.load_balancer_inbound_nat_rules,
+                InboundNatRule(inbound_nat_rule),
+                'name', inbound_nat_rule)
     except AttributeError:
         ip_config.load_balancer_inbound_nat_rules = [InboundNatRule(inbound_nat_rule)]
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
@@ -958,8 +979,7 @@ def create_vnet_gateway_root_cert(resource_group_name, gateway_name, public_cert
         config.vpn_client_root_certificates = []
 
     cert = VpnClientRootCertificate(name=cert_name, public_cert_data=public_cert_data)
-    config.vpn_client_root_certificates.append(cert)
-
+    _upsert(config.vpn_client_root_certificates, cert, 'name', cert_name)
     return ncf.create_or_update(resource_group_name, gateway_name, gateway)
 
 def delete_vnet_gateway_root_cert(resource_group_name, gateway_name, cert_name):
@@ -979,8 +999,7 @@ def create_vnet_gateway_revoked_cert(resource_group_name, gateway_name, thumbpri
     config, gateway, ncf = _prep_cert_create(gateway_name, resource_group_name)
 
     cert = VpnClientRevokedCertificate(name=cert_name, thumbprint=thumbprint)
-    config.vpn_client_revoked_certificates.append(cert)
-
+    _upsert(config.vpn_client_revoked_certificates, cert, 'name', cert_name)
     return ncf.create_or_update(resource_group_name, gateway_name, gateway)
 
 def delete_vnet_gateway_revoked_cert(resource_group_name, gateway_name, cert_name):
