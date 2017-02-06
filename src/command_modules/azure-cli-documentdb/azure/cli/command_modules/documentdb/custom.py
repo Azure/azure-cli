@@ -71,9 +71,9 @@ def cli_documentdb_update(client,
     """
     existing = client.database_accounts.get(resource_group_name, account_name)
 
-    updateConsistencyPolicy = False
+    update_consistency_policy = False
     if max_interval is not None or max_staleness_prefix is not None or default_consistency_level is not None:
-        updateConsistencyPolicy = True
+        update_consistency_policy = True
 
     if max_staleness_prefix is None:
         max_staleness_prefix = existing.consistency_policy.max_staleness_prefix
@@ -85,7 +85,7 @@ def cli_documentdb_update(client,
         default_consistency_level = existing.consistency_policy.default_consistency_level
 
     consistency_policy = None
-    if updateConsistencyPolicy:
+    if update_consistency_policy:
         consistency_policy = ConsistencyPolicy(default_consistency_level, max_staleness_prefix, max_interval)
     else:
         consistency_policy = existing.consistency_policy
