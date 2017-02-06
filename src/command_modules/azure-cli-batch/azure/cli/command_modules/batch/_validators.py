@@ -276,6 +276,21 @@ def validate_pool_settings(ns, parser):
     in the add pool request body.
     """
     if not ns.json_file:
+        if ns.node_agent_sku_id and not ns.image:
+            raise ValueError("Missing required argument: --image")
+        if ns.image:
+            ns.version = 'latest'
+            try:
+                ns.publisher, ns.offer, ns.sku = ns.image.split(':', 2)
+            except ValueError:
+                message = ("Incorrect format for VM image URN. Should be in the format: \n"
+                           "'publisher:offer:sku[:version]'")
+                raise ValueError(message)
+            try:
+                ns.sku, ns.version = ns.sku.split(':', 1)
+            except ValueError:
+                pass
+            del ns.image
         groups = ['pool.cloud_service_configuration', 'pool.virtual_machine_configuration']
         parser.parse_mutually_exclusive(ns, True, groups)
 
@@ -287,25 +302,6 @@ def validate_pool_settings(ns, parser):
             raise ValueError(message)
         if ns.auto_scale_formula:
             ns.enable_auto_scale = True
-        if ns.image:
-            version = 'latest'
-            try:
-                publisher, offer, sku = ns.image.split(':', 2)
-            except ValueError:
-                message = ("Incorrect format for VM image URN. Should be in the format: \n"
-                           "'publisher:offer:sku[:version]'")
-                raise ValueError(message)
-            try:
-                sku, version = sku.split(':', 1)
-            except ValueError:
-                pass
-            ns.pool = {'virtual_machine_configuration': {'image_reference': {
-                'publisher': publisher,
-                'offer': offer,
-                'sku': sku,
-                'version': version
-            }}}
-            del ns.image
 
 
 def validate_cert_settings(ns):

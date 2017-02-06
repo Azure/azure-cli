@@ -69,9 +69,9 @@ cli_batch_data_plane_command('batch pool usage-metrics list', data_path.format('
 cli_batch_data_plane_command('batch pool all-statistics show', data_path.format('pool', 'PoolOperations.get_all_pools_lifetime_statistics'), pool_client_factory)
 cli_batch_data_plane_command('batch pool create', data_path.format('pool', 'PoolOperations.add'), pool_client_factory, validator=validate_pool_settings,
                              ignore=['pool.cloud_service_configuration.current_os_version', 'pool.virtual_machine_configuration.windows_configuration',
-                                     'pool.auto_scale_evaluation_interval', 'pool.enable_auto_scale', 'pool.max_tasks_per_node', 'pool.metadata',
-                                     'pool.resize_timeout', 'pool.cloud_service_configuration.target_os_version', 'pool.task_scheduling_policy',
-                                     'pool.virtual_machine_configuration.image_reference', 'pool.start_task.max_task_retry_count', 'pool.start_task.environment_settings'])
+                                     'pool.auto_scale_evaluation_interval', 'pool.enable_auto_scale', 'pool.max_tasks_per_node', 'pool.network_configuration',
+                                     'pool.cloud_service_configuration.target_os_version', 'pool.task_scheduling_policy',
+                                     'pool.start_task.max_task_retry_count', 'pool.start_task.environment_settings'], silent=['pool.virtual_machine_configuration.image_reference'])
 cli_batch_data_plane_command('batch pool list', data_path.format('pool', 'PoolOperations.list'), pool_client_factory)
 cli_batch_data_plane_command('batch pool delete', data_path.format('pool', 'PoolOperations.delete'), pool_client_factory)
 cli_batch_data_plane_command('batch pool show', data_path.format('pool', 'PoolOperations.get'), pool_client_factory)
@@ -86,8 +86,8 @@ cli_batch_data_plane_command('batch node delete', data_path.format('pool', 'Pool
 
 cli_batch_data_plane_command('batch job all-statistics show', data_path.format('job', 'JobOperations.get_all_jobs_lifetime_statistics'), job_client_factory)
 cli_batch_data_plane_command('batch job create', data_path.format('job', 'JobOperations.add'), job_client_factory,
-                             ignore=['job.job_preparation_task', 'job.job_release_task', 'job.pool_info.auto_pool_specification', 'job.metadata',
-                                     'job.job_manager_task.kill_job_on_completion', 'job.constraints', 'job.common_environment_settings',
+                             ignore=['job.job_preparation_task', 'job.job_release_task', 'job.pool_info.auto_pool_specification', 'job.on_task_failure',
+                                     'job.job_manager_task.kill_job_on_completion', 'job.common_environment_settings', 'job.on_all_tasks_complete',
                                      'job.job_manager_task.run_exclusive', 'job.job_manager_task.constraints', 'job.job_manager_task.application_package_references'])
 cli_batch_data_plane_command('batch job delete', data_path.format('job', 'JobOperations.delete'), job_client_factory)
 cli_batch_data_plane_command('batch job show', data_path.format('job', 'JobOperations.get'), job_client_factory)
@@ -100,10 +100,9 @@ cli_batch_data_plane_command('batch job stop', data_path.format('job', 'JobOpera
 cli_batch_data_plane_command('batch job prep-release-status list', data_path.format('job', 'JobOperations.list_preparation_and_release_task_status'), job_client_factory)
 
 cli_batch_data_plane_command('batch job-schedule create', data_path.format('job_schedule', 'JobScheduleOperations.add'), job_schedule_client_factory,
-                             ignore=['cloud_job_schedule.job_specification.job_preparation_task', 'cloud_job_schedule.metadata',
+                             ignore=['cloud_job_schedule.job_specification.job_preparation_task',
                                      'cloud_job_schedule.job_specification.job_release_task', 'cloud_job_schedule.job_specification.metadata',
                                      'cloud_job_schedule.job_specification.job_manager_task.kill_job_on_completion',
-                                     'cloud_job_schedule.job_specification.constraints'
                                      'cloud_job_schedule.job_specification.job_manager_task.run_exclusive',
                                      'cloud_job_schedule.job_specification.job_manager_task.application_package_references',
                                      'cloud_job_schedule.job_specification.job_manager_task.environment_settings'])

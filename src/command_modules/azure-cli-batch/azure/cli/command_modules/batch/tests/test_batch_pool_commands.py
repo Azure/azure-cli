@@ -59,8 +59,8 @@ class BatchPoolScenarioTest(BatchDataPlaneTestBase):
 
         # test create pool with parameters from mutually exclusive groups
         try:
-            self.cmd('batch pool create --id mutually-exclusive-test --vm-size small --os-family' +
-                     '4 --image Canonical:UbuntuServer')
+            self.cmd('batch pool create --id mutually-exclusive-test --vm-size small --os-family ' +
+                     '4 --image Canonical:UbuntuServer:16-LTS:latest')
             raise AssertionError("Excepted exception to be raised.")
         except SystemExit as exp:
             self.assertEqual(exp.code, 2)

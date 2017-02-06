@@ -233,16 +233,23 @@ def format_options_name(operation):
 class BatchArgumentTree(object):
     """Dependency tree parser for arguments of complex objects"""
 
-    def __init__(self, validator):
+    def __init__(self, validator, silent):
         self._arg_tree = {}
         self._request_param = {}
         self._custom_validator = validator
+        self._silent_args = silent
         self.done = False
 
     def __iter__(self):
         """Iterate over arguments"""
         for arg, details in self._arg_tree.items():
             yield arg, details
+
+    def _is_silent(self, name):
+        """Whether argument should not be exposed"""
+        arg = self._arg_tree[name]
+        full_path = full_name(arg)
+        return arg['path'] in self._silent_args or full_path in self._silent_args
 
     def _is_bool(self, name):
         """Whether argument value is a boolean"""
@@ -379,6 +386,13 @@ class BatchArgumentTree(object):
             elif self._is_duration(name):
                 details['options']['type'] = validators.duration_format
                 self._help(name, "Expected format is an ISO-8601 duration.")
+            elif self._is_silent(name):
+                import argparse
+                from azure.cli.core.commands.parameters import IgnoreAction
+                details['options']['nargs'] = '?'
+                details['options']['help'] = argparse.SUPPRESS
+                details['options']['required'] = False
+                details['options']['action'] = IgnoreAction
             yield (name, CliCommandArgument(dest=name, **details['options']))
 
     def existing(self, name):
@@ -461,12 +475,13 @@ class AzureBatchDataPlaneCommand(object):
     # pylint:disable=too-many-instance-attributes, too-few-public-methods
 
     def __init__(self, module_name, name, operation, factory, transform_result,  # pylint:disable=too-many-arguments
-                 table_transformer, flatten, ignore, validator):
+                 table_transformer, flatten, ignore, validator, silent):
 
         if not isinstance(operation, string_types):
             raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
         self.flatten = flatten  # Number of object levels to flatten
+        self.silent = silent if silent else []
         self.ignore = list(IGNORE_PARAMETERS)  # Parameters to ignore
         if ignore:
             self.ignore.extend(ignore)
@@ -751,7 +766,7 @@ class AzureBatchDataPlaneCommand(object):
         from azure.cli.core.commands.parameters import file_type
         from argcomplete.completers import FilesCompleter, DirectoriesCompleter
 
-        self.parser = BatchArgumentTree(self.validator)
+        self.parser = BatchArgumentTree(self.validator, self.silent)
         self._load_options_model(handler)
         for arg in extract_args_from_signature(handler):
             arg_type = find_param_type(handler, arg[0])
@@ -815,11 +830,11 @@ class AzureBatchDataPlaneCommand(object):
 
 def cli_batch_data_plane_command(name, operation, client_factory, transform=None,  # pylint:disable=too-many-arguments
                                  table_transformer=None, flatten=FLATTEN,
-                                 ignore=None, validator=None):
+                                 ignore=None, validator=None, silent=None):
     """ Registers an Azure CLI Batch Data Plane command. These commands must respond to a
     challenge from the service when they make requests. """
-    command = AzureBatchDataPlaneCommand(__name__, name, operation, client_factory,
-                                         transform, table_transformer, flatten, ignore, validator)
+    command = AzureBatchDataPlaneCommand(__name__, name, operation, client_factory, transform,
+                                         table_transformer, flatten, ignore, validator, silent)
 
     # add parameters required to create a batch client
     group_name = 'Batch Account'
