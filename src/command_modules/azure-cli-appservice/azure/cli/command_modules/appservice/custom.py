@@ -178,12 +178,11 @@ def add_hostname(resource_group_name, webappName, name, slot=None):
     webapp = client.sites.get_site(resource_group_name, webappName)
     binding = HostNameBinding(webapp.location, host_name_binding_name=name, site_name=webapp.name)
     if slot is None:
-        return client.sites.create_or_update_site_host_name_binding(resource_group_name, webapp.name,
-                                                                    name, binding)
+        return client.sites.create_or_update_site_host_name_binding(
+            resource_group_name, webapp.name, name, binding)
     else:
-        return client.sites.create_or_update_site_host_name_binding_slot(resource_group_name,
-                                                                         webapp.name, name,
-                                                                         binding, slot)
+        return client.sites.create_or_update_site_host_name_binding_slot(
+            resource_group_name, webapp.name, name, binding, slot)
 
 def delete_hostname(resource_group_name, webappName, name, slot=None):
     client = web_client_factory()
