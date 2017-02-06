@@ -105,8 +105,9 @@ register_cli_argument('vm extension', 'vm_name', arg_type=existing_vm_name, opti
 
 register_cli_argument('vm extension image', 'image_location', options_list=('--location', '-l'))
 register_cli_argument('vm extension image', 'publisher_name', options_list=('--publisher', '-p'), help='Image publisher name')
-register_cli_argument('vm extension image', 'type', options_list=('--name', '-n'))
+register_cli_argument('vm extension image', 'type', options_list=('--name', '-n'), help='Name of the extension')
 register_cli_argument('vm extension image', 'latest', action='store_true')
+register_cli_argument('vm extension image', 'version', help='Extension version')
 
 for dest in ['vm_scale_set_name', 'virtual_machine_scale_set_name', 'name']:
     register_cli_argument('vmss', dest, vmss_name_type)

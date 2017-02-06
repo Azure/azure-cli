@@ -13,7 +13,7 @@ image_long_summary = """                      URN aliases: CentOS, CoreOS, Debia
                       Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd
 """
 
-ids_example = """        - name: {0}
+vm_ids_example = """        - name: {0}
           text: az {1} --ids $(az vm list -g group_name --query "[].id" -o tsv)
 """
 
@@ -235,7 +235,7 @@ helps['vm access delete-linux-user'] = """
         - name: Delete User
           text: az vm access delete-linux-user -u username -n vm_name -r group_name
 {0}
-""".format(ids_example.format('Delete User by VM Ids', 'az vm access delete-linux-user -u username'))
+""".format(vm_ids_example.format('Delete User by VM Ids', 'az vm access delete-linux-user -u username'))
 
 helps['vm access reset-linux-ssh'] = """
     type: command
@@ -247,7 +247,7 @@ helps['vm access reset-linux-ssh'] = """
         - name: Reset SSH
           text: az vm access reset-linux-ssh -n vm_name -r group_name
 {0}
-""".format(ids_example.format('Reset SSH by VM Ids', 'vm access reset-linux-ssh'))
+""".format(vm_ids_example.format('Reset SSH by VM Ids', 'vm access reset-linux-ssh'))
 
 helps['vm access set-linux-user'] = """
     type: command
@@ -256,8 +256,8 @@ helps['vm access set-linux-user'] = """
         - name: Set Linux User Access
           text: az vm access set-linux-user -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n vm_name -r group_name
 {0}
-""".format(ids_example.format('Set Linux User Access by VM Ids', 'vm access set-linux-user -u username '
-                                                                 '--ssh-key-value "$(< ~/.ssh/id_rsa.pub)"'))
+""".format(vm_ids_example.format('Set Linux User Access by VM Ids', 'vm access set-linux-user -u username '
+                                                                    '--ssh-key-value "$(< ~/.ssh/id_rsa.pub)"'))
 
 helps['vm access reset-windows-admin'] = """
     type: command
@@ -266,8 +266,8 @@ helps['vm access reset-windows-admin'] = """
         - name: Reset Windows Admin
           text: az vm access reset-windows-admin -u username -p password -n vm_name -g resource_group_name
 {0}
-""".format(ids_example.format('Reset Windows Admin by VM Ids', 'vm access reset-windows-admin -u username -p '
-                                                               'password'))
+""".format(vm_ids_example.format('Reset Windows Admin by VM Ids', 'vm access reset-windows-admin -u username -p '
+                                                                  'password'))
 
 helps['vm availability-set'] = """
     type: group
@@ -294,7 +294,7 @@ helps[vm_boot_diagnostics_disable] = """
 {0}
 {1}
 """.format(name_group_example.format('Disable boot diagnostics', vm_boot_diagnostics_disable),
-           ids_example.format('Disable boot diagnostics by VM Ids', vm_boot_diagnostics_disable))
+           vm_ids_example.format('Disable boot diagnostics by VM Ids', vm_boot_diagnostics_disable))
 
 vm_boot_diagnostics_enable = 'vm boot-diagnostics enable'
 vm_boot_diagnostics_enable_cmd = "{0} --storage https://mystor.blob.core.windows.net/".format(vm_boot_diagnostics_enable)
@@ -305,7 +305,7 @@ helps[vm_boot_diagnostics_enable] = """
 {0}
 {1}
 """.format(name_group_example.format('Enable boot diagnostics', vm_boot_diagnostics_enable_cmd),
-           ids_example.format('Enable boot diagnostics by VM Ids', vm_boot_diagnostics_enable_cmd))
+           vm_ids_example.format('Enable boot diagnostics by VM Ids', vm_boot_diagnostics_enable_cmd))
 
 boot_diagnostics_log = 'vm boot-diagnostics get-boot-log'
 helps[boot_diagnostics_log] = """
@@ -315,7 +315,7 @@ helps[boot_diagnostics_log] = """
 {0}
 {1}
 """.format(name_group_example.format('Disable boot diagnostics', boot_diagnostics_log),
-           ids_example.format('Disable boot diagnostics by VM Ids', boot_diagnostics_log))
+           vm_ids_example.format('Disable boot diagnostics by VM Ids', boot_diagnostics_log))
 
 helps['acs'] = """
     type: group
@@ -450,22 +450,110 @@ helps[vm_disk_list] = """
     examples:
         - name: List attached VM disks by VM name and Resource Group
           text: az vm disk list -g group_name --vm-name vm_name
-{0}
-""".format(ids_example.format('List attached VM disks by IDs', vm_disk_list))
+        - name: List attached VM disks by IDs of disks with names containing "data_disk"
+          text: >
+            az vm disk list --ids \\
+                $(az resource list --query "[?contains(name, 'data_disk')].id" -o tsv)
+"""
 
 helps['vm extension'] = """
     type: group
     short-summary: Extend the functionality of your VMs with vm extensions
+    long-summary: >
+        Azure virtual machine extensions are small applications that provide post-deployment configuration and
+        automation tasks on Azure virtual machines. For example, if a virtual machine requires software installation,
+        anti-virus protection, or Docker configuration, a VM extension can be used to complete these tasks.
+        Extensions can be bundled with a new virtual machine deployment or run against any existing system.
 """
 
 helps['vm extension list'] = """
     type: command
     short-summary:  List extensions attached to a VM in a resource group
+    examples:
+        - name: List extensions by VM
+          text: az vm extension list -g group_name --vm-name vm_name
+        - name: List extensions by Ids containing "my_extension" in the name
+          text: >
+            az vm extension list --ids \\
+                $(az resource list --query "[?contains(name, 'my_extension')].id" -o tsv)
+"""
+
+helps['vm extension delete'] = """
+    type: command
+    examples:
+        - name: Delete extension by VM and extension name
+          text: az vm extension delete -g group_name --vm-name vm_name -n extension_name
+        - name: Delete extensions by Ids containing "my_extension" in the name
+          text: >
+            az vm extension delete --ids \\
+                $(az resource list --query "[?contains(name, 'my_extension')].id" -o tsv)
+"""
+
+helps['vm extension show'] = """
+    type: command
+    examples:
+        - name: Show extension by VM and extension name
+          text: az vm extension show -g group_name --vm-name vm_name -n extension_name
 """
 
 helps['vm extension image'] = """
     type: group
     short-summary: Find VM extensions available for your subscription and region
+"""
+
+helps['vm extension image list'] = """
+    type: command
+    examples:
+        - name: List unique publishers for extensions
+          text: az vm extension image list --query "[].publisher" -o tsv | sort -u
+        - name: Find extensions with Docker in the name
+          text: az vm extension image list --query "[].name" -o tsv | sort -u | grep Docker
+        - name: List extension names where publisher name starts with "Microsoft.Azure.App"
+          text: >
+            az vm extension image list --query \\
+                "[?starts_with(publisher, 'Microsoft.Azure.App')].publisher" \\
+                -o tsv | sort -u | xargs -I{} az vm extension image list-names --publisher {} -l westus
+"""
+
+helps['vm extension image list-names'] = """
+    type: command
+    examples:
+        - name: Find Docker extension by publisher and location
+          text: >
+            az vm extension image list-names --publisher Microsoft.Azure.Extensions \\
+                -l westus --query "[?starts_with(name, 'Docker')]"
+        - name: Find the CustomScript extension by publisher and location
+          text: >
+            az vm extension image list-names --publisher Microsoft.Azure.Extensions \\
+                -l westus --query "[?starts_with(name, 'Custom')]"
+"""
+
+helps['vm extension image list-versions'] = """
+    type: command
+    examples:
+        - name: Find the available versions for the DockerExtension
+          text: >
+            az vm extension image list-versions --publisher Microsoft.Azure.Extensions \\
+                -l westus -n DockerExtension -otable
+"""
+
+helps['vm extension image show'] = """
+    type: command
+    examples:
+        - name: Show the CustomScript extension version 2.0.2
+          text: >
+            az vm extension image show -l westus -n CustomScript \\
+              --publisher Microsoft.Azure.Extensions --version 2.0.2
+        - name: Show the latest version of the DockerExtension
+          text: >
+            publisher=Microsoft.Azure.Extensions\n\r
+            extension=DockerExtension\n\r
+            location=westus\n\r
+            latest=$(az vm extension image list-versions \\
+              --publisher ${publisher} -l ${location} -n ${extension} \\
+              --query "[].name" -o tsv | sort | tail -n 1)
+            az vm extension image show -l ${location} \\
+              --publisher ${publisher} -n ${extension} --version ${latest}
 """
 
 helps['vm image'] = """
