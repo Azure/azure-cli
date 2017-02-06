@@ -387,10 +387,71 @@ helps['vm disk'] = """
     type: group
     short-summary: Manage VM data disks
 """
+
 helps['vm unmanaged-disk'] = """
     type: group
     short-summary: Manage VM unmanaged data disks
+    long-summary: >
+        Just like any other computer, virtual machines in Azure use disks as a place to store an operating system,
+        applications, and data. All Azure virtual machines have at least two disks – a Linux operating system disk
+        (in the case of a Linux VM) and a temporary disk. The operating system disk is created from an image, and both
+        the operating system disk and the image are actually virtual hard disks (VHDs) stored in an Azure storage
+        account. Virtual machines also can have one or more data disks, that are also stored as VHDs.\n\r
+
+        Operating System Disk\n\r
+        Every virtual machine has one attached operating system disk. It’s registered as a SATA drive and is labeled
+        /dev/sda by default. This disk has a maximum capacity of 1023 gigabytes (GB).\n\r
+
+        Temporary disk\n\r
+        The temporary disk is automatically created for you. On Linux virtual machines, the disk is typically
+        /dev/sdb and is formatted and mounted to /mnt/resource by the Azure Linux Agent. The size of the temporary disk
+        varies, based on the size of the virtual machine.\n\r
+
+        Data disk\n\r
+        A data disk is a VHD that’s attached to a virtual machine to store application data, or other data you need
+        to keep. Data disks are registered as SCSI drives and are labeled with a letter that you choose. Each data
+        disk has a maximum capacity of 1023 GB. The size of the virtual machine determines how many data disks you can
+        attach to it and the type of storage you can use to host the disks.
 """
+
+helps['vm unmanaged-disk attach-new'] = """
+    type: command
+    long-summary: >
+        Attach a persistent disk to your VM so that you can preserve your data - even if your VM is reprovisioned due
+        to maintenance or resizing.
+    examples:
+        - name: Attach a new default sized (1023 GiB) data disk
+          text: az vm unmanaged-disk attach-new -g group_name --vm-name vm_name
+"""
+
+helps['vm unmanaged-disk attach-existing'] = """
+    type: command
+    long-summary: >
+        Attach a persistent disk to your VM so that you can preserve your data - even if your VM is reprovisioned due
+        to maintenance or resizing.
+    examples:
+        - name: Attach an existing data disk
+          text: >
+            az vm unmanaged-disk attach-new -g group_name --vm-name vm_name \\
+                --vhd https://mystorage.blob.core.windows.net/vhds/d1.vhd
+"""
+
+helps['vm unmanaged-disk detach'] = """
+    type: command
+    examples:
+        - name: Detach a data disk
+          text: >
+            az vm unmanaged-disk attach-new -g group_name --vm-name vm_name -n disk_name
+"""
+
+vm_disk_list = 'vm disk list'
+helps[vm_disk_list] = """
+    type: command
+    examples:
+        - name: List attached VM disks by VM name and Resource Group
+          text: az vm disk list -g group_name --vm-name vm_name
+{0}
+""".format(ids_example.format('List attached VM disks by IDs', vm_disk_list))
 
 helps['vm extension'] = """
     type: group
