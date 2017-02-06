@@ -20,9 +20,6 @@ register_cli_argument('cloud', 'cloud_name', options_list=('--name', '-n'),
                       help='Name of the registered cloud',
                       completer=get_cloud_name_completion_list)
 
-register_cli_argument('cloud', 'default_subscription',
-                      help='Name or id of the default subscription to be used when switching cloud')
-
 register_cli_argument('cloud show', 'cloud_name',
                       help='Name of the registered cloud. If not specified, we use the current active cloud.')
 register_cli_argument('cloud update', 'cloud_name',
