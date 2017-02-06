@@ -288,7 +288,7 @@ def list_ip_addresses(resource_group_name=None, vm_name=None):
 
 def create_managed_disk(resource_group_name, disk_name, location=None,
                         source_blob_uri=None, source_disk=None, source_snapshot=None,
-                        size_gb=None, storage_account_type=None):
+                        size_gb=None, sku=None):
     from azure.mgmt.compute.models import Disk, CreationData, DiskCreateOption, ImageDiskReference
     location = location or get_resource_group_location(resource_group_name)
     if source_blob_uri:
@@ -306,21 +306,21 @@ def create_managed_disk(resource_group_name, disk_name, location=None,
         raise CLIError('usage error: --size-gb required to create an empty disk')
 
     disk = Disk(location, disk_size_gb=size_gb, creation_data=creation_data,
-                account_type=storage_account_type)
+                account_type=sku)
     client = _compute_client_factory()
     return client.disks.create_or_update(resource_group_name, disk_name, disk)
 
 
-def update_managed_disk(instance, size_gb=None, storage_account_type=None):
+def update_managed_disk(instance, size_gb=None, sku=None):
     if size_gb is not None:
         instance.disk_size_gb = size_gb
-    if storage_account_type is not None:
-        instance.account_type = storage_account_type
+    if sku is not None:
+        instance.account_type = sku
     return instance
 
 
 def attach_managed_data_disk(resource_group_name, vm_name, disk,
-                             new=False, storage_account_type=None, size_gb=None):
+                             new=False, sku=None, size_gb=None):
     '''attach a managed disk'''
     vm = get_vm(resource_group_name, vm_name)
     from azure.mgmt.compute.models import (CreationData, DiskCreateOptionTypes,
@@ -336,7 +336,7 @@ def attach_managed_data_disk(resource_group_name, vm_name, disk,
                              disk_size_gb=size_gb)
     else:
         params = ManagedDiskParameters(id=disk,
-                                       storage_account_type=storage_account_type)
+                                       storage_account_type=sku)
         data_disk = DataDisk(lun, DiskCreateOptionTypes.attach, managed_disk=params)
 
     vm.storage_profile.data_disks.append(data_disk)
@@ -393,7 +393,7 @@ def grant_disk_access(resource_group_name, disk_name, duration_in_seconds):
 
 def create_snapshot(resource_group_name, snapshot_name, location=None,
                     source_blob_uri=None, source_disk=None, source_snapshot=None,
-                    size_gb=None, storage_account_type=None):
+                    size_gb=None, sku=None):
     from azure.mgmt.compute.models import (Snapshot, CreationData, DiskCreateOption,
                                            ImageDiskReference)
     location = location or get_resource_group_location(resource_group_name)
@@ -412,14 +412,14 @@ def create_snapshot(resource_group_name, snapshot_name, location=None,
         raise CLIError('Please supply size for the snapshots')
 
     snapshot = Snapshot(location, disk_size_gb=size_gb, creation_data=creation_data,
-                        account_type=storage_account_type)
+                        account_type=sku)
     client = _compute_client_factory()
     return client.snapshots.create_or_update(resource_group_name, snapshot_name, snapshot)
 
 
-def update_snapshot(instance, storage_account_type=None):
-    if storage_account_type is not None:
-        instance.account_type = storage_account_type
+def update_snapshot(instance, sku=None):
+    if sku is not None:
+        instance.account_type = sku
     return instance
 
 

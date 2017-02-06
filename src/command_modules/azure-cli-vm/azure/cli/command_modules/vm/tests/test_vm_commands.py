@@ -337,15 +337,15 @@ class VMManagedDiskScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('accountType', 'Standard_LRS'),
             JMESPathCheck('diskSizeGb', 1)
         ])
-        self.cmd('disk update -g {} -n {} --size-gb {} --storage-account-type {}'.format(self.resource_group, disk_name, 2, 'Premium_LRS'), checks=[
+        self.cmd('disk update -g {} -n {} --size-gb {} --sku {}'.format(self.resource_group, disk_name, 2, 'Premium_LRS'), checks=[
             JMESPathCheck('accountType', 'Premium_LRS'),
             JMESPathCheck('diskSizeGb', 2)
         ])
-        os_snapshot = self.cmd('snapshot create -g {} -n {} --size-gb {} --storage-account-type {}'.format(self.resource_group, snapshot_name, 1, 'Premium_LRS'), checks=[
+        os_snapshot = self.cmd('snapshot create -g {} -n {} --size-gb {} --sku {}'.format(self.resource_group, snapshot_name, 1, 'Premium_LRS'), checks=[
             JMESPathCheck('accountType', 'Premium_LRS'),
             JMESPathCheck('diskSizeGb', 1)
         ])
-        self.cmd('snapshot update -g {} -n {} --storage-account-type {}'.format(self.resource_group, snapshot_name, 'Standard_LRS'), checks=[
+        self.cmd('snapshot update -g {} -n {} --sku {}'.format(self.resource_group, snapshot_name, 'Standard_LRS'), checks=[
             JMESPathCheck('accountType', 'Standard_LRS'),
             JMESPathCheck('diskSizeGb', 1)
         ])

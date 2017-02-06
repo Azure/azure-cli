@@ -42,7 +42,7 @@ name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 multi_ids_type = CliArgumentType(nargs='+')
 existing_vm_name = CliArgumentType(overrides=name_arg_type, help='The name of the Virtual Machine', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'), id_part='name')
 vmss_name_type = CliArgumentType(name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), help='Scale set name.', id_part='name')
-disk_storage_account_type = CliArgumentType(required=False, help='underlying storage account type', **enum_choice_list(['Premium_LRS', 'Standard_LRS']))
+disk_sku = CliArgumentType(required=False, help='underlying storage sku', **enum_choice_list(['Premium_LRS', 'Standard_LRS']))
 
 # ARGUMENT REGISTRATION
 
@@ -71,7 +71,7 @@ register_cli_argument('vm disk', 'vm_name', options_list=('--vm-name',), id_part
 register_cli_argument('vm disk', 'disk', validator=validate_vm_disk, help='disk name or id',
                       completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
 register_cli_argument('vm disk', 'new', action="store_true", help='create a new disk')
-register_cli_argument('vm disk', 'storage_account_type', arg_type=disk_storage_account_type)
+register_cli_argument('vm disk', 'sku', arg_type=disk_sku)
 register_cli_argument('vm disk', 'size_gb', options_list=('--size-gb', '-z'), help='size in GB.')
 
 register_cli_argument('vm availability-set', 'availability_set_name', name_arg_type, id_part='name',
@@ -234,12 +234,12 @@ register_cli_argument('vmss create', 'vm_sku', help='Size of VMs in the scale se
 existing_disk_name = CliArgumentType(overrides=name_arg_type, help='The name of the managed disk', completer=get_resource_name_completion_list('Microsoft.Compute/disks'), id_part='name')
 register_cli_argument('disk', 'disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
 register_cli_argument('disk', 'name', arg_type=name_arg_type)
-register_cli_argument('disk', 'storage_account_type', arg_type=disk_storage_account_type)
+register_cli_argument('disk', 'sku', arg_type=disk_sku)
 
 existing_snapshot_name = CliArgumentType(overrides=name_arg_type, help='The name of the snapshot', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'), id_part='name')
 register_cli_argument('snapshot', 'snapshot_name', existing_snapshot_name, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'))
 register_cli_argument('snapshot', 'name', arg_type=name_arg_type)
-register_cli_argument('snapshot', 'storage_account_type', arg_type=disk_storage_account_type)
+register_cli_argument('snapshot', 'sku', arg_type=disk_sku)
 
 existing_image_name = CliArgumentType(overrides=name_arg_type, help='The name of the custom image', completer=get_resource_name_completion_list('Microsoft.Compute/images'), id_part='name')
 register_cli_argument('image', 'os_type', **enum_choice_list(['Windows', 'Linux']))
