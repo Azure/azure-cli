@@ -318,7 +318,7 @@ class VMCreateFromUnmanagedDiskTest(ResourceGroupVCRTestBase):
             JMESPathCheck('name', managed_os_disk)
         ])
         # create a vm by attaching to it
-        self.cmd('vm create -g {} -n {} --managed-os-disk {} --os-type linux'.format(self.resource_group, vm2, managed_os_disk), checks=[
+        self.cmd('vm create -g {} -n {} --attach-os-disk {} --os-type linux'.format(self.resource_group, vm2, managed_os_disk), checks=[
             JMESPathCheck('powerState', 'VM running')
         ])
 

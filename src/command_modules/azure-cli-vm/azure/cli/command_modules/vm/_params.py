@@ -9,6 +9,7 @@ from argcomplete.completers import FilesCompleter
 from azure.mgmt.compute.models import (CachingTypes,
                                        ContainerServiceOchestratorTypes,
                                        UpgradeMode)
+from azure.mgmt.storage.models import SkuName
 from azure.cli.core.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
 from azure.cli.core.commands.parameters import \
     (location_type, get_one_of_subscription_locations,
@@ -171,7 +172,7 @@ register_cli_argument('vm create', 'name', name_arg_type, validator=_resource_no
 
 register_cli_argument('vmss create', 'name', name_arg_type)
 register_cli_argument('vmss create', 'nat_backend_port', default=None, help='Backend port to open with NAT rules.  Defaults to 22 on Linux and 3389 on Windows.')
-register_cli_argument('vmss create', 'single_placement_group', default=None, help="Enable single placement group. This flag will default to True if instance count <=100; For instance count >100, CLI will turn it off as it won't work", **enum_choice_list(['true', 'false']))
+register_cli_argument('vmss create', 'single_placement_group', default=None, help="Enable single placement group. This flag will default to True if instance count <=100, and default to False for instance count >100.", **enum_choice_list(['true', 'false']))
 
 for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'location', location_type, help='Location in which to create VM and related resources. Defaults to the resource group\'s location.')
@@ -191,9 +192,8 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'os_type', help='Type of OS installed on a custom VHD. Do not use when specifiying an URN or URN alias.', arg_group='Storage', **enum_choice_list(['windows', 'linux']))
     register_cli_argument(scope, 'storage_account', help="Only applicable when use with '--use-unmanaged-disk'. The name to use when creating a new storage account or referencing an existing one. If omitted, an appropriate storage account in the same resource group and location will be used, or a new one will be created.", arg_group='Storage')
     register_cli_argument(scope, 'storage_caching', help='Storage caching type for the VM OS disk', arg_group='Storage', **enum_choice_list(['ReadWrite', 'ReadOnly']))
-    register_cli_argument(scope, 'storage_sku', help="The storage SKU to use for new storage accounts. Allowed value: Premium_LRS, Standard_LRS. With use with '--use-unmanaged-disk', 3 more options are available: Standard_GRS, Standard_RAGRS, Standard_ZRS. ", arg_group='Storage')
+    register_cli_argument(scope, 'storage_sku', help='The sku of storage account to persist VM. By default, only Standard_LRS and Premium_LRS are allowed. Using with --use-unmanaged-disk, all are available.', arg_group='Storage', **enum_choice_list(SkuName))
     register_cli_argument(scope, 'storage_container_name', help="Only applicable when use with '--use-unmanaged-disk'. Name of the storage container for the VM OS disk.", arg_group='Storage')
-
     register_cli_argument(scope, 'os_publisher', ignore_type)
     register_cli_argument(scope, 'os_offer', ignore_type)
     register_cli_argument(scope, 'os_sku', ignore_type)
@@ -219,7 +219,7 @@ for scope in ['vm create', 'vmss create']:
 
 register_cli_argument('vm create', 'vm_name', name_arg_type, id_part=None, help='Name of the virtual machine.', validator=process_vm_create_namespace)
 register_cli_argument('vm create', 'availability_set', help='Name or ID of an existing availability set to add the VM to. None by default.')
-register_cli_argument('vm create', 'managed_os_disk', help='create VM by attaching to an existing managed OS disk', arg_group='Storage')
+register_cli_argument('vm create', 'managed_os_disk', options_list=('--attach-os-disk',), help='create VM by attaching to an existing managed OS disk', arg_group='Storage')
 
 register_cli_argument('vmss create', 'vmss_name', name_arg_type, id_part=None, help='Name of the virtual machine scale set.', validator=process_vmss_create_namespace)
 register_cli_argument('vmss create', 'load_balancer', help='Name to use when creating a new load balancer (default) or referencing an existing one. Can also reference an existing load balancer by ID or specify "" for none.', arg_group='Load Balancer')
