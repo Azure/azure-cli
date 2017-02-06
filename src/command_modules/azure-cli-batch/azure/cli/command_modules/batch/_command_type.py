@@ -35,7 +35,9 @@ IGNORE_OPTIONS = {  # Options parameters that should not be exposed as arguments
 }
 IGNORE_PARAMETERS = [
     'callback',
-    'thumbprint_algorithm'
+    'thumbprint_algorithm',
+    'display_name',
+    'common_environment_settings'
 ]
 FLATTEN_OPTIONS = {  # Options to be flattened into multiple arguments.
     'ocp_range': {'start_range': "The byte range to be retrieved. "
@@ -695,6 +697,8 @@ class AzureBatchDataPlaneCommand(object):
                               val in param_model._validation.items() if val.get('required')]  # pylint: disable=protected-access
 
             for param_attr, details in self._get_attrs(param_model, path):
+                if param_attr in IGNORE_PARAMETERS:
+                    continue
                 options = {}
                 options['options_list'] = [arg_name(param_attr)]
                 options['required'] = False

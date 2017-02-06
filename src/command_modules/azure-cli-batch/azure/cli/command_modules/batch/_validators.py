@@ -11,8 +11,33 @@ from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
 from msrest.serialization import Deserializer
 from msrest.exceptions import DeserializationError
 
-# TYPES VALIDATORS
 
+def load_node_agent_skus(prefix, **kwargs):  # pylint: disable=unused-argument
+    from msrest.exceptions import ClientRequestError
+    from azure.batch.models import BatchErrorException
+    from azure.cli.command_modules.batch._client_factory import account_client_factory
+    from azure.cli.core._config import az_config
+    all_images = []
+    client_creds = {}
+    client_creds['account_name'] = az_config.get('batch', 'account', None)
+    client_creds['account_key'] = az_config.get('batch', 'access_key', None)
+    client_creds['account_endpoint'] = az_config.get('batch', 'endpoint', None)
+    try:
+        client = account_client_factory(client_creds)
+        skus = client.list_node_agent_skus()
+        for sku in skus:
+            for image in sku['verifiedImageReferences']:
+                all_images.append("{}:{}:{}:{}".format(
+                    image['publisher'],
+                    image['offer'],
+                    image['sku'],
+                    image['version']))
+        return all_images
+    except (ClientRequestError, BatchErrorException):
+        return []
+
+
+# TYPES VALIDATORS
 
 def datetime_format(value):
     """Validate the correct format of a datetime string and deserialize."""
@@ -260,6 +285,27 @@ def validate_pool_settings(ns, parser):
                        "Please swap for the equivalent: Standard_A1 (small), Standard_A2 "
                        "(medium), Standard_A3 (large), or Standard_A4 (extra large).")
             raise ValueError(message)
+        if ns.auto_scale_formula:
+            ns.enable_auto_scale = True
+        if ns.image:
+            version = 'latest'
+            try:
+                publisher, offer, sku = ns.image.split(':', 2)
+            except ValueError:
+                message = ("Incorrect format for VM image URN. Should be in the format: \n"
+                           "'publisher:offer:sku[:version]'")
+                raise ValueError(message)
+            try:
+                sku, version = sku.split(':', 1)
+            except ValueError:
+                pass
+            ns.pool = {'virtual_machine_configuration': {'image_reference': {
+                'publisher': publisher,
+                'offer': offer,
+                'sku': sku,
+                'version': version
+            }}}
+            del ns.image
 
 
 def validate_cert_settings(ns):

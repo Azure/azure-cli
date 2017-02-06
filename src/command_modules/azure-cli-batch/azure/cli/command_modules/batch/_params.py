@@ -19,7 +19,7 @@ from azure.cli.command_modules.batch._validators import \
     (application_enabled, datetime_format, storage_account_id, application_package_reference_format,
      validate_client_parameters, validate_pool_resize_parameters, metadata_item_format,
      certificate_reference_format, validate_json_file, validate_cert_file,
-     environment_setting_format, validate_cert_settings, resource_file_format)
+     environment_setting_format, validate_cert_settings, resource_file_format, load_node_agent_skus)
 
 # pylint: disable=line-too-long
 # ARGUMENT DEFINITIONS
@@ -81,6 +81,8 @@ for command in ['job create', 'job set', 'job reset', 'job-schedule create', 'jo
     register_cli_argument('batch {}'.format(command), 'pool_id', options_list=('--pool-id',), help='The id of an existing pool. All the tasks of the job will run on the specified pool.')
 
 register_cli_argument('batch pool create', 'os_family', **enum_choice_list(['2', '3', '4', '5']))
+register_extra_cli_argument('batch pool create', 'image', completer=load_node_agent_skus, arg_group="Pool: Virtual Machine Configuration",
+                            help="OS image URN in 'publisher:offer:sku[:version]' format. Version is optional and if omitted latest will be used.\n\tValues from 'az batch pool node-agent-skus list'.\n\tExample: 'MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest'")
 
 register_cli_argument('batch certificate', 'thumbprint', help='The certificate thumbprint.')
 register_cli_argument('batch certificate show', 'thumbprint', help='The certificate thumbprint.', validator=validate_cert_settings)

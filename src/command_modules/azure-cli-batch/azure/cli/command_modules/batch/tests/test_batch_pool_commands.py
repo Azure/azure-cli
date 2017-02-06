@@ -38,8 +38,9 @@ class BatchPoolScenarioTest(BatchDataPlaneTestBase):
             self.pool_paas))
 
         # test create iaas pool using parameters
-        self.cmd('batch pool create --id {} --vm-size Standard_A1 --publisher Canonical --offer '
-                 'UbuntuServer --sku 16.04.0-LTS --node-agent-sku-id "batch.node.ubuntu 16.04"'.
+        self.cmd('batch pool create --id {} --vm-size Standard_A1 '
+                 '--image Canonical:UbuntuServer:16.04.0-LTS '
+                 '--node-agent-sku-id "batch.node.ubuntu 16.04"'.
                  format(self.pool_iaas))
 
         # test create pool with missing parameters
@@ -59,15 +60,15 @@ class BatchPoolScenarioTest(BatchDataPlaneTestBase):
         # test create pool with parameters from mutually exclusive groups
         try:
             self.cmd('batch pool create --id mutually-exclusive-test --vm-size small --os-family' +
-                     '4 --publisher Canonical --offer UbuntuServer')
+                     '4 --image Canonical:UbuntuServer')
             raise AssertionError("Excepted exception to be raised.")
         except SystemExit as exp:
             self.assertEqual(exp.code, 2)
 
         # test create pool with invalid vm size for IaaS
         try:
-            self.cmd('batch pool create --id invalid-size-test --vm-size small --publisher ' +
-                     'Canonical --offer UbuntuServer --sku 16.04.0-LTS --node-agent-sku-id ' +
+            self.cmd('batch pool create --id invalid-size-test --vm-size small ' +
+                     '--image Canonical:UbuntuServer:16.04.0-LTS --node-agent-sku-id ' +
                      '"batch.node.ubuntu 16.04"')
         except SystemExit as exp:
             self.assertEqual(exp.code, 2)
