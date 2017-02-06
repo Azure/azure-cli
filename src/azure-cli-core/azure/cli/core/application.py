@@ -205,7 +205,7 @@ class Application(object):
     def _register_builtin_arguments(**kwargs):
         global_group = kwargs['global_group']
         global_group.add_argument('--output', '-o', dest='_output_format',
-                                  choices=['json', 'tsv', 'list', 'table', 'jsonc'],
+                                  choices=['json', 'tsv', 'table', 'jsonc'],
                                   default=az_config.get('core', 'output', fallback='json'),
                                   help='Output format',
                                   type=str.lower)

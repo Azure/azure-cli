@@ -9,7 +9,6 @@ import errno
 import sys
 import platform
 import json
-import re
 import traceback
 from collections import OrderedDict
 from six import StringIO, text_type, u, string_types
@@ -78,13 +77,6 @@ def format_table(obj):
                        "Use --debug for more info.")
 
 
-def format_list(obj):
-    result = obj.result
-    result_list = result if isinstance(result, list) else [result]
-    lo = ListOutput()
-    return lo.dump(result_list)
-
-
 def format_tsv(obj):
     result = obj.result
     result_list = result if isinstance(result, list) else [result]
@@ -106,11 +98,10 @@ class OutputProducer(object):  # pylint: disable=too-few-public-methods
         'jsonc': format_json_color,
         'table': format_table,
         'text': format_text,
-        'list': format_list,
         'tsv': format_tsv,
     }
 
-    def __init__(self, formatter=format_list, file=sys.stdout):  # pylint: disable=redefined-builtin
+    def __init__(self, formatter, file=sys.stdout):  # pylint: disable=redefined-builtin
         self.formatter = formatter
         self.file = file
 
@@ -131,7 +122,7 @@ class OutputProducer(object):  # pylint: disable=too-few-public-methods
 
     @staticmethod
     def get_formatter(format_type):
-        return OutputProducer.format_dict.get(format_type, format_list)
+        return OutputProducer.format_dict.get(format_type)
 
 
 class TableOutput(object):  # pylint: disable=too-few-public-methods
@@ -178,78 +169,6 @@ class TableOutput(object):  # pylint: disable=too-few-public-methods
         if table_str == '\n':
             raise ValueError('Unable to extract fields for table.')
         return table_str + '\n'
-
-
-class ListOutput(object):  # pylint: disable=too-few-public-methods
-
-    # Match the capital letters in a camel case string
-    FORMAT_KEYS_PATTERN = re.compile('([A-Z]+(?![a-z])|[A-Z]{1}[a-z]+)')
-
-    def __init__(self):
-        self._formatted_keys_cache = {}
-
-    @staticmethod
-    def _get_max_key_len(keys):
-        return len(max(keys, key=len)) if keys else 0
-
-    @staticmethod
-    def _sort_key_func(key, item):
-        # We want dictionaries to be last so use ASCII char 126 ~ to
-        # prefix dictionary and list key names.
-        if isinstance(item[key], dict):
-            return '~~' + key
-        elif isinstance(item[key], list):
-            return '~' + key
-        else:
-            return key
-
-    def _get_formatted_key(self, key):
-        def _format_key(key):
-            words = [word for word in re.split(ListOutput.FORMAT_KEYS_PATTERN, key) if word]
-            return ' '.join(words).title()
-
-        try:
-            return self._formatted_keys_cache[key]
-        except KeyError:
-            self._formatted_keys_cache[key] = _format_key(key)
-            return self._formatted_keys_cache[key]
-
-    @staticmethod
-    def _dump_line(io, line, indent):
-        io.write('   ' * indent)
-        io.write(_decode_str(line))
-        io.write('\n')
-
-    def _dump_object(self, io, obj, indent):
-        if isinstance(obj, list):
-            for array_item in obj:
-                self._dump_object(io, array_item, indent)
-        elif isinstance(obj, dict):
-            obj_fk = {k: self._get_formatted_key(k) for k in obj}
-            key_width = ListOutput._get_max_key_len(obj_fk.values())
-            for key in sorted(obj, key=lambda x: ListOutput._sort_key_func(x, obj)):
-                if isinstance(obj[key], dict) or isinstance(obj[key], list):
-                    # complex object
-                    line = '%s :' % (self._get_formatted_key(key).ljust(key_width))
-                    ListOutput._dump_line(io, line, indent)
-                    self._dump_object(io, obj[key] if obj[key] else 'None', indent + 1)
-                else:
-                    # non-complex so write it
-                    line = '%s : %s' % (self._get_formatted_key(key).ljust(key_width),
-                                        'None' if obj[key] is None else obj[key])
-                    ListOutput._dump_line(io, line, indent)
-        else:
-            ListOutput._dump_line(io, obj, indent)
-
-    def dump(self, data):
-        io = StringIO()
-        for obj in data:
-            self._dump_object(io, obj, 0)
-            io.write('\n')
-        io.write('\n')
-        result = io.getvalue()
-        io.close()
-        return result
 
 
 class TextOutput(object):
