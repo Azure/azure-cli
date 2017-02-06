@@ -38,7 +38,7 @@ from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone
 logger = azlogging.get_az_logger(__name__)
 
 def _upsert(collection, obj, key_name, key_value):
-    match = next((x for x in collection if getattr(x, key_name) == key_value), None)
+    match = next((x for x in collection if getattr(x, key_name, None) == key_value), None)
     if match:
         logger.warning("Item '%s' already exists. Replacing with new values.", key_value)
         collection.remove(match)
