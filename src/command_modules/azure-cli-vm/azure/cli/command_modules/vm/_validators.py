@@ -6,6 +6,8 @@
 import os
 import re
 
+from msrestazure.azure_exceptions import CloudError
+
 from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid_resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core._util import CLIError
@@ -149,7 +151,6 @@ def _validate_vm_create_storage_profile(namespace, for_scale_set=False):  # pyli
                                          else StorageProfile.ManagedPirImage)
         else:
             # last try: is it a custom image name?
-            from msrestazure.azure_exceptions import CloudError
             compute_client = _compute_client_factory()
             try:
                 compute_client.images.get(namespace.resource_group_name, image)
@@ -531,64 +532,69 @@ def validate_vm_disk(namespace):
 
 
 def process_disk_or_snapshot_create_namespace(namespace):
-    temp = [namespace.source_disk, namespace.source_snapshot, namespace.source_blob_uri]
-    if sum([1 for t in temp if t]) > 1:
-        raise CLIError('Only one source can be specified: --source-disk | --source-snapshot | '
-                       '--source-blob-uri')
-
-    if namespace.source_disk:
-        namespace.source_disk = _get_resource_id(namespace.source_disk,
-                                                 namespace.resource_group_name,
-                                                 'disks', 'Microsoft.Compute')
-    elif namespace.source_snapshot:
-        namespace.source_snapshot = _get_resource_id(namespace.source_snapshot,
-                                                     namespace.resource_group_name,
-                                                     'snapshots', 'Microsoft.Compute')
+    if namespace.source:
+        try:
+            namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot = _figure_out_storage_source(namespace.resource_group_name, namespace.source)  # pylint: disable=line-too-long
+        except CloudError:
+            raise CLIError("Incorrect '--source' usage: --source VHD_BLOB_URI | SNAPSHOT | DISK")
 
 
 def process_image_create_namespace(namespace):
-    temp = [namespace.os_disk, namespace.os_snapshot,
-            namespace.os_blob_uri, namespace.source_virtual_machine]
-    if sum([1 for t in temp if t]) > 1:
-        raise CLIError('Only one os disk source can be specified: --os-disk | --os-snapshot | '
-                       '--os-blob-uri | --source-virtual-machine')
-
-    if namespace.os_disk:
-        namespace.os_disk = _get_resource_id(namespace.os_disk, namespace.resource_group_name,
-                                             'disks', 'Microsoft.Compute')
-    if namespace.os_snapshot:
-        namespace.os_snapshot = _get_resource_id(namespace.os_snapshot,
-                                                 namespace.resource_group_name,
-                                                 'snapshots', 'Microsoft.Compute')
-
-    if namespace.data_disks:
-        ids = []
-        for d in namespace.data_disks:
-            ids.append(_get_resource_id(d, namespace.resource_group_name,
-                                        'disks', 'Microsoft.Compute'))
-        namespace.data_disks = ids
-
-    if namespace.data_snapshots:
-        ids = []
-        for d in namespace.data_snapshots:
-            ids.append(_get_resource_id(d, namespace.resource_group_name,
-                                        'snapshots', 'Microsoft.Compute'))
-        namespace.data_snapshots = ids
-
-    if namespace.source_virtual_machine:
-        namespace.source_virtual_machine = _get_resource_id(namespace.source_virtual_machine,
-                                                            namespace.resource_group_name,
-                                                            'virtualMachines',
-                                                            'Microsoft.Compute')
+    try:
+        # try capturing from VM, a most common scenario
+        compute_client = _compute_client_factory()
+        res_id = _get_resource_id(namespace.source, namespace.resource_group_name,
+                                  'virtualMachines', 'Microsoft.Compute')
+        res = parse_resource_id(res_id)
+        vm_info = compute_client.virtual_machines.get(res['resource_group'], res['name'])
+        # pylint: disable=no-member
+        namespace.os_type = vm_info.storage_profile.os_disk.os_type.value
+        namespace.source_virtual_machine = res_id
+        if namespace.data_disk_sources:
+            raise CLIError("'--data-disk-sources' is not allowed when capturing "
+                           "images from virtual machines")
+    except CloudError:
+        namespace.os_blob_uri, namespace.os_disk, namespace.os_snapshot = _figure_out_storage_source(namespace.resource_group_name, namespace.source)  # pylint: disable=line-too-long
+        namespace.data_blob_uris = []
+        namespace.data_disks = []
+        namespace.data_snapshots = []
+        if namespace.data_disk_sources:
+            for data_disk_source in namespace.data_disk_sources:
+                source_blob_uri, source_disk, source_snapshot = _figure_out_storage_source(
+                    namespace.resource_group_name, data_disk_source)
+                if source_blob_uri:
+                    namespace.data_blob_uris.append(source_blob_uri)
+                if source_disk:
+                    namespace.data_disks.append(source_disk)
+                if source_snapshot:
+                    namespace.data_snapshots.append(source_snapshot)
         if not namespace.os_type:
-            compute_client = _compute_client_factory()
-            res = parse_resource_id(namespace.source_virtual_machine)
-            vm_info = compute_client.virtual_machines.get(res['resource_group'], res['name'])
-            # pylint: disable=no-member
-            namespace.os_type = vm_info.storage_profile.os_disk.os_type.value
-    elif not namespace.os_type:
-        raise CLIError("usage error: os type is required to create the image, "
-                       "please specify '--os-type OS_TYPE'")
+            raise CLIError("usage error: os type is required to create the image, "
+                           "please specify '--os-type OS_TYPE'")
+
+
+def _figure_out_storage_source(resource_group_name, source):
+    source = source.lower()
+    source_blob_uri = None
+    source_disk = None
+    source_snapshot = None
+    if source.lower().endswith('.vhd'):
+        source_blob_uri = source
+    elif '/disks/' in source:
+        source_disk = source
+    elif '/snapshots/' in source:
+        source_snapshot = source
+    else:
+        compute_client = _compute_client_factory()
+        # pylint: disable=no-member
+        try:
+            info = compute_client.snapshots.get(resource_group_name, source)
+            source_snapshot = info.id
+        except CloudError:
+            info = compute_client.disks.get(resource_group_name, source)
+            source_disk = info.id
+
+    return (source_blob_uri, source_disk, source_snapshot)
 
 
 # endregion

@@ -264,7 +264,7 @@ class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
         # capture to a custom image
         image_name = 'myImage'
         new_vm_name = 'vm2'
-        self.cmd('image create -g {} -n {} --source-virtual-machine {}'.format(self.resource_group, image_name, self.vm_name), checks=[
+        self.cmd('image create -g {} -n {} --source {}'.format(self.resource_group, image_name, self.vm_name), checks=[
             JMESPathCheck('name', image_name),
             JMESPathCheck('sourceVirtualMachine.id', vm['id'])
         ])
@@ -314,7 +314,7 @@ class VMCreateFromUnmanagedDiskTest(ResourceGroupVCRTestBase):
         test_specialized_os_disk_vhd_uri = vm1_info['storageProfile']['osDisk']['vhd']['uri']
         vm2 = 'vm2'
         managed_os_disk = 'os1'
-        self.cmd('disk create -g {} -n {} --source-blob-uri {}'.format(self.resource_group, managed_os_disk, test_specialized_os_disk_vhd_uri), checks=[
+        self.cmd('disk create -g {} -n {} --source {}'.format(self.resource_group, managed_os_disk, test_specialized_os_disk_vhd_uri), checks=[
             JMESPathCheck('name', managed_os_disk)
         ])
         # create a vm by attaching to it
@@ -331,30 +331,47 @@ class VMManagedDiskScenarioTest(ResourceGroupVCRTestBase):
 
     def body(self):
         disk_name = 'd1'
+        disk_name2 = 'd2'
         snapshot_name = 's1'
+        snapshot_name2 = 's2'
         image_name = 'i1'
+
+        # create a disk and update
         data_disk = self.cmd('disk create -g {} -n {} --size-gb {}'.format(self.resource_group, disk_name, 1), checks=[
             JMESPathCheck('accountType', 'Standard_LRS'),
             JMESPathCheck('diskSizeGb', 1)
         ])
-        self.cmd('disk update -g {} -n {} --size-gb {} --sku {}'.format(self.resource_group, disk_name, 2, 'Premium_LRS'), checks=[
+        self.cmd('disk update -g {} -n {} --size-gb {} --sku {}'.format(self.resource_group, disk_name, 10, 'Premium_LRS'), checks=[
             JMESPathCheck('accountType', 'Premium_LRS'),
-            JMESPathCheck('diskSizeGb', 2)
+            JMESPathCheck('diskSizeGb', 10)
         ])
-        os_snapshot = self.cmd('snapshot create -g {} -n {} --size-gb {} --sku {}'.format(self.resource_group, snapshot_name, 1, 'Premium_LRS'), checks=[
+
+        # create another disk by importing from the disk1
+        data_disk2 = self.cmd('disk create -g {} -n {} --source {}'.format(self.resource_group, disk_name2, data_disk['id']))
+
+        # create a snpashot
+        os_snapshot = self.cmd('snapshot create -g {} -n {} --size-gb {} --sku {}'.format(
+            self.resource_group, snapshot_name, 1, 'Premium_LRS'), checks=[
             JMESPathCheck('accountType', 'Premium_LRS'),
             JMESPathCheck('diskSizeGb', 1)
         ])
+        # update the sku
         self.cmd('snapshot update -g {} -n {} --sku {}'.format(self.resource_group, snapshot_name, 'Standard_LRS'), checks=[
             JMESPathCheck('accountType', 'Standard_LRS'),
             JMESPathCheck('diskSizeGb', 1)
         ])
-        # Till now, image creation doesn't inspect the disk for os, so the command below should succeed with junk disk
-        self.cmd('image create -g {} -n {} --os-snapshot {} --data-disks {} --os-type Linux'.format(self.resource_group, image_name, snapshot_name, disk_name), checks=[
+
+        # create another snapshot by importing from the disk1
+        data_snapshot = self.cmd('snapshot create -g {} -n {} --source {} --sku {}'.format(
+            self.resource_group, snapshot_name2, disk_name, 'Premium_LRS'))
+
+        # till now, image creation doesn't inspect the disk for os, so the command below should succeed with junk disk
+        # pylint: disable=too-many-format-args
+        self.cmd('image create -g {} -n {} --source {} --data-disk-sources {} {} {} --os-type Linux'.format(
+            self.resource_group, image_name, snapshot_name, disk_name, data_snapshot['id'], data_disk2['id']), checks=[
             JMESPathCheck('storageProfile.osDisk.osType', 'Linux'),
             JMESPathCheck('storageProfile.osDisk.snapshot.id', os_snapshot['id']),
-            JMESPathCheck('length(storageProfile.dataDisks)', 1),
-            JMESPathCheck('storageProfile.dataDisks[0].managedDisk.id', data_disk['id']),
+            JMESPathCheck('length(storageProfile.dataDisks)', 3)
         ])
 
     def test_managed_disk(self):
@@ -1009,7 +1026,7 @@ class VMUnmanagedDataDiskTest(ResourceGroupVCRTestBase):
         # capture to a custom image
         image_name = 'myImage'
         new_vm_name = 'vm2'
-        self.cmd('image create -g {} -n {} --source-virtual-machine {}'.format(self.resource_group, image_name, self.vm_name))
+        self.cmd('image create -g {} -n {} --source {}'.format(self.resource_group, image_name, self.vm_name))
 
         # use the new image to create a vm
         self.cmd('vm create -g {0} -n {1} --admin-username ubuntu --admin-password testPassword0 --authentication-type password '

@@ -287,8 +287,10 @@ def list_ip_addresses(resource_group_name=None, vm_name=None):
 
 
 def create_managed_disk(resource_group_name, disk_name, location=None,
-                        source_blob_uri=None, source_disk=None, source_snapshot=None,
-                        size_gb=None, sku=None):
+                        size_gb=None, sku=None,
+                        source=None,  # pylint: disable=unused-argument
+                        # below are generated internally from 'source'
+                        source_blob_uri=None, source_disk=None, source_snapshot=None):
     from azure.mgmt.compute.models import Disk, CreationData, DiskCreateOption, ImageDiskReference
     location = location or get_resource_group_location(resource_group_name)
     if source_blob_uri:
@@ -392,8 +394,10 @@ def grant_disk_access(resource_group_name, disk_name, duration_in_seconds):
 
 
 def create_snapshot(resource_group_name, snapshot_name, location=None,
-                    source_blob_uri=None, source_disk=None, source_snapshot=None,
-                    size_gb=None, sku=None):
+                    size_gb=None, sku=None,
+                    source=None,  # pylint: disable=unused-argument
+                    # below are generated internally from 'source'
+                    source_blob_uri=None, source_disk=None, source_snapshot=None):
     from azure.mgmt.compute.models import (Snapshot, CreationData, DiskCreateOption,
                                            ImageDiskReference)
     location = location or get_resource_group_location(resource_group_name)
@@ -458,7 +462,9 @@ def list_images(resource_group_name=None):
         return client.images.list()
 
 
-def create_image(resource_group_name, name, os_type=None, location=None,
+def create_image(resource_group_name, name, os_type=None, location=None,  # pylint: disable=too-many-locals,line-too-long
+                 source=None, data_disk_sources=None,  # pylint: disable=unused-argument
+                 # below are generated internally from 'source' and 'data_disk_sources'
                  source_virtual_machine=None,
                  os_blob_uri=None, data_blob_uris=None,
                  os_snapshot=None, data_snapshots=None,

@@ -331,11 +331,11 @@ helps['disk create'] = """
     short-summary: create a managed disk
     examples:
         - name: Create by importing from blob uri
-          text: az disk create -g myRG -n myDisk --source-blob-uri https://vhd1234.blob.core.windows.net/vhds/osdisk1234.vhd
+          text: az disk create -g myRG -n myDisk --source https://vhd1234.blob.core.windows.net/vhds/osdisk1234.vhd
         - name: Create an empty disk
           text: az disk create -g myRG -n myDisk --size-gb 10
         - name: Create by copying from an existing disk or snapshot
-          text: az disk create -g myRG -n myDisk2 --source-disk myDisk
+          text: az disk create -g myRG -n myDisk2 --source myDisk
 """
 helps['disk list'] = """
     type: command
@@ -363,11 +363,11 @@ helps['snapshot create'] = """
     short-summary: create a snapshot
     examples:
         - name: Create by importing from blob uri
-          text: az snapshot create -g myRG -n mySnapshot --source-blob-uri https://vhd1234.blob.core.windows.net/vhds/osdisk1234.vhd
+          text: az snapshot create -g myRG -n mySnapshot --source https://vhd1234.blob.core.windows.net/vhds/osdisk1234.vhd
         - name: Create an empty snapshot
           text: az snapshot create -g myRG -n mySnapshot --size-gb 10
         - name: Create by copying from an existing disk from the same resource group
-          text: az snapshot create -g myRG -n mySnapshot2 --source-disk myDisk
+          text: az snapshot create -g myRG -n mySnapshot2 --source myDisk
 """
 helps['snapshot update'] = """
     type: command
@@ -390,9 +390,9 @@ helps['image create'] = """
     short-summary: create a custom image from managed disks or snapshots
     examples:
         - name: Create from an existing disk
-          text: az image create -g myRG -n image1 --os-type Linux --os-snapshot /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/rg1/providers/Microsoft.Compute/snapshots/s1 --data-snapshot /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/rg/providers/Microsoft.Compute/snapshots/s2
+          text: az image create -g myRG -n image1 --os-type Linux --source /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/rg1/providers/Microsoft.Compute/snapshots/s1 --data-snapshot /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/rg/providers/Microsoft.Compute/snapshots/s2
         - name: Create by capturing an existing generalize virtual machine from the same resource group
-          text: az image create -g myRG -n image1 --source-virtual-machine myvm1
+          text: az image create -g myRG -n image1 --source myvm1
 """
 helps['image list'] = """
     type: command

@@ -244,21 +244,26 @@ register_cli_argument('snapshot', 'sku', arg_type=disk_sku)
 existing_image_name = CliArgumentType(overrides=name_arg_type, help='The name of the custom image', completer=get_resource_name_completion_list('Microsoft.Compute/images'), id_part='name')
 register_cli_argument('image', 'os_type', **enum_choice_list(['Windows', 'Linux']))
 register_cli_argument('image', 'image_name', arg_type=name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/images'))
-register_cli_argument('image create', 'name', arg_type=name_arg_type, validator=process_image_create_namespace, help='new image name')
-register_cli_argument('image create', 'os_blob_uri', help='blob uri of os virtual hard disk')
-register_cli_argument('image create', 'data_blob_uris', arg_type=multi_ids_type, help='space separated blob uris of data virtual hard disk')
-register_cli_argument('image create', 'os_snapshot', help='snapshot id or name to copy for the os disk')
-register_cli_argument('image create', 'os_disk', help='managed os disk id or name to copy for the os disk')
-register_cli_argument('image create', 'data_disks', arg_type=multi_ids_type, help='space separated managed disk id or name to copy for datat disks')
-register_cli_argument('image create', 'data_snapshots', arg_type=multi_ids_type, help='space separated snapshot id or name to copy for datat disks')
-register_cli_argument('image create', 'source_virtual_machine', help='id or name of a generalized virtual machine to capture image from',
-                      completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'))
+register_cli_argument('image create', 'name', arg_type=name_arg_type, help='new image name')
+
+# here we collpase all difference image sources to under 2 common arguments --os-disk-source --data-disk-sources
+register_extra_cli_argument('image create', 'source', validator=process_image_create_namespace,
+                            help='OS disk source of the new image, including a virtual machine id or name, sas uri to a os disk blob, managed os disk id or name, or os snapshot id or name')
+register_extra_cli_argument('image create', 'data_disk_sources', nargs='+',
+                            help='space separated 1 or more data disk sources, including sas uri to a blob, managed disk id or name, or snapshot id or name')
+register_cli_argument('image create', 'source_virtual_machine', ignore_type)
+register_cli_argument('image create', 'os_blob_uri', ignore_type)
+register_cli_argument('image create', 'os_disk', ignore_type)
+register_cli_argument('image create', 'os_snapshot', ignore_type)
+register_cli_argument('image create', 'data_blob_uris', ignore_type)
+register_cli_argument('image create', 'data_disks', ignore_type)
+register_cli_argument('image create', 'data_snapshots', ignore_type)
 
 for scope in ['disk', 'snapshot']:
-    register_cli_argument(scope, 'source_blob_uri', help='a sas uri to a blob to be imported into a managed disk or snapshot')
-    register_cli_argument(scope, 'source_disk', help='id or name of the source managed disk to copy from', validator=process_disk_or_snapshot_create_namespace,
-                          completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
-    register_cli_argument(scope, 'source_snapshot', help='id or name of the source snapshot to copy from', validator=process_disk_or_snapshot_create_namespace,
-                          completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'))
+    register_extra_cli_argument(scope + ' create', 'source', validator=process_disk_or_snapshot_create_namespace,
+                                help='source to create the disk from, including a sas uri to a blob, managed disk id or name, or snapshot id or name')
+    register_cli_argument(scope, 'source_blob_uri', ignore_type)
+    register_cli_argument(scope, 'source_disk', ignore_type)
+    register_cli_argument(scope, 'source_snapshot', ignore_type)
     register_cli_argument(scope, 'size_gb', options_list=('--size-gb', '-z'), help='size in GB.')
     register_cli_argument(scope, 'duration_in_seconds', help='Time duration in seconds until the SAS access expires')
