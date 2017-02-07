@@ -89,16 +89,16 @@ class VMOpenPortTest(ResourceGroupVCRTestBase):
         vm = self.vm_name
 
         # min params - apply to existing NIC (updates existing NSG)
-        nsg_id = self.cmd('vm open-port -g {} -n {}'.format(rg, vm))['networkSecurityGroup']['id']
+        nsg_id = self.cmd('vm open-port -g {} -n {} --port * --priority 900'.format(rg, vm))['networkSecurityGroup']['id']
         nsg_name = os.path.split(nsg_id)[1]
         self.cmd('network nsg show -g {} -n {}'.format(rg, nsg_name),
-                 checks=JMESPathCheck("length(securityRules[?name == 'open-port-cmd'])", 1))
+                 checks=JMESPathCheck("length(securityRules[?name == 'open-port-all'])", 1))
 
         # apply to subnet (creates new NSG)
         new_nsg = 'newNsg'
-        self.cmd('vm open-port -g {} -n {} --apply-to-subnet --nsg-name {}'.format(rg, vm, new_nsg))
+        self.cmd('vm open-port -g {} -n {} --apply-to-subnet --nsg-name {} --port * --priority 900'.format(rg, vm, new_nsg))
         self.cmd('network nsg show -g {} -n {}'.format(rg, new_nsg),
-                 checks=JMESPathCheck("length(securityRules[?name == 'open-port-cmd'])", 1))
+                 checks=JMESPathCheck("length(securityRules[?name == 'open-port-all'])", 1))
 
 
 class VMShowListSizesListIPAddressesScenarioTest(ResourceGroupVCRTestBase):
@@ -541,7 +541,7 @@ class VMExtensionScenarioTest(ResourceGroupVCRTestBase):
 
     def set_up(self):
         super(VMExtensionScenarioTest, self).set_up()
-        self.cmd('vm create -n {} -g {} --image UbuntuLTS --authentication-type password --admin-password TestPass1@'.format(self.vm_name, self.resource_group))
+        self.cmd('vm create -n {} -g {} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password TestPass1@'.format(self.vm_name, self.resource_group))
 
     def test_vm_extension(self):
         self.execute()
@@ -682,7 +682,7 @@ class VMMultiNicScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-m
         rg = self.resource_group
         vm_name = self.vm_name
 
-        self.cmd('vm create -g {} -n {} --image UbuntuLTS --nics nic1 nic2 nic3 nic4 --size Standard_DS3 --ssh-key-value \'{}\''.format(rg, vm_name, TEST_SSH_KEY_PUB))
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --nics nic1 nic2 nic3 nic4 --admin-username user11 --size Standard_DS3 --ssh-key-value \'{}\''.format(rg, vm_name, TEST_SSH_KEY_PUB))
         self.cmd('vm show -g {} -n {}'.format(rg, vm_name), checks=[
             JMESPathCheck("networkProfile.networkInterfaces[0].id.ends_with(@, 'nic1')", True),
             JMESPathCheck("networkProfile.networkInterfaces[1].id.ends_with(@, 'nic2')", True),
@@ -728,7 +728,7 @@ class VMCreateNoneOptionsTest(ResourceGroupVCRTestBase):  # pylint: disable=too-
         self.location = 'eastus'  # ...but create resources in eastus
 
         self.cmd('vm create -n {vm_name} -g {resource_group} --image Debian --availability-set {quotes} --nsg {quotes}'
-                 ' --ssh-key-value \'{ssh_key}\' --public-ip-address {quotes} --tags {quotes} --location {loc}'
+                 ' --ssh-key-value \'{ssh_key}\' --public-ip-address {quotes} --tags {quotes} --location {loc} --admin-username user11'
                  .format(vm_name=vm_name, resource_group=self.resource_group,
                          ssh_key=TEST_SSH_KEY_PUB,
                          quotes='""' if platform.system() == 'Windows' else "''", loc=self.location))
@@ -756,7 +756,7 @@ class VMBootDiagnostics(ResourceGroupVCRTestBase):
     def set_up(self):
         super(VMBootDiagnostics, self).set_up()
         self.cmd('storage account create -g {} -n {} --sku Standard_LRS -l westus'.format(self.resource_group, self.storage_name))
-        self.cmd('vm create -n {} -g {} --image UbuntuLTS --authentication-type password --admin-password TestPass1@ --use-unmanaged-disk'.format(self.vm_name, self.resource_group))
+        self.cmd('vm create -n {} -g {} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password TestPass1@ --use-unmanaged-disk'.format(self.vm_name, self.resource_group))
 
     def body(self):
         storage_uri = 'https://{}.blob.core.windows.net/'.format(self.storage_name)
@@ -833,7 +833,7 @@ class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
         super(DiagnosticsExtensionInstallTest, self).set_up()
         self.cmd('storage account create -g {} -n {} -l westus --sku Standard_LRS'.format(self.resource_group, self.storage_account))
         self.cmd('vmss create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-password TestTest12#$'.format(self.resource_group, self.vmss))
-        self.cmd('vm create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-password TestTest12#$ --use-unmanaged-disk'.format(self.resource_group, self.vm))
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password TestTest12#$ --use-unmanaged-disk'.format(self.resource_group, self.vm))
 
     def test_diagnostics_extension_install(self):
         self.execute()
@@ -917,6 +917,7 @@ class VMCreateExistingOptions(ResourceGroupVCRTestBase):
                  ' --nsg {nsg_name}'
                  ' --use-unmanaged-disk'
                  ' --size Standard_DS2'
+                 ' --admin-username user11'
                  ' --storage-account {storage_name} --storage-container-name {container_name} -g {resource_group}'
                  ' --name {vm_name} --ssh-key-value \'{key_value}\''
                  .format(vnet_name=self.vnet_name, subnet_name=self.subnet_name,
@@ -948,7 +949,7 @@ class VMCreateCustomIP(ResourceGroupVCRTestBase):
         vm_name = 'vrfvmz'
         dns_name = 'vrfmyvm00110011z'
 
-        self.cmd('vm create -n {vm_name} -g {resource_group} --image openSUSE'
+        self.cmd('vm create -n {vm_name} -g {resource_group} --image openSUSE --admin-username user11'
                  ' --private-ip-address 10.0.0.5 --public-ip-address-allocation static'
                  ' --public-ip-address-dns-name {dns_name} --ssh-key-value \'{key_value}\''
                  .format(vm_name=vm_name, resource_group=self.resource_group, dns_name=dns_name, key_value=TEST_SSH_KEY_PUB))
@@ -1227,7 +1228,7 @@ class VMSSCreateNoneOptionsTest(ResourceGroupVCRTestBase):  # pylint: disable=to
     def body(self):
         vmss_name = 'vmss1'
 
-        self.cmd('vmss create -n {0} -g {1} --image Debian --load-balancer {3}'
+        self.cmd('vmss create -n {0} -g {1} --image Debian --load-balancer {3} --admin-username ubuntu'
                  ' --ssh-key-value \'{2}\' --public-ip-address {3} --tags {3}'
                  .format(vmss_name, self.resource_group, TEST_SSH_KEY_PUB, '""' if platform.system() == 'Windows' else "''"))
 
@@ -1264,7 +1265,7 @@ class VMSSCreateExistingOptions(ResourceGroupVCRTestBase):
         container_name = 'vrfcontainer'
         sku_name = 'Standard_A3'
 
-        self.cmd('vmss create --image CentOS --os-disk-name {}'
+        self.cmd('vmss create --image CentOS --os-disk-name {} --admin-username ubuntu'
                  ' --vnet-name {} --subnet {} -l "West US" --vm-sku {}'
                  ' --storage-container-name {} -g {} --name {} --load-balancer {}'
                  ' --ssh-key-value \'{}\' --backend-pool-name {}'

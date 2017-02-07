@@ -155,6 +155,8 @@ register_cli_argument('vm image', 'sku', options_list=('--sku', '-s'))
 register_cli_argument('vm open-port', 'vm_name', name_arg_type, help='The name of the virtual machine to open inbound traffic on.')
 register_cli_argument('vm open-port', 'network_security_group_name', options_list=('--nsg-name',), help='The name of the network security group to create if one does not exist. Ignored if an NSG already exists.', validator=validate_nsg_name)
 register_cli_argument('vm open-port', 'apply_to_subnet', help='Allow inbound traffic on the subnet instead of the NIC', action='store_true')
+register_cli_argument('vm open-port', 'port', help="The port or port range to open inbound traffic to. Use '*' to allow traffic to all ports.")
+register_cli_argument('vm open-port', 'priority', help='Rule priority, between 100 (highest priority) and 4096 (lowest priority). Must be unique for each rule in the collection.', type=int)
 
 register_cli_argument('vm nic', 'vm_name', existing_vm_name, options_list=('--vm-name',), id_part=None)
 register_cli_argument('vm nic', 'nics', nargs='+', help='Names or IDs of NICs.', validator=validate_vm_nics)

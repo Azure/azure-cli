@@ -1070,11 +1070,11 @@ def vm_set_nics(resource_group_name, vm_name, nics, primary_nic=None):
 # pylint: disable=no-member
 
 
-def vm_open_port(resource_group_name, vm_name, network_security_group_name=None,
+def vm_open_port(resource_group_name, vm_name, port, priority, network_security_group_name=None,
                  apply_to_subnet=False):
-    """ Opens a VM to all inbound traffic and protocols by adding a security rule to the network
+    """ Opens a VM to inbound traffic on specified ports by adding a security rule to the network
     security group (NSG) that is attached to the VM's network interface (NIC) or subnet. The
-    existing NSG will be used or a new one will be created. The rule name is 'open-port-cmd' and
+    existing NSG will be used or a new one will be created. The rule name is 'open-port-{port}' and
     will overwrite an existing rule with this name. For multi-NIC VMs, or for more fine
     grained control, use the appropriate network commands directly (nsg rule create, etc).
     """
@@ -1113,13 +1113,14 @@ def vm_open_port(resource_group_name, vm_name, network_security_group_name=None,
 
     # update the NSG with the new rule to allow inbound traffic
     from azure.mgmt.network.models import SecurityRule
-    rule = SecurityRule(protocol='*', access='allow', direction='inbound', name='open-port-cmd',
-                        source_port_range='*', destination_port_range='*', priority=900,
+    rule_name = 'open-port-all' if port == '*' else 'open-port-{}'.format(port)
+    rule = SecurityRule(protocol='*', access='allow', direction='inbound', name=rule_name,
+                        source_port_range='*', destination_port_range=port, priority=priority,
                         source_address_prefix='*', destination_address_prefix='*')
     nsg_name = nsg.name or os.path.split(nsg.id)[1]
     LongRunningOperation('Adding security rule')(
         network.security_rules.create_or_update(
-            resource_group_name, nsg_name, 'open-port-cmd', rule)
+            resource_group_name, nsg_name, rule_name, rule)
     )
 
     # update the NIC or subnet
