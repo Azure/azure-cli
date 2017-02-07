@@ -1486,15 +1486,12 @@ def import_zone(resource_group_name, zone_name, file_name):
     with open(file_name) as f:
         file_text = f.read()
     zone_obj = parse_zone_file(file_text)
-    if zone_origin and zone_name != zone_origin.rstrip('.'):
-        raise CLIError('Zone file origin "{}" does not match zone name "{}"'
-                       .format(zone_origin, zone_name))
 
     record_sets = {}
     for record_set_name in zone_obj:
         for record_set_type in zone_obj[record_set_name]:
             for entry in zone_obj[record_set_name][record_set_type]:
-                record_set_ttl = entry.get('ttl', 3600)
+                record_set_ttl = entry['ttl']
                 record_set_key = '{}{}'.format(record_set_name.lower(), record_set_type)
 
                 record = _build_record(entry)

@@ -21,37 +21,44 @@ class TestDnsZoneImport(unittest.TestCase):
         self.assertEqual(zone['@']['soa'][0]['minimum'], min_ttl)
 
     def _check_ns(self, zone, name, records_to_check):
+        self.assertEqual(len(records_to_check), len(zone[name]['ns']))
         for i, record in enumerate(zone[name]['ns']):
             self.assertEqual(record['ttl'], records_to_check[i][0])
             self.assertEqual(record['host'], records_to_check[i][1])
 
     def _check_mx(self, zone, name, records_to_check):
+        self.assertEqual(len(records_to_check), len(zone[name]['mx']))
         for i, record in enumerate(zone[name]['mx']):
             self.assertEqual(record['ttl'], records_to_check[i][0])
             self.assertEqual(int(record['preference']), records_to_check[i][1])
             self.assertEqual(record['host'], records_to_check[i][2])
 
     def _check_a(self, zone, name, records_to_check):
+        self.assertEqual(len(records_to_check), len(zone[name]['a']))
         for i, record in enumerate(zone[name]['a']):
             self.assertEqual(record['ttl'], records_to_check[i][0])
             self.assertEqual(record['ip'], records_to_check[i][1])
 
     def _check_aaaa(self, zone, name, records_to_check):
+        self.assertEqual(len(records_to_check), len(zone[name]['aaaa']))
         for i, record in enumerate(zone[name]['aaaa']):
             self.assertEqual(record['ttl'], records_to_check[i][0])
             self.assertEqual(record['ip'], records_to_check[i][1])
 
     def _check_cname(self, zone, name, records_to_check):
+        self.assertEqual(len(records_to_check), len(zone[name]['cname']))
         for i, record in enumerate(zone[name]['cname']):
             self.assertEqual(record['ttl'], records_to_check[i][0])
             self.assertEqual(record['alias'], records_to_check[i][1])
 
     def _check_ptr(self, zone, name, records_to_check):
+        self.assertEqual(len(records_to_check), len(zone[name]['ptr']))
         for i, record in enumerate(zone[name]['ptr']):
             self.assertEqual(record['ttl'], records_to_check[i][0])
             self.assertEqual(record['host'], records_to_check[i][1])
 
     def _check_txt(self, zone, name, records_to_check):
+        self.assertEqual(len(records_to_check), len(zone[name]['txt']))
         for i, record in enumerate(zone[name]['txt']):
             self.assertEqual(record['ttl'], records_to_check[i][0])
             for txt_entry in record['txt']:
@@ -63,6 +70,7 @@ class TestDnsZoneImport(unittest.TestCase):
                 self.assertEqual(long_txt, records_to_check[i][2])
 
     def _check_srv(self, zone, name, records_to_check):
+        self.assertEqual(len(records_to_check), len(zone[name]['srv']))
         for i, record in enumerate(zone[name]['srv']):
             self.assertEqual(record['ttl'], records_to_check[i][0])
             self.assertEqual(int(record['priority']), records_to_check[i][1])
@@ -102,15 +110,77 @@ class TestDnsZoneImport(unittest.TestCase):
     def test_zone_file_2(self):
         zone = self._get_zone_object('zone2.txt')
         self._check_soa(zone, 3600, 10, 900, 600, 86400, 3600)
+        self._check_ns(zone, '@', [(3600, 'zoneimport.')])
+        self._check_a(zone, 'a2', [(3600, '1.2.3.4'), (3600, '2.3.4.5')])
+        self._check_aaaa(zone, 'aaaa2', [(3600, '2001:cafe:130::100'), (3600, '2001:cafe:130::101')])
+        self._check_txt(zone, 'doozie', [(3600, 108, None)])
+        self._check_cname(zone, 'fee2', [(3600, 'bar.com.'), (3600, 'bar.')])  # TODO: CNAME should only have ONE record...
+        self._check_mx(zone, 'mail', [(3600, 10, 'mail1.mymail.com.'), (3600, 11, 'flooble.')])
+        self._check_srv(zone, 'sip.tcp', [(3600, 10, 20, 30, 'foobar.'), (3600, 55, 66, 77, 'zoo.')])
+        self._check_ns(zone, 'test-ns2', [(3600, 'ns1.com.'), (3600, 'ns2.com.')])
+        self._check_txt(zone, 'test-txt2', [(3600, 8, 'string 1'), (3600, 8, 'string 2')])
+        #self._check_a(zone, 'aa', [(100, '4.5.6.7'), (200, '6.7.8.9')])
+        self._check_mx(zone, 'aa', [(300, 1, 'foo.com')])
+        #self._check_a(zone, '200', [(300, '7.8.9.0')])  # TODO: This gets confused for TTL not name...
+        # TODO: The split and rejoin is truncating characters...
+        #self._check_txt(zone, 'longtxt', [(999, None, 'this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....')])
+        self._check_txt(zone, 'spf', [(100, 72, None)])
+        self._check_txt(zone, '@', [(200, 78, None), (3600, None, 'v=spf1 mx ip4:14.14.22.0/23 a:mail.trum.ch mx:mese.ch include:spf.mapp.com ?all')])
+        self._check_ptr(zone, '160.1', [(3600, 'foo.com.')])
+        self._check_ptr(zone, '160.2', [(3600, 'foobar.com.'), (3600, 'bar.com.')])
+        self._check_ptr(zone, '160.3', [(3600, 'foo.com.'), (3600, 'bar.com.')])
+        self._check_txt(zone, 't1', [(3600, None, 'foobar')])
+        self._check_txt(zone, 't2', [(3600, None, 'foobar')])
+        self._check_txt(zone, 't3', [(3600, None, 'foobar')])
+        self._check_txt(zone, 't4', [(3600, None, 'foo;bar')])
+        self._check_txt(zone, 't5', [(3600, None, 'foo;bar')])
+        self._check_txt(zone, 't6', [(3600, None, 'foo;bar')])
+        #self._check_txt(zone, 't7', [(3600, None, '"quoted string"')])  # TODO: handle quoted string
+        #self.assertTrue('t8' not in zone)  # TODO: reject multiple unquoted strings?
+        self._check_txt(zone, 't9', [(3600, None, 'foobarr')])
+        self._check_txt(zone, 't10', [(3600, None, 'foo bar')])
+        self._check_txt(zone, 't11', [(3600, None, 'foobar')])
+        self._check_a(zone, 'base', [(3600, '194.124.202.114')])
+        self._check_mx(zone, 'base', [(3600, 10, 'be.xpiler.de.')])
+        self._check_txt(zone, 'base', [
+            (3600, None, 'v=spf1 mx include:_spf4.xcaign.de include:_spf6.xcaign.de -all'),
+            (3600, None, 'spf2.0/mfrom,pra mx ip4:15.19.14.0/24 ip4:8.8.11.4/27 ip4:9.16.20.19/26 -all')
+        ])
+        self._check_a(zone, 'even', [(3600, '194.124.202.114')])
+        self._check_mx(zone, 'even', [(3600, 10, 'be.xpiler.de.')])
+        self._check_txt(zone, 'even', [(3600, None, 'v=spf1 mx include:_spf4.xgn.de include:_spf6.xgn.de -all')])
 
     def test_zone_file_3(self):
         zone = self._get_zone_object('zone3.txt')
-        self._check_soa(zone, 86400, 2003080800, 43200, 900, 1814400, 10800)  # should 3600 override 1d or not??
+        self._check_soa(zone, 86400, 2003080800, 43200, 900, 1814400, 10800)  # TODO: should 3600 override 1d or not??
+        self._check_ns(zone, '@', [(86400, 'ns1.com.')])
+        self._check_a(zone, 'test-a', [(3600, '1.2.3.4')])
+        self._check_aaaa(zone, 'test-aaaa', [(3600, '2001:cafe:130::100')])
+        self._check_cname(zone, 'test-cname', [(3600, 'target.com.')])
+        self._check_mx(zone, 'test-mx', [(3600, 10, 'mail.com.')])
+        self._check_ns(zone, 'test-ns', [(3600, 'ns1.com.')])
+        self._check_srv(zone, '_sip._tcp.test-srv', [(3600, 1, 2, 3, 'target.com.')])
+        self._check_txt(zone, 'test-txt', [(3600, None, 'string 1')])
+        #self._check_a(zone, 'd1', [(3600, '12.1.2.3'), (3600, '12.2.3.4'), (3600, '12.3.4.5'), (3600, '12.4.5.6')])  # TODO: Fix @/$ORIGIN parsing...
+        self._check_ns(zone, 'd1', [(3600, 'hood.com.')])
+        self._check_txt(zone, 'd1', [(3600, None, 'fishfishfish')])
+        self._check_a(zone, 'f1', [(3600, '11.1.2.3'), (3600, '11.2.3.3')])
+        #self._check_a(zone, 'f2', [(3600, '11.2.3.4'), (3600, '11.5.6.7')]  # TODO: Fix @/$ORIGIN parsing...
+        self._check_srv(zone, '_sip._tcp', [(3600, 10, 20, 30, 'foo.com.')])
+        self._check_mx(zone, 'mail', [(3600, 100, 'mail.test.com.')])
+        self._check_a(zone, 'noclass', [(3600, '1.2.3.4'), (3600, '2.3.4.5')])
+        self._check_cname(zone, 'noclass', [(3600, 'bar.com')])
+        self._check_txt(zone, 'txt1', [(3600, None, 'string 1 only')])
+        self._check_txt(zone, 'txt2', [(3600, None, 'string1string2')])
+        self._check_txt(zone, 'txt3', [
+            (3600, 296, None),
+            (3600, None, 'string;string;string')
+        ])
 
     def test_zone_file_4(self):
         zone = self._get_zone_object('zone4.txt')
         self._check_soa(zone, 3600, 2003080800, 43200, 900, 1814400, 10800)
-        self.assertEqual(zone['@']['ns'][0]['ttl'], 100)
+        self._check_ns(zone, '@', [(100, 'ns1')])
 
     def test_zone_file_5(self):
         zone = self._get_zone_object('zone5.txt')
