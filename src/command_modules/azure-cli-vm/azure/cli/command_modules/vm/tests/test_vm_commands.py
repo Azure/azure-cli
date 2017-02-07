@@ -233,7 +233,7 @@ class VMImageShowScenarioTest(VCRTestBase):
         self.execute()
 
     def body(self):
-        self.cmd('vm image show --location {} --publisher {} --offer {} --skus {} --version {}'.format(
+        self.cmd('vm image show --location {} --publisher {} --offer {} --sku {} --version {}'.format(
             self.location, self.publisher_name, self.offer, self.skus, self.version), checks=[
                 JMESPathCheck('type(@)', 'object'),
                 JMESPathCheck('location', self.location),

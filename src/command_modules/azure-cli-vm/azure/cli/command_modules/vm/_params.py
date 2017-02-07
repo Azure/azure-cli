@@ -152,6 +152,8 @@ register_cli_argument('vm image list', 'image_location', location_type)
 register_cli_argument('vm image', 'publisher_name', options_list=('--publisher', '-p'))
 register_cli_argument('vm image', 'offer', options_list=('--offer', '-f'))
 register_cli_argument('vm image', 'sku', options_list=('--sku', '-s'))
+# overriding skus from the sdk operation to be a single sku
+register_cli_argument('vm image show', 'skus', options_list=('--sku', '-s'))
 
 register_cli_argument('vm open-port', 'vm_name', name_arg_type, help='The name of the virtual machine to open inbound traffic on.')
 register_cli_argument('vm open-port', 'network_security_group_name', options_list=('--nsg-name',), help='The name of the network security group to create if one does not exist. Ignored if an NSG already exists.', validator=validate_nsg_name)

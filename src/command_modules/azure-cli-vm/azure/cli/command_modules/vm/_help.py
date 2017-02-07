@@ -561,6 +561,57 @@ helps['vm image'] = """
     short-summary: VM images available on the Azure marketplace
 """
 
+helps['vm image list'] = """
+    type: command
+    short-summary: List the VM images available on the Azure marketplace
+    examples:
+        - name: List all images
+          text: az vm image list --all
+        - name: List all offline cached CentOS images
+          text: az vm image list -f CentOS
+        - name: List all CentOS images
+          text: az vm image list -f CentOS --all
+"""
+
+helps['vm image list-offers'] = """
+    type: command
+    short-summary: List the VM image offers available on the Azure marketplace
+    examples:
+        - name: List all offers from Microsoft in westus
+          text: az vm image list-offers -l westus -p Microsoft
+        - name: List all offers from OpenLocic in westus
+          text: az vm image list-offers -l westus -p OpenLogic
+"""
+
+helps['vm image list-publishers'] = """
+    type: command
+    short-summary: List the VM image publishers available on the Azure marketplace
+    examples:
+        - name: List all publishers in westus
+          text: az vm image list-publishers -l westus
+        - name: List all publishers with names starting with "Open" in westus
+          text: az vm image list-publishers -l westus --query "[?starts_with(name, 'Open')]"
+"""
+
+helps['vm image list-skus'] = """
+    type: command
+    short-summary: List the VM image skus available on the Azure marketplace
+    examples:
+        - name: List all skus available for CentOS published by OpenLogic in westus
+          text: az vm image list-skus -l westus -f CentOS -p OpenLogic
+"""
+
+helps['vm image show'] = """
+    type: command
+    short-summary: Show a VM image available on the Azure marketplace
+    examples:
+        - name: List all skus available for CentOS published by OpenLogic in westus
+          text: >
+            latest=$(az vm image list -p OpenLogic -s 7.3 --all --query \\
+                "[?offer=='CentOS'].version" -o tsv | sort -u | tail -n 1)
+            az vm image show -l westus -f CentOS -p OpenLogic --s 7.3 --version ${latest}
+"""
+
 helps['vm nic'] = """
     type: group
     short-summary: Manage VM network interfaces, see also 'az network nic'
