@@ -23,72 +23,72 @@ name_group_example = """        - name: {0} by Name and Group
 """
 
 helps['vm create'] = """
-            type: command
-            short-summary: Create an Azure Virtual Machine
-            long-summary: See https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-quick-create-cli/ for an end-to-end tutorial
-            parameters:
-                - name: --image
-                  type: string
-                  short-summary: 'OS image (URN alias, URN, Custom Image name or ID, VHD Blob URI).'
-                  long-summary: |
+    type: command
+    short-summary: Create an Azure Virtual Machine
+    long-summary: See https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-quick-create-cli/ for an end-to-end tutorial
+    parameters:
+        - name: --image
+          type: string
+          short-summary: 'OS image (URN alias, URN, Custom Image name or ID, VHD Blob URI).'
+          long-summary: |
 {0}
-                  populator-commands:
-                  - az vm image list
-                  - az vm image show
-                - name: --ssh-key-value
-                  short-summary: SSH public key or public key file path.
-            examples:
-                - name: Create a Linux VM with SSH key authentication, add a public DNS entry and add to an existing Virtual Network and Availability Set.
-                  text: >
-                    az vm create -n my_vm_name -g myrg --image <linux image from 'az vm image list'>
-                    --vnet-name my_existing_vnet --subnet subnet1
-                    --availability-set my_existing_availability_set
-                    --public-ip-address-dns-name my_globally_unique_vm_dns_name
-                    --ssh-key-value "<ssh-rsa-key, key-file-path or not specified for default-key-path>"
-                - name: Create a simple Windows Server VM with private IP address only
-                  text: >
-                    az vm create -n my_vm_name -g myrg --admin-username myadmin --admin-password Password@1234
-                     --public-ip-address "" --image Win2012R2Datacenter
-                - name: Create a simple Ubuntu VM with public IP address, DNS entry, 2 data disk(10GB, 20GB), and generate ssh key pairs under ~/.ssh
-                  text: >
-                    az vm create -n my_vm_name -g myrg --admin-username myadmin --admin-password Password@1234
-                    --public-ip-address-dns-name my_globally_unique_vm_dns_name --image ubuntults --data-disk-sizes-gb 10 20
-                    --size Standard_DS2 --generate-ssh-keys
-                - name: Create a VM from a custom managed image
-                  text: >
-                    az vm create -g myrg -n my_vm_name --image my_image_in_myrg --admin-username myadmin --admin-password Password@1234
-                - name: Create a VM with unmanaged os disk by using image blob uri
-                  text: >
-                    az vm create -g myrg -n my_vm_name --image https://account123.blob.core.windows.net/Images/my_vhd-osDisk.vhd
-                    --os-type linux --admin-username myadmin --admin-password Password@1234
-                - name: Create a VM by attaching to an existing specialized managed os disk
-                  text: >
-                    az vm create -g myrg -n my_vm_name --managed-os-disk my-os-disk
-                    --os-type linux --admin-username myadmin --admin-password Password@1234
-            """.format(image_long_summary)
+          populator-commands:
+          - az vm image list
+          - az vm image show
+        - name: --ssh-key-value
+          short-summary: SSH public key or public key file path.
+    examples:
+        - name: Create a Linux VM with SSH key authentication, add a public DNS entry and add to an existing Virtual Network and Availability Set.
+          text: >
+            az vm create -n my_vm_name -g myrg --image <linux image from 'az vm image list'>
+            --vnet-name my_existing_vnet --subnet subnet1
+            --availability-set my_existing_availability_set
+            --public-ip-address-dns-name my_globally_unique_vm_dns_name
+            --ssh-key-value "<ssh-rsa-key, key-file-path or not specified for default-key-path>"
+        - name: Create a simple Windows Server VM with private IP address only
+          text: >
+            az vm create -n my_vm_name -g myrg --admin-username myadmin --admin-password Password@1234
+             --public-ip-address "" --image Win2012R2Datacenter
+        - name: Create a simple Ubuntu VM with public IP address, DNS entry, 2 data disk(10GB, 20GB), and generate ssh key pairs under ~/.ssh
+          text: >
+            az vm create -n my_vm_name -g myrg --admin-username myadmin --admin-password Password@1234
+            --public-ip-address-dns-name my_globally_unique_vm_dns_name --image ubuntults --data-disk-sizes-gb 10 20
+            --size Standard_DS2 --generate-ssh-keys
+        - name: Create a VM from a custom managed image
+          text: >
+            az vm create -g myrg -n my_vm_name --image my_image_in_myrg --admin-username myadmin --admin-password Password@1234
+        - name: Create a VM with unmanaged os disk by using image blob uri
+          text: >
+            az vm create -g myrg -n my_vm_name --image https://account123.blob.core.windows.net/Images/my_vhd-osDisk.vhd
+            --os-type linux --admin-username myadmin --admin-password Password@1234
+        - name: Create a VM by attaching to an existing specialized managed os disk
+          text: >
+            az vm create -g myrg -n my_vm_name --managed-os-disk my-os-disk
+            --os-type linux --admin-username myadmin --admin-password Password@1234
+""".format(image_long_summary)
 
 helps['vmss create'] = """
-            type: command
-            short-summary: Create an Azure Virtual Machine Scale Set
-            long-summary: See https://azure.microsoft.com/en-us/blog/azure-virtual-machine-scale-sets-ga/ for an introduction to scale sets.
-            parameters:
-                - name: --image
-                  type: string
-                  short-summary: 'OS image (URN alias, URN or URI).'
-                  long-summary: |
+    type: command
+    short-summary: Create an Azure Virtual Machine Scale Set
+    long-summary: See https://azure.microsoft.com/en-us/blog/azure-virtual-machine-scale-sets-ga/ for an introduction to scale sets.
+    parameters:
+        - name: --image
+          type: string
+          short-summary: 'OS image (URN alias, URN or URI).'
+          long-summary: |
 {0}
-            examples:
-                - name: Windows scaleset with 5 instances, a load balancer, a public IP address and a 2GB data disk
-                  text: >
-                    az vmss create -n my_vmss_name -g myrg --admin-password MyPassword123 --instance-count 5 --image Win2012R2Datacenter --data-disk-sizes-gb 2
-                - name: Linux scaleset with auto-generated ssh key pair under ~/.ssh, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network
-                  text: >
-                    az vmss create -n my_vmss_name -g myrg --dns-name-for-public-ip myGloballyUniqueDnsName
-                    --load-balancer myLoadBalancer --vnet-name myVNET --subnet mySubnet --image UbuntuLTS
-                    --generate-ssh-keys
-                - name: Scaleset created from custom Linux image using existing ssh public key of ~/.ssh/id_rsa.pub
-                  text: >
-                    az vmss create -n my_vmss_name -g myrg --image my_linuximage_in_myrg
+    examples:
+        - name: Windows scaleset with 5 instances, a load balancer, a public IP address and a 2GB data disk
+          text: >
+            az vmss create -n my_vmss_name -g myrg --admin-password MyPassword123 --instance-count 5 --image Win2012R2Datacenter --data-disk-sizes-gb 2
+        - name: Linux scaleset with auto-generated ssh key pair under ~/.ssh, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network
+          text: >
+            az vmss create -n my_vmss_name -g myrg --dns-name-for-public-ip myGloballyUniqueDnsName
+            --load-balancer myLoadBalancer --vnet-name myVNET --subnet mySubnet --image UbuntuLTS
+            --generate-ssh-keys
+        - name: Scaleset created from custom Linux image using existing ssh public key of ~/.ssh/id_rsa.pub
+          text: >
+            az vmss create -n my_vmss_name -g myrg --image my_linuximage_in_myrg
 """.format(image_long_summary)
 
 helps['vm availability-set create'] = """
@@ -113,17 +113,24 @@ helps['vm availability-set update'] = """
 """
 
 helps['vm availability-set convert'] = """
-            type: command
-            short-summary: convert an availability set to contain VMs with managed disks
-            """
+    type: command
+    short-summary: convert an availability set to contain VMs with managed disks
+    examples:
+        - name: Convert AV Set with unmanaged disks to managed by resource group and name
+          text: vm availability-set convert -g group_name -n av_set_name
+        - name: Convert AV Set with unmanaged disks to managed by Ids
+          text: >
+            az vm availability-set convert --ids $(az vm availability-set \\
+                list -g group_name --query "[].id" -o tsv)
+"""
 
 helps['vm extension set'] = """
-            type: command
-            examples:
-                - name: Add a new linux user
-                  text:
-                    az vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.4 --vm-name myvm --resource-group mygroup --protected-settings '{"username":"user1", "ssh_key":"ssh_rsa ..."}'
-            """
+    type: command
+    examples:
+        - name: Add a new linux user
+          text:
+            az vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.4 --vm-name myvm --resource-group mygroup --protected-settings '{"username":"user1", "ssh_key":"ssh_rsa ..."}'
+"""
 
 helps['vm availability-set delete'] = """
     type: command
@@ -163,25 +170,25 @@ helps['vm extension set'] = """
 """
 
 generic_update_help = """
-                - name: Add or update a tag
-                  text: az <command> -n name -g group --set tags.tagName=tagValue
-                - name: Remove a tag
-                  text: az <command> -n name -g group --remove tags.tagName
+        - name: Add or update a tag
+          text: az <command> -n name -g group --set tags.tagName=tagValue
+        - name: Remove a tag
+          text: az <command> -n name -g group --remove tags.tagName
 """
 
 helps['vm update'] = """
-            type: command
-            short-summary: Update VM properties
-            long-summary: Update VM objects and properties using paths that correspond to 'az vm show'.  See examples.
-            examples:
+    type: command
+    short-summary: Update VM properties
+    long-summary: Update VM objects and properties using paths that correspond to 'az vm show'.  See examples.
+    examples:
 {0}
-                - name: Set primary NIC
-                  text: az <command> -n name -g group --set networkProfile.networkInterfaces[1].primary=false networkProfile.networkInterfaces[0].primary=true
-                - name: Add new non-primary NIC
-                  text: az <command> -n name -g group --add networkProfile.networkInterfaces primary=false id=<NIC_ID>
-                - name: Remove fourth NIC
-                  text: az <command> -n name -g group --remove networkProfile.networkInterfaces 3
-            """.format(generic_update_help)
+        - name: Set primary NIC
+          text: az <command> -n name -g group --set networkProfile.networkInterfaces[1].primary=false networkProfile.networkInterfaces[0].primary=true
+        - name: Add new non-primary NIC
+          text: az <command> -n name -g group --add networkProfile.networkInterfaces primary=false id=<NIC_ID>
+        - name: Remove fourth NIC
+          text: az <command> -n name -g group --remove networkProfile.networkInterfaces 3
+""".format(generic_update_help)
 
 helps['vm show'] = """
     type: command
@@ -212,7 +219,11 @@ helps['vmss show'] = """
 helps['vm convert'] = """
     type: command
     short-summary: Convert VM with unmanaged disks to use managed disks
-"""
+    examples:
+        - name: Convert VM with unmanaged disks to managed by resource group and name
+          text: az vm convert -g group_name -n vm_name
+{0}
+""".format(vm_ids_example.format('Convert VM with unmanaged disks to managed by Ids', 'vm convert'))
 
 helps['vm'] = """
     type: group
@@ -379,15 +390,7 @@ helps['vm diagnostics set'] = """
                 -n setting_name -g group_name
 """
 
-helps['vm disk'] = """
-    type: group
-    short-summary: Manage VM data disks
-"""
-
-helps['vm unmanaged-disk'] = """
-    type: group
-    short-summary: Manage VM unmanaged data disks
-    long-summary: >
+disk_long_summary = """
         Just like any other computer, virtual machines in Azure use disks as a place to store an operating system,
         applications, and data. All Azure virtual machines have at least two disks – a Linux operating system disk
         (in the case of a Linux VM) and a temporary disk. The operating system disk is created from an image, and both
@@ -410,26 +413,32 @@ helps['vm unmanaged-disk'] = """
         attach to it and the type of storage you can use to host the disks.
 """
 
-helps['vm unmanaged-disk attach-new'] = """
+helps['vm disk'] = """
+    type: group
+    short-summary: Manage VM data disks
+    long-summary: >
+{0}
+""".format(disk_long_summary)
+
+helps['vm unmanaged-disk'] = """
+    type: group
+    short-summary: Manage VM unmanaged data disks
+    long-summary: >
+{0}
+""".format(disk_long_summary)
+
+helps['vm unmanaged-disk attach'] = """
     type: command
     long-summary: >
         Attach a persistent disk to your VM so that you can preserve your data - even if your VM is reprovisioned due
         to maintenance or resizing.
     examples:
         - name: Attach a new default sized (1023 GiB) data disk
-          text: az vm unmanaged-disk attach-new -g group_name --vm-name vm_name
-"""
-
-helps['vm unmanaged-disk attach-existing'] = """
-    type: command
-    long-summary: >
-        Attach a persistent disk to your VM so that you can preserve your data - even if your VM is reprovisioned due
-        to maintenance or resizing.
-    examples:
+          text: az vm unmanaged-disk attach -g group_name --vm-name vm_name
         - name: Attach an existing data disk
           text: >
-            az vm unmanaged-disk attach-new -g group_name --vm-name vm_name \\
-                --vhd https://mystorage.blob.core.windows.net/vhds/d1.vhd
+            az vm unmanaged-disk attach -g group_name --vm-name vm_name \\
+                --vhd-uri https://mystorage.blob.core.windows.net/vhds/d1.vhd
 """
 
 helps['vm unmanaged-disk detach'] = """
@@ -437,19 +446,36 @@ helps['vm unmanaged-disk detach'] = """
     examples:
         - name: Detach a data disk
           text: >
-            az vm unmanaged-disk attach-new -g group_name --vm-name vm_name -n disk_name
+            az vm unmanaged-disk detach -g group_name --vm-name vm_name -n disk_name
 """
 
-vm_disk_list = 'vm disk list'
-helps[vm_disk_list] = """
+helps['vm unmanaged-disk list'] = """
     type: command
     examples:
         - name: List attached VM disks by VM name and Resource Group
-          text: az vm disk list -g group_name --vm-name vm_name
+          text: az vm unmanaged-disk list -g group_name --vm-name vm_name
         - name: List attached VM disks by IDs of disks with names containing "data_disk"
           text: >
-            az vm disk list --ids \\
+            az vm unmanaged-disk list --ids \\
                 $(az resource list --query "[?contains(name, 'data_disk')].id" -o tsv)
+"""
+
+helps['vm disk detach'] = """
+    type: command
+    examples:
+        - name: Detach a data disk
+          text: >
+            az vm disk detach -g group_name --vm-name vm_name -n disk_name
+"""
+
+helps['vm disk attach'] = """
+    type: command
+    long-summary: >
+        Attach a persistent disk to your VM so that you can preserve your data - even if your VM is reprovisioned due
+        to maintenance or resizing.
+    examples:
+        - name: Attach a new default sized (1023 GiB) data disk
+          text: az vm disk attach -g group_name --vm-name vm_name --disk disk_name --new
 """
 
 helps['vm extension'] = """
@@ -860,22 +886,27 @@ helps['disk create'] = """
         - name: Create by copying from an existing disk or snapshot
           text: az disk create -g myRG -n myDisk2 --source myDisk
 """
+
 helps['disk list'] = """
     type: command
     short-summary: list managed disks under a resource group or under current subscription
 """
+
 helps['disk delete'] = """
     type: command
     short-summary: delete a managed disk
 """
+
 helps['disk update'] = """
     type: command
     short-summary: update a managed disk
 """
+
 helps['disk grant-access'] = """
     type: command
     short-summary: grant read access to a managed disk
 """
+
 helps['disk revoke-access'] = """
     type: command
     short-summary: revoke read access to a managed disk
@@ -892,22 +923,27 @@ helps['snapshot create'] = """
         - name: Create by copying from an existing disk from the same resource group
           text: az snapshot create -g myRG -n mySnapshot2 --source myDisk
 """
+
 helps['snapshot update'] = """
     type: command
     short-summary: update a snapshot
 """
+
 helps['snapshot list'] = """
     type: command
     short-summary: list snapshots under a resource group or under current subscription
 """
+
 helps['snapshot grant-access'] = """
     type: command
     short-summary: grant read access to a snapshot
 """
+
 helps['snapshot revoke-access'] = """
     type: command
     short-summary: revoke read access to a snapshot
 """
+
 helps['image create'] = """
     type: command
     short-summary: create a custom image from managed disks or snapshots
@@ -917,6 +953,7 @@ helps['image create'] = """
         - name: Create by capturing an existing generalize virtual machine from the same resource group
           text: az image create -g myRG -n image1 --source myvm1
 """
+
 helps['image list'] = """
     type: command
     short-summary: list custom images under a resource group or under current subscription
