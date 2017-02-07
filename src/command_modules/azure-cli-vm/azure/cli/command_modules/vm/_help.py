@@ -392,13 +392,13 @@ helps['vm diagnostics set'] = """
 
 disk_long_summary = """
         Just like any other computer, virtual machines in Azure use disks as a place to store an operating system,
-        applications, and data. All Azure virtual machines have at least two disks – a Linux operating system disk
+        applications, and data. All Azure virtual machines have at least two disks - a Linux operating system disk
         (in the case of a Linux VM) and a temporary disk. The operating system disk is created from an image, and both
         the operating system disk and the image are actually virtual hard disks (VHDs) stored in an Azure storage
         account. Virtual machines also can have one or more data disks, that are also stored as VHDs.\n\r
 
         Operating System Disk\n\r
-        Every virtual machine has one attached operating system disk. It’s registered as a SATA drive and is labeled
+        Every virtual machine has one attached operating system disk. It's registered as a SATA drive and is labeled
         /dev/sda by default. This disk has a maximum capacity of 1023 gigabytes (GB).\n\r
 
         Temporary disk\n\r
@@ -407,7 +407,7 @@ disk_long_summary = """
         varies, based on the size of the virtual machine.\n\r
 
         Data disk\n\r
-        A data disk is a VHD that’s attached to a virtual machine to store application data, or other data you need
+        A data disk is a VHD that's attached to a virtual machine to store application data, or other data you need
         to keep. Data disks are registered as SCSI drives and are labeled with a letter that you choose. Each data
         disk has a maximum capacity of 1023 GB. The size of the virtual machine determines how many data disks you can
         attach to it and the type of storage you can use to host the disks.
