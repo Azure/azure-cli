@@ -332,6 +332,8 @@ class StorageFileScenarioTest(StorageAccountVCRTestBase):
         dir = 'testdir01'
         s.cmd('storage directory create --share-name {} --name {} --fail-on-exist'.format(share, dir),
               checks=JMESPathCheck('created', True))
+        s.cmd('storage directory list -s {}'.format(share),
+              checks=JMESPathCheck('length(@)', 1))
         s.cmd('storage directory exists --share-name {} -n {}'.format(share, dir),
               checks=JMESPathCheck('exists', True))
         s.cmd('storage directory metadata update --share-name {} -n {} --metadata a=b c=d'.format(share, dir))
