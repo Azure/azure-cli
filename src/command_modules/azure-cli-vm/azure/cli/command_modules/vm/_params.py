@@ -6,8 +6,7 @@
 # pylint: disable=line-too-long
 from argcomplete.completers import FilesCompleter
 
-from azure.mgmt.compute.models import (VirtualHardDisk,
-                                       CachingTypes,
+from azure.mgmt.compute.models import (CachingTypes,
                                        ContainerServiceOchestratorTypes,
                                        UpgradeMode)
 from azure.mgmt.storage.models import SkuName
@@ -19,7 +18,8 @@ from azure.cli.command_modules.vm._actions import \
     (load_images_from_aliases_doc, get_vm_sizes, _resource_not_exists)
 from azure.cli.command_modules.vm._validators import \
     (validate_nsg_name, validate_vm_nics, validate_vm_nic, process_vm_create_namespace,
-     process_vmss_create_namespace)
+     process_vmss_create_namespace, process_image_create_namespace,
+     process_disk_or_snapshot_create_namespace, validate_vm_disk, validate_location)
 
 
 def get_urn_aliases_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
@@ -42,6 +42,7 @@ name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 multi_ids_type = CliArgumentType(nargs='+')
 existing_vm_name = CliArgumentType(overrides=name_arg_type, help='The name of the Virtual Machine', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'), id_part='name')
 vmss_name_type = CliArgumentType(name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), help='Scale set name.', id_part='name')
+disk_sku = CliArgumentType(required=False, help='underlying storage sku', **enum_choice_list(['Premium_LRS', 'Standard_LRS']))
 
 # ARGUMENT REGISTRATION
 
@@ -53,17 +54,31 @@ register_cli_argument('vm', 'name', arg_type=name_arg_type)
 for item in ['show', 'list']:
     register_cli_argument('vm {}'.format(item), 'show_details', action='store_true', options_list=('--show-details', '-d'), help='show public ip address, FQDN, and power states. command will run slow')
 
-register_cli_argument('vm disk', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',))
-register_cli_argument('vm disk', 'disk_name', options_list=('--name', '-n'), help='The data disk name. If missing, will retrieve from vhd uri')
-register_cli_argument('vm disk', 'disk_size', help='Size of disk (GiB)', default=1023, type=int)
-register_cli_argument('vm disk', 'lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virutal Machine size.')
-register_cli_argument('vm disk', 'vhd', type=VirtualHardDisk, help='virtual hard disk\'s uri. For example:https://mystorage.blob.core.windows.net/vhds/d1.vhd')
-register_cli_argument('vm disk', 'caching', help='Host caching policy', default=CachingTypes.none.value, **enum_choice_list(CachingTypes))
+register_cli_argument('vm unmanaged-disk', 'vm_name', arg_type=existing_vm_name)
+register_cli_argument('vm unmanaged-disk attach', 'disk_name', options_list=('--name', '-n'), help='The data disk name(optional when create a new disk)')
+register_cli_argument('vm unmanaged-disk detach', 'disk_name', options_list=('--name', '-n'), help='The data disk name.')
+register_cli_argument('vm unmanaged-disk', 'disk_size', help='Size of disk (GiB)', default=1023, type=int)
+register_cli_argument('vm unmanaged-disk', 'new', action="store_true", help='create a new disk')
+register_cli_argument('vm unmanaged-disk', 'lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virutal Machine size.')
+register_cli_argument('vm unmanaged-disk', 'vhd_uri', help="virtual hard disk's uri. For example:https://mystorage.blob.core.windows.net/vhds/d1.vhd")
+register_cli_argument('vm unmanaged-disk', 'caching', help='Host caching policy', default=CachingTypes.none.value, **enum_choice_list(CachingTypes))
 
-for item in ['attach-existing', 'attach-new', 'detach']:
-    register_cli_argument('vm disk {}'.format(item), 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',), id_part=None)
+for item in ['attach', 'detach']:
+    register_cli_argument('vm unmanaged-disk {}'.format(item), 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',), id_part=None)
 
-register_cli_argument('vm availability-set', 'availability_set_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'), help='Name of the availability set')
+register_cli_argument('vm disk', 'vm_name', options_list=('--vm-name',), id_part=None,
+                      completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'))
+register_cli_argument('vm disk', 'disk', validator=validate_vm_disk, help='disk name or id',
+                      completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
+register_cli_argument('vm disk', 'new', action="store_true", help='create a new disk')
+register_cli_argument('vm disk', 'sku', arg_type=disk_sku)
+register_cli_argument('vm disk', 'size_gb', options_list=('--size-gb', '-z'), help='size in GB.')
+
+register_cli_argument('vm availability-set', 'availability_set_name', name_arg_type, id_part='name',
+                      completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'), help='Name of the availability set')
+register_cli_argument('vm availability-set create', 'availability_set_name', name_arg_type, validator=validate_location, help='Name of the availability set')
+register_cli_argument('vm availability-set create', 'unmanaged', action='store_true', help='contained VMs should use unmanaged disks')
+register_cli_argument('vm availability-set create', 'validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
 
 register_cli_argument('vm access', 'username', options_list=('--username', '-u'), help='The user name')
 register_cli_argument('vm access', 'password', options_list=('--password', '-p'), help='The user password')
@@ -105,6 +120,10 @@ for dest in ['vm_scale_set_name', 'virtual_machine_scale_set_name', 'name']:
 register_cli_argument('vmss', 'instance_id', id_part='child_name')
 register_cli_argument('vmss', 'instance_ids', multi_ids_type, help='Space separated list of IDs (ex: 1 2 3 ...) or * for all instances. If not provided, the action will be applied on the scaleset itself')
 register_cli_argument('vmss', 'tags', tags_type)
+
+register_cli_argument('vmss disk', 'lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virutal Machine instance size.')
+register_cli_argument('vmss disk', 'size_gb', options_list=('--size-gb', '-z'), help='size in GB.')
+register_cli_argument('vmss disk', 'vmss_name', vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
 
 register_cli_argument('vmss extension', 'extension_name', name_arg_type, help='Name of the extension.')
 register_cli_argument('vmss extension', 'vmss_name', id_part=None)
@@ -153,7 +172,7 @@ register_cli_argument('vm create', 'name', name_arg_type, validator=_resource_no
 
 register_cli_argument('vmss create', 'name', name_arg_type)
 register_cli_argument('vmss create', 'nat_backend_port', default=None, help='Backend port to open with NAT rules.  Defaults to 22 on Linux and 3389 on Windows.')
-
+register_cli_argument('vmss create', 'single_placement_group', default=None, help="Enable single placement group. This flag will default to True if instance count <=100, and default to False for instance count >100.", **enum_choice_list(['true', 'false']))
 
 for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'location', location_type, help='Location in which to create VM and related resources. Defaults to the resource group\'s location.')
@@ -171,17 +190,18 @@ for scope in ['vm create', 'vmss create']:
 
     register_cli_argument(scope, 'os_disk_name', help='The name of the new VM OS disk.', arg_group='Storage')
     register_cli_argument(scope, 'os_type', help='Type of OS installed on a custom VHD. Do not use when specifiying an URN or URN alias.', arg_group='Storage', **enum_choice_list(['windows', 'linux']))
-    register_cli_argument(scope, 'storage_account', help='The name to use when creating a new storage account or referencing an existing one. If omitted, an appropriate storage account in the same resource group and location will be used, or a new one will be created.', arg_group='Storage')
+    register_cli_argument(scope, 'storage_account', help="Only applicable when use with '--use-unmanaged-disk'. The name to use when creating a new storage account or referencing an existing one. If omitted, an appropriate storage account in the same resource group and location will be used, or a new one will be created.", arg_group='Storage')
     register_cli_argument(scope, 'storage_caching', help='Storage caching type for the VM OS disk', arg_group='Storage', **enum_choice_list(['ReadWrite', 'ReadOnly']))
-    register_cli_argument(scope, 'storage_sku', help='The storage SKU to use for new storage accounts.', arg_group='Storage', **enum_choice_list(SkuName))
-    register_cli_argument(scope, 'storage_container_name', help='Name of the storage container for the VM OS disk.', arg_group='Storage')
-
+    register_cli_argument(scope, 'storage_sku', help='The sku of storage account to persist VM. By default, only Standard_LRS and Premium_LRS are allowed. Using with --use-unmanaged-disk, all are available.', arg_group='Storage', **enum_choice_list(SkuName))
+    register_cli_argument(scope, 'storage_container_name', help="Only applicable when use with '--use-unmanaged-disk'. Name of the storage container for the VM OS disk.", arg_group='Storage')
     register_cli_argument(scope, 'os_publisher', ignore_type)
     register_cli_argument(scope, 'os_offer', ignore_type)
     register_cli_argument(scope, 'os_sku', ignore_type)
     register_cli_argument(scope, 'os_version', ignore_type)
     register_cli_argument(scope, 'storage_profile', ignore_type)
-
+    register_cli_argument(scope, 'use_unmanaged_disk', action='store_true', help='Do not use managed disk to persist VM', arg_group='Storage')
+    register_cli_argument(scope, 'data_disk_sizes_gb', nargs='+', type=int, help='space separated empty managed data disk sizes in GB to create', arg_group='Storage')
+    register_cli_argument(scope, 'image_data_disks', ignore_type)
     for item in ['storage_account', 'public_ip', 'nsg', 'nic', 'vnet', 'load_balancer']:
         register_cli_argument(scope, '{}_type'.format(item), ignore_type)
 
@@ -199,6 +219,7 @@ for scope in ['vm create', 'vmss create']:
 
 register_cli_argument('vm create', 'vm_name', name_arg_type, id_part=None, help='Name of the virtual machine.', validator=process_vm_create_namespace)
 register_cli_argument('vm create', 'availability_set', help='Name or ID of an existing availability set to add the VM to. None by default.')
+register_cli_argument('vm create', 'managed_os_disk', options_list=('--attach-os-disk',), help='create VM by attaching to an existing managed OS disk', arg_group='Storage')
 
 register_cli_argument('vmss create', 'vmss_name', name_arg_type, id_part=None, help='Name of the virtual machine scale set.', validator=process_vmss_create_namespace)
 register_cli_argument('vmss create', 'load_balancer', help='Name to use when creating a new load balancer (default) or referencing an existing one. Can also reference an existing load balancer by ID or specify "" for none.', arg_group='Load Balancer')
@@ -209,3 +230,40 @@ register_cli_argument('vmss create', 'instance_count', help='Number of VMs in th
 register_cli_argument('vmss create', 'disable_overprovision', help='Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details).', action='store_true')
 register_cli_argument('vmss create', 'upgrade_policy_mode', help=None, **enum_choice_list(UpgradeMode))
 register_cli_argument('vmss create', 'vm_sku', help='Size of VMs in the scale set.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
+
+existing_disk_name = CliArgumentType(overrides=name_arg_type, help='The name of the managed disk', completer=get_resource_name_completion_list('Microsoft.Compute/disks'), id_part='name')
+register_cli_argument('disk', 'disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
+register_cli_argument('disk', 'name', arg_type=name_arg_type)
+register_cli_argument('disk', 'sku', arg_type=disk_sku)
+
+existing_snapshot_name = CliArgumentType(overrides=name_arg_type, help='The name of the snapshot', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'), id_part='name')
+register_cli_argument('snapshot', 'snapshot_name', existing_snapshot_name, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'))
+register_cli_argument('snapshot', 'name', arg_type=name_arg_type)
+register_cli_argument('snapshot', 'sku', arg_type=disk_sku)
+
+existing_image_name = CliArgumentType(overrides=name_arg_type, help='The name of the custom image', completer=get_resource_name_completion_list('Microsoft.Compute/images'), id_part='name')
+register_cli_argument('image', 'os_type', **enum_choice_list(['Windows', 'Linux']))
+register_cli_argument('image', 'image_name', arg_type=name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/images'))
+register_cli_argument('image create', 'name', arg_type=name_arg_type, help='new image name')
+
+# here we collpase all difference image sources to under 2 common arguments --os-disk-source --data-disk-sources
+register_extra_cli_argument('image create', 'source', validator=process_image_create_namespace,
+                            help='OS disk source of the new image, including a virtual machine id or name, sas uri to a os disk blob, managed os disk id or name, or os snapshot id or name')
+register_extra_cli_argument('image create', 'data_disk_sources', nargs='+',
+                            help='space separated 1 or more data disk sources, including sas uri to a blob, managed disk id or name, or snapshot id or name')
+register_cli_argument('image create', 'source_virtual_machine', ignore_type)
+register_cli_argument('image create', 'os_blob_uri', ignore_type)
+register_cli_argument('image create', 'os_disk', ignore_type)
+register_cli_argument('image create', 'os_snapshot', ignore_type)
+register_cli_argument('image create', 'data_blob_uris', ignore_type)
+register_cli_argument('image create', 'data_disks', ignore_type)
+register_cli_argument('image create', 'data_snapshots', ignore_type)
+
+for scope in ['disk', 'snapshot']:
+    register_extra_cli_argument(scope + ' create', 'source', validator=process_disk_or_snapshot_create_namespace,
+                                help='source to create the disk from, including a sas uri to a blob, managed disk id or name, or snapshot id or name')
+    register_cli_argument(scope, 'source_blob_uri', ignore_type)
+    register_cli_argument(scope, 'source_disk', ignore_type)
+    register_cli_argument(scope, 'source_snapshot', ignore_type)
+    register_cli_argument(scope, 'size_gb', options_list=('--size-gb', '-z'), help='size in GB.')
+    register_cli_argument(scope, 'duration_in_seconds', help='Time duration in seconds until the SAS access expires')

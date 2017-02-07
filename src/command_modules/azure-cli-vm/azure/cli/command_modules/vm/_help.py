@@ -9,6 +9,7 @@ from azure.cli.core.help_files import helps
 
 image_long_summary = """                      URN aliases: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS, Win2008R2SP1, Win2012Datacenter, Win2012R2Datacenter.
                       Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest
+                      Example Custom Image Resource ID or Name: /subscriptions/subscription-id/resourceGroups/myrg/providers/Microsoft.Compute/images/myImage
                       Example URI: http://<storageAccount>.blob.core.windows.net/vhds/osdiskimage.vhd
 """
 
@@ -19,7 +20,7 @@ helps['vm create'] = """
             parameters:
                 - name: --image
                   type: string
-                  short-summary: 'OS image (URN alias, URN or URI).'
+                  short-summary: 'OS image (URN alias, URN, Custom Image name or ID, VHD Blob URI).'
                   long-summary: |
 {0}
                   populator-commands:
@@ -39,10 +40,22 @@ helps['vm create'] = """
                   text: >
                     az vm create -n my_vm_name -g myrg --admin-username myadmin --admin-password Password@1234
                      --public-ip-address "" --image Win2012R2Datacenter
-                - name: Create a simple Windows Server VM with public IP address and DNS entry
+                - name: Create a simple Ubuntu VM with public IP address, DNS entry, 2 data disk(10GB, 20GB), and generate ssh key pairs under ~/.ssh
                   text: >
                     az vm create -n my_vm_name -g myrg --admin-username myadmin --admin-password Password@1234
-                    --public-ip-address-dns-name my_globally_unique_vm_dns_name --image Win2012R2Datacenter
+                    --public-ip-address-dns-name my_globally_unique_vm_dns_name --image ubuntults --data-disk-sizes-gb 10 20
+                    --size Standard_DS2 --generate-ssh-keys
+                - name: Create a VM from a custom managed image
+                  text: >
+                    az vm create -g myrg -n my_vm_name --image my_image_in_myrg --admin-username myadmin --admin-password Password@1234
+                - name: Create a VM with unmanaged os disk by using image blob uri
+                  text: >
+                    az vm create -g myrg -n my_vm_name --image https://account123.blob.core.windows.net/Images/my_vhd-osDisk.vhd
+                    --os-type linux --admin-username myadmin --admin-password Password@1234
+                - name: Create a VM by attaching to an existing specialized managed os disk
+                  text: >
+                    az vm create -g myrg -n my_vm_name --managed-os-disk my-os-disk
+                    --os-type linux --admin-username myadmin --admin-password Password@1234
             """.format(image_long_summary)
 
 helps['vmss create'] = """
@@ -56,14 +69,17 @@ helps['vmss create'] = """
                   long-summary: |
 {0}
             examples:
-                - name: Windows scaleset with 5 instances, a load balancer and a public IP address
+                - name: Windows scaleset with 5 instances, a load balancer, a public IP address and a 2GB data disk
                   text: >
-                    az vmss create -n myName -g myResourceGroup --admin-password MyPassword123 --instance-count 5 --image Win2012R2Datacenter
-                - name: Linux scaleset with SSH authentication, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network
+                    az vmss create -n my_vmss_name -g myrg --admin-password MyPassword123 --instance-count 5 --image Win2012R2Datacenter --data-disk-sizes-gb 2
+                - name: Linux scaleset with auto-generated ssh key pair under ~/.ssh, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network
                   text: >
-                    az vmss create  -n myName -g myResourceGroup --dns-name-for-public-ip myGloballyUniqueDnsName
-                    --load-balancer myLoadBalancer --vnet-name myVNET --subnet mySubnet --image <linux image from 'az vm image list'>
-                    --ssh-key-value "<ssh-key-value or ssh-key-file-path>"
+                    az vmss create -n my_vmss_name -g myrg --dns-name-for-public-ip myGloballyUniqueDnsName
+                    --load-balancer myLoadBalancer --vnet-name myVNET --subnet mySubnet --image UbuntuLTS
+                    --generate-ssh-keys
+                - name: Scaleset created from custom Linux image using existing ssh public key of ~/.ssh/id_rsa.pub
+                  text: >
+                    az vmss create -n my_vmss_name -g myrg --image my_linuximage_in_myrg
 """.format(image_long_summary)
 
 helps['vm availability-set create'] = """
@@ -75,6 +91,11 @@ helps['vm availability-set create'] = """
 helps['vm availability-set update'] = """
             type: command
             short-summary: Update an availability set
+            """
+
+helps['vm availability-set convert'] = """
+            type: command
+            short-summary: convert an availability set to contain VMs with managed disks
             """
 
 helps['vm extension set'] = """
@@ -147,6 +168,11 @@ helps['vm get-instance-view'] = """
     short-summary: "Gets a VM including instance information (powerState)"
 """
 
+helps['vm convert'] = """
+    type: command
+    short-summary: Convert VM with unmanaged disks to use managed disks
+"""
+
 helps['vm'] = """
     type: group
     short-summary: Provision Linux and Windows virtual machines in minutes
@@ -201,7 +227,11 @@ helps['vm diagnostics'] = """
 """
 helps['vm disk'] = """
     type: group
-    short-summary: Manage VM storage disks
+    short-summary: Manage VM data disks
+"""
+helps['vm unmanaged-disk'] = """
+    type: group
+    short-summary: Manage VM unmanaged data disks
 """
 helps['vm extension'] = """
     type: group
@@ -230,6 +260,10 @@ helps['vmss'] = """
 helps['vmss diagnostics'] = """
     type: group
     short-summary: Configure the Azure VMSS diagnostics extension
+"""
+helps['vmss list_instance_connection_info'] = """
+    type: group
+    short-summary: Get IP address and port number used to connect to individual instances.
 """
 helps['vmss extension'] = """
     type: group
@@ -275,4 +309,92 @@ helps['vm generalize'] = """
 helps['vm wait'] = """
     type: command
     short-summary: Place the CLI in a waiting state until a condition of the VM is met.
+"""
+
+helps['disk'] = """
+    type: group
+    short-summary: Commands to manage 'Managed Disks'
+"""
+
+helps['snapshot'] = """
+    type: group
+    short-summary: Commands to manage snapshots
+"""
+
+helps['image'] = """
+    type: group
+    short-summary: Commands to manage custom virtual machine images based on managed disks/snapshots
+"""
+
+helps['disk create'] = """
+    type: command
+    short-summary: create a managed disk
+    examples:
+        - name: Create by importing from blob uri
+          text: az disk create -g myRG -n myDisk --source https://vhd1234.blob.core.windows.net/vhds/osdisk1234.vhd
+        - name: Create an empty disk
+          text: az disk create -g myRG -n myDisk --size-gb 10
+        - name: Create by copying from an existing disk or snapshot
+          text: az disk create -g myRG -n myDisk2 --source myDisk
+"""
+helps['disk list'] = """
+    type: command
+    short-summary: list managed disks under a resource group or under current subscription
+"""
+helps['disk delete'] = """
+    type: command
+    short-summary: delete a managed disk
+"""
+helps['disk update'] = """
+    type: command
+    short-summary: update a managed disk
+"""
+helps['disk grant-access'] = """
+    type: command
+    short-summary: grant read access to a managed disk
+"""
+helps['disk revoke-access'] = """
+    type: command
+    short-summary: revoke read access to a managed disk
+"""
+
+helps['snapshot create'] = """
+    type: command
+    short-summary: create a snapshot
+    examples:
+        - name: Create by importing from blob uri
+          text: az snapshot create -g myRG -n mySnapshot --source https://vhd1234.blob.core.windows.net/vhds/osdisk1234.vhd
+        - name: Create an empty snapshot
+          text: az snapshot create -g myRG -n mySnapshot --size-gb 10
+        - name: Create by copying from an existing disk from the same resource group
+          text: az snapshot create -g myRG -n mySnapshot2 --source myDisk
+"""
+helps['snapshot update'] = """
+    type: command
+    short-summary: update a snapshot
+"""
+helps['snapshot list'] = """
+    type: command
+    short-summary: list snapshots under a resource group or under current subscription
+"""
+helps['snapshot grant-access'] = """
+    type: command
+    short-summary: grant read access to a snapshot
+"""
+helps['snapshot revoke-access'] = """
+    type: command
+    short-summary: revoke read access to a snapshot
+"""
+helps['image create'] = """
+    type: command
+    short-summary: create a custom image from managed disks or snapshots
+    examples:
+        - name: Create from an existing disk
+          text: az image create -g myRG -n image1 --os-type Linux --source /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/rg1/providers/Microsoft.Compute/snapshots/s1 --data-snapshot /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/rg/providers/Microsoft.Compute/snapshots/s2
+        - name: Create by capturing an existing generalize virtual machine from the same resource group
+          text: az image create -g myRG -n image1 --source myvm1
+"""
+helps['image list'] = """
+    type: command
+    short-summary: list custom images under a resource group or under current subscription
 """
