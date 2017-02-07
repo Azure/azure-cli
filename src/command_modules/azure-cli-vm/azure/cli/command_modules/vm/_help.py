@@ -14,7 +14,8 @@ image_long_summary = """                      URN aliases: CentOS, CoreOS, Debia
 """
 
 vm_ids_example = """        - name: {0}
-          text: az {1} --ids $(az vm list -g group_name --query "[].id" -o tsv)
+          text: >
+            az {1} --ids $(az vm list -g group_name --query "[].id" -o tsv)
 """
 
 name_group_example = """        - name: {0} by Name and Group
@@ -206,11 +207,6 @@ helps['vmss show'] = """
     parameters:
         - name: --ids
           short-summary: "One or more scale set or specific VM instance IDs. If provided, no other 'Resource Id' arguments should be specified."
-"""
-
-helps['vm get-instance-view'] = """
-    type: command
-    short-summary: "Gets a VM including instance information (powerState)"
 """
 
 helps['vm convert'] = """
@@ -680,43 +676,163 @@ helps['vmss extension image'] = """
     short-summary: Find scale-set extensions available for your subscription and region
 """
 
-helps['vm capture'] = """
-    type: command
-    long-summary: See https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/ for an end-to-end tutorial
-    examples:
-        - name: Process to deallocate, generalize, and capture a stopped virtual machine
+deallocate_generalize_capture = """        - name: Process to deallocate, generalize, and capture a stopped virtual machine
           text: >
             az vm deallocate -g my_rg -n my_vm_name\n\r
             az vm generalize -g my_rg -n my_vm_name\n\r
             az vm capture -g my_rg -n my_vm_name --vhd-name-prefix my_prefix\n\r
+        - name: Process to deallocate, generalize, and capture multiple stopped virtual machines
+          text: >
+            vms_ids=$(az vm list -g group_name --query "[].id" -o tsv)\n\r
+            az vm deallocate --ids ${vms_ids}\n\r
+            az vm generalize --ids ${vms_ids}\n\r
+            az vm capture --ids ${vms_ids} --vhd-name-prefix my_prefix\n\r
 """
+
+helps['vm capture'] = """
+    type: command
+    long-summary: See https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/ for an end-to-end tutorial
+    examples:
+{0}
+""".format(deallocate_generalize_capture)
+
+helps['vm delete'] = """
+    type: command
+    examples:
+        - name: Delete a virtual machine without prompt for confirmation
+          text: >
+            az vm delete -g group_name -n vm_name --force
+{0}
+""".format(vm_ids_example.format('Delete a virtual machine by Ids', 'vm delete'))
 
 helps['vm deallocate'] = """
     type: command
     long-summary: See https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/ for an end-to-end tutorial
     examples:
-        - name: Process to deallocate, generalize, and capture a stopped virtual machine
-          text: >
-            az vm deallocate -g my_rg -n my_vm_name\n\r
-            az vm generalize -g my_rg -n my_vm_name\n\r
-            az vm capture -g my_rg -n my_vm_name --vhd-name-prefix my_prefix\n\r
-"""
+{0}
+""".format(deallocate_generalize_capture)
 
 helps['vm generalize'] = """
     type: command
     long-summary: See https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-capture-image/ for an end-to-end tutorial
     examples:
-        - name: Process to deallocate, generalize, and capture a stopped virtual machine
-          text: >
-            az vm deallocate -g my_rg -n my_vm_name\n\r
-            az vm generalize -g my_rg -n my_vm_name\n\r
-            az vm capture -g my_rg -n my_vm_name --vhd-name-prefix my_prefix\n\r
+{0}
+""".format(deallocate_generalize_capture)
+
+helps['vm get-instance-view'] = """
+    type: command
+    short-summary: "Gets a VM including instance information (powerState)"
+    examples:
+        - name: Get instance view by name and resource group
+          text: az vm get-instance-view -g group_name -n vm_name
+{0}
+""".format(vm_ids_example.format('Get instance view by Ids', 'vm get-instance-view'))
+
+helps['vm list'] = """
+    type: command
+    examples:
+        - name: List all VMs
+          text: az vm list
+        - name: List all VMs by group
+          text: az vm list -g group_name
+        - name: List all VMs by group with details
+          text: az vm list -g group_name -d
 """
+
+helps['vm list-ip-addresses'] = """
+    type: command
+    examples:
+        - name: Get IP addresses for a VM
+          text: az vm list-ip-addresses -g group_name -n vm_name
+{0}
+""".format(vm_ids_example.format('Get IP addresses for VMs by Ids', 'vm list-ip-addresses'))
+
+helps['vm list-sizes'] = """
+    type: command
+    examples:
+        - name: List available VM sizes in West US
+          text: az vm list-sizes -l westus
+"""
+
+helps['vm list-usage'] = """
+    type: command
+    examples:
+        - name: Get the compute resource usage for West US
+          text: az vm list-usage -l westus
+"""
+
+helps['vm list-vm-resize-options'] = """
+    type: command
+    examples:
+        - name: List all available VM sizes for resizing for a VM by resource group and VM name
+          text: az vm list-vm-resize-options -g group_name -n vm_name
+{0}
+""".format(vm_ids_example.format('List all available VM sizes for resizing by VM Ids', 'vm list-vm-resize-options'))
+
+helps['vm open-port'] = """
+    type: command
+    examples:
+        - name: Open all ports on a VM to inbound traffic by resource group and VM name
+          text: az vm open-port -g group_name -n vm_name
+{0}
+""".format(vm_ids_example.format('Open all ports for multiple VMs by Ids', 'vm open-port'))
+
+helps['vm redeploy'] = """
+    type: command
+    examples:
+        - name: Redeploy VM by resource group and VM name
+          text: az vm redeploy -g group_name -n vm_name
+{0}
+""".format(vm_ids_example.format('Redeploy VMs by VM Ids', 'vm redeploy'))
+
+helps['vm resize'] = """
+    type: command
+    examples:
+        - name: Resize VM by resource group and VM name
+          text: az vm resize -g group_name -n vm_name --size Standard_DS3_v2
+{0}
+""".format(vm_ids_example.format('Resize VMs by VM Ids', 'vm redeploy --size Standard_DS3_v2'))
+
+helps['vm restart'] = """
+    type: command
+    examples:
+        - name: Restart VM by resource group and VM name
+          text: az vm restart -g group_name -n vm_name
+{0}
+""".format(vm_ids_example.format('Restart VM by by VM Ids', 'vm restart'))
+
+helps['vm show'] = """
+    type: command
+    examples:
+        - name: Show VM details by resource group and VM name
+          text: az vm show -g group_name -n vm_name -d
+{0}
+""".format(vm_ids_example.format('Show VM details by by VM Ids', 'vm show -d'))
+
+helps['vm start'] = """
+    type: command
+    examples:
+        - name: Start a stopped VM by resource group and VM name
+          text: az vm start -g group_name -n vm_name
+{0}
+""".format(vm_ids_example.format('Start stopped VMs by by VM Ids', 'vm start'))
+
+helps['vm stop'] = """
+    type: command
+    examples:
+        - name: Stop a running VM by resource group and VM name
+          text: az vm stop -g group_name -n vm_name
+{0}
+""".format(vm_ids_example.format('Stop running VMs by by VM Ids', 'vm stop'))
 
 helps['vm wait'] = """
     type: command
     short-summary: Place the CLI in a waiting state until a condition of the VM is met.
-"""
+    examples:
+        - name: Wait until VM is created
+          text: az vm wait -g group_name -n vm_name --created
+{0}
+""".format(vm_ids_example.format('Wait until VMs are deleted by Ids', 'vm wait --deleted'))
 
 helps['disk'] = """
     type: group
