@@ -78,6 +78,10 @@ class TestDnsZoneImport(unittest.TestCase):
             self.assertEqual(int(record['port']), records_to_check[i][3])
             self.assertEqual(record['target'], records_to_check[i][4])
 
+    def _check_ttl(self, zone, name, rec_type, ttl):
+        for record in zone[name][rec_type]:
+            self.assertEqual(record['ttl'], ttl)
+
     def _get_zone_object(self, file_name):
         file_path = os.path.join(TEST_DIR, 'zone_files', file_name)
         file_text = None
@@ -181,10 +185,31 @@ class TestDnsZoneImport(unittest.TestCase):
         zone = self._get_zone_object('zone4.txt')
         self._check_soa(zone, 3600, 2003080800, 43200, 900, 1814400, 10800)
         self._check_ns(zone, '@', [(100, 'ns1')])
+        self._check_ttl(zone, 'ttl-300', 'a', 300)
+        self._check_ttl(zone, 'ttl-0', 'a', 0)
+        self._check_ttl(zone, 'ttl-60', 'a', 60)
+        self._check_ttl(zone, 'ttl-1w', 'a', 604800)
+        self._check_ttl(zone, 'ttl-1d', 'a', 86400)
+        self._check_ttl(zone, 'ttl-1h', 'a', 3600)
+        self._check_ttl(zone, 'ttl-99s', 'a', 99)
+        self._check_ttl(zone, 'ttl-100', 'a', 100)
+        self._check_ttl(zone, 'ttl-6m', 'a', 360)
+        self._check_ttl(zone, 'ttl-mix', 'a', 777600)  # TODO: crazy string parse for TTL?
+        self._check_ttl(zone, 'xttl-1w', 'a', 604800)
+        self._check_ttl(zone, 'xttl-1d', 'a', 86400)
+        self._check_ttl(zone, 'xttl-1h', 'a', 3600)
+        self._check_ttl(zone, 'xttl-99s', 'a', 99)
+        self._check_ttl(zone, 'xttl-100', 'a', 100)
+        self._check_ttl(zone, 'xttl-6m', 'a', 360)
+        self._check_ttl(zone, 'xttl-mix', 'a', 777600)  # TODO: crazy string parse for TTL?
+        #self._check_a(zone, 'c1', [(10, '11.1.2.3'), (10, '11.2.3.3')])  # TODO: Fix TTL for second one?  Should be 10...
+        #self._check_a(zone, 'c2', [(10, '11.2.3.4'), (5, '11.5.6.7')])  # TODO: Fix @/$ORIGIN parsing
 
     def test_zone_file_5(self):
         zone = self._get_zone_object('zone5.txt')
         self._check_soa(zone, 3600, 2003080800, 43200, 900, 1814400, 10800)
+        #self._check_a(zone, '@', [(3600, '1.2.3.4')])
+        #self._check_a(zone, 'www', [(3600, '2.3.4.5')])
 
 if __name__ == '__main__':
     unittest.main()
