@@ -10,8 +10,6 @@ import json
 
 from enum import Enum
 
-from azure.cli.core._util import CLIError
-
 
 class ArmTemplateBuilder(object):
 
@@ -70,6 +68,9 @@ class ArmTemplateBuilder(object):
 class StorageProfile(Enum):
     SAPirImage = 1
     SACustomImage = 2
+    ManagedPirImage = 3  # this would be the main scenarios
+    ManagedCustomImage = 4
+    ManagedSpecializedOSDisk = 5
 
 
 def build_deployment_resource(name, template, dependencies=None):
@@ -245,12 +246,13 @@ def build_vnet_resource(name, location, tags, vnet_prefix=None, subnet=None,
     return vnet
 
 
-def build_vm_resource(
+def build_vm_resource(  # pylint: disable=too-many-locals
         name, location, tags, size, storage_profile, nics, admin_username,
         availability_set_id=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
-        image_reference=None, os_disk_name=None, custom_image_os_type=None, storage_caching=None,
+        image_reference=None, os_disk_name=None, custom_image_os_type=None,
+        storage_caching=None, storage_sku=None,
         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
-        os_vhd_uri=None):
+        os_vhd_uri=None, managed_os_disk=None, data_disk_sizes_gb=None, image_data_disks=None):
 
     def _build_os_profile():
 
@@ -303,9 +305,45 @@ def build_vm_resource(
                     'sku': os_sku,
                     'version': os_version
                 }
+            },
+            'ManagedPirImage': {
+                'osDisk': {
+                    'createOption': 'fromImage',
+                    'name': os_disk_name,
+                    'caching': storage_caching,
+                    'managedDisk': {'storageAccountType': storage_sku}
+                },
+                'imageReference': {
+                    'publisher': os_publisher,
+                    'offer': os_offer,
+                    'sku': os_sku,
+                    'version': os_version
+                }
+            },
+            'ManagedCustomImage': {
+                'osDisk': {
+                    'createOption': 'fromImage',
+                    'name': os_disk_name,
+                    'caching': storage_caching,
+                    'managedDisk': {'storageAccountType': storage_sku}
+                },
+                "imageReference": {
+                    'id': image_reference
+                }
+            },
+            'ManagedSpecializedOSDisk': {
+                'osDisk': {
+                    'createOption': 'attach',
+                    'osType': custom_image_os_type,
+                    'managedDisk': {
+                        "id": managed_os_disk
+                    }
+                }
             }
         }
-        return storage_profiles[storage_profile.name]
+        profile = storage_profiles[storage_profile.name]
+        return _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
+                                 storage_caching, storage_sku)
 
     vm_properties = {
         'hardwareProfile': {'vmSize': size},
@@ -317,10 +355,11 @@ def build_vm_resource(
     if availability_set_id:
         vm_properties['availabilitySet'] = {'id': availability_set_id}
 
-    vm_properties['osProfile'] = _build_os_profile()
+    if not managed_os_disk:
+        vm_properties['osProfile'] = _build_os_profile()
 
     vm = {
-        'apiVersion': '2015-06-15',
+        'apiVersion': '2016-04-30-preview',
         'type': 'Microsoft.Compute/virtualMachines',
         'name': name,
         'location': location,
@@ -331,35 +370,26 @@ def build_vm_resource(
     return vm
 
 
-def build_load_balancer_inbound_nat_rules_resource(lb_name, location, backend_port, instance_count,
-                                                   frontend_ip_name):
-
-    lb_id = "resourceId('Microsoft.Network/loadBalancers', '{}')".format(lb_name)
-
-    nat_rule_properties = {
-        'frontendIPConfiguration': {
-            'id': "[concat({}, '/frontendIPConfigurations/', '{}')]".format(lb_id, frontend_ip_name)
-        },
-        'protocol': 'tcp',
-        'frontendPort': "[copyIndex(50000)]",
-        'backendPort': backend_port,
-        'enableFloatingIP': False
-    }
-    nat_rules = {
-        'apiVersion': '2015-06-15',
-        'type': 'Microsoft.Network/loadBalancers/inboundNatRules',
-        'name': "[concat('{}', '/', 'NAT-RULE', copyIndex())]".format(lb_name),
-        'location': location,
-        'copy': {
-            'name': 'lbNatLoop',
-            'count': instance_count
-        },
-        'dependsOn': [
-            'Microsoft.Network/loadBalancers/{}'.format(lb_name)
-        ],
-        'properties': nat_rule_properties
-    }
-    return nat_rules
+def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
+                      storage_caching, storage_sku):
+    if data_disk_sizes_gb is not None:
+        profile['dataDisks'] = []
+        for image_data_disk in image_data_disks or []:
+            profile['dataDisks'].append({
+                'lun': image_data_disk.lun,
+                'createOption': "fromImage",
+            })
+        lun = max([d.lun for d in image_data_disks]) + 1 if image_data_disks else 1
+        for size in data_disk_sizes_gb:
+            profile['dataDisks'].append({
+                'lun': lun,
+                'createOption': "empty",
+                'diskSizeGB': int(size),
+                'caching': storage_caching,
+                'managedDisk': {'storageAccountType': storage_sku}
+            })
+            lun = lun + 1
+    return profile
 
 
 def build_load_balancer_resource(name, location, tags, backend_pool_name, nat_pool_name,
@@ -449,10 +479,12 @@ def build_vmss_storage_account_pool_resource(loop_name, location, tags, storage_
 def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgrade_policy_mode,
                         vm_sku, instance_count, ip_config_name, nic_name, subnet_id,
                         admin_username, authentication_type,
-                        storage_profile, os_disk_name, storage_caching, os_type,
+                        storage_profile, os_disk_name,
+                        storage_caching, storage_sku, data_disk_sizes_gb, image_data_disks, os_type,
                         image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
-                        backend_address_pool_id=None, inbound_nat_pool_id=None):
+                        backend_address_pool_id=None, inbound_nat_pool_id=None,
+                        single_placement_group=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -472,33 +504,45 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
         ]
 
     # Build storage profile
-    storage_properties = {
-        'osDisk': {
+    storage_properties = {}
+    if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
+        storage_properties['osDisk'] = {
             'name': os_disk_name,
             'caching': storage_caching,
             'createOption': 'FromImage',
         }
-    }
 
-    if storage_profile == StorageProfile.SACustomImage:
-        storage_properties['osDisk'].update({
-            'osType': os_type,
-            'image': {
-                'uri': image
-            }
-        })
-    elif storage_profile == StorageProfile.SAPirImage:
-        storage_properties['osDisk']['vhdContainers'] = "[variables('vhdContainers')]"
-    else:
-        raise CLIError('Unsupported storage profile.')
+        if storage_profile == StorageProfile.SACustomImage:
+            storage_properties['osDisk'].update({
+                'osType': os_type,
+                'image': {
+                    'uri': image
+                }
+            })
+        else:
+            storage_properties['osDisk']['vhdContainers'] = "[variables('vhdContainers')]"
+    elif storage_profile in [StorageProfile.ManagedPirImage, StorageProfile.ManagedPirImage]:
+        storage_properties['osDisk'] = {
+            'createOption': 'FromImage',
+            'caching': storage_caching,
+            'managedDisk': {'storageAccountType': storage_sku}
+        }
 
-    if storage_profile in [StorageProfile.SAPirImage]:
+    if storage_profile in [StorageProfile.SAPirImage, StorageProfile.ManagedPirImage]:
         storage_properties['imageReference'] = {
             'publisher': os_publisher,
             'offer': os_offer,
             'sku': os_sku,
             'version': os_version
         }
+    if storage_profile == StorageProfile.ManagedCustomImage:
+        storage_properties['imageReference'] = {
+            'id': image
+        }
+
+    storage_profile = _build_data_disks(storage_properties, data_disk_sizes_gb,
+                                        image_data_disks, storage_caching,
+                                        storage_sku)
 
     # Build OS Profile
     os_profile = {
@@ -520,9 +564,12 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
             }
         }
 
+    if single_placement_group is None:  # this should never happen, but just in case
+        raise ValueError('single_placement_group was not set by validators')
     # Build VMSS
     vmss_properties = {
         'overprovision': overprovision,
+        'singlePlacementGroup': single_placement_group,
         'upgradePolicy': {
             'mode': upgrade_policy_mode
         },
@@ -545,7 +592,7 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': '2016-03-30',
+        'apiVersion': '2016-04-30-preview',
         'dependsOn': [],
         'sku': {
             'name': vm_sku,
@@ -555,3 +602,22 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
         'properties': vmss_properties
     }
     return vmss
+
+
+def build_av_set_resource(name, location, tags,
+                          platform_update_domain_count, platform_fault_domain_count, unmanaged):
+    av_set = {
+        'type': 'Microsoft.Compute/availabilitySets',
+        'name': name,
+        'location': location,
+        'tags': tags,
+        'apiVersion': '2016-04-30-preview',
+        'sku': {
+            'name': 'Classic' if unmanaged else 'Aligned'
+        },
+        "properties": {
+            'platformUpdateDomainCount': platform_update_domain_count,
+            'platformFaultDomainCount': platform_fault_domain_count,
+        }
+    }
+    return av_set

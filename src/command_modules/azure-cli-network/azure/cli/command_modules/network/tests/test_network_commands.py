@@ -284,7 +284,7 @@ class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
             checks=JMESPathCheck('length(@)', 2))
 
         self.cmd('network express-route peering update -g {} --circuit-name {} -n AzurePublicPeering --set vlanId=200'.format(rg, circuit),
-            checks=JMESPathCheck('vlanId', 200))
+                 checks=JMESPathCheck('vlanId', 200))
 
     def _test_express_route_auth(self):
         rg = self.resource_group
