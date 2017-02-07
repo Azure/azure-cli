@@ -119,7 +119,7 @@ def _make_parser():
     _make_record_parser(parsers, 'TXT', [('txt', str, '+')])
     _make_record_parser(parsers, 'PTR', [('ttl', str, '?'), ('host', str)])
     _make_record_parser(parsers, 'SRV', [('ttl', str, '?'), ('priority', int), ('weight', int), ('port', int), ('target', str)])
-    _make_record_parser(parsers, 'SPF', [('ttl', str, '?'), ('data', str)])
+    _make_record_parser(parsers, 'SPF', [('ttl', str, '?'), ('txt', str)])
     _make_record_parser(parsers, 'URI', [('ttl', str, '?'), ('priority', int), ('weight', int), ('target', str)])
 
     return parsers
@@ -486,18 +486,22 @@ def parse_zone_file(text, ignore_invalid=False):
                 record_type = 'txt'
 
             if record_type == 'txt':
+                if not isinstance(record['txt'], list):
+                    record['txt'] = [record['txt']]
+
+                # parser may interpret a text record as TTL because TTL is a string...
                 try:
                     record['ttl'] = _convert_to_seconds(record['ttl']) if 'ttl' in record else current_ttl
                 except CLIError:
-                    # parser may interpret a text record as TTL...
                     if len(record['txt']):
                         record['txt'] = [record['ttl']] + record['txt']
+                        record['ttl'] = current_ttl
                 long_text = ''.join(x for x in record['txt']) if isinstance(record['txt'], list) else record['txt']
-                if len(long_text) > 255:
-                    # TODO: break long text up into 255 character segments
-                    pass
-                else:
-                    record['txt'] = long_text
+                record['txt'] = []
+                while len(long_text) > 255:
+                    record['txt'].append(long_text[:255])
+                    long_text = long_text[255:]
+                record['txt'].append(long_text)
             else:
                 record['ttl'] = _convert_to_seconds(record['ttl']) if 'ttl' in record else current_ttl
 
