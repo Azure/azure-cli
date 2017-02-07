@@ -1070,7 +1070,7 @@ def vm_set_nics(resource_group_name, vm_name, nics, primary_nic=None):
 # pylint: disable=no-member
 
 
-def vm_open_port(resource_group_name, vm_name, port, priority, network_security_group_name=None,
+def vm_open_port(resource_group_name, vm_name, port, priority=900, network_security_group_name=None,
                  apply_to_subnet=False):
     """ Opens a VM to inbound traffic on specified ports by adding a security rule to the network
     security group (NSG) that is attached to the VM's network interface (NIC) or subnet. The
