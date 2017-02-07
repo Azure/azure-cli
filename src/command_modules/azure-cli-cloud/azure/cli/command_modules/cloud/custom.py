@@ -10,7 +10,7 @@ from azure.cli.core.cloud import (Cloud,
                                   get_cloud,
                                   remove_cloud,
                                   add_cloud,
-                                  modify_active_cloud,
+                                  switch_active_cloud,
                                   update_cloud,
                                   get_active_cloud_name,
                                   CloudAlreadyRegisteredException,
@@ -97,6 +97,6 @@ def unregister_cloud(cloud_name):
 
 def set_cloud(cloud_name):
     try:
-        modify_active_cloud(cloud_name)
+        switch_active_cloud(cloud_name)
     except CloudNotRegisteredException as e:
         raise CLIError(e)

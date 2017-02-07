@@ -248,7 +248,7 @@ def get_cloud_subscription(cloud_name):
     config.read(CLOUD_CONFIG_FILE)
     try:
         return config.get(cloud_name, 'subscription')
-    except configparser.NoOptionError:
+    except (configparser.NoOptionError, configparser.NoSectionError):
         return None
 
 
@@ -290,7 +290,7 @@ def _set_active_subscription(cloud_name):
         logger.warning("Use 'az account set' to set the active subscription.")
 
 
-def modify_active_cloud(cloud_name):
+def switch_active_cloud(cloud_name):
     if get_active_cloud_name() == cloud_name:
         return
     if not _get_cloud(cloud_name):
