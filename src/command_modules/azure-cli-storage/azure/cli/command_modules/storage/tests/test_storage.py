@@ -90,7 +90,7 @@ class StorageAccountScenarioTest(ResourceGroupVCRTestBase):
               checks=JMESPathCheck('tags', {}))
         s.cmd('storage account update -g {} -n {} --sku Standard_GRS'.format(rg, account),
               checks=JMESPathCheck('sku.name', 'Standard_GRS'))
-        s.cmd('storage account delete -g {} -n {} --force'.format(rg, account))
+        s.cmd('storage account delete -g {} -n {} --yes'.format(rg, account))
         s.cmd('storage account check-name --name {}'.format(account), checks=JMESPathCheck('nameAvailable', True))
         result = s.cmd('storage account check-name --name teststorageomega --query "nameAvailable" -o tsv')
         assert result == 'true'

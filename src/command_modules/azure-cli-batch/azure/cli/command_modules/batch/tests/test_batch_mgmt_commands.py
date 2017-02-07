@@ -21,7 +21,7 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
     def tear_down(self):
         rg = self.resource_group
         name = self.storage_account_name
-        self.cmd('storage account delete -g {} -n {} --force'.format(rg, name))
+        self.cmd('storage account delete -g {} -n {} --yes'.format(rg, name))
 
     def __init__(self, test_method):
         super(BatchMgmtAccountScenarioTest, self).__init__(__file__, test_method)
@@ -115,8 +115,8 @@ class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
         rg = self.resource_group
         sname = self.storage_account_name
         name = self.account_name
-        self.cmd('storage account delete -g {} -n {} --force'.format(rg, sname))
-        self.cmd('batch account delete -g {} -n {} --force'.format(rg, name))
+        self.cmd('storage account delete -g {} -n {} --yes'.format(rg, sname))
+        self.cmd('batch account delete -g {} -n {} --yes'.format(rg, name))
 
     def __init__(self, test_method):
         super(BatchMgmtApplicationScenarioTest, self).__init__(__file__, test_method)

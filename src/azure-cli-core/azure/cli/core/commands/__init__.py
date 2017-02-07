@@ -30,8 +30,6 @@ logger = azlogging.get_az_logger(__name__)
 
 # pylint: disable=too-many-arguments,too-few-public-methods
 
-FORCE_PARAM_NAME = 'force'
-
 
 class CliArgumentType(object):
     REMOVE = '---REMOVE---'
@@ -322,7 +320,7 @@ def create_command(module_name, name, operation,
         from azure.common import AzureException
 
         if confirmation \
-            and not kwargs.get(FORCE_PARAM_NAME) \
+            and not kwargs.get('yes') \
             and not az_config.getboolean('core', 'disable_confirm_prompt', fallback=False) \
                 and not _user_confirmed(confirmation, kwargs):
             raise CLIError('Operation cancelled.')
@@ -378,7 +376,7 @@ def create_command(module_name, name, operation,
     cmd = CliCommand(name, _execute_command, table_transformer=table_transformer,
                      arguments_loader=arguments_loader, description_loader=description_loader)
     if confirmation:
-        cmd.add_argument(FORCE_PARAM_NAME,
+        cmd.add_argument('yes', '--yes', '-y',
                          action='store_true',
                          help='Do not prompt for confirmation')
     return cmd
@@ -392,7 +390,7 @@ def _user_confirmed(confirmation, command_args):
             return prompt_y_n(confirmation)
         return prompt_y_n('Are you sure you want to perform this operation?')
     except NoTTYException:
-        logger.warning('Unable to prompt for confirmation as no tty available. Use --force.')
+        logger.warning('Unable to prompt for confirmation as no tty available. Use --yes.')
         return False
 
 
