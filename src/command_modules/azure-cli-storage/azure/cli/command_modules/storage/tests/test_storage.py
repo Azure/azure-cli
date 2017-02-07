@@ -71,6 +71,17 @@ class StorageAccountScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck("contains(connectionString, 'https')", False),
             JMESPathCheck("contains(connectionString, '{}')".format(account), True)
         ])
+        connection_string = s.cmd('storage account show-connection-string -g {} -n {} -otsv'.format(rg, account))
+        s.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
+            JMESPathCheck('blob.read', False),
+            JMESPathCheck('blob.retentionPolicy.enabled', False)
+        ])
+        s.cmd('storage logging update --log r --retention 1 --service b --connection-string {}'.format(connection_string))
+        s.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
+            JMESPathCheck('blob.read', True),
+            JMESPathCheck('blob.retentionPolicy.enabled', True),
+            JMESPathCheck('blob.retentionPolicy.days', 1)
+        ])
         keys_result = s.cmd('storage account keys list -g {} -n {}'.format(rg, account))
         key1 = keys_result[0]
         key2 = keys_result[1]
@@ -137,6 +148,11 @@ class StorageBlobScenarioTest(StorageAccountVCRTestBase):
         s.cmd('storage blob upload -n {} -c {} --type append --file "{}"'.format(append_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
         s.cmd('storage blob upload -n {} -c {} --type append --file "{}"'.format(append_blob, container, os.path.join(TEST_DIR, 'testfile.rst')))
         s.cmd('storage blob exists -n {} -c {}'.format(append_blob, container), checks=JMESPathCheck('exists', True))
+
+        # test generate a sas
+        sas = s.cmd('storage blob generate-sas -n {} -c {} --expiry 2046-12-31T08:23Z --permissions r --https-only')
+        sas_keys = dict(pair.split('=') for pair in sas.split('&'))
+        assert u'se' in sas_keys
 
         blob_url = 'https://{}.blob.core.windows.net/{}/{}'.format(account, container, blob)
         s.cmd('storage blob url -n {} -c {}'.format(blob, container), checks=StringCheck(blob_url))
