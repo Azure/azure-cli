@@ -46,8 +46,7 @@ def datetime_format(value):
     except DeserializationError:
         message = "Argument {} is not a valid ISO-8601 datetime format"
         raise ValueError(message.format(value))
-    else:
-        return datetime_obj
+    return datetime_obj
 
 
 def duration_format(value):
@@ -57,8 +56,7 @@ def duration_format(value):
     except DeserializationError:
         message = "Argument {} is not in a valid ISO-8601 duration format"
         raise ValueError(message.format(value))
-    else:
-        return duration_obj
+    return duration_obj
 
 
 def metadata_item_format(value):
@@ -69,8 +67,7 @@ def metadata_item_format(value):
         message = ("Incorrectly formatted metadata. "
                    "Argmuent values should be in the format a=b c=d")
         raise ValueError(message)
-    else:
-        return {'name': data_name, 'value': data_value}
+    return {'name': data_name, 'value': data_value}
 
 
 def environment_setting_format(value):
@@ -81,8 +78,7 @@ def environment_setting_format(value):
         message = ("Incorrectly formatted enviroment settings. "
                    "Argmuent values should be in the format a=b c=d")
         raise ValueError(message)
-    else:
-        return {'name': env_name, 'value': env_value}
+    return {'name': env_name, 'value': env_value}
 
 
 def application_package_reference_format(value):
@@ -110,8 +106,7 @@ def task_id_ranges_format(value):
         message = ("Incorrectly formatted task ID range. "
                    "Argmuent values should be numbers in the format 'start-end'")
         raise ValueError(message)
-    else:
-        return {'start': start, 'end': end}
+    return {'start': start, 'end': end}
 
 
 def resource_file_format(value):
@@ -122,8 +117,7 @@ def resource_file_format(value):
         message = ("Incorrectly formatted resource reference. "
                    "Argmuent values should be in the format filename=blobsource")
         raise ValueError(message)
-    else:
-        return {'file_path': file_name, 'blob_source': blob_source}
+    return {'file_path': file_name, 'blob_source': blob_source}
 
 
 # COMMAND NAMESPACE VALIDATORS
@@ -167,9 +161,8 @@ def application_enabled(namespace):
 
 def validate_pool_resize_parameters(namespace):
     """Validate pool resize parameters correct"""
-    if not namespace.abort:
-        if not namespace.target_dedicated:
-            raise ValueError("The target-dedicated parameter is required to resize the pool.")
+    if not namespace.abort and not namespace.target_dedicated:
+        raise ValueError("The target-dedicated parameter is required to resize the pool.")
 
 
 def validate_json_file(namespace):
