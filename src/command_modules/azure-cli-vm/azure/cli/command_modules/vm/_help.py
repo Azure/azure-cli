@@ -615,6 +615,44 @@ helps['vm image show'] = """
 helps['vm nic'] = """
     type: group
     short-summary: Manage VM network interfaces, see also 'az network nic'
+    long-summary: >
+        A network interface (NIC) is the interconnection between a Virtual Machine (VM) and the underlying software
+        network. See https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-network-interface-overview
+"""
+
+helps['vm nic list'] = """
+    type: command
+    examples:
+        - name: List all of the network interfaces on a VM
+          text: az vm nic list -g group_name --vm-name vm_name
+"""
+
+helps['vm nic add'] = """
+    type: command
+    examples:
+        - name: Add two network interfaces to a VM
+          text: az vm nic add -g group_name --vm-name vm_name --nics nic_name1 nic_name2
+"""
+
+helps['vm nic remove'] = """
+    type: command
+    examples:
+        - name: Remove two network interfaces to a VM
+          text: az vm nic remove -g group_name --vm-name vm_name --nics nic_name1 nic_name2
+"""
+
+helps['vm nic show'] = """
+    type: command
+    examples:
+        - name: Show details of a network interface on a VM
+          text: az vm nic show -g group_name --vm-name vm_name --nic nic_name1
+"""
+
+helps['vm nic set'] = """
+    type: command
+    examples:
+        - name: Set a network interface on a VM to be the primary network interface
+          text: az vm nic set -g group_name --vm-name vm_name --nic nic_name1 nic_name2 --primary-nic nic_name2
 """
 
 helps['vmss'] = """
