@@ -93,7 +93,7 @@ class StorageAccountScenarioTest(ResourceGroupVCRTestBase):
         s.cmd('storage account delete -g {} -n {} --force'.format(rg, account))
         s.cmd('storage account check-name --name {}'.format(account), checks=JMESPathCheck('nameAvailable', True))
         result = s.cmd('storage account check-name --name teststorageomega --query "nameAvailable" -o tsv')
-        assert result == 'false'
+        assert result == 'true'
 
 
 class StorageBlobScenarioTest(StorageAccountVCRTestBase):
