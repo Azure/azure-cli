@@ -9,8 +9,8 @@ import unittest
 from collections import OrderedDict
 from six import StringIO
 
-from azure.cli.core._output import (OutputProducer, format_json, format_table, format_list,
-                                    format_tsv, ListOutput, CommandResultItem)
+from azure.cli.core._output import (OutputProducer, format_json, format_table,
+                                    format_tsv, CommandResultItem)
 import azure.cli.core._util as util
 
 
@@ -75,12 +75,6 @@ class TestOutput(unittest.TestCase):
   "contents": ""
 }
 """))
-
-    def test_out_boolean_valid(self):
-        output_producer = OutputProducer(formatter=format_list, file=self.io)
-        output_producer.out(CommandResultItem(True))
-        self.assertEqual(util.normalize_newlines(self.io.getvalue()),
-                         util.normalize_newlines("""True\n\n\n"""))
 
     # TABLE output tests
 
@@ -149,124 +143,6 @@ qwerty  0b1f6472qwerty
 ------  --------------  --------  --------
 qwerty  0b1f6472qwerty         1  0b1f6472
 """))
-
-    # LIST output tests
-
-    def test_out_list_valid(self):
-        output_producer = OutputProducer(formatter=format_list, file=self.io)
-        output_producer.out(CommandResultItem({'active': True, 'id': '0b1f6472'}))
-        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-            """Active : True
-Id     : 0b1f6472
-
-
-"""))
-
-    def test_out_list_valid_caps(self):
-        output_producer = OutputProducer(formatter=format_list, file=self.io)
-        output_producer.out(CommandResultItem({'active': True, 'TESTStuff': 'blah'}))
-        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-            """Test Stuff : blah
-Active     : True
-
-
-"""))
-
-    def test_out_list_valid_none_val(self):
-        output_producer = OutputProducer(formatter=format_list, file=self.io)
-        output_producer.out(CommandResultItem({'active': None, 'id': '0b1f6472'}))
-        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-            """Active : None
-Id     : 0b1f6472
-
-
-"""))
-
-    def test_out_list_valid_empty_array(self):
-        output_producer = OutputProducer(formatter=format_list, file=self.io)
-        output_producer.out(CommandResultItem({'active': None, 'id': '0b1f6472', 'hosts': []}))
-        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-            """Active : None
-Id     : 0b1f6472
-Hosts  :
-   None
-
-
-"""))
-
-    def test_out_list_valid_array_complex(self):
-        output_producer = OutputProducer(formatter=format_list, file=self.io)
-        output_producer.out(CommandResultItem([
-            {'active': True, 'id': '783yesdf'},
-            {'active': False, 'id': '3hjnme32'},
-            {'active': False, 'id': '23hiujbs'}]))
-        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-            """Active : True
-Id     : 783yesdf
-
-Active : False
-Id     : 3hjnme32
-
-Active : False
-Id     : 23hiujbs
-
-
-"""))
-
-    def test_out_list_valid_str_array(self):
-        output_producer = OutputProducer(formatter=format_list, file=self.io)
-        output_producer.out(CommandResultItem(['location', 'id', 'host', 'server']))
-        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-            """location
-
-id
-
-host
-
-server
-
-
-"""))
-
-    def test_out_list_valid_complex_array(self):
-        output_producer = OutputProducer(formatter=format_list, file=self.io)
-        output_producer.out(CommandResultItem({'active': True, 'id': '0b1f6472',
-                                               'myarray': ['1', '2', '3', '4']}))
-        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-            """Active  : True
-Id      : 0b1f6472
-Myarray :
-   1
-   2
-   3
-   4
-
-
-"""))
-
-    def test_out_list_format_key_simple(self):
-        lo = ListOutput()
-        self.assertEqual(lo._formatted_keys_cache, {})
-        lo._get_formatted_key('locationId')
-        self.assertEqual(lo._formatted_keys_cache, {'locationId': 'Location Id'})
-
-    def test_out_list_format_key_single(self):
-        lo = ListOutput()
-        self.assertEqual(lo._formatted_keys_cache, {})
-        lo._get_formatted_key('location')
-        self.assertEqual(lo._formatted_keys_cache, {'location': 'Location'})
-
-    def test_out_list_format_key_multiple_caps(self):
-        lo = ListOutput()
-        self.assertEqual(lo._formatted_keys_cache, {})
-        lo._get_formatted_key('fooIDS')
-        self.assertEqual(lo._formatted_keys_cache, {'fooIDS': 'Foo Ids'})
-
-    def test_out_list_format_key_multiple_words(self):
-        lo = ListOutput()
-        self.assertEqual(lo._formatted_keys_cache, {})
-        lo._get_formatted_key('locationIdState')
-        self.assertEqual(lo._formatted_keys_cache, {'locationIdState': 'Location Id State'})
 
     # TSV output tests
     def test_output_format_dict(self):
