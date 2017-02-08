@@ -752,7 +752,8 @@ class AzureBatchDataPlaneCommand(object):
                         values_index = options['help'].find(' Possible values include')
                         if values_index >= 0:
                             choices = options['help'][values_index + 25:].split(', ')
-                            options['choices'] = [c for c in choices if c != "'unmapped'"]
+                            options['choices'] = [c.strip(' \'') \
+                                                  for c in choices if c != "'unmapped'"]
                             options['help'] = options['help'][0:values_index]
                         self._resolve_conflict(param_attr, param_attr, path, options,
                                                details['type'], required_attrs, conflict_names)
