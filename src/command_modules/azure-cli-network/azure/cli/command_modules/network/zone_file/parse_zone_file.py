@@ -29,7 +29,6 @@
 
 """
 Known limitations:
-    * only one $ORIGIN and one $TTL are supported
     * only the IN class is supported
     * PTR records must have a non-empty name
     * currently only supports the following:
@@ -44,13 +43,21 @@ import argparse
 from collections import OrderedDict
 import re
 
-from .configs import SUPPORTED_RECORDS
-from .exceptions import InvalidLineException
-
+import azure.cli.core.azlogging as azlogging
 from azure.cli.core._util import CLIError
 
-semicolon_regex = re.compile(r'(?:"[^"]*")*[^\\](;.*)')
+from azure.cli.command_modules.network.zone_file.configs import SUPPORTED_RECORDS
+from azure.cli.command_modules.network.zone_file.exceptions import InvalidLineException
 
+logger = azlogging.get_az_logger(__name__)
+semicolon_regex = re.compile(r'(?:"[^"]*")*[^\\](;.*)')
+date_regex_dict = {
+    'w': {'regex': re.compile(r'(\d*w)'), 'scale': 86400 * 7},
+    'd': {'regex': re.compile(r'(\d*d)'), 'scale': 86400},
+    'h': {'regex': re.compile(r'(\d*h)'), 'scale': 3600},
+    'm': {'regex': re.compile(r'(\d*m)'), 'scale': 60},
+    's': {'regex': re.compile(r'(\d*s)'), 'scale': 1}
+}
 
 class ZonefileLineParser(argparse.ArgumentParser):
     def error(self, message):
@@ -86,41 +93,43 @@ def _make_parser():
 
     # parse $ORIGIN
     origin = ZonefileLineParser('$ORIGIN')
+    origin.add_argument('DELIM', type=str)
     origin.add_argument('value', type=str)
     parsers.append(origin)
 
     # parse $TTL
     ttl = ZonefileLineParser('$TTL')
+    ttl.add_argument('DELIM', type=str)
     ttl.add_argument('value', type=str)
     parsers.append(ttl)
 
     # parse each RR
     _make_record_parser(parsers, 'SOA', [
-        ('ttl', str),
+        ('ttl', str), ('DELIM', str),
         ('mname', str), ('rname', str), ('serial', int), ('refresh', str),
         ('retry', str), ('expire', str), ('minimum', str)
     ])
     # special case can result in ambiguous parse
     # requires extra checking
     _make_record_parser(parsers, 'SOA', [
-        ('mname', str), ('rname', str), ('serial', int), ('refresh', str),
+        ('DELIM', str), ('mname', str), ('rname', str), ('serial', int), ('refresh', str),
         ('retry', str), ('expire', str), ('minimum', str)
     ])
     _make_record_parser(parsers, 'SOA', [
-        ('mname', str), ('rname', str), ('serial', int), ('refresh', str),
+        ('DELIM', str), ('mname', str), ('rname', str), ('serial', int), ('refresh', str),
         ('retry', str), ('expire', str)
     ])
-    _make_record_parser(parsers, 'NS', [('ttl', str, '?'), ('host', str)])
-    _make_record_parser(parsers, 'A', [('ttl', str, '?'), ('ip', str)])
-    _make_record_parser(parsers, 'AAAA', [('ttl', str, '?'), ('ip', str)])
-    _make_record_parser(parsers, 'CNAME', [('ttl', str, '?'), ('alias', str)])
-    _make_record_parser(parsers, 'MX', [('ttl', str, '?'), ('preference', str), ('host', str)])
-    _make_record_parser(parsers, 'TXT', [('ttl', str), ('txt', str, '+')])
-    _make_record_parser(parsers, 'TXT', [('txt', str, '+')])
-    _make_record_parser(parsers, 'PTR', [('ttl', str, '?'), ('host', str)])
-    _make_record_parser(parsers, 'SRV', [('ttl', str, '?'), ('priority', int), ('weight', int), ('port', int), ('target', str)])
-    _make_record_parser(parsers, 'SPF', [('ttl', str, '?'), ('txt', str)])
-    _make_record_parser(parsers, 'URI', [('ttl', str, '?'), ('priority', int), ('weight', int), ('target', str)])
+    _make_record_parser(parsers, 'NS', [('ttl', str, '?'), ('DELIM', str), ('host', str)])
+    _make_record_parser(parsers, 'A', [('ttl', str, '?'), ('DELIM', str), ('ip', str)])
+    _make_record_parser(parsers, 'AAAA', [('ttl', str, '?'), ('DELIM', str), ('ip', str)])
+    _make_record_parser(parsers, 'CNAME', [('ttl', str, '?'), ('DELIM', str), ('alias', str)])
+    _make_record_parser(parsers, 'MX', [('ttl', str, '?'), ('DELIM', str), ('preference', str), ('host', str)])
+    _make_record_parser(parsers, 'TXT', [('ttl', str), ('DELIM', str), ('txt', str, '+')])
+    _make_record_parser(parsers, 'TXT', [('DELIM', str), ('txt', str, '+')])
+    _make_record_parser(parsers, 'PTR', [('ttl', str, '?'), ('DELIM', str), ('host', str)])
+    _make_record_parser(parsers, 'SRV', [('ttl', str, '?'), ('DELIM', str), ('priority', int), ('weight', int), ('port', int), ('target', str)])
+    _make_record_parser(parsers, 'SPF', [('ttl', str, '?'), ('DELIM', str), ('txt', str)])
+    _make_record_parser(parsers, 'URI', [('ttl', str, '?'), ('DELIM', str), ('priority', int), ('weight', int), ('target', str)])
 
     return parsers
 
@@ -343,21 +352,31 @@ def _add_record_names(text):
 
     for line in lines:
         tokens = _tokenize_line(line)
-        
-        if not tokens[0].startswith("$"):
-            is_int = False
-            try:
-                int(tokens[0])
-                is_int = True
-            except ValueError:
-                pass
-            has_name = not is_int and tokens[0] not in SUPPORTED_RECORDS
 
-            if has_name:
-                previous_record_name = tokens[0]
-            else:
-                # add back the name
-                tokens = [previous_record_name] + tokens
+        record_name = None
+        type_index = 0
+        for type_index in range(4):
+            if tokens[type_index] in SUPPORTED_RECORDS:
+                break
+        if type_index == 3:
+            raise CLIError('Record type not found: {}'.format(line))
+
+        # determine if name is missing
+        needs_name = True
+        if type_index == 2:
+            # both NAME and TTL are supplied
+            needs_name = False
+        elif type_index == 0 and tokens[type_index].startswith('$'):
+            # $ORIGIN or $TTL supplied. Name is N/A
+            needs_name = False
+        elif type_index == 1 and len(line.lstrip()) == len(line):
+            # Name OR TTL supplied. If no leading whitespace, assume name was supplied
+            needs_name = False
+
+        if needs_name:
+            tokens = [previous_record_name] + tokens
+        else:
+            previous_record_name = previous_record_name if tokens[0].startswith('$') else tokens[0]
 
         ret.append(_serialize(tokens))
 
@@ -385,7 +404,7 @@ def _parse_record(parser, record_token):
     # move the record type to the front of the token list so it will conform to argparse
     if record_type != parser.prog:
         raise IncorrectParserException
-    record_token.remove(record_type)
+    #record_token.remove(record_type)
 
     try:
         rr, unmatched = parser.parse_known_args(record_token)
@@ -416,29 +435,30 @@ def _convert_to_seconds(value):
     """ Converts TTL strings into seconds """
     try:
         return int(value)
-    except ValueError as ex:
+    except ValueError:
+        # parse the BIND format
+        # (w)eek, (d)ay, (h)our, (m)inute, (s)econd
+        seconds = 0
+        ttl_string = value.lower()
+        for component in ['w', 'd', 'h', 'm', 's']:
+            regex = date_regex_dict[component]['regex']
+            match = regex.search(ttl_string)
+            if match:
+                match_string = match.group(0)
+                ttl_string = ttl_string.replace(match_string, '')
+                match_value = int(match_string.strip(component))
+                seconds += match_value * date_regex_dict[component]['scale']
+            if not ttl_string:
+                return seconds
+        # convert the last piece without any units, which must be seconds
         try:
-            number = int(value[:-1])
-            letter = value[-1].lower()
-            if letter == 's':
-                return number
-            elif letter == 'm':
-                return number * 60
-            elif letter == 'h':
-                return number * 3600
-            elif letter == 'd':
-                return number * 86400
-            elif letter == 'w':
-                return number * 86400 * 7
-            elif letter == 'y':
-                return number * 86400 * 365.25
-            else:
-                raise ValueError
+            seconds += int(ttl_string)
+            return seconds
         except ValueError:
-            raise CLIError("Unable to convert value '{}' into seconds.".format(value))
+            raise CLIError("Unable to convert value '{}' to seconds.".format(value))
+        
 
-
-def parse_zone_file(text, ignore_invalid=False):
+def parse_zone_file(text, zone_name, ignore_invalid=False):
     """
     Parse a zonefile into a dict
     """
@@ -451,7 +471,7 @@ def parse_zone_file(text, ignore_invalid=False):
 
     zone_obj = OrderedDict()
     record_lines = text.split("\n")
-    current_origin = ''
+    current_origin = zone_name.rstrip('.') + '.'
     current_ttl = 3600
 
     for record_line in record_lines:
@@ -461,6 +481,8 @@ def parse_zone_file(text, ignore_invalid=False):
             record_token = _tokenize_line(record_line)
             try:
                 record = _parse_record(parser, record_token)
+                if record['DELIM'].lower() != record['type'].lower():
+                    raise IncorrectParserException
                 parse_match = True
                 break
             except (InvalidLineException, IncorrectParserException):
@@ -470,11 +492,18 @@ def parse_zone_file(text, ignore_invalid=False):
 
         record_type = record['type'].lower()
         if record_type.lower() == '$origin':
-            current_origin = record['value']
+            origin_value = record['value']
+            if not origin_value.endswith('.'):
+                logger.warning("$ORIGIN '{}' should have terminating dot.".format(origin_value))
+            current_origin = origin_value.rstrip('.') + '.'
         elif record_type.lower() == '$ttl':
             current_ttl = _convert_to_seconds(record['value'])
         else:
             record_name = record['name']
+            if record_name == '@':
+                record_name = current_origin
+            elif not record_name.endswith('.'):
+                record_name = '{}.{}'.format(record_name, current_origin)
 
             # special record-specific fix-ups
             if record_type == 'ptr':
