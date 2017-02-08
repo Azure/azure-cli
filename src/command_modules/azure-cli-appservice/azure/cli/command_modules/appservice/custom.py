@@ -552,15 +552,7 @@ def update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_ty
     client = web_client_factory()
     webapp = client.sites.get_site(resource_group_name, name)
     ssl_states = webapp.host_name_ssl_states
-    thumbprint_val = None
     host_name = None
-    ssl_type = ssl_type.upper();
-    if ssl_type == 'SNI':
-        ssl_type = SslState.sni_enabled
-    elif ssl_type == 'IP':
-        ssl_type = SslState.ip_based_enabled
-    else:
-        ssl_type = SslState.disabled
     webapp_certs = client.certificates.get_certificates(resource_group_name)
     for webapp_cert in webapp_certs:
         if(webapp_cert.thumbprint == certificate_thumbprint):
@@ -570,11 +562,16 @@ def update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_ty
 
 def bind_ssl_cert(resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
     ssl_type = ssl_type.upper();
-    if ssl_type == 'SNI':  ssl_type = SslState.sni_enabled
-    elif ssl_type == 'IP': ssl_type = SslState.ip_based_enabled
-    else:                  ssl_type = SslState.disabled
-    return update_ssl_binding(resource_group_name, name, webapp.location, host_name, ssl_type, certificate_thumbprint, client, slot)
+
+    if ssl_type == 'SNI':  
+        ssl_type = SslState.sni_enabled
+    elif ssl_type == 'IP': 
+        ssl_type = SslState.ip_based_enabled
+    else:                  
+        ssl_type = SslState.disabled
+
+    return update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_type, slot)
 
 def unbind_ssl_cert(resource_group_name, name, certificate_thumbprint, slot=None):
     ssl_type = SslState.disabled
-    return update_host_name_ssl_state(resource_group_name, name, webapp.location, host_name, ssl_type, certificate_thumbprint, client, slot)
+    return update_ssl_binding(resource_group_name, name, certificate_thumbprint, SslState.disabled, slot)
