@@ -17,7 +17,6 @@ class BatchJobTest(BatchDataPlaneTestBase):
         super(BatchJobTest, self).__init__(__file__, test_method)
         self.pool_paas = "azure-cli-test-paas"
         self.job1 = "cli-test-job-1"
-        self.job2 = "cli-test-job-2"
         self.data_dir = os.path.join(
             os.path.dirname(__file__), 'data', 'batch-job-{}.json').replace('\\', '\\\\')
 
@@ -44,7 +43,8 @@ class BatchJobTest(BatchDataPlaneTestBase):
         start_time = datetime.datetime.now().isoformat()
         # test create job with missing parameters
         try:
-            self.cmd('batch job create --id {} --metadata test=value --job-max-task-retry-count 5 '
+            self.cmd('batch job create --id {} --metadata test=value '
+                     '--job-max-task-retry-count 5 '
                      '--job-manager-task-run-elevated'.format(self.job1))
         except SystemExit as exp:
             self.assertEqual(exp.code, 2)
@@ -60,8 +60,10 @@ class BatchJobTest(BatchDataPlaneTestBase):
         job1 = self.cmd('batch job show --job-id {}'.format(self.job1))
         self.assertEqual(job1['metadata'][0]['name'], 'test')
         self.assertEqual(job1['metadata'][0]['value'], 'value')
-        self.assertEqual(job1['jobManagerTask']['environmentSettings'][0]['name'], 'CLI_TEST_VAR')
-        self.assertEqual(job1['jobManagerTask']['environmentSettings'][0]['value'], 'CLI_TEST_VAR_VALUE')
+        self.assertEqual(job1['jobManagerTask']['environmentSettings'][0]['name'],
+                         'CLI_TEST_VAR')
+        self.assertEqual(job1['jobManagerTask']['environmentSettings'][0]['value'],
+                         'CLI_TEST_VAR_VALUE')
         self.assertEqual(job1['jobManagerTask']['id'], 'JobManager')
         self.assertEqual(job1['constraints']['maxTaskRetryCount'], 5)
         self.assertEqual(job1['onAllTasksComplete'], 'noAction')
@@ -80,8 +82,10 @@ class BatchJobTest(BatchDataPlaneTestBase):
         job1 = self.cmd('batch job show --job-id {}'.format(self.job1))
         self.assertEqual(job1['metadata'][0]['name'], 'test')
         self.assertEqual(job1['metadata'][0]['value'], 'value')
-        self.assertEqual(job1['jobManagerTask']['environmentSettings'][0]['name'], 'CLI_TEST_VAR')
-        self.assertEqual(job1['jobManagerTask']['environmentSettings'][0]['value'], 'CLI_TEST_VAR_VALUE')
+        self.assertEqual(job1['jobManagerTask']['environmentSettings'][0]['name'],
+                         'CLI_TEST_VAR')
+        self.assertEqual(job1['jobManagerTask']['environmentSettings'][0]['value'],
+                         'CLI_TEST_VAR_VALUE')
         self.assertEqual(job1['jobManagerTask']['id'], 'JobManager')
         self.assertEqual(job1['constraints']['maxTaskRetryCount'], 0)
         self.assertEqual(job1['constraints']['maxWallClockTime'], '1279 days, 12:30:05')
@@ -89,7 +93,8 @@ class BatchJobTest(BatchDataPlaneTestBase):
 
         # test filter/header argument
         try:
-            self.cmd('batch job reset --job-id {} --pool-id {} --on-all-tasks-complete terminateJob '
+            self.cmd('batch job reset --job-id {} --pool-id {} '
+                     '--on-all-tasks-complete terminateJob '
                      '--if-unmodified-since {}'.format(self.job1, self.pool_paas, start_time))
             raise AssertionError('Expected CLIError to be raised.')
         except CLIError as exp:

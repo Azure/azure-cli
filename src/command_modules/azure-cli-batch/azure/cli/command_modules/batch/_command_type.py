@@ -166,6 +166,13 @@ def find_return_type(model):
         return re.sub(r"\n\s*", "", return_type.group(1))
 
 
+def enum_value(enum_str):
+    """Strip chars around enum value str.
+    :param str enum_str: Enum value.
+    """
+    return enum_str.strip(' \'')
+
+
 def class_name(type_str):
     """Extract class name from type docstring.
     :param str type_str: Parameter type docstring.
@@ -752,8 +759,8 @@ class AzureBatchDataPlaneCommand(object):
                         values_index = options['help'].find(' Possible values include')
                         if values_index >= 0:
                             choices = options['help'][values_index + 25:].split(', ')
-                            options['choices'] = [c.strip(' \'') \
-                                                  for c in choices if c != "'unmapped'"]
+                            options['choices'] = [enum_value(c) \
+                                                  for c in choices if enum_value(c) != "unmapped"]
                             options['help'] = options['help'][0:values_index]
                         self._resolve_conflict(param_attr, param_attr, path, options,
                                                details['type'], required_attrs, conflict_names)
