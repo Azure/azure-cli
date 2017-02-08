@@ -66,6 +66,14 @@ class BatchJobTest(BatchDataPlaneTestBase):
         self.assertEqual(job1['constraints']['maxTaskRetryCount'], 5)
         self.assertEqual(job1['onAllTasksComplete'], 'noAction')
 
+        # test bad enum value
+        try:
+            self.cmd('batch job set --job-id {} '
+                     '--on-all-tasks-complete badValue '.format(self.job1))
+            raise AssertionError('Expected SystemExit to be raised.')
+        except SystemExit as exp:
+            self.assertEqual(exp.code, 2)
+
         # test patch job
         self.cmd('batch job set --job-id {} --job-max-wall-clock-time P3Y6M4DT12H30M5S '
                  '--on-all-tasks-complete terminateJob'.format(self.job1))
