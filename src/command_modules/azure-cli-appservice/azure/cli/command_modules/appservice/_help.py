@@ -77,6 +77,36 @@ helps['appservice web config hostname'] = """
     short-summary: commands to configure hostnames
 """
 
+helps['appservice web config ssl'] = """
+    type: group
+    short-summary: commands to configure ssl certs
+"""
+
+helps['appservice web config ssl upload'] = """
+    type: group
+    short-summary: Upload an ssl certificate to the webapp
+"""
+
+helps['appservice web config ssl list'] = """
+    type: group
+    short-summary: List ssl certificates within a resource group
+"""
+
+helps['appservice web config ssl bind'] = """
+    type: group
+    short-summary: commands to configure hostnames
+"""
+
+helps['appservice web config ssl unbind'] = """
+    type: group
+    short-summary: commands to configure hostnames
+"""
+
+helps['appservice web config ssl remove'] = """
+    type: group
+    short-summary: commands to configure hostnames
+"""
+
 helps['appservice web deployment'] = """
     type: group
     short-summary: Commands to manage web app deployments
