@@ -111,7 +111,7 @@ database_types = ['SqlAzure', 'MySql']
 frequency_units = ['Hour', 'Day']
 
 register_cli_argument('appservice web config backup create', 'storage_account_url', help='SAS URL for the blob storage container')
-register_cli_argument('appservice web config backup create', 'backup_name', help='If specified, backup blob will be named <backup_name>.zip')
+register_cli_argument('appservice web config backup create', 'backup_name', help='If specified, backup blob will be named <backup-name>.zip')
 register_cli_argument('appservice web config backup create', 'database_name', help='Name of the database to backup')
 register_cli_argument('appservice web config backup create', 'database_connection_string', help='Connection string for the database to backup')
 register_cli_argument('appservice web config backup create', 'database_type', help='Type of database being backed up', **enum_choice_list(database_types))
