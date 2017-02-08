@@ -362,7 +362,6 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('sql elastic-pools db show-activity -g {} --server-name {} --elastic-pool-name {}'
                  .format(rg, self.sql_server_name, self.pool_name),
                  checks=[
-                     JMESPathCheck('length(@)', 1),
                      JMESPathCheck('[0].resourceGroup', rg),
                      JMESPathCheck('[0].serverName', self.sql_server_name),
                      JMESPathCheck('[0].currentElasticPoolName', self.pool_name)])
