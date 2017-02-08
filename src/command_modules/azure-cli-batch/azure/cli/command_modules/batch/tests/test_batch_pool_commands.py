@@ -10,10 +10,10 @@ from azure.cli.command_modules.batch.tests.test_batch_data_plane_command_base im
     BatchDataPlaneTestBase)
 
 
-class BatchPoolScenarioTest(BatchDataPlaneTestBase):
+class BatchPoolTest(BatchDataPlaneTestBase):
 
     def __init__(self, test_method):
-        super(BatchPoolScenarioTest, self).__init__(__file__, test_method)
+        super(BatchPoolTest, self).__init__(__file__, test_method)
         self.pool_paas = "azure-cli-test-paas"
         self.pool_iaas = "azure-cli-test-iaas"
         self.pool_json = "azure-cli-test-json"
@@ -24,7 +24,7 @@ class BatchPoolScenarioTest(BatchDataPlaneTestBase):
         # Clean up any running pools in case the test exited early
         for pool in [self.pool_iaas, self.pool_paas, self.pool_json]:
             try:
-                self.cmd('batch pool delete --pool-id {} --yes'.format(pool))
+                self.cmd('batch pool delete --pool-id {} --force'.format(pool))
             except Exception:  # pylint: disable=broad-except
                 pass
 
@@ -163,7 +163,7 @@ class BatchPoolScenarioTest(BatchDataPlaneTestBase):
         self.cmd('batch pool node-agent-skus list')
 
         # test delete iaas pool
-        self.cmd('batch pool delete --pool-id {} --yes'.format(self.pool_iaas))
+        self.cmd('batch pool delete --pool-id {} --force'.format(self.pool_iaas))
         pool_result = self.cmd('batch pool show --pool-id {} --select "state"'.format(
             self.pool_iaas))
         self.assertEqual(pool_result['state'], 'deleting')
