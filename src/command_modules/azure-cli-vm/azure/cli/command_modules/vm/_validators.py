@@ -240,20 +240,20 @@ def _validate_vm_create_vnet(namespace, for_scale_set=False):
         for vnet_match in (v for v in client.list(rg) if v.location == location and v.subnets):
 
             # 1 - find a suitable existing vnet/subnet
-            subnet = None
-            subnet_matches = [s for s in vnet_match.subnets if s.name.lower() != 'gatewaysubnet']
-            if subnet_matches:
-                if for_scale_set:
-                    for s in subnet_matches:
+            result = None
+            if not for_scale_set:
+                result = next((s for s in vnet_match.subnets if s.name.lower() != 'gatewaysubnet'),
+                              None)
+            else:
+                for s in vnet_match.subnets:
+                    if s.name.lower() != 'gatewaysubnet':
                         subnet_mask = s.address_prefix.split('/')[-1]
                         if _subnet_capacity_check(subnet_mask, namespace.instance_count):
-                            subnet = s
+                            result = s
                             break
-                else:
-                    subnet = subnet_matches[0]
-            if not subnet:
+            if not result:
                 continue
-            namespace.subnet = subnet.name
+            namespace.subnet = result.name
             namespace.vnet_name = vnet_match.name
             namespace.vnet_type = 'existing'
             return
@@ -528,7 +528,7 @@ def process_vmss_create_namespace(namespace):
     validate_location(namespace)
     _validate_vm_create_storage_profile(namespace, for_scale_set=True)
     _validate_vmss_create_load_balancer(namespace)
-    _validate_vm_create_vnet(namespace, True)
+    _validate_vm_create_vnet(namespace, for_scale_set=True)
     _validate_vmss_create_subnet(namespace)
     _validate_vmss_create_public_ip(namespace)
     _validate_vm_create_auth(namespace)
