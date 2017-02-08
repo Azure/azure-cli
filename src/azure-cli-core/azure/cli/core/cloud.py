@@ -282,7 +282,7 @@ def _set_active_subscription(cloud_name):
             logger.warning("Active subscription switched to '%s (%s)'.",
                            sub[_SUBSCRIPTION_NAME], sub[_SUBSCRIPTION_ID])
         except CLIError as e:
-            logger.error(e)
+            logger.warning(e)
             logger.warning("Unable to automatically switch the active subscription. "
                            "Use 'az account set'.")
     else:
