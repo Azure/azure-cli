@@ -822,7 +822,7 @@ class AzureBatchDataPlaneCommand(object):
             param = CONFIRM_PARAM_NAME
             docstring = 'Do not prompt for confirmation.'
             yield (param, CliCommandArgument(param,
-                                             options_list=[arg_name(param)],
+                                             options_list=['--yes', '-y'],
                                              required=False,
                                              action='store_true',
                                              help=docstring))
