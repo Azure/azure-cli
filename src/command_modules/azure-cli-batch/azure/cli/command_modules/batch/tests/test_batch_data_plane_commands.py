@@ -38,7 +38,7 @@ class BatchCertificateScenarioTest(BatchDataPlaneTestBase):
             JMESPathCheck('[0].thumbprint', self.cert_thumbprint),
         ])
 
-        self.cmd("batch certificate delete --thumbprint {} --force".
+        self.cmd("batch certificate delete --thumbprint {} --yes".
                  format(self.cert_thumbprint))
 
         self.cmd('batch certificate show --thumbprint {}'.
@@ -113,7 +113,7 @@ class BatchPoolScenarioTest(BatchDataPlaneTestBase):
                          JMESPathCheck('metadata[0].name', 'a'),
                          JMESPathCheck('metadata[1].value', 'd')])
 
-        self.cmd('batch pool delete --pool-id {} --force'.format(self.create_pool_id))
+        self.cmd('batch pool delete --pool-id {} --yes'.format(self.create_pool_id))
 
 
 class BatchJobListScenarioTest(BatchDataPlaneTestBase):
@@ -123,7 +123,7 @@ class BatchJobListScenarioTest(BatchDataPlaneTestBase):
                  format(self.create_jobschedule_file_path))
 
     def tear_down(self):
-        self.cmd('batch job-schedule delete --job-schedule-id {} --force'.
+        self.cmd('batch job-schedule delete --job-schedule-id {} --yes'.
                  format(self.job_schedule_id))
 
     def __init__(self, test_method):
@@ -154,7 +154,7 @@ class BatchJobListScenarioTest(BatchDataPlaneTestBase):
             [i for i in result if i['id'] == '{}:job-1'.format(self.job_schedule_id)])
         self.assertIsNotNone([i for i in result if i['id'] == self.create_job_id])
 
-        self.cmd('batch job delete --job-id {} --force'.format(self.create_job_id))
+        self.cmd('batch job delete --job-id {} --yes'.format(self.create_job_id))
 
 
 class BatchTaskAddScenarioTest(BatchDataPlaneTestBase):
@@ -163,7 +163,7 @@ class BatchTaskAddScenarioTest(BatchDataPlaneTestBase):
         self.cmd('batch job create --json-file "{}"'.format(self.create_job_file_path))
 
     def tear_down(self):
-        self.cmd('batch job delete --job-id {} --force'.format(self.job_id))
+        self.cmd('batch job delete --job-id {} --yes'.format(self.job_id))
 
     def __init__(self, test_method):
         super(BatchTaskAddScenarioTest, self).__init__(__file__, test_method)
@@ -188,7 +188,7 @@ class BatchTaskAddScenarioTest(BatchDataPlaneTestBase):
                  checks=[JMESPathCheck('id', self.task_id),
                          JMESPathCheck('commandLine', 'cmd /c dir /s')])
 
-        self.cmd('batch task delete --job-id {} --task-id {} --force'.
+        self.cmd('batch task delete --job-id {} --task-id {} --yes'.
                  format(self.job_id, self.task_id))
 
         self.cmd('batch task create --job-id {} --task-id aaa --command-line "echo hello"'.
@@ -196,7 +196,7 @@ class BatchTaskAddScenarioTest(BatchDataPlaneTestBase):
                  checks=[JMESPathCheck('id', 'aaa'),
                          JMESPathCheck('commandLine', 'echo hello')])
 
-        self.cmd('batch task delete --job-id {} --task-id aaa --force'.format(self.job_id))
+        self.cmd('batch task delete --job-id {} --task-id aaa --yes'.format(self.job_id))
 
         result = self.cmd('batch task create --job-id {} --json-file "{}"'.
                           format(self.job_id, self.create_tasks_file_path),
