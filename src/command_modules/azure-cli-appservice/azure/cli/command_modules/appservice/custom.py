@@ -7,7 +7,6 @@
 from __future__ import print_function
 import json
 import threading
-import OpenSSL.crypto
 import base64
 
 try:
@@ -15,8 +14,11 @@ try:
 except ImportError:
     from urlparse import urlparse # pylint: disable=import-error
 
+import OpenSSL.crypto
+
 from azure.mgmt.web.models import (Site, SiteConfig, User, ServerFarmWithRichSku,
-                                   SkuDescription, SslState, HostNameBinding, SiteSourceControl, Certificate, HostNameSslState)
+                                   SkuDescription, SslState, HostNameBinding,
+                                   SiteSourceControl, Certificate, HostNameSslState)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
@@ -501,21 +503,21 @@ def upload_ssl_cert(resource_group_name, name, certificate_password, certificate
         hosting_environment_profile_param = ""
 
     thumb_print = get_cert(certificate_password, certificate_file)
-    cert_name = generate_cert_name(thumb_print, hosting_environment_profile_param, webapp.location, resource_group_name)
+    cert_name = generate_cert_name(thumb_print, hosting_environment_profile_param, 
+                                   webapp.location, resource_group_name)
     cert_base64_str = base64.b64encode(cert_contents).decode("utf-8")
     cert = Certificate(password=certificate_password, pfx_blob=cert_base64_str, location=webapp.location)
     return client.certificates.create_or_update_certificate(resource_group_name, cert_name, cert)
 
 def generate_cert_name(thumb_print, hosting_environment, location, resource_group_name):
-  return "%s_%s_%s_%s" % (thumb_print, hosting_environment, location, resource_group_name)
+    return "%s_%s_%s_%s" % (thumb_print, hosting_environment, location, resource_group_name)
 
 def get_cert(certificate_password, certificate_file):
     ''' Decrypts the .pfx file '''
-    p12 = OpenSSL.crypto.load_pkcs12(open(certificate_file, 'rb').read(), certificate_password)
-    
+    p12 = OpenSSL.crypto.load_pkcs12(open(certificate_file, 'rb').read(), certificate_password)    
     cert = p12.get_certificate()
     digest_algorithm = 'sha1'
-    thumbprint = cert.digest(digest_algorithm).decode("utf-8").replace(':', '') 
+    thumbprint = cert.digest(digest_algorithm).decode("utf-8").replace(':', '')
     return thumbprint
 
 def list_ssl_certs(resource_group_name):
@@ -525,7 +527,6 @@ def list_ssl_certs(resource_group_name):
 def delete_ssl_cert(resource_group_name, name, certificate_thumbprint, slot=None):
     client = web_client_factory()
     webapp = client.sites.get_site(resource_group_name, name)
-    ssl_states = webapp.host_name_ssl_states
     cert_name = None
     webapp_certs = client.certificates.get_certificates(resource_group_name)
     for webapp_cert in webapp_certs:
@@ -542,36 +543,39 @@ def should_use_deployment_slot(webapp_name, slot=None):
     return qualified_site_name
 
 def update_host_name_ssl_state(resource_group_name, webapp_name, location, host_name, ssl_state, thumbprint, client, slot=None):
-    webappWithNewSslBinding =Site(host_name_ssl_states=[HostNameSslState(name=host_name, ssl_state=ssl_state, thumbprint=thumbprint, to_update=True)], location=location)
+    webappWithNewSslBinding = Site(host_name_ssl_states=[HostNameSslState(name=host_name, ssl_state=ssl_state, thumbprint=thumbprint, to_update=True)], location=location)
     if should_use_deployment_slot(webapp_name) is None:
-        return client.sites.create_or_update_site(resource_group_name, webapp_name, site_envelope=webappWithNewSslBinding)
+        return client.sites.create_or_update_site(resource_group_name, webapp_name,
+                                                  site_envelope=webappWithNewSslBinding)
     else:
-        return client.sites.create_or_update_site_slot(resource_group_name, webapp_name, site_envelope=webappWithNewSslBinding, slot=slot)
+        return client.sites.create_or_update_site_slot(resource_group_name, webapp_name, 
+                                                       site_envelope=webappWithNewSslBinding, slot=slot)
 
 def update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
     client = web_client_factory()
     webapp = client.sites.get_site(resource_group_name, name)
-    ssl_states = webapp.host_name_ssl_states
     host_name = None
     webapp_certs = client.certificates.get_certificates(resource_group_name)
     for webapp_cert in webapp_certs:
-        if(webapp_cert.thumbprint == certificate_thumbprint):
-            cert_name = webapp_cert.name
+        if webapp_cert.thumbprint == certificate_thumbprint:
             host_name = webapp_cert.host_names[0]
-    return update_host_name_ssl_state(resource_group_name, name, webapp.location, host_name, ssl_type, certificate_thumbprint, client, slot)
+    return update_host_name_ssl_state(resource_group_name, name, webapp.location, 
+                                      host_name, ssl_type, certificate_thumbprint, client, slot)
 
 def bind_ssl_cert(resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
-    ssl_type = ssl_type.upper();
+    ssl_type_str = ssl_type.upper()
+    ssl_type_val = None
+    if ssl_type_str == 'SNI':
+        ssl_type_val = SslState.sni_enabled
+    elif ssl_type_str == 'IP':
+        ssl_type_val = SslState.ip_based_enabled
+    else:
+        ssl_type_val = SslState.disabled
 
-    if ssl_type == 'SNI':  
-        ssl_type = SslState.sni_enabled
-    elif ssl_type == 'IP': 
-        ssl_type = SslState.ip_based_enabled
-    else:                  
-        ssl_type = SslState.disabled
-
-    return update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_type, slot)
+    return update_ssl_binding(resource_group_name, name, 
+                              certificate_thumbprint, ssl_type_val, slot)
 
 def unbind_ssl_cert(resource_group_name, name, certificate_thumbprint, slot=None):
     ssl_type = SslState.disabled
-    return update_ssl_binding(resource_group_name, name, certificate_thumbprint, SslState.disabled, slot)
+    return update_ssl_binding(resource_group_name, name, 
+                              certificate_thumbprint, SslState.disabled, slot)
