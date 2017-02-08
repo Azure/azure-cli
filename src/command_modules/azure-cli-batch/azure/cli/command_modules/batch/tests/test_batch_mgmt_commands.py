@@ -79,7 +79,7 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
         self.assertTrue(keys['primary'] != keys2['primary'])
 
         # test batch account delete
-        self.cmd('batch account delete -g {} -n {} --force'.format(rg, name))
+        self.cmd('batch account delete -g {} -n {} --yes'.format(rg, name))
         self.cmd('batch account list -g {}'.format(rg), checks=NoneCheck())
 
         self.cmd('batch location quotas show -l {}'.format(loc),
@@ -180,8 +180,8 @@ class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
                          JMESPathCheck('packages[0].state', 'active')])
 
         # test batch applcation delete
-        self.cmd('batch application package delete -g {} -n {} --application-id {} --version {} --force'.  # pylint: disable=line-too-long
+        self.cmd('batch application package delete -g {} -n {} --application-id {} --version {} --yes'.  # pylint: disable=line-too-long
                  format(rg, name, aname, ver))
-        self.cmd('batch application delete -g {} -n {} --application-id {} --force'.
+        self.cmd('batch application delete -g {} -n {} --application-id {} --yes'.
                  format(rg, name, aname))
         self.cmd('batch application list -g {} -n {}'.format(rg, name), checks=NoneCheck())

@@ -12,7 +12,7 @@ from msrest.exceptions import DeserializationError
 
 from azure.cli.command_modules.batch import _validators as validators
 from azure.cli.core.commands import (
-    FORCE_PARAM_NAME,
+    CONFIRM_PARAM_NAME,
     command_table,
     command_module_map,
     CliCommand,
@@ -584,7 +584,7 @@ class AzureBatchDataPlaneCommand(object):
         :returns: bool
         """
         return self.confirmation \
-            and not kwargs.get(FORCE_PARAM_NAME) \
+            and not kwargs.get(CONFIRM_PARAM_NAME) \
             and not config.getboolean('core', 'disable_confirm_prompt', fallback=False) \
             and not user(self.confirmation, kwargs)
 
@@ -819,7 +819,7 @@ class AzureBatchDataPlaneCommand(object):
                                              validator=validators.validate_file_destination,
                                              help=docstring))
         if self.confirmation:
-            param = FORCE_PARAM_NAME
+            param = CONFIRM_PARAM_NAME
             docstring = 'Do not prompt for confirmation.'
             yield (param, CliCommandArgument(param,
                                              options_list=[arg_name(param)],

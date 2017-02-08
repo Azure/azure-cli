@@ -30,6 +30,8 @@ logger = azlogging.get_az_logger(__name__)
 
 # pylint: disable=too-many-arguments,too-few-public-methods
 
+CONFIRM_PARAM_NAME = 'yes'
+
 
 class CliArgumentType(object):
     REMOVE = '---REMOVE---'
@@ -320,7 +322,7 @@ def create_command(module_name, name, operation,
         from azure.common import AzureException
 
         if confirmation \
-            and not kwargs.get('yes') \
+            and not kwargs.get(CONFIRM_PARAM_NAME) \
             and not az_config.getboolean('core', 'disable_confirm_prompt', fallback=False) \
                 and not _user_confirmed(confirmation, kwargs):
             raise CLIError('Operation cancelled.')
@@ -376,7 +378,7 @@ def create_command(module_name, name, operation,
     cmd = CliCommand(name, _execute_command, table_transformer=table_transformer,
                      arguments_loader=arguments_loader, description_loader=description_loader)
     if confirmation:
-        cmd.add_argument('yes', '--yes', '-y',
+        cmd.add_argument(CONFIRM_PARAM_NAME, '--yes', '-y',
                          action='store_true',
                          help='Do not prompt for confirmation')
     return cmd

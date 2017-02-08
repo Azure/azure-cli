@@ -556,9 +556,9 @@ class TestBatchLoader(unittest.TestCase):
         from azure.cli.core.commands import _user_confirmed as user
 
         self.assertFalse(self.command_job._cancel_operation({}, config, user))
-        self.assertFalse(self.command_job._cancel_operation({'force': True}, config, user))
-        self.assertFalse(self.command_delete._cancel_operation({'force': True}, config, user))
-        self.assertTrue(self.command_delete._cancel_operation({'force': None}, config, user))
+        self.assertFalse(self.command_job._cancel_operation({'yes': True}, config, user))
+        self.assertFalse(self.command_delete._cancel_operation({'yes': True}, config, user))
+        self.assertTrue(self.command_delete._cancel_operation({'yes': None}, config, user))
 
     def test_batch_should_flatten(self):
         self.assertFalse(self.command_task._should_flatten('task.depends_on'))
@@ -580,7 +580,7 @@ class TestBatchLoader(unittest.TestCase):
         handler = operations.pool_operations.PoolOperations.add
         args = list(self.command_pool._load_transformed_arguments(handler))
         self.assertEqual(len(args), 30)
-        self.assertFalse('force' in [a for a, _ in args])
+        self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
         self.assertTrue('application_package_references' in [a for a, _ in args])
@@ -590,31 +590,31 @@ class TestBatchLoader(unittest.TestCase):
         handler = operations.job_operations.JobOperations.add
         args = list(self.command_job._load_transformed_arguments(handler))
         self.assertEqual(len(args), 13)
-        self.assertFalse('force' in [a for a, _ in args])
+        self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
         handler = operations.task_operations.TaskOperations.add
         args = list(self.command_task._load_transformed_arguments(handler))
         self.assertEqual(len(args), 8)
-        self.assertFalse('force' in [a for a, _ in args])
+        self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
         handler = operations.file_operations.FileOperations.get_from_task
         args = list(self.command_file._load_transformed_arguments(handler))
         self.assertEqual(len(args), 8)
-        self.assertFalse('force' in [a for a, _ in args])
+        self.assertFalse('yes' in [a for a, _ in args])
         self.assertFalse('json_file' in [a for a, _ in args])
         self.assertTrue('destination' in [a for a, _ in args])
         handler = operations.job_operations.JobOperations.list
         args = list(self.command_list._load_transformed_arguments(handler))
         self.assertEqual(len(args), 3)
-        self.assertFalse('force' in [a for a, _ in args])
+        self.assertFalse('yes' in [a for a, _ in args])
         self.assertFalse('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
         handler = operations.pool_operations.PoolOperations.delete
         args = list(self.command_delete._load_transformed_arguments(handler))
         self.assertEqual(len(args), 6)
-        self.assertTrue('force' in [a for a, _ in args])
+        self.assertTrue('yes' in [a for a, _ in args])
         self.assertFalse('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
         handler = operations.job_schedule_operations.JobScheduleOperations.add
@@ -624,7 +624,7 @@ class TestBatchLoader(unittest.TestCase):
         self.assertTrue('job_manager_task_id' in [a for a, _ in args])
         self.assertTrue('job_manager_task_max_wall_clock_time' in [a for a, _ in args])
         self.assertTrue('job_max_wall_clock_time' in [a for a, _ in args])
-        self.assertFalse('force' in [a for a, _ in args])
+        self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
 
