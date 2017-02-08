@@ -1,6 +1,46 @@
 Release History
 ===============
 
+0.1.9 (2017-02-08)
+------------------
+
+* Managed Disks support
+  * Upgraded azure-cli-vm to 0.1.1b3
+  * Upgraded azure-cli-acs to 0.1.1b3
+* See the `HISTORY.rst` files in each module for a changelog.  
+
+Source download:  
+https://azurecliprod.blob.core.windows.net/releases/azure-cli_packaged_0.1.9.tar.gz  
+sha256 4da806cc46acd8e634bc38eb81591b7ecf352703fb84d9b4cfcf4364237ac8b2
+
+
+---
+
+<details>
+  <summary>List of component versions in this release (click to expand)</summary><p>
+$ az --version  
+azure-cli (0.1.1b3)  
+
+acr (0.1.1b2)  
+acs (0.1.1b3)  
+appservice (0.1.1b2)  
+cloud (0.1.1b2)  
+component (0.1.0rc2)  
+configure (0.1.1b3)  
+container (0.1.1b2)  
+context (0.1.1b2)  
+core (0.1.1b3)  
+feedback (0.1.1b2)  
+network (0.1.1b2)  
+nspkg (0.1.2)  
+profile (0.1.1b2)  
+resource (0.1.1b2)  
+role (0.1.1b2)  
+storage (0.1.1b2)  
+vm (0.1.1b3)  
+</p></details>
+
+
 0.1.8 (2017-01-30)
 ------------------
 
