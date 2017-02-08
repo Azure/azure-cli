@@ -484,7 +484,7 @@ class ResourceGroupVCRTestBase(VCRTestBase):
             self.location, self.resource_group))
 
     def tear_down(self):
-        self.cmd('group delete --name {} --no-wait --force'.format(self.resource_group))
+        self.cmd('group delete --name {} --no-wait --yes'.format(self.resource_group))
 
 
 class StorageAccountVCRTestBase(VCRTestBase):
@@ -511,6 +511,6 @@ class StorageAccountVCRTestBase(VCRTestBase):
             self.account, self.resource_group))
 
     def tear_down(self):
-        self.cmd('storage account delete -g {} -n {} --force'.format(
+        self.cmd('storage account delete -g {} -n {} --yes'.format(
             self.resource_group, self.account))
-        self.cmd('group delete --name {} --no-wait --force'.format(self.resource_group))
+        self.cmd('group delete --name {} --no-wait --yes'.format(self.resource_group))
