@@ -42,12 +42,10 @@ class BatchJobTest(BatchDataPlaneTestBase):
 
         start_time = datetime.datetime.now().isoformat()
         # test create job with missing parameters
-        try:
+        with self.assertRaises(SystemExit):
             self.cmd('batch job create --id {} --metadata test=value '
                      '--job-max-task-retry-count 5 '
                      '--job-manager-task-run-elevated'.format(self.job1))
-        except SystemExit as exp:
-            self.assertEqual(exp.code, 2)
 
         # test create job
         self.cmd('batch job create --id {} --metadata test=value --job-max-task-retry-count 5 '
@@ -69,12 +67,9 @@ class BatchJobTest(BatchDataPlaneTestBase):
         self.assertEqual(job1['onAllTasksComplete'], 'noAction')
 
         # test bad enum value
-        try:
+        with self.assertRaises(SystemExit):
             self.cmd('batch job set --job-id {} '
                      '--on-all-tasks-complete badValue '.format(self.job1))
-            raise AssertionError('Expected SystemExit to be raised.')
-        except SystemExit as exp:
-            self.assertEqual(exp.code, 2)
 
         # test patch job
         self.cmd('batch job set --job-id {} --job-max-wall-clock-time P3Y6M4DT12H30M5S '
@@ -92,13 +87,10 @@ class BatchJobTest(BatchDataPlaneTestBase):
         self.assertEqual(job1['onAllTasksComplete'], 'terminateJob')
 
         # test filter/header argument
-        try:
+        with self.assertRaises(CLIError):
             self.cmd('batch job reset --job-id {} --pool-id {} '
                      '--on-all-tasks-complete terminateJob '
                      '--if-unmodified-since {}'.format(self.job1, self.pool_paas, start_time))
-            raise AssertionError('Expected CLIError to be raised.')
-        except CLIError as exp:
-            pass
 
         # test reset job
         self.cmd('batch job reset --job-id {} --pool-id {}  '
