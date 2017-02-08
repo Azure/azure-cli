@@ -94,17 +94,17 @@ helps['appservice web config ssl list'] = """
 
 helps['appservice web config ssl bind'] = """
     type: group
-    short-summary: commands to configure hostnames
+    short-summary: Bind an ssl certificate to the webapp
 """
 
 helps['appservice web config ssl unbind'] = """
     type: group
-    short-summary: commands to configure hostnames
+    short-summary: Unbind an ssl certificate from the webapp
 """
 
-helps['appservice web config ssl remove'] = """
+helps['appservice web config ssl delete'] = """
     type: group
-    short-summary: commands to configure hostnames
+    short-summary: Delete an ssl certificate from the webapp
 """
 
 helps['appservice web deployment'] = """
