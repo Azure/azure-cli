@@ -10,10 +10,10 @@ from azure.cli.command_modules.batch.tests.test_batch_data_plane_command_base im
     BatchDataPlaneTestBase)
 
 
-class BatchPoolScenarioTest(BatchDataPlaneTestBase):
+class BatchPoolTest(BatchDataPlaneTestBase):
 
     def __init__(self, test_method):
-        super(BatchPoolScenarioTest, self).__init__(__file__, test_method)
+        super(BatchPoolTest, self).__init__(__file__, test_method)
         self.pool_paas = "azure-cli-test-paas"
         self.pool_iaas = "azure-cli-test-iaas"
         self.pool_json = "azure-cli-test-json"
