@@ -24,11 +24,11 @@ class BatchJobTest(BatchDataPlaneTestBase):
     def tear_down(self):
         # Clean up any running pools in case the test exited early
         try:
-            self.cmd('batch pool delete --pool-id {} --force'.format(self.pool_paas))
+            self.cmd('batch pool delete --pool-id {} --yes'.format(self.pool_paas))
         except Exception:  # pylint: disable=broad-except
             pass
         try:
-            self.cmd('batch job delete --job-id {} --force'.format(self.job1))
+            self.cmd('batch job delete --job-id {} --yes'.format(self.job1))
         except Exception:  # pylint: disable=broad-except
             pass
 
