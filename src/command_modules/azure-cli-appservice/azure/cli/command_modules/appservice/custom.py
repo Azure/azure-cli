@@ -7,14 +7,7 @@
 from __future__ import print_function
 import json
 import threading
-import contextlib
 import OpenSSL.crypto
-import os
-import requests
-import ssl
-import tempfile
-import hashlib
-import sys
 import base64
 
 try:
