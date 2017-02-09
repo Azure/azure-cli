@@ -532,13 +532,14 @@ def delete_ssl_cert(resource_group_name, certificate_thumbprint):
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
             cert_name = webapp_cert.name
+            break
 
     return client.certificates.delete_certificate(resource_group_name, cert_name)
 
 def should_use_deployment_slot(webapp_name, slot=None):
     qualified_site_name = None
     if slot is not None:
-        qualified_site_name = "%s(%s)" % (webapp_name, slot)
+        qualified_site_name = "{}({})".format(webapp_name, slot)
 
     return qualified_site_name
 
