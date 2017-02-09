@@ -547,9 +547,9 @@ def update_host_name_ssl_state(resource_group_name, webapp_name, location,
     webappWithNewSslBinding = Site(host_name_ssl_states=
                                    [HostNameSslState
                                     (
-                                        name=host_name, 
-                                        ssl_state=ssl_state, 
-                                        thumbprint=thumbprint, 
+                                        name=host_name,
+                                        ssl_state=ssl_state,
+                                        thumbprint=thumbprint,
                                         to_update=True
                                     )
                                    ],
@@ -561,7 +561,7 @@ def update_host_name_ssl_state(resource_group_name, webapp_name, location,
     else:
         return client.sites.create_or_update_site_slot(resource_group_name,
                                                        webapp_name,
-                                                       site_envelope=webappWithNewSslBinding, 
+                                                       site_envelope=webappWithNewSslBinding,
                                                        slot=slot)
 
 def update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):

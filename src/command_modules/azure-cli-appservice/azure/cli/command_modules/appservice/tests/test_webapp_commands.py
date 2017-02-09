@@ -368,10 +368,9 @@ class WebappSSLCertTest(ResourceGroupVCRTestBase):
     def body(self):
         plan = 'webapp-ssl-test'
 
-        '''
-        Cert Generated using this method
-        https://docs.microsoft.com/en-us/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
-        '''
+        #Cert Generated using
+        #https://docs.microsoft.com/en-us/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = 'DB2BA6898D0B330A93E7F69FF505C61EF39921B6'
