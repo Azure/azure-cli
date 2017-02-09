@@ -17,8 +17,10 @@ from azure.cli.core.cloud import (Cloud,
                                   CloudNotRegisteredException,
                                   CannotUnregisterCloudException)
 
+
 def list_clouds():
     return get_clouds()
+
 
 def show_cloud(cloud_name=None):
     if not cloud_name:
@@ -27,6 +29,7 @@ def show_cloud(cloud_name=None):
         return get_cloud(cloud_name)
     except CloudNotRegisteredException as e:
         raise CLIError(e)
+
 
 def _build_cloud(cloud_name, cloud_config=None, cloud_args=None):
     if cloud_config:
@@ -42,7 +45,9 @@ def _build_cloud(cloud_name, cloud_config=None, cloud_args=None):
             setattr(c.suffixes, arg.replace('suffix_', ''), cloud_args[arg])
     return c
 
- # pylint: disable=unused-argument,too-many-arguments
+    # pylint: disable=unused-argument,too-many-arguments
+
+
 def register_cloud(cloud_name,
                    cloud_config=None,
                    endpoint_management=None,
@@ -63,6 +68,7 @@ def register_cloud(cloud_name,
         add_cloud(c)
     except CloudAlreadyRegisteredException as e:
         raise CLIError(e)
+
 
 def modify_cloud(cloud_name=None,
                  cloud_config=None,
@@ -87,6 +93,7 @@ def modify_cloud(cloud_name=None,
     except CloudNotRegisteredException as e:
         raise CLIError(e)
 
+
 def unregister_cloud(cloud_name):
     try:
         return remove_cloud(cloud_name)
@@ -94,6 +101,7 @@ def unregister_cloud(cloud_name):
         raise CLIError(e)
     except CannotUnregisterCloudException as e:
         raise CLIError(e)
+
 
 def set_cloud(cloud_name):
     try:
