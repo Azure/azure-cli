@@ -209,10 +209,18 @@ def get_custom_clouds():
     return [c for c in get_clouds() if c.name not in known_cloud_names]
 
 
-def get_clouds():
-    if not os.path.isfile(CLOUD_CONFIG_FILE):
-        for c in KNOWN_CLOUDS:
+def _init_known_clouds():
+    config = configparser.SafeConfigParser()
+    config.read(CLOUD_CONFIG_FILE)
+    stored_cloud_names = config.sections()
+    for c in KNOWN_CLOUDS:
+        if c.name not in stored_cloud_names:
             _save_cloud(c)
+
+
+def get_clouds():
+    # ensure the known clouds are always in cloud config
+    _init_known_clouds()
     clouds = []
     config = configparser.SafeConfigParser()
     config.read(CLOUD_CONFIG_FILE)
