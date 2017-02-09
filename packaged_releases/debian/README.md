@@ -20,8 +20,8 @@ $ chmod +x debian_build.sh debian_dir_creator.sh
 
 Then execute it with the appropriate environment variable values.
 ```
-$ export CLI_VERSION=0.1.8 \
-    && export CLI_DOWNLOAD_SHA256=0fbce9ab85caabd679cdb8dcebad65706d701bd11c36c7e8ef89979cfbdb079f \
+$ export CLI_VERSION=0.1.9 \
+    && export CLI_DOWNLOAD_SHA256=4da806cc46acd8e634bc38eb81591b7ecf352703fb84d9b4cfcf4364237ac8b2 \
     && ~/debian_build.sh ~/debian_dir_creator.sh
 ```
 

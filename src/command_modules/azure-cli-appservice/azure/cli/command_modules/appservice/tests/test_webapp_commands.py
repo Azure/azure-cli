@@ -222,7 +222,7 @@ class AppServiceBadErrorPolishTest(ResourceGroupVCRTestBase):
 
     def tear_down(self):
         super(AppServiceBadErrorPolishTest, self).tear_down()
-        self.cmd('group delete -n {} --force'.format(self.resource_group2))
+        self.cmd('group delete -n {} --yes'.format(self.resource_group2))
 
     def body(self):
         # we will try to produce an error by try creating 2 webapp with same name in different groups

@@ -3,6 +3,12 @@
 Release History
 ===============
 
+0.1.1b3 (2017-02-08)
++++++++++++++++++++++
+
+* VM/VMSS: Managed Disk Support
+* Enhance vm open-port command with --port and --priority parameters.
+
 0.1.1b2 (2017-01-30)
 +++++++++++++++++++++
 

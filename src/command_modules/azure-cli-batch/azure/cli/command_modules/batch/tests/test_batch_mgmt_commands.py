@@ -21,7 +21,7 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
     def tear_down(self):
         rg = self.resource_group
         name = self.storage_account_name
-        self.cmd('storage account delete -g {} -n {} --force'.format(rg, name))
+        self.cmd('storage account delete -g {} -n {} --yes'.format(rg, name))
 
     def __init__(self, test_method):
         super(BatchMgmtAccountScenarioTest, self).__init__(__file__, test_method)
@@ -79,7 +79,7 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
         self.assertTrue(keys['primary'] != keys2['primary'])
 
         # test batch account delete
-        self.cmd('batch account delete -g {} -n {} --force'.format(rg, name))
+        self.cmd('batch account delete -g {} -n {} --yes'.format(rg, name))
         self.cmd('batch account list -g {}'.format(rg), checks=NoneCheck())
 
         self.cmd('batch location quotas show -l {}'.format(loc),
@@ -115,8 +115,8 @@ class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
         rg = self.resource_group
         sname = self.storage_account_name
         name = self.account_name
-        self.cmd('storage account delete -g {} -n {} --force'.format(rg, sname))
-        self.cmd('batch account delete -g {} -n {} --force'.format(rg, name))
+        self.cmd('storage account delete -g {} -n {} --yes'.format(rg, sname))
+        self.cmd('batch account delete -g {} -n {} --yes'.format(rg, name))
 
     def __init__(self, test_method):
         super(BatchMgmtApplicationScenarioTest, self).__init__(__file__, test_method)
@@ -180,8 +180,8 @@ class BatchMgmtApplicationScenarioTest(ResourceGroupVCRTestBase):
                          JMESPathCheck('packages[0].state', 'active')])
 
         # test batch applcation delete
-        self.cmd('batch application package delete -g {} -n {} --application-id {} --version {} --force'.  # pylint: disable=line-too-long
+        self.cmd('batch application package delete -g {} -n {} --application-id {} --version {} --yes'.  # pylint: disable=line-too-long
                  format(rg, name, aname, ver))
-        self.cmd('batch application delete -g {} -n {} --application-id {} --force'.
+        self.cmd('batch application delete -g {} -n {} --application-id {} --yes'.
                  format(rg, name, aname))
         self.cmd('batch application list -g {} -n {}'.format(rg, name), checks=NoneCheck())

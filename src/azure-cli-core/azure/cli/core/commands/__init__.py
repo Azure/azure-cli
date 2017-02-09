@@ -30,7 +30,9 @@ logger = azlogging.get_az_logger(__name__)
 
 # pylint: disable=too-many-arguments,too-few-public-methods
 
-FORCE_PARAM_NAME = 'force'
+CONFIRM_PARAM_NAME = 'yes'
+
+BLACKLISTED_MODS = ['context']
 
 
 class CliArgumentType(object):
@@ -235,7 +237,7 @@ def get_command_table(module_name=None):
     If the module is not found, all commands are loaded.
     '''
     loaded = False
-    if module_name and module_name != 'acs':
+    if module_name and module_name != 'acs' and module_name not in BLACKLISTED_MODS:
         try:
             import_module('azure.cli.command_modules.' + module_name).load_commands()
             logger.debug("Successfully loaded command table from module '%s'.", module_name)
@@ -249,7 +251,8 @@ def get_command_table(module_name=None):
         try:
             mods_ns_pkg = import_module('azure.cli.command_modules')
             installed_command_modules = [modname for _, modname, _ in
-                                         pkgutil.iter_modules(mods_ns_pkg.__path__)]
+                                         pkgutil.iter_modules(mods_ns_pkg.__path__)
+                                         if modname not in BLACKLISTED_MODS]
         except ImportError:
             pass
         logger.debug('Installed command modules %s', installed_command_modules)
@@ -322,7 +325,7 @@ def create_command(module_name, name, operation,
         from azure.common import AzureException
 
         if confirmation \
-            and not kwargs.get(FORCE_PARAM_NAME) \
+            and not kwargs.get(CONFIRM_PARAM_NAME) \
             and not az_config.getboolean('core', 'disable_confirm_prompt', fallback=False) \
                 and not _user_confirmed(confirmation, kwargs):
             raise CLIError('Operation cancelled.')
@@ -378,7 +381,7 @@ def create_command(module_name, name, operation,
     cmd = CliCommand(name, _execute_command, table_transformer=table_transformer,
                      arguments_loader=arguments_loader, description_loader=description_loader)
     if confirmation:
-        cmd.add_argument(FORCE_PARAM_NAME,
+        cmd.add_argument(CONFIRM_PARAM_NAME, '--yes', '-y',
                          action='store_true',
                          help='Do not prompt for confirmation')
     return cmd
@@ -392,7 +395,7 @@ def _user_confirmed(confirmation, command_args):
             return prompt_y_n(confirmation)
         return prompt_y_n('Are you sure you want to perform this operation?')
     except NoTTYException:
-        logger.warning('Unable to prompt for confirmation as no tty available. Use --force.')
+        logger.warning('Unable to prompt for confirmation as no tty available. Use --yes.')
         return False
 
 

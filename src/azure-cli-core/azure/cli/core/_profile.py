@@ -9,6 +9,7 @@ import collections
 import errno
 import json
 import os.path
+from pprint import pformat
 from enum import Enum
 
 import adal
@@ -17,8 +18,7 @@ from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core._util import CLIError, get_file_json
 from azure.cli.core.adal_authentication import AdalAuthentication
-from azure.cli.core.cloud import get_cloud
-from azure.cli.core.context import get_active_context
+from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -62,7 +62,11 @@ def _authentication_context_factory(authority, cache):
 
 _AUTH_CTX_FACTORY = _authentication_context_factory
 
-CLOUD = get_cloud(get_active_context()['cloud'])
+CLOUD = get_active_cloud()
+
+logger.debug("Current active cloud '%s'", CLOUD.name)
+logger.debug(pformat(vars(CLOUD.endpoints)))
+logger.debug(pformat(vars(CLOUD.suffixes)))
 
 
 def get_authority_url(tenant=None):
@@ -154,9 +158,11 @@ class Profile(object):
         return consolidated
 
     def _set_subscriptions(self, new_subscriptions):
-        existing_ones = self.load_cached_subscriptions()
+        existing_ones = self.load_cached_subscriptions(all_clouds=True)
         active_one = next((x for x in existing_ones if x.get(_IS_DEFAULT_SUBSCRIPTION)), None)
         active_subscription_id = active_one[_SUBSCRIPTION_ID] if active_one else None
+        active_cloud = get_active_cloud()
+        default_sub_id = None
 
         # merge with existing ones
         dic = collections.OrderedDict((x[_SUBSCRIPTION_ID], x) for x in existing_ones)
@@ -174,52 +180,52 @@ class Profile(object):
             if not new_active_one:
                 new_active_one = new_subscriptions[0]
             new_active_one[_IS_DEFAULT_SUBSCRIPTION] = True
+            default_sub_id = new_active_one[_SUBSCRIPTION_ID]
         else:
             new_subscriptions[0][_IS_DEFAULT_SUBSCRIPTION] = True
+            default_sub_id = new_subscriptions[0][_SUBSCRIPTION_ID]
 
-        self._cache_subscriptions_to_local_storage(subscriptions)
+        set_cloud_subscription(active_cloud.name, default_sub_id)
+        self._storage[_SUBSCRIPTIONS] = subscriptions
 
     def set_active_subscription(self, subscription):  # take id or name
-        subscriptions = self.load_cached_subscriptions()
-
+        subscriptions = self.load_cached_subscriptions(all_clouds=True)
+        active_cloud = get_active_cloud()
         subscription = subscription.lower()
         result = [x for x in subscriptions
-                  if subscription in [x[_SUBSCRIPTION_ID].lower(), x[_SUBSCRIPTION_NAME].lower()]]
+                  if subscription in [x[_SUBSCRIPTION_ID].lower(),
+                                      x[_SUBSCRIPTION_NAME].lower()] and
+                  x[_ENVIRONMENT_NAME] == active_cloud.name]
 
         if len(result) != 1:
-            raise CLIError('The subscription of "{}" does not exist or has more than'
-                           ' one match.'.format(subscription))
+            raise CLIError("The subscription of '{}' does not exist or has more than"
+                           " one match in cloud '{}'.".format(subscription, active_cloud.name))
 
         for s in subscriptions:
             s[_IS_DEFAULT_SUBSCRIPTION] = False
         result[0][_IS_DEFAULT_SUBSCRIPTION] = True
 
-        self._cache_subscriptions_to_local_storage(subscriptions)
+        set_cloud_subscription(active_cloud.name, result[0][_SUBSCRIPTION_ID])
+        self._storage[_SUBSCRIPTIONS] = subscriptions
 
     def logout(self, user_or_sp):
-        subscriptions = self.load_cached_subscriptions()
+        subscriptions = self.load_cached_subscriptions(all_clouds=True)
         result = [x for x in subscriptions
                   if user_or_sp.lower() == x[_USER_ENTITY][_USER_NAME].lower()]
         subscriptions = [x for x in subscriptions if x not in result]
 
-        # reset the active subscription if needed
-        result = [x for x in subscriptions if x.get(_IS_DEFAULT_SUBSCRIPTION)]
-        if not result and subscriptions:
-            subscriptions[0][_IS_DEFAULT_SUBSCRIPTION] = True
-
-        self._cache_subscriptions_to_local_storage(subscriptions)
-
+        self._storage[_SUBSCRIPTIONS] = subscriptions
         self._creds_cache.remove_cached_creds(user_or_sp)
 
     def logout_all(self):
-        self._cache_subscriptions_to_local_storage([])
+        self._storage[_SUBSCRIPTIONS] = []
         self._creds_cache.remove_all_cached_creds()
 
-    def load_cached_subscriptions(self):
-        return self._storage.get(_SUBSCRIPTIONS) or []
-
-    def _cache_subscriptions_to_local_storage(self, subscriptions):
-        self._storage[_SUBSCRIPTIONS] = subscriptions
+    def load_cached_subscriptions(self, all_clouds=False):
+        subscriptions = self._storage.get(_SUBSCRIPTIONS) or []
+        active_cloud = get_active_cloud()
+        return [sub for sub in subscriptions
+                if all_clouds or sub[_ENVIRONMENT_NAME] == active_cloud.name]
 
     def get_current_account_user(self):
         try:

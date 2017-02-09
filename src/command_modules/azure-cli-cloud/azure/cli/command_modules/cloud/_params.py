@@ -20,6 +20,12 @@ register_cli_argument('cloud', 'cloud_name', options_list=('--name', '-n'),
                       help='Name of the registered cloud',
                       completer=get_cloud_name_completion_list)
 
+register_cli_argument('cloud show', 'cloud_name',
+                      help='Name of the registered cloud. If not specified, we use the current active cloud.')
+register_cli_argument('cloud update', 'cloud_name',
+                      help='Name of the registered cloud. If not specified, we use the current active cloud.')
+
+register_cli_argument('cloud register', 'cloud_name', completer=None)
 register_cli_argument('cloud register', 'cloud_config', options_list=('--cloud-config',),
                       help='JSON encoded cloud configuration. Use @{file} to load from a file.',
                       type=json.loads)

@@ -222,7 +222,7 @@ def _validate_vm_create_availability_set(namespace):
             name=name)
 
 
-def _validate_vm_create_vnet(namespace):
+def _validate_vm_create_vnet(namespace, for_scale_set=False):
 
     vnet = namespace.vnet_name
     subnet = namespace.subnet
@@ -230,22 +230,30 @@ def _validate_vm_create_vnet(namespace):
     location = namespace.location
     nics = getattr(namespace, 'nics', None)
 
-    if not vnet and not subnet and not nics:
+    if not vnet and not subnet and not nics:  # pylint: disable=too-many-nested-blocks
         # if nothing specified, try to find an existing vnet and subnet in the target resource group
         from azure.mgmt.network import NetworkManagementClient
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
         client = get_mgmt_service_client(NetworkManagementClient).virtual_networks
 
-        # find VNET in target resource group that matches the VM's location and has a subnet
+        # find VNET in target resource group that matches the VM's location with a matching subnet
         for vnet_match in (v for v in client.list(rg) if v.location == location and v.subnets):
 
             # 1 - find a suitable existing vnet/subnet
-            subnet_match = next(
-                (s.name for s in vnet_match.subnets if s.name.lower() != 'gatewaysubnet'), None
-            )
-            if not subnet_match:
+            result = None
+            if not for_scale_set:
+                result = next((s for s in vnet_match.subnets if s.name.lower() != 'gatewaysubnet'),
+                              None)
+            else:
+                for s in vnet_match.subnets:
+                    if s.name.lower() != 'gatewaysubnet':
+                        subnet_mask = s.address_prefix.split('/')[-1]
+                        if _subnet_capacity_check(subnet_mask, namespace.instance_count):
+                            result = s
+                            break
+            if not result:
                 continue
-            namespace.subnet = subnet_match
+            namespace.subnet = result.name
             namespace.vnet_name = vnet_match.name
             namespace.vnet_type = 'existing'
             return
@@ -269,20 +277,24 @@ def _validate_vm_create_vnet(namespace):
     namespace.vnet_type = 'new'
 
 
+def _subnet_capacity_check(subnet_mask, vmss_instance_count):
+    mask = int(subnet_mask)
+    # '2' are the reserved broadcasting addresses
+    return ((1 << (32 - mask)) - 2) > vmss_instance_count
+
+
 def _validate_vmss_create_subnet(namespace):
-    # TODO: we can consider for non-new sceanrio there are user asks
     if namespace.vnet_type == 'new':
         if namespace.subnet_address_prefix is None:
             cidr = namespace.vnet_address_prefix.split('/', 1)[0]
             i = 0
-            for i in range(8, 32, 1):
-                if 2 << i > namespace.instance_count:
+            for i in range(24, 16, -1):
+                if _subnet_capacity_check(i, namespace.instance_count):
                     break
-                i = i + 1
-            if i > 32:
-                err = "instance count '{}' is out of range of 32 bits IP addresses'"
+            if i < 16:
+                err = "instance count '{}' is out of range of 2^16 subnet size'"
                 raise CLIError(err.format(namespace.instance_count))
-            namespace.subnet_address_prefix = '{}/{}'.format(cidr, 32 - i)
+            namespace.subnet_address_prefix = '{}/{}'.format(cidr, i)
 
 
 def _validate_vm_create_nsg(namespace):
@@ -516,7 +528,7 @@ def process_vmss_create_namespace(namespace):
     validate_location(namespace)
     _validate_vm_create_storage_profile(namespace, for_scale_set=True)
     _validate_vmss_create_load_balancer(namespace)
-    _validate_vm_create_vnet(namespace)
+    _validate_vm_create_vnet(namespace, for_scale_set=True)
     _validate_vmss_create_subnet(namespace)
     _validate_vmss_create_public_ip(namespace)
     _validate_vm_create_auth(namespace)
