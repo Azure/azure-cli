@@ -186,6 +186,7 @@ class StringCheck(object):  # pylint: disable=too-few-public-methods
             raise AssertionError("Actual value '{}' != Expected value {}".format(
                 data, self.expected_result))
 
+
 class CustomCheck(object): # pylint: disable=too-few-public-methods
 
     def __init__(self, custom_callback):
