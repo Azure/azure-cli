@@ -547,10 +547,10 @@ def update_host_name_ssl_state(resource_group_name, webapp_name, location,
     webappWithNewSslBinding = Site(host_name_ssl_states=
                                    [HostNameSslState
                                     (
-                                     name=host_name, 
-                                     ssl_state=ssl_state, 
-                                     thumbprint=thumbprint, 
-                                     to_update=True
+                                        name=host_name, 
+                                        ssl_state=ssl_state, 
+                                        thumbprint=thumbprint, 
+                                        to_update=True
                                     )
                                    ],
                                    location=location)
@@ -561,7 +561,8 @@ def update_host_name_ssl_state(resource_group_name, webapp_name, location,
     else:
         return client.sites.create_or_update_site_slot(resource_group_name,
                                                        webapp_name,
-                                                       site_envelope=webappWithNewSslBinding, slot=slot)
+                                                       site_envelope=webappWithNewSslBinding, 
+                                                       slot=slot)
 
 def update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
     client = web_client_factory()
@@ -584,8 +585,7 @@ def bind_ssl_cert(resource_group_name, name, certificate_thumbprint, ssl_type, s
                                   certificate_thumbprint, SslState.ip_based_enabled, slot)
     else:
         raise CLIError("Please specify either 'SNI' or 'IP' for --ssl-type")
-    
 
 def unbind_ssl_cert(resource_group_name, name, certificate_thumbprint, slot=None):
-    return update_ssl_binding(resource_group_name, name, 
+    return update_ssl_binding(resource_group_name, name,
                               certificate_thumbprint, SslState.disabled, slot)
