@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 from azure.cli.core import __version__ as core_version
 from azure.cli.core._profile import Profile, CLOUD
 import azure.cli.core._debug as _debug
@@ -14,6 +15,7 @@ from azure.storage._error import _ERROR_STORAGE_MISSING_INFO
 logger = azlogging.get_az_logger(__name__)
 
 UA_AGENT = "AZURECLI/{}".format(core_version)
+ENV_ADDITIONAL_USER_AGENT = 'AZURE_HTTP_USER_AGENT'
 
 
 def get_mgmt_service_client(client_type, subscription_id=None, api_version=None):
@@ -30,6 +32,10 @@ def configure_common_settings(client):
     client = _debug.allow_debug_connection(client)
 
     client.config.add_user_agent(UA_AGENT)
+    try:
+        client.config.add_user_agent(os.environ[ENV_ADDITIONAL_USER_AGENT])
+    except KeyError:
+        pass
 
     for header, value in APPLICATION.session['headers'].items():
         # We are working with the autorest team to expose the add_header
@@ -90,7 +96,14 @@ def get_subscription_id():
 
 
 def _add_headers(request):
-    request.headers['User-Agent'] = ' '.join((request.headers['User-Agent'], UA_AGENT))
+    agents = [request.headers['User-Agent'], UA_AGENT]
+    try:
+        agents.append(os.environ[ENV_ADDITIONAL_USER_AGENT])
+    except KeyError:
+        pass
+
+    request.headers['User-Agent'] = ' '.join(agents)
+
     try:
         request.headers.update(APPLICATION.session['headers'])
     except KeyError:
