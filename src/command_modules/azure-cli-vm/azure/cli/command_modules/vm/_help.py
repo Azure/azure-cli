@@ -63,7 +63,7 @@ helps['vm create'] = """
             --os-type linux --admin-username myadmin --admin-password Password@1234
         - name: Create a VM by attaching to an existing specialized managed os disk
           text: >
-            az vm create -g myrg -n my_vm_name --managed-os-disk my-os-disk
+            az vm create -g myrg -n my_vm_name --attach-os-disk my-os-disk
             --os-type linux --admin-username myadmin --admin-password Password@1234
 """.format(image_long_summary)
 
