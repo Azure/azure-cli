@@ -16,7 +16,7 @@ from ._client_factory import web_client_factory
 def _generic_site_operation(resource_group_name, name, operation_name, slot=None, #pylint: disable=too-many-arguments
                             extra_parameter=None, client=None):
     client = client or web_client_factory()
-    m = getattr(client.sites,
+    m = getattr(client.web_apps,
                 operation_name if slot is None else operation_name + '_slot')
     if slot is None:
         return (m(resource_group_name, name)
