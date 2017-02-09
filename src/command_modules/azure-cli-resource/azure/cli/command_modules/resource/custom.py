@@ -151,7 +151,7 @@ def delete_resource(resource_group_name=None, resource_provider_namespace=None,
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
                          parent_resource_path, resource_type, resource_name,
                          resource_id, api_version)
-    res.delete()
+    return res.delete()
 
 def tag_resource(tags, resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None,
@@ -560,14 +560,14 @@ class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
 
     def delete(self):
         if self.resource_id:
-            self.rcf.resources.delete_by_id(self.resource_id, self.api_version)
+            return self.rcf.resources.delete_by_id(self.resource_id, self.api_version)
         else:
-            self.rcf.resources.delete(self.resource_group_name,
-                                      self.resource_provider_namespace,
-                                      self.parent_resource_path or '',
-                                      self.resource_type,
-                                      self.resource_name,
-                                      self.api_version)
+            return self.rcf.resources.delete(self.resource_group_name,
+                                             self.resource_provider_namespace,
+                                             self.parent_resource_path or '',
+                                             self.resource_type,
+                                             self.resource_name,
+                                             self.api_version)
 
     def tag(self, tags):
         resource = self.get_resource()

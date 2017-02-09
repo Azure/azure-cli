@@ -17,12 +17,11 @@ except ImportError:
 
 from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import
 
-from azure.mgmt.compute.models import (DataDisk,
+from azure.mgmt.compute.models import (VirtualHardDisk,
                                        VirtualMachineScaleSet,
                                        VirtualMachineCaptureParameters,
                                        VirtualMachineScaleSetExtension,
                                        VirtualMachineScaleSetExtensionProfile)
-from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.arm import parse_resource_id, resource_id
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
@@ -37,6 +36,13 @@ from ._actions import (load_images_from_aliases_doc,
 from ._client_factory import _compute_client_factory
 
 logger = azlogging.get_az_logger(__name__)
+
+
+def get_resource_group_location(resource_group_name):
+    from azure.mgmt.resource.resources import ResourceManagementClient
+    client = get_mgmt_service_client(ResourceManagementClient)
+    # pylint: disable=no-member
+    return client.resource_groups.get(resource_group_name).location
 
 
 def get_vm(resource_group_name, vm_name, expand=None):
@@ -171,8 +177,9 @@ def get_vm_details(resource_group_name, vm_name):
         for ip_configuration in nic.ip_configurations:
             private_ips.append(ip_configuration.private_ip_address)
             if ip_configuration.public_ip_address:
-                public_ip_info = network_client.public_ip_addresses.get(resource_group_name,
-                                                                        ip_configuration.public_ip_address.id.split('/')[-1])
+                res = parse_resource_id(ip_configuration.public_ip_address.id)
+                public_ip_info = network_client.public_ip_addresses.get(res['resource_group'],
+                                                                        res['name'])
                 if public_ip_info.ip_address:
                     public_ips.append(public_ip_info.ip_address)
                 if public_ip_info.dns_settings:
@@ -279,46 +286,267 @@ def list_ip_addresses(resource_group_name=None, vm_name=None):
     return result
 
 
-def attach_new_disk(resource_group_name, vm_name, vhd, lun=None,
-                    disk_name=None, disk_size=1023, caching=None):
-    ''' Attach a new disk to an existing Virtual Machine'''
-    return _attach_disk(resource_group_name, vm_name, vhd, DiskCreateOptionTypes.empty,
-                        lun, disk_name, caching, disk_size)
+def create_managed_disk(resource_group_name, disk_name, location=None,
+                        size_gb=None, sku=None,
+                        source=None,  # pylint: disable=unused-argument
+                        # below are generated internally from 'source'
+                        source_blob_uri=None, source_disk=None, source_snapshot=None):
+    from azure.mgmt.compute.models import Disk, CreationData, DiskCreateOption, ImageDiskReference
+    location = location or get_resource_group_location(resource_group_name)
+    if source_blob_uri:
+        option = DiskCreateOption.import_enum
+    elif source_disk or source_snapshot:
+        option = DiskCreateOption.copy  # pylint: disable=redefined-variable-type
+    else:
+        option = DiskCreateOption.empty
+
+    creation_data = CreationData(option, source_uri=source_blob_uri,
+                                 image_reference=None,
+                                 source_resource_id=source_disk or source_snapshot)
+
+    if size_gb is None and option == DiskCreateOption.empty:
+        raise CLIError('usage error: --size-gb required to create an empty disk')
+
+    disk = Disk(location, disk_size_gb=size_gb, creation_data=creation_data,
+                account_type=sku)
+    client = _compute_client_factory()
+    return client.disks.create_or_update(resource_group_name, disk_name, disk)
 
 
-def attach_existing_disk(resource_group_name, vm_name, vhd, lun=None, disk_name=None, caching=None):
-    ''' Attach an existing disk to an existing Virtual Machine '''
-    return _attach_disk(resource_group_name, vm_name, vhd, DiskCreateOptionTypes.attach,
-                        lun, disk_name, caching)
+def update_managed_disk(instance, size_gb=None, sku=None):
+    if size_gb is not None:
+        instance.disk_size_gb = size_gb
+    if sku is not None:
+        instance.account_type = sku
+    return instance
 
 
-def _attach_disk(resource_group_name, vm_name, vhd, create_option, lun=None,
-                 disk_name=None, caching=None, disk_size=None):
+def attach_managed_data_disk(resource_group_name, vm_name, disk,
+                             new=False, sku=None, size_gb=None):
+    '''attach a managed disk'''
+    vm = get_vm(resource_group_name, vm_name)
+    from azure.mgmt.compute.models import (CreationData, DiskCreateOptionTypes,
+                                           ManagedDiskParameters, DataDisk)
+    # pylint: disable=no-member
+    luns = [d.lun for d in vm.storage_profile.data_disks] if vm.storage_profile.data_disks else []
+    lun = max(luns) + 1 if luns else 1
+    if new:
+        if not size_gb:
+            raise CLIError('usage error: --size-gb required to create an empty disk for attach')
+        data_disk = DataDisk(lun, DiskCreateOptionTypes.empty,
+                             name=parse_resource_id(disk)['name'],
+                             disk_size_gb=size_gb)
+    else:
+        params = ManagedDiskParameters(id=disk,
+                                       storage_account_type=sku)
+        data_disk = DataDisk(lun, DiskCreateOptionTypes.attach, managed_disk=params)
+
+    vm.storage_profile.data_disks.append(data_disk)
+    set_vm(vm)
+
+
+def detach_managed_data_disk(resource_group_name, vm_name, disk_name):
+    '''detach a managed disk'''
+    vm = get_vm(resource_group_name, vm_name)
+    # pylint: disable=no-member
+    matched = [d for d in vm.storage_profile.data_disks if d.name.lower() == disk_name.lower()]
+    if not matched:
+        raise CLIError('disk to remove is not found')
+    for d in matched:
+        vm.storage_profile.data_disks.remove(d)
+    set_vm(vm)
+
+
+def attach_managed_data_disk_to_vmss(resource_group_name, vmss_name, size_gb, lun=None):
+    from azure.mgmt.compute.models import (DiskCreateOptionTypes,
+                                           VirtualMachineScaleSetDataDisk)
+    client = _compute_client_factory()
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name,
+                                                 vmss_name)
+    # pylint: disable=no-member
+    data_disks = vmss.virtual_machine_profile.storage_profile.data_disks or []
+    if lun is None:
+        luns = [d.lun for d in data_disks]
+        lun = max(luns) + 1 if luns else 1
+    data_disk = VirtualMachineScaleSetDataDisk(lun, DiskCreateOptionTypes.empty,
+                                               disk_size_gb=size_gb)
+    data_disks.append(data_disk)
+    vmss.virtual_machine_profile.storage_profile.data_disks = data_disks
+    return client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
+
+
+def detach_disk_from_vmss(resource_group_name, vmss_name, lun):
+    client = _compute_client_factory()
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name,
+                                                 vmss_name)
+    # pylint: disable=no-member
+    data_disks = vmss.virtual_machine_profile.storage_profile.data_disks
+    to_delete = [d for d in data_disks if d.lun == lun]
+    if not to_delete:
+        raise CLIError("Could not find the data disk with lun '{}'".format(lun))
+    data_disks.remove(to_delete[0])
+    return client.virtual_machine_scale_sets.create_or_update(resource_group_name,
+                                                              vmss_name, vmss)
+
+
+def grant_disk_access(resource_group_name, disk_name, duration_in_seconds):
+    return _grant_access(resource_group_name, disk_name, duration_in_seconds, True)
+
+
+def create_snapshot(resource_group_name, snapshot_name, location=None,
+                    size_gb=None, sku=None,
+                    source=None,  # pylint: disable=unused-argument
+                    # below are generated internally from 'source'
+                    source_blob_uri=None, source_disk=None, source_snapshot=None):
+    from azure.mgmt.compute.models import (Snapshot, CreationData, DiskCreateOption,
+                                           ImageDiskReference)
+    location = location or get_resource_group_location(resource_group_name)
+    if source_blob_uri:
+        option = DiskCreateOption.import_enum
+    elif source_disk or source_snapshot:
+        option = DiskCreateOption.copy  # pylint: disable=redefined-variable-type
+    else:
+        option = DiskCreateOption.empty
+
+    creation_data = CreationData(option, source_uri=source_blob_uri,
+                                 image_reference=None,
+                                 source_resource_id=source_disk or source_snapshot)
+
+    if size_gb is None and option == DiskCreateOption.empty:
+        raise CLIError('Please supply size for the snapshots')
+
+    snapshot = Snapshot(location, disk_size_gb=size_gb, creation_data=creation_data,
+                        account_type=sku)
+    client = _compute_client_factory()
+    return client.snapshots.create_or_update(resource_group_name, snapshot_name, snapshot)
+
+
+def update_snapshot(instance, sku=None):
+    if sku is not None:
+        instance.account_type = sku
+    return instance
+
+
+def list_managed_disks(resource_group_name=None):
+    client = _compute_client_factory()
+    if resource_group_name:
+        return client.disks.list_by_resource_group(resource_group_name)
+    else:
+        return client.disks.list()
+
+
+def list_snapshots(resource_group_name=None):
+    client = _compute_client_factory()
+    if resource_group_name:
+        return client.snapshots.list_by_resource_group(resource_group_name)
+    else:
+        return client.snapshots.list()
+
+
+def grant_snapshot_access(resource_group_name, snapshot_name, duration_in_seconds):
+    return _grant_access(resource_group_name, snapshot_name, duration_in_seconds, False)
+
+
+def _grant_access(resource_group_name, name, duration_in_seconds, is_disk):
+    from azure.mgmt.compute.models import AccessLevel
+    client = _compute_client_factory()
+    op = client.disks if is_disk else client.snapshots
+    return op.grant_access(resource_group_name, name, AccessLevel.read, duration_in_seconds)
+
+
+def list_images(resource_group_name=None):
+    client = _compute_client_factory()
+    if resource_group_name:
+        return client.images.list_by_resource_group(resource_group_name)
+    else:
+        return client.images.list()
+
+
+def create_image(resource_group_name, name, os_type=None, location=None,  # pylint: disable=too-many-locals,line-too-long
+                 source=None, data_disk_sources=None,  # pylint: disable=unused-argument
+                 # below are generated internally from 'source' and 'data_disk_sources'
+                 source_virtual_machine=None,
+                 os_blob_uri=None, data_blob_uris=None,
+                 os_snapshot=None, data_snapshots=None,
+                 os_disk=None, data_disks=None):
+    from azure.mgmt.compute.models import (ImageOSDisk, ImageDataDisk, ImageStorageProfile, Image,
+                                           OperatingSystemTypes, SubResource,
+                                           OperatingSystemStateTypes)
+    # pylint: disable=line-too-long
+    if source_virtual_machine:
+        location = location or get_resource_group_location(resource_group_name)
+        image = Image(location, source_virtual_machine=SubResource(source_virtual_machine))
+    else:
+        os_disk = ImageOSDisk(os_type=os_type,
+                              os_state=OperatingSystemStateTypes.generalized,
+                              snapshot=SubResource(os_snapshot) if os_snapshot else None,
+                              managed_disk=SubResource(os_disk) if os_disk else None,
+                              blob_uri=os_blob_uri)
+        all_data_disks = []
+        lun = 1
+        if data_blob_uris:
+            for d in data_blob_uris:
+                all_data_disks.append(ImageDataDisk(lun, blob_uri=d))
+                lun += 1
+        if data_snapshots:
+            for d in data_snapshots:
+                all_data_disks.append(ImageDataDisk(lun, snapshot=SubResource(d)))
+                lun += 1
+        if data_disks:
+            for d in data_disks:
+                all_data_disks.append(ImageDataDisk(lun, managed_disk=SubResource(d)))
+                lun += 1
+
+        image_storage_profile = image_storage_profile = ImageStorageProfile(os_disk=os_disk, data_disks=all_data_disks)
+        location = location or get_resource_group_location(resource_group_name)
+        # pylint disable=no-member
+        image = Image(location, storage_profile=image_storage_profile)
+
+    client = _compute_client_factory()
+    return client.images.create_or_update(resource_group_name, name, image)
+
+
+def attach_unmanaged_data_disk(resource_group_name, vm_name, new=False, vhd_uri=None, lun=None,
+                               disk_name=None, size_gb=1023, caching=None):
+    ''' Attach an unmanaged disk'''
+    from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
+    from azure.mgmt.compute.models import DataDisk
+    if not new and not disk_name:
+        raise CLIError('Pleae provide the name of the existing disk to attach')
+    create_option = DiskCreateOptionTypes.empty if new else DiskCreateOptionTypes.attach
+
     vm = get_vm(resource_group_name, vm_name)
     if disk_name is None:
-        file_name = vhd.uri.split('/')[-1]
-        disk_name = os.path.splitext(file_name)[0]
+        import datetime
+        disk_name = vm_name + '-' + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     # pylint: disable=no-member
+    if vhd_uri is None:
+        if not hasattr(vm.storage_profile.os_disk, 'vhd'):
+            raise CLIError('Adding unmanaged disks to a VM with managed disks is not supported')
+        blob_uri = vm.storage_profile.os_disk.vhd.uri
+        vhd_uri = blob_uri[0:blob_uri.rindex('/') + 1] + disk_name + '.vhd'
+
     if lun is None:
         lun = _get_disk_lun(vm.storage_profile.data_disks)
-    disk = DataDisk(lun=lun, vhd=vhd, name=disk_name,
+    disk = DataDisk(lun=lun, vhd=VirtualHardDisk(vhd_uri), name=disk_name,
                     create_option=create_option,
-                    caching=caching, disk_size_gb=disk_size)
+                    caching=caching, disk_size_gb=size_gb if new else None)
     if vm.storage_profile.data_disks is None:
         vm.storage_profile.data_disks = []
-    vm.storage_profile.data_disks.append(disk)  # pylint: disable=no-member
+    vm.storage_profile.data_disks.append(disk)
     return set_vm(vm)
 
 
-def detach_disk(resource_group_name, vm_name, disk_name):
+def detach_unmanaged_data_disk(resource_group_name, vm_name, disk_name):
     ''' Detach a disk from a Virtual Machine '''
     vm = get_vm(resource_group_name, vm_name)
     # Issue: https://github.com/Azure/autorest/issues/934
     vm.resources = None
     try:
+        # pylint: disable=no-member
         disk = next(d for d in vm.storage_profile.data_disks if
-                    d.name.lower() == disk_name.lower())  # pylint: disable=no-member
-        vm.storage_profile.data_disks.remove(disk)  # pylint: disable=no-member
+                    d.name.lower() == disk_name.lower())
+        vm.storage_profile.data_disks.remove(disk)
     except (StopIteration, AttributeError):
         raise CLIError("No disk with the name '{}' found".format(disk_name))
     return set_vm(vm)
@@ -349,7 +577,7 @@ def get_instance_view(resource_group_name, vm_name):
     return get_vm(resource_group_name, vm_name, 'instanceView')
 
 
-def list_disks(resource_group_name, vm_name):
+def list_unmanaged_disks(resource_group_name, vm_name):
     ''' List disks for a Virtual Machine '''
     vm = get_vm(resource_group_name, vm_name)
     return vm.storage_profile.data_disks  # pylint: disable=no-member
@@ -842,11 +1070,11 @@ def vm_set_nics(resource_group_name, vm_name, nics, primary_nic=None):
 # pylint: disable=no-member
 
 
-def vm_open_port(resource_group_name, vm_name, network_security_group_name=None,
+def vm_open_port(resource_group_name, vm_name, port, priority=900, network_security_group_name=None,
                  apply_to_subnet=False):
-    """ Opens a VM to all inbound traffic and protocols by adding a security rule to the network
+    """ Opens a VM to inbound traffic on specified ports by adding a security rule to the network
     security group (NSG) that is attached to the VM's network interface (NIC) or subnet. The
-    existing NSG will be used or a new one will be created. The rule name is 'open-port-cmd' and
+    existing NSG will be used or a new one will be created. The rule name is 'open-port-{port}' and
     will overwrite an existing rule with this name. For multi-NIC VMs, or for more fine
     grained control, use the appropriate network commands directly (nsg rule create, etc).
     """
@@ -885,13 +1113,14 @@ def vm_open_port(resource_group_name, vm_name, network_security_group_name=None,
 
     # update the NSG with the new rule to allow inbound traffic
     from azure.mgmt.network.models import SecurityRule
-    rule = SecurityRule(protocol='*', access='allow', direction='inbound', name='open-port-cmd',
-                        source_port_range='*', destination_port_range='*', priority=900,
+    rule_name = 'open-port-all' if port == '*' else 'open-port-{}'.format(port)
+    rule = SecurityRule(protocol='*', access='allow', direction='inbound', name=rule_name,
+                        source_port_range='*', destination_port_range=port, priority=priority,
                         source_address_prefix='*', destination_address_prefix='*')
     nsg_name = nsg.name or os.path.split(nsg.id)[1]
     LongRunningOperation('Adding security rule')(
         network.security_rules.create_or_update(
-            resource_group_name, nsg_name, 'open-port-cmd', rule)
+            resource_group_name, nsg_name, rule_name, rule)
     )
 
     # update the NIC or subnet
@@ -1115,6 +1344,43 @@ def start_vmss(resource_group_name, vm_scale_set_name, instance_ids=None):
                                                        instance_ids=instance_ids)
 
 
+def list_vmss_instance_connection_info(resource_group_name, vm_scale_set_name):
+    client = _compute_client_factory()
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name,
+                                                 vm_scale_set_name)
+    # find the load balancer
+    nic_configs = vmss.virtual_machine_profile.network_profile.network_interface_configurations
+    primary_nic_config = next(n for n in nic_configs if n.primary)
+    if primary_nic_config is None:
+        raise CLIError('could not find a primary nic which is needed to search to load balancer')
+    ip_configs = primary_nic_config.ip_configurations
+    ip_config = next((ip for ip in ip_configs if ip.load_balancer_inbound_nat_pools), None)
+    if not ip_config:
+        raise CLIError('No load-balancer exist to retrieve public ip address')
+    res_id = ip_config.load_balancer_inbound_nat_pools[0].id
+    lb_info = parse_resource_id(res_id)
+    lb_name = lb_info['name']
+    lb_rg = lb_info['resource_group']
+
+    # get public ip
+    from azure.mgmt.network import NetworkManagementClient
+    network_client = get_mgmt_service_client(NetworkManagementClient)
+    lb = network_client.load_balancers.get(lb_rg, lb_name)
+    res_id = lb.frontend_ip_configurations[0].public_ip_address.id  # TODO: will this always work?
+    public_ip_info = parse_resource_id(res_id)
+    public_ip_name = public_ip_info['name']
+    public_ip_rg = public_ip_info['resource_group']
+    public_ip = network_client.public_ip_addresses.get(public_ip_rg, public_ip_name)
+    public_ip_address = public_ip.ip_address
+
+    # loop around inboundnatrule
+    instance_addresses = []
+    for rule in lb.inbound_nat_rules:
+        instance_addresses.append('{}:{}'.format(public_ip_address, rule.frontend_port))
+
+    return instance_addresses
+
+
 def availset_get(resource_group_name, name):
     return _compute_client_factory().availability_sets.get(resource_group_name, name)
 
@@ -1129,6 +1395,14 @@ def vmss_get(resource_group_name, name):
 
 def vmss_set(**kwargs):
     return _compute_client_factory().virtual_machine_scale_sets.create_or_update(**kwargs)
+
+
+def convert_av_set_to_managed_disk(resource_group_name, availability_set_name):
+    av_set = availset_get(resource_group_name, availability_set_name)
+    if av_set.sku.name != 'Aligned':
+        av_set.sku.name = 'Aligned'
+        return availset_set(resource_group_name=resource_group_name, name=availability_set_name,
+                            parameters=av_set)
 
 
 def update_acs(resource_group_name, container_service_name, new_agent_count):
@@ -1147,7 +1421,7 @@ def list_container_services(client, resource_group_name=None):
 
 
 # pylint: disable=too-many-locals, unused-argument, too-many-statements
-def create_vm(vm_name, resource_group_name, image,
+def create_vm(vm_name, resource_group_name, image=None,
               size='Standard_DS1', location=None, tags=None, no_wait=False,
               authentication_type=None, admin_password=None, admin_username=getpass.getuser(),
               ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
@@ -1157,7 +1431,9 @@ def create_vm(vm_name, resource_group_name, image,
               public_ip_address=None, public_ip_address_allocation='dynamic',
               public_ip_address_dns_name=None,
               os_disk_name=None, os_type=None, storage_account=None,
-              storage_caching='ReadWrite', storage_container_name='vhds', storage_sku='Premium_LRS',
+              storage_caching='ReadWrite', storage_container_name='vhds',
+              storage_sku='Standard_LRS', use_unmanaged_disk=False,
+              managed_os_disk=None, data_disk_sizes_gb=None, image_data_disks=None,
               vnet_name=None, vnet_address_prefix='10.0.0.0/16',
               subnet=None, subnet_address_prefix='10.0.0.0/24', storage_profile=None,
               os_publisher=None, os_offer=None, os_sku=None, os_version=None,
@@ -1242,6 +1518,7 @@ def create_vm(vm_name, resource_group_name, image,
             raise CLIError('When specifying an existing NIC, do not specify NSG, '
                            'public IP, VNet or subnet.')
 
+    os_vhd_uri = None
     if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
         storage_account_name = storage_account.rsplit('/', 1)
         storage_account_name = storage_account_name[1] if \
@@ -1253,8 +1530,8 @@ def create_vm(vm_name, resource_group_name, image,
     vm_resource = build_vm_resource(
         vm_name, location, tags, size, storage_profile, nics, admin_username, availability_set,
         admin_password, ssh_key_value, ssh_dest_key_path, image, os_disk_name,
-        os_type, storage_caching, os_publisher, os_offer, os_sku, os_version,
-        os_vhd_uri)
+        os_type, storage_caching, storage_sku, os_publisher, os_offer, os_sku, os_version,
+        os_vhd_uri, managed_os_disk, data_disk_sizes_gb, image_data_disks)
     vm_resource['dependsOn'] = vm_dependencies
 
     master_template.add_resource(vm_resource)
@@ -1290,18 +1567,20 @@ def create_vmss(vmss_name, resource_group_name, image,
                 public_ip_address_dns_name=None,
                 storage_caching='ReadOnly',
                 storage_container_name='vhds', storage_sku='Standard_LRS',
-                os_type=None, os_disk_name='osdiskimage',
+                os_type=None, os_disk_name=None,
+                use_unmanaged_disk=False, data_disk_sizes_gb=None, image_data_disks=None,
                 vnet_name=None, vnet_address_prefix='10.0.0.0/16',
-                subnet=None, subnet_address_prefix='10.0.0.0/24',
+                subnet=None, subnet_address_prefix=None,
                 os_offer=None, os_publisher=None, os_sku=None, os_version=None,
-                load_balancer_type=None, vnet_type=None, public_ip_type=None, storage_profile=None):
+                load_balancer_type=None, vnet_type=None, public_ip_type=None, storage_profile=None,
+                single_placement_group=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.command_modules.vm._vm_utils import random_string
     from azure.cli.command_modules.vm._template_builder import (
         ArmTemplateBuilder, StorageProfile, build_vmss_resource, build_storage_account_resource,
         build_vnet_resource, build_public_ip_resource, build_load_balancer_resource,
         build_output_deployment_resource, build_deployment_resource,
-        build_load_balancer_inbound_nat_rules_resource, build_vmss_storage_account_pool_resource)
+        build_vmss_storage_account_pool_resource)
 
     from azure.cli.core._profile import CLOUD
     from azure.mgmt.resource.resources import ResourceManagementClient
@@ -1347,9 +1626,6 @@ def create_vmss(vmss_name, resource_group_name, image,
         if not backend_port:
             backend_port = 3389 if os_type == 'windows' else 22
 
-        master_template.add_resource(build_load_balancer_inbound_nat_rules_resource(
-            load_balancer, location, backend_port, instance_count, 'loadBalancerFrontEnd'))
-
         lb_resource = build_load_balancer_resource(
             load_balancer, location, tags, backend_pool_name, nat_pool_name, backend_port,
             'loadBalancerFrontEnd', public_ip_address_id, subnet_id)
@@ -1360,8 +1636,6 @@ def create_vmss(vmss_name, resource_group_name, image,
         master_template.add_resource(build_vmss_storage_account_pool_resource(
             'storageLoop', location, tags, storage_sku))
         vmss_dependencies.append('storageLoop')
-    else:
-        raise CLIError('Unsupported storage profile.')
 
     scrubbed_name = vmss_name.replace('-', '').lower()[:5]
     naming_prefix = '{}{}'.format(scrubbed_name,
@@ -1378,11 +1652,13 @@ def create_vmss(vmss_name, resource_group_name, image,
                                         vm_sku, instance_count,
                                         ip_config_name, nic_name, subnet_id, admin_username,
                                         authentication_type, storage_profile,
-                                        os_disk_name, storage_caching, os_type,
-                                        image, admin_password,
+                                        os_disk_name, storage_caching,
+                                        storage_sku, data_disk_sizes_gb, image_data_disks,
+                                        os_type, image, admin_password,
                                         ssh_key_value, ssh_dest_key_path,
                                         os_publisher, os_offer, os_sku, os_version,
-                                        backend_address_pool_id, inbound_nat_pool_id)
+                                        backend_address_pool_id, inbound_nat_pool_id,
+                                        single_placement_group=single_placement_group)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     master_template.add_resource(vmss_resource)
@@ -1406,3 +1682,37 @@ def create_vmss(vmss_name, resource_group_name, image,
 
     # creates the VMSS deployment
     return client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
+
+
+def create_av_set(availability_set_name, resource_group_name, location=None, no_wait=False,
+                  platform_update_domain_count=5, platform_fault_domain_count=5,
+                  unmanaged=False, tags=None, validate=False):
+    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
+    from azure.cli.command_modules.vm._vm_utils import random_string
+    from azure.cli.command_modules.vm._template_builder import (ArmTemplateBuilder,
+                                                                build_av_set_resource)
+
+    tags = tags or {}
+
+    # Build up the ARM template
+    master_template = ArmTemplateBuilder()
+
+    av_set_resource = build_av_set_resource(availability_set_name, location, tags,
+                                            platform_update_domain_count,
+                                            platform_fault_domain_count, unmanaged)
+    master_template.add_resource(av_set_resource)
+
+    template = master_template.build()
+
+    # deploy ARM template
+    deployment_name = 'av_set_deploy_' + random_string(32)
+    client = get_mgmt_service_client(ResourceManagementClient).deployments
+    properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
+    if validate:
+        return client.validate(resource_group_name, deployment_name, properties)
+
+    LongRunningOperation()(client.create_or_update(
+        resource_group_name, deployment_name, properties, raw=no_wait))
+    compute_client = _compute_client_factory()
+    return compute_client.availability_sets.get(resource_group_name, availability_set_name)

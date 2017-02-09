@@ -70,7 +70,7 @@ The release archive should be uploaded to a storage account.
 
 Upload the archive:
 ```
-$ export AZURE_STORAGE_CONNECTION_STRING=$(az storage account show-connection-string  -g {RG} -n azurecliprod -otsv)
+$ export AZURE_STORAGE_CONNECTION_STRING=$(az storage account show-connection-string  -g azure-cli-prod -n azurecliprod -otsv)
 $ az storage blob upload -f azure-cli_packaged_{VERSION}.tar.gz -n azure-cli_packaged_{VERSION}.tar.gz -c releases
 ```
 
@@ -81,6 +81,10 @@ $ az storage blob url -c releases -n azure-cli_packaged_{VERSION}.tar.gz
 
 An example URL is `https://azurecliprod.blob.core.windows.net/releases/azure-cli_packaged_{VERSION}.tar.gz`.
 
+Get the SHA256 checksum:
+```
+$ shasum -a 256 azure-cli_packaged_{VERSION}.tar.gz
+```
 
 4 - Build/Release for Debian, Docker, Homebrew
 ----------------------------------------------

@@ -25,12 +25,6 @@ def cf_ni(_):
     return get_mgmt_service_client(NetworkManagementClient, api_version='2016-03-30').network_interfaces  # pylint: disable=line-too-long
 
 
-def cf_avail_set_create(_):
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.command_modules.vm.mgmt_avail_set.lib import AvailSetCreationClient as AvailSetCreateClient  # pylint: disable=line-too-long
-    return get_mgmt_service_client(AvailSetCreateClient).avail_set
-
-
 def cf_avail_set(_):
     return _compute_client_factory().availability_sets
 
@@ -75,3 +69,15 @@ def cf_vmss_vm(_):
 
 def cf_vm_sizes(_):
     return _compute_client_factory().virtual_machine_sizes
+
+
+def cf_disks(_):
+    return _compute_client_factory().disks
+
+
+def cf_snapshots(_):
+    return _compute_client_factory().snapshots
+
+
+def cf_images(_):
+    return _compute_client_factory().images

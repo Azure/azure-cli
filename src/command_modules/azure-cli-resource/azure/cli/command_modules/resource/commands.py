@@ -22,10 +22,8 @@ from azure.cli.command_modules.resource._client_factory import (_resource_client
 def transform_resource_group_list(result):
     return [OrderedDict([('Name', r['name']), \
             ('Location', r['location']), ('Status', r['properties']['provisioningState'])]) for r in result]
-cli_command(__name__, 'group delete',
-            'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.delete',
-            cf_resource_groups,
-            no_wait_param='raw', confirmation=True)
+
+cli_command(__name__, 'group delete', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.delete', cf_resource_groups, no_wait_param='raw', confirmation=True)
 cli_generic_wait_command(__name__, 'group wait', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get', cf_resource_groups)
 cli_command(__name__, 'group show', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get', cf_resource_groups)
 cli_command(__name__, 'group exists', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.check_existence', cf_resource_groups)
@@ -115,5 +113,3 @@ cli_command(__name__, 'lock delete', 'azure.cli.command_modules.resource.custom#
 cli_command(__name__, 'lock list', 'azure.cli.command_modules.resource.custom#list_locks')
 cli_command(__name__, 'lock show', 'azure.cli.command_modules.resource.custom#get_lock')
 cli_command(__name__, 'lock update', 'azure.cli.command_modules.resource.custom#update_lock')
-
-

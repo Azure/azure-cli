@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.1.1b2+dev'
+VERSION = '0.1.1b3+dev'
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -25,7 +25,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-compute==0.32.1',
+    'azure-mgmt-compute==0.33.0',
     'azure-mgmt-network==0.30.0',
     'azure-mgmt-resource==0.30.2',
     'azure-storage==0.33.0',
@@ -55,10 +55,6 @@ setup(
     ],
     packages=[
         'azure.cli.command_modules.vm',
-        'azure.cli.command_modules.vm.mgmt_avail_set',
-        'azure.cli.command_modules.vm.mgmt_avail_set.lib',
-        'azure.cli.command_modules.vm.mgmt_avail_set.lib.models',
-        'azure.cli.command_modules.vm.mgmt_avail_set.lib.operations',
         'azure.cli.command_modules.vm.mgmt_acs',
         'azure.cli.command_modules.vm.mgmt_acs.lib',
         'azure.cli.command_modules.vm.mgmt_acs.lib.models',

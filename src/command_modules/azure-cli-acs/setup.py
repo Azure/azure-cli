@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.1.1b2+dev'
+VERSION = '0.1.1b3+dev'
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -25,7 +25,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-compute==0.32.1',
+    'azure-mgmt-compute==0.33.0',
     'paramiko',
     'pyyaml',
     'six',

@@ -7,26 +7,26 @@ import requests
 from adal.adal_error import AdalError
 from azure.cli.core.prompting import prompt_pass, NoTTYException
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._profile import Profile, CLOUD
+from azure.cli.core._profile import Profile
 from azure.cli.core._util import CLIError
 
 logger = azlogging.get_az_logger(__name__)
 
 
-def load_subscriptions():
+def load_subscriptions(all_clouds=False):
     profile = Profile()
-    subscriptions = profile.load_cached_subscriptions()
+    subscriptions = profile.load_cached_subscriptions(all_clouds)
     return subscriptions
 
 
-def list_subscriptions(list_all=False):  # pylint: disable=redefined-builtin
+def list_subscriptions(all_clouds=False):  # pylint: disable=redefined-builtin
     """List the imported subscriptions."""
-    subscriptions = load_subscriptions()
+    subscriptions = load_subscriptions(all_clouds)
     if not subscriptions:
         logger.warning('Please run "az login" to access your accounts.')
     for sub in subscriptions:
         sub['cloudName'] = sub.pop('environmentName', None)
-    return [sub for sub in subscriptions if list_all or sub['cloudName'] == CLOUD.name]
+    return subscriptions
 
 
 def show_subscription(subscription=None, expanded_view=None):
@@ -91,7 +91,7 @@ def login(username=None, password=None, service_principal=None, tenant=None):
 
 
 def logout(username=None):
-    """Log out to remove accesses to Azure subscriptions"""
+    """Log out to remove access to Azure subscriptions"""
     profile = Profile()
     if not username:
         username = profile.get_current_account_user()
