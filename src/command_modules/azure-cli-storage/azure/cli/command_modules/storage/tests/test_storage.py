@@ -124,6 +124,36 @@ class StorageAccountScenarioTest(ResourceGroupVCRTestBase):
         assert result == 'true'
 
 
+class StorageCorsScenarioTest(StorageAccountVCRTestBase):
+    def __init__(self, test_method):
+        super(StorageCorsScenarioTest, self).__init__(__file__, test_method, resource_group='test_cors_scenario_test')
+
+    def test_storage_cors_scenario(self):
+        self.execute()
+
+    def body(self):
+        connection_string = self.cmd('storage account show-connection-string -n {} -g {} -otsv'.format(
+            self.account, self.resource_group))
+
+        self.cmd('storage cors list --connection-string {}'.format(connection_string),
+                 checks=JMESPathCheck('length(@)', 0))
+
+        self.cmd('storage cors add --method POST --origins http://example.com --services bfq --max-age 60 --connection-string {}'.format(connection_string))
+
+        self.cmd('storage cors list --connection-string {}'.format(connection_string),
+                 checks=JMESPathCheck('length(@)', 3))
+
+        self.cmd('storage cors clear --services bf --connection-string {}'.format(connection_string))
+
+        self.cmd('storage cors list --connection-string {}'.format(connection_string),
+                 checks=JMESPathCheck('length(@)', 1))
+
+        self.cmd('storage cors clear --services bfq --connection-string {}'.format(connection_string))
+
+        self.cmd('storage cors list --connection-string {}'.format(connection_string),
+                 checks=JMESPathCheck('length(@)', 0))
+
+
 class StorageBlobScenarioTest(StorageAccountVCRTestBase):
 
     def __init__(self, test_method):
