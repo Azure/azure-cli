@@ -16,7 +16,7 @@ Commands to manage Azure container registries
         check-name: Checks whether the container registry name is available for use.
         create    : Creates a container registry.
         delete    : Deletes a container registry.
-        list      : Lists all the available container registries under the current subscription.
+        list      : Lists all the container registries under the current subscription.
         login     : Login to a container registry through Docker.
         show      : Gets the properties of the specified container registry.
         update    : Updates a container registry.
@@ -205,10 +205,9 @@ Show tags of a given repository in a given container registry
         --username -u          : The username used to log into a container registry.
 
     Examples
-        Show tags of a given repository in a given container registry if admin user is enabled
-            az acr repository show-tags -n myRegistry --repository myRepository
-        Show tags of a given repository in a given container registry with credentials
-            az acr repository show-tags -n myRegistry --repository myRepository -u myUsername -p myPassword
+        Show tags of a given repository in a given container registry. Enter login credentials in the
+        prompt if admin user is disabled.
+            az acr repository show-tags -n MyRegistry --repository MyRepository
 
 Login to a container registry
 -------------
@@ -219,5 +218,9 @@ Login to a container registry
 
     Arguments
         --name -n [Required]: The name of the container registry.
-        --password -p       : The password used to log into the container registry.
-        --username -u       : The username used to log into the container registry.
+        --password -p       : The password used to log into a container registry.
+        --username -u       : The username used to log into a container registry.
+
+    Examples
+        Login to a container registry
+            az acr login -n MyRegistry

@@ -20,6 +20,7 @@ from ._utils import (
     random_storage_account_name,
     get_location_from_resource_group
 )
+from ._docker_utils import docker_login_to_registry
 
 
 logger = azlogging.get_az_logger(__name__)
@@ -176,10 +177,10 @@ def acr_update_set(client,
 
     return client.update(resource_group_name, registry_name, parameters)
 
-def acr_login(registry_name):
+def acr_login(registry_name, username=None, password=None):
     '''Login to a container registry through Docker.
     :param str registry_name: The name of container registry
+    :param str username: The username used to log into the container registry
+    :param str password: The password used to log into the container registry
     '''
-    registry, _ = get_registry_by_name(registry_name)
-    login_server = registry.login_server #pylint: disable=no-member
-    docker_login_to_registry(login_server)
+    docker_login_to_registry(registry_name, username, password)
