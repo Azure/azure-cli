@@ -2,9 +2,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import os
 
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase,
                                                      JMESPathCheck, NoneCheck)
+
+TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+
 #pylint: disable=line-too-long
 
 class WebappBasicE2ETest(ResourceGroupVCRTestBase):
@@ -351,3 +355,38 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('[0].name', self.webapp + '/' + slot),
             ])
         self.cmd('appservice web deployment slot delete -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=NoneCheck())
+
+class WebappSSLCertTest(ResourceGroupVCRTestBase):
+
+  def __init__(self, test_method):
+      super(WebappSSLCertTest, self).__init__(__file__, test_method, resource_group='azurecli-webapp-ssl')
+      self.webapp_name = 'webapp-ssl-test123'
+
+
+  def test_webapp_ssl(self):
+      self.execute()
+
+  def body(self):
+      plan = 'webapp-ssl-test'
+
+      '''
+      Cert Generated using this method
+      https://docs.microsoft.com/en-us/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl 
+      '''
+      pfx_file = os.path.join(TEST_DIR, 'server.pfx')
+      cert_password = 'test'
+      cert_thumbprint = 'DB2BA6898D0B330A93E7F69FF505C61EF39921B6'
+      self.cmd('appservice plan create -g {} -n {} --sku B1'.format(self.resource_group, plan))
+      self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, plan))
+      result = self.cmd('appservice web config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {}'.format(self.resource_group, self.webapp_name, pfx_file, cert_password), checks=[
+            JMESPathCheck('thumbprint', cert_thumbprint)
+            ])
+      result = self.cmd('appservice web config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {}'.format(self.resource_group, self.webapp_name, cert_thumbprint, 'SNI'), checks=[
+            JMESPathCheck('hostNameSslStates[0].sslState', 'SniEnabled'),
+            JMESPathCheck('hostNameSslStates[0].thumbprint', cert_thumbprint)
+            ])
+      result = self.cmd('appservice web config ssl unbind -g {} -n {} --certificate-thumbprint {}'.format(self.resource_group, self.webapp_name, cert_thumbprint), checks=[
+            JMESPathCheck('hostNameSslStates[0].sslState', 'Disabled')
+            ])
+      result = self.cmd('appservice web config ssl delete -g {} -n {} --certificate-thumbprint {}'.format(self.resource_group, self.webapp_name, cert_thumbprint), checks=[])
+      self.cmd('appservice web delete -g {} -n {}'.format(self.resource_group, self.webapp_name))

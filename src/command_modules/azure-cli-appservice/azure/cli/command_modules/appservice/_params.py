@@ -104,6 +104,14 @@ register_cli_argument('appservice web config update', 'java_container', help="Th
 register_cli_argument('appservice web config update', 'java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
 register_cli_argument('appservice web config update', 'app_command_line', options_list=('--startup-file',), help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
 
+register_cli_argument('appservice web config ssl bind', 'certificate_thumbprint', help='The ssl cert thumbprint')
+register_cli_argument('appservice web config ssl bind', 'ssl_type', help='The ssl cert type, e.g., SNI or IP')
+register_cli_argument('appservice web config ssl upload', 'certificate_password', help='The ssl cert password')
+register_cli_argument('appservice web config ssl upload', 'certificate_file', help='The filepath for the .pfx file')
+register_cli_argument('appservice web config ssl unbind', 'certificate_thumbprint', help='The ssl cert thumbprint')
+register_cli_argument('appservice web config ssl delete', 'certificate_thumbprint', help='The ssl cert thumbprint')
+
+
 register_cli_argument('appservice web config hostname', 'webapp', help="webapp name", completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
 register_cli_argument('appservice web config hostname', 'name', arg_type=name_arg_type, completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name')
 

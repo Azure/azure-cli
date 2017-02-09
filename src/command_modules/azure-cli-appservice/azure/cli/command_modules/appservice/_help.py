@@ -83,27 +83,27 @@ helps['appservice web config ssl'] = """
 """
 
 helps['appservice web config ssl upload'] = """
-    type: group
+    type: command
     short-summary: Upload an ssl certificate to the webapp
 """
 
 helps['appservice web config ssl list'] = """
-    type: group
+    type: command
     short-summary: List ssl certificates within a resource group
 """
 
 helps['appservice web config ssl bind'] = """
-    type: group
+    type: command
     short-summary: Bind an ssl certificate to the webapp
 """
 
 helps['appservice web config ssl unbind'] = """
-    type: group
+    type: command
     short-summary: Unbind an ssl certificate from the webapp
 """
 
 helps['appservice web config ssl delete'] = """
-    type: group
+    type: command
     short-summary: Delete an ssl certificate from the webapp
 """
 
