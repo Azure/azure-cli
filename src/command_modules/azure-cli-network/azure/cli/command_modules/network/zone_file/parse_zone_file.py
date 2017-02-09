@@ -145,10 +145,15 @@ def _tokenize_line(line):
     escape = False
     quote = False
     tokbuf = ""
+    firstchar = True
     ll = list(line)
     while len(ll) > 0:
         c = ll.pop(0)
         if c.isspace():
+            if firstchar:
+                # used by the _add_record_names method
+                tokbuf += '$NAME'
+
             if not quote and not escape:
                 # end of token
                 if len(tokbuf) > 0:
@@ -164,12 +169,8 @@ def _tokenize_line(line):
                 escape = False
             else:
                 tokbuf = ""
-
-            continue
-
-        if c == '\\':
+        elif c == '\\':
             escape = True
-            continue
         elif c == '"':
             if not escape:
                 if quote:
@@ -177,20 +178,22 @@ def _tokenize_line(line):
                     ret.append(tokbuf)
                     tokbuf = ""
                     quote = False
-                    continue
                 else:
                     # beginning of quote
                     quote = True
-                    continue
-            
-        # normal character
-        tokbuf += c
-        escape = False
+        else:
+            # normal character
+            tokbuf += c
+            escape = False
+        firstchar = False
 
-    if len(tokbuf.strip(" ").strip("\n")) > 0:
+    if len(tokbuf.strip(' \n\t')):
         ret.append(tokbuf)
 
-    return ret
+    if len(ret) == 1 and ret[0] == '$NAME':
+        return []
+    else:
+        return ret
 
 
 def _find_comment_index(line):
@@ -272,6 +275,7 @@ def _flatten(text):
     * remove parenthesis 
     """
     lines = text.split("\n")
+    SENTINEL = '%%%'
 
     # tokens: sequence of non-whitespace separated by '' where a newline was
     tokens = []
@@ -285,7 +289,7 @@ def _flatten(text):
             if token is '' and i > 0:
                 continue
             tokens.append(token) if token else tokens.append(' ')
-        tokens.append('%%%')
+        tokens.append(SENTINEL)
 
     # find (...) and turn it into a single line ("capture" it)
     capturing = False
@@ -294,12 +298,12 @@ def _flatten(text):
     flattened = []
     while len(tokens) > 0:
         tok = tokens.pop(0)
-        if not capturing and len(tok) == 0:
+        if not capturing and tok == SENTINEL:
             # normal end-of-line
             if len(captured) > 0:
                 flattened.append(" ".join(captured))
                 captured = []
-            continue 
+            continue
 
         if tok.startswith("("):
             # begin grouping
@@ -311,7 +315,8 @@ def _flatten(text):
             tok = tok.rstrip(")")
             capturing = False 
 
-        captured.append(tok)
+        if tok != SENTINEL:
+            captured.append(tok)
 
     return "\n".join(flattened)
 
@@ -322,25 +327,16 @@ def _remove_class(text):
     The only class that gets used today (for all intents
     and purposes) is 'IN'.
     """
-
     # see RFC 1035 for list of classes
     lines = text.split("\n")
     ret = []
     for line in lines:
-        tokens = _tokenize_line(line)
-        tokens_upper = [t.upper() for t in tokens]
-
-        if "IN" in tokens_upper:
-            tokens.remove("IN")
-        elif "CS" in tokens_upper:
-            tokens.remove("CS")
-        elif "CH" in tokens_upper:
-            tokens.remove("CH")
-        elif "HS" in tokens_upper:
-            tokens.remove("HS")
-
+        original_tokens = _tokenize_line(line)
+        tokens = []
+        for token in original_tokens:
+            if token.upper() != 'IN':
+                tokens.append(token)
         ret.append(_serialize(tokens))
-
     return "\n".join(ret)
 
 
@@ -357,31 +353,14 @@ def _add_record_names(text):
 
     for line in lines:
         tokens = _tokenize_line(line)
+        if not tokens:
+            continue
 
-        record_name = None
-        type_index = 0
-        for type_index in range(4):
-            if tokens[type_index] in SUPPORTED_RECORDS:
-                break
-        if type_index == 3:
-            raise CLIError('Record type not found: {}'.format(line))
-
-        # determine if name is missing
-        needs_name = True
-        if type_index == 2:
-            # both NAME and TTL are supplied
-            needs_name = False
-        elif type_index == 0 and tokens[type_index].startswith('$'):
-            # $ORIGIN or $TTL supplied. Name is N/A
-            needs_name = False
-        elif type_index == 1 and len(line.lstrip(' \t')) == len(line):
-            # Name OR TTL supplied. If no leading whitespace, assume name was supplied
-            needs_name = False
-
-        if needs_name:
-            tokens = [previous_record_name] + tokens
-        else:
-            previous_record_name = previous_record_name if tokens[0].startswith('$') else tokens[0]
+        record_name = tokens[0]
+        if record_name == '$NAME':
+            tokens = [previous_record_name] + tokens[1:]
+        elif not record_name.startswith('$'):
+            previous_record_name = record_name
 
         ret.append(_serialize(tokens))
 
@@ -409,7 +388,6 @@ def _parse_record(parser, record_token):
     # move the record type to the front of the token list so it will conform to argparse
     if record_type != parser.prog:
         raise IncorrectParserException
-    #record_token.remove(record_type)
 
     try:
         rr, unmatched = parser.parse_known_args(record_token)
@@ -483,9 +461,9 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
         parse_match = False
         record = None
         for parser in parsers:
-            record_token = _tokenize_line(record_line)
+            record_tokens = _tokenize_line(record_line)
             try:
-                record = _parse_record(parser, record_token)
+                record = _parse_record(parser, record_tokens)
                 if record['DELIM'].lower() != record['type'].lower():
                     raise IncorrectParserException
                 parse_match = True
