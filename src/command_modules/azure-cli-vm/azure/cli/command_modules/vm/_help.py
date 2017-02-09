@@ -40,31 +40,34 @@ helps['vm create'] = """
     examples:
         - name: Create a Linux VM with SSH key authentication, add a public DNS entry and add to an existing Virtual Network and Availability Set.
           text: >
-            az vm create -n my_vm_name -g myrg --image <linux image from 'az vm image list'>
+            az vm create -n my-vm-name -g myrg --image <linux image from 'az vm image list'>
             --vnet-name my_existing_vnet --subnet subnet1
             --availability-set my_existing_availability_set
             --public-ip-address-dns-name my_globally_unique_vm_dns_name
             --ssh-key-value "<ssh-rsa-key, key-file-path or not specified for default-key-path>"
         - name: Create a simple Windows Server VM with private IP address only
           text: >
-            az vm create -n my_vm_name -g myrg --admin-username myadmin --admin-password Password@1234
+            az vm create -n my-vm-name -g myrg --admin-username myadmin --admin-password Password@1234
              --public-ip-address "" --image Win2012R2Datacenter
         - name: Create a simple Ubuntu VM with public IP address, DNS entry, 2 data disk(10GB, 20GB), and generate ssh key pairs under ~/.ssh
           text: >
-            az vm create -n my_vm_name -g myrg --admin-username myadmin --admin-password Password@1234
+            az vm create -n my-vm-name -g myrg --admin-username myadmin --admin-password Password@1234
             --public-ip-address-dns-name my_globally_unique_vm_dns_name --image ubuntults --data-disk-sizes-gb 10 20
             --size Standard_DS2 --generate-ssh-keys
         - name: Create a VM from a custom managed image
           text: >
-            az vm create -g myrg -n my_vm_name --image my_image_in_myrg --admin-username myadmin --admin-password Password@1234
+            az vm create -g myrg -n my-vm-name --image my_image_in_myrg --admin-username myadmin --admin-password Password@1234
         - name: Create a VM with unmanaged os disk by using image blob uri
           text: >
-            az vm create -g myrg -n my_vm_name --image https://account123.blob.core.windows.net/Images/my_vhd-osDisk.vhd
+            az vm create -g myrg -n my-vm-name --image https://account123.blob.core.windows.net/Images/my_vhd-osDisk.vhd
             --os-type linux --admin-username myadmin --admin-password Password@1234
         - name: Create a VM by attaching to an existing specialized managed os disk
           text: >
-            az vm create -g myrg -n my_vm_name --attach-os-disk my-os-disk
+            az vm create -g myrg -n my-vm-name --managed-os-disk my-os-disk
             --os-type linux --admin-username myadmin --admin-password Password@1234
+        - name: Create an Ubuntu VM and provide a cloud-init script (https://docs.microsoft.com/en-us/azure/virtual-machines/virtual-machines-linux-using-cloud-init)
+          text: >
+            az vm create -g group_name -n vm-ame --image ubuntults --custom_data ./my-cloud-init-script.yml
 """.format(image_long_summary)
 
 helps['vmss create'] = """
@@ -221,7 +224,7 @@ helps['vm convert'] = """
     short-summary: Convert VM with unmanaged disks to use managed disks
     examples:
         - name: Convert VM with unmanaged disks to managed by resource group and name
-          text: az vm convert -g group_name -n vm_name
+          text: az vm convert -g group_name -n vm-name
 {0}
 """.format(vm_ids_example.format('Convert VM with unmanaged disks to managed by Ids', 'vm convert'))
 
@@ -240,7 +243,7 @@ helps['vm access delete-linux-user'] = """
         Delete a user account without logging into to the VM directly.
     examples:
         - name: Delete User
-          text: az vm access delete-linux-user -u username -n vm_name -r group_name
+          text: az vm access delete-linux-user -u username -n vm-name -r group_name
 {0}
 """.format(vm_ids_example.format('Delete User by VM Ids', 'az vm access delete-linux-user -u username'))
 
@@ -252,7 +255,7 @@ helps['vm access reset-linux-ssh'] = """
         default values. The user account (name, password or SSH keys) will not be changed.
     examples:
         - name: Reset SSH
-          text: az vm access reset-linux-ssh -n vm_name -r group_name
+          text: az vm access reset-linux-ssh -n vm-name -r group_name
 {0}
 """.format(vm_ids_example.format('Reset SSH by VM Ids', 'vm access reset-linux-ssh'))
 
@@ -261,7 +264,7 @@ helps['vm access set-linux-user'] = """
     long-summary: Note, the user will have an admin's privilege.
     examples:
         - name: Set Linux User Access
-          text: az vm access set-linux-user -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n vm_name -r group_name
+          text: az vm access set-linux-user -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n vm-name -r group_name
 {0}
 """.format(vm_ids_example.format('Set Linux User Access by VM Ids', 'vm access set-linux-user -u username '
                                                                     '--ssh-key-value "$(< ~/.ssh/id_rsa.pub)"'))
@@ -271,7 +274,7 @@ helps['vm access reset-windows-admin'] = """
     long-summary: Note, this resets the admin's credentials. You can't add a new admin.
     examples:
         - name: Reset Windows Admin
-          text: az vm access reset-windows-admin -u username -p password -n vm_name -g resource_group_name
+          text: az vm access reset-windows-admin -u username -p password -n vm-name -g resource_group_name
 {0}
 """.format(vm_ids_example.format('Reset Windows Admin by VM Ids', 'vm access reset-windows-admin -u username -p '
                                                                   'password'))
@@ -434,10 +437,10 @@ helps['vm unmanaged-disk attach'] = """
         to maintenance or resizing.
     examples:
         - name: Attach a new default sized (1023 GiB) data disk
-          text: az vm unmanaged-disk attach -g group_name --vm-name vm_name
+          text: az vm unmanaged-disk attach -g group_name --vm-name vm-name
         - name: Attach an existing data disk
           text: >
-            az vm unmanaged-disk attach -g group_name --vm-name vm_name \\
+            az vm unmanaged-disk attach -g group_name --vm-name vm-name \\
                 --vhd-uri https://mystorage.blob.core.windows.net/vhds/d1.vhd
 """
 
@@ -446,14 +449,14 @@ helps['vm unmanaged-disk detach'] = """
     examples:
         - name: Detach a data disk
           text: >
-            az vm unmanaged-disk detach -g group_name --vm-name vm_name -n disk_name
+            az vm unmanaged-disk detach -g group_name --vm-name vm-name -n disk_name
 """
 
 helps['vm unmanaged-disk list'] = """
     type: command
     examples:
         - name: List attached VM disks by VM name and Resource Group
-          text: az vm unmanaged-disk list -g group_name --vm-name vm_name
+          text: az vm unmanaged-disk list -g group_name --vm-name vm-name
         - name: List attached VM disks by IDs of disks with names containing "data_disk"
           text: >
             az vm unmanaged-disk list --ids \\
@@ -465,7 +468,7 @@ helps['vm disk detach'] = """
     examples:
         - name: Detach a data disk
           text: >
-            az vm disk detach -g group_name --vm-name vm_name -n disk_name
+            az vm disk detach -g group_name --vm-name vm-name -n disk_name
 """
 
 helps['vm disk attach'] = """
@@ -475,7 +478,7 @@ helps['vm disk attach'] = """
         to maintenance or resizing.
     examples:
         - name: Attach a new default sized (1023 GiB) data disk
-          text: az vm disk attach -g group_name --vm-name vm_name --disk disk_name --new
+          text: az vm disk attach -g group_name --vm-name vm-name --disk disk_name --new
 """
 
 helps['vm extension'] = """
@@ -493,7 +496,7 @@ helps['vm extension list'] = """
     short-summary:  List extensions attached to a VM in a resource group
     examples:
         - name: List extensions by VM
-          text: az vm extension list -g group_name --vm-name vm_name
+          text: az vm extension list -g group_name --vm-name vm-name
         - name: List extensions by Ids containing "my_extension" in the name
           text: >
             az vm extension list --ids \\
@@ -504,7 +507,7 @@ helps['vm extension delete'] = """
     type: command
     examples:
         - name: Delete extension by VM and extension name
-          text: az vm extension delete -g group_name --vm-name vm_name -n extension_name
+          text: az vm extension delete -g group_name --vm-name vm-name -n extension_name
         - name: Delete extensions by Ids containing "my_extension" in the name
           text: >
             az vm extension delete --ids \\
@@ -515,7 +518,7 @@ helps['vm extension show'] = """
     type: command
     examples:
         - name: Show extension by VM and extension name
-          text: az vm extension show -g group_name --vm-name vm_name -n extension_name
+          text: az vm extension show -g group_name --vm-name vm-name -n extension_name
 """
 
 helps['vm extension image'] = """
@@ -646,35 +649,35 @@ helps['vm nic list'] = """
     type: command
     examples:
         - name: List all of the network interfaces on a VM
-          text: az vm nic list -g group_name --vm-name vm_name
+          text: az vm nic list -g group_name --vm-name vm-name
 """
 
 helps['vm nic add'] = """
     type: command
     examples:
         - name: Add two network interfaces to a VM
-          text: az vm nic add -g group_name --vm-name vm_name --nics nic_name1 nic_name2
+          text: az vm nic add -g group_name --vm-name vm-name --nics nic_name1 nic_name2
 """
 
 helps['vm nic remove'] = """
     type: command
     examples:
         - name: Remove two network interfaces to a VM
-          text: az vm nic remove -g group_name --vm-name vm_name --nics nic_name1 nic_name2
+          text: az vm nic remove -g group_name --vm-name vm-name --nics nic_name1 nic_name2
 """
 
 helps['vm nic show'] = """
     type: command
     examples:
         - name: Show details of a network interface on a VM
-          text: az vm nic show -g group_name --vm-name vm_name --nic nic_name1
+          text: az vm nic show -g group_name --vm-name vm-name --nic nic_name1
 """
 
 helps['vm nic set'] = """
     type: command
     examples:
         - name: Set a network interface on a VM to be the primary network interface
-          text: az vm nic set -g group_name --vm-name vm_name --nic nic_name1 nic_name2 --primary-nic nic_name2
+          text: az vm nic set -g group_name --vm-name vm-name --nic nic_name1 nic_name2 --primary-nic nic_name2
 """
 
 helps['vmss'] = """
@@ -704,9 +707,9 @@ helps['vmss extension image'] = """
 
 deallocate_generalize_capture = """        - name: Process to deallocate, generalize, and capture a stopped virtual machine
           text: >
-            az vm deallocate -g my_rg -n my_vm_name\n\r
-            az vm generalize -g my_rg -n my_vm_name\n\r
-            az vm capture -g my_rg -n my_vm_name --vhd-name-prefix my_prefix\n\r
+            az vm deallocate -g my_rg -n my-vm-name\n\r
+            az vm generalize -g my_rg -n my-vm-name\n\r
+            az vm capture -g my_rg -n my-vm-name --vhd-name-prefix my_prefix\n\r
         - name: Process to deallocate, generalize, and capture multiple stopped virtual machines
           text: >
             vms_ids=$(az vm list -g group_name --query "[].id" -o tsv)\n\r
@@ -727,7 +730,7 @@ helps['vm delete'] = """
     examples:
         - name: Delete a virtual machine without prompt for confirmation
           text: >
-            az vm delete -g group_name -n vm_name --force
+            az vm delete -g group_name -n vm-name --force
 {0}
 """.format(vm_ids_example.format('Delete a virtual machine by Ids', 'vm delete'))
 
@@ -750,7 +753,7 @@ helps['vm get-instance-view'] = """
     short-summary: "Gets a VM including instance information (powerState)"
     examples:
         - name: Get instance view by name and resource group
-          text: az vm get-instance-view -g group_name -n vm_name
+          text: az vm get-instance-view -g group_name -n vm-name
 {0}
 """.format(vm_ids_example.format('Get instance view by Ids', 'vm get-instance-view'))
 
@@ -769,7 +772,7 @@ helps['vm list-ip-addresses'] = """
     type: command
     examples:
         - name: Get IP addresses for a VM
-          text: az vm list-ip-addresses -g group_name -n vm_name
+          text: az vm list-ip-addresses -g group_name -n vm-name
 {0}
 """.format(vm_ids_example.format('Get IP addresses for VMs by Ids', 'vm list-ip-addresses'))
 
@@ -791,7 +794,7 @@ helps['vm list-vm-resize-options'] = """
     type: command
     examples:
         - name: List all available VM sizes for resizing for a VM by resource group and VM name
-          text: az vm list-vm-resize-options -g group_name -n vm_name
+          text: az vm list-vm-resize-options -g group_name -n vm-name
 {0}
 """.format(vm_ids_example.format('List all available VM sizes for resizing by VM Ids', 'vm list-vm-resize-options'))
 
@@ -799,7 +802,7 @@ helps['vm open-port'] = """
     type: command
     examples:
         - name: Open all ports on a VM to inbound traffic by resource group and VM name
-          text: az vm open-port -g group_name -n vm_name
+          text: az vm open-port -g group_name -n vm-name
 {0}
 """.format(vm_ids_example.format('Open all ports for multiple VMs by Ids', 'vm open-port'))
 
@@ -807,7 +810,7 @@ helps['vm redeploy'] = """
     type: command
     examples:
         - name: Redeploy VM by resource group and VM name
-          text: az vm redeploy -g group_name -n vm_name
+          text: az vm redeploy -g group_name -n vm-name
 {0}
 """.format(vm_ids_example.format('Redeploy VMs by VM Ids', 'vm redeploy'))
 
@@ -815,7 +818,7 @@ helps['vm resize'] = """
     type: command
     examples:
         - name: Resize VM by resource group and VM name
-          text: az vm resize -g group_name -n vm_name --size Standard_DS3_v2
+          text: az vm resize -g group_name -n vm-name --size Standard_DS3_v2
 {0}
 """.format(vm_ids_example.format('Resize VMs by VM Ids', 'vm redeploy --size Standard_DS3_v2'))
 
@@ -823,7 +826,7 @@ helps['vm restart'] = """
     type: command
     examples:
         - name: Restart VM by resource group and VM name
-          text: az vm restart -g group_name -n vm_name
+          text: az vm restart -g group_name -n vm-name
 {0}
 """.format(vm_ids_example.format('Restart VM by by VM Ids', 'vm restart'))
 
@@ -831,7 +834,7 @@ helps['vm show'] = """
     type: command
     examples:
         - name: Show VM details by resource group and VM name
-          text: az vm show -g group_name -n vm_name -d
+          text: az vm show -g group_name -n vm-name -d
 {0}
 """.format(vm_ids_example.format('Show VM details by by VM Ids', 'vm show -d'))
 
@@ -839,7 +842,7 @@ helps['vm start'] = """
     type: command
     examples:
         - name: Start a stopped VM by resource group and VM name
-          text: az vm start -g group_name -n vm_name
+          text: az vm start -g group_name -n vm-name
 {0}
 """.format(vm_ids_example.format('Start stopped VMs by by VM Ids', 'vm start'))
 
@@ -847,7 +850,7 @@ helps['vm stop'] = """
     type: command
     examples:
         - name: Stop a running VM by resource group and VM name
-          text: az vm stop -g group_name -n vm_name
+          text: az vm stop -g group_name -n vm-name
 {0}
 """.format(vm_ids_example.format('Stop running VMs by by VM Ids', 'vm stop'))
 
@@ -856,7 +859,7 @@ helps['vm wait'] = """
     short-summary: Place the CLI in a waiting state until a condition of the VM is met.
     examples:
         - name: Wait until VM is created
-          text: az vm wait -g group_name -n vm_name --created
+          text: az vm wait -g group_name -n vm-name --created
 {0}
 """.format(vm_ids_example.format('Wait until VMs are deleted by Ids', 'vm wait --deleted'))
 
