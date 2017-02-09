@@ -62,3 +62,5 @@ register_cli_argument('documentdb update', 'default_consistency_level', help="de
 register_cli_argument('documentdb update', 'max_staleness_prefix', help="when used with Bounded Staleness consistency, this value represents the number of stale requests tolerated. Accepted range for this value is 1 - 2,147,483,647", type=int)
 register_cli_argument('documentdb update', 'max_interval', help="when used with Bounded Staleness consistency, this value represents the time amount of staleness (in seconds) tolerated. Accepted range for this value is 1 - 100", type=int)
 register_cli_argument('documentdb update', 'ip_range_filter', validator=validate_ip_range_filter, help="firewall support. Specifies the set of IP addresses or IP address ranges in CIDR form to be included as the allowed list of client IPs for a given database account. IP addresses/ranges must be comma separated and must not contain any spaces", nargs='+')
+
+register_cli_argument('documentdb list', 'resource_group_name', help="name of the resource group")
