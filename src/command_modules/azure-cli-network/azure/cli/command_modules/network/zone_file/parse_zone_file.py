@@ -280,7 +280,12 @@ def _flatten(text):
             continue 
 
         l = l.replace("\t", " ")
-        tokens += list(filter(lambda x: len(x) > 0, l.split(" "))) + ['']
+        #tokens += list(filter(lambda x: len(x) > 0, l.split(" "))) + ['XX']
+        for i, token in enumerate(l.split(' ')):
+            if token is '' and i > 0:
+                continue
+            tokens.append(token) if token else tokens.append(' ')
+        tokens.append('%%%')
 
     # find (...) and turn it into a single line ("capture" it)
     capturing = False
@@ -369,7 +374,7 @@ def _add_record_names(text):
         elif type_index == 0 and tokens[type_index].startswith('$'):
             # $ORIGIN or $TTL supplied. Name is N/A
             needs_name = False
-        elif type_index == 1 and len(line.lstrip()) == len(line):
+        elif type_index == 1 and len(line.lstrip(' \t')) == len(line):
             # Name OR TTL supplied. If no leading whitespace, assume name was supplied
             needs_name = False
 

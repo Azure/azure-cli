@@ -125,8 +125,8 @@ class TestDnsZoneImport(unittest.TestCase):
         self._check_srv(zone, 'sip.tcp.' + zn, [(3600, 10, 20, 30, 'foobar.'), (3600, 55, 66, 77, 'zoo.')])
         self._check_ns(zone, 'test-ns2.' + zn, [(3600, 'ns1.com.'), (3600, 'ns2.com.')])
         self._check_txt(zone, 'test-txt2.' + zn, [(3600, 8, 'string 1'), (3600, 8, 'string 2')])
-        #self._check_a(zone, 'aa.' + zn, [(100, '4.5.6.7'), (200, '6.7.8.9')])
-        #self._check_a(zone, '200.' + zn, [(300, '7.8.9.0')])  # TODO: Fix Name/TTL parsing...
+        self._check_a(zone, 'aa.' + zn, [(100, '4.5.6.7'), (200, '6.7.8.9')])
+        self._check_a(zone, '200.' + zn, [(300, '7.8.9.0')])
         self._check_mx(zone, 'aa.' + zn, [(300, 1, 'foo.com')])
         # TODO: The split and rejoin is truncating characters...
         #self._check_txt(zone, 'longtxt.' + zn, [(999, None, 'this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....')])
