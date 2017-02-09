@@ -25,16 +25,19 @@ def _compute_client_factory(**_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(ComputeManagementClient)
 
+
 def get_vm_sizes(location):
     return list(_compute_client_factory().virtual_machine_sizes.list(location))
 
-def get_vm_size_completion_list(prefix, action, parsed_args, **kwargs):#pylint: disable=unused-argument
+
+def get_vm_size_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
     try:
         location = parsed_args.location
     except AttributeError:
         location = get_one_of_subscription_locations()
     result = get_vm_sizes(location)
     return [r.name for r in result]
+
 
 def _get_default_install_location(exe_name):
     system = platform.system()
@@ -49,13 +52,14 @@ def _get_default_install_location(exe_name):
         install_location = None
     return install_location
 
+
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
 register_cli_argument('acs', 'name', arg_type=name_arg_type, help='ACS cluster name', completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'))
 register_cli_argument('acs', 'resource_group', arg_type=resource_group_name_type)
 
 register_cli_argument('acs', 'orchestrator_type', **enum_choice_list(ContainerServiceOchestratorTypes))
-#some admin names are prohibited in acs, such as root, admin, etc. Because we have no control on the orchestrators, so default to a safe name.
+# some admin names are prohibited in acs, such as root, admin, etc. Because we have no control on the orchestrators, so default to a safe name.
 register_cli_argument('acs', 'admin_username', options_list=('--admin-username',), default='azureuser', required=False)
 register_cli_argument('acs', 'dns_name_prefix', options_list=('--dns-prefix', '-d'))
 register_cli_argument('acs', 'container_service_name', options_list=('--name', '-n'), help='The name of the container service', completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'))
