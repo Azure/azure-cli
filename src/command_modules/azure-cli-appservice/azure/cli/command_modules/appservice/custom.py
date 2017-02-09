@@ -502,18 +502,18 @@ def upload_ssl_cert(resource_group_name, name, certificate_password, certificate
     if hosting_environment_profile_param is None:
         hosting_environment_profile_param = ""
 
-    thumb_print = get_cert(certificate_password, certificate_file)
-    cert_name = generate_cert_name(thumb_print, hosting_environment_profile_param,
+    thumb_print = _get_cert(certificate_password, certificate_file)
+    cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
                                    webapp.location, resource_group_name)
     cert_base64_str = base64.b64encode(cert_contents).decode("utf-8")
     cert = Certificate(password=certificate_password, pfx_blob=cert_base64_str,
                        location=webapp.location)
     return client.certificates.create_or_update_certificate(resource_group_name, cert_name, cert)
 
-def generate_cert_name(thumb_print, hosting_environment, location, resource_group_name):
+def _generate_cert_name(thumb_print, hosting_environment, location, resource_group_name):
     return "%s_%s_%s_%s" % (thumb_print, hosting_environment, location, resource_group_name)
 
-def get_cert(certificate_password, certificate_file):
+def _get_cert(certificate_password, certificate_file):
     ''' Decrypts the .pfx file '''
     p12 = OpenSSL.crypto.load_pkcs12(open(certificate_file, 'rb').read(), certificate_password)
     cert = p12.get_certificate()
@@ -531,62 +531,51 @@ def delete_ssl_cert(resource_group_name, certificate_thumbprint):
     webapp_certs = client.certificates.get_certificates(resource_group_name)
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
-            cert_name = webapp_cert.name
-            break
+            return client.certificates.delete_certificate(resource_group_name, cert_name)
+    raise CLIError("Certificate for thumbprint '{}' not found.".format(certificate_thumbprint))
 
-    return client.certificates.delete_certificate(resource_group_name, cert_name)
-
-def should_use_deployment_slot(webapp_name, slot=None):
-    qualified_site_name = None
-    if slot is not None:
-        qualified_site_name = "{}({})".format(webapp_name, slot)
-
-    return qualified_site_name
-
-def update_host_name_ssl_state(resource_group_name, webapp_name, location,
+def _update_host_name_ssl_state(resource_group_name, webapp_name, location,
                                host_name, ssl_state, thumbprint, client, slot=None):
-    webappWithNewSslBinding = Site(host_name_ssl_states=
-                                   [HostNameSslState
-                                    (
-                                        name=host_name,
-                                        ssl_state=ssl_state,
-                                        thumbprint=thumbprint,
-                                        to_update=True
-                                    )
-                                   ],
-                                   location=location)
-    if should_use_deployment_slot(webapp_name) is None:
+    updated_webapp = Site(host_name_ssl_states=
+                          [HostNameSslState
+                           (
+                               name=host_name,
+                               ssl_state=ssl_state,
+                               thumbprint=thumbprint,
+                               to_update=True
+                           )
+                          ],
+                          location=location)
+    if slot:
+        return client.sites.create_or_update_site_slot(resource_group_name,
+                                                       '{}({})'.format(webapp_name, slot),
+                                                       site_envelope=updated_webapp,
+                                                       slot=slot)
+    else:
         return client.sites.create_or_update_site(resource_group_name,
                                                   webapp_name,
-                                                  site_envelope=webappWithNewSslBinding)
-    else:
-        return client.sites.create_or_update_site_slot(resource_group_name,
-                                                       webapp_name,
-                                                       site_envelope=webappWithNewSslBinding,
-                                                       slot=slot)
+                                                  site_envelope=updated_webapp)
 
-def update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
+def _update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
     client = web_client_factory()
     webapp = client.sites.get_site(resource_group_name, name)
     host_name = None
     webapp_certs = client.certificates.get_certificates(resource_group_name)
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
-            host_name = webapp_cert.host_names[0]
-    return update_host_name_ssl_state(resource_group_name, name, webapp.location,
-                                      host_name, ssl_type, certificate_thumbprint, client, slot)
+            return _update_host_name_ssl_state(resource_group_name, name, webapp.location,
+                                               webapp_cert.host_names[0], ssl_type,
+                                               certificate_thumbprint, client, slot)
+    raise CLIError("Certificate for thumbprint '{}' not found.".format(certificate_thumbprint))
 
 def bind_ssl_cert(resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
-    ssl_type_str = ssl_type.upper()
-    if ssl_type_str == 'SNI':
-        return update_ssl_binding(resource_group_name, name,
+    if ssl_type == 'SNI':
+        return _update_ssl_binding(resource_group_name, name,
                                   certificate_thumbprint, SslState.sni_enabled, slot)
-    elif ssl_type_str == 'IP':
-        return update_ssl_binding(resource_group_name, name,
-                                  certificate_thumbprint, SslState.ip_based_enabled, slot)
     else:
-        raise CLIError("Please specify either 'SNI' or 'IP' for --ssl-type")
+        return _update_ssl_binding(resource_group_name, name,
+                                  certificate_thumbprint, SslState.ip_based_enabled, slot)
 
 def unbind_ssl_cert(resource_group_name, name, certificate_thumbprint, slot=None):
-    return update_ssl_binding(resource_group_name, name,
+    return _update_ssl_binding(resource_group_name, name,
                               certificate_thumbprint, SslState.disabled, slot)
