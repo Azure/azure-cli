@@ -506,7 +506,7 @@ def upload_ssl_cert(resource_group_name, name, certificate_password, certificate
     cert_name = generate_cert_name(thumb_print, hosting_environment_profile_param,
                                    webapp.location, resource_group_name)
     cert_base64_str = base64.b64encode(cert_contents).decode("utf-8")
-    cert = Certificate(password=certificate_password, pfx_blob=cert_base64_str, 
+    cert = Certificate(password=certificate_password, pfx_blob=cert_base64_str,
                        location=webapp.location)
     return client.certificates.create_or_update_certificate(resource_group_name, cert_name, cert)
 
@@ -525,7 +525,7 @@ def list_ssl_certs(resource_group_name):
     client = web_client_factory()
     return client.certificates.get_certificates(resource_group_name)
 
-def delete_ssl_cert(resource_group_name, name, certificate_thumbprint):
+def delete_ssl_cert(resource_group_name, certificate_thumbprint):
     client = web_client_factory()
     cert_name = None
     webapp_certs = client.certificates.get_certificates(resource_group_name)
@@ -542,10 +542,17 @@ def should_use_deployment_slot(webapp_name, slot=None):
 
     return qualified_site_name
 
-def update_host_name_ssl_state(resource_group_name, webapp_name, location, 
+def update_host_name_ssl_state(resource_group_name, webapp_name, location,
                                host_name, ssl_state, thumbprint, client, slot=None):
     webappWithNewSslBinding = Site(host_name_ssl_states=
-                                   [HostNameSslState(name=host_name, ssl_state=ssl_state, thumbprint=thumbprint, to_update=True)],
+                                   [HostNameSslState
+                                    (
+                                     name=host_name, 
+                                     ssl_state=ssl_state, 
+                                     thumbprint=thumbprint, 
+                                     to_update=True
+                                    )
+                                   ],
                                    location=location)
     if should_use_deployment_slot(webapp_name) is None:
         return client.sites.create_or_update_site(resource_group_name,
@@ -569,18 +576,16 @@ def update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_ty
 
 def bind_ssl_cert(resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
     ssl_type_str = ssl_type.upper()
-    ssl_type_val = None
     if ssl_type_str == 'SNI':
         return update_ssl_binding(resource_group_name, name,
-                              certificate_thumbprint, SslState.sni_enabled, slot)
+                                  certificate_thumbprint, SslState.sni_enabled, slot)
     elif ssl_type_str == 'IP':
         return update_ssl_binding(resource_group_name, name,
-                              certificate_thumbprint, SslState.ip_based_enabled, slot)
+                                  certificate_thumbprint, SslState.ip_based_enabled, slot)
     else:
         raise CLIError("Please specify either 'SNI' or 'IP' for --ssl-type")
     
 
 def unbind_ssl_cert(resource_group_name, name, certificate_thumbprint, slot=None):
-    ssl_type = SslState.disabled
     return update_ssl_binding(resource_group_name, name, 
                               certificate_thumbprint, SslState.disabled, slot)
