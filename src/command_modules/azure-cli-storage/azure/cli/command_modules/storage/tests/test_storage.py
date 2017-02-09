@@ -696,6 +696,10 @@ class StorageTableScenarioTest(StorageAccountVCRTestBase):
         res = s.cmd('storage table list')
         assert table in [x['name'] for x in res]
 
+        sas = s.cmd('storage table generate-sas -n {} --permissions r'.format(table))
+        sas_keys = dict(pair.split('=') for pair in sas.split('&'))
+        assert u'sig' in sas_keys
+
         s._table_acl_scenario(table)
 
         s._storage_entity_scenario(table)
@@ -774,6 +778,10 @@ class StorageQueueScenarioTest(StorageAccountVCRTestBase):
 
         res = s.cmd('storage queue list')
         assert queue in [x['name'] for x in res]
+
+        sas = s.cmd('storage queue generate-sas -n {} --permissions r'.format(queue))
+        sas_keys = dict(pair.split('=') for pair in sas.split('&'))
+        assert u'sig' in sas_keys
 
         s.cmd('storage queue metadata show -n {}'.format(queue), checks=[
             JMESPathCheck('a', 'b'),
