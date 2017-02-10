@@ -42,6 +42,8 @@ or:
 
    $ wget -q -O - https://aka.ms/InstallAzureCli | bash
 
+Update with ``$ az component update``
+
 Install additional components with ``$ az component update --add <component_name>``
 
 Pip
@@ -52,6 +54,8 @@ On Linux, see our `prerequisites <https://github.com/Azure/azure-cli/blob/master
 .. code-block:: console
 
    $ pip install --user azure-cli
+
+Update with ``$ az component update``
 
 Install additional components with ``$ az component update --add <component_name>``
 
