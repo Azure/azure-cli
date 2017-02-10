@@ -85,6 +85,7 @@ def login(username=None, password=None, service_principal=None, tenant=None):
         raise CLIError(err)
     except requests.exceptions.ConnectionError as err:
         raise CLIError('Please ensure you have network connection. Error detail: ' + str(err))
+    # use deepcopy as we don't want to persist these changes to file.
     all_subscriptions = deepcopy(subscriptions)
     for sub in all_subscriptions:
         sub['cloudName'] = sub.pop('environmentName', None)
