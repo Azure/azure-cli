@@ -341,13 +341,13 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     :type admin_username: str
     :param agent_count: The number of agents for the cluster.  Note, for
      DC/OS clusters you will also get 1 or 2 public agents in addition to
-     these seleted masters.
+     these selected masters.
     :type agent_count: str
     :param agent_vm_size: The size of the Virtual Machine.
     :type agent_vm_size: str
     :param location: Location for VM resources.
     :type location: str
-    :param master_count: The number of DC/OS masters for the cluster.
+    :param master_count: The number of masters for the cluster.
     :type master_count: str
     :param orchestrator_type: The type of orchestrator used to manage the
      applications on the cluster. Possible values include: 'dcos', 'swarm'
