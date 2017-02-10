@@ -233,7 +233,7 @@ def dcos_install_cli(install_location=None, client_version='1.8'):
     except IOError as err:
         raise CLIError('Connection error while attempting to download client ({})'.format(err))
 
-def k8s_install_cli(client_version="1.4.5", install_location=None):
+def k8s_install_cli(client_version="1.5.1", install_location=None):
     """
     Downloads the kubectl command line from Kubernetes
     """
