@@ -67,7 +67,7 @@ helps['vm create'] = """
             --os-type linux --admin-username myadmin --admin-password Password@1234
         - name: Create an Ubuntu VM and provide a cloud-init script (https://docs.microsoft.com/en-us/azure/virtual-machines/virtual-machines-linux-using-cloud-init)
           text: >
-            az vm create -g group_name -n vm-ame --image ubuntults --custom_data ./my-cloud-init-script.yml
+            az vm create -g group_name -n vm-ame --image debian --custom_data ./my-cloud-init-script.yml
 """.format(image_long_summary)
 
 helps['vmss create'] = """
@@ -92,6 +92,9 @@ helps['vmss create'] = """
         - name: Scaleset created from custom Linux image using existing ssh public key of ~/.ssh/id_rsa.pub
           text: >
             az vmss create -n my_vmss_name -g myrg --image my_linuximage_in_myrg
+        - name: Scaleset created with a cloud-init script (https://docs.microsoft.com/en-us/azure/virtual-machines/virtual-machines-linux-using-cloud-init)
+          text: >
+            az vmss create -g group_name -n my-vmss-name --image debian --custom_data ./my-cloud-init-script.yml
 """.format(image_long_summary)
 
 helps['vm availability-set create'] = """

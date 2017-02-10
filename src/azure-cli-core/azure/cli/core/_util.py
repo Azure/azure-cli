@@ -7,9 +7,11 @@ from __future__ import print_function
 import re
 import sys
 import json
+import base64
 from datetime import datetime, timedelta
 from enum import Enum
 
+import six
 import azure.cli.core.azlogging as azlogging
 
 CLI_PACKAGE_NAME = 'azure-cli'
@@ -151,3 +153,17 @@ def to_camel_case(s):
 def to_snake_case(s):
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', s)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+
+def b64encode(s):
+    """
+    Encodes a string to base64 on 2.x and 3.x
+    :param str s: latin_1 encoded string
+    :return: base64 encoded string
+    :rtype: str
+    """
+    encoded = base64.b64encode(six.b(s))
+    if encoded is str:
+        return encoded
+    else:
+        return encoded.decode('latin-1')

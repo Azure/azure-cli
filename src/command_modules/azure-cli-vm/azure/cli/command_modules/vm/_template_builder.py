@@ -7,9 +7,10 @@
 
 from collections import OrderedDict
 import json
-import base64
 
 from enum import Enum
+
+from azure.cli.core._util import b64encode
 
 
 class ArmTemplateBuilder(object):
@@ -267,7 +268,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
             os_profile['adminPassword'] = admin_password
 
         if custom_data:
-            os_profile['customData'] = base64.b64encode(bytes(custom_data, 'utf-8')).decode("utf-8")
+            os_profile['customData'] = b64encode(custom_data)
 
         if ssh_key_value and ssh_key_path:
             os_profile['linuxConfiguration'] = {
@@ -570,7 +571,7 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
         }
 
     if custom_data:
-        os_profile['customData'] = base64.b64encode(bytes(custom_data, 'utf-8')).decode("utf-8")
+        os_profile['customData'] = b64encode(custom_data)
 
     if single_placement_group is None:  # this should never happen, but just in case
         raise ValueError('single_placement_group was not set by validators')
