@@ -222,6 +222,7 @@ def get_clouds():
     # ensure the known clouds are always in cloud config
     _init_known_clouds()
     clouds = []
+    # load the config again as it may have changed
     config = configparser.SafeConfigParser()
     config.read(CLOUD_CONFIG_FILE)
     for section in config.sections():
