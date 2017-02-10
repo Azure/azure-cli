@@ -297,8 +297,8 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None,
 
 def show_backup_configuration(resource_group_name, webapp_name, slot=None):
     try:
-        return _generic_site_operation(resource_group_name, webapp_name, 'get_site_backup_configuration',
-                                       slot)
+        return _generic_site_operation(resource_group_name, webapp_name,
+                                       'get_site_backup_configuration', slot)
     except:
         raise CLIError('Backup configuration not found')
 
@@ -330,16 +330,19 @@ def update_backup_schedule(resource_group_name, webapp_name, storage_account_url
     configuration = None
 
     try:
-        configuration = _generic_site_operation(resource_group_name, webapp_name, 'get_site_backup_configuration', slot)
+        configuration = _generic_site_operation(resource_group_name, webapp_name,
+                                                'get_site_backup_configuration', slot)
     except:
         # No configuration set yet
         if not storage_account_url or not frequency or not retention_period_in_days:
-            raise CLIError('No backup configuration found. Specify container-url, frequency, and retention period to create one.')
+            raise CLIError('No backup configuration found. Specify container-url, ' +
+                           'frequency, and retention period to create one.')
 
     storage_account_url = storage_account_url or configuration.storage_account_url
     if keep_at_least_one_backup is None:
         keep_at_least_one_backup = configuration.backup_schedule.keep_at_least_one_backup
-    retention_period_in_days = retention_period_in_days or configuration.backup_schedule.retention_period_in_days
+    retention_period_in_days = (retention_period_in_days or 
+                                configuration.backup_schedule.retention_period_in_days)
 
     if frequency:
         # Parse schedule frequency

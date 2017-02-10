@@ -370,10 +370,10 @@ class WebappBackupConfigScenarioTest(ResourceGroupVCRTestBase):
         frequency = '1d'
         db_conn_str = 'Server=tcp:cli-backup.database.windows.net,1433;Initial Catalog=cli-db;Persist Security Info=False;User ID=cliuser;Password=cli!password1;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
         retention_period = 5
-        
+
         # set without databases
         self.cmd('appservice web config backup update -g {} --webapp-name {} --frequency {} --container-url {}  --retain-one --retention {}'
-                    .format(self.resource_group, self.webapp_name, frequency, sas_url, retention_period), checks=NoneCheck())
+                 .format(self.resource_group, self.webapp_name, frequency, sas_url, retention_period), checks=NoneCheck())
 
         checks = [
             JMESPathCheck('backupSchedule.frequencyInterval', 1),
@@ -387,7 +387,7 @@ class WebappBackupConfigScenarioTest(ResourceGroupVCRTestBase):
         database_name = 'cli-db'
         database_type = 'SQLAzure'
         self.cmd('appservice web config backup update -g {} --webapp-name {} --db-connection-string "{}" --db-name {} --db-type {} --retain-one'
-                    .format(self.resource_group, self.webapp_name, db_conn_str, database_name, database_type), checks=NoneCheck())
+                 .format(self.resource_group, self.webapp_name, db_conn_str, database_name, database_type), checks=NoneCheck())
 
         checks = [
             JMESPathCheck('backupSchedule.frequencyInterval', 1),
@@ -404,7 +404,7 @@ class WebappBackupConfigScenarioTest(ResourceGroupVCRTestBase):
         frequency = '18h'
         retention_period = 7
         self.cmd('appservice web config backup update -g {} --webapp-name {} --frequency {} --retention {}'
-                    .format(self.resource_group, self.webapp_name, frequency, retention_period), checks=NoneCheck())
+                 .format(self.resource_group, self.webapp_name, frequency, retention_period), checks=NoneCheck())
 
         checks = [
             JMESPathCheck('backupSchedule.frequencyInterval', 18),
@@ -447,7 +447,7 @@ class WebappBackupRestoreScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('databases[0].name', database_name)
             ]
         self.cmd('appservice web config backup create -g {} --webapp-name {} --container-url {} --db-connection-string "{}" --db-name {} --db-type {} --backup-name {}'
-                     .format(self.resource_group, self.webapp_name, sas_url, db_conn_str, database_name, database_type, backup_name), checks=create_checks)
+                 .format(self.resource_group, self.webapp_name, sas_url, db_conn_str, database_name, database_type, backup_name), checks=create_checks)
 
         list_checks = [
             JMESPathCheck('[-1].backupItemName', backup_name),
@@ -462,4 +462,4 @@ class WebappBackupRestoreScenarioTest(ResourceGroupVCRTestBase):
         time.sleep(300) # Allow plenty of time for a backup to finish -- database backup takes a while (skipped in playback)
 
         self.cmd('appservice web config backup restore -g {} --webapp-name {} --container-url {} --backup-name {} --db-connection-string "{}" --db-name {} --db-type {} --ignore-hostname-conflict --overwrite'
-                     .format(self.resource_group, self.webapp_name, sas_url, backup_name, db_conn_str, database_name, database_type), checks=JMESPathCheck('name', self.webapp_name))
+                 .format(self.resource_group, self.webapp_name, sas_url, backup_name, db_conn_str, database_name, database_type), checks=JMESPathCheck('name', self.webapp_name))
