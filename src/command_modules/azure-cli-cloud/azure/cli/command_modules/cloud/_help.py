@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps #pylint: disable=unused-import
+from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
-#pylint: disable=line-too-long
+# pylint: disable=line-too-long
 
 helps['cloud'] = """
     type: group
@@ -19,17 +19,25 @@ helps['cloud list'] = """
 
 helps['cloud show'] = """
             type: command
-            short-summary: Show the endpoints and parameters for a cloud registered
+            short-summary: Show the configuration for a registered cloud
 """
 
 helps['cloud register'] = """
             type: command
             short-summary: Register a cloud
-            long-summary: Register a cloud by passing in the configuration for it.
-                        After a cloud is registered, it can be referenced in the context commands.
 """
 
 helps['cloud unregister'] = """
             type: command
             short-summary: Unregister a cloud
+"""
+
+helps['cloud set'] = """
+            type: command
+            short-summary: Set the active cloud
+"""
+
+helps['cloud update'] = """
+            type: command
+            short-summary: Update the configuration for a cloud
 """

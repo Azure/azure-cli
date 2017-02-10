@@ -72,16 +72,33 @@ class StorageAccountScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck("contains(connectionString, '{}')".format(account), True)
         ])
         connection_string = s.cmd('storage account show-connection-string -g {} -n {} -otsv'.format(rg, account))
+
         s.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
             JMESPathCheck('blob.read', False),
             JMESPathCheck('blob.retentionPolicy.enabled', False)
         ])
-        s.cmd('storage logging update --log r --retention 1 --service b --connection-string {}'.format(connection_string))
+        s.cmd('storage logging update --services b --log r --retention 1 --service b --connection-string {}'.format(connection_string))
         s.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
             JMESPathCheck('blob.read', True),
             JMESPathCheck('blob.retentionPolicy.enabled', True),
             JMESPathCheck('blob.retentionPolicy.days', 1)
         ])
+
+        s.cmd('storage metrics show --connection-string {}'.format(connection_string), checks=[
+            JMESPathCheck('file.hour.enabled', True),
+            JMESPathCheck('file.minute.enabled', False),
+        ])
+        s.cmd('storage metrics update --services f --hour false --retention 1 --connection-string {}'.format(connection_string))
+        s.cmd('storage metrics show --connection-string {}'.format(connection_string), checks=[
+            JMESPathCheck('file.hour.enabled', False),
+            JMESPathCheck('file.minute.enabled', False),
+        ])
+
+        sas = s.cmd('storage account generate-sas --resource-types o --services b --expiry 2046-12-'
+                    '31T08:23Z --permissions r --https-only --account-name {}'.format(account))
+        sas_keys = dict(pair.split('=') for pair in sas.split('&'))
+        assert u'sig' in sas_keys
+
         keys_result = s.cmd('storage account keys list -g {} -n {}'.format(rg, account))
         key1 = keys_result[0]
         key2 = keys_result[1]
@@ -105,6 +122,36 @@ class StorageAccountScenarioTest(ResourceGroupVCRTestBase):
         s.cmd('storage account check-name --name {}'.format(account), checks=JMESPathCheck('nameAvailable', True))
         result = s.cmd('storage account check-name --name teststorageomega --query "nameAvailable" -o tsv')
         assert result == 'true'
+
+
+class StorageCorsScenarioTest(StorageAccountVCRTestBase):
+    def __init__(self, test_method):
+        super(StorageCorsScenarioTest, self).__init__(__file__, test_method, resource_group='test_cors_scenario_test')
+
+    def test_storage_cors_scenario(self):
+        self.execute()
+
+    def body(self):
+        connection_string = self.cmd('storage account show-connection-string -n {} -g {} -otsv'.format(
+            self.account, self.resource_group))
+
+        self.cmd('storage cors list --connection-string {}'.format(connection_string),
+                 checks=JMESPathCheck('length(@)', 0))
+
+        self.cmd('storage cors add --method POST --origins http://example.com --services bfq --max-age 60 --connection-string {}'.format(connection_string))
+
+        self.cmd('storage cors list --connection-string {}'.format(connection_string),
+                 checks=JMESPathCheck('length(@)', 3))
+
+        self.cmd('storage cors clear --services bf --connection-string {}'.format(connection_string))
+
+        self.cmd('storage cors list --connection-string {}'.format(connection_string),
+                 checks=JMESPathCheck('length(@)', 1))
+
+        self.cmd('storage cors clear --services bfq --connection-string {}'.format(connection_string))
+
+        self.cmd('storage cors list --connection-string {}'.format(connection_string),
+                 checks=JMESPathCheck('length(@)', 0))
 
 
 class StorageBlobScenarioTest(StorageAccountVCRTestBase):
@@ -174,6 +221,13 @@ class StorageBlobScenarioTest(StorageAccountVCRTestBase):
             JMESPathCheck('name', block_blob),
             JMESPathCheck('properties.blobType', 'BlockBlob')
         ])
+
+        s.cmd('storage blob update -c {} -n {} --content-type "test/type"'.format(container, block_blob))
+        s.cmd('storage blob show -c {} -n {}'.format(container, block_blob),
+              checks=JMESPathCheck('properties.contentSettings.contentType', 'test/type'))
+
+        s.cmd('storage blob service-properties show', checks=JMESPathCheck('hourMetrics.enabled', True))
+
         s.cmd('storage blob download -n {} -c {} --file "{}"'.format(blob, container, dest_file))
         if os.path.isfile(dest_file):
             os.remove(dest_file)
@@ -269,6 +323,10 @@ class StorageBlobScenarioTest(StorageAccountVCRTestBase):
             JMESPathCheck('properties.lease.state', 'available'),
             JMESPathCheck('properties.lease.status', 'unlocked')
         ])
+
+        sas = s.cmd('storage container generate-sas -n {}'.format(container))
+        sas_keys = dict(pair.split('=') for pair in sas.split('&'))
+        assert u'sig' in sas_keys
 
         # verify delete operation
         s.cmd('storage container delete --name {} --fail-not-exist'.format(container), checks=JMESPathCheck('deleted', True))
@@ -419,6 +477,14 @@ class StorageFileScenarioTest(StorageAccountVCRTestBase):
         for res in s.cmd('storage file list -s {}'.format(share)):
             assert filename in res['name']
 
+        sas = s.cmd('storage file generate-sas -s {} -p {}'.format(share, filename))
+        sas_keys = dict(pair.split('=') for pair in sas.split('&'))
+        assert u'sig' in sas_keys
+
+        s.cmd('storage file update -s {} -p {} --content-type "test/type"'.format(share, filename))
+        s.cmd('storage file show -s {} -p {}'.format(share, filename),
+              checks=JMESPathCheck('properties.contentSettings.contentType', 'test/type'))
+
         s.cmd('storage file delete --share-name {} -p "{}"'.format(share, filename))
         s.cmd('storage file exists --share-name {} -p "{}"'.format(share, filename),
               checks=JMESPathCheck('exists', False))
@@ -467,7 +533,6 @@ class StorageFileScenarioTest(StorageAccountVCRTestBase):
         res = [x['name'] for x in s.cmd('storage share list')]
         assert share1 in res
         assert share2 in res
-
         # verify metadata can be set, queried, and cleared
         s.cmd('storage share metadata update --name {} --metadata a=b c=d'.format(share1))
         s.cmd('storage share metadata show -n {}'.format(share1), checks=[
@@ -480,9 +545,15 @@ class StorageFileScenarioTest(StorageAccountVCRTestBase):
         s.cmd('storage share update --name {} --quota 3'.format(share1))
         s.cmd('storage share show --name {}'.format(share1),
               checks=JMESPathCheck('properties.quota', 3))
+        sas = s.cmd('storage share generate-sas -n {} --permissions r --expiry 2046-08-23T10:30Z'.format(share1))
+        sas_keys = dict(pair.split('=') for pair in sas.split('&'))
+        assert u'sig' in sas_keys
 
         self._storage_file_scenario(share1)
         self._storage_directory_scenario(share1)
+
+        s.cmd('storage share delete -n {}'.format(share1),
+              checks=JMESPathCheck('deleted', True))
 
 
 class StorageFileCopyScenarioTest(StorageAccountVCRTestBase):
@@ -625,6 +696,10 @@ class StorageTableScenarioTest(StorageAccountVCRTestBase):
         res = s.cmd('storage table list')
         assert table in [x['name'] for x in res]
 
+        sas = s.cmd('storage table generate-sas -n {} --permissions r'.format(table))
+        sas_keys = dict(pair.split('=') for pair in sas.split('&'))
+        assert u'sig' in sas_keys
+
         s._table_acl_scenario(table)
 
         s._storage_entity_scenario(table)
@@ -703,6 +778,10 @@ class StorageQueueScenarioTest(StorageAccountVCRTestBase):
 
         res = s.cmd('storage queue list')
         assert queue in [x['name'] for x in res]
+
+        sas = s.cmd('storage queue generate-sas -n {} --permissions r'.format(queue))
+        sas_keys = dict(pair.split('=') for pair in sas.split('&'))
+        assert u'sig' in sas_keys
 
         s.cmd('storage queue metadata show -n {}'.format(queue), checks=[
             JMESPathCheck('a', 'b'),
@@ -813,3 +892,19 @@ class StorageBlobNoCredentialsScenarioTest(VCRTestBase):
         self.pop_env('AZURE_STORAGE_CONNECTION_STRING')
         with self.assertRaisesRegexp(CLIError, re.escape(NO_CREDENTIALS_ERROR_MESSAGE)):
             self.cmd('storage blob upload -c foo -n bar -f file_0')
+
+
+class StorageTableAndQueueStatsTest(StorageAccountVCRTestBase):
+    def __init__(self, test_method):
+        super(StorageTableAndQueueStatsTest, self).__init__(__file__, test_method)
+        self.account_sku = 'Standard_RAGRS'
+
+    def test_table_and_queue_stats(self):
+        # combine two tests to avoid repeatedly creating accounts.
+        self.execute()
+
+    def body(self):
+        self.cmd('storage table stats --account-name {}'.format(self.account),
+                 checks=JMESPathCheck('geoReplication.status', 'live'))
+        self.cmd('storage queue stats --account-name {}'.format(self.account),
+                 checks=JMESPathCheck('geoReplication.status', 'live'))

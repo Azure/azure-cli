@@ -488,8 +488,10 @@ class ResourceGroupVCRTestBase(VCRTestBase):
 
 
 class StorageAccountVCRTestBase(VCRTestBase):
-    # pylint: disable=too-many-arguments
+    account_location = 'westus'
+    account_sku = 'Standard_LRS'
 
+    # pylint: disable=too-many-arguments
     def __init__(self, test_file, test_name, resource_group='vcr_resource_group', run_live=False,
                  debug=False, debug_vcr=False, skip_setup=False, skip_teardown=False):
         super(StorageAccountVCRTestBase, self).__init__(test_file, test_name, run_live=run_live,
@@ -497,20 +499,25 @@ class StorageAccountVCRTestBase(VCRTestBase):
                                                         skip_setup=skip_setup,
                                                         skip_teardown=skip_teardown)
         self.resource_group_original = resource_group
-        random_tag = '_{}_'.format(''.join((choice(ascii_lowercase + digits) for _ in range(4))))
-        self.resource_group = '{}{}'.format(resource_group, '' if self.playback else random_tag)
-
-        self.account = MOCKED_STORAGE_ACCOUNT if self.playback else \
-            'vcrstorage{}'.format(''.join(choice(digits) for i in range(12)))
-        self.location = 'westus'
+        self.resource_group = '{}{}'.format(resource_group,
+                                            '' if self.playback else self.generate_random_tag())
+        self.account = MOCKED_STORAGE_ACCOUNT if self.playback else self.generate_account_name()
 
     def set_up(self):
         self.cmd('group create --location {} --name {} --tags use=az-test'.format(
-            self.location, self.resource_group))
-        self.cmd('storage account create --sku Standard_LRS -l westus -n {} -g {}'.format(
-            self.account, self.resource_group))
+            self.account_location, self.resource_group))
+        self.cmd('storage account create --sku {} -l {} -n {} -g {}'.format(
+            self.account_sku, self.account_location, self.account, self.resource_group))
 
     def tear_down(self):
         self.cmd('storage account delete -g {} -n {} --yes'.format(
             self.resource_group, self.account))
         self.cmd('group delete --name {} --no-wait --yes'.format(self.resource_group))
+
+    @classmethod
+    def generate_account_name(cls):
+        return 'vcrstorage{}'.format(''.join(choice(digits) for _ in range(12)))
+
+    @classmethod
+    def generate_random_tag(cls):
+        return '_{}_'.format(''.join((choice(ascii_lowercase + digits) for _ in range(4))))
