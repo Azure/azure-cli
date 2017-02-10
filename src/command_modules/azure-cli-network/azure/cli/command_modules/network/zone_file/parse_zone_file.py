@@ -464,7 +464,16 @@ def _post_process_ttl(zone):
                 record['ttl'] = ttl
 
 
-def _process_txt_record(record, current_ttl):
+def _pre_process_txt_records(text):
+    """ This looks only for the cases of multiple text records not surrounded by quotes. 
+    This must be done after flattening but before any tokenization occurs, as this strips out
+    the quotes. """
+    lines = text.split('\n')
+    for line in lines:
+        pass
+    return text
+
+def _post_process_txt_record(record, current_ttl):
     if not isinstance(record['txt'], list):
         record['txt'] = [record['txt']]
     record['ttl'] = _convert_to_seconds(record['ttl']) if 'ttl' in record else current_ttl
@@ -486,6 +495,7 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
     text = _remove_comments(text)
     text = _flatten(text)
     text = _remove_class(text)
+    text = _pre_process_txt_records(text)
     text = _add_record_names(text)
 
     zone_obj = OrderedDict()
@@ -542,9 +552,9 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
             elif record_type == 'spf':
                 record_type = 'txt'
 
-            # handle TXT concatenation and splitting separately
             if record_type == 'txt':
-                _process_txt_record(record, current_ttl)
+                # handle TXT concatenation and splitting separately
+                _post_process_txt_record(record, current_ttl)
             else:
                 record['ttl'] = _convert_to_seconds(record['ttl']) if 'ttl' in record else current_ttl
 
