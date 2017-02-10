@@ -504,7 +504,7 @@ def upload_ssl_cert(resource_group_name, name, certificate_password, certificate
 
     thumb_print = _get_cert(certificate_password, certificate_file)
     cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
-                                   webapp.location, resource_group_name)
+                                    webapp.location, resource_group_name)
     cert_base64_str = base64.b64encode(cert_contents).decode("utf-8")
     cert = Certificate(password=certificate_password, pfx_blob=cert_base64_str,
                        location=webapp.location)
@@ -521,7 +521,7 @@ def _get_cert(certificate_password, certificate_file):
     thumbprint = cert.digest(digest_algorithm).decode("utf-8").replace(':', '')
     return thumbprint
 
-def list_ssl_certs(resource_group_name, name):
+def list_ssl_certs(resource_group_name):
     client = web_client_factory()
     return client.certificates.get_certificates(resource_group_name)
 
@@ -540,7 +540,7 @@ def delete_ssl_cert(resource_group_name, name, certificate_thumbprint):
             raise CLIError(error_str_2.format(certificate_thumbprint))
 
 def _update_host_name_ssl_state(resource_group_name, webapp_name, location,
-                               host_name, ssl_state, thumbprint, client, slot=None):
+                                host_name, ssl_state, thumbprint, client, slot=None):
     updated_webapp = Site(host_name_ssl_states=
                           [HostNameSslState
                            (
@@ -564,7 +564,6 @@ def _update_host_name_ssl_state(resource_group_name, webapp_name, location,
 def _update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
     client = web_client_factory()
     webapp = client.sites.get_site(resource_group_name, name)
-    host_name = None
     webapp_certs = client.certificates.get_certificates(resource_group_name)
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
@@ -576,11 +575,11 @@ def _update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_t
 def bind_ssl_cert(resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
     if ssl_type == 'SNI':
         return _update_ssl_binding(resource_group_name, name,
-                                  certificate_thumbprint, SslState.sni_enabled, slot)
+                                   certificate_thumbprint, SslState.sni_enabled, slot)
     else:
         return _update_ssl_binding(resource_group_name, name,
-                                  certificate_thumbprint, SslState.ip_based_enabled, slot)
+                                   certificate_thumbprint, SslState.ip_based_enabled, slot)
 
 def unbind_ssl_cert(resource_group_name, name, certificate_thumbprint, slot=None):
     return _update_ssl_binding(resource_group_name, name,
-                              certificate_thumbprint, SslState.disabled, slot)
+                               certificate_thumbprint, SslState.disabled, slot)
