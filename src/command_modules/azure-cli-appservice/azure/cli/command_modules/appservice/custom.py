@@ -521,18 +521,23 @@ def _get_cert(certificate_password, certificate_file):
     thumbprint = cert.digest(digest_algorithm).decode("utf-8").replace(':', '')
     return thumbprint
 
-def list_ssl_certs(resource_group_name):
+def list_ssl_certs(resource_group_name, name):
     client = web_client_factory()
     return client.certificates.get_certificates(resource_group_name)
 
-def delete_ssl_cert(resource_group_name, certificate_thumbprint):
+def delete_ssl_cert(resource_group_name, name, certificate_thumbprint):
     client = web_client_factory()
-    cert_name = None
+    error_str_1 = "Certificate for thumbprint '{}' found, but not for webapp '{}'"
+    error_str_2 = "Certificate for thumbprint '{}' not found"
     webapp_certs = client.certificates.get_certificates(resource_group_name)
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
-            return client.certificates.delete_certificate(resource_group_name, cert_name)
-    raise CLIError("Certificate for thumbprint '{}' not found.".format(certificate_thumbprint))
+            for hostname in webapp_cert.host_names:
+                if name in hostname:
+                    return client.certificates.delete_certificate(resource_group_name,
+                                                                  webapp_cert.name)
+                raise CLIError(error_str_1.format(certificate_thumbprint, name))
+            raise CLIError(error_str_2.format(certificate_thumbprint))
 
 def _update_host_name_ssl_state(resource_group_name, webapp_name, location,
                                host_name, ssl_state, thumbprint, client, slot=None):

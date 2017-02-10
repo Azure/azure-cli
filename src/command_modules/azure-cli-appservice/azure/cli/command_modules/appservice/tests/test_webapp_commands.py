@@ -366,7 +366,7 @@ class WebappSSLCertTest(ResourceGroupVCRTestBase):
         self.execute()
 
     def body(self):
-        plan = 'webapp-ssl-test'
+        plan = 'webapp-ssl-test-plan'
 
         #Cert Generated using
         #https://docs.microsoft.com/en-us/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
@@ -386,5 +386,5 @@ class WebappSSLCertTest(ResourceGroupVCRTestBase):
         self.cmd('appservice web config ssl unbind -g {} -n {} --certificate-thumbprint {}'.format(self.resource_group, self.webapp_name, cert_thumbprint), checks=[
             JMESPathCheck('hostNameSslStates[0].sslState', 'Disabled')
             ])
-        self.cmd('appservice web config ssl delete -g {} -n {} --certificate-thumbprint {}'.format(self.resource_group, self.webapp_name, cert_thumbprint), checks=[])
+        self.cmd('appservice web config ssl delete -g {} -n {} --certificate-thumbprint {}'.format(self.resource_group, self.webapp_name, cert_thumbprint))
         self.cmd('appservice web delete -g {} -n {}'.format(self.resource_group, self.webapp_name))
