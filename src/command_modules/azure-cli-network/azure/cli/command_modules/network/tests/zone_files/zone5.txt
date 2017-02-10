@@ -25,10 +25,10 @@ test-ns IN NS ns1 ; Should give test-ns.example.com NS ns1.example.com.
 test-srv IN SRV 1 2 3 srv1 ; Should give test-srv.example.com SRV 1 2 3 srv1.example.com.
 
 ; And repeat the above, this time with fully-qualified targets
-test-cname2 IN CNAME r1. ; Should give test-cname.example.com. CNAME r1.
-test-mx2 IN MX 10 m1. ; Should give test-mx.example.com MX 10 m1.
-test-ns2 IN NS ns1. ; Should give test-ns.example.com NS ns1.
-test-srv2 IN SRV 1 2 3 srv1. ; Should give test-srv.example.com SRV 1 2 3 srv1.
+test-cname2 IN CNAME r1. ; Should give test-cname2.example.com. CNAME r1.
+test-mx2 IN MX 10 m1. ; Should give test-mx2.example.com MX 10 m1.
+test-ns2 IN NS ns1. ; Should give test-ns2.example.com NS ns1.
+test-srv2 IN SRV 1 2 3 srv1. ; Should give test-srv2.example.com SRV 1 2 3 srv1.
 
 ; Check that changes to $ORIGIN are picked up
 $ORIGIN subzone.example.com.
@@ -42,9 +42,5 @@ test-cname IN CNAME r1 ; Should give test-cname.subzone.example.com.
 $ORIGIN foo.com
 record.example.com. IN CNAME bar ; Should give record.example.com. CNAME bar.foo.com.
 
-; Fully-qualified name that doesn't match zone name should fail
-fail IN A 5.6.7.8 ; fail.foo.com. is not in the zone ‘example.com.’
-test. IN A 6.7.8.9 ; 'test.' is not in the zone ‘example.com.’
-
-; But a fully-qualified name that is within the zone should work OK
+; A fully-qualified name that is within the zone should work OK
 test.example.com. IN A 7.8.9.0 ; Should work OK

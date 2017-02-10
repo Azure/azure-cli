@@ -31,7 +31,7 @@ doozie                  TXT	( "abcdefghijklmnopqrstuvwxyz"
                         	  "abcdefghijklmnopqrstuvwxyz"
 							  "1234567890" )
 fee2                    CNAME	bar.com.
-                        CNAME	bar.
+                        CNAME	bar. ; This should be ignored and a warning given
 mail                    MX	10	mail1.mymail.com.
                         MX	11	flooble.
 sip.tcp                 SRV	10 20 30	foobar.
@@ -44,13 +44,13 @@ test-txt2               TXT "string 1"
 aa	100	A 4.5.6.7  ; A record
     200 A 6.7.8.9  ; Another A record, same record set, use the lower of the two TTLs
 	300 MX 1 foo.com ; MX record with name 'aa', TTL 300
-200		A 7.8.9.0	; A record with name 200, TTL inherited from MX record above
+200		A 7.8.9.0	; A record with name 200
 
 longtxt  999 TXT "this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer...."
 longtxt2 100 TXT "01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789"
 
-spf 100 SPF "this is an SPF record! Convert to TXT on import and keep the quote marks"
-@ 200 TXT "this is another SPF, this time as TXT...again, we need to keep the quote marks"
+spf 100 SPF "this is an SPF record! Convert to TXT on import"
+@ 200 TXT "this is another SPF, this time as TXT"
 
 ; PTR tests
 160.1                   PTR        foo.com.
@@ -77,7 +77,7 @@ t6                            TXT         "foo\;bar"
 ; string with quotes
 t7                            TXT         "\"quoted string\""
 
-; error
+; two strings, no quotes
 t8                            TXT         foo bar
 
 ; multi-line

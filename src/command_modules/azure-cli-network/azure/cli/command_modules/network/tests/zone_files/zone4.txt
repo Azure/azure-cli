@@ -55,8 +55,8 @@ xttl-mix 2d1W3h4M5 IN A 10.9.9.9 ; Should have TTL of 788645
 ; Check for conflicting TTLs on records with the same name
 c1 10 IN A 11.1.2.3
 c1 20 IN A 11.2.3.3 ; Same record set as c1 above, should use TTL 10 and give warning
-c2 10 IN A 11.2.3.4
+c2 10 IN A 11.2.3.4 ; Will have TTL of 5 because of the below record...
 
 $ORIGIN c2.example.com.
 $TTL 5
-@ IN A 11.5.6.7 ; Same record set as c2 above, should use TTL 5 and give warning
+@ IN A 11.5.6.7 ; Same record set as c2 above, should use TTL 5 for entire record set and give warning

@@ -456,12 +456,14 @@ def _post_process_ttl(zone):
 
     for name in zone:
         for record_type in zone[name]:
-            ttl = min([x['ttl'] for x in zone[name][record_type]])
-            for record in zone[name][record_type]:
-                if record['ttl'] != ttl:
-                    logger.warning('Using lowest TTL {} for the record set. Ignoring value {}'
-                        .format(ttl, record['ttl']))
-                record['ttl'] = ttl
+            records = zone[name][record_type]
+            if isinstance(records, list):
+                ttl = min([x['ttl'] for x in records])
+                for record in records:
+                    if record['ttl'] != ttl:
+                        logger.warning('Using lowest TTL {} for the record set. Ignoring value {}'
+                            .format(ttl, record['ttl']))
+                    record['ttl'] = ttl
 
 
 def _pre_process_txt_records(text):
@@ -486,6 +488,21 @@ def _post_process_txt_record(record, current_ttl):
     record['txt'].append(long_text)
 
 
+def _post_check_names(zone):
+    # get the origin name that has the SOA record
+    # ensure the origin is in each record set
+    origin = None
+    for name in zone:
+        for record_type in zone[name]:
+            if record_type == 'soa':
+                origin = name
+                break
+        if origin: break
+    bad_names = [x for x in zone if origin not in x]
+    if bad_names:
+        raise CLIError("Record names '{}' are not part of the domain.".format(bad_names))
+
+
 def parse_zone_file(text, zone_name, ignore_invalid=False):
     """
     Parse a zonefile into a dict
@@ -502,6 +519,7 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
     record_lines = text.split("\n")
     current_origin = zone_name.rstrip('.') + '.'
     current_ttl = 3600
+    soa_processed = False
 
     for record_line in record_lines:
         parse_match = False
@@ -558,11 +576,34 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
             else:
                 record['ttl'] = _convert_to_seconds(record['ttl']) if 'ttl' in record else current_ttl
 
-            if not record_name in zone_obj:
+            if record_name not in zone_obj:
                 zone_obj[record_name] = OrderedDict()
-            if not record_type in zone_obj[record_name]:
+
+            if record_type == 'soa':
+                if soa_processed:
+                    raise CLIError('Zone file can contain only one SOA record.')
+                if record_name != current_origin:
+                    raise CLIError("Zone SOA record must be at the apex '@'.")
+                zone_obj[record_name][record_type] = record
+                soa_processed = True
+                continue
+
+            if not soa_processed:
+                raise CLIError('First record in zone file must be SOA.')
+
+            if record_type == 'cname':
+                if record_type in zone_obj[record_name]:
+                    logger.warning("CNAME record already exists for '{}'. Ignoring '{}'."
+                        .format(record_name, record['alias']))
+                    continue
+                zone_obj[record_name][record_type] = record
+                continue
+
+            # any other record can have multiple entries
+            if record_type not in zone_obj[record_name]:
                 zone_obj[record_name][record_type] = []
             zone_obj[record_name][record_type].append(record)
 
     _post_process_ttl(zone_obj)
+    _post_check_names(zone_obj)
     return zone_obj

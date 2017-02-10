@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from collections import Counter, OrderedDict
-from itertools import groupby
 from msrestazure.azure_exceptions import CloudError
 
 # pylint: disable=no-self-use,too-many-arguments,no-member,too-many-lines
@@ -1451,6 +1450,7 @@ def export_zone(resource_group_name, zone_name, file_name=None):
         print(zone_file_text)
 
 
+# pylint: disable=too-many-return-statements
 def _build_record(data):
 
     record_type = data['type'].lower()
@@ -1479,13 +1479,13 @@ def _build_record(data):
             return TxtRecord(text_data) if isinstance(text_data, list) else TxtRecord([text_data])
     except KeyError as ke:
         raise CLIError("The {} record '{}' is missing a property.  {}"
-                        .format(record_type, data['name'], ke))
+                       .format(record_type, data['name'], ke))
 
 def import_zone(resource_group_name, zone_name, file_name):
     file_text = None
     with open(file_name) as f:
         file_text = f.read()
-    zone_obj = parse_zone_file(file_text)
+    zone_obj = parse_zone_file(file_text, zone_name)
 
     record_sets = {}
     for record_set_name in zone_obj:
@@ -1497,9 +1497,11 @@ def import_zone(resource_group_name, zone_name, file_name):
                 record = _build_record(entry)
                 record_set = record_sets.get(record_set_key, None)
                 if not record_set:
-                    record_set = RecordSet(name=record_set_name, type=record_set_type, ttl=record_set_ttl)
+                    record_set = RecordSet(
+                        name=record_set_name, type=record_set_type, ttl=record_set_ttl)
                     record_sets[record_set_key] = record_set
-                _add_record(record_set, record, record_set_type, is_list=record_set_type.lower() not in ['soa', 'cname'])
+                _add_record(record_set, record, record_set_type,
+                            is_list=record_set_type.lower() not in ['soa', 'cname'])
 
     total_records = 0
     for rs in record_sets.values():
@@ -1511,7 +1513,7 @@ def import_zone(resource_group_name, zone_name, file_name):
     print('TOTAL: {}'.format(total_records))
 
     client = get_mgmt_service_client(DnsManagementClient)
-    zone = client.zones.create_or_update(resource_group_name, zone_name, Zone('global'))
+    client.zones.create_or_update(resource_group_name, zone_name, Zone('global'))
     for rs in record_sets.values():
 
         rs.type = rs.type.lower()
@@ -1528,9 +1530,11 @@ def import_zone(resource_group_name, zone_name, file_name):
             root_ns.ttl = rs.ttl
             rs = root_ns
             rs.type = rs.type.rsplit('/', 1)[1]
-        print("Importing {} records of type '{}' and name '{}'".format(record_count, rs.type, rs.name))
+        print("Importing {} records of type '{}' and name '{}'"
+              .format(record_count, rs.type, rs.name))
         try:
-            client.record_sets.create_or_update(resource_group_name, zone_name, rs.name, rs.type, rs)
+            client.record_sets.create_or_update(
+                resource_group_name, zone_name, rs.name, rs.type, rs)
         except Exception as ex:
             print('{} {}'.format(type(ex), ex))
             continue
