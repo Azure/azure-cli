@@ -274,6 +274,7 @@ def _flatten(text):
     Flatten the text:
     * make sure each record is on one line.
     * remove parenthesis 
+    * remove Windows line endings
     """
     lines = text.split("\n")
     SENTINEL = '%%%'
@@ -284,8 +285,8 @@ def _flatten(text):
         if len(l) == 0:
             continue 
 
-        l = l.replace("\t", " ")
-        #tokens += list(filter(lambda x: len(x) > 0, l.split(" "))) + ['XX']
+        l = l.replace('\t', ' ')
+        l = l.replace('\r', ' ')
         for i, token in enumerate(l.split(' ')):
             if token is '' and i > 0:
                 continue

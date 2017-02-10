@@ -2,6 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+from __future__ import print_function
+
 from collections import Counter, OrderedDict
 from msrestazure.azure_exceptions import CloudError
 
@@ -1468,29 +1470,37 @@ def _build_record(data):
         elif record_type == 'ptr':
             return PtrRecord(data['host'])
         elif record_type == 'soa':
-            return SoaRecord(data['mname'], data['rname'], data['serial'], data['refresh'],
+            return SoaRecord(data['host'], data['email'], data['serial'], data['refresh'],
                              data['retry'], data['expire'], data['minimum'])
-        elif record_type == 'spf':
-            return TxtRecord([data['data']])
         elif record_type == 'srv':
             return SrvRecord(data['priority'], data['weight'], data['port'], data['target'])
-        elif record_type in ['txt']:
+        elif record_type in ['txt', 'spf']:
             text_data = data['txt']
             return TxtRecord(text_data) if isinstance(text_data, list) else TxtRecord([text_data])
     except KeyError as ke:
         raise CLIError("The {} record '{}' is missing a property.  {}"
                        .format(record_type, data['name'], ke))
 
+# pylint: disable=too-many-statements
 def import_zone(resource_group_name, zone_name, file_name):
-    file_text = None
-    with open(file_name) as f:
-        file_text = f.read()
+    from azure.cli.core._util import read_file_content
+    file_text = read_file_content(file_name)
     zone_obj = parse_zone_file(file_text, zone_name)
 
+    origin = zone_name
     record_sets = {}
     for record_set_name in zone_obj:
         for record_set_type in zone_obj[record_set_name]:
-            for entry in zone_obj[record_set_name][record_set_type]:
+            record_set_obj = zone_obj[record_set_name][record_set_type]
+
+            if record_set_type == 'soa':
+                origin = record_set_name.rstrip('.')
+
+            if not isinstance(record_set_obj, list):
+                record_set_obj = [record_set_obj]
+
+            for entry in record_set_obj:
+
                 record_set_ttl = entry['ttl']
                 record_set_key = '{}{}'.format(record_set_name.lower(), record_set_type)
 
@@ -1498,7 +1508,7 @@ def import_zone(resource_group_name, zone_name, file_name):
                 record_set = record_sets.get(record_set_key, None)
                 if not record_set:
                     record_set = RecordSet(
-                        name=record_set_name, type=record_set_type, ttl=record_set_ttl)
+                        name=record_set_name.rstrip('.'), type=record_set_type, ttl=record_set_ttl)
                     record_sets[record_set_key] = record_set
                 _add_record(record_set, record, record_set_type,
                             is_list=record_set_type.lower() not in ['soa', 'cname'])
@@ -1510,13 +1520,15 @@ def import_zone(resource_group_name, zone_name, file_name):
         except TypeError:
             record_count = 1
         total_records += record_count
-    print('TOTAL: {}'.format(total_records))
+    cum_records = 0
 
     client = get_mgmt_service_client(DnsManagementClient)
+    print('== BEGINNING ZONE IMPORT: {} ==\n'.format(zone_name))
     client.zones.create_or_update(resource_group_name, zone_name, Zone('global'))
     for rs in record_sets.values():
 
         rs.type = rs.type.lower()
+        rs.name = '@' if rs.name == origin else rs.name
 
         try:
             record_count = len(getattr(rs, _type_to_property_name(rs.type)))
@@ -1525,6 +1537,7 @@ def import_zone(resource_group_name, zone_name, file_name):
         if rs.name == '@' and rs.type == 'soa':
             root_soa = client.record_sets.get(resource_group_name, zone_name, '@', 'SOA')
             rs.soa_record.host = root_soa.soa_record.host
+            rs.name = '@'
         elif rs.name == '@' and rs.type == 'ns':
             root_ns = client.record_sets.get(resource_group_name, zone_name, '@', 'NS')
             root_ns.ttl = rs.ttl
@@ -1535,9 +1548,11 @@ def import_zone(resource_group_name, zone_name, file_name):
         try:
             client.record_sets.create_or_update(
                 resource_group_name, zone_name, rs.name, rs.type, rs)
-        except Exception as ex:
-            print('{} {}'.format(type(ex), ex))
-            continue
+            cum_records += record_count
+        except CloudError as ex:
+            logger.error(ex)
+    print("\n== {}/{} RECORDS IMPORTED SUCCESSFULLY: '{}' =="
+          .format(cum_records, total_records, zone_name))
 
 
 def add_dns_aaaa_record(resource_group_name, zone_name, record_set_name, ipv6_address):

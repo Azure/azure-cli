@@ -84,10 +84,10 @@ class TestDnsZoneImport(unittest.TestCase):
             self.assertEqual(record['ttl'], ttl)
 
     def _get_zone_object(self, file_name, zone_name):  # pylint: disable=no-self-use
+        from azure.cli.core._util import read_file_content
         file_path = os.path.join(TEST_DIR, 'zone_files', file_name)
         file_text = None
-        with open(file_path) as f:
-            file_text = f.read()
+        file_text = read_file_content(file_path)
         return parse_zone_file(file_text, zone_name)
 
     def test_zone_file_1(self):
@@ -227,7 +227,6 @@ class TestDnsZoneImport(unittest.TestCase):
             (3600, '1.2.3.4'),
             (3600, '2.3.4.5')
         ])
-        self._check_cname(zone, 'noclass.' + zn, 3600, 'bar.com.' + zn)
         self._check_txt(zone, 'txt1.' + zn, [(3600, None, 'string 1 only')])
         self._check_txt(zone, 'txt2.' + zn, [(3600, None, 'string1string2')])
         self._check_txt(zone, 'txt3.' + zn, [

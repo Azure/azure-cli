@@ -8,7 +8,7 @@
 			15m ; ret = update retry
 			3w ; ex = expiry
 			3h ; min = minimum
-			) ; Should give email ‘hostmaster.example.com.’
+			) ; Should give email 'hostmaster.example.com.'
 
 default IN A 0.1.2.3 ; Should give default.example.com. A 0.1.2.3
 tc IN CNAME test ; Should give tc.example.com. CNAME test.example.com.
@@ -38,7 +38,7 @@ test-cname IN CNAME r1 ; Should give test-cname.subzone.example.com.
 
 ; CNAME r1.subzone.example.com.
 ; Check $ORIGIN from outside zone is permitted (but not for record names)
-; Also check that $ORIGIN without ‘.’ terminator has one added (and a warning)
+; Also check that $ORIGIN without '.' terminator has one added (and a warning)
 $ORIGIN foo.com
 record.example.com. IN CNAME bar ; Should give record.example.com. CNAME bar.foo.com.
 

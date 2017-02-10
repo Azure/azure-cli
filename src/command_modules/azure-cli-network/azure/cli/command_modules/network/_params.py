@@ -560,8 +560,8 @@ register_cli_argument('network dns', 'record_type', modified_record_type)
 
 register_cli_argument('network dns zone', 'zone_name', name_arg_type)
 
-register_cli_argument('network dns zone import', 'file_name', type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to import')
-register_cli_argument('network dns zone export', 'file_name', type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to save')
+register_cli_argument('network dns zone import', 'file_name', options_list=('--file-name', '-f'), type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to import')
+register_cli_argument('network dns zone export', 'file_name', options_list=('--file-name', '-f'), type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to save')
 register_cli_argument('network dns zone update', 'if_none_match', ignore_type)
 
 register_cli_argument('network dns record txt add', 'value', nargs='+')
