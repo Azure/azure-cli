@@ -16,7 +16,8 @@ from azure.cli.command_modules.resource._client_factory import (_resource_client
                                                                 cf_tags,
                                                                 cf_deployments,
                                                                 cf_deployment_operations,
-                                                                cf_policy_definitions)
+                                                                cf_policy_definitions,
+                                                                cf_resource_links)
 
 # Resource group commands
 def transform_resource_group_list(result):
@@ -113,3 +114,9 @@ cli_command(__name__, 'lock delete', 'azure.cli.command_modules.resource.custom#
 cli_command(__name__, 'lock list', 'azure.cli.command_modules.resource.custom#list_locks')
 cli_command(__name__, 'lock show', 'azure.cli.command_modules.resource.custom#get_lock')
 cli_command(__name__, 'lock update', 'azure.cli.command_modules.resource.custom#update_lock')
+
+cli_command(__name__, 'resource link create', 'azure.cli.command_modules.resource.custom#create_resource_link')
+cli_command(__name__, 'resource link delete', 'azure.mgmt.resource.links.operations#ResourceLinksOperations.delete', cf_resource_links)
+cli_command(__name__, 'resource link show', 'azure.mgmt.resource.links.operations#ResourceLinksOperations.get', cf_resource_links)
+cli_command(__name__, 'resource link list', 'azure.cli.command_modules.resource.custom#list_resource_links')
+cli_command(__name__, 'resource link update', 'azure.cli.command_modules.resource.custom#update_resource_link')
