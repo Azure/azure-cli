@@ -1079,9 +1079,9 @@ class VMCreateCustomDataScenarioTest(ResourceGroupVCRTestBase):  # pylint: disab
             custom_data=self.custom_data
         ))
 
-        self.cmd('vm show -g {rg} -n vm-name'.format(rg=self.resource_group, vm_name=self.vm_name), checks=[
+        self.cmd('vm show -g {rg} -n {vm_name}'.format(rg=self.resource_group, vm_name=self.vm_name), checks=[
             JMESPathCheck('provisioningState', 'Succeeded'),
-            JMESPathCheck('osProfile.custom_data', 'I2Nsb3VkLWNvbmZpZwpob3N0bmFtZTogbXlWTWhvc3RuYW1l')
+            JMESPathCheck('osProfile.customData', 'I2Nsb3VkLWNvbmZpZwpob3N0bmFtZTogbXlWTWhvc3RuYW1l')
         ])
 
 
@@ -1365,6 +1365,26 @@ class VMSSVMsScenarioTest(ResourceGroupVCRTestBase):
         self._check_vms_power_state('PowerState/deallocated')
         self.cmd('vmss delete-instances --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name))
         self.cmd('vmss list-instances --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
+
+
+class VMSSCustomDataScenarioTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(VMSSCustomDataScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_vmss_create_custom_data')
+
+    def test_vmss_create_custom_data(self):
+        self.execute()
+
+    def body(self):
+        vmss_name = 'vmss-custom-data'
+
+        self.cmd('vmss create -n {0} -g {1} --image Debian --admin-username deploy --ssh-key-value \'{2}\' '
+                 '--custom-data \'#cloud-config\nhostname: myVMhostname\' '
+                 .format(vmss_name, self.resource_group, TEST_SSH_KEY_PUB))
+
+        self.cmd('vmss show -n {} -g {}'.format(vmss_name, self.resource_group), [
+            JMESPathCheck('provisioningState', 'Succeeded'),
+            JMESPathCheck('virtualMachineProfile.osProfile.customData', 'I2Nsb3VkLWNvbmZpZwpob3N0bmFtZTogbXlWTWhvc3RuYW1l')
+        ])
 
 
 class VMSSNicScenarioTest(ResourceGroupVCRTestBase):
