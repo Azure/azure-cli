@@ -190,6 +190,7 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'admin_username', help='Username for the VM.', arg_group='Authentication')
     register_cli_argument(scope, 'admin_password', help="Password for the VM if authentication type is 'Password'.", arg_group='Authentication')
     register_cli_argument(scope, 'ssh_key_value', help='SSH public key or public key file path.', completer=FilesCompleter(), type=file_type, arg_group='Authentication')
+    register_cli_argument(scope, 'custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
     register_cli_argument(scope, 'ssh_dest_key_path', help='Destination file path on the VM for the SSH key.', arg_group='Authentication')
     register_cli_argument(scope, 'authentication_type', help='Type of authentication to use with the VM. Defaults to password for Windows and SSH public key for Linux.', arg_group='Authentication', **enum_choice_list(['ssh', 'password']))
 

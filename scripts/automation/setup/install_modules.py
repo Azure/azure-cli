@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import sys
+import os
 import subprocess
 import automation.utilities.path as autmation_path
 
@@ -19,7 +20,10 @@ def install_modules():
 
     for name, path in all_modules:
         try:
-            subprocess.check_call(INSTALL_COMMAND.format(path).split())
+            if os.listdir(path):
+                subprocess.check_call(INSTALL_COMMAND.format(path).split())
+            else:
+                print('{0} is empty... skipping it.'.format(path))
         except subprocess.CalledProcessError as err:
             # exit code is not zero
             failures.append('Failed to install {}. Error message: {}'.format(name, err.output))

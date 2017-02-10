@@ -1438,7 +1438,7 @@ def create_vm(vm_name, resource_group_name, image=None,
               subnet=None, subnet_address_prefix='10.0.0.0/24', storage_profile=None,
               os_publisher=None, os_offer=None, os_sku=None, os_version=None,
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_type=None,
-              nic_type=None, validate=False):
+              nic_type=None, validate=False, custom_data=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.command_modules.vm._vm_utils import random_string
     from azure.cli.command_modules.vm._template_builder import (
@@ -1527,11 +1527,14 @@ def create_vm(vm_name, resource_group_name, image=None,
             storage_account_name, CLOUD.suffixes.storage_endpoint, storage_container_name,
             os_disk_name)
 
+    if custom_data:
+        custom_data = read_content_if_is_file(custom_data)
+
     vm_resource = build_vm_resource(
         vm_name, location, tags, size, storage_profile, nics, admin_username, availability_set,
         admin_password, ssh_key_value, ssh_dest_key_path, image, os_disk_name,
         os_type, storage_caching, storage_sku, os_publisher, os_offer, os_sku, os_version,
-        os_vhd_uri, managed_os_disk, data_disk_sizes_gb, image_data_disks)
+        os_vhd_uri, managed_os_disk, data_disk_sizes_gb, image_data_disks, custom_data)
     vm_resource['dependsOn'] = vm_dependencies
 
     master_template.add_resource(vm_resource)
@@ -1573,7 +1576,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                 subnet=None, subnet_address_prefix=None,
                 os_offer=None, os_publisher=None, os_sku=None, os_version=None,
                 load_balancer_type=None, vnet_type=None, public_ip_type=None, storage_profile=None,
-                single_placement_group=None):
+                single_placement_group=None, custom_data=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.command_modules.vm._vm_utils import random_string
     from azure.cli.command_modules.vm._template_builder import (
@@ -1647,6 +1650,9 @@ def create_vmss(vmss_name, resource_group_name, image,
     ip_config_name = '{}IPConfig'.format(naming_prefix)
     nic_name = '{}Nic'.format(naming_prefix)
 
+    if custom_data:
+        custom_data = read_content_if_is_file(custom_data)
+
     vmss_resource = build_vmss_resource(vmss_name, naming_prefix, location, tags,
                                         not disable_overprovision, upgrade_policy_mode,
                                         vm_sku, instance_count,
@@ -1658,7 +1664,8 @@ def create_vmss(vmss_name, resource_group_name, image,
                                         ssh_key_value, ssh_dest_key_path,
                                         os_publisher, os_offer, os_sku, os_version,
                                         backend_address_pool_id, inbound_nat_pool_id,
-                                        single_placement_group=single_placement_group)
+                                        single_placement_group=single_placement_group,
+                                        custom_data=custom_data)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     master_template.add_resource(vmss_resource)
