@@ -1049,6 +1049,42 @@ class VMUnmanagedDataDiskTest(ResourceGroupVCRTestBase):
                  ])
 
 
+class VMCreateCustomDataScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
+
+    def __init__(self, test_method):
+        super(VMCreateCustomDataScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_create_vm_custom_data')
+        self.deployment_name = 'azurecli-test-dep-vm-create-custom-data'
+        self.admin_username = 'ubuntu'
+        self.location = 'westus'
+        self.vm_image = 'UbuntuLTS'
+        self.auth_type = 'ssh'
+        self.vm_name = 'vm-name'
+        self.custom_data = '#cloud-config\nhostname: myVMhostname'
+
+    def test_vm_create_custom_data(self):
+        self.execute()
+
+    def set_up(self):
+        super(VMCreateCustomDataScenarioTest, self).set_up()
+
+    def body(self):
+        self.cmd('vm create -g {rg} -n {vm_name} --admin-username {admin} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' -l {location} --custom-data \'{custom_data}\''.format(
+            rg=self.resource_group,
+            admin=self.admin_username,
+            image=self.vm_image,
+            vm_name=self.vm_name,
+            auth_type=self.auth_type,
+            ssh_key=TEST_SSH_KEY_PUB,
+            location=self.location,
+            custom_data=self.custom_data
+        ))
+
+        self.cmd('vm show -g {rg} -n {vm_name}'.format(rg=self.resource_group, vm_name=self.vm_name), checks=[
+            JMESPathCheck('provisioningState', 'Succeeded'),
+            JMESPathCheck('osProfile.customData', 'I2Nsb3VkLWNvbmZpZwpob3N0bmFtZTogbXlWTWhvc3RuYW1l')
+        ])
+
+
 class AzureContainerServiceScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, test_method):
@@ -1329,6 +1365,26 @@ class VMSSVMsScenarioTest(ResourceGroupVCRTestBase):
         self._check_vms_power_state('PowerState/deallocated')
         self.cmd('vmss delete-instances --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name))
         self.cmd('vmss list-instances --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
+
+
+class VMSSCustomDataScenarioTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(VMSSCustomDataScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_vmss_create_custom_data')
+
+    def test_vmss_create_custom_data(self):
+        self.execute()
+
+    def body(self):
+        vmss_name = 'vmss-custom-data'
+
+        self.cmd('vmss create -n {0} -g {1} --image Debian --admin-username deploy --ssh-key-value \'{2}\' '
+                 '--custom-data \'#cloud-config\nhostname: myVMhostname\' '
+                 .format(vmss_name, self.resource_group, TEST_SSH_KEY_PUB))
+
+        self.cmd('vmss show -n {} -g {}'.format(vmss_name, self.resource_group), [
+            JMESPathCheck('provisioningState', 'Succeeded'),
+            JMESPathCheck('virtualMachineProfile.osProfile.customData', 'I2Nsb3VkLWNvbmZpZwpob3N0bmFtZTogbXlWTWhvc3RuYW1l')
+        ])
 
 
 class VMSSNicScenarioTest(ResourceGroupVCRTestBase):
