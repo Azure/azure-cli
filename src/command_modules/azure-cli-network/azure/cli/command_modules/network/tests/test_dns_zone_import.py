@@ -99,18 +99,18 @@ class TestDnsZoneImport(unittest.TestCase):
             (172800, 'ns0-00.azure-dns.org.'),
             (172800, 'ns0-00.azure-dns.info.')
         ])
-        self._check_ns(zone, 'myns.' + zn, [(3600, 'ns.contoso.com')])
-        self._check_mx(zone, 'mymx.' + zn, [(3600, 1, 'mail.contoso.com')])
+        self._check_ns(zone, 'myns.' + zn, [(3600, 'ns.contoso.com.')])
+        self._check_mx(zone, 'mymx.' + zn, [(3600, 1, 'mail.contoso.com.')])
         self._check_a(zone, 'manuala.' + zn, [(3600, '10.0.0.10')])
         self._check_a(zone, 'mya.' + zn, [(0, '10.0.1.0'), (0, '10.0.1.1')])
         self._check_aaaa(zone, 'myaaaa.' + zn, [(3600, '2001:4898:e0:99:6dc4:6329:1c99:4e69')])
-        self._check_cname(zone, 'mycname.' + zn, [(3600, 'contoso.com')])
+        self._check_cname(zone, 'mycname.' + zn, [(3600, 'contoso.com.')])
         self._check_ptr(zone, 'myname.' + zn, [(3600, 'myptrdname')])
         self._check_ptr(zone, 'myptr.' + zn, [(3600, 'contoso.com')])
         self._check_txt(zone, 'myname2.' + zn, [(3600, 9, 'manualtxt')])
         self._check_txt(zone, 'mytxt2.' + zn, [(7200, 7, 'abc def'), (7200, 7, 'foo bar')])
         self._check_txt(zone, 'mytxtrs.' + zn, [(3600, 2, 'hi')])
-        self._check_srv(zone, 'mysrv.' + zn, [(3600, 1, 2, 1234, 'target.contoso.com')])
+        self._check_srv(zone, 'mysrv.' + zn, [(3600, 1, 2, 1234, 'target.contoso.com.')])
 
     def test_zone_file_2(self):
         zn = 'mytestzone.com.'
@@ -125,13 +125,13 @@ class TestDnsZoneImport(unittest.TestCase):
         self._check_srv(zone, 'sip.tcp.' + zn, [(3600, 10, 20, 30, 'foobar.'), (3600, 55, 66, 77, 'zoo.')])
         self._check_ns(zone, 'test-ns2.' + zn, [(3600, 'ns1.com.'), (3600, 'ns2.com.')])
         self._check_txt(zone, 'test-txt2.' + zn, [(3600, 8, 'string 1'), (3600, 8, 'string 2')])
-        self._check_a(zone, 'aa.' + zn, [(100, '4.5.6.7'), (200, '6.7.8.9')])
-        #self._check_a(zone, '200.' + zn, [(300, '7.8.9.0')])  # TTL should be 300 not 3600?
-        self._check_mx(zone, 'aa.' + zn, [(300, 1, 'foo.com')])
-        # TODO: The split and rejoin is truncating characters...
-        #self._check_txt(zone, 'longtxt.' + zn, [(999, None, 'this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....this is a super long txt record...wow, it is really really long!  And I even used copy and paste to make it longer....')])
+        self._check_a(zone, 'aa.' + zn, [(100, '4.5.6.7'), (100, '6.7.8.9')])
+        self._check_a(zone, '200.' + zn, [(3600, '7.8.9.0')])  # TODO: TTL should be 300 not 3600?
+        self._check_mx(zone, 'aa.' + zn, [(300, 1, 'foo.com.' + zn)])
+        self._check_txt(zone, 'longtxt2.' + zn, [(100, 500, None)])
+        self._check_txt(zone, 'longtxt.' + zn, [(999, 936, None)])
         self._check_txt(zone, 'spf.' + zn, [(100, 72, None)])
-        self._check_txt(zone, zn, [(200, 78, None), (3600, None, 'v=spf1 mx ip4:14.14.22.0/23 a:mail.trum.ch mx:mese.ch include:spf.mapp.com ?all')])
+        self._check_txt(zone, zn, [(200, 78, None), (200, None, 'v=spf1 mx ip4:14.14.22.0/23 a:mail.trum.ch mx:mese.ch include:spf.mapp.com ?all')])
         self._check_ptr(zone, '160.1.' + zn, [(3600, 'foo.com.')])
         self._check_ptr(zone, '160.2.' + zn, [(3600, 'foobar.com.'), (3600, 'bar.com.')])
         self._check_ptr(zone, '160.3.' + zn, [(3600, 'foo.com.'), (3600, 'bar.com.')])
@@ -141,8 +141,8 @@ class TestDnsZoneImport(unittest.TestCase):
         self._check_txt(zone, 't4.' + zn, [(3600, None, 'foo;bar')])
         self._check_txt(zone, 't5.' + zn, [(3600, None, 'foo;bar')])
         self._check_txt(zone, 't6.' + zn, [(3600, None, 'foo;bar')])
-        #self._check_txt(zone, 't7.' + zn, [(3600, None, '"quoted string"')])  # TODO: handle quoted string
-        #self.assertTrue('t8' not in zone)  # TODO: reject multiple unquoted strings?
+        self._check_txt(zone, 't7.' + zn, [(3600, None, '"quoted string"')])
+        self.assertTrue('t8.' + zn not in zone)
         self._check_txt(zone, 't9.' + zn, [(3600, None, 'foobarr')])
         self._check_txt(zone, 't10.' + zn, [(3600, None, 'foo bar')])
         self._check_txt(zone, 't11.' + zn, [(3600, None, 'foobar')])
@@ -176,7 +176,7 @@ class TestDnsZoneImport(unittest.TestCase):
         self._check_srv(zone, '_sip._tcp.' + zn, [(3600, 10, 20, 30, 'foo.com.')])
         self._check_mx(zone, 'mail.' + zn, [(3600, 100, 'mail.test.com.')])
         self._check_a(zone, 'noclass.' + zn, [(3600, '1.2.3.4'), (3600, '2.3.4.5')])
-        self._check_cname(zone, 'noclass.' + zn, [(3600, 'bar.com')])
+        self._check_cname(zone, 'noclass.' + zn, [(3600, 'bar.com.' + zn)])
         self._check_txt(zone, 'txt1.' + zn, [(3600, None, 'string 1 only')])
         self._check_txt(zone, 'txt2.' + zn, [(3600, None, 'string1string2')])
         self._check_txt(zone, 'txt3.' + zn, [
@@ -188,7 +188,7 @@ class TestDnsZoneImport(unittest.TestCase):
         zn = 'example.com.'
         zone = self._get_zone_object('zone4.txt', zn)
         self._check_soa(zone, zn, 3600, 2003080800, 43200, 900, 1814400, 10800)
-        self._check_ns(zone, zn, [(100, 'ns1')])
+        self._check_ns(zone, zn, [(100, 'ns1.' + zn)])
         self._check_ttl(zone, 'ttl-300.' + zn, 'a', 300)
         self._check_ttl(zone, 'ttl-0.' + zn, 'a', 0)
         self._check_ttl(zone, 'ttl-60.' + zn, 'a', 60)
@@ -206,8 +206,8 @@ class TestDnsZoneImport(unittest.TestCase):
         self._check_ttl(zone, 'xttl-100.' + zn, 'a', 100)
         self._check_ttl(zone, 'xttl-6m.' + zn, 'a', 360)
         self._check_ttl(zone, 'xttl-mix.' + zn, 'a', 788645)
-        #self._check_a(zone, 'c1.' + zn, [(10, '11.1.2.3'), (10, '11.2.3.3')])  # TODO: Fix TTL for second one?  Should be 10...
-        self._check_a(zone, 'c2.' + zn, [(10, '11.2.3.4'), (5, '11.5.6.7')])
+        self._check_a(zone, 'c1.' + zn, [(10, '11.1.2.3'), (10, '11.2.3.3')])
+        self._check_a(zone, 'c2.' + zn, [(5, '11.2.3.4'), (5, '11.5.6.7')])
 
     def test_zone_file_5(self):
         zn = 'example.com.'

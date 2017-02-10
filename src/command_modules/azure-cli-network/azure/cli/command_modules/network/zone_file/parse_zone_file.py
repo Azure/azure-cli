@@ -106,17 +106,15 @@ def _make_parser():
     # parse each RR
     _make_record_parser(parsers, 'SOA', [
         ('ttl', str), ('DELIM', str),
-        ('mname', str), ('rname', str), ('serial', int), ('refresh', str),
-        ('retry', str), ('expire', str), ('minimum', str)
-    ])
-    # special case can result in ambiguous parse
-    # requires extra checking
-    _make_record_parser(parsers, 'SOA', [
-        ('DELIM', str), ('mname', str), ('rname', str), ('serial', int), ('refresh', str),
+        ('host', str), ('email', str), ('serial', int), ('refresh', str),
         ('retry', str), ('expire', str), ('minimum', str)
     ])
     _make_record_parser(parsers, 'SOA', [
-        ('DELIM', str), ('mname', str), ('rname', str), ('serial', int), ('refresh', str),
+        ('DELIM', str), ('host', str), ('email', str), ('serial', int), ('refresh', str),
+        ('retry', str), ('expire', str), ('minimum', str)
+    ])
+    _make_record_parser(parsers, 'SOA', [
+        ('DELIM', str), ('host', str), ('email', str), ('serial', int), ('refresh', str),
         ('retry', str), ('expire', str)
     ])
     _make_record_parser(parsers, 'NS', [('ttl', str, '?'), ('DELIM', str), ('host', str)])
@@ -139,7 +137,6 @@ def _tokenize_line(line):
     Tokenize a line:
     * split tokens on whitespace
     * treat quoted strings as a single token
-    * handle escaped spaces and comment delimiters
     """
     ret = []
     escape = False
@@ -159,7 +156,7 @@ def _tokenize_line(line):
                 if len(tokbuf) > 0:
                     ret.append(tokbuf)
 
-                tokbuf = ""
+                tokbuf = ''
             elif quote:
                 # in quotes
                 tokbuf += c
@@ -168,7 +165,7 @@ def _tokenize_line(line):
                 tokbuf += c
                 escape = False
             else:
-                tokbuf = ""
+                tokbuf = ''
         elif c == '\\':
             escape = True
         elif c == '"':
@@ -176,11 +173,15 @@ def _tokenize_line(line):
                 if quote:
                     # end of quote
                     ret.append(tokbuf)
-                    tokbuf = ""
+                    tokbuf = ''
                     quote = False
                 else:
                     # beginning of quote
                     quote = True
+            else:
+                #append the mystic noodle
+                tokbuf += '\\"'
+                escape = False
         else:
             # normal character
             tokbuf += c
@@ -439,7 +440,42 @@ def _convert_to_seconds(value):
             return seconds
         except ValueError:
             raise CLIError("Unable to convert value '{}' to seconds.".format(value))
-        
+
+
+def _expand_with_origin(record, properties, origin):
+
+    if not isinstance(properties, list):
+        properties = [properties]
+
+    for property in properties:
+        if not record[property].endswith('.'):
+            record[property] = '{}.{}'.format(record[property], origin)
+
+
+def _post_process_ttl(zone):
+
+    for name in zone:
+        for record_type in zone[name]:
+            ttl = min([x['ttl'] for x in zone[name][record_type]])
+            for record in zone[name][record_type]:
+                if record['ttl'] != ttl:
+                    logger.warning('Using lowest TTL {} for the record set. Ignoring value {}'
+                        .format(ttl, record['ttl']))
+                record['ttl'] = ttl
+
+
+def _process_txt_record(record, current_ttl):
+    if not isinstance(record['txt'], list):
+        record['txt'] = [record['txt']]
+    record['ttl'] = _convert_to_seconds(record['ttl']) if 'ttl' in record else current_ttl
+    long_text = ''.join(x for x in record['txt']) if isinstance(record['txt'], list) else record['txt']
+    long_text = long_text.replace('\\', '')
+    record['txt'] = []
+    while len(long_text) > 255:
+        record['txt'].append(long_text[:255])
+        long_text = long_text[255:]
+    record['txt'].append(long_text)
+
 
 def parse_zone_file(text, zone_name, ignore_invalid=False):
     """
@@ -494,26 +530,21 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
             elif record_type == 'soa':
                 for key in ['refresh', 'retry', 'expire', 'minimum']:
                     record[key] = _convert_to_seconds(record[key])
+                _expand_with_origin(record, 'email', current_origin)
+            elif record_type == 'cname':
+                _expand_with_origin(record, 'alias', current_origin)
+            elif record_type == 'mx':
+                _expand_with_origin(record, 'host', current_origin)
+            elif record_type == 'ns':
+                _expand_with_origin(record, 'host', current_origin)
+            elif record_type == 'srv':
+                _expand_with_origin(record, 'target', current_origin)
             elif record_type == 'spf':
                 record_type = 'txt'
 
+            # handle TXT concatenation and splitting separately
             if record_type == 'txt':
-                if not isinstance(record['txt'], list):
-                    record['txt'] = [record['txt']]
-
-                # parser may interpret a text record as TTL because TTL is a string...
-                try:
-                    record['ttl'] = _convert_to_seconds(record['ttl']) if 'ttl' in record else current_ttl
-                except CLIError:
-                    if len(record['txt']):
-                        record['txt'] = [record['ttl']] + record['txt']
-                        record['ttl'] = current_ttl
-                long_text = ''.join(x for x in record['txt']) if isinstance(record['txt'], list) else record['txt']
-                record['txt'] = []
-                while len(long_text) > 255:
-                    record['txt'].append(long_text[:255])
-                    long_text = long_text[255:]
-                record['txt'].append(long_text)
+                _process_txt_record(record, current_ttl)
             else:
                 record['ttl'] = _convert_to_seconds(record['ttl']) if 'ttl' in record else current_ttl
 
@@ -523,4 +554,5 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
                 zone_obj[record_name][record_type] = []
             zone_obj[record_name][record_type].append(record)
 
+    _post_process_ttl(zone_obj)
     return zone_obj
