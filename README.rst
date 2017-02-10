@@ -42,6 +42,7 @@ or:
 
    $ wget -q -O - https://aka.ms/InstallAzureCli | bash
 
+Update with ``$ az component update``
 Install additional components with ``$ az component update --add <component_name>``
 
 Pip
@@ -53,6 +54,7 @@ On Linux, see our `prerequisites <https://github.com/Azure/azure-cli/blob/master
 
    $ pip install --user azure-cli
 
+Update with ``$ az component update``
 Install additional components with ``$ az component update --add <component_name>``
 
 Enable tab completion with ``source az.completion.sh`` (not available on Windows CMD).
