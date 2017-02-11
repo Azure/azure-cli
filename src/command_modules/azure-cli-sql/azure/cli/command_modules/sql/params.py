@@ -31,8 +31,9 @@ with ParametersContext(command='sql db restore-point') as c:
 with ParametersContext(command='sql db service-tier-advisor') as c:
     c.register_alias('database_name', ('--database-name',))
 
-with ParametersContext(command='sql db transparent-data-encryption') as c:
-    c.register_alias('database_name', ('--database-name',))
+## TDE will not be included in the first batch of GA commands
+#with ParametersContext(command='sql db transparent-data-encryption') as c:
+#    c.register_alias('database_name', ('--database-name',))
 
 with ParametersContext(command='sql elastic-pools') as c:
     c.register_alias('elastic_pool_name', ('--name', '-n'))

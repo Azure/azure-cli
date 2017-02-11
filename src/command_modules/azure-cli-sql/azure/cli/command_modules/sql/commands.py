@@ -57,10 +57,11 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
     with s.group('sql db restore-point') as c:
         c.command('list', 'list_restore_points')
 
-    with s.group('sql db transparent-data-encryption') as c:
-        c.command('create', 'create_or_update_transparent_data_encryption_configuration')
-        c.command('show-configuration', 'get_transparent_data_encryption_configuration')
-        c.command('show-activity', 'list_transparent_data_encryption_activity')
+    ## TDE will not be included in the first batch of GA commands
+    #with s.group('sql db transparent-data-encryption') as c:
+    #    c.command('create', 'create_or_update_transparent_data_encryption_configuration')
+    #    c.command('show-configuration', 'get_transparent_data_encryption_configuration')
+    #    c.command('show-activity', 'list_transparent_data_encryption_activity')
 
     with s.group('sql db service-tier-advisor') as c:
         c.command('list', 'list_service_tier_advisors')
