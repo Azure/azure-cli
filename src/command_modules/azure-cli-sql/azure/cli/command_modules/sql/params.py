@@ -10,6 +10,14 @@ with ParametersContext(command='sql db') as c:
     c.register_alias('database_name', ('--name', '-n'))
     c.register_alias('server_name', ('--server-name', '-s'))
 
+with ParametersContext(command='sql db create') as c:
+    c.register_alias('requested_service_objective_name', ('--service-objective-name',))
+    c.register_alias('requested_service_objective_id', ('--service-objective-id',))
+    # Alternative commands will be implemented for non-default create modes
+    c.ignore('create_mode')
+    # Source database id is only used for non-default create modes
+    c.ignore('source_database_id')
+
 with ParametersContext(command='sql db data-warehouse') as c:
     c.register_alias('database_name', ('--database-name',))
 

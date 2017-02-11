@@ -14,8 +14,8 @@ class SqlServerMgmtScenarioTest(ResourceGroupVCRTestBase):
                                                         resource_group='cli-test-sql-mgmt')
         self.sql_server_names = ['cliautomation01', 'cliautomation02']
         self.location = "westus"
-        self.administrator_login = 'admin123'
-        self.administrator_login_password = 'SecretPassword123'
+        self.admin_login = 'admin123'
+        self.admin_password = 'SecretPassword123'
 
     def test_sql_mgmt(self):
         self.execute()
@@ -23,12 +23,12 @@ class SqlServerMgmtScenarioTest(ResourceGroupVCRTestBase):
     def body(self):
         rg = self.resource_group
         loc = self.location
-        user = self.administrator_login
-        password = self.administrator_login_password
+        user = self.admin_login
+        password = self.admin_password
 
         # test create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l {} '
-                 '--administrator-login {} --administrator-login-password {}'
+                 '--admin-login {} --admin-password {}'
                  .format(rg, self.sql_server_names[0], loc, user, password), checks=[
                      JMESPathCheck('name', self.sql_server_names[0]),
                      JMESPathCheck('resourceGroup', rg),
@@ -39,7 +39,7 @@ class SqlServerMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # test create another sql server
         self.cmd('sql server create -g {} --name {} -l {} '
-                 '--administrator-login {} --administrator-login-password {}'
+                 '--admin-login {} --admin-password {}'
                  .format(rg, self.sql_server_names[1], loc, user, password), checks=[
                      JMESPathCheck('name', self.sql_server_names[1]),
                      JMESPathCheck('resourceGroup', rg),
@@ -72,8 +72,8 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
                                                                 resource_group='cli-test-sql-mgmt')
         self.sql_server_name = 'cliautomation03'
         self.location = "westus"
-        self.administrator_login = 'admin123'
-        self.administrator_login_password = 'SecretPassword123'
+        self.admin_login = 'admin123'
+        self.admin_password = 'SecretPassword123'
 
     def test_sql_firewall_mgmt(self):
         self.execute()
@@ -81,8 +81,8 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
     def body(self):
         rg = self.resource_group
         loc = self.location
-        user = self.administrator_login
-        password = self.administrator_login_password
+        user = self.admin_login
+        password = self.admin_password
         firewall_rule_1 = 'rule1'
         start_ip_address_1 = '0.0.0.0'
         end_ip_address_1 = '255.255.255.255'
@@ -92,7 +92,7 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # test create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l {} '
-                 '--administrator-login {} --administrator-login-password {}'
+                 '--admin-login {} --admin-password {}'
                  .format(rg, self.sql_server_name, loc, user, password), checks=[
                      JMESPathCheck('name', self.sql_server_name),
                      JMESPathCheck('resourceGroup', rg),
@@ -162,8 +162,8 @@ class SqlServerServiceObjectiveMgmtScenarioTest(ResourceGroupVCRTestBase):
             __file__, test_method, resource_group='cli-test-sql-mgmt')
         self.sql_server_name = 'cliautomation04'
         self.location = "westus"
-        self.administrator_login = 'admin123'
-        self.administrator_login_password = 'SecretPassword123'
+        self.admin_login = 'admin123'
+        self.admin_password = 'SecretPassword123'
 
     def test_sql_service_objective_mgmt(self):
         self.execute()
@@ -171,12 +171,12 @@ class SqlServerServiceObjectiveMgmtScenarioTest(ResourceGroupVCRTestBase):
     def body(self):
         rg = self.resource_group
         loc = self.location
-        user = self.administrator_login
-        password = self.administrator_login_password
+        user = self.admin_login
+        password = self.admin_password
 
         # test create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l {} '
-                 '--administrator-login {} --administrator-login-password {}'
+                 '--admin-login {} --admin-password {}'
                  .format(rg, self.sql_server_name, loc, user, password), checks=[
                      JMESPathCheck('name', self.sql_server_name),
                      JMESPathCheck('resourceGroup', rg),
@@ -205,8 +205,8 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
             __file__, test_method, resource_group='cli-test-sql-mgmt')
         self.sql_server_name = 'cliautomation05'
         self.location = "westus"
-        self.administrator_login = 'admin123'
-        self.administrator_login_password = 'SecretPassword123'
+        self.admin_login = 'admin123'
+        self.admin_password = 'SecretPassword123'
         self.database_name = "cliautomationdb01"
 
     def test_sql_db_mgmt(self):
@@ -215,12 +215,12 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
     def body(self):
         rg = self.resource_group
         loc = self.location
-        user = self.administrator_login
-        password = self.administrator_login_password
+        user = self.admin_login
+        password = self.admin_password
 
         # create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l {} '
-                 '--administrator-login {} --administrator-login-password {}'
+                 '--admin-login {} --admin-password {}'
                  .format(rg, self.sql_server_name, loc, user, password), checks=[
                      JMESPathCheck('name', self.sql_server_name),
                      JMESPathCheck('resourceGroup', rg),
@@ -273,8 +273,8 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
             __file__, test_method, resource_group='cli-test-sql-mgmt')
         self.sql_server_name = 'cliautomation06'
         self.location = "westus"
-        self.administrator_login = 'admin123'
-        self.administrator_login_password = 'SecretPassword123'
+        self.admin_login = 'admin123'
+        self.admin_password = 'SecretPassword123'
         self.database_name = "cliautomationdb02"
         self.pool_name = "cliautomationpool01"
 
@@ -284,12 +284,12 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
     def body(self):
         rg = self.resource_group
         loc = self.location
-        user = self.administrator_login
-        password = self.administrator_login_password
+        user = self.admin_login
+        password = self.admin_password
 
         # create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l {} '
-                 '--administrator-login {} --administrator-login-password {}'
+                 '--admin-login {} --admin-password {}'
                  .format(rg, self.sql_server_name, loc, user, password), checks=[
                      JMESPathCheck('name', self.sql_server_name),
                      JMESPathCheck('resourceGroup', rg),
