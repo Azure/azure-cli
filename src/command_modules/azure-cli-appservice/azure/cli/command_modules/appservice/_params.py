@@ -111,4 +111,5 @@ register_cli_argument('appservice web source-control', 'manual_integration', act
 register_cli_argument('appservice web source-control', 'repo_url', help='repository url to pull the latest source from, e.g. https://github.com/foo/foo-web')
 register_cli_argument('appservice web source-control', 'branch', help='the branch name of the repository')
 register_cli_argument('appservice web source-control', 'repository_type', help='repository type', default='git', **enum_choice_list(['git', 'mercurial']))
+register_cli_argument('appservice web source-control', 'git_token', help='git access token required for auto sync')
 

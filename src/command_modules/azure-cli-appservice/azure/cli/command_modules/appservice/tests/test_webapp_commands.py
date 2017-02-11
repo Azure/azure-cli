@@ -66,7 +66,7 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
         result = self.cmd('appservice web config show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
             JMESPathCheck('detailedErrorLoggingEnabled', True),
             JMESPathCheck('httpLoggingEnabled', True),
-            JMESPathCheck('scmType', 'LocalGit'), 
+            JMESPathCheck('scmType', 'LocalGit'),
             JMESPathCheck('requestTracingEnabled', True)
             #TODO: contact webapp team for where to retrieve 'level'
             ])

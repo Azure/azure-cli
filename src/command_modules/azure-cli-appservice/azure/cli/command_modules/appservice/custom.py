@@ -13,7 +13,7 @@ except ImportError:
     from urlparse import urlparse # pylint: disable=import-error
 
 from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan,
-                                   SkuDescription, SslState, HostNameBinding, SiteSourceControl)
+                                   SkuDescription, SslState, HostNameBinding)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
@@ -218,11 +218,16 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
 
 
 def config_source_control(resource_group_name, name, repo_url, repository_type=None, branch=None,
-                          manual_integration=None, slot=None):
+                          git_token=None, manual_integration=None, slot=None):
+    from azure.mgmt.web.models import SiteSourceControl, SourceControl
     client = web_client_factory()
     location = _get_location_from_webapp(client, resource_group_name, name)
+    if git_token:
+        sc = SourceControl(location, name='GitHub', token = git_token)
+        client.update_source_control('GitHub', sc)
+
     source_control = SiteSourceControl(location, repo_url=repo_url, branch=branch,
-                                       is_manual_integration=True if manual_integration is None else manual_integration,
+                                       is_manual_integration=manual_integration,
                                        is_mercurial=(repository_type != 'git'))
     return _generic_site_operation(resource_group_name, name,
                                    'create_or_update_source_control',
