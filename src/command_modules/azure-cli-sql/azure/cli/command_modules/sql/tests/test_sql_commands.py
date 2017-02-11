@@ -247,9 +247,10 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('name', self.database_name),
                      JMESPathCheck('resourceGroup', rg)])
 
-        self.cmd('sql db show-usage -g {} --server-name {} --name {}'
-                 .format(rg, self.sql_server_name, self.database_name), checks=[
-                     JMESPathCheck('[0].resourceName', self.database_name)])
+        ## Usages will not be included in the first batch of GA commands
+        #self.cmd('sql db show-usage -g {} --server-name {} --name {}'
+        #         .format(rg, self.sql_server_name, self.database_name), checks=[
+        #             JMESPathCheck('[0].resourceName', self.database_name)])
 
         self.cmd('sql db update -g {} --server-name {} --name {} '
                  '--set tags.key1=value1'

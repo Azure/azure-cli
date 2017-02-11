@@ -15,7 +15,8 @@ with ServiceGroup(__name__, get_sql_servers_operation, server_operations) as s:
         c.command('create', 'create_or_update')
         c.command('delete', 'delete')
         c.command('show', 'get_by_resource_group')
-        c.command('show-usage', 'list_usages')
+        ## Usages will not be included in the first batch of GA commands
+        #c.command('show-usage', 'list_usages')
         c.command('list', 'list_by_resource_group')
         c.generic_update_command('update', 'get_by_resource_group', 'create_or_update')
 
@@ -38,7 +39,8 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
         c.command('create', 'create_or_update')
         c.command('show', 'get')
         c.command('list', 'list_by_server')
-        c.command('show-usage', 'list_usages')
+        ## Usages will not be included in the first batch of GA commands
+        #c.command('show-usage', 'list_usages')
         c.command('delete', 'delete')
         c.generic_update_command('update', 'get', 'create_or_update')
 
