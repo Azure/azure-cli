@@ -8,6 +8,7 @@ from ._util import ParametersContext, patch_arg_make_required
 
 with ParametersContext(command='sql db') as c:
     c.register_alias('database_name', ('--name', '-n'))
+    c.register_alias('server_name', ('--server-name', '-s'))
 
 with ParametersContext(command='sql db data-warehouse') as c:
     c.register_alias('database_name', ('--database-name',))
