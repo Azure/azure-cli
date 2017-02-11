@@ -12,6 +12,7 @@ import paramiko
 from sshtunnel import SSHTunnelForwarder
 from scp import SCPClient
 
+
 def SecureCopy(user, host, src, dest,
                key_filename=os.path.join(os.path.expanduser("~"), '.ssh', 'id_rsa')):
     ssh = paramiko.SSHClient()
@@ -23,6 +24,7 @@ def SecureCopy(user, host, src, dest,
 
     scp.get(src, dest)
     scp.close()
+
 
 class ACSClient(object):
     def __init__(self, client=None):
@@ -149,11 +151,10 @@ class ACSClient(object):
         if local_port is 0:
             local_port = self.get_available_local_port()
 
-        with SSHTunnelForwarder(
-            (self.host, self.port),
-            ssh_username=self.username,
-            remote_bind_address=(remote_host, remote_port),
-            local_bind_address=('0.0.0.0', local_port)):
+        with SSHTunnelForwarder((self.host, self.port),
+                                ssh_username=self.username,
+                                remote_bind_address=(remote_host, remote_port),
+                                local_bind_address=('0.0.0.0', local_port)):
             try:
                 while True:
                     sleep(1)
