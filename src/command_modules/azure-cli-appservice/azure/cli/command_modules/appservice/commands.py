@@ -51,7 +51,7 @@ cli_command(__name__, 'appservice web deployment list-site-credentials',
             'azure.mgmt.web.operations.web_apps_operations#WebAppsOperations.list_publishing_credentials', factory)
 
 factory = lambda _: web_client_factory()
-cli_command(__name__, 'appservice web deployment user show', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.get_publishing_credentials', factory)
+cli_command(__name__, 'appservice web deployment user show', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.get_publishing_user', factory)
 
 factory = lambda _: web_client_factory().app_service_plans
 cli_command(__name__, 'appservice plan create', 'azure.cli.command_modules.appservice.custom#create_app_service_plan')

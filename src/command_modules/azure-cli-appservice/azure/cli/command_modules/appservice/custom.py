@@ -326,20 +326,21 @@ def _get_location_from_app_service_plan(client, resource_group_name, plan):
     return plan.location
 
 def _get_local_git_url(client, resource_group_name, name, slot=None):
-    user = client.get_publishing_credentials()
+    user = client.get_publishing_user()
     result = _generic_site_operation(resource_group_name, name, 'get_source_control', slot)
     parsed = urlparse(result.repo_url)
     return '{}://{}@{}/{}.git'.format(parsed.scheme, user.publishing_user_name,
                                       parsed.netloc, name)
 
 def _get_scm_url(client, resource_group_name, name, slot=None):
-    if slot is None:
-        poller = client.web_apps.list_publishing_credentials(resource_group_name, name,
-                                                               slot)
-    else:
-        poller = client.web_apps.list_publishing_credentials_slot(resource_group_name, name)
-    result = poller.result()
-    return result.scm_uri
+    from azure.mgmt.web.models import HostType
+    webapp = show_webapp(resource_group_name, name, slot=slot)
+    for host in webapp.host_name_ssl_states or []:
+        if host.host_type == HostType.repository:
+            return "https://{}".format(host.name)
+
+    # this should not happen, but throw anyway
+    raise ValueError('Failed to retrieve Scm Uri')
 
 def set_deployment_user(user_name, password=None):
     '''

@@ -53,12 +53,11 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
             ])
 
-        # TODO: bring it back after service gets fixed
-        #result = self.cmd('appservice web source-control config-local-git -g {} -n {}'.format(self.resource_group, webapp_name))
-        #self.assertTrue(result['url'].endswith(webapp_name + '.git'))
-        #self.cmd('appservice web source-control show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
-        #    JMESPathCheck('repoUrl', 'https://{}.scm.azurewebsites.net'.format(webapp_name))
-        #    ])
+        result = self.cmd('appservice web source-control config-local-git -g {} -n {}'.format(self.resource_group, webapp_name))
+        self.assertTrue(result['url'].endswith(webapp_name + '.git'))
+        self.cmd('appservice web source-control show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
+            JMESPathCheck('repoUrl', 'https://{}.scm.azurewebsites.net'.format(webapp_name))
+            ])
 
         #turn on diagnostics
         test_cmd = ('appservice web log config -g {} -n {} --level verbose'.format(self.resource_group, webapp_name) + ' '
@@ -67,7 +66,7 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
         result = self.cmd('appservice web config show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
             JMESPathCheck('detailedErrorLoggingEnabled', True),
             JMESPathCheck('httpLoggingEnabled', True),
-            #JMESPathCheck('scmType', 'LocalGit'), # TODO: bring it back
+            JMESPathCheck('scmType', 'LocalGit'), 
             JMESPathCheck('requestTracingEnabled', True)
             #TODO: contact webapp team for where to retrieve 'level'
             ])
