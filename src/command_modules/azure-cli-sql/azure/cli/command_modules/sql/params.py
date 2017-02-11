@@ -28,8 +28,9 @@ with ParametersContext(command='sql db replication-link') as c:
 with ParametersContext(command='sql db restore-point') as c:
     c.register_alias('database_name', ('--database-name',))
 
-with ParametersContext(command='sql db service-tier-advisor') as c:
-    c.register_alias('database_name', ('--database-name',))
+## Service tier advisor will not be included in the first batch of GA commands
+#with ParametersContext(command='sql db service-tier-advisor') as c:
+#    c.register_alias('database_name', ('--database-name',))
 
 ## TDE will not be included in the first batch of GA commands
 #with ParametersContext(command='sql db transparent-data-encryption') as c:
