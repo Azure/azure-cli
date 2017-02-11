@@ -49,9 +49,10 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
         c.command('failover', 'failover_replication_link')
         c.command('force-failover', 'failover_replication_link_allow_data_loss')
 
-    with s.group('sql db data-warehouse') as c:
-        c.command('pause', 'pause_data_warehouse')
-        c.command('resume', 'resume_data_warehouse')
+    ## Data Warehouse will not be included in the first batch of GA commands
+    #with s.group('sql db data-warehouse') as c:
+    #    c.command('pause', 'pause_data_warehouse')
+    #    c.command('resume', 'resume_data_warehouse')
 
     with s.group('sql db restore-point') as c:
         c.command('list', 'list_restore_points')

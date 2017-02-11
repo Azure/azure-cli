@@ -18,8 +18,9 @@ with ParametersContext(command='sql db create') as c:
     # Source database id is only used for non-default create modes
     c.ignore('source_database_id')
 
-with ParametersContext(command='sql db data-warehouse') as c:
-    c.register_alias('database_name', ('--database-name',))
+## Data Warehouse will not be included in the first batch of GA commands
+#with ParametersContext(command='sql db data-warehouse') as c:
+#    c.register_alias('database_name', ('--database-name',))
 
 with ParametersContext(command='sql db replication-link') as c:
     c.register_alias('database_name', ('--database-name',))
