@@ -40,6 +40,9 @@ with ParametersContext(command='sql elastic-pools recommended db') as c:
 
 with ParametersContext(command='sql server') as c:
     c.register_alias('server_name', ('--name', '-n'))
+    c.register_alias('administrator_login', ('--admin-login', '-u'))
+    c.register_alias('administrator_login_password', ('--admin-password', '-p'))
+    c.register_alias('version', ('--version-TODO-REMOVE-ME',))
 
 with ParametersContext(command='sql server firewall') as c:
     c.register_alias('server_name', ('--server-name',))
