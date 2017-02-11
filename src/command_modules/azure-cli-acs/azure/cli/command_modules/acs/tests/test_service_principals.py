@@ -9,7 +9,9 @@ import tempfile
 import unittest
 
 from azure.cli.core._util import CLIError
-from azure.cli.command_modules.acs.custom import _validate_service_principal, load_acs_service_principal, store_acs_service_principal
+from azure.cli.command_modules.acs.custom import _validate_service_principal, \
+    load_acs_service_principal, store_acs_service_principal
+
 
 class AcsServicePrincipalTest(unittest.TestCase):
     def test_load_non_existent_service_principal(self):
