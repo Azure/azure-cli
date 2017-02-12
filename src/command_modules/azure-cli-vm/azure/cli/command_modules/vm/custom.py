@@ -598,13 +598,71 @@ def capture_vm(resource_group_name, vm_name, vhd_name_prefix,
     print(json.dumps(result.output, indent=2))  # pylint: disable=no-member
 
 
-def reset_windows_admin(
-        resource_group_name, vm_name, username, password):
+def set_user(resource_group_name, vm_name, username, password=None, ssh_key_value=None):
+    '''Update or Add(only on Linux VM) users
+    :param username: user name
+    :param password: user password.
+    :param ssh_key_value: SSH key file value or key file path
+    '''
+    vm = get_vm(resource_group_name, vm_name, 'instanceView')
+    if _is_linx_vm(vm):
+        return _set_linux_user(resource_group_name, vm_name, username, password, ssh_key_value)
+    else:
+        if ssh_key_value:
+            raise CLIError('SSH key is not appliable on a Windows VM')
+        return _reset_windows_admin(resource_group_name, vm, username, password)
+
+
+def delete_user(
+        resource_group_name, vm_name, username):
+    '''Remove a user(not supported on Windows VM)
+    :param username: user name
+    '''
+    vm = get_vm(resource_group_name, vm_name, 'instanceView')
+    if not _is_linx_vm(vm):
+        raise CLIError('Deleting a user is not supported on Windows VM')
+    poller = _update_linux_access_extension(resource_group_name, vm_name,
+                                            {'remove_user': username})
+    return ExtensionUpdateLongRunningOperation('deleting user', 'done')(poller)
+
+
+def reset_linux_ssh(resource_group_name, vm_name):
+    '''Reset the SSH configuration In Linux VM'''
+    vm = get_vm(resource_group_name, vm_name, 'instanceView')
+    if not _is_linx_vm(vm):
+        raise CLIError('Resetting SSH is not supported in Windows VM')
+    poller = _update_linux_access_extension(resource_group_name, vm_name,
+                                            {'reset_ssh': True})
+    return ExtensionUpdateLongRunningOperation('resetting SSH', 'done')(poller)
+
+
+def _is_linx_vm(vm):
+    os_type = vm.storage_profile.os_disk.os_type.value
+    return os_type.lower() == 'linux'
+
+
+def _set_linux_user(
+        resource_group_name, vm_name, username, password=None, ssh_key_value=None):
+    protected_settings = {}
+    protected_settings['username'] = username
+    if password:
+        protected_settings['password'] = password
+    elif not ssh_key_value and not password:  # default to ssh
+        ssh_key_value = os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
+
+    if ssh_key_value:
+        protected_settings['ssh_key'] = read_content_if_is_file(ssh_key_value)
+
+    poller = _update_linux_access_extension(resource_group_name, vm_name,
+                                            protected_settings)
+    return ExtensionUpdateLongRunningOperation('setting user', 'done')(poller)
+
+
+def _reset_windows_admin(
+        resource_group_name, vm, username, password):
     '''Update the password.
     You can only change the password. Adding a new user is not supported.
     '''
-    vm = get_vm(resource_group_name, vm_name, 'instanceView')
-
     client = _compute_client_factory()
 
     from azure.mgmt.compute.models import VirtualMachineExtension
@@ -621,46 +679,9 @@ def reset_windows_admin(
                                   settings={'UserName': username},
                                   auto_upgrade_minor_version=auto_upgrade)
 
-    poller = client.virtual_machine_extensions.create_or_update(resource_group_name, vm_name,
+    poller = client.virtual_machine_extensions.create_or_update(resource_group_name, vm.name,
                                                                 _ACCESS_EXT_HANDLER_NAME, ext)
     return ExtensionUpdateLongRunningOperation('resetting admin', 'done')(poller)
-
-
-def set_linux_user(
-        resource_group_name, vm_name, username, password=None, ssh_key_value=None):
-    '''create or update a user credential
-    :param username: user name
-    :param password: user password.
-    :param ssh_key_value: SSH key file value or key file path
-    '''
-    protected_settings = {}
-    protected_settings['username'] = username
-    if password:
-        protected_settings['password'] = password
-    elif not ssh_key_value and not password:  # default to ssh
-        ssh_key_value = os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
-
-    if ssh_key_value:
-        protected_settings['ssh_key'] = read_content_if_is_file(ssh_key_value)
-
-    poller = _update_linux_access_extension(resource_group_name, vm_name,
-                                            protected_settings)
-    return ExtensionUpdateLongRunningOperation('setting user', 'done')(poller)
-
-
-def delete_linux_user(
-        resource_group_name, vm_name, username):
-    '''Remove the user '''
-    poller = _update_linux_access_extension(resource_group_name, vm_name,
-                                            {'remove_user': username})
-    return ExtensionUpdateLongRunningOperation('deleting user', 'done')(poller)
-
-
-def reset_linux_ssh(resource_group_name, vm_name):
-    '''Reset the SSH configuration'''
-    poller = _update_linux_access_extension(resource_group_name, vm_name,
-                                            {'reset_ssh': True})
-    return ExtensionUpdateLongRunningOperation('resetting SSH', 'done')(poller)
 
 
 def _update_linux_access_extension(resource_group_name, vm_name, protected_settings):
