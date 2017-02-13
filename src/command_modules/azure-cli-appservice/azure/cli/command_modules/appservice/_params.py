@@ -11,7 +11,7 @@ from azure.cli.core.commands.parameters import (resource_group_name_type, locati
                                                 get_resource_name_completion_list, file_type,
                                                 CliArgumentType, ignore_type, enum_choice_list)
 
-from azure.mgmt.web.models import (DatabaseServerType, FrequencyUnit)
+from azure.mgmt.web.models import (DatabaseServerType)
 
 from ._client_factory import web_client_factory
 
@@ -110,7 +110,6 @@ register_cli_argument('appservice web config hostname', 'webapp', help="webapp n
 register_cli_argument('appservice web config hostname', 'name', arg_type=name_arg_type, completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name')
 
 db_types = [DatabaseServerType.my_sql, DatabaseServerType.sql_azure]
-frequency_units = [FrequencyUnit.hour, FrequencyUnit.day]
 
 register_cli_argument('appservice web config backup', 'storage_account_url', help='URL with SAS token to the blob storage container', options_list=['--container-url'])
 register_cli_argument('appservice web config backup', 'webapp_name', help='The name of the webapp')
@@ -126,7 +125,7 @@ register_cli_argument('appservice web config backup update', 'retention_period_i
 
 register_cli_argument('appservice web config backup restore', 'backup_name', help='Name of the backup to restore')
 register_cli_argument('appservice web config backup restore', 'target_name', help='Name of the app which will be overwritten with the restored data. If unspecified, the target is the source webapp')
-register_cli_argument('appservice web config backup restore', 'overwrite', help='Overwrite the source webapp, if target_name is not specified', action='store_true')
+register_cli_argument('appservice web config backup restore', 'overwrite', help='Overwrite the source webapp, if --target-name is not specified', action='store_true')
 register_cli_argument('appservice web config backup restore', 'ignore_hostname_conflict', help='Ignores custom hostnames stored in the backup', action='store_true')
 
 register_cli_argument('appservice web source-control', 'manual_integration', action='store_true', help='disable automatic sync between source control and web')

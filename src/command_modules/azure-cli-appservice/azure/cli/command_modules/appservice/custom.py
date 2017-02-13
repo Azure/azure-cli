@@ -12,6 +12,8 @@ try:
 except ImportError:
     from urlparse import urlparse # pylint: disable=import-error
 
+from msrestazure.azure_exceptions import CloudError
+
 from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan,
                                    SkuDescription, SslState, HostNameBinding, SiteSourceControl,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
@@ -310,7 +312,7 @@ def create_backup(resource_group_name, webapp_name, storage_account_url,
                   db_name=None, db_type=None,
                   db_connection_string=None, backup_name=None, slot=None):
     client = web_client_factory()
-    if backup_name is not None and backup_name.lower().endswith('.zip'):
+    if backup_name and backup_name.lower().endswith('.zip'):
         backup_name = backup_name[:-4]
     location = _get_location_from_webapp(client, resource_group_name, webapp_name)
     db_setting = _create_db_setting(db_name, db_type, db_connection_string)
@@ -332,38 +334,25 @@ def update_backup_schedule(resource_group_name, webapp_name, storage_account_url
     try:
         configuration = _generic_site_operation(resource_group_name, webapp_name,
                                                 'get_site_backup_configuration', slot)
-    except:
+    except CloudError:
         # No configuration set yet
-        if not storage_account_url or not frequency or not retention_period_in_days:
-            raise CLIError('No backup configuration found. Specify container-url, ' +
-                           'frequency, and retention period to create one.')
+        if not all([storage_account_url, frequency, retention_period_in_days]):
+            raise CLIError('No backup configuration found. A configuration must be created. ' +
+                           'Usage: --container-url URL --frequency TIME --retention DAYS')
 
-    storage_account_url = storage_account_url or configuration.storage_account_url
-    if keep_at_least_one_backup is None:
-        keep_at_least_one_backup = configuration.backup_schedule.keep_at_least_one_backup
-    retention_period_in_days = (retention_period_in_days or 
-                                configuration.backup_schedule.retention_period_in_days)
+    # If arguments were not specified, use the values in the current backup schedule
+    if storage_account_url is None:
+        storage_account_url = configuration.storage_account_url
+
+    if retention_period_in_days is None:
+        retention_period_in_days = configuration.backup_schedule.retention_period_in_days
 
     if frequency:
         # Parse schedule frequency
-        unit_part = frequency.lower()[-1]
-        if unit_part == 'd':
-            frequency_unit = FrequencyUnit.day
-        elif unit_part == 'h':
-            frequency_unit = FrequencyUnit.hour
-        else:
-            raise CLIError('Frequency must end with d or h for "day" or "hour"')
-
-        try:
-            frequency_num = int(frequency[:-1])
-        except ValueError:
-            raise CLIError('Frequency must start with a number')
-
-        if frequency_num < 0:
-            raise CLIError('Frequency must be positive')
+        frequency_num, frequency_unit = _parse_frequency(frequency)
     else:
-        frequency_unit = configuration.backup_schedule.frequency_unit
         frequency_num = configuration.backup_schedule.frequency_interval
+        frequency_unit = configuration.backup_schedule.frequency_unit
 
     if configuration and configuration.databases:
         db = configuration.databases[0]
@@ -403,12 +392,29 @@ def restore_backup(resource_group_name, webapp_name, storage_account_url, backup
         return client.sites.restore_site(resource_group_name, webapp_name, 0, restore_request)
 
 def _create_db_setting(db_name, db_type, db_connection_string):
-    if db_name and db_type and db_connection_string:
+    if all([db_name, db_type, db_connection_string]):
         return [DatabaseBackupSetting(db_type, db_name, connection_string=db_connection_string)]
-    elif not db_name and not db_type and not db_connection_string:
-        return None
+    elif any([db_name, db_type, db_connection_string]):
+        raise CLIError('usage error: --db-name NAME --db-type TYPE --db-connection-string STRING')
+
+def _parse_frequency(frequency):
+    unit_part = frequency.lower()[-1]
+    if unit_part == 'd':
+        frequency_unit = FrequencyUnit.day
+    elif unit_part == 'h':
+        frequency_unit = FrequencyUnit.hour
     else:
-        raise CLIError('db-name, db-type, and db-connection-string must all be specified together')
+        raise CLIError('Frequency must end with d or h for "day" or "hour"')
+
+    try:
+        frequency_num = int(frequency[:-1])
+    except ValueError:
+        raise CLIError('Frequency must start with a number')
+
+    if frequency_num < 0:
+        raise CLIError('Frequency must be positive')
+
+    return frequency_num, frequency_unit
 
 def _normalize_sku(sku):
     sku = sku.upper()

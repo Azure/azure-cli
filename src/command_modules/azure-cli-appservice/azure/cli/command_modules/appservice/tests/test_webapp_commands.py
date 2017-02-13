@@ -438,7 +438,7 @@ class WebappBackupRestoreScenarioTest(ResourceGroupVCRTestBase):
         database_name = 'cli-db'
         database_type = 'SQLAzure'
         backup_name = 'mybackup'
-        
+
         create_checks = [
             JMESPathCheck('backupItemName', backup_name),
             JMESPathCheck('storageAccountUrl', sas_url),
