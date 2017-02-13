@@ -7,7 +7,7 @@ import os
 from six.moves import configparser
 
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._config import GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH
+from azure.cli.core._config import GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH, set_global_config_value
 from azure.cli.core._util import CLIError
 
 CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
@@ -177,17 +177,7 @@ KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE
 
 
 def _set_active_cloud(cloud_name):
-    global_config = configparser.SafeConfigParser()
-    global_config.read(GLOBAL_CONFIG_PATH)
-    try:
-        global_config.add_section('cloud')
-    except configparser.DuplicateSectionError:
-        pass
-    global_config.set('cloud', 'name', cloud_name)
-    if not os.path.isdir(GLOBAL_CONFIG_DIR):
-        os.makedirs(GLOBAL_CONFIG_DIR)
-    with open(GLOBAL_CONFIG_PATH, 'w') as configfile:
-        global_config.write(configfile)
+    set_global_config_value('cloud', 'name', cloud_name)
 
 
 def get_active_cloud_name():
