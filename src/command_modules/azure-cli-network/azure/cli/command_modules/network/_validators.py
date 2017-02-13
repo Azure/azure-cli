@@ -144,6 +144,14 @@ def validate_inbound_nat_rule_name_or_id(namespace):
         namespace.inbound_nat_rule = _generate_lb_subproperty_id(
             namespace, 'inboundNatRules', rule_name)
 
+def validate_location(namespace):
+    if not namespace.location:
+        from azure.mgmt.resource.resources import ResourceManagementClient
+        from azure.cli.core.commands.client_factory import get_mgmt_service_client
+        resource_client = get_mgmt_service_client(ResourceManagementClient)
+        rg = resource_client.resource_groups.get(namespace.resource_group_name)
+        namespace.location = rg.location  # pylint: disable=no-member
+
 def validate_metadata(namespace):
     if namespace.metadata:
         namespace.metadata = dict(x.split('=', 1) for x in namespace.metadata)
@@ -517,6 +525,8 @@ def process_vnet_gateway_create_namespace(namespace):
             'incorrect usage: --bgp-peering-address IP --asn ASN [--peer-weight WEIGHT]')
 
 def process_vpn_connection_create_namespace(namespace):
+
+    validate_location(namespace)
 
     args = [a for a in [namespace.express_route_circuit2,
                         namespace.local_gateway2,
