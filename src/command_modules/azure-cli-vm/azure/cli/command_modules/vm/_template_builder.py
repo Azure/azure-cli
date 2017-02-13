@@ -385,7 +385,7 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
                 'lun': image_data_disk.lun,
                 'createOption': "fromImage",
             })
-        lun = max([d.lun for d in image_data_disks]) + 1 if image_data_disks else 1
+        lun = max([d.lun for d in image_data_disks]) + 1 if image_data_disks else 0
         for size in data_disk_sizes_gb:
             profile['dataDisks'].append({
                 'lun': lun,
