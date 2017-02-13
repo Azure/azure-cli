@@ -80,8 +80,8 @@ register_cli_argument('vm availability-set create', 'availability_set_name', nam
 register_cli_argument('vm availability-set create', 'unmanaged', action='store_true', help='contained VMs should use unmanaged disks')
 register_cli_argument('vm availability-set create', 'validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
 
-register_cli_argument('vm access', 'username', options_list=('--username', '-u'), help='The user name')
-register_cli_argument('vm access', 'password', options_list=('--password', '-p'), help='The user password')
+register_cli_argument('vm user', 'username', options_list=('--username', '-u'), help='The user name')
+register_cli_argument('vm user', 'password', options_list=('--password', '-p'), help='The user password')
 
 register_cli_argument('acs', 'name', arg_type=name_arg_type)
 register_cli_argument('acs', 'orchestrator_type', **enum_choice_list(ContainerServiceOchestratorTypes))

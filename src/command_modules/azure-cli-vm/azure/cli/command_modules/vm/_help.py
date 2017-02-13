@@ -235,22 +235,22 @@ helps['vm'] = """
     type: group
     short-summary: Provision Linux and Windows virtual machines in minutes
 """
-helps['vm access'] = """
+helps['vm user'] = """
     type: group
-    short-summary: Manage user access
+    short-summary: Manage users
 """
 
-helps['vm access delete-linux-user'] = """
+helps['vm user delete'] = """
     type: command
     long-summary: >
         Delete a user account without logging into to the VM directly.
     examples:
         - name: Delete User
-          text: az vm access delete-linux-user -u username -n vm-name -r group_name
+          text: az vm user delete -u username -n vm-name -r group_name
 {0}
-""".format(vm_ids_example.format('Delete User by VM Ids', 'az vm access delete-linux-user -u username'))
+""".format(vm_ids_example.format('Delete User by VM Ids', 'az vm user delete -u username'))
 
-helps['vm access reset-linux-ssh'] = """
+helps['vm user reset-ssh'] = """
     type: command
     short-summary: Reset the SSH configuration.
     long-summary: >
@@ -258,29 +258,21 @@ helps['vm access reset-linux-ssh'] = """
         default values. The user account (name, password or SSH keys) will not be changed.
     examples:
         - name: Reset SSH
-          text: az vm access reset-linux-ssh -n vm-name -r group_name
+          text: az vm user reset-ssh -n vm-name -r group_name
 {0}
-""".format(vm_ids_example.format('Reset SSH by VM Ids', 'vm access reset-linux-ssh'))
+""".format(vm_ids_example.format('Reset SSH by VM Ids', 'vm user reset-ssh'))
 
-helps['vm access set-linux-user'] = """
+helps['vm user update'] = """
     type: command
     long-summary: Note, the user will have an admin's privilege.
     examples:
-        - name: Set Linux User Access
-          text: az vm access set-linux-user -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n vm-name -r group_name
-{0}
-""".format(vm_ids_example.format('Set Linux User Access by VM Ids', 'vm access set-linux-user -u username '
-                                                                    '--ssh-key-value "$(< ~/.ssh/id_rsa.pub)"'))
-
-helps['vm access reset-windows-admin'] = """
-    type: command
-    long-summary: Note, this resets the admin's credentials. You can't add a new admin.
-    examples:
         - name: Reset Windows Admin
-          text: az vm access reset-windows-admin -u username -p password -n vm-name -g resource_group_name
+          text: az vm user update -u username -p password -n vm-name -g resource_group_name
+        - name: Set Linux User
+          text: az vm user update -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n vm-name -r group_name
 {0}
-""".format(vm_ids_example.format('Reset Windows Admin by VM Ids', 'vm access reset-windows-admin -u username -p '
-                                                                  'password'))
+""".format(vm_ids_example.format('Set Linux User by VM Ids', 'vm user update -u username '
+                                 '--ssh-key-value "$(< ~/.ssh/id_rsa.pub)"'))
 
 helps['vm availability-set'] = """
     type: group

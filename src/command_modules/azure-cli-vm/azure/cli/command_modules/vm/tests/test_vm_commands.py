@@ -386,7 +386,7 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # py
         self.vm_name = 'vm-state-mod'
         self.nsg_name = 'mynsg'
         self.ip_name = 'mypubip'
-        self.storage_name = 'ab394fvkdj34'
+        self.storage_name = 'ab394fvkdj39'
         self.vnet_name = 'myvnet'
 
     def test_vm_create_state_modifications(self):
@@ -432,8 +432,8 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # py
         ])
         self._check_vm_power_state('PowerState/running')
 
-        self.cmd('vm access set-linux-user -g {} -n {} -u foouser1 -p Foo12345 '.format(self.resource_group, self.vm_name))
-        self.cmd('vm access delete-linux-user -g {} -n {} -u foouser1'.format(self.resource_group, self.vm_name))
+        self.cmd('vm user update -g {} -n {} -u foouser1 -p Foo12345 '.format(self.resource_group, self.vm_name))
+        self.cmd('vm user delete -g {} -n {} -u foouser1'.format(self.resource_group, self.vm_name))
 
         self.cmd('network nsg show --resource-group {} --name {}'.format(
             self.resource_group, self.nsg_name), checks=[
