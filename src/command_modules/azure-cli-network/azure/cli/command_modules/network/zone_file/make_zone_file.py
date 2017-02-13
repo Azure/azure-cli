@@ -24,6 +24,7 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
 #pylint: skip-file
+from __future__ import print_function
 
 def make_zone_file(json_obj):
     """
@@ -50,8 +51,7 @@ def make_zone_file(json_obj):
     import azure.cli.command_modules.network.zone_file.record_processors as record_processors
     from six import StringIO
 
-    old_stdout = sys.stdout
-    sys.stdout = zone_file = StringIO()
+    zone_file = StringIO()
 
     HEADER = """
 ; Exported zone file from Azure DNS\n\
@@ -68,7 +68,7 @@ $ORIGIN {origin}\n\
         datetime=json_obj.pop('datetime'),
         ttl=json_obj.pop('$ttl'),
         origin=json_obj.pop('$origin')
-    ))
+    ), file=zone_file)
 
     for record_set_name in json_obj.keys():
 
@@ -91,13 +91,12 @@ $ORIGIN {origin}\n\
             
             for entry in record:
                 method = 'process_{}'.format(record_type.strip('$'))
-                getattr(record_processors, method)(entry, record_set_name, first_line)
+                getattr(record_processors, method)(zone_file, entry, record_set_name, first_line)
                 first_line = False
 
-            print('')
+            print('', file=zone_file)
     
     result = zone_file.getvalue()
-    sys.stdout = old_stdout
     zone_file.close()
 
     return result

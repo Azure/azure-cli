@@ -1378,7 +1378,7 @@ def _type_to_property_name(key):
     return type_dict[key.lower()]
 
 
-def export_zone(resource_group_name, zone_name, file_name=None):
+def export_zone(resource_group_name, zone_name):
     from time import localtime, strftime
 
     client = get_mgmt_service_client(DnsManagementClient)
@@ -1442,14 +1442,7 @@ def export_zone(resource_group_name, zone_name, file_name=None):
 
             zone_obj[record_set_name][record_type].append(record_obj)
 
-    zone_file_text = make_zone_file(zone_obj)
-
-    if file_name:
-        with open(file_name, 'w') as f:
-            f.write(zone_file_text)
-            return
-    else:
-        print(zone_file_text)
+    print(make_zone_file(zone_obj))
 
 
 # pylint: disable=too-many-return-statements

@@ -29,15 +29,15 @@ from __future__ import print_function
 
 import copy
 
-def process_soa(data, name, print_name=False):
+def process_soa(io, data, name, print_name=False):
     """
     Replace {SOA} in template with a set of serialized SOA records
     """
     indent = ' ' * len('{} {} IN SOA '.format(name, data['ttl']))
-    print('{} {} IN SOA {} {} ('.format(name, data['ttl'], data['mname'], data['rname']))
+    print('{} {} IN SOA {} {} ('.format(name, data['ttl'], data['mname'], data['rname']), file=io)
     for item in ['serial', 'refresh', 'retry', 'expire', 'minimum']:
-        print('{}{} ; {}'.format(indent, data[item], item))
-    print('{})'.format(indent))
+        print('{}{} ; {}'.format(indent, data[item], item), file=io)
+    print('{})'.format(indent), file=io)
 
 def _quote_field(data, field):
     """
@@ -53,7 +53,7 @@ def _quote_field(data, field):
     return data
 
 
-def process_rr(data, record_type, record_keys, name, print_name):
+def process_rr(io, data, record_type, record_keys, name, print_name):
     """ Print out single line record entries """
     if data is None:
         return
@@ -64,39 +64,39 @@ def process_rr(data, record_type, record_keys, name, print_name):
         raise ValueError('record_keys must be a string or list of strings')
 
     name_display = name if print_name else ' ' * len(name)
-    print('{} {} IN {} '.format(name_display, data['ttl'], record_type), end='')
+    print('{} {} IN {} '.format(name_display, data['ttl'], record_type), end='', file=io)
 
     for i, key in enumerate(record_keys):
-        print(data[key], end='\n' if i == len(record_keys) - 1 else ' ')
+        print(data[key], end='\n' if i == len(record_keys) - 1 else ' ', file=io)
 
 
-def process_ns(data, name, print_name=False):
-    process_rr(data, 'NS', 'host', name, print_name)
+def process_ns(io, data, name, print_name=False):
+    process_rr(io, data, 'NS', 'host', name, print_name)
 
 
-def process_a(data, name, print_name=False):
-    return process_rr(data, 'A', 'ip', name, print_name)
+def process_a(io, data, name, print_name=False):
+    return process_rr(io, data, 'A', 'ip', name, print_name)
 
 
-def process_aaaa(data, name, print_name=False):
-    return process_rr(data, 'AAAA', 'ip', name, print_name)
+def process_aaaa(io, data, name, print_name=False):
+    return process_rr(io, data, 'AAAA', 'ip', name, print_name)
 
 
-def process_cname(data, name, print_name=False):
-    return process_rr(data, 'CNAME', 'alias', name, print_name)
+def process_cname(io, data, name, print_name=False):
+    return process_rr(io, data, 'CNAME', 'alias', name, print_name)
 
 
-def process_mx(data, name, print_name=False):
-    return process_rr(data, 'MX', ['preference', 'host'], name, print_name)
+def process_mx(io, data, name, print_name=False):
+    return process_rr(io, data, 'MX', ['preference', 'host'], name, print_name)
 
 
-def process_ptr(data, name, print_name=False):
-    return process_rr(data, 'PTR', 'host', name, print_name)
+def process_ptr(io, data, name, print_name=False):
+    return process_rr(io, data, 'PTR', 'host', name, print_name)
 
 
-def process_txt(data, name, print_name=False):
-    return process_rr(_quote_field(data, 'txt'), 'TXT', 'txt', name, print_name)
+def process_txt(io, data, name, print_name=False):
+    return process_rr(io, _quote_field(data, 'txt'), 'TXT', 'txt', name, print_name)
 
 
-def process_srv(data, name, print_name=False):
-    return process_rr(data, 'SRV', ['priority', 'weight', 'port', 'target'], name, print_name)
+def process_srv(io, data, name, print_name=False):
+    return process_rr(io, data, 'SRV', ['priority', 'weight', 'port', 'target'], name, print_name)
