@@ -90,13 +90,14 @@ recommanded_elastic_pools_ops = \
     create_service_adapter('azure.mgmt.sql.operations.recommended_elastic_pools_operations',
                            'RecommendedElasticPoolsOperations')
 
-with ServiceGroup(__name__, get_sql_recommended_elastic_pools_operations,
-                  recommanded_elastic_pools_ops) as s:
-    with s.group('sql elastic-pool recommended') as c:
-        c.command('show', 'get')
-        c.command('show-metrics', 'list_metrics')
-        c.command('list', 'list')
+#with ServiceGroup(__name__, get_sql_recommended_elastic_pools_operations,
+#                  recommanded_elastic_pools_ops) as s:
+    ## Recommended elastic pools will not be included in the first batch of GA commands
+    #with s.group('sql elastic-pool recommended') as c:
+    #    c.command('show', 'get')
+    #    c.command('show-metrics', 'list_metrics')
+    #    c.command('list', 'list')
 
-    with s.group('sql elastic-pool recommended db') as c:
-        c.command('show', 'get_databases')
-        c.command('list', 'list_databases')
+    #with s.group('sql elastic-pool recommended db') as c:
+    #    c.command('show', 'get_databases')
+    #    c.command('list', 'list_databases')

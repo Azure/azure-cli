@@ -43,12 +43,13 @@ with ParametersContext(command='sql elastic-pool db') as c:
     c.register_alias('elastic_pool_name', ('--elastic-pool-name',))
     c.register_alias('database_name', ('--name', '-n'))
 
-with ParametersContext(command='sql elastic-pool recommended') as c:
-    c.register_alias('recommended_elastic_pool_name', ('--name', '-n'))
+## Recommended elastic pools will not be included in the first batch of GA commands
+#with ParametersContext(command='sql elastic-pool recommended') as c:
+#    c.register_alias('recommended_elastic_pool_name', ('--name', '-n'))
 
-with ParametersContext(command='sql elastic-pool recommended db') as c:
-    c.register_alias('recommended_elastic_pool_name', ('--recommended-elastic-pool-name',))
-    c.register_alias('database_name', ('--name', '-n'))
+#with ParametersContext(command='sql elastic-pool recommended db') as c:
+#    c.register_alias('recommended_elastic_pool_name', ('--recommended-elastic-pool-name',))
+#    c.register_alias('database_name', ('--name', '-n'))
 
 with ParametersContext(command='sql server') as c:
     c.register_alias('server_name', ('--name', '-n'))
