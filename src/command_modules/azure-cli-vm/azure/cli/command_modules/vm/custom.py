@@ -287,7 +287,7 @@ def list_ip_addresses(resource_group_name=None, vm_name=None):
 
 
 def create_managed_disk(resource_group_name, disk_name, location=None,
-                        size_gb=None, sku=None,
+                        size_gb=None, sku='Premium_LRS',
                         source=None,  # pylint: disable=unused-argument
                         # below are generated internally from 'source'
                         source_blob_uri=None, source_disk=None, source_snapshot=None):
@@ -329,7 +329,7 @@ def attach_managed_data_disk(resource_group_name, vm_name, disk,
                                            ManagedDiskParameters, DataDisk)
     # pylint: disable=no-member
     luns = [d.lun for d in vm.storage_profile.data_disks] if vm.storage_profile.data_disks else []
-    lun = max(luns) + 1 if luns else 1
+    lun = max(luns) + 1 if luns else 0
     if new:
         if not size_gb:
             raise CLIError('usage error: --size-gb required to create an empty disk for attach')
@@ -367,7 +367,7 @@ def attach_managed_data_disk_to_vmss(resource_group_name, vmss_name, size_gb, lu
     data_disks = vmss.virtual_machine_profile.storage_profile.data_disks or []
     if lun is None:
         luns = [d.lun for d in data_disks]
-        lun = max(luns) + 1 if luns else 1
+        lun = max(luns) + 1 if luns else 0
     data_disk = VirtualMachineScaleSetDataDisk(lun, DiskCreateOptionTypes.empty,
                                                disk_size_gb=size_gb)
     data_disks.append(data_disk)
@@ -394,7 +394,7 @@ def grant_disk_access(resource_group_name, disk_name, duration_in_seconds):
 
 
 def create_snapshot(resource_group_name, snapshot_name, location=None,
-                    size_gb=None, sku=None,
+                    size_gb=None, sku='Standard_LRS',
                     source=None,  # pylint: disable=unused-argument
                     # below are generated internally from 'source'
                     source_blob_uri=None, source_disk=None, source_snapshot=None):
@@ -521,7 +521,7 @@ def attach_unmanaged_data_disk(resource_group_name, vm_name, new=False, vhd_uri=
         disk_name = vm_name + '-' + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     # pylint: disable=no-member
     if vhd_uri is None:
-        if not hasattr(vm.storage_profile.os_disk, 'vhd'):
+        if not hasattr(vm.storage_profile.os_disk, 'vhd') or not vm.storage_profile.os_disk.vhd:
             raise CLIError('Adding unmanaged disks to a VM with managed disks is not supported')
         blob_uri = vm.storage_profile.os_disk.vhd.uri
         vhd_uri = blob_uri[0:blob_uri.rindex('/') + 1] + disk_name + '.vhd'
@@ -1432,7 +1432,7 @@ def create_vm(vm_name, resource_group_name, image=None,
               public_ip_address_dns_name=None,
               os_disk_name=None, os_type=None, storage_account=None,
               storage_caching='ReadWrite', storage_container_name='vhds',
-              storage_sku='Standard_LRS', use_unmanaged_disk=False,
+              storage_sku='Premium_LRS', use_unmanaged_disk=False,
               managed_os_disk=None, data_disk_sizes_gb=None, image_data_disks=None,
               vnet_name=None, vnet_address_prefix='10.0.0.0/16',
               subnet=None, subnet_address_prefix='10.0.0.0/24', storage_profile=None,
