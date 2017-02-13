@@ -121,10 +121,9 @@ cli_command(__name__, 'vmss nic list-vm-nics', 'azure.mgmt.network.operations.ne
 cli_command(__name__, 'vmss nic show', 'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.get_virtual_machine_scale_set_network_interface', cf_ni)
 
 # VM Access
-cli_command(__name__, 'vm access set-linux-user', custom_path.format('set_linux_user'))
-cli_command(__name__, 'vm access delete-linux-user', custom_path.format('delete_linux_user'))
-cli_command(__name__, 'vm access reset-linux-ssh', custom_path.format('reset_linux_ssh'))
-cli_command(__name__, 'vm access reset-windows-admin', custom_path.format('reset_windows_admin'))
+cli_command(__name__, 'vm user update', custom_path.format('set_user'))
+cli_command(__name__, 'vm user delete', custom_path.format('delete_user'))
+cli_command(__name__, 'vm user reset-ssh', custom_path.format('reset_linux_ssh'))
 
 # # VM Availability Set
 cli_command(__name__, 'vm availability-set create', custom_path.format('create_av_set'), transform=transform_av_set_output)
