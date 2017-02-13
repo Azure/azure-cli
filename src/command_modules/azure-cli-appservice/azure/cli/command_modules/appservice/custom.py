@@ -125,7 +125,7 @@ def update_site_configs(resource_group_name, name, slot=None,
     args, _, _, values = inspect.getargvalues(frame) #pylint: disable=deprecated-method
     for arg in args[3:]:
         if arg is not None:
-            setattr(configs, arg, values[arg] if arg not in bool_flags else values[arg]=='true')
+            setattr(configs, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 
     return _generic_site_operation(resource_group_name, name, 'update_configuration', slot, configs)
 
@@ -195,7 +195,7 @@ def delete_hostname(resource_group_name, webapp_name, name, slot=None):
         return client.web_apps.delete_host_name_binding(resource_group_name, webapp_name, name)
     else:
         return client.web_apps.delete_host_name_binding_slot(resource_group_name,
-                                                               webapp_name, slot, name)
+                                                             webapp_name, slot, name)
 
 def list_hostnames(resource_group_name, webapp_name, slot=None):
     return _generic_site_operation(resource_group_name, webapp_name, 'list_host_name_bindings',
@@ -223,7 +223,7 @@ def config_source_control(resource_group_name, name, repo_url, repository_type=N
     client = web_client_factory()
     location = _get_location_from_webapp(client, resource_group_name, name)
     if git_token:
-        sc = SourceControl(location, name='GitHub', token = git_token)
+        sc = SourceControl(location, name='GitHub', token=git_token)
         client.update_source_control('GitHub', sc)
 
     source_control = SiteSourceControl(location, repo_url=repo_url, branch=branch,
@@ -247,7 +247,8 @@ def enable_local_git(resource_group_name, name, slot=None):
     if slot is None:
         client.web_apps.create_or_update_configuration(resource_group_name, name, site_config)
     else:
-        client.web_apps.create_or_update_configuration_slot(resource_group_name, name, site_config, slot)
+        client.web_apps.create_or_update_configuration_slot(resource_group_name, name,
+                                                            site_config, slot)
 
     return {'url' : _get_local_git_url(client, resource_group_name, name, slot)}
 
@@ -337,7 +338,7 @@ def _get_local_git_url(client, resource_group_name, name, slot=None):
     return '{}://{}@{}/{}.git'.format(parsed.scheme, user.publishing_user_name,
                                       parsed.netloc, name)
 
-def _get_scm_url(client, resource_group_name, name, slot=None):
+def _get_scm_url(resource_group_name, name, slot=None):
     from azure.mgmt.web.models import HostType
     webapp = show_webapp(resource_group_name, name, slot=slot)
     for host in webapp.host_name_ssl_states or []:
@@ -437,13 +438,13 @@ def delete_slot(resource_group_name, webapp, slot):
     client.web_apps.delete_slot(resource_group_name, webapp, slot)
 
 def get_streaming_log(resource_group_name, name, provider=None, slot=None):
-    client = web_client_factory()
-    scm_url = _get_scm_url(client, resource_group_name, name, slot)
+    scm_url = _get_scm_url(resource_group_name, name, slot)
     streaming_url = scm_url + '/logstream'
     import time
     if provider:
         streaming_url += ('/' + provider.lstrip('/'))
 
+    client = web_client_factory()
     user, password = _get_site_credential(client, resource_group_name, name)
     t = threading.Thread(target=_stream_trace, args=(streaming_url, user, password))
     t.daemon = True
@@ -456,8 +457,7 @@ def download_historical_logs(resource_group_name, name, log_file=None, slot=None
     '''
     Download historical logs as a zip file
     '''
-    client = web_client_factory()
-    scm_url = _get_scm_url(client, resource_group_name, name, slot)
+    scm_url = _get_scm_url(resource_group_name, name, slot)
     url = scm_url.rstrip('/') + '/dump'
     import requests
     r = requests.get(url, stream=True)
