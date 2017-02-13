@@ -24,16 +24,9 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
 #pylint: skip-file
+from __future__ import print_function
 
-from .record_processors import (
-    process_origin, process_ttl, process_soa, process_ns, process_a,
-    process_aaaa, process_cname, process_mx, process_ptr, process_txt,
-    process_srv, process_spf, process_uri
-)
-from .configs import DEFAULT_TEMPLATE
-
-
-def make_zone_file(json_zone_file, template=None):
+def make_zone_file(json_obj):
     """
     Generate the DNS zonefile, given a json-encoded description of the
     zone file (@json_zone_file) and the template to fill in (@template)
@@ -54,32 +47,56 @@ def make_zone_file(json_zone_file, template=None):
         "uri":     [ uri records ]
     }
     """
+    import sys
+    import azure.cli.command_modules.network.zone_file.record_processors as record_processors
+    from six import StringIO
 
-    if template is None:
-        template = DEFAULT_TEMPLATE[:]
+    zone_file = StringIO()
 
-    soa_records = [json_zone_file.get('soa')] if json_zone_file.get('soa') else None
+    HEADER = """
+; Exported zone file from Azure DNS\n\
+;      Zone name: {zone_name}\n\
+;      Resource Group Name: {resource_group}\n\
+;      Date and time (UTC): {datetime}\n\n\
+$TTL {ttl}\n\
+$ORIGIN {origin}\n\
+    """
+    zone_name = json_obj.pop('zone-name')
+    print(HEADER.format(
+        zone_name=zone_name,
+        resource_group=json_obj.pop('resource-group'),
+        datetime=json_obj.pop('datetime'),
+        ttl=json_obj.pop('$ttl'),
+        origin=json_obj.pop('$origin')
+    ), file=zone_file)
 
-    zone_file = template
-    zone_file = process_origin(json_zone_file.get('$origin', None), zone_file)
-    zone_file = process_ttl(json_zone_file.get('$ttl', None), zone_file)
-    zone_file = process_soa(soa_records, zone_file)
-    zone_file = process_ns(json_zone_file.get('ns', None), zone_file)
-    zone_file = process_a(json_zone_file.get('a', None), zone_file)
-    zone_file = process_aaaa(json_zone_file.get('aaaa', None), zone_file)
-    zone_file = process_cname(json_zone_file.get('cname', None), zone_file)
-    zone_file = process_mx(json_zone_file.get('mx', None), zone_file)
-    zone_file = process_ptr(json_zone_file.get('ptr', None), zone_file)
-    zone_file = process_txt(json_zone_file.get('txt', None), zone_file)
-    zone_file = process_srv(json_zone_file.get('srv', None), zone_file)
-    zone_file = process_spf(json_zone_file.get('spf', None), zone_file)
-    zone_file = process_uri(json_zone_file.get('uri', None), zone_file)
+    for record_set_name in json_obj.keys():
 
-    # remove newlines, but terminate with one
-    zone_file = "\n".join(
-        filter(
-            lambda l: len(l.strip()) > 0, [tl.strip() for tl in zone_file.split("\n")]
-        )
-    ) + "\n"
+        record_set = json_obj[record_set_name]
+        if isinstance(record_set, str):
+            # These are handled above so we can skip them
+            continue
 
-    return zone_file
+        first_line = True
+        record_set_keys = list(record_set.keys())
+        if 'soa' in record_set_keys:
+            record_set_keys.remove('soa')
+            record_set_keys = ['soa'] + record_set_keys
+
+        for record_type in record_set_keys:
+
+            record = record_set[record_type]
+            if not isinstance(record, list):
+                record = [record]
+            
+            for entry in record:
+                method = 'process_{}'.format(record_type.strip('$'))
+                getattr(record_processors, method)(zone_file, entry, record_set_name, first_line)
+                first_line = False
+
+            print('', file=zone_file)
+    
+    result = zone_file.getvalue()
+    zone_file.close()
+
+    return result

@@ -8,8 +8,6 @@
 #pylint: disable=bad-continuation
 #pylint: disable=too-many-lines
 import os
-import re
-import tempfile
 
 from azure.cli.core.commands.arm import resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -1269,19 +1267,8 @@ class NetworkZoneImportExportTest(ResourceGroupVCRTestBase):
 
     def body(self):
         zone_name = 'myzone.com'
-        zone_file_path = os.path.join(TEST_DIR, 'zone.txt')
+        zone_file_path = os.path.join(TEST_DIR, 'zone_files', 'zone1.txt')
 
         self.cmd('network dns zone import -n {} -g {} --file-name "{}"'
                  .format(zone_name, self.resource_group, zone_file_path))
-
-        _, temp_file_path = tempfile.mkstemp()
-        self.cmd('network dns zone export -n {} -g {} --file-name "{}"'
-                 .format(zone_name, self.resource_group, temp_file_path))
-
-        temp_file_text = None
-        with open(temp_file_path, 'r') as f:
-            temp_file_text = f.read()
-        temp_file_text = re.sub('ns..?-..', 'ns0-00', temp_file_text)
-
-        with open(zone_file_path, 'r') as f:
-            self.assertEqual(temp_file_text, f.read(), 'Exported file {} should match imported file'.format(temp_file_path))
+        self.cmd('network dns zone export -n {} -g {}'.format(zone_name, self.resource_group))
