@@ -275,8 +275,6 @@ class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('vm show -g {} -n {}'.format(self.resource_group, new_vm_name), checks=[
             JMESPathCheck('length(storageProfile.dataDisks)', 1),
             JMESPathCheck('storageProfile.dataDisks[0].diskSizeGb', 1),
-            JMESPathCheck('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS'),
-            JMESPathCheck('storageProfile.osDisk.managedDisk.storageAccountType', 'Standard_LRS'),
             JMESPathCheck('storageProfile.osDisk.osType', 'Linux')
         ])
         # use it to create a vmss
@@ -338,11 +336,11 @@ class VMManagedDiskScenarioTest(ResourceGroupVCRTestBase):
 
         # create a disk and update
         data_disk = self.cmd('disk create -g {} -n {} --size-gb {}'.format(self.resource_group, disk_name, 1), checks=[
-            JMESPathCheck('accountType', 'Standard_LRS'),
+            JMESPathCheck('accountType', 'Premium_LRS'),
             JMESPathCheck('diskSizeGb', 1)
         ])
-        self.cmd('disk update -g {} -n {} --size-gb {} --sku {}'.format(self.resource_group, disk_name, 10, 'Premium_LRS'), checks=[
-            JMESPathCheck('accountType', 'Premium_LRS'),
+        self.cmd('disk update -g {} -n {} --size-gb {} --sku {}'.format(self.resource_group, disk_name, 10, 'Standard_LRS'), checks=[
+            JMESPathCheck('accountType', 'Standard_LRS'),
             JMESPathCheck('diskSizeGb', 10)
         ])
 
@@ -641,7 +639,7 @@ class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=t
         super(VMCreateUbuntuScenarioTest, self).set_up()
 
     def body(self):
-        self.cmd('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' --location {location}'.format(
+        self.cmd('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' --location {location} --data-disk-sizes-gb 1'.format(
             rg=self.resource_group,
             admin=self.admin_username,
             vm_name=self.vm_names[0],
@@ -657,6 +655,8 @@ class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=t
             JMESPathCheck('osProfile.computerName', self.vm_names[0]),
             JMESPathCheck('osProfile.linuxConfiguration.disablePasswordAuthentication', True),
             JMESPathCheck('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', TEST_SSH_KEY_PUB),
+            JMESPathCheck('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
+            JMESPathCheck('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
         ])
 
 
