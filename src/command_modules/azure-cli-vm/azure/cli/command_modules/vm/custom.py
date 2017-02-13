@@ -602,7 +602,7 @@ def set_user(resource_group_name, vm_name, username, password=None, ssh_key_valu
     '''Update or Add(only on Linux VM) users
     :param username: user name
     :param password: user password.
-    :param ssh_key_value: SSH key file value or key file path
+    :param ssh_key_value: SSH public key file value or public key file path
     '''
     vm = get_vm(resource_group_name, vm_name, 'instanceView')
     if _is_linx_vm(vm):
