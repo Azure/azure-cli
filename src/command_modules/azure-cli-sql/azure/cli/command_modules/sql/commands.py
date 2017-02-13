@@ -74,14 +74,14 @@ elasticpools_ops = create_service_adapter('azure.mgmt.sql.operations.elastic_poo
                                           'ElasticPoolsOperations')
 
 with ServiceGroup(__name__, get_sql_elasticpools_operations, elasticpools_ops) as s:
-    with s.group('sql elastic-pools') as c:
+    with s.group('sql elastic-pool') as c:
         c.command('create', 'create_or_update')
         c.command('delete', 'delete')
         c.command('show', 'get')
         c.command('list', 'list_by_server')
         c.generic_update_command('update', 'get', 'create_or_update')
 
-    with s.group('sql elastic-pools db') as c:
+    with s.group('sql elastic-pool db') as c:
         c.command('list', 'list_databases')
         c.command('show', 'get_database')
         c.command('show-activity', 'list_database_activity')
@@ -92,11 +92,11 @@ recommanded_elastic_pools_ops = \
 
 with ServiceGroup(__name__, get_sql_recommended_elastic_pools_operations,
                   recommanded_elastic_pools_ops) as s:
-    with s.group('sql elastic-pools recommended') as c:
+    with s.group('sql elastic-pool recommended') as c:
         c.command('show', 'get')
         c.command('show-metrics', 'list_metrics')
         c.command('list', 'list')
 
-    with s.group('sql elastic-pools recommended db') as c:
+    with s.group('sql elastic-pool recommended db') as c:
         c.command('show', 'get_databases')
         c.command('list', 'list_databases')

@@ -36,17 +36,17 @@ with ParametersContext(command='sql db restore-point') as c:
 #with ParametersContext(command='sql db transparent-data-encryption') as c:
 #    c.register_alias('database_name', ('--database-name',))
 
-with ParametersContext(command='sql elastic-pools') as c:
+with ParametersContext(command='sql elastic-pool') as c:
     c.register_alias('elastic_pool_name', ('--name', '-n'))
 
-with ParametersContext(command='sql elastic-pools db') as c:
+with ParametersContext(command='sql elastic-pool db') as c:
     c.register_alias('elastic_pool_name', ('--elastic-pool-name',))
     c.register_alias('database_name', ('--name', '-n'))
 
-with ParametersContext(command='sql elastic-pools recommended') as c:
+with ParametersContext(command='sql elastic-pool recommended') as c:
     c.register_alias('recommended_elastic_pool_name', ('--name', '-n'))
 
-with ParametersContext(command='sql elastic-pools recommended db') as c:
+with ParametersContext(command='sql elastic-pool recommended db') as c:
     c.register_alias('recommended_elastic_pool_name', ('--recommended-elastic-pool-name',))
     c.register_alias('database_name', ('--name', '-n'))
 
@@ -82,7 +82,7 @@ with ParametersContext(command='sql db create') as c:
 
     c.expand('parameters', Database)
 
-with ParametersContext(command='sql elastic-pools create') as c:
+with ParametersContext(command='sql elastic-pool create') as c:
     from azure.mgmt.sql.models.elastic_pool import ElasticPool
 
     c.expand('parameters', ElasticPool)

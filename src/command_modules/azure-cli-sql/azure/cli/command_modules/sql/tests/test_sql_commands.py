@@ -296,26 +296,26 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('administratorLogin', user)])
 
-        # test sql elastic-pools commands
-        self.cmd('sql elastic-pools create -g {} --server-name {} -l {} --name {}'
+        # test sql elastic-pool commands
+        self.cmd('sql elastic-pool create -g {} --server-name {} -l {} --name {}'
                  .format(rg, self.sql_server_name, loc, self.pool_name), checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
                      JMESPathCheck('state', 'Ready')])
 
-        self.cmd('sql elastic-pools show -g {} --server-name {} --name {}'
+        self.cmd('sql elastic-pool show -g {} --server-name {} --name {}'
                  .format(rg, self.sql_server_name, self.pool_name), checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
                      JMESPathCheck('state', 'Ready')])
 
-        self.cmd('sql elastic-pools list -g {} --server-name {}'
+        self.cmd('sql elastic-pool list -g {} --server-name {}'
                  .format(rg, self.sql_server_name), checks=[
                      JMESPathCheck('[0].resourceGroup', rg),
                      JMESPathCheck('[0].name', self.pool_name),
                      JMESPathCheck('[0].state', 'Ready')])
 
-        self.cmd('sql elastic-pools update -g {} --server-name {} --name {} '
+        self.cmd('sql elastic-pool update -g {} --server-name {} --name {} '
                  '--set tags.key1=value1'
                  .format(rg, self.sql_server_name, self.pool_name), checks=[
                      JMESPathCheck('resourceGroup', rg),
@@ -323,7 +323,7 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('state', 'Ready'),
                      JMESPathCheck('tags.key1', 'value1')])
 
-        self.cmd('sql elastic-pools update -g {} --server-name {} --name {} '
+        self.cmd('sql elastic-pool update -g {} --server-name {} --name {} '
                  '--remove tags.key1'
                  .format(rg, self.sql_server_name, self.pool_name), checks=[
                      JMESPathCheck('resourceGroup', rg),
@@ -341,8 +341,8 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('elasticPoolName', self.pool_name),
                      JMESPathCheck('status', 'Online')])
 
-        # test sql elastic-pools db sub-group commands
-        self.cmd('sql elastic-pools db list -g {} --server-name {} --elastic-pool-name {}'
+        # test sql elastic-pool db sub-group commands
+        self.cmd('sql elastic-pool db list -g {} --server-name {} --elastic-pool-name {}'
                  .format(rg, self.sql_server_name, self.pool_name),
                  checks=[
                      JMESPathCheck('length(@)', 1),
@@ -351,7 +351,7 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('[0].elasticPoolName', self.pool_name),
                      JMESPathCheck('[0].status', 'Online')])
 
-        self.cmd('sql elastic-pools db show -g {} --server-name {} --elastic-pool-name {} '
+        self.cmd('sql elastic-pool db show -g {} --server-name {} --elastic-pool-name {} '
                  '--name {}'
                  .format(rg, self.sql_server_name, self.pool_name, self.database_name),
                  checks=[
@@ -360,7 +360,7 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('elasticPoolName', self.pool_name),
                      JMESPathCheck('status', 'Online')])
 
-        self.cmd('sql elastic-pools db show-activity -g {} --server-name {} --elastic-pool-name {}'
+        self.cmd('sql elastic-pool db show-activity -g {} --server-name {} --elastic-pool-name {}'
                  .format(rg, self.sql_server_name, self.pool_name),
                  checks=[
                      JMESPathCheck('length(@)', 1),
@@ -373,7 +373,7 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                  .format(rg, self.sql_server_name, self.database_name), checks=[NoneCheck()])
 
         # delete sql elastic pool
-        self.cmd('sql elastic-pools delete -g {} --server-name {} --name {}'
+        self.cmd('sql elastic-pool delete -g {} --server-name {} --name {}'
                  .format(rg, self.sql_server_name, self.pool_name), checks=[NoneCheck()])
 
         # delete sql server

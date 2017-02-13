@@ -79,23 +79,23 @@ helps['sql db service-tier-advisor'] = """
             type: group
             short-summary: Manage database service tier advisors
             """
-helps['sql elastic-pools'] = """
+helps['sql elastic-pool'] = """
             type: group
             short-summary: Commands to manage database elastic pools
             """
-helps['sql elastic-pools update'] = """
+helps['sql elastic-pool update'] = """
             type: command
             short-summary: Update a database elastic pool
             """
-helps['sql elastic-pools db'] = """
+helps['sql elastic-pool db'] = """
             type: group
             short-summary: Command to manage databases activities in database elastic pools
             """
-helps['sql elastic-pools recommended'] = """
+helps['sql elastic-pool recommended'] = """
             type: group
             short-summary: Commands to see information about an Azure SQL Recommended Elastic Pool
             """
-helps['sql elastic-pools recommended db'] = """
+helps['sql elastic-pool recommended db'] = """
             type: group
             short-summary: Commands to see information about an Azure SQL database inside of Recommended Elastic Pool
             """
