@@ -10,9 +10,9 @@ from msrestazure.azure_exceptions import CloudError
 
 from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid_resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.cli.core._util import CLIError
+from azure.cli.core._util import CLIError, random_string
 from ._client_factory import _compute_client_factory
-from azure.cli.command_modules.vm._vm_utils import random_string, check_existence
+from azure.cli.command_modules.vm._vm_utils import check_existence
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.azlogging as azlogging
 

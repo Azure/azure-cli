@@ -1461,7 +1461,7 @@ def create_vm(vm_name, resource_group_name, image=None,
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_type=None,
               nic_type=None, validate=False, custom_data=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.cli.command_modules.vm._vm_utils import random_string
+    from azure.cli.core._util import random_string
     from azure.cli.command_modules.vm._template_builder import (
         ArmTemplateBuilder, build_vm_resource, build_storage_account_resource, build_nic_resource,
         build_vnet_resource, build_nsg_resource, build_public_ip_resource,
@@ -1599,7 +1599,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                 load_balancer_type=None, vnet_type=None, public_ip_type=None, storage_profile=None,
                 single_placement_group=None, custom_data=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.cli.command_modules.vm._vm_utils import random_string
+    from azure.cli.core._util import random_string
     from azure.cli.command_modules.vm._template_builder import (
         ArmTemplateBuilder, StorageProfile, build_vmss_resource, build_storage_account_resource,
         build_vnet_resource, build_public_ip_resource, build_load_balancer_resource,
@@ -1717,7 +1717,7 @@ def create_av_set(availability_set_name, resource_group_name, location=None, no_
                   unmanaged=False, tags=None, validate=False):
     from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
-    from azure.cli.command_modules.vm._vm_utils import random_string
+    from azure.cli.core._util import random_string
     from azure.cli.command_modules.vm._template_builder import (ArmTemplateBuilder,
                                                                 build_av_set_resource)
 

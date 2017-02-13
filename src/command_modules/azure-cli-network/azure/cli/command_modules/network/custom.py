@@ -915,6 +915,18 @@ update_nsg_rule.__doc__ = SecurityRule.__doc__
 
 # endregion
 
+def create_vpn_connection(resource_group_name, location, connection_name, vnet_gateway1,
+                          vnet_gateway2=None, express_route_circuit2=None, local_gateway2=None,
+                          authorization_key=None, enable_bgp=False, routing_weight=10,
+                          connection_type=None, shared_key=None, tags=None, no_wait=False):
+    from azure.mgmt.network.models import virtual_network_gateway_connection
+    vpn_connection = virtual_network_gateway_connection(
+        vnet_gateway1, connection_type, location, tags, authorization_key, vnet_gateway2,
+        local_gateway2, routing_weight, shared_key, express_route_circuit2, enable_bgp)
+    return _network_client_factory().virtual_network_gateway_connections.create_or_update(
+        resource_group_name, connection_name, vpn_connection, raw=no_wait)
+
+
 def update_vpn_connection(instance, routing_weight=None, shared_key=None, tags=None,
                           enable_bgp=None):
     ncf = _network_client_factory()
