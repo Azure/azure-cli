@@ -111,7 +111,7 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
         result = self.cmd('appservice web config show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
             JMESPathCheck('alwaysOn', False),
             JMESPathCheck('autoHealEnabled', False),
-            JMESPathCheck('phpVersion', '5.4'),
+            JMESPathCheck('phpVersion', '5.6'),
             JMESPathCheck('netFrameworkVersion', 'v4.0'),
             JMESPathCheck('pythonVersion', ''),
             JMESPathCheck('use32BitWorkerProcess', True),
@@ -122,13 +122,13 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
         checks = [
             JMESPathCheck('alwaysOn', True),
             JMESPathCheck('autoHealEnabled', True),
-            JMESPathCheck('phpVersion', '5.5'),
+            JMESPathCheck('phpVersion', '7.0'),
             JMESPathCheck('netFrameworkVersion', 'v3.0'),
             JMESPathCheck('pythonVersion', '3.4'),
             JMESPathCheck('use32BitWorkerProcess', False),
             JMESPathCheck('webSocketsEnabled', True)
             ]
-        result = self.cmd('appservice web config update -g {} -n {} --always-on true --auto-heal-enabled true --php-version 5.5 --net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false --web-sockets-enabled=true'.format(
+        result = self.cmd('appservice web config update -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.0 --net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false --web-sockets-enabled=true'.format(
             self.resource_group, self.webapp_name), checks=checks)
         result = self.cmd('appservice web config show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=checks)
 
@@ -235,7 +235,7 @@ class LinuxWebappSceanrioTest(ResourceGroupVCRTestBase):
 
     def body(self):
         plan = 'webapp-linux-plan'
-        webapp = 'webapp-linux'
+        webapp = 'webapp-linux1'
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(self.resource_group, plan), checks=[
             JMESPathCheck('reserved', True), #this weird field means it is a linux
             JMESPathCheck('sku.name', 'S1'),
@@ -271,7 +271,7 @@ class WebappGitScenarioTest(ResourceGroupVCRTestBase):
 
     def body(self):
         plan = 'webapp-git-plan5'
-        webapp = 'web-git-test'
+        webapp = 'web-git-test2'
 
         #You can create and use any repros with the 3 files under "./sample_web"
         test_git_repo = 'https://github.com/yugangw-msft/azure-site-test'
@@ -281,7 +281,6 @@ class WebappGitScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('appservice web source-control config -g {} -n {} --repo-url {} --branch {}'.format(self.resource_group, webapp, test_git_repo, 'master'), checks=[
             JMESPathCheck('repoUrl', test_git_repo),
-            JMESPathCheck('isManualIntegration', False),
             JMESPathCheck('isMercurial', False),
             JMESPathCheck('branch', 'master')
             ])
@@ -296,12 +295,8 @@ class WebappGitScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('appservice web source-control show -g {} -n {}'.format(self.resource_group, webapp), checks=[
             JMESPathCheck('repoUrl', test_git_repo),
-            JMESPathCheck('isManualIntegration', False),
             JMESPathCheck('isMercurial', False),
             JMESPathCheck('branch', 'master')
-            ])
-        self.cmd('appservice web source-control config -g {} -n {} --repo-url {} --manual-integration'.format(self.resource_group, webapp, test_git_repo), checks=[
-            JMESPathCheck('isManualIntegration', True)
             ])
         self.cmd('appservice web source-control delete -g {} -n {}'.format(self.resource_group, webapp), checks=[
             JMESPathCheck('repoUrl', None)
@@ -310,19 +305,22 @@ class WebappGitScenarioTest(ResourceGroupVCRTestBase):
 class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(WebappSlotScenarioTest, self).__init__(__file__, test_method, resource_group='cli-webapp-slot2')
-        self.webapp = 'web-slot-test'
+        self.plan = 'webapp-slot-test2-plan'
+        self.webapp = 'web-slot-test2'
 
     def test_webapp_slot(self):
         self.execute()
 
     def body(self):
-        slot = 'staging'
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, self.plan))
+        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp, self.plan))
         #You can create and use any repros with the 3 files under "./sample_web" and with a 'staging 'branch
+        slot = 'staging'
         test_git_repo = 'https://github.com/yugangw-msft/azure-site-test'
 
+
         self.cmd('appservice web deployment slot create -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=[
-            JMESPathCheck('name', self.webapp + '/' + slot),
-            JMESPathCheck('siteName', '{}({})'.format(self.webapp, slot))
+            JMESPathCheck('name', self.webapp + '/' + slot)
             ])
 
         self.cmd('appservice web source-control config -g {} -n {} --repo-url {} --branch {} --slot {}'.format(self.resource_group, self.webapp, test_git_repo, slot, slot), checks=[
