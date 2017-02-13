@@ -8,7 +8,6 @@
 #pylint: disable=bad-continuation
 #pylint: disable=too-many-lines
 import os
-import tempfile
 
 from azure.cli.core.commands.arm import resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -1272,7 +1271,4 @@ class NetworkZoneImportExportTest(ResourceGroupVCRTestBase):
 
         self.cmd('network dns zone import -n {} -g {} --file-name "{}"'
                  .format(zone_name, self.resource_group, zone_file_path))
-
-        _, temp_file_path = tempfile.mkstemp()
-        self.cmd('network dns zone export -n {} -g {} --file-name "{}"'
-                 .format(zone_name, self.resource_group, temp_file_path))
+        self.cmd('network dns zone export -n {} -g {}'.format(zone_name, self.resource_group))
