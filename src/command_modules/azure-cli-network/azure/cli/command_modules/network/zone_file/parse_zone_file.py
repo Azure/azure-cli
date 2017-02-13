@@ -29,7 +29,6 @@
 
 """
 Known limitations:
-    * only one $ORIGIN and one $TTL are supported
     * only the IN class is supported
     * PTR records must have a non-empty name
     * currently only supports the following:
@@ -41,11 +40,24 @@ import copy
 import datetime
 import time
 import argparse
-from collections import defaultdict
+from collections import OrderedDict
+import re
 
-from .configs import SUPPORTED_RECORDS, DEFAULT_TEMPLATE
-from .exceptions import InvalidLineException
+import azure.cli.core.azlogging as azlogging
+from azure.cli.core._util import CLIError
 
+from azure.cli.command_modules.network.zone_file.configs import SUPPORTED_RECORDS
+from azure.cli.command_modules.network.zone_file.exceptions import InvalidLineException
+
+logger = azlogging.get_az_logger(__name__)
+semicolon_regex = re.compile(r'(?:"[^"]*")*[^\\](;.*)')
+date_regex_dict = {
+    'w': {'regex': re.compile(r'(\d*w)'), 'scale': 86400 * 7},
+    'd': {'regex': re.compile(r'(\d*d)'), 'scale': 86400},
+    'h': {'regex': re.compile(r'(\d*h)'), 'scale': 3600},
+    'm': {'regex': re.compile(r'(\d*m)'), 'scale': 60},
+    's': {'regex': re.compile(r'(\d*s)'), 'scale': 1}
+}
 
 class ZonefileLineParser(argparse.ArgumentParser):
     def error(self, message):
@@ -55,80 +67,96 @@ class ZonefileLineParser(argparse.ArgumentParser):
         raise InvalidLineException(message)
 
 
-def make_rr_subparser(subparsers, rec_type, args_and_types):
+class IncorrectParserException(Exception):
+    pass
+
+
+def _make_record_parser(parsers, rec_type, arg_defs):
     """
-    Make a subparser for a given type of DNS record
+    Make a parser for a given type of DNS record
     """
-    sp = subparsers.add_parser(rec_type)
+    parser = ZonefileLineParser(rec_type)
+    parser.add_argument('name', type=str)
 
-    sp.add_argument("name", type=str)
-    sp.add_argument("ttl", type=int, nargs='?')
-    sp.add_argument(rec_type, type=str)
+    for arg in arg_defs:
+        nargs = arg[2] if len(arg) > 2 else 1
+        parser.add_argument(arg[0], type=arg[1], nargs=nargs)
 
-    for (argname, argtype) in args_and_types:
-        sp.add_argument(argname, type=argtype)
-
-    return sp
+    parsers.append(parser)
 
 
-def make_parser():
+def _make_parser():
     """
-    Make an ArgumentParser that accepts DNS RRs
+    Make an array of parsers that can process different DNS record types
     """
-    line_parser = ZonefileLineParser()
-    subparsers = line_parser.add_subparsers()
+    parsers = []
 
     # parse $ORIGIN
-    sp = subparsers.add_parser("$ORIGIN")
-    sp.add_argument("$ORIGIN", type=str)
+    origin = ZonefileLineParser('$ORIGIN')
+    origin.add_argument('DELIM', type=str)
+    origin.add_argument('value', type=str)
+    parsers.append(origin)
 
     # parse $TTL
-    sp = subparsers.add_parser("$TTL")
-    sp.add_argument("$TTL", type=int)
+    ttl = ZonefileLineParser('$TTL')
+    ttl.add_argument('DELIM', type=str)
+    ttl.add_argument('value', type=str)
+    parsers.append(ttl)
 
     # parse each RR
-    args_and_types = [
-        ("mname", str), ("rname", str), ("serial", int), ("refresh", int),
-        ("retry", int), ("expire", int), ("minimum", int)
-    ]
-    make_rr_subparser(subparsers, "SOA", args_and_types)
+    _make_record_parser(parsers, 'SOA', [
+        ('ttl', str), ('DELIM', str),
+        ('host', str), ('email', str), ('serial', int), ('refresh', str),
+        ('retry', str), ('expire', str), ('minimum', str)
+    ])
+    _make_record_parser(parsers, 'SOA', [
+        ('DELIM', str), ('host', str), ('email', str), ('serial', int), ('refresh', str),
+        ('retry', str), ('expire', str), ('minimum', str)
+    ])
+    _make_record_parser(parsers, 'SOA', [
+        ('DELIM', str), ('host', str), ('email', str), ('serial', int), ('refresh', str),
+        ('retry', str), ('expire', str)
+    ])
+    _make_record_parser(parsers, 'NS', [('ttl', str, '?'), ('DELIM', str), ('host', str)])
+    _make_record_parser(parsers, 'A', [('ttl', str, '?'), ('DELIM', str), ('ip', str)])
+    _make_record_parser(parsers, 'AAAA', [('ttl', str, '?'), ('DELIM', str), ('ip', str)])
+    _make_record_parser(parsers, 'CNAME', [('ttl', str, '?'), ('DELIM', str), ('alias', str)])
+    _make_record_parser(parsers, 'MX', [('ttl', str, '?'), ('DELIM', str), ('preference', str), ('host', str)])
+    _make_record_parser(parsers, 'TXT', [('ttl', str), ('DELIM', str), ('txt', str, '+')])
+    _make_record_parser(parsers, 'TXT', [('DELIM', str), ('txt', str, '+')])
+    _make_record_parser(parsers, 'PTR', [('ttl', str, '?'), ('DELIM', str), ('host', str)])
+    _make_record_parser(parsers, 'SRV', [('ttl', str, '?'), ('DELIM', str), ('priority', int), ('weight', int), ('port', int), ('target', str)])
+    _make_record_parser(parsers, 'SPF', [('ttl', str, '?'), ('DELIM', str), ('txt', str)])
+    _make_record_parser(parsers, 'URI', [('ttl', str, '?'), ('DELIM', str), ('priority', int), ('weight', int), ('target', str)])
 
-    make_rr_subparser(subparsers, "NS", [("host", str)])
-    make_rr_subparser(subparsers, "A", [("ip", str)])
-    make_rr_subparser(subparsers, "AAAA", [("ip", str)])
-    make_rr_subparser(subparsers, "CNAME", [("alias", str)])
-    make_rr_subparser(subparsers, "MX", [("preference", str), ("host", str)])
-    make_rr_subparser(subparsers, "TXT", [("txt", str)])
-    make_rr_subparser(subparsers, "PTR", [("host", str)])
-    make_rr_subparser(subparsers, "SRV", [("priority", int), ("weight", int), ("port", int), ("target", str)])
-    make_rr_subparser(subparsers, "SPF", [("data", str)])
-    make_rr_subparser(subparsers, "URI", [("priority", int), ("weight", int), ("target", str)])
-
-    return line_parser
+    return parsers
 
 
-def tokenize_line(line):
+def _tokenize_line(line, quote_strings=False, infer_name=True):
     """
     Tokenize a line:
     * split tokens on whitespace
     * treat quoted strings as a single token
-    * drop comments
-    * handle escaped spaces and comment delimiters
     """
     ret = []
     escape = False
     quote = False
     tokbuf = ""
+    firstchar = True
     ll = list(line)
     while len(ll) > 0:
         c = ll.pop(0)
         if c.isspace():
+            if firstchar:
+                # used by the _add_record_names method
+                tokbuf += '$NAME' if infer_name else ' '
+
             if not quote and not escape:
                 # end of token
                 if len(tokbuf) > 0:
                     ret.append(tokbuf)
 
-                tokbuf = ""
+                tokbuf = ''
             elif quote:
                 # in quotes
                 tokbuf += c
@@ -137,43 +165,77 @@ def tokenize_line(line):
                 tokbuf += c
                 escape = False
             else:
-                tokbuf = ""
-
-            continue
-
-        if c == '\\':
+                tokbuf = ''
+        elif c == '\\':
             escape = True
-            continue
         elif c == '"':
             if not escape:
                 if quote:
                     # end of quote
+                    if quote_strings:
+                        tokbuf += '"'
                     ret.append(tokbuf)
-                    tokbuf = ""
+                    tokbuf = ''
                     quote = False
-                    continue
                 else:
                     # beginning of quote
+                    if quote_strings:
+                        tokbuf += '"'
                     quote = True
-                    continue
-        elif c == ';':
-            if not escape:
-                # comment 
-                ret.append(tokbuf)
-                tokbuf = ""
-                break
-            
-        # normal character
-        tokbuf += c
-        escape = False
+            else:
+                #append the escaped quote
+                tokbuf += '\\"'
+                escape = False
+        else:
+            # normal character
+            tokbuf += c
+            escape = False
+        firstchar = False
 
-    if len(tokbuf.strip(" ").strip("\n")) > 0:
+    if len(tokbuf.strip(' \r\n\t')):
         ret.append(tokbuf)
 
-    return ret
+    if len(ret) == 1 and ret[0] == '$NAME':
+        return []
+    else:
+        return ret
 
 
-def serialize(tokens):
+def _find_comment_index(line):
+    """
+    Finds the index of a ; denoting a comment.
+    Ignores escaped semicolons and semicolons inside quotes
+    """
+    ret = []
+    escape = False
+    quote = False
+    for i, char in enumerate(line):
+        if char == '\\':
+            escape = True
+            continue
+        elif char == '"':
+            if escape:
+                escape = False
+                continue
+            else:
+                quote = not quote
+        elif char == ';':
+            if quote:
+                continue
+            elif escape:
+                escape = False
+                continue
+            else:
+                # comment denoting semicolon found
+                return i
+        else:
+            escape = False
+            continue
+    # no unquoted, unescaped ; found
+    return -1
+
+
+def _serialize(tokens):
     """
     Serialize tokens:
     * quote whitespace-containing tokens
@@ -192,38 +254,41 @@ def serialize(tokens):
     return " ".join(ret)
 
 
-def remove_comments(text):
+def _remove_comments(text):
     """
     Remove comments from a zonefile
     """
     ret = []
     lines = text.split("\n")
     for line in lines:
-        if len(line) == 0:
+        if not line:
             continue 
 
-        line = serialize(tokenize_line(line))
-        ret.append(line)
+        index = _find_comment_index(line)
+        if index != -1:
+            line = line[:index]
+        if line:
+            ret.append(line)
 
     return "\n".join(ret)
 
 
-def flatten(text):
+def _flatten(text):
     """
     Flatten the text:
     * make sure each record is on one line.
     * remove parenthesis 
+    * remove Windows line endings
     """
-    lines = text.split("\n")
+    lines = text.split('\n')
+    SENTINEL = '%%%'
 
     # tokens: sequence of non-whitespace separated by '' where a newline was
     tokens = []
-    for l in lines:
-        if len(l) == 0:
-            continue 
-
-        l = l.replace("\t", " ")
-        tokens += list(filter(lambda x: len(x) > 0, l.split(" "))) + ['']
+    for l in (x  for x in lines if len(x) > 0):
+        l = l.replace('\t', ' ')
+        tokens += _tokenize_line(l, quote_strings=True, infer_name=False)
+        tokens.append(SENTINEL)
 
     # find (...) and turn it into a single line ("capture" it)
     capturing = False
@@ -232,12 +297,16 @@ def flatten(text):
     flattened = []
     while len(tokens) > 0:
         tok = tokens.pop(0)
-        if not capturing and len(tok) == 0:
+
+        if tok == '$NAME':
+            tok = ' '
+
+        if not capturing and tok == SENTINEL:
             # normal end-of-line
             if len(captured) > 0:
                 flattened.append(" ".join(captured))
                 captured = []
-            continue 
+            continue
 
         if tok.startswith("("):
             # begin grouping
@@ -249,40 +318,32 @@ def flatten(text):
             tok = tok.rstrip(")")
             capturing = False 
 
-        captured.append(tok)
+        if tok != SENTINEL:
+            captured.append(tok)
 
     return "\n".join(flattened)
 
 
-def remove_class(text):
+def _remove_class(text):
     """
     Remove the CLASS from each DNS record, if present.
     The only class that gets used today (for all intents
     and purposes) is 'IN'.
     """
-
     # see RFC 1035 for list of classes
     lines = text.split("\n")
     ret = []
     for line in lines:
-        tokens = tokenize_line(line)
-        tokens_upper = [t.upper() for t in tokens]
-
-        if "IN" in tokens_upper:
-            tokens.remove("IN")
-        elif "CS" in tokens_upper:
-            tokens.remove("CS")
-        elif "CH" in tokens_upper:
-            tokens.remove("CH")
-        elif "HS" in tokens_upper:
-            tokens.remove("HS")
-
-        ret.append(serialize(tokens))
-
+        original_tokens = _tokenize_line(line)
+        tokens = []
+        for token in original_tokens:
+            if token.upper() != 'IN':
+                tokens.append(token)
+        ret.append(_serialize(tokens))
     return "\n".join(ret)
 
 
-def add_record_names(text):
+def _add_record_names(text):
     """
     Go through each line of the text and ensure that 
     a name is defined.  Use previous record name if there is none.
@@ -294,121 +355,263 @@ def add_record_names(text):
     previous_record_name = None
 
     for line in lines:
-        tokens = tokenize_line(line)
-        
-        if not tokens[0].startswith("$"):
-            is_int = False
-            try:
-                int(tokens[0])
-                is_int = True
-            except ValueError:
-                pass
-            has_name = not is_int and tokens[0] not in SUPPORTED_RECORDS
+        tokens = _tokenize_line(line)
+        if not tokens:
+            continue
 
-            if has_name:
-                previous_record_name = tokens[0]
-            else:
-                # add back the name
-                tokens = [previous_record_name] + tokens
+        record_name = tokens[0]
+        if record_name == '$NAME':
+            tokens = [previous_record_name] + tokens[1:]
+        elif not record_name.startswith('$'):
+            previous_record_name = record_name
 
-        ret.append(serialize(tokens))
+        ret.append(_serialize(tokens))
 
     return "\n".join(ret)
 
-def parse_line(parser, record_token, parsed_records):
-    """
-    Given the parser, capitalized list of a line's tokens, and the current set of records 
-    parsed so far, parse it into a dictionary.
 
-    Return the new set of parsed records.
-    Raise an exception on error.
-    """
+def _parse_record(parser, record_token):
 
     global SUPPORTED_RECORDS
 
-    line = " ".join(record_token)
-
     # match parser to record type
-    if len(record_token) >= 2 and record_token[1] in SUPPORTED_RECORDS:
-        # with no ttl
-        record_token = [record_token[1]] + record_token
-    elif len(record_token) >= 3 and record_token[2] in SUPPORTED_RECORDS:
-        # with ttl
-        record_token = [record_token[2]] + record_token
+    record_type = None
+    for i in range(3):
+        try:
+            if record_token[i] in SUPPORTED_RECORDS:
+                record_type = record_token[i]
+                break
+        except KeyError:
+            break
+
+    if not record_type:
+        from azure.cli.core._util import CLIError
+        raise CLIError('Unable to determine record type: {}'.format(' '.join(record_token)))
+            
+    # move the record type to the front of the token list so it will conform to argparse
+    if record_type != parser.prog:
+        raise IncorrectParserException
 
     try:
         rr, unmatched = parser.parse_known_args(record_token)
         assert len(unmatched) == 0, "Unmatched fields: %s" % unmatched
-    except (SystemExit, AssertionError, InvalidLineException):
+    except (SystemExit, AssertionError, InvalidLineException) as ex:
         # invalid argument 
-        raise InvalidLineException(line)
+        raise InvalidLineException(' '.join(record_token))
 
-    record_dict = rr.__dict__
+    record = rr.__dict__
+    record['type'] = record_type
 
-    # what kind of record? including origin and ttl
-    record_type = None
-    for key in record_dict.keys():
-        if key in SUPPORTED_RECORDS and (key.startswith("$") or record_dict[key] == key):
-            record_type = key
-            if record_dict[key] == key:
-                del record_dict[key]
-            break
+    # remove emtpy fields
+    for field in list(record.keys()):
+        if record[field] is None:
+            del record[field]
 
-    assert record_type is not None, "Unknown record type in %s" % rr
-
-    # clean fields
-    for field in list(record_dict.keys()):
-        if record_dict[field] is None:
-            del record_dict[field]
-
-    current_origin = record_dict.get('$origin', parsed_records.get('$origin', None))
-
-    # special record-specific fix-ups
-    if record_type == 'PTR':
-        record_dict['fullname'] = record_dict['name'] + '.' + current_origin
-      
-    if len(record_dict) > 0:
-        if record_type.startswith("$"):
-            # put the value directly
-            record_dict_key = record_type.lower()
-            parsed_records[record_dict_key] = record_dict[record_type]
-        else:
-            record_dict_key = record_type.lower()
-            parsed_records[record_dict_key].append(record_dict)
-
-    return parsed_records
-
-# LOCAL COPY
-def parse_lines(text, ignore_invalid=False):
-    """
-    Parse a zonefile into a dict.
-    @text must be flattened--each record must be on one line.
-    Also, all comments must be removed.
-    """
-    json_zone_file = defaultdict(list)
-    record_lines = text.split("\n")
-    parser = make_parser()
-
-    for record_line in record_lines:
-        record_token = tokenize_line(record_line)
+    for key in record:
         try:
-            json_zone_file = parse_line(parser, record_token, json_zone_file)
-        except InvalidLineException:
-            if ignore_invalid:
-                continue
-            else:
-                raise
+            if len(record[key]) == 1:
+                record[key] = record[key][0]
+        except TypeError:
+            continue
 
-    return json_zone_file
+    return record
 
 
-def parse_zone_file(text, ignore_invalid=False):
+def _convert_to_seconds(value):
+    """ Converts TTL strings into seconds """
+    try:
+        return int(value)
+    except ValueError:
+        # parse the BIND format
+        # (w)eek, (d)ay, (h)our, (m)inute, (s)econd
+        seconds = 0
+        ttl_string = value.lower()
+        for component in ['w', 'd', 'h', 'm', 's']:
+            regex = date_regex_dict[component]['regex']
+            match = regex.search(ttl_string)
+            if match:
+                match_string = match.group(0)
+                ttl_string = ttl_string.replace(match_string, '')
+                match_value = int(match_string.strip(component))
+                seconds += match_value * date_regex_dict[component]['scale']
+            if not ttl_string:
+                return seconds
+        # convert the last piece without any units, which must be seconds
+        try:
+            seconds += int(ttl_string)
+            return seconds
+        except ValueError:
+            raise CLIError("Unable to convert value '{}' to seconds.".format(value))
+
+
+def _expand_with_origin(record, properties, origin):
+
+    if not isinstance(properties, list):
+        properties = [properties]
+
+    for property in properties:
+        if not record[property].endswith('.'):
+            record[property] = '{}.{}'.format(record[property], origin)
+
+
+def _post_process_ttl(zone):
+
+    for name in zone:
+        for record_type in zone[name]:
+            records = zone[name][record_type]
+            if isinstance(records, list):
+                ttl = min([x['ttl'] for x in records])
+                for record in records:
+                    if record['ttl'] != ttl:
+                        logger.warning('Using lowest TTL {} for the record set. Ignoring value {}'
+                            .format(ttl, record['ttl']))
+                    record['ttl'] = ttl
+
+
+def _pre_process_txt_records(text):
+    """ This looks only for the cases of multiple text records not surrounded by quotes. 
+    This must be done after flattening but before any tokenization occurs, as this strips out
+    the quotes. """
+    lines = text.split('\n')
+    for line in lines:
+        pass
+    return text
+
+def _post_process_txt_record(record, current_ttl):
+    if not isinstance(record['txt'], list):
+        record['txt'] = [record['txt']]
+    record['ttl'] = _convert_to_seconds(record['ttl']) if 'ttl' in record else current_ttl
+    long_text = ''.join(x for x in record['txt']) if isinstance(record['txt'], list) else record['txt']
+    long_text = long_text.replace('\\', '')
+    original_len = len(long_text)
+    record['txt'] = []
+    while len(long_text) > 255:
+        record['txt'].append(long_text[:255])
+        long_text = long_text[255:]
+    record['txt'].append(long_text)
+    final_str = ''.join(record['txt'])
+    final_len = len(final_str)
+    assert(original_len == final_len)
+    if final_len > 500:
+        print('WONKY STRING? {}\n{}'.format(final_len, final_str))
+
+
+def _post_check_names(zone):
+    # get the origin name that has the SOA record
+    # ensure the origin is in each record set
+    origin = None
+    for name in zone:
+        for record_type in zone[name]:
+            if record_type == 'soa':
+                origin = name
+                break
+        if origin: break
+    bad_names = [x for x in zone if origin not in x]
+    if bad_names:
+        raise CLIError("Record names '{}' are not part of the domain.".format(bad_names))
+
+
+def parse_zone_file(text, zone_name, ignore_invalid=False):
     """
     Parse a zonefile into a dict
     """
-    text = remove_comments(text)
-    text = flatten(text)
-    text = remove_class(text)
-    text = add_record_names(text)
-    json_zone_file = parse_lines(text, ignore_invalid=ignore_invalid)
-    return json_zone_file
+    parsers = _make_parser()
+
+    text = _remove_comments(text)
+    text = _flatten(text)
+    text = _remove_class(text)
+    text = _pre_process_txt_records(text)
+    text = _add_record_names(text)
+
+    zone_obj = OrderedDict()
+    record_lines = text.split("\n")
+    current_origin = zone_name.rstrip('.') + '.'
+    current_ttl = 3600
+    soa_processed = False
+
+    for record_line in record_lines:
+        parse_match = False
+        record = None
+        for parser in parsers:
+            record_tokens = _tokenize_line(record_line)
+            try:
+                record = _parse_record(parser, record_tokens)
+                if record['DELIM'].lower() != record['type'].lower():
+                    raise IncorrectParserException
+                parse_match = True
+                break
+            except (InvalidLineException, IncorrectParserException):
+                continue
+        if not parse_match and not ignore_invalid:
+            raise CLIError('Unable to parse: {}'.format(record_line))
+
+        record_type = record['type'].lower()
+        if record_type.lower() == '$origin':
+            origin_value = record['value']
+            if not origin_value.endswith('.'):
+                logger.warning("$ORIGIN '{}' should have terminating dot.".format(origin_value))
+            current_origin = origin_value.rstrip('.') + '.'
+        elif record_type.lower() == '$ttl':
+            current_ttl = _convert_to_seconds(record['value'])
+        else:
+            record_name = record['name']
+            if record_name == '@':
+                record_name = current_origin
+            elif not record_name.endswith('.'):
+                record_name = '{}.{}'.format(record_name, current_origin)
+
+            # special record-specific fix-ups
+            if record_type == 'ptr':
+                record['fullname'] = record_name + '.' + current_origin
+            elif record_type == 'soa':
+                for key in ['refresh', 'retry', 'expire', 'minimum']:
+                    record[key] = _convert_to_seconds(record[key])
+                _expand_with_origin(record, 'email', current_origin)
+            elif record_type == 'cname':
+                _expand_with_origin(record, 'alias', current_origin)
+            elif record_type == 'mx':
+                _expand_with_origin(record, 'host', current_origin)
+            elif record_type == 'ns':
+                _expand_with_origin(record, 'host', current_origin)
+            elif record_type == 'srv':
+                _expand_with_origin(record, 'target', current_origin)
+            elif record_type == 'spf':
+                record_type = 'txt'
+
+            if record_type == 'txt':
+                # handle TXT concatenation and splitting separately
+                _post_process_txt_record(record, current_ttl)
+            else:
+                record['ttl'] = _convert_to_seconds(record['ttl']) if 'ttl' in record else current_ttl
+
+            if record_name not in zone_obj:
+                zone_obj[record_name] = OrderedDict()
+
+            if record_type == 'soa':
+                if soa_processed:
+                    raise CLIError('Zone file can contain only one SOA record.')
+                if record_name != current_origin:
+                    raise CLIError("Zone SOA record must be at the apex '@'.")
+                zone_obj[record_name][record_type] = record
+                soa_processed = True
+                continue
+
+            if not soa_processed:
+                raise CLIError('First record in zone file must be SOA.')
+
+            if record_type == 'cname':
+                if record_type in zone_obj[record_name]:
+                    logger.warning("CNAME record already exists for '{}'. Ignoring '{}'."
+                        .format(record_name, record['alias']))
+                    continue
+                zone_obj[record_name][record_type] = record
+                continue
+
+            # any other record can have multiple entries
+            if record_type not in zone_obj[record_name]:
+                zone_obj[record_name][record_type] = []
+            zone_obj[record_name][record_type].append(record)
+
+    _post_process_ttl(zone_obj)
+    _post_check_names(zone_obj)
+    return zone_obj
