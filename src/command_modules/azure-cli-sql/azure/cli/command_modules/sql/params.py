@@ -25,8 +25,11 @@ with ParametersContext(command='sql db create') as c:
 with ParametersContext(command='sql db replication-link') as c:
     c.register_alias('database_name', ('--database-name',))
 
-with ParametersContext(command='sql db restore-point') as c:
-    c.register_alias('database_name', ('--database-name',))
+## Data Warehouse will not be included in the first batch of GA commands
+## (list_restore_points also applies to db, but it's not very useful. It's
+## mainly useful for dw.)
+#with ParametersContext(command='sql db restore-point') as c:
+#    c.register_alias('database_name', ('--database-name', '-d'))
 
 ## Service tier advisor will not be included in the first batch of GA commands
 #with ParametersContext(command='sql db service-tier-advisor') as c:

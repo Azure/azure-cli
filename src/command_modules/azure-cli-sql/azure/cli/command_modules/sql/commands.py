@@ -56,8 +56,11 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
     #    c.command('pause', 'pause_data_warehouse')
     #    c.command('resume', 'resume_data_warehouse')
 
-    with s.group('sql db restore-point') as c:
-        c.command('list', 'list_restore_points')
+    ## Data Warehouse will not be included in the first batch of GA commands
+    ## (list_restore_points also applies to db, but it's not very useful. It's
+    ## mainly useful for dw.)
+    #with s.group('sql db restore-point') as c:
+    #    c.command('list', 'list_restore_points')
 
     ## TDE will not be included in the first batch of GA commands
     #with s.group('sql db transparent-data-encryption') as c:
