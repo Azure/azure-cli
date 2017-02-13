@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-#pylint: skip-file
+# pylint: skip-file
 import mock
 import os
 import requests
@@ -13,16 +13,19 @@ import yaml
 
 from msrestazure.azure_exceptions import CloudError
 
-from azure.cli.command_modules.acs.custom import merge_kubernetes_configurations, _acs_browse_internal, _add_role_assignment
-from azure.mgmt.compute.models import ContainerServiceOchestratorTypes, ContainerService, ContainerServiceOrchestratorProfile
+from azure.cli.command_modules.acs.custom import (merge_kubernetes_configurations,
+                                                  _acs_browse_internal, _add_role_assignment)
+from azure.mgmt.compute.models import (ContainerServiceOchestratorTypes, ContainerService,
+                                       ContainerServiceOrchestratorProfile)
+
 
 class AcsCustomCommandTest(unittest.TestCase):
-    
     def test_add_role_assignment_basic(self):
         role = 'Owner'
         sp = '1234567'
 
-        with mock.patch('azure.cli.command_modules.role.custom.create_role_assignment') as create_role_assignment:
+        with mock.patch(
+                'azure.cli.command_modules.role.custom.create_role_assignment') as create_role_assignment:
             ok = _add_role_assignment(role, sp, delay=0, output=False)
             create_role_assignment.assert_called_with(role, sp)
             self.assertTrue(ok, 'Expected _add_role_assignment to succeed')
@@ -31,7 +34,8 @@ class AcsCustomCommandTest(unittest.TestCase):
         role = 'Owner'
         sp = '1234567'
 
-        with mock.patch('azure.cli.command_modules.role.custom.create_role_assignment') as create_role_assignment:
+        with mock.patch(
+                'azure.cli.command_modules.role.custom.create_role_assignment') as create_role_assignment:
             resp = mock.Mock()
             resp.status_code = 409
             resp.content = 'Conflict'
@@ -47,7 +51,8 @@ class AcsCustomCommandTest(unittest.TestCase):
         role = 'Owner'
         sp = '1234567'
 
-        with mock.patch('azure.cli.command_modules.role.custom.create_role_assignment') as create_role_assignment:
+        with mock.patch(
+                'azure.cli.command_modules.role.custom.create_role_assignment') as create_role_assignment:
             resp = mock.Mock()
             resp.status_code = 500
             resp.content = 'Internal Error'
@@ -55,17 +60,20 @@ class AcsCustomCommandTest(unittest.TestCase):
             err.message = 'Internal Error'
             create_role_assignment.side_effect = err
             ok = _add_role_assignment(role, sp, delay=0, output=False)
-            
+
             create_role_assignment.assert_called_with(role, sp)
             self.assertFalse(ok, 'Expected _add_role_assignment to fail')
 
     @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
     def test_browse_k8s(self, get_subscription_id):
         acs_info = ContainerService("location", {}, {}, {})
-        acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(ContainerServiceOchestratorTypes.kubernetes)
-        
-        with mock.patch('azure.cli.command_modules.acs.custom._get_acs_info', return_value=acs_info) as get_acs_info:
-            with mock.patch('azure.cli.command_modules.acs.custom._k8s_browse_internal') as k8s_browse:
+        acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
+            ContainerServiceOchestratorTypes.kubernetes)
+
+        with mock.patch('azure.cli.command_modules.acs.custom._get_acs_info',
+                        return_value=acs_info) as get_acs_info:
+            with mock.patch(
+                    'azure.cli.command_modules.acs.custom._k8s_browse_internal') as k8s_browse:
                 _acs_browse_internal(acs_info, 'resource-group', 'name', False, 'ssh/key/file')
                 get_acs_info.assert_called_with('name', 'resource-group')
                 k8s_browse.assert_called_with('name', acs_info, False, 'ssh/key/file')
@@ -73,9 +81,11 @@ class AcsCustomCommandTest(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
     def test_browse_dcos(self, get_subscription_id):
         acs_info = ContainerService("location", {}, {}, {})
-        acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(ContainerServiceOchestratorTypes.dcos)
-        
-        with mock.patch('azure.cli.command_modules.acs.custom._dcos_browse_internal') as dcos_browse:
+        acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
+            ContainerServiceOchestratorTypes.dcos)
+
+        with mock.patch(
+                'azure.cli.command_modules.acs.custom._dcos_browse_internal') as dcos_browse:
             _acs_browse_internal(acs_info, 'resource-group', 'name', False, 'ssh/key/file')
             dcos_browse.assert_called_with(acs_info, False, 'ssh/key/file')
 

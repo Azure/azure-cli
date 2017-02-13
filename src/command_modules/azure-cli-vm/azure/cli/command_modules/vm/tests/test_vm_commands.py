@@ -275,8 +275,6 @@ class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('vm show -g {} -n {}'.format(self.resource_group, new_vm_name), checks=[
             JMESPathCheck('length(storageProfile.dataDisks)', 1),
             JMESPathCheck('storageProfile.dataDisks[0].diskSizeGb', 1),
-            JMESPathCheck('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS'),
-            JMESPathCheck('storageProfile.osDisk.managedDisk.storageAccountType', 'Standard_LRS'),
             JMESPathCheck('storageProfile.osDisk.osType', 'Linux')
         ])
         # use it to create a vmss
@@ -338,11 +336,11 @@ class VMManagedDiskScenarioTest(ResourceGroupVCRTestBase):
 
         # create a disk and update
         data_disk = self.cmd('disk create -g {} -n {} --size-gb {}'.format(self.resource_group, disk_name, 1), checks=[
-            JMESPathCheck('accountType', 'Standard_LRS'),
+            JMESPathCheck('accountType', 'Premium_LRS'),
             JMESPathCheck('diskSizeGb', 1)
         ])
-        self.cmd('disk update -g {} -n {} --size-gb {} --sku {}'.format(self.resource_group, disk_name, 10, 'Premium_LRS'), checks=[
-            JMESPathCheck('accountType', 'Premium_LRS'),
+        self.cmd('disk update -g {} -n {} --size-gb {} --sku {}'.format(self.resource_group, disk_name, 10, 'Standard_LRS'), checks=[
+            JMESPathCheck('accountType', 'Standard_LRS'),
             JMESPathCheck('diskSizeGb', 10)
         ])
 
@@ -386,7 +384,7 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # py
         self.vm_name = 'vm-state-mod'
         self.nsg_name = 'mynsg'
         self.ip_name = 'mypubip'
-        self.storage_name = 'ab394fvkdj34'
+        self.storage_name = 'ab394fvkdj39'
         self.vnet_name = 'myvnet'
 
     def test_vm_create_state_modifications(self):
@@ -432,8 +430,8 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # py
         ])
         self._check_vm_power_state('PowerState/running')
 
-        self.cmd('vm access set-linux-user -g {} -n {} -u foouser1 -p Foo12345 '.format(self.resource_group, self.vm_name))
-        self.cmd('vm access delete-linux-user -g {} -n {} -u foouser1'.format(self.resource_group, self.vm_name))
+        self.cmd('vm user update -g {} -n {} -u foouser1 -p Foo12345 '.format(self.resource_group, self.vm_name))
+        self.cmd('vm user delete -g {} -n {} -u foouser1'.format(self.resource_group, self.vm_name))
 
         self.cmd('network nsg show --resource-group {} --name {}'.format(
             self.resource_group, self.nsg_name), checks=[
@@ -641,7 +639,7 @@ class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=t
         super(VMCreateUbuntuScenarioTest, self).set_up()
 
     def body(self):
-        self.cmd('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' --location {location}'.format(
+        self.cmd('vm create --resource-group {rg} --admin-username {admin} --name {vm_name} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' --location {location} --data-disk-sizes-gb 1'.format(
             rg=self.resource_group,
             admin=self.admin_username,
             vm_name=self.vm_names[0],
@@ -657,6 +655,8 @@ class VMCreateUbuntuScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=t
             JMESPathCheck('osProfile.computerName', self.vm_names[0]),
             JMESPathCheck('osProfile.linuxConfiguration.disablePasswordAuthentication', True),
             JMESPathCheck('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', TEST_SSH_KEY_PUB),
+            JMESPathCheck('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
+            JMESPathCheck('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
         ])
 
 
@@ -1049,6 +1049,42 @@ class VMUnmanagedDataDiskTest(ResourceGroupVCRTestBase):
                  ])
 
 
+class VMCreateCustomDataScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
+
+    def __init__(self, test_method):
+        super(VMCreateCustomDataScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_create_vm_custom_data')
+        self.deployment_name = 'azurecli-test-dep-vm-create-custom-data'
+        self.admin_username = 'ubuntu'
+        self.location = 'westus'
+        self.vm_image = 'UbuntuLTS'
+        self.auth_type = 'ssh'
+        self.vm_name = 'vm-name'
+        self.custom_data = '#cloud-config\nhostname: myVMhostname'
+
+    def test_vm_create_custom_data(self):
+        self.execute()
+
+    def set_up(self):
+        super(VMCreateCustomDataScenarioTest, self).set_up()
+
+    def body(self):
+        self.cmd('vm create -g {rg} -n {vm_name} --admin-username {admin} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' -l {location} --custom-data \'{custom_data}\''.format(
+            rg=self.resource_group,
+            admin=self.admin_username,
+            image=self.vm_image,
+            vm_name=self.vm_name,
+            auth_type=self.auth_type,
+            ssh_key=TEST_SSH_KEY_PUB,
+            location=self.location,
+            custom_data=self.custom_data
+        ))
+
+        self.cmd('vm show -g {rg} -n {vm_name}'.format(rg=self.resource_group, vm_name=self.vm_name), checks=[
+            JMESPathCheck('provisioningState', 'Succeeded'),
+            JMESPathCheck('osProfile.customData', 'I2Nsb3VkLWNvbmZpZwpob3N0bmFtZTogbXlWTWhvc3RuYW1l')
+        ])
+
+
 class AzureContainerServiceScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, test_method):
@@ -1329,6 +1365,26 @@ class VMSSVMsScenarioTest(ResourceGroupVCRTestBase):
         self._check_vms_power_state('PowerState/deallocated')
         self.cmd('vmss delete-instances --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name))
         self.cmd('vmss list-instances --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
+
+
+class VMSSCustomDataScenarioTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(VMSSCustomDataScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_vmss_create_custom_data')
+
+    def test_vmss_create_custom_data(self):
+        self.execute()
+
+    def body(self):
+        vmss_name = 'vmss-custom-data'
+
+        self.cmd('vmss create -n {0} -g {1} --image Debian --admin-username deploy --ssh-key-value \'{2}\' '
+                 '--custom-data \'#cloud-config\nhostname: myVMhostname\' '
+                 .format(vmss_name, self.resource_group, TEST_SSH_KEY_PUB))
+
+        self.cmd('vmss show -n {} -g {}'.format(vmss_name, self.resource_group), [
+            JMESPathCheck('provisioningState', 'Succeeded'),
+            JMESPathCheck('virtualMachineProfile.osProfile.customData', 'I2Nsb3VkLWNvbmZpZwpob3N0bmFtZTogbXlWTWhvc3RuYW1l')
+        ])
 
 
 class VMSSNicScenarioTest(ResourceGroupVCRTestBase):

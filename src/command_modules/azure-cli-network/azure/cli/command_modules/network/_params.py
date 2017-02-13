@@ -551,19 +551,17 @@ register_cli_argument('network traffic-manager endpoint', 'weight', help="Weight
 register_cli_argument('network traffic-manager endpoint create', 'target', help='Fully-qualified DNS name of the endpoint.', validator=process_tm_endpoint_create_namespace)
 
 # DNS
-register_cli_argument('network dns', 'location', help=argparse.SUPPRESS, default='global')
 register_cli_argument('network dns', 'record_set_name', name_arg_type, help='The name of the record set, relative to the name of the zone.')
 register_cli_argument('network dns', 'relative_record_set_name', name_arg_type, help='The name of the record set, relative to the name of the zone.')
 register_cli_argument('network dns', 'zone_name', options_list=('--zone-name', '-z'), help='The name of the zone.', type=dns_zone_name_type)
 register_cli_argument('network dns', 'metadata', nargs='+', help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.', validator=validate_metadata)
 
 register_cli_argument('network dns', 'record_type', modified_record_type)
-register_cli_argument('network dns', 'location', help=argparse.SUPPRESS, default='global')
 
 register_cli_argument('network dns zone', 'zone_name', name_arg_type)
 
-register_cli_argument('network dns zone import', 'file_name', type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to import')
-register_cli_argument('network dns zone export', 'file_name', type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to save')
+register_cli_argument('network dns zone import', 'file_name', options_list=('--file-name', '-f'), type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to import')
+register_cli_argument('network dns zone export', 'file_name', options_list=('--file-name', '-f'), type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to save')
 register_cli_argument('network dns zone update', 'if_none_match', ignore_type)
 
 register_cli_argument('network dns record txt add', 'value', nargs='+')

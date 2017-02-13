@@ -10,6 +10,8 @@ import json
 
 from enum import Enum
 
+from azure.cli.core._util import b64encode
+
 
 class ArmTemplateBuilder(object):
 
@@ -251,18 +253,22 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         availability_set_id=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
         image_reference=None, os_disk_name=None, custom_image_os_type=None,
         storage_caching=None, storage_sku=None,
-        os_publisher=None, os_offer=None, os_sku=None, os_version=None,
-        os_vhd_uri=None, managed_os_disk=None, data_disk_sizes_gb=None, image_data_disks=None):
+        os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
+        managed_os_disk=None, data_disk_sizes_gb=None, image_data_disks=None,
+        custom_data=None):
 
     def _build_os_profile():
 
         os_profile = {
             'computerName': name,
-            'adminUsername': admin_username,
+            'adminUsername': admin_username
         }
 
         if admin_password:
             os_profile['adminPassword'] = admin_password
+
+        if custom_data:
+            os_profile['customData'] = b64encode(custom_data)
 
         if ssh_key_value and ssh_key_path:
             os_profile['linuxConfiguration'] = {
@@ -379,7 +385,7 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
                 'lun': image_data_disk.lun,
                 'createOption': "fromImage",
             })
-        lun = max([d.lun for d in image_data_disks]) + 1 if image_data_disks else 1
+        lun = max([d.lun for d in image_data_disks]) + 1 if image_data_disks else 0
         for size in data_disk_sizes_gb:
             profile['dataDisks'].append({
                 'lun': lun,
@@ -484,7 +490,7 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
                         image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
                         backend_address_pool_id=None, inbound_nat_pool_id=None,
-                        single_placement_group=None):
+                        single_placement_group=None, custom_data=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -563,6 +569,9 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
                 ]
             }
         }
+
+    if custom_data:
+        os_profile['customData'] = b64encode(custom_data)
 
     if single_placement_group is None:  # this should never happen, but just in case
         raise ValueError('single_placement_group was not set by validators')
