@@ -122,6 +122,7 @@ class TestDnsZoneImport(unittest.TestCase):
     def test_zone_file_2(self):
         zn = 'mytestzone.com.'
         zone = self._get_zone_object('zone2.txt', zn)
+        self._check_txt(zone, 'spaces.' + zn, [(3600, 5, None)])
         self._check_soa(zone, zn, 3600, 10, 900, 600, 86400, 3600)
         self._check_ns(zone, zn, [(3600, 'zoneimport.')])
         self._check_a(zone, 'a2.' + zn, [
@@ -157,7 +158,7 @@ class TestDnsZoneImport(unittest.TestCase):
         self._check_a(zone, '200.' + zn, [(3600, '7.8.9.0')])
         self._check_mx(zone, 'aa.' + zn, [(300, 1, 'foo.com.' + zn)])
         self._check_txt(zone, 'longtxt2.' + zn, [(100, 500, None)])
-        self._check_txt(zone, 'longtxt.' + zn, [(999, 936, None)])
+        self._check_txt(zone, 'longtxt.' + zn, [(999, 944, None)])
         self._check_txt(zone, 'spf.' + zn, [(100, None, 'this is an SPF record! Convert to TXT on import')])  # pylint: disable=line-too-long
         self._check_txt(zone, zn, [
             (200, None, 'this is another SPF, this time as TXT'),

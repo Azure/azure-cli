@@ -132,7 +132,7 @@ def _make_parser():
     return parsers
 
 
-def _tokenize_line(line):
+def _tokenize_line(line, quote_strings=False, infer_name=True):
     """
     Tokenize a line:
     * split tokens on whitespace
@@ -149,7 +149,7 @@ def _tokenize_line(line):
         if c.isspace():
             if firstchar:
                 # used by the _add_record_names method
-                tokbuf += '$NAME'
+                tokbuf += '$NAME' if infer_name else ' '
 
             if not quote and not escape:
                 # end of token
@@ -172,14 +172,18 @@ def _tokenize_line(line):
             if not escape:
                 if quote:
                     # end of quote
+                    if quote_strings:
+                        tokbuf += '"'
                     ret.append(tokbuf)
                     tokbuf = ''
                     quote = False
                 else:
                     # beginning of quote
+                    if quote_strings:
+                        tokbuf += '"'
                     quote = True
             else:
-                #append the mystic noodle
+                #append the escaped quote
                 tokbuf += '\\"'
                 escape = False
         else:
@@ -188,7 +192,7 @@ def _tokenize_line(line):
             escape = False
         firstchar = False
 
-    if len(tokbuf.strip(' \n\t')):
+    if len(tokbuf.strip(' \r\n\t')):
         ret.append(tokbuf)
 
     if len(ret) == 1 and ret[0] == '$NAME':
@@ -276,21 +280,14 @@ def _flatten(text):
     * remove parenthesis 
     * remove Windows line endings
     """
-    lines = text.split("\n")
+    lines = text.split('\n')
     SENTINEL = '%%%'
 
     # tokens: sequence of non-whitespace separated by '' where a newline was
     tokens = []
-    for l in lines:
-        if len(l) == 0:
-            continue 
-
+    for l in (x  for x in lines if len(x) > 0):
         l = l.replace('\t', ' ')
-        l = l.replace('\r', ' ')
-        for i, token in enumerate(l.split(' ')):
-            if token is '' and i > 0:
-                continue
-            tokens.append(token) if token else tokens.append(' ')
+        tokens += _tokenize_line(l, quote_strings=True, infer_name=False)
         tokens.append(SENTINEL)
 
     # find (...) and turn it into a single line ("capture" it)
@@ -300,6 +297,10 @@ def _flatten(text):
     flattened = []
     while len(tokens) > 0:
         tok = tokens.pop(0)
+
+        if tok == '$NAME':
+            tok = ' '
+
         if not capturing and tok == SENTINEL:
             # normal end-of-line
             if len(captured) > 0:
@@ -482,11 +483,17 @@ def _post_process_txt_record(record, current_ttl):
     record['ttl'] = _convert_to_seconds(record['ttl']) if 'ttl' in record else current_ttl
     long_text = ''.join(x for x in record['txt']) if isinstance(record['txt'], list) else record['txt']
     long_text = long_text.replace('\\', '')
+    original_len = len(long_text)
     record['txt'] = []
     while len(long_text) > 255:
         record['txt'].append(long_text[:255])
         long_text = long_text[255:]
     record['txt'].append(long_text)
+    final_str = ''.join(record['txt'])
+    final_len = len(final_str)
+    assert(original_len == final_len)
+    if final_len > 500:
+        print('WONKY STRING? {}\n{}'.format(final_len, final_str))
 
 
 def _post_check_names(zone):
