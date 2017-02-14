@@ -14,7 +14,7 @@ except ImportError:
     from urlparse import urlparse # pylint: disable=import-error
 import OpenSSL.crypto
 
-from azure.mgmt.web.models import (Site, SiteConfig, User, ServerFarmWithRichSku,
+from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan,
                                    SkuDescription, SslState, HostNameBinding,
                                    SiteSourceControl, Certificate, HostNameSslState)
 
@@ -504,7 +504,7 @@ def _stream_trace(streaming_url, user_name, password):
 
 def upload_ssl_cert(resource_group_name, name, certificate_password, certificate_file):
     client = web_client_factory()
-    webapp = client.sites.get_site(resource_group_name, name)
+    webapp = _generic_site_operation(resource_group_name, name, 'get')
     cert_file = open(certificate_file, 'rb')
     cert_contents = cert_file.read()
     hosting_environment_profile_param = webapp.hosting_environment_profile
@@ -514,10 +514,9 @@ def upload_ssl_cert(resource_group_name, name, certificate_password, certificate
     thumb_print = _get_cert(certificate_password, certificate_file)
     cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
                                     webapp.location, resource_group_name)
-    cert_base64_str = base64.b64encode(cert_contents).decode("utf-8")
-    cert = Certificate(password=certificate_password, pfx_blob=cert_base64_str,
+    cert = Certificate(password=certificate_password, pfx_blob=cert_contents,
                        location=webapp.location)
-    return client.certificates.create_or_update_certificate(resource_group_name, cert_name, cert)
+    return client.certificates.create_or_update(resource_group_name, cert_name, cert)
 
 def _generate_cert_name(thumb_print, hosting_environment, location, resource_group_name):
     return "%s_%s_%s_%s" % (thumb_print, hosting_environment, location, resource_group_name)
@@ -532,19 +531,19 @@ def _get_cert(certificate_password, certificate_file):
 
 def list_ssl_certs(resource_group_name):
     client = web_client_factory()
-    return client.certificates.get_certificates(resource_group_name)
+    return client.certificates.list_by_resource_group(resource_group_name)
 
 def delete_ssl_cert(resource_group_name, name, certificate_thumbprint):
     client = web_client_factory()
     error_str_1 = "Certificate for thumbprint '{}' found, but not for webapp '{}'"
     error_str_2 = "Certificate for thumbprint '{}' not found"
-    webapp_certs = client.certificates.get_certificates(resource_group_name)
+    webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
             for hostname in webapp_cert.host_names:
                 if name in hostname:
-                    return client.certificates.delete_certificate(resource_group_name,
-                                                                  webapp_cert.name)
+                    return client.certificates.delete(resource_group_name,
+                                                      webapp_cert.name)
                 raise CLIError(error_str_1.format(certificate_thumbprint, name))
             raise CLIError(error_str_2.format(certificate_thumbprint))
 
@@ -561,19 +560,19 @@ def _update_host_name_ssl_state(resource_group_name, webapp_name, location,
                           ],
                           location=location)
     if slot:
-        return client.sites.create_or_update_site_slot(resource_group_name,
-                                                       '{}({})'.format(webapp_name, slot),
-                                                       site_envelope=updated_webapp,
-                                                       slot=slot)
+        return client.web_apps.create_or_update_slot(resource_group_name,
+                                                     '{}({})'.format(webapp_name, slot),
+                                                     site_envelope=updated_webapp,
+                                                     slot=slot)
     else:
-        return client.sites.create_or_update_site(resource_group_name,
-                                                  webapp_name,
-                                                  site_envelope=updated_webapp)
+        return client.web_apps.create_or_update(resource_group_name,
+                                                webapp_name,
+                                                site_envelope=updated_webapp)
 
 def _update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
     client = web_client_factory()
-    webapp = client.sites.get_site(resource_group_name, name)
-    webapp_certs = client.certificates.get_certificates(resource_group_name)
+    webapp = _generic_site_operation(resource_group_name, name, 'get')
+    webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
             return _update_host_name_ssl_state(resource_group_name, name, webapp.location,
