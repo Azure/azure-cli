@@ -916,11 +916,12 @@ update_nsg_rule.__doc__ = SecurityRule.__doc__
 
 # endregion
 
-def create_vpn_connection(client, resource_group_name, connection_name, vnet_gateway1, location=None,
+# pylint: disable=too-many-locals
+def create_vpn_connection(client, resource_group_name, connection_name, vnet_gateway1,
+                          location=None, tags=None, no_wait=False, validate=False,
                           vnet_gateway2=None, express_route_circuit2=None, local_gateway2=None,
                           authorization_key=None, enable_bgp=False, routing_weight=10,
-                          connection_type=None, shared_key=None, tags=None, no_wait=False,
-                          validate=False):
+                          connection_type=None, shared_key=None):
     """
     :param str vnet_gateway1: Name or ID of the source virtual network gateway.
     :param str vnet_gateway2: Name or ID of the destination virtual network gateway to connect to
@@ -937,8 +938,8 @@ def create_vpn_connection(client, resource_group_name, connection_name, vnet_gat
     from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
     from azure.cli.core._util import random_string
-    from azure.cli.command_modules.network._template_builder import (ArmTemplateBuilder,
-                                                                build_vpn_connection_resource)
+    from azure.cli.command_modules.network._template_builder import \
+        ArmTemplateBuilder, build_vpn_connection_resource
 
     tags = tags or {}
 

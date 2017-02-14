@@ -8,10 +8,6 @@
 from collections import OrderedDict
 import json
 
-from enum import Enum
-
-from azure.cli.core._util import b64encode
-
 
 class ArmTemplateBuilder(object):
 
@@ -90,7 +86,7 @@ def build_vpn_connection_resource(name, location, tags, gateway1, gateway2, vpn_
     elif vpn_type == 'ExpressRoute':
         vpn_properties.update({
             'peer': {'id': gateway2}
-        }) 
+        })
 
     vpn_connection = {
         'type': 'Microsoft.Network/connections',
