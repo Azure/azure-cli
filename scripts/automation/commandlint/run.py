@@ -18,7 +18,7 @@ from importlib import import_module
 
 def dump_no_help(modules):
     cmd_table = APPLICATION.configuration.get_command_table()
-
+    exit = 0
     for cmd in cmd_table:
         cmd_table[cmd].load_arguments()
 
@@ -34,11 +34,14 @@ def dump_no_help(modules):
     for cmd in cmd_table:
         descrip = cmd_table[cmd].description
         if descrip is None or descrip is "":
+            exit = 1
             print(cmd)
 
         for key in cmd_table[cmd].arguments:
             if cmd_table[cmd].arguments[key].type.settings.get('help') is None:
+                exit = 1
                 print(cmd + " " + str(cmd_table[cmd].arguments[key].name))
+    sys.exit(exit)
 
 if __name__ == '__main__':
     parse = argparse.ArgumentParser('Test tools')
