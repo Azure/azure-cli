@@ -65,7 +65,7 @@ with ParametersContext(command='sql server firewall') as c:
     c.register_alias('firewall_rule_name', ('--name', '-n'))
 
 with ParametersContext(command='sql server service-objective') as c:
-    c.register_alias('server_name', ('--server-name',))
+    c.register_alias('server_name', ('--server-name', '-s'))
     c.register_alias('service_objective_name', ('--name', '-n'))
 
 with ParametersContext(command='sql server create') as c:
