@@ -1011,12 +1011,12 @@ def _validate_bgp_peering(instance, asn, bgp_peering_address, peer_weight):
                 instance.bgp_settings.peer_weight = peer_weight
             if bgp_peering_address is not None:
                 instance.bgp_settings.bgp_peering_address = bgp_peering_address
-        elif asn and bgp_peering_address:
+        elif asn:
             from azure.mgmt.network.models import BgpSettings
             instance.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
         else:
             raise CLIError(
-                'incorrect usage: --asn ASN --bgp-peering-address IP [--peer-weight WEIGHT]')
+                'incorrect usage: --asn ASN [--peer-weight WEIGHT --bgp-peering-address IP]')
 
 # region VNet Gateway Commands
 
