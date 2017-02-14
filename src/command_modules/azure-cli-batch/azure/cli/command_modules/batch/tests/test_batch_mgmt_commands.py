@@ -7,6 +7,7 @@ import tempfile
 
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck,
                                                      NoneCheck)
+from azure.cli.core._config import az_config
 
 
 def _before_record_response(response):
@@ -26,9 +27,9 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(BatchMgmtAccountScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'vcr_resource_group'
-        self.account_name = 'clibatchtest4'
+        self.account_name = 'clibatchtest1'
         self.location = 'brazilsouth'
-        self.storage_account_name = 'clibatchteststorage3'
+        self.storage_account_name = 'clibatchteststorage1'
 
     def test_batch_account_mgmt(self):
         self.execute()
@@ -77,6 +78,18 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
                                  JMESPathCheck('secondary', keys['secondary'])])
 
         self.assertTrue(keys['primary'] != keys2['primary'])
+
+        self.cmd('batch account login -g {} -n {}'.
+                 format(rg, name), checks=NoneCheck())
+        self.assertEqual(az_config.config_parser.get('batch', 'auth_mode'), 'aad')
+        self.assertEqual(az_config.config_parser.get('batch', 'account'), name)
+        self.assertFalse(az_config.config_parser.has_option('batch', 'access_key'))
+
+        self.cmd('batch account login -g {} -n {} --shared-key-auth'.
+                 format(rg, name), checks=NoneCheck())
+        self.assertEqual(az_config.config_parser.get('batch', 'auth_mode'), 'shared_key')
+        self.assertEqual(az_config.config_parser.get('batch', 'account'), name)
+        self.assertEqual(az_config.config_parser.get('batch', 'access_key'), keys2['primary'])
 
         # test batch account delete
         self.cmd('batch account delete -g {} -n {} --yes'.format(rg, name))

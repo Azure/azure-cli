@@ -71,6 +71,30 @@ def update_account(client, resource_group_name, account_name,  # pylint:disable=
                          auto_storage=properties)
 
 
+def login_account(client, resource_group_name, account_name, shared_key_auth=False):
+    from azure.cli.core._config import az_config, set_global_config
+    from azure.cli.core._profile import Profile
+
+    account = client.get(resource_group_name=resource_group_name,
+                         account_name=account_name)
+    if not az_config.config_parser.has_section('batch'):
+        az_config.config_parser.add_section('batch')
+    az_config.config_parser.set('batch', 'account', account.name)
+    az_config.config_parser.set('batch', 'endpoint',
+                                'https://{}/'.format(account.account_endpoint))
+
+    if shared_key_auth:
+        keys = client.get_keys(resource_group_name=resource_group_name,
+                               account_name=account_name)
+        az_config.config_parser.set('batch', 'auth_mode', 'shared_key')
+        az_config.config_parser.set('batch', 'access_key', keys.primary)
+    else:
+        az_config.config_parser.set('batch', 'auth_mode', 'aad')
+        az_config.config_parser.remove_option('batch', 'access_key')
+
+    set_global_config(az_config.config_parser)
+
+
 @transfer_doc(UpdateApplicationParameters)
 def update_application(client, resource_group_name, account_name, application_id,  # pylint:disable=too-many-arguments
                        allow_updates=None, display_name=None, default_version=None):

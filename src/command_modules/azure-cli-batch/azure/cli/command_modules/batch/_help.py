@@ -42,6 +42,11 @@ helps['batch account keys'] = """
     short-summary: Commands to manage your Batch account keys.
 """
 
+helps['batch account login'] = """
+    type: command
+    short-summary: Log in with specified Batch account through Azure Active Directory or Shared Key authentication.
+"""
+
 helps['batch application'] = """
     type: group
     short-summary: Commands to manage your Batch applications.
