@@ -17,6 +17,7 @@ from azure.mgmt.network.models import \
      SecurityRuleProtocol)
 
 import azure.cli.core.azlogging as azlogging
+from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 from azure.cli.core._util import CLIError
 from azure.cli.command_modules.network._client_factory import _network_client_factory
@@ -915,6 +916,57 @@ def update_subnet(instance, resource_group_name, address_prefix=None, network_se
 update_nsg_rule.__doc__ = SecurityRule.__doc__
 
 # endregion
+
+# pylint: disable=too-many-locals
+def create_vpn_connection(client, resource_group_name, connection_name, vnet_gateway1,
+                          location=None, tags=None, no_wait=False, validate=False,
+                          vnet_gateway2=None, express_route_circuit2=None, local_gateway2=None,
+                          authorization_key=None, enable_bgp=False, routing_weight=10,
+                          connection_type=None, shared_key=None):
+    """
+    :param str vnet_gateway1: Name or ID of the source virtual network gateway.
+    :param str vnet_gateway2: Name or ID of the destination virtual network gateway to connect to
+        using a 'Vnet2Vnet' connection.
+    :param str local_gateway2: Name or ID of the destination local network gateway to connect to
+        using an 'IPSec' connection.
+    :param str express_route_circuit2: Name or ID of the destination ExpressRoute to connect to
+        using an 'ExpressRoute' connection.
+    :param str authorization_key: The authorization key for the VPN connection.
+    :param bool enable_bgp: Enable BGP for this VPN connection.
+    :param bool no_wait: Do not wait for the long running operation to finish.
+    :param bool validate: Display and validate the ARM template but do not create any resources.
+    """
+    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
+    from azure.cli.core._util import random_string
+    from azure.cli.command_modules.network._template_builder import \
+        ArmTemplateBuilder, build_vpn_connection_resource
+
+    tags = tags or {}
+
+    # Build up the ARM template
+    master_template = ArmTemplateBuilder()
+    vpn_connection_resource = build_vpn_connection_resource(
+        connection_name, location, tags, vnet_gateway1,
+        vnet_gateway2 or local_gateway2 or express_route_circuit2,
+        connection_type, authorization_key, enable_bgp, routing_weight, shared_key)
+    master_template.add_resource(vpn_connection_resource)
+    master_template.add_output('resource', connection_name, output_type='object')
+
+    template = master_template.build()
+
+    # deploy ARM template
+    deployment_name = 'vpn_connection_deploy_' + random_string(32)
+    client = get_mgmt_service_client(ResourceManagementClient).deployments
+    properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
+    if validate:
+        from pprint import pprint
+        pprint(template)
+        return client.validate(resource_group_name, deployment_name, properties)
+
+    return LongRunningOperation()(client.create_or_update(
+        resource_group_name, deployment_name, properties, raw=no_wait))
+
 
 def update_vpn_connection(instance, routing_weight=None, shared_key=None, tags=None,
                           enable_bgp=None):
