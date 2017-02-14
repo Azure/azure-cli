@@ -64,8 +64,13 @@ def validate_client_parameters(namespace):
     if not n.sas_token:
         n.sas_token = az_config.get('storage', 'sas_token', None)
 
+    # strip the '?' from sas token. the portal and command line are returns sas token in different
+    # forms
+    if n.sas_token:
+        n.sas_token = n.sas_token.lstrip('?')
+
     # if account name is specified but no key, attempt to query
-    if n.account_name and not n.account_key:
+    if n.account_name and not n.account_key and not n.sas_token:
         scf = get_mgmt_service_client(StorageManagementClient)
         acc = next((x for x in scf.storage_accounts.list() if x.name == n.account_name), None)
         if acc:
