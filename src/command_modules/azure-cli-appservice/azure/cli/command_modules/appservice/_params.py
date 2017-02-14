@@ -11,7 +11,7 @@ from azure.cli.core.commands.parameters import (resource_group_name_type, locati
                                                 get_resource_name_completion_list, file_type,
                                                 CliArgumentType, ignore_type, enum_choice_list)
 
-from azure.mgmt.web.models import (DatabaseServerType)
+from azure.mgmt.web.models import DatabaseType
 
 from ._client_factory import web_client_factory
 
@@ -109,13 +109,11 @@ register_cli_argument('appservice web config update', 'app_command_line', option
 register_cli_argument('appservice web config hostname', 'webapp', help="webapp name", completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
 register_cli_argument('appservice web config hostname', 'name', arg_type=name_arg_type, completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name')
 
-db_types = [DatabaseServerType.my_sql, DatabaseServerType.sql_azure]
-
 register_cli_argument('appservice web config backup', 'storage_account_url', help='URL with SAS token to the blob storage container', options_list=['--container-url'])
 register_cli_argument('appservice web config backup', 'webapp_name', help='The name of the webapp')
 register_cli_argument('appservice web config backup', 'db_name', help='Name of the database in the backup', arg_group='Database')
 register_cli_argument('appservice web config backup', 'db_connection_string', help='Connection string for the database in the backup', arg_group='Database')
-register_cli_argument('appservice web config backup', 'db_type', help='Type of database in the backup', arg_group='Database', **enum_choice_list(db_types))
+register_cli_argument('appservice web config backup', 'db_type', help='Type of database in the backup', arg_group='Database', **enum_choice_list(DatabaseType))
 
 register_cli_argument('appservice web config backup create', 'backup_name', help='Name of the backup. If unspecified, the backup will be named with the webapp name and a timestamp')
 

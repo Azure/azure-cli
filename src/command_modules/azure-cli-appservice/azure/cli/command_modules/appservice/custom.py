@@ -15,7 +15,7 @@ except ImportError:
 from msrestazure.azure_exceptions import CloudError
 
 from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan,
-                                   SkuDescription, SslState, HostNameBinding, SiteSourceControl,
+                                   SkuDescription, SslState, HostNameBinding,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
                                    RestoreRequest, FrequencyUnit)
 
@@ -300,12 +300,12 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None,
 def show_backup_configuration(resource_group_name, webapp_name, slot=None):
     try:
         return _generic_site_operation(resource_group_name, webapp_name,
-                                       'get_site_backup_configuration', slot)
+                                       'get_backup_configuration', slot)
     except:
         raise CLIError('Backup configuration not found')
 
 def list_backups(resource_group_name, webapp_name, slot=None):
-    return _generic_site_operation(resource_group_name, webapp_name, 'list_site_backups',
+    return _generic_site_operation(resource_group_name, webapp_name, 'list_backups',
                                    slot)
 
 def create_backup(resource_group_name, webapp_name, storage_account_url,
@@ -319,9 +319,9 @@ def create_backup(resource_group_name, webapp_name, storage_account_url,
     backup_request = BackupRequest(location, backup_request_name=backup_name,
                                    storage_account_url=storage_account_url, databases=db_setting)
     if slot:
-        return client.sites.backup_site_slot(resource_group_name, webapp_name, backup_request, slot)
+        return client.web_apps.backup_slot(resource_group_name, webapp_name, backup_request, slot)
     else:
-        return client.sites.backup_site(resource_group_name, webapp_name, backup_request)
+        return client.web_apps.backup(resource_group_name, webapp_name, backup_request)
 
 def update_backup_schedule(resource_group_name, webapp_name, storage_account_url=None,
                            frequency=None, keep_at_least_one_backup=False,
@@ -333,7 +333,7 @@ def update_backup_schedule(resource_group_name, webapp_name, storage_account_url
 
     try:
         configuration = _generic_site_operation(resource_group_name, webapp_name,
-                                                'get_site_backup_configuration', slot)
+                                                'get_backup_configuration', slot)
     except CloudError:
         # No configuration set yet
         if not all([storage_account_url, frequency, retention_period_in_days]):
@@ -362,15 +362,15 @@ def update_backup_schedule(resource_group_name, webapp_name, storage_account_url
 
     db_setting = _create_db_setting(db_name, db_type, db_connection_string)
 
-    backup_schedule = BackupSchedule(frequency_unit, frequency_num,
+    backup_schedule = BackupSchedule(frequency_num, frequency_unit.name,
                                      keep_at_least_one_backup, retention_period_in_days)
     backup_request = BackupRequest(location, backup_schedule=backup_schedule, enabled=True,
                                    storage_account_url=storage_account_url, databases=db_setting)
     if slot:
-        return client.sites.update_site_backup_configuration_slot(resource_group_name, webapp_name,
+        return client.web_apps.update_backup_configuration_slot(resource_group_name, webapp_name,
                                                                   backup_request, slot)
     else:
-        return client.sites.update_site_backup_configuration(resource_group_name, webapp_name,
+        return client.web_apps.update_backup_configuration(resource_group_name, webapp_name,
                                                              backup_request)
 
 def restore_backup(resource_group_name, webapp_name, storage_account_url, backup_name,
@@ -387,9 +387,9 @@ def restore_backup(resource_group_name, webapp_name, storage_account_url, backup
                                      site_name=target_name, databases=db_setting,
                                      ignore_conflicting_host_names=ignore_hostname_conflict)
     if slot:
-        return client.sites.restore_site(resource_group_name, webapp_name, 0, restore_request, slot)
+        return client.web_apps.restore(resource_group_name, webapp_name, 0, restore_request, slot)
     else:
-        return client.sites.restore_site(resource_group_name, webapp_name, 0, restore_request)
+        return client.web_apps.restore(resource_group_name, webapp_name, 0, restore_request)
 
 def _create_db_setting(db_name, db_type, db_connection_string):
     if all([db_name, db_type, db_connection_string]):
