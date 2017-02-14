@@ -6,8 +6,6 @@
 # AZURE CLI ACR TEST DEFINITIONS
 #pylint: disable=line-too-long
 
-from random import randint
-
 from azure.cli.core.test_utils.vcr_test_base import (
     ResourceGroupVCRTestBase,
     JMESPathCheck,
