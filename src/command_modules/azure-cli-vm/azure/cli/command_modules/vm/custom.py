@@ -1424,9 +1424,9 @@ def create_vm(vm_name, resource_group_name, image=None,
               public_ip_address=None, public_ip_address_allocation='dynamic',
               public_ip_address_dns_name=None,
               os_disk_name=None, os_type=None, storage_account=None,
-              storage_caching='ReadWrite', storage_container_name='vhds',
+              storage_caching=None, storage_container_name=None,
               storage_sku='Premium_LRS', use_unmanaged_disk=False,
-              managed_os_disk=None, data_disk_sizes_gb=None, image_data_disks=None,
+              attach_os_disk=None, data_disk_sizes_gb=None, image_data_disks=None,
               vnet_name=None, vnet_address_prefix='10.0.0.0/16',
               subnet=None, subnet_address_prefix='10.0.0.0/24', storage_profile=None,
               os_publisher=None, os_offer=None, os_sku=None, os_version=None,
@@ -1450,6 +1450,8 @@ def create_vm(vm_name, resource_group_name, image=None,
     # determine final defaults and calculated values
     tags = tags or {}
     os_disk_name = os_disk_name or 'osdisk_{}'.format(random_string(10))
+    storage_container_name = storage_container_name or 'vhds'
+    storage_caching = storage_caching or 'ReadWrite'
 
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
@@ -1526,6 +1528,9 @@ def create_vm(vm_name, resource_group_name, image=None,
         os_vhd_uri = 'https://{}.blob.{}/{}/{}.vhd'.format(
             storage_account_name, CLOUD.suffixes.storage_endpoint, storage_container_name,
             os_disk_name)
+    elif storage_profile == StorageProfile.SASpecializedOSDisk:
+        os_vhd_uri = attach_os_disk
+        os_disk_name = attach_os_disk.rsplit('/', 1)[1][:-4]
 
     if custom_data:
         custom_data = read_content_if_is_file(custom_data)
@@ -1534,7 +1539,7 @@ def create_vm(vm_name, resource_group_name, image=None,
         vm_name, location, tags, size, storage_profile, nics, admin_username, availability_set,
         admin_password, ssh_key_value, ssh_dest_key_path, image, os_disk_name,
         os_type, storage_caching, storage_sku, os_publisher, os_offer, os_sku, os_version,
-        os_vhd_uri, managed_os_disk, data_disk_sizes_gb, image_data_disks, custom_data)
+        os_vhd_uri, attach_os_disk, data_disk_sizes_gb, image_data_disks, custom_data)
     vm_resource['dependsOn'] = vm_dependencies
 
     master_template.add_resource(vm_resource)
@@ -1546,6 +1551,9 @@ def create_vm(vm_name, resource_group_name, image=None,
     client = get_mgmt_service_client(ResourceManagementClient).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     if validate:
+        from pprint import pprint
+        import sys
+        pprint(template, sys.stderr)
         return client.validate(resource_group_name, deployment_name, properties, raw=no_wait)
 
     # creates the VM deployment
@@ -1568,8 +1576,8 @@ def create_vmss(vmss_name, resource_group_name, image,
                 load_balancer=None, backend_pool_name=None, nat_pool_name=None, backend_port=None,
                 public_ip_address=None, public_ip_address_allocation='dynamic',
                 public_ip_address_dns_name=None,
-                storage_caching='ReadOnly',
-                storage_container_name='vhds', storage_sku='Standard_LRS',
+                storage_caching=None,
+                storage_container_name=None, storage_sku='Standard_LRS',
                 os_type=None, os_disk_name=None,
                 use_unmanaged_disk=False, data_disk_sizes_gb=None, image_data_disks=None,
                 vnet_name=None, vnet_address_prefix='10.0.0.0/16',
@@ -1596,6 +1604,8 @@ def create_vmss(vmss_name, resource_group_name, image,
     # determine final defaults and calculated values
     tags = tags or {}
     os_disk_name = os_disk_name or 'osdisk_{}'.format(random_string(10))
+    storage_container_name = storage_container_name or 'vhds'
+    storage_caching = storage_caching or 'ReadOnly'
 
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
@@ -1701,6 +1711,9 @@ def create_vmss(vmss_name, resource_group_name, image,
     client = get_mgmt_service_client(ResourceManagementClient).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     if validate:
+        from pprint import pprint
+        import sys
+        pprint(template, sys.stderr)
         return client.validate(resource_group_name, deployment_name, properties, raw=no_wait)
 
     # creates the VMSS deployment
