@@ -77,6 +77,13 @@ class CommandGroup(object):
                     self._service_adapter(method_name),
                     client_factory=self._client_factory)
 
+    def custom_command(self, name, custom_func_name):
+        custom_path = 'azure.cli.command_modules.sql.custom#{}'
+        cli_command(self._scope,
+                    '{} {}'.format(self._group_name, name),
+                    custom_path.format(custom_func_name),
+                    client_factory=self._client_factory)
+
     def generic_update_command(self, name, getter_op, setter_op):
         cli_generic_update_command(
             self._scope,

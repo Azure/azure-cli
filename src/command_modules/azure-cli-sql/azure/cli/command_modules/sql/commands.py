@@ -8,8 +8,6 @@ from ._util import (get_sql_servers_operation, get_sql_database_operations,
                     ServiceGroup, create_service_adapter)
 from azure.cli.core.commands import cli_command
 
-custom_path = 'azure.cli.command_modules.sql.custom#{}'
-
 server_operations = create_service_adapter('azure.mgmt.sql.operations.servers_operations',
                                            'ServersOperations')
 
@@ -33,8 +31,7 @@ with ServiceGroup(__name__, get_sql_servers_operation, server_operations) as s:
         c.command('delete', 'delete_firewall_rule')
         c.command('show', 'get_firewall_rule')
         c.command('list', 'list_firewall_rules')
-
-cli_command(__name__, 'sql server firewall allow-all-azure-ips', custom_path.format('firewall_allow_all_azure_ips'), client_factory=get_sql_servers_operation)
+        c.custom_command('allow-all-azure-ips', 'firewall_allow_all_azure_ips')
 
 database_operations = create_service_adapter('azure.mgmt.sql.operations.databases_operations',
                                              'DatabasesOperations')
