@@ -122,7 +122,7 @@ register_cli_argument('appservice web config backup update', 'keep_at_least_one_
 register_cli_argument('appservice web config backup update', 'retention_period_in_days', help='How many days to keep a backup before automatically deleting it. Set to 0 for indefinite retention', options_list=['--retention'])
 
 register_cli_argument('appservice web config backup restore', 'backup_name', help='Name of the backup to restore')
-register_cli_argument('appservice web config backup restore', 'target_name', help='Name of the app which will be overwritten with the restored data. If unspecified, the target is the source webapp')
+register_cli_argument('appservice web config backup restore', 'target_name', help='The name to use for the restored webapp. If unspecified, will default to the name that was used when the backup was created')
 register_cli_argument('appservice web config backup restore', 'overwrite', help='Overwrite the source webapp, if --target-name is not specified', action='store_true')
 register_cli_argument('appservice web config backup restore', 'ignore_hostname_conflict', help='Ignores custom hostnames stored in the backup', action='store_true')
 

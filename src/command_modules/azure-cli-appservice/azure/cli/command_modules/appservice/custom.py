@@ -368,10 +368,10 @@ def update_backup_schedule(resource_group_name, webapp_name, storage_account_url
                                    storage_account_url=storage_account_url, databases=db_setting)
     if slot:
         return client.web_apps.update_backup_configuration_slot(resource_group_name, webapp_name,
-                                                                  backup_request, slot)
+                                                                backup_request, slot)
     else:
         return client.web_apps.update_backup_configuration(resource_group_name, webapp_name,
-                                                             backup_request)
+                                                           backup_request)
 
 def restore_backup(resource_group_name, webapp_name, storage_account_url, backup_name,
                    db_name=None, db_type=None, db_connection_string=None,
@@ -402,6 +402,7 @@ def _parse_frequency(frequency):
     if unit_part == 'd':
         frequency_unit = FrequencyUnit.day
     elif unit_part == 'h':
+        # pylint: disable=redefined-variable-type
         frequency_unit = FrequencyUnit.hour
     else:
         raise CLIError('Frequency must end with d or h for "day" or "hour"')
