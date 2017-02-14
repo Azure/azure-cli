@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 import requests
 
 from azure.cli.core.prompting import prompt, prompt_pass, NoTTYException
@@ -38,8 +39,10 @@ def _obtain_data_from_registry(login_server, path, resultIndex, username, passwo
                 # we should follow the next path indicated in the link header
                 path = linkHeader[(linkHeader.index('<')+1):linkHeader.index('>')]
                 executeNextHttpCall = True
+        elif response.status_code == 401:
+            raise CLIError('Invalid username or password specified.')
         else:
-            response.raise_for_status()
+            raise CLIError(json.loads(response.text)['errors'][0]['message'])
 
     return resultList
 
