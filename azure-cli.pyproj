@@ -15,7 +15,8 @@
     <InterpreterId>{54f4b6dc-0859-46dc-99bb-b275c9d0aca3}</InterpreterId>
     <InterpreterVersion>3.5</InterpreterVersion>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
-    <CommandLineArguments>network vpn-connection create -g tjp-vpn -n vpn1 --vnet-gateway1 gw1 --vnet-gateway2 gw2 --shared-key 123</CommandLineArguments>
+    <CommandLineArguments>
+    </CommandLineArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -368,6 +369,7 @@
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\_help.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\_template_builder.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\_util.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\_validators.py" />
     <Compile Include="command_modules\azure-cli-profile\azure\cli\command_modules\profile\_help.py">
@@ -697,7 +699,6 @@
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_local_gateway\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_express_route_circuit\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_traffic_manager_profile\" />
-    <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vpn_connection\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\zone_files\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\zone_file\" />
     <Folder Include="command_modules\azure-cli-redis\" />
@@ -812,7 +813,6 @@
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_lb\azuredeploy.json" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vnet_gateway\azuredeploy.json" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vnet_gateway\swagger_create_vnet_gateway.json" />
-    <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\mgmt_vpn_connection\azuredeploy.json" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\TestCert.pfx" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\zone_files\merge1.txt" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\zone_files\merge2.txt" />

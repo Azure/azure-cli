@@ -509,6 +509,9 @@ register_cli_argument('network vpn-connection create', 'connection_name', option
 register_cli_argument('network vpn-connection create', 'vnet_gateway1', validator=process_vpn_connection_create_namespace)
 register_cli_argument('network vpn-connection create', 'connection_type', ignore_type)
 
+for item in ['vnet_gateway2', 'local_gateway2', 'express_route_circuit2']:
+    register_cli_argument('network vpn-connection create', item, arg_group='Destination')
+
 register_cli_argument('network vpn-connection update', 'routing_weight', type=int, help='Connection routing weight')
 register_cli_argument('network vpn-connection update', 'enable_bgp', help='Enable BGP (Border Gateway Protocol)', **enum_choice_list(['true', 'false']))
 
