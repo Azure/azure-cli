@@ -144,6 +144,14 @@ def validate_inbound_nat_rule_name_or_id(namespace):
         namespace.inbound_nat_rule = _generate_lb_subproperty_id(
             namespace, 'inboundNatRules', rule_name)
 
+def validate_location(namespace):
+    if not namespace.location:
+        from azure.mgmt.resource.resources import ResourceManagementClient
+        from azure.cli.core.commands.client_factory import get_mgmt_service_client
+        resource_client = get_mgmt_service_client(ResourceManagementClient)
+        rg = resource_client.resource_groups.get(namespace.resource_group_name)
+        namespace.location = rg.location  # pylint: disable=no-member
+
 def validate_metadata(namespace):
     if namespace.metadata:
         namespace.metadata = dict(x.split('=', 1) for x in namespace.metadata)
@@ -518,9 +526,11 @@ def process_vnet_gateway_create_namespace(namespace):
 
 def process_vpn_connection_create_namespace(namespace):
 
-    args = [a for a in [namespace.express_route_circuit2_id,
-                        namespace.local_gateway2_id,
-                        namespace.vnet_gateway2_id]
+    validate_location(namespace)
+
+    args = [a for a in [namespace.express_route_circuit2,
+                        namespace.local_gateway2,
+                        namespace.vnet_gateway2]
             if a]
     if len(args) != 1:
         raise ValueError('usage error: --vnet-gateway2 NAME_OR_ID | --local-gateway2 NAME_OR_ID '
@@ -537,27 +547,27 @@ def process_vpn_connection_create_namespace(namespace):
                 name=value)
         return value
 
-    if namespace.local_gateway2_id or namespace.vnet_gateway2_id and not namespace.shared_key:
+    if namespace.local_gateway2 or namespace.vnet_gateway2 and not namespace.shared_key:
         raise CLIError('--shared-key is required for VNET-to-VNET or Site-to-Site connections.')
 
-    if namespace.express_route_circuit2_id and namespace.shared_key:
+    if namespace.express_route_circuit2 and namespace.shared_key:
         raise CLIError('--shared-key cannot be used with an ExpressRoute connection.')
 
-    namespace.vnet_gateway1_id = \
-        _validate_name_or_id(namespace, namespace.vnet_gateway1_id, 'virtualNetworkGateways')
+    namespace.vnet_gateway1 = \
+        _validate_name_or_id(namespace, namespace.vnet_gateway1, 'virtualNetworkGateways')
 
-    if namespace.express_route_circuit2_id:
-        namespace.express_route_circuit2_id = \
+    if namespace.express_route_circuit2:
+        namespace.express_route_circuit2 = \
             _validate_name_or_id(
-                namespace, namespace.express_route_circuit2_id, 'expressRouteCircuits')
+                namespace, namespace.express_route_circuit2, 'expressRouteCircuits')
         namespace.connection_type = 'ExpressRoute'
-    elif namespace.local_gateway2_id:
-        namespace.local_gateway2_id = \
-            _validate_name_or_id(namespace, namespace.local_gateway2_id, 'localNetworkGateways')
+    elif namespace.local_gateway2:
+        namespace.local_gateway2 = \
+            _validate_name_or_id(namespace, namespace.local_gateway2, 'localNetworkGateways')
         namespace.connection_type = 'IPSec'
-    elif namespace.vnet_gateway2_id:
-        namespace.vnet_gateway2_id = \
-            _validate_name_or_id(namespace, namespace.vnet_gateway2_id, 'virtualNetworkGateways')
+    elif namespace.vnet_gateway2:
+        namespace.vnet_gateway2 = \
+            _validate_name_or_id(namespace, namespace.vnet_gateway2, 'virtualNetworkGateways')
         namespace.connection_type = 'Vnet2Vnet'
 
 def load_cert_file(param_name):
