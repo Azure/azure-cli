@@ -7,7 +7,6 @@
 from __future__ import print_function
 import json
 import threading
-import base64
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -16,7 +15,7 @@ import OpenSSL.crypto
 
 from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan,
                                    SkuDescription, SslState, HostNameBinding,
-                                   SiteSourceControl, Certificate, HostNameSslState)
+                                   Certificate, HostNameSslState)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
