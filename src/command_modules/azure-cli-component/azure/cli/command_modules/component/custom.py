@@ -141,7 +141,25 @@ def _install_or_update(package_list, link, private, pre):
     _run_pip(pip, pip_args)
 
 
-def update(private=False, pre=False, link=None, additional_components=None):
+def _verify_additional_components(components, private, allow_third_party):
+    # Don't verify as third party packages allowed or private server which we can't query
+    if allow_third_party or private:
+        return
+    third_party = []
+    first_party_component_names = [r['name']for r in _get_first_party_pypi_command_modules()]
+    for c in components:
+        if c not in first_party_component_names:
+            third_party.append(c)
+    if third_party:
+        raise CLIError("The following components are third party or not available"
+                       " '{}'.".format(', '.join(third_party)))
+
+
+def update(private=False,
+           pre=False,
+           link=None,
+           additional_components=None,
+           allow_third_party=False):
     """ Update the CLI and all installed components """
     _verify_not_dev()
     import pip
@@ -152,6 +170,7 @@ def update(private=False, pre=False, link=None, additional_components=None):
                      if dist.key.startswith(COMPONENT_PREFIX)]
     # Install/Update any new components the user requested
     if additional_components:
+        _verify_additional_components(additional_components, private, allow_third_party)
         for c in additional_components:
             package_list += [COMPONENT_PREFIX + c]
     _install_or_update(package_list, link, private, pre)
