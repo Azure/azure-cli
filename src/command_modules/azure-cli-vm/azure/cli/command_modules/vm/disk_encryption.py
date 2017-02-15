@@ -1,6 +1,8 @@
 from msrestazure.azure_exceptions import CloudError
+import azure.cli.core.azlogging as azlogging
 from azure.cli.core._util import CLIError
 from .custom import get_vm, set_vm, _compute_client_factory
+logger = azlogging.get_az_logger(__name__)
 
 extension_info = {
     'Linux': {
@@ -180,8 +182,9 @@ def disable_disk_encryption(resource_group_name, vm_name, volume_type=None):
     vm.storage_profile.os_disk.encryption_settings = disk_encryption_settings
     return set_vm(vm)
 
+
 def show_encryption_status(resource_group_name, vm_name):
-    status = {
+    encryption_status = {
         'osVolumeEncrypted': 'NotEncrypted',
         'osVolumeEncryptionSettings': None,
         'dataVolumesEncrypted': 'NotEncrypted'
@@ -193,19 +196,45 @@ def show_encryption_status(resource_group_name, vm_name):
     compute_client = _compute_client_factory()
     extension_result = compute_client.virtual_machine_extensions.get(resource_group_name, vm_name,
                                                                      extension['name'], 'instanceView')
+    logger.debug(extension_result)
+    encryption_status = {}
+    if extension_result.instance_view.statuses:
+        encryption_status['progressMessage'] = extension_result.instance_view.statuses[0].message
+
+    substatus_message = None
+    if getattr(extension_result.instance_view, 'substatuses', None):
+        substatus_message = extension_result.instance_view.substatuses[0].message
 
 
+    encryption_status['osVolumeEncryptionSettings'] = vm.storage_profile.os_disk.encryption_settings
 
-def show_disk_encryption(resource_group_name, vm_name):
-    vm = get_vm(resource_group_name, vm_name)
-    os_type = vm.storage_profile.os_disk.os_type.value  # pylint: disable=no-member
-    is_linux = os_type.lower() == 'linux'
-    extension = extension_info[os_type]
-    client = _compute_client_factory()
-    extension_result = client.virtual_machine_extensions.get(resource_group_name, vm_name,
-                                                             extension['name'], 'instanceView')
-    return extension_result
+    import json
+    if is_linux:
+        try: 
+            message_object = json.loads(substatus_message)
+        except:
+            message_object = None # outdated versions of guest agent produce messages that cannot be parsed
 
+        if message_object and ('os' in message_object):
+            encryption_status['osVolumeEncrypted'] = message_object['os']
+        else:
+            encryption_status['osVolumeEncrypted'] = 'Unknown'
+
+        if message_object and 'data' in message_object:
+            encryption_status['dataVolumesEncrypted'] = message_object['data']
+        else:
+            encryption_status['dataVolumesEncrypted'] = 'Unknown'
+    else:
+        # Windows - get os and data volume encryption state from the vm model 
+        if encryption_status['osVolumeEncryptionSettings'].enabled and encryption_status['osVolumeEncryptionSettings'].disk_encryption_key.secret_url:
+            encryption_status['osVolumeEncrypted'] = 'Encrypted'
+
+        if extension_result.provisioning_state == 'Succeeded':
+            volume_type = extension_result.settings.get('VolumeType', None)
+            if not volume_type or volume_type.lower() != 'os':
+                encryption_status['dataVolumesEncrypted'] = 'Encrypted'
+
+    return encryption_status
 
 
 def _get_sequence_version(compute_client, resource_group_name, vm_name, extension_name):
