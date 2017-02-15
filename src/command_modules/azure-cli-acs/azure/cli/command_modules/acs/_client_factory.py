@@ -28,3 +28,9 @@ def _graph_client_factory(**_):
                                        base_url=CLOUD.endpoints.active_directory_graph_resource_id)
     configure_common_settings(client)
     return client
+
+
+def acs_client_factory(_):
+    from azure.mgmt.compute import ComputeManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(ComputeManagementClient).container_services

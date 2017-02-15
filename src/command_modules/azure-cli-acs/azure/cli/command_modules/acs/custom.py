@@ -31,7 +31,7 @@ from msrestazure.azure_exceptions import CloudError
 import azure.cli.core.azlogging as azlogging
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.vm._validators import _is_valid_ssh_rsa_public_key
-from azure.cli.command_modules.vm.mgmt_acs.lib import \
+from azure.cli.command_modules.acs.mgmt_acs.lib import \
     AcsCreationClient as ACSClient
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,line-too-long
 from azure.cli.core._util import CLIError
@@ -46,7 +46,7 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     ServicePrincipalCreateParameters,
                                     GetObjectsParameters)
 from azure.mgmt.authorization.models import RoleAssignmentProperties
-from ._client_factory import (_auth_client_factory, _graph_client_factory)
+from ._client_factory import (_auth_client_factory, _graph_client_factory, acs_client_factory)
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -691,6 +691,21 @@ def _mkdir_p(path):
             pass
         else:
             raise
+
+
+def update_acs(resource_group_name, container_service_name, new_agent_count):
+    client = acs_client_factory(None)
+    instance = client.get(resource_group_name, container_service_name)
+    instance.agent_pool_profiles[0].count = new_agent_count  # pylint: disable=no-member
+    return client.create_or_update(resource_group_name, container_service_name, instance)
+
+
+def list_container_services(resource_group_name=None):
+    ''' List Container Services. '''
+    client = acs_client_factory(None)
+    svc_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
+        if resource_group_name else client.list()
+    return list(svc_list)
 
 
 def show_service_principal(client, identifier):
