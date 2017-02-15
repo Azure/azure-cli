@@ -36,7 +36,7 @@ register_extra_cli_argument('batch account create', 'storage_account', help='The
 register_cli_argument('batch account set', 'tags', tags_type)
 register_extra_cli_argument('batch account set', 'storage_account', help='The storage account name or resource ID to be used for auto storage.', validator=storage_account_id)
 register_cli_argument('batch account keys renew', 'key_name', **enum_choice_list(AccountKeyType))
-register_cli_argument('batch account login', 'shared_key_auth', action='store_true', help='Using Shared Key authentication, if not specified, it will use Azure Active Directory authenticate.')
+register_cli_argument('batch account login', 'shared_key_auth', action='store_true', help='Using Shared Key authentication, if not specified, it will use Azure Active Directory authentication.')
 
 register_cli_argument('batch application set', 'application_id', options_list=('--application-id',), help="The ID of the application.")
 register_cli_argument('batch application set', 'allow_updates', options_list=('--allow-updates',), help="Specify to indicate whether packages within the application may be overwritten using the same version string. Specify either 'true' or 'false' to update the property.")
