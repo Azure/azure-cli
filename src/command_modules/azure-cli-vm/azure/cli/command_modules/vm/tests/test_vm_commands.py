@@ -971,12 +971,12 @@ class VMCreateExistingIdsOptions(ResourceGroupVCRTestBase):
         rg = self.resource_group
 
         av_set = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Compute', type='availabilitySets', name=self.availset_name)
-        pip = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='publicIpAddresses', name=self.pubip_name)
+        pub_ip = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='publicIpAddresses', name=self.pubip_name)
         subnet = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='virtualNetworks', child_type='subnets', name=self.vnet_name, child_name=self.subnet_name)
         nsg = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='networkSecurityGroups', name=self.nsg_name)
 
         assert is_valid_resource_id(av_set)
-        assert is_valid_resource_id(pip)
+        assert is_valid_resource_id(pub_ip)
         assert is_valid_resource_id(subnet)
         assert is_valid_resource_id(nsg)
 
@@ -990,7 +990,7 @@ class VMCreateExistingIdsOptions(ResourceGroupVCRTestBase):
                  ' --admin-username user11'
                  ' --storage-account {storage_name} --storage-container-name {container_name} -g {resource_group}'
                  ' --name {vm_name} --ssh-key-value \'{key_value}\''
-                 .format(subnet=subnet, availset=av_set, pubip=pip,
+                 .format(subnet=subnet, availset=av_set, pubip=pub_ip,
                          resource_group=self.resource_group, nsg=nsg,
                          vm_name=self.vm_name, disk_name=self.disk_name,
                          container_name=self.container_name, storage_name=self.storage_name,
