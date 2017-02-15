@@ -29,7 +29,7 @@ def dump_no_help(modules):
         try:
             import_module('azure.cli.command_modules.' + mod).load_params(mod)
         except Exception as ex:
-            print("EXCEPTION: " + ex.message)
+            print("EXCEPTION: " + str(mod))
 
     _update_command_definitions(cmd_table)
 
@@ -48,43 +48,29 @@ def dump_no_help(modules):
 
         param_list = []
         for key in cmd_table[cmd].arguments:
-            if cmd_table[cmd].arguments[key].type.settings.get('help') is None:
+            if not cmd_table[cmd].arguments[key].type.settings.get('help'):
                 exit_val = 1
-                param_list.append(cmd_table[cmd].arguments[key].type.settings.get('name'))
+                param_list.append(cmd_table[cmd].arguments[key].name)
+        if param_list:
+            parameters[cmd] = param_list
 
-        parameters[cmd] = param_list
     data = {
         "subgroups" : subgroups_list,
         "commands" : command_list,
         "parameters" : parameters
     }
-    json.dumps(data)
+
+    print(json.dumps(data, indent=2, sort_keys=True))
+
     return exit_val
 
 if __name__ == '__main__':
-    parse = argparse.ArgumentParser('Test tools')
-    parse.add_argument('--module', dest='modules', action='append',
-                       help='The modules of which the test to be run. Accept short names, except '
-                            'azure-cli, azure-cli-core and azure-cli-nspkg. The modules list can '
-                            'also be set through environment variable AZURE_CLI_TEST_MODULES. The '
-                            'value should be a string of comma separated module names. The '
-                            'environment variable will be overwritten by command line parameters.')
-    args = parse.parse_args()
-
-    if not args.modules and os.environ.get('AZURE_CLI_TEST_MODULES', None):
-        print('Test modules list is parsed from environment variable AZURE_CLI_TEST_MODULES.')
-        args.modules = [m.strip() for m in os.environ.get('AZURE_CLI_TEST_MODULES').split(',')]
-
-    selected_modules = filter_user_selected_modules_with_tests(args.modules)
-    if not selected_modules:
-        try:
-            mods_ns_pkg = import_module('azure.cli.command_modules')
-            installed_command_modules = [modname for _, modname, _ in
-                                         pkgutil.iter_modules(mods_ns_pkg.__path__)]
-        except ImportError:
-            pass
-        exit_value = dump_no_help(installed_command_modules)
-    else:
-        exit_value = dump_no_help(selected_modules)
+    try:
+        mods_ns_pkg = import_module('azure.cli.command_modules')
+        installed_command_modules = [modname for _, modname, _ in
+                                     pkgutil.iter_modules(mods_ns_pkg.__path__)]
+    except ImportError:
+        pass
+    exit_value = dump_no_help(installed_command_modules)
     sys.exit(exit_value)
 
