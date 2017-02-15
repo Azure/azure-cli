@@ -23,7 +23,7 @@ from azure.mgmt.compute.models import (VirtualHardDisk,
                                        VirtualMachineScaleSetExtension,
                                        VirtualMachineScaleSetExtensionProfile)
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.commands.arm import parse_resource_id, resource_id
+from azure.cli.core.commands.arm import parse_resource_id, resource_id, is_valid_resource_id
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core._util import CLIError
 import azure.cli.core.azlogging as azlogging
@@ -1519,12 +1519,19 @@ def create_vm(vm_name, resource_group_name, image=None,
                                                                   public_ip_address_allocation,
                                                                   public_ip_address_dns_name))
 
-        subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(
-            network_id_template, vnet_name, subnet)
-        nsg_id = '{}/networkSecurityGroups/{}'.format(network_id_template, nsg) if nsg else None
-        public_ip_address_id = \
-            '{}/publicIPAddresses/{}'.format(network_id_template, public_ip_address) \
-            if public_ip_address else None
+        subnet_id = subnet if is_valid_resource_id(subnet) else \
+            '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
+
+        nsg_id = None
+        if nsg:
+            nsg_id = nsg if is_valid_resource_id(nsg) else \
+                '{}/networkSecurityGroups/{}'.format(network_id_template, nsg)
+
+        public_ip_address_id = None
+        if public_ip_address:
+            public_ip_address_id = public_ip_address if is_valid_resource_id(public_ip_address) \
+                else '{}/publicIPAddresses/{}'.format(network_id_template, public_ip_address)
+
         nics = [
             {'id': '{}/networkInterfaces/{}'.format(network_id_template, nic_name)}
         ]
@@ -1629,7 +1636,9 @@ def create_vmss(vmss_name, resource_group_name, image,
         vmss_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
         master_template.add_resource(build_vnet_resource(
             vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix))
-    subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
+
+    subnet_id = subnet if is_valid_resource_id(subnet) else \
+        '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
 
     if load_balancer_type == 'new':
         load_balancer = load_balancer or '{}LB'.format(vmss_name)
@@ -1643,7 +1652,10 @@ def create_vmss(vmss_name, resource_group_name, image,
                                                                   tags,
                                                                   public_ip_address_allocation,
                                                                   public_ip_address_dns_name))
-        public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template, public_ip_address) if public_ip_address else None  # pylint: disable=line-too-long
+        public_ip_address_id = None
+        if public_ip_address:
+            public_ip_address_id = public_ip_address if is_valid_resource_id(public_ip_address) \
+                else '{}/publicIPAddresses/{}'.format(network_id_template, public_ip_address)
 
         # calculate default names if not provided
         backend_pool_name = backend_pool_name or '{}BEPool'.format(load_balancer)
@@ -1665,10 +1677,21 @@ def create_vmss(vmss_name, resource_group_name, image,
     scrubbed_name = vmss_name.replace('-', '').lower()[:5]
     naming_prefix = '{}{}'.format(scrubbed_name,
                                   random_string(9 - len(scrubbed_name), force_lower=True))
-    backend_address_pool_id = '{}/loadBalancers/{}/backendAddressPools/{}'.format(
-        network_id_template, load_balancer, backend_pool_name) if load_balancer_type else None
-    inbound_nat_pool_id = '{}/loadBalancers/{}/inboundNatPools/{}'.format(
-        network_id_template, load_balancer, nat_pool_name) if load_balancer_type == 'new' else None
+    backend_address_pool_id = None
+    inbound_nat_pool_id = None
+    if is_valid_resource_id(load_balancer):
+        backend_address_pool_id = \
+            '{}/backendAddressPools/{}'.format(load_balancer, backend_pool_name) \
+            if load_balancer_type else None
+        inbound_nat_pool_id = '{}/inboundNatPools/{}'.format(load_balancer, nat_pool_name) \
+            if load_balancer_type == 'new' else None
+    else:
+        backend_address_pool_id = '{}/loadBalancers/{}/backendAddressPools/{}'.format(
+            network_id_template, load_balancer, backend_pool_name) if load_balancer_type else None
+        inbound_nat_pool_id = '{}/loadBalancers/{}/inboundNatPools/{}'.format(
+            network_id_template, load_balancer, nat_pool_name) if load_balancer_type == 'new' \
+            else None
+
     ip_config_name = '{}IPConfig'.format(naming_prefix)
     nic_name = '{}Nic'.format(naming_prefix)
 
