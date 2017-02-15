@@ -324,7 +324,7 @@ def create_backup(resource_group_name, webapp_name, storage_account_url,
         return client.web_apps.backup(resource_group_name, webapp_name, backup_request)
 
 def update_backup_schedule(resource_group_name, webapp_name, storage_account_url=None,
-                           frequency=None, keep_at_least_one_backup=False,
+                           frequency=None, keep_at_least_one_backup=None,
                            retention_period_in_days=None, db_name=None,
                            db_connection_string=None, db_type=None, slot=None):
     client = web_client_factory()
@@ -336,9 +336,11 @@ def update_backup_schedule(resource_group_name, webapp_name, storage_account_url
                                                 'get_backup_configuration', slot)
     except CloudError:
         # No configuration set yet
-        if not all([storage_account_url, frequency, retention_period_in_days]):
+        if not all([storage_account_url, frequency, retention_period_in_days,
+                    keep_at_least_one_backup]):
             raise CLIError('No backup configuration found. A configuration must be created. ' +
-                           'Usage: --container-url URL --frequency TIME --retention DAYS')
+                           'Usage: --container-url URL --frequency TIME --retention DAYS ' +
+                           '--retain-one TRUE/FALSE')
 
     # If arguments were not specified, use the values in the current backup schedule
     if storage_account_url is None:
@@ -346,6 +348,11 @@ def update_backup_schedule(resource_group_name, webapp_name, storage_account_url
 
     if retention_period_in_days is None:
         retention_period_in_days = configuration.backup_schedule.retention_period_in_days
+
+    if keep_at_least_one_backup is None:
+        keep_at_least_one_backup = configuration.backup_schedule.keep_at_least_one_backup
+    else:
+        keep_at_least_one_backup = keep_at_least_one_backup.lower() == 'true'
 
     if frequency:
         # Parse schedule frequency

@@ -372,7 +372,7 @@ class WebappBackupConfigScenarioTest(ResourceGroupVCRTestBase):
         retention_period = 5
 
         # set without databases
-        self.cmd('appservice web config backup update -g {} --webapp-name {} --frequency {} --container-url {}  --retain-one --retention {}'
+        self.cmd('appservice web config backup update -g {} --webapp-name {} --frequency {} --container-url {}  --retain-one true --retention {}'
                  .format(self.resource_group, self.webapp_name, frequency, sas_url, retention_period), checks=NoneCheck())
 
         checks = [
@@ -386,7 +386,7 @@ class WebappBackupConfigScenarioTest(ResourceGroupVCRTestBase):
         # update with databases
         database_name = 'cli-db'
         database_type = 'SqlAzure'
-        self.cmd('appservice web config backup update -g {} --webapp-name {} --db-connection-string "{}" --db-name {} --db-type {} --retain-one'
+        self.cmd('appservice web config backup update -g {} --webapp-name {} --db-connection-string "{}" --db-name {} --db-type {} --retain-one true'
                  .format(self.resource_group, self.webapp_name, db_conn_str, database_name, database_type), checks=NoneCheck())
 
         checks = [
@@ -403,7 +403,7 @@ class WebappBackupConfigScenarioTest(ResourceGroupVCRTestBase):
         # update frequency and retention only
         frequency = '18h'
         retention_period = 7
-        self.cmd('appservice web config backup update -g {} --webapp-name {} --frequency {} --retention {}'
+        self.cmd('appservice web config backup update -g {} --webapp-name {} --frequency {} --retain-one false --retention {}'
                  .format(self.resource_group, self.webapp_name, frequency, retention_period), checks=NoneCheck())
 
         checks = [

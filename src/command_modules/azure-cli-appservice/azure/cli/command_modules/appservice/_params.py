@@ -118,7 +118,7 @@ register_cli_argument('appservice web config backup', 'db_type', help='Type of d
 register_cli_argument('appservice web config backup create', 'backup_name', help='Name of the backup. If unspecified, the backup will be named with the webapp name and a timestamp')
 
 register_cli_argument('appservice web config backup update', 'frequency', help='How often to backup. Use a number followed by d or h, e.g. 5d = 5 days, 2h = 2 hours')
-register_cli_argument('appservice web config backup update', 'keep_at_least_one_backup', help='Always keep one backup, regardless of how old it is', options_list=['--retain-one'], action='store_true')
+register_cli_argument('appservice web config backup update', 'keep_at_least_one_backup', help='Always keep one backup, regardless of how old it is', options_list=['--retain-one'], **enum_choice_list(two_states_switch))
 register_cli_argument('appservice web config backup update', 'retention_period_in_days', help='How many days to keep a backup before automatically deleting it. Set to 0 for indefinite retention', options_list=['--retention'])
 
 register_cli_argument('appservice web config backup restore', 'backup_name', help='Name of the backup to restore')
