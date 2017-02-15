@@ -11,3 +11,4 @@ register_cli_argument('component', 'link', options_list=('--link', '-l'), help='
 register_cli_argument('component', 'private', help='Include packages from a private server.', action='store_true')
 register_cli_argument('component', 'pre', help='Include pre-release versions', action='store_true')
 register_cli_argument('component', 'additional_components', options_list=('--add',), nargs='+', help='The names of additional components to install (space separated)')
+register_cli_argument('component', 'allow_third_party', options_list=('--allow-third-party',), action='store_true', help='Allow installation of 3rd party command modules. This option is assumed with --private.')
