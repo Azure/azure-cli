@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.test_utils.vcr_test_base import (
-    ResourceGroupVCRTestBase, JMESPathCheck, NoneCheck, CustomCheck)
+    ResourceGroupVCRTestBase, JMESPathCheck, NoneCheck)
 
 
 class SqlServerMgmtScenarioTest(ResourceGroupVCRTestBase):
@@ -281,7 +281,7 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
     def test_sql_elastic_pools_mgmt(self):
         self.execute()
 
-    def custom_activity_checker(self, activities):
+    def verify_activities(self, activities):
         if isinstance(activities, list.__class__):
             raise AssertionError("Actual value '{}' expected to be list class."
                                  .format(activities))
@@ -379,11 +379,11 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('elasticPoolName', self.pool_name),
                      JMESPathCheck('status', 'Online')])
 
-        self.cmd('sql elastic-pools db show-activity -g {} --server-name {} --elastic-pool-name {}'
-                 .format(rg, self.sql_server_name, self.pool_name),
-                 checks=[
-                     JMESPathCheck('type(@)', 'array'),
-                     CustomCheck(self.custom_activity_checker)])
+        activities = self.cmd('sql elastic-pools db show-activity -g {} '
+                              '--server-name {} --elastic-pool-name {}'
+                              .format(rg, self.sql_server_name, self.pool_name),
+                              checks=[JMESPathCheck('type(@)', 'array')])
+        self.verify_activities(activities)
 
         # delete sql server database
         self.cmd('sql db delete -g {} --server-name {} --name {}'
