@@ -151,8 +151,9 @@ def _verify_additional_components(components, private, allow_third_party):
         if c not in first_party_component_names:
             third_party.append(c)
     if third_party:
-        raise CLIError("The following components are third party or not available"
-                       " '{}'.".format(', '.join(third_party)))
+        raise CLIError("The following component(s) '{}' are third party or not available. "
+                       "Use --allow-third-party to install "
+                       "third party packages.".format(', '.join(third_party)))
 
 
 def update(private=False,
