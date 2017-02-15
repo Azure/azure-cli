@@ -238,8 +238,6 @@ register_cli_argument('vmss create', 'upgrade_policy_mode', help=None, **enum_ch
 register_cli_argument('vmss create', 'vm_sku', help='Size of VMs in the scale set.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
 
 register_cli_argument('vm encrypt', 'volume_type', help='Type of volume that the encryption operation is performed on', **enum_choice_list(['DATA', 'OS', 'ALL']))
-#TODO: whether mentioning BitLocker is a good idea, as this is not linux stuff
-register_cli_argument('vm encrypt', 'sequence_version', type=int, help='Sequence version of the BitLocker operation. Increment this version number every time a disk-encryption operation is performed on the same VM.')
 
 existing_disk_name = CliArgumentType(overrides=name_arg_type, help='The name of the managed disk', completer=get_resource_name_completion_list('Microsoft.Compute/disks'), id_part='name')
 register_cli_argument('disk', 'disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
