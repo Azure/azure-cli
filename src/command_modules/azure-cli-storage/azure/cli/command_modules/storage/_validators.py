@@ -7,7 +7,7 @@ import argparse
 import os
 import re
 from collections import OrderedDict
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from azure.cli.core._config import az_config
 from azure.cli.core._profile import CLOUD
@@ -16,9 +16,10 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.storage.models import CustomDomain
+from azure.storage.sharedaccesssignature import SharedAccessSignature
 from azure.storage.blob import Include, PublicAccess
 from azure.storage.blob.baseblobservice import BaseBlobService
-from azure.storage.blob.models import ContentSettings as BlobContentSettings
+from azure.storage.blob.models import ContentSettings as BlobContentSettings, BlobPermissions
 from azure.storage.file import FileService
 from azure.storage.file.models import ContentSettings as FileContentSettings
 from azure.storage.models import ResourceTypes, Services
@@ -29,8 +30,35 @@ from .util import glob_files_locally
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
-# region PARAMETER VALIDATORS
 
+# Utilities
+
+def _query_account_key(account_name):
+    scf = get_mgmt_service_client(StorageManagementClient)
+    acc = next((x for x in scf.storage_accounts.list() if x.name == account_name), None)
+    if acc:
+        from azure.cli.core.commands.arm import parse_resource_id
+        rg = parse_resource_id(acc.id)['resource_group']
+        return scf.storage_accounts.list_keys(rg, account_name).keys[0].value  # pylint: disable=no-member
+    else:
+        raise ValueError("Storage account '{}' not found.".format(account_name))
+
+
+def _create_short_lived_blob_sas(account_name, account_key, container, blob):
+    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    sas = SharedAccessSignature(account_name, account_key)
+    return sas.generate_blob(container, blob, permission=BlobPermissions(read=True), expiry=expiry,
+                             protocol='https')
+
+
+def _create_short_lived_file_sas(account_name, account_key, share, directory_name, file_name):
+    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    sas = SharedAccessSignature(account_name, account_key)
+    return sas.generate_file(share, directory_name=directory_name, file_name=file_name,
+                             permission=BlobPermissions(read=True), expiry=expiry, protocol='https')
+
+
+# region PARAMETER VALIDATORS
 
 def validate_accept(namespace):
     if namespace.accept:
@@ -71,44 +99,94 @@ def validate_client_parameters(namespace):
 
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key and not n.sas_token:
-        scf = get_mgmt_service_client(StorageManagementClient)
-        acc = next((x for x in scf.storage_accounts.list() if x.name == n.account_name), None)
-        if acc:
-            from azure.cli.core.commands.arm import parse_resource_id
-            rg = parse_resource_id(acc.id)['resource_group']
-            n.account_key = \
-                scf.storage_accounts.list_keys(rg, n.account_name).keys[0].value  # pylint: disable=no-member
-        else:
-            raise ValueError("Storage account '{}' not found.".format(n.account_name))
+        n.account_key = _query_account_key(n.account_name)
 
 
-def validate_source_uri(namespace):
-    usage_string = 'invalid usage: supply only one of the following argument sets:' + \
-                   '\n\t   --source-uri' + \
-                   '\n\tOR --source-container --source-blob [--source-snapshot] [--source-sas]' + \
-                   '\n\tOR --source-share --source-path [--source-sas]'
+def validate_source_uri(namespace):  # pylint: disable=too-many-statements
+    usage_string = \
+        'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
+        '\n\t   --source-uri' \
+        '\n\tOR --source-container --source-blob [--source-account-name & sas] [--source-snapshot]'\
+        '\n\tOR --source-container --source-blob [--source-account-name & key] [--source-snapshot]'\
+        '\n\tOR --source-share --source-path' \
+        '\n\tOR --source-share --source-path [--source-account-name & sas]' \
+        '\n\tOR --source-share --source-path [--source-account-name & key]'
+
     ns = vars(namespace)
-    validate_client_parameters(namespace)  # must run first to resolve storage account
-    storage_acc = ns.get('account_name', None) or az_config.get('storage', 'account', None)
-    uri = ns.get('copy_source', None)
+
+    # source as blob
     container = ns.pop('source_container', None)
     blob = ns.pop('source_blob', None)
-    sas = ns.pop('source_sas', None)
     snapshot = ns.pop('source_snapshot', None)
+
+    # source as file
     share = ns.pop('source_share', None)
     path = ns.pop('source_path', None)
+
+    # source credential clues
+    source_account_name = ns.pop('source_account_name', None)
+    source_account_key = ns.pop('source_account_key', None)
+    sas = ns.pop('source_sas', None)
+
+    # source in the form of an uri
+    uri = ns.get('copy_source', None)
     if uri:
-        if any([container, blob, sas, snapshot, share, path]):
-            raise ValueError(usage_string)
+        if any([container, blob, sas, snapshot, share, path, source_account_name,
+                source_account_key]):
+            raise ValueError(usage_string.format('Unused parameters are given in addition to the '
+                                                 'source URI'))
         else:
             # simplest scenario--no further processing necessary
             return
 
+    # ensure either a file or blob source is specified
     valid_blob_source = container and blob and not share and not path
     valid_file_source = share and path and not container and not blob and not snapshot
 
-    if (not valid_blob_source and not valid_file_source) or (valid_blob_source and valid_file_source):  # pylint: disable=line-too-long
-        raise ValueError(usage_string)
+    if not valid_blob_source and not valid_file_source:
+        raise ValueError(usage_string.format('Neither a valid blob or file source is specified'))
+    elif valid_blob_source and valid_file_source:
+        raise ValueError(usage_string.format('Ambiguous parameters, both blob and file sources are '
+                                             'specified'))
+
+    validate_client_parameters(namespace)  # must run first to resolve storage account
+
+    # determine if the copy will happen in the same storage account
+    same_account = False
+    if not source_account_name and source_account_key:
+        raise ValueError(usage_string.format('Source account key is given but account name is not'))
+    elif not source_account_name and not source_account_key:
+        # neither source account name or key is given, assume that user intends to copy blob in
+        # the same account
+        same_account = True
+        source_account_name = ns.get('account_name', None)
+        source_account_key = ns.get('account_key', None)
+    elif source_account_name and not source_account_key:
+        if source_account_name == ns.get('account_name', None):
+            # the source account name is same as the destination account name
+            same_account = True
+            source_account_key = ns.get('account_key', None)
+        else:
+            # the source account is different from destination account but the key is missing
+            # try to query one.
+            try:
+                source_account_key = _query_account_key(source_account_name)
+            except ValueError:
+                raise ValueError('Source storage account {} not found.'.format(source_account_name))
+    # else: both source account name and key are given by user
+
+    if not source_account_name:
+        raise ValueError(usage_string.format('Storage account name not found'))
+
+    if not sas and not same_account:
+        # to generate sas token for across accounts copy when sas is not given
+        if valid_file_source:
+            dir_name, file_name = os.path.split(path) if path else (None, '')
+            sas = _create_short_lived_file_sas(source_account_name, source_account_key, share,
+                                               dir_name, file_name)
+        elif valid_blob_source:
+            sas = _create_short_lived_blob_sas(source_account_name, source_account_key, container,
+                                               blob)
 
     query_params = []
     if sas:
@@ -117,7 +195,7 @@ def validate_source_uri(namespace):
         query_params.append(snapshot)
 
     uri = 'https://{0}.{1}.{6}/{2}/{3}{4}{5}'.format(
-        storage_acc,
+        source_account_name,
         'blob' if valid_blob_source else 'file',
         container if valid_blob_source else share,
         blob if valid_blob_source else path,

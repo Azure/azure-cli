@@ -192,6 +192,8 @@ def register_source_uri_arguments(scope):
     register_extra_cli_argument(scope, 'source_container', default=None, help='The container name for the source storage account.', arg_group='Copy Source')
     register_extra_cli_argument(scope, 'source_blob', default=None, help='The blob name for the source storage account.', arg_group='Copy Source')
     register_extra_cli_argument(scope, 'source_snapshot', default=None, help='The blob snapshot for the source storage account.', arg_group='Copy Source')
+    register_extra_cli_argument(scope, 'source_account_name', default=None, help='The storage account name of the source blob.', arg_group='Copy Source')
+    register_extra_cli_argument(scope, 'source_account_key', default=None, help='The storage account key of the source blob.', arg_group='Copy Source')
 
 
 # CUSTOM CHOICE LISTS
@@ -364,7 +366,7 @@ with CommandContext('storage file download-batch') as c:
 with CommandContext('storage file copy start-batch') as c:
     c.reg_arg('source_client', ignore_type, validator=get_source_file_or_blob_service_client)
 
-    with c.arg_group('Copy Source Arguments') as group:
+    with c.arg_group('Copy Source') as group:
         group.reg_extra_arg('source_account')
         group.reg_extra_arg('source_key')
         group.reg_extra_arg('source_uri')
