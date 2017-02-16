@@ -9,12 +9,14 @@ import argparse
 import os
 import sys
 import json
+import yaml
 from importlib import import_module
 
 from automation.utilities.path import filter_user_selected_modules_with_tests
 from azure.cli.core.application import APPLICATION, Application
 from azure.cli.core.application import Configuration
 from azure.cli.core.commands import load_params, _update_command_definitions
+from azure.cli.core.help_files import helps
 
 
 
@@ -37,11 +39,11 @@ def dump_no_help(modules):
     subgroups_list = []
     parameters = {}
     for cmd in cmd_table:
-        if not cmd_table[cmd].description:
+        if not cmd_table[cmd].description and cmd not in helps:
             command_list.append(cmd)
             exit_val = 1
         group_name = " ".join(cmd.split()[:-1])
-        if group_name in cmd_table and not cmd_table[group_name].description:
+        if group_name not in helps:
             exit_val = 1
             if group_name not in subgroups_list:
                 subgroups_list.append(group_name)
@@ -53,6 +55,23 @@ def dump_no_help(modules):
                 param_list.append(cmd_table[cmd].arguments[key].name)
         if param_list:
             parameters[cmd] = param_list
+
+    for cmd in helps:
+        diction_help = yaml.load(helps[cmd])
+        if "short-summary" in diction_help:
+            if "type" in diction_help:
+                if diction_help["type"] == "command":
+                    if cmd in command_list:
+                        command_list.remove(cmd)
+                elif diction_help["type"] == "group":
+                    if cmd in subgroups_list:
+                        subgroups_list.remove(cmd)
+        if "parameters" in diction_help:
+            # params = yaml.load(diction_help["parameters"])
+            for param in diction_help["parameters"]:
+                if "short-summary" in param:
+                    if param["name"].split()[0] in parameters:
+                        parameters.pop(cmd, None)
 
     data = {
         "subgroups" : subgroups_list,
