@@ -1177,7 +1177,7 @@ class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
 class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkDnsScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_dns')
+        super(NetworkDnsScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_dns', debug=True)
 
     def test_network_dns(self):
         self.execute()
@@ -1209,27 +1209,28 @@ class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
 
         for t in record_types:
             # test creating the record set and then adding records
-            self.cmd('network dns record-set create -n myrs{0} -g {1} --zone-name {2} --type {0}'
+            self.cmd('network dns record-set {0} create -n myrs{0} -g {1} --zone-name {2}'
                      .format(t, rg, zone_name))
-            self.cmd('network dns record {0} add -g {1} --zone-name {2} --record-set-name myrs{0} {3}'
-                     .format(t, rg, zone_name, args[t]))
+            add_command = 'set-record' if t == 'cname' else 'add-record'
+            self.cmd('network dns record-set {0} {4} -g {1} --zone-name {2} --record-set-name myrs{0} {3}'
+                     .format(t, rg, zone_name, args[t], add_command))
             # test creating the record set at the same time you add records
-            self.cmd('network dns record {0} add -g {1} --zone-name {2} --record-set-name myrs{0}alt {3}'
-                     .format(t, rg, zone_name, args[t]))
+            self.cmd('network dns record-set {0} {4} -g {1} --zone-name {2} --record-set-name myrs{0}alt {3}'
+                     .format(t, rg, zone_name, args[t], add_command))
 
-        self.cmd('network dns record {0} add -g {1} --zone-name {2} --record-set-name myrs{0} {3}'
+        self.cmd('network dns record-set {0} add-record -g {1} --zone-name {2} --record-set-name myrs{0} {3}'
                  .format('a', rg, zone_name, '--ipv4-address 10.0.0.11'))
-        self.cmd('network dns record update-soa -g {0} --zone-name {1} {2}'
+        self.cmd('network dns record-set soa update -g {0} --zone-name {1} {2}'
                      .format(rg, zone_name, args['soa']))
 
         long_value = '0123456789' * 50
-        self.cmd('network dns record txt add -g {} -z {} -n longtxt -v {}'.format(rg, zone_name, long_value))
+        self.cmd('network dns record-set txt add-record -g {} -z {} -n longtxt -v {}'.format(rg, zone_name, long_value))
 
         typed_record_sets = 2 * len(record_types) + 1
         self.cmd('network dns zone show -n {} -g {}'.format(zone_name, rg), checks=[
             JMESPathCheck('numberOfRecordSets', base_record_sets + typed_record_sets)
             ])
-        self.cmd('network dns record-set show -n myrs{0} -g {1} --type {0} --zone-name {2}'
+        self.cmd('network dns record-set {0} show -n myrs{0} -g {1} --zone-name {2}'
                  .format('a', rg, zone_name), checks=[
                      JMESPathCheck('length(arecords)', 2)
                      ])
@@ -1238,27 +1239,27 @@ class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network dns record-set list -g {} -z {}'.format(rg, zone_name),
             checks=JMESPathCheck('length(@)', base_record_sets + typed_record_sets))
 
-        self.cmd('network dns record-set list -g {} -z {} --type txt'.format(rg, zone_name),
+        self.cmd('network dns record-set txt list -g {} -z {}'.format(rg, zone_name),
             checks=JMESPathCheck('length(@)', 3))
 
         for t in record_types:
-            self.cmd('network dns record {0} remove -g {1} --zone-name {2} --record-set-name myrs{0} {3}'
+            self.cmd('network dns record-set {0} remove-record -g {1} --zone-name {2} --record-set-name myrs{0} {3}'
                      .format(t, rg, zone_name, args[t]))
-        self.cmd('network dns record-set show -n myrs{0} -g {1} --type {0} --zone-name {2}'
+        self.cmd('network dns record-set {0} show -n myrs{0} -g {1} --zone-name {2}'
                  .format('a', rg, zone_name), checks=[
                      JMESPathCheck('length(arecords)', 1)
                      ])
 
-        self.cmd('network dns record {0} remove -g {1} --zone-name {2} --record-set-name myrs{0} {3}'
+        self.cmd('network dns record-set {0} remove-record -g {1} --zone-name {2} --record-set-name myrs{0} {3}'
                      .format('a', rg, zone_name, '--ipv4-address 10.0.0.11'))
-        self.cmd('network dns record-set show -n myrs{0} -g {1} --type {0} --zone-name {2}'
+        self.cmd('network dns record-set {0} show -n myrs{0} -g {1} --zone-name {2}'
                  .format('a', rg, zone_name), checks=[
                      JMESPathCheck('arecords', None)
                      ])
 
-        self.cmd('network dns record-set delete -n myrs{0} -g {1} --type {0} --zone-name {2}'
+        self.cmd('network dns record-set {0} delete -n myrs{0} -g {1} --zone-name {2}'
                  .format('a', rg, zone_name))
-        self.cmd('network dns record-set show -n myrs{0} -g {1} --type {0} --zone-name {2}'
+        self.cmd('network dns record-set {0} show -n myrs{0} -g {1} --zone-name {2}'
                  .format('a', rg, zone_name), allowed_exceptions='does not exist in resource group')
 
 class NetworkZoneImportExportTest(ResourceGroupVCRTestBase):
