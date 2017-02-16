@@ -21,6 +21,10 @@ mgmt_path = 'azure.mgmt.compute.operations.{}#{}.{}'
 
 # VM
 
+def empty_on_404(ex):
+    if ex.status_code == 404:
+        return None
+    raise ex
 
 def transform_ip_addresses(result):
     transformed = []
@@ -88,7 +92,7 @@ cli_command(__name__, 'vm create', custom_path.format('create_vm'), transform=tr
 cli_command(__name__, 'vm delete', mgmt_path.format(op_var, op_class, 'delete'), cf_vm, confirmation=True)
 cli_command(__name__, 'vm deallocate', mgmt_path.format(op_var, op_class, 'deallocate'), cf_vm)
 cli_command(__name__, 'vm generalize', mgmt_path.format(op_var, op_class, 'generalize'), cf_vm)
-cli_command(__name__, 'vm show', custom_path.format('show_vm'), table_transformer=transform_vm)
+cli_command(__name__, 'vm show', custom_path.format('show_vm'), table_transformer=transform_vm, exception_handler=empty_on_404)
 cli_command(__name__, 'vm list-vm-resize-options', mgmt_path.format(op_var, op_class, 'list_available_sizes'), cf_vm)
 cli_command(__name__, 'vm stop', mgmt_path.format(op_var, op_class, 'power_off'), cf_vm)
 cli_command(__name__, 'vm restart', mgmt_path.format(op_var, op_class, 'restart'), cf_vm)
