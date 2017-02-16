@@ -7,6 +7,7 @@
 
 from azure.cli.core.commands import cli_command
 
+
 cli_command(__name__, 'acs browse', 'azure.cli.command_modules.acs.custom#acs_browse')
 cli_command(__name__, 'acs install-cli', 'azure.cli.command_modules.acs.custom#acs_install_cli')
 cli_command(__name__, 'acs dcos browse', 'azure.cli.command_modules.acs.custom#dcos_browse')
