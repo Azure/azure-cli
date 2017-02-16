@@ -11,7 +11,8 @@ from azure.cli.command_modules.vm.custom import (_get_access_extension_upgrade_i
                                                  _WINDOWS_ACCESS_EXT)
 from azure.cli.command_modules.vm.custom import \
     (attach_unmanaged_data_disk, detach_unmanaged_data_disk)
-from azure.mgmt.compute.models import NetworkProfile, StorageProfile, DataDisk
+from azure.cli.command_modules.vm.disk_encryption import enable, disable
+from azure.mgmt.compute.models import NetworkProfile, StorageProfile, DataDisk, OSDisk, OperatingSystemTypes
 from azure.mgmt.compute.models.compute_management_client_enums import (DiskCreateOptionTypes,
                                                                        CachingTypes)
 
@@ -188,11 +189,25 @@ class Test_Vm_Custom(unittest.TestCase):
         mock_vm_set.assert_called_once_with(vm)
         self.assertEqual(len(vm.storage_profile.data_disks), 0)
 
+    @mock.patch('azure.cli.command_modules.vm.disk_encryption._compute_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.disk_encryption.set_vm', autospec=True)
+    @mock.patch('azure.mgmt.keyvault.KeyVaultManagementClient', autospec=True)
+    def test_enable_disk_encryption(self, mock_keyvault_mgmt, mock_vm_set, mock_compute_client_factory):
+        faked_keyvault = '/subscriptions/01234567-1bf0-4dda-aec3-cb9272f09590/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/v1'
+        os_disk = OSDisk(None, OperatingSystemTypes.linux)
+        vm = FakedVM(None, [], os_disk=os_disk)
+        client_mock = mock.MagicMock()
+        client_mock.virtual_machines.get.return_value = vm
+        mock_compute_client_factory.return_value = client_mock
+        enable('rg1', 'vm1', 'client_id', faked_keyvault, 'client_secret', volume_type='data') 
+
+
+
 
 class FakedVM:  # pylint: disable=too-few-public-methods,old-style-class
-    def __init__(self, nics=None, disks=None):
+    def __init__(self, nics=None, disks=None, os_disk=None):
         self.network_profile = NetworkProfile(nics)
-        self.storage_profile = StorageProfile(data_disks=disks)
+        self.storage_profile = StorageProfile(data_disks=disks, os_disk=os_disk)
 
 
 class FakedAccessExtensionEntity:  # pylint: disable=too-few-public-methods,old-style-class

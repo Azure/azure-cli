@@ -107,9 +107,9 @@ cli_generic_update_command(__name__, 'vm update',
                            no_wait_param='raw')
 cli_generic_wait_command(__name__, 'vm wait', 'azure.cli.command_modules.vm.custom#get_instance_view')
 cli_command(__name__, 'vm convert', mgmt_path.format(op_var, op_class, 'convert_to_managed_disks'), cf_vm)
-cli_command(__name__, 'vm encrypt enable', 'azure.cli.command_modules.vm.disk_encryption#encrypt_disk')
-cli_command(__name__, 'vm encrypt disable', 'azure.cli.command_modules.vm.disk_encryption#disable_disk_encryption')
-cli_command(__name__, 'vm encrypt show', 'azure.cli.command_modules.vm.disk_encryption#show_encryption_status')
+cli_command(__name__, 'vm encrypt enable', 'azure.cli.command_modules.vm.disk_encryption#enable')
+cli_command(__name__, 'vm encrypt disable', 'azure.cli.command_modules.vm.disk_encryption#disable')
+cli_command(__name__, 'vm encrypt show', 'azure.cli.command_modules.vm.disk_encryption#show')
 
 # VM NIC
 cli_command(__name__, 'vm nic add', custom_path.format('vm_add_nics'))

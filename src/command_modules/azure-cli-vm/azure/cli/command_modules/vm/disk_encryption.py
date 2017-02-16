@@ -7,7 +7,7 @@ from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._util import CLIError
-from .custom import get_vm, set_vm, _compute_client_factory
+from .custom import set_vm, _compute_client_factory
 logger = azlogging.get_az_logger(__name__)
 
 _DATA_VOLUME_TYPE = 'DATA'
@@ -33,21 +33,36 @@ def keyvault_mgmt_client_factory(**_):
     return get_mgmt_service_client(KeyVaultManagementClient)
 
 
-def encrypt_disk(resource_group_name, vm_name,  # pylint: disable=too-many-arguments,too-many-locals, too-many-statements
-                 aad_client_id, aad_client_secret,
-                 disk_encryption_keyvault,
-                 key_encryption_key_url=None,
-                 key_encryption_keyvault_id=None,
-                 aad_client_cert_thumbprint=None,
-                 key_encryption_algorithm='RSA-OAEP',
-                 volume_type=None):
+def enable(resource_group_name, vm_name,  # pylint: disable=too-many-arguments,too-many-locals, too-many-statements
+           aad_client_id,
+           disk_encryption_keyvault,
+           aad_client_secret=None, aad_client_cert_thumbprint=None,
+           key_encryption_keyvault_id=None,
+           key_encryption_key_url=None,
+           key_encryption_algorithm='RSA-OAEP',
+           volume_type=None):
+    '''
+    Enable disk encryption on OS disk, Data disks, or both
+    :param str aad_client_id: Client ID of AAD app with permissions to write secrets to KeyVault
+    :param str aad_client_secret: Client Secret of AAD app with permissions to
+    write secrets to KeyVault
+    :param str aad_client_cert_thumbprint: Thumbprint of AAD app certificate with permissions
+    to write secrets to KeyVaul
+    :param str disk_encryption_keyvault:KeyVault where generated encryption key will be placed to
+    :param str key_encryption_key_url:Versioned KeyVault URL of the KeyEncryptionKey used to
+    encrypt the disk encryption key
+    :param str key_encryption_keyvault_id: id of the KeyVault containing the key encryption key
+    used to encrypt the disk encryption key. If missing, CLI will derive the value from
+    --key-encryption-key-url
+    '''
     # pylint: disable=no-member
-    vm = get_vm(resource_group_name, vm_name)
+    compute_client = _compute_client_factory()
+    vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     os_type = vm.storage_profile.os_disk.os_type.value
     is_linux = _is_linux_vm(os_type)
     extension = extension_info[os_type]
 
-    if aad_client_cert_thumbprint and aad_client_secret:
+    if not aad_client_cert_thumbprint and not aad_client_secret:
         raise CLIError('Please provide either --aad-client-id or --aad-client-cert-thumbprint')
 
     if volume_type is None:
@@ -61,8 +76,7 @@ def encrypt_disk(resource_group_name, vm_name,  # pylint: disable=too-many-argum
         if image_reference:
             _check_encrypt_is_supported(image_reference, volume_type)
 
-    # TODO: support passphase for linux
-    compute_client = _compute_client_factory()
+    # TODO: support passphase for linux if there is ask
     sequence_version = _get_sequence_version(compute_client, resource_group_name,
                                              vm_name, extension['name'])
 
@@ -126,7 +140,7 @@ def encrypt_disk(resource_group_name, vm_name,  # pylint: disable=too-many-argum
 
     status_url = extension_result.instance_view.statuses[0].message
 
-    vm = get_vm(resource_group_name, vm_name)
+    vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     secret_ref = KeyVaultSecretReference(secret_url=status_url,
                                          source_vault=SubResource(keyvault_info.id))
 
@@ -143,12 +157,12 @@ def encrypt_disk(resource_group_name, vm_name,  # pylint: disable=too-many-argum
     return set_vm(vm)
 
 
-def disable_disk_encryption(resource_group_name, vm_name,
-                            volume_type=None, force=False):
+def disable(resource_group_name, vm_name, volume_type=None, force=False):
     '''
     Disable disk encryption on OS disk, Data disks, or both
     '''
-    vm = get_vm(resource_group_name, vm_name)
+    compute_client = _compute_client_factory()
+    vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     # pylint: disable=no-member
     os_type = vm.storage_profile.os_disk.os_type.value
 
@@ -170,7 +184,6 @@ def disable_disk_encryption(resource_group_name, vm_name,
             raise CLIError("VM has data disks, please specify --volume-type")
 
     extension = extension_info[os_type]
-    compute_client = _compute_client_factory()
     sequence_version = _get_sequence_version(compute_client, resource_group_name,
                                              vm_name, extension['name'])
 
@@ -202,27 +215,27 @@ def disable_disk_encryption(resource_group_name, vm_name,
     if extension_result.provisioning_state != 'Succeeded':
         raise CLIError("Extension updating didn't succeed")
 
-    vm = get_vm(resource_group_name, vm_name)
+    vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     disk_encryption_settings = DiskEncryptionSettings(enabled=False)
-
     vm.storage_profile.os_disk.encryption_settings = disk_encryption_settings
     return set_vm(vm)
 
 
-def show_encryption_status(resource_group_name, vm_name):
+def show(resource_group_name, vm_name):
+    '''show the encryption status'''
     encryption_status = {
         'osDisk': 'NotEncrypted',
         'osDiskEncryptionSettings': None,
         'dataDisk': 'NotEncrypted',
         'osType': None
     }
-    vm = get_vm(resource_group_name, vm_name)
+    compute_client = _compute_client_factory()
+    vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     # pylint: disable=no-member
     os_type = vm.storage_profile.os_disk.os_type.value
     is_linux = _is_linux_vm(os_type)
     encryption_status['osType'] = os_type
     extension = extension_info[os_type]
-    compute_client = _compute_client_factory()
     extension_result = compute_client.virtual_machine_extensions.get(resource_group_name,
                                                                      vm_name,
                                                                      extension['name'],
