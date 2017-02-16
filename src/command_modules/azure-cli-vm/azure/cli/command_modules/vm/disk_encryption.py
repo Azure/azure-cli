@@ -154,7 +154,13 @@ def enable(resource_group_name, vm_name,  # pylint: disable=too-many-arguments,t
                                                       enabled=True)
 
     vm.storage_profile.os_disk.encryption_settings = disk_encryption_settings
-    return set_vm(vm)
+    result = set_vm(vm)
+    if is_linux and volume_type != _DATA_VOLUME_TYPE:
+        # TODO: expose a 'wait' command to do the monitor and handle the reboot
+        logger.warning("The encryption request was accepted. Please use 'show' command to monitor "
+                       "the progress. If you see 'VMRestartPending', please restart the VM, and "
+                       "the encryption will finish shortly")
+    return result
 
 
 def disable(resource_group_name, vm_name, volume_type=None, force=False):

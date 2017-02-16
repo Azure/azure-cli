@@ -503,6 +503,7 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
 
     #retry while server replication is done
     if not skip_assignment:
+        # pylint: disable=line-too-long
         for scope in scopes:
             for l in range(0, _RETRY_TIMES):
                 try:
