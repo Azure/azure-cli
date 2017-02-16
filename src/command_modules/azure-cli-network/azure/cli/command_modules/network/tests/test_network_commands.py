@@ -1198,8 +1198,8 @@ class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
             'aaaa': '--ipv6-address 2001:db8:0:1:1:1:1:1',
             'cname': '--cname mycname',
             'mx': '--exchange 12 --preference 13',
-            'ns': '--dname foobar.com',
-            'ptr': '--dname foobar.com',
+            'ns': '--nsdname foobar.com',
+            'ptr': '--ptrdname foobar.com',
             'soa': '--email foo.com --expire-time 30 --minimum-ttl 20 --refresh-time 60 --retry-time 90 --serial-number 123',
             'srv': '--port 1234 --priority 1 --target target.com --weight 50',
             'txt': '--value some_text'
