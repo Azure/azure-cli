@@ -12,8 +12,12 @@ try:
 except ImportError:
     from urlparse import urlparse # pylint: disable=import-error
 
+from msrestazure.azure_exceptions import CloudError
+
 from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan,
-                                   SkuDescription, SslState, HostNameBinding)
+                                   SkuDescription, SslState, HostNameBinding,
+                                   BackupRequest, DatabaseBackupSetting, BackupSchedule,
+                                   RestoreRequest, FrequencyUnit)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
@@ -292,6 +296,133 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None,
     if admin_site_name is not None:
         instance.admin_site_name = admin_site_name
     return instance
+
+def show_backup_configuration(resource_group_name, webapp_name, slot=None):
+    try:
+        return _generic_site_operation(resource_group_name, webapp_name,
+                                       'get_backup_configuration', slot)
+    except:
+        raise CLIError('Backup configuration not found')
+
+def list_backups(resource_group_name, webapp_name, slot=None):
+    return _generic_site_operation(resource_group_name, webapp_name, 'list_backups',
+                                   slot)
+
+def create_backup(resource_group_name, webapp_name, storage_account_url,
+                  db_name=None, db_type=None,
+                  db_connection_string=None, backup_name=None, slot=None):
+    client = web_client_factory()
+    if backup_name and backup_name.lower().endswith('.zip'):
+        backup_name = backup_name[:-4]
+    location = _get_location_from_webapp(client, resource_group_name, webapp_name)
+    db_setting = _create_db_setting(db_name, db_type, db_connection_string)
+    backup_request = BackupRequest(location, backup_request_name=backup_name,
+                                   storage_account_url=storage_account_url, databases=db_setting)
+    if slot:
+        return client.web_apps.backup_slot(resource_group_name, webapp_name, backup_request, slot)
+    else:
+        return client.web_apps.backup(resource_group_name, webapp_name, backup_request)
+
+def update_backup_schedule(resource_group_name, webapp_name, storage_account_url=None,
+                           frequency=None, keep_at_least_one_backup=None,
+                           retention_period_in_days=None, db_name=None,
+                           db_connection_string=None, db_type=None, slot=None):
+    client = web_client_factory()
+    location = _get_location_from_webapp(client, resource_group_name, webapp_name)
+    configuration = None
+
+    try:
+        configuration = _generic_site_operation(resource_group_name, webapp_name,
+                                                'get_backup_configuration', slot)
+    except CloudError:
+        # No configuration set yet
+        if not all([storage_account_url, frequency, retention_period_in_days,
+                    keep_at_least_one_backup]):
+            raise CLIError('No backup configuration found. A configuration must be created. ' +
+                           'Usage: --container-url URL --frequency TIME --retention DAYS ' +
+                           '--retain-one TRUE/FALSE')
+
+    # If arguments were not specified, use the values in the current backup schedule
+    if storage_account_url is None:
+        storage_account_url = configuration.storage_account_url
+
+    if retention_period_in_days is None:
+        retention_period_in_days = configuration.backup_schedule.retention_period_in_days
+
+    if keep_at_least_one_backup is None:
+        keep_at_least_one_backup = configuration.backup_schedule.keep_at_least_one_backup
+    else:
+        keep_at_least_one_backup = keep_at_least_one_backup.lower() == 'true'
+
+    if frequency:
+        # Parse schedule frequency
+        frequency_num, frequency_unit = _parse_frequency(frequency)
+    else:
+        frequency_num = configuration.backup_schedule.frequency_interval
+        frequency_unit = configuration.backup_schedule.frequency_unit
+
+    if configuration and configuration.databases:
+        db = configuration.databases[0]
+        db_type = db_type or db.database_type
+        db_name = db_name or db.name
+        db_connection_string = db_connection_string or db.connection_string
+
+    db_setting = _create_db_setting(db_name, db_type, db_connection_string)
+
+    backup_schedule = BackupSchedule(frequency_num, frequency_unit.name,
+                                     keep_at_least_one_backup, retention_period_in_days)
+    backup_request = BackupRequest(location, backup_schedule=backup_schedule, enabled=True,
+                                   storage_account_url=storage_account_url, databases=db_setting)
+    if slot:
+        return client.web_apps.update_backup_configuration_slot(resource_group_name, webapp_name,
+                                                                backup_request, slot)
+    else:
+        return client.web_apps.update_backup_configuration(resource_group_name, webapp_name,
+                                                           backup_request)
+
+def restore_backup(resource_group_name, webapp_name, storage_account_url, backup_name,
+                   db_name=None, db_type=None, db_connection_string=None,
+                   target_name=None, overwrite=None, ignore_hostname_conflict=None, slot=None):
+    client = web_client_factory()
+    storage_blob_name = backup_name
+    if not storage_blob_name.lower().endswith('.zip'):
+        storage_blob_name += '.zip'
+    location = _get_location_from_webapp(client, resource_group_name, webapp_name)
+    db_setting = _create_db_setting(db_name, db_type, db_connection_string)
+    restore_request = RestoreRequest(location, storage_account_url=storage_account_url,
+                                     blob_name=storage_blob_name, overwrite=overwrite,
+                                     site_name=target_name, databases=db_setting,
+                                     ignore_conflicting_host_names=ignore_hostname_conflict)
+    if slot:
+        return client.web_apps.restore(resource_group_name, webapp_name, 0, restore_request, slot)
+    else:
+        return client.web_apps.restore(resource_group_name, webapp_name, 0, restore_request)
+
+def _create_db_setting(db_name, db_type, db_connection_string):
+    if all([db_name, db_type, db_connection_string]):
+        return [DatabaseBackupSetting(db_type, db_name, connection_string=db_connection_string)]
+    elif any([db_name, db_type, db_connection_string]):
+        raise CLIError('usage error: --db-name NAME --db-type TYPE --db-connection-string STRING')
+
+def _parse_frequency(frequency):
+    unit_part = frequency.lower()[-1]
+    if unit_part == 'd':
+        frequency_unit = FrequencyUnit.day
+    elif unit_part == 'h':
+        # pylint: disable=redefined-variable-type
+        frequency_unit = FrequencyUnit.hour
+    else:
+        raise CLIError('Frequency must end with d or h for "day" or "hour"')
+
+    try:
+        frequency_num = int(frequency[:-1])
+    except ValueError:
+        raise CLIError('Frequency must start with a number')
+
+    if frequency_num < 0:
+        raise CLIError('Frequency must be positive')
+
+    return frequency_num, frequency_unit
 
 def _normalize_sku(sku):
     sku = sku.upper()

@@ -349,3 +349,117 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('[0].name', self.webapp + '/' + slot),
             ])
         self.cmd('appservice web deployment slot delete -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=NoneCheck())
+
+class WebappBackupConfigScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(WebappBackupConfigScenarioTest, self).__init__(__file__, test_method, resource_group='cli-webapp-backup')
+        self.webapp_name = 'azurecli-webapp-backupconfigtest'
+
+    def test_webapp_backup_config(self):
+        self.execute()
+
+    def set_up(self):
+        super(WebappBackupConfigScenarioTest, self).set_up()
+        plan = 'webapp-backup-plan'
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, plan))
+        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, plan))
+
+    def body(self):
+        sas_url = 'https://azureclistore.blob.core.windows.net/sitebackups?sv=2015-04-05&sr=c&sig=%2FjH1lEtbm3uFqtMI%2BfFYwgrntOs1qhGnpGv9uRibJ7A%3D&se=2017-02-14T04%3A53%3A28Z&sp=rwdl'
+        frequency = '1d'
+        db_conn_str = 'Server=tcp:cli-backup.database.windows.net,1433;Initial Catalog=cli-db;Persist Security Info=False;User ID=cliuser;Password=cli!password1;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+        retention_period = 5
+
+        # set without databases
+        self.cmd('appservice web config backup update -g {} --webapp-name {} --frequency {} --container-url {}  --retain-one true --retention {}'
+                 .format(self.resource_group, self.webapp_name, frequency, sas_url, retention_period), checks=NoneCheck())
+
+        checks = [
+            JMESPathCheck('backupSchedule.frequencyInterval', 1),
+            JMESPathCheck('backupSchedule.frequencyUnit', 'Day'),
+            JMESPathCheck('backupSchedule.keepAtLeastOneBackup', True),
+            JMESPathCheck('backupSchedule.retentionPeriodInDays', retention_period)
+            ]
+        self.cmd('appservice web config backup show -g {} --webapp-name {}'.format(self.resource_group, self.webapp_name), checks=checks)
+
+        # update with databases
+        database_name = 'cli-db'
+        database_type = 'SqlAzure'
+        self.cmd('appservice web config backup update -g {} --webapp-name {} --db-connection-string "{}" --db-name {} --db-type {} --retain-one true'
+                 .format(self.resource_group, self.webapp_name, db_conn_str, database_name, database_type), checks=NoneCheck())
+
+        checks = [
+            JMESPathCheck('backupSchedule.frequencyInterval', 1),
+            JMESPathCheck('backupSchedule.frequencyUnit', 'Day'),
+            JMESPathCheck('backupSchedule.keepAtLeastOneBackup', True),
+            JMESPathCheck('backupSchedule.retentionPeriodInDays', retention_period),
+            JMESPathCheck('databases[0].connectionString', db_conn_str),
+            JMESPathCheck('databases[0].databaseType', database_type),
+            JMESPathCheck('databases[0].name', database_name)
+            ]
+        self.cmd('appservice web config backup show -g {} --webapp-name {}'.format(self.resource_group, self.webapp_name), checks=checks)
+
+        # update frequency and retention only
+        frequency = '18h'
+        retention_period = 7
+        self.cmd('appservice web config backup update -g {} --webapp-name {} --frequency {} --retain-one false --retention {}'
+                 .format(self.resource_group, self.webapp_name, frequency, retention_period), checks=NoneCheck())
+
+        checks = [
+            JMESPathCheck('backupSchedule.frequencyInterval', 18),
+            JMESPathCheck('backupSchedule.frequencyUnit', 'Hour'),
+            JMESPathCheck('backupSchedule.keepAtLeastOneBackup', False),
+            JMESPathCheck('backupSchedule.retentionPeriodInDays', retention_period),
+            JMESPathCheck('databases[0].connectionString', db_conn_str),
+            JMESPathCheck('databases[0].databaseType', database_type),
+            JMESPathCheck('databases[0].name', database_name)
+            ]
+        self.cmd('appservice web config backup show -g {} --webapp-name {}'.format(self.resource_group, self.webapp_name), checks=checks)
+
+class WebappBackupRestoreScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(WebappBackupRestoreScenarioTest, self).__init__(__file__, test_method, resource_group='cli-webapp-backup')
+        self.webapp_name = 'azurecli-webapp-backuptest2'
+
+    def test_webapp_backup_restore(self):
+        self.execute()
+
+    def set_up(self):
+        super(WebappBackupRestoreScenarioTest, self).set_up()
+        plan = 'webapp-backup-plan'
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, plan))
+        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, plan))
+
+    def body(self):
+        sas_url = 'https://azureclistore.blob.core.windows.net/sitebackups?sv=2015-04-05&sr=c&sig=%2FjH1lEtbm3uFqtMI%2BfFYwgrntOs1qhGnpGv9uRibJ7A%3D&se=2017-02-14T04%3A53%3A28Z&sp=rwdl'
+        db_conn_str = 'Server=tcp:cli-backup.database.windows.net,1433;Initial Catalog=cli-db;Persist Security Info=False;User ID=cliuser;Password=cli!password1;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+        database_name = 'cli-db'
+        database_type = 'SqlAzure'
+        backup_name = 'mybackup'
+
+        create_checks = [
+            JMESPathCheck('backupItemName', backup_name),
+            JMESPathCheck('storageAccountUrl', sas_url),
+            JMESPathCheck('databases[0].connectionString', db_conn_str),
+            JMESPathCheck('databases[0].databaseType', database_type),
+            JMESPathCheck('databases[0].name', database_name)
+            ]
+        self.cmd('appservice web config backup create -g {} --webapp-name {} --container-url {} --db-connection-string "{}" --db-name {} --db-type {} --backup-name {}'
+                 .format(self.resource_group, self.webapp_name, sas_url, db_conn_str, database_name, database_type, backup_name), checks=create_checks)
+
+        list_checks = [
+            JMESPathCheck('[-1].backupItemName', backup_name),
+            JMESPathCheck('[-1].storageAccountUrl', sas_url),
+            JMESPathCheck('[-1].databases[0].connectionString', db_conn_str),
+            JMESPathCheck('[-1].databases[0].databaseType', database_type),
+            JMESPathCheck('[-1].databases[0].name', database_name)
+            ]
+        self.cmd('appservice web config backup list -g {} --webapp-name {}'.format(self.resource_group, self.webapp_name), checks=list_checks)
+
+        import time
+        time.sleep(300) # Allow plenty of time for a backup to finish -- database backup takes a while (skipped in playback)
+
+        self.cmd('appservice web config backup restore -g {} --webapp-name {} --container-url {} --backup-name {} --db-connection-string "{}" --db-name {} --db-type {} --ignore-hostname-conflict --overwrite'
+                 .format(self.resource_group, self.webapp_name, sas_url, backup_name, db_conn_str, database_name, database_type), checks=JMESPathCheck('name', self.webapp_name))
