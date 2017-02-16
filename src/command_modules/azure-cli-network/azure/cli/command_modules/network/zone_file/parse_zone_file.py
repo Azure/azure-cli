@@ -492,8 +492,6 @@ def _post_process_txt_record(record, current_ttl):
     final_str = ''.join(record['txt'])
     final_len = len(final_str)
     assert(original_len == final_len)
-    if final_len > 500:
-        print('WONKY STRING? {}\n{}'.format(final_len, final_str))
 
 
 def _post_check_names(zone):

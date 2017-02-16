@@ -1662,6 +1662,17 @@ def add_dns_srv_record(resource_group_name, zone_name, record_set_name, priority
 def add_dns_txt_record(resource_group_name, zone_name, record_set_name, value):
     record = TxtRecord(value)
     record_type = 'txt'
+    long_text = ''.join(x for x in record.value)
+    long_text = long_text.replace('\\', '')
+    original_len = len(long_text)
+    record.value = []
+    while len(long_text) > 255:
+        record.value.append(long_text[:255])
+        long_text = long_text[255:]
+    record.value.append(long_text)
+    final_str = ''.join(record.value)
+    final_len = len(final_str)
+    assert(original_len == final_len)
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
 def remove_dns_aaaa_record(resource_group_name, zone_name, record_set_name, ipv6_address):
