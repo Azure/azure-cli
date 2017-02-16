@@ -104,7 +104,7 @@ register_cli_argument('appservice web config update', 'java_container', help="Th
 register_cli_argument('appservice web config update', 'java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
 register_cli_argument('appservice web config update', 'app_command_line', options_list=('--startup-file',), help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
 
-register_cli_argument('appservice web config ssl bind', 'ssl_type', help='The ssl cert type, e.g., SNI or IP', **enum_choice_list(['SNI', 'IP']))
+register_cli_argument('appservice web config ssl bind', 'ssl_type', help='The ssl cert type', **enum_choice_list(['SNI', 'IP']))
 register_cli_argument('appservice web config ssl upload', 'certificate_password', help='The ssl cert password')
 register_cli_argument('appservice web config ssl upload', 'certificate_file', type=file_type, help='The filepath for the .pfx file')
 register_cli_argument('appservice web config ssl', 'certificate_thumbprint', help='The ssl cert thumbprint')
