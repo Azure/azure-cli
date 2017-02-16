@@ -1,8 +1,17 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
 from msrestazure.azure_exceptions import CloudError
+from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._util import CLIError
 from .custom import get_vm, set_vm, _compute_client_factory
 logger = azlogging.get_az_logger(__name__)
+
+_DATA_VOLUME_TYPE = 'DATA'
+_STATUS_ENCRYPTED = 'Encrypted'
 
 extension_info = {
     'Linux': {
@@ -18,23 +27,29 @@ extension_info = {
 }
 
 
-def keyvault_client_factory(**_):
+def keyvault_mgmt_client_factory(**_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.keyvault import KeyVaultManagementClient
     return get_mgmt_service_client(KeyVaultManagementClient)
 
 
-# TODO: add client cert support, key encryption key, etc
-def encrypt_disk(resource_group_name, vm_name,
+def encrypt_disk(resource_group_name, vm_name,  # pylint: disable=too-many-arguments,too-many-locals, too-many-statements
                  aad_client_id, aad_client_secret,
-                 keyvault, key_encryption_key_url=None, key_encryption_vault_id=None,
-                 client_cert_thumbprint=None, key_encryption_algorithm='RSA-OAEP',
+                 disk_encryption_keyvault,
+                 key_encryption_key_url=None,
+                 key_encryption_keyvault_id=None,
+                 aad_client_cert_thumbprint=None,
+                 key_encryption_algorithm='RSA-OAEP',
                  volume_type=None):
     # pylint: disable=no-member
     vm = get_vm(resource_group_name, vm_name)
     os_type = vm.storage_profile.os_disk.os_type.value
-    is_linux = os_type.lower() == 'linux'
+    is_linux = _is_linux_vm(os_type)
     extension = extension_info[os_type]
+
+    if aad_client_cert_thumbprint and aad_client_secret:
+        raise CLIError('Please provide either --aad-client-id or --aad-client-cert-thumbprint')
+
     if volume_type is None:
         if vm.storage_profile.data_disks:
             raise CLIError('VM has data disks, please supply --volume-type')
@@ -47,47 +62,43 @@ def encrypt_disk(resource_group_name, vm_name,
             _check_encrypt_is_supported(image_reference, volume_type)
 
     # TODO: support passphase for linux
-    # TODO: cross check the secret stuff
     compute_client = _compute_client_factory()
     sequence_version = _get_sequence_version(compute_client, resource_group_name,
                                              vm_name, extension['name'])
 
-    from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id
-    keyvault_client = keyvault_client_factory()
-    if is_valid_resource_id(keyvault):
-        res = parse_resource_id(keyvault)
+    keyvault_client = keyvault_mgmt_client_factory()
+    if is_valid_resource_id(disk_encryption_keyvault):
+        res = parse_resource_id(disk_encryption_keyvault)
         keyvault_info = keyvault_client.vaults.get(res['resource_group'], res['name'])
     else:
-        result = keyvault_client.vaults.list()
-        temp = next((k for k in result if k.name == keyvault), None)
-        if not temp:
-            raise CloudError("'{}' is not found under subscription".format(keyvault))
-        res = parse_resource_id(temp.id)  # 'list' doesn't return all the info, so need a 'get'
-        keyvault_info = keyvault_client.vaults.get(res['resource_group'], res['name'])
-
+        keyvault_info = _look_for_keyvault(keyvault_client, disk_encryption_keyvault,
+                                           get_detail=True)
     keyvault_url = keyvault_info.properties.vault_uri
+
+    if key_encryption_key_url and not key_encryption_keyvault_id:
+        try:
+            from urllib.parse import urlparse
+        except ImportError:
+            from urlparse import urlparse  # pylint: disable=import-error
+        hostname = urlparse(key_encryption_key_url).hostname
+        if not hostname:
+            raise CLIError('Please provide a full url to --key-encryption-key-url')
+        key_encryption_keyvault_id = _look_for_keyvault(keyvault_client,
+                                                        hostname.split('.')[0], get_detail=False).id
 
     public_config = {
         'AADClientID': aad_client_id,
-        'AADClientCertThumbprint': client_cert_thumbprint,
+        'AADClientCertThumbprint': aad_client_cert_thumbprint,
         'KeyVaultURL': keyvault_url,
         'VolumeType': volume_type,
         'EncryptionOperation': 'EnableEncryption',
         'KeyEncryptionKeyURL': key_encryption_key_url,
-        'KeyEncryptionAlgorithm': key_encryption_algorithm,  # TODO cross check
+        'KeyEncryptionAlgorithm': key_encryption_algorithm,
         'SequenceVersion': sequence_version,
     }
     private_config = {
         'AADClientSecret': aad_client_secret if is_linux else (aad_client_secret or '')
     }
-
-    # If keyEncryptionKeyUrl is not null but keyEncryptionAlgorithm is,
-    # use the default key encryption algorithm
-    # if(!utils.stringIsNullOrEmpty(options.keyEncryptionKeyUrl)) {
-    #    if(utils.stringIsNullOrEmpty(options.keyEncryptionAlgorithm)) {
-    #      params.keyEncryptionAlgorithm = vmConstants.EXTENSIONS.DEFAULT_KEY_ENCRYPTION_ALGORITHM
-    #    }
-    # }
 
     from azure.mgmt.compute.models import (VirtualMachineExtension, DiskEncryptionSettings,
                                            KeyVaultSecretReference, KeyVaultKeyReference,
@@ -118,27 +129,42 @@ def encrypt_disk(resource_group_name, vm_name,
     vm = get_vm(resource_group_name, vm_name)
     secret_ref = KeyVaultSecretReference(secret_url=status_url,
                                          source_vault=SubResource(keyvault_info.id))
+
+    key_encryption_key_obj = None
+    if key_encryption_key_url:
+        key_encryption_key_obj = KeyVaultKeyReference(key_encryption_key_url,
+                                                      SubResource(key_encryption_keyvault_id))
+
     disk_encryption_settings = DiskEncryptionSettings(disk_encryption_key=secret_ref,
-                                                      key_encryption_key=None,  # TODO key_encryption_key_url,
+                                                      key_encryption_key=key_encryption_key_obj,
                                                       enabled=True)
-    # Cross check the xplat's stuff
 
     vm.storage_profile.os_disk.encryption_settings = disk_encryption_settings
     return set_vm(vm)
 
 
-def disable_disk_encryption(resource_group_name, vm_name, volume_type=None):
+def disable_disk_encryption(resource_group_name, vm_name,
+                            volume_type=None, force=False):
+    '''
+    Disable disk encryption on OS disk, Data disks, or both
+    '''
     vm = get_vm(resource_group_name, vm_name)
     # pylint: disable=no-member
     os_type = vm.storage_profile.os_disk.os_type.value
 
     # be nice, figure out the default volume type
-    is_linux = os_type.lower() == 'linux'
+    is_linux = _is_linux_vm(os_type)
     if is_linux:
-        if volume_type and volume_type != 'DATA':
-            raise CLIError("Only data disk is supported to disable on Linux VM")
+        if volume_type:
+            if volume_type != _DATA_VOLUME_TYPE:
+                raise CLIError("Only data disk is supported to disable on Linux VM")
+            elif not force:
+                status = show_encryption_status(resource_group_name, vm_name)
+                if status['osDisk'] == _STATUS_ENCRYPTED:
+                    raise CLIError("VM's OS disk is encrypted. Disabling encryption on data "
+                                   "disk can still cause VM unbootable. Use '--force' to continue")
         else:
-            volume_type = 'DATA'
+            volume_type = _DATA_VOLUME_TYPE
     elif volume_type is None:
         if vm.storage_profile.data_disks:
             raise CLIError("VM has data disks, please specify --volume-type")
@@ -185,19 +211,23 @@ def disable_disk_encryption(resource_group_name, vm_name, volume_type=None):
 
 def show_encryption_status(resource_group_name, vm_name):
     encryption_status = {
-        'osVolumeEncrypted': 'NotEncrypted',
-        'osVolumeEncryptionSettings': None,
-        'dataVolumesEncrypted': 'NotEncrypted'
+        'osDisk': 'NotEncrypted',
+        'osDiskEncryptionSettings': None,
+        'dataDisk': 'NotEncrypted',
+        'osType': None
     }
     vm = get_vm(resource_group_name, vm_name)
+    # pylint: disable=no-member
     os_type = vm.storage_profile.os_disk.os_type.value
-    is_linux = os_type.lower() == 'linux'
+    is_linux = _is_linux_vm(os_type)
+    encryption_status['osType'] = os_type
     extension = extension_info[os_type]
     compute_client = _compute_client_factory()
-    extension_result = compute_client.virtual_machine_extensions.get(resource_group_name, vm_name,
-                                                                     extension['name'], 'instanceView')
+    extension_result = compute_client.virtual_machine_extensions.get(resource_group_name,
+                                                                     vm_name,
+                                                                     extension['name'],
+                                                                     'instanceView')
     logger.debug(extension_result)
-    encryption_status = {}
     if extension_result.instance_view.statuses:
         encryption_status['progressMessage'] = extension_result.instance_view.statuses[0].message
 
@@ -205,34 +235,35 @@ def show_encryption_status(resource_group_name, vm_name):
     if getattr(extension_result.instance_view, 'substatuses', None):
         substatus_message = extension_result.instance_view.substatuses[0].message
 
-
-    encryption_status['osVolumeEncryptionSettings'] = vm.storage_profile.os_disk.encryption_settings
+    encryption_status['osDiskEncryptionSettings'] = vm.storage_profile.os_disk.encryption_settings
 
     import json
     if is_linux:
-        try: 
+        try:
             message_object = json.loads(substatus_message)
-        except:
-            message_object = None # outdated versions of guest agent produce messages that cannot be parsed
+        except json.decoder.JSONDecodeError:
+            message_object = None  # might be from outdated extension
 
         if message_object and ('os' in message_object):
-            encryption_status['osVolumeEncrypted'] = message_object['os']
+            encryption_status['osDisk'] = message_object['os']
         else:
-            encryption_status['osVolumeEncrypted'] = 'Unknown'
+            encryption_status['osDisk'] = 'Unknown'
 
         if message_object and 'data' in message_object:
-            encryption_status['dataVolumesEncrypted'] = message_object['data']
+            encryption_status['dataDisk'] = message_object['data']
         else:
-            encryption_status['dataVolumesEncrypted'] = 'Unknown'
+            encryption_status['dataDisk'] = 'Unknown'
     else:
-        # Windows - get os and data volume encryption state from the vm model 
-        if encryption_status['osVolumeEncryptionSettings'].enabled and encryption_status['osVolumeEncryptionSettings'].disk_encryption_key.secret_url:
-            encryption_status['osVolumeEncrypted'] = 'Encrypted'
+        # Windows - get os and data volume encryption state from the vm model
+        if (encryption_status['osDiskEncryptionSettings'].enabled and
+                encryption_status['osDiskEncryptionSettings'].disk_encryption_key.secret_url):
+            encryption_status['osDisk'] = _STATUS_ENCRYPTED
 
         if extension_result.provisioning_state == 'Succeeded':
             volume_type = extension_result.settings.get('VolumeType', None)
-            if not volume_type or volume_type.lower() != 'os':
-                encryption_status['dataVolumesEncrypted'] = 'Encrypted'
+            about_data_disk = not volume_type or volume_type.lower() != 'os'
+            if about_data_disk and extension_result.settings.get('EncryptionOperation', None) == 'EnableEncryption':  # pylint: disable=line-too-long
+                encryption_status['dataDisk'] = _STATUS_ENCRYPTED
 
     return encryption_status
 
@@ -250,10 +281,29 @@ def _get_sequence_version(compute_client, resource_group_name, vm_name, extensio
     return sequence_version
 
 
+def _is_linux_vm(os_type):
+    return os_type.lower() == 'linux'
+
+
+def _look_for_keyvault(keyvault_client, keyvault_name, get_detail):
+    result = keyvault_client.vaults.list()
+    temp = next((k for k in result if k.name == keyvault_name), None)
+    if not temp:
+        raise CloudError("'{}' is not found under subscription".format(keyvault_name))
+    if get_detail:
+        res = parse_resource_id(temp.id)  # 'list' doesn't return all the info, so need a 'get'
+        keyvault_info = keyvault_client.vaults.get(res['resource_group'], res['name'])
+        return keyvault_info
+    else:
+        return temp
+
+
 def _check_encrypt_is_supported(image_reference, volume_type):
     offer = getattr(image_reference, 'offer', None)
     publisher = getattr(image_reference, 'publisher', None)
     sku = getattr(image_reference, 'sku', None)
+
+    # custom image?
     if not offer or not publisher or not sku:
         return True
 
@@ -284,7 +334,7 @@ def _check_encrypt_is_supported(image_reference, volume_type):
             'sku': '16.04'
         }]
 
-    if volume_type.lower() == 'data':
+    if volume_type.upper() == _DATA_VOLUME_TYPE:
         supported.append({
             'offer': 'CentOS',
             'publisher': 'OpenLogic',
@@ -298,5 +348,5 @@ def _check_encrypt_is_supported(image_reference, volume_type):
             return True
 
     sku_list = ['{} {}'.format(a['offer'], a['sku']) for a in supported]
-    message = "Encryption is not suppored for current VM. Supported Linux skus are '{}'".format(sku_list)
+    message = "Encryption is not suppored for current VM. Supported are '{}'".format(sku_list)
     raise CLIError(message)
