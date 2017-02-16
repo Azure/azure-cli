@@ -46,7 +46,7 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     ServicePrincipalCreateParameters,
                                     GetObjectsParameters)
 from azure.mgmt.authorization.models import RoleAssignmentProperties
-from ._client_factory import (_auth_client_factory, _graph_client_factory, acs_client_factory)
+from ._client_factory import (_auth_client_factory, _graph_client_factory)
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -693,16 +693,14 @@ def _mkdir_p(path):
             raise
 
 
-def update_acs(resource_group_name, container_service_name, new_agent_count):
-    client = acs_client_factory(None)
+def update_acs(client, resource_group_name, container_service_name, new_agent_count):
     instance = client.get(resource_group_name, container_service_name)
     instance.agent_pool_profiles[0].count = new_agent_count  # pylint: disable=no-member
     return client.create_or_update(resource_group_name, container_service_name, instance)
 
 
-def list_container_services(resource_group_name=None):
+def list_container_services(client, resource_group_name=None):
     ''' List Container Services. '''
-    client = acs_client_factory(None)
     svc_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
         if resource_group_name else client.list()
     return list(svc_list)
