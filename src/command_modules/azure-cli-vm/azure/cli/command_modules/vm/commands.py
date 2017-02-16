@@ -6,7 +6,7 @@
 from collections import OrderedDict
 
 from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, cf_ni,
-                                                          cf_acs, cf_vm_ext,
+                                                          cf_vm_ext,
                                                           cf_vm_ext_image, cf_vm_image, cf_usage,
                                                           cf_vmss, cf_vmss_vm,
                                                           cf_vm_sizes, cf_disks, cf_snapshots,
@@ -147,38 +147,6 @@ cli_generic_update_command(__name__, 'vmss update',
 cli_command(__name__, 'vm boot-diagnostics disable', custom_path.format('disable_boot_diagnostics'))
 cli_command(__name__, 'vm boot-diagnostics enable', custom_path.format('enable_boot_diagnostics'))
 cli_command(__name__, 'vm boot-diagnostics get-boot-log', custom_path.format('get_boot_log'))
-
-# ACS
-
-
-def transform_acs(r):
-    orchestratorType = 'Unknown'
-    orchestratorProfile = r.get('orchestratorProfile')
-    if orchestratorProfile:
-        orchestratorType = orchestratorProfile.get('orchestratorType')
-    res = OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']),
-                       ('Orchestrator', orchestratorType), ('Location', r['location']),
-                       ('ProvisioningState', r['provisioningState'])])
-    return res
-
-
-def transform_acs_list(result):
-    transformed = []
-    for r in result:
-        res = transform_acs(r)
-        transformed.append(res)
-    return transformed
-
-
-op_var = 'container_services_operations'
-op_class = 'ContainerServicesOperations'
-cli_command(__name__, 'acs show', mgmt_path.format(op_var, op_class, 'get'), cf_acs, table_transformer=transform_acs)
-cli_command(__name__, 'acs list', custom_path.format('list_container_services'), cf_acs, table_transformer=transform_acs_list)
-cli_command(__name__, 'acs delete', mgmt_path.format(op_var, op_class, 'delete'), cf_acs)
-cli_command(__name__, 'acs scale', custom_path.format('update_acs'))
-# Per conversation with ACS team, hide the update till we have something meaningful to tweak
-# from azure.cli.command_modules.vm.custom import update_acs
-# cli_generic_update_command(__name__, 'acs update', ContainerServicesOperations.get, ContainerServicesOperations.create_or_update, cf_acs)
 
 # VM Diagnostics
 cli_command(__name__, 'vm diagnostics set', custom_path.format('set_diagnostics_extension'))

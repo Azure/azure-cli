@@ -92,3 +92,6 @@ register_cli_argument('acs kubernetes get-credentials', 'path',
                       default=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
                       type=file_type,
                       completer=FilesCompleter())
+register_cli_argument('acs scale', 'new_agent_count', type=int, help='The number of agents for the cluster')
+register_cli_argument('acs create', 'service_principal', help='Service principal for making calls into Azure APIs')
+register_cli_argument('acs create', 'client_secret', help='Client secret to use with the service principal for making calls to Azure APIs')

@@ -1427,21 +1427,6 @@ def convert_av_set_to_managed_disk(resource_group_name, availability_set_name):
                             parameters=av_set)
 
 
-def update_acs(resource_group_name, container_service_name, new_agent_count):
-    client = _compute_client_factory()
-    instance = client.container_services.get(resource_group_name, container_service_name)
-    instance.agent_pool_profiles[0].count = new_agent_count
-    return client.container_services.create_or_update(resource_group_name,
-                                                      container_service_name, instance)
-
-
-def list_container_services(client, resource_group_name=None):
-    ''' List Container Services. '''
-    svc_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
-        if resource_group_name else client.list()
-    return list(svc_list)
-
-
 # pylint: disable=too-many-locals, unused-argument, too-many-statements
 def create_vm(vm_name, resource_group_name, image=None,
               size='Standard_DS1', location=None, tags=None, no_wait=False,

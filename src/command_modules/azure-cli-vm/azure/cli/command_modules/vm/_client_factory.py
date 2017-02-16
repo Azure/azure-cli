@@ -29,18 +29,8 @@ def cf_avail_set(_):
     return _compute_client_factory().availability_sets
 
 
-def cf_acs_create(_):
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.command_modules.vm.mgmt_acs.lib import AcsCreationClient as AcsCreateClient
-    return get_mgmt_service_client(AcsCreateClient).acs
-
-
 def cf_vm(_):
     return _compute_client_factory().virtual_machines
-
-
-def cf_acs(_):
-    return _compute_client_factory().container_services
 
 
 def cf_vm_ext(_):
