@@ -36,7 +36,7 @@ from azure.cli.main import main as cli_main
 from azure.cli.core import __version__ as core_version
 import azure.cli.core._debug as _debug
 from azure.cli.core._profile import Profile
-from azure.cli.core._util import CLIError
+from azure.cli.core._util import CLIError, random_string
 
 LIVE_TEST_CONTROL_ENV = 'AZURE_CLI_TEST_RUN_LIVE'
 COMMAND_COVERAGE_CONTROL_ENV = 'AZURE_CLI_TEST_COMMAND_COVERAGE'
@@ -301,8 +301,7 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
         request.uri = _scrub_deployment_name(request.uri)
 
         # replace random storage account name with dummy name
-        request.uri = re.sub('/vcrstorage([\\d]+).',
-                             '/{}.'.format(MOCKED_STORAGE_ACCOUNT), request.uri)
+        request.uri = re.sub(r'(vcrstorage[\d]+)', MOCKED_STORAGE_ACCOUNT, request.uri)
         # prevents URI mismatch between Python 2 and 3 if request URI has extra / chars
         request.uri = re.sub('//', '/', request.uri)
         request.uri = re.sub('/', '//', request.uri, count=1)
@@ -516,8 +515,8 @@ class StorageAccountVCRTestBase(VCRTestBase):
 
     @classmethod
     def generate_account_name(cls):
-        return 'vcrstorage{}'.format(''.join(choice(digits) for _ in range(12)))
+        return 'vcrstorage{}'.format(random_string(12, digits_only=True))
 
     @classmethod
     def generate_random_tag(cls):
-        return '_{}_'.format(''.join((choice(ascii_lowercase + digits) for _ in range(4))))
+        return '_{}_'.format(random_string(4, force_lower=True))
