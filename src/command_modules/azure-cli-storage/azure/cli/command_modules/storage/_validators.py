@@ -430,17 +430,21 @@ def get_source_file_or_blob_service_client(namespace):
     """
     usage_string = 'invalid usage: supply only one of the following argument sets:' + \
                    '\n\t   --source-uri' + \
-                   '\n\tOR --source-container [--source-account] [--source-key] [--source-sas]' + \
-                   '\n\tOR --source-share [--source-account] [--source-key] [--source-sas]'
+                   '\n\tOR --source-container' + \
+                   '\n\tOR --source-container --source-account-name --source-account-key' + \
+                   '\n\tOR --source-container --source-account-name --source-sas' + \
+                   '\n\tOR --source-share --source-account-name --source-account-key' + \
+                   '\n\tOR --source-share --source-account-name --source-account-sas'
+
     ns = vars(namespace)
-    source_account = ns.pop('source_account', None)
+    source_account = ns.pop('source_account_name', None)
+    source_key = ns.pop('source_account_key', None)
     source_uri = ns.pop('source_uri', None)
-    source_key = ns.pop('source_key', None)
     source_sas = ns.get('source_sas', None)
     source_container = ns.get('source_container', None)
     source_share = ns.get('source_share', None)
 
-    if source_account and source_uri:
+    if source_uri and source_account:
         raise ValueError(usage_string)
 
     elif (not source_account) and (not source_uri):
@@ -454,7 +458,8 @@ def get_source_file_or_blob_service_client(namespace):
         # A few arguments check will be made as well so as not to cause ambiguity.
 
         if source_key:
-            raise ValueError('invalid usage: --source-key is set but --source-account is missing.')
+            raise ValueError('invalid usage: --source-account-key is set but --source-account-name'
+                             ' is missing.')
 
         if source_container and source_share:
             raise ValueError(usage_string)
@@ -465,15 +470,20 @@ def get_source_file_or_blob_service_client(namespace):
         ns['source_client'] = None
 
     elif source_account:
-        if ('source_container' in ns) and ('source_share' in ns):
+        if source_container and source_share:
             raise ValueError(usage_string)
 
-        if 'source_container' in ns:
+        if not (source_key or source_sas):
+            # when either storage account key or SAS is given, try to fetch the key in the current
+            # subscription
+            source_key = _query_account_key(source_account)
+
+        if source_container:
             from azure.storage.blob.blockblobservice import BlockBlobService
             ns['source_client'] = BlockBlobService(account_name=source_account,
                                                    account_key=source_key,
                                                    sas_token=source_sas)
-        elif 'source_share' in ns:
+        elif source_share:
             ns['source_client'] = FileService(account_name=source_account,
                                               account_key=source_key,
                                               sas_token=source_sas)
