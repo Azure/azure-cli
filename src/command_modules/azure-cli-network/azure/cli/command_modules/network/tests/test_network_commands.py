@@ -1222,7 +1222,10 @@ class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network dns record update-soa -g {0} --zone-name {1} {2}'
                      .format(rg, zone_name, args['soa']))
 
-        typed_record_sets = 2 * len(record_types)
+        long_value = '0123456789' * 50
+        self.cmd('network dns record txt add -g {} -z {} -n longtxt -v {}'.format(rg, zone_name, long_value))
+
+        typed_record_sets = 2 * len(record_types) + 1
         self.cmd('network dns zone show -n {} -g {}'.format(zone_name, rg), checks=[
             JMESPathCheck('numberOfRecordSets', base_record_sets + typed_record_sets)
             ])
@@ -1236,7 +1239,7 @@ class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
             checks=JMESPathCheck('length(@)', base_record_sets + typed_record_sets))
 
         self.cmd('network dns record-set list -g {} -z {} --type txt'.format(rg, zone_name),
-            checks=JMESPathCheck('length(@)', 2))
+            checks=JMESPathCheck('length(@)', 3))
 
         for t in record_types:
             self.cmd('network dns record {0} remove -g {1} --zone-name {2} --record-set-name myrs{0} {3}'
