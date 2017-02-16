@@ -888,7 +888,7 @@ class VMCreateExistingOptions(ResourceGroupVCRTestBase):
         super(VMCreateExistingOptions, self).__init__(__file__, test_method, resource_group='cli_test_vm_create_existing')
         self.availset_name = 'vrfavailset'
         self.pubip_name = 'vrfpubip'
-        self.storage_name = 'azureclivrfstorage0011'
+        self.storage_name = 'vcrstorage0012345'
         self.vnet_name = 'vrfvnet'
         self.subnet_name = 'vrfsubnet'
         self.nsg_name = 'vrfnsg'
@@ -902,7 +902,7 @@ class VMCreateExistingOptions(ResourceGroupVCRTestBase):
     def set_up(self):
         super(VMCreateExistingOptions, self).set_up()
 
-        self.cmd('vm availability-set create --name {} -g {}'.format(self.availset_name, self.resource_group))
+        self.cmd('vm availability-set create --name {} -g {} --unmanaged --platform-fault-domain-count 3 --platform-update-domain-count 3'.format(self.availset_name, self.resource_group))
         self.cmd('network public-ip create --name {} -g {}'.format(self.pubip_name, self.resource_group))
         self.cmd('storage account create --name {} -g {} -l westus --sku Standard_LRS'.format(self.storage_name, self.resource_group))
         self.cmd('network vnet create --name {} -g {} --subnet-name {}'.format(self.vnet_name, self.resource_group, self.subnet_name))
@@ -923,6 +923,75 @@ class VMCreateExistingOptions(ResourceGroupVCRTestBase):
                  .format(vnet_name=self.vnet_name, subnet_name=self.subnet_name,
                          availset_name=self.availset_name, pubip_name=self.pubip_name,
                          resource_group=self.resource_group, nsg_name=self.nsg_name,
+                         vm_name=self.vm_name, disk_name=self.disk_name,
+                         container_name=self.container_name, storage_name=self.storage_name,
+                         key_value=TEST_SSH_KEY_PUB))
+
+        self.cmd('vm availability-set show -n {} -g {}'.format(self.availset_name, self.resource_group),
+                 checks=JMESPathCheck('virtualMachines[0].id.ends_with(@, \'{}\')'.format(self.vm_name.upper()), True))
+        self.cmd('network nsg show -n {} -g {}'.format(self.nsg_name, self.resource_group),
+                 checks=JMESPathCheck('networkInterfaces[0].id.ends_with(@, \'{}\')'.format(self.vm_name + 'VMNic'), True))
+        self.cmd('network nic show -n {}VMNic -g {}'.format(self.vm_name, self.resource_group),
+                 checks=JMESPathCheck('ipConfigurations[0].publicIpAddress.id.ends_with(@, \'{}\')'.format(self.pubip_name), True))
+        self.cmd('vm show -n {} -g {}'.format(self.vm_name, self.resource_group),
+                 checks=JMESPathCheck('storageProfile.osDisk.vhd.uri', 'https://{}.blob.core.windows.net/{}/{}.vhd'.format(self.storage_name, self.container_name, self.disk_name)))
+
+
+# pylint: disable=too-many-instance-attributes
+class VMCreateExistingIdsOptions(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(VMCreateExistingIdsOptions, self).__init__(__file__, test_method, resource_group='cli_test_vm_create_existing_ids')
+        self.availset_name = 'vrfavailset'
+        self.pubip_name = 'vrfpubip'
+        self.storage_name = 'vcrstorage01234560'
+        self.vnet_name = 'vrfvnet'
+        self.subnet_name = 'vrfsubnet'
+        self.nsg_name = 'vrfnsg'
+        self.vm_name = 'vrfvm'
+        self.disk_name = 'vrfosdisk'
+        self.container_name = 'vrfcontainer'
+
+    def test_vm_create_existing_ids_options(self):
+        self.execute()
+
+    def set_up(self):
+        super(VMCreateExistingIdsOptions, self).set_up()
+
+        self.cmd('vm availability-set create --name {} -g {} --unmanaged --platform-fault-domain-count 3 --platform-update-domain-count 3'.format(self.availset_name, self.resource_group))
+        self.cmd('network public-ip create --name {} -g {}'.format(self.pubip_name, self.resource_group))
+        self.cmd('storage account create --name {} -g {} -l westus --sku Standard_LRS'.format(self.storage_name, self.resource_group))
+        self.cmd('network vnet create --name {} -g {} --subnet-name {}'.format(self.vnet_name, self.resource_group, self.subnet_name))
+        self.cmd('network nsg create --name {} -g {}'.format(self.nsg_name, self.resource_group))
+
+    def body(self):
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
+        subscription_id = get_subscription_id()
+        rg = self.resource_group
+
+        av_set = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Compute', type='availabilitySets', name=self.availset_name)
+        pub_ip = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='publicIpAddresses', name=self.pubip_name)
+        subnet = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='virtualNetworks', child_type='subnets', name=self.vnet_name, child_name=self.subnet_name)
+        nsg = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='networkSecurityGroups', name=self.nsg_name)
+
+        assert is_valid_resource_id(av_set)
+        assert is_valid_resource_id(pub_ip)
+        assert is_valid_resource_id(subnet)
+        assert is_valid_resource_id(nsg)
+
+        self.cmd('vm create --image UbuntuLTS --os-disk-name {disk_name}'
+                 ' --subnet {subnet}'
+                 ' --availability-set {availset}'
+                 ' --public-ip-address {pubip} -l "West US"'
+                 ' --nsg {nsg}'
+                 ' --use-unmanaged-disk'
+                 ' --size Standard_DS2'
+                 ' --admin-username user11'
+                 ' --storage-account {storage_name} --storage-container-name {container_name} -g {resource_group}'
+                 ' --name {vm_name} --ssh-key-value \'{key_value}\''
+                 .format(subnet=subnet, availset=av_set, pubip=pub_ip,
+                         resource_group=self.resource_group, nsg=nsg,
                          vm_name=self.vm_name, disk_name=self.disk_name,
                          container_name=self.container_name, storage_name=self.storage_name,
                          key_value=TEST_SSH_KEY_PUB))
@@ -1308,6 +1377,62 @@ class VMSSCreateExistingOptions(ResourceGroupVCRTestBase):
                  ' --nat-pool-name {} --use-unmanaged-disk'
                  .format(os_disk_name, self.vnet_name, self.subnet_name, sku_name, container_name,
                          self.resource_group, vmss_name, self.lb_name, TEST_SSH_KEY_PUB,
+                         self.bepool_name, self.natpool_name))
+        self.cmd('vmss show --name {} -g {}'.format(vmss_name, self.resource_group), checks=[
+            JMESPathCheck('sku.name', sku_name),
+            JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.name', os_disk_name),
+            JMESPathCheck('virtualMachineProfile.storageProfile.osDisk.vhdContainers[0].ends_with(@, \'{}\')'
+                          .format(container_name), True)
+        ])
+        self.cmd('network lb show --name {} -g {}'.format(self.lb_name, self.resource_group),
+                 checks=JMESPathCheck('backendAddressPools[0].backendIpConfigurations[0].id.contains(@, \'{}\')'.format(vmss_name), True))
+        self.cmd('network vnet show --name {} -g {}'.format(self.vnet_name, self.resource_group),
+                 checks=JMESPathCheck('subnets[0].ipConfigurations[0].id.contains(@, \'{}\')'.format(vmss_name), True))
+
+
+class VMSSCreateExistingIdsOptions(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(VMSSCreateExistingIdsOptions, self).__init__(__file__, test_method, resource_group='cli_test_vmss_create_existing_ids_options')
+        self.vnet_name = 'vrfvnet'
+        self.subnet_name = 'vrfsubnet'
+        self.lb_name = 'vrflb'
+        self.bepool_name = 'mybepool'
+        self.natpool_name = 'mynatpool'
+
+    def set_up(self):
+        super(VMSSCreateExistingIdsOptions, self).set_up()
+        self.cmd('network vnet create -n {} -g {} --subnet-name {}'
+                 .format(self.vnet_name, self.resource_group, self.subnet_name))
+        self.cmd('network lb create --name {} -g {} --backend-pool-name {}'
+                 .format(self.lb_name, self.resource_group, self.bepool_name))
+
+    def test_vmss_create_existing_ids_options(self):
+        self.execute()
+
+    def body(self):
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
+        subscription_id = get_subscription_id()
+        rg = self.resource_group
+        vmss_name = 'vrfvmss'
+        os_disk_name = 'vrfosdisk'
+        container_name = 'vrfcontainer'
+        sku_name = 'Standard_A3'
+
+        subnet = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='virtualNetworks', child_type='subnets', name=self.vnet_name, child_name=self.subnet_name)
+        lb = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='loadBalancers', name=self.lb_name)
+
+        assert is_valid_resource_id(subnet)
+        assert is_valid_resource_id(lb)
+
+        self.cmd('vmss create --image CentOS --os-disk-name {} --admin-username ubuntu'
+                 ' --subnet {} -l "West US" --vm-sku {}'
+                 ' --storage-container-name {} -g {} --name {} --load-balancer {}'
+                 ' --ssh-key-value \'{}\' --backend-pool-name {}'
+                 ' --nat-pool-name {} --use-unmanaged-disk'
+                 .format(os_disk_name, subnet, sku_name, container_name,
+                         self.resource_group, vmss_name, lb, TEST_SSH_KEY_PUB,
                          self.bepool_name, self.natpool_name))
         self.cmd('vmss show --name {} -g {}'.format(vmss_name, self.resource_group), checks=[
             JMESPathCheck('sku.name', sku_name),

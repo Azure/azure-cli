@@ -167,3 +167,10 @@ def b64encode(s):
         return encoded
     else:
         return encoded.decode('latin-1')
+
+
+def random_string(length=16, force_lower=False):
+    from string import ascii_letters, digits, ascii_lowercase
+    from random import choice
+    choice_set = ascii_lowercase + digits if force_lower else ascii_letters + digits
+    return ''.join([choice(choice_set) for _ in range(length)])

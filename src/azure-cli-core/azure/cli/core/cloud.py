@@ -45,12 +45,13 @@ class CloudSuffixNotSetException(CLIError):
     pass
 
 
-class CloudEndpoints(object):  # pylint: disable=too-few-public-methods
+class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many-instance-attributes
 
     def __init__(self,  # pylint: disable=too-many-arguments
                  management=None,
                  resource_manager=None,
                  sql_management=None,
+                 batch_resource_id=None,
                  gallery=None,
                  active_directory=None,
                  active_directory_resource_id=None,
@@ -59,6 +60,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods
         self.management = management
         self.resource_manager = resource_manager
         self.sql_management = sql_management
+        self.batch_resource_id = batch_resource_id
         self.gallery = gallery
         self.active_directory = active_directory
         self.active_directory_resource_id = active_directory_resource_id
@@ -116,6 +118,7 @@ AZURE_PUBLIC_CLOUD = Cloud(
         management='https://management.core.windows.net/',
         resource_manager='https://management.azure.com/',
         sql_management='https://management.core.windows.net:8443/',
+        batch_resource_id='https://batch.core.windows.net/',
         gallery='https://gallery.azure.com/',
         active_directory='https://login.microsoftonline.com',
         active_directory_resource_id='https://management.core.windows.net/',
@@ -133,6 +136,7 @@ AZURE_CHINA_CLOUD = Cloud(
         management='https://management.core.chinacloudapi.cn/',
         resource_manager='https://management.chinacloudapi.cn',
         sql_management='https://management.core.chinacloudapi.cn:8443/',
+        batch_resource_id='https://batch.chinacloudapi.cn/',
         gallery='https://gallery.chinacloudapi.cn/',
         active_directory='https://login.chinacloudapi.cn',
         active_directory_resource_id='https://management.core.chinacloudapi.cn/',
@@ -148,6 +152,7 @@ AZURE_US_GOV_CLOUD = Cloud(
         management='https://management.core.usgovcloudapi.net/',
         resource_manager='https://management.usgovcloudapi.net/',
         sql_management='https://management.core.usgovcloudapi.net:8443/',
+        batch_resource_id='https://batch.core.usgovcloudapi.net/',
         gallery='https://gallery.usgovcloudapi.net/',
         active_directory='https://login.microsoftonline.com',
         active_directory_resource_id='https://management.core.usgovcloudapi.net/',
@@ -163,6 +168,7 @@ AZURE_GERMAN_CLOUD = Cloud(
         management='https://management.core.cloudapi.de/',
         resource_manager='https://management.microsoftazure.de',
         sql_management='https://management.core.cloudapi.de:8443/',
+        batch_resource_id='https://batch.cloudapi.de/',
         gallery='https://gallery.cloudapi.de/',
         active_directory='https://login.microsoftonline.de',
         active_directory_resource_id='https://management.core.cloudapi.de/',

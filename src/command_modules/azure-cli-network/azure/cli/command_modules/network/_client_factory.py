@@ -98,11 +98,6 @@ def cf_usages(_):
 def cf_virtual_network_gateway_connections(_):
     return _network_client_factory().virtual_network_gateway_connections
 
-def cf_vpn_connection_create(_):
-    from azure.cli.command_modules.network.mgmt_vpn_connection.lib import VpnConnectionCreationClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(VpnConnectionCreationClient).vpn_connection
-
 def cf_virtual_network_gateways(_):
     return _network_client_factory().virtual_network_gateways
 

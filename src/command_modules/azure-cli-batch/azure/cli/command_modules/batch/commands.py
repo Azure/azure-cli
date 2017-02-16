@@ -39,6 +39,7 @@ cli_command(__name__, 'batch account delete', mgmt_path.format('batch_account', 
 cli_command(__name__, 'batch account autostorage-keys sync', mgmt_path.format('batch_account', 'BatchAccountOperations.synchronize_auto_storage_keys'), account_mgmt_client_factory)
 cli_command(__name__, 'batch account keys list', mgmt_path.format('batch_account', 'BatchAccountOperations.get_keys'), account_mgmt_client_factory)
 cli_command(__name__, 'batch account keys renew', mgmt_path.format('batch_account', 'BatchAccountOperations.regenerate_key'), account_mgmt_client_factory)
+cli_command(__name__, 'batch account login', custom_path.format('login_account'), account_mgmt_client_factory)
 
 cli_command(__name__, 'batch application list', mgmt_path.format('application', 'ApplicationOperations.list'), application_mgmt_client_factory)
 cli_command(__name__, 'batch application show', mgmt_path.format('application', 'ApplicationOperations.get'), application_mgmt_client_factory)

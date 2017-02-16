@@ -11,6 +11,8 @@ from azure.cli.core.commands.parameters import (resource_group_name_type, locati
                                                 get_resource_name_completion_list, file_type,
                                                 CliArgumentType, ignore_type, enum_choice_list)
 
+from azure.mgmt.web.models import DatabaseType
+
 from ._client_factory import web_client_factory
 
 def _generic_site_operation(resource_group_name, name, operation_name, slot=None, #pylint: disable=too-many-arguments
@@ -111,6 +113,23 @@ register_cli_argument('appservice web config ssl', 'certificate_thumbprint', hel
 
 register_cli_argument('appservice web config hostname', 'webapp', help="webapp name", completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
 register_cli_argument('appservice web config hostname', 'name', arg_type=name_arg_type, completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name')
+
+register_cli_argument('appservice web config backup', 'storage_account_url', help='URL with SAS token to the blob storage container', options_list=['--container-url'])
+register_cli_argument('appservice web config backup', 'webapp_name', help='The name of the webapp')
+register_cli_argument('appservice web config backup', 'db_name', help='Name of the database in the backup', arg_group='Database')
+register_cli_argument('appservice web config backup', 'db_connection_string', help='Connection string for the database in the backup', arg_group='Database')
+register_cli_argument('appservice web config backup', 'db_type', help='Type of database in the backup', arg_group='Database', **enum_choice_list(DatabaseType))
+
+register_cli_argument('appservice web config backup create', 'backup_name', help='Name of the backup. If unspecified, the backup will be named with the webapp name and a timestamp')
+
+register_cli_argument('appservice web config backup update', 'frequency', help='How often to backup. Use a number followed by d or h, e.g. 5d = 5 days, 2h = 2 hours')
+register_cli_argument('appservice web config backup update', 'keep_at_least_one_backup', help='Always keep one backup, regardless of how old it is', options_list=['--retain-one'], **enum_choice_list(two_states_switch))
+register_cli_argument('appservice web config backup update', 'retention_period_in_days', help='How many days to keep a backup before automatically deleting it. Set to 0 for indefinite retention', options_list=['--retention'])
+
+register_cli_argument('appservice web config backup restore', 'backup_name', help='Name of the backup to restore')
+register_cli_argument('appservice web config backup restore', 'target_name', help='The name to use for the restored webapp. If unspecified, will default to the name that was used when the backup was created')
+register_cli_argument('appservice web config backup restore', 'overwrite', help='Overwrite the source webapp, if --target-name is not specified', action='store_true')
+register_cli_argument('appservice web config backup restore', 'ignore_hostname_conflict', help='Ignores custom hostnames stored in the backup', action='store_true')
 
 register_cli_argument('appservice web source-control', 'manual_integration', action='store_true', help='disable automatic sync between source control and web')
 register_cli_argument('appservice web source-control', 'repo_url', help='repository url to pull the latest source from, e.g. https://github.com/foo/foo-web')

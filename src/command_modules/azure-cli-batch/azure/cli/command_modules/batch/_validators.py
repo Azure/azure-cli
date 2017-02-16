@@ -241,25 +241,30 @@ def validate_client_parameters(namespace):
     if not namespace.account_endpoint:
         namespace.account_endpoint = az_config.get('batch', 'endpoint', None)
 
-    # if account name is specified but no key, attempt to query
+    # if account name is specified but no key, attempt to query if we use shared key auth
     if namespace.account_name and namespace.account_endpoint and not namespace.account_key:
-        endpoint = urlsplit(namespace.account_endpoint)
-        host = endpoint.netloc
-        client = get_mgmt_service_client(BatchManagementClient)
-        acc = next((x for x in client.batch_account.list()
-                    if x.name == namespace.account_name and x.account_endpoint == host), None)
-        if acc:
-            from azure.cli.core.commands.arm import parse_resource_id
-            rg = parse_resource_id(acc.id)['resource_group']
-            namespace.account_key = \
-                client.batch_account.get_keys(rg, namespace.account_name).primary  # pylint: disable=no-member
-        else:
-            raise ValueError("Batch account '{}' not found.".format(namespace.account_name))
+        if az_config.get('batch', 'auth_mode', 'shared_key') == 'shared_key':
+            endpoint = urlsplit(namespace.account_endpoint)
+            host = endpoint.netloc
+            client = get_mgmt_service_client(BatchManagementClient)
+            acc = next((x for x in client.batch_account.list()
+                        if x.name == namespace.account_name and x.account_endpoint == host), None)
+            if acc:
+                from azure.cli.core.commands.arm import parse_resource_id
+                rg = parse_resource_id(acc.id)['resource_group']
+                namespace.account_key = \
+                    client.batch_account.get_keys(rg, namespace.account_name).primary  # pylint: disable=no-member
+            else:
+                raise ValueError("Batch account '{}' not found.".format(namespace.account_name))
     else:
         if not namespace.account_name:
             raise ValueError("Need specifiy batch account in command line or enviroment variable.")
         if not namespace.account_endpoint:
             raise ValueError("Need specifiy batch endpoint in command line or enviroment variable.")
+
+    if az_config.get('batch', 'auth_mode', 'shared_key') == 'aad':
+        namespace.account_key = None
+
 
 # CUSTOM REQUEST VALIDATORS
 

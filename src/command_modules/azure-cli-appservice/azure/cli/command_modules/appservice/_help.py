@@ -253,6 +253,31 @@ helps['appservice web config hostname list'] = """
     short-summary: list all hostname bindings
 """
 
+helps['appservice web config backup list'] = """
+    type: command
+    short-summary: list all of an app's backups
+"""
+
+helps['appservice web config backup create'] = """
+    type: command
+    short-summary: create a backup of a web app
+"""
+
+helps['appservice web config backup show'] = """
+    type: command
+    short-summary: show a web app's backup schedule
+"""
+
+helps['appservice web config backup update'] = """
+    type: command
+    short-summary: configure a new backup schedule
+"""
+
+helps['appservice web config backup restore'] = """
+    type: command
+    short-summary: restore an app from a backup
+"""
+
 helps['appservice web browse'] = """
     type: command
     short-summary: Open the web app in a browser

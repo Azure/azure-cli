@@ -28,11 +28,18 @@ cli_command(__name__, 'appservice web config hostname delete', 'azure.cli.comman
 cli_command(__name__, 'appservice web config container update', 'azure.cli.command_modules.appservice.custom#update_container_settings')
 cli_command(__name__, 'appservice web config container delete', 'azure.cli.command_modules.appservice.custom#delete_container_settings')
 cli_command(__name__, 'appservice web config container show', 'azure.cli.command_modules.appservice.custom#show_container_settings')
+
 cli_command(__name__, 'appservice web config ssl upload', 'azure.cli.command_modules.appservice.custom#upload_ssl_cert')
 cli_command(__name__, 'appservice web config ssl list', 'azure.cli.command_modules.appservice.custom#list_ssl_certs')
 cli_command(__name__, 'appservice web config ssl bind', 'azure.cli.command_modules.appservice.custom#bind_ssl_cert')
 cli_command(__name__, 'appservice web config ssl unbind', 'azure.cli.command_modules.appservice.custom#unbind_ssl_cert')
 cli_command(__name__, 'appservice web config ssl delete', 'azure.cli.command_modules.appservice.custom#delete_ssl_cert')
+
+cli_command(__name__, 'appservice web config backup list', 'azure.cli.command_modules.appservice.custom#list_backups')
+cli_command(__name__, 'appservice web config backup show', 'azure.cli.command_modules.appservice.custom#show_backup_configuration')
+cli_command(__name__, 'appservice web config backup create', 'azure.cli.command_modules.appservice.custom#create_backup')
+cli_command(__name__, 'appservice web config backup update', 'azure.cli.command_modules.appservice.custom#update_backup_schedule')
+cli_command(__name__, 'appservice web config backup restore', 'azure.cli.command_modules.appservice.custom#restore_backup')
 
 factory = lambda _: web_client_factory().web_apps
 cli_command(__name__, 'appservice web source-control config-local-git', 'azure.cli.command_modules.appservice.custom#enable_local_git')
