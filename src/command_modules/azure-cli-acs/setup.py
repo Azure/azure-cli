@@ -25,7 +25,10 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    'azure-mgmt-authorization==0.30.0rc6',
     'azure-mgmt-compute==0.33.0',
+    'azure-graphrbac==0.30.0rc6',
+    'azure-cli-core',
     'paramiko',
     'pyyaml',
     'six',

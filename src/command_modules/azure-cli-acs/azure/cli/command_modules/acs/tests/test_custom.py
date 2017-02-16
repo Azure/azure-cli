@@ -25,7 +25,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         sp = '1234567'
 
         with mock.patch(
-                'azure.cli.command_modules.role.custom.create_role_assignment') as create_role_assignment:
+                'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
             ok = _add_role_assignment(role, sp, delay=0, output=False)
             create_role_assignment.assert_called_with(role, sp)
             self.assertTrue(ok, 'Expected _add_role_assignment to succeed')
@@ -35,7 +35,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         sp = '1234567'
 
         with mock.patch(
-                'azure.cli.command_modules.role.custom.create_role_assignment') as create_role_assignment:
+                'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
             resp = mock.Mock()
             resp.status_code = 409
             resp.content = 'Conflict'
@@ -52,7 +52,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         sp = '1234567'
 
         with mock.patch(
-                'azure.cli.command_modules.role.custom.create_role_assignment') as create_role_assignment:
+                'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
             resp = mock.Mock()
             resp.status_code = 500
             resp.content = 'Internal Error'
