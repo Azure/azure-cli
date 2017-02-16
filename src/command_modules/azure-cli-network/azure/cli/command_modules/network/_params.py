@@ -578,7 +578,7 @@ for item in ['list', 'show']:
 for item in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
     register_cli_argument('network dns record {} add'.format(item), 'record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
     register_cli_argument('network dns record {} remove'.format(item), 'record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone.')
-register_cli_argument('network dns record cname add'.format(item), 'record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone. Creates a new record set if one does not exist. If a matching record already exists, it is replaced.')
+register_cli_argument('network dns record cname add', 'record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone. Creates a new record set if one does not exist. If a matching record already exists, it is replaced.')
 
 register_cli_argument('network dns record a', 'ipv4_address', options_list=('--ipv4-address', '-a'), help='IPV4 address in string notation.')
 register_cli_argument('network dns record aaaa', 'ipv6_address', options_list=('--ipv6-address', '-a'), help='IPV6 address in string notation.')

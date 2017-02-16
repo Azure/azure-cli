@@ -1672,7 +1672,7 @@ def add_dns_txt_record(resource_group_name, zone_name, record_set_name, value):
     record.value.append(long_text)
     final_str = ''.join(record.value)
     final_len = len(final_str)
-    assert(original_len == final_len)
+    assert original_len == final_len
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
 def remove_dns_aaaa_record(resource_group_name, zone_name, record_set_name, ipv6_address):
