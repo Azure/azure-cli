@@ -560,6 +560,7 @@ register_cli_argument('network dns', 'metadata', nargs='+', help='Metadata in sp
 register_cli_argument('network dns', 'record_type', modified_record_type)
 
 register_cli_argument('network dns zone', 'zone_name', name_arg_type)
+register_cli_argument('network dns zone', 'location', ignore_type)
 
 register_cli_argument('network dns zone import', 'file_name', options_list=('--file-name', '-f'), type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to import')
 register_cli_argument('network dns zone export', 'file_name', options_list=('--file-name', '-f'), type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to save')
@@ -576,5 +577,26 @@ for item in ['list', 'show']:
     register_cli_argument('network dns record-set {}'.format(item), 'record_type', options_list=('--type', '-t'), **enum_choice_list(RecordType))
 
 for item in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
-    register_cli_argument('network dns record {} add'.format(item), 'record_set_name', options_list=('--record-set-name',), help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
-    register_cli_argument('network dns record {} remove'.format(item), 'record_set_name', options_list=('--record-set-name',), help='The name of the record set relative to the zone.')
+    register_cli_argument('network dns record {} add'.format(item), 'record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
+    register_cli_argument('network dns record {} remove'.format(item), 'record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone.')
+register_cli_argument('network dns record cname add', 'record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone. Creates a new record set if one does not exist. If a matching record already exists, it is replaced.')
+
+register_cli_argument('network dns record a', 'ipv4_address', options_list=('--ipv4-address', '-a'), help='IPV4 address in string notation.')
+register_cli_argument('network dns record aaaa', 'ipv6_address', options_list=('--ipv6-address', '-a'), help='IPV6 address in string notation.')
+register_cli_argument('network dns record cname', 'cname', options_list=('--cname', '-c'), help='Canonical name.')
+register_cli_argument('network dns record mx', 'exchange', options_list=('--exchange', '-e'), help='Exchange metric.')
+register_cli_argument('network dns record mx', 'preference', options_list=('--preference', '-p'), help='Preference metric.')
+register_cli_argument('network dns record ns', 'dname', options_list=('--nsdname', '-d'), help='Name server domain name.')
+register_cli_argument('network dns record ptr', 'dname', options_list=('--ptrdname', '-d'), help='PTR target domain name.')
+register_cli_argument('network dns record update-soa', 'host', options_list=('--host', '-t'), help='Host name.')
+register_cli_argument('network dns record update-soa', 'email', options_list=('--email', '-e'), help='Email address.')
+register_cli_argument('network dns record update-soa', 'expire_time', options_list=('--expire-time', '-x'), help='Expire time (seconds).')
+register_cli_argument('network dns record update-soa', 'minimum_ttl', options_list=('--minimum-ttl', '-m'), help='Minimum TTL (time-to-live, seconds).')
+register_cli_argument('network dns record update-soa', 'refresh_time', options_list=('--refresh-time', '-f'), help='Refresh value (seconds).')
+register_cli_argument('network dns record update-soa', 'retry_time', options_list=('--retry-time', '-r'), help='Retry time (seconds).')
+register_cli_argument('network dns record update-soa', 'serial_number', options_list=('--serial-number', '-s'), help='Serial number.')
+register_cli_argument('network dns record srv', 'priority', options_list=('--priority', '-p'), help='Priority metric.')
+register_cli_argument('network dns record srv', 'weight', options_list=('--weight', '-w'), help='Weight metric.')
+register_cli_argument('network dns record srv', 'port', options_list=('--port', '-r'), help='Service port.')
+register_cli_argument('network dns record srv', 'target', options_list=('--target', '-t'), help='Target domain name.')
+register_cli_argument('network dns record txt', 'value', options_list=('--value', '-v'), nargs='+', help='Space separated list of text values which will be concatenated together.')
