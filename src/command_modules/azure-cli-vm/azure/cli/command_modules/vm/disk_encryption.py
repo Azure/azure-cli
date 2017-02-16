@@ -136,7 +136,7 @@ def enable(resource_group_name, vm_name,  # pylint: disable=too-many-arguments,t
         raise CLIError('Extension needed for disk encryption was not provisioned correctly')
     if not (extension_result.instance_view.statuses and
             extension_result.instance_view.statuses[0].message):
-        raise CLIError('Could not found url pointing to the secret from disk encryption')
+        raise CLIError('Could not found url pointing to the secret for disk encryption')
 
     status_url = extension_result.instance_view.statuses[0].message
 
@@ -170,13 +170,15 @@ def disable(resource_group_name, vm_name, volume_type=None, force=False):
     is_linux = _is_linux_vm(os_type)
     if is_linux:
         if volume_type:
-            if volume_type != _DATA_VOLUME_TYPE:
-                raise CLIError("Only data disk is supported to disable on Linux VM")
-            elif not force:
-                status = show_encryption_status(resource_group_name, vm_name)
-                if status['osDisk'] == _STATUS_ENCRYPTED:
-                    raise CLIError("VM's OS disk is encrypted. Disabling encryption on data "
-                                   "disk can still cause VM unbootable. Use '--force' to continue")
+            if not force:
+                if volume_type == _DATA_VOLUME_TYPE:
+                    status = show(resource_group_name, vm_name)
+                    if status['osDisk'] == _STATUS_ENCRYPTED:
+                        raise CLIError("VM's OS disk is encrypted. Disabling encryption on data "
+                                       "disk can still cause VM unbootable. Use '--force' "
+                                       "to continue")
+                else:
+                    raise CLIError("Only data disk is supported to disable on Linux VM")
         else:
             volume_type = _DATA_VOLUME_TYPE
     elif volume_type is None:
