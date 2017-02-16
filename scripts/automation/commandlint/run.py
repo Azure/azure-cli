@@ -58,20 +58,15 @@ def dump_no_help(modules):
 
     for cmd in helps:
         diction_help = yaml.load(helps[cmd])
-        if "short-summary" in diction_help:
-            if "type" in diction_help:
-                if diction_help["type"] == "command":
-                    if cmd in command_list:
-                        command_list.remove(cmd)
-                elif diction_help["type"] == "group":
-                    if cmd in subgroups_list:
-                        subgroups_list.remove(cmd)
+        if "short-summary" in diction_help and "type" in diction_help:
+            if diction_help["type"] == "command" and cmd in command_list:
+                command_list.remove(cmd)
+            elif diction_help["type"] == "group" and cmd in subgroups_list:
+                subgroups_list.remove(cmd)
         if "parameters" in diction_help:
-            # params = yaml.load(diction_help["parameters"])
             for param in diction_help["parameters"]:
-                if "short-summary" in param:
-                    if param["name"].split()[0] in parameters:
-                        parameters.pop(cmd, None)
+                if "short-summary" in param and param["name"].split()[0] in parameters:
+                    parameters.pop(cmd, None)
 
     data = {
         "subgroups" : subgroups_list,
