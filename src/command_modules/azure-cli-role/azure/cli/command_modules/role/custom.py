@@ -435,7 +435,8 @@ def _resolve_service_principal(client, identifier):
         raise CLIError("service principal '{}' doesn't exist".format(identifier))
 
 def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint:disable=too-many-arguments,too-many-statements,too-many-locals
-                                      scopes=None, role='Contributor', expanded_view=None, skip_assignment=False):
+                                      scopes=None, role='Contributor', expanded_view=None,
+                                      skip_assignment=False):
     '''create a service principal and configure its access to Azure resources
     :param str name: a display name or an app id uri. Command will generate one if missing.
     :param str password: the password used to login. If missing, command will generate one.

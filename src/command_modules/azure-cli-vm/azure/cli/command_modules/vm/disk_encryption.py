@@ -62,6 +62,8 @@ def enable(resource_group_name, vm_name,  # pylint: disable=too-many-arguments,t
     is_linux = _is_linux_vm(os_type)
     extension = extension_info[os_type]
 
+    # 1. First validate arguments
+
     if not aad_client_cert_thumbprint and not aad_client_secret:
         raise CLIError('Please provide either --aad-client-id or --aad-client-cert-thumbprint')
 
@@ -71,15 +73,18 @@ def enable(resource_group_name, vm_name,  # pylint: disable=too-many-arguments,t
         else:
             volume_type = 'OS'
 
+    # encryption is not supported on all linux distros, but service never tells you
+    # so let us verify at the client side
     if is_linux:
         image_reference = getattr(vm.storage_profile, 'image_reference', None)
         if image_reference:
             _check_encrypt_is_supported(image_reference, volume_type)
 
-    # TODO: support passphase for linux if there is ask
+    # sequence_version should be incremented if encryptions occurred before
     sequence_version = _get_sequence_version(compute_client, resource_group_name,
                                              vm_name, extension['name'])
 
+    # retrieve keyvault details
     keyvault_client = keyvault_mgmt_client_factory()
     if is_valid_resource_id(disk_encryption_keyvault):
         res = parse_resource_id(disk_encryption_keyvault)
@@ -89,6 +94,7 @@ def enable(resource_group_name, vm_name,  # pylint: disable=too-many-arguments,t
                                            get_detail=True)
     keyvault_url = keyvault_info.properties.vault_uri
 
+    # disk encryption key itself can be further protected, so let us verify
     if key_encryption_key_url and not key_encryption_keyvault_id:
         try:
             from urllib.parse import urlparse
@@ -100,6 +106,8 @@ def enable(resource_group_name, vm_name,  # pylint: disable=too-many-arguments,t
         key_encryption_keyvault_id = _look_for_keyvault(keyvault_client,
                                                         hostname.split('.')[0], get_detail=False).id
 
+    # 2. we are ready to provision/update the disk encryption extensions
+    # The following logic was mostly ported from xplat-cli
     public_config = {
         'AADClientID': aad_client_id,
         'AADClientCertThumbprint': aad_client_cert_thumbprint,
@@ -130,6 +138,7 @@ def enable(resource_group_name, vm_name,  # pylint: disable=too-many-arguments,t
         resource_group_name, vm_name, extension['name'], ext)
     poller.result()
 
+    # verify the extension was ok
     extension_result = compute_client.virtual_machine_extensions.get(
         resource_group_name, vm_name, extension['name'], 'instanceView')
     if extension_result.provisioning_state != 'Succeeded':
@@ -138,6 +147,7 @@ def enable(resource_group_name, vm_name,  # pylint: disable=too-many-arguments,t
             extension_result.instance_view.statuses[0].message):
         raise CLIError('Could not found url pointing to the secret for disk encryption')
 
+    # 3. update VM's storage profile with the secrets
     status_url = extension_result.instance_view.statuses[0].message
 
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
@@ -154,13 +164,12 @@ def enable(resource_group_name, vm_name,  # pylint: disable=too-many-arguments,t
                                                       enabled=True)
 
     vm.storage_profile.os_disk.encryption_settings = disk_encryption_settings
-    result = set_vm(vm)
+    set_vm(vm)
     if is_linux and volume_type != _DATA_VOLUME_TYPE:
         # TODO: expose a 'wait' command to do the monitor and handle the reboot
         logger.warning("The encryption request was accepted. Please use 'show' command to monitor "
                        "the progress. If you see 'VMRestartPending', please restart the VM, and "
                        "the encryption will finish shortly")
-    return result
 
 
 def disable(resource_group_name, vm_name, volume_type=None, force=False):
@@ -172,7 +181,7 @@ def disable(resource_group_name, vm_name, volume_type=None, force=False):
     # pylint: disable=no-member
     os_type = vm.storage_profile.os_disk.os_type.value
 
-    # be nice, figure out the default volume type
+    # 1. be nice, figure out the default volume type and also verify VM will not be busted
     is_linux = _is_linux_vm(os_type)
     if is_linux:
         if volume_type:
@@ -191,10 +200,13 @@ def disable(resource_group_name, vm_name, volume_type=None, force=False):
         if vm.storage_profile.data_disks:
             raise CLIError("VM has data disks, please specify --volume-type")
 
+    # sequence_version should be incremented since encryptions occurred before
     extension = extension_info[os_type]
     sequence_version = _get_sequence_version(compute_client, resource_group_name,
                                              vm_name, extension['name'])
 
+    # 2. update the disk encryption extension
+    # The following logic was mostly ported from xplat-cli
     public_config = {
         'VolumeType': volume_type,
         'EncryptionOperation': 'DisableEncryption',
@@ -217,6 +229,7 @@ def disable(resource_group_name, vm_name, volume_type=None, force=False):
                                                                         extension['name'], ext)
     poller.result()
 
+    # 3. Remove the secret from VM's storage profile
     extension_result = compute_client.virtual_machine_extensions.get(resource_group_name, vm_name,
                                                                      extension['name'],
                                                                      'instanceView')
@@ -226,7 +239,7 @@ def disable(resource_group_name, vm_name, volume_type=None, force=False):
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     disk_encryption_settings = DiskEncryptionSettings(enabled=False)
     vm.storage_profile.os_disk.encryption_settings = disk_encryption_settings
-    return set_vm(vm)
+    set_vm(vm)
 
 
 def show(resource_group_name, vm_name):
@@ -240,6 +253,7 @@ def show(resource_group_name, vm_name):
     compute_client = _compute_client_factory()
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     # pylint: disable=no-member
+    # The following logic was mostly ported from xplat-cli
     os_type = vm.storage_profile.os_disk.os_type.value
     is_linux = _is_linux_vm(os_type)
     encryption_status['osType'] = os_type
