@@ -1768,5 +1768,9 @@ def dict_matches_filter(d, filter_dict):
                for key in filter_dict)
 
 def lists_match(l1, l2):
-    return Counter(l1) == Counter(l2)
+    try:
+        return Counter(l1) == Counter(l2)
+    except TypeError:
+        return False
+
 #endregion
