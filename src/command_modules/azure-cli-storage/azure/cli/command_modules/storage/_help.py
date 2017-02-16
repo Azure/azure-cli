@@ -35,6 +35,11 @@ helps['storage account'] = """
     short-summary: Manage storage accounts.
 """
 
+helps['storage account update'] = """
+    type: command
+    short-summary: Update the properties of a storage account.
+"""
+
 helps['storage account keys'] = """
     type: group
     short-summary: Manage storage account keys.
