@@ -11,7 +11,8 @@ import mock
 from azure.cli.core._util import CLIError
 
 from azure.cli.command_modules.vm._validators import (validate_ssh_key,
-                                                      _is_valid_ssh_rsa_public_key)
+                                                      _is_valid_ssh_rsa_public_key,
+                                                      _figure_out_storage_source)
 
 
 class TestActions(unittest.TestCase):
@@ -57,3 +58,10 @@ class TestActions(unittest.TestCase):
         validate_ssh_key(args4)
         self.assertTrue(os.path.isfile(public_key_file4 + '.private'))
         self.assertTrue(os.path.isfile(public_key_file4))
+
+    def test_figure_out_storage_source(self):
+        test_data = 'https://av123images.blob.core.windows.net/images/TDAZBET.vhd'
+        src_blob_uri, src_disk, src_snapshot = _figure_out_storage_source('tg1', test_data)
+        self.assertFalse(src_disk)
+        self.assertFalse(src_snapshot)
+        self.assertEqual(src_blob_uri, test_data)
