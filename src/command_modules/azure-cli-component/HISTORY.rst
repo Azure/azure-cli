@@ -3,6 +3,12 @@
 Release History
 ===============
 
+0.1.1rc1 (2017-02-17)
++++++++++++++++++++++
+
+* 'component update' now checks additional component author on PyPI
+
+
 0.1.0rc2 (2017-01-30)
 +++++++++++++++++++++
 
