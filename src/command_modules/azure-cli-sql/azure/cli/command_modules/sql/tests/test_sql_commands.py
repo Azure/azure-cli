@@ -276,8 +276,9 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(SqlElasticPoolsMgmtScenarioTest, self).__init__(
             __file__, test_method, resource_group='cli-test-sql-mgmt')
-        self.sql_server_name = 'cliautomation08'
-        self.location = "westus"
+        self.sql_server_name = 'cliautomation09'
+        self.location_short_name = 'westus'
+        self.location_long_name = 'West US'
         self.admin_login = 'admin123'
         self.admin_password = 'SecretPassword123'
         self.database_name = "cliautomationdb02"
@@ -288,23 +289,26 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
 
     def body(self):
         rg = self.resource_group
-        loc = self.location
+        loc_short = self.location_short_name
+        loc_long = self.location_long_name
         user = self.admin_login
         password = self.admin_password
 
         # create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l {} '
                  '--admin-login {} --admin-password {}'
-                 .format(rg, self.sql_server_name, loc, user, password), checks=[
+                 .format(rg, self.sql_server_name, loc_short, user, password), checks=[
                      JMESPathCheck('name', self.sql_server_name),
                      JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('location', loc_long),
                      JMESPathCheck('administratorLogin', user)])
 
         # test sql elastic-pool commands
-        self.cmd('sql elastic-pool create -g {} --server-name {} -l {} --name {}'
-                 .format(rg, self.sql_server_name, loc, self.pool_name), checks=[
+        self.cmd('sql elastic-pool create -g {} --server-name {} --name {}'
+                 .format(rg, self.sql_server_name, self.pool_name), checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
+                     JMESPathCheck('location', loc_long),
                      JMESPathCheck('state', 'Ready')])
 
         self.cmd('sql elastic-pool show -g {} --server-name {} --name {}'

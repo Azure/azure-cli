@@ -9,6 +9,13 @@ from ._util import (
     get_sql_elasticpools_operations
 )
 
+# Determines server location
+def get_server_location(server_name, resource_group_name):
+    server_client = get_sql_servers_operation(None)
+    return server_client.get_by_resource_group(
+        server_name=server_name,
+        resource_group_name=resource_group_name).location
+
 # Creates a database. Wrapper function which uses the server location so that the user doesn't
 # need to specify location.
 def db_create(
@@ -19,16 +26,32 @@ def db_create(
     **kwargs):
 
     # Determine server location
-    server_client = get_sql_servers_operation(None)
-    kwargs['location'] = server_client.get_by_resource_group(
-        server_name=server_name,
-        resource_group_name=resource_group_name).location
+    kwargs['location'] = get_server_location(server_name=server_name, resource_group_name=resource_group_name)
 
     # Create
     return client.create_or_update(
         server_name=server_name,
         resource_group_name=resource_group_name,
         database_name=database_name,
+        parameters=kwargs)
+
+# Creates an elastic pool. Wrapper function which uses the server location so that the user doesn't
+# need to specify location.
+def elastic_pool_create(
+    client,
+    server_name,
+    resource_group_name,
+    elastic_pool_name,
+    **kwargs):
+
+    # Determine server location
+    kwargs['location'] = get_server_location(server_name=server_name, resource_group_name=resource_group_name)
+
+    # Create
+    return client.create_or_update(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        elastic_pool_name=elastic_pool_name,
         parameters=kwargs)
 
 # Lists databases in a server or elastic pool.

@@ -18,7 +18,7 @@ with ParametersContext(command='sql db') as c:
     c.register_alias('requested_service_objective_id', ('--service-objective-id',))
 
 with ParametersContext(command='sql db create') as c:
-    # We have wrapper function that determines server location so user doesn't need to.
+    # We have a wrapper function that determines server location so user doesn't need to specify it as param.
     # Also we have specific commands to special create modes, so they can be ignored
     # for regular db create.
     ignore_params = ['location'] + sql_db_special_create_mode_params
@@ -92,7 +92,10 @@ with ParametersContext(command='sql server create') as c:
         'administrator_login_password': patch_arg_make_required
     })
 
+with ParametersContext(command='sql elastic-pool') as c:
+    c.register_alias('server_name', ('--server-name', '-s'))
+
 with ParametersContext(command='sql elastic-pool create') as c:
     from azure.mgmt.sql.models.elastic_pool import ElasticPool
-
-    c.expand('parameters', ElasticPool)
+    # We have a wrapper function that determines server location so user doesn't need to specify it as param.
+    c.expand('parameters', ElasticPool, ignores=['location'])

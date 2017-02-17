@@ -80,7 +80,7 @@ elasticpools_ops = create_service_adapter('azure.mgmt.sql.operations.elastic_poo
 
 with ServiceGroup(__name__, get_sql_elasticpools_operations, elasticpools_ops) as s:
     with s.group('sql elastic-pool') as c:
-        c.command('create', 'create_or_update')
+        c.custom_command('create', 'elastic_pool_create')
         c.command('delete', 'delete')
         c.command('show', 'get')
         c.command('list', 'list_by_server')
