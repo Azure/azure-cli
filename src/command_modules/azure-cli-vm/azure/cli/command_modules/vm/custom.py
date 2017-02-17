@@ -348,15 +348,14 @@ def attach_managed_data_disk(resource_group_name, vm_name, disk,
     set_vm(vm)
 
 
-def detach_managed_data_disk(resource_group_name, vm_name, disk_name):
-    '''detach a managed disk'''
+def detach_data_disk(resource_group_name, vm_name, disk_name):
+    # here we handle both unmanaged or managed disk
     vm = get_vm(resource_group_name, vm_name)
     # pylint: disable=no-member
-    matched = [d for d in vm.storage_profile.data_disks if d.name.lower() == disk_name.lower()]
-    if not matched:
-        raise CLIError('disk to remove is not found')
-    for d in matched:
-        vm.storage_profile.data_disks.remove(d)
+    leftovers = [d for d in vm.storage_profile.data_disks if d.name.lower() != disk_name.lower()]
+    if len(vm.storage_profile.data_disks) == len(leftovers):
+        raise CLIError("No disk with the name '{}' was found".format(disk_name))
+    vm.storage_profile.data_disks = leftovers
     set_vm(vm)
 
 
@@ -384,10 +383,10 @@ def detach_disk_from_vmss(resource_group_name, vmss_name, lun):
                                                  vmss_name)
     # pylint: disable=no-member
     data_disks = vmss.virtual_machine_profile.storage_profile.data_disks
-    to_delete = [d for d in data_disks if d.lun == lun]
-    if not to_delete:
+    leftovers = [d for d in data_disks if d.lun != lun]
+    if len(data_disks) == len(leftovers):
         raise CLIError("Could not find the data disk with lun '{}'".format(lun))
-    data_disks.remove(to_delete[0])
+    vmss.virtual_machine_profile.storage_profile.data_disks = leftovers
     return client.virtual_machine_scale_sets.create_or_update(resource_group_name,
                                                               vmss_name, vmss)
 
@@ -537,21 +536,6 @@ def attach_unmanaged_data_disk(resource_group_name, vm_name, new=False, vhd_uri=
     if vm.storage_profile.data_disks is None:
         vm.storage_profile.data_disks = []
     vm.storage_profile.data_disks.append(disk)
-    return set_vm(vm)
-
-
-def detach_unmanaged_data_disk(resource_group_name, vm_name, disk_name):
-    ''' Detach a disk from a Virtual Machine '''
-    vm = get_vm(resource_group_name, vm_name)
-    # Issue: https://github.com/Azure/autorest/issues/934
-    vm.resources = None
-    try:
-        # pylint: disable=no-member
-        disk = next(d for d in vm.storage_profile.data_disks if
-                    d.name.lower() == disk_name.lower())
-        vm.storage_profile.data_disks.remove(disk)
-    except (StopIteration, AttributeError):
-        raise CLIError("No disk with the name '{}' found".format(disk_name))
     return set_vm(vm)
 
 
