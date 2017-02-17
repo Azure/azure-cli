@@ -4,18 +4,37 @@
 # --------------------------------------------------------------------------------------------
 
 from ._util import ParametersContext, patch_arg_make_required
-
+from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument
 
 with ParametersContext(command='sql db') as c:
     c.register_alias('database_name', ('--name', '-n'))
     c.register_alias('server_name', ('--server-name', '-s'))
 
 with ParametersContext(command='sql db create') as c:
+    from azure.mgmt.sql.models.database import Database
+    c.expand('parameters', Database)
+
     c.register_alias('requested_service_objective_name', ('--service-objective-name',))
     c.register_alias('requested_service_objective_id', ('--service-objective-id',))
-    # Alternative commands will be implemented for non-default create modes
+
+    # These parameters are applicable to non-default create modes, for which we will 
+    # implement alternative commands
     c.ignore('create_mode')
-    # Source database id is only used for non-default create modes
+    c.ignore('source_database_id')
+
+with ParametersContext(command='sql db update') as c:
+    from azure.mgmt.sql.models.database import Database
+    c.expand('parameters', Database)
+
+    c.register_alias('requested_service_objective_name', ('--service-objective-name',))
+    c.register_alias('requested_service_objective_id', ('--service-objective-id',))
+
+    # Location isn't required for update
+    c.ignore('location')
+
+    # These parameters are applicable to create only, not update
+    c.ignore('collation')
+    c.ignore('create_mode')
     c.ignore('source_database_id')
 
 ## Data Warehouse will not be included in the first batch of GA commands
@@ -76,11 +95,6 @@ with ParametersContext(command='sql server create') as c:
         'administrator_login': patch_arg_make_required,
         'administrator_login_password': patch_arg_make_required
     })
-
-with ParametersContext(command='sql db create') as c:
-    from azure.mgmt.sql.models.database import Database
-
-    c.expand('parameters', Database)
 
 with ParametersContext(command='sql elastic-pool create') as c:
     from azure.mgmt.sql.models.elastic_pool import ElasticPool
