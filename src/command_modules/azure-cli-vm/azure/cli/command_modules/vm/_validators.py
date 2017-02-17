@@ -586,15 +586,14 @@ def process_image_create_namespace(namespace):
 
 
 def _figure_out_storage_source(resource_group_name, source):
-    source = source.lower()
     source_blob_uri = None
     source_disk = None
     source_snapshot = None
     if source.lower().endswith('.vhd'):
         source_blob_uri = source
-    elif '/disks/' in source:
+    elif '/disks/' in source.lower():
         source_disk = source
-    elif '/snapshots/' in source:
+    elif '/snapshots/' in source.lower():
         source_snapshot = source
     else:
         compute_client = _compute_client_factory()
