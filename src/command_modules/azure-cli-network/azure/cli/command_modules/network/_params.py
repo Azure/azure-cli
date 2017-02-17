@@ -571,6 +571,7 @@ register_cli_argument('network dns record-set create', 'if_none_match', help='Cr
 for item in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
     register_cli_argument('network dns record-set {} add-record'.format(item), 'record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
     register_cli_argument('network dns record-set {} remove-record'.format(item), 'record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone.')
+    register_cli_argument('network dns record-set {} remove-record'.format(item), 'keep_empty_record_set', action='store_true', help='Keep the empty record set if the last record is removed.')
 register_cli_argument('network dns record-set cname set-record', 'record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
 
 register_cli_argument('network dns record-set soa', 'relative_record_set_name', ignore_type, default='@')
