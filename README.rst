@@ -53,7 +53,7 @@ On Linux, see our `prerequisites <https://github.com/Azure/azure-cli/blob/master
 
 .. code-block:: console
 
-   $ pip install --user azure-cli
+   $ pip install --user --upgrade azure-cli
 
 Update with ``$ az component update``
 
