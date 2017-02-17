@@ -9,13 +9,12 @@ from azure.cli.core.commands import register_cli_argument, register_extra_cli_ar
 with ParametersContext(command='sql db') as c:
     c.register_alias('database_name', ('--name', '-n'))
     c.register_alias('server_name', ('--server-name', '-s'))
+    c.register_alias('requested_service_objective_name', ('--service-objective-name',))
+    c.register_alias('requested_service_objective_id', ('--service-objective-id',))
 
 with ParametersContext(command='sql db create') as c:
     from azure.mgmt.sql.models.database import Database
     c.expand('parameters', Database)
-
-    c.register_alias('requested_service_objective_name', ('--service-objective-name',))
-    c.register_alias('requested_service_objective_id', ('--service-objective-id',))
 
     # These parameters are applicable to non-default create modes, for which we will 
     # implement alternative commands
@@ -25,9 +24,6 @@ with ParametersContext(command='sql db create') as c:
 with ParametersContext(command='sql db update') as c:
     from azure.mgmt.sql.models.database import Database
     c.expand('parameters', Database)
-
-    c.register_alias('requested_service_objective_name', ('--service-objective-name',))
-    c.register_alias('requested_service_objective_id', ('--service-objective-id',))
 
     # Location isn't required for update
     c.ignore('location')
