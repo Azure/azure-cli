@@ -471,6 +471,9 @@ for record in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
     helps['network dns record-set {} remove-record'.format(record)] = """
         type: command
         short-summary: Remove {} record from its record set.
+        long-summary: >
+            By default, if the last record in a set is removed, the record set is deleted. To
+            retain the empty record set, include --keep-empty-record-set.
     """.format(record.upper())
 
     helps['network dns record-set {} create'.format(record)] = """

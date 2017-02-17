@@ -49,8 +49,6 @@ DEPENDENCIES = [
     'applicationinsights',
     'argcomplete>=1.8.0',
     'azure-cli-nspkg',
-    'azure-mgmt-trafficmanager==0.30.0rc6',
-    'azure-mgmt-dns==1.0.0',
     'colorama',
     'jmespath',
     'msrest>=0.4.4',
