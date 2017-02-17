@@ -1031,6 +1031,48 @@ class VMCreateCustomIP(ResourceGroupVCRTestBase):
                  checks=JMESPathCheck('ipConfigurations[0].privateIpAllocationMethod', 'Static'))
 
 
+class VMDiskAttachDetachTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(VMDiskAttachDetachTest, self).__init__(__file__, test_method, resource_group='cli-test-disk')
+        self.location = 'westus'
+        self.vm_name = 'vm-diskattach-test'
+
+    def test_vm_disk_attach_detach(self):
+        self.execute()
+
+    def set_up(self):
+        super(VMDiskAttachDetachTest, self).set_up()
+        self.cmd('vm create -g {} --location {} -n {} --admin-username admin123 '
+                 '--image centos --admin-password testPassword0 '
+                 '--authentication-type password'.format(
+                     self.resource_group, self.location, self.vm_name))
+
+    def body(self):
+        disk_name = 'd1'
+        disk_name2 = 'd2'
+        self.cmd('vm disk attach -g {} --vm-name {} --disk {} --new --size-gb 1'.format(
+            self.resource_group, self.vm_name, disk_name))
+        self.cmd('vm disk attach -g {} --vm-name {} --disk {} --new --size-gb 2 --lun 2'.format(
+            self.resource_group, self.vm_name, disk_name2))
+        self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name), checks=[
+            JMESPathCheck('length(storageProfile.dataDisks)', 2),
+            JMESPathCheck('storageProfile.dataDisks[0].name', disk_name),
+            JMESPathCheck('storageProfile.dataDisks[1].name', disk_name2),
+            JMESPathCheck('storageProfile.dataDisks[1].lun', 2),
+        ])
+        self.cmd('vm disk detach -g {} --vm-name {} -n {}'.format(
+            self.resource_group, self.vm_name, disk_name2))
+        self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name), checks=[
+            JMESPathCheck('length(storageProfile.dataDisks)', 1),
+            JMESPathCheck('storageProfile.dataDisks[0].name', disk_name),
+        ])
+        self.cmd('vm disk detach -g {} --vm-name {} -n {}'.format(
+            self.resource_group, self.vm_name, disk_name))
+        self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name), checks=[
+            JMESPathCheck('length(storageProfile.dataDisks)', 0),
+        ])
+
+
 class VMUnmanagedDataDiskTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):

@@ -160,13 +160,13 @@ cli_command(__name__, 'vmss diagnostics set', custom_path.format('set_vmss_diagn
 cli_command(__name__, 'vmss diagnostics get-default-config', custom_path.format('show_default_diagnostics_configuration'))
 
 cli_command(__name__, 'vm disk attach', custom_path.format('attach_managed_data_disk'))
-cli_command(__name__, 'vm disk detach', custom_path.format('detach_managed_data_disk'))
+cli_command(__name__, 'vm disk detach', custom_path.format('detach_data_disk'))
 
 cli_command(__name__, 'vmss disk attach', custom_path.format('attach_managed_data_disk_to_vmss'))
 cli_command(__name__, 'vmss disk detach', custom_path.format('detach_disk_from_vmss'))
 
 cli_command(__name__, 'vm unmanaged-disk attach', custom_path.format('attach_unmanaged_data_disk'))
-cli_command(__name__, 'vm unmanaged-disk detach', custom_path.format('detach_unmanaged_data_disk'))
+cli_command(__name__, 'vm unmanaged-disk detach', custom_path.format('detach_data_disk'))
 cli_command(__name__, 'vm unmanaged-disk list', custom_path.format('list_unmanaged_disks'))
 
 # VM Extension

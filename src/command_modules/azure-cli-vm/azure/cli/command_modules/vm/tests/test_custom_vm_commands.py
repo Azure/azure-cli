@@ -13,7 +13,7 @@ from azure.cli.command_modules.vm.custom import (_get_access_extension_upgrade_i
                                                  _LINUX_ACCESS_EXT,
                                                  _WINDOWS_ACCESS_EXT)
 from azure.cli.command_modules.vm.custom import \
-    (attach_unmanaged_data_disk, detach_unmanaged_data_disk)
+    (attach_unmanaged_data_disk, detach_data_disk)
 from azure.cli.command_modules.vm.disk_encryption import enable, disable
 from azure.mgmt.compute.models import (NetworkProfile, StorageProfile, DataDisk, OSDisk,
                                        OperatingSystemTypes, InstanceViewStatus,
@@ -188,7 +188,7 @@ class Test_Vm_Custom(unittest.TestCase):
         mock_vm_get.return_value = vm
 
         # execute
-        detach_unmanaged_data_disk('rg1', 'vm1', 'd1')
+        detach_data_disk('rg1', 'vm1', 'd1')
 
         # assert
         self.assertTrue(mock_vm_get.called)
