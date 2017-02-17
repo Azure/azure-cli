@@ -13,7 +13,10 @@ import os.path
 from azure.cli.core.azlogging import get_az_logger
 from azure.cli.core._util import CLIError
 from azure.common import AzureException, AzureHttpError
-from .util import filter_none, create_blob_service_from_storage_client, collect_blobs, collect_files
+from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_files,
+                                                    create_blob_service_from_storage_client,
+                                                    create_short_lived_container_sas,
+                                                    create_short_lived_share_sas)
 
 
 def storage_file_upload_batch(client, destination, source, pattern=None, dryrun=False,
@@ -128,11 +131,18 @@ def storage_file_copy_batch(client, source_client,
         # repeatedly create existing directory so as to optimize the performance.
         existing_dirs = set([])
 
+        if not source_sas and client.account_name != source_client.account_name:
+            # when blob is copied across storage account without sas, generate a short lived
+            # sas for it
+            source_sas = create_short_lived_container_sas(source_client.account_name,
+                                                          source_client.account_key,
+                                                          source_container)
+
         def action_blob_copy(blob_name):
             if dryrun:
                 logger.warning('  - copy blob %s', blob_name)
             else:
-                _create_file_and_directory_from_blob(
+                return _create_file_and_directory_from_blob(
                     client, source_client, destination_share, source_container, source_sas,
                     blob_name, destination_dir=destination_path, metadata=metadata, timeout=timeout,
                     existing_dirs=existing_dirs)
@@ -151,12 +161,19 @@ def storage_file_copy_batch(client, source_client,
         # repeatedly create existing directory so as to optimize the performance.
         existing_dirs = set([])
 
+        if not source_sas and client.account_name != source_client.account_name:
+            # when file is copied across storage account without sas, generate a short lived
+            # sas for it
+            source_sas = create_short_lived_share_sas(source_client.account_name,
+                                                      source_client.account_key,
+                                                      source_share)
+
         def action_file_copy(file_info):
             dir_name, file_name = file_info
             if dryrun:
                 logger.warning('  - copy file %s', os.path.join(dir_name, file_name))
             else:
-                _create_file_and_directory_from_file(
+                return _create_file_and_directory_from_file(
                     client, source_client, destination_share, source_share, source_sas, dir_name,
                     file_name, destination_dir=destination_path, metadata=metadata,
                     timeout=timeout, existing_dirs=existing_dirs)
