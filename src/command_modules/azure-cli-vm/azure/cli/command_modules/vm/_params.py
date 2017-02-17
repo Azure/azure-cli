@@ -70,6 +70,7 @@ register_cli_argument('vm disk', 'vm_name', options_list=('--vm-name',), id_part
                       completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'))
 register_cli_argument('vm disk', 'disk', validator=validate_vm_disk, help='disk name or id',
                       completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
+register_cli_argument('vm disk detach', 'disk_name', options_list=('--name', '-n'), help='The data disk name.')
 register_cli_argument('vm disk', 'new', action="store_true", help='create a new disk')
 register_cli_argument('vm disk', 'sku', arg_type=disk_sku)
 register_cli_argument('vm disk', 'size_gb', options_list=('--size-gb', '-z'), help='size in GB.')
