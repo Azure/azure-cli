@@ -15,16 +15,17 @@ class SqlServerMgmtScenarioTest(ResourceGroupVCRTestBase):
         self.sql_server_names = ['cliautomation01', 'cliautomation02']
         self.location = "westus"
         self.admin_login = 'admin123'
-        self.admin_password = 'SecretPassword123'
+        self.admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
-    def test_sql_mgmt(self):
+    def test_sql_server_mgmt(self):
         self.execute()
 
     def body(self):
         rg = self.resource_group
         loc = self.location
         user = self.admin_login
-        password = self.admin_password
+        password = self.admin_passwords[0]
+        password_updated = self.admin_passwords[1]
 
         # test create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l {} '
@@ -36,6 +37,13 @@ class SqlServerMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # test list sql server should be 1
         self.cmd('sql server list -g {}'.format(rg), checks=[JMESPathCheck('length(@)', 1)])
+
+        # test update sql server
+        self.cmd('sql server update -g {} --name {} --admin-password {}'
+                 .format(rg, self.sql_server_names[0], password_updated), checks=[
+                     JMESPathCheck('name', self.sql_server_names[0]),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('administratorLogin', user)])
 
         # test create another sql server
         self.cmd('sql server create -g {} --name {} -l {} '

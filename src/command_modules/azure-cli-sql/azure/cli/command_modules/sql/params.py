@@ -69,7 +69,6 @@ with ParametersContext(command='sql server') as c:
     c.register_alias('server_name', ('--name', '-n'))
     c.register_alias('administrator_login', ('--admin-login', '-u'))
     c.register_alias('administrator_login_password', ('--admin-password', '-p'))
-    c.register_alias('version', ('--version-TODO-REMOVE-ME',))
 
 with ParametersContext(command='sql server firewall') as c:
     c.register_alias('server_name', ('--server-name', '-s'))
@@ -82,15 +81,26 @@ with ParametersContext(command='sql server service-objective') as c:
 with ParametersContext(command='sql server create') as c:
     from azure.mgmt.sql.models.server import Server
 
+    # 12.0 is the only server version allowed and it's already the default.
+    ignore_params = ['version']
+
     # About the patches:
     #
     # - Both administrator_login and administrator_login_password are required for server creation.
     # However these two parameters are given default value in the create_or_update function
     # signature, therefore, they can't be automatically converted to requirement arguments.
-    c.expand('parameters', Server, group_name='Authentication', patches={
+    c.expand('parameters', Server, group_name='Authentication', ignores=ignore_params, patches={
         'administrator_login': patch_arg_make_required,
         'administrator_login_password': patch_arg_make_required
     })
+
+with ParametersContext(command='sql server update') as c:
+    # location and administrator_login cannot be updated.
+    # 12.0 is the only server version allowed and it's already the default.
+    ignore_params = ['location', 'administrator_login', 'version']
+
+    from azure.mgmt.sql.models.server import Server
+    c.expand('parameters', Server, ignores=ignore_params)
 
 with ParametersContext(command='sql elastic-pool') as c:
     c.register_alias('server_name', ('--server-name', '-s'))
