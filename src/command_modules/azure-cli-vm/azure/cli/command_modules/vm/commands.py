@@ -109,7 +109,7 @@ cli_generic_wait_command(__name__, 'vm wait', 'azure.cli.command_modules.vm.cust
 cli_command(__name__, 'vm convert', mgmt_path.format(op_var, op_class, 'convert_to_managed_disks'), cf_vm)
 cli_command(__name__, 'vm encryption enable', 'azure.cli.command_modules.vm.disk_encryption#enable')
 cli_command(__name__, 'vm encryption disable', 'azure.cli.command_modules.vm.disk_encryption#disable')
-cli_command(__name__, 'vm encryption show', 'azure.cli.command_modules.vm.disk_encryption#show')
+cli_command(__name__, 'vm encryption show', 'azure.cli.command_modules.vm.disk_encryption#show', exception_handler=empty_on_404)
 
 # VM NIC
 cli_command(__name__, 'vm nic add', custom_path.format('vm_add_nics'))
