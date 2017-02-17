@@ -1632,7 +1632,7 @@ def add_dns_ptr_record(resource_group_name, zone_name, record_set_name, dname):
     record_type = 'ptr'
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
-def update_dns_soa_record(resource_group_name, zone_name, email=None,
+def update_dns_soa_record(resource_group_name, zone_name, host=None, email=None,
                           serial_number=None, refresh_time=None, retry_time=None, expire_time=None,
                           minimum_ttl=None):
     record_set_name = '@'
@@ -1642,6 +1642,7 @@ def update_dns_soa_record(resource_group_name, zone_name, email=None,
     record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     record = record_set.soa_record
 
+    record.host = host or record.host
     record.email = email or record.email
     record.serial_number = serial_number or record.serial_number
     record.refresh_time = refresh_time or record.refresh_time
@@ -1661,6 +1662,17 @@ def add_dns_srv_record(resource_group_name, zone_name, record_set_name, priority
 def add_dns_txt_record(resource_group_name, zone_name, record_set_name, value):
     record = TxtRecord(value)
     record_type = 'txt'
+    long_text = ''.join(x for x in record.value)
+    long_text = long_text.replace('\\', '')
+    original_len = len(long_text)
+    record.value = []
+    while len(long_text) > 255:
+        record.value.append(long_text[:255])
+        long_text = long_text[255:]
+    record.value.append(long_text)
+    final_str = ''.join(record.value)
+    final_len = len(final_str)
+    assert original_len == final_len
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
 def remove_dns_aaaa_record(resource_group_name, zone_name, record_set_name, ipv6_address):
@@ -1767,5 +1779,9 @@ def dict_matches_filter(d, filter_dict):
                for key in filter_dict)
 
 def lists_match(l1, l2):
-    return Counter(l1) == Counter(l2)
+    try:
+        return Counter(l1) == Counter(l2)
+    except TypeError:
+        return False
+
 #endregion

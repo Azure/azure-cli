@@ -25,7 +25,10 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    'azure-mgmt-authorization==0.30.0rc6',
     'azure-mgmt-compute==0.33.0',
+    'azure-graphrbac==0.30.0rc6',
+    'azure-cli-core',
     'paramiko',
     'pyyaml',
     'six',
@@ -55,6 +58,10 @@ setup(
     ],
     packages=[
         'azure.cli.command_modules.acs',
+        'azure.cli.command_modules.acs.mgmt_acs',
+        'azure.cli.command_modules.acs.mgmt_acs.lib',
+        'azure.cli.command_modules.acs.mgmt_acs.lib.models',
+        'azure.cli.command_modules.acs.mgmt_acs.lib.operations',
     ],
     install_requires=DEPENDENCIES,
 )

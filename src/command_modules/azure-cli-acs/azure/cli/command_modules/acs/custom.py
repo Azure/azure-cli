@@ -9,33 +9,44 @@ import errno
 import json
 import os
 import os.path
+import uuid
+import datetime
 import platform
 import random
 import stat
 import string
 import subprocess
 import sys
-from six.moves.urllib.request import (urlretrieve, urlopen)  # pylint: disable=import-error
-from six.moves.urllib.error import URLError  # pylint: disable=import-error
 import threading
 import time
 import webbrowser
 import yaml
+import dateutil.parser
+from dateutil.relativedelta import relativedelta
+from six.moves.urllib.request import (urlretrieve, urlopen)  # pylint: disable=import-error
+from six.moves.urllib.error import URLError  # pylint: disable=import-error
 
 from msrestazure.azure_exceptions import CloudError
 
 import azure.cli.core.azlogging as azlogging
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.vm._validators import _is_valid_ssh_rsa_public_key
-from azure.cli.command_modules.vm.mgmt_acs.lib import \
+from azure.cli.command_modules.acs.mgmt_acs.lib import \
     AcsCreationClient as ACSClient
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,line-too-long
 from azure.cli.core._util import CLIError
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core._environment import get_config_dir
 from azure.mgmt.compute import ComputeManagementClient
 from azure.mgmt.compute.models import ContainerServiceOchestratorTypes
-from azure.cli.core._environment import get_config_dir
+from azure.graphrbac.models import (ApplicationCreateParameters,
+                                    PasswordCredential,
+                                    KeyCredential,
+                                    ServicePrincipalCreateParameters,
+                                    GetObjectsParameters)
+from azure.mgmt.authorization.models import RoleAssignmentProperties
+from ._client_factory import (_auth_client_factory, _graph_client_factory)
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -281,9 +292,6 @@ def k8s_install_cli(client_version="1.5.1", install_location=None):
 
 
 def _validate_service_principal(client, sp_id):
-    from azure.cli.command_modules.role.custom import (
-        show_service_principal,
-    )
     # discard the result, we're trusting this to throw if it can't find something
     try:
         show_service_principal(client.service_principals, sp_id)
@@ -293,11 +301,6 @@ def _validate_service_principal(client, sp_id):
 
 
 def _build_service_principal(client, name, url, client_secret):
-    from azure.cli.command_modules.role.custom import (
-        create_application,
-        create_service_principal,
-    )
-
     sys.stdout.write('creating service principal')
     result = create_application(client.applications, name, url, [url], password=client_secret)
     service_principal = result.app_id  # pylint: disable=no-member
@@ -318,7 +321,6 @@ def _add_role_assignment(role, service_principal, delay=2, output=True):
     if output:
         sys.stdout.write('waiting for AAD role to propagate.')
     for x in range(0, 10):
-        from azure.cli.command_modules.role.custom import create_role_assignment
         try:
             # TODO: break this out into a shared utility library
             create_role_assignment(role, service_principal)
@@ -421,7 +423,6 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     groups.get(resource_group_name)
 
     if orchestrator_type == 'Kubernetes' or orchestrator_type == 'kubernetes':
-        from azure.cli.command_modules.role.custom import _graph_client_factory
         # TODO: This really needs to be broken out and unit tested.
         client = _graph_client_factory()
         if not service_principal:
@@ -690,3 +691,181 @@ def _mkdir_p(path):
             pass
         else:
             raise
+
+
+def update_acs(client, resource_group_name, container_service_name, new_agent_count):
+    instance = client.get(resource_group_name, container_service_name)
+    instance.agent_pool_profiles[0].count = new_agent_count  # pylint: disable=no-member
+    return client.create_or_update(resource_group_name, container_service_name, instance)
+
+
+def list_container_services(client, resource_group_name=None):
+    ''' List Container Services. '''
+    svc_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
+        if resource_group_name else client.list()
+    return list(svc_list)
+
+
+def show_service_principal(client, identifier):
+    object_id = _resolve_service_principal(client, identifier)
+    return client.get(object_id)
+
+
+def _resolve_service_principal(client, identifier):
+    # todo: confirm with graph team that a service principal name must be unique
+    result = list(client.list(filter="servicePrincipalNames/any(c:c eq '{}')".format(identifier)))
+    if result:
+        return result[0].object_id
+    try:
+        uuid.UUID(identifier)
+        return identifier  # assume an object id
+    except ValueError:
+        raise CLIError("service principal '{}' doesn't exist".format(identifier))
+
+
+def create_application(client, display_name, homepage, identifier_uris,  # pylint: disable=too-many-arguments
+                       available_to_other_tenants=False, password=None, reply_urls=None,
+                       key_value=None, key_type=None, key_usage=None, start_date=None,
+                       end_date=None):
+    password_creds, key_creds = _build_application_creds(password, key_value, key_type,
+                                                         key_usage, start_date, end_date)
+
+    app_create_param = ApplicationCreateParameters(available_to_other_tenants,
+                                                   display_name,
+                                                   identifier_uris,
+                                                   homepage=homepage,
+                                                   reply_urls=reply_urls,
+                                                   key_credentials=key_creds,
+                                                   password_credentials=password_creds)
+    return client.create(app_create_param)
+
+
+def _build_application_creds(password=None, key_value=None, key_type=None,  # pylint: disable=too-many-arguments
+                             key_usage=None, start_date=None, end_date=None):
+    if password and key_value:
+        raise CLIError('specify either --password or --key-value, but not both.')
+
+    if not start_date:
+        start_date = datetime.datetime.utcnow()
+    elif isinstance(start_date, str):
+        start_date = dateutil.parser.parse(start_date)
+
+    if not end_date:
+        end_date = start_date + relativedelta(years=1)
+    elif isinstance(end_date, str):
+        end_date = dateutil.parser.parse(end_date)  # pylint: disable=redefined-variable-type
+
+    key_type = key_type or 'AsymmetricX509Cert'
+    key_usage = key_usage or 'Verify'
+
+    password_creds = None
+    key_creds = None
+    if password:
+        password_creds = [PasswordCredential(start_date, end_date, str(uuid.uuid4()), password)]
+    elif key_value:
+        key_creds = [KeyCredential(start_date, end_date, key_value, str(uuid.uuid4()),
+                                   key_usage, key_type)]
+
+    return (password_creds, key_creds)
+
+
+def create_service_principal(identifier):
+    return _create_service_principal(identifier)
+
+
+def _create_service_principal(identifier, resolve_app=True):
+    client = _graph_client_factory()
+
+    if resolve_app:
+        try:
+            uuid.UUID(identifier)
+            result = list(client.applications.list(filter="appId eq '{}'".format(identifier)))
+        except ValueError:
+            result = list(client.applications.list(
+                filter="identifierUris/any(s:s eq '{}')".format(identifier)))
+
+        if not result:  # assume we get an object id
+            result = [client.applications.get(identifier)]
+        app_id = result[0].app_id
+    else:
+        app_id = identifier
+
+    return client.service_principals.create(ServicePrincipalCreateParameters(app_id, True))
+
+
+def create_role_assignment(role, assignee, resource_group_name=None, scope=None):
+    return _create_role_assignment(role, assignee, resource_group_name, scope)
+
+
+def _create_role_assignment(role, assignee, resource_group_name=None, scope=None,  # pylint: disable=too-many-arguments
+                            resolve_assignee=True):
+    factory = _auth_client_factory(scope)
+    assignments_client = factory.role_assignments
+    definitions_client = factory.role_definitions
+
+    scope = _build_role_scope(resource_group_name, scope,
+                              assignments_client.config.subscription_id)
+
+    role_id = _resolve_role_id(role, scope, definitions_client)
+    object_id = _resolve_object_id(assignee) if resolve_assignee else assignee
+    properties = RoleAssignmentProperties(role_id, object_id)
+    assignment_name = uuid.uuid4()
+    custom_headers = None
+    return assignments_client.create(scope, assignment_name, properties,
+                                     custom_headers=custom_headers)
+
+
+def _build_role_scope(resource_group_name, scope, subscription_id):
+    subscription_scope = '/subscriptions/' + subscription_id
+    if scope:
+        if resource_group_name:
+            err = 'Resource group "{}" is redundant because scope is supplied'
+            raise CLIError(err.format(resource_group_name))
+    elif resource_group_name:
+        scope = subscription_scope + '/resourceGroups/' + resource_group_name
+    else:
+        scope = subscription_scope
+    return scope
+
+
+def _resolve_role_id(role, scope, definitions_client):
+    role_id = None
+    try:
+        uuid.UUID(role)
+        role_id = role
+    except ValueError:
+        pass
+    if not role_id:  # retrieve role id
+        role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
+        if not role_defs:
+            raise CLIError("Role '{}' doesn't exist.".format(role))
+        elif len(role_defs) > 1:
+            ids = [r.id for r in role_defs]
+            err = "More than one role matches the given name '{}'. Please pick a value from '{}'"
+            raise CLIError(err.format(role, ids))
+        role_id = role_defs[0].id
+    return role_id
+
+
+def _resolve_object_id(assignee):
+    client = _graph_client_factory()
+    result = None
+    if assignee.find('@') >= 0:  # looks like a user principal name
+        result = list(client.users.list(filter="userPrincipalName eq '{}'".format(assignee)))
+    if not result:
+        result = list(client.service_principals.list(
+            filter="servicePrincipalNames/any(c:c eq '{}')".format(assignee)))
+    if not result:  # assume an object id, let us verify it
+        result = _get_object_stubs(client, [assignee])
+
+    # 2+ matches should never happen, so we only check 'no match' here
+    if not result:
+        raise CLIError("No matches in graph database for '{}'".format(assignee))
+
+    return result[0].object_id
+
+
+def _get_object_stubs(graph_client, assignees):
+    params = GetObjectsParameters(include_directory_object_references=True,
+                                  object_ids=assignees)
+    return list(graph_client.objects.get_objects_by_object_ids(params))

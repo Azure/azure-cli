@@ -322,36 +322,6 @@ helps[boot_diagnostics_log] = """
 """.format(name_group_example.format('Disable boot diagnostics', boot_diagnostics_log),
            vm_ids_example.format('Disable boot diagnostics by VM Ids', boot_diagnostics_log))
 
-helps['acs'] = """
-    type: group
-    short-summary: Commands to manage Azure container services
-"""
-
-helps['acs create'] = """
-    type: command
-    short-summary: Create a container service with your preferred orchestrator
-"""
-
-helps['acs delete'] = """
-    type: command
-    short-summary: delete a container service
-"""
-
-helps['acs list'] = """
-    type: command
-    short-summary: list container services
-"""
-
-helps['acs show'] = """
-    type: command
-    short-summary: show a container service
-"""
-
-helps['acs scale'] = """
-    type: command
-    short-summary: change private agent count of a container service.
-"""
-
 helps['vm diagnostics'] = """
     type: group
     short-summary: Configure the Azure VM diagnostics extension

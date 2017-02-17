@@ -323,14 +323,16 @@ def update_managed_disk(instance, size_gb=None, sku=None):
 
 
 def attach_managed_data_disk(resource_group_name, vm_name, disk,
-                             new=False, sku=None, size_gb=None):
+                             new=False, sku=None, size_gb=None, lun=None):
     '''attach a managed disk'''
     vm = get_vm(resource_group_name, vm_name)
     from azure.mgmt.compute.models import (CreationData, DiskCreateOptionTypes,
                                            ManagedDiskParameters, DataDisk)
     # pylint: disable=no-member
-    luns = [d.lun for d in vm.storage_profile.data_disks] if vm.storage_profile.data_disks else []
-    lun = max(luns) + 1 if luns else 0
+    if lun is None:
+        luns = ([d.lun for d in vm.storage_profile.data_disks]
+                if vm.storage_profile.data_disks else [])
+        lun = max(luns) + 1 if luns else 0
     if new:
         if not size_gb:
             raise CLIError('usage error: --size-gb required to create an empty disk for attach')
@@ -1427,21 +1429,6 @@ def convert_av_set_to_managed_disk(resource_group_name, availability_set_name):
                             parameters=av_set)
 
 
-def update_acs(resource_group_name, container_service_name, new_agent_count):
-    client = _compute_client_factory()
-    instance = client.container_services.get(resource_group_name, container_service_name)
-    instance.agent_pool_profiles[0].count = new_agent_count
-    return client.container_services.create_or_update(resource_group_name,
-                                                      container_service_name, instance)
-
-
-def list_container_services(client, resource_group_name=None):
-    ''' List Container Services. '''
-    svc_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
-        if resource_group_name else client.list()
-    return list(svc_list)
-
-
 # pylint: disable=too-many-locals, unused-argument, too-many-statements
 def create_vm(vm_name, resource_group_name, image=None,
               size='Standard_DS1', location=None, tags=None, no_wait=False,
@@ -1736,8 +1723,9 @@ def create_vmss(vmss_name, resource_group_name, image,
     return client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
 
 
-def create_av_set(availability_set_name, resource_group_name, location=None, no_wait=False,
-                  platform_update_domain_count=5, platform_fault_domain_count=5,
+def create_av_set(availability_set_name, resource_group_name,
+                  platform_update_domain_count, platform_fault_domain_count,
+                  location=None, no_wait=False,
                   unmanaged=False, tags=None, validate=False):
     from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink

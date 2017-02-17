@@ -398,44 +398,41 @@ cli_generic_update_command(__name__, 'network traffic-manager endpoint update',
                            custom_function_op=custom_path.format('update_traffic_manager_endpoint'))
 
 # DNS ZonesOperations
-cli_command(__name__, 'network dns zone show', 'azure.mgmt.dns.operations.zones_operations#ZonesOperations.get', cf_dns_mgmt_zones, table_transformer=transform_dns_zone_table_output)
-cli_command(__name__, 'network dns zone delete', 'azure.mgmt.dns.operations.zones_operations#ZonesOperations.delete', cf_dns_mgmt_zones, confirmation=True)
+dns_zone_path = 'azure.mgmt.dns.operations.zones_operations#ZonesOperations.'
+cli_command(__name__, 'network dns zone show', dns_zone_path + 'get', cf_dns_mgmt_zones, table_transformer=transform_dns_zone_table_output)
+cli_command(__name__, 'network dns zone delete', dns_zone_path + 'delete', cf_dns_mgmt_zones, confirmation=True)
 cli_command(__name__, 'network dns zone list', custom_path.format('list_dns_zones'), table_transformer=transform_dns_zone_table_output)
 cli_generic_update_command(__name__, 'network dns zone update',
-                           'azure.mgmt.dns.operations.zones_operations#ZonesOperations.get',
-                           'azure.mgmt.dns.operations.zones_operations#ZonesOperations.create_or_update',
+                           dns_zone_path + 'get',
+                           dns_zone_path + 'create_or_update',
                            cf_dns_mgmt_zones)
 cli_command(__name__, 'network dns zone import', custom_path.format('import_zone'))
 cli_command(__name__, 'network dns zone export', custom_path.format('export_zone'))
 cli_command(__name__, 'network dns zone create', custom_path.format('create_dns_zone'), cf_dns_mgmt_zones)
 
 # DNS RecordSetsOperations
-cli_command(__name__, 'network dns record-set show', 'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.get', cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output)
-cli_command(__name__, 'network dns record-set delete', 'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.delete', cf_dns_mgmt_record_sets)
-cli_command(__name__, 'network dns record-set list', custom_path.format('list_dns_record_set'), cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output, table_transformer=transform_dns_record_set_table_output)
-cli_command(__name__, 'network dns record-set create', custom_path.format('create_dns_record_set'), transform=transform_dns_record_set_output)
-cli_generic_update_command(__name__, 'network dns record-set update',
-                           'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.get',
-                           'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.create_or_update',
-                           cf_dns_mgmt_record_sets,
-                           custom_function_op=custom_path.format('update_dns_record_set'),
-                           transform=transform_dns_record_set_output)
+dns_record_set_path = 'azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.'
+cli_command(__name__, 'network dns record-set list', custom_path.format('list_dns_record_set'), cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output)
+for record in ['a', 'aaaa', 'mx', 'ns', 'ptr', 'srv', 'txt']:
+    cli_command(__name__, 'network dns record-set {} show'.format(record), dns_record_set_path + 'get', cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output)
+    cli_command(__name__, 'network dns record-set {} delete'.format(record), dns_record_set_path + 'delete', cf_dns_mgmt_record_sets)
+    cli_command(__name__, 'network dns record-set {} list'.format(record), custom_path.format('list_dns_record_set'), cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output, table_transformer=transform_dns_record_set_table_output)
+    cli_command(__name__, 'network dns record-set {} create'.format(record), custom_path.format('create_dns_record_set'), transform=transform_dns_record_set_output)
+    cli_command(__name__, 'network dns record-set {} add-record'.format(record), custom_path.format('add_dns_{}_record'.format(record)), transform=transform_dns_record_set_output)
+    cli_command(__name__, 'network dns record-set {} remove-record'.format(record), custom_path.format('remove_dns_{}_record'.format(record)), transform=transform_dns_record_set_output)
+    cli_generic_update_command(__name__, 'network dns record-set {} update'.format(record),
+                               dns_record_set_path + 'get',
+                               dns_record_set_path + 'create_or_update',
+                               cf_dns_mgmt_record_sets,
+                               custom_function_op=custom_path.format('update_dns_record_set'),
+                               transform=transform_dns_record_set_output)
 
-# DNS RecordOperations
-cli_command(__name__, 'network dns record aaaa add', custom_path.format('add_dns_aaaa_record'))
-cli_command(__name__, 'network dns record a add', custom_path.format('add_dns_a_record'))
-cli_command(__name__, 'network dns record cname add', custom_path.format('add_dns_cname_record'))
-cli_command(__name__, 'network dns record ns add', custom_path.format('add_dns_ns_record'))
-cli_command(__name__, 'network dns record mx add', custom_path.format('add_dns_mx_record'))
-cli_command(__name__, 'network dns record ptr add', custom_path.format('add_dns_ptr_record'))
-cli_command(__name__, 'network dns record srv add', custom_path.format('add_dns_srv_record'))
-cli_command(__name__, 'network dns record txt add', custom_path.format('add_dns_txt_record'))
-cli_command(__name__, 'network dns record update-soa', custom_path.format('update_dns_soa_record'))
-cli_command(__name__, 'network dns record aaaa remove', custom_path.format('remove_dns_aaaa_record'))
-cli_command(__name__, 'network dns record a remove', custom_path.format('remove_dns_a_record'))
-cli_command(__name__, 'network dns record cname remove', custom_path.format('remove_dns_cname_record'))
-cli_command(__name__, 'network dns record ns remove', custom_path.format('remove_dns_ns_record'))
-cli_command(__name__, 'network dns record mx remove', custom_path.format('remove_dns_mx_record'))
-cli_command(__name__, 'network dns record ptr remove', custom_path.format('remove_dns_ptr_record'))
-cli_command(__name__, 'network dns record srv remove', custom_path.format('remove_dns_srv_record'))
-cli_command(__name__, 'network dns record txt remove', custom_path.format('remove_dns_txt_record'))
+cli_command(__name__, 'network dns record-set soa show', dns_record_set_path + 'get', cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output)
+cli_command(__name__, 'network dns record-set soa update', custom_path.format('update_dns_soa_record'), transform=transform_dns_record_set_output)
+
+cli_command(__name__, 'network dns record-set cname show', dns_record_set_path + 'get', cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output)
+cli_command(__name__, 'network dns record-set cname delete', dns_record_set_path + 'delete', cf_dns_mgmt_record_sets)
+cli_command(__name__, 'network dns record-set cname list', custom_path.format('list_dns_record_set'), cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output, table_transformer=transform_dns_record_set_table_output)
+cli_command(__name__, 'network dns record-set cname create', custom_path.format('create_dns_record_set'), transform=transform_dns_record_set_output)
+cli_command(__name__, 'network dns record-set cname set-record', custom_path.format('add_dns_cname_record'), transform=transform_dns_record_set_output)
+cli_command(__name__, 'network dns record-set cname remove-record', custom_path.format('remove_dns_cname_record'), transform=transform_dns_record_set_output)

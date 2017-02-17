@@ -109,20 +109,21 @@ def create_storage_account(resource_group_name, account_name, sku, location,
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
 
-def set_storage_account_properties(
-        resource_group_name, account_name, sku=None, tags=None, custom_domain=None,
-        encryption=None, access_tier=None):
-    ''' Update storage account property (only one at a time).'''
+def update_storage_account(instance, sku=None, tags=None, custom_domain=None,
+                           encryption=None, access_tier=None):
     from azure.mgmt.storage.models import \
-        (StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier)
-    scf = storage_client_factory()
-    params = StorageAccountUpdateParameters(
-        sku=Sku(sku) if sku else None,
-        tags=tags,
-        custom_domain=CustomDomain(custom_domain) if custom_domain else None,
-        encryption=encryption,
-        access_tier=AccessTier(access_tier) if access_tier else None)
-    return scf.storage_accounts.update(resource_group_name, account_name, params)
+        (StorageAccountCreateParameters, Sku, CustomDomain, AccessTier)
+
+    params = StorageAccountCreateParameters(
+        sku=Sku(sku) if sku is not None else instance.sku,
+        kind=instance.kind,
+        location=instance.location,
+        tags=tags if tags is not None else instance.tags,
+        custom_domain=CustomDomain(custom_domain) if custom_domain is not None else instance.custom_domain,  # pylint: disable=line-too-long
+        encryption=encryption if encryption is not None else instance.encryption,
+        access_tier=AccessTier(access_tier) if access_tier is not None else instance.access_tier
+    )
+    return params
 
 
 @transfer_doc(BlockBlobService.create_blob_from_path)

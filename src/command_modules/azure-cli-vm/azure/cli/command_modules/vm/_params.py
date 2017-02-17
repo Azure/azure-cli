@@ -7,7 +7,6 @@
 from argcomplete.completers import FilesCompleter
 
 from azure.mgmt.compute.models import (CachingTypes,
-                                       ContainerServiceOchestratorTypes,
                                        UpgradeMode)
 from azure.mgmt.storage.models import SkuName
 from azure.cli.core.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
@@ -73,27 +72,18 @@ register_cli_argument('vm disk', 'disk', validator=validate_vm_disk, help='disk 
 register_cli_argument('vm disk', 'new', action="store_true", help='create a new disk')
 register_cli_argument('vm disk', 'sku', arg_type=disk_sku)
 register_cli_argument('vm disk', 'size_gb', options_list=('--size-gb', '-z'), help='size in GB.')
+register_cli_argument('vm disk', 'lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virutal Machine size.')
 
 register_cli_argument('vm availability-set', 'availability_set_name', name_arg_type, id_part='name',
                       completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'), help='Name of the availability set')
 register_cli_argument('vm availability-set create', 'availability_set_name', name_arg_type, validator=validate_location, help='Name of the availability set')
 register_cli_argument('vm availability-set create', 'unmanaged', action='store_true', help='contained VMs should use unmanaged disks')
+register_cli_argument('vm availability-set create', 'platform_update_domain_count', type=int, help='Update Domain count. Example: 2')
+register_cli_argument('vm availability-set create', 'platform_fault_domain_count', type=int, help='Fault Domain count. Example: 2')
 register_cli_argument('vm availability-set create', 'validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
 
 register_cli_argument('vm user', 'username', options_list=('--username', '-u'), help='The user name')
 register_cli_argument('vm user', 'password', options_list=('--password', '-p'), help='The user password')
-
-register_cli_argument('acs', 'name', arg_type=name_arg_type)
-register_cli_argument('acs', 'orchestrator_type', **enum_choice_list(ContainerServiceOchestratorTypes))
-# some admin names are prohibited in acs, such as root, admin, etc. Because we have no control on the orchestrators, so default to a safe name.
-register_cli_argument('acs', 'admin_username', options_list=('--admin-username',), default='azureuser', required=False)
-register_cli_argument('acs', 'dns_name_prefix', options_list=('--dns-prefix', '-d'))
-register_extra_cli_argument('acs create', 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing')
-register_cli_argument('acs', 'container_service_name', options_list=('--name', '-n'), help='The name of the container service', completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'))
-register_cli_argument('acs create', 'agent_vm_size', completer=get_vm_size_completion_list)
-register_cli_argument('acs scale', 'new_agent_count', type=int, help='The number of agents for the cluster')
-register_cli_argument('acs create', 'service_principal', help='Service principal for making calls into Azure APIs')
-register_cli_argument('acs create', 'client_secret', help='Client secret to use with the service principal for making calls to Azure APIs')
 
 register_cli_argument('vm capture', 'overwrite', action='store_true')
 
@@ -195,7 +185,7 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'authentication_type', help='Type of authentication to use with the VM. Defaults to password for Windows and SSH public key for Linux.', arg_group='Authentication', **enum_choice_list(['ssh', 'password']))
 
     register_cli_argument(scope, 'os_disk_name', help='The name of the new VM OS disk.', arg_group='Storage')
-    register_cli_argument(scope, 'os_type', help='Type of OS installed on a custom VHD. Do not use when specifiying an URN or URN alias.', arg_group='Storage', **enum_choice_list(['windows', 'linux']))
+    register_cli_argument(scope, 'os_type', help='Type of OS installed on a custom VHD. Do not use when specifying an URN or URN alias.', arg_group='Storage', **enum_choice_list(['windows', 'linux']))
     register_cli_argument(scope, 'storage_account', help="Only applicable when use with '--use-unmanaged-disk'. The name to use when creating a new storage account or referencing an existing one. If omitted, an appropriate storage account in the same resource group and location will be used, or a new one will be created.", arg_group='Storage')
     register_cli_argument(scope, 'storage_caching', help='Storage caching type for the VM OS disk', arg_group='Storage', **enum_choice_list(['ReadWrite', 'ReadOnly']))
     register_cli_argument(scope, 'storage_sku', help='The sku of storage account to persist VM. By default, only Standard_LRS and Premium_LRS are allowed. Using with --use-unmanaged-disk, all are available.', arg_group='Storage', **enum_choice_list(SkuName))

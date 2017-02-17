@@ -44,20 +44,25 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-cli-acr',
     'azure-cli-acs',
     'azure-cli-appservice',
-    'azure-cli-core',
-    'azure-cli-component',
-    'azure-cli-container',
+    'azure-cli-batch',
     'azure-cli-cloud',
+    'azure-cli-component',
     'azure-cli-configure',
+    'azure-cli-container',
+    'azure-cli-core',
+    'azure-cli-documentdb',
     'azure-cli-feedback',
+    'azure-cli-iot',
+    'azure-cli-keyvault',
     'azure-cli-network',
     'azure-cli-nspkg',
     'azure-cli-profile',
+    'azure-cli-redis',
     'azure-cli-resource',
     'azure-cli-role',
+    'azure-cli-sql',
     'azure-cli-storage',
     'azure-cli-vm'
 ]

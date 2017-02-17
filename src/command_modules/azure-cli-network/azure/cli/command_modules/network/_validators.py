@@ -127,6 +127,17 @@ def validate_cert(namespace):
             # app-gateway ssl-cert create does not have these fields and that is okay
             pass
 
+def validate_dns_record_type(namespace):
+    tokens = namespace.command.split(' ')
+    types = ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'soa', 'srv', 'txt']
+    for token in tokens:
+        if token in types:
+            if hasattr(namespace, 'record_type'):
+                namespace.record_type = token
+            else:
+                namespace.record_set_type = token
+            return
+
 def validate_inbound_nat_rule_id_list(namespace):
     _generate_lb_id_list_from_names_or_ids(
         namespace, 'load_balancer_inbound_nat_rule_ids', 'inboundNatRules')

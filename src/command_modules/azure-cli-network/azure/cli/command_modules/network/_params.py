@@ -16,7 +16,6 @@ from azure.mgmt.network.models.network_management_client_enums import \
      ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType, IPVersion, LoadDistribution,
      ProbeProtocol, TransportProtocol, SecurityRuleAccess, SecurityRuleProtocol,
      SecurityRuleDirection)
-from azure.mgmt.dns.models.dns_management_client_enums import RecordType
 
 from azure.cli.core.commands import \
     (CliArgumentType, register_cli_argument, register_extra_cli_argument)
@@ -40,7 +39,7 @@ from azure.cli.command_modules.network._validators import \
      validate_auth_cert, validate_cert, validate_inbound_nat_rule_id_list,
      validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
      validate_address_pool_name_or_id, validate_servers, load_cert_file, validate_metadata,
-     validate_peering_type,
+     validate_peering_type, validate_dns_record_type,
      get_public_ip_validator, get_nsg_validator, get_subnet_validator,
      get_virtual_network_validator)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
@@ -125,7 +124,6 @@ load_balancer_name_type = CliArgumentType(options_list=('--lb-name',), metavar='
 private_ip_address_type = CliArgumentType(help='Static private IP address to use.', validator=validate_private_ip_address)
 cookie_based_affinity_type = CliArgumentType(**enum_choice_list(ApplicationGatewayCookieBasedAffinity))
 http_protocol_type = CliArgumentType(**enum_choice_list(ApplicationGatewayProtocol))
-modified_record_type = CliArgumentType(options_list=('--type', '-t'), help='The type of DNS records in the record set.', **enum_choice_list([x.value for x in RecordType if x.value != 'SOA']))
 
 # ARGUMENT REGISTRATION
 
@@ -557,24 +555,42 @@ register_cli_argument('network dns', 'relative_record_set_name', name_arg_type, 
 register_cli_argument('network dns', 'zone_name', options_list=('--zone-name', '-z'), help='The name of the zone.', type=dns_zone_name_type)
 register_cli_argument('network dns', 'metadata', nargs='+', help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.', validator=validate_metadata)
 
-register_cli_argument('network dns', 'record_type', modified_record_type)
-
 register_cli_argument('network dns zone', 'zone_name', name_arg_type)
+register_cli_argument('network dns zone', 'location', ignore_type)
 
 register_cli_argument('network dns zone import', 'file_name', options_list=('--file-name', '-f'), type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to import')
 register_cli_argument('network dns zone export', 'file_name', options_list=('--file-name', '-f'), type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to save')
 register_cli_argument('network dns zone update', 'if_none_match', ignore_type)
 
-register_cli_argument('network dns record txt add', 'value', nargs='+')
-register_cli_argument('network dns record txt remove', 'value', nargs='+')
+for item in ['record_type', 'record_set_type']:
+    register_cli_argument('network dns record-set', item, ignore_type, validator=validate_dns_record_type)
 
-register_cli_argument('network dns record-set create', 'record_set_type', modified_record_type)
 register_cli_argument('network dns record-set create', 'ttl', help='Record set TTL (time-to-live)')
 register_cli_argument('network dns record-set create', 'if_none_match', help='Create the record set only if it does not already exist.', action='store_true')
 
-for item in ['list', 'show']:
-    register_cli_argument('network dns record-set {}'.format(item), 'record_type', options_list=('--type', '-t'), **enum_choice_list(RecordType))
-
 for item in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
-    register_cli_argument('network dns record {} add'.format(item), 'record_set_name', options_list=('--record-set-name',), help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
-    register_cli_argument('network dns record {} remove'.format(item), 'record_set_name', options_list=('--record-set-name',), help='The name of the record set relative to the zone.')
+    register_cli_argument('network dns record-set {} add-record'.format(item), 'record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
+    register_cli_argument('network dns record-set {} remove-record'.format(item), 'record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone.')
+register_cli_argument('network dns record-set cname set-record', 'record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
+
+register_cli_argument('network dns record-set soa', 'relative_record_set_name', ignore_type, default='@')
+
+register_cli_argument('network dns record-set a', 'ipv4_address', options_list=('--ipv4-address', '-a'), help='IPV4 address in string notation.')
+register_cli_argument('network dns record-set aaaa', 'ipv6_address', options_list=('--ipv6-address', '-a'), help='IPV6 address in string notation.')
+register_cli_argument('network dns record-set cname', 'cname', options_list=('--cname', '-c'), help='Canonical name.')
+register_cli_argument('network dns record-set mx', 'exchange', options_list=('--exchange', '-e'), help='Exchange metric.')
+register_cli_argument('network dns record-set mx', 'preference', options_list=('--preference', '-p'), help='Preference metric.')
+register_cli_argument('network dns record-set ns', 'dname', options_list=('--nsdname', '-d'), help='Name server domain name.')
+register_cli_argument('network dns record-set ptr', 'dname', options_list=('--ptrdname', '-d'), help='PTR target domain name.')
+register_cli_argument('network dns record-set soa', 'host', options_list=('--host', '-t'), help='Host name.')
+register_cli_argument('network dns record-set soa', 'email', options_list=('--email', '-e'), help='Email address.')
+register_cli_argument('network dns record-set soa', 'expire_time', options_list=('--expire-time', '-x'), help='Expire time (seconds).')
+register_cli_argument('network dns record-set soa', 'minimum_ttl', options_list=('--minimum-ttl', '-m'), help='Minimum TTL (time-to-live, seconds).')
+register_cli_argument('network dns record-set soa', 'refresh_time', options_list=('--refresh-time', '-f'), help='Refresh value (seconds).')
+register_cli_argument('network dns record-set soa', 'retry_time', options_list=('--retry-time', '-r'), help='Retry time (seconds).')
+register_cli_argument('network dns record-set soa', 'serial_number', options_list=('--serial-number', '-s'), help='Serial number.')
+register_cli_argument('network dns record-set srv', 'priority', options_list=('--priority', '-p'), help='Priority metric.')
+register_cli_argument('network dns record-set srv', 'weight', options_list=('--weight', '-w'), help='Weight metric.')
+register_cli_argument('network dns record-set srv', 'port', options_list=('--port', '-r'), help='Service port.')
+register_cli_argument('network dns record-set srv', 'target', options_list=('--target', '-t'), help='Target domain name.')
+register_cli_argument('network dns record-set txt', 'value', options_list=('--value', '-v'), nargs='+', help='Space separated list of text values which will be concatenated together.')

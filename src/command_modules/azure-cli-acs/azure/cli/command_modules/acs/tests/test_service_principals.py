@@ -3,10 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import mock
 import os
 import tempfile
 import unittest
+import mock
 
 from azure.cli.core._util import CLIError
 from azure.cli.command_modules.acs.custom import _validate_service_principal, \
