@@ -9,311 +9,311 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 helps['appservice'] = """
     type: group
-    short-summary: commands to manage your Azure web apps and App Service plans
+    short-summary: Manage your Azure Web apps and App Service plans.
 """
 
 helps['appservice web'] = """
     type: group
-    short-summary: commands to manage web apps
+    short-summary: Manage web apps.
 """
 
 helps['appservice web config'] = """
     type: group
-    short-summary: commands to configure the web app
+    short-summary: Configure a web app.
 """
 
 helps['appservice web config show'] = """
     type: command
-    short-summary: show web app configurations
+    short-summary: Show web app configurations.
 """
 
 helps['appservice web config update'] = """
     type: command
-    short-summary: update web app configurations
+    short-summary: Update web app configurations.
 """
 
 helps['appservice web config appsettings'] = """
     type: group
-    short-summary: commands to configure application settings
+    short-summary: Configure web app settings.
 """
 
 helps['appservice web config appsettings show'] = """
     type: command
-    short-summary: show application settings
+    short-summary: Show web app settings.
 """
 
 helps['appservice web config appsettings update'] = """
     type: command
-    short-summary: create or update application settings
+    short-summary: Create or update web app settings.
 """
 
 helps['appservice web config appsettings delete'] = """
     type: command
-    short-summary: delete application settings
+    short-summary: Delete web app settings.
 """
 
 helps['appservice web config container'] = """
     type: group
-    short-summary: commands to configure container-specific application settings
+    short-summary: Configure container specific settings.
 """
 
 helps['appservice web config container show'] = """
     type: command
-    short-summary: show container settings
+    short-summary: Show container settings.
 """
 
 helps['appservice web config container update'] = """
     type: command
-    short-summary: update container settings
+    short-summary: Update container settings.
 """
 
 helps['appservice web config container delete'] = """
     type: command
-    short-summary: delete container settings
+    short-summary: Delete container settings.
 """
 
 helps['appservice web config hostname'] = """
     type: group
-    short-summary: commands to configure hostnames
+    short-summary: Configure hostnames.
 """
 
 helps['appservice web config ssl'] = """
     type: group
-    short-summary: commands to configure ssl certs
+    short-summary: Configure SSL certificates.
 """
 
 helps['appservice web config ssl upload'] = """
     type: command
-    short-summary: Upload an ssl certificate to the webapp
+    short-summary: Upload an SSL certificate to a web app.
 """
 
 helps['appservice web config ssl list'] = """
     type: command
-    short-summary: List ssl certificates within a resource group
+    short-summary: List SSL certificates.
 """
 
 helps['appservice web config ssl bind'] = """
     type: command
-    short-summary: Bind an ssl certificate to the webapp
+    short-summary: Bind an SSL certificate to a web app.
 """
 
 helps['appservice web config ssl unbind'] = """
     type: command
-    short-summary: Unbind an ssl certificate from the webapp
+    short-summary: Unbind an SSL certificate from a web app.
 """
 
 helps['appservice web config ssl delete'] = """
     type: command
-    short-summary: Delete an ssl certificate from the webapp
+    short-summary: Delete an SSL certificate from a web app.
 """
 
 helps['appservice web deployment'] = """
     type: group
-    short-summary: Commands to manage web app deployments
+    short-summary: Manage web app deployments.
 """
 
 helps['appservice web deployment slot'] = """
     type: group
-    short-summary: Commands to manage web app deployment slots
+    short-summary: Manage web app deployment slots.
 """
 
 helps['appservice web deployment slot auto-swap'] = """
     type: group
-    short-summary: Commands to enable or disable auto-swap for a web-app deployment slot
+    short-summary: Enable or disable auto-swap for a web app deployment slot.
 """
 
 helps['appservice web log'] = """
     type: group
-    short-summary: commands to manage web app logs
+    short-summary: Manage web app logs.
 """
 
 helps['appservice web log config'] = """
     type: command
-    short-summary: configure web app logs
+    short-summary: Configure web app logs.
 """
 
 helps['appservice web deployment'] = """
     type: group
-    short-summary: commands to manage web app deployments
+    short-summary: Manage web application deployments.
 """
 
 helps['appservice web deployment list-site-credentials'] = """
     type: command
-    short-summary: show site level deployment credentials
+    short-summary: Show site-level deployment credentials.
 """
 
 helps['appservice web deployment slot auto-swap'] = """
     type: command
-    short-summary: configure slot auto swap
+    short-summary: Configure slot auto swap.
 """
 
 helps['appservice web deployment slot create'] = """
     type: command
-    short-summary: create a slot
+    short-summary: Create a slot.
 """
 
 helps['appservice web deployment slot swap'] = """
     type: command
-    short-summary: swap slots
+    short-summary: Swap slots.
 """
 
 helps['appservice web deployment slot list'] = """
     type: command
-    short-summary: list all slots
+    short-summary: List all slots.
 """
 
 helps['appservice web deployment slot delete'] = """
     type: command
-    short-summary: delete a slot
+    short-summary: Delete a slot.
 """
 
 helps['appservice web deployment user'] = """
     type: group
-    short-summary: commands to manage user credentials for a deployment
+    short-summary: Manage user credentials for a deployment.
 """
 
 helps['appservice web deployment slot'] = """
     type: group
-    short-summary: commands to manage deployment slots
+    short-summary: Manage deployment slots.
 """
 
 helps['appservice web source-control'] = """
     type: group
-    short-summary: commands to manage source control systems
+    short-summary: Manage source control systems.
 """
 
 helps['appservice web source-control config'] = """
     type: command
-    short-summary: associate to Git or Mercurial repositories
+    short-summary: Associate to Git or Mercurial repositories.
 """
 
 helps['appservice web source-control config-local-git'] = """
     type: command
-    short-summary: enable local git
-    long-summary: You will get a url to clone and later push to the web app
+    short-summary: Enable local git.
+    long-summary: You get a url to clone and later push to the web app.
 """
 
 helps['appservice web source-control delete'] = """
     type: command
-    short-summary: delete source control configurations.
+    short-summary: Delete source control configurations.
 """
 
 helps['appservice web source-control show'] = """
     type: command
-    short-summary: show source control configurations.
+    short-summary: Show source control configurations.
 """
 
 helps['appservice web source-control sync'] = """
     type: command
-    short-summary: synchronize from the source repository, only needed under maunal integration mode.
+    short-summary: Synchronize from the source repository, only needed under maunal integration mode.
 """
 
 helps['appservice plan'] = """
     type: group
-    short-summary: Commands to manage App Service plans.
+    short-summary: Manage App Service plans.
 """
 
 helps['appservice plan update'] = """
     type: command
-    short-summary: update an App Service plan
+    short-summary: Update an App Service plan.
 """
 
 helps['appservice plan create'] = """
     type: command
-    short-summary: create an App Service plan
+    short-summary: Create an App Service plan.
 """
 
 helps['appservice plan delete'] = """
     type: command
-    short-summary: delete an App Service plan
+    short-summary: Delete an App Service plan.
 """
 
 helps['appservice plan list'] = """
     type: command
-    short-summary: list App Service plans
+    short-summary: List App Service plans.
 """
 
 helps['appservice plan show'] = """
     type: command
-    short-summary: Get the App Service plans for a resource group or a set of resource groups
+    short-summary: Get the App Service plans for a resource group or a set of resource groups.
 """
 
 helps['appservice web config hostname add'] = """
     type: command
-    short-summary: bind a hostname (custom domain) to the web app
+    short-summary: Bind a hostname (custom domain) to a web app.
 """
 
 helps['appservice web config hostname delete'] = """
     type: command
-    short-summary: unbind a hostname (custom domain) from the web app
+    short-summary: Unbind a hostname (custom domain) from a web app.
 """
 
 helps['appservice web config hostname list'] = """
     type: command
-    short-summary: list all hostname bindings
+    short-summary: List all hostname bindings.
 """
 
 helps['appservice web config backup list'] = """
     type: command
-    short-summary: list all of an app's backups
+    short-summary: List all backups of a web app.
 """
 
 helps['appservice web config backup create'] = """
     type: command
-    short-summary: create a backup of a web app
+    short-summary: Create a backup of a web app.
 """
 
 helps['appservice web config backup show'] = """
     type: command
-    short-summary: show a web app's backup schedule
+    short-summary: Show the backup schedule of a web app.
 """
 
 helps['appservice web config backup update'] = """
     type: command
-    short-summary: configure a new backup schedule
+    short-summary: Configure a new backup schedule.
 """
 
 helps['appservice web config backup restore'] = """
     type: command
-    short-summary: restore an app from a backup
+    short-summary: Restore a web app from a backup.
 """
 
 helps['appservice web browse'] = """
     type: command
-    short-summary: Open the web app in a browser
+    short-summary: Open the web app in a browser.
 """
 
 helps['appservice web create'] = """
     type: command
-    short-summary: create a web app
+    short-summary: Create a web app.
 """
 
 helps['appservice web delete'] = """
     type: command
-    short-summary: delete a web app
+    short-summary: Delete a web app.
 """
 
 helps['appservice web list'] = """
     type: command
-    short-summary: list web apps
+    short-summary: List web apps.
 """
 
 helps['appservice web restart'] = """
     type: command
-    short-summary: restart a web app
+    short-summary: Restart a web app.
 """
 
 helps['appservice web start'] = """
     type: command
-    short-summary: start a web app
+    short-summary: Start a web app.
 """
 
 helps['appservice web show'] = """
     type: command
-    short-summary: show a web app
+    short-summary: Show a web app.
 """
 
 helps['appservice web stop'] = """
     type: command
-    short-summary: stop a web app
+    short-summary: Stop a web app.
 """
