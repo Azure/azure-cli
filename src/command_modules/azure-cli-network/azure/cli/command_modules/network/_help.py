@@ -9,24 +9,24 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 helps['network'] = """
     type: group
-    short-summary: Manages Network resources
+    short-summary: Manages Azure Network resources.
 """
 
 helps['network dns'] = """
     type: group
-    short-summary: Host your DNS domain in Azure
+    short-summary: Host your DNS domain in Azure.
 """
 
 # region Application Gateway
 
 helps['network application-gateway'] = """
     type: group
-    short-summary: Provides application-level routing and load balancing services
+    short-summary: Provides application-level routing and load balancing services.
 """
 
 helps['network application-gateway create'] = """
     type: command
-    short-summary: Create a new application gateway.
+    short-summary: Create an application gateway.
 """
 
 helps['network application-gateway delete'] = """
@@ -36,7 +36,7 @@ helps['network application-gateway delete'] = """
 
 helps['network application-gateway list'] = """
     type: command
-    short-summary: List application gateways in a resource group or subscription.
+    short-summary: List application gateways.
 """
 
 helps['network application-gateway show'] = """
@@ -61,12 +61,12 @@ helps['network application-gateway update'] = """
 
 helps['network application-gateway show-backend-health'] = """
     type: command
-    short-summary: Show details on the backend health of the application gateway.
+    short-summary: Show details about the backend health of an application gateway.
 """
 
 helps['network application-gateway wait'] = """
     type: command
-    short-summary: Place the CLI in a waiting state until a condition of the Application Gateway is met.
+    short-summary: Place the CLI in a waiting state until a condition of the application gateway is met.
 """
 #endregion
 
@@ -74,64 +74,64 @@ helps['network application-gateway wait'] = """
 
 helps['network application-gateway address-pool'] = """
     type: group
-    short-summary: Manage application gateway backend address pools.
+    short-summary: Manage backend address pools for an application gateway.
 """
 
 helps['network application-gateway address-pool create'] = """
     type: command
-    short-summary: Create a new application gateway backend address pool.
+    short-summary: Create a backend address pool.
 """
 
 helps['network application-gateway address-pool delete'] = """
     type: command
-    short-summary: Delete an application gateway backend address pool.
+    short-summary: Delete a backend address pool.
 """
 
 helps['network application-gateway address-pool list'] = """
     type: command
-    short-summary: List backend address pools in an application gateway.
+    short-summary: List backend address pools.
 """
 
 helps['network application-gateway address-pool show'] = """
     type: command
-    short-summary: Show details of an application gateway backend address pool.
+    short-summary: Show details of a backend address pool.
 """
 
 helps['network application-gateway address-pool update'] = """
     type: command
-    short-summary: Update an application gateway backend address pool.
+    short-summary: Update a backend address pool.
 """
 # endregion
 
 # region Application Gateway Authorization Cert
 helps['network application-gateway auth-cert'] = """
     type: group
-    short-summary: Manage application gateway authorization certificates.
+    short-summary: Manage authorization certificates for an application gateway.
 """
 
 helps['network application-gateway auth-cert create'] = """
     type: command
-    short-summary: Create a new application gateway authorization certificate.
+    short-summary: Create an authorization certificate.
 """
 
 helps['network application-gateway auth-cert delete'] = """
     type: command
-    short-summary: Delete an application gateway authorization certificate.
+    short-summary: Delete an authorization certificate.
 """
 
 helps['network application-gateway auth-cert list'] = """
     type: command
-    short-summary: List authorization certificates of an application gateway.
+    short-summary: List authorization certificates.
 """
 
 helps['network application-gateway auth-cert show'] = """
     type: command
-    short-summary: Show details of an application gateway authorization certificate.
+    short-summary: Show details of an authorization certificate.
 """
 
 helps['network application-gateway auth-cert update'] = """
     type: command
-    short-summary: Update an application gateway authorization certificate.
+    short-summary: Update an authorization certificate.
 """
 # endregion
 
@@ -139,32 +139,32 @@ helps['network application-gateway auth-cert update'] = """
 
 helps['network application-gateway frontend-ip'] = """
     type: group
-    short-summary: Manage application gateway front-end IP addresses
+    short-summary: Manage frontend IP addresses for an application gateway.
 """
 
 helps['network application-gateway frontend-ip create'] = """
     type: command
-    short-summary: Create a new application gateway front-end IP address.
+    short-summary: Create a frontend IP address.
 """
 
 helps['network application-gateway frontend-ip delete'] = """
     type: command
-    short-summary: Delete an application gateway front-end IP address.
+    short-summary: Delete a frontend IP address.
 """
 
 helps['network application-gateway frontend-ip list'] = """
     type: command
-    short-summary: List front-end IP addresses in an application gateway.
+    short-summary: List frontend IP addresses.
 """
 
 helps['network application-gateway frontend-ip show'] = """
     type: command
-    short-summary: Show details of an application gateway front-end IP address.
+    short-summary: Show details of the frontend IP address.
 """
 
 helps['network application-gateway frontend-ip update'] = """
     type: command
-    short-summary: Update an application gateway front-end IP address.
+    short-summary: Update the frontend IP address.
 """
 #endregion
 
@@ -172,32 +172,32 @@ helps['network application-gateway frontend-ip update'] = """
 
 helps['network application-gateway frontend-port'] = """
     type: group
-    short-summary: Manage application gateway front-end ports
+    short-summary: Manage frontend ports for an application gateway.
 """
 
 helps['network application-gateway frontend-port create'] = """
     type: command
-    short-summary: Create a new application gateway front-end port.
+    short-summary: Create a frontend port.
 """
 
 helps['network application-gateway frontend-port delete'] = """
     type: command
-    short-summary: Delete an application gateway front-end port.
+    short-summary: Delete a frontend port.
 """
 
 helps['network application-gateway frontend-port list'] = """
     type: command
-    short-summary: List front-end ports in an application gateway.
+    short-summary: List frontend ports.
 """
 
 helps['network application-gateway frontend-port show'] = """
     type: command
-    short-summary: Show details of an application gateway front-end port.
+    short-summary: Show details of a frontend port.
 """
 
 helps['network application-gateway frontend-port update'] = """
     type: command
-    short-summary: Update an application gateway front-end port.
+    short-summary: Update the frontend port.
 """
 #endregion
 
@@ -205,32 +205,32 @@ helps['network application-gateway frontend-port update'] = """
 
 helps['network application-gateway http-listener'] = """
     type: group
-    short-summary: Manage application gateway HTTP listeners
+    short-summary: Manage HTTP listeners for an application gateway.
 """
 
 helps['network application-gateway http-listener create'] = """
     type: command
-    short-summary: Create a new application gateway HTTP listener.
+    short-summary: Create an HTTP listener.
 """
 
 helps['network application-gateway http-listener delete'] = """
     type: command
-    short-summary: Delete an application gateway HTTP listener.
+    short-summary: Delete an HTTP listener.
 """
 
 helps['network application-gateway http-listener list'] = """
     type: command
-    short-summary: List HTTP listeners in an application gateway.
+    short-summary: List HTTP listeners.
 """
 
 helps['network application-gateway http-listener show'] = """
     type: command
-    short-summary: Show details of an application gateway HTTP listener.
+    short-summary: Show details of an HTTP listener.
 """
 
 helps['network application-gateway http-listener update'] = """
     type: command
-    short-summary: Update an application gateway HTTP listener.
+    short-summary: Update an HTTP listener.
 """
 #endregion
 
@@ -238,32 +238,32 @@ helps['network application-gateway http-listener update'] = """
 
 helps['network application-gateway http-settings'] = """
     type: group
-    short-summary: Manage application gateway HTTP settings
+    short-summary: Manage HTTP settings for an application gateway.
 """
 
 helps['network application-gateway http-settings create'] = """
     type: command
-    short-summary: Create new application gateway HTTP settings.
+    short-summary: Create HTTP settings.
 """
 
 helps['network application-gateway http-settings delete'] = """
     type: command
-    short-summary: Delete application gateway HTTP settings.
+    short-summary: Delete HTTP settings.
 """
 
 helps['network application-gateway http-settings list'] = """
     type: command
-    short-summary: List HTTP settings in an application gateway.
+    short-summary: List HTTP settings.
 """
 
 helps['network application-gateway http-settings show'] = """
     type: command
-    short-summary: Show details of an application gateway HTTP settings.
+    short-summary: Show details of HTTP settings.
 """
 
 helps['network application-gateway http-settings update'] = """
     type: command
-    short-summary: Update an application gateway HTTP settings.
+    short-summary: Update HTTP settings.
 """
 #endregion
 
@@ -271,31 +271,31 @@ helps['network application-gateway http-settings update'] = """
 
 helps['network application-gateway probe'] = """
     type: group
-    short-summary: Gather information, such as utilization, to be evaluated by rules
+    short-summary: Use probes to gather information, such as utilization, and then evaluate it by using rules.
 """
 helps['network application-gateway probe create'] = """
     type: command
-    short-summary: Create a new application gateway probe.
+    short-summary: Create a probe.
 """
 
 helps['network application-gateway probe delete'] = """
     type: command
-    short-summary: Delete an application gateway probe.
+    short-summary: Delete a probe.
 """
 
 helps['network application-gateway probe list'] = """
     type: command
-    short-summary: List probes in an application gateway.
+    short-summary: List probes.
 """
 
 helps['network application-gateway probe show'] = """
     type: command
-    short-summary: Show details of an application gateway probe.
+    short-summary: Show details of a probe.
 """
 
 helps['network application-gateway probe update'] = """
     type: command
-    short-summary: Update an application gateway probe.
+    short-summary: Update a probe.
 """
 #endregion
 
@@ -303,32 +303,32 @@ helps['network application-gateway probe update'] = """
 
 helps['network application-gateway rule'] = """
     type: group
-    short-summary: Evaluate probe information and define routing rules
+    short-summary: Evaluate probe information and define routing rules.
 """
 
 helps['network application-gateway rule create'] = """
     type: command
-    short-summary: Create a new application gateway rule.
+    short-summary: Create a rule.
 """
 
 helps['network application-gateway rule delete'] = """
     type: command
-    short-summary: Delete an application gateway rule.
+    short-summary: Delete a rule.
 """
 
 helps['network application-gateway rule list'] = """
     type: command
-    short-summary: List rules in an application gateway.
+    short-summary: List rules.
 """
 
 helps['network application-gateway rule show'] = """
     type: command
-    short-summary: Show details of an application gateway rule.
+    short-summary: Show details of a rule.
 """
 
 helps['network application-gateway rule update'] = """
     type: command
-    short-summary: Update an application gateway rule.
+    short-summary: Update a rule.
 """
 #endregion
 
@@ -336,38 +336,38 @@ helps['network application-gateway rule update'] = """
 
 helps['network application-gateway ssl-cert'] = """
     type: group
-    short-summary: Manage application gateway SSL certificates
+    short-summary: Manage SSL certificates for an application gateway.
 """
 helps['network application-gateway ssl-cert create'] = """
     type: command
-    short-summary: Upload an SSL certificate for an application gateway.
+    short-summary: Upload an SSL certificate.
 """
 
 helps['network application-gateway ssl-cert delete'] = """
     type: command
-    short-summary: Delete an application gateway SSL certificate.
+    short-summary: Delete an SSL certificate.
 """
 
 helps['network application-gateway ssl-cert list'] = """
     type: command
-    short-summary: List SSL certificates in an application gateway.
+    short-summary: List SSL certificates.
 """
 
 helps['network application-gateway ssl-cert show'] = """
     type: command
-    short-summary: Show details of an application gateway SSL certificate.
+    short-summary: Show details of an SSL certificate.
 """
 
 helps['network application-gateway ssl-cert update'] = """
     type: command
-    short-summary: Update an application gateway SSL certificate.
+    short-summary: Update an SSL certificate.
 """
 #endregion
 
 # region Application Gateway SSL Policy
 helps['network application-gateway ssl-policy'] = """
     type: group
-    short-summary: Manage the SSL policy of an application gateway.
+    short-summary: Manage the SSL policy for an application gateway.
 """
 
 helps['network application-gateway ssl-policy set'] = """
@@ -385,31 +385,31 @@ helps['network application-gateway ssl-policy show'] = """
 
 helps['network application-gateway url-path-map'] = """
     type: group
-    short-summary: Manage application gateway URL path maps
+    short-summary: Manage URL path maps for an application gateway.
 """
 helps['network application-gateway url-path-map create'] = """
     type: command
-    short-summary: Create a new application gateway URL path map.
+    short-summary: Create a URL path map.
 """
 
 helps['network application-gateway url-path-map delete'] = """
     type: command
-    short-summary: Delete an application gateway URL path map.
+    short-summary: Delete a URL path map.
 """
 
 helps['network application-gateway url-path-map list'] = """
     type: command
-    short-summary: List URL path maps in an application gateway.
+    short-summary: List URL path maps.
 """
 
 helps['network application-gateway url-path-map show'] = """
     type: command
-    short-summary: Show details of an application gateway URL path map.
+    short-summary: Show details of a URL path map.
 """
 
 helps['network application-gateway url-path-map update'] = """
     type: command
-    short-summary: Update an application gateway URL path map.
+    short-summary: Update a URL path map.
 """
 #endregion
 
@@ -417,35 +417,35 @@ helps['network application-gateway url-path-map update'] = """
 
 helps['network application-gateway url-path-map rule'] = """
     type: group
-    short-summary: Manage application gateway URL path map rules
+    short-summary: Manage the rules for a URL path map.
 """
 
 helps['network application-gateway url-path-map rule create'] = """
     type: command
-    short-summary: Create a new application gateway URL path map rule.
+    short-summary: Create a rule for a URL path map.
 """
 
 helps['network application-gateway url-path-map rule delete'] = """
     type: command
-    short-summary: Delete an application gateway URL path map rule.
+    short-summary: Delete a rule for a URL path map.
 """
 #endregion
 
 # region Application Gateway WAF Config
 helps['network application-gateway waf-config'] = """
     type: group
-    short-summary: Configure web application firewall settings of an application gateway.
-    long-summary: Only applicable to gateways with SKU type WAF.
+    short-summary: Configure the settings of a web application firewall.
+    long-summary: This command is only applicable to application gateways with SKU type of WAF.
 """
 
 helps['network application-gateway waf-config set'] = """
     type: command
-    short-summary: Update web application firewall configuration.
+    short-summary: Update the firewall configuration of a web application.
 """
 
 helps['network application-gateway waf-config show'] = """
     type: command
-    short-summary: Show the web application firewall configuration.
+    short-summary: Show the firewall configuration of a web application.
 """
 # endregion
 
@@ -470,7 +470,7 @@ for record in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
 
     helps['network dns record-set {} remove-record'.format(record)] = """
         type: command
-        short-summary: Remove {} record from its record set.
+        short-summary: Remove {} record from the record set.
     """.format(record.upper())
 
     helps['network dns record-set {} create'.format(record)] = """
@@ -507,7 +507,7 @@ for item in ['a', 'aaaa', 'mx', 'ns', 'ptr', 'srv', 'txt']:
 
 helps['network dns record-set cname set-record'] = """
     type: command
-    short-summary: Sets the value of the CNAME record.
+    short-summary: Set the value of the CNAME record.
 """
 
 helps['network dns record-set soa'] = """
@@ -522,7 +522,7 @@ helps['network dns record-set soa show'] = """
 
 helps['network dns record-set soa update'] = """
     type: command
-    short-summary: Update properties of the zone's SOA re.
+    short-summary: Update properties of the zone's SOA record.
 """
 
 
@@ -536,20 +536,20 @@ helps['network dns record-set list'] = """
 # region DNS Zone
 helps['network dns zone'] = """
     type: group
-    short-summary: Manage DNS zones
+    short-summary: Manage DNS zones.
 """
 
 helps['network dns zone create'] = """
     type: command
-    short-summary: Creates a new DNS zone.
+    short-summary: Create a DNS zone.
     parameters:
         - name: --if-none-match
-          short-summary: Create only if there isn't an existing DNS zone matches the given one.
+          short-summary: Create a DNS zone only if one doesn't exist that matches the given one.
 """
 
 helps['network dns zone delete'] = """
     type: command
-    short-summary: Deletes a DNS zone and all associated records.
+    short-summary: Delete a DNS zone and all associated records.
     long-summary: |
         WARNING: This operation cannot be undone.
 """
@@ -566,17 +566,17 @@ helps['network dns zone import'] = """
 
 helps['network dns zone list'] = """
     type: command
-    short-summary: List DNS zones in a resource group or subscription.
+    short-summary: List DNS zones.
 """
 
 helps['network dns zone show'] = """
     type: command
-    short-summary: Gets DNS zone parameters. Does not show DNS records within the zone.
+    short-summary: Get DNS zone parameters. Does not show DNS records within the zone.
 """
 
 helps['network dns zone update'] = """
     type: command
-    short-summary: Updates DNS zone properties. Does not modify DNS records within the zone.
+    short-summary: Update DNS zone properties. Does not modify DNS records within the zone.
     parameters:
         - name: --if-match
           short-summary: Update only if the resource with the same ETAG exists.
@@ -587,7 +587,7 @@ helps['network dns zone update'] = """
 
 helps['network express-route'] = """
     type: group
-    short-summary: Dedicated private network fiber connections to Azure
+    short-summary: Manage dedicated private network fiber connections to Azure.
 """
 
 helps['network express-route create'] = """
@@ -640,27 +640,27 @@ helps['network express-route list-service-providers'] = """
 
 helps['network express-route auth'] = """
     type: group
-    short-summary: Manage ExpressRoute circuit authentication
+    short-summary: Manage authentication of an ExpressRoute circuit.
 """
 
 helps['network express-route auth create'] = """
     type: command
-    short-summary: Create an authorization setting in an ExpressRoute circuit.
+    short-summary: Create an authorization setting.
 """
 
 helps['network express-route auth delete'] = """
     type: command
-    short-summary: Delete an authorization setting in an ExpressRoute circuit.
+    short-summary: Delete an authorization setting.
 """
 
 helps['network express-route auth list'] = """
     type: command
-    short-summary: List authorization settings of an ExpressRoute circuit.
+    short-summary: List authorization settings.
 """
 
 helps['network express-route auth show'] = """
     type: command
-    short-summary: Show details of an authorization setting in an ExpressRoute circuit.
+    short-summary: Show details of an authorization setting.
 """
 #endregion
 
@@ -668,32 +668,32 @@ helps['network express-route auth show'] = """
 
 helps['network express-route peering'] = """
     type: group
-    short-summary: Manage ExpressRoute peering
+    short-summary: Manage ExpressRoute peering.
 """
 
 helps['network express-route peering create'] = """
     type: command
-    short-summary: Create peering settings in an ExpressRoute circuit.
+    short-summary: Create peering settings.
 """
 
 helps['network express-route peering delete'] = """
     type: command
-    short-summary: Delete peering settings in an ExpressRoute circuit.
+    short-summary: Delete peering settings.
 """
 
 helps['network express-route peering list'] = """
     type: command
-    short-summary: List peering settings of an ExpressRoute circuit.
+    short-summary: List peering settings.
 """
 
 helps['network express-route peering show'] = """
     type: command
-    short-summary: Show peering details of an ExpressRoute circuit.
+    short-summary: Show peering details.
 """
 
 helps['network express-route peering update'] = """
     type: command
-    short-summary: Update peering settings in an ExpressRoute circuit.
+    short-summary: Update peering settings.
 """
 #endregion
 
@@ -701,12 +701,12 @@ helps['network express-route peering update'] = """
 
 helps['network lb'] = """
     type: group
-    short-summary: Deliver high availability and network performance to your applications
+    short-summary: Use a load balancer to deliver high availability and network performance to your applications.
 """
 
 helps['network lb create'] = """
     type: command
-    short-summary: Create a new load balancer.
+    short-summary: Create a load balancer.
 """
 
 helps['network lb delete'] = """
@@ -716,7 +716,7 @@ helps['network lb delete'] = """
 
 helps['network lb list'] = """
     type: command
-    short-summary: List load balancers in a resource group or subscription.
+    short-summary: List load balancers.
 """
 
 helps['network lb show'] = """
@@ -734,27 +734,27 @@ helps['network lb update'] = """
 
 helps['network lb address-pool'] = """
     type: group
-    short-summary: Manage load balancer backend address pools
+    short-summary: Manage backend address pools for a load balancer.
 """
 
 helps['network lb address-pool create'] = """
     type: command
-    short-summary: Create a new load balancer backend address pool.
+    short-summary: Create a backend address pool.
 """
 
 helps['network lb address-pool delete'] = """
     type: command
-    short-summary: Delete a load balancer backend address pool.
+    short-summary: Delete a backend address pool.
 """
 
 helps['network lb address-pool list'] = """
     type: command
-    short-summary: List backend address pools in a load balancer.
+    short-summary: List backend address pools.
 """
 
 helps['network lb address-pool show'] = """
     type: command
-    short-summary: Show details of a load balancer backend address pool.
+    short-summary: Show details of a backend address pool.
 """
 #endregion
 
@@ -762,32 +762,32 @@ helps['network lb address-pool show'] = """
 
 helps['network lb frontend-ip'] = """
     type: group
-    short-summary: Manage load balancer front-end IP addresses
+    short-summary: Manage frontend IP addresses for a load balancer 
 """
 
 helps['network lb frontend-ip create'] = """
     type: command
-    short-summary: Create a new load balancer front-end IP address.
+    short-summary: Create a frontend IP address.
 """
 
 helps['network lb frontend-ip delete'] = """
     type: command
-    short-summary: Delete a load balancer front-end IP address.
+    short-summary: Delete a frontend IP address.
 """
 
 helps['network lb frontend-ip list'] = """
     type: command
-    short-summary: List front-end IP addresses in a load balancer.
+    short-summary: List frontend IP addresses.
 """
 
 helps['network lb frontend-ip show'] = """
     type: command
-    short-summary: Show details of a load balancer front-end IP address.
+    short-summary: Show details of a frontend IP address.
 """
 
 helps['network lb frontend-ip update'] = """
     type: command
-    short-summary: Update a load balancer front-end IP address.
+    short-summary: Update a frontend IP address.
 """
 #endregion
 
@@ -795,32 +795,32 @@ helps['network lb frontend-ip update'] = """
 
 helps['network lb inbound-nat-pool'] = """
     type: group
-    short-summary: Manage load balancer inbound NAT address pools
+    short-summary: Manage inbound NAT address pools for a load balancer. 
 """
 
 helps['network lb inbound-nat-pool create'] = """
     type: command
-    short-summary: Create a new load balancer inbound NAT address pool.
+    short-summary: Create an inbound NAT address pool.
 """
 
 helps['network lb inbound-nat-pool delete'] = """
     type: command
-    short-summary: Delete a load balancer inbound NAT address pool.
+    short-summary: Delete an inbound NAT address pool.
 """
 
 helps['network lb inbound-nat-pool list'] = """
     type: command
-    short-summary: List inbound NAT address pools in a load balancer.
+    short-summary: List inbound NAT address pools.
 """
 
 helps['network lb inbound-nat-pool show'] = """
     type: command
-    short-summary: Show details of a load balancer inbound NAT address pool.
+    short-summary: Show details of an inbound NAT address pool.
 """
 
 helps['network lb inbound-nat-pool update'] = """
     type: command
-    short-summary: Update a load balancer inbound NAT address pool.
+    short-summary: Update an inbound NAT address pool.
 """
 #endregion
 
@@ -828,32 +828,32 @@ helps['network lb inbound-nat-pool update'] = """
 
 helps['network lb inbound-nat-rule'] = """
     type: group
-    short-summary: Manage load balancer inbound NAT rules
+    short-summary: Manage inbound NAT rules for a load balancer.
 """
 
 helps['network lb inbound-nat-rule create'] = """
     type: command
-    short-summary: Create a new load balancer inbound NAT rule.
+    short-summary: Create an inbound NAT rule.
 """
 
 helps['network lb inbound-nat-rule delete'] = """
     type: command
-    short-summary: Delete a load balancer inbound NAT rule.
+    short-summary: Delete an inbound NAT rule.
 """
 
 helps['network lb inbound-nat-rule list'] = """
     type: command
-    short-summary: List inbound NAT rules in a load balancer.
+    short-summary: List inbound NAT rules.
 """
 
 helps['network lb inbound-nat-rule show'] = """
     type: command
-    short-summary: Show details of a load balancer inbound NAT rule.
+    short-summary: Show details of an inbound NAT rule.
 """
 
 helps['network lb inbound-nat-rule update'] = """
     type: command
-    short-summary: Update a load balancer inbound NAT rule.
+    short-summary: Update an inbound NAT rule.
 """
 #endregion
 
@@ -861,32 +861,32 @@ helps['network lb inbound-nat-rule update'] = """
 
 helps['network lb probe'] = """
     type: group
-    short-summary: Evaluate probe information and define routing rules
+    short-summary: Evaluate probe information and define routing rules.
 """
 
 helps['network lb probe create'] = """
     type: command
-    short-summary: Create a new load balancer probe.
+    short-summary: Create a probe.
 """
 
 helps['network lb probe delete'] = """
     type: command
-    short-summary: Delete a load balancer probe.
+    short-summary: Delete a probe.
 """
 
 helps['network lb probe list'] = """
     type: command
-    short-summary: List probes in a load balancer.
+    short-summary: List probes.
 """
 
 helps['network lb probe show'] = """
     type: command
-    short-summary: Show details of a load balancer probe.
+    short-summary: Show details of a probe.
 """
 
 helps['network lb probe update'] = """
     type: command
-    short-summary: Update a load balancer probe.
+    short-summary: Update a probe.
 """
 #endregion
 
@@ -894,12 +894,12 @@ helps['network lb probe update'] = """
 
 helps['network lb rule'] = """
     type: group
-    short-summary: Commands to manage load balancing rules.
+    short-summary: Manage load balancing rules.
 """
 
 helps['network lb rule create'] = """
     type: command
-    short-summary: Create a new load balancing rule.
+    short-summary: Create a load balancing rule.
 """
 
 helps['network lb rule delete'] = """
@@ -909,7 +909,7 @@ helps['network lb rule delete'] = """
 
 helps['network lb rule list'] = """
     type: command
-    short-summary: List load balancing rules in a load balancer.
+    short-summary: List load balancing rules.
 """
 
 helps['network lb rule show'] = """
@@ -927,12 +927,12 @@ helps['network lb rule update'] = """
 
 helps['network local-gateway'] = """
     type: group
-    short-summary: Manage local gateways
+    short-summary: Manage local gateways.
 """
 
 helps['network local-gateway create'] = """
     type: command
-    short-summary: Create a new local VPN gateway.
+    short-summary: Create a local VPN gateway.
 """
 
 helps['network local-gateway delete'] = """
@@ -941,7 +941,7 @@ helps['network local-gateway delete'] = """
 """
 helps['network local-gateway list'] = """
     type: command
-    short-summary: List local VPN gateways in a resource group.
+    short-summary: List local VPN gateways.
 """
 helps['network local-gateway show'] = """
     type: command
@@ -950,7 +950,7 @@ helps['network local-gateway show'] = """
 
 helps['network local-gateway update'] = """
     type: command
-    short-summary: Update an existing local VPN gateway.
+    short-summary: Update a local VPN gateway.
 """
 #endregion
 
@@ -958,17 +958,17 @@ helps['network local-gateway update'] = """
 
 helps['network nic'] = """
     type: group
-    short-summary: Manage network interfaces (NIC)
+    short-summary: Manage network interfaces.
 """
 
 helps['network nic show-effective-route-table'] = """
     type: command
-    short-summary: Show all route tables applied on a network interface.
+    short-summary: Show all route tables applied to a network interface.
 """
 
 helps['network nic list-effective-nsg'] = """
     type: command
-    short-summary: List all network security groups applied on a network interface.
+    short-summary: List all network security groups applied to a network interface.
 """
 
 helps['network nic create'] = """
@@ -983,14 +983,14 @@ helps['network nic delete'] = """
 
 helps['network nic list'] = """
     type: command
-    short-summary: List network interfaces within a subscription or resource group.
+    short-summary: List network interfaces.
     long-summary: |
-        Does not list network interfaces attached to scale set virtual machines. Use 'az vmss nic list' or 'az vmss nic list-vm-nics' to display that information.
+        Does not list network interfaces attached to VMs in a VM scale sets. Use 'az vmss nic list' or 'az vmss nic list-vm-nics' to display that information.
 """
 
 helps['network nic show'] = """
     type: command
-    short-summary: Show details on a network interface.
+    short-summary: Show details of a network interface.
 """
 
 helps['network nic update'] = """
@@ -1003,36 +1003,34 @@ helps['network nic update'] = """
 
 helps['network nic ip-config'] = """
     type: group
-    short-summary: Manage NIC IP configurations.
+    short-summary: Manage IP configurations of a network interface.
 """
 
 helps['network nic ip-config create'] = """
     type: command
-    short-summary: Create a new IP configuration on a NIC.
-    long-summary: You must have the Microsoft.Network/AllowMultipleIpConfigurationsPerNic feature
-        enabled for your subscription. Only one configuration may be designated as the primary
-        IP configuration per NIC, using the --make-primary flag.
+    short-summary: Create an IP configuration.
+    long-summary: You must have the Microsoft.Network/AllowMultipleIpConfigurationsPerNic feature enabled for your subscription. Only one configuration may be designated as the primary IP configuration per NIC, using the --make-primary flag.
 """
 
 helps['network nic ip-config delete'] = """
     type: command
-    short-summary: Delete an IP configuration from a NIC.
+    short-summary: Delete an IP configuration.
     long-summary: A NIC must have at least one IP configuration.
 """
 
 helps['network nic ip-config list'] = """
     type: command
-    short-summary: List IP configurations on a NIC.
+    short-summary: List IP configurations.
 """
 
 helps['network nic ip-config show'] = """
     type: command
-    short-summary: Show details of an IP configurations on a NIC.
+    short-summary: Show details of an IP configuration.
 """
 
 helps['network nic ip-config update'] = """
     type: command
-    short-summary: Update an IP configurations on a NIC.
+    short-summary: Update an IP configuration.
 """
 #endregion
 
@@ -1040,17 +1038,17 @@ helps['network nic ip-config update'] = """
 
 helps['network nic ip-config address-pool'] = """
     type: group
-    short-summary: Manage NIC IP configuration backend address pools.
+    short-summary: Manage backend address pools in an IP configuration.
 """
 
 helps['network nic ip-config address-pool add'] = """
     type: command
-    short-summary: Add a backend address pool reference to an IP configuration.
+    short-summary: Add a backend address pool.
 """
 
 helps['network nic ip-config address-pool remove'] = """
     type: command
-    short-summary: Remove a backend address pool reference from an IP configuration.
+    short-summary: Remove a backend address pool.
 """
 #endregion
 
@@ -1058,17 +1056,17 @@ helps['network nic ip-config address-pool remove'] = """
 
 helps['network nic ip-config inbound-nat-rule'] = """
     type: group
-    short-summary: Manage NIC IP configuration inbound NAT rules.
+    short-summary: Manage inbound NAT rules for an IP configuration.
 """
 
 helps['network nic ip-config inbound-nat-rule add'] = """
     type: command
-    short-summary: Add an inbound NAT rule reference to an IP configuration.
+    short-summary: Add an inbound NAT rule.
 """
 
 helps['network nic ip-config inbound-nat-rule remove'] = """
     type: command
-    short-summary: Remove an inbound NAT rule reference from an IP configuration.
+    short-summary: Remove an inbound NAT rule.
 """
 #endregion
 
@@ -1076,17 +1074,17 @@ helps['network nic ip-config inbound-nat-rule remove'] = """
 
 helps['network nsg'] = """
     type: group
-    short-summary: Manage Network Security Groups (NSG)
+    short-summary: Manage Azure Network Security Groups.
 """
 
 helps['network nsg rule'] = """
     type: group
-    short-summary: Manage NSG rules
+    short-summary: Manage NSG rules.
 """
 
 helps['network nsg rule create'] = """
     type: command
-    short-summary: Create a new NSG rule.
+    short-summary: Create an NSG rule.
 """
 
 helps['network nsg rule delete'] = """
@@ -1116,12 +1114,12 @@ helps['network nsg rule update'] = """
 
 helps['network public-ip'] = """
     type: group
-    short-summary: Manage public IP addresses
+    short-summary: Manage public IP addresses.
 """
 
 helps['network public-ip create'] = """
     type: command
-    short-summary: Create a new public IP address.
+    short-summary: Create a public IP address.
 """
 
 helps['network public-ip delete'] = """
@@ -1131,7 +1129,7 @@ helps['network public-ip delete'] = """
 
 helps['network public-ip list'] = """
     type: command
-    short-summary: List public IP addresses within a resource group or subscription.
+    short-summary: List public IP addresses.
 """
 
 helps['network public-ip show'] = """
@@ -1141,7 +1139,7 @@ helps['network public-ip show'] = """
 
 helps['network public-ip update'] = """
     type: command
-    short-summary: Update an existing public IP address.
+    short-summary: Update a public IP address.
 """
 #endregion
 
@@ -1149,12 +1147,12 @@ helps['network public-ip update'] = """
 
 helps['network route-table'] = """
     type: group
-    short-summary: Commands to manage route tables.
+    short-summary: Manage route tables.
 """
 
 helps['network route-table create'] = """
     type: command
-    short-summary: Create a new route table.
+    short-summary: Create a route table.
 """
 
 helps['network route-table delete'] = """
@@ -1164,7 +1162,7 @@ helps['network route-table delete'] = """
 
 helps['network route-table list'] = """
     type: command
-    short-summary: List route tables in a resource group or subscription.
+    short-summary: List route tables.
 """
 
 helps['network route-table show'] = """
@@ -1179,12 +1177,12 @@ helps['network route-table update'] = """
 
 helps['network route-table route'] = """
     type: group
-    short-summary: Commands to manage route table routes.
+    short-summary: Manage routes in a route table.
 """
 
 helps['network route-table route create'] = """
     type: command
-    short-summary: Create a new route in a route table.
+    short-summary: Create a route in a route table.
 """
 
 helps['network route-table route delete'] = """
@@ -1213,72 +1211,72 @@ helps['network route-table route update'] = """
 
 helps['network traffic-manager'] = """
     type: group
-    short-summary: Route incoming traffic for high performance and availability
+    short-summary: Route incoming traffic for high performance and availability.
 """
 
 helps['network traffic-manager endpoint'] = """
     type: group
-    short-summary: Manage traffic manager end points
+    short-summary: Manage traffic manager end points.
 """
 
 helps['network traffic-manager profile'] = """
     type: group
-    short-summary: Manage traffic manager profiles
+    short-summary: Manage traffic manager profiles.
 """
 
 helps['network traffic-manager profile check-dns'] = """
     type: command
-    short-summary: Check the availability of a Traffic Manager relative DNS name.
+    short-summary: Check the availability of a relative DNS name.
 """
 
 helps['network traffic-manager profile create'] = """
     type: command
-    short-summary: Create a new Traffic Manager profile.
+    short-summary: Create a profile.
 """
 
 helps['network traffic-manager profile delete'] = """
     type: command
-    short-summary: Delete a Traffic Manager profile.
+    short-summary: Delete a profile.
 """
 
 helps['network traffic-manager profile list'] = """
     type: command
-    short-summary: List Traffic Manager profiles in a resource group or subscription.
+    short-summary: List profiles.
 """
 
 helps['network traffic-manager profile show'] = """
     type: command
-    short-summary: Show details of a Traffic Manager profile.
+    short-summary: Show details of a profile.
 """
 
 helps['network traffic-manager profile update'] = """
     type: command
-    short-summary: Update an existing Traffic Manager profile.
+    short-summary: Update a profile.
 """
 
 helps['network traffic-manager endpoint create'] = """
     type: command
-    short-summary: Create a new Traffic Manager endpoint.
+    short-summary: Create an endpoint.
 """
 
 helps['network traffic-manager endpoint delete'] = """
     type: command
-    short-summary: Delete a Traffic Manager endpoint.
+    short-summary: Delete an endpoint.
 """
 
 helps['network traffic-manager endpoint list'] = """
     type: command
-    short-summary: List Traffic Manager endpoints in a resource group.
+    short-summary: List endpoints.
 """
 
 helps['network traffic-manager endpoint show'] = """
     type: command
-    short-summary: Show details of a Traffic Manager endpoint.
+    short-summary: Show details of an endpoint.
 """
 
 helps['network traffic-manager endpoint update'] = """
     type: command
-    short-summary: Update an existing Traffic Manager endpoint.
+    short-summary: Update an endpoint.
 """
 #endregion
 
@@ -1286,7 +1284,7 @@ helps['network traffic-manager endpoint update'] = """
 
 helps['network vnet'] = """
     type: group
-    short-summary: Manage virtual networks.
+    short-summary: Manage Azure Virtual Networks.
 """
 
 helps['network vnet check-ip-address'] = """
@@ -1297,8 +1295,7 @@ helps['network vnet check-ip-address'] = """
 helps['network vnet create'] = """
     type: command
     short-summary: Create a virtual network.
-    long-summary: You may also create a subnet at the same time by specifying a subnet name and
-        (optionally) an address prefix.
+    long-summary: You may also create a subnet at the same time by specifying a subnet name and (optionally) an address prefix.
 """
 
 helps['network vnet delete'] = """
@@ -1308,7 +1305,7 @@ helps['network vnet delete'] = """
 
 helps['network vnet list'] = """
     type: command
-    short-summary: List virtual networks within a resource group or subscription.
+    short-summary: List virtual networks.
 """
 
 helps['network vnet show'] = """
@@ -1341,17 +1338,17 @@ helps['network vnet subnet delete'] = """
 
 helps['network vnet subnet list'] = """
     type: command
-    short-summary: List subnets within a virtual network.
+    short-summary: List subnets in a virtual network.
 """
 
 helps['network vnet subnet show'] = """
     type: command
-    short-summary: Show details on a virtual network subnet.
+    short-summary: Show details on a subnet in a virtual network.
 """
 
 helps['network vnet subnet update'] = """
     type: command
-    short-summary: Update a virtual network subnet.
+    short-summary: Update a subnet in a virtual network.
 """
 #endregion
 
@@ -1392,12 +1389,12 @@ helps['network vnet peering update'] = """
 
 helps['network vpn-connection'] = """
     type: group
-    short-summary: Manage VPN connections
+    short-summary: Manage VPN connections.
 """
 
 helps['network vpn-connection create'] = """
     type: command
-    short-summary: Create a new VPN connection.
+    short-summary: Create a VPN connection.
 """
 
 helps['network vpn-connection delete'] = """
@@ -1407,7 +1404,7 @@ helps['network vpn-connection delete'] = """
 
 helps['network vpn-connection list'] = """
     type: command
-    short-summary: List VPN connections in a resource group or subscription.
+    short-summary: List VPN connections.
 """
 
 helps['network vpn-connection show'] = """
@@ -1426,7 +1423,7 @@ helps['network vpn-connection update'] = """
 
 helps['network vpn-connection shared-key'] = """
     type: group
-    short-summary: Manage VPN shared keys
+    short-summary: Manage VPN shared keys.
 """
 
 helps['network vpn-connection shared-key reset'] = """
@@ -1450,42 +1447,42 @@ helps['network vpn-connection shared-key update'] = """
 
 helps['network vnet-gateway'] = """
     type: group
-    short-summary: Establish secure, cross-premises connectivity
+    short-summary: Use an Azure Virtual Network Gateway to establish secure, cross-premises connectivity.
 """
 
 helps['network vnet-gateway create'] = """
     type: command
-    short-summary: Create a VNet gateway.
+    short-summary: Create a virtual network gateway.
 """
 
 helps['network vnet-gateway create'] = """
     type: command
-    short-summary: Create a VNet gateway.
+    short-summary: Create a virtual network gateway.
 """
 
 helps['network vnet-gateway delete'] = """
     type: command
-    short-summary: Delete a VNet gateway.
+    short-summary: Delete a virtual network gateway.
 """
 
 helps['network vnet-gateway list'] = """
     type: command
-    short-summary: List VNet gateways in a resource group or subscription.
+    short-summary: List virtual network gateways.
 """
 
 helps['network vnet-gateway reset'] = """
     type: command
-    short-summary: Reset a VNet gateway.
+    short-summary: Reset a virtual network gateway.
 """
 
 helps['network vnet-gateway show'] = """
     type: command
-    short-summary: Show details of a VNet gateway.
+    short-summary: Show details of a virtual network gateway.
 """
 
 helps['network vnet-gateway update'] = """
     type: command
-    short-summary: Update a VNet gateway.
+    short-summary: Update a virtual network gateway.
 """
 #endregion
 
@@ -1493,17 +1490,17 @@ helps['network vnet-gateway update'] = """
 
 helps['network vnet-gateway revoked-cert'] = """
     type: group
-    short-summary: Manage VNet gateway revoked certificates
+    short-summary: Manage revoked certificates in a virtual network gateway.
 """
 
 helps['network vnet-gateway revoked-cert create'] = """
     type: command
-    short-summary: Revoke a VNet gateway certficate.
+    short-summary: Revoke a certificate.
 """
 
 helps['network vnet-gateway revoked-cert delete'] = """
     type: command
-    short-summary: Delete a revoked VNet gateway certificate.
+    short-summary: Delete a revoked certificate.
 """
 
 #endregion
@@ -1511,17 +1508,17 @@ helps['network vnet-gateway revoked-cert delete'] = """
 # region VNet Gateway Root Cert
 helps['network vnet-gateway root-cert'] = """
     type: group
-    short-summary: Manage VNet gateway root certificates
+    short-summary: Manage root certificates for a virtuak network gateway.
 """
 
 helps['network vnet-gateway root-cert create'] = """
     type: command
-    short-summary: Upload a VNet gateway root certificate.
+    short-summary: Upload a root certificate.
 """
 
 helps['network vnet-gateway root-cert delete'] = """
     type: command
-    short-summary: Delete a VNet gateway root certificate.
+    short-summary: Delete a root certificate.
 """
 
 #endregion
