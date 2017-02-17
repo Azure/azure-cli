@@ -1211,7 +1211,7 @@ class AzureContainerServiceScenarioTest(ResourceGroupVCRTestBase):  # pylint: di
             key_file.write(TEST_SSH_KEY_PUB)
 
         acs_name = 'acstest123'
-        dns_prefix = 'myacs123'
+        dns_prefix = 'myacs1234'
 
         # create
         pathname = pathname.replace('\\', '\\\\')
