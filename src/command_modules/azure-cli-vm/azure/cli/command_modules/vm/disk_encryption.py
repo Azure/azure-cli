@@ -2,9 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
-from msrestazure.azure_exceptions import CloudError
-from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id
+import uuid
+from azure.cli.core.commands.arm import parse_resource_id
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._util import CLIError
 from .custom import set_vm, _compute_client_factory
@@ -27,18 +26,12 @@ extension_info = {
 }
 
 
-def keyvault_mgmt_client_factory(**_):
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.keyvault import KeyVaultManagementClient
-    return get_mgmt_service_client(KeyVaultManagementClient)
-
-
 def enable(resource_group_name, vm_name,  # pylint: disable=too-many-arguments,too-many-locals, too-many-statements
            aad_client_id,
            disk_encryption_keyvault,
            aad_client_secret=None, aad_client_cert_thumbprint=None,
-           key_encryption_keyvault_id=None,
-           key_encryption_key_url=None,
+           key_encryption_keyvault=None,
+           key_encryption_key=None,
            key_encryption_algorithm='RSA-OAEP',
            volume_type=None):
     '''
@@ -47,13 +40,11 @@ def enable(resource_group_name, vm_name,  # pylint: disable=too-many-arguments,t
     :param str aad_client_secret: Client Secret of AAD app with permissions to
     write secrets to KeyVault
     :param str aad_client_cert_thumbprint: Thumbprint of AAD app certificate with permissions
-    to write secrets to KeyVaul
-    :param str disk_encryption_keyvault:KeyVault where generated encryption key will be placed to
-    :param str key_encryption_key_url:Versioned KeyVault URL of the KeyEncryptionKey used to
-    encrypt the disk encryption key
-    :param str key_encryption_keyvault_id: id of the KeyVault containing the key encryption key
-    used to encrypt the disk encryption key. If missing, CLI will derive the value from
-    --key-encryption-key-url
+    to write secrets to KeyVault
+    :param str disk_encryption_keyvault:the KeyVault where generated encryption key will be placed
+    :param str key_encryption_key: KeyVault key name or URL used to encrypt the disk encryption key
+    :param str key_encryption_keyvault: the KeyVault containing the key encryption key
+    used to encrypt the disk encryption key. If missing, CLI will use --disk-encryption-keyvault
     '''
     # pylint: disable=no-member
     compute_client = _compute_client_factory()
@@ -80,41 +71,29 @@ def enable(resource_group_name, vm_name,  # pylint: disable=too-many-arguments,t
         if image_reference:
             _check_encrypt_is_supported(image_reference, volume_type)
 
-    # sequence_version should be incremented if encryptions occurred before
-    sequence_version = _get_sequence_version(compute_client, resource_group_name,
-                                             vm_name, extension['name'])
+    # sequence_version should be unique
+    sequence_version = uuid.uuid4()
 
     # retrieve keyvault details
-    keyvault_client = keyvault_mgmt_client_factory()
-    if is_valid_resource_id(disk_encryption_keyvault):
-        res = parse_resource_id(disk_encryption_keyvault)
-        keyvault_info = keyvault_client.vaults.get(res['resource_group'], res['name'])
-    else:
-        keyvault_info = _look_for_keyvault(keyvault_client, disk_encryption_keyvault,
-                                           get_detail=True)
-    keyvault_url = keyvault_info.properties.vault_uri
+    disk_encryption_keyvault_url = _get_key_vault_base_url(
+        (parse_resource_id(disk_encryption_keyvault))['name'])
 
     # disk encryption key itself can be further protected, so let us verify
-    if key_encryption_key_url and not key_encryption_keyvault_id:
-        try:
-            from urllib.parse import urlparse
-        except ImportError:
-            from urlparse import urlparse  # pylint: disable=import-error
-        hostname = urlparse(key_encryption_key_url).hostname
-        if not hostname:
-            raise CLIError('Please provide a full url to --key-encryption-key-url')
-        key_encryption_keyvault_id = _look_for_keyvault(keyvault_client,
-                                                        hostname.split('.')[0], get_detail=False).id
+    if key_encryption_key:
+        key_encryption_keyvault = key_encryption_keyvault or disk_encryption_keyvault
+        if '://' not in key_encryption_key:  # appears a key name
+            key_encryption_key = _get_keyvault_key_url(
+                (parse_resource_id(key_encryption_keyvault))['name'], key_encryption_key)
 
     # 2. we are ready to provision/update the disk encryption extensions
     # The following logic was mostly ported from xplat-cli
     public_config = {
         'AADClientID': aad_client_id,
         'AADClientCertThumbprint': aad_client_cert_thumbprint,
-        'KeyVaultURL': keyvault_url,
+        'KeyVaultURL': disk_encryption_keyvault_url,
         'VolumeType': volume_type,
         'EncryptionOperation': 'EnableEncryption',
-        'KeyEncryptionKeyURL': key_encryption_key_url,
+        'KeyEncryptionKeyURL': key_encryption_key,
         'KeyEncryptionAlgorithm': key_encryption_algorithm,
         'SequenceVersion': sequence_version,
     }
@@ -152,12 +131,12 @@ def enable(resource_group_name, vm_name,  # pylint: disable=too-many-arguments,t
 
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     secret_ref = KeyVaultSecretReference(secret_url=status_url,
-                                         source_vault=SubResource(keyvault_info.id))
+                                         source_vault=SubResource(disk_encryption_keyvault))
 
     key_encryption_key_obj = None
-    if key_encryption_key_url:
-        key_encryption_key_obj = KeyVaultKeyReference(key_encryption_key_url,
-                                                      SubResource(key_encryption_keyvault_id))
+    if key_encryption_key:
+        key_encryption_key_obj = KeyVaultKeyReference(key_encryption_key,
+                                                      SubResource(key_encryption_keyvault))
 
     disk_encryption_settings = DiskEncryptionSettings(disk_encryption_key=secret_ref,
                                                       key_encryption_key=key_encryption_key_obj,
@@ -202,8 +181,7 @@ def disable(resource_group_name, vm_name, volume_type=None, force=False):
 
     # sequence_version should be incremented since encryptions occurred before
     extension = extension_info[os_type]
-    sequence_version = _get_sequence_version(compute_client, resource_group_name,
-                                             vm_name, extension['name'])
+    sequence_version = uuid.uuid4()
 
     # 2. update the disk encryption extension
     # The following logic was mostly ported from xplat-cli
@@ -303,34 +281,26 @@ def show(resource_group_name, vm_name):
     return encryption_status
 
 
-def _get_sequence_version(compute_client, resource_group_name, vm_name, extension_name):
-    sequence_version = None
-    try:
-        ext = compute_client.virtual_machine_extensions.get(resource_group_name, vm_name,
-                                                            extension_name)
-        sequence_version = ext.settings.get('SequenceVersion', None)
-        if sequence_version is not None:
-            sequence_version += 1
-    except CloudError:
-        pass
-    return sequence_version
-
-
 def _is_linux_vm(os_type):
     return os_type.lower() == 'linux'
 
 
-def _look_for_keyvault(keyvault_client, keyvault_name, get_detail):
-    result = keyvault_client.vaults.list()
-    temp = next((k for k in result if k.name == keyvault_name), None)
-    if not temp:
-        raise CloudError("'{}' is not found under subscription".format(keyvault_name))
-    if get_detail:
-        res = parse_resource_id(temp.id)  # 'list' doesn't return all the info, so need a 'get'
-        keyvault_info = keyvault_client.vaults.get(res['resource_group'], res['name'])
-        return keyvault_info
-    else:
-        return temp
+def _get_keyvault_key_url(keyvault_name, key_name):
+    from azure.cli.core._profile import Profile
+
+    def get_token(server, resource, scope):  # pylint: disable=unused-argument
+        return Profile().get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+
+    from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
+    client = KeyVaultClient(KeyVaultAuthentication(get_token))
+    result = client.keyvault.get_key(_get_key_vault_base_url(keyvault_name), key_name, '')
+    return result.key.kid  # pylint: disable=no-member
+
+
+def _get_key_vault_base_url(vault_name):
+    from azure.cli.core._profile import CLOUD
+    suffix = CLOUD.suffixes.keyvault_dns
+    return 'https://{}{}'.format(vault_name, suffix)
 
 
 def _check_encrypt_is_supported(image_reference, volume_type):

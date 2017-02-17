@@ -609,4 +609,17 @@ def _figure_out_storage_source(resource_group_name, source):
     return (source_blob_uri, source_disk, source_snapshot)
 
 
+def process_disk_encryption_namespace(namespace):
+    namespace.disk_encryption_keyvault = _get_resource_id(namespace.disk_encryption_keyvault,
+                                                          namespace.resource_group_name,
+                                                          'vaults', 'Microsoft.KeyVault')
+
+    if namespace.key_encryption_keyvault:
+        if not namespace.key_encryption_key:
+            raise CLIError("Incorrect usage '--key-encryption-keyvault': "
+                           "'--key-encryption-key' is required")
+        namespace.key_encryption_keyvault = _get_resource_id(namespace.key_encryption_keyvault,
+                                                             namespace.resource_group_name,
+                                                             'vaults', 'Microsoft.KeyVault')
+
 # endregion

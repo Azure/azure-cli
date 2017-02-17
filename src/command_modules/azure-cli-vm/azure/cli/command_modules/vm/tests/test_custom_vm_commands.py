@@ -197,8 +197,8 @@ class Test_Vm_Custom(unittest.TestCase):
 
     # pylint: disable=line-too-long
     @mock.patch('azure.cli.command_modules.vm.disk_encryption._compute_client_factory', autospec=True)
-    @mock.patch('azure.cli.command_modules.vm.disk_encryption.keyvault_mgmt_client_factory', autospec=True)
-    def test_enable_encryption_error_cases_handling(self, mock_keyvault_client_factory, mock_compute_client_factory):
+    @mock.patch('azure.cli.command_modules.vm.disk_encryption._get_keyvault_key_url', autospec=True)
+    def test_enable_encryption_error_cases_handling(self, mock_get_keyvault_key_url, mock_compute_client_factory):
         faked_keyvault = '/subscriptions/01234567-1bf0-4dda-aec3-cb9272f09590/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/v1'
         os_disk = OSDisk(None, OperatingSystemTypes.linux)
         existing_disk = DataDisk(lun=1, vhd='https://someuri', name='d1', create_option=DiskCreateOptionTypes.empty)
@@ -208,8 +208,7 @@ class Test_Vm_Custom(unittest.TestCase):
         compute_client_mock.virtual_machines.get.return_value = vm
         mock_compute_client_factory.return_value = compute_client_mock
 
-        keyvault_client_mock = mock.MagicMock()
-        mock_keyvault_client_factory.return_value = keyvault_client_mock
+        mock_get_keyvault_key_url.return_value = 'https://somevaults.vault.azure.net/'
 
         # throw when VM has disks, but no --volume-type is specified
         with self.assertRaises(CLIError) as context:
@@ -229,14 +228,6 @@ class Test_Vm_Custom(unittest.TestCase):
             enable('rg1', 'vm1', 'client_id', faked_keyvault, 'client_secret', volume_type='DATA')
 
         self.assertTrue("Encryption is not suppored for current VM. Supported are" in str(context.exception))
-        vm.storage_profile.image_reference = None  # clean up
-
-        # throw when --key-encryption-key-url is not
-        vm.storage_profile.data_disks = []
-        with self.assertRaises(CLIError) as context:
-            enable('rg1', 'vm1', 'client_id', faked_keyvault, 'client_secret', key_encryption_key_url='fail_you')
-
-        self.assertTrue("--key-encryption-key-url" in str(context.exception))
 
     @mock.patch('azure.cli.command_modules.vm.disk_encryption.set_vm', autospec=True)
     @mock.patch('azure.cli.command_modules.vm.disk_encryption._compute_client_factory', autospec=True)
