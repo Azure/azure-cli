@@ -182,7 +182,7 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'authentication_type', help='Type of authentication to use with the VM. Defaults to password for Windows and SSH public key for Linux.', arg_group='Authentication', **enum_choice_list(['ssh', 'password']))
 
     register_cli_argument(scope, 'os_disk_name', help='The name of the new VM OS disk.', arg_group='Storage')
-    register_cli_argument(scope, 'os_type', help='Type of OS installed on a custom VHD. Do not use when specifiying an URN or URN alias.', arg_group='Storage', **enum_choice_list(['windows', 'linux']))
+    register_cli_argument(scope, 'os_type', help='Type of OS installed on a custom VHD. Do not use when specifying an URN or URN alias.', arg_group='Storage', **enum_choice_list(['windows', 'linux']))
     register_cli_argument(scope, 'storage_account', help="Only applicable when use with '--use-unmanaged-disk'. The name to use when creating a new storage account or referencing an existing one. If omitted, an appropriate storage account in the same resource group and location will be used, or a new one will be created.", arg_group='Storage')
     register_cli_argument(scope, 'storage_caching', help='Storage caching type for the VM OS disk', arg_group='Storage', **enum_choice_list(['ReadWrite', 'ReadOnly']))
     register_cli_argument(scope, 'storage_sku', help='The sku of storage account to persist VM. By default, only Standard_LRS and Premium_LRS are allowed. Using with --use-unmanaged-disk, all are available.', arg_group='Storage', **enum_choice_list(SkuName))
