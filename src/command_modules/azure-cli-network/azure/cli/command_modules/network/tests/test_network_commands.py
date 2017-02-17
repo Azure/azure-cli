@@ -1177,7 +1177,7 @@ class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
 class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkDnsScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_dns', debug=True)
+        super(NetworkDnsScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_dns')
 
     def test_network_dns(self):
         self.execute()
