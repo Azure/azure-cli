@@ -8,60 +8,6 @@ from azure.cli.core.commands.parameters import ignore_type
 from azure.cli.core.commands.arm import cli_generic_update_command
 
 
-# MANAGEMENT CLIENT FACTORIES
-def get_monitor_management_client(_):
-    from azure.mgmt.monitor import MonitorManagementClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(MonitorManagementClient)
-
-
-def get_monitor_autoscale_settings_operation(kwargs):
-    return get_monitor_management_client(kwargs).autoscale_settings
-
-
-def get_monitor_service_diagnostic_settings_operation(kwargs):
-    return get_monitor_management_client(kwargs).service_diagnostic_settings
-
-
-def get_monitor_alert_rules_operation(kwargs):
-    return get_monitor_management_client(kwargs).alert_rules
-
-
-def get_monitor_alert_rule_incidents_operation(kwargs):
-    return get_monitor_management_client(kwargs).alert_rule_incidents
-
-
-def get_monitor_log_profiles_operation(kwargs):
-    return get_monitor_management_client(kwargs).log_profiles
-
-
-# DATA CLIENT FACTORIES
-def get_monitor_client(_):
-    from azure.monitor import MonitorClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(MonitorClient)
-
-
-def get_monitor_event_categories_operation(kwargs):
-    return get_monitor_client(kwargs).event_categories
-
-
-def get_monitor_activity_logs_operation(kwargs):
-    return get_monitor_client(kwargs).activity_logs
-
-
-def get_monitor_tenant_activity_logs_operation(kwargs):
-    return get_monitor_client(kwargs).tenant_activity_logs
-
-
-def get_monitor_metric_definitions_operation(kwargs):
-    return get_monitor_client(kwargs).metric_definitions
-
-
-def get_monitor_metrics_operation(kwargs):
-    return get_monitor_client(kwargs).metrics
-
-
 # COMMANDS UTILITIES
 
 def create_service_adapter(service_model, service_class):

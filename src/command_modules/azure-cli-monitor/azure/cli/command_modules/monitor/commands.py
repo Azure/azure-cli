@@ -3,13 +3,18 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from ._util import (get_monitor_alert_rules_operation, get_monitor_alert_rule_incidents_operation,
-                    get_monitor_log_profiles_operation, get_monitor_autoscale_settings_operation,
-                    get_monitor_service_diagnostic_settings_operation,
-                    get_monitor_event_categories_operation,
-                    get_monitor_activity_logs_operation, get_monitor_tenant_activity_logs_operation,
-                    get_monitor_metric_definitions_operation, get_monitor_metrics_operation,
-                    ServiceGroup, create_service_adapter)
+from ._client_factory import (get_monitor_alert_rules_operation,
+                              get_monitor_alert_rule_incidents_operation,
+                              get_monitor_log_profiles_operation,
+                              get_monitor_autoscale_settings_operation,
+                              get_monitor_service_diagnostic_settings_operation,
+                              get_monitor_event_categories_operation,
+                              get_monitor_activity_logs_operation,
+                              get_monitor_tenant_activity_logs_operation,
+                              get_monitor_metric_definitions_operation,
+                              get_monitor_metrics_operation)
+from ._util import (ServiceGroup, create_service_adapter)
+
 
 # MANAGEMENT COMMANDS
 alert_rules_operations = create_service_adapter(
