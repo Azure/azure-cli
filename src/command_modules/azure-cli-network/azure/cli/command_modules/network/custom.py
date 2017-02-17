@@ -1405,7 +1405,7 @@ def list_dns_record_set(client, resource_group_name, zone_name, record_type=None
     if record_type:
         return client.list_by_type(resource_group_name, zone_name, record_type)
     else:
-        return client.list_all_in_resource_group(resource_group_name, zone_name)
+        return client.list_by_dns_zone(resource_group_name, zone_name)
 
 def update_dns_record_set(instance, metadata=None):
     if metadata is not None:
@@ -1434,7 +1434,7 @@ def export_zone(resource_group_name, zone_name):
     from time import localtime, strftime
 
     client = get_mgmt_service_client(DnsManagementClient)
-    record_sets = client.record_sets.list_all_in_resource_group(resource_group_name, zone_name)
+    record_sets = client.record_sets.list_by_dns_zone(resource_group_name, zone_name)
 
     zone_obj = OrderedDict({
         '$origin': zone_name.rstrip('.') + '.',
