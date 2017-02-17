@@ -453,82 +453,82 @@ helps['network application-gateway waf-config show'] = """
 
 helps['network dns record-set'] = """
     type: group
-    short-summary: Manage DNS record sets.
+    short-summary: Manage DNS records and record sets.
 """
 
-helps['network dns record-set create'] = """
-    type: command
-    short-summary: Create an empty record set within a DNS zone.
-    long-summary: |
-        If a matching record set already exists, it will be overwritten unless --if-none-match is supplied.
-"""
-
-helps['network dns record-set delete'] = """
-    type: command
-    short-summary: Deletes a record set within a DNS zone.
-"""
-
-helps['network dns record-set list'] = """
-    type: command
-    short-summary: Lists all record sets within a DNS zone.
-"""
-
-helps['network dns record-set show'] = """
-    type: command
-    short-summary: Show details of a record set within a DNS zone.
-"""
-
-helps['network dns record-set update'] = """
-    type: command
-    short-summary: Update properties of a record set within a DNS zone.
-"""
 # endregion
 
 # region DNS records
 
-helps['network dns record'] = """
-    type: group
-    short-summary: Manage DNS records contained in a record set
+for record in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
+    helps['network dns record-set {}'.format(record)] = """
+        type: group
+        short-summary: Manage DNS {} records.
+    """.format(record.upper())
+
+for record in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
+
+    helps['network dns record-set {} remove-record'.format(record)] = """
+        type: command
+        short-summary: Remove {} record from its record set.
+    """.format(record.upper())
+
+    helps['network dns record-set {} create'.format(record)] = """
+        type: command
+        short-summary: Create an empty {} record set.
+    """.format(record.upper())
+
+    helps['network dns record-set {} delete'.format(record)] = """
+        type: command
+        short-summary: Delete a {} record set and all records within.
+    """.format(record.upper())
+
+    helps['network dns record-set {} list'.format(record)] = """
+        type: command
+        short-summary: List all {} record sets in a zone.
+    """.format(record.upper())
+
+    helps['network dns record-set {} show'.format(record)] = """
+        type: command
+        short-summary: Show details of {} record set.
+    """.format(record.upper())
+
+for item in ['a', 'aaaa', 'mx', 'ns', 'ptr', 'srv', 'txt']:
+
+    helps['network dns record-set {} update'.format(record)] = """
+        type: command
+        short-summary: Update {} record set.
+    """.format(record.upper())
+
+    helps['network dns record-set {} add-record'.format(record)] = """
+        type: command
+        short-summary: Add {} record.
+    """.format(record.upper())
+
+helps['network dns record-set cname set-record'] = """
+    type: command
+    short-summary: Sets the value of the CNAME record.
 """
 
-helps['network dns record a'] = """
+helps['network dns record-set soa'] = """
     type: group
-    short-summary: Manage DNS A records
+    short-summary: Manage DNS zone SOA record.
 """
 
-helps['network dns record aaaa'] = """
-    type: group
-    short-summary: Manage DNS AAAA records
+helps['network dns record-set soa show'] = """
+    type: command
+    short-summary: Show details of the DNS zone's SOA record.
 """
 
-helps['network dns record cname'] = """
-    type: group
-    short-summary: Manage DNS CNAME records
+helps['network dns record-set soa update'] = """
+    type: command
+    short-summary: Update properties of the zone's SOA re.
 """
 
-helps['network dns record mx'] = """
-    type: group
-    short-summary: Manage DNS MX (mail) records
-"""
 
-helps['network dns record ns'] = """
-    type: group
-    short-summary: Manage DNS NS (nameserver) records
-"""
-
-helps['network dns record ptr'] = """
-    type: group
-    short-summary: Manage DNS PTR (pointer) records
-"""
-
-helps['network dns record srv'] = """
-    type: group
-    short-summary: Manage DNS SRV records
-"""
-
-helps['network dns record txt'] = """
-    type: group
-    short-summary: Manage DNS TXT records
+helps['network dns record-set list'] = """
+    type: command
+    short-summary: List all record sets within a DNS zone.
 """
 
 #endregion
