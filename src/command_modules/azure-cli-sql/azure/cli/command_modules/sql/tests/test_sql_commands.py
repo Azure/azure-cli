@@ -78,7 +78,7 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(SqlServerFirewallMgmtScenarioTest, self).__init__(__file__, test_method,
                                                                 resource_group='cli-test-sql-mgmt')
-        self.sql_server_name = 'cliautomation03'
+        self.sql_server_name = 'cliautomation10'
         self.location = "westus"
         self.admin_login = 'admin123'
         self.admin_password = 'SecretPassword123'
@@ -97,6 +97,8 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
         firewall_rule_2 = 'rule2'
         start_ip_address_2 = '123.123.123.123'
         end_ip_address_2 = '123.123.123.124'
+        allow_all_azure_ips_rule = 'AllowAllAzureIPs'
+        allow_all_azure_ips_address = '0.0.0.0'
 
         # test create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l {} '
@@ -148,7 +150,23 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('sql server firewall list -g {} --server-name {}'
                  .format(rg, self.sql_server_name), checks=[JMESPathCheck('length(@)', 2)])
 
+        # test sql server firewall create azure ip rule
+        self.cmd('sql server firewall allow-all-azure-ips -g {} --server-name {} '
+                 .format(rg, self.sql_server_name), checks=[
+                             JMESPathCheck('name', allow_all_azure_ips_rule),
+                             JMESPathCheck('resourceGroup', rg),
+                             JMESPathCheck('startIpAddress', allow_all_azure_ips_address),
+                             JMESPathCheck('endIpAddress', allow_all_azure_ips_address)])
+
+        # test sql server firewall list
+        self.cmd('sql server firewall list -g {} --server-name {}'
+                 .format(rg, self.sql_server_name), checks=[JMESPathCheck('length(@)', 3)])
+
         # test sql server firewall delete
+        self.cmd('sql server firewall delete --name {} -g {} --server-name {}'
+                 .format(allow_all_azure_ips_rule, rg, self.sql_server_name), checks=NoneCheck())
+        self.cmd('sql server firewall list -g {} --server-name {}'
+                 .format(rg, self.sql_server_name), checks=[JMESPathCheck('length(@)', 2)])
         self.cmd('sql server firewall delete --name {} -g {} --server-name {}'
                  .format(firewall_rule_1, rg, self.sql_server_name), checks=NoneCheck())
         self.cmd('sql server firewall list -g {} --server-name {}'
