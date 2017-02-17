@@ -3,6 +3,12 @@
 Release History
 ===============
 
+0.1.2rc1 (2017-02-17)
++++++++++++++++++++++
+
+* Fixes KeyError: 'environmentName' after log in
+* Handle cloud switching in more user friendly way
+
 0.1.1b2 (2017-01-30)
 +++++++++++++++++++++
 
