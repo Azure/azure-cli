@@ -1186,14 +1186,12 @@ class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
 class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkDnsScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_dns', debug=True)
+        super(NetworkDnsScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_dns')
 
     def test_network_dns(self):
         self.execute()
 
     def body(self):
-        from azure.cli.core._util import CLIError
-
         zone_name = 'myzone.com'
         rg = self.resource_group
 
@@ -1267,8 +1265,8 @@ class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network dns record-set {0} remove-record -g {1} --zone-name {2} --record-set-name myrs{0} {3}'
                      .format('a', rg, zone_name, '--ipv4-address 10.0.0.11'))
 
-        with self.assertRaises(CLIError):
-            self.cmd('network dns record-set {0} show -n myrs{0} -g {1} --zone-name {2}'.format('a', rg, zone_name))
+        self.cmd('network dns record-set {0} show -n myrs{0} -g {1} --zone-name {2}'.format('a', rg, zone_name),
+            checks=NoneCheck())
 
         self.cmd('network dns record-set {0} delete -n myrs{0} -g {1} --zone-name {2}'
                  .format('a', rg, zone_name))

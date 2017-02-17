@@ -1529,6 +1529,7 @@ def _build_record(data):
 # pylint: disable=too-many-statements
 def import_zone(resource_group_name, zone_name, file_name):
     from azure.cli.core._util import read_file_content
+    import sys
     file_text = read_file_content(file_name)
     zone_obj = parse_zone_file(file_text, zone_name)
 
@@ -1568,7 +1569,7 @@ def import_zone(resource_group_name, zone_name, file_name):
     cum_records = 0
 
     client = get_mgmt_service_client(DnsManagementClient)
-    print('== BEGINNING ZONE IMPORT: {} ==\n'.format(zone_name))
+    print('== BEGINNING ZONE IMPORT: {} ==\n'.format(zone_name), file=sys.stderr)
     client.zones.create_or_update(resource_group_name, zone_name, Zone('global'))
     for rs in record_sets.values():
 
@@ -1593,11 +1594,12 @@ def import_zone(resource_group_name, zone_name, file_name):
                 resource_group_name, zone_name, rs.name, rs.type, rs)
             cum_records += record_count
             print("({}/{}) Imported {} records of type '{}' and name '{}'"
-                  .format(cum_records, total_records, record_count, rs.type, rs.name))
+                  .format(cum_records, total_records, record_count, rs.type, rs.name),
+                  file=sys.stderr)
         except CloudError as ex:
             logger.error(ex)
     print("\n== {}/{} RECORDS IMPORTED SUCCESSFULLY: '{}' =="
-          .format(cum_records, total_records, zone_name))
+          .format(cum_records, total_records, zone_name), file=sys.stderr)
 
 
 def add_dns_aaaa_record(resource_group_name, zone_name, record_set_name, ipv6_address):
