@@ -8,30 +8,9 @@ from ._util import (get_sql_servers_operation, get_sql_database_operations,
                     ServiceGroup, create_service_adapter)
 from azure.cli.core.commands import cli_command
 
-server_operations = create_service_adapter('azure.mgmt.sql.operations.servers_operations',
-                                           'ServersOperations')
-
-with ServiceGroup(__name__, get_sql_servers_operation, server_operations) as s:
-    with s.group('sql server') as c:
-        c.command('create', 'create_or_update')
-        c.command('delete', 'delete')
-        c.command('show', 'get_by_resource_group')
-        ## Usages will not be included in the first batch of GA commands
-        #c.command('show-usage', 'list_usages')
-        c.command('list', 'list_by_resource_group')
-        c.generic_update_command('update', 'get_by_resource_group', 'create_or_update')
-
-    with s.group('sql server service-objective') as c:
-        c.command('list', 'list_service_objectives')
-        c.command('show', 'get_service_objective')
-
-    with s.group('sql server firewall') as c:
-        c.command('create', 'create_or_update_firewall_rule')
-        c.command('update', 'create_or_update_firewall_rule')
-        c.command('delete', 'delete_firewall_rule')
-        c.command('show', 'get_firewall_rule')
-        c.command('list', 'list_firewall_rules')
-        c.custom_command('allow-all-azure-ips', 'firewall_allow_all_azure_ips')
+###############################################
+#                sql db                       #
+###############################################
 
 database_operations = create_service_adapter('azure.mgmt.sql.operations.databases_operations',
                                              'DatabasesOperations')
@@ -75,6 +54,10 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
     #    c.command('list', 'list_service_tier_advisors')
     #    c.command('show', 'get_service_tier_advisor')
 
+###############################################
+#                sql elastic-pool             #
+###############################################
+
 elasticpools_ops = create_service_adapter('azure.mgmt.sql.operations.elastic_pools_operations',
                                           'ElasticPoolsOperations')
 
@@ -101,3 +84,32 @@ recommanded_elastic_pools_ops = \
     #with s.group('sql elastic-pool recommended db') as c:
     #    c.command('show', 'get_databases')
     #    c.command('list', 'list_databases')
+
+###############################################
+#                sql server                   #
+###############################################
+
+server_operations = create_service_adapter('azure.mgmt.sql.operations.servers_operations',
+                                           'ServersOperations')
+
+with ServiceGroup(__name__, get_sql_servers_operation, server_operations) as s:
+    with s.group('sql server') as c:
+        c.command('create', 'create_or_update')
+        c.command('delete', 'delete')
+        c.command('show', 'get_by_resource_group')
+        ## Usages will not be included in the first batch of GA commands
+        #c.command('show-usage', 'list_usages')
+        c.command('list', 'list_by_resource_group')
+        c.generic_update_command('update', 'get_by_resource_group', 'create_or_update')
+
+    with s.group('sql server service-objective') as c:
+        c.command('list', 'list_service_objectives')
+        c.command('show', 'get_service_objective')
+
+    with s.group('sql server firewall') as c:
+        c.command('create', 'create_or_update_firewall_rule')
+        c.command('update', 'create_or_update_firewall_rule')
+        c.command('delete', 'delete_firewall_rule')
+        c.command('show', 'get_firewall_rule')
+        c.command('list', 'list_firewall_rules')
+        c.custom_command('allow-all-azure-ips', 'firewall_allow_all_azure_ips')
