@@ -7,15 +7,15 @@ from azure.cli.core.help_files import helps
 
 helps['acs'] = """
      type: group
-     short-summary: Commands to manage Azure container services
+     short-summary: Commands to manage Azure Container Services
  """
 helps['acs dcos'] = """
     type: group
-    short-summary: Commands to manage a DCOS orchestrated Azure container service.
+    short-summary: Commands to manage a DCOS orchestrated Azure Container Service.
 """
 helps['acs kubernetes'] = """
     type: group
-    short-summary: Commands to manage a kubernetes orchestrated Azure container service.
+    short-summary: Commands to manage a Kubernetes orchestrated Azure Container Service.
 """
 helps['acs scale'] = """
     type: command
@@ -23,5 +23,5 @@ helps['acs scale'] = """
 """
 helps['acs install-cli'] = """
     type: command
-    short-summary: Downloads the dcos/kubernetes command line from Mesosphere. Default is dcos.
+    short-summary: Downloads the DCOS/Kubernetes command line.
 """
