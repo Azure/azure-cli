@@ -435,7 +435,8 @@ def _resolve_service_principal(client, identifier):
         raise CLIError("service principal '{}' doesn't exist".format(identifier))
 
 def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint:disable=too-many-arguments,too-many-statements,too-many-locals
-                                      scopes=None, role='Contributor', expanded_view=None):
+                                      scopes=None, role='Contributor', expanded_view=None,
+                                      skip_assignment=False):
     '''create a service principal and configure its access to Azure resources
     :param str name: a display name or an app id uri. Command will generate one if missing.
     :param str password: the password used to login. If missing, command will generate one.
@@ -502,23 +503,25 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
         sp_created = True
 
     #retry while server replication is done
-    for scope in scopes:
-        for l in range(0, _RETRY_TIMES):
-            try:
-                _create_role_assignment(role, sp_oid, None, scope, resolve_assignee=False)
-                break
-            except Exception as ex:
-                if l < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
-                    time.sleep(5)
-                    logger.warning('Retrying role assignment creation: %s/%s', l+1, _RETRY_TIMES)
-                    continue
-                elif sp_created:
-                    #dump out history for diagnoses
-                    logger.warning('Role assignment creation failed. Traces followed:\n')
-                    logger.warning('Service principal response: %s\n', aad_sp.response.headers)
-                    if getattr(ex, 'response', None) is not None:
-                        logger.warning('role assignment response: %s\n', ex.response.headers) #pylint: disable=no-member
-                raise
+    if not skip_assignment:
+        # pylint: disable=line-too-long
+        for scope in scopes:
+            for l in range(0, _RETRY_TIMES):
+                try:
+                    _create_role_assignment(role, sp_oid, None, scope, resolve_assignee=False)
+                    break
+                except Exception as ex:
+                    if l < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
+                        time.sleep(5)
+                        logger.warning('Retrying role assignment creation: %s/%s', l+1, _RETRY_TIMES)
+                        continue
+                    elif sp_created:
+                        #dump out history for diagnoses
+                        logger.warning('Role assignment creation failed. Traces followed:\n')
+                        logger.warning('Service principal response: %s\n', aad_sp.response.headers)
+                        if getattr(ex, 'response', None) is not None:
+                            logger.warning('role assignment response: %s\n', ex.response.headers) #pylint: disable=no-member
+                    raise
 
     if expanded_view:
         from azure.cli.core._profile import Profile
