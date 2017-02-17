@@ -30,6 +30,13 @@ with ParametersContext(command='sql db create') as c:
     from azure.mgmt.sql.models.database import Database
     c.expand('parameters', Database, ignores=ignores)
 
+with ParametersContext(command='sql db create-copy') as c:
+    # Wrapper function determines location and create mode params
+    ignores = ['location'] + sql_db_special_create_mode_params
+
+    from azure.mgmt.sql.models.database import Database
+    c.expand('parameters', Database, ignores=ignores)
+
 with ParametersContext(command='sql db update') as c:
     # These parameters are applicable to create only, not update.
     ignores = ['location', 'collation'] + sql_db_special_create_mode_params

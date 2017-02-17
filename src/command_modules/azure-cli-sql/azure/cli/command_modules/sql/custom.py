@@ -9,6 +9,8 @@ from ._util import (
     get_sql_elasticpools_operations
 )
 
+from azure.cli.core.commands.client_factory import get_subscription_id
+
 ###############################################
 #                Common funcs                 #
 ###############################################
@@ -35,6 +37,42 @@ def db_create(
 
     # Determine server location
     kwargs['location'] = get_server_location(server_name=server_name, resource_group_name=resource_group_name)
+
+    # Create
+    return client.create_or_update(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        database_name=database_name,
+        parameters=kwargs)
+
+# Copies a database. Wrapper function to make create mode more convenient.
+def db_create_copy(
+    client,
+    server_name,
+    resource_group_name,
+    database_name,
+    source_database_name,
+    source_server_name=None,
+    source_resource_group_name=None,
+    source_subscription_id=None,
+    **kwargs):
+
+    # Determine server location
+    kwargs['location'] = get_server_location(server_name=server_name, resource_group_name=resource_group_name)
+
+    # Determine optional values
+    source_subscription_id = source_subscription_id or get_subscription_id()
+    source_server_name = source_server_name or server_name
+    source_resource_group_name = source_resource_group_name or resource_group_name
+
+    # Set create mode properties
+    kwargs['create_mode'] = 'Copy'
+    from urllib.parse import quote
+    kwargs['source_database_id'] = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}'.format(
+        quote(source_subscription_id),
+        quote(source_resource_group_name),
+        quote(source_server_name),
+        quote(source_database_name))
 
     # Create
     return client.create_or_update(
