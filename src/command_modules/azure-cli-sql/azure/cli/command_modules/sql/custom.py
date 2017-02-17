@@ -3,7 +3,33 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from ._util import get_sql_servers_operation
+from ._util import (
+    get_sql_servers_operation,
+    get_sql_database_operations,
+    get_sql_elasticpools_operations
+)
+
+# Lists databases in a server or elastic pool.
+def db_list(
+    client,
+    server_name,
+    resource_group_name,
+    elastic_pool_name=None):
+
+    if elastic_pool_name:
+        # List all databases in the elastic pool
+        pool_client = get_sql_elasticpools_operations(None)
+        return pool_client.list_databases(
+            server_name=server_name,
+            resource_group_name=resource_group_name,
+            elastic_pool_name=elastic_pool_name)
+        return 
+    else:
+        # List all databases in the server
+        return client.list_by_server(
+            resource_group_name=resource_group_name,
+            server_name=server_name
+        )
 
 # Creates a firewall rule with special start/end ip address value
 # that represents all azure ips.

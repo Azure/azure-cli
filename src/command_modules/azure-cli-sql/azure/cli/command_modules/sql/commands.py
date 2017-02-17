@@ -40,7 +40,7 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
     with s.group('sql db') as c:
         c.command('create', 'create_or_update')
         c.command('show', 'get')
-        c.command('list', 'list_by_server')
+        c.custom_command('list', 'db_list')
         ## Usages will not be included in the first batch of GA commands
         #c.command('show-usage', 'list_usages')
         c.command('delete', 'delete')
@@ -85,11 +85,6 @@ with ServiceGroup(__name__, get_sql_elasticpools_operations, elasticpools_ops) a
         c.command('show', 'get')
         c.command('list', 'list_by_server')
         c.generic_update_command('update', 'get', 'create_or_update')
-
-    with s.group('sql elastic-pool db') as c:
-        c.command('list', 'list_databases')
-        c.command('show', 'get_database')
-        c.command('show-activity', 'list_database_activity')
 
 recommanded_elastic_pools_ops = \
     create_service_adapter('azure.mgmt.sql.operations.recommended_elastic_pools_operations',
