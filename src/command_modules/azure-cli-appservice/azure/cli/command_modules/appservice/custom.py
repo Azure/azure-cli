@@ -677,7 +677,7 @@ def delete_ssl_cert(resource_group_name, name, certificate_thumbprint):
             raise CLIError(error_str_2.format(certificate_thumbprint))
 
 def _update_host_name_ssl_state(resource_group_name, webapp_name, location,
-                                host_name, ssl_state, thumbprint, client, slot=None):
+                                host_name, ssl_state, thumbprint, slot=None):
     updated_webapp = Site(host_name_ssl_states=
                           [HostNameSslState
                            (
@@ -700,7 +700,7 @@ def _update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_t
         if webapp_cert.thumbprint == certificate_thumbprint:
             return _update_host_name_ssl_state(resource_group_name, name, webapp.location,
                                                webapp_cert.host_names[0], ssl_type,
-                                               certificate_thumbprint, client, slot)
+                                               certificate_thumbprint, slot)
     raise CLIError("Certificate for thumbprint '{}' not found.".format(certificate_thumbprint))
 
 def bind_ssl_cert(resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
