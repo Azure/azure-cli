@@ -94,9 +94,18 @@ class NetworkAppGatewayExistingSubnetScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
     def body(self):
+        from azure.cli.core._util import CLIError
         rg = self.resource_group
         vnet = self.cmd('network vnet create -g {} -n vnet2 --subnet-name subnet1'.format(rg))
         subnet_id = vnet['newVNet']['subnets'][0]['id']
+
+        with self.assertRaises(CLIError):
+            # make sure it fails
+            self.cmd('network application-gateway create -g {} -n ag2 --subnet {} --subnet-address-prefix 10.0.0.0/28'.format(rg, subnet_id), checks=[
+                JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+                JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.subnet.id', subnet_id)
+            ])
+        # now verify it succeeds
         self.cmd('network application-gateway create -g {} -n ag2 --subnet {} --servers 172.0.0.1 www.mydomain.com'.format(rg, subnet_id), checks=[
             JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
             JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.subnet.id', subnet_id)
@@ -165,7 +174,7 @@ class NetworkAppGatewayPublicIpScenarioTest(ResourceGroupVCRTestBase):
     def body(self):
         rg = self.resource_group
         public_ip_name = 'publicip4'
-        self.cmd('network application-gateway create -g {} -n test4 --subnet subnet1 --vnet-name vnet4 --public-ip-address {}'.format(rg, public_ip_name), checks=[
+        self.cmd('network application-gateway create -g {} -n test4 --subnet subnet1 --vnet-name vnet4 --vnet-address-prefix 10.0.0.1/16 --subnet-address-prefix 10.0.0.1/28 --public-ip-address {}'.format(rg, public_ip_name), checks=[
             JMESPathCheck("applicationGateway.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{}')".format(public_ip_name), True),
             JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic')
         ])

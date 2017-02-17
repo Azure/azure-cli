@@ -362,6 +362,20 @@ def process_ag_create_namespace(namespace):
     if namespace.subnet or namespace.virtual_network_name:
         get_subnet_validator(has_type_field=True, allow_new=True)(namespace)
 
+    prefix_usage_error = CLIError('Do not specify --subnet-address-prefix or --vnet-address-prefix'
+                                  ' when using an existing subnet.')
+    if namespace.subnet_address_prefix:
+        if '__SET__' in namespace.subnet_address_prefix:
+            if namespace.subnet_type != 'new':
+                raise prefix_usage_error
+            namespace.subnet_address_prefix = namespace.subnet_address_prefix.replace('__SET__', '')
+
+    if namespace.vnet_address_prefix:
+        if '__SET__' in namespace.vnet_address_prefix:
+            if namespace.subnet_type != 'new':
+                raise prefix_usage_error
+            namespace.vnet_address_prefix = namespace.vnet_address_prefix.replace('__SET__', '')
+
     if namespace.public_ip_address:
         get_public_ip_validator(
             has_type_field=True, allow_none=True, allow_new=True, default_none=True)(namespace)
