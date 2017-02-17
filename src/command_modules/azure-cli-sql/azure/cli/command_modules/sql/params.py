@@ -18,24 +18,20 @@ with ParametersContext(command='sql db') as c:
     c.register_alias('requested_service_objective_id', ('--service-objective-id',))
 
 with ParametersContext(command='sql db create') as c:
-    from azure.mgmt.sql.models.database import Database
-    c.expand('parameters', Database)
+    # We have wrapper function that determines server location so user doesn't need to.
+    # Also we have specific commands to special create modes, so they can be ignored
+    # for regular db create.
+    ignore_params = ['location'] + sql_db_special_create_mode_params
 
-    for p in sql_db_special_create_mode_params:
-        c.ignore(p)
+    from azure.mgmt.sql.models.database import Database
+    c.expand('parameters', Database, ignores=ignore_params)
 
 with ParametersContext(command='sql db update') as c:
+    # These parameters are applicable to create only, not update.
+    ignore_params = ['location', 'collation'] + sql_db_special_create_mode_params
+
     from azure.mgmt.sql.models.database import Database
-    c.expand('parameters', Database)
-
-    # Location isn't required for update
-    c.ignore('location')
-
-    # These parameters are applicable to create only, not update
-    sql_db_non_updateable_params = ['collation']
-
-    for p in sql_db_special_create_mode_params + sql_db_non_updateable_params:
-        c.ignore(p)
+    c.expand('parameters', Database, ignores=ignore_params)
 
 ## Data Warehouse will not be included in the first batch of GA commands
 #with ParametersContext(command='sql db data-warehouse') as c:

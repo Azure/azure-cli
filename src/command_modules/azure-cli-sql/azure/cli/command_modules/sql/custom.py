@@ -9,6 +9,28 @@ from ._util import (
     get_sql_elasticpools_operations
 )
 
+# Creates a database. Wrapper function which uses the server location so that the user doesn't
+# need to specify location.
+def db_create(
+    client,
+    server_name,
+    resource_group_name,
+    database_name,
+    **kwargs):
+
+    # Determine server location
+    server_client = get_sql_servers_operation(None)
+    kwargs['location'] = server_client.get_by_resource_group(
+        server_name=server_name,
+        resource_group_name=resource_group_name).location
+
+    # Create
+    return client.create_or_update(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        database_name=database_name,
+        parameters=kwargs)
+
 # Lists databases in a server or elastic pool.
 def db_list(
     client,

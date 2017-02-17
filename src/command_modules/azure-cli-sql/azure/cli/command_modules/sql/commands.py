@@ -38,7 +38,7 @@ database_operations = create_service_adapter('azure.mgmt.sql.operations.database
 
 with ServiceGroup(__name__, get_sql_database_operations, database_operations) as s:
     with s.group('sql db') as c:
-        c.command('create', 'create_or_update')
+        c.custom_command('create', 'db_create')
         c.command('show', 'get')
         c.custom_command('list', 'db_list')
         ## Usages will not be included in the first batch of GA commands
