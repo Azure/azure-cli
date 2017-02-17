@@ -688,15 +688,9 @@ def _update_host_name_ssl_state(resource_group_name, webapp_name, location,
                            )
                           ],
                           location=location)
-    if slot:
-        return client.web_apps.create_or_update_slot(resource_group_name,
-                                                     '{}({})'.format(webapp_name, slot),
-                                                     site_envelope=updated_webapp,
-                                                     slot=slot)
-    else:
-        return client.web_apps.create_or_update(resource_group_name,
-                                                webapp_name,
-                                                site_envelope=updated_webapp)
+    name = '{}({})'.format(webapp_name, slot) if slot else webapp_name
+    return _generic_site_operation(resource_group_name, name, 'create_or_update',
+                                   slot, updated_webapp)
 
 def _update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
     client = web_client_factory()
