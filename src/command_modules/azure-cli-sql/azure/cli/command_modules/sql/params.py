@@ -6,6 +6,11 @@
 from ._util import ParametersContext, patch_arg_make_required
 from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument
 
+# sql db params that are used for non-default create modes. These are ignored
+# for regular create (because we have custom commands for special create modes)
+# and ignored for update (because they are not applicable to update)
+sql_db_special_create_mode_params = ['create_mode', 'source_database_id']
+
 with ParametersContext(command='sql db') as c:
     c.register_alias('database_name', ('--name', '-n'))
     c.register_alias('server_name', ('--server-name', '-s'))
@@ -16,10 +21,8 @@ with ParametersContext(command='sql db create') as c:
     from azure.mgmt.sql.models.database import Database
     c.expand('parameters', Database)
 
-    # These parameters are applicable to non-default create modes, for which we will 
-    # implement alternative commands
-    c.ignore('create_mode')
-    c.ignore('source_database_id')
+    for p in sql_db_special_create_mode_params:
+        c.ignore(p)
 
 with ParametersContext(command='sql db update') as c:
     from azure.mgmt.sql.models.database import Database
@@ -29,9 +32,10 @@ with ParametersContext(command='sql db update') as c:
     c.ignore('location')
 
     # These parameters are applicable to create only, not update
-    c.ignore('collation')
-    c.ignore('create_mode')
-    c.ignore('source_database_id')
+    sql_db_non_updateable_params = ['collation']
+
+    for p in sql_db_special_create_mode_params + sql_db_non_updateable_params:
+        c.ignore(p)
 
 ## Data Warehouse will not be included in the first batch of GA commands
 #with ParametersContext(command='sql db data-warehouse') as c:
