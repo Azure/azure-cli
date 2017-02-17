@@ -52,9 +52,9 @@ helps['monitor event-categories'] = """
             type: group
             short-summary: Commands to manage event categories.
             """
-helps['monitor events'] = """
+helps['monitor activity-logs'] = """
             type: group
-            short-summary: Commands to manage events.
+            short-summary: Commands to manage activity logs.
             """
 helps['monitor metrics'] = """
             type: group
@@ -64,11 +64,7 @@ helps['monitor metric-definitions'] = """
             type: group
             short-summary: Commands to manage metric definitions.
             """
-helps['monitor tenant-events'] = """
+helps['monitor tenant-activity-logs'] = """
             type: group
-            short-summary: Commands to manage tenant events.
-            """
-helps['monitor usage-metrics'] = """
-            type: group
-            short-summary: Commands to manage usage metrics.
+            short-summary: Commands to manage tenant activity logs.
             """

@@ -6,14 +6,14 @@
 from ._util import (get_monitor_alert_rules_operation, get_monitor_alert_rule_incidents_operation,
                     get_monitor_log_profiles_operation, get_monitor_autoscale_settings_operation,
                     get_monitor_service_diagnostic_settings_operation,
-                    get_monitor_usage_metrics_operation, get_monitor_event_categories_operation,
-                    get_monitor_events_operation, get_monitor_tenant_events_operation,
+                    get_monitor_event_categories_operation,
+                    get_monitor_activity_logs_operation, get_monitor_tenant_activity_logs_operation,
                     get_monitor_metric_definitions_operation, get_monitor_metrics_operation,
                     ServiceGroup, create_service_adapter)
 
 # MANAGEMENT COMMANDS
 alert_rules_operations = create_service_adapter(
-    'azure.cli.command_modules.monitor.sdk.operations.alert_rules_operations',
+    'azure.mgmt.monitor.operations.alert_rules_operations',
     'AlertRulesOperations')
 
 with ServiceGroup(__name__, get_monitor_alert_rules_operation, alert_rules_operations) as s:
@@ -25,7 +25,7 @@ with ServiceGroup(__name__, get_monitor_alert_rules_operation, alert_rules_opera
         c.generic_update_command('update', 'get', 'create_or_update')
 
 alert_rule_incidents_operations = create_service_adapter(
-    'azure.cli.command_modules.monitor.sdk.operations.alert_rule_incidents_operations',
+    'azure.mgmt.monitor.operations.alert_rule_incidents_operations',
     'AlertRuleIncidentsOperations')
 
 with ServiceGroup(__name__, get_monitor_alert_rule_incidents_operation,
@@ -35,7 +35,7 @@ with ServiceGroup(__name__, get_monitor_alert_rule_incidents_operation,
         c.command('list', 'list_by_alert_rule')
 
 log_profiles_operations = create_service_adapter(
-    'azure.cli.command_modules.monitor.sdk.operations.log_profiles_operations',
+    'azure.mgmt.monitor.operations.log_profiles_operations',
     'LogProfilesOperations')
 
 with ServiceGroup(__name__, get_monitor_log_profiles_operation,
@@ -48,7 +48,7 @@ with ServiceGroup(__name__, get_monitor_log_profiles_operation,
         c.generic_update_command('update', 'get', 'create_or_update')
 
 service_diagnostic_settings_operations = create_service_adapter(
-    'azure.cli.command_modules.monitor.sdk.operations.service_diagnostic_settings_operations',
+    'azure.mgmt.monitor.operations.service_diagnostic_settings_operations',
     'ServiceDiagnosticSettingsOperations')
 
 with ServiceGroup(__name__, get_monitor_service_diagnostic_settings_operation,
@@ -59,7 +59,7 @@ with ServiceGroup(__name__, get_monitor_service_diagnostic_settings_operation,
         c.generic_update_command('update', 'get', 'create_or_update')
 
 autoscale_settings_operations = create_service_adapter(
-    'azure.cli.command_modules.monitor.sdk.operations.autoscale_settings_operations',
+    'azure.mgmt.monitor.operations.autoscale_settings_operations',
     'AutoscaleSettingsOperations')
 
 with ServiceGroup(__name__, get_monitor_autoscale_settings_operation,
@@ -73,13 +73,6 @@ with ServiceGroup(__name__, get_monitor_autoscale_settings_operation,
 
 
 # DATA COMMANDS
-usage_metrics_operations = create_service_adapter(
-    'azure.monitor.operations.usage_metrics_operations', 'UsageMetricsOperations')
-
-with ServiceGroup(__name__, get_monitor_usage_metrics_operation, usage_metrics_operations) as s:
-    with s.group('monitor usage-matrics') as c:
-        c.command('list', 'list')
-
 event_categories_operations = create_service_adapter(
     'azure.monitor.operations.event_categories_operations', 'EventCategoriesOperations')
 
@@ -88,19 +81,20 @@ with ServiceGroup(__name__, get_monitor_event_categories_operation,
     with s.group('monitor event-categories') as c:
         c.command('list', 'list')
 
-events_operations = create_service_adapter(
-    'azure.monitor.operations.events_operations', 'EventsOperations')
+activity_logs_operations = create_service_adapter(
+    'azure.monitor.operations.activity_logs_operations', 'ActivityLogsOperations')
 
-with ServiceGroup(__name__, get_monitor_events_operation, events_operations) as s:
-    with s.group('monitor events') as c:
+with ServiceGroup(__name__, get_monitor_activity_logs_operation,
+                  activity_logs_operations) as s:
+    with s.group('monitor activity-logs') as c:
         c.command('list', 'list')
 
-tenant_events_operations = create_service_adapter(
-    'azure.monitor.operations.tenant_events_operations', 'TenantEventsOperations')
+tenant_activity_logs_operations = create_service_adapter(
+    'azure.monitor.operations.tenant_activity_logs_operations', 'TenantActivityLogsOperations')
 
-with ServiceGroup(__name__, get_monitor_tenant_events_operation,
-                  tenant_events_operations) as s:
-    with s.group('monitor tenant-events') as c:
+with ServiceGroup(__name__, get_monitor_tenant_activity_logs_operation,
+                  tenant_activity_logs_operations) as s:
+    with s.group('monitor tenant-activity-logs') as c:
         c.command('list', 'list')
 
 metric_definitions_operations = create_service_adapter(

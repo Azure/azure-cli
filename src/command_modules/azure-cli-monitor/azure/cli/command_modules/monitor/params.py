@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 from ._util import ParametersContext
 
 with ParametersContext(command='monitor alert-rules') as c:
@@ -20,7 +21,7 @@ with ParametersContext(command='monitor autoscale-settings') as c:
     c.register_alias('autoscale_setting_name', ('--name', '-n'))
 
 with ParametersContext(command='monitor alert-rules create') as c:
-    from azure.cli.command_modules.monitor.sdk.models.alert_rule_resource import AlertRuleResource
+    from azure.mgmt.monitor.models.alert_rule_resource import AlertRuleResource
 
     c.expand('parameters', AlertRuleResource)
     c.register('condition', ('--condition',),
@@ -28,19 +29,19 @@ with ParametersContext(command='monitor alert-rules create') as c:
                help='JSON encoded condition configuration. Use @{file} to load from a file.')
 
 with ParametersContext(command='monitor service-diagnostic-settings create') as c:
-    from azure.cli.command_modules.monitor.sdk.models.service_diagnostic_settings import \
+    from azure.mgmt.monitor.models.service_diagnostic_settings import \
         (ServiceDiagnosticSettings)
 
     c.expand('parameters', ServiceDiagnosticSettings)
 
 with ParametersContext(command='monitor log-profiles create') as c:
-    from azure.cli.command_modules.monitor.sdk.models.log_profile_properties import \
+    from azure.mgmt.monitor.models.log_profile_properties import \
         (LogProfileProperties)
 
     c.expand('parameters', LogProfileProperties)
 
 with ParametersContext(command='monitor autoscale-settings create') as c:
-    from azure.cli.command_modules.monitor.sdk.models.autoscale_setting_resource import \
+    from azure.mgmt.monitor.models.autoscale_setting_resource import \
         (AutoscaleSettingResource)
 
     c.expand('parameters', AutoscaleSettingResource)
