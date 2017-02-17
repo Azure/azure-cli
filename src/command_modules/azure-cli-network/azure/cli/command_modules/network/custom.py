@@ -121,7 +121,7 @@ create_ag_backend_address_pool.__doc__ = AppGatewayOperations.create_or_update._
 
 def update_ag_backend_address_pool(instance, parent, item_name, servers=None): # pylint: disable=unused-argument
     if servers is not None:
-        instance.servers = servers
+        instance.backend_addresses = servers
     return parent
 
 def create_ag_frontend_ip_configuration(resource_group_name, application_gateway_name, item_name,
@@ -151,7 +151,7 @@ def update_ag_frontend_ip_configuration(instance, parent, item_name, public_ip_a
         instance.subnet = SubResource(subnet)
     if private_ip_address is not None:
         instance.private_ip_address = private_ip_address
-        instance.private_ip_address_allocation = 'static'
+        instance.private_ip_allocation_method = 'static'
     return parent
 update_ag_frontend_ip_configuration.__doc__ = AppGatewayOperations.create_or_update.__doc__
 
@@ -227,7 +227,7 @@ def update_ag_backend_http_settings_collection(instance, parent, item_name, port
     if cookie_based_affinity is not None:
         instance.cookie_based_affinity = cookie_based_affinity
     if timeout is not None:
-        instance.timeout = timeout
+        instance.request_timeout = timeout
     return parent
 
 def create_ag_probe(resource_group_name, application_gateway_name, item_name, protocol, host,
@@ -260,7 +260,7 @@ def update_ag_probe(instance, parent, item_name, protocol=None, host=None, path=
     if timeout is not None:
         instance.timeout = timeout
     if threshold is None:
-        instance.threshold = threshold
+        instance.unhealthy_threshold = threshold
     return parent
 
 def create_ag_request_routing_rule(resource_group_name, application_gateway_name, item_name,
