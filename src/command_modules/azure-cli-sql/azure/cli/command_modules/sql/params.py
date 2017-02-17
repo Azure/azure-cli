@@ -89,6 +89,11 @@ with ParametersContext(command='sql elastic-pool create') as c:
     # We have a wrapper function that determines server location so user doesn't need to specify it as param.
     c.expand('parameters', ElasticPool, ignores=['location'])
 
+with ParametersContext(command='sql elastic-pool update') as c:
+    from azure.mgmt.sql.models.elastic_pool import ElasticPool
+    # We have a wrapper function that determines server location so user doesn't need to specify it as param.
+    c.expand('parameters', ElasticPool, ignores=['location'])
+
 ###############################################
 #                sql server                   #
 ###############################################
