@@ -52,6 +52,8 @@ def _create_short_lived_blob_sas(account_name, account_key, container, blob):
 
 
 def _create_short_lived_file_sas(account_name, account_key, share, directory_name, file_name):
+    # if dir is empty string change it to None
+    directory_name = directory_name if directory_name else None
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     sas = SharedAccessSignature(account_name, account_key)
     return sas.generate_file(share, directory_name=directory_name, file_name=file_name,
