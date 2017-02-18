@@ -9,6 +9,6 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 helps['taskhelp'] = """
     type: group
-    short-summary: Provides long-form help content by topic
-    long-summary: If you don't have the taskhelp component installed, add it with `az component update --add taskhelp`
+    short-summary: Provides long-form help content by topic.
+    long-summary: If you don't have the taskhelp component installed, add it with `az component update --add taskhelp`.
 """
