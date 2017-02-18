@@ -78,7 +78,47 @@ helps['storage blob service-properties'] = """
     type: group
     short-summary: Manage storage blob service properties.
 """
-
+helps['storage blob copy start-batch'] = """
+    type: command
+    short-summary: Copy multiple blobs or files to a blob container.
+    parameters:
+        - name: --destination-container
+          type: string
+          short-summary: The blob container where the selected source files or blobs to be copied to.
+        - name: --pattern
+          type: string
+          short-summary: The pattern is used for globbing files or blobs in the source. The
+                         supported patterns are '*', '?', '[seq', and '[!seq]'.
+        - name: --dryrun
+          type: bool
+          short-summary: Output the list of files or blobs which would be uploaded. No actual data
+                         transfer will occur.
+        - name: --source-account-name
+          type: string
+          short-summary: The source storage account from which the files or blobs will be copied to
+                         the destination. If omitted, it is assumed that source is in the same
+                         storage account as destination
+        - name: --source-account-key
+          type: string
+          short-summary: The account key for the source storage account. If it is omitted the command
+                         will try to query the key use the current log in azure account.
+        - name: --source-container
+          type: string
+          short-summary: The source container from which the blobs will be copied to the destination
+        - name: --source-share
+          type: string
+          short-summary: The source share from which the files will be copied to the destination
+        - name: --source-uri
+          type: string
+          short-summary: A URI specifies an file share or blob container from which the files or
+                         blobs will be copied to the destination. If the source is in another
+                         account, the source must either be public or must be authenticated via a
+                         shared access signature. If the source is public, no authentication is
+                         required.
+        - name: --source-sas
+          type: string
+          short-summary: The shared access signature for the source storage account.
+"""
 helps['storage container'] = """
     type: group
     short-summary: Manage blob storage containers.
@@ -239,7 +279,7 @@ helps['storage file download-batch'] = """
 
 helps['storage file copy start-batch'] = """
     type: command
-    short-summary: Asynchronously copy multiple files to a file share.
+    short-summary: Copy multiple files or blobs to a file share.
     parameters:
         - name: --destination-share
           type: string
@@ -252,13 +292,14 @@ helps['storage file copy start-batch'] = """
           short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq', and '[!seq]'.
         - name: --dryrun
           type: bool
+
           short-summary: The list of files or blobs that are uploaded. No actual data transfer occurs.
-        - name: --source-account
+        - name: --source-account-name
           type: string
-          short-summary: The source storage account from which the files or blobs are copied to the destination. If omitted, it is assumed that source is in the same storage account as destination
-        - name: --source-key
+          short-summary: The source storage account from which the files or blobs are copied to the destination. If omitted, it is assumed that source is in the same storage account as destination.
+        - name: --source-account-key
           type: string
-          short-summary: The account key for the source storage account.
+          short-summary: The account key for the source storage account. If it is omitted, the command will try to query the key using the current log in.
         - name: --source-container
           type: string
           short-summary: The source container from which the blobs are copied to the destination.

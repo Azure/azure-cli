@@ -18,7 +18,8 @@ from azure.cli.command_modules.vm._actions import \
 from azure.cli.command_modules.vm._validators import \
     (validate_nsg_name, validate_vm_nics, validate_vm_nic, process_vm_create_namespace,
      process_vmss_create_namespace, process_image_create_namespace,
-     process_disk_or_snapshot_create_namespace, validate_vm_disk, validate_location)
+     process_disk_or_snapshot_create_namespace, validate_vm_disk, validate_location,
+     process_disk_encryption_namespace)
 
 
 def get_urn_aliases_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
@@ -69,6 +70,7 @@ register_cli_argument('vm disk', 'vm_name', options_list=('--vm-name',), id_part
                       completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'))
 register_cli_argument('vm disk', 'disk', validator=validate_vm_disk, help='disk name or id',
                       completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
+register_cli_argument('vm disk detach', 'disk_name', options_list=('--name', '-n'), help='The data disk name.')
 register_cli_argument('vm disk', 'new', action="store_true", help='create a new disk')
 register_cli_argument('vm disk', 'sku', arg_type=disk_sku)
 register_cli_argument('vm disk', 'size_gb', options_list=('--size-gb', '-z'), help='size in GB.')
@@ -226,6 +228,10 @@ register_cli_argument('vmss create', 'instance_count', help='Number of VMs in th
 register_cli_argument('vmss create', 'disable_overprovision', help='Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details).', action='store_true')
 register_cli_argument('vmss create', 'upgrade_policy_mode', help=None, **enum_choice_list(UpgradeMode))
 register_cli_argument('vmss create', 'vm_sku', help='Size of VMs in the scale set.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
+
+register_cli_argument('vm encryption', 'volume_type', help='Type of volume that the encryption operation is performed on', **enum_choice_list(['DATA', 'OS', 'ALL']))
+register_cli_argument('vm encryption', 'force', action='store_true', help='continue with encryption operations regardless of the warnings')
+register_cli_argument('vm encryption', 'disk_encryption_keyvault', validator=process_disk_encryption_namespace)
 
 existing_disk_name = CliArgumentType(overrides=name_arg_type, help='The name of the managed disk', completer=get_resource_name_completion_list('Microsoft.Compute/disks'), id_part='name')
 register_cli_argument('disk', 'disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))

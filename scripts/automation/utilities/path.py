@@ -29,8 +29,7 @@ def get_command_modules_paths(include_prefix=False):
     modules_paths = ((name if include_prefix else name[len(COMMAND_MODULE_PREFIX):],
                       os.path.join(root, name))
                      for name in os.listdir(root) if name.startswith(COMMAND_MODULE_PREFIX))
-
-    return list(modules_paths)
+    return list([path for path in modules_paths if os.path.isfile(os.path.join(path[1], 'setup.py'))])
 
 
 def get_command_modules_paths_with_tests():

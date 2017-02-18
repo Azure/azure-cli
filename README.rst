@@ -53,7 +53,7 @@ On Linux, see our `prerequisites <https://github.com/Azure/azure-cli/blob/master
 
 .. code-block:: console
 
-   $ pip install --user azure-cli
+   $ pip install --user --upgrade azure-cli
 
 Update with ``$ az component update``
 
@@ -82,6 +82,8 @@ Apt-get
 
 For Debian/Ubuntu based systems.
 
+**This install does not support the component feature.**
+
 First, modify your sources list:
 
     **32 bit system**
@@ -104,6 +106,8 @@ Docker (versioned)
 ^^^^^^^^^^^^^^^^^^
 
 We maintain a Docker image preconfigured with the Azure CLI.
+
+**This install does not support the component feature.**
 
 .. code-block:: console
 
