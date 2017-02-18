@@ -29,7 +29,7 @@ helps['vm create'] = """
     parameters:
         - name: --image
           type: string
-          short-summary: 'The name of the OS image (URN alias, URN, Custom Image name or ID, or VHD Blob URI).'
+          short-summary: 'The name of the operating system image (URN alias, URN, Custom Image name or ID, or VHD Blob URI).'
           long-summary: |
 {0}
           populator-commands:
@@ -49,7 +49,7 @@ helps['vm create'] = """
           text: >
             az vm create -n my-vm-name -g myrg --admin-username myadmin --admin-password Password@1234
              --public-ip-address "" --image Win2012R2Datacenter
-        - name: Create a simple Ubuntu VM with a public IP address, DNS entry, 2 data disk(10GB, 20GB), and then generate ssh key pairs under ~/.ssh.
+        - name: Create a simple Ubuntu Linux VM with a public IP address, DNS entry, 2 data disk(10GB, 20GB), and then generate ssh key pairs under ~/.ssh.
           text: >
             az vm create -n my-vm-name -g myrg --admin-username myadmin --admin-password Password@1234
             --public-ip-address-dns-name my_globally_unique_vm_dns_name --image ubuntults --data-disk-sizes-gb 10 20
@@ -61,11 +61,11 @@ helps['vm create'] = """
           text: >
             az vm create -g myrg -n my-vm-name --image https://account123.blob.core.windows.net/Images/my_vhd-osDisk.vhd
             --os-type linux --admin-username myadmin --admin-password Password@1234
-        - name: Create a VM by attaching to an existing specialized managed operating system disk.
+        - name: Create a VM by attaching to a specialized managed operating system disk.
           text: >
             az vm create -g myrg -n my-vm-name --attach-os-disk my-os-disk
             --os-type linux --admin-username myadmin --admin-password Password@1234
-        - name: Create an Ubuntu VM and provide a cloud-init script (https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init).
+        - name: Create an Ubuntu Linux VM and provide a cloud-init script (https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init).
           text: >
             az vm create -g group_name -n vm-ame --image debian --custom_data ./my-cloud-init-script.yml
 """.format(image_long_summary)
@@ -77,14 +77,14 @@ helps['vmss create'] = """
     parameters:
         - name: --image
           type: string
-          short-summary: 'The name of the OS image (URN alias, URN, or URI).'
+          short-summary: 'The name of the operating system image (URN alias, URN, or URI).'
           long-summary: |
 {0}
     examples:
         - name: Create a Windows VM scale set with 5 instances, a load balancer, a public IP address, and a 2GB data disk.
           text: >
             az vmss create -n my_vmss_name -g myrg --admin-password MyPassword123 --instance-count 5 --image Win2012R2Datacenter --data-disk-sizes-gb 2
-        - name: Create a Linux scale set with an auto-generated ssh key pair under ~/.ssh, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network.
+        - name: Create a Linux VM scale set with an auto-generated ssh key pair under ~/.ssh, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network.
           text: >
             az vmss create -n my_vmss_name -g myrg --dns-name-for-public-ip myGloballyUniqueDnsName
             --load-balancer myLoadBalancer --vnet-name myVNET --subnet mySubnet --image UbuntuLTS
@@ -122,9 +122,9 @@ helps['vm availability-set convert'] = """
     type: command
     short-summary: Convert an Azure Availability Set to contain VMs with managed disks.
     examples:
-        - name: Use resource group and name to convert an availability set with unmanaged disks to use managed disks.
+        - name: Use the availability set name to convert it from using unmanaged disks to managed disks.
           text: vm availability-set convert -g group_name -n av_set_name
-        - name: Use Ids to convert an availability set with unmanaged disks to use managed disks.
+        - name: Use the availability set ID to convert it from using unmanaged disks to managed disks.
           text: >
             az vm availability-set convert --ids $(az vm availability-set \\
                 list -g group_name --query "[].id" -o tsv)
@@ -133,7 +133,7 @@ helps['vm availability-set convert'] = """
 helps['vm extension set'] = """
     type: command
     examples:
-        - name: Add a new linux user account to a VM.
+        - name: Add a user account to a Linux VM.
           text:
             az vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.4 --vm-name myvm --resource-group mygroup --protected-settings '{"username":"user1", "ssh_key":"ssh_rsa ..."}'
 """
@@ -148,7 +148,7 @@ helps['vm availability-set delete'] = """
 helps['vm availability-set list'] = """
     type: command
     examples:
-        - name: List availability sets in resource group.
+        - name: List availability sets.
           text: az vm availability-set list -g group_name
 """
 
@@ -162,14 +162,14 @@ helps['vm availability-set list-sizes'] = """
 helps['vm availability-set show'] = """
     type: command
     examples:
-        - name: Retrieve information about an availability set.
+        - name: Get information about an availability set.
           text: az vm availability-set show -n av_set_name -g group_name
 """
 
 helps['vm extension set'] = """
     type: command
     examples:
-        - name: Add a new linux user account to a VM.
+        - name: Add a user account to a Linux VM.
           text:
             az vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.4 --vm-name myvm
             --resource-group mygroup --protected-settings '{"username":"user1", "ssh_key":"ssh_rsa ..."}'
@@ -198,7 +198,7 @@ helps['vm update'] = """
 
 helps['vm show'] = """
     type: command
-    short-summary: Retrieves information about a virtual machine.
+    short-summary: Get information about an Azure Virtual Machine.
 """
 
 helps['vmss get-instance-view'] = """
@@ -226,7 +226,7 @@ helps['vm convert'] = """
     type: command
     short-summary: Convert a VM with unmanaged disks to use managed disks.
     examples:
-        - name: Use resource group and name to convert a VM with unmanaged disks to use managed disks.
+        - name: Convert a VM with unmanaged disks to use managed disks.
           text: az vm convert -g group_name -n vm-name
 {0}
 """.format(vm_ids_example.format('Convert VM with unmanaged disks to managed by Ids', 'vm convert'))
@@ -282,7 +282,7 @@ helps['vm availability-set'] = """
 
 helps['vm boot-diagnostics'] = """
     type: group
-    short-summary: Troubleshoot the start up of a virtual machine.
+    short-summary: Troubleshoot the start up of an Azure Virtual Machine.
     long-summary: >
         When bringing your own image to Azure or even booting one of the platform images, there can be many reasons why a VM gets into a non-bootable state. These features enable you to easily diagnose and recover your VMs from boot failures.
 """
@@ -434,7 +434,7 @@ helps['vm unmanaged-disk detach'] = """
 helps['vm unmanaged-disk list'] = """
     type: command
     examples:
-        - name: Use VM name and resource group to list the disks attached to a VM.
+        - name: List the disks attached to a VM.
           text: az vm unmanaged-disk list -g group_name --vm-name vm-name
         - name: Use IDs of disks with names containing "data_disk" to list the disks attached to a VM.
           text: >
@@ -472,7 +472,7 @@ helps['vm extension list'] = """
     examples:
         - name: Use the VM name to list the extensions attached to it.
           text: az vm extension list -g group_name --vm-name vm-name
-        - name: Use Ids to list the extensions attached to a VM with "my_extension" in the name.
+        - name: Use IDs to list the extensions with "my_extension" in the name.
           text: >
             az vm extension list --ids \\
                 $(az resource list --query "[?contains(name, 'my_extension')].id" -o tsv)
@@ -483,7 +483,7 @@ helps['vm extension delete'] = """
     examples:
         - name: Use VM name and extension name to delete an extension from a VM.
           text: az vm extension delete -g group_name --vm-name vm-name -n extension_name
-        - name: Use Ids to delete extensions that contain "my_extension" in the name.
+        - name: Use IDs to delete extensions that contain "my_extension" in the name.
           text: >
             az vm extension delete --ids \\
                 $(az resource list --query "[?contains(name, 'my_extension')].id" -o tsv)
@@ -768,7 +768,7 @@ helps['vm list-usage'] = """
 helps['vm list-vm-resize-options'] = """
     type: command
     examples:
-        - name: Use resource group and VM name to list all available VM sizes for resizing.
+        - name: List all available VM sizes for resizing.
           text: az vm list-vm-resize-options -g group_name -n vm-name
 {0}
 """.format(vm_ids_example.format('List all available VM sizes for resizing by VM Ids', 'vm list-vm-resize-options'))
@@ -776,7 +776,7 @@ helps['vm list-vm-resize-options'] = """
 helps['vm open-port'] = """
     type: command
     examples:
-        - name: Use resource group and VM name to open all ports on a VM to inbound traffic.
+        - name: Open all ports on a VM to inbound traffic.
           text: az vm open-port -g group_name -n vm-name
 {0}
 """.format(vm_ids_example.format('Open all ports for multiple VMs by Ids', 'vm open-port'))
@@ -784,7 +784,7 @@ helps['vm open-port'] = """
 helps['vm redeploy'] = """
     type: command
     examples:
-        - name: Use resource group and VM name to redeploy a VM.
+        - name: Redeploy a VM.
           text: az vm redeploy -g group_name -n vm-name
 {0}
 """.format(vm_ids_example.format('Redeploy VMs by VM Ids', 'vm redeploy'))
@@ -792,7 +792,7 @@ helps['vm redeploy'] = """
 helps['vm resize'] = """
     type: command
     examples:
-        - name: Use resource group and VM name to resize a VM.
+        - name: Resize a VM.
           text: az vm resize -g group_name -n vm-name --size Standard_DS3_v2
 {0}
 """.format(vm_ids_example.format('Resize VMs by VM Ids', 'vm redeploy --size Standard_DS3_v2'))
@@ -800,7 +800,7 @@ helps['vm resize'] = """
 helps['vm restart'] = """
     type: command
     examples:
-        - name: Use resource group and VM name to restart a VM.
+        - name: Restart a VM.
           text: az vm restart -g group_name -n vm-name
 {0}
 """.format(vm_ids_example.format('Restart VM by by VM Ids', 'vm restart'))
@@ -808,7 +808,7 @@ helps['vm restart'] = """
 helps['vm show'] = """
     type: command
     examples:
-        - name: Use resource group and VM name to show information about a VM.
+        - name: Show information about a VM.
           text: az vm show -g group_name -n vm-name -d
 {0}
 """.format(vm_ids_example.format('Show VM details by by VM Ids', 'vm show -d'))
@@ -816,7 +816,7 @@ helps['vm show'] = """
 helps['vm start'] = """
     type: command
     examples:
-        - name: Use resource group and VM name to start a stopped VM.
+        - name: Start a stopped VM.
           text: az vm start -g group_name -n vm-name
 {0}
 """.format(vm_ids_example.format('Start stopped VMs by by VM Ids', 'vm start'))
@@ -824,7 +824,7 @@ helps['vm start'] = """
 helps['vm stop'] = """
     type: command
     examples:
-        - name: Use resource group and VM name to stop a running VM.
+        - name: Stop a running VM.
           text: az vm stop -g group_name -n vm-name
 {0}
 """.format(vm_ids_example.format('Stop running VMs by by VM Ids', 'vm stop'))
@@ -840,17 +840,17 @@ helps['vm wait'] = """
 
 helps['disk'] = """
     type: group
-    short-summary: Commands to manage managed disks.
+    short-summary: Manage Azure Managed Disks.
 """
 
 helps['snapshot'] = """
     type: group
-    short-summary: Commands to manage snapshots.
+    short-summary: Manage Azure Snapshots.
 """
 
 helps['image'] = """
     type: group
-    short-summary: Commands to manage custom virtual machine images based on managed disks or snapshots.
+    short-summary: Manage custom Virtual Machine Images.
 """
 
 helps['disk create'] = """
@@ -867,7 +867,7 @@ helps['disk create'] = """
 
 helps['disk list'] = """
     type: command
-    short-summary: List the managed disks in a resource group or subscription.
+    short-summary: List managed disks.
 """
 
 helps['disk delete'] = """
@@ -909,7 +909,7 @@ helps['snapshot update'] = """
 
 helps['snapshot list'] = """
     type: command
-    short-summary: List the snapshots in a resource group or subscription.
+    short-summary: List snapshots.
 """
 
 helps['snapshot grant-access'] = """
@@ -924,7 +924,7 @@ helps['snapshot revoke-access'] = """
 
 helps['image create'] = """
     type: command
-    short-summary: Create a custom image from managed disks or snapshots.
+    short-summary: Create a custom Virtual Machine Image from managed disks or snapshots.
     examples:
         - name: Create an image from an existing disk.
           text: az image create -g myRG -n image1 --os-type Linux --source /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/rg1/providers/Microsoft.Compute/snapshots/s1 --data-snapshot /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/rg/providers/Microsoft.Compute/snapshots/s2
@@ -934,5 +934,5 @@ helps['image create'] = """
 
 helps['image list'] = """
     type: command
-    short-summary: List the custom images in a resource group or subscription.
+    short-summary: List custom VM images.
 """
