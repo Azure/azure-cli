@@ -159,12 +159,12 @@ helps['network application-gateway frontend-ip list'] = """
 
 helps['network application-gateway frontend-ip show'] = """
     type: command
-    short-summary: Show details of the frontend IP address.
+    short-summary: Show details of a frontend IP address.
 """
 
 helps['network application-gateway frontend-ip update'] = """
     type: command
-    short-summary: Update the frontend IP address.
+    short-summary: Update a frontend IP address.
 """
 #endregion
 
@@ -197,7 +197,7 @@ helps['network application-gateway frontend-port show'] = """
 
 helps['network application-gateway frontend-port update'] = """
     type: command
-    short-summary: Update the frontend port.
+    short-summary: Update a frontend port.
 """
 #endregion
 
@@ -604,12 +604,12 @@ helps['network express-route delete'] = """
 
 helps['network express-route get-stats'] = """
     type: command
-    short-summary: Show stats of an ExpressRoute circuit.
+    short-summary: Show statistics of an ExpressRoute circuit.
 """
 
 helps['network express-route list'] = """
     type: command
-    short-summary: List ExpressRoute circuits in a subscription or resource group.
+    short-summary: List ExpressRoute circuits.
 """
 
 helps['network express-route list-arp-tables'] = """
@@ -764,7 +764,7 @@ helps['network lb address-pool show'] = """
 
 helps['network lb frontend-ip'] = """
     type: group
-    short-summary: Manage frontend IP addresses for a load balancer 
+    short-summary: Manage frontend IP addresses for a load balancer. 
 """
 
 helps['network lb frontend-ip create'] = """
@@ -987,7 +987,7 @@ helps['network nic list'] = """
     type: command
     short-summary: List network interfaces.
     long-summary: |
-        Does not list network interfaces attached to VMs in a VM scale sets. Use 'az vmss nic list' or 'az vmss nic list-vm-nics' to display that information.
+        Does not list network interfaces attached to VMs in VM scale sets. Use 'az vmss nic list' or 'az vmss nic list-vm-nics' to display that information.
 """
 
 helps['network nic show'] = """
@@ -1218,12 +1218,12 @@ helps['network traffic-manager'] = """
 
 helps['network traffic-manager endpoint'] = """
     type: group
-    short-summary: Manage traffic manager end points.
+    short-summary: Manage Traffic Manager end points.
 """
 
 helps['network traffic-manager profile'] = """
     type: group
-    short-summary: Manage traffic manager profiles.
+    short-summary: Manage Traffic Manager profiles.
 """
 
 helps['network traffic-manager profile check-dns'] = """
@@ -1325,32 +1325,32 @@ helps['network vnet update'] = """
 
 helps['network vnet subnet'] = """
     type: group
-    short-summary: Manage virtual network subnets.
+    short-summary: Manage subnets in an Azure Virtual Network.
 """
 
 helps['network vnet subnet create'] = """
     type: command
-    short-summary: Create a virtual network subnet.
+    short-summary: Create a subnet.
 """
 
 helps['network vnet subnet delete'] = """
     type: command
-    short-summary: Delete a virtual network subnet.
+    short-summary: Delete a subnet.
 """
 
 helps['network vnet subnet list'] = """
     type: command
-    short-summary: List subnets in a virtual network.
+    short-summary: List subnets.
 """
 
 helps['network vnet subnet show'] = """
     type: command
-    short-summary: Show details on a subnet in a virtual network.
+    short-summary: Show details of a subnet.
 """
 
 helps['network vnet subnet update'] = """
     type: command
-    short-summary: Update a subnet in a virtual network.
+    short-summary: Update a subnet.
 """
 #endregion
 
@@ -1358,32 +1358,32 @@ helps['network vnet subnet update'] = """
 
 helps['network vnet peering'] = """
     type: group
-    short-summary: Manage peering connections between virtual networks.
+    short-summary: Manage peering connections between Azure Virtual Networks.
 """
 
 helps['network vnet peering create'] = """
     type: command
-    short-summary: Create a virtual network peering.
+    short-summary: Create a peering.
 """
 
 helps['network vnet peering delete'] = """
     type: command
-    short-summary: Delete a virtual network peering.
+    short-summary: Delete a peering.
 """
 
 helps['network vnet peering list'] = """
     type: command
-    short-summary: List peerings within a virtual network.
+    short-summary: List peerings.
 """
 
 helps['network vnet peering show'] = """
     type: command
-    short-summary: Show details on a virtual network peering.
+    short-summary: Show details of a peering.
 """
 
 helps['network vnet peering update'] = """
     type: command
-    short-summary: Update a virtual network peering.
+    short-summary: Update a peering.
 """
 #endregion
 
@@ -1430,12 +1430,12 @@ helps['network vpn-connection shared-key'] = """
 
 helps['network vpn-connection shared-key reset'] = """
     type: command
-    short-summary: Reset the VPN connection shared key.
+    short-summary: Reset a VPN connection shared key.
 """
 
 helps['network vpn-connection shared-key show'] = """
     type: command
-    short-summary: Show the VPN connection shared key.
+    short-summary: Show a VPN connection shared key.
 """
 
 helps['network vpn-connection shared-key update'] = """
