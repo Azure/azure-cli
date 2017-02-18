@@ -58,7 +58,7 @@ helps['role definition create'] = """
           type: string
           short-summary: 'JSON formatted string or a path to a file with such content'
     examples:
-        - name: Create a role with following definition content:
+        - name: Create a role with following definition content
           text: |
                 {
                     "Name": "Contoso On-call",
@@ -98,7 +98,7 @@ helps['role definition create'] = """
                   type: string
                   short-summary: 'JSON formatted string or a path to a file with such content'
             examples:
-                - name: Create a role with following definition content:
+                - name: Create a role with following definition content
                   text: |
                         {
                             "Name": "Contoso On-call",
