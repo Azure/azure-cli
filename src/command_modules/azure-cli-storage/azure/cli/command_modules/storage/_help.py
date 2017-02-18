@@ -25,6 +25,38 @@ helps['storage entity insert'] = """
           short-summary: The server timeout, expressed in seconds.
 """
 
+helps['storage blob upload'] = """
+    type: command
+    short-summary: Upload a specified file to a storage blob.
+    long-summary: Creates a new blob from a file path, or updates the content of an
+    existing blob, with automatic chunking and progress notifications.
+    examples:
+        - name: Upload to a blob with all required fields
+          text: az storage blob upload -f $file_to_upload -c $container_name -n $blob_name
+"""
+
+helps['storage blob delete'] = """
+    type: command
+    short-summary: Marks the specified blob or snapshot for deletion.
+    long-summary: The blob is marked for later deletion during garbage collection.  Note that in order to delete a blob,
+        you must delete all of its snapshots. You can delete both at the same time with the Delete
+        Blob operation.
+    examples:
+        - name: Delete a blob with all required fields
+          text: az storage blob delete -c $container_name -n $blob_name
+"""
+
+helps['storage account delete'] = """
+    type: command
+    short-summary: Deletes a storage account.
+    examples:
+        - name: Delete a storage account using a resource ID
+          text: az storage account delete --ids $blob_resource_ID
+        - name: Delete a storage account using an account name and resource group
+          text: az storage account delete -n $blob_name -g $resource_group_name
+"""
+
+
 helps['storage'] = """
     type: group
     short-summary: Durable, highly available, and massively scalable cloud storage
