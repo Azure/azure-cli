@@ -5,6 +5,7 @@
 
 import os
 import re
+from json import JSONDecodeError
 
 from msrestazure.azure_exceptions import CloudError
 
@@ -12,7 +13,7 @@ from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core._util import CLIError, random_string
 from ._client_factory import _compute_client_factory
-from azure.cli.command_modules.vm._vm_utils import check_existence
+from azure.cli.command_modules.vm._vm_utils import check_existence, load_json
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.azlogging as azlogging
 
@@ -64,6 +65,51 @@ def validate_location(namespace):
         resource_client = get_mgmt_service_client(ResourceManagementClient)
         rg = resource_client.resource_groups.get(namespace.resource_group_name)
         namespace.location = rg.location  # pylint: disable=no-member
+
+
+def _validate_secrets(secrets, os_type):
+    """
+    Validates a parsed JSON array containing secrets for use in VM Creation
+    Secrets JSON structure
+    [{
+        "sourceVault": { "id": "value" },
+        "vaultCertificates": [{
+            "certificateUrl": "value",
+            "certificateStore": "cert store name (only on windows)"
+        }]
+    }]
+    :param dict secrets: Dict fitting the JSON description above
+    :param string os_type: the type of OS (linux or windows)
+    :return: errors if any were found
+    :rtype: list
+    """
+    is_windows = os_type == 'windows'
+    errors = []
+
+    try:
+        loaded_secret = load_json(secrets)
+    except JSONDecodeError as err:
+        raise CLIError('Error decoding secrets: {0}'.format(err))
+
+    for idx, secret in enumerate(loaded_secret):
+        if 'sourceVault' not in secret:
+            errors.append('Secret is missing sourceVault key at index {0}'.format(idx))
+        if 'sourceVault' in secret and 'id' not in secret['sourceVault']:
+            errors.append('Secret is missing sourceVault.id key at index {0}'.format(idx))
+        if 'vaultCertificates' not in secret or not secret['vaultCertificates']:
+            errors.append('Secret is missing vaultCertificates array or it is empty at index {0}'.format(idx))
+        else:
+            for jdx, cert in enumerate(secret['vaultCertificates']):
+                message = 'Secret is missing {0} within vaultCertificates array at secret index {1} and ' \
+                          'vaultCertificate index {2}'
+                if 'certificateUrl' not in cert:
+                    errors.append(message.format('certificateUrl', idx, jdx))
+                if is_windows and 'certificateStore' not in cert:
+                    errors.append(message.format('certificateStore', idx, jdx))
+
+    if errors:
+        errors.append(secrets)
+        raise CLIError('\n'.join(errors))
 
 
 # region VM Create Validators
@@ -590,6 +636,8 @@ def process_vm_create_namespace(namespace):
     _validate_vm_create_public_ip(namespace)
     _validate_vm_create_nics(namespace)
     _validate_vm_create_auth(namespace)
+    if namespace.secrets:
+        _validate_secrets(namespace.secrets, namespace.os_type)
 
 
 # endregion

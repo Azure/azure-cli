@@ -213,6 +213,7 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'public_ip_address', help='Name of the public IP address when creating one (default) or referencing an existing one. Can also reference an existing public IP by ID or specify "" for None.', arg_group='Network')
     register_cli_argument(scope, 'public_ip_address_allocation', help=None, arg_group='Network', **enum_choice_list(['dynamic', 'static']))
     register_cli_argument(scope, 'public_ip_address_dns_name', help='Globally unique DNS name for a newly created Public IP.', arg_group='Network')
+    register_cli_argument(scope, 'secrets', help='Key Vault secrets as a JSON string or file \'[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]\'', completer=FilesCompleter(), type=file_type)
 
 register_cli_argument('vm create', 'vm_name', name_arg_type, id_part=None, help='Name of the virtual machine.', validator=process_vm_create_namespace)
 register_cli_argument('vm create', 'attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')

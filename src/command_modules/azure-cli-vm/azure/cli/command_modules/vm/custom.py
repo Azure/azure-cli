@@ -1431,7 +1431,7 @@ def create_vm(vm_name, resource_group_name, image=None,
               subnet=None, subnet_address_prefix='10.0.0.0/24', storage_profile=None,
               os_publisher=None, os_offer=None, os_sku=None, os_version=None,
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_type=None,
-              nic_type=None, validate=False, custom_data=None):
+              nic_type=None, validate=False, custom_data=None, secrets=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core._util import random_string
     from azure.cli.command_modules.vm._template_builder import (
@@ -1535,11 +1535,14 @@ def create_vm(vm_name, resource_group_name, image=None,
     if custom_data:
         custom_data = read_content_if_is_file(custom_data)
 
+    if secrets:
+        secrets = load_json(secrets)
+
     vm_resource = build_vm_resource(
         vm_name, location, tags, size, storage_profile, nics, admin_username, availability_set,
         admin_password, ssh_key_value, ssh_dest_key_path, image, os_disk_name,
         os_type, storage_caching, storage_sku, os_publisher, os_offer, os_sku, os_version,
-        os_vhd_uri, attach_os_disk, data_disk_sizes_gb, image_data_disks, custom_data)
+        os_vhd_uri, attach_os_disk, data_disk_sizes_gb, image_data_disks, custom_data, secrets)
     vm_resource['dependsOn'] = vm_dependencies
 
     master_template.add_resource(vm_resource)
@@ -1583,7 +1586,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                 subnet=None, subnet_address_prefix=None,
                 os_offer=None, os_publisher=None, os_sku=None, os_version=None,
                 load_balancer_type=None, vnet_type=None, public_ip_type=None, storage_profile=None,
-                single_placement_group=None, custom_data=None):
+                single_placement_group=None, custom_data=None, secrets=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core._util import random_string
     from azure.cli.command_modules.vm._template_builder import (

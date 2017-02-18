@@ -256,7 +256,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         storage_caching=None, storage_sku=None,
         os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
         attach_os_disk=None, data_disk_sizes_gb=None, image_data_disks=None,
-        custom_data=None):
+        custom_data=None, secrets=None):
 
     def _build_os_profile():
 
@@ -283,6 +283,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                     ]
                 }
             }
+
+        if secrets:
+            os_profile['secrets'] = secrets
 
         return os_profile
 
