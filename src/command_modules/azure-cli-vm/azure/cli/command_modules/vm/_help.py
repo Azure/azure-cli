@@ -603,7 +603,7 @@ helps['vm image list-skus'] = """
 
 helps['vm image show'] = """
     type: command
-    short-summary: Show a VM image available in the Azure Marketplace
+    short-summary: Show a VM image available in the Azure Marketplace.
     examples:
         - name: List all skus available for CentOS published by OpenLogic in westus.
           text: >
@@ -695,7 +695,7 @@ deallocate_generalize_capture = """        - name: Process to deallocate, genera
 
 helps['vm capture'] = """
     type: command
-    long-summary: For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-capture-image. 
+    long-summary: For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-capture-image.
     examples:
 {0}
 """.format(deallocate_generalize_capture)
