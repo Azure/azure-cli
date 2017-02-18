@@ -52,6 +52,8 @@ def _create_short_lived_blob_sas(account_name, account_key, container, blob):
 
 
 def _create_short_lived_file_sas(account_name, account_key, share, directory_name, file_name):
+    # if dir is empty string change it to None
+    directory_name = directory_name if directory_name else None
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     sas = SharedAccessSignature(account_name, account_key)
     return sas.generate_file(share, directory_name=directory_name, file_name=file_name,
@@ -152,19 +154,16 @@ def validate_source_uri(namespace):  # pylint: disable=too-many-statements
     validate_client_parameters(namespace)  # must run first to resolve storage account
 
     # determine if the copy will happen in the same storage account
-    same_account = False
     if not source_account_name and source_account_key:
         raise ValueError(usage_string.format('Source account key is given but account name is not'))
     elif not source_account_name and not source_account_key:
         # neither source account name or key is given, assume that user intends to copy blob in
         # the same account
-        same_account = True
         source_account_name = ns.get('account_name', None)
         source_account_key = ns.get('account_key', None)
     elif source_account_name and not source_account_key:
         if source_account_name == ns.get('account_name', None):
             # the source account name is same as the destination account name
-            same_account = True
             source_account_key = ns.get('account_key', None)
         else:
             # the source account is different from destination account but the key is missing
@@ -178,13 +177,14 @@ def validate_source_uri(namespace):  # pylint: disable=too-many-statements
     if not source_account_name:
         raise ValueError(usage_string.format('Storage account name not found'))
 
-    if not sas and not same_account:
-        # to generate sas token for across accounts copy when sas is not given
-        if valid_file_source:
+    if not sas:
+        # generate a sas token even in the same account when the source and destination are not the
+        # same kind.
+        if valid_file_source and ns.get('container_name', None):
             dir_name, file_name = os.path.split(path) if path else (None, '')
             sas = _create_short_lived_file_sas(source_account_name, source_account_key, share,
                                                dir_name, file_name)
-        elif valid_blob_source:
+        elif valid_blob_source and ns.get('share_name', None):
             sas = _create_short_lived_blob_sas(source_account_name, source_account_key, container,
                                                blob)
 
