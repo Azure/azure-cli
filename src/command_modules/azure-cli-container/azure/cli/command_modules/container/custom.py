@@ -362,7 +362,7 @@ def _check_registry_information(registry_name, registry_resource_id):
 
     if registry_resource_id:
         registry_id_pattern = "/subscriptions/[-a-z0-9]+/resourcegroups/[-a-z0-9_.()]+/providers/Microsoft.ContainerRegistry/registries/[a-z0-9]+"
-        if not re.match(registry_id_pattern, registry_resource_id):
+        if not re.match(registry_id_pattern, registry_resource_id, re.IGNORECASE):
             raise CLIError("Invalid registry resource ID")
     else:
         # Check the
