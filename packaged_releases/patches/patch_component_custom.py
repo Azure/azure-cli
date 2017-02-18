@@ -20,6 +20,6 @@ def remove(component_name):
     """ Remove a component """
     _raise_error("Components cannot be removed.")
 
-def update(private=False, pre=False, link=None, additional_components=None):
+def update(private=False, pre=False, link=None, additional_components=None, allow_third_party=False):
     """ Update the CLI and all installed components """
     _raise_error("Components cannot be updated.")
