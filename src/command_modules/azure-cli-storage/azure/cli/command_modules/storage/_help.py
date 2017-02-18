@@ -52,7 +52,7 @@ helps['storage blob'] = """
 
 helps['storage blob exists'] = """
     type: command
-    short-summary: Returns a boolean indicating whether the blob exists.
+    short-summary: Indicates whether the blob exists.
 """
 
 helps['storage blob list'] = """
@@ -87,34 +87,25 @@ helps['storage blob copy start-batch'] = """
           short-summary: The blob container where the selected source files or blobs to be copied to.
         - name: --pattern
           type: string
-          short-summary: The pattern is used for globbing files or blobs in the source. The
-                         supported patterns are '*', '?', '[seq', and '[!seq]'.
+          short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq', and '[!seq]'.
         - name: --dryrun
           type: bool
-          short-summary: Output the list of files or blobs which would be uploaded. No actual data
-                         transfer will occur.
+          short-summary: List of files or blobs to be uploaded. No actual data transfer will occur.
         - name: --source-account-name
           type: string
-          short-summary: The source storage account from which the files or blobs will be copied to
-                         the destination. If omitted, it is assumed that source is in the same
-                         storage account as destination
+          short-summary: The source storage account from which the files or blobs are copied to the destination. If omitted, it is assumed that source is in the same storage account as destination.
         - name: --source-account-key
           type: string
-          short-summary: The account key for the source storage account. If it is omitted the command
-                         will try to query the key use the current log in azure account.
+          short-summary: The account key for the source storage account.
         - name: --source-container
           type: string
-          short-summary: The source container from which the blobs will be copied to the destination
+          short-summary: The source container from which the blobs are copied to the destination.
         - name: --source-share
           type: string
-          short-summary: The source share from which the files will be copied to the destination
+          short-summary: The source share from which the files are copied to the destination.
         - name: --source-uri
           type: string
-          short-summary: A URI specifies an file share or blob container from which the files or
-                         blobs will be copied to the destination. If the source is in another
-                         account, the source must either be public or must be authenticated via a
-                         shared access signature. If the source is public, no authentication is
-                         required.
+          short-summary: A URI specifies an file share or blob container from which the files or blobs are copied to the destination. If the source is in another account, the source must either be public or must be authenticated by using a shared access signature. If the source is public, no authentication is required.
         - name: --source-sas
           type: string
           short-summary: The shared access signature for the source storage account.
@@ -126,7 +117,7 @@ helps['storage container'] = """
 
 helps['storage container exists'] = """
     type: command
-    short-summary: Returns a boolean indicating whether the container exists.
+    short-summary: Indicates whether the container exists.
 """
 
 helps['storage container list'] = """
@@ -176,7 +167,7 @@ helps['storage directory'] = """
 
 helps['storage directory exists'] = """
     type: command
-    short-summary: Returns a boolean indicating whether the directory exists.
+    short-summary: Indicates whether the directory exists.
 """
 
 helps['storage directory metadata'] = """
@@ -207,7 +198,7 @@ helps['storage file'] = """
 
 helps['storage file exists'] = """
     type: command
-    short-summary: Returns a boolean indicating whether the file exists.
+    short-summary: Indicates whether the file exists.
 """
 
 helps['storage file list'] = """
@@ -235,16 +226,16 @@ helps['storage file upload-batch'] = """
     parameters:
         - name: --source -s
           type: string
-          short-summary: The directory from which the files should to be uploaded.
+          short-summary: The directory from which the files should be uploaded.
         - name: --destination -d
           type: string
-          short-summary: The destination of the upload operation. The destination can be the file share URL or the share name. When the destination is the share URL, the storage account name will parsed from the URL.
+          short-summary: The destination of the upload operation. The destination can be the file share URL or the share name. When the destination is the share URL, the storage account name is parsed from the URL.
         - name: --pattern
           type: string
           short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq', and '[!seq]'.
         - name: --dryrun
           type: bool
-          short-summary: The list of files that are uploaded. No actual data transfer occurs.
+          short-summary: The list of files to upload. No actual data transfer occurs.
         - name: --max-connections
           type: integer
           short-summary: The maximum number of parallel connections to use. Default value is 1.
@@ -268,7 +259,7 @@ helps['storage file download-batch'] = """
           short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq', and '[!seq]'.
         - name: --dryrun
           type: bool
-          short-summary: The list of files that are downloaded. No actual data transfer occurs.
+          short-summary: The list of files to be downloaded. No actual data transfer occurs.
         - name: --max-connections
           type: integer
           short-summary: The maximum number of parallel connections to use. Default value is 1.
@@ -293,7 +284,7 @@ helps['storage file copy start-batch'] = """
         - name: --dryrun
           type: bool
 
-          short-summary: The list of files or blobs that are uploaded. No actual data transfer occurs.
+          short-summary: The list of files or blobs to be uploaded. No actual data transfer occurs.
         - name: --source-account-name
           type: string
           short-summary: The source storage account from which the files or blobs are copied to the destination. If omitted, it is assumed that source is in the same storage account as destination.
