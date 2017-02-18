@@ -9,7 +9,7 @@ from azure.cli.core.help_files import helps
 
 helps['acr'] = """
             type: group
-            short-summary: Commands to manage Azure container registries.
+            short-summary: Manage Azure container registries.
             """
 
 helps['acr credential'] = """
@@ -25,10 +25,10 @@ helps['acr repository'] = """
 helps['acr list'] = """
             type: command
             examples:
-                - name: List container registries and show result in a table.
+                - name: List container registries and show the results in a table.
                   text:
                     az acr list -o table
-                - name: List container registries in a resource group and show result in a table.
+                - name: List container registries in a resource group and the show results in a table.
                   text:
                     az acr list -g myResourceGroup -o table
             """
@@ -46,15 +46,15 @@ helps['acr create'] = """
 
 helps['acr update'] = """
             type: command
-            short-summary: Updates a container registry.
+            short-summary: Update a Azure container registry.
             examples:
-                - name: Update tags for a container registry
+                - name: Update tags for a container registry.
                   text:
                     az acr update -n myRegistry --tags key1=value1 key2=value2
-                - name: Update storage account for a container registry
+                - name: Update the storage account for a container registry.
                   text:
                     az acr update -n myRegistry --storage-account-name myStorageAccount
-                - name: Enable admin user for a container registry
+                - name: Enable the administrator user account for a container registry.
                   text:
                     az acr update -n myRegistry --admin-enabled true
             """
@@ -62,10 +62,10 @@ helps['acr update'] = """
 helps['acr repository list'] = """
             type: command
             examples:
-                - name: List repositories in a given container registry if admin user is enabled
+                - name: If the administrator user account is enabled, list the repositories in a given container registry. 
                   text:
                     az acr repository list -n myRegistry
-                - name: List repositories in a given container registry with credentials
+                - name: List the repositories in a given container registry with credentials.
                   text:
                     az acr repository list -n myRegistry -u myUsername -p myPassword
             """
@@ -73,10 +73,10 @@ helps['acr repository list'] = """
 helps['acr repository show-tags'] = """
             type: command
             examples:
-                - name: Show tags of a given repository in a given container registry if admin user is enabled
+                - name: If the administrator user account is enabled, show the tags of a given repository in a given container registry.
                   text:
                     az acr repository show-tags -n myRegistry --repository myRepository
-                - name: Show tags of a given repository in a given container registry with credentials
+                - name: Show the tags of a given repository in a given container registry with credentials.
                   text:
                     az acr repository show-tags -n myRegistry --repository myRepository -u myUsername -p myPassword
             """
