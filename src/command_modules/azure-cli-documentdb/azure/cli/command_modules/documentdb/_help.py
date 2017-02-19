@@ -9,5 +9,5 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 helps['documentdb'] = """
     type: group
-    short-summary: Commands to manage your Azure DocumentDB (NoSQL) database accounts.
+    short-summary: Manage your Azure DocumentDB (NoSQL) database accounts.
 """

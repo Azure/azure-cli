@@ -9,35 +9,35 @@ from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
 helps['cloud'] = """
     type: group
-    short-summary: Manage the Azure clouds registered
+    short-summary: Manage the registered Azure clouds.
 """
 
 helps['cloud list'] = """
             type: command
-            short-summary: List the clouds registered
+            short-summary: List the registered clouds.
 """
 
 helps['cloud show'] = """
             type: command
-            short-summary: Show the configuration for a registered cloud
+            short-summary: Show the configuration of a registered cloud.
 """
 
 helps['cloud register'] = """
             type: command
-            short-summary: Register a cloud
+            short-summary: Register a cloud.
 """
 
 helps['cloud unregister'] = """
             type: command
-            short-summary: Unregister a cloud
+            short-summary: Unregister a cloud.
 """
 
 helps['cloud set'] = """
             type: command
-            short-summary: Set the active cloud
+            short-summary: Set the active cloud.
 """
 
 helps['cloud update'] = """
             type: command
-            short-summary: Update the configuration for a cloud
+            short-summary: Update the configuration for a cloud.
 """
