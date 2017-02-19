@@ -80,6 +80,14 @@ helps['network application-gateway address-pool'] = """
 helps['network application-gateway address-pool create'] = """
     type: command
     short-summary: Create a backend address pool.
+    examples:
+        - name: Create an address pool with two endpoints specified by IP.
+          text: >
+            az network application-gateway address-pool create
+            -g my_resource_group
+            --gateway-name my_ag
+            -n my_address_pool
+            --servers 10.0.0.4 10.0.0.5
 """
 
 helps['network application-gateway address-pool delete'] = """
@@ -276,6 +284,16 @@ helps['network application-gateway probe'] = """
 helps['network application-gateway probe create'] = """
     type: command
     short-summary: Create a probe.
+    examples:
+        - name: Create a .
+          text: >
+            az network application-gateway probe create
+            -g my_resource_group
+            -n my_probe
+            --protocol Https
+            --gateway-name my_ag
+            --host 127.0.0.1
+            --path /path/to/probe
 """
 
 helps['network application-gateway probe delete'] = """
@@ -493,6 +511,10 @@ for record in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
     helps['network dns record-set {} show'.format(record)] = """
         type: command
         short-summary: Show details of {} record set.
+        examples:
+        - name: Show information about an A record set.
+          text: >
+            az network dns record-set a show -g my_resource_group -n my_record_set -z www.mysite.com
     """.format(record.upper())
 
 for item in ['a', 'aaaa', 'mx', 'ns', 'ptr', 'srv', 'txt']:
@@ -531,6 +553,13 @@ helps['network dns record-set soa update'] = """
 helps['network dns record-set list'] = """
     type: command
     short-summary: List all record sets within a DNS zone.
+    examples:
+        - name: List all "@" record sets within this zone.
+          text: >
+            az network dns record-set list
+            -g my_resource_group
+            -z www.mysite.com
+            --query "[?name=='@']"
 """
 
 #endregion
@@ -547,6 +576,10 @@ helps['network dns zone create'] = """
     parameters:
         - name: --if-none-match
           short-summary: Create a DNS zone only if one doesn't exist that matches the given one.
+    examples:
+        - name: Create DNS zone for a specific fully qualified domain name.
+          text: >
+            az network dns zone create -g my_resource_group -n www.mysite.com
 """
 
 helps['network dns zone delete'] = """
@@ -564,6 +597,13 @@ helps['network dns zone export'] = """
 helps['network dns zone import'] = """
     type: command
     short-summary: Create a DNS zone using a DNS zone file.
+    examples:
+        - name: Import a local zone file into a DNS zone resource.
+          text: >
+            az network dns zone import
+            -g my_resource_group
+            -n my_zone
+            -f zone_file_path
 """
 
 helps['network dns zone list'] = """
@@ -709,6 +749,17 @@ helps['network lb'] = """
 helps['network lb create'] = """
     type: command
     short-summary: Create a load balancer.
+    examples:
+        - name: Create a basic load balancer.
+          text: >
+            az network lb create -g my_resource_group -n my_lb
+        - name: Create a load balancer on a specific virtual network and subnet.
+          text: >
+            az network lb create
+            -g my_resource_group
+            -n my_lb
+            --vnet-name my_vnet
+            --subnet my_subnet
 """
 
 helps['network lb delete'] = """
@@ -836,6 +887,17 @@ helps['network lb inbound-nat-rule'] = """
 helps['network lb inbound-nat-rule create'] = """
     type: command
     short-summary: Create an inbound NAT rule.
+    examples:
+        - name: Create a basic inbound NAT rule for port 80.
+          text: >
+            az network lb inbound-nat-rule create
+            -g my_resource_group
+            --lb-name my_lb
+            -n my_nat_rule
+            --protocol Tcp
+            --frontend-ip-name my_ip_conf
+            --frontend-port 80
+            --backend-port 80
 """
 
 helps['network lb inbound-nat-rule delete'] = """
@@ -869,6 +931,16 @@ helps['network lb probe'] = """
 helps['network lb probe create'] = """
     type: command
     short-summary: Create a probe.
+    examples:
+        - name: Create a probe on a load balancer over HTTP and port 80.
+          text: >
+            az network lb probe create
+            -g my_resource_group
+            --lb-name my_lb
+            -n my_probe
+            --protocol Http
+            --port 80
+            --path /
 """
 
 helps['network lb probe delete'] = """
@@ -902,6 +974,19 @@ helps['network lb rule'] = """
 helps['network lb rule create'] = """
     type: command
     short-summary: Create a load balancing rule.
+    examples:
+        - name: Create a basic load balancing rule that assigns a front-facing IP configuration
+                and port to a backend address pool and port.
+          text: >
+            az network lb rule create
+            -g my_resource_group
+            --lb-name my_lb
+            -n my_lb_rule
+            --protocol Tcp
+            --frontend-ip-name my_ip_config
+            --frontend-port 80
+            --backend-pool-name m_pool
+            --backend-port 80
 """
 
 helps['network lb rule delete'] = """
@@ -976,6 +1061,24 @@ helps['network nic list-effective-nsg'] = """
 helps['network nic create'] = """
     type: command
     short-summary: Create a network interface.
+    examples:
+        - name: Create a network interface for a specified subnet on a specified virtual network.
+          text: >
+            az network nic create
+            -g my_resource_group
+            --vnet-name my_vnet
+            --subnet my_subnet
+            -n my_nic
+        - name: Create a network interface for a specified subnet on a specified virtual network which allows 
+                IP forwarding subject to the specified NSG.
+          text: >
+            az network nic create
+            -g my_resource_group
+            --vnet-name my_vnet
+            --subnet my_subnet
+            -n my_nic
+            --ip-forwarding
+            --network-security-group my_nsg
 """
 
 helps['network nic delete'] = """
@@ -988,16 +1091,34 @@ helps['network nic list'] = """
     short-summary: List network interfaces.
     long-summary: |
         Does not list network interfaces attached to VMs in VM scale sets. Use 'az vmss nic list' or 'az vmss nic list-vm-nics' to display that information.
+    examples:
+        - name: List all NICs by internal DNS suffix.
+          text: >
+            az network nic list --query "[?dnsSettings.internalDomainNameSuffix=='<dns_suffix>']"
 """
 
 helps['network nic show'] = """
     type: command
     short-summary: Show details of a network interface.
+    examples:
+        - name: Get the internal domain name suffix for a NIC.
+          text: >
+            az network nic show
+            -g my_resource_group
+            -n my_nic
+            --query "dnsSettings.internalDomainNameSuffix"
 """
 
 helps['network nic update'] = """
     type: command
     short-summary: Update a network interface.
+    examples:
+        - name: Update a network interface to use a different NSG.
+          text: >
+            az network nic update
+            -g my_resource_group
+            -n my_nic
+            --network-security-group my_new_nsg
 """
 #endregion
 
@@ -1033,6 +1154,21 @@ helps['network nic ip-config show'] = """
 helps['network nic ip-config update'] = """
     type: command
     short-summary: Update an IP configuration.
+    examples:
+        - name: Update the NIC to use a new private IP address.
+          text: >
+            az network nic ip-config update
+            -g my_resource_group
+            --nic-name my_nic
+            -n my_ip_config
+            --private-ip-address 10.0.0.9
+        - name: Make this IP configuration the default for the supplied NIC.
+          text: >
+            az network nic ip-config update
+            -g my_resource_group
+            --nic-name my_nic
+            -n my_ip_config
+            --make-primary
 """
 #endregion
 
@@ -1084,9 +1220,68 @@ helps['network nsg rule'] = """
     short-summary: Manage NSG rules.
 """
 
+helps['network nsg create'] = """
+    type: command
+    short-summary: Create a network security group.
+    examples:
+        - name: Create an NSG with some tags.
+          text: >
+            az network nsg create
+            -g my_resource_group
+            -n my_nsg
+            --tags super_secure no_80 no_22
+"""
+
+helps['network nsg list'] = """
+    type: command
+    short-summary: Lists information about network security groups.
+    examples:
+        - name: List all NSGs for a specific region (for example, West US).
+          text: >
+            az network nsg list --query "[?location=='westus']"
+"""
+
+helps['network nsg show'] = """
+    type: command
+    short-summary: Retrieves information about the specified network security group.
+    examples:
+        - name: Get basic information about an NSG.
+          text: >
+            az network nsg show -g my_resource_group -n my_nsg
+        - name: Get basic information about all default NSG rules with "Allow" access.
+          text: >
+            az network nsg show
+            -g my_resource_group
+            -n my_nsg
+            --query "defaultSecurityRules[?access=='Allow']"
+"""
+
 helps['network nsg rule create'] = """
     type: command
     short-summary: Create an NSG rule.
+    examples:
+        - name: Create a basic "Allow" NSG rule with the highest priority (that is, 100).  By default, source address
+                and port are "*" and destination address is "*:80".
+          text: >
+            az network nsg rule create
+            -g my_resource_group
+            --nsg-name my_nsg
+            -n my_nsg_rule
+            --priority 100
+        - name: Create a "Deny" rule over TCP for a specific IP address range with the lowest priority (that is, 4096).
+          text: >
+            az network nsg rule create
+            -g my_resource_group
+            --nsg-name my_nsg
+            -n my_nsg_rule
+            --priority 4096
+            --source-address-prefix 208.130.28/24
+            --source-port-range 80
+            --destination-address-prefix *
+            --destination-port-range 80
+            --access Deny
+            --protocol Tcp
+            --description "Deny from specific IP address range on 80."
 """
 
 helps['network nsg rule delete'] = """
@@ -1107,6 +1302,14 @@ helps['network nsg rule show'] = """
 helps['network nsg rule update'] = """
     type: command
     short-summary: Update an NSG rule.
+    examples:
+        - name: Update an NSG rule with a new wildcard destination address prefix.
+          text: >
+            az network nsg rule update
+            -g my_resource_group
+            --nsg-name my_nsg
+            -n my_nsg_rule
+            --destination-address-prefix *
 """
 
 
@@ -1122,6 +1325,18 @@ helps['network public-ip'] = """
 helps['network public-ip create'] = """
     type: command
     short-summary: Create a public IP address.
+    examples:
+        - name: Create a basic public IP resource.
+          text: >
+            az network public-ip create -g my_resource_group -n my_ip
+        - name: Create a static public IP resource for a DNS name label
+                (for example, mylabel.westus.cloudapp.azure.com).
+          text: >
+            az network public-ip create
+            -g my_resource_group
+            -n my_ip
+            --dns-name mylabel
+            --allocation-method Static
 """
 
 helps['network public-ip delete'] = """
@@ -1132,16 +1347,45 @@ helps['network public-ip delete'] = """
 helps['network public-ip list'] = """
     type: command
     short-summary: List public IP addresses.
+    examples:
+        - name: List all public IPs in a resource group.
+          text: >
+            az network public-ip list -g my_reource_group
+        - name: List all public IPs for a domain name label (for example `<my_label>.eastus.cloudapp.azure.com`).
+          text: >
+            az network public-ip list
+            -g my_resource_group
+            --query "[?dnsSettings.domainNameLabel=='<my_label>']"
 """
 
 helps['network public-ip show'] = """
     type: command
     short-summary: Show details of a public IP address.
+    examples:
+        - name: Get information about a public IP resource.
+          text: >
+            az network public-ip show -g my_resource_group -n my_ip
+        - name: Get FQDN and IP address for a public IP resource.
+          text: >
+            az network public-ip show
+            -g my_resource_group
+            -n my_ip
+            --query "{ fqdn:dnsSettings.fqdn, address: ipAddress }"
 """
 
 helps['network public-ip update'] = """
     type: command
     short-summary: Update a public IP address.
+    examples:
+        - name: Update a public IP resource with a DNS name label
+                (for example, mylabel.westus.cloudapp.azure.com) and 
+                static allocation.
+          text: >
+            az network public-ip update
+            -g my_resource_group
+            -n my_ip
+            --dns-name mylabel
+            --allocation-method Static
 """
 #endregion
 
@@ -1298,6 +1542,18 @@ helps['network vnet create'] = """
     type: command
     short-summary: Create a virtual network.
     long-summary: You may also create a subnet at the same time by specifying a subnet name and (optionally) an address prefix.
+    examples:
+        - name: Create a basic virtual network.
+          text: >
+            az network vnet create -g my_resource_group -n my_vnet
+        - name: Create a virtual network with a specific address prefix and one subnet.
+          text: >
+            az network vnet create
+            -g my_resource_group
+            -n my_vnet
+            --address-prefix 10.0.0.0/16
+            --subnet-name my_subnet
+            --subnet-prefix 10.0.0.0/24
 """
 
 helps['network vnet delete'] = """
@@ -1308,6 +1564,10 @@ helps['network vnet delete'] = """
 helps['network vnet list'] = """
     type: command
     short-summary: List virtual networks.
+    examples:
+        - name: List virtual networks which specify a certain address prefix.
+          text: >
+            az network vnet list --query "[?contains(addressSpace.addressPrefixes, '10.0.0.0/16')]"
 """
 
 helps['network vnet show'] = """
@@ -1330,7 +1590,17 @@ helps['network vnet subnet'] = """
 
 helps['network vnet subnet create'] = """
     type: command
-    short-summary: Create a subnet.
+    short-summary: Create a subnet and associate an existing NSG and route table.
+    examples:
+        - name: <example name>.
+          text: >
+            az network vnet subnet create
+            -g my_resource_group
+            --vnet-name my_vnet
+            -n my_subnet
+            --address-prefix 10.0.0.0/24
+            --network-security-group my_nsg
+            --route-table my_routes
 """
 
 helps['network vnet subnet delete'] = """
@@ -1455,11 +1725,14 @@ helps['network vnet-gateway'] = """
 helps['network vnet-gateway create'] = """
     type: command
     short-summary: Create a virtual network gateway.
-"""
-
-helps['network vnet-gateway create'] = """
-    type: command
-    short-summary: Create a virtual network gateway.
+    examples:
+        - name: Create a basic virtual network gateway and associate with a public IP address.
+          text: >
+            az network vnet-gateway create
+            -g my_resource_group
+            --vnet my_vnet
+            -n my_vnet_gateway
+            --public-ip-address my_ip
 """
 
 helps['network vnet-gateway delete'] = """
