@@ -45,7 +45,7 @@ helps['storage file upload'] = """
 
 helps['storage blob show'] = """
     type: command
-    short-summary: Returns properties for a named blob in a container in a storage account. 
+    short-summary: Returns properties for a named blob in a container in a storage account.
     long-summary: Blob properties only.  To show contents of a blob, use az storage blob list
     examples:
         - name: Show properties of a blob with all required fields
@@ -76,7 +76,7 @@ helps['storage container create'] = """
     short-summary: Creates a container in a storage account.
     examples:
         - name: Create a storage container in a storage account
-          text: az storage container create -n $storage_container_name 
+          text: az storage container create -n $storage_container_name
         - name: Create a storage container in a storage account and return an error if the container already exists
           text: az storage container create -n $storage_container_name --fail-on-exist
 """
@@ -86,7 +86,7 @@ helps['storage account list'] = """
     short-summary: Lists storage accounts
     examples:
         - name: List all storage accounts in a subscription
-          text: az storage account list 
+          text: az storage account list
         - name: List all storage accounts in a region
           text: az storage account list -g $resource_group_name
 """
@@ -120,7 +120,7 @@ helps['storage account delete'] = """
 """
 
 
-helps['storage account show connection string'] = """
+helps['storage account show-connection-string'] = """
     type: command
     short-summary: Returns the properties for the specified storage account.
     examples:
