@@ -40,28 +40,28 @@ helps['vm create'] = """
     examples:
         - name: Create a simple Windows Server VM with a private IP address.
           text: >
-            az vm create -n my_vm -g my_rg --admin-username my_admin --admin-password my_p
+            az vm create -n myVm -g my_rg --admin-username my_admin --admin-password my_p
              --public-ip-address "" --image Win2012R2Datacenter
         - name: Create a VM from a custom managed image (see `az image create` for generation information).
           text: >
-            az vm create -g my_rg -n my_vm --image my_image_in_my_rg --admin-username my_admin --admin-password my_p
+            az vm create -g my_rg -n myVm --image my_image_in_my_rg --admin-username my_admin --admin-password my_p
         - name: Create a VM by attaching to a specialized managed operating system disk.
           text: >
-            az vm create -g my_rg -n my_vm --attach-os-disk my-os-disk
+            az vm create -g my_rg -n myVm --attach-os-disk my-os-disk
             --os-type linux --admin-username my_admin --admin-password my_p
         - name: Create an Ubuntu Linux VM and provide a cloud-init script (https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init).
           text: >
             az vm create -g my_rg -n vm-ame --image debian --custom_data ./my-cloud-init-script.yml
         - name: Create a Linux VM with SSH key authentication, add a public DNS entry, and then add it to an existing virtual network and availability set.
           text: >
-            az vm create -n my_vm -g my_rg --image <linux image from 'az vm image list'>
+            az vm create -n myVm -g my_rg --image <linux image from 'az vm image list'>
             --vnet-name my_existing_vnet --subnet subnet1
             --availability-set my_existing_availability_set
             --public-ip-address-dns-name my_globally_unique_vm_dns_name
             --ssh-key-value "<ssh-rsa-key, key-file-path or not specified for default-key-path>"
         - name: Create a simple Ubuntu Linux VM with a public IP address, DNS entry, 2 data disk(10GB, 20GB), and then generate ssh key pairs under ~/.ssh.
           text: >
-            az vm create -n my_vm -g my_rg --admin-username my_admin --admin-password my_p
+            az vm create -n myVm -g my_rg --admin-username my_admin --admin-password my_p
             --public-ip-address-dns-name my_globally_unique_vm_dns_name --image ubuntults --data-disk-sizes-gb 10 20
             --size Standard_DS2 --generate-ssh-keys
 """.format(image_long_summary)
@@ -242,7 +242,7 @@ helps['vm user delete'] = """
         Delete a user account from a VM without logging into it.
     examples:
         - name: Delete a user account.
-          text: az vm user delete -u username -n my_vm -r my_rg
+          text: az vm user delete -u username -n myVm -r my_rg
 {0}
 """.format(vm_ids_example.format('Delete User by VM Ids', 'az vm user delete -u username'))
 
@@ -253,7 +253,7 @@ helps['vm user reset-ssh'] = """
         The extension will restart the SSH server, open the SSH port on your VM, and reset the SSH configuration to default values. The user account (name, password, or SSH keys) are not changed.
     examples:
         - name: Reset the SSH configuration.
-          text: az vm user reset-ssh -n my_vm -r my_rg
+          text: az vm user reset-ssh -n myVm -r my_rg
 {0}
 """.format(vm_ids_example.format('Reset SSH by VM Ids', 'vm user reset-ssh'))
 
@@ -262,9 +262,9 @@ helps['vm user update'] = """
     long-summary: Update a user account.
     examples:
         - name: Update a Windows user account.
-          text: az vm user update -u username -p password -n my_vm -g resource_my_rg
+          text: az vm user update -u username -p password -n myVm -g resource_my_rg
         - name: Update a Linux user account.
-          text: az vm user update -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n my_vm -r my_rg
+          text: az vm user update -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n myVm -r my_rg
 {0}
 """.format(vm_ids_example.format('Set Linux User by VM Ids', 'vm user update -u username '
                                  '--ssh-key-value "$(< ~/.ssh/id_rsa.pub)"'))
@@ -419,7 +419,7 @@ helps['vm unmanaged-disk attach'] = """
           text: az vm unmanaged-disk attach -g my_rg --vm-name my_vm
         - name: Attach an existing data disk to a VM.
           text: >
-            az vm unmanaged-disk attach -g my_rg --vm-name my_vm \\
+            az vm unmanaged-disk attach -g my_rg --vm-name myVm \\
                 --vhd-uri https://mystorage.blob.core.windows.net/vhds/d1.vhd
 """
 
@@ -428,7 +428,7 @@ helps['vm unmanaged-disk detach'] = """
     examples:
         - name: Detach a data disk from a VM.
           text: >
-            az vm unmanaged-disk detach -g my_rg --vm-name my_vm -n disk_name
+            az vm unmanaged-disk detach -g my_rg --vm-name myVm -n disk_name
 """
 
 helps['vm unmanaged-disk list'] = """
@@ -447,7 +447,7 @@ helps['vm disk detach'] = """
     examples:
         - name: Detach a data disk from a VM.
           text: >
-            az vm disk detach -g my_rg --vm-name my_vm -n disk_name
+            az vm disk detach -g my_rg --vm-name myVm -n disk_name
 """
 
 helps['vm disk attach'] = """
@@ -456,7 +456,7 @@ helps['vm disk attach'] = """
         Attach a persistent disk to your VM so that you can preserve your data, even if your VM is reprovisioned due to maintenance or resizing.
     examples:
         - name: Attach a new default sized (1023 GiB) data disk to a VM.
-          text: az vm disk attach -g my_rg --vm-name my_vm --disk disk_name --new
+          text: az vm disk attach -g my_rg --vm-name myVm --disk disk_name --new
 """
 
 helps['vm extension'] = """
@@ -482,7 +482,7 @@ helps['vm extension delete'] = """
     type: command
     examples:
         - name: Use VM name and extension name to delete an extension from a VM.
-          text: az vm extension delete -g my_rg --vm-name my_vm -n extension_name
+          text: az vm extension delete -g my_rg --vm-name myVm -n extension_name
         - name: Use IDs to delete extensions that contain "my_extension" in the name.
           text: >
             az vm extension delete --ids \\
@@ -493,7 +493,7 @@ helps['vm extension show'] = """
     type: command
     examples:
         - name: Use VM name and extension name to show the extensions attached to a VM.
-          text: az vm extension show -g my_rg --vm-name my_vm -n extension_name
+          text: az vm extension show -g my_rg --vm-name myVm -n extension_name
 """
 
 helps['vm extension image'] = """
@@ -631,28 +631,28 @@ helps['vm nic add'] = """
     type: command
     examples:
         - name: Add two NICs to a VM.
-          text: az vm nic add -g my_rg --vm-name my_vm --nics nic_name1 nic_name2
+          text: az vm nic add -g my_rg --vm-name myVm --nics nic_name1 nic_name2
 """
 
 helps['vm nic remove'] = """
     type: command
     examples:
         - name: Remove two NICs from a VM.
-          text: az vm nic remove -g my_rg --vm-name my_vm --nics nic_name1 nic_name2
+          text: az vm nic remove -g my_rg --vm-name myVm --nics nic_name1 nic_name2
 """
 
 helps['vm nic show'] = """
     type: command
     examples:
         - name: Show details of a NIC on a VM.
-          text: az vm nic show -g my_rg --vm-name my_vm --nic nic_name1
+          text: az vm nic show -g my_rg --vm-name myVm --nic nic_name1
 """
 
 helps['vm nic set'] = """
     type: command
     examples:
         - name: Set a NIC on a VM to be primary.
-          text: az vm nic set -g my_rg --vm-name my_vm --nic nic_name1 nic_name2 --primary-nic nic_name2
+          text: az vm nic set -g my_rg --vm-name myVm --nic nic_name1 nic_name2 --primary-nic nic_name2
 """
 
 helps['vmss'] = """
@@ -684,7 +684,7 @@ deallocate_generalize_capture = """        - name: Process to deallocate, genera
           text: >
             az vm deallocate -g my_rg -n my_vm\n\r
             az vm generalize -g my_rg -n my_vm\n\r
-            az vm capture -g my_rg -n my_vm --vhd-name-prefix my_prefix\n\r
+            az vm capture -g my_rg -n myVm --vhd-name-prefix my_prefix\n\r
         - name: The process to deallocate, generalize, and capture multiple stopped virtual machines.
           text: >
             vms_ids=$(az vm list -g my_rg --query "[].id" -o tsv)\n\r
@@ -705,7 +705,7 @@ helps['vm delete'] = """
     examples:
         - name: Delete a VM without a prompt for confirmation.
           text: >
-            az vm delete -g my_rg -n my_vm --force
+            az vm delete -g my_rg -n myVm --force
 {0}
 """.format(vm_ids_example.format('Delete a virtual machine by Ids', 'vm delete'))
 
@@ -779,9 +779,9 @@ helps['vm open-port'] = """
     type: command
     examples:
         - name: Open all ports on a VM to inbound traffic.
-          text: az vm open-port -g my_rg -n my_vm --port *
+          text: az vm open-port -g my_rg -n myVm --port *
         - name: Open a range of ports on a VM to inbound traffic with the highest priority.
-          text: az vm open-port -g my_rg -n my_vm --port 80-100 --priority 100
+          text: az vm open-port -g my_rg -n myVm --port 80-100 --priority 100
 {0}
 """.format(vm_ids_example.format('Open all ports for multiple VMs by Ids', 'vm open-port'))
 
@@ -797,7 +797,7 @@ helps['vm resize'] = """
     type: command
     examples:
         - name: Resize a VM.
-          text: az vm resize -g my_rg -n my_vm --size Standard_DS3_v2
+          text: az vm resize -g my_rg -n myVm --size Standard_DS3_v2
 {0}
 """.format(vm_ids_example.format('Resize VMs by VM Ids', 'vm redeploy --size Standard_DS3_v2'))
 
@@ -813,7 +813,7 @@ helps['vm show'] = """
     type: command
     examples:
         - name: Show information about a VM.
-          text: az vm show -g my_rg -n my_vm -d
+          text: az vm show -g my_rg -n myVm -d
 {0}
 """.format(vm_ids_example.format('Show VM details by by VM Ids', 'vm show -d'))
 
@@ -838,7 +838,7 @@ helps['vm wait'] = """
     short-summary: Place the CLI in a waiting state until a condition of the VM is met.
     examples:
         - name: Wait until the VM is created.
-          text: az vm wait -g my_rg -n my_vm --created
+          text: az vm wait -g my_rg -n myVm --created
 {0}
 """.format(vm_ids_example.format('Wait until VMs are deleted by Ids', 'vm wait --deleted'))
 
