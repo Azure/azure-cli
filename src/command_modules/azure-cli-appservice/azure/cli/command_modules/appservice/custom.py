@@ -494,7 +494,7 @@ def set_deployment_user(user_name, password=None):
             raise CLIError('Please specify both username and password in non-interactive mode.')
 
     user.publishing_password = password
-    result = client.provider.update_publishing_user(user)
+    result = client.update_publishing_user(user)
     return result
 
 def view_in_browser(resource_group_name, name, slot=None):
@@ -560,7 +560,7 @@ def swap_slot(resource_group_name, webapp, slot, target_slot=None):
     if target_slot is None:
         poller = client.web_apps.swap_slot_with_production(resource_group_name, webapp, slot, True)
     else:
-        poller = client.web_apps.swap_slots_slot(resource_group_name, webapp, slot, target_slot,)
+        poller = client.web_apps.swap_slot_slot(resource_group_name, webapp, slot, target_slot, True)
 
     return AppServiceLongRunningOperation()(poller)
 
