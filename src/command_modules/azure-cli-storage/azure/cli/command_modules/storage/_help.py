@@ -66,9 +66,9 @@ helps['storage account create'] = """
     short-summary: Creates a storage account.
     examples:
         - name: Create a storage account with minimal options.
-          text: az storage account create -n my_storage_account -g my_rg -l westus --sku Standard_LRS
+          text: az storage account create -n mystorageaccount -g my_rg -l westus --sku Standard_LRS
         - name: Create a storage account saccount1 in resource group rg1 in the West US region with locally redundant storage.
-          text: az storage account create -n my_storage_account -g my_rg -l westus --sku Standard_LRS
+          text: az storage account create -n mystorageaccount -g my_rg -l westus --sku Standard_LRS
 """
 
 helps['storage container create'] = """
@@ -98,7 +98,7 @@ helps['storage account show'] = """
         - name: Show properties for a storage account using one or more resource ID.
           text: az storage account show --ids ${storage_account_resource_id}
         - name: Show properties for a storage account using an account name and resource group.
-          text: az storage account show -g my_rg -n my_storage_account
+          text: az storage account show -g my_rg -n mystorageaccount
 """
 
 helps['storage blob list'] = """
@@ -116,7 +116,7 @@ helps['storage account delete'] = """
         - name: Delete a storage account using one or more resource ID.
           text: az storage account delete --ids ${storage_account_resource_id}
         - name: Delete a storage account using an account name and resource group.
-          text: az storage account delete -n my_storage_account -g my_rg
+          text: az storage account delete -n mystorageaccount -g my_rg
 """
 
 
@@ -125,7 +125,7 @@ helps['storage account show-connection-string'] = """
     short-summary: Returns the properties for the specified storage account.
     examples:
         - name: Get a connection string for a storage account.
-          text: az storage account show-connection-string -g my_rg -n my_storage_account.
+          text: az storage account show-connection-string -g my_rg -n mystorageaccount
 """
 
 helps['storage'] = """
@@ -153,7 +153,7 @@ helps['storage account keys list'] = """
     short-summary: Lists the primary and secondary keys for a storage account.
     examples:
         - name: List the primary and secondary keys for a storage account.
-          text: az storage account keys list -g my_rg -n my_storage_account
+          text: az storage account keys list -g my_rg -n mystorageaccount
 """
 
 helps['storage blob'] = """

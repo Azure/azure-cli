@@ -38,29 +38,13 @@ helps['vm create'] = """
         - name: --ssh-key-value
           short-summary: The SSH public key or public key file path.
     examples:
-        - name: Create a Linux VM with SSH key authentication, add a public DNS entry, and then add it to an existing virtual network and availability set.
-          text: >
-            az vm create -n my_vm -g my_rg --image <linux image from 'az vm image list'>
-            --vnet-name my_existing_vnet --subnet subnet1
-            --availability-set my_existing_availability_set
-            --public-ip-address-dns-name my_globally_unique_vm_dns_name
-            --ssh-key-value "<ssh-rsa-key, key-file-path or not specified for default-key-path>"
         - name: Create a simple Windows Server VM with a private IP address.
           text: >
             az vm create -n my_vm -g my_rg --admin-username my_admin --admin-password my_p
              --public-ip-address "" --image Win2012R2Datacenter
-        - name: Create a simple Ubuntu Linux VM with a public IP address, DNS entry, 2 data disk(10GB, 20GB), and then generate ssh key pairs under ~/.ssh.
-          text: >
-            az vm create -n my_vm -g my_rg --admin-username my_admin --admin-password my_p
-            --public-ip-address-dns-name my_globally_unique_vm_dns_name --image ubuntults --data-disk-sizes-gb 10 20
-            --size Standard_DS2 --generate-ssh-keys
-        - name: Create a VM from a custom managed image.
+        - name: Create a VM from a custom managed image (see `az image create` for generation information).
           text: >
             az vm create -g my_rg -n my_vm --image my_image_in_my_rg --admin-username my_admin --admin-password my_p
-        - name: Create a VM with an unmanaged operating system disk by using an image blob uri.
-          text: >
-            az vm create -g my_rg -n my_vm --image https://account123.blob.core.windows.net/Images/my_vhd-osDisk.vhd
-            --os-type linux --admin-username my_admin --admin-password my_p
         - name: Create a VM by attaching to a specialized managed operating system disk.
           text: >
             az vm create -g my_rg -n my_vm --attach-os-disk my-os-disk
@@ -68,6 +52,18 @@ helps['vm create'] = """
         - name: Create an Ubuntu Linux VM and provide a cloud-init script (https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init).
           text: >
             az vm create -g my_rg -n vm-ame --image debian --custom_data ./my-cloud-init-script.yml
+        - name: Create a Linux VM with SSH key authentication, add a public DNS entry, and then add it to an existing virtual network and availability set.
+          text: >
+            az vm create -n my_vm -g my_rg --image <linux image from 'az vm image list'>
+            --vnet-name my_existing_vnet --subnet subnet1
+            --availability-set my_existing_availability_set
+            --public-ip-address-dns-name my_globally_unique_vm_dns_name
+            --ssh-key-value "<ssh-rsa-key, key-file-path or not specified for default-key-path>"
+        - name: Create a simple Ubuntu Linux VM with a public IP address, DNS entry, 2 data disk(10GB, 20GB), and then generate ssh key pairs under ~/.ssh.
+          text: >
+            az vm create -n my_vm -g my_rg --admin-username my_admin --admin-password my_p
+            --public-ip-address-dns-name my_globally_unique_vm_dns_name --image ubuntults --data-disk-sizes-gb 10 20
+            --size Standard_DS2 --generate-ssh-keys
 """.format(image_long_summary)
 
 helps['vmss create'] = """
@@ -227,7 +223,7 @@ helps['vm convert'] = """
     short-summary: Convert a VM with unmanaged disks to use managed disks.
     examples:
         - name: Convert a VM with unmanaged disks to use managed disks.
-          text: az vm convert -g my_rg -n vm-name
+          text: az vm convert -g my_rg -n my_vm
 {0}
 """.format(vm_ids_example.format('Convert VM with unmanaged disks to managed by Ids', 'vm convert'))
 
@@ -325,6 +321,10 @@ helps['acs'] = """
 helps['acs create'] = """
     type: command
     short-summary: Create a container service with your preferred orchestrator.
+    examples:
+        - name: Create a Kubernetes container service and generate keys.
+          text: >
+            az acs create -g my_rg -n my_container_service --orchestrator-type kubernetes --generate-ssh-keys
 """
 
 helps['acs delete'] = """
@@ -358,7 +358,7 @@ helps['vm diagnostics get-default-config'] = """
         - name: Get the default diagnostics on a Linux VM and override the storage account key.
           text: >
             az vm diagnostics get-default-config \\
-                --query "merge(@, {storageAccount: 'my_storage_account'})"
+                --query "merge(@, {storageAccount: 'mystorageaccount'})"
         - name: Get the default diagnostics on a Windows VM.
           text: >
             az vm diagnostics get-default-config --is-windows-os
@@ -371,12 +371,12 @@ helps['vm diagnostics set'] = """
         - name: Set up default diagnostics on a Linux VM.
           text: >
             default_config=$(az vm diagnostics get-default-config \\
-                --query "merge(@, {storageAccount: 'my_storage_account'})")
+                --query "merge(@, {storageAccount: 'mystorageaccount'})")
 
-            storage_key=$(az storage account keys list -g my_rg -n my_storage_account \\
+            storage_key=$(az storage account keys list -g my_rg -n mystorageaccount \\
                 --query "[?keyName=='key1'] | [0].value" -o tsv)
 
-            settings="{'storageAccountName': 'my_storage_account', 'storageAccountKey': \\
+            settings="{'storageAccountName': 'mystorageaccount', 'storageAccountKey': \\
                 '${storage_key}'}"
 
             az vm diagnostics set --settings "${default_config}" --protected-settings "${settings}" \\
@@ -416,7 +416,7 @@ helps['vm unmanaged-disk attach'] = """
         Attach a persistent disk to your VM so that you can preserve your data, even if your VM is reprovisioned due to maintenance or resizing.
     examples:
         - name: Attach a new default sized (1023 GiB) data disk to a VM.
-          text: az vm unmanaged-disk attach -g my_rg --vm-name vm-name
+          text: az vm unmanaged-disk attach -g my_rg --vm-name my_vm
         - name: Attach an existing data disk to a VM.
           text: >
             az vm unmanaged-disk attach -g my_rg --vm-name my_vm \\
@@ -435,7 +435,7 @@ helps['vm unmanaged-disk list'] = """
     type: command
     examples:
         - name: List the disks attached to a VM.
-          text: az vm unmanaged-disk list -g my_rg --vm-name vm-name
+          text: az vm unmanaged-disk list -g my_rg --vm-name my_vm
         - name: Use IDs of disks with names containing "data_disk" to list the disks attached to a VM.
           text: >
             az vm unmanaged-disk list --ids \\
@@ -471,7 +471,7 @@ helps['vm extension list'] = """
     short-summary:  List the extensions attached to a VM in a resource group.
     examples:
         - name: Use the VM name to list the extensions attached to it.
-          text: az vm extension list -g my_rg --vm-name vm-name
+          text: az vm extension list -g my_rg --vm-name my_vm
         - name: Use IDs to list the extensions with "my_extension" in the name.
           text: >
             az vm extension list --ids \\
@@ -624,7 +624,7 @@ helps['vm nic list'] = """
     type: command
     examples:
         - name: List all of the NICs on a VM.
-          text: az vm nic list -g my_rg --vm-name vm-name
+          text: az vm nic list -g my_rg --vm-name my_vm
 """
 
 helps['vm nic add'] = """
@@ -728,7 +728,7 @@ helps['vm get-instance-view'] = """
     short-summary: "Get information about a VM including instance information (powerState)."
     examples:
         - name: Use resource group and name to get instance view information of a VM.
-          text: az vm get-instance-view -g my_rg -n vm-name
+          text: az vm get-instance-view -g my_rg -n my_vm
 {0}
 """.format(vm_ids_example.format('Get instance view by Ids', 'vm get-instance-view'))
 
@@ -749,7 +749,7 @@ helps['vm list-ip-addresses'] = """
     type: command
     examples:
         - name: Get the IP addresses for a VM.
-          text: az vm list-ip-addresses -g my_rg -n vm-name
+          text: az vm list-ip-addresses -g my_rg -n my_vm
 {0}
 """.format(vm_ids_example.format('Get IP addresses for VMs by Ids', 'vm list-ip-addresses'))
 
@@ -771,7 +771,7 @@ helps['vm list-vm-resize-options'] = """
     type: command
     examples:
         - name: List all available VM sizes for resizing.
-          text: az vm list-vm-resize-options -g my_rg -n vm-name
+          text: az vm list-vm-resize-options -g my_rg -n my_vm
 {0}
 """.format(vm_ids_example.format('List all available VM sizes for resizing by VM Ids', 'vm list-vm-resize-options'))
 
@@ -779,7 +779,9 @@ helps['vm open-port'] = """
     type: command
     examples:
         - name: Open all ports on a VM to inbound traffic.
-          text: az vm open-port -g my_rg -n vm-name
+          text: az vm open-port -g my_rg -n my_vm --port *
+        - name: Open a range of ports on a VM to inbound traffic with the highest priority.
+          text: az vm open-port -g my_rg -n my_vm --port 80-100 --priority 100
 {0}
 """.format(vm_ids_example.format('Open all ports for multiple VMs by Ids', 'vm open-port'))
 
@@ -787,7 +789,7 @@ helps['vm redeploy'] = """
     type: command
     examples:
         - name: Redeploy a VM.
-          text: az vm redeploy -g my_rg -n vm-name
+          text: az vm redeploy -g my_rg -n my_vm
 {0}
 """.format(vm_ids_example.format('Redeploy VMs by VM Ids', 'vm redeploy'))
 
@@ -803,7 +805,7 @@ helps['vm restart'] = """
     type: command
     examples:
         - name: Restart a VM.
-          text: az vm restart -g my_rg -n vm-name
+          text: az vm restart -g my_rg -n my_vm
 {0}
 """.format(vm_ids_example.format('Restart VM by by VM Ids', 'vm restart'))
 
@@ -819,7 +821,7 @@ helps['vm start'] = """
     type: command
     examples:
         - name: Start a stopped VM.
-          text: az vm start -g my_rg -n vm-name
+          text: az vm start -g my_rg -n my_vm
 {0}
 """.format(vm_ids_example.format('Start stopped VMs by by VM Ids', 'vm start'))
 
@@ -827,7 +829,7 @@ helps['vm stop'] = """
     type: command
     examples:
         - name: Stop a running VM.
-          text: az vm stop -g my_rg -n vm-name
+          text: az vm stop -g my_rg -n my_vm
 {0}
 """.format(vm_ids_example.format('Stop running VMs by by VM Ids', 'vm stop'))
 

@@ -36,6 +36,9 @@ helps['role assignment'] = """
 helps['role assignment create'] = """
     type: command
     short-summary: Create a new role assignment.
+    examples:
+        - name: Create role assignment for a specified user, group, or service principal.
+          text: az role assignment create --assignee sp_name --role a_role
 """
 helps['role assignment delete'] = """
     type: command
