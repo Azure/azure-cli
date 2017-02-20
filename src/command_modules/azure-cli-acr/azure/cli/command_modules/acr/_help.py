@@ -30,7 +30,7 @@ helps['acr list'] = """
                     az acr list -o table
                 - name: List container registries in a resource group and the show results in a table.
                   text:
-                    az acr list -g myResourceGroup -o table
+                    az acr list -g my_rg -o table
             """
 
 helps['acr create'] = """
@@ -38,10 +38,10 @@ helps['acr create'] = """
             examples:
                 - name: Create a container registry with a new storage account.
                   text:
-                    az acr create -n myRegistry -g myResourceGroup -l southcentralus
+                    az acr create -n my_registry -g my_rg -l southcentralus
                 - name: Create a container registry with an existing storage account.
                   text:
-                    az acr create -n myRegistry -g myResourceGroup -l southcentralus --storage-account-name myStorageAccount
+                    az acr create -n my_registry -g my_rg -l southcentralus --storage-account-name my_storage_account
             """
 
 helps['acr update'] = """
@@ -50,13 +50,13 @@ helps['acr update'] = """
             examples:
                 - name: Update tags for a container registry.
                   text:
-                    az acr update -n myRegistry --tags key1=value1 key2=value2
+                    az acr update -n my_registry --tags key1=value1 key2=value2
                 - name: Update the storage account for a container registry.
                   text:
-                    az acr update -n myRegistry --storage-account-name myStorageAccount
+                    az acr update -n my_registry --storage-account-name my_storage_account
                 - name: Enable the administrator user account for a container registry.
                   text:
-                    az acr update -n myRegistry --admin-enabled true
+                    az acr update -n my_registry --admin-enabled true
             """
 
 helps['acr repository list'] = """
@@ -64,10 +64,10 @@ helps['acr repository list'] = """
             examples:
                 - name: If the administrator user account is enabled, list the repositories in a given container registry. 
                   text:
-                    az acr repository list -n myRegistry
+                    az acr repository list -n my_registry
                 - name: List the repositories in a given container registry with credentials.
                   text:
-                    az acr repository list -n myRegistry -u myUsername -p myPassword
+                    az acr repository list -n my_registry -u my_username -p my_p
             """
 
 helps['acr repository show-tags'] = """
@@ -75,8 +75,8 @@ helps['acr repository show-tags'] = """
             examples:
                 - name: If the administrator user account is enabled, show the tags of a given repository in a given container registry.
                   text:
-                    az acr repository show-tags -n myRegistry --repository myRepository
+                    az acr repository show-tags -n my_registry --repository my_repository
                 - name: Show the tags of a given repository in a given container registry with credentials.
                   text:
-                    az acr repository show-tags -n myRegistry --repository myRepository -u myUsername -p myPassword
+                    az acr repository show-tags -n my_registry --repository my_repository -u my_username -p my_p
             """

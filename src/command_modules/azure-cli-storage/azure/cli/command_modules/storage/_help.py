@@ -31,7 +31,7 @@ helps['storage blob upload'] = """
     long-summary: Creates a new blob from a file path, or updates the content of an existing blob, with automatic chunking and progress notifications.
     examples:
         - name: Upload to a blob with all required fields
-          text: az storage blob upload -f $file_to_upload -c $container_name -n $blob_name
+          text: az storage blob upload -f /path/to/file -c my_container -n my_blob
 """
 
 helps['storage file upload'] = """
@@ -40,7 +40,7 @@ helps['storage file upload'] = """
     long-summary: Creates or updates an azure file from a source path with automatic chunking and progress notifications.
     examples:
         - name: Upload to a file share with all required fields
-          text: az storage file upload -s $share_name -source $file_to_upload
+          text: az storage file upload -s my_share -source /path/to/file
 """
 
 helps['storage blob show'] = """
@@ -49,7 +49,7 @@ helps['storage blob show'] = """
     long-summary: Blob properties only.  To show contents of a blob, use az storage blob list
     examples:
         - name: Show properties of a blob with all required fields
-          text: az storage blob show -c $container_name -n $blob_name
+          text: az storage blob show -c my_container -n my_blob
 """
 
 helps['storage blob delete'] = """
@@ -58,7 +58,7 @@ helps['storage blob delete'] = """
     long-summary: The blob is marked for later deletion during garbage collection.  Note that in order to delete a blob, you must delete all of its snapshots. You can delete both at the same time with the Delete Blob operation.
     examples:
         - name: Delete a blob with all required fields
-          text: az storage blob delete -c $container_name -n $blob_name
+          text: az storage blob delete -c my_container -n my_blob
 """
 
 helps['storage account create'] = """
@@ -66,9 +66,9 @@ helps['storage account create'] = """
     short-summary: Creates a storage account.
     examples:
         - name: Create a storage account with minimal options
-          text: az storage account create -n $storage_account_name -g $resource_group_name -l $region --sku $sku
+          text: az storage account create -n my_storage_account -g my_rg -l westus --sku Standard_LRS
         - name: Create a storage account saccount1 in resource group rg1 in the West US region with locally redundant storage
-          text: az storage account create -n $saccount1 -g $rg1 -l westus --sku Standard_LRS
+          text: az storage account create -n my_storage_account -g my_rg -l westus --sku Standard_LRS
 """
 
 helps['storage container create'] = """
@@ -76,9 +76,9 @@ helps['storage container create'] = """
     short-summary: Creates a container in a storage account.
     examples:
         - name: Create a storage container in a storage account
-          text: az storage container create -n $storage_container_name
+          text: az storage container create -n my_storage_container
         - name: Create a storage container in a storage account and return an error if the container already exists
-          text: az storage container create -n $storage_container_name --fail-on-exist
+          text: az storage container create -n my_storage_container --fail-on-exist
 """
 
 helps['storage account list'] = """
@@ -88,7 +88,7 @@ helps['storage account list'] = """
         - name: List all storage accounts in a subscription
           text: az storage account list
         - name: List all storage accounts in a region
-          text: az storage account list -g $resource_group_name
+          text: az storage account list -g my_rg
 """
 
 helps['storage account show'] = """
@@ -96,9 +96,9 @@ helps['storage account show'] = """
     short-summary: Returns storage account properties
     examples:
         - name: Show properties for a storage account using one or more resource ID
-          text: az storage account show --ids $storage_account_resource_id
+          text: az storage account show --ids ${storage_account_resource_id}
         - name: Show properties for a storage account using an account name and resource group
-          text: az storage account show -g $resource_group_name -n $storage_account_name
+          text: az storage account show -g my_rg -n my_storage_account
 """
 
 helps['storage blob list'] = """
@@ -106,7 +106,7 @@ helps['storage blob list'] = """
     short-summary: Lists storage blobs in a container
     examples:
         - name: List all storage blobs in a container
-          text: az storage blob list -c $container_name
+          text: az storage blob list -c my_container
 """
 
 helps['storage account delete'] = """
@@ -114,9 +114,9 @@ helps['storage account delete'] = """
     short-summary: Deletes a storage account.
     examples:
         - name: Delete a storage account using one or more resource ID
-          text: az storage account delete --ids $storage_account_resource_id
+          text: az storage account delete --ids ${storage_account_resource_id}
         - name: Delete a storage account using an account name and resource group
-          text: az storage account delete -n $storage_account_name -g $resource_group_name
+          text: az storage account delete -n my_storage_account -g my_rg
 """
 
 
@@ -125,7 +125,7 @@ helps['storage account show-connection-string'] = """
     short-summary: Returns the properties for the specified storage account.
     examples:
         - name: Get a connection string for a storage account
-          text: az storage account show-connection-string -g $resource_group_name -n $storage_account_name
+          text: az storage account show-connection-string -g my_rg -n my_storage_account
 """
 
 helps['storage'] = """
@@ -153,7 +153,7 @@ helps['storage account keys list'] = """
     short-summary: Lists the primary and secondary keys for a storage account.
     examples:
         - name: List the primary and secondary keys for a storage account
-          text: az storage account keys list -g $resource_group_name -n $storage_account_name
+          text: az storage account keys list -g my_rg -n my_storage_account
 """
 
 helps['storage blob'] = """
