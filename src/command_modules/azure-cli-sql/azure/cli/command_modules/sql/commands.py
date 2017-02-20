@@ -20,6 +20,7 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
         c.custom_command('create', 'db_create')
         c.custom_command('copy', 'db_copy')
         c.custom_command('create-replica', 'db_create_replica')
+        c.custom_command('restore', 'db_restore')
         c.command('show', 'get')
         c.custom_command('list', 'db_list')
         ## Usages will not be included in the first batch of GA commands

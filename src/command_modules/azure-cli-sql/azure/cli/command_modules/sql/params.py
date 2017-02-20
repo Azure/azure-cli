@@ -13,7 +13,7 @@ from azure.cli.core.commands import register_cli_argument, register_extra_cli_ar
 # sql db params that are used for non-default create modes. These are ignored
 # for regular create (because we have custom commands for special create modes)
 # and ignored for update (because they are not applicable to update)
-sql_db_special_create_mode_params = ['create_mode', 'source_database_id']
+sql_db_special_create_mode_params = ['create_mode', 'source_database_id', 'restorePointInTime']
 
 with ParametersContext(command='sql db') as c:
     c.register_alias('database_name', ('--name', '-n'))
@@ -21,34 +21,30 @@ with ParametersContext(command='sql db') as c:
     c.register_alias('requested_service_objective_name', ('--service-objective-name',))
     c.register_alias('requested_service_objective_id', ('--service-objective-id',))
 
-with ParametersContext(command='sql db create') as c:
-    # We have a wrapper function that determines server location so user doesn't need to specify it as param.
-    # Also we have specific commands to special create modes, so they can be ignored
-    # for regular db create.
-    ignores = ['location'] + sql_db_special_create_mode_params
-
+def configure_db_create_params(c):
     from azure.mgmt.sql.models.database import Database
+    # We have a wrapper function that determines server location so user doesn't need to specify it as param.
+    # Also we have specific commands to special create modes which have their own required params, so
+    # database properties related to create mode can be ignores
+    ignores = ['location'] + sql_db_special_create_mode_params
     c.expand('parameters', Database, ignores=ignores)
+
+with ParametersContext(command='sql db create') as c:
+    configure_db_create_params(c)
 
 with ParametersContext(command='sql db copy') as c:
-    # Wrapper function determines location and create mode params
-    ignores = ['location'] + sql_db_special_create_mode_params
-
-    from azure.mgmt.sql.models.database import Database
-    c.expand('parameters', Database, ignores=ignores)
+    configure_db_create_params(c)
 
 with ParametersContext(command='sql db create-replica') as c:
-    # Wrapper function determines location and create mode params
-    ignores = ['location'] + sql_db_special_create_mode_params
+    configure_db_create_params(c)
 
-    from azure.mgmt.sql.models.database import Database
-    c.expand('parameters', Database, ignores=ignores)
+with ParametersContext(command='sql db restore') as c:
+    configure_db_create_params(c)
 
 with ParametersContext(command='sql db update') as c:
+    from azure.mgmt.sql.models.database import Database
     # These parameters are applicable to create only, not update.
     ignores = ['location', 'collation'] + sql_db_special_create_mode_params
-
-    from azure.mgmt.sql.models.database import Database
     c.expand('parameters', Database, ignores=ignores)
 
 #####
