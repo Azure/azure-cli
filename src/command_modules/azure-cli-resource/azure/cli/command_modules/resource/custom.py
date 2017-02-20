@@ -548,16 +548,21 @@ def list_resource_links(scope=None, filter_string=None):
         return links_client.list_at_source_scope(scope, filter=filter_string)
     return links_client.list_at_subscription(filter=filter_string)
 
+def _validate_resource_inputs(resource_group_name, resource_provider_namespace,
+                              resource_type, resource_name):
+    if resource_group_name is None:
+        raise CLIError('--resource-group/-g is required.')
+    if resource_type is None:
+        raise CLIError('--resource-type is required')
+    if resource_name is None:
+        raise CLIError('--name/-n is required')
+    if resource_provider_namespace is None:
+        raise CLIError('--namespace is required')
+
 class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
     def __init__(self, resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None,
                  resource_id=None, api_version=None, rcf=None):
-        if bool(resource_id) == bool(resource_group_name or resource_type or
-                                     parent_resource_path or resource_provider_namespace or
-                                     resource_name):
-            raise IncorrectUsageError(
-                "(--id ID | --resource-group RG --name NAME --namespace NAMESPACE --resource-type TYPE -n NAME)") #pylint: disable=line-too-long
-
         #if the resouce_type is in format 'namespace/type' split it.
         #(we don't have to do this, but commands like 'vm show' returns such values)
         if resource_type and not resource_provider_namespace and not parent_resource_path:
@@ -571,6 +576,8 @@ class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
             if resource_id:
                 api_version = _ResourceUtils._resolve_api_version_by_id(self.rcf, resource_id)
             else:
+                _validate_resource_inputs(resource_group_name, resource_provider_namespace,
+                                          resource_type, resource_name)
                 api_version = _ResourceUtils._resolve_api_version(self.rcf,
                                                                   resource_provider_namespace,
                                                                   parent_resource_path,
