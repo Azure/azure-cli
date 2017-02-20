@@ -153,10 +153,48 @@ helps['feature'] = """
     type: group
     short-summary: Manage resource provider features, such as previews.
 """
+
 helps['group'] = """
     type: group
     short-summary: Manage resource groups.
 """
+
+helps['group exists'] = """
+    type: command
+    short-summary: Checks whether resource group exists.
+    examples:
+        - name: Check group existence.
+          text: >
+            az group exists -n my_rg
+"""
+
+helps['group create'] = """
+    type: command
+    short-summary: Create a new resource group.
+    examples:
+        - name: Create a resource group in West US.
+          text: >
+            az group create -l westus -n my_rg
+"""
+
+helps['group delete'] = """
+    type: command
+    short-summary: Delete resource group.
+    examples:
+        - name: Delete a resource group.
+          text: >
+            az group delete -n my_rg
+"""
+
+helps['group list'] = """
+    type: command
+    short-summary: List resource groups, optionally filtered by a tag.
+    examples:
+        - name: List all resource groups for West US.
+          text: >
+            az group list --query "[?location=='westus']"
+"""
+
 helps['group update'] = """
     type: group
     short-summary: Update a resource group.

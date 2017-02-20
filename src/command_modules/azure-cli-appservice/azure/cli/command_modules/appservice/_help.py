@@ -45,6 +45,13 @@ helps['appservice web config appsettings show'] = """
 helps['appservice web config appsettings update'] = """
     type: command
     short-summary: Create or update web app settings.
+    examples:
+        - name: Set the default node version for a specified web app.
+          text: >
+            az appservice web config appsettings update
+            -g my_rg
+            -n myuniqueapp
+            --settings WEBSITE_NODE_DEFAULT_VERSION=6.9.1
 """
 
 helps['appservice web config appsettings delete'] = """
@@ -155,6 +162,14 @@ helps['appservice web deployment slot create'] = """
 helps['appservice web deployment slot swap'] = """
     type: command
     short-summary: Swap slots.
+    examples:
+        - name: Swap a staging slot into production for the specified web app.
+          text: >
+            az appservice web deployment slot swap
+            -g my_rg
+            -n myunqiueapp
+            --slot staging
+            --target-slot production
 """
 
 helps['appservice web deployment slot list'] = """
@@ -170,6 +185,18 @@ helps['appservice web deployment slot delete'] = """
 helps['appservice web deployment user'] = """
     type: group
     short-summary: Manage user credentials for a deployment.
+"""
+
+helps['appservice web deployment user set'] = """
+    type: command
+    short-summary: Update deployment credentials.
+    long-summary: All web apps in the subscription will be impacted since all web apps share
+                  the same deployment credentials.
+    examples:
+        - name: Set FTP and git deployment credentials for all web apps.
+          text: >
+            az appservice web deployment user set
+            --user-name my_user_name
 """
 
 helps['appservice web deployment slot'] = """
@@ -190,7 +217,15 @@ helps['appservice web source-control config'] = """
 helps['appservice web source-control config-local-git'] = """
     type: command
     short-summary: Enable local git.
-    long-summary: You get a url to clone and later push to the web app.
+    long-summary: Get an endpoint to clone and later push to the web app.
+    examples:
+        - name: Get a git endpoint for a web app and add it as a remote.
+          text: >
+            az appservice web source-control config-local-git \\
+                -g my_rg -n myuniqueapp
+
+            git remote add azure \\
+                https://<deploy_user_name>@myuniqueapp.scm.azurewebsites.net/myuniqueapp.git
 """
 
 helps['appservice web source-control delete'] = """
@@ -221,6 +256,18 @@ helps['appservice plan update'] = """
 helps['appservice plan create'] = """
     type: command
     short-summary: Create an App Service plan.
+    examples:
+        - name: Create a basic App Service plan.
+          text: >
+            az appservice plan create -g my_rg -n my_plan
+        - name: Create a standard App Service plan with with four Linux workers.
+          text: >
+            az appservice plan create
+            -g my_rg
+            -n my_plan2
+            --is-linux
+            --number-of-workers 4
+            --sku S1
 """
 
 helps['appservice plan delete'] = """
@@ -231,6 +278,10 @@ helps['appservice plan delete'] = """
 helps['appservice plan list'] = """
     type: command
     short-summary: List App Service plans.
+    examples:
+        - name: List all free tier App Service plans.
+          text: >
+            az appservice plan list --query "[?sku.tier=='Free']"
 """
 
 helps['appservice plan show'] = """
@@ -286,6 +337,14 @@ helps['appservice web browse'] = """
 helps['appservice web create'] = """
     type: command
     short-summary: Create a web app.
+    examples:
+        - name: Create a basic App Service plan.  Name must be unique to yield a unique FQDN;
+                for example, myuniqueapp.azurewebsites.net.
+          text: >
+            az appservice web create
+            -g my_rg
+            -p my_plan
+            -n myuniqueapp
 """
 
 helps['appservice web delete'] = """
@@ -296,6 +355,13 @@ helps['appservice web delete'] = """
 helps['appservice web list'] = """
     type: command
     short-summary: List web apps.
+    examples:
+        - name: List default host name and state for all web apps.
+          text: >
+            az appservice web list --query "[].{ hostName: defaultHostName, state: state }"
+        - name: List all running web apps.
+          text: >
+            az appservice web list --query "[?state=='Running']"
 """
 
 helps['appservice web restart'] = """
