@@ -285,7 +285,7 @@ helps['network application-gateway probe create'] = """
     type: command
     short-summary: Create a probe.
     examples:
-        - name: Create a .
+        - name: Create an application gateway probe.
           text: >
             az network application-gateway probe create
             -g my_rg
