@@ -38,10 +38,10 @@ helps['acr create'] = """
             examples:
                 - name: Create a container registry with a new storage account.
                   text:
-                    az acr create -n my_registry -g my_rg -l southcentralus
+                    az acr create -n myregistry -g my_rg -l southcentralus
                 - name: Create a container registry with an existing storage account.
                   text:
-                    az acr create -n my_registry -g my_rg -l southcentralus --storage-account-name my_storage_account
+                    az acr create -n myregistry -g my_rg -l southcentralus --storage-account-name mystorageaccount
             """
 
 helps['acr update'] = """
@@ -50,13 +50,13 @@ helps['acr update'] = """
             examples:
                 - name: Update tags for a container registry.
                   text:
-                    az acr update -n my_registry --tags key1=value1 key2=value2
+                    az acr update -n myregistry --tags key1=value1 key2=value2
                 - name: Update the storage account for a container registry.
                   text:
-                    az acr update -n my_registry --storage-account-name my_storage_account
+                    az acr update -n myregistry --storage-account-name mystorageaccount
                 - name: Enable the administrator user account for a container registry.
                   text:
-                    az acr update -n my_registry --admin-enabled true
+                    az acr update -n myregistry --admin-enabled true
             """
 
 helps['acr repository list'] = """
@@ -64,10 +64,10 @@ helps['acr repository list'] = """
             examples:
                 - name: If the administrator user account is enabled, list the repositories in a given container registry. 
                   text:
-                    az acr repository list -n my_registry
+                    az acr repository list -n myregistry
                 - name: List the repositories in a given container registry with credentials.
                   text:
-                    az acr repository list -n my_registry -u my_username -p my_p
+                    az acr repository list -n myregistry -u my_username -p my_p
             """
 
 helps['acr repository show-tags'] = """
@@ -75,8 +75,48 @@ helps['acr repository show-tags'] = """
             examples:
                 - name: If the administrator user account is enabled, show the tags of a given repository in a given container registry.
                   text:
-                    az acr repository show-tags -n my_registry --repository my_repository
+                    az acr repository show-tags -n myregistry --repository my_repository
                 - name: Show the tags of a given repository in a given container registry with credentials.
                   text:
-                    az acr repository show-tags -n my_registry --repository my_repository -u my_username -p my_p
+                    az acr repository show-tags -n myregistry --repository my_repository -u my_username -p my_p
             """
+
+helps['acr credential show'] = """
+    type: command
+    examples:
+        - name: Get credentials for a registry.
+          text: >
+            az acr credential show -g my_rg -n myregistry
+"""
+
+helps['acr show'] = """
+    type: command
+    examples:
+        - name: Get the login server for a registry.
+          text: >
+            az acr show -n myregistry --query "loginServer"
+"""
+
+helps['acr credential renew'] = """
+    type: command
+    examples:
+        - name: Renew credentials for a registry.
+          text: >
+            az acr credential renew -g my_rg -n myregistry
+"""
+
+helps['acr check-name'] = """
+    type: command
+    examples:
+        - name: Check if a registry name already exists.
+          text: >
+            az acr check-name -n doesthisnameexist
+"""
+
+helps['acr delete'] = """
+    type: command
+    examples:
+        - name: Delete a registry
+          text: >
+            az acr delete -g my_rg -n myregistry
+"""
