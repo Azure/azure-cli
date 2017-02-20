@@ -131,12 +131,16 @@ def create_ag_frontend_ip_configuration(resource_group_name, application_gateway
     from azure.mgmt.network.models import ApplicationGatewayFrontendIPConfiguration
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    new_config = ApplicationGatewayFrontendIPConfiguration(
-        name=item_name,
-        private_ip_address=private_ip_address if private_ip_address else None,
-        private_ip_allocation_method='static' if private_ip_address else 'dynamic',
-        public_ip_address=SubResource(public_ip_address) if public_ip_address else None,
-        subnet=SubResource(subnet) if subnet else None)
+    if public_ip_address:
+        new_config = ApplicationGatewayFrontendIPConfiguration(
+            name=item_name,
+            public_ip_address=SubResource(public_ip_address))
+    else:
+        new_config = ApplicationGatewayFrontendIPConfiguration(
+            name=item_name,
+            private_ip_address=private_ip_address if private_ip_address else None,
+            private_ip_allocation_method='Static' if private_ip_address else 'Dynamic',
+            subnet=SubResource(subnet))
     _upsert(ag.frontend_ip_configurations, new_config, 'name', item_name)
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
@@ -151,7 +155,7 @@ def update_ag_frontend_ip_configuration(instance, parent, item_name, public_ip_a
         instance.subnet = SubResource(subnet)
     if private_ip_address is not None:
         instance.private_ip_address = private_ip_address
-        instance.private_ip_allocation_method = 'static'
+        instance.private_ip_allocation_method = 'Static'
     return parent
 update_ag_frontend_ip_configuration.__doc__ = AppGatewayOperations.create_or_update.__doc__
 
@@ -259,7 +263,7 @@ def update_ag_probe(instance, parent, item_name, protocol=None, host=None, path=
         instance.interval = interval
     if timeout is not None:
         instance.timeout = timeout
-    if threshold is None:
+    if threshold is not None:
         instance.unhealthy_threshold = threshold
     return parent
 
