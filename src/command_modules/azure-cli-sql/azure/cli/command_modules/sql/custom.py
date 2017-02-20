@@ -51,10 +51,9 @@ def _db_create_special(
     database_name,
     server_name,
     resource_group_name,
-    source_database_name,
-    source_server_name,
-    source_resource_group_name,
-    source_subscription_id,
+    dest_database_name,
+    dest_server_name,
+    dest_resource_group_name,
     kwargs):
 
     # Determine server location
@@ -62,35 +61,34 @@ def _db_create_special(
 
     # Set create mode properties
     from urllib.parse import quote
+    subscription_id = get_subscription_id()
     kwargs['source_database_id'] = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}'.format(
-        quote(source_subscription_id),
-        quote(source_resource_group_name),
-        quote(source_server_name),
-        quote(source_database_name))
+        quote(subscription_id),
+        quote(resource_group_name),
+        quote(server_name),
+        quote(database_name))
 
     # Create
     return client.create_or_update(
-        server_name=server_name,
-        resource_group_name=resource_group_name,
-        database_name=database_name,
+        server_name=dest_server_name,
+        resource_group_name=dest_resource_group_name,
+        database_name=dest_database_name,
         parameters=kwargs)
 
 # Copies a database. Wrapper function to make create mode more convenient.
-def db_create_copy(
+def db_copy(
     client,
     database_name,
     server_name,
     resource_group_name,
-    source_database_name,
-    source_server_name=None,
-    source_resource_group_name=None,
-    source_subscription_id=None,
+    dest_database_name,
+    dest_server_name=None,
+    dest_resource_group_name=None,
     **kwargs):
 
     # Determine optional values
-    source_server_name = source_server_name or server_name
-    source_resource_group_name = source_resource_group_name or resource_group_name
-    source_subscription_id = source_subscription_id or get_subscription_id()
+    dest_server_name = dest_server_name or server_name
+    dest_resource_group_name = dest_resource_group_name or resource_group_name
 
     # Set create mode
     kwargs['create_mode'] = 'Copy'
@@ -100,10 +98,9 @@ def db_create_copy(
         database_name,
         server_name,
         resource_group_name,
-        source_database_name,
-        source_server_name,
-        source_resource_group_name,
-        source_subscription_id,
+        dest_database_name,
+        dest_server_name,
+        dest_resource_group_name,
         kwargs)
 
 # Copies a secondary replica. Wrapper function to make create mode more convenient.
@@ -112,14 +109,12 @@ def db_create_replica(
     database_name,
     server_name,
     resource_group_name,
-    source_server_name,
-    source_resource_group_name=None,
-    source_subscription_id=None,
+    dest_server_name,
+    dest_resource_group_name=None,
     **kwargs):
 
     # Determine optional values
-    source_resource_group_name = source_resource_group_name or resource_group_name
-    source_subscription_id = source_subscription_id or get_subscription_id()
+    dest_resource_group_name = dest_resource_group_name or resource_group_name
 
     # Set create mode
     kwargs['create_mode'] = 'OnlineSecondary'
@@ -130,9 +125,8 @@ def db_create_replica(
         server_name,
         resource_group_name,
         database_name, # replica must have the same database name as the source db
-        source_server_name,
-        source_resource_group_name,
-        source_subscription_id,
+        dest_server_name,
+        dest_resource_group_name,
         kwargs)
 
 # Lists databases in a server or elastic pool.

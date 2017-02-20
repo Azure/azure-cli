@@ -18,7 +18,7 @@ database_operations = create_service_adapter('azure.mgmt.sql.operations.database
 with ServiceGroup(__name__, get_sql_database_operations, database_operations) as s:
     with s.group('sql db') as c:
         c.custom_command('create', 'db_create')
-        c.custom_command('create-copy', 'db_create_copy')
+        c.custom_command('copy', 'db_copy')
         c.custom_command('create-replica', 'db_create_replica')
         c.command('show', 'get')
         c.custom_command('list', 'db_list')

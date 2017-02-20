@@ -290,11 +290,12 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('name', self.database_name),
                      JMESPathCheck('tags.key1', 'value1')])
 
-        self.cmd('sql db create-copy -g {} --server-name {} --name {} '
-                 '--source-database-name {}'
-                 .format(rg, self.sql_server_name, self.database_copy_name, self.database_name), checks=[
+        self.cmd('sql db copy -g {} --server-name {} --name {} '
+                 '--dest-database-name {}'
+                 .format(rg, self.sql_server_name, self.database_name, self.database_copy_name), checks=[
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('name', self.database_copy_name)])
+                     JMESPathCheck('name', self.database_copy_name)
+                ])
 
         self.cmd('sql db delete -g {} --server-name {} --name {}'
                  .format(rg, self.sql_server_name, self.database_name), checks=[NoneCheck()])
