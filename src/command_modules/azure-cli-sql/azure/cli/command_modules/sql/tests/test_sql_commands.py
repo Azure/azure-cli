@@ -291,7 +291,7 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('tags.key1', 'value1')])
 
         self.cmd('sql db copy -g {} --server-name {} --name {} '
-                 '--dest-database-name {}'
+                 '--dest-name {}'
                  .format(rg, self.sql_server_name, self.database_name, self.database_copy_name), checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.database_copy_name)

@@ -23,29 +23,57 @@ with ParametersContext(command='sql db') as c:
 
 def configure_db_create_params(c):
     from azure.mgmt.sql.models.database import Database
+    c.expand('parameters', Database)
+
     # We have a wrapper function that determines server location so user doesn't need to specify it as param.
     # Also we have specific commands to special create modes which have their own required params, so
     # database properties related to create mode can be ignores
     ignores = ['location'] + sql_db_special_create_mode_params
-    c.expand('parameters', Database, ignores=ignores)
+    for p in ignores:
+        c.ignore(p)
 
 with ParametersContext(command='sql db create') as c:
     configure_db_create_params(c)
 
+# The following params are ignored when creating a copy or secondary because their
+# values are determined by the source db
+sql_db_copy_ignored_params = ['collation', 'edition', 'max_size_bytes']
+
 with ParametersContext(command='sql db copy') as c:
     configure_db_create_params(c)
+    c.register_alias('requested_service_objective_name', ('--dest-service-objective-name',))
+    c.register_alias('requested_service_objective_id', ('--dest-service-objective-id',))
+    c.register_alias('elastic_pool_name', ('--dest-elastic-pool-name',))
+    for i in sql_db_copy_ignored_params:
+        c.ignore(i)
 
-with ParametersContext(command='sql db create-replica') as c:
+with ParametersContext(command='sql db create-secondary') as c:
     configure_db_create_params(c)
+    c.register_alias('requested_service_objective_name', ('--secondary-service-objective-name',))
+    c.register_alias('requested_service_objective_id', ('--secondary-service-objective-id',))
+    c.register_alias('elastic_pool_name', ('--secondary-elastic-pool-name',))
+    for i in sql_db_copy_ignored_params:
+        c.ignore(i)
+
+# The following params are ignored when restoring because their values are determined by the source db
+sql_db_restore_ignored_params = ['collation', 'max_size_bytes']
 
 with ParametersContext(command='sql db restore') as c:
     configure_db_create_params(c)
+    c.register_alias('requested_service_objective_name', ('--dest-service-objective-name',))
+    c.register_alias('requested_service_objective_id', ('--dest-service-objective-id',))
+    c.register_alias('elastic_pool_name', ('--dest-elastic-pool-name',))
+    for i in sql_db_restore_ignored_params:
+        c.ignore(i)
 
 with ParametersContext(command='sql db update') as c:
     from azure.mgmt.sql.models.database import Database
+    c.expand('parameters', Database)
+
     # These parameters are applicable to create only, not update.
     ignores = ['location', 'collation'] + sql_db_special_create_mode_params
-    c.expand('parameters', Database, ignores=ignores)
+    for i in ignores:
+        c.ignore(i)
 
 #####
 #           sql db replication-link
@@ -96,13 +124,15 @@ with ParametersContext(command='sql elastic-pool') as c:
 
 with ParametersContext(command='sql elastic-pool create') as c:
     from azure.mgmt.sql.models.elastic_pool import ElasticPool
+    c.expand('parameters', ElasticPool)
     # We have a wrapper function that determines server location so user doesn't need to specify it as param.
-    c.expand('parameters', ElasticPool, ignores=['location'])
+    c.ignore('location')
 
 with ParametersContext(command='sql elastic-pool update') as c:
     from azure.mgmt.sql.models.elastic_pool import ElasticPool
+    c.expand('parameters', ElasticPool)
     # We have a wrapper function that determines server location so user doesn't need to specify it as param.
-    c.expand('parameters', ElasticPool, ignores=['location'])
+    c.ignore('location')
 
 ###############################################
 #                sql server                   #
@@ -115,10 +145,6 @@ with ParametersContext(command='sql server') as c:
 
 with ParametersContext(command='sql server create') as c:
     from azure.mgmt.sql.models.server import Server
-
-    # 12.0 is the only server version allowed and it's already the default.
-    ignores = ['version']
-
     # - Both administrator_login and administrator_login_password are required for server creation.
     # However these two parameters are given default value in the create_or_update function
     # signature, therefore, they can't be automatically converted to requirement arguments.
@@ -126,16 +152,19 @@ with ParametersContext(command='sql server create') as c:
         'administrator_login': patch_arg_make_required,
         'administrator_login_password': patch_arg_make_required
     }
+    c.expand('parameters', Server, group_name='Authentication', patches=patches)
 
-    c.expand('parameters', Server, group_name='Authentication', ignores=ignores, patches=patches)
+    # 12.0 is the only server version allowed and it's already the default.
+    c.ignore('version')
 
 with ParametersContext(command='sql server update') as c:
     from azure.mgmt.sql.models.server import Server
+    c.expand('parameters', Server)
 
     # location and administrator_login cannot be updated.
     # 12.0 is the only server version allowed and it's already the default.
-    ignores = ['location', 'administrator_login', 'version']
-    c.expand('parameters', Server, ignores=ignores)
+    for i in ['location', 'administrator_login', 'version']:
+        c.ignore(i)
 
 #####
 #           sql server firewall

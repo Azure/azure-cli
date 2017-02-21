@@ -125,7 +125,7 @@ class ParametersContext(object):
     def register_alias(self, argument_name, options_list):
         register_cli_argument(self._commmand, argument_name, options_list=options_list)
 
-    def expand(self, argument_name, model_type, group_name=None, patches=None, ignores=None):
+    def expand(self, argument_name, model_type, group_name=None, patches=None):
         # TODO:
         # two privates symbols are imported here. they should be made public or this utility class
         # should be moved into azure.cli.core
@@ -147,9 +147,6 @@ class ParametersContext(object):
 
         expanded_arguments = []
         for name, arg in extract_args_from_signature(model_type.__init__):
-            if ignores and name in ignores:
-                continue
-
             if name in parameter_docs:
                 arg.type.settings['help'] = parameter_docs[name]
 

@@ -81,7 +81,7 @@ def db_copy(
     database_name,
     server_name,
     resource_group_name,
-    dest_database_name,
+    dest_name,
     dest_server_name=None,
     dest_resource_group_name=None,
     **kwargs):
@@ -98,23 +98,23 @@ def db_copy(
         database_name,
         server_name,
         resource_group_name,
-        dest_database_name,
+        dest_name,
         dest_server_name,
         dest_resource_group_name,
         kwargs)
 
 # Copies a secondary replica. Wrapper function to make create mode more convenient.
-def db_create_replica(
+def db_create_secondary(
     client,
     database_name,
     server_name,
     resource_group_name,
-    dest_server_name,
-    dest_resource_group_name=None,
+    secondary_server_name,
+    secondary_resource_group_name=None,
     **kwargs):
 
     # Determine optional values
-    dest_resource_group_name = dest_resource_group_name or resource_group_name
+    secondary_resource_group_name = secondary_resource_group_name or resource_group_name
 
     # Set create mode
     kwargs['create_mode'] = 'OnlineSecondary'
@@ -125,18 +125,18 @@ def db_create_replica(
         server_name,
         resource_group_name,
         database_name, # replica must have the same database name as the source db
-        dest_server_name,
-        dest_resource_group_name,
+        secondary_server_name,
+        secondary_resource_group_name,
         kwargs)
 
-# Copies a database from a database point in time backup. Wrapper function to make create mode more convenient.
+# Creates a database from a database point in time backup. Wrapper function to make create mode more convenient.
 def db_restore(
     client,
     database_name,
     server_name,
     resource_group_name,
     restore_point_in_time,
-    dest_database_name,
+    dest_name,
     dest_server_name=None,
     dest_resource_group_name=None,
     **kwargs):
@@ -154,7 +154,7 @@ def db_restore(
         database_name,
         server_name,
         resource_group_name,
-        dest_database_name,
+        dest_name,
         dest_server_name,
         dest_resource_group_name,
         kwargs)
