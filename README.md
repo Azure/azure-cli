@@ -143,6 +143,8 @@ $ pip install --pre azure-cli --extra-index-url https://azureclinightly.blob.cor
 - Install additional components with:
     ```
     $ export AZURE_COMPONENT_PACKAGE_INDEX_URL=https://azureclinightly.blob.core.windows.net/packages
+    ```
+    ```
     $ az component update --add <component_name> --private
     ```
 - To view the list of installed packages, run ``az component list``
