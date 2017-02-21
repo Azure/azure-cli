@@ -332,13 +332,13 @@ def _check_registry_information(registry_name, registry_resource_id):
         if not re.match(registry_id_pattern, registry_resource_id):
             raise CLIError("Invalid registry resource ID")
     else:
-        # Check the
-        name_pattern = '[^0-9a-zA-Z]'
-        name_length = len(registry_name)
-        if re.search(name_pattern, registry_name) or\
-                (name_length < 5 or name_length > 50):
-            raise CLIError(
-                "Registry name '{}' is invalid. A valid registry name is between 5-50 characters and contains only alphanumeric values.".format(registry_name))
+        if registry_name:
+            name_pattern = '[^0-9a-zA-Z]'
+            name_length = len(registry_name)
+            if re.search(name_pattern, registry_name) or\
+                    (name_length < 5 or name_length > 50):
+                raise CLIError(
+                    "Registry name '{}' is invalid. A valid registry name is between 5-50 characters and contains only alphanumeric values.".format(registry_name))
 
 def add_ci(
         target_name,
