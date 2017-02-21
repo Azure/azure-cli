@@ -10,9 +10,9 @@ import time
 import uuid
 from subprocess import CalledProcessError, check_output
 
-import azure.cli.core.azlogging as azlogging
 import requests
 import yaml
+import azure.cli.core.azlogging as azlogging
 from azure.cli.core._config import az_config
 from azure.cli.core._profile import _SERVICE_PRINCIPAL, CredsCache, Profile
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long
