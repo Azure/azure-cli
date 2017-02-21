@@ -84,9 +84,9 @@ helps['network application-gateway address-pool create'] = """
         - name: Create an address pool with two endpoints specified by IP.
           text: >
             az network application-gateway address-pool create
-            -g my_rg
-            --gateway-name my_ag
-            -n my_address_pool
+            -g MyResourceGroup
+            --gateway-name MyApplicationGateway
+            -n MyAddressPool
             --servers 10.0.0.4 10.0.0.5
 """
 
@@ -288,10 +288,10 @@ helps['network application-gateway probe create'] = """
         - name: Create an application gateway probe.
           text: >
             az network application-gateway probe create
-            -g my_rg
-            -n my_probe
+            -g MyResourceGroup
+            -n MyProbe
             --protocol Https
-            --gateway-name my_ag
+            --gateway-name MyApplicationGateway
             --host 127.0.0.1
             --path /path/to/probe
 """
@@ -519,7 +519,7 @@ for record in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
         examples:
         - name: Show information about an A record set.
           text: >
-            az network dns record-set a show -g my_rg -n my_record_set -z www.mysite.com
+            az network dns record-set a show -g MyResourceGroup -n MyRecordSet -z www.mysite.com
     """.format(record.upper())
 
 for item in ['a', 'aaaa', 'mx', 'ns', 'ptr', 'srv', 'txt']:
@@ -562,7 +562,7 @@ helps['network dns record-set list'] = """
         - name: List all "@" record sets within this zone.
           text: >
             az network dns record-set list
-            -g my_rg
+            -g MyResourceGroup
             -z www.mysite.com
             --query "[?name=='@']"
 """
@@ -584,7 +584,7 @@ helps['network dns zone create'] = """
     examples:
         - name: Create DNS zone for a specific fully qualified domain name.
           text: >
-            az network dns zone create -g my_rg -n www.mysite.com
+            az network dns zone create -g MyResourceGroup -n www.mysite.com
 """
 
 helps['network dns zone delete'] = """
@@ -606,9 +606,9 @@ helps['network dns zone import'] = """
         - name: Import a local zone file into a DNS zone resource.
           text: >
             az network dns zone import
-            -g my_rg
-            -n my_zone
-            -f zone_file_path
+            -g MyResourceGroup
+            -n MyZone
+            -f /path/to/zone/file
 """
 
 helps['network dns zone list'] = """
@@ -757,14 +757,14 @@ helps['network lb create'] = """
     examples:
         - name: Create a basic load balancer.
           text: >
-            az network lb create -g my_rg -n my_lb
+            az network lb create -g MyResourceGroup -n MyLb
         - name: Create a load balancer on a specific virtual network and subnet.
           text: >
             az network lb create
-            -g my_rg
-            -n my_lb
-            --vnet-name my_vnet
-            --subnet my_subnet
+            -g MyResourceGroup
+            -n MyLb
+            --vnet-name MyVnet
+            --subnet MySubnet
 """
 
 helps['network lb delete'] = """
@@ -896,11 +896,11 @@ helps['network lb inbound-nat-rule create'] = """
         - name: Create a basic inbound NAT rule for port 80.
           text: >
             az network lb inbound-nat-rule create
-            -g my_rg
-            --lb-name my_lb
-            -n my_nat_rule
+            -g MyResourceGroup
+            --lb-name MyLb
+            -n MyNatRule
             --protocol Tcp
-            --frontend-ip-name my_ip_conf
+            --frontend-ip-name MyIpConfig
             --frontend-port 80
             --backend-port 80
 """
@@ -940,9 +940,9 @@ helps['network lb probe create'] = """
         - name: Create a probe on a load balancer over HTTP and port 80.
           text: >
             az network lb probe create
-            -g my_rg
-            --lb-name my_lb
-            -n my_probe
+            -g MyResourceGroup
+            --lb-name MyLb
+            -n MyProbe
             --protocol Http
             --port 80
             --path /
@@ -984,11 +984,11 @@ helps['network lb rule create'] = """
                 and port to a backend address pool and port.
           text: >
             az network lb rule create
-            -g my_rg
-            --lb-name my_lb
-            -n my_lb_rule
+            -g MyResourceGroup
+            --lb-name MyLb
+            -n MyLbRule
             --protocol Tcp
-            --frontend-ip-name my_ip_config
+            --frontend-ip-name MyIpConfig
             --frontend-port 80
             --backend-pool-name m_pool
             --backend-port 80
@@ -1070,20 +1070,20 @@ helps['network nic create'] = """
         - name: Create a network interface for a specified subnet on a specified virtual network.
           text: >
             az network nic create
-            -g my_rg
-            --vnet-name my_vnet
-            --subnet my_subnet
-            -n my_nic
+            -g MyResourceGroup
+            --vnet-name MyVnet
+            --subnet MySubnet
+            -n MyNic
         - name: Create a network interface for a specified subnet on a specified virtual network which allows 
                 IP forwarding subject to the specified NSG.
           text: >
             az network nic create
-            -g my_rg
-            --vnet-name my_vnet
-            --subnet my_subnet
-            -n my_nic
+            -g MyResourceGroup
+            --vnet-name MyVnet
+            --subnet MySubnet
+            -n MyNic
             --ip-forwarding
-            --network-security-group my_nsg
+            --network-security-group MyNsg
 """
 
 helps['network nic delete'] = """
@@ -1109,8 +1109,8 @@ helps['network nic show'] = """
         - name: Get the internal domain name suffix for a NIC.
           text: >
             az network nic show
-            -g my_rg
-            -n my_nic
+            -g MyResourceGroup
+            -n MyNic
             --query "dnsSettings.internalDomainNameSuffix"
 """
 
@@ -1121,9 +1121,9 @@ helps['network nic update'] = """
         - name: Update a network interface to use a different NSG.
           text: >
             az network nic update
-            -g my_rg
-            -n my_nic
-            --network-security-group my_new_nsg
+            -g MyResourceGroup
+            -n MyNic
+            --network-security-group MyNsg
 """
 #endregion
 
@@ -1163,16 +1163,16 @@ helps['network nic ip-config update'] = """
         - name: Update the NIC to use a new private IP address.
           text: >
             az network nic ip-config update
-            -g my_rg
-            --nic-name my_nic
-            -n my_ip_config
+            -g MyResourceGroup
+            --nic-name MyNic
+            -n MyIpConfig
             --private-ip-address 10.0.0.9
         - name: Make this IP configuration the default for the supplied NIC.
           text: >
             az network nic ip-config update
-            -g my_rg
-            --nic-name my_nic
-            -n my_ip_config
+            -g MyResourceGroup
+            --nic-name MyNic
+            -n MyIpConfig
             --make-primary
 """
 #endregion
@@ -1232,8 +1232,8 @@ helps['network nsg create'] = """
         - name: Create an NSG with some tags.
           text: >
             az network nsg create
-            -g my_rg
-            -n my_nsg
+            -g MyResourceGroup
+            -n MyNsg
             --tags super_secure no_80 no_22
 """
 
@@ -1252,12 +1252,12 @@ helps['network nsg show'] = """
     examples:
         - name: Get basic information about an NSG.
           text: >
-            az network nsg show -g my_rg -n my_nsg
+            az network nsg show -g MyResourceGroup -n MyNsg
         - name: Get basic information about all default NSG rules with "Allow" access.
           text: >
             az network nsg show
-            -g my_rg
-            -n my_nsg
+            -g MyResourceGroup
+            -n MyNsg
             --query "defaultSecurityRules[?access=='Allow']"
 """
 
@@ -1269,16 +1269,16 @@ helps['network nsg rule create'] = """
                 and port are "*" and destination address is "*:80".
           text: >
             az network nsg rule create
-            -g my_rg
-            --nsg-name my_nsg
-            -n my_nsg_rule
+            -g MyResourceGroup
+            --nsg-name MyNsg
+            -n MyNsgRule
             --priority 100
         - name: Create a "Deny" rule over TCP for a specific IP address range with the lowest priority (that is, 4096).
           text: >
             az network nsg rule create
-            -g my_rg
-            --nsg-name my_nsg
-            -n my_nsg_rule
+            -g MyResourceGroup
+            --nsg-name MyNsg
+            -n MyNsgRule
             --priority 4096
             --source-address-prefix 208.130.28/24
             --source-port-range 80
@@ -1311,9 +1311,9 @@ helps['network nsg rule update'] = """
         - name: Update an NSG rule with a new wildcard destination address prefix.
           text: >
             az network nsg rule update
-            -g my_rg
-            --nsg-name my_nsg
-            -n my_nsg_rule
+            -g MyResourceGroup
+            --nsg-name MyNsg
+            -n MyNsgRule
             --destination-address-prefix *
 """
 
@@ -1333,14 +1333,14 @@ helps['network public-ip create'] = """
     examples:
         - name: Create a basic public IP resource.
           text: >
-            az network public-ip create -g my_rg -n my_ip
+            az network public-ip create -g MyResourceGroup -n MyIp
         - name: Create a static public IP resource for a DNS name label
-                (for example, mylabel.westus.cloudapp.azure.com).
+                (for example, MyLabel.westus.cloudapp.azure.com).
           text: >
             az network public-ip create
-            -g my_rg
-            -n my_ip
-            --dns-name mylabel
+            -g MyResourceGroup
+            -n MyIp
+            --dns-name MyLabel
             --allocation-method Static
 """
 
@@ -1355,12 +1355,12 @@ helps['network public-ip list'] = """
     examples:
         - name: List all public IPs in a resource group.
           text: >
-            az network public-ip list -g my_reource_group
-        - name: List all public IPs for a domain name label (for example `<my_label>.eastus.cloudapp.azure.com`).
+            az network public-ip list -g MyResourceGroup
+        - name: List all public IPs for a domain name label (for example `MyLabel.eastus.cloudapp.azure.com`).
           text: >
             az network public-ip list
-            -g my_rg
-            --query "[?dnsSettings.domainNameLabel=='<my_label>']"
+            -g MyResourceGroup
+            --query "[?dnsSettings.domainNameLabel=='MyLabel']"
 """
 
 helps['network public-ip show'] = """
@@ -1369,12 +1369,12 @@ helps['network public-ip show'] = """
     examples:
         - name: Get information about a public IP resource.
           text: >
-            az network public-ip show -g my_rg -n my_ip
+            az network public-ip show -g MyResourceGroup -n MyIp
         - name: Get FQDN and IP address for a public IP resource.
           text: >
             az network public-ip show
-            -g my_rg
-            -n my_ip
+            -g MyResourceGroup
+            -n MyIp
             --query "{ fqdn:dnsSettings.fqdn, address: ipAddress }"
 """
 
@@ -1383,13 +1383,13 @@ helps['network public-ip update'] = """
     short-summary: Update a public IP address.
     examples:
         - name: Update a public IP resource with a DNS name label
-                (for example, mylabel.westus.cloudapp.azure.com) and 
+                (for example, MyLabel.westus.cloudapp.azure.com) and 
                 static allocation.
           text: >
             az network public-ip update
-            -g my_rg
-            -n my_ip
-            --dns-name mylabel
+            -g MyResourceGroup
+            -n MyIp
+            --dns-name MyLabel
             --allocation-method Static
 """
 #endregion
@@ -1550,14 +1550,14 @@ helps['network vnet create'] = """
     examples:
         - name: Create a basic virtual network.
           text: >
-            az network vnet create -g my_rg -n my_vnet
+            az network vnet create -g MyResourceGroup -n MyVnet
         - name: Create a virtual network with a specific address prefix and one subnet.
           text: >
             az network vnet create
-            -g my_rg
-            -n my_vnet
+            -g MyResourceGroup
+            -n MyVnet
             --address-prefix 10.0.0.0/16
-            --subnet-name my_subnet
+            --subnet-name MySubnet
             --subnet-prefix 10.0.0.0/24
 """
 
@@ -1600,12 +1600,12 @@ helps['network vnet subnet create'] = """
         - name: <example name>.
           text: >
             az network vnet subnet create
-            -g my_rg
-            --vnet-name my_vnet
-            -n my_subnet
+            -g MyResourceGroup
+            --vnet-name MyVnet
+            -n MySubnet
             --address-prefix 10.0.0.0/24
-            --network-security-group my_nsg
-            --route-table my_routes
+            --network-security-group MyNsg
+            --route-table MyRouteTable
 """
 
 helps['network vnet subnet delete'] = """
@@ -1734,10 +1734,10 @@ helps['network vnet-gateway create'] = """
         - name: Create a basic virtual network gateway and associate with a public IP address.
           text: >
             az network vnet-gateway create
-            -g my_rg
-            --vnet my_vnet
-            -n my_vnet_gateway
-            --public-ip-address my_ip
+            -g MyResourceGroup
+            --vnet MyVnet
+            -n MyVnetGateway
+            --public-ip-address MyIp
 """
 
 helps['network vnet-gateway delete'] = """
