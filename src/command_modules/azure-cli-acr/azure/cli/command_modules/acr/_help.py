@@ -30,7 +30,7 @@ helps['acr list'] = """
                     az acr list -o table
                 - name: List container registries in a resource group and the show results in a table.
                   text:
-                    az acr list -g my_resource_group -o table
+                    az acr list -g MyResourceGroup -o table
             """
 
 helps['acr create'] = """
@@ -38,10 +38,10 @@ helps['acr create'] = """
             examples:
                 - name: Create a container registry with a new storage account.
                   text:
-                    az acr create -n myregistry -g my_resource_group -l southcentralus
+                    az acr create -n MyRegistry -g MyResourceGroup -l southcentralus
                 - name: Create a container registry with an existing storage account.
                   text:
-                    az acr create -n myregistry -g my_resource_group -l southcentralus --storage-account-name mystorageaccount
+                    az acr create -n MyRegistry -g MyResourceGroup -l southcentralus --storage-account-name MyStorageAccount
             """
 
 helps['acr update'] = """
@@ -50,13 +50,13 @@ helps['acr update'] = """
             examples:
                 - name: Update tags for a container registry.
                   text:
-                    az acr update -n myregistry --tags key1=value1 key2=value2
+                    az acr update -n MyRegistry --tags key1=value1 key2=value2
                 - name: Update the storage account for a container registry.
                   text:
-                    az acr update -n myregistry --storage-account-name mystorageaccount
+                    az acr update -n MyRegistry --storage-account-name MyStorageAccount
                 - name: Enable the administrator user account for a container registry.
                   text:
-                    az acr update -n myregistry --admin-enabled true
+                    az acr update -n MyRegistry --admin-enabled true
             """
 
 helps['acr repository list'] = """
@@ -64,10 +64,10 @@ helps['acr repository list'] = """
             examples:
                 - name: If the administrator user account is enabled, list the repositories in a given container registry. 
                   text:
-                    az acr repository list -n myregistry
+                    az acr repository list -n MyRegistry
                 - name: List the repositories in a given container registry with credentials.
                   text:
-                    az acr repository list -n myregistry -u my_username -p my_p
+                    az acr repository list -n MyRegistry
             """
 
 helps['acr repository show-tags'] = """
@@ -75,10 +75,10 @@ helps['acr repository show-tags'] = """
             examples:
                 - name: If the administrator user account is enabled, show the tags of a given repository in a given container registry.
                   text:
-                    az acr repository show-tags -n myregistry --repository my_repository
+                    az acr repository show-tags -n MyRegistry --repository MyRepository
                 - name: Show the tags of a given repository in a given container registry with credentials.
                   text:
-                    az acr repository show-tags -n myregistry --repository my_repository -u my_username -p my_p
+                    az acr repository show-tags -n MyRegistry --repository MyRepository
             """
 
 helps['acr credential show'] = """
@@ -86,7 +86,7 @@ helps['acr credential show'] = """
     examples:
         - name: Get credentials for a registry.
           text: >
-            az acr credential show -g my_resource_group -n myregistry
+            az acr credential show -g MyResourceGroup -n MyRegistry
 """
 
 helps['acr show'] = """
@@ -94,7 +94,7 @@ helps['acr show'] = """
     examples:
         - name: Get the login server for a registry.
           text: >
-            az acr show -n myregistry --query "loginServer"
+            az acr show -n MyRegistry --query "loginServer"
 """
 
 helps['acr credential renew'] = """
@@ -102,7 +102,7 @@ helps['acr credential renew'] = """
     examples:
         - name: Renew credentials for a registry.
           text: >
-            az acr credential renew -g my_resource_group -n myregistry
+            az acr credential renew -g MyResourceGroup -n MyRegistry
 """
 
 helps['acr check-name'] = """
@@ -118,5 +118,5 @@ helps['acr delete'] = """
     examples:
         - name: Delete a registry
           text: >
-            az acr delete -g my_resource_group -n myregistry
+            az acr delete -g MyResourceGroup -n MyRegistry
 """
