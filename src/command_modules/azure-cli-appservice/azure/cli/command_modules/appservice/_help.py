@@ -49,8 +49,8 @@ helps['appservice web config appsettings update'] = """
         - name: Set the default node version for a specified web app.
           text: >
             az appservice web config appsettings update
-            -g my_rg
-            -n myuniqueapp
+            -g MyResourceGroup
+            -n MyUniqueApp
             --settings WEBSITE_NODE_DEFAULT_VERSION=6.9.1
 """
 
@@ -166,8 +166,8 @@ helps['appservice web deployment slot swap'] = """
         - name: Swap a staging slot into production for the specified web app.
           text: >
             az appservice web deployment slot swap
-            -g my_rg
-            -n myunqiueapp
+            -g MyResourceGroup
+            -n MyUniqueApp
             --slot staging
             --target-slot production
 """
@@ -196,7 +196,7 @@ helps['appservice web deployment user set'] = """
         - name: Set FTP and git deployment credentials for all web apps.
           text: >
             az appservice web deployment user set
-            --user-name my_user_name
+            --user-name MyUserName
 """
 
 helps['appservice web deployment slot'] = """
@@ -222,10 +222,10 @@ helps['appservice web source-control config-local-git'] = """
         - name: Get a git endpoint for a web app and add it as a remote.
           text: >
             az appservice web source-control config-local-git \\
-                -g my_rg -n myuniqueapp
+                -g MyResourceGroup -n MyUniqueApp
 
             git remote add azure \\
-                https://<deploy_user_name>@myuniqueapp.scm.azurewebsites.net/myuniqueapp.git
+                https://<deploy_user_name>@MyUniqueApp.scm.azurewebsites.net/MyUniqueApp.git
 """
 
 helps['appservice web source-control delete'] = """
@@ -259,12 +259,12 @@ helps['appservice plan create'] = """
     examples:
         - name: Create a basic App Service plan.
           text: >
-            az appservice plan create -g my_rg -n my_plan
+            az appservice plan create -g MyResourceGroup -n MyPlan
         - name: Create a standard App Service plan with with four Linux workers.
           text: >
             az appservice plan create
-            -g my_rg
-            -n my_plan2
+            -g MyResourceGroup
+            -n MyPlan
             --is-linux
             --number-of-workers 4
             --sku S1
@@ -339,12 +339,12 @@ helps['appservice web create'] = """
     short-summary: Create a web app.
     examples:
         - name: Create a basic App Service plan.  Name must be unique to yield a unique FQDN;
-                for example, myuniqueapp.azurewebsites.net.
+                for example, MyUniqueApp.azurewebsites.net.
           text: >
             az appservice web create
-            -g my_rg
-            -p my_plan
-            -n myuniqueapp
+            -g MyResourceGroup
+            -p MyPlan
+            -n MyUniqueApp
 """
 
 helps['appservice web delete'] = """

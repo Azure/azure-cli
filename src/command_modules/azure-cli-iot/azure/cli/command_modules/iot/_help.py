@@ -28,13 +28,13 @@ helps['iot hub create'] = """
     examples:
         - name: Create an IoT Hub with the free pricing tier F1, in the region of the resource group.
           text: >
-            az iot hub create --resource-group my-resource-group --name my-iot-hub
+            az iot hub create --resource-group MyResourceGroup --name MyIotHub
         - name: Create an IoT Hub with the standard pricing tier S1, in the region of the resource group.
           text: >
-            az iot hub create --resource-group my-resource-group --name my-iot-hub --sku S1
+            az iot hub create --resource-group MyResourceGroup --name MyIotHub --sku S1
         - name: Create an IoT Hub with the free pricing tier F1, in the `westus` region.
           text: >
-            az iot hub create --resource-group my-resource-group --name my-iot-hub --location westus
+            az iot hub create --resource-group MyResourceGroup --name MyIotHub --location westus
 """
 
 helps['iot hub show'] = """
@@ -48,8 +48,8 @@ helps['iot hub update'] = """
     examples:
         - name: Add an IP filter rule.
           text: >
-            az iot hub update --name my-iot-hub --add properties.ipFilterRules filter_name=test-rule action=Accept ip_mask=127.0.0.0/31
-            az iot hub update --name my-iot-hub --add properties.ipFilterRules filter_name=test-rule action=Reject ip_mask=127.0.0.0/31
+            az iot hub update --name MyIotHub --add properties.ipFilterRules filter_name=test-rule action=Accept ip_mask=127.0.0.0/31
+            az iot hub update --name MyIotHub --add properties.ipFilterRules filter_name=test-rule action=Reject ip_mask=127.0.0.0/31
 """
 
 helps['iot hub list'] = """
@@ -65,13 +65,13 @@ helps['iot hub show-connection-string'] = """
     examples:
         - name: Show the connection string of an IoT Hub using default policy (`iothubowner`) and primary key.
           text: >
-            az iot hub show-connection-string --name my-iot-hub
+            az iot hub show-connection-string --name MyIotHub
         - name: Show the connection string of an IoT Hub using policy `service` and secondary key.
           text: >
-            az iot hub show-connection-string --name my-iot-hub --policy-name service --key secondary
+            az iot hub show-connection-string --name MyIotHub --policy-name service --key secondary
         - name: Show the connection strings of all IoT Hubs in a resource group.
           text: >
-            az iot hub show-connection-string --resource-group my-resource-group
+            az iot hub show-connection-string --resource-group MyResourceGroup
         - name: Show the connection strings of all IoT Hubs in a subscription.
           text: >
             az iot hub show-connection-string
@@ -93,10 +93,10 @@ helps['iot hub consumer-group create'] = """
     examples:
         - name: Create a consumer group `cg1` in the default event hub endpoint `events`.
           text: >
-            az iot hub consumer-group create --hub-name my-iot-hub --name cg1
+            az iot hub consumer-group create --hub-name MyIotHub --name cg1
         - name: Create a consumer group `cg1` in the operation monitoring event hub endpoint `operationsMonitoringEvents`.
           text: >
-            az iot hub consumer-group create --hub-name my-iot-hub --event-hub-name operationsMonitoringEvents --name cg1
+            az iot hub consumer-group create --hub-name MyIotHub --event-hub-name operationsMonitoringEvents --name cg1
 """
 
 helps['iot hub consumer-group list'] = """
@@ -135,7 +135,7 @@ helps['iot hub policy create'] = """
     examples:
         - name: Create a new shared access policy.
           text: >
-            az iot hub policy create --hub-name my-iot-hub --name new-policy --permissions RegistryWrite ServiceConnect DeviceConnect
+            az iot hub policy create --hub-name MyIotHub --name new-policy --permissions RegistryWrite ServiceConnect DeviceConnect
 """
 
 helps['iot hub policy delete'] = """
@@ -184,19 +184,19 @@ helps['iot device create'] = """
     examples:
         - name: Create a device authenticating with symmetric key.
           text: >
-            az iot device create --hub-name my-iot-hub --device-id my-device
+            az iot device create --hub-name MyIotHub --device-id MyDevice
         - name: Create a device authenticating with existing X.509 certificate.
           text: >
-            az iot device create --hub-name my-iot-hub --device-id my-device --x509 --primary-thumbprint X.509_certificate_thumbprint
+            az iot device create --hub-name MyIotHub --device-id MyDevice --x509 --primary-thumbprint X.509_certificate_thumbprint
         - name: Create a device authenticating with self-signed X.509 certificate, which is put into to the current directory.
           text: >
-            az iot device create --hub-name my-iot-hub --device-id my-device --x509
+            az iot device create --hub-name MyIotHub --device-id MyDevice --x509
         - name: Create a device authenticating with self-signed X.509 certificate, which is valid for 100 days.
           text: >
-            az iot device create --hub-name my-iot-hub --device-id my-device --x509 --valid-days 100
+            az iot device create --hub-name MyIotHub --device-id MyDevice --x509 --valid-days 100
         - name: Create a device authenticating with self-signed X.509 certificate, which is put into the specified directory.
           text: >
-            az iot device create --hub-name my-iot-hub --device-id my-device --x509 --output-dir /path/to/output
+            az iot device create --hub-name MyIotHub --device-id MyDevice --x509 --output-dir /path/to/output
 """
 
 helps['iot device show'] = """
@@ -210,7 +210,7 @@ helps['iot device update'] = """
     examples:
         - name: Disable a device.
           text: >
-            az iot device update --hub-name my-iot-hub --device-id my-device --set status=disabled
+            az iot device update --hub-name MyIotHub --device-id MyDevice --set status=disabled
 """
 
 helps['iot device list'] = """
@@ -230,16 +230,16 @@ helps['iot device show-connection-string'] = """
     examples:
         - name: Show the connection string of a device in an IoT Hub using primary key.
           text: >
-            az iot device show-connection-string --hub-name my-iot-hub --device-id my-device
+            az iot device show-connection-string --hub-name MyIotHub --device-id MyDevice
         - name: Show the connection string of a device in an IoT Hub using secondary key.
           text: >
-            az iot device show-connection-string --hub-name my-iot-hub --device-id my-device --key secondary
+            az iot device show-connection-string --hub-name MyIotHub --device-id MyDevice --key secondary
         - name: Show the connection strings of the default devices in an IoT Hub using primary key.
           text: >
-            az iot device show-connection-string --hub-name my-iot-hub
+            az iot device show-connection-string --hub-name MyIotHub
         - name: Show the connection strings of the top 100 devices in an IoT Hub using primary key.
           text: >
-            az iot device show-connection-string --hub-name my-iot-hub --top 100
+            az iot device show-connection-string --hub-name MyIotHub --top 100
 """
 
 helps['iot device message'] = """
@@ -253,10 +253,10 @@ helps['iot device message send'] = """
     examples:
         - name: Send a device-to-cloud message to an IoT Hub with a default message.
           text: >
-            az iot device message send --hub-name my-iot-hub --device-id my-device
+            az iot device message send --hub-name MyIotHub --device-id MyDevice
         - name: Send a device-to-cloud message to an IoT Hub with a custom message.
           text: >
-            az iot device message send --hub-name my-iot-hub --device-id my-device --data "Custom Message"
+            az iot device message send --hub-name MyIotHub --device-id MyDevice --data "Custom Message"
 """
 
 helps['iot device message receive'] = """
@@ -265,10 +265,10 @@ helps['iot device message receive'] = """
     examples:
         - name: Receive a cloud-to-device message from an IoT Hub with a default lock timeout.
           text: >
-            az iot device message receive --hub-name my-iot-hub --device-id my-device
+            az iot device message receive --hub-name MyIotHub --device-id MyDevice
         - name: Receive a cloud-to-device message from an IoT Hub with a lock timeout of 300 seconds.
           text: >
-            az iot device message receive --hub-name my-iot-hub --device-id my-device --lock-timeout 300
+            az iot device message receive --hub-name MyIotHub --device-id MyDevice --lock-timeout 300
 """
 
 helps['iot device message complete'] = """
