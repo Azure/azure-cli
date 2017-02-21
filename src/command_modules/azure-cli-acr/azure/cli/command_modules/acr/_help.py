@@ -30,7 +30,7 @@ helps['acr list'] = """
                     az acr list -o table
                 - name: List container registries in a resource group and the show results in a table.
                   text:
-                    az acr list -g my_rg -o table
+                    az acr list -g my_resource_group -o table
             """
 
 helps['acr create'] = """
@@ -38,10 +38,10 @@ helps['acr create'] = """
             examples:
                 - name: Create a container registry with a new storage account.
                   text:
-                    az acr create -n myregistry -g my_rg -l southcentralus
+                    az acr create -n myregistry -g my_resource_group -l southcentralus
                 - name: Create a container registry with an existing storage account.
                   text:
-                    az acr create -n myregistry -g my_rg -l southcentralus --storage-account-name mystorageaccount
+                    az acr create -n myregistry -g my_resource_group -l southcentralus --storage-account-name mystorageaccount
             """
 
 helps['acr update'] = """
@@ -86,7 +86,7 @@ helps['acr credential show'] = """
     examples:
         - name: Get credentials for a registry.
           text: >
-            az acr credential show -g my_rg -n myregistry
+            az acr credential show -g my_resource_group -n myregistry
 """
 
 helps['acr show'] = """
@@ -102,7 +102,7 @@ helps['acr credential renew'] = """
     examples:
         - name: Renew credentials for a registry.
           text: >
-            az acr credential renew -g my_rg -n myregistry
+            az acr credential renew -g my_resource_group -n myregistry
 """
 
 helps['acr check-name'] = """
@@ -118,5 +118,5 @@ helps['acr delete'] = """
     examples:
         - name: Delete a registry
           text: >
-            az acr delete -g my_rg -n myregistry
+            az acr delete -g my_resource_group -n myregistry
 """

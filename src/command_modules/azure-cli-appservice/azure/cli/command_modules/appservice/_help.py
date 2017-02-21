@@ -49,7 +49,7 @@ helps['appservice web config appsettings update'] = """
         - name: Set the default node version for a specified web app.
           text: >
             az appservice web config appsettings update
-            -g my_rg
+            -g my_resource_group
             -n myuniqueapp
             --settings WEBSITE_NODE_DEFAULT_VERSION=6.9.1
 """
@@ -166,7 +166,7 @@ helps['appservice web deployment slot swap'] = """
         - name: Swap a staging slot into production for the specified web app.
           text: >
             az appservice web deployment slot swap
-            -g my_rg
+            -g my_resource_group
             -n myunqiueapp
             --slot staging
             --target-slot production
@@ -222,7 +222,7 @@ helps['appservice web source-control config-local-git'] = """
         - name: Get a git endpoint for a web app and add it as a remote.
           text: >
             az appservice web source-control config-local-git \\
-                -g my_rg -n myuniqueapp
+                -g my_resource_group -n myuniqueapp
 
             git remote add azure \\
                 https://<deploy_user_name>@myuniqueapp.scm.azurewebsites.net/myuniqueapp.git
@@ -259,11 +259,11 @@ helps['appservice plan create'] = """
     examples:
         - name: Create a basic App Service plan.
           text: >
-            az appservice plan create -g my_rg -n my_plan
+            az appservice plan create -g my_resource_group -n my_plan
         - name: Create a standard App Service plan with with four Linux workers.
           text: >
             az appservice plan create
-            -g my_rg
+            -g my_resource_group
             -n my_plan2
             --is-linux
             --number-of-workers 4
@@ -342,7 +342,7 @@ helps['appservice web create'] = """
                 for example, myuniqueapp.azurewebsites.net.
           text: >
             az appservice web create
-            -g my_rg
+            -g my_resource_group
             -p my_plan
             -n myuniqueapp
 """
