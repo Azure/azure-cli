@@ -340,7 +340,6 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         #verify the web page contains content from the staging branch
         self.assertTrue('Staging' in str(r.content))
 
-        # Test default slot swap to production.
         self.cmd('appservice web deployment slot swap -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
 
         time.sleep(30) # 30 seconds should be enough for the slot swap finished(Skipped under playback mode)
@@ -348,11 +347,6 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         r = requests.get('http://{}.azurewebsites.net'.format(self.webapp))
         #verify the web page contains content from the staging branch
         self.assertTrue('Staging' in str(r.content))
-
-        # Test explicit slot swap to production.
-        self.cmd('appservice web deployment slot swap -g {} -n {} --slot {} --target-slot {}'.format(self.resource_group, self.webapp, slot, 'production'))
-
-        time.sleep(30) # 30 seconds should be enough for the slot swap finished(Skipped under playback mode)
 
         self.cmd('appservice web deployment slot list -g {} -n {}'.format(self.resource_group, self.webapp), checks=[
             JMESPathCheck("length([])", 1),
