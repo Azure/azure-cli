@@ -206,7 +206,7 @@ def update_ag_http_listener(instance, parent, item_name, frontend_ip=None, front
             instance.ssl_certificate = None
             instance.protocol = 'Http'
     if host_name is not None:
-        instance.host_name = host_name if host_name else None
+        instance.host_name = host_name or None
     instance.require_server_name_indication = instance.host_name and \
         instance.protocol.lower() == 'https'
     return parent
