@@ -1300,7 +1300,7 @@ def update_local_gateway(instance, gateway_ip_address=None, local_address_prefix
     if gateway_ip_address is not None:
         instance.gateway_ip_address = gateway_ip_address
     if local_address_prefix is not None:
-        instance.local_address_prefix = local_address_prefix
+        instance.local_network_address_space.address_prefixes = local_address_prefix
     if tags is not None:
         instance.tags = tags
     return instance
