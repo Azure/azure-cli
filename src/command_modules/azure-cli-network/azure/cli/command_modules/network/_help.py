@@ -408,6 +408,11 @@ helps['network application-gateway url-path-map'] = """
 helps['network application-gateway url-path-map create'] = """
     type: command
     short-summary: Create a URL path map.
+    long-summary: >
+        The map must be created with at least one rule. This command requires the creation of the
+        first rule at the time the map is created. To create additional rules (using different
+        address pools or HTTP settings) use the 'url-path-map rule create' command. To update the
+        rule created using this command, use the 'url-path-map rule update' command.
 """
 
 helps['network application-gateway url-path-map delete'] = """
