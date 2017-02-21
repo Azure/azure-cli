@@ -43,15 +43,15 @@ helps['vm create'] = """
             az vm create -n myVm -g my_resource_group --image UbuntuLTS
         - name: Create a simple Windows Server VM with a private IP address.
           text: >
-            az vm create -n myVm -g my_resource_group --admin-username my_admin
+            az vm create -n myVm -g my_resource_group
              --public-ip-address "" --image Win2012R2Datacenter
         - name: Create a VM from a custom managed image (see `az image create` for generation information).
           text: >
-            az vm create -g my_resource_group -n myVm --image my_image_in_my_resource_group --admin-username my_admin
+            az vm create -g my_resource_group -n myVm --image my_image_in_my_resource_group
         - name: Create a VM by attaching to a specialized managed operating system disk.
           text: >
             az vm create -g my_resource_group -n myVm --attach-os-disk my-os-disk
-            --os-type linux --admin-username my_admin
+            --os-type linux
         - name: Create an Ubuntu Linux VM and provide a cloud-init script (https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init).
           text: >
             az vm create -g my_resource_group -n vm-ame --image debian --custom_data ./my-cloud-init-script.yml
@@ -64,7 +64,7 @@ helps['vm create'] = """
             --ssh-key-value "<ssh-rsa-key, key-file-path or not specified for default-key-path>"
         - name: Create a simple Ubuntu Linux VM with a public IP address, DNS entry, 2 data disk(10GB, 20GB), and then generate ssh key pairs under ~/.ssh.
           text: >
-            az vm create -n myVm -g my_resource_group --admin-username my_admin
+            az vm create -n myVm -g my_resource_group
             --public-ip-address-dns-name my_globally_unique_vm_dns_name --image ubuntults --data-disk-sizes-gb 10 20
             --size Standard_DS2 --generate-ssh-keys
 """.format(image_long_summary)
