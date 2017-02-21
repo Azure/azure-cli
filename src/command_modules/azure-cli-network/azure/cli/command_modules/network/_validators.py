@@ -382,8 +382,8 @@ def process_ag_create_namespace(namespace):
         namespace.frontend_type = 'publicIp'
     else:
         namespace.frontend_type = 'privateIp'
-        namespace.private_ip_address_allocation = 'static' if namespace.private_ip_address \
-            else 'dynamic'
+        namespace.private_ip_address_allocation = 'Static' if namespace.private_ip_address \
+            else 'Dynamic'
 
     namespace.sku_tier = namespace.sku_name.split('_', 1)[0]
 
