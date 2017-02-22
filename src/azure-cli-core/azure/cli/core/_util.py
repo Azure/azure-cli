@@ -11,6 +11,7 @@ import base64
 from datetime import datetime, timedelta
 from enum import Enum
 
+import binascii
 import six
 import azure.cli.core.azlogging as azlogging
 
@@ -174,6 +175,17 @@ def b64encode(s):
         return encoded
     else:
         return encoded.decode('latin-1')
+
+
+def b64_to_hex(s):
+    """
+    Decodes a string to base64 on 2.x and 3.x
+    :param str s: base64 encoded string
+    :return: uppercase hex string
+    :rtype: str
+    """
+    decoded = base64.b64decode(s)
+    return binascii.hexlify(decoded).upper()
 
 
 def random_string(length=16, force_lower=False, digits_only=False):
