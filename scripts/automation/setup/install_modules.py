@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import sys
+import os
 import subprocess
 import automation.utilities.path as autmation_path
 

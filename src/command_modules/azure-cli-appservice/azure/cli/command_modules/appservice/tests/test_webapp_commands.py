@@ -2,9 +2,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import os
 
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase,
                                                      JMESPathCheck, NoneCheck)
+
+TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+
 #pylint: disable=line-too-long
 
 class WebappBasicE2ETest(ResourceGroupVCRTestBase):
@@ -111,7 +115,7 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
         result = self.cmd('appservice web config show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
             JMESPathCheck('alwaysOn', False),
             JMESPathCheck('autoHealEnabled', False),
-            JMESPathCheck('phpVersion', '5.4'),
+            JMESPathCheck('phpVersion', '5.6'),
             JMESPathCheck('netFrameworkVersion', 'v4.0'),
             JMESPathCheck('pythonVersion', ''),
             JMESPathCheck('use32BitWorkerProcess', True),
@@ -122,13 +126,13 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
         checks = [
             JMESPathCheck('alwaysOn', True),
             JMESPathCheck('autoHealEnabled', True),
-            JMESPathCheck('phpVersion', '5.5'),
+            JMESPathCheck('phpVersion', '7.0'),
             JMESPathCheck('netFrameworkVersion', 'v3.0'),
             JMESPathCheck('pythonVersion', '3.4'),
             JMESPathCheck('use32BitWorkerProcess', False),
             JMESPathCheck('webSocketsEnabled', True)
             ]
-        result = self.cmd('appservice web config update -g {} -n {} --always-on true --auto-heal-enabled true --php-version 5.5 --net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false --web-sockets-enabled=true'.format(
+        result = self.cmd('appservice web config update -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.0 --net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false --web-sockets-enabled=true'.format(
             self.resource_group, self.webapp_name), checks=checks)
         result = self.cmd('appservice web config show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=checks)
 
@@ -153,7 +157,7 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
         self.assertTrue('s2' not in result)
         self.assertTrue('s3' in result)
 
-        self.cmd('appservice web config hostname list -g {} --webapp {}'.format(self.resource_group, self.webapp_name), checks=[
+        self.cmd('appservice web config hostname list -g {} --webapp-name {}'.format(self.resource_group, self.webapp_name), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', '{0}/{0}.azurewebsites.net'.format(self.webapp_name))
             ])
@@ -235,7 +239,7 @@ class LinuxWebappSceanrioTest(ResourceGroupVCRTestBase):
 
     def body(self):
         plan = 'webapp-linux-plan'
-        webapp = 'webapp-linux'
+        webapp = 'webapp-linux1'
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(self.resource_group, plan), checks=[
             JMESPathCheck('reserved', True), #this weird field means it is a linux
             JMESPathCheck('sku.name', 'S1'),
@@ -271,7 +275,7 @@ class WebappGitScenarioTest(ResourceGroupVCRTestBase):
 
     def body(self):
         plan = 'webapp-git-plan5'
-        webapp = 'web-git-test'
+        webapp = 'web-git-test2'
 
         #You can create and use any repros with the 3 files under "./sample_web"
         test_git_repo = 'https://github.com/yugangw-msft/azure-site-test'
@@ -281,7 +285,6 @@ class WebappGitScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('appservice web source-control config -g {} -n {} --repo-url {} --branch {}'.format(self.resource_group, webapp, test_git_repo, 'master'), checks=[
             JMESPathCheck('repoUrl', test_git_repo),
-            JMESPathCheck('isManualIntegration', False),
             JMESPathCheck('isMercurial', False),
             JMESPathCheck('branch', 'master')
             ])
@@ -296,12 +299,8 @@ class WebappGitScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('appservice web source-control show -g {} -n {}'.format(self.resource_group, webapp), checks=[
             JMESPathCheck('repoUrl', test_git_repo),
-            JMESPathCheck('isManualIntegration', False),
             JMESPathCheck('isMercurial', False),
             JMESPathCheck('branch', 'master')
-            ])
-        self.cmd('appservice web source-control config -g {} -n {} --repo-url {} --manual-integration'.format(self.resource_group, webapp, test_git_repo), checks=[
-            JMESPathCheck('isManualIntegration', True)
             ])
         self.cmd('appservice web source-control delete -g {} -n {}'.format(self.resource_group, webapp), checks=[
             JMESPathCheck('repoUrl', None)
@@ -310,19 +309,22 @@ class WebappGitScenarioTest(ResourceGroupVCRTestBase):
 class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(WebappSlotScenarioTest, self).__init__(__file__, test_method, resource_group='cli-webapp-slot2')
-        self.webapp = 'web-slot-test'
+        self.plan = 'webapp-slot-test2-plan'
+        self.webapp = 'web-slot-test2'
 
     def test_webapp_slot(self):
         self.execute()
 
     def body(self):
-        slot = 'staging'
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, self.plan))
+        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp, self.plan))
         #You can create and use any repros with the 3 files under "./sample_web" and with a 'staging 'branch
+        slot = 'staging'
         test_git_repo = 'https://github.com/yugangw-msft/azure-site-test'
 
+
         self.cmd('appservice web deployment slot create -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=[
-            JMESPathCheck('name', self.webapp + '/' + slot),
-            JMESPathCheck('siteName', '{}({})'.format(self.webapp, slot))
+            JMESPathCheck('name', self.webapp + '/' + slot)
             ])
 
         self.cmd('appservice web source-control config -g {} -n {} --repo-url {} --branch {} --slot {}'.format(self.resource_group, self.webapp, test_git_repo, slot, slot), checks=[
@@ -351,3 +353,151 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('[0].name', self.webapp + '/' + slot),
             ])
         self.cmd('appservice web deployment slot delete -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=NoneCheck())
+
+class WebappSSLCertTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(WebappSSLCertTest, self).__init__(__file__, test_method, resource_group='test_cli_webapp_ssl')
+        self.webapp_name = 'webapp-ssl-test123'
+
+    def test_webapp_ssl(self):
+        self.execute()
+
+    def body(self):
+        plan = 'webapp-ssl-test-plan'
+
+        #Cert Generated using
+        #https://docs.microsoft.com/en-us/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+
+        pfx_file = os.path.join(TEST_DIR, 'server.pfx')
+        cert_password = 'test'
+        cert_thumbprint = 'DB2BA6898D0B330A93E7F69FF505C61EF39921B6'
+        self.cmd('appservice plan create -g {} -n {} --sku B1'.format(self.resource_group, plan))
+        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, plan))
+        self.cmd('appservice web config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {}'.format(self.resource_group, self.webapp_name, pfx_file, cert_password), checks=[
+            JMESPathCheck('thumbprint', cert_thumbprint)
+            ])
+        self.cmd('appservice web config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {}'.format(self.resource_group, self.webapp_name, cert_thumbprint, 'SNI'), checks=[
+            JMESPathCheck('hostNameSslStates[0].sslState', 'SniEnabled'),
+            JMESPathCheck('hostNameSslStates[0].thumbprint', cert_thumbprint)
+            ])
+        self.cmd('appservice web config ssl unbind -g {} -n {} --certificate-thumbprint {}'.format(self.resource_group, self.webapp_name, cert_thumbprint), checks=[
+            JMESPathCheck('hostNameSslStates[0].sslState', 'Disabled')
+            ])
+        self.cmd('appservice web config ssl delete -g {} -n {} --certificate-thumbprint {}'.format(self.resource_group, self.webapp_name, cert_thumbprint))
+        self.cmd('appservice web delete -g {} -n {}'.format(self.resource_group, self.webapp_name))
+
+class WebappBackupConfigScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(WebappBackupConfigScenarioTest, self).__init__(__file__, test_method, resource_group='cli-webapp-backup')
+        self.webapp_name = 'azurecli-webapp-backupconfigtest'
+
+    def test_webapp_backup_config(self):
+        self.execute()
+
+    def set_up(self):
+        super(WebappBackupConfigScenarioTest, self).set_up()
+        plan = 'webapp-backup-plan'
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, plan))
+        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, plan))
+
+    def body(self):
+        sas_url = 'https://azureclistore.blob.core.windows.net/sitebackups?sv=2015-04-05&sr=c&sig=%2FjH1lEtbm3uFqtMI%2BfFYwgrntOs1qhGnpGv9uRibJ7A%3D&se=2017-02-14T04%3A53%3A28Z&sp=rwdl'
+        frequency = '1d'
+        db_conn_str = 'Server=tcp:cli-backup.database.windows.net,1433;Initial Catalog=cli-db;Persist Security Info=False;User ID=cliuser;Password=cli!password1;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+        retention_period = 5
+
+        # set without databases
+        self.cmd('appservice web config backup update -g {} --webapp-name {} --frequency {} --container-url {}  --retain-one true --retention {}'
+                 .format(self.resource_group, self.webapp_name, frequency, sas_url, retention_period), checks=NoneCheck())
+
+        checks = [
+            JMESPathCheck('backupSchedule.frequencyInterval', 1),
+            JMESPathCheck('backupSchedule.frequencyUnit', 'Day'),
+            JMESPathCheck('backupSchedule.keepAtLeastOneBackup', True),
+            JMESPathCheck('backupSchedule.retentionPeriodInDays', retention_period)
+            ]
+        self.cmd('appservice web config backup show -g {} --webapp-name {}'.format(self.resource_group, self.webapp_name), checks=checks)
+
+        # update with databases
+        database_name = 'cli-db'
+        database_type = 'SqlAzure'
+        self.cmd('appservice web config backup update -g {} --webapp-name {} --db-connection-string "{}" --db-name {} --db-type {} --retain-one true'
+                 .format(self.resource_group, self.webapp_name, db_conn_str, database_name, database_type), checks=NoneCheck())
+
+        checks = [
+            JMESPathCheck('backupSchedule.frequencyInterval', 1),
+            JMESPathCheck('backupSchedule.frequencyUnit', 'Day'),
+            JMESPathCheck('backupSchedule.keepAtLeastOneBackup', True),
+            JMESPathCheck('backupSchedule.retentionPeriodInDays', retention_period),
+            JMESPathCheck('databases[0].connectionString', db_conn_str),
+            JMESPathCheck('databases[0].databaseType', database_type),
+            JMESPathCheck('databases[0].name', database_name)
+            ]
+        self.cmd('appservice web config backup show -g {} --webapp-name {}'.format(self.resource_group, self.webapp_name), checks=checks)
+
+        # update frequency and retention only
+        frequency = '18h'
+        retention_period = 7
+        self.cmd('appservice web config backup update -g {} --webapp-name {} --frequency {} --retain-one false --retention {}'
+                 .format(self.resource_group, self.webapp_name, frequency, retention_period), checks=NoneCheck())
+
+        checks = [
+            JMESPathCheck('backupSchedule.frequencyInterval', 18),
+            JMESPathCheck('backupSchedule.frequencyUnit', 'Hour'),
+            JMESPathCheck('backupSchedule.keepAtLeastOneBackup', False),
+            JMESPathCheck('backupSchedule.retentionPeriodInDays', retention_period),
+            JMESPathCheck('databases[0].connectionString', db_conn_str),
+            JMESPathCheck('databases[0].databaseType', database_type),
+            JMESPathCheck('databases[0].name', database_name)
+            ]
+        self.cmd('appservice web config backup show -g {} --webapp-name {}'.format(self.resource_group, self.webapp_name), checks=checks)
+
+class WebappBackupRestoreScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(WebappBackupRestoreScenarioTest, self).__init__(__file__, test_method, resource_group='cli-webapp-backup')
+        self.webapp_name = 'azurecli-webapp-backuptest2'
+
+    def test_webapp_backup_restore(self):
+        self.execute()
+
+    def set_up(self):
+        super(WebappBackupRestoreScenarioTest, self).set_up()
+        plan = 'webapp-backup-plan'
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, plan))
+        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, plan))
+
+    def body(self):
+        sas_url = 'https://azureclistore.blob.core.windows.net/sitebackups?sv=2015-04-05&sr=c&sig=%2FjH1lEtbm3uFqtMI%2BfFYwgrntOs1qhGnpGv9uRibJ7A%3D&se=2017-02-14T04%3A53%3A28Z&sp=rwdl'
+        db_conn_str = 'Server=tcp:cli-backup.database.windows.net,1433;Initial Catalog=cli-db;Persist Security Info=False;User ID=cliuser;Password=cli!password1;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+        database_name = 'cli-db'
+        database_type = 'SqlAzure'
+        backup_name = 'mybackup'
+
+        create_checks = [
+            JMESPathCheck('backupItemName', backup_name),
+            JMESPathCheck('storageAccountUrl', sas_url),
+            JMESPathCheck('databases[0].connectionString', db_conn_str),
+            JMESPathCheck('databases[0].databaseType', database_type),
+            JMESPathCheck('databases[0].name', database_name)
+            ]
+        self.cmd('appservice web config backup create -g {} --webapp-name {} --container-url {} --db-connection-string "{}" --db-name {} --db-type {} --backup-name {}'
+                 .format(self.resource_group, self.webapp_name, sas_url, db_conn_str, database_name, database_type, backup_name), checks=create_checks)
+
+        list_checks = [
+            JMESPathCheck('[-1].backupItemName', backup_name),
+            JMESPathCheck('[-1].storageAccountUrl', sas_url),
+            JMESPathCheck('[-1].databases[0].connectionString', db_conn_str),
+            JMESPathCheck('[-1].databases[0].databaseType', database_type),
+            JMESPathCheck('[-1].databases[0].name', database_name)
+            ]
+        self.cmd('appservice web config backup list -g {} --webapp-name {}'.format(self.resource_group, self.webapp_name), checks=list_checks)
+
+        import time
+        time.sleep(300) # Allow plenty of time for a backup to finish -- database backup takes a while (skipped in playback)
+
+        self.cmd('appservice web config backup restore -g {} --webapp-name {} --container-url {} --backup-name {} --db-connection-string "{}" --db-name {} --db-type {} --ignore-hostname-conflict --overwrite'
+                 .format(self.resource_group, self.webapp_name, sas_url, backup_name, db_conn_str, database_name, database_type), checks=JMESPathCheck('name', self.webapp_name))
+

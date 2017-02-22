@@ -9,7 +9,7 @@ from six.moves import configparser  # pylint: disable=redefined-builtin
 from adal.adal_error import AdalError
 
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._config import (GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH, ENV_VAR_PREFIX)
+from azure.cli.core._config import (GLOBAL_CONFIG_PATH, ENV_VAR_PREFIX, set_global_config)
 from azure.cli.core._util import CLIError
 from azure.cli.core.prompting import (prompt,
                                       prompt_y_n,
@@ -112,9 +112,9 @@ def _handle_global_configuration():
                                           'core', 'output', OUTPUT_LIST))
         answers['output_type_prompt'] = output_index
         answers['output_type_options'] = str(OUTPUT_LIST)
+        enable_file_logging = prompt_y_n(MSG_PROMPT_FILE_LOGGING, default='n')
         allow_telemetry = prompt_y_n(MSG_PROMPT_TELEMETRY, default='y')
         answers['telemetry_prompt'] = allow_telemetry
-        enable_file_logging = prompt_y_n(MSG_PROMPT_FILE_LOGGING, default='n')
         # save the global config
         try:
             global_config.add_section('core')
@@ -127,10 +127,7 @@ def _handle_global_configuration():
         global_config.set('core', 'output', OUTPUT_LIST[output_index]['name'])
         global_config.set('core', 'collect_telemetry', 'yes' if allow_telemetry else 'no')
         global_config.set('logging', 'enable_log_file', 'yes' if enable_file_logging else 'no')
-        if not os.path.isdir(GLOBAL_CONFIG_DIR):
-            os.makedirs(GLOBAL_CONFIG_DIR)
-        with open(GLOBAL_CONFIG_PATH, 'w') as configfile:
-            global_config.write(configfile)
+        set_global_config(global_config)
 
 def handle_configure():
     try:

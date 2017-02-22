@@ -9,7 +9,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup
 
-VERSION = "0.1.1b3+dev"
+VERSION = "0.1.2rc1+dev"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -44,20 +44,25 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-cli-acr',
     'azure-cli-acs',
     'azure-cli-appservice',
-    'azure-cli-core',
-    'azure-cli-component',
-    'azure-cli-container',
+    'azure-cli-batch',
     'azure-cli-cloud',
+    'azure-cli-component',
     'azure-cli-configure',
+    'azure-cli-container',
+    'azure-cli-core',
+    'azure-cli-documentdb',
     'azure-cli-feedback',
+    'azure-cli-iot',
+    'azure-cli-keyvault',
     'azure-cli-network',
     'azure-cli-nspkg',
     'azure-cli-profile',
+    'azure-cli-redis',
     'azure-cli-resource',
     'azure-cli-role',
+    'azure-cli-sql',
     'azure-cli-storage',
     'azure-cli-vm'
 ]

@@ -6,14 +6,14 @@
 from collections import OrderedDict
 
 from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, cf_ni,
-                                                          cf_acs, cf_vm_ext,
+                                                          cf_vm_ext,
                                                           cf_vm_ext_image, cf_vm_image, cf_usage,
                                                           cf_vmss, cf_vmss_vm,
                                                           cf_vm_sizes, cf_disks, cf_snapshots,
                                                           cf_images)
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_wait_command
-
+from azure.cli.core._util import empty_on_404
 # pylint: disable=line-too-long
 
 custom_path = 'azure.cli.command_modules.vm.custom#{}'
@@ -88,7 +88,7 @@ cli_command(__name__, 'vm create', custom_path.format('create_vm'), transform=tr
 cli_command(__name__, 'vm delete', mgmt_path.format(op_var, op_class, 'delete'), cf_vm, confirmation=True)
 cli_command(__name__, 'vm deallocate', mgmt_path.format(op_var, op_class, 'deallocate'), cf_vm)
 cli_command(__name__, 'vm generalize', mgmt_path.format(op_var, op_class, 'generalize'), cf_vm)
-cli_command(__name__, 'vm show', custom_path.format('show_vm'), table_transformer=transform_vm)
+cli_command(__name__, 'vm show', custom_path.format('show_vm'), table_transformer=transform_vm, exception_handler=empty_on_404)
 cli_command(__name__, 'vm list-vm-resize-options', mgmt_path.format(op_var, op_class, 'list_available_sizes'), cf_vm)
 cli_command(__name__, 'vm stop', mgmt_path.format(op_var, op_class, 'power_off'), cf_vm)
 cli_command(__name__, 'vm restart', mgmt_path.format(op_var, op_class, 'restart'), cf_vm)
@@ -107,24 +107,26 @@ cli_generic_update_command(__name__, 'vm update',
                            no_wait_param='raw')
 cli_generic_wait_command(__name__, 'vm wait', 'azure.cli.command_modules.vm.custom#get_instance_view')
 cli_command(__name__, 'vm convert', mgmt_path.format(op_var, op_class, 'convert_to_managed_disks'), cf_vm)
+cli_command(__name__, 'vm encryption enable', 'azure.cli.command_modules.vm.disk_encryption#enable')
+cli_command(__name__, 'vm encryption disable', 'azure.cli.command_modules.vm.disk_encryption#disable')
+cli_command(__name__, 'vm encryption show', 'azure.cli.command_modules.vm.disk_encryption#show', exception_handler=empty_on_404)
 
 # VM NIC
 cli_command(__name__, 'vm nic add', custom_path.format('vm_add_nics'))
 cli_command(__name__, 'vm nic remove', custom_path.format('vm_remove_nics'))
 cli_command(__name__, 'vm nic set', custom_path.format('vm_set_nics'))
-cli_command(__name__, 'vm nic show', custom_path.format('vm_show_nic'))
+cli_command(__name__, 'vm nic show', custom_path.format('vm_show_nic'), exception_handler=empty_on_404)
 cli_command(__name__, 'vm nic list', custom_path.format('vm_list_nics'))
 
 # VMSS NIC
 cli_command(__name__, 'vmss nic list', 'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.list_virtual_machine_scale_set_network_interfaces', cf_ni)
 cli_command(__name__, 'vmss nic list-vm-nics', 'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.list_virtual_machine_scale_set_vm_network_interfaces', cf_ni)
-cli_command(__name__, 'vmss nic show', 'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.get_virtual_machine_scale_set_network_interface', cf_ni)
+cli_command(__name__, 'vmss nic show', 'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.get_virtual_machine_scale_set_network_interface', cf_ni, exception_handler=empty_on_404)
 
 # VM Access
-cli_command(__name__, 'vm access set-linux-user', custom_path.format('set_linux_user'))
-cli_command(__name__, 'vm access delete-linux-user', custom_path.format('delete_linux_user'))
-cli_command(__name__, 'vm access reset-linux-ssh', custom_path.format('reset_linux_ssh'))
-cli_command(__name__, 'vm access reset-windows-admin', custom_path.format('reset_windows_admin'))
+cli_command(__name__, 'vm user update', custom_path.format('set_user'))
+cli_command(__name__, 'vm user delete', custom_path.format('delete_user'))
+cli_command(__name__, 'vm user reset-ssh', custom_path.format('reset_linux_ssh'))
 
 # # VM Availability Set
 cli_command(__name__, 'vm availability-set create', custom_path.format('create_av_set'), transform=transform_av_set_output)
@@ -132,7 +134,7 @@ cli_command(__name__, 'vm availability-set create', custom_path.format('create_a
 op_var = 'availability_sets_operations'
 op_class = 'AvailabilitySetsOperations'
 cli_command(__name__, 'vm availability-set delete', mgmt_path.format(op_var, op_class, 'delete'), cf_avail_set)
-cli_command(__name__, 'vm availability-set show', mgmt_path.format(op_var, op_class, 'get'), cf_avail_set, transform=transform_av_set_output)
+cli_command(__name__, 'vm availability-set show', mgmt_path.format(op_var, op_class, 'get'), cf_avail_set, transform=transform_av_set_output, exception_handler=empty_on_404)
 cli_command(__name__, 'vm availability-set list', mgmt_path.format(op_var, op_class, 'list'), cf_avail_set, transform=transform_av_set_collection_output)
 cli_command(__name__, 'vm availability-set list-sizes', mgmt_path.format(op_var, op_class, 'list_available_sizes'), cf_avail_set)
 cli_command(__name__, 'vm availability-set convert', custom_path.format('convert_av_set_to_managed_disk'))
@@ -149,38 +151,6 @@ cli_command(__name__, 'vm boot-diagnostics disable', custom_path.format('disable
 cli_command(__name__, 'vm boot-diagnostics enable', custom_path.format('enable_boot_diagnostics'))
 cli_command(__name__, 'vm boot-diagnostics get-boot-log', custom_path.format('get_boot_log'))
 
-# ACS
-
-
-def transform_acs(r):
-    orchestratorType = 'Unknown'
-    orchestratorProfile = r.get('orchestratorProfile')
-    if orchestratorProfile:
-        orchestratorType = orchestratorProfile.get('orchestratorType')
-    res = OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']),
-                       ('Orchestrator', orchestratorType), ('Location', r['location']),
-                       ('ProvisioningState', r['provisioningState'])])
-    return res
-
-
-def transform_acs_list(result):
-    transformed = []
-    for r in result:
-        res = transform_acs(r)
-        transformed.append(res)
-    return transformed
-
-
-op_var = 'container_services_operations'
-op_class = 'ContainerServicesOperations'
-cli_command(__name__, 'acs show', mgmt_path.format(op_var, op_class, 'get'), cf_acs, table_transformer=transform_acs)
-cli_command(__name__, 'acs list', custom_path.format('list_container_services'), cf_acs, table_transformer=transform_acs_list)
-cli_command(__name__, 'acs delete', mgmt_path.format(op_var, op_class, 'delete'), cf_acs)
-cli_command(__name__, 'acs scale', custom_path.format('update_acs'))
-# Per conversation with ACS team, hide the update till we have something meaningful to tweak
-# from azure.cli.command_modules.vm.custom import update_acs
-# cli_generic_update_command(__name__, 'acs update', ContainerServicesOperations.get, ContainerServicesOperations.create_or_update, cf_acs)
-
 # VM Diagnostics
 cli_command(__name__, 'vm diagnostics set', custom_path.format('set_diagnostics_extension'))
 cli_command(__name__, 'vm diagnostics get-default-config', custom_path.format('show_default_diagnostics_configuration'))
@@ -190,39 +160,39 @@ cli_command(__name__, 'vmss diagnostics set', custom_path.format('set_vmss_diagn
 cli_command(__name__, 'vmss diagnostics get-default-config', custom_path.format('show_default_diagnostics_configuration'))
 
 cli_command(__name__, 'vm disk attach', custom_path.format('attach_managed_data_disk'))
-cli_command(__name__, 'vm disk detach', custom_path.format('detach_managed_data_disk'))
+cli_command(__name__, 'vm disk detach', custom_path.format('detach_data_disk'))
 
 cli_command(__name__, 'vmss disk attach', custom_path.format('attach_managed_data_disk_to_vmss'))
 cli_command(__name__, 'vmss disk detach', custom_path.format('detach_disk_from_vmss'))
 
 cli_command(__name__, 'vm unmanaged-disk attach', custom_path.format('attach_unmanaged_data_disk'))
-cli_command(__name__, 'vm unmanaged-disk detach', custom_path.format('detach_unmanaged_data_disk'))
+cli_command(__name__, 'vm unmanaged-disk detach', custom_path.format('detach_data_disk'))
 cli_command(__name__, 'vm unmanaged-disk list', custom_path.format('list_unmanaged_disks'))
 
 # VM Extension
 op_var = 'virtual_machine_extensions_operations'
 op_class = 'VirtualMachineExtensionsOperations'
 cli_command(__name__, 'vm extension delete', mgmt_path.format(op_var, op_class, 'delete'), cf_vm_ext)
-cli_command(__name__, 'vm extension show', mgmt_path.format(op_var, op_class, 'get'), cf_vm_ext)
+cli_command(__name__, 'vm extension show', mgmt_path.format(op_var, op_class, 'get'), cf_vm_ext, exception_handler=empty_on_404)
 cli_command(__name__, 'vm extension set', custom_path.format('set_extension'))
 cli_command(__name__, 'vm extension list', custom_path.format('list_extensions'))
 
 # VMSS Extension
 cli_command(__name__, 'vmss extension delete', custom_path.format('delete_vmss_extension'))
-cli_command(__name__, 'vmss extension show', custom_path.format('get_vmss_extension'))
+cli_command(__name__, 'vmss extension show', custom_path.format('get_vmss_extension'), exception_handler=empty_on_404)
 cli_command(__name__, 'vmss extension set', custom_path.format('set_vmss_extension'))
 cli_command(__name__, 'vmss extension list', custom_path.format('list_vmss_extensions'))
 
 # VM Extension Image
 op_var = 'virtual_machine_extension_images_operations'
 op_class = 'VirtualMachineExtensionImagesOperations'
-cli_command(__name__, 'vm extension image show', mgmt_path.format(op_var, op_class, 'get'), cf_vm_ext_image)
+cli_command(__name__, 'vm extension image show', mgmt_path.format(op_var, op_class, 'get'), cf_vm_ext_image, exception_handler=empty_on_404)
 cli_command(__name__, 'vm extension image list-names', mgmt_path.format(op_var, op_class, 'list_types'), cf_vm_ext_image)
 cli_command(__name__, 'vm extension image list-versions', mgmt_path.format(op_var, op_class, 'list_versions'), cf_vm_ext_image)
 cli_command(__name__, 'vm extension image list', custom_path.format('list_vm_extension_images'))
 
 # VMSS Extension Image (convenience copy of VM Extension Image)
-cli_command(__name__, 'vmss extension image show', mgmt_path.format(op_var, op_class, 'get'), cf_vm_ext_image)
+cli_command(__name__, 'vmss extension image show', mgmt_path.format(op_var, op_class, 'get'), cf_vm_ext_image, exception_handler=empty_on_404)
 cli_command(__name__, 'vmss extension image list-names', mgmt_path.format(op_var, op_class, 'list_types'), cf_vm_ext_image)
 cli_command(__name__, 'vmss extension image list-versions', mgmt_path.format(op_var, op_class, 'list_versions'), cf_vm_ext_image)
 cli_command(__name__, 'vmss extension image list', custom_path.format('list_vm_extension_images'))
@@ -230,7 +200,7 @@ cli_command(__name__, 'vmss extension image list', custom_path.format('list_vm_e
 # VM Image
 op_var = 'virtual_machine_images_operations'
 op_class = 'VirtualMachineImagesOperations'
-cli_command(__name__, 'vm image show', mgmt_path.format(op_var, op_class, 'get'), cf_vm_image)
+cli_command(__name__, 'vm image show', mgmt_path.format(op_var, op_class, 'get'), cf_vm_image, exception_handler=empty_on_404)
 cli_command(__name__, 'vm image list-offers', mgmt_path.format(op_var, op_class, 'list_offers'), cf_vm_image)
 cli_command(__name__, 'vm image list-publishers', mgmt_path.format(op_var, op_class, 'list_publishers'), cf_vm_image)
 cli_command(__name__, 'vm image list-skus', mgmt_path.format(op_var, op_class, 'list_skus'), cf_vm_image)
@@ -249,7 +219,7 @@ cli_command(__name__, 'vmss create', custom_path.format('create_vmss'), transfor
 cli_command(__name__, 'vmss deallocate', custom_path.format('deallocate_vmss'))
 cli_command(__name__, 'vmss delete-instances', custom_path.format('delete_vmss_instances'))
 cli_command(__name__, 'vmss get-instance-view', custom_path.format('get_vmss_instance_view'))
-cli_command(__name__, 'vmss show', custom_path.format('show_vmss'))
+cli_command(__name__, 'vmss show', custom_path.format('show_vmss'), exception_handler=empty_on_404)
 cli_command(__name__, 'vmss list', custom_path.format('list_vmss'))
 cli_command(__name__, 'vmss stop', custom_path.format('stop_vmss'))
 cli_command(__name__, 'vmss restart', custom_path.format('restart_vmss'))
@@ -267,7 +237,7 @@ op_var = 'disks_operations'
 op_class = 'DisksOperations'
 cli_command(__name__, 'disk create', custom_path.format('create_managed_disk'))
 cli_command(__name__, 'disk list', custom_path.format('list_managed_disks'))
-cli_command(__name__, 'disk show', mgmt_path.format(op_var, op_class, 'get'), cf_disks)
+cli_command(__name__, 'disk show', mgmt_path.format(op_var, op_class, 'get'), cf_disks, exception_handler=empty_on_404)
 cli_command(__name__, 'disk delete', mgmt_path.format(op_var, op_class, 'delete'), cf_disks)
 cli_command(__name__, 'disk grant-access', custom_path.format('grant_disk_access'))
 cli_command(__name__, 'disk revoke-access', mgmt_path.format(op_var, op_class, 'revoke_access'), cf_disks)
@@ -280,7 +250,7 @@ op_var = 'snapshots_operations'
 op_class = 'SnapshotsOperations'
 cli_command(__name__, 'snapshot create', custom_path.format('create_snapshot'))
 cli_command(__name__, 'snapshot list', custom_path.format('list_snapshots'))
-cli_command(__name__, 'snapshot show', mgmt_path.format(op_var, op_class, 'get'), cf_snapshots)
+cli_command(__name__, 'snapshot show', mgmt_path.format(op_var, op_class, 'get'), cf_snapshots, exception_handler=empty_on_404)
 cli_command(__name__, 'snapshot delete', mgmt_path.format(op_var, op_class, 'delete'), cf_snapshots)
 cli_command(__name__, 'snapshot grant-access', custom_path.format('grant_snapshot_access'))
 cli_command(__name__, 'snapshot revoke-access', mgmt_path.format(op_var, op_class, 'revoke_access'), cf_snapshots)
@@ -293,5 +263,5 @@ op_var = 'images_operations'
 op_class = 'ImagesOperations'
 cli_command(__name__, 'image create', custom_path.format('create_image'))
 cli_command(__name__, 'image list', custom_path.format('list_images'))
-cli_command(__name__, 'image show', mgmt_path.format(op_var, op_class, 'get'), cf_images)
+cli_command(__name__, 'image show', mgmt_path.format(op_var, op_class, 'get'), cf_images, exception_handler=empty_on_404)
 cli_command(__name__, 'image delete', mgmt_path.format(op_var, op_class, 'delete'), cf_images)

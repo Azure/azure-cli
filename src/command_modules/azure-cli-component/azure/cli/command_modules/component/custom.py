@@ -32,6 +32,25 @@ def list_components():
                    if dist.key.startswith(COMPONENT_PREFIX)], key=lambda x: x['name'])
 
 
+def _get_first_party_pypi_command_modules():
+    try:
+        import xmlrpclib
+    except ImportError:
+        import xmlrpc.client as xmlrpclib  # pylint: disable=import-error
+    results = []
+    client = xmlrpclib.ServerProxy('https://pypi.python.org/pypi')
+    pypi_hits = client.search({'author': 'Microsoft Corporation', 'author_email': 'azpycli'})
+    for hit in pypi_hits:
+        if hit['name'].startswith(COMPONENT_PREFIX):
+            comp_name = hit['name'].replace(COMPONENT_PREFIX, '')
+            results.append({
+                'name': comp_name,
+                'summary': hit['summary'],
+                'version': hit['version']
+            })
+    return results
+
+
 def list_available_components():
     """ List publicly available components that can be installed """
     _verify_not_dev()
@@ -41,23 +60,13 @@ def list_available_components():
                                  pip.get_installed_distributions(local_only=True) if
                                  dist.key.startswith(COMPONENT_PREFIX)]
 
-    try:
-        import xmlrpclib
-    except ImportError:
-        import xmlrpc.client as xmlrpclib  # pylint: disable=import-error
-    client = xmlrpclib.ServerProxy('https://pypi.python.org/pypi')
-    pypi_hits = client.search({'author': 'Microsoft Corporation', 'author_email': 'azpycli'})
+    pypi_results = _get_first_party_pypi_command_modules()
     logger.debug('The following components are already installed %s', installed_component_names)
-    logger.debug("Found %d result(s)", len(pypi_hits))
-    for hit in pypi_hits:
-        if hit['name'].startswith(COMPONENT_PREFIX):
-            comp_name = hit['name'].replace(COMPONENT_PREFIX, '')
-            if comp_name not in installed_component_names:
-                available_components.append({
-                    'name': comp_name,
-                    'summary': hit['summary'],
-                    'version': hit['version']
-                })
+    logger.debug("Found %d result(s)", len(pypi_results))
+
+    for pypi_res in pypi_results:
+        if pypi_res['name'] not in installed_component_names:
+            available_components.append(pypi_res)
     if not available_components:
         logger.warning('All available components are already installed.')
     return available_components
@@ -132,7 +141,26 @@ def _install_or_update(package_list, link, private, pre):
     _run_pip(pip, pip_args)
 
 
-def update(private=False, pre=False, link=None, additional_components=None):
+def _verify_additional_components(components, private, allow_third_party):
+    # Don't verify as third party packages allowed or private server which we can't query
+    if allow_third_party or private:
+        return
+    third_party = []
+    first_party_component_names = [r['name']for r in _get_first_party_pypi_command_modules()]
+    for c in components:
+        if c not in first_party_component_names:
+            third_party.append(c)
+    if third_party:
+        raise CLIError("The following component(s) '{}' are third party or not available. "
+                       "Use --allow-third-party to install "
+                       "third party packages.".format(', '.join(third_party)))
+
+
+def update(private=False,
+           pre=False,
+           link=None,
+           additional_components=None,
+           allow_third_party=False):
     """ Update the CLI and all installed components """
     _verify_not_dev()
     import pip
@@ -143,6 +171,7 @@ def update(private=False, pre=False, link=None, additional_components=None):
                      if dist.key.startswith(COMPONENT_PREFIX)]
     # Install/Update any new components the user requested
     if additional_components:
+        _verify_additional_components(additional_components, private, allow_third_party)
         for c in additional_components:
             package_list += [COMPONENT_PREFIX + c]
     _install_or_update(package_list, link, private, pre)

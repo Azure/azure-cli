@@ -7,7 +7,7 @@ import os
 from six.moves import configparser
 
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._config import GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH
+from azure.cli.core._config import GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH, set_global_config_value
 from azure.cli.core._util import CLIError
 
 CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
@@ -45,12 +45,13 @@ class CloudSuffixNotSetException(CLIError):
     pass
 
 
-class CloudEndpoints(object):  # pylint: disable=too-few-public-methods
+class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many-instance-attributes
 
     def __init__(self,  # pylint: disable=too-many-arguments
                  management=None,
                  resource_manager=None,
                  sql_management=None,
+                 batch_resource_id=None,
                  gallery=None,
                  active_directory=None,
                  active_directory_resource_id=None,
@@ -59,6 +60,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods
         self.management = management
         self.resource_manager = resource_manager
         self.sql_management = sql_management
+        self.batch_resource_id = batch_resource_id
         self.gallery = gallery
         self.active_directory = active_directory
         self.active_directory_resource_id = active_directory_resource_id
@@ -116,6 +118,7 @@ AZURE_PUBLIC_CLOUD = Cloud(
         management='https://management.core.windows.net/',
         resource_manager='https://management.azure.com/',
         sql_management='https://management.core.windows.net:8443/',
+        batch_resource_id='https://batch.core.windows.net/',
         gallery='https://gallery.azure.com/',
         active_directory='https://login.microsoftonline.com',
         active_directory_resource_id='https://management.core.windows.net/',
@@ -133,6 +136,7 @@ AZURE_CHINA_CLOUD = Cloud(
         management='https://management.core.chinacloudapi.cn/',
         resource_manager='https://management.chinacloudapi.cn',
         sql_management='https://management.core.chinacloudapi.cn:8443/',
+        batch_resource_id='https://batch.chinacloudapi.cn/',
         gallery='https://gallery.chinacloudapi.cn/',
         active_directory='https://login.chinacloudapi.cn',
         active_directory_resource_id='https://management.core.chinacloudapi.cn/',
@@ -148,6 +152,7 @@ AZURE_US_GOV_CLOUD = Cloud(
         management='https://management.core.usgovcloudapi.net/',
         resource_manager='https://management.usgovcloudapi.net/',
         sql_management='https://management.core.usgovcloudapi.net:8443/',
+        batch_resource_id='https://batch.core.usgovcloudapi.net/',
         gallery='https://gallery.usgovcloudapi.net/',
         active_directory='https://login.microsoftonline.com',
         active_directory_resource_id='https://management.core.usgovcloudapi.net/',
@@ -163,6 +168,7 @@ AZURE_GERMAN_CLOUD = Cloud(
         management='https://management.core.cloudapi.de/',
         resource_manager='https://management.microsoftazure.de',
         sql_management='https://management.core.cloudapi.de:8443/',
+        batch_resource_id='https://batch.cloudapi.de/',
         gallery='https://gallery.cloudapi.de/',
         active_directory='https://login.microsoftonline.de',
         active_directory_resource_id='https://management.core.cloudapi.de/',
@@ -177,17 +183,7 @@ KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE
 
 
 def _set_active_cloud(cloud_name):
-    global_config = configparser.SafeConfigParser()
-    global_config.read(GLOBAL_CONFIG_PATH)
-    try:
-        global_config.add_section('cloud')
-    except configparser.DuplicateSectionError:
-        pass
-    global_config.set('cloud', 'name', cloud_name)
-    if not os.path.isdir(GLOBAL_CONFIG_DIR):
-        os.makedirs(GLOBAL_CONFIG_DIR)
-    with open(GLOBAL_CONFIG_PATH, 'w') as configfile:
-        global_config.write(configfile)
+    set_global_config_value('cloud', 'name', cloud_name)
 
 
 def get_active_cloud_name():
@@ -209,11 +205,20 @@ def get_custom_clouds():
     return [c for c in get_clouds() if c.name not in known_cloud_names]
 
 
-def get_clouds():
-    if not os.path.isfile(CLOUD_CONFIG_FILE):
-        for c in KNOWN_CLOUDS:
+def _init_known_clouds():
+    config = configparser.SafeConfigParser()
+    config.read(CLOUD_CONFIG_FILE)
+    stored_cloud_names = config.sections()
+    for c in KNOWN_CLOUDS:
+        if c.name not in stored_cloud_names:
             _save_cloud(c)
+
+
+def get_clouds():
+    # ensure the known clouds are always in cloud config
+    _init_known_clouds()
     clouds = []
+    # load the config again as it may have changed
     config = configparser.SafeConfigParser()
     config.read(CLOUD_CONFIG_FILE)
     for section in config.sections():

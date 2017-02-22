@@ -7,14 +7,12 @@ from azure.cli.core.help_files import helps
 
 helps['container'] = """
     type: group
-    short-summary: "Set up automated builds and deployments for multi-container
-        Docker applications."
+    short-summary: "Set up automated builds and deployments for multi-container Docker applications."
 """
 
 helps['container release'] = """
     type: group
-    short-summary: "Set up automated builds and deployments for a
-        multi-container Docker application."
+    short-summary: "Set up automated builds and deployments for a multi-container Docker application."
 """
 
 helps['container build'] = """

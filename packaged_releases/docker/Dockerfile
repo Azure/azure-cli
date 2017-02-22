@@ -5,8 +5,22 @@
 
 FROM python:3.5.2-alpine
 
-ENV CLI_VERSION 0.1.9
-ENV CLI_DOWNLOAD_SHA256 4da806cc46acd8e634bc38eb81591b7ecf352703fb84d9b4cfcf4364237ac8b2
+ENV CLI_VERSION 0.2.0
+ENV CLI_DOWNLOAD_SHA256 e625a57f61b29f4058a0e30ee35ea527f4e4e0138d74f6191df5794a4ff993ea
+
+# Metadata as defined at http://label-schema.org
+ARG BUILD_DATE
+LABEL org.label-schema.schema-version="1.0" \
+      org.label-schema.vendor="Microsoft" \
+      org.label-schema.name="Azure CLI 2.0" \
+      org.label-schema.version=$CLI_VERSION \
+      org.label-schema.license="MIT" \
+      org.label-schema.description="The Azure CLI 2.0 is the new Azure CLI and is applicable when you use the Resource Manager deployment model." \
+      org.label-schema.url="https://docs.microsoft.com/en-us/cli/azure/overview" \
+      org.label-schema.usage="https://docs.microsoft.com/en-us/cli/azure/install-az-cli2#docker" \
+      org.label-schema.build-date=$BUILD_DATE \
+      org.label-schema.vcs-url="https://github.com/Azure/azure-cli.git" \
+      org.label-schema.docker.cmd="docker run -v ${HOME}:/root -it azuresdk/azure-cli-python:<version>"
 
 # INSTALL DEPENDENCIES
 # pip wheel - required for CLI packaging

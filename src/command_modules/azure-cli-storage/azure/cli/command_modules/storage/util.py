@@ -96,6 +96,28 @@ def glob_files_remotely(client, share_name, pattern):
                 queue.appendleft(os.path.join(current_dir, f.name))
 
 
+def create_short_lived_container_sas(account_name, account_key, container):
+    from datetime import datetime, timedelta
+    from azure.storage.sharedaccesssignature import SharedAccessSignature
+    from azure.storage.blob.models import BlobPermissions
+
+    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    sas = SharedAccessSignature(account_name, account_key)
+    return sas.generate_container(container, permission=BlobPermissions(read=True), expiry=expiry,
+                                  protocol='https')
+
+
+def create_short_lived_share_sas(account_name, account_key, share):
+    from datetime import datetime, timedelta
+    from azure.storage.sharedaccesssignature import SharedAccessSignature
+    from azure.storage.blob.models import BlobPermissions
+
+    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    sas = SharedAccessSignature(account_name, account_key)
+    return sas.generate_share(share, permission=BlobPermissions(read=True), expiry=expiry,
+                              protocol='https')
+
+
 def mkdir_p(path):
     import errno
     try:

@@ -4,127 +4,88 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
+import os.path
 from collections import namedtuple
-from datetime import datetime
-from azure.storage.blob import BlockBlobService
-from azure.storage.blob.models import Include
+from azure.common import AzureException
+
+from azure.cli.core._util import CLIError
 from azure.cli.core.azlogging import get_az_logger
+from azure.cli.command_modules.storage.util import (create_blob_service_from_storage_client,
+                                                    create_file_share_from_storage_client,
+                                                    create_short_lived_share_sas,
+                                                    create_short_lived_container_sas,
+                                                    filter_none, collect_blobs, collect_files,
+                                                    mkdir_p)
 
 
 BlobCopyResult = namedtuple('BlobCopyResult', ['name', 'copy_id'])
 
 
 # pylint: disable=too-many-arguments
-def storage_blob_copy_batch(client, source_account, source_container, destination_container,
-                            source_sas=None, prefix=None, recursive=False, snapshots=False,
-                            exclude_old=False, exclude_new=False):
-    """
-    Copy blobs between containers and storage accounts. This is a server-side copy operation
-    therefore the command is asynchronous.
+def storage_blob_copy_batch(client, source_client,
+                            destination_container=None, source_container=None, source_share=None,
+                            source_sas=None, pattern=None, dryrun=False):
+    """Copy a group of blob or files to a blob container."""
+    logger = None
+    if dryrun:
+        logger = get_az_logger(__name__)
+        logger.warning('copy files or blobs to blob container')
+        logger.warning('    account %s', client.account_name)
+        logger.warning('  container %s', destination_container)
+        logger.warning('     source %s', source_container or source_share)
+        logger.warning('source type %s', 'blob' if source_container else 'file')
+        logger.warning('    pattern %s', pattern)
+        logger.warning(' operations')
 
-    :param str source_account:
-        The account name of the source storage account
+    if source_container:
+        # copy blobs for blob container
 
-    :param str source_container:
-        The source blob container
+        # if the source client is None, recreate one from the destination client.
+        source_client = source_client or create_blob_service_from_storage_client(client)
 
-    :param str source_sas:
-        The shared access signature used to access the source container. It is not required if
-        either a connection string is given or the source container doesn't require a sas.
+        if not source_sas and client.account_name != source_client.account_name:
+            # when the blob is copied across storage account without sas, generate a short lived
+            # sas for it
+            source_sas = create_short_lived_container_sas(source_client.account_name,
+                                                          source_client.account_key,
+                                                          source_container)
 
-    :param str destination_container:
-        The destination blob container
-
-    :param str prefix:
-        If option --recursive is specified, then this command interprets the specified the pattern
-        given as a blob prefix. If option --recursive is not specified, then the given pattern
-        matches the against exact blob names.
-
-    :param bool recursive:
-        Copy all the files to the given container and maintain the folder structure.
-
-    :param bool snapshots:
-        Copy both the blobs and their snapshots.
-
-    :param bool exclude_old:
-        Excludes an older source resource. The resource will not be copied if the last modified time
-        of the source is the same or older than destination.
-
-    :param bool exclude_new:
-        Excludes a newer source resource. The resource will not be copied if the last modified time
-        of the source is the same or newer than destination.
-
-    :return: A BlobCopyTicket instance summarize the operations
-    """
-
-    # TODO:
-    # 1. Page the result list (using num_result and marker)
-    # 2. Support connection string for source
-    # 3. stop using 'baseblobservice.exists' function. it doesn't provide performance gain
-    #    since it invoked the get_blob_properties any way.
-
-    # Question:
-    # 1. Performance of creating a source blob service
-    src_client = BlockBlobService(account_name=source_account, sas_token=source_sas)
-
-    def _get_blob_name(source_blob):
-        name = source_blob.name
-        if source_blob.snapshot is not None:
-            # the snapshot time string has seven digital in the microseconds, which make strptime
-            # nearly unusable. therefore characters after dot are thrown away
-            time_string = source_blob.snapshot[:source_blob.snapshot.rfind('.')]
-            snapshot_time = datetime.strptime(time_string, '%Y-%m-%dT%H:%M:%S')
-
-            # insert the date time string before the file extension
-            dot = name.rfind('.')
-            dot = len(name) if dot == -1 else dot
-            name = '{0}({1}){2}'.format(name[0:dot],
-                                        snapshot_time.strftime('%Y-%m-%d %H%M%S'),
-                                        name[dot:])
-        return name
-
-    def _get_blob_url(source_blob):
-        # to be removed once this issue is fixed:
-        # https://github.com/Azure/azure-storage-python/issues/233
-        src_url = src_client.make_blob_url(source_container, source_blob.name, sas_token=source_sas)
-
-        if source_blob.snapshot is not None:
-            # this is a blob snapshot
-            if '?' in src_url:
-                src_url += '&snapshot=' + str(source_blob.snapshot)
+        def action_blob_copy(blob_name):
+            if dryrun:
+                logger.warning('  - copy blob %s', blob_name)
             else:
-                src_url += '?snapshot=' + str(source_blob.snapshot)
+                return _copy_blob_to_blob_container(client, source_client, destination_container,
+                                                    source_container, source_sas, blob_name)
 
-        return src_url
+        return list(filter_none(action_blob_copy(blob) for blob in collect_blobs(source_client,
+                                                                                 source_container,
+                                                                                 pattern)))
 
-    def _copy_single_blob(source_blob):
-        kwargs = {
-            "container_name": destination_container,
-            "blob_name": _get_blob_name(source_blob),
-            "copy_source": _get_blob_url(source_blob)
-        }
+    elif source_share:
+        # copy blob from file share
 
-        if (exclude_new or exclude_old) and client.exists(destination_container, source_blob.name):
-            if exclude_old:
-                destination_blob = client.get_blob_properties(destination_container,
-                                                              source_blob.name)
-                kwargs["source_if_modified_since"] = destination_blob.properties.last_modified
-            if exclude_new:
-                kwargs["destination_if_modified_since"] = source_blob.properties.last_modified
+        # if the source client is None, recreate one from the destination client.
+        source_client = source_client or create_file_share_from_storage_client(client)
 
-        return client.copy_blob(**kwargs)
+        if not source_sas and client.account_name != source_client.account_name:
+            # when the file is copied across storage account without sas, generate a short lived sas
+            source_sas = create_short_lived_share_sas(source_client.account_name,
+                                                      source_client.account_key,
+                                                      source_share)
 
-    if recursive:
-        source_blobs = src_client.list_blobs(
-            source_container,
-            prefix=prefix,
-            include=Include(snapshots=True) if snapshots else None)
-    elif src_client.exists(source_container, prefix):
-        source_blobs = [src_client.get_blob_properties(source_container, prefix)]
+        def action_file_copy(file_info):
+            dir_name, file_name = file_info
+            if dryrun:
+                logger.warning('  - copy file %s', os.path.join(dir_name, file_name))
+            else:
+                return _copy_file_to_blob_container(client, source_client, destination_container,
+                                                    source_share, source_sas, dir_name, file_name)
+
+        return list(filter_none(action_file_copy(file) for file in collect_files(source_client,
+                                                                                 source_share,
+                                                                                 pattern)))
     else:
-        source_blobs = []
-
-    return [BlobCopyResult(b.name, _copy_single_blob(b).id) for b in source_blobs]
+        raise ValueError('Fail to find source. Neither blob container or file share is specified')
 
 
 # pylint: disable=unused-argument
@@ -149,7 +110,6 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         The pattern is used for files globbing. The supported patterns are '*', '?', '[seq]',
         and '[!seq]'.
     """
-    from .util import collect_blobs
     source_blobs = collect_blobs(client, source_container_name, pattern)
 
     if dryrun:
@@ -261,10 +221,6 @@ def storage_blob_upload_batch(client, source, destination, pattern=None, source_
 
 def _download_blob(blob_service, container, destination_folder, blob_name):
     # TODO: try catch IO exception
-
-    import os.path
-    from .util import mkdir_p
-
     destination_path = os.path.join(destination_folder, blob_name)
     destination_folder = os.path.dirname(destination_path)
     if not os.path.exists(destination_folder):
@@ -272,3 +228,33 @@ def _download_blob(blob_service, container, destination_folder, blob_name):
 
     blob = blob_service.get_blob_to_path(container, blob_name, destination_path)
     return blob.name
+
+
+def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_container,
+                                 source_container, source_sas, source_blob_name):
+    source_blob_url = source_blob_service.make_blob_url(source_container, source_blob_name,
+                                                        sas_token=source_sas)
+
+    try:
+        blob_service.copy_blob(destination_container, source_blob_name, source_blob_url)
+        return blob_service.make_blob_url(destination_container, source_blob_name)
+    except AzureException:
+        error_template = 'Failed to copy blob {} to container {}.'
+        raise CLIError(error_template.format(source_blob_name, destination_container))
+
+
+def _copy_file_to_blob_container(blob_service, source_file_service, destination_container,
+                                 source_share, source_sas, source_file_dir, source_file_name):
+    source_file_dir = source_file_dir if source_file_dir else None
+    file_url = source_file_service.make_file_url(source_share, source_file_dir, source_file_name,
+                                                 sas_token=source_sas)
+
+    blob_name = os.path.join(source_file_dir, source_file_name) \
+        if source_file_dir else source_file_name
+
+    try:
+        blob_service.copy_blob(destination_container, blob_name=blob_name, copy_source=file_url)
+        return blob_service.make_blob_url(destination_container, blob_name)
+    except AzureException as ex:
+        error_template = 'Failed to copy file {} to container {}. {}'
+        raise CLIError(error_template.format(source_file_name, destination_container, ex))

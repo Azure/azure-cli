@@ -23,7 +23,7 @@ from azure.mgmt.compute.models import (VirtualHardDisk,
                                        VirtualMachineScaleSetExtension,
                                        VirtualMachineScaleSetExtensionProfile)
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.commands.arm import parse_resource_id, resource_id
+from azure.cli.core.commands.arm import parse_resource_id, resource_id, is_valid_resource_id
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core._util import CLIError
 import azure.cli.core.azlogging as azlogging
@@ -173,7 +173,8 @@ def get_vm_details(resource_group_name, vm_name):
     # pylint: disable=line-too-long,no-member
     for nic_ref in result.network_profile.network_interfaces:
         nic = network_client.network_interfaces.get(resource_group_name, nic_ref.id.split('/')[-1])
-        mac_addresses.append(nic.mac_address)
+        if nic.mac_address:
+            mac_addresses.append(nic.mac_address)
         for ip_configuration in nic.ip_configurations:
             private_ips.append(ip_configuration.private_ip_address)
             if ip_configuration.public_ip_address:
@@ -287,7 +288,7 @@ def list_ip_addresses(resource_group_name=None, vm_name=None):
 
 
 def create_managed_disk(resource_group_name, disk_name, location=None,
-                        size_gb=None, sku=None,
+                        size_gb=None, sku='Premium_LRS',
                         source=None,  # pylint: disable=unused-argument
                         # below are generated internally from 'source'
                         source_blob_uri=None, source_disk=None, source_snapshot=None):
@@ -322,14 +323,16 @@ def update_managed_disk(instance, size_gb=None, sku=None):
 
 
 def attach_managed_data_disk(resource_group_name, vm_name, disk,
-                             new=False, sku=None, size_gb=None):
+                             new=False, sku=None, size_gb=None, lun=None):
     '''attach a managed disk'''
     vm = get_vm(resource_group_name, vm_name)
     from azure.mgmt.compute.models import (CreationData, DiskCreateOptionTypes,
                                            ManagedDiskParameters, DataDisk)
     # pylint: disable=no-member
-    luns = [d.lun for d in vm.storage_profile.data_disks] if vm.storage_profile.data_disks else []
-    lun = max(luns) + 1 if luns else 1
+    if lun is None:
+        luns = ([d.lun for d in vm.storage_profile.data_disks]
+                if vm.storage_profile.data_disks else [])
+        lun = max(luns) + 1 if luns else 0
     if new:
         if not size_gb:
             raise CLIError('usage error: --size-gb required to create an empty disk for attach')
@@ -345,15 +348,14 @@ def attach_managed_data_disk(resource_group_name, vm_name, disk,
     set_vm(vm)
 
 
-def detach_managed_data_disk(resource_group_name, vm_name, disk_name):
-    '''detach a managed disk'''
+def detach_data_disk(resource_group_name, vm_name, disk_name):
+    # here we handle both unmanaged or managed disk
     vm = get_vm(resource_group_name, vm_name)
     # pylint: disable=no-member
-    matched = [d for d in vm.storage_profile.data_disks if d.name.lower() == disk_name.lower()]
-    if not matched:
-        raise CLIError('disk to remove is not found')
-    for d in matched:
-        vm.storage_profile.data_disks.remove(d)
+    leftovers = [d for d in vm.storage_profile.data_disks if d.name.lower() != disk_name.lower()]
+    if len(vm.storage_profile.data_disks) == len(leftovers):
+        raise CLIError("No disk with the name '{}' was found".format(disk_name))
+    vm.storage_profile.data_disks = leftovers
     set_vm(vm)
 
 
@@ -367,7 +369,7 @@ def attach_managed_data_disk_to_vmss(resource_group_name, vmss_name, size_gb, lu
     data_disks = vmss.virtual_machine_profile.storage_profile.data_disks or []
     if lun is None:
         luns = [d.lun for d in data_disks]
-        lun = max(luns) + 1 if luns else 1
+        lun = max(luns) + 1 if luns else 0
     data_disk = VirtualMachineScaleSetDataDisk(lun, DiskCreateOptionTypes.empty,
                                                disk_size_gb=size_gb)
     data_disks.append(data_disk)
@@ -381,10 +383,10 @@ def detach_disk_from_vmss(resource_group_name, vmss_name, lun):
                                                  vmss_name)
     # pylint: disable=no-member
     data_disks = vmss.virtual_machine_profile.storage_profile.data_disks
-    to_delete = [d for d in data_disks if d.lun == lun]
-    if not to_delete:
+    leftovers = [d for d in data_disks if d.lun != lun]
+    if len(data_disks) == len(leftovers):
         raise CLIError("Could not find the data disk with lun '{}'".format(lun))
-    data_disks.remove(to_delete[0])
+    vmss.virtual_machine_profile.storage_profile.data_disks = leftovers
     return client.virtual_machine_scale_sets.create_or_update(resource_group_name,
                                                               vmss_name, vmss)
 
@@ -394,7 +396,7 @@ def grant_disk_access(resource_group_name, disk_name, duration_in_seconds):
 
 
 def create_snapshot(resource_group_name, snapshot_name, location=None,
-                    size_gb=None, sku=None,
+                    size_gb=None, sku='Standard_LRS',
                     source=None,  # pylint: disable=unused-argument
                     # below are generated internally from 'source'
                     source_blob_uri=None, source_disk=None, source_snapshot=None):
@@ -521,7 +523,7 @@ def attach_unmanaged_data_disk(resource_group_name, vm_name, new=False, vhd_uri=
         disk_name = vm_name + '-' + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     # pylint: disable=no-member
     if vhd_uri is None:
-        if not hasattr(vm.storage_profile.os_disk, 'vhd'):
+        if not hasattr(vm.storage_profile.os_disk, 'vhd') or not vm.storage_profile.os_disk.vhd:
             raise CLIError('Adding unmanaged disks to a VM with managed disks is not supported')
         blob_uri = vm.storage_profile.os_disk.vhd.uri
         vhd_uri = blob_uri[0:blob_uri.rindex('/') + 1] + disk_name + '.vhd'
@@ -534,21 +536,6 @@ def attach_unmanaged_data_disk(resource_group_name, vm_name, new=False, vhd_uri=
     if vm.storage_profile.data_disks is None:
         vm.storage_profile.data_disks = []
     vm.storage_profile.data_disks.append(disk)
-    return set_vm(vm)
-
-
-def detach_unmanaged_data_disk(resource_group_name, vm_name, disk_name):
-    ''' Detach a disk from a Virtual Machine '''
-    vm = get_vm(resource_group_name, vm_name)
-    # Issue: https://github.com/Azure/autorest/issues/934
-    vm.resources = None
-    try:
-        # pylint: disable=no-member
-        disk = next(d for d in vm.storage_profile.data_disks if
-                    d.name.lower() == disk_name.lower())
-        vm.storage_profile.data_disks.remove(disk)
-    except (StopIteration, AttributeError):
-        raise CLIError("No disk with the name '{}' found".format(disk_name))
     return set_vm(vm)
 
 
@@ -598,13 +585,71 @@ def capture_vm(resource_group_name, vm_name, vhd_name_prefix,
     print(json.dumps(result.output, indent=2))  # pylint: disable=no-member
 
 
-def reset_windows_admin(
-        resource_group_name, vm_name, username, password):
+def set_user(resource_group_name, vm_name, username, password=None, ssh_key_value=None):
+    '''Update or Add(only on Linux VM) users
+    :param username: user name
+    :param password: user password.
+    :param ssh_key_value: SSH public key file value or public key file path
+    '''
+    vm = get_vm(resource_group_name, vm_name, 'instanceView')
+    if _is_linx_vm(vm):
+        return _set_linux_user(resource_group_name, vm_name, username, password, ssh_key_value)
+    else:
+        if ssh_key_value:
+            raise CLIError('SSH key is not appliable on a Windows VM')
+        return _reset_windows_admin(resource_group_name, vm, username, password)
+
+
+def delete_user(
+        resource_group_name, vm_name, username):
+    '''Remove a user(not supported on Windows VM)
+    :param username: user name
+    '''
+    vm = get_vm(resource_group_name, vm_name, 'instanceView')
+    if not _is_linx_vm(vm):
+        raise CLIError('Deleting a user is not supported on Windows VM')
+    poller = _update_linux_access_extension(resource_group_name, vm_name,
+                                            {'remove_user': username})
+    return ExtensionUpdateLongRunningOperation('deleting user', 'done')(poller)
+
+
+def reset_linux_ssh(resource_group_name, vm_name):
+    '''Reset the SSH configuration In Linux VM'''
+    vm = get_vm(resource_group_name, vm_name, 'instanceView')
+    if not _is_linx_vm(vm):
+        raise CLIError('Resetting SSH is not supported in Windows VM')
+    poller = _update_linux_access_extension(resource_group_name, vm_name,
+                                            {'reset_ssh': True})
+    return ExtensionUpdateLongRunningOperation('resetting SSH', 'done')(poller)
+
+
+def _is_linx_vm(vm):
+    os_type = vm.storage_profile.os_disk.os_type.value
+    return os_type.lower() == 'linux'
+
+
+def _set_linux_user(
+        resource_group_name, vm_name, username, password=None, ssh_key_value=None):
+    protected_settings = {}
+    protected_settings['username'] = username
+    if password:
+        protected_settings['password'] = password
+    elif not ssh_key_value and not password:  # default to ssh
+        ssh_key_value = os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
+
+    if ssh_key_value:
+        protected_settings['ssh_key'] = read_content_if_is_file(ssh_key_value)
+
+    poller = _update_linux_access_extension(resource_group_name, vm_name,
+                                            protected_settings)
+    return ExtensionUpdateLongRunningOperation('setting user', 'done')(poller)
+
+
+def _reset_windows_admin(
+        resource_group_name, vm, username, password):
     '''Update the password.
     You can only change the password. Adding a new user is not supported.
     '''
-    vm = get_vm(resource_group_name, vm_name, 'instanceView')
-
     client = _compute_client_factory()
 
     from azure.mgmt.compute.models import VirtualMachineExtension
@@ -621,46 +666,9 @@ def reset_windows_admin(
                                   settings={'UserName': username},
                                   auto_upgrade_minor_version=auto_upgrade)
 
-    poller = client.virtual_machine_extensions.create_or_update(resource_group_name, vm_name,
+    poller = client.virtual_machine_extensions.create_or_update(resource_group_name, vm.name,
                                                                 _ACCESS_EXT_HANDLER_NAME, ext)
     return ExtensionUpdateLongRunningOperation('resetting admin', 'done')(poller)
-
-
-def set_linux_user(
-        resource_group_name, vm_name, username, password=None, ssh_key_value=None):
-    '''create or update a user credential
-    :param username: user name
-    :param password: user password.
-    :param ssh_key_value: SSH key file value or key file path
-    '''
-    protected_settings = {}
-    protected_settings['username'] = username
-    if password:
-        protected_settings['password'] = password
-    elif not ssh_key_value and not password:  # default to ssh
-        ssh_key_value = os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
-
-    if ssh_key_value:
-        protected_settings['ssh_key'] = read_content_if_is_file(ssh_key_value)
-
-    poller = _update_linux_access_extension(resource_group_name, vm_name,
-                                            protected_settings)
-    return ExtensionUpdateLongRunningOperation('setting user', 'done')(poller)
-
-
-def delete_linux_user(
-        resource_group_name, vm_name, username):
-    '''Remove the user '''
-    poller = _update_linux_access_extension(resource_group_name, vm_name,
-                                            {'remove_user': username})
-    return ExtensionUpdateLongRunningOperation('deleting user', 'done')(poller)
-
-
-def reset_linux_ssh(resource_group_name, vm_name):
-    '''Reset the SSH configuration'''
-    poller = _update_linux_access_extension(resource_group_name, vm_name,
-                                            {'reset_ssh': True})
-    return ExtensionUpdateLongRunningOperation('resetting SSH', 'done')(poller)
 
 
 def _update_linux_access_extension(resource_group_name, vm_name, protected_settings):
@@ -1405,24 +1413,9 @@ def convert_av_set_to_managed_disk(resource_group_name, availability_set_name):
                             parameters=av_set)
 
 
-def update_acs(resource_group_name, container_service_name, new_agent_count):
-    client = _compute_client_factory()
-    instance = client.container_services.get(resource_group_name, container_service_name)
-    instance.agent_pool_profiles[0].count = new_agent_count
-    return client.container_services.create_or_update(resource_group_name,
-                                                      container_service_name, instance)
-
-
-def list_container_services(client, resource_group_name=None):
-    ''' List Container Services. '''
-    svc_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
-        if resource_group_name else client.list()
-    return list(svc_list)
-
-
 # pylint: disable=too-many-locals, unused-argument, too-many-statements
 def create_vm(vm_name, resource_group_name, image=None,
-              size='Standard_DS1', location=None, tags=None, no_wait=False,
+              size='Standard_DS1_v2', location=None, tags=None, no_wait=False,
               authentication_type=None, admin_password=None, admin_username=getpass.getuser(),
               ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
               availability_set=None,
@@ -1432,15 +1425,15 @@ def create_vm(vm_name, resource_group_name, image=None,
               public_ip_address_dns_name=None,
               os_disk_name=None, os_type=None, storage_account=None,
               storage_caching='ReadWrite', storage_container_name='vhds',
-              storage_sku='Standard_LRS', use_unmanaged_disk=False,
+              storage_sku='Premium_LRS', use_unmanaged_disk=False,
               managed_os_disk=None, data_disk_sizes_gb=None, image_data_disks=None,
               vnet_name=None, vnet_address_prefix='10.0.0.0/16',
               subnet=None, subnet_address_prefix='10.0.0.0/24', storage_profile=None,
               os_publisher=None, os_offer=None, os_sku=None, os_version=None,
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_type=None,
-              nic_type=None, validate=False):
+              nic_type=None, validate=False, custom_data=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.cli.command_modules.vm._vm_utils import random_string
+    from azure.cli.core._util import random_string
     from azure.cli.command_modules.vm._template_builder import (
         ArmTemplateBuilder, build_vm_resource, build_storage_account_resource, build_nic_resource,
         build_vnet_resource, build_nsg_resource, build_public_ip_resource,
@@ -1497,12 +1490,19 @@ def create_vm(vm_name, resource_group_name, image=None,
                                                                   public_ip_address_allocation,
                                                                   public_ip_address_dns_name))
 
-        subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(
-            network_id_template, vnet_name, subnet)
-        nsg_id = '{}/networkSecurityGroups/{}'.format(network_id_template, nsg) if nsg else None
-        public_ip_address_id = \
-            '{}/publicIPAddresses/{}'.format(network_id_template, public_ip_address) \
-            if public_ip_address else None
+        subnet_id = subnet if is_valid_resource_id(subnet) else \
+            '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
+
+        nsg_id = None
+        if nsg:
+            nsg_id = nsg if is_valid_resource_id(nsg) else \
+                '{}/networkSecurityGroups/{}'.format(network_id_template, nsg)
+
+        public_ip_address_id = None
+        if public_ip_address:
+            public_ip_address_id = public_ip_address if is_valid_resource_id(public_ip_address) \
+                else '{}/publicIPAddresses/{}'.format(network_id_template, public_ip_address)
+
         nics = [
             {'id': '{}/networkInterfaces/{}'.format(network_id_template, nic_name)}
         ]
@@ -1527,11 +1527,14 @@ def create_vm(vm_name, resource_group_name, image=None,
             storage_account_name, CLOUD.suffixes.storage_endpoint, storage_container_name,
             os_disk_name)
 
+    if custom_data:
+        custom_data = read_content_if_is_file(custom_data)
+
     vm_resource = build_vm_resource(
         vm_name, location, tags, size, storage_profile, nics, admin_username, availability_set,
         admin_password, ssh_key_value, ssh_dest_key_path, image, os_disk_name,
         os_type, storage_caching, storage_sku, os_publisher, os_offer, os_sku, os_version,
-        os_vhd_uri, managed_os_disk, data_disk_sizes_gb, image_data_disks)
+        os_vhd_uri, managed_os_disk, data_disk_sizes_gb, image_data_disks, custom_data)
     vm_resource['dependsOn'] = vm_dependencies
 
     master_template.add_resource(vm_resource)
@@ -1573,9 +1576,9 @@ def create_vmss(vmss_name, resource_group_name, image,
                 subnet=None, subnet_address_prefix=None,
                 os_offer=None, os_publisher=None, os_sku=None, os_version=None,
                 load_balancer_type=None, vnet_type=None, public_ip_type=None, storage_profile=None,
-                single_placement_group=None):
+                single_placement_group=None, custom_data=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.cli.command_modules.vm._vm_utils import random_string
+    from azure.cli.core._util import random_string
     from azure.cli.command_modules.vm._template_builder import (
         ArmTemplateBuilder, StorageProfile, build_vmss_resource, build_storage_account_resource,
         build_vnet_resource, build_public_ip_resource, build_load_balancer_resource,
@@ -1604,7 +1607,9 @@ def create_vmss(vmss_name, resource_group_name, image,
         vmss_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
         master_template.add_resource(build_vnet_resource(
             vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix))
-    subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
+
+    subnet_id = subnet if is_valid_resource_id(subnet) else \
+        '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
 
     if load_balancer_type == 'new':
         load_balancer = load_balancer or '{}LB'.format(vmss_name)
@@ -1618,7 +1623,10 @@ def create_vmss(vmss_name, resource_group_name, image,
                                                                   tags,
                                                                   public_ip_address_allocation,
                                                                   public_ip_address_dns_name))
-        public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template, public_ip_address) if public_ip_address else None  # pylint: disable=line-too-long
+        public_ip_address_id = None
+        if public_ip_address:
+            public_ip_address_id = public_ip_address if is_valid_resource_id(public_ip_address) \
+                else '{}/publicIPAddresses/{}'.format(network_id_template, public_ip_address)
 
         # calculate default names if not provided
         backend_pool_name = backend_pool_name or '{}BEPool'.format(load_balancer)
@@ -1640,12 +1648,26 @@ def create_vmss(vmss_name, resource_group_name, image,
     scrubbed_name = vmss_name.replace('-', '').lower()[:5]
     naming_prefix = '{}{}'.format(scrubbed_name,
                                   random_string(9 - len(scrubbed_name), force_lower=True))
-    backend_address_pool_id = '{}/loadBalancers/{}/backendAddressPools/{}'.format(
-        network_id_template, load_balancer, backend_pool_name) if load_balancer_type else None
-    inbound_nat_pool_id = '{}/loadBalancers/{}/inboundNatPools/{}'.format(
-        network_id_template, load_balancer, nat_pool_name) if load_balancer_type == 'new' else None
+    backend_address_pool_id = None
+    inbound_nat_pool_id = None
+    if is_valid_resource_id(load_balancer):
+        backend_address_pool_id = \
+            '{}/backendAddressPools/{}'.format(load_balancer, backend_pool_name) \
+            if load_balancer_type else None
+        inbound_nat_pool_id = '{}/inboundNatPools/{}'.format(load_balancer, nat_pool_name) \
+            if load_balancer_type == 'new' else None
+    else:
+        backend_address_pool_id = '{}/loadBalancers/{}/backendAddressPools/{}'.format(
+            network_id_template, load_balancer, backend_pool_name) if load_balancer_type else None
+        inbound_nat_pool_id = '{}/loadBalancers/{}/inboundNatPools/{}'.format(
+            network_id_template, load_balancer, nat_pool_name) if load_balancer_type == 'new' \
+            else None
+
     ip_config_name = '{}IPConfig'.format(naming_prefix)
     nic_name = '{}Nic'.format(naming_prefix)
+
+    if custom_data:
+        custom_data = read_content_if_is_file(custom_data)
 
     vmss_resource = build_vmss_resource(vmss_name, naming_prefix, location, tags,
                                         not disable_overprovision, upgrade_policy_mode,
@@ -1658,7 +1680,8 @@ def create_vmss(vmss_name, resource_group_name, image,
                                         ssh_key_value, ssh_dest_key_path,
                                         os_publisher, os_offer, os_sku, os_version,
                                         backend_address_pool_id, inbound_nat_pool_id,
-                                        single_placement_group=single_placement_group)
+                                        single_placement_group=single_placement_group,
+                                        custom_data=custom_data)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     master_template.add_resource(vmss_resource)
@@ -1684,12 +1707,13 @@ def create_vmss(vmss_name, resource_group_name, image,
     return client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
 
 
-def create_av_set(availability_set_name, resource_group_name, location=None, no_wait=False,
-                  platform_update_domain_count=5, platform_fault_domain_count=5,
+def create_av_set(availability_set_name, resource_group_name,
+                  platform_update_domain_count, platform_fault_domain_count,
+                  location=None, no_wait=False,
                   unmanaged=False, tags=None, validate=False):
     from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
-    from azure.cli.command_modules.vm._vm_utils import random_string
+    from azure.cli.core._util import random_string
     from azure.cli.command_modules.vm._template_builder import (ArmTemplateBuilder,
                                                                 build_av_set_resource)
 

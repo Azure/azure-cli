@@ -281,6 +281,26 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
     def test_sql_elastic_pools_mgmt(self):
         self.execute()
 
+    def verify_activities(self, activities):
+        if isinstance(activities, list.__class__):
+            raise AssertionError("Actual value '{}' expected to be list class."
+                                 .format(activities))
+
+        for activity in activities:
+            if isinstance(activity, dict.__class__):
+                raise AssertionError("Actual value '{}' expected to be dict class"
+                                     .format(activities))
+            if activity['resourceGroup'] != self.resource_group:
+                raise AssertionError("Actual value '{}' != Expected value {}"
+                                     .format(activity['resourceGroup'], self.resource_group))
+            elif activity['serverName'] != self.sql_server_name:
+                raise AssertionError("Actual value '{}' != Expected value {}"
+                                     .format(activity['serverName'], self.sql_server_name))
+            elif activity['currentElasticPoolName'] != self.pool_name:
+                raise AssertionError("Actual value '{}' != Expected value {}"
+                                     .format(activity['currentElasticPoolName'], self.pool_name))
+        return True
+
     def body(self):
         rg = self.resource_group
         loc = self.location
@@ -359,13 +379,11 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('elasticPoolName', self.pool_name),
                      JMESPathCheck('status', 'Online')])
 
-        self.cmd('sql elastic-pools db show-activity -g {} --server-name {} --elastic-pool-name {}'
-                 .format(rg, self.sql_server_name, self.pool_name),
-                 checks=[
-                     JMESPathCheck('length(@)', 1),
-                     JMESPathCheck('[0].resourceGroup', rg),
-                     JMESPathCheck('[0].serverName', self.sql_server_name),
-                     JMESPathCheck('[0].currentElasticPoolName', self.pool_name)])
+        activities = self.cmd('sql elastic-pools db show-activity -g {} '
+                              '--server-name {} --elastic-pool-name {}'
+                              .format(rg, self.sql_server_name, self.pool_name),
+                              checks=[JMESPathCheck('type(@)', 'array')])
+        self.verify_activities(activities)
 
         # delete sql server database
         self.cmd('sql db delete -g {} --server-name {} --name {}'

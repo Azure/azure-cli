@@ -12,6 +12,7 @@ from azure.cli.command_modules.acs.proxy import Proxy
 LPWSTR = POINTER(WCHAR)
 HINTERNET = LPVOID
 
+
 class WinProxy(Proxy):
     INTERNET_PER_CONN_PROXY_SERVER = 2
     INTERNET_OPTION_REFRESH = 37
@@ -27,7 +28,7 @@ class WinProxy(Proxy):
         """
         Sets the HTTP proxy on Windows
         """
-        setting = create_unicode_buffer(host+':'+str(port))
+        setting = create_unicode_buffer(host + ':' + str(port))
         self._set_internet_options(setting)
 
     def disable_http_proxy(self):
@@ -65,6 +66,7 @@ class WinProxy(Proxy):
         InternetSetOption(None, self.INTERNET_OPTION_SETTINGS_CHANGED, None, 0)
         InternetSetOption(None, self.INTERNET_OPTION_REFRESH, None, 0)
 
+
 # pylint: disable=too-few-public-methods
 class INTERNET_PER_CONN_OPTION(Structure):
     class Value(Union):
@@ -78,6 +80,7 @@ class INTERNET_PER_CONN_OPTION(Structure):
         ('dwOption', DWORD),
         ('Value', Value),
     ]
+
 
 class INTERNET_PER_CONN_OPTION_LIST(Structure):
     _fields_ = [

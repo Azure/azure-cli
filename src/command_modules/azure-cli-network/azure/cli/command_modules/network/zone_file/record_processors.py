@@ -25,80 +25,21 @@
 #SOFTWARE.
 #pylint: skip-file
 
+from __future__ import print_function
+
 import copy
 
-def process_origin(data, template):
-    """
-    Replace {$origin} in template with a serialized $ORIGIN record
-    """
-    record = ""
-    if data is not None:
-        record += "$ORIGIN %s" % data
-
-    return template.replace("{$origin}", record)
-
-
-def process_ttl(data, template):
-    """
-    Replace {$ttl} in template with a serialized $TTL record
-    """
-    record = ""
-    if data is not None:
-        record += "$TTL %s" % data
-
-    return template.replace("{$ttl}", record)
-
-
-def process_soa(data, template):
+def process_soa(io, data, name, print_name=False):
     """
     Replace {SOA} in template with a set of serialized SOA records
     """
-    record = template[:]
+    indent = ' ' * len('{} {} IN SOA '.format(name, data['ttl']))
+    print('{} {} IN SOA {} {} ('.format(name, data['ttl'], data['mname'], data['rname']), file=io)
+    for item in ['serial', 'refresh', 'retry', 'expire', 'minimum']:
+        print('{}{} ; {}'.format(indent, data[item], item), file=io)
+    print('{})'.format(indent), file=io)
 
-    if data is not None:
-    
-        assert len(data) == 1, "Only support one SOA RR at this time"
-        data = data[0]
-
-        soadat = []
-        domain_fields = ['mname', 'rname']
-        param_fields = ['serial', 'refresh', 'retry', 'expire', 'minimum']
-
-        for f in domain_fields + param_fields:
-            assert f in data.keys(), "Missing '%s' (%s)" % (f, data)
-
-        data_name = str(data.get('name', '@'))
-        soadat.append(data_name)
-
-        if data.get('ttl') is not None:
-            soadat.append( str(data['ttl']) )
-  
-        soadat.append("IN")
-        soadat.append("SOA")
-
-        for key in domain_fields:
-            value = str(data[key])
-            soadat.append(value)
-
-        soadat.append("(")
-
-        for key in param_fields:
-            value = str(data[key])
-            soadat.append(value)
-
-        soadat.append(")")
-
-        soa_txt = " ".join(soadat)
-        record = record.replace("{soa}", soa_txt)
-
-    else:
-        # clear all SOA fields 
-        record = record.replace("{soa}", "")
-
-    return record
-
-
-def quote_field(data, field):
+def _quote_field(data, field):
     """
     Quote a field in a list of DNS records.
     Return the new data records.
@@ -106,119 +47,56 @@ def quote_field(data, field):
     if data is None:
         return None 
 
-    data_dup = copy.deepcopy(data)
-    for i in range(0, len(data_dup)):
-        data_dup[i][field] = '"%s"' % data_dup[i][field]
-        data_dup[i][field] = data_dup[i][field].replace(";", "\;")
+    data[field] = '"%s"' % data[field]
+    data[field] = data[field].replace(";", "\;")
 
-    return data_dup
+    return data
 
 
-def process_rr(data, record_type, record_keys, field, template):
-    """
-    Meta method:
-    Replace $field in template with the serialized $record_type records,
-    using @record_key from each datum.
-    """
+def process_rr(io, data, record_type, record_keys, name, print_name):
+    """ Print out single line record entries """
     if data is None:
-        return template.replace(field, "")
+        return
 
-    if type(record_keys) == list:
-        pass
-    elif type(record_keys) == str:
+    if isinstance(record_keys, str):
         record_keys = [record_keys]
-    else:
-        raise ValueError("Invalid record keys")
+    elif not isinstance(record_keys, list):
+        raise ValueError('record_keys must be a string or list of strings')
 
-    assert type(data) == list, "Data must be a list"
+    name_display = name if print_name else ' ' * len(name)
+    print('{} {} IN {} '.format(name_display, data['ttl'], record_type), end='', file=io)
 
-    record = ""
-    for i in range(0, len(data)):
-
-        for record_key in record_keys:
-            assert record_key in data[i].keys(), "Missing '%s'" % record_key
-
-        record_data = []
-        record_data.append( str(data[i].get('name', '@')) )
-        if data[i].get('ttl') is not None:
-            record_data.append( str(data[i]['ttl']) )
-
-        record_data.append(record_type)
-        record_data += [str(data[i][record_key]) for record_key in record_keys]
-        record += " ".join(record_data) + "\n"
-
-    return template.replace(field, record)
+    for i, key in enumerate(record_keys):
+        print(data[key], end='\n' if i == len(record_keys) - 1 else ' ', file=io)
 
 
-def process_ns(data, template):
-    """
-    Replace {ns} in template with the serialized NS records
-    """
-    return process_rr(data, "NS", "host", "{ns}", template)
+def process_ns(io, data, name, print_name=False):
+    process_rr(io, data, 'NS', 'host', name, print_name)
 
 
-def process_a(data, template):
-    """
-    Replace {a} in template with the serialized A records
-    """
-    return process_rr(data, "A", "ip", "{a}", template)
+def process_a(io, data, name, print_name=False):
+    return process_rr(io, data, 'A', 'ip', name, print_name)
 
 
-def process_aaaa(data, template):
-    """
-    Replace {aaaa} in template with the serialized A records
-    """
-    return process_rr(data, "AAAA", "ip", "{aaaa}", template)
+def process_aaaa(io, data, name, print_name=False):
+    return process_rr(io, data, 'AAAA', 'ip', name, print_name)
 
 
-def process_cname(data, template):
-    """
-    Replace {cname} in template with the serialized CNAME records
-    """
-    return process_rr(data, "CNAME", "alias", "{cname}", template)
+def process_cname(io, data, name, print_name=False):
+    return process_rr(io, data, 'CNAME', 'alias', name, print_name)
 
 
-def process_mx(data, template):
-    """
-    Replace {mx} in template with the serialized MX records
-    """
-    return process_rr(data, "MX", ["preference", "host"], "{mx}", template)
+def process_mx(io, data, name, print_name=False):
+    return process_rr(io, data, 'MX', ['preference', 'host'], name, print_name)
 
 
-def process_ptr(data, template):
-    """
-    Replace {ptr} in template with the serialized PTR records
-    """
-    return process_rr(data, "PTR", "host", "{ptr}", template)
+def process_ptr(io, data, name, print_name=False):
+    return process_rr(io, data, 'PTR', 'host', name, print_name)
 
 
-def process_txt(data, template):
-    """
-    Replace {txt} in template with the serialized TXT records
-    """
-    # quote txt
-    data_dup = quote_field(data, "txt")
-    return process_rr(data_dup, "TXT", "txt", "{txt}", template)
+def process_txt(io, data, name, print_name=False):
+    return process_rr(io, _quote_field(data, 'txt'), 'TXT', 'txt', name, print_name)
 
 
-def process_srv(data, template):
-    """
-    Replace {srv} in template with the serialized SRV records
-    """
-    return process_rr(data, "SRV", ["priority", "weight", "port", "target"], "{srv}", template)
-
-
-def process_spf(data, template):
-    """
-    Replace {spf} in template with the serialized SPF records
-    """
-    return process_rr(data, "SPF", "data", "{spf}", template)
-
-
-def process_uri(data, template):
-    """
-    Replace {uri} in templtae with the serialized URI records
-    """
-    # quote target 
-    data_dup = quote_field(data, "target")
-    return process_rr(data_dup, "URI", ["priority", "weight", "target"], "{uri}", template)
+def process_srv(io, data, name, print_name=False):
+    return process_rr(io, data, 'SRV', ['priority', 'weight', 'port', 'target'], name, print_name)
