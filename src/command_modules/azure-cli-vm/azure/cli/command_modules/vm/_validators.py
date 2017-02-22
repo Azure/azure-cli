@@ -380,9 +380,10 @@ def _validate_vm_create_auth(namespace):
 
     if not namespace.authentication_type:
         # apply default auth type (password for Windows, ssh for Linux) by examining the OS type
-        namespace.authentication_type = 'password' if namespace.os_type == 'windows' else 'ssh'
+        # pylint: disable=line-too-long
+        namespace.authentication_type = 'password' if namespace.os_type.lower() == 'windows' else 'ssh'
 
-    if namespace.os_type == 'windows' and namespace.authentication_type == 'ssh':
+    if namespace.os_type.lower() == 'windows' and namespace.authentication_type == 'ssh':
         raise CLIError('SSH not supported for Windows VMs.')
 
     # validate proper arguments supplied based on the authentication type
