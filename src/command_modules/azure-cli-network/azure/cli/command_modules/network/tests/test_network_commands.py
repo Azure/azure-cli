@@ -1268,7 +1268,7 @@ class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network dns record-set {0} show -n myrs{0} -g {1} --zone-name {2}'.format('a', rg, zone_name),
             checks=NoneCheck())
 
-        self.cmd('network dns record-set {0} delete -n myrs{0} -g {1} --zone-name {2}'
+        self.cmd('network dns record-set {0} delete -n myrs{0} -g {1} --zone-name {2} -y'
                  .format('a', rg, zone_name))
         self.cmd('network dns record-set {0} show -n myrs{0} -g {1} --zone-name {2}'
                  .format('a', rg, zone_name), allowed_exceptions='does not exist in resource group')
