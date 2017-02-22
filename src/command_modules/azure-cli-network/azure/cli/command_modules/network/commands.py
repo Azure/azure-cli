@@ -418,7 +418,7 @@ dns_record_set_path = 'azure.mgmt.dns.operations.record_sets_operations#RecordSe
 cli_command(__name__, 'network dns record-set list', custom_path.format('list_dns_record_set'), cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output)
 for record in ['a', 'aaaa', 'mx', 'ns', 'ptr', 'srv', 'txt']:
     cli_command(__name__, 'network dns record-set {} show'.format(record), dns_record_set_path + 'get', cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output, exception_handler=empty_on_404)
-    cli_command(__name__, 'network dns record-set {} delete'.format(record), dns_record_set_path + 'delete', cf_dns_mgmt_record_sets)
+    cli_command(__name__, 'network dns record-set {} delete'.format(record), dns_record_set_path + 'delete', cf_dns_mgmt_record_sets, confirmation=True)
     cli_command(__name__, 'network dns record-set {} list'.format(record), custom_path.format('list_dns_record_set'), cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output, table_transformer=transform_dns_record_set_table_output)
     cli_command(__name__, 'network dns record-set {} create'.format(record), custom_path.format('create_dns_record_set'), transform=transform_dns_record_set_output)
     cli_command(__name__, 'network dns record-set {} add-record'.format(record), custom_path.format('add_dns_{}_record'.format(record)), transform=transform_dns_record_set_output)
