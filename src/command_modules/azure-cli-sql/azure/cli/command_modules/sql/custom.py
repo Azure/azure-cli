@@ -208,7 +208,7 @@ def elastic_pool_create(
 ###############################################
 
 #####
-#           sql server firewall
+#           sql server firewall-rule
 #####
 
 # Creates a firewall rule with special start/end ip address value

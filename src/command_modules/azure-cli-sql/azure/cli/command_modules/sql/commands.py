@@ -109,7 +109,7 @@ with ServiceGroup(__name__, get_sql_servers_operation, server_operations) as s:
         c.command('list', 'list_service_objectives')
         c.command('show', 'get_service_objective')
 
-    with s.group('sql server firewall') as c:
+    with s.group('sql server firewall-rule') as c:
         c.command('create', 'create_or_update_firewall_rule')
         c.command('update', 'create_or_update_firewall_rule')
         c.command('delete', 'delete_firewall_rule')

@@ -167,10 +167,10 @@ with ParametersContext(command='sql server update') as c:
         c.ignore(i)
 
 #####
-#           sql server firewall
+#           sql server firewall-rule
 #####
 
-with ParametersContext(command='sql server firewall') as c:
+with ParametersContext(command='sql server firewall-rule') as c:
     c.register_alias('server_name', ('--server-name', '-s'))
     c.register_alias('firewall_rule_name', ('--name', '-n'))
 

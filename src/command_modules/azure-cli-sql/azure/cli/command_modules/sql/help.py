@@ -75,27 +75,27 @@ helps['sql server update'] = """
             type: command
             short-summary: Update an Azure SQL server.
             """
-helps['sql server firewall'] = """
+helps['sql server firewall-rule'] = """
             type: group
             short-summary: Commands to manage Azure SQL server's firewall rules
             """
-helps['sql server firewall allow-all-azure-ips'] = """
+helps['sql server firewall-rule allow-all-azure-ips'] = """
             type: command
             short-summary: Create a firewall rule that allows all Azure IP addresses to access the server
             """
-helps['sql server firewall create'] = """
+helps['sql server firewall-rule create'] = """
             type: command
             short-summary: Create a firewall rule that allows an IP address range to access the server
             """
-helps['sql server firewall update'] = """
+helps['sql server firewall-rule update'] = """
             type: command
             short-summary: Update firewall rule
             """
-helps['sql server firewall show'] = """
+helps['sql server firewall-rule show'] = """
             type: command
             short-summary: Show the details of firewall rule
             """
-helps['sql server firewall list'] = """
+helps['sql server firewall-rule list'] = """
             type: command
             short-summary: List firewall rules
             """
