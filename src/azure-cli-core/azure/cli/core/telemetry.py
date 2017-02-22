@@ -79,7 +79,8 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         for name, props in self.exceptions:
             props.update(base)
             props.update(cli)
-            props.update({'Reserved.DataModel.CorrelationId': str(uuid.uuid4())})
+            props.update({'Reserved.DataModel.CorrelationId': str(uuid.uuid4()),
+                          'Reserved.EventId': str(uuid.uuid4())})
             events.append({'name': name, 'properties': props})
 
         payload = json.dumps(events)
