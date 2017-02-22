@@ -1681,6 +1681,9 @@ def create_vmss(vmss_name, resource_group_name, image,
     if custom_data:
         custom_data = read_content_if_is_file(custom_data)
 
+    if secrets:
+        secrets = load_json(secrets)
+
     vmss_resource = build_vmss_resource(vmss_name, naming_prefix, location, tags,
                                         not disable_overprovision, upgrade_policy_mode,
                                         vm_sku, instance_count,
@@ -1693,7 +1696,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                                         os_publisher, os_offer, os_sku, os_version,
                                         backend_address_pool_id, inbound_nat_pool_id,
                                         single_placement_group=single_placement_group,
-                                        custom_data=custom_data)
+                                        custom_data=custom_data, secrets=secrets)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     master_template.add_resource(vmss_resource)

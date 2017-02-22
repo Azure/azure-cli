@@ -97,11 +97,12 @@ def _validate_secrets(secrets, os_type):
         if 'sourceVault' in secret and 'id' not in secret['sourceVault']:
             errors.append('Secret is missing sourceVault.id key at index {0}'.format(idx))
         if 'vaultCertificates' not in secret or not secret['vaultCertificates']:
-            errors.append('Secret is missing vaultCertificates array or it is empty at index {0}'.format(idx))
+            err = 'Secret is missing vaultCertificates array or it is empty at index {0}'
+            errors.append(err.format(idx))
         else:
             for jdx, cert in enumerate(secret['vaultCertificates']):
-                message = 'Secret is missing {0} within vaultCertificates array at secret index {1} and ' \
-                          'vaultCertificate index {2}'
+                message = 'Secret is missing {0} within vaultCertificates array at secret ' \
+                          'index {1} and vaultCertificate index {2}'
                 if 'certificateUrl' not in cert:
                     errors.append(message.format('certificateUrl', idx, jdx))
                 if is_windows and 'certificateStore' not in cert:

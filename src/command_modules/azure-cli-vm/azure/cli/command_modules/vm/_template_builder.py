@@ -502,7 +502,7 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
                         image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
                         backend_address_pool_id=None, inbound_nat_pool_id=None,
-                        single_placement_group=None, custom_data=None):
+                        single_placement_group=None, custom_data=None, secrets=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -584,6 +584,9 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
 
     if custom_data:
         os_profile['customData'] = b64encode(custom_data)
+
+    if secrets:
+        os_profile['secrets'] = secrets
 
     if single_placement_group is None:  # this should never happen, but just in case
         raise ValueError('single_placement_group was not set by validators')

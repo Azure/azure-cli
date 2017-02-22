@@ -4,13 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 import codecs
+import json
 import os
 import re
 import time
 
 from OpenSSL import crypto
-
 from msrestazure.azure_exceptions import CloudError
+
+from azure.keyvault.key_vault_id import parse_secret_id
 from azure.mgmt.keyvault.models import (VaultCreateOrUpdateParameters,
                                         VaultProperties,
                                         AccessPolicyEntry,
@@ -27,7 +29,8 @@ from azure.cli.core._util import CLIError
 import azure.cli.core.azlogging as azlogging
 
 from azure.keyvault import KeyVaultClient
-from azure.cli.command_modules.keyvault._validators import secret_text_encoding_values
+from azure.cli.command_modules.keyvault._validators import secret_text_encoding_values, \
+    _get_resource_group_from_vault_name
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -85,6 +88,106 @@ def _get_object_id(graph_client, subscription=None, spn=None, upn=None):
     if upn:
         return _get_object_id_by_upn(graph_client, upn)
     return _get_object_id_from_subscription(graph_client, subscription)
+
+
+def _get_vault_id_from_name(client, vault_name):
+    group_name = _get_resource_group_from_vault_name(vault_name)
+    vault = client.get(group_name, vault_name)
+    return vault.id
+
+
+def get_vm_format_secret(client, secrets, certificate_store=None):
+    """
+    Format secrets to be used in `az vm create --secrets`
+    :param client: management api client
+    :param dict secrets: array of secrets to be formatted
+    :param str certificate_store: certificate store the secret will be applied (Windows only)
+    :return: formatted secrets as an array
+    :rtype: list
+    """
+    grouped_secrets = {}
+    if isinstance(secrets, dict):
+        secrets = [secrets]
+
+    # group secrets by source vault
+    for secret in secrets:
+        parsed = parse_secret_id(secret['id'])
+        match = re.search('://(.+?)\\.', parsed.vault)
+        vault_name = match.group(1)
+        if vault_name not in grouped_secrets:
+            grouped_secrets[vault_name] = {
+                'vaultCertificates': [],
+                'id': _get_vault_id_from_name(client, vault_name)
+            }
+
+        vault_cert = {'certificateUrl': secret['id']}
+        if certificate_store:
+            vault_cert['certificateStore'] = certificate_store
+
+        grouped_secrets[vault_name]['vaultCertificates'].append(vault_cert)
+
+    # transform the reduced map to vm format
+    formatted = [{'sourceVault': {'id': value['id']},
+                  'vaultCertificates': value['vaultCertificates']}
+                 for _, value in list(grouped_secrets.items())]
+
+    # This is a hack to dump out json to STDOUT with the exact formatting we
+    # desire. The issue is that this JSON contains a resource id and the default
+    # output adds a resourceGroup to the keys upon formatting for output. We don't
+    # want that to be added since it would be different from what --secrets in vm
+    # and vmss create require.
+    #
+    # Also, vm-format should only produce JSON as it's the only format that makes
+    # sense for this cmd
+    print(json.dumps(formatted, sort_keys=True, indent=2))
+    return None
+
+
+def get_default_policy(client): #pylint: disable=unused-argument
+    return {
+        "attributes": {
+            "enabled": True,
+            "expires": None,
+            "not_before": None
+        },
+        "issuer_parameters": {
+            "name": "Self"
+        },
+        "key_properties": {
+            "exportable": True,
+            "key_size": 2048,
+            "key_type": "RSA",
+            "reuse_key": False
+        },
+        "lifetime_actions": [
+            {
+                "action": {
+                    "action_type": "AutoRenew"
+                },
+                "trigger": {
+                    "lifetime_percentage": 90
+                }
+            }
+        ],
+        "secret_properties": {
+            "content_type": "application/x-pkcs12"
+        },
+        "x509_certificate_properties": {
+            "ekus": None,
+            "key_usage": [
+                "digitalSignature",
+                "nonRepudiation",
+                "keyEncipherment",
+                "keyAgreement",
+                "keyCertSign"
+            ],
+            "subject": 'C=US, ST=WA, L=Redmon, O=Test Noodle, OU=TestNugget, '
+                       'CN=www.mytestdomain.com',
+            "subject_alternative_names": None,
+            "validity_in_months": 60
+        }
+    }
+
 
 def create_keyvault(client, resource_group_name, vault_name, location, #pylint:disable=too-many-arguments
                     sku=SkuName.standard.value,
