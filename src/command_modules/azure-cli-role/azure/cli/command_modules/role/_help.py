@@ -9,25 +9,25 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 helps['ad sp create-for-rbac'] = """
             examples:
-                - name: Create with defaults
+                - name: Create role assignments with defaults.
                   text: az ad sp create-for-rbac
-                - name: Create with a custom name
-                  text: az ad sp create-for-rbac -n "http://my-app"
-                - name: Create role assignments at the same time
-                  text: az ad sp create-for-rbac -n "http://my-app" --role contributor --scopes /subscriptions/11111111-2222-3333-4444-555555555555/resourceGroups/mygroup /subscriptions/11111111-2222-3333-4444-666666666666/resourceGroups/my-another-group
-                - name: Login with this service principal
+                - name: Create role assignments with a custom name.
+                  text: az ad sp create-for-rbac -n "http://MyApp"
+                - name: Create role assignments at the same time.
+                  text: az ad sp create-for-rbac -n "http://MyApp" --role contributor --scopes /subscriptions/11111111-2222-3333-4444-555555555555/resourceGroups/MyResourceGroup /subscriptions/11111111-2222-3333-4444-666666666666/resourceGroups/MyAnotherResourceGroup
+                - name: Login with a service principal.
                   text: az login --service-principal -u <name> -p <password> --tenant <tenant>
-                - name: Reset credentials on expiration
+                - name: Reset credentials on expiration.
                   text: az ad sp reset-credentials --name <name>
-                - name: Create role assignments
+                - name: Create role assignments.
                   text: az role assignment create --assignee <name> --role Contributor
-                - name: Revoke the service principal when done with it
+                - name: Revoke the service principal when done with it.
                   text: az ad app delete --id <name>
             """
 
 helps['role'] = """
     type: group
-    short-summary: Use role assignments to manage access to your Azure resources
+    short-summary: Use role assignments to manage access to your Azure resources.
 """
 helps['role assignment'] = """
     type: group
@@ -35,24 +35,27 @@ helps['role assignment'] = """
 """
 helps['role assignment create'] = """
     type: command
-    short-summary: Create a new role assignment
+    short-summary: Create a new role assignment.
+    examples:
+        - name: Create role assignment for a specified user, group, or service principal.
+          text: az role assignment create --assignee sp_name --role a_role
 """
 helps['role assignment delete'] = """
     type: command
-    short-summary: Delete role assignments
+    short-summary: Delete role assignments.
 """
 helps['role assignment list'] = """
     type: command
-    short-summary: list role assignments
+    short-summary: List role assignments.
 """
 helps['role definition'] = """
     type: group
-    short-summary: Manage role definitions
+    short-summary: Manage role definitions.
 """
 
 helps['role definition create'] = """
     type: command
-    short-summary: Create a custom role definition
+    short-summary: Create a custom role definition.
     parameters: 
         - name: --role-definition
           type: string
@@ -81,15 +84,15 @@ helps['role definition create'] = """
 
 helps['role definition delete'] = """
     type: command
-    short-summary: Delete a role definition
+    short-summary: Delete a role definition.
 """
 helps['role definition list'] = """
     type: command
-    short-summary: list role definitions
+    short-summary: List role definitions.
 """
 helps['role definition update'] = """
     type: command
-    short-summary: update a role definition
+    short-summary: Update a role definition.
 """
 helps['role definition create'] = """
             type: command
@@ -121,21 +124,21 @@ helps['role definition create'] = """
             """
 helps['ad'] = """
     type: group
-    short-summary: Synchronize on-premises directories and manage Azure Active Directory (AAD) resources
+    short-summary: Synchronize on-premises directories and manage Azure Active Directory resources.
 """
 helps['ad app'] = """
     type: group
-    short-summary: Manages AAD applications
+    short-summary: Manage Azure Active Directory applications.
 """
 helps['ad group'] = """
     type: group
-    short-summary: Manages AAD groups
+    short-summary: Manage Azure Active Directory groups.
 """
 helps['ad sp'] = """
     type: group
-    short-summary: Manages AAD service principals for automation authentication
+    short-summary: Manage Azure Active Directory service principals for automation authentication.
 """
 helps['ad user'] = """
     type: group
-    short-summary: Manages AAD users and user authentication
+    short-summary: Manage Azure Active Directory users and user authentication.
 """

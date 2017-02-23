@@ -16,6 +16,7 @@ from azure.mgmt.resource.resources.models import GenericResource
 
 from azure.mgmt.resource.policy.models import (PolicyAssignment, PolicyDefinition)
 from azure.mgmt.resource.locks.models import ManagementLockObject
+from azure.mgmt.resource.links.models import ResourceLinkProperties
 
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core._util import CLIError, get_file_json
@@ -25,7 +26,8 @@ from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
 
 from ._client_factory import (_resource_client_factory,
                               _resource_policy_client_factory,
-                              _resource_lock_client_factory)
+                              _resource_lock_client_factory,
+                              _resource_links_client_factory)
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -509,17 +511,58 @@ def update_lock(name, resource_group_name=None,
     return lock_client.management_locks.create_or_update_at_resource_group_level(
         resource_group_name, name, params)
 
+def create_resource_link(link_id, target_id, notes=None):
+    '''
+    :param target_id: The id of the resource link target.
+    :type target_id: str
+    :param notes: Notes for this link.
+    :type notes: str
+    '''
+    links_client = _resource_links_client_factory().resource_links
+    properties = ResourceLinkProperties(target_id, notes)
+    links_client.create_or_update(link_id, properties)
+
+def update_resource_link(link_id, target_id=None, notes=None):
+    '''
+    :param target_id: The id of the resource link target.
+    :type target_id: str
+    :param notes: Notes for this link.
+    :type notes: str
+    '''
+    links_client = _resource_links_client_factory().resource_links
+    params = links_client.get(link_id)
+    properties = ResourceLinkProperties(
+        target_id if target_id is not None else params.properties.target_id, #pylint: disable=no-member
+        notes=notes if notes is not None else params.properties.notes) #pylint: disable=no-member
+    links_client.create_or_update(link_id, properties)
+
+def list_resource_links(scope=None, filter_string=None):
+    '''
+    :param scope: The scope for the links
+    :type scope: str
+    :param filter_string: A filter for restricting the results
+    :type filter_string: str
+    '''
+    links_client = _resource_links_client_factory().resource_links
+    if scope is not None:
+        return links_client.list_at_source_scope(scope, filter=filter_string)
+    return links_client.list_at_subscription(filter=filter_string)
+
+def _validate_resource_inputs(resource_group_name, resource_provider_namespace,
+                              resource_type, resource_name):
+    if resource_group_name is None:
+        raise CLIError('--resource-group/-g is required.')
+    if resource_type is None:
+        raise CLIError('--resource-type is required')
+    if resource_name is None:
+        raise CLIError('--name/-n is required')
+    if resource_provider_namespace is None:
+        raise CLIError('--namespace is required')
 
 class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
     def __init__(self, resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None,
                  resource_id=None, api_version=None, rcf=None):
-        if bool(resource_id) == bool(resource_group_name or resource_type or
-                                     parent_resource_path or resource_provider_namespace or
-                                     resource_name):
-            raise IncorrectUsageError(
-                "(--id ID | --resource-group RG --name NAME --namespace NAMESPACE --resource-type TYPE -n NAME)") #pylint: disable=line-too-long
-
         #if the resouce_type is in format 'namespace/type' split it.
         #(we don't have to do this, but commands like 'vm show' returns such values)
         if resource_type and not resource_provider_namespace and not parent_resource_path:
@@ -533,6 +576,8 @@ class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
             if resource_id:
                 api_version = _ResourceUtils._resolve_api_version_by_id(self.rcf, resource_id)
             else:
+                _validate_resource_inputs(resource_group_name, resource_provider_namespace,
+                                          resource_type, resource_name)
                 api_version = _ResourceUtils._resolve_api_version(self.rcf,
                                                                   resource_provider_namespace,
                                                                   parent_resource_path,

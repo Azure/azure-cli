@@ -173,8 +173,8 @@ def add_id_parameters(command_table):
                              '--ids',
                              metavar='RESOURCE_ID',
                              dest=argparse.SUPPRESS,
-                             help="One or more resource IDs. If provided, no other 'Resource Id' "
-                                  "arguments should be specified.",
+                             help="One or more resource IDs (space delimited). If provided, "
+                                  "no other 'Resource Id' arguments should be specified.",
                              action=split_action(command.arguments),
                              nargs='+',
                              type=ResourceId,

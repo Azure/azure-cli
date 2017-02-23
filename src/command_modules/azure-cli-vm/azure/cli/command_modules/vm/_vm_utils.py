@@ -9,13 +9,6 @@ from azure.cli.core._util import get_file_json, CLIError
 from azure.cli.core.commands.arm import parse_resource_id
 
 
-def random_string(length=16, force_lower=False):
-    from string import ascii_letters, digits, ascii_lowercase
-    from random import choice
-    choice_set = ascii_lowercase + digits if force_lower else ascii_letters + digits
-    return ''.join([choice(choice_set) for n in range(length)])  # pylint: disable=unused-variable
-
-
 def read_content_if_is_file(string_or_file):
     content = string_or_file
     if os.path.exists(string_or_file):

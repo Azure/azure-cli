@@ -9,11 +9,11 @@ from azure.cli.core.help_files import helps
 
 helps['sql'] = """
             type: group
-            short-summary: Commands to manage Azure SQL Databases.
+            short-summary: Manage Azure SQL databases.
             """
 helps['sql db'] = """
             type: group
-            short-summary: Commands to manage databases.
+            short-summary: Manage databases.
             """
 helps['sql db copy'] = """
             type: command
@@ -41,19 +41,19 @@ helps['sql db replication-link'] = """
             """
 #helps['sql db data-warehouse'] = """
 #            type: group
-#            short-summary: Manage database data warehouse
+#            short-summary: Manage database data warehouse.
 #            """
 #helps['sql db restore-point'] = """
 #            type: group
-#            short-summary: Manage database restore points
+#            short-summary: Manage database restore points.
 #            """
 #helps['sql db transparent-data-encryption'] = """
 #            type: group
-#            short-summary: Manage database transparent data encryption
+#            short-summary: Manage database transparent data encryption.
 #            """
 #helps['sql db service-tier-advisor'] = """
 #            type: group
-#            short-summary: Manage database service tier advisors
+#            short-summary: Manage database service tier advisors.
 #            """
 helps['sql elastic-pool'] = """
             type: group
@@ -61,65 +61,65 @@ helps['sql elastic-pool'] = """
             """
 helps['sql elastic-pool create'] = """
             type: command
-            short-summary: Creates an elastic pool
+            short-summary: Creates an elastic pool.
             """
 helps['sql elastic-pool update'] = """
             type: command
-            short-summary: Updates an elastic pool
+            short-summary: Updates an elastic pool.
             """
 #helps['sql elastic-pool db'] = """
 #            type: group
-#            short-summary: Command to manage databases activities in database elastic pools
+#            short-summary: Command to manage databases activities in database elastic pools.
 #            """
 #helps['sql elastic-pool recommended'] = """
 #            type: group
-#            short-summary: Commands to see information about an Azure SQL Recommended Elastic Pool
+#            short-summary: Get information about an Azure SQL Recommended Elastic Pool.
 #            """
 #helps['sql elastic-pool recommended db'] = """
 #            type: group
-#            short-summary: Commands to see information about an Azure SQL Database inside of Recommended Elastic Pool
+#            short-summary: Get information about an Azure SQL Database inside of Recommended Elastic Pool.
 #            """
 helps['sql server'] = """
             type: group
-            short-summary: Commands to manage servers.
+            short-summary: Manage servers.
             """
 helps['sql server create'] = """
             type: command
-            short-summary: Create a new Azure SQL server
+            short-summary: Creates an Azure SQL server.
             """
 helps['sql server list'] = """
             type: command
-            short-summary: List the SQL servers belong to given resource group.
+            short-summary: Lists Azure SQL servers.
             """
 helps['sql server update'] = """
             type: command
-            short-summary: Update an Azure SQL server.
+            short-summary: Updates an Azure SQL server.
             """
 helps['sql server firewall-rule'] = """
             type: group
-            short-summary: Commands to manage Azure SQL server's firewall rules
+            short-summary: Manage Azure SQL server's firewall rules.
             """
 #helps['sql server firewall-rule allow-all-azure-ips'] = """
 #            type: command
-#            short-summary: Create a firewall rule that allows all Azure IP addresses to access the server
+#            short-summary: Create a firewall rule that allows all Azure IP addresses to access the server.
 #            """
 helps['sql server firewall-rule create'] = """
             type: command
-            short-summary: Create a firewall rule that allows an IP address range to access the server
+            short-summary: Creates an Azure SQL server firewall rule.
             """
 helps['sql server firewall-rule update'] = """
             type: command
-            short-summary: Update firewall rule
+            short-summary: Updates an Azure SQL server firewall rule.
             """
 helps['sql server firewall-rule show'] = """
             type: command
-            short-summary: Show the details of firewall rule
+            short-summary: Shows the details of an Azure SQL server firewall rule.
             """
 helps['sql server firewall-rule list'] = """
             type: command
-            short-summary: List firewall rules
+            short-summary: Lists the Azure SQL server firewall rules.
             """
 helps['sql server service-objective'] = """
             type: group
-            short-summary: Commands to show Azure SQL server's service objectives
+            short-summary: Show Azure SQL server's service objectives.
             """

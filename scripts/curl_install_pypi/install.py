@@ -162,6 +162,7 @@ def get_install_dir():
             create_dir(install_dir)
             if os.listdir(install_dir):
                 print_status("'{}' is not empty and may contain a previous installation.".format(install_dir))
+                print_status("If you'd like to update the CLI, exit this script and run 'az component update'.")
                 ans_yes = prompt_y_n('Remove this directory?', 'n')
                 if ans_yes:
                     shutil.rmtree(install_dir)
@@ -197,6 +198,8 @@ def _get_default_rc_file():
     bashrc_exists = os.path.isfile(USER_BASH_RC)
     bash_profile_exists = os.path.isfile(USER_BASH_PROFILE)
     if not bashrc_exists and bash_profile_exists:
+        return USER_BASH_PROFILE
+    if bashrc_exists and bash_profile_exists and platform.system().lower() == 'darwin':
         return USER_BASH_PROFILE
     return USER_BASH_RC if bashrc_exists else None
 

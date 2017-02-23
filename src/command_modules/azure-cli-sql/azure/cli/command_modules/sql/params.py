@@ -32,6 +32,9 @@ def configure_db_create_params(c):
     from azure.mgmt.sql.models.database import Database
     c.expand('parameters', Database)
 
+    # Adjust help text.
+    c.argument('edition', options_list=('--edition',), help='The edition of the Azure SQL database.')
+
     # We have a wrapper function that determines server location so user doesn't need to specify it as param.
     # Also we have specific commands to special create modes which have their own required params, so
     # database properties related to create mode can be ignored
@@ -199,3 +202,5 @@ with ParametersContext(command='sql server service-objective') as c:
     c.register_alias('server_name', ('--server', '-s'))
     c.register_alias('service_objective_name', ('--name', '-n'))
 
+with ParametersContext(command='sql elastic-pools create') as c:
+    from azure.mgmt.sql.models.elastic_pool import ElasticPool

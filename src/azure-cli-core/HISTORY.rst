@@ -3,6 +3,23 @@
 Release History
 ===============
 
+0.1.2rc2 (2017-02-22)
+^^^^^^^^^^^^^^^^^^^^^
+
+* Telemetry: Generate unique event ID for each exception.
+* Show privacy statement on first invocation of ‘az’ command.
+
+
+0.1.2rc1 (2017-02-17)
+^^^^^^^^^^^^^^^^^^^^^
+
+* Show commands return empty string with exit code 0 for 404 responses
+* Fix: Ensure known clouds are always in cloud config
+* Handle cloud switching in more user friendly way + remove context
+* Add support for prompts for yes / no with -y option
+* Remove list output
+
+
 0.1.1b3 (2017-01-30)
 ^^^^^^^^^^^^^^^^^^^^
 

@@ -3,6 +3,18 @@
 Release History
 ===============
 
+0.1.2rc2 (2017-02-22)
++++++++++++++++++++++
+
+* Switch question ordering for ‘az configure’.
+
+
+0.1.2rc1 (2017-02-17)
++++++++++++++++++++++
+
+* Release candidate.
+
+
 0.1.1b3 (2017-01-30)
 +++++++++++++++++++++
 

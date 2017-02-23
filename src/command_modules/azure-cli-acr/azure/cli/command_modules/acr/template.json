@@ -47,7 +47,7 @@
             "name": "[parameters('storageAccountName')]",
             "type": "Microsoft.Storage/storageAccounts",
             "location": "[parameters('registryLocation')]",
-            "apiVersion": "2016-01-01",
+            "apiVersion": "2016-12-01",
             "tags": {
                 "containerregistry": "[parameters('registryName')]"
             },
@@ -78,7 +78,7 @@
                 "adminUserEnabled": "[parameters('adminUserEnabled')]",
                 "storageAccount": {
                     "name": "[parameters('storageAccountName')]",
-                    "accessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2016-01-01').keys[0].value]"
+                    "accessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2016-12-01').keys[0].value]"
                 }
             }
         }

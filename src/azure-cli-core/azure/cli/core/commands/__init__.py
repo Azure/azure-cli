@@ -32,6 +32,8 @@ logger = azlogging.get_az_logger(__name__)
 
 CONFIRM_PARAM_NAME = 'yes'
 
+BLACKLISTED_MODS = ['context']
+
 
 class CliArgumentType(object):
     REMOVE = '---REMOVE---'
@@ -235,7 +237,7 @@ def get_command_table(module_name=None):
     If the module is not found, all commands are loaded.
     '''
     loaded = False
-    if module_name and module_name != 'acs':
+    if module_name and module_name != 'acs' and module_name not in BLACKLISTED_MODS:
         try:
             import_module('azure.cli.command_modules.' + module_name).load_commands()
             logger.debug("Successfully loaded command table from module '%s'.", module_name)
@@ -249,7 +251,8 @@ def get_command_table(module_name=None):
         try:
             mods_ns_pkg = import_module('azure.cli.command_modules')
             installed_command_modules = [modname for _, modname, _ in
-                                         pkgutil.iter_modules(mods_ns_pkg.__path__)]
+                                         pkgutil.iter_modules(mods_ns_pkg.__path__)
+                                         if modname not in BLACKLISTED_MODS]
         except ImportError:
             pass
         logger.debug('Installed command modules %s', installed_command_modules)
@@ -291,10 +294,11 @@ def register_extra_cli_argument(command, dest, **kwargs):
 
 def cli_command(module_name, name, operation,
                 client_factory=None, transform=None, table_transformer=None,
-                no_wait_param=None, confirmation=None):
+                no_wait_param=None, confirmation=None, exception_handler=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
     command_table[name] = create_command(module_name, name, operation, transform, table_transformer,
-                                         client_factory, no_wait_param, confirmation=confirmation)
+                                         client_factory, no_wait_param, confirmation=confirmation,
+                                         exception_handler=exception_handler)
 
 
 def get_op_handler(operation):
@@ -311,7 +315,7 @@ def get_op_handler(operation):
 
 def create_command(module_name, name, operation,
                    transform_result, table_transformer, client_factory,
-                   no_wait_param=None, confirmation=None):
+                   no_wait_param=None, confirmation=None, exception_handler=None):
     if not isinstance(operation, string_types):
         raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
@@ -330,7 +334,13 @@ def create_command(module_name, name, operation,
         client = client_factory(kwargs) if client_factory else None
         try:
             op = get_op_handler(operation)
-            result = op(client, **kwargs) if client else op(**kwargs)
+            try:
+                result = op(client, **kwargs) if client else op(**kwargs)
+            except Exception as ex:  # pylint: disable=broad-except
+                if exception_handler:
+                    result = exception_handler(ex)
+                else:
+                    raise ex
 
             if no_wait_param and kwargs.get(no_wait_param, None):
                 return None  # return None for 'no-wait'

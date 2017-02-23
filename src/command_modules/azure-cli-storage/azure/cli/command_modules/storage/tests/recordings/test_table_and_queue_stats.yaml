@@ -1,0 +1,276 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.13 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1
+          msrest/0.4.4 msrest_azure/0.4.7 storagemanagementclient/0.31.0 Azure-SDK-For-Python
+          AZURECLI/TEST/0.1.1b3+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [47ef18ae-ef1b-11e6-bdeb-3c15c2cf0610]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/storageAccounts?api-version=2016-12-01
+  response:
+    body: {string: !!python/unicode '{"value":[
+    {
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vcr_resource_group/providers/Microsoft.Storage/storageAccounts/dummystorage",
+        "kind": "Storage",
+        "location": "westus",
+        "name": "dummystorage",
+        "properties": {
+            "creationTime": "2017-02-09T22:58:13.5358967Z",
+            "primaryEndpoints": {
+                "blob": "https://dummystorage.blob.core.windows.net/",
+                "file": "https://dummystorage.file.core.windows.net/",
+                "queue": "https://dummystorage.queue.core.windows.net/",
+                "table": "https://dummystorage.table.core.windows.net/"
+            },
+            "primaryLocation": "westus",
+            "provisioningState": "Succeeded",
+            "secondaryEndpoints": {
+                "blob": "https://dummystorage-secondary.blob.core.windows.net/",
+                "queue": "https://dummystorage-secondary.queue.core.windows.net/",
+                "table": "https://dummystorage-secondary.table.core.windows.net/"
+            },
+            "secondaryLocation": "eastus",
+            "statusOfPrimary": "available",
+            "statusOfSecondary": "available"
+        },
+        "sku": {
+            "name": "Standard_RAGRS",
+            "tier": "Standard"
+        },
+        "tags": {},
+        "type": "Microsoft.Storage/storageAccounts"
+    }
+]}
+
+        '}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['59553']
+      content-type: [application/json]
+      date: ['Thu, 09 Feb 2017 22:58:33 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.13 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1
+          msrest/0.4.4 msrest_azure/0.4.7 storagemanagementclient/0.31.0 Azure-SDK-For-Python
+          AZURECLI/TEST/0.1.1b3+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [4898661e-ef1b-11e6-82b4-3c15c2cf0610]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vcr_resource_group/providers/Microsoft.Storage/storageAccounts/dummystorage/listKeys?api-version=2016-12-01
+  response:
+    body: {string: !!python/unicode '{"keys":[{"keyName":"key1","permissions":"Full","value":"+7wvOHF4jC0yRsNPW17zapiiwWqvNz0zzwsCjCXUGzxgn8GCe/JUGtlfK65/wRMLt4Pr9z3+IChX3TddPZkxvA=="},{"keyName":"key2","permissions":"Full","value":"9qVRqW/jXQ8K3c87TxCGz19Le2GKY3kE9zeLUj3jUUOobzlQWGO2CY9DxIpyjpmWAmw9q+u6C+hS2wqLoGAgDw=="}]}
+
+        '}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['289']
+      content-type: [application/json]
+      date: ['Thu, 09 Feb 2017 22:58:34 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 2.7.13; Darwin 16.4.0) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [39f38745-ef1b-11e6-bffd-3c15c2cf0610]
+      x-ms-date: ['Thu, 09 Feb 2017 22:58:35 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.secondary.table.core.windows.net/?comp=stats&restype=service
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceStats><GeoReplication><Status>unavailable</Status><LastSyncTime></LastSyncTime></GeoReplication></StorageServiceStats>"}
+    headers:
+      content-type: [application/xml]
+      date: ['Thu, 09 Feb 2017 22:58:35 GMT']
+      server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 2.7.13; Darwin 16.4.0) AZURECLI/0.1.1b3+dev
+          AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [39f38745-ef1b-11e6-bffd-3c15c2cf0610]
+      x-ms-date: ['Thu, 09 Feb 2017 22:58:53 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.secondary.table.core.windows.net/?comp=stats&restype=service
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceStats><GeoReplication><Status>unavailable</Status><LastSyncTime></LastSyncTime></GeoReplication></StorageServiceStats>"}
+    headers:
+      content-type: [application/xml]
+      date: ['Thu, 09 Feb 2017 22:58:53 GMT']
+      server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 2.7.13; Darwin 16.4.0) AZURECLI/0.1.1b3+dev
+          AZURECLI/0.1.1b3+dev AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [39f38745-ef1b-11e6-bffd-3c15c2cf0610]
+      x-ms-date: ['Thu, 09 Feb 2017 22:59:17 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.secondary.table.core.windows.net/?comp=stats&restype=service
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceStats><GeoReplication><Status>live</Status><LastSyncTime>Thu,\
+        \ 09 Feb 2017 22:56:48 GMT</LastSyncTime></GeoReplication></StorageServiceStats>"}
+    headers:
+      content-type: [application/xml]
+      date: ['Thu, 09 Feb 2017 22:59:18 GMT']
+      server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.13 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1
+          msrest/0.4.4 msrest_azure/0.4.7 storagemanagementclient/0.31.0 Azure-SDK-For-Python
+          AZURECLI/TEST/0.1.1b3+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [62fca773-ef1b-11e6-b0c2-3c15c2cf0610]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/storageAccounts?api-version=2016-12-01
+  response:
+    body: {string: !!python/unicode '{"value":[
+    {
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vcr_resource_group/providers/Microsoft.Storage/storageAccounts/dummystorage",
+        "kind": "Storage",
+        "location": "westus",
+        "name": "dummystorage",
+        "properties": {
+            "creationTime": "2017-02-09T22:58:13.5358967Z",
+            "primaryEndpoints": {
+                "blob": "https://dummystorage.blob.core.windows.net/",
+                "file": "https://dummystorage.file.core.windows.net/",
+                "queue": "https://dummystorage.queue.core.windows.net/",
+                "table": "https://dummystorage.table.core.windows.net/"
+            },
+            "primaryLocation": "westus",
+            "provisioningState": "Succeeded",
+            "secondaryEndpoints": {
+                "blob": "https://dummystorage-secondary.blob.core.windows.net/",
+                "queue": "https://dummystorage-secondary.queue.core.windows.net/",
+                "table": "https://dummystorage-secondary.table.core.windows.net/"
+            },
+            "secondaryLocation": "eastus",
+            "statusOfPrimary": "available",
+            "statusOfSecondary": "available"
+        },
+        "sku": {
+            "name": "Standard_RAGRS",
+            "tier": "Standard"
+        },
+        "tags": {},
+        "type": "Microsoft.Storage/storageAccounts"
+    }
+]}
+        '}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['59553']
+      content-type: [application/json]
+      date: ['Thu, 09 Feb 2017 22:59:18 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.13 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1
+          msrest/0.4.4 msrest_azure/0.4.7 storagemanagementclient/0.31.0 Azure-SDK-For-Python
+          AZURECLI/TEST/0.1.1b3+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [633015ca-ef1b-11e6-a862-3c15c2cf0610]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vcr_resource_group/providers/Microsoft.Storage/storageAccounts/dummystorage/listKeys?api-version=2016-12-01
+  response:
+    body: {string: !!python/unicode '{"keys":[{"keyName":"key1","permissions":"Full","value":"+7wvOHF4jC0yRsNPW17zapiiwWqvNz0zzwsCjCXUGzxgn8GCe/JUGtlfK65/wRMLt4Pr9z3+IChX3TddPZkxvA=="},{"keyName":"key2","permissions":"Full","value":"9qVRqW/jXQ8K3c87TxCGz19Le2GKY3kE9zeLUj3jUUOobzlQWGO2CY9DxIpyjpmWAmw9q+u6C+hS2wqLoGAgDw=="}]}
+
+        '}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['289']
+      content-type: [application/json]
+      date: ['Thu, 09 Feb 2017 22:59:19 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 2.7.13; Darwin 16.4.0) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [39f38745-ef1b-11e6-bffd-3c15c2cf0610]
+      x-ms-date: ['Thu, 09 Feb 2017 22:59:20 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.secondary.queue.core.windows.net/?comp=stats&restype=service
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceStats><GeoReplication><Status>live</Status><LastSyncTime>Thu,\
+        \ 09 Feb 2017 22:56:41 GMT</LastSyncTime></GeoReplication></StorageServiceStats>"}
+    headers:
+      cache-control: [no-cache]
+      content-type: [application/xml]
+      date: ['Thu, 09 Feb 2017 22:59:20 GMT']
+      server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+version: 1

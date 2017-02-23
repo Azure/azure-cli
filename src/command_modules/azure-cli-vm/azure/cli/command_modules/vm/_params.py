@@ -7,7 +7,6 @@
 from argcomplete.completers import FilesCompleter
 
 from azure.mgmt.compute.models import (CachingTypes,
-                                       ContainerServiceOchestratorTypes,
                                        UpgradeMode)
 from azure.mgmt.storage.models import SkuName
 from azure.cli.core.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
@@ -19,7 +18,8 @@ from azure.cli.command_modules.vm._actions import \
 from azure.cli.command_modules.vm._validators import \
     (validate_nsg_name, validate_vm_nics, validate_vm_nic, process_vm_create_namespace,
      process_vmss_create_namespace, process_image_create_namespace,
-     process_disk_or_snapshot_create_namespace, validate_vm_disk, validate_location)
+     process_disk_or_snapshot_create_namespace, validate_vm_disk, validate_location,
+     process_disk_encryption_namespace)
 
 
 def get_urn_aliases_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
@@ -70,30 +70,22 @@ register_cli_argument('vm disk', 'vm_name', options_list=('--vm-name',), id_part
                       completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'))
 register_cli_argument('vm disk', 'disk', validator=validate_vm_disk, help='disk name or id',
                       completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
+register_cli_argument('vm disk detach', 'disk_name', options_list=('--name', '-n'), help='The data disk name.')
 register_cli_argument('vm disk', 'new', action="store_true", help='create a new disk')
 register_cli_argument('vm disk', 'sku', arg_type=disk_sku)
 register_cli_argument('vm disk', 'size_gb', options_list=('--size-gb', '-z'), help='size in GB.')
+register_cli_argument('vm disk', 'lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virutal Machine size.')
 
 register_cli_argument('vm availability-set', 'availability_set_name', name_arg_type, id_part='name',
                       completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'), help='Name of the availability set')
 register_cli_argument('vm availability-set create', 'availability_set_name', name_arg_type, validator=validate_location, help='Name of the availability set')
 register_cli_argument('vm availability-set create', 'unmanaged', action='store_true', help='contained VMs should use unmanaged disks')
+register_cli_argument('vm availability-set create', 'platform_update_domain_count', type=int, help='Update Domain count. Example: 2')
+register_cli_argument('vm availability-set create', 'platform_fault_domain_count', type=int, help='Fault Domain count. Example: 2')
 register_cli_argument('vm availability-set create', 'validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
 
-register_cli_argument('vm access', 'username', options_list=('--username', '-u'), help='The user name')
-register_cli_argument('vm access', 'password', options_list=('--password', '-p'), help='The user password')
-
-register_cli_argument('acs', 'name', arg_type=name_arg_type)
-register_cli_argument('acs', 'orchestrator_type', **enum_choice_list(ContainerServiceOchestratorTypes))
-# some admin names are prohibited in acs, such as root, admin, etc. Because we have no control on the orchestrators, so default to a safe name.
-register_cli_argument('acs', 'admin_username', options_list=('--admin-username',), default='azureuser', required=False)
-register_cli_argument('acs', 'dns_name_prefix', options_list=('--dns-prefix', '-d'))
-register_extra_cli_argument('acs create', 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing')
-register_cli_argument('acs', 'container_service_name', options_list=('--name', '-n'), help='The name of the container service', completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'))
-register_cli_argument('acs create', 'agent_vm_size', completer=get_vm_size_completion_list)
-register_cli_argument('acs scale', 'new_agent_count', type=int, help='The number of agents for the cluster')
-register_cli_argument('acs create', 'service_principal', help='Service principal for making calls into Azure APIs')
-register_cli_argument('acs create', 'client_secret', help='Client secret to use with the service principal for making calls to Azure APIs')
+register_cli_argument('vm user', 'username', options_list=('--username', '-u'), help='The user name')
+register_cli_argument('vm user', 'password', options_list=('--password', '-p'), help='The user password')
 
 register_cli_argument('vm capture', 'overwrite', action='store_true')
 
@@ -105,8 +97,9 @@ register_cli_argument('vm extension', 'vm_name', arg_type=existing_vm_name, opti
 
 register_cli_argument('vm extension image', 'image_location', options_list=('--location', '-l'))
 register_cli_argument('vm extension image', 'publisher_name', options_list=('--publisher', '-p'), help='Image publisher name')
-register_cli_argument('vm extension image', 'type', options_list=('--name', '-n'))
+register_cli_argument('vm extension image', 'type', options_list=('--name', '-n'), help='Name of the extension')
 register_cli_argument('vm extension image', 'latest', action='store_true')
+register_cli_argument('vm extension image', 'version', help='Extension version')
 
 for dest in ['vm_scale_set_name', 'virtual_machine_scale_set_name', 'name']:
     register_cli_argument('vmss', dest, vmss_name_type)
@@ -151,6 +144,8 @@ register_cli_argument('vm image list', 'image_location', location_type)
 register_cli_argument('vm image', 'publisher_name', options_list=('--publisher', '-p'))
 register_cli_argument('vm image', 'offer', options_list=('--offer', '-f'))
 register_cli_argument('vm image', 'sku', options_list=('--sku', '-s'))
+# overriding skus from the sdk operation to be a single sku
+register_cli_argument('vm image show', 'skus', options_list=('--sku', '-s'))
 
 register_cli_argument('vm open-port', 'vm_name', name_arg_type, help='The name of the virtual machine to open inbound traffic on.')
 register_cli_argument('vm open-port', 'network_security_group_name', options_list=('--nsg-name',), help='The name of the network security group to create if one does not exist. Ignored if an NSG already exists.', validator=validate_nsg_name)
@@ -187,11 +182,12 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'admin_username', help='Username for the VM.', arg_group='Authentication')
     register_cli_argument(scope, 'admin_password', help="Password for the VM if authentication type is 'Password'.", arg_group='Authentication')
     register_cli_argument(scope, 'ssh_key_value', help='SSH public key or public key file path.', completer=FilesCompleter(), type=file_type, arg_group='Authentication')
+    register_cli_argument(scope, 'custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
     register_cli_argument(scope, 'ssh_dest_key_path', help='Destination file path on the VM for the SSH key.', arg_group='Authentication')
     register_cli_argument(scope, 'authentication_type', help='Type of authentication to use with the VM. Defaults to password for Windows and SSH public key for Linux.', arg_group='Authentication', **enum_choice_list(['ssh', 'password']))
 
     register_cli_argument(scope, 'os_disk_name', help='The name of the new VM OS disk.', arg_group='Storage')
-    register_cli_argument(scope, 'os_type', help='Type of OS installed on a custom VHD. Do not use when specifiying an URN or URN alias.', arg_group='Storage', **enum_choice_list(['windows', 'linux']))
+    register_cli_argument(scope, 'os_type', help='Type of OS installed on a custom VHD. Do not use when specifying an URN or URN alias.', arg_group='Storage', **enum_choice_list(['windows', 'linux']))
     register_cli_argument(scope, 'storage_account', help="Only applicable when use with '--use-unmanaged-disk'. The name to use when creating a new storage account or referencing an existing one. If omitted, an appropriate storage account in the same resource group and location will be used, or a new one will be created.", arg_group='Storage')
     register_cli_argument(scope, 'storage_caching', help='Storage caching type for the VM OS disk', arg_group='Storage', **enum_choice_list(['ReadWrite', 'ReadOnly']))
     register_cli_argument(scope, 'storage_sku', help='The sku of storage account to persist VM. By default, only Standard_LRS and Premium_LRS are allowed. Using with --use-unmanaged-disk, all are available.', arg_group='Storage', **enum_choice_list(SkuName))
@@ -232,6 +228,10 @@ register_cli_argument('vmss create', 'instance_count', help='Number of VMs in th
 register_cli_argument('vmss create', 'disable_overprovision', help='Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details).', action='store_true')
 register_cli_argument('vmss create', 'upgrade_policy_mode', help=None, **enum_choice_list(UpgradeMode))
 register_cli_argument('vmss create', 'vm_sku', help='Size of VMs in the scale set.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
+
+register_cli_argument('vm encryption', 'volume_type', help='Type of volume that the encryption operation is performed on', **enum_choice_list(['DATA', 'OS', 'ALL']))
+register_cli_argument('vm encryption', 'force', action='store_true', help='continue with encryption operations regardless of the warnings')
+register_cli_argument('vm encryption', 'disk_encryption_keyvault', validator=process_disk_encryption_namespace)
 
 existing_disk_name = CliArgumentType(overrides=name_arg_type, help='The name of the managed disk', completer=get_resource_name_completion_list('Microsoft.Compute/disks'), id_part='name')
 register_cli_argument('disk', 'disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
