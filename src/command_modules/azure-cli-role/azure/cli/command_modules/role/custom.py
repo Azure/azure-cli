@@ -497,7 +497,7 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
                     logger.warning('Retrying service principal creation: %s/%s', l+1, _RETRY_TIMES)
                 else:
                     logger.warning("Creating service principal failed for appid '%s'. Trace followed:\n%s",
-                                   name, ex.response.headers) #pylint: disable=no-member
+                                   name, ex.response.headers if hasattr(ex, 'response') else ex) #pylint: disable=no-member
                     raise
         sp_oid = aad_sp.object_id
         sp_created = True
@@ -518,7 +518,6 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
                     elif sp_created:
                         #dump out history for diagnoses
                         logger.warning('Role assignment creation failed. Traces followed:\n')
-                        logger.warning('Service principal response: %s\n', aad_sp.response.headers)
                         if getattr(ex, 'response', None) is not None:
                             logger.warning('role assignment response: %s\n', ex.response.headers) #pylint: disable=no-member
                     raise
