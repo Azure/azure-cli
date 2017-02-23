@@ -20,7 +20,8 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
         c.custom_command('create', 'db_create')
         c.custom_command('copy', 'db_copy')
         c.custom_command('create-secondary', 'db_create_secondary')
-        c.custom_command('restore', 'db_restore')
+        ## Commented out for now because restorePointInTime property is not yet in Swagger spec
+        #c.custom_command('restore', 'db_restore')
         c.command('show', 'get')
         c.custom_command('list', 'db_list')
         ## Usages will not be included in the first batch of GA commands
@@ -115,4 +116,5 @@ with ServiceGroup(__name__, get_sql_servers_operation, server_operations) as s:
         c.command('delete', 'delete_firewall_rule')
         c.command('show', 'get_firewall_rule')
         c.command('list', 'list_firewall_rules')
-        c.custom_command('allow-all-azure-ips', 'firewall_allow_all_azure_ips')
+        ## Keeping this command hidden for now. `firewall-rule create` will explain the special 0.0.0.0 rule.
+        #c.custom_command('allow-all-azure-ips', 'firewall_allow_all_azure_ips')

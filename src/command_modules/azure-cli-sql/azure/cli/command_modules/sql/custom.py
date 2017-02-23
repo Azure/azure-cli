@@ -130,34 +130,34 @@ def db_create_secondary(
         kwargs)
 
 # Creates a database from a database point in time backup. Wrapper function to make create mode more convenient.
-def db_restore(
-    client,
-    database_name,
-    server_name,
-    resource_group_name,
-    restore_point_in_time,
-    dest_name,
-    dest_server_name=None,
-    dest_resource_group_name=None,
-    **kwargs):
+#def db_restore(
+#    client,
+#    database_name,
+#    server_name,
+#    resource_group_name,
+#    restore_point_in_time,
+#    dest_name,
+#    dest_server_name=None,
+#    dest_resource_group_name=None,
+#    **kwargs):
 
-    # Determine optional values
-    dest_resource_group_name = dest_resource_group_name or resource_group_name
-    dest_server_name = dest_server_name or server_name
+#    # Determine optional values
+#    dest_resource_group_name = dest_resource_group_name or resource_group_name
+#    dest_server_name = dest_server_name or server_name
 
-    # Set create mode: TODO - doesn't yet work because restorePointInTime is not yet in Swagger spec
-    kwargs['create_mode'] = 'PointInTimeRestore'
-    #kwargs['restore_point_in_time'] = restore_point_in_time
+#    # Set create mode: TODO - doesn't yet work because restorePointInTime is not yet in Swagger spec
+#    kwargs['create_mode'] = 'PointInTimeRestore'
+#    #kwargs['restore_point_in_time'] = restore_point_in_time
 
-    return _db_create_special(
-        client,
-        database_name,
-        server_name,
-        resource_group_name,
-        dest_name,
-        dest_server_name,
-        dest_resource_group_name,
-        kwargs)
+#    return _db_create_special(
+#        client,
+#        database_name,
+#        server_name,
+#        resource_group_name,
+#        dest_name,
+#        dest_server_name,
+#        dest_resource_group_name,
+#        kwargs)
 
 # Lists databases in a server or elastic pool.
 def db_list(
