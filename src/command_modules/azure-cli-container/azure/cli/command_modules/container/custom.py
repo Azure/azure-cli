@@ -5,26 +5,29 @@
 
 import json
 import os
+import re
 import time
 import uuid
 from subprocess import CalledProcessError, check_output
 
+import azure.cli.core.azlogging as azlogging
 import requests
 import yaml
-
-import azure.cli.core.azlogging as azlogging
 from azure.cli.core._config import az_config
-from azure.cli.core._profile import Profile, CredsCache, _SERVICE_PRINCIPAL
-# pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long
+from azure.cli.core._profile import _SERVICE_PRINCIPAL, CredsCache, Profile
+# pylint:
+# disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long
 from azure.cli.core._util import CLIError
 
 logger = azlogging.get_az_logger(__name__)
 
-BASE_URL = az_config.get('container', 'service_url', fallback='https://api.mindaro.microsoft.io')
+BASE_URL = az_config.get('container', 'service_url',
+                         fallback='https://api.mindaro.microsoft.io')
 SUBSCRIPTION_URL = "/subscriptions/{subscription_id}"
 RESOURCE_BASE_URL = SUBSCRIPTION_URL + "/resourceGroups/{resource_group_name}"
 CONTAINER_SERVICE_PROVIDER = "/providers/Microsoft.ContainerService"
-CONTAINER_SERVICE_RESOURCE_URL = (RESOURCE_BASE_URL + CONTAINER_SERVICE_PROVIDER + "/containerServices/{container_service_name}")
+CONTAINER_SERVICE_RESOURCE_URL = (
+    RESOURCE_BASE_URL + CONTAINER_SERVICE_PROVIDER + "/containerServices/{container_service_name}")
 
 SERVICE_URL = BASE_URL + SUBSCRIPTION_URL
 API_VERSION = "2016-11-01-preview"
@@ -33,6 +36,7 @@ SERVICE_RESOURCE_ID = "https://mindaro.microsoft.io/"
 DOCKERFILE_FILE = 'Dockerfile'
 DOCKER_COMPOSE_FILE = 'docker-compose.yml'
 DOCKER_COMPOSE_EXPECTED_VERSION = '2'
+
 
 def add_release(
         target_name,
@@ -84,6 +88,7 @@ def add_release(
         remote_branch,
         remote_access_token)
 
+
 def _get_valid_remote_url(remote_url=None, remote_access_token=None):
     """
     Calls the git repo parser to check for non VSTS repository and
@@ -93,12 +98,15 @@ def _get_valid_remote_url(remote_url=None, remote_access_token=None):
     repo_type = _get_repo_type(remote_url)
 
     if not repo_type:
-        raise CLIError("Invalid repository. Only Github and VSTS repositories supported.")
+        raise CLIError(
+            "Invalid repository. Only Github and VSTS repositories supported.")
 
     if repo_type != 'vsts' and not remote_access_token:
-        raise CLIError("--remote-access-token is required for non VSTS repositories")
+        raise CLIError(
+            "--remote-access-token is required for non VSTS repositories")
 
     return remote_url
+
 
 def _get_repo_type(remote_url):
     """
@@ -111,6 +119,7 @@ def _get_repo_type(remote_url):
         return 'vsts'
 
     return None
+
 
 def _call_rp_configure_cicd(
         target_name,
@@ -151,7 +160,8 @@ def _call_rp_configure_cicd(
     _, subscription_id, _ = profile.get_login_credentials()
 
     o_auth_token = _get_service_token()
-    container_service_resource_id = CONTAINER_SERVICE_RESOURCE_URL.format(subscription_id=subscription_id, resource_group_name=target_resource_group, container_service_name=target_name)
+    container_service_resource_id = CONTAINER_SERVICE_RESOURCE_URL.format(
+        subscription_id=subscription_id, resource_group_name=target_resource_group, container_service_name=target_name)
     data = {
         'acsResourceId': container_service_resource_id,
         'vstsAccountName': vsts_account_name,
@@ -161,7 +171,7 @@ def _call_rp_configure_cicd(
         'remoteToken': remote_access_token,
         'remoteUrl': remote_url,
         'remoteBranch': remote_branch,
-        'createRelease' : create_release
+        'createRelease': create_release
     }
 
     configure_ci_cd_url = SERVICE_URL.format(
@@ -171,15 +181,18 @@ def _call_rp_configure_cicd(
     headers['Authorization'] = o_auth_token
     headers['Content-Type'] = 'application/json; charset=utf-8'
     headers['x-ms-client-request-id'] = str(uuid.uuid1())
-    req = requests.post(configure_ci_cd_url, data=json.dumps(data), headers=headers, timeout=600)
+    req = requests.post(configure_ci_cd_url, data=json.dumps(
+        data), headers=headers, timeout=600)
     while req.status_code == 202:  # Long-running operation
         time.sleep(10)
-        req = requests.get(BASE_URL + req.headers['Location'], headers=headers, timeout=600)
+        req = requests.get(
+            BASE_URL + req.headers['Location'], headers=headers, timeout=600)
     if req.status_code != 200:
         raise CLIError(
             'Server returned status code: ' + str(req.status_code) + '. Could not configure CI/CD: ' + req.text)
     json_request = req.json()
     return json_request
+
 
 def list_releases(target_name, target_resource_group):
     """
@@ -194,7 +207,8 @@ def list_releases(target_name, target_resource_group):
     _, subscription_id, _ = profile.get_login_credentials()
 
     o_auth_token = _get_service_token()
-    container_service_resource_id = CONTAINER_SERVICE_RESOURCE_URL.format(subscription_id=subscription_id, resource_group_name=target_resource_group, container_service_name=target_name)
+    container_service_resource_id = CONTAINER_SERVICE_RESOURCE_URL.format(
+        subscription_id=subscription_id, resource_group_name=target_resource_group, container_service_name=target_name)
     data = {
         'acsResourceId': container_service_resource_id
     }
@@ -206,22 +220,26 @@ def list_releases(target_name, target_resource_group):
     headers['Authorization'] = o_auth_token
     headers['Content-Type'] = 'application/json; charset=utf-8'
     headers['x-ms-client-request-id'] = str(uuid.uuid1())
-    req = requests.post(list_releases_url, data=json.dumps(data), headers=headers, timeout=600)
+    req = requests.post(list_releases_url, data=json.dumps(
+        data), headers=headers, timeout=600)
     while req.status_code == 202:  # Long-running operation
         time.sleep(10)
-        req = requests.get(BASE_URL + req.headers['Location'], headers=headers, timeout=600)
+        req = requests.get(
+            BASE_URL + req.headers['Location'], headers=headers, timeout=600)
     if req.status_code != 200:
         raise CLIError(
             'Server returned status code: ' + str(req.status_code) + '. Could not list releases: ' + req.text)
     json_request = req.json()
     return json_request
 
+
 def _is_inside_git_directory():
     """
     Determines if the user is inside the .git folder of a git repo
     """
     try:
-        is_inside_git_dir = check_output(['git', 'rev-parse', '--is-inside-git-dir'])
+        is_inside_git_dir = check_output(
+            ['git', 'rev-parse', '--is-inside-git-dir'])
     except OSError:
         raise CLIError('Git is not currently installed.')
 
@@ -234,11 +252,12 @@ def _is_inside_git_directory():
     else:
         raise CLIError('Unexpected value from git operation.')
 
+
 def _gitroot():
     """
     Gets the absolute path of the repository root
     """
-    if _is_inside_git_directory(): # special case need to navigate to parent
+    if _is_inside_git_directory():  # special case need to navigate to parent
         os.chdir('..')
     try:
         base = check_output(['git', 'rev-parse', '--show-toplevel'])
@@ -247,6 +266,7 @@ def _gitroot():
     except CalledProcessError:
         raise CLIError('Current working directory is not a git repository')
     return base.decode('utf-8').strip()
+
 
 def _get_filepath_in_current_git_repo(file_to_search):
     """
@@ -258,17 +278,21 @@ def _get_filepath_in_current_git_repo(file_to_search):
                 return os.path.join(dirpath, file_name)
     return None
 
+
 def _ensure_docker_compose():
     """
     1. Raises an error if there is no docker_compose_file present.
     2. Raises an error if the version specified in the docker_compose_file is not
     docker_compose_version.
     """
-    docker_compose_file = _get_filepath_in_current_git_repo(DOCKER_COMPOSE_FILE)
+    docker_compose_file = _get_filepath_in_current_git_repo(
+        DOCKER_COMPOSE_FILE)
 
     if not docker_compose_file:
-        raise CLIError('Docker compose file "{}" was not found.'.format(DOCKER_COMPOSE_FILE))
+        raise CLIError(
+            'Docker compose file "{}" was not found.'.format(DOCKER_COMPOSE_FILE))
     _ensure_version(docker_compose_file, DOCKER_COMPOSE_EXPECTED_VERSION)
+
 
 def _ensure_version(filepath, expected_version):
     with open(filepath, 'r') as f:
@@ -283,6 +307,7 @@ def _ensure_version(filepath, expected_version):
                     filepath,
                     expected_version))
 
+
 def _ensure_dockerfile():
     """
     1. Raises an error if there is no dockerfile present.
@@ -290,7 +315,9 @@ def _ensure_dockerfile():
     dockerfile_file = _get_filepath_in_current_git_repo(DOCKERFILE_FILE)
 
     if not dockerfile_file:
-        raise CLIError('Docker file "{}" was not found.'.format(dockerfile_file))
+        raise CLIError(
+            'Docker file "{}" was not found.'.format(dockerfile_file))
+
 
 def _get_remote_url():
     """
@@ -302,9 +329,11 @@ def _get_remote_url():
         remotes = check_output(['git', 'remote']).strip().splitlines()
         remote_url = ''
         if len(remotes) == 1:
-            remote_url = check_output(['git', 'remote', 'get-url', remotes[0].decode()]).strip()
+            remote_url = check_output(
+                ['git', 'remote', 'get-url', remotes[0].decode()]).strip()
         else:
-            remote_url = check_output(['git', 'remote', 'get-url', 'origin']).strip()
+            remote_url = check_output(
+                ['git', 'remote', 'get-url', 'origin']).strip()
     except ValueError as e:
         logger.debug(e)
         raise CLIError(
@@ -312,12 +341,15 @@ def _get_remote_url():
             Please run this command in a git repository folder with \
             an 'origin' remote or specify a remote using '--remote-url'")
     except CalledProcessError as e:
-        raise CLIError('Please ensure git version 2.7.0 or greater is installed.\n' + e)
+        raise CLIError(
+            'Please ensure git version 2.7.0 or greater is installed.\n' + e)
     return remote_url.decode()
+
 
 def _check_registry_information(registry_name, registry_resource_id):
     """
-    Check that only one of registry_name and registry_resource_id is provided
+    Check that only one of registry_name and registry_resource_id is provided and that
+    the registry name is valid
     :param registry_name: The registry name.
     :type name: String
     :param registry_resource_id: The registry resource id.
@@ -325,7 +357,22 @@ def _check_registry_information(registry_name, registry_resource_id):
     Sample registry_resource_id: /subscriptions/{subscriptionId}/resourcegroups/{resourceGroup}/providers/Microsoft.ContainerRegistry/registries/{registryName}
     """
     if registry_name and registry_resource_id:
-        raise CLIError("Please provide only one of registry-name and registry-resource-id, not both.")
+        raise CLIError(
+            "Please provide only one of registry-name and registry-resource-id, not both.")
+
+    if registry_resource_id:
+        registry_id_pattern = "/subscriptions/[-a-z0-9]+/resourcegroups/[-a-z0-9_.()]+/providers/Microsoft.ContainerRegistry/registries/[a-z0-9]+"
+        if not re.match(registry_id_pattern, registry_resource_id, re.IGNORECASE):
+            raise CLIError("Invalid registry resource ID")
+    else:
+        # Check the
+        name_pattern = '[^0-9a-zA-Z]'
+        name_length = len(registry_name)
+        if re.search(name_pattern, registry_name) or\
+                (name_length < 5 or name_length > 50):
+            raise CLIError(
+                "Registry name '{}' is invalid. A valid registry name is between 5-50 characters and contains only alphanumeric values.".format(
+                    registry_name))
 
 def add_ci(
         target_name,
@@ -385,10 +432,11 @@ def _get_service_token():
     tenant = account['tenantId']
 
     if account['user']['type'] == _SERVICE_PRINCIPAL:
-        scheme, token = credsCache.retrieve_token_for_service_principal(user_name, SERVICE_RESOURCE_ID)
+        scheme, token = credsCache.retrieve_token_for_service_principal(
+            user_name, SERVICE_RESOURCE_ID)
     else:
-        scheme, token = credsCache.retrieve_token_for_user(user_name, tenant, SERVICE_RESOURCE_ID)
+        scheme, token = credsCache.retrieve_token_for_user(
+            user_name, tenant, SERVICE_RESOURCE_ID)
 
     service_token = "{} {}".format(scheme, token)
     return service_token
-    
