@@ -7,12 +7,12 @@ interactions:
       CommandName: [ad sp create-for-rbac]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [e0761064-be4f-11e6-8c2b-64510658e3b3]
+      x-ms-client-request-id: [3a804da6-f9ee-11e6-9eee-64510658e3b3]
     method: GET
-    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28x%3Ax%20eq%20%27http%3A%2F%2Fcli_create_rbac_sp%27%29&api-version=1.6
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28x%3Ax%20eq%20%27http%3A%2F%2Fvcr_resource_group%27%29&api-version=1.6
   response:
     body: {string: '{"odata.metadata":"https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal","value":[]}'}
     headers:
@@ -21,67 +21,68 @@ interactions:
       Content-Length: ['166']
       Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
       DataServiceVersion: [3.0;]
-      Date: ['Fri, 09 Dec 2016 20:41:40 GMT']
-      Duration: ['1260955']
+      Date: ['Thu, 23 Feb 2017 17:33:49 GMT']
+      Duration: ['449568']
       Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-IIS/8.5]
+      X-AspNet-Version: [4.0.30319]
+      X-Content-Type-Options: [nosniff]
+      X-Powered-By: [ASP.NET, ASP.NET]
+      ocp-aad-diagnostics-server-name: [yRBJh4dspOv++pwa/drzGfs7HFSRglZb5EucLHEsUN0=]
+      ocp-aad-session-key: [yal3PmxqpIg4klhvOsqdJq2GoIzSmWqIHh37B-dVMhdRdqouj2nPDteSmXsjBgsnMjn7X3fZRKL0had7AHwAv_7csM55MEWum49Gs07y86ul8FvSCph11f_MfNqRuM7WM6is9lQNc0sDFYM4Jo3Y4A.mCpkA8LYjzbQ83AFF8rjBNPVreRVem5amdBhFsRm6Pk]
+      request-id: [677da38f-3682-47b5-a93d-b92bc4cc34bf]
+      x-ms-dirapi-data-contract-version: ['1.6']
+    status: {code: 200, message: OK}
+- request:
+    body: '{"homepage": "http://azure-cli-2017-02-23-17-33-50", "identifierUris":
+      ["http://vcr_resource_group"], "displayName": "azure-cli-2017-02-23-17-33-50",
+      "passwordCredentials": [{"keyId": "52d87eba-1a6f-4b7c-8b32-4123522c4de3", "startDate":
+      "2017-02-23T17:33:50.46579499999999996Z", "endDate": "2018-02-23T17:33:50.46579499999999996Z",
+      "value": "7c2c77c6-8d1e-4e8a-9f42-577a7131dff4"}], "availableToOtherTenants":
+      false}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ad sp create-for-rbac]
+      Connection: [keep-alive]
+      Content-Length: ['416']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.2rc1+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [3a804da6-f9ee-11e6-9eee-64510658e3b3]
+    method: POST
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/applications?api-version=1.6
+  response:
+    body: {string: '{"odata.metadata":"https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/$metadata#directoryObjects/Microsoft.DirectoryServices.Application/@Element","odata.type":"Microsoft.DirectoryServices.Application","objectType":"Application","objectId":"8578d509-5d2f-416b-94ce-23d53f9eb5ef","deletionTimestamp":null,"addIns":[],"appId":"cbd47edd-8cac-4a0b-97e4-edbab8c408b6","appRoles":[],"availableToOtherTenants":false,"displayName":"azure-cli-2017-02-23-17-33-50","errorUrl":null,"groupMembershipClaims":null,"homepage":"http://azure-cli-2017-02-23-17-33-50","identifierUris":["http://vcr_resource_group"],"keyCredentials":[],"knownClientApplications":[],"logoutUrl":null,"oauth2AllowImplicitFlow":false,"oauth2AllowUrlPathMatching":false,"oauth2Permissions":[{"adminConsentDescription":"Allow
+        the application to access azure-cli-2017-02-23-17-33-50 on behalf of the signed-in
+        user.","adminConsentDisplayName":"Access azure-cli-2017-02-23-17-33-50","id":"a6c941b1-dbc2-4f8e-97d5-d04af3631c7d","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        the application to access azure-cli-2017-02-23-17-33-50 on your behalf.","userConsentDisplayName":"Access
+        azure-cli-2017-02-23-17-33-50","value":"user_impersonation"}],"oauth2RequirePostResponse":false,"passwordCredentials":[{"customKeyIdentifier":null,"endDate":"2018-02-23T17:33:50.465795Z","keyId":"52d87eba-1a6f-4b7c-8b32-4123522c4de3","startDate":"2017-02-23T17:33:50.465795Z","value":null}],"publicClient":null,"recordConsentConditions":null,"replyUrls":[],"requiredResourceAccess":[],"samlMetadataUrl":null}'}
+    headers:
+      Access-Control-Allow-Origin: ['*']
+      Cache-Control: [no-cache]
+      Content-Length: ['1573']
+      Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      DataServiceVersion: [3.0;]
+      Date: ['Thu, 23 Feb 2017 17:33:49 GMT']
+      Duration: ['4245588']
+      Expires: ['-1']
+      Location: ['https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/directoryObjects/8578d509-5d2f-416b-94ce-23d53f9eb5ef/Microsoft.DirectoryServices.Application']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       X-AspNet-Version: [4.0.30319]
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET, ASP.NET]
-      ocp-aad-diagnostics-server-name: [1l3fvSoDCV+VKoBCuHRN+HIwCACBOck3dqmtCGj+aiU=]
-      ocp-aad-session-key: [hzdfPZdbotT_EMN2cJ0UFaYHB0aSz7QBQvnYqhjZqvYq6e6466fIjGbZg3L-faJYFoQv6T4sYUoBV8vKcpbRpfZhVz8x6e1HpLjPrQ7ChAoxyZbIpteM4Ps8GWt318ibmCOX8tGBuE4PBmOjL7GD7A.MbXtAuuF7up-6hmpN0xV_N_nKAO3zEkaZ2DcxN5wJjs]
-      request-id: [52e927e8-39e6-4ee7-85ca-be6309ad33d7]
-      x-ms-dirapi-data-contract-version: ['1.6']
-    status: {code: 200, message: OK}
-- request:
-    body: '{"passwordCredentials": [{"keyId": "ab6e6f54-fd82-45e8-b61e-8651041d4c44",
-      "endDate": "2017-12-09T20:41:40.13882999999999998Z", "value": "verySecret",
-      "startDate": "2016-12-09T20:41:40.13882999999999998Z"}], "availableToOtherTenants":
-      false, "homepage": "http://azure-cli-2016-12-09-20-41-40", "displayName": "azure-cli-2016-12-09-20-41-40",
-      "identifierUris": ["http://cli_create_rbac_sp"]}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [ad sp create-for-rbac]
-      Connection: [keep-alive]
-      Content-Length: ['390']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.0b10+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [e0761064-be4f-11e6-8c2b-64510658e3b3]
-    method: POST
-    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/applications?api-version=1.6
-  response:
-    body: {string: '{"odata.metadata":"https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/$metadata#directoryObjects/@Element","odata.type":"Microsoft.DirectoryServices.Application","objectType":"Application","objectId":"aaca1d37-c997-4739-9ab8-e6af46321ee6","deletionTimestamp":null,"addIns":[],"appId":"7e7c7423-5658-478f-99ad-ad2e3e84e3b7","appRoles":[],"availableToOtherTenants":false,"displayName":"azure-cli-2016-12-09-20-41-40","errorUrl":null,"groupMembershipClaims":null,"homepage":"http://azure-cli-2016-12-09-20-41-40","identifierUris":["http://cli_create_rbac_sp"],"keyCredentials":[],"knownClientApplications":[],"mainLogo@odata.mediaEditLink":"directoryObjects/aaca1d37-c997-4739-9ab8-e6af46321ee6/Microsoft.DirectoryServices.Application/mainLogo","logoutUrl":null,"oauth2AllowImplicitFlow":false,"oauth2AllowUrlPathMatching":false,"oauth2Permissions":[{"adminConsentDescription":"Allow
-        the application to access azure-cli-2016-12-09-20-41-40 on behalf of the signed-in
-        user.","adminConsentDisplayName":"Access azure-cli-2016-12-09-20-41-40","id":"8739fdcb-d0bf-4f77-93d9-3717c208bcc9","isEnabled":true,"type":"User","userConsentDescription":"Allow
-        the application to access azure-cli-2016-12-09-20-41-40 on your behalf.","userConsentDisplayName":"Access
-        azure-cli-2016-12-09-20-41-40","value":"user_impersonation"}],"oauth2RequirePostResponse":false,"passwordCredentials":[{"customKeyIdentifier":null,"endDate":"2017-12-09T20:41:40.13883Z","keyId":"ab6e6f54-fd82-45e8-b61e-8651041d4c44","startDate":"2016-12-09T20:41:40.13883Z","value":null}],"publicClient":null,"recordConsentConditions":null,"replyUrls":[],"requiredResourceAccess":[],"samlMetadataUrl":null}'}
-    headers:
-      Access-Control-Allow-Origin: ['*']
-      Cache-Control: [no-cache]
-      Content-Length: ['1667']
-      Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
-      DataServiceVersion: [3.0;]
-      Date: ['Fri, 09 Dec 2016 20:41:40 GMT']
-      Duration: ['4281891']
-      Expires: ['-1']
-      Location: ['https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/directoryObjects/aaca1d37-c997-4739-9ab8-e6af46321ee6/Microsoft.DirectoryServices.Application']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Powered-By: [ASP.NET, ASP.NET]
-      ocp-aad-diagnostics-server-name: [3DlL0WHZ9dYR1n7sfg7IZPMFzYZMxSbRqG1Kv8gBPcQ=]
-      ocp-aad-session-key: [W-Wa7SK3L0FQ6Mo09gaqwtTTjCoX64KPSqyqg-CCmN1wd6qHnv6oaLDvzAZZFJh0TK1ewo-Zf_EoaawBxvJ_lHvog4St_uwJQlXhrFLA6IenvspI2fw4-xYxgePRlGn7spFfgQ_PEDHnrZDELhRBMg.F2KXfiEsNC_hBcCUrRCfQmMX7UUydw0upnFhu6lC62A]
-      request-id: [580dbe04-7f51-4d21-8e9b-381cbf521247]
+      ocp-aad-diagnostics-server-name: [LGrz1WUl5DILl3/CaskyzRSuDBcdtXB5yluMXFtXdZ4=]
+      ocp-aad-session-key: [3IgoGfRSwWfgC2R50L3qTVsbEdtQ1cr2BKp8poWhAACToc_9300zeh_DEzdTbqIqmVhC2LXfmeO1QvO6DirYPFBiA6g1K0GhspvKhfCD9nbZwAF2FDNr1tms40Snrln0tgO-qc157G1i15GUu-wjfQ.X7XEeuynEa1evtYazzeDWEKhdLaBLobV9_1Ny2Zx--w]
+      request-id: [09afa656-7297-4f42-8713-abaa25758f93]
       x-ms-dirapi-data-contract-version: ['1.6']
     status: {code: 201, message: Created}
 - request:
-    body: '{"accountEnabled": true, "appId": "7e7c7423-5658-478f-99ad-ad2e3e84e3b7"}'
+    body: '{"accountEnabled": true, "appId": "cbd47edd-8cac-4a0b-97e4-edbab8c408b6"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -89,36 +90,36 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['73']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [e0761064-be4f-11e6-8c2b-64510658e3b3]
+      x-ms-client-request-id: [3a804da6-f9ee-11e6-9eee-64510658e3b3]
     method: POST
     uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?api-version=1.6
   response:
-    body: {string: '{"odata.metadata":"https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/$metadata#directoryObjects/@Element","odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"cda5291d-37a9-44f0-8940-64717dc06cbd","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"azure-cli-2016-12-09-20-41-40","appId":"7e7c7423-5658-478f-99ad-ad2e3e84e3b7","appOwnerTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"azure-cli-2016-12-09-20-41-40","errorUrl":null,"homepage":"http://azure-cli-2016-12-09-20-41-40","keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
-        the application to access azure-cli-2016-12-09-20-41-40 on behalf of the signed-in
-        user.","adminConsentDisplayName":"Access azure-cli-2016-12-09-20-41-40","id":"8739fdcb-d0bf-4f77-93d9-3717c208bcc9","isEnabled":true,"type":"User","userConsentDescription":"Allow
-        the application to access azure-cli-2016-12-09-20-41-40 on your behalf.","userConsentDisplayName":"Access
-        azure-cli-2016-12-09-20-41-40","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"AzureSDKTeam","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["7e7c7423-5658-478f-99ad-ad2e3e84e3b7","http://cli_create_rbac_sp"],"servicePrincipalType":"Application","tags":[]}'}
+    body: {string: '{"odata.metadata":"https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal/@Element","odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"75759c09-6804-4038-898d-1d41a6797d40","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"azure-cli-2017-02-23-17-33-50","appId":"cbd47edd-8cac-4a0b-97e4-edbab8c408b6","appOwnerTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"azure-cli-2017-02-23-17-33-50","errorUrl":null,"homepage":"http://azure-cli-2017-02-23-17-33-50","keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
+        the application to access azure-cli-2017-02-23-17-33-50 on behalf of the signed-in
+        user.","adminConsentDisplayName":"Access azure-cli-2017-02-23-17-33-50","id":"a6c941b1-dbc2-4f8e-97d5-d04af3631c7d","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        the application to access azure-cli-2017-02-23-17-33-50 on your behalf.","userConsentDisplayName":"Access
+        azure-cli-2017-02-23-17-33-50","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"AzureSDKTeam","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["cbd47edd-8cac-4a0b-97e4-edbab8c408b6","http://vcr_resource_group"],"servicePrincipalType":"Application","tags":[]}'}
     headers:
       Access-Control-Allow-Origin: ['*']
       Cache-Control: [no-cache]
-      Content-Length: ['1454']
+      Content-Length: ['1499']
       Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
       DataServiceVersion: [3.0;]
-      Date: ['Fri, 09 Dec 2016 20:41:40 GMT']
-      Duration: ['3432344']
+      Date: ['Thu, 23 Feb 2017 17:33:49 GMT']
+      Duration: ['1630223']
       Expires: ['-1']
-      Location: ['https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/directoryObjects/cda5291d-37a9-44f0-8940-64717dc06cbd/Microsoft.DirectoryServices.ServicePrincipal']
+      Location: ['https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/directoryObjects/75759c09-6804-4038-898d-1d41a6797d40/Microsoft.DirectoryServices.ServicePrincipal']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       X-AspNet-Version: [4.0.30319]
+      X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET, ASP.NET]
-      ocp-aad-diagnostics-server-name: [idCFdvS08KcWm23eEQ/NFOhEHlkip0SFh+wWMsXwOUM=]
-      ocp-aad-session-key: [T4xaHnoajezHizC3C_E6zWLd94ml30Niu_XTEGuVXyvgIZlJUVVsbA3Py_-Zv2SXGaaKzJ1Dm-f6wFLKzOgooIPI0CbfBZtnkhl6JH7ogVcTNMnC5RB82xo5-SnhH10mK85Hzp-aSLuSq67C7k7Esw.eap9sJ9-1tJQ3bCiwgXQqmChHNSWhUmqnFFDPcKeLVM]
-      request-id: [8aef4aa5-3971-417c-8e00-f852dd21ed18]
+      ocp-aad-diagnostics-server-name: [Ue0m2ry87paBgn6wfB+K5tt5b2Dv1ZHncR3p21kT7JM=]
+      ocp-aad-session-key: [r-Xlesmj8WzNmOU1T240d9iWr9Or6FfL3JfgIGhXdHMMwl7AT8c4a7Vzby7wrZPoUKiXjh3utMTw4l5OCgvoxxLA4Lq7z4eh4WoO7xjmN-Lx55xCucOO3sXGJwuXMvlAQEttKq48Yz1XqZPGBcvW9g.01Cwh1CHRK06nFOdEmS4OjEU07ZXDsl8NL14Yf0WMl0]
+      request-id: [e667ab16-3d4d-4237-94ca-34997e7a0b86]
       x-ms-dirapi-data-contract-version: ['1.6']
     status: {code: 201, message: Created}
 - request:
@@ -128,19 +129,19 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [e39f5194-be4f-11e6-bebd-64510658e3b3]
+      x-ms-client-request-id: [3da9d0c8-f9ee-11e6-aed9-64510658e3b3]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Contributor%27&api-version=2015-07-01
   response:
     body: {string: '{"value":[{"properties":{"roleName":"Contributor","type":"BuiltInRole","description":"Lets
-        you manage everything except access to resources.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":["Microsoft.Authorization/*/Delete","Microsoft.Authorization/*/Write"]}],"createdOn":"0001-01-01T08:00:00.0000000Z","updatedOn":"2016-05-31T23:13:58.6741320Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","type":"Microsoft.Authorization/roleDefinitions","name":"b24988ac-6180-42a0-ab88-20f7382dd24c"}],"nextLink":null}'}
+        you manage everything except access to resources.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":["Microsoft.Authorization/*/Delete","Microsoft.Authorization/*/Write","Microsoft.Authorization/elevateAccess/Action"]}],"createdOn":"0001-01-01T08:00:00.0000000Z","updatedOn":"2016-12-14T02:04:45.1393855Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","type":"Microsoft.Authorization/roleDefinitions","name":"b24988ac-6180-42a0-ab88-20f7382dd24c"}],"nextLink":null}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 09 Dec 2016 20:41:40 GMT']
+      Date: ['Thu, 23 Feb 2017 17:33:51 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
@@ -150,31 +151,31 @@ interactions:
       Vary: [Accept-Encoding]
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET]
-      content-length: ['665']
+      content-length: ['712']
     status: {code: 200, message: OK}
 - request:
     body: '{"properties": {"roleDefinitionId": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
-      "principalId": "cda5291d-37a9-44f0-8940-64717dc06cbd"}}'
+      "principalId": "75759c09-6804-4038-898d-1d41a6797d40"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['233']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [e3cc2dee-be4f-11e6-96b1-64510658e3b3]
+      x-ms-client-request-id: [3ded1a58-f9ee-11e6-a1b0-64510658e3b3]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments/c18d9d01-2da7-4cfa-9048-ffdc91c4bf8c?api-version=2015-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments/e40edef7-02c1-445c-b6d2-4de59c762141?api-version=2015-07-01
   response:
-    body: {string: '{"error":{"code":"PrincipalNotFound","message":"Principal cda5291d37a944f0894064717dc06cbd
+    body: {string: '{"error":{"code":"PrincipalNotFound","message":"Principal 75759c0968044038898d1d41a6797d40
         does not exist in the directory 54826b22-38d6-4fb2-bad9-b7b93a3e9c5a."}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Length: ['163']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 09 Dec 2016 20:41:41 GMT']
+      Date: ['Thu, 23 Feb 2017 17:33:52 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
@@ -191,19 +192,19 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [e71ab39e-be4f-11e6-8fed-64510658e3b3]
+      x-ms-client-request-id: [417fb00c-f9ee-11e6-9214-64510658e3b3]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Contributor%27&api-version=2015-07-01
   response:
     body: {string: '{"value":[{"properties":{"roleName":"Contributor","type":"BuiltInRole","description":"Lets
-        you manage everything except access to resources.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":["Microsoft.Authorization/*/Delete","Microsoft.Authorization/*/Write"]}],"createdOn":"0001-01-01T08:00:00.0000000Z","updatedOn":"2016-05-31T23:13:58.6741320Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","type":"Microsoft.Authorization/roleDefinitions","name":"b24988ac-6180-42a0-ab88-20f7382dd24c"}],"nextLink":null}'}
+        you manage everything except access to resources.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":["Microsoft.Authorization/*/Delete","Microsoft.Authorization/*/Write","Microsoft.Authorization/elevateAccess/Action"]}],"createdOn":"0001-01-01T08:00:00.0000000Z","updatedOn":"2016-12-14T02:04:45.1393855Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","type":"Microsoft.Authorization/roleDefinitions","name":"b24988ac-6180-42a0-ab88-20f7382dd24c"}],"nextLink":null}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 09 Dec 2016 20:41:46 GMT']
+      Date: ['Thu, 23 Feb 2017 17:33:57 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
@@ -213,31 +214,31 @@ interactions:
       Vary: [Accept-Encoding]
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET]
-      content-length: ['665']
+      content-length: ['712']
     status: {code: 200, message: OK}
 - request:
     body: '{"properties": {"roleDefinitionId": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
-      "principalId": "cda5291d-37a9-44f0-8940-64717dc06cbd"}}'
+      "principalId": "75759c09-6804-4038-898d-1d41a6797d40"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['233']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [e750f7dc-be4f-11e6-9f09-64510658e3b3]
+      x-ms-client-request-id: [41b9c486-f9ee-11e6-963d-64510658e3b3]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments/fd729eff-33b3-46e6-ae36-4f9324b2ab89?api-version=2015-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments/b560797d-2304-4c2d-ae64-56e529f17344?api-version=2015-07-01
   response:
-    body: {string: '{"error":{"code":"PrincipalNotFound","message":"Principal cda5291d37a944f0894064717dc06cbd
+    body: {string: '{"error":{"code":"PrincipalNotFound","message":"Principal 75759c0968044038898d1d41a6797d40
         does not exist in the directory 54826b22-38d6-4fb2-bad9-b7b93a3e9c5a."}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Length: ['163']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 09 Dec 2016 20:41:47 GMT']
+      Date: ['Thu, 23 Feb 2017 17:33:58 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
@@ -254,19 +255,19 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [ea94b694-be4f-11e6-807a-64510658e3b3]
+      x-ms-client-request-id: [4518b0f4-f9ee-11e6-9ae7-64510658e3b3]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Contributor%27&api-version=2015-07-01
   response:
     body: {string: '{"value":[{"properties":{"roleName":"Contributor","type":"BuiltInRole","description":"Lets
-        you manage everything except access to resources.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":["Microsoft.Authorization/*/Delete","Microsoft.Authorization/*/Write"]}],"createdOn":"0001-01-01T08:00:00.0000000Z","updatedOn":"2016-05-31T23:13:58.6741320Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","type":"Microsoft.Authorization/roleDefinitions","name":"b24988ac-6180-42a0-ab88-20f7382dd24c"}],"nextLink":null}'}
+        you manage everything except access to resources.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":["Microsoft.Authorization/*/Delete","Microsoft.Authorization/*/Write","Microsoft.Authorization/elevateAccess/Action"]}],"createdOn":"0001-01-01T08:00:00.0000000Z","updatedOn":"2016-12-14T02:04:45.1393855Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","type":"Microsoft.Authorization/roleDefinitions","name":"b24988ac-6180-42a0-ab88-20f7382dd24c"}],"nextLink":null}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 09 Dec 2016 20:41:52 GMT']
+      Date: ['Thu, 23 Feb 2017 17:34:04 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
@@ -276,31 +277,31 @@ interactions:
       Vary: [Accept-Encoding]
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET]
-      content-length: ['665']
+      content-length: ['712']
     status: {code: 200, message: OK}
 - request:
     body: '{"properties": {"roleDefinitionId": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
-      "principalId": "cda5291d-37a9-44f0-8940-64717dc06cbd"}}'
+      "principalId": "75759c09-6804-4038-898d-1d41a6797d40"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['233']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [eabb7c7e-be4f-11e6-9a37-64510658e3b3]
+      x-ms-client-request-id: [454a18f6-f9ee-11e6-b3f9-64510658e3b3]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments/0fd49765-4792-465c-9bf8-2876b03e82d6?api-version=2015-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments/b90fe71d-b46a-4b6e-bf76-91d3e11622a8?api-version=2015-07-01
   response:
-    body: {string: '{"error":{"code":"PrincipalNotFound","message":"Principal cda5291d37a944f0894064717dc06cbd
+    body: {string: '{"error":{"code":"PrincipalNotFound","message":"Principal 75759c0968044038898d1d41a6797d40
         does not exist in the directory 54826b22-38d6-4fb2-bad9-b7b93a3e9c5a."}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Length: ['163']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 09 Dec 2016 20:41:53 GMT']
+      Date: ['Thu, 23 Feb 2017 17:34:03 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
@@ -308,7 +309,7 @@ interactions:
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET]
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 400, message: Bad Request}
 - request:
     body: null
@@ -317,19 +318,19 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [ee1c8cb4-be4f-11e6-9e0f-64510658e3b3]
+      x-ms-client-request-id: [4888431a-f9ee-11e6-ad80-64510658e3b3]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Contributor%27&api-version=2015-07-01
   response:
     body: {string: '{"value":[{"properties":{"roleName":"Contributor","type":"BuiltInRole","description":"Lets
-        you manage everything except access to resources.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":["Microsoft.Authorization/*/Delete","Microsoft.Authorization/*/Write"]}],"createdOn":"0001-01-01T08:00:00.0000000Z","updatedOn":"2016-05-31T23:13:58.6741320Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","type":"Microsoft.Authorization/roleDefinitions","name":"b24988ac-6180-42a0-ab88-20f7382dd24c"}],"nextLink":null}'}
+        you manage everything except access to resources.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":["Microsoft.Authorization/*/Delete","Microsoft.Authorization/*/Write","Microsoft.Authorization/elevateAccess/Action"]}],"createdOn":"0001-01-01T08:00:00.0000000Z","updatedOn":"2016-12-14T02:04:45.1393855Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","type":"Microsoft.Authorization/roleDefinitions","name":"b24988ac-6180-42a0-ab88-20f7382dd24c"}],"nextLink":null}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 09 Dec 2016 20:41:58 GMT']
+      Date: ['Thu, 23 Feb 2017 17:34:09 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
@@ -339,31 +340,31 @@ interactions:
       Vary: [Accept-Encoding]
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET]
-      content-length: ['665']
+      content-length: ['712']
     status: {code: 200, message: OK}
 - request:
     body: '{"properties": {"roleDefinitionId": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
-      "principalId": "cda5291d-37a9-44f0-8940-64717dc06cbd"}}'
+      "principalId": "75759c09-6804-4038-898d-1d41a6797d40"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['233']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [ee53ae28-be4f-11e6-b3a1-64510658e3b3]
+      x-ms-client-request-id: [48bb2322-f9ee-11e6-965e-64510658e3b3]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments/4255d595-77c2-4f0e-bf29-14aee5f2bc1a?api-version=2015-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments/5d0d4473-50b8-4378-b53c-4f29f11d3eab?api-version=2015-07-01
   response:
-    body: {string: '{"error":{"code":"PrincipalNotFound","message":"Principal cda5291d37a944f0894064717dc06cbd
+    body: {string: '{"error":{"code":"PrincipalNotFound","message":"Principal 75759c0968044038898d1d41a6797d40
         does not exist in the directory 54826b22-38d6-4fb2-bad9-b7b93a3e9c5a."}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Length: ['163']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 09 Dec 2016 20:41:58 GMT']
+      Date: ['Thu, 23 Feb 2017 17:34:09 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
@@ -371,7 +372,7 @@ interactions:
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 400, message: Bad Request}
 - request:
     body: null
@@ -380,19 +381,19 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f1a73ed2-be4f-11e6-8f62-64510658e3b3]
+      x-ms-client-request-id: [4bf0fa38-f9ee-11e6-bd85-64510658e3b3]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Contributor%27&api-version=2015-07-01
   response:
     body: {string: '{"value":[{"properties":{"roleName":"Contributor","type":"BuiltInRole","description":"Lets
-        you manage everything except access to resources.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":["Microsoft.Authorization/*/Delete","Microsoft.Authorization/*/Write"]}],"createdOn":"0001-01-01T08:00:00.0000000Z","updatedOn":"2016-05-31T23:13:58.6741320Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","type":"Microsoft.Authorization/roleDefinitions","name":"b24988ac-6180-42a0-ab88-20f7382dd24c"}],"nextLink":null}'}
+        you manage everything except access to resources.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":["Microsoft.Authorization/*/Delete","Microsoft.Authorization/*/Write","Microsoft.Authorization/elevateAccess/Action"]}],"createdOn":"0001-01-01T08:00:00.0000000Z","updatedOn":"2016-12-14T02:04:45.1393855Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","type":"Microsoft.Authorization/roleDefinitions","name":"b24988ac-6180-42a0-ab88-20f7382dd24c"}],"nextLink":null}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 09 Dec 2016 20:42:04 GMT']
+      Date: ['Thu, 23 Feb 2017 17:34:15 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
@@ -402,31 +403,31 @@ interactions:
       Vary: [Accept-Encoding]
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET]
-      content-length: ['665']
+      content-length: ['712']
     status: {code: 200, message: OK}
 - request:
     body: '{"properties": {"roleDefinitionId": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
-      "principalId": "cda5291d-37a9-44f0-8940-64717dc06cbd"}}'
+      "principalId": "75759c09-6804-4038-898d-1d41a6797d40"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['233']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f1c9fc90-be4f-11e6-8ea3-64510658e3b3]
+      x-ms-client-request-id: [4c17a040-f9ee-11e6-8bad-64510658e3b3]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments/7d071f96-de65-4c11-a6c8-2366ce577bfa?api-version=2015-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments/a6144076-14a1-4fcd-bc7e-76349db6fef8?api-version=2015-07-01
   response:
-    body: {string: '{"error":{"code":"PrincipalNotFound","message":"Principal cda5291d37a944f0894064717dc06cbd
+    body: {string: '{"error":{"code":"PrincipalNotFound","message":"Principal 75759c0968044038898d1d41a6797d40
         does not exist in the directory 54826b22-38d6-4fb2-bad9-b7b93a3e9c5a."}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Length: ['163']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 09 Dec 2016 20:42:05 GMT']
+      Date: ['Thu, 23 Feb 2017 17:34:15 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
@@ -434,7 +435,7 @@ interactions:
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET]
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 400, message: Bad Request}
 - request:
     body: null
@@ -443,19 +444,19 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f513f22e-be4f-11e6-b0ec-64510658e3b3]
+      x-ms-client-request-id: [4f9402de-f9ee-11e6-b892-64510658e3b3]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Contributor%27&api-version=2015-07-01
   response:
     body: {string: '{"value":[{"properties":{"roleName":"Contributor","type":"BuiltInRole","description":"Lets
-        you manage everything except access to resources.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":["Microsoft.Authorization/*/Delete","Microsoft.Authorization/*/Write"]}],"createdOn":"0001-01-01T08:00:00.0000000Z","updatedOn":"2016-05-31T23:13:58.6741320Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","type":"Microsoft.Authorization/roleDefinitions","name":"b24988ac-6180-42a0-ab88-20f7382dd24c"}],"nextLink":null}'}
+        you manage everything except access to resources.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":["Microsoft.Authorization/*/Delete","Microsoft.Authorization/*/Write","Microsoft.Authorization/elevateAccess/Action"]}],"createdOn":"0001-01-01T08:00:00.0000000Z","updatedOn":"2016-12-14T02:04:45.1393855Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","type":"Microsoft.Authorization/roleDefinitions","name":"b24988ac-6180-42a0-ab88-20f7382dd24c"}],"nextLink":null}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 09 Dec 2016 20:42:09 GMT']
+      Date: ['Thu, 23 Feb 2017 17:34:21 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
@@ -465,30 +466,92 @@ interactions:
       Vary: [Accept-Encoding]
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET]
-      content-length: ['665']
+      content-length: ['712']
     status: {code: 200, message: OK}
 - request:
     body: '{"properties": {"roleDefinitionId": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
-      "principalId": "cda5291d-37a9-44f0-8940-64717dc06cbd"}}'
+      "principalId": "75759c09-6804-4038-898d-1d41a6797d40"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['233']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f53996ae-be4f-11e6-bcf8-64510658e3b3]
+      x-ms-client-request-id: [4fba50c8-f9ee-11e6-9e15-64510658e3b3]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments/3124b869-875b-420c-af90-2d67d98ed97e?api-version=2015-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments/f3d93f2d-dd32-4489-a0b3-661256828e82?api-version=2015-07-01
   response:
-    body: {string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"cda5291d-37a9-44f0-8940-64717dc06cbd","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleAssignments/3124b869-875b-420c-af90-2d67d98ed97e","type":"Microsoft.Authorization/roleAssignments","name":"3124b869-875b-420c-af90-2d67d98ed97e"}'}
+    body: {string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"75759c09-6804-4038-898d-1d41a6797d40","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleAssignments/f3d93f2d-dd32-4489-a0b3-661256828e82","type":"Microsoft.Authorization/roleAssignments","name":"f3d93f2d-dd32-4489-a0b3-661256828e82"}'}
     headers:
       Cache-Control: [no-cache]
       Content-Length: ['686']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 09 Dec 2016 20:42:11 GMT']
+      Date: ['Thu, 23 Feb 2017 17:34:23 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-IIS/8.5]
+      Set-Cookie: [x-ms-gateway-slice=productionb; path=/]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      X-Content-Type-Options: [nosniff]
+      X-Powered-By: [ASP.NET]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.2rc1+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [50b85f1e-f9ee-11e6-a204-64510658e3b3]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vcr_resource_group/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Contributor%27&api-version=2015-07-01
+  response:
+    body: {string: '{"value":[{"properties":{"roleName":"Contributor","type":"BuiltInRole","description":"Lets
+        you manage everything except access to resources.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":["Microsoft.Authorization/*/Delete","Microsoft.Authorization/*/Write","Microsoft.Authorization/elevateAccess/Action"]}],"createdOn":"0001-01-01T08:00:00.0000000Z","updatedOn":"2016-12-14T02:04:45.1393855Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","type":"Microsoft.Authorization/roleDefinitions","name":"b24988ac-6180-42a0-ab88-20f7382dd24c"}],"nextLink":null}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 23 Feb 2017 17:34:22 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-IIS/8.5]
+      Set-Cookie: [x-ms-gateway-slice=productionb; path=/]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: [Accept-Encoding]
+      X-Content-Type-Options: [nosniff]
+      X-Powered-By: [ASP.NET]
+      content-length: ['712']
+    status: {code: 200, message: OK}
+- request:
+    body: '{"properties": {"roleDefinitionId": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
+      "principalId": "75759c09-6804-4038-898d-1d41a6797d40"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['233']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.2rc1+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [50df7ae8-f9ee-11e6-ac3d-64510658e3b3]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vcr_resource_group/providers/Microsoft.Authorization/roleAssignments/cfaa2150-8df7-4145-9f8e-7d7c6f80272f?api-version=2015-07-01
+  response:
+    body: {string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"75759c09-6804-4038-898d-1d41a6797d40","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vcr_resource_group","createdOn":"2017-02-23T17:34:24.2052935Z","updatedOn":"2017-02-23T17:34:24.2052935Z","createdBy":null,"updatedBy":"e7e158d3-7cdc-47cd-8825-5859d7ab2b55"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vcr_resource_group/providers/Microsoft.Authorization/roleAssignments/cfaa2150-8df7-4145-9f8e-7d7c6f80272f","type":"Microsoft.Authorization/roleAssignments","name":"cfaa2150-8df7-4145-9f8e-7d7c6f80272f"}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['754']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 23 Feb 2017 17:34:23 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
@@ -506,100 +569,37 @@ interactions:
       CommandName: [ad sp create-for-rbac]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [e0761064-be4f-11e6-8c2b-64510658e3b3]
+      x-ms-client-request-id: [3a804da6-f9ee-11e6-9eee-64510658e3b3]
     method: GET
-    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28x%3Ax%20eq%20%27http%3A%2F%2Fcli_create_rbac_sp%27%29&api-version=1.6
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28x%3Ax%20eq%20%27http%3A%2F%2Fvcr_resource_group%27%29&api-version=1.6
   response:
-    body: {string: '{"odata.metadata":"https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"cda5291d-37a9-44f0-8940-64717dc06cbd","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"azure-cli-2016-12-09-20-41-40","appId":"7e7c7423-5658-478f-99ad-ad2e3e84e3b7","appOwnerTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"azure-cli-2016-12-09-20-41-40","errorUrl":null,"homepage":"http://azure-cli-2016-12-09-20-41-40","keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
-        the application to access azure-cli-2016-12-09-20-41-40 on behalf of the signed-in
-        user.","adminConsentDisplayName":"Access azure-cli-2016-12-09-20-41-40","id":"8739fdcb-d0bf-4f77-93d9-3717c208bcc9","isEnabled":true,"type":"User","userConsentDescription":"Allow
-        the application to access azure-cli-2016-12-09-20-41-40 on your behalf.","userConsentDisplayName":"Access
-        azure-cli-2016-12-09-20-41-40","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"AzureSDKTeam","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["http://cli_create_rbac_sp","7e7c7423-5658-478f-99ad-ad2e3e84e3b7"],"servicePrincipalType":"Application","tags":[]}]}'}
+    body: {string: '{"odata.metadata":"https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"75759c09-6804-4038-898d-1d41a6797d40","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"azure-cli-2017-02-23-17-33-50","appId":"cbd47edd-8cac-4a0b-97e4-edbab8c408b6","appOwnerTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"azure-cli-2017-02-23-17-33-50","errorUrl":null,"homepage":"http://azure-cli-2017-02-23-17-33-50","keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
+        the application to access azure-cli-2017-02-23-17-33-50 on behalf of the signed-in
+        user.","adminConsentDisplayName":"Access azure-cli-2017-02-23-17-33-50","id":"a6c941b1-dbc2-4f8e-97d5-d04af3631c7d","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        the application to access azure-cli-2017-02-23-17-33-50 on your behalf.","userConsentDisplayName":"Access
+        azure-cli-2017-02-23-17-33-50","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"AzureSDKTeam","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["http://vcr_resource_group","cbd47edd-8cac-4a0b-97e4-edbab8c408b6"],"servicePrincipalType":"Application","tags":[]}]}'}
     headers:
       Access-Control-Allow-Origin: ['*']
       Cache-Control: [no-cache]
       Content-Length: ['1502']
       Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
       DataServiceVersion: [3.0;]
-      Date: ['Fri, 09 Dec 2016 20:42:12 GMT']
-      Duration: ['1747537']
+      Date: ['Thu, 23 Feb 2017 17:34:23 GMT']
+      Duration: ['578744']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       X-AspNet-Version: [4.0.30319]
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET, ASP.NET]
-      ocp-aad-diagnostics-server-name: [Rqi9SNMjpM2VdY3oPX7t1hoksRSH2GqDuH2d5VsjisM=]
-      ocp-aad-session-key: [PMuWdDTfLIG52R_cETwEmzDw_kTaT2xFaC83UfwHBaL7FnE3kHcPBgY1q2hYPAgb97HLvCgJBPs0XkjqKaUv2kPsF34Jy5-ndP80IICgDPaqZ_gJ3DqSQSoZuWouBtKiQc5tPyGsKKI_DEmUYB41Xw.D2ivoiksvsftmZzbS7Slw6Tv-QVpUB7mlfvQrpDJX7g]
-      request-id: [36c7baf4-e7ad-4f76-80bb-719c4a49e8c3]
+      ocp-aad-diagnostics-server-name: [Fv3pe8wSS10orakeX5YBYAUGBJPRrLBvCZV18hEs24U=]
+      ocp-aad-session-key: [IkFW2bLrUr5hPzQoauauUT544MgmVHmnKDcB-ICPtPne8jef805fzmQChLwkRLeq-SuFJbzOTcpxjiKQ2F1rd_gDMIhjqC6-KB4qzIo-i2ZwjRoiuWVIGU2E9wFktRdBaCCdfZJiMaVDVCFFbqW23g.cfSN6lXshtJ2CwE2aluwKPNX_ywePLqL2-VteElJdtw]
+      request-id: [ac5f8cfd-5ddb-4645-a624-56e81d7d3b90]
       x-ms-dirapi-data-contract-version: ['1.6']
     status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b10+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [f660611e-be4f-11e6-9d94-64510658e3b3]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_create_rbac_sp/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Contributor%27&api-version=2015-07-01
-  response:
-    body: {string: '{"value":[{"properties":{"roleName":"Contributor","type":"BuiltInRole","description":"Lets
-        you manage everything except access to resources.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":["Microsoft.Authorization/*/Delete","Microsoft.Authorization/*/Write"]}],"createdOn":"0001-01-01T08:00:00.0000000Z","updatedOn":"2016-05-31T23:13:58.6741320Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","type":"Microsoft.Authorization/roleDefinitions","name":"b24988ac-6180-42a0-ab88-20f7382dd24c"}],"nextLink":null}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 09 Dec 2016 20:42:12 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Set-Cookie: [x-ms-gateway-slice=productionb; path=/]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      content-length: ['665']
-    status: {code: 200, message: OK}
-- request:
-    body: '{"properties": {"roleDefinitionId": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
-      "principalId": "cda5291d-37a9-44f0-8940-64717dc06cbd"}}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Length: ['233']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b10+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [f6890e5c-be4f-11e6-97b3-64510658e3b3]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_create_rbac_sp/providers/Microsoft.Authorization/roleAssignments/3de99cfa-402c-44e5-ae4d-89a379b36e47?api-version=2015-07-01
-  response:
-    body: {string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"cda5291d-37a9-44f0-8940-64717dc06cbd","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_create_rbac_sp","createdOn":"2016-12-09T20:42:13.1838384Z","updatedOn":"2016-12-09T20:42:13.1838384Z","createdBy":null,"updatedBy":"e7e158d3-7cdc-47cd-8825-5859d7ab2b55"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_create_rbac_sp/providers/Microsoft.Authorization/roleAssignments/3de99cfa-402c-44e5-ae4d-89a379b36e47","type":"Microsoft.Authorization/roleAssignments","name":"3de99cfa-402c-44e5-ae4d-89a379b36e47"}'}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['754']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 09 Dec 2016 20:42:13 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.5]
-      Set-Cookie: [x-ms-gateway-slice=productionb; path=/]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
-    status: {code: 201, message: Created}
 - request:
     body: null
     headers:
@@ -608,26 +608,26 @@ interactions:
       CommandName: [role assignment list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [e0761064-be4f-11e6-8c2b-64510658e3b3]
+      x-ms-client-request-id: [3a804da6-f9ee-11e6-9eee-64510658e3b3]
     method: GET
-    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%27http%3A%2F%2Fcli_create_rbac_sp%27%29&api-version=1.6
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%27http%3A%2F%2Fvcr_resource_group%27%29&api-version=1.6
   response:
-    body: {string: '{"odata.metadata":"https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"cda5291d-37a9-44f0-8940-64717dc06cbd","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"azure-cli-2016-12-09-20-41-40","appId":"7e7c7423-5658-478f-99ad-ad2e3e84e3b7","appOwnerTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"azure-cli-2016-12-09-20-41-40","errorUrl":null,"homepage":"http://azure-cli-2016-12-09-20-41-40","keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
-        the application to access azure-cli-2016-12-09-20-41-40 on behalf of the signed-in
-        user.","adminConsentDisplayName":"Access azure-cli-2016-12-09-20-41-40","id":"8739fdcb-d0bf-4f77-93d9-3717c208bcc9","isEnabled":true,"type":"User","userConsentDescription":"Allow
-        the application to access azure-cli-2016-12-09-20-41-40 on your behalf.","userConsentDisplayName":"Access
-        azure-cli-2016-12-09-20-41-40","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"AzureSDKTeam","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["http://cli_create_rbac_sp","7e7c7423-5658-478f-99ad-ad2e3e84e3b7"],"servicePrincipalType":"Application","tags":[]}]}'}
+    body: {string: '{"odata.metadata":"https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"75759c09-6804-4038-898d-1d41a6797d40","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"azure-cli-2017-02-23-17-33-50","appId":"cbd47edd-8cac-4a0b-97e4-edbab8c408b6","appOwnerTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"azure-cli-2017-02-23-17-33-50","errorUrl":null,"homepage":"http://azure-cli-2017-02-23-17-33-50","keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
+        the application to access azure-cli-2017-02-23-17-33-50 on behalf of the signed-in
+        user.","adminConsentDisplayName":"Access azure-cli-2017-02-23-17-33-50","id":"a6c941b1-dbc2-4f8e-97d5-d04af3631c7d","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        the application to access azure-cli-2017-02-23-17-33-50 on your behalf.","userConsentDisplayName":"Access
+        azure-cli-2017-02-23-17-33-50","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"AzureSDKTeam","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["http://vcr_resource_group","cbd47edd-8cac-4a0b-97e4-edbab8c408b6"],"servicePrincipalType":"Application","tags":[]}]}'}
     headers:
       Access-Control-Allow-Origin: ['*']
       Cache-Control: [no-cache]
       Content-Length: ['1502']
       Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
       DataServiceVersion: [3.0;]
-      Date: ['Fri, 09 Dec 2016 20:42:14 GMT']
-      Duration: ['1365434']
+      Date: ['Thu, 23 Feb 2017 17:34:24 GMT']
+      Duration: ['940326']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
@@ -635,9 +635,9 @@ interactions:
       X-AspNet-Version: [4.0.30319]
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET, ASP.NET]
-      ocp-aad-diagnostics-server-name: [idCFdvS08KcWm23eEQ/NFOhEHlkip0SFh+wWMsXwOUM=]
-      ocp-aad-session-key: [WLvtmOeYOEIy27obMvJuZTqsEX_RDUewhU88vD30mL6ttrWghxVKLA4n0mGCaCUY6nvbNGnRwg8w57s_FSvJkdmf-P67-uBcTXYLSfyvmdnClhRbVleTYIvcBvNDqD4tbicJwRnGRRYga41bAaW70A.OdESciQb0ZMmrFlIdjCTrMVQtKqNrQPhpSxDqzAxed4]
-      request-id: [2d7287f9-1bae-4a85-89cb-b09b381de32b]
+      ocp-aad-diagnostics-server-name: [ob5MfgM/paATdU07erorYq4RLE1A2vGZUIqL/xduZaE=]
+      ocp-aad-session-key: [uwSyWeGjwcoDaYQ0Jp1AGPXGVNw9FFkeK0JLRdOL_yrw3f4jfXXt9AQH0QyuE2z7uPpkQemnupUJ-kt1s7cdHg8r-f8nuEW7ZjbkmNSEXsG9DFeM4TmtCINzqmJNYEQk79zd3FaBa8JEnmkY058Yow.yCKsfC0Lp-OfsaYouMtq69AbFwmnZSLL-bT6LlIfeN0]
+      request-id: [43809b93-4b61-4f97-a2b9-52e31f5d4729]
       x-ms-dirapi-data-contract-version: ['1.6']
     status: {code: 200, message: OK}
 - request:
@@ -647,18 +647,18 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f7a81390-be4f-11e6-91f6-64510658e3b3]
+      x-ms-client-request-id: [52480958-f9ee-11e6-85b2-64510658e3b3]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments?$filter=principalId%20eq%20%27cda5291d-37a9-44f0-8940-64717dc06cbd%27&api-version=2015-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments?$filter=principalId%20eq%20%2775759c09-6804-4038-898d-1d41a6797d40%27&api-version=2015-07-01
   response:
-    body: {string: '{"value":[{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"cda5291d-37a9-44f0-8940-64717dc06cbd","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleAssignments/3124b869-875b-420c-af90-2d67d98ed97e","type":"Microsoft.Authorization/roleAssignments","name":"3124b869-875b-420c-af90-2d67d98ed97e"},{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"cda5291d-37a9-44f0-8940-64717dc06cbd","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_create_rbac_sp","createdOn":"2016-12-09T20:42:14.0439349Z","updatedOn":"2016-12-09T20:42:14.0439349Z","createdBy":"e7e158d3-7cdc-47cd-8825-5859d7ab2b55","updatedBy":"e7e158d3-7cdc-47cd-8825-5859d7ab2b55"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_create_rbac_sp/providers/Microsoft.Authorization/roleAssignments/3de99cfa-402c-44e5-ae4d-89a379b36e47","type":"Microsoft.Authorization/roleAssignments","name":"3de99cfa-402c-44e5-ae4d-89a379b36e47"}],"nextLink":null}'}
+    body: {string: '{"value":[{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"75759c09-6804-4038-898d-1d41a6797d40","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleAssignments/f3d93f2d-dd32-4489-a0b3-661256828e82","type":"Microsoft.Authorization/roleAssignments","name":"f3d93f2d-dd32-4489-a0b3-661256828e82"},{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"75759c09-6804-4038-898d-1d41a6797d40","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vcr_resource_group","createdOn":"2017-02-23T17:34:24.6940853Z","updatedOn":"2017-02-23T17:34:24.6940853Z","createdBy":"e7e158d3-7cdc-47cd-8825-5859d7ab2b55","updatedBy":"e7e158d3-7cdc-47cd-8825-5859d7ab2b55"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vcr_resource_group/providers/Microsoft.Authorization/roleAssignments/cfaa2150-8df7-4145-9f8e-7d7c6f80272f","type":"Microsoft.Authorization/roleAssignments","name":"cfaa2150-8df7-4145-9f8e-7d7c6f80272f"}],"nextLink":null}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 09 Dec 2016 20:42:14 GMT']
+      Date: ['Thu, 23 Feb 2017 17:34:25 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
@@ -677,10 +677,10 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f7e2b21c-be4f-11e6-abe7-64510658e3b3]
+      x-ms-client-request-id: [52805b00-f9ee-11e6-80e4-64510658e3b3]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions?api-version=2015-07-01
   response:
@@ -697,7 +697,7 @@ interactions:
         ,\"Microsoft.Compute/virtualMachines/start/action\",\"Microsoft.Insights/alertRules/*\"\
         ,\"Microsoft.Network/*/read\",\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/read\"\
         ,\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/resources/read\"\
-        ,\"Microsoft.Storage/*/read\",\"Microsoft.Support/*\"],\"notActions\":null}],\"\
+        ,\"Microsoft.Storage/*/read\",\"Microsoft.Support/*\"],\"notActions\":[]}],\"\
         createdOn\":\"2016-08-04T16:46:01.6106554Z\",\"updatedOn\":\"2016-08-04T16:46:01.6106554Z\"\
         ,\"createdBy\":\"e7e158d3-7cdc-47cd-8825-5859d7ab2b55\",\"updatedBy\":\"e7e158d3-7cdc-47cd-8825-5859d7ab2b55\"\
         },\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/353790dd-e776-4b53-a723-d809f8fa2337\"\
@@ -709,19 +709,19 @@ interactions:
         ,\"Microsoft.Compute/virtualMachines/start/action\",\"Microsoft.Insights/alertRules/*\"\
         ,\"Microsoft.Network/*/read\",\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/read\"\
         ,\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/resources/read\"\
-        ,\"Microsoft.Storage/*/read\",\"Microsoft.Support/*\"],\"notActions\":null}],\"\
+        ,\"Microsoft.Storage/*/read\",\"Microsoft.Support/*\"],\"notActions\":[]}],\"\
         createdOn\":\"2016-10-07T21:12:48.7544984Z\",\"updatedOn\":\"2016-10-07T21:12:48.7544984Z\"\
         ,\"createdBy\":\"5963f50c-7c43-405c-af7e-53294de76abd\",\"updatedBy\":\"5963f50c-7c43-405c-af7e-53294de76abd\"\
         },\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/e90a40de-fb39-4e25-b6c6-d61fe106a9d1\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"e90a40de-fb39-4e25-b6c6-d61fe106a9d1\"\
         },{\"properties\":{\"roleName\":\"API Management Service Contributor\",\"\
-        type\":\"BuiltInRole\",\"description\":\"API Management Service Contributor\"\
+        type\":\"BuiltInRole\",\"description\":\"Can manage service and the APIs\"\
         ,\"assignableScopes\":[\"/\"],\"permissions\":[{\"actions\":[\"Microsoft.ApiManagement/service/*\"\
         ,\"Microsoft.Authorization/*/read\",\"Microsoft.Insights/alertRules/*\",\"\
         Microsoft.ResourceHealth/availabilityStatuses/read\",\"Microsoft.Resources/deployments/*\"\
         ,\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/read\"\
         ,\"Microsoft.Support/*\"],\"notActions\":[]}],\"createdOn\":\"0001-01-01T08:00:00.0000000Z\"\
-        ,\"updatedOn\":\"2016-11-19T00:02:57.6497116Z\",\"createdBy\":null,\"updatedBy\"\
+        ,\"updatedOn\":\"2017-01-23T23:12:00.5823195Z\",\"createdBy\":null,\"updatedBy\"\
         :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/312a565d-c81f-4fd8-895a-4e21e48d571c\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"312a565d-c81f-4fd8-895a-4e21e48d571c\"\
         },{\"properties\":{\"roleName\":\"API Management Service Operator Role\",\"\
@@ -739,13 +739,13 @@ interactions:
         ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/e022efe7-f5ba-4159-bbe4-b44f577e9b61\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"e022efe7-f5ba-4159-bbe4-b44f577e9b61\"\
         },{\"properties\":{\"roleName\":\"API Management Service Reader Role\",\"\
-        type\":\"BuiltInRole\",\"description\":\"API Management Service Reader Role\"\
+        type\":\"BuiltInRole\",\"description\":\"Read-only access to service and APIs\"\
         ,\"assignableScopes\":[\"/\"],\"permissions\":[{\"actions\":[\"Microsoft.ApiManagement/service/*/read\"\
         ,\"Microsoft.ApiManagement/service/read\",\"Microsoft.Authorization/*/read\"\
         ,\"Microsoft.Insights/alertRules/*\",\"Microsoft.ResourceHealth/availabilityStatuses/read\"\
         ,\"Microsoft.Resources/deployments/*\",\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/read\"\
         ,\"Microsoft.Support/*\"],\"notActions\":[\"Microsoft.ApiManagement/service/users/keys/read\"\
-        ]}],\"createdOn\":\"2016-11-09T00:26:45.1540473Z\",\"updatedOn\":\"2016-11-18T23:59:28.8342821Z\"\
+        ]}],\"createdOn\":\"2016-11-09T00:26:45.1540473Z\",\"updatedOn\":\"2017-01-23T23:10:34.8876776Z\"\
         ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/71522526-b88f-4d52-b57f-d31fc3546d0d\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"71522526-b88f-4d52-b57f-d31fc3546d0d\"\
         },{\"properties\":{\"roleName\":\"Application Insights Component Contributor\"\
@@ -774,6 +774,78 @@ interactions:
         ,\"updatedOn\":\"2016-05-31T23:13:38.5728496Z\",\"createdBy\":null,\"updatedBy\"\
         :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/d3881f73-407a-4167-8283-e981cbba0404\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"d3881f73-407a-4167-8283-e981cbba0404\"\
+        },{\"properties\":{\"roleName\":\"Backup Contributor\",\"type\":\"BuiltInRole\"\
+        ,\"description\":\"Lets you manage backup service,but can't create vaults\
+        \ and give access to others\",\"assignableScopes\":[\"/\"],\"permissions\"\
+        :[{\"actions\":[\"Microsoft.Network/virtualNetworks/read\",\"Microsoft.RecoveryServices/Vaults/backupFabrics/operationResults/*\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/*\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupJobs/*\",\"Microsoft.RecoveryServices/Vaults/backupJobsExport/action\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupManagementMetaData/*\",\"Microsoft.RecoveryServices/Vaults/backupOperationResults/*\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupPolicies/*\",\"Microsoft.RecoveryServices/Vaults/backupProtectableItems/*\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupProtectedItems/*\",\"Microsoft.RecoveryServices/Vaults/backupProtectionContainers/*\"\
+        ,\"Microsoft.RecoveryServices/Vaults/certificates/*\",\"Microsoft.RecoveryServices/Vaults/extendedInformation/*\"\
+        ,\"Microsoft.RecoveryServices/Vaults/read\",\"Microsoft.RecoveryServices/Vaults/refreshContainers/*\"\
+        ,\"Microsoft.RecoveryServices/Vaults/registeredIdentities/*\",\"Microsoft.RecoveryServices/Vaults/usages/*\"\
+        ,\"Microsoft.Resources/deployments/*\",\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/read\"\
+        ,\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/read\"\
+        ,\"Microsoft.Storage/storageAccounts/read\",\"Microsoft.Support/*\"],\"notActions\"\
+        :[]}],\"createdOn\":\"2017-01-03T13:12:15.7321344Z\",\"updatedOn\":\"2017-01-26T22:47:17.0791169Z\"\
+        ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/5e467623-bb1f-42f4-a55d-6e525e11384b\"\
+        ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"5e467623-bb1f-42f4-a55d-6e525e11384b\"\
+        },{\"properties\":{\"roleName\":\"Backup Operator\",\"type\":\"BuiltInRole\"\
+        ,\"description\":\"Lets you manage backup services, except removal of backup,\
+        \ vault creation and giving access to others\",\"assignableScopes\":[\"/\"\
+        ],\"permissions\":[{\"actions\":[\"Microsoft.Network/virtualNetworks/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/operationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/operationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/backup/action\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/operationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/operationStatus/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints/restore/action\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/write\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupJobs/*\",\"Microsoft.RecoveryServices/Vaults/backupJobs/cancel/action\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupJobs/operationResults/read\",\"\
+        Microsoft.RecoveryServices/Vaults/backupJobs/read\",\"Microsoft.RecoveryServices/Vaults/backupJobsExport/action\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupManagementMetaData/read\",\"Microsoft.RecoveryServices/Vaults/backupOperationResults/*\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupPolicies/operationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupPolicies/read\",\"Microsoft.RecoveryServices/Vaults/backupProtectableItems/*\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupProtectableItems/read\",\"Microsoft.RecoveryServices/Vaults/backupProtectedItems/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupProtectionContainers/read\",\"\
+        Microsoft.RecoveryServices/Vaults/extendedInformation/read\",\"Microsoft.RecoveryServices/Vaults/extendedInformation/write\"\
+        ,\"Microsoft.RecoveryServices/Vaults/read\",\"Microsoft.RecoveryServices/Vaults/refreshContainers/*\"\
+        ,\"Microsoft.RecoveryServices/Vaults/registeredIdentities/operationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/registeredIdentities/read\",\"Microsoft.RecoveryServices/Vaults/registeredIdentities/write\"\
+        ,\"Microsoft.RecoveryServices/Vaults/usages/read\",\"Microsoft.Resources/deployments/*\"\
+        ,\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/read\"\
+        ,\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/read\"\
+        ,\"Microsoft.Storage/storageAccounts/read\",\"Microsoft.Support/*\"],\"notActions\"\
+        :[]}],\"createdOn\":\"2017-01-03T13:21:11.8947640Z\",\"updatedOn\":\"2017-01-26T22:55:05.8565834Z\"\
+        ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/00c29273-979b-4161-815c-10b084fb9324\"\
+        ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"00c29273-979b-4161-815c-10b084fb9324\"\
+        },{\"properties\":{\"roleName\":\"Backup Reader\",\"type\":\"BuiltInRole\"\
+        ,\"description\":\"Can view backup services, but can't make changes\",\"assignableScopes\"\
+        :[\"/\"],\"permissions\":[{\"actions\":[\"Microsoft.RecoveryServices/Vaults/backupFabrics/operationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/operationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/operationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/operationStatus/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupJobs/operationResults/read\",\"\
+        Microsoft.RecoveryServices/Vaults/backupJobs/read\",\"Microsoft.RecoveryServices/Vaults/backupJobsExport/action\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupManagementMetaData/read\",\"Microsoft.RecoveryServices/Vaults/backupOperationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupPolicies/operationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupPolicies/read\",\"Microsoft.RecoveryServices/Vaults/backupProtectedItems/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupProtectionContainers/read\",\"\
+        Microsoft.RecoveryServices/Vaults/extendedInformation/read\",\"Microsoft.RecoveryServices/Vaults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/refreshContainers/read\",\"Microsoft.RecoveryServices/Vaults/registeredIdentities/operationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/registeredIdentities/read\",\"Microsoft.RecoveryServices/Vaults/usages/read\"\
+        ],\"notActions\":[]}],\"createdOn\":\"2017-01-03T13:18:41.3893065Z\",\"updatedOn\"\
+        :\"2017-01-26T22:59:50.0629680Z\",\"createdBy\":null,\"updatedBy\":null},\"\
+        id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/a795c7a0-d4a2-40c1-ae25-d81f01202912\"\
+        ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"a795c7a0-d4a2-40c1-ae25-d81f01202912\"\
         },{\"properties\":{\"roleName\":\"BizTalk Contributor\",\"type\":\"BuiltInRole\"\
         ,\"description\":\"Lets you manage BizTalk services, but not access to them.\"\
         ,\"assignableScopes\":[\"/\"],\"permissions\":[{\"actions\":[\"Microsoft.Authorization/*/read\"\
@@ -874,8 +946,9 @@ interactions:
         description\":\"Lets you manage everything except access to resources.\",\"\
         assignableScopes\":[\"/\"],\"permissions\":[{\"actions\":[\"*\"],\"notActions\"\
         :[\"Microsoft.Authorization/*/Delete\",\"Microsoft.Authorization/*/Write\"\
-        ]}],\"createdOn\":\"0001-01-01T08:00:00.0000000Z\",\"updatedOn\":\"2016-05-31T23:13:58.6741320Z\"\
-        ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c\"\
+        ,\"Microsoft.Authorization/elevateAccess/Action\"]}],\"createdOn\":\"0001-01-01T08:00:00.0000000Z\"\
+        ,\"updatedOn\":\"2016-12-14T02:04:45.1393855Z\",\"createdBy\":null,\"updatedBy\"\
+        :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"b24988ac-6180-42a0-ab88-20f7382dd24c\"\
         },{\"properties\":{\"roleName\":\"Data Factory Contributor\",\"type\":\"BuiltInRole\"\
         ,\"description\":\"Create and manage data factories, as well as child resources\
@@ -908,19 +981,19 @@ interactions:
         ,\"Microsoft.Compute/virtualMachines/*/read\",\"Microsoft.Compute/virtualMachines/deallocate/action\"\
         ,\"Microsoft.Compute/virtualMachines/read\",\"Microsoft.Compute/virtualMachines/restart/action\"\
         ,\"Microsoft.Compute/virtualMachines/start/action\",\"Microsoft.DevTestLab/*/read\"\
-        ,\"Microsoft.DevTestLab/labs/createEnvironment/action\",\"Microsoft.DevTestLab/labs/formulas/delete\"\
-        ,\"Microsoft.DevTestLab/labs/formulas/read\",\"Microsoft.DevTestLab/labs/formulas/write\"\
-        ,\"Microsoft.DevTestLab/labs/policySets/evaluatePolicies/action\",\"Microsoft.DevTestLab/labs/virtualMachines/claim/action\"\
-        ,\"Microsoft.Network/loadBalancers/backendAddressPools/join/action\",\"Microsoft.Network/loadBalancers/inboundNatRules/join/action\"\
-        ,\"Microsoft.Network/networkInterfaces/*/read\",\"Microsoft.Network/networkInterfaces/join/action\"\
-        ,\"Microsoft.Network/networkInterfaces/read\",\"Microsoft.Network/networkInterfaces/write\"\
-        ,\"Microsoft.Network/publicIPAddresses/*/read\",\"Microsoft.Network/publicIPAddresses/join/action\"\
-        ,\"Microsoft.Network/publicIPAddresses/read\",\"Microsoft.Network/virtualNetworks/subnets/join/action\"\
-        ,\"Microsoft.Resources/deployments/operations/read\",\"Microsoft.Resources/deployments/read\"\
-        ,\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/read\"\
+        ,\"Microsoft.DevTestLab/labs/claimAnyVm/action\",\"Microsoft.DevTestLab/labs/createEnvironment/action\"\
+        ,\"Microsoft.DevTestLab/labs/formulas/delete\",\"Microsoft.DevTestLab/labs/formulas/read\"\
+        ,\"Microsoft.DevTestLab/labs/formulas/write\",\"Microsoft.DevTestLab/labs/policySets/evaluatePolicies/action\"\
+        ,\"Microsoft.DevTestLab/labs/virtualMachines/claim/action\",\"Microsoft.Network/loadBalancers/backendAddressPools/join/action\"\
+        ,\"Microsoft.Network/loadBalancers/inboundNatRules/join/action\",\"Microsoft.Network/networkInterfaces/*/read\"\
+        ,\"Microsoft.Network/networkInterfaces/join/action\",\"Microsoft.Network/networkInterfaces/read\"\
+        ,\"Microsoft.Network/networkInterfaces/write\",\"Microsoft.Network/publicIPAddresses/*/read\"\
+        ,\"Microsoft.Network/publicIPAddresses/join/action\",\"Microsoft.Network/publicIPAddresses/read\"\
+        ,\"Microsoft.Network/virtualNetworks/subnets/join/action\",\"Microsoft.Resources/deployments/operations/read\"\
+        ,\"Microsoft.Resources/deployments/read\",\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/read\"\
         ,\"Microsoft.Storage/storageAccounts/listKeys/action\"],\"notActions\":[\"\
         Microsoft.Compute/virtualMachines/vmSizes/read\"]}],\"createdOn\":\"2015-06-08T21:52:45.0657582Z\"\
-        ,\"updatedOn\":\"2016-11-10T02:51:04.6149820Z\",\"createdBy\":null,\"updatedBy\"\
+        ,\"updatedOn\":\"2017-02-02T02:38:38.2961026Z\",\"createdBy\":null,\"updatedBy\"\
         :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/76283e04-6283-4c54-8f91-bcf1374a3c64\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"76283e04-6283-4c54-8f91-bcf1374a3c64\"\
         },{\"properties\":{\"roleName\":\"DNS Zone Contributor\",\"type\":\"BuiltInRole\"\
@@ -1208,7 +1281,7 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 09 Dec 2016 20:42:15 GMT']
+      Date: ['Thu, 23 Feb 2017 17:34:26 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
@@ -1218,11 +1291,10 @@ interactions:
       Vary: [Accept-Encoding]
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET]
-      content-length: ['46733']
+      content-length: ['53728']
     status: {code: 200, message: OK}
 - request:
-    body: '{"objectIds": ["cda5291d-37a9-44f0-8940-64717dc06cbd"], "includeDirectoryObjectReferences":
-      true}'
+    body: '{"includeDirectoryObjectReferences": true, "objectIds": ["75759c09-6804-4038-898d-1d41a6797d40"]}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -1230,36 +1302,34 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['97']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [e0761064-be4f-11e6-8c2b-64510658e3b3]
+      x-ms-client-request-id: [3a804da6-f9ee-11e6-9eee-64510658e3b3]
     method: POST
     uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/getObjectsByObjectIds?api-version=1.6-internal
   response:
-    body: {string: '{"odata.metadata":"https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/$metadata#directoryObjects","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"cda5291d-37a9-44f0-8940-64717dc06cbd","deletionTimestamp":null,"accountEnabled":true,"appBranding":null,"appCategory":null,"appData":null,"appDisplayName":"azure-cli-2016-12-09-20-41-40","appId":"7e7c7423-5658-478f-99ad-ad2e3e84e3b7","appMetadata":null,"appOwnerTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","appRoleAssignmentRequired":false,"appRoles":[],"authenticationPolicy":null,"displayName":"azure-cli-2016-12-09-20-41-40","errorUrl":null,"homepage":"http://azure-cli-2016-12-09-20-41-40","keyCredentials":[],"logoutUrl":null,"microsoftFirstParty":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
-        the application to access azure-cli-2016-12-09-20-41-40 on behalf of the signed-in
-        user.","adminConsentDisplayName":"Access azure-cli-2016-12-09-20-41-40","id":"8739fdcb-d0bf-4f77-93d9-3717c208bcc9","isEnabled":true,"lang":null,"origin":"Application","type":"User","userConsentDescription":"Allow
-        the application to access azure-cli-2016-12-09-20-41-40 on your behalf.","userConsentDisplayName":"Access
-        azure-cli-2016-12-09-20-41-40","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"AzureSDKTeam","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["http://cli_create_rbac_sp","7e7c7423-5658-478f-99ad-ad2e3e84e3b7"],"tags":[],"useCustomTokenSigningKey":null}]}'}
+    body: {string: '{"odata.metadata":"https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/$metadata#directoryObjects","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"75759c09-6804-4038-898d-1d41a6797d40","deletionTimestamp":null,"accountEnabled":true,"appBranding":null,"appCategory":null,"appData":null,"appDisplayName":"azure-cli-2017-02-23-17-33-50","appId":"cbd47edd-8cac-4a0b-97e4-edbab8c408b6","appMetadata":null,"appOwnerTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","appRoleAssignmentRequired":false,"appRoles":[],"authenticationPolicy":null,"displayName":"azure-cli-2017-02-23-17-33-50","errorUrl":null,"homepage":"http://azure-cli-2017-02-23-17-33-50","keyCredentials":[],"logoutUrl":null,"microsoftFirstParty":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
+        the application to access azure-cli-2017-02-23-17-33-50 on behalf of the signed-in
+        user.","adminConsentDisplayName":"Access azure-cli-2017-02-23-17-33-50","id":"a6c941b1-dbc2-4f8e-97d5-d04af3631c7d","isEnabled":true,"lang":null,"origin":"Application","type":"User","userConsentDescription":"Allow
+        the application to access azure-cli-2017-02-23-17-33-50 on your behalf.","userConsentDisplayName":"Access
+        azure-cli-2017-02-23-17-33-50","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"AzureSDKTeam","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["http://vcr_resource_group","cbd47edd-8cac-4a0b-97e4-edbab8c408b6"],"tags":[],"useCustomTokenSigningKey":null}]}'}
     headers:
       Access-Control-Allow-Origin: ['*']
       Cache-Control: [no-cache]
       Content-Length: ['1580']
       Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
       DataServiceVersion: [3.0;]
-      Date: ['Fri, 09 Dec 2016 20:42:15 GMT']
-      Duration: ['1874131']
+      Date: ['Thu, 23 Feb 2017 17:34:26 GMT']
+      Duration: ['637710']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET, ASP.NET]
-      ocp-aad-diagnostics-server-name: [VN6JFju2ntHZdAkZZ1BZ44JK9tpKF11dfK3idB4Oz2w=]
-      ocp-aad-session-key: [mk_DVoPrZEr-INdXT6xh9x65FRz1YkcA6HxJDZIVEbmR-ty5TrJKl6FARZAY9llRtRuW9cAjoGI2X35tU1_HZmgjOhCqjCKCMEeJLDpy3KIiacd75csvf-w-L4IAji-ApNOjFhVKGfS15TAWHHauWg.-TWx2zLjLxMT0lpEjZ1lyK8eSZXKsnkURDo_biaEgV4]
-      request-id: [73ee0e36-ad0a-491d-87e8-87b831380612]
+      ocp-aad-diagnostics-server-name: [DGvaKJF/I0NUPXpHcjKjsxX9QXjPcGK3c0rkkAszIkY=]
+      ocp-aad-session-key: [hC9qXY2j3-2sORydkiTUE-5jp9FPi5rcP1FXg3VFyxceJ79rgyVyrgQOpcOCipKwnsmpgyTrAw1uvGS8hoYaylz5B5rs1sbrxdPgIq_nc3gp2VxubM8jhhKp-hUbFbA6W1LaArYJUI36NGq39DlGrA.46lpqoQY1-8iQ_K0zLD3eaesx7v3FEee219-BShzr74]
+      request-id: [4006125b-1627-4335-b6c9-48b637fb03e5]
       x-ms-dirapi-data-contract-version: [1.6-internal]
     status: {code: 200, message: OK}
 - request:
@@ -1270,35 +1340,34 @@ interactions:
       CommandName: [role assignment list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [e0761064-be4f-11e6-8c2b-64510658e3b3]
+      x-ms-client-request-id: [3a804da6-f9ee-11e6-9eee-64510658e3b3]
     method: GET
-    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%27http%3A%2F%2Fcli_create_rbac_sp%27%29&api-version=1.6
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%27http%3A%2F%2Fvcr_resource_group%27%29&api-version=1.6
   response:
-    body: {string: '{"odata.metadata":"https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/$metadata#directoryObjects","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"cda5291d-37a9-44f0-8940-64717dc06cbd","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"azure-cli-2016-12-09-20-41-40","appId":"7e7c7423-5658-478f-99ad-ad2e3e84e3b7","appOwnerTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"azure-cli-2016-12-09-20-41-40","errorUrl":null,"homepage":"http://azure-cli-2016-12-09-20-41-40","keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
-        the application to access azure-cli-2016-12-09-20-41-40 on behalf of the signed-in
-        user.","adminConsentDisplayName":"Access azure-cli-2016-12-09-20-41-40","id":"8739fdcb-d0bf-4f77-93d9-3717c208bcc9","isEnabled":true,"type":"User","userConsentDescription":"Allow
-        the application to access azure-cli-2016-12-09-20-41-40 on your behalf.","userConsentDisplayName":"Access
-        azure-cli-2016-12-09-20-41-40","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"AzureSDKTeam","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["http://cli_create_rbac_sp","7e7c7423-5658-478f-99ad-ad2e3e84e3b7"],"servicePrincipalType":"Application","tags":[]}]}'}
+    body: {string: '{"odata.metadata":"https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/$metadata#directoryObjects","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"75759c09-6804-4038-898d-1d41a6797d40","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"azure-cli-2017-02-23-17-33-50","appId":"cbd47edd-8cac-4a0b-97e4-edbab8c408b6","appOwnerTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"azure-cli-2017-02-23-17-33-50","errorUrl":null,"homepage":"http://azure-cli-2017-02-23-17-33-50","keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
+        the application to access azure-cli-2017-02-23-17-33-50 on behalf of the signed-in
+        user.","adminConsentDisplayName":"Access azure-cli-2017-02-23-17-33-50","id":"a6c941b1-dbc2-4f8e-97d5-d04af3631c7d","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        the application to access azure-cli-2017-02-23-17-33-50 on your behalf.","userConsentDisplayName":"Access
+        azure-cli-2017-02-23-17-33-50","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"AzureSDKTeam","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["http://vcr_resource_group","cbd47edd-8cac-4a0b-97e4-edbab8c408b6"],"servicePrincipalType":"Application","tags":[]}]}'}
     headers:
       Access-Control-Allow-Origin: ['*']
       Cache-Control: [no-cache]
       Content-Length: ['1457']
       Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
       DataServiceVersion: [3.0;]
-      Date: ['Fri, 09 Dec 2016 20:42:15 GMT']
-      Duration: ['1267143']
+      Date: ['Thu, 23 Feb 2017 17:34:27 GMT']
+      Duration: ['1052184']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       X-AspNet-Version: [4.0.30319]
       X-Powered-By: [ASP.NET, ASP.NET]
-      ocp-aad-diagnostics-server-name: [Vysq2vNZzcPtnjT1P5DAD3ODEK1mXogz2xu8HZBYqqY=]
-      ocp-aad-session-key: [x-wPTb8p20rv4H_IVGmTl0o6auL5-0qoRIqtYf28k3upaPch87NgJimr19OA-VYVWsw6Yhuc5fhs82NisqAuL0AWPvzw8vfpyGDAd-oV7OHa7P_bH4lP0YVZ9qbuYReCbyxL596gCEo4hGrl6NVLcQ.n6dOul3Kej3dT-zUckruqyDPVuTKs52q-qNBi3xn3Dg]
-      request-id: [b7964f24-5904-4f57-9da3-82886e25f0e0]
+      ocp-aad-diagnostics-server-name: [Ue0m2ry87paBgn6wfB+K5tt5b2Dv1ZHncR3p21kT7JM=]
+      ocp-aad-session-key: [stbYTIj69HeP4Qs6LvFqcdERq8z34luSgqizYYXrdNCaDiemQpiwhm8JPXagkuL2h_T3vRJtl_tzQC23D4DdEFpcTetHC-6zS6qpODXiSZFI3_zfrc25OEmDHZTh-qr0tAZUnkBUQdGsdkZQWZvwvQ.7C8ckb0m716xvMWcnw9nuqaT7tKrFGJiRqqDXg8OJr8]
+      request-id: [1bb85ab6-c789-4019-8b1b-94d862c56e2c]
       x-ms-dirapi-data-contract-version: ['1.6']
     status: {code: 200, message: OK}
 - request:
@@ -1308,18 +1377,18 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f8c93aa8-be4f-11e6-b5a5-64510658e3b3]
+      x-ms-client-request-id: [5372ac18-f9ee-11e6-afb2-64510658e3b3]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments?$filter=principalId%20eq%20%27cda5291d-37a9-44f0-8940-64717dc06cbd%27&api-version=2015-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments?$filter=principalId%20eq%20%2775759c09-6804-4038-898d-1d41a6797d40%27&api-version=2015-07-01
   response:
-    body: {string: '{"value":[{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"cda5291d-37a9-44f0-8940-64717dc06cbd","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleAssignments/3124b869-875b-420c-af90-2d67d98ed97e","type":"Microsoft.Authorization/roleAssignments","name":"3124b869-875b-420c-af90-2d67d98ed97e"},{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"cda5291d-37a9-44f0-8940-64717dc06cbd","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_create_rbac_sp","createdOn":"2016-12-09T20:42:14.0439349Z","updatedOn":"2016-12-09T20:42:14.0439349Z","createdBy":"e7e158d3-7cdc-47cd-8825-5859d7ab2b55","updatedBy":"e7e158d3-7cdc-47cd-8825-5859d7ab2b55"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_create_rbac_sp/providers/Microsoft.Authorization/roleAssignments/3de99cfa-402c-44e5-ae4d-89a379b36e47","type":"Microsoft.Authorization/roleAssignments","name":"3de99cfa-402c-44e5-ae4d-89a379b36e47"}],"nextLink":null}'}
+    body: {string: '{"value":[{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"75759c09-6804-4038-898d-1d41a6797d40","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleAssignments/f3d93f2d-dd32-4489-a0b3-661256828e82","type":"Microsoft.Authorization/roleAssignments","name":"f3d93f2d-dd32-4489-a0b3-661256828e82"},{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"75759c09-6804-4038-898d-1d41a6797d40","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vcr_resource_group","createdOn":"2017-02-23T17:34:24.6940853Z","updatedOn":"2017-02-23T17:34:24.6940853Z","createdBy":"e7e158d3-7cdc-47cd-8825-5859d7ab2b55","updatedBy":"e7e158d3-7cdc-47cd-8825-5859d7ab2b55"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vcr_resource_group/providers/Microsoft.Authorization/roleAssignments/cfaa2150-8df7-4145-9f8e-7d7c6f80272f","type":"Microsoft.Authorization/roleAssignments","name":"cfaa2150-8df7-4145-9f8e-7d7c6f80272f"}],"nextLink":null}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 09 Dec 2016 20:42:16 GMT']
+      Date: ['Thu, 23 Feb 2017 17:34:27 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
@@ -1338,12 +1407,12 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f8eb3176-be4f-11e6-bd36-64510658e3b3]
+      x-ms-client-request-id: [53a87d34-f9ee-11e6-bec1-64510658e3b3]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_create_rbac_sp/providers/Microsoft.Authorization/roleDefinitions?api-version=2015-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vcr_resource_group/providers/Microsoft.Authorization/roleDefinitions?api-version=2015-07-01
   response:
     body: {string: "{\"value\":[{\"properties\":{\"roleName\":\"CluRoleDefinition\"\
         ,\"type\":\"CustomRole\",\"description\":\"Super awesome Clu Role Definition\"\
@@ -1358,7 +1427,7 @@ interactions:
         ,\"Microsoft.Compute/virtualMachines/start/action\",\"Microsoft.Insights/alertRules/*\"\
         ,\"Microsoft.Network/*/read\",\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/read\"\
         ,\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/resources/read\"\
-        ,\"Microsoft.Storage/*/read\",\"Microsoft.Support/*\"],\"notActions\":null}],\"\
+        ,\"Microsoft.Storage/*/read\",\"Microsoft.Support/*\"],\"notActions\":[]}],\"\
         createdOn\":\"2016-08-04T16:46:01.6106554Z\",\"updatedOn\":\"2016-08-04T16:46:01.6106554Z\"\
         ,\"createdBy\":\"e7e158d3-7cdc-47cd-8825-5859d7ab2b55\",\"updatedBy\":\"e7e158d3-7cdc-47cd-8825-5859d7ab2b55\"\
         },\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/353790dd-e776-4b53-a723-d809f8fa2337\"\
@@ -1370,19 +1439,19 @@ interactions:
         ,\"Microsoft.Compute/virtualMachines/start/action\",\"Microsoft.Insights/alertRules/*\"\
         ,\"Microsoft.Network/*/read\",\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/read\"\
         ,\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/resources/read\"\
-        ,\"Microsoft.Storage/*/read\",\"Microsoft.Support/*\"],\"notActions\":null}],\"\
+        ,\"Microsoft.Storage/*/read\",\"Microsoft.Support/*\"],\"notActions\":[]}],\"\
         createdOn\":\"2016-10-07T21:12:48.7544984Z\",\"updatedOn\":\"2016-10-07T21:12:48.7544984Z\"\
         ,\"createdBy\":\"5963f50c-7c43-405c-af7e-53294de76abd\",\"updatedBy\":\"5963f50c-7c43-405c-af7e-53294de76abd\"\
         },\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/e90a40de-fb39-4e25-b6c6-d61fe106a9d1\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"e90a40de-fb39-4e25-b6c6-d61fe106a9d1\"\
         },{\"properties\":{\"roleName\":\"API Management Service Contributor\",\"\
-        type\":\"BuiltInRole\",\"description\":\"API Management Service Contributor\"\
+        type\":\"BuiltInRole\",\"description\":\"Can manage service and the APIs\"\
         ,\"assignableScopes\":[\"/\"],\"permissions\":[{\"actions\":[\"Microsoft.ApiManagement/service/*\"\
         ,\"Microsoft.Authorization/*/read\",\"Microsoft.Insights/alertRules/*\",\"\
         Microsoft.ResourceHealth/availabilityStatuses/read\",\"Microsoft.Resources/deployments/*\"\
         ,\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/read\"\
         ,\"Microsoft.Support/*\"],\"notActions\":[]}],\"createdOn\":\"0001-01-01T08:00:00.0000000Z\"\
-        ,\"updatedOn\":\"2016-11-19T00:02:57.6497116Z\",\"createdBy\":null,\"updatedBy\"\
+        ,\"updatedOn\":\"2017-01-23T23:12:00.5823195Z\",\"createdBy\":null,\"updatedBy\"\
         :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/312a565d-c81f-4fd8-895a-4e21e48d571c\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"312a565d-c81f-4fd8-895a-4e21e48d571c\"\
         },{\"properties\":{\"roleName\":\"API Management Service Operator Role\",\"\
@@ -1400,13 +1469,13 @@ interactions:
         ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/e022efe7-f5ba-4159-bbe4-b44f577e9b61\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"e022efe7-f5ba-4159-bbe4-b44f577e9b61\"\
         },{\"properties\":{\"roleName\":\"API Management Service Reader Role\",\"\
-        type\":\"BuiltInRole\",\"description\":\"API Management Service Reader Role\"\
+        type\":\"BuiltInRole\",\"description\":\"Read-only access to service and APIs\"\
         ,\"assignableScopes\":[\"/\"],\"permissions\":[{\"actions\":[\"Microsoft.ApiManagement/service/*/read\"\
         ,\"Microsoft.ApiManagement/service/read\",\"Microsoft.Authorization/*/read\"\
         ,\"Microsoft.Insights/alertRules/*\",\"Microsoft.ResourceHealth/availabilityStatuses/read\"\
         ,\"Microsoft.Resources/deployments/*\",\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/read\"\
         ,\"Microsoft.Support/*\"],\"notActions\":[\"Microsoft.ApiManagement/service/users/keys/read\"\
-        ]}],\"createdOn\":\"2016-11-09T00:26:45.1540473Z\",\"updatedOn\":\"2016-11-18T23:59:28.8342821Z\"\
+        ]}],\"createdOn\":\"2016-11-09T00:26:45.1540473Z\",\"updatedOn\":\"2017-01-23T23:10:34.8876776Z\"\
         ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/71522526-b88f-4d52-b57f-d31fc3546d0d\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"71522526-b88f-4d52-b57f-d31fc3546d0d\"\
         },{\"properties\":{\"roleName\":\"Application Insights Component Contributor\"\
@@ -1435,6 +1504,78 @@ interactions:
         ,\"updatedOn\":\"2016-05-31T23:13:38.5728496Z\",\"createdBy\":null,\"updatedBy\"\
         :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/d3881f73-407a-4167-8283-e981cbba0404\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"d3881f73-407a-4167-8283-e981cbba0404\"\
+        },{\"properties\":{\"roleName\":\"Backup Contributor\",\"type\":\"BuiltInRole\"\
+        ,\"description\":\"Lets you manage backup service,but can't create vaults\
+        \ and give access to others\",\"assignableScopes\":[\"/\"],\"permissions\"\
+        :[{\"actions\":[\"Microsoft.Network/virtualNetworks/read\",\"Microsoft.RecoveryServices/Vaults/backupFabrics/operationResults/*\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/*\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupJobs/*\",\"Microsoft.RecoveryServices/Vaults/backupJobsExport/action\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupManagementMetaData/*\",\"Microsoft.RecoveryServices/Vaults/backupOperationResults/*\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupPolicies/*\",\"Microsoft.RecoveryServices/Vaults/backupProtectableItems/*\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupProtectedItems/*\",\"Microsoft.RecoveryServices/Vaults/backupProtectionContainers/*\"\
+        ,\"Microsoft.RecoveryServices/Vaults/certificates/*\",\"Microsoft.RecoveryServices/Vaults/extendedInformation/*\"\
+        ,\"Microsoft.RecoveryServices/Vaults/read\",\"Microsoft.RecoveryServices/Vaults/refreshContainers/*\"\
+        ,\"Microsoft.RecoveryServices/Vaults/registeredIdentities/*\",\"Microsoft.RecoveryServices/Vaults/usages/*\"\
+        ,\"Microsoft.Resources/deployments/*\",\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/read\"\
+        ,\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/read\"\
+        ,\"Microsoft.Storage/storageAccounts/read\",\"Microsoft.Support/*\"],\"notActions\"\
+        :[]}],\"createdOn\":\"2017-01-03T13:12:15.7321344Z\",\"updatedOn\":\"2017-01-26T22:47:17.0791169Z\"\
+        ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/5e467623-bb1f-42f4-a55d-6e525e11384b\"\
+        ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"5e467623-bb1f-42f4-a55d-6e525e11384b\"\
+        },{\"properties\":{\"roleName\":\"Backup Operator\",\"type\":\"BuiltInRole\"\
+        ,\"description\":\"Lets you manage backup services, except removal of backup,\
+        \ vault creation and giving access to others\",\"assignableScopes\":[\"/\"\
+        ],\"permissions\":[{\"actions\":[\"Microsoft.Network/virtualNetworks/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/operationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/operationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/backup/action\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/operationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/operationStatus/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints/restore/action\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/write\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupJobs/*\",\"Microsoft.RecoveryServices/Vaults/backupJobs/cancel/action\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupJobs/operationResults/read\",\"\
+        Microsoft.RecoveryServices/Vaults/backupJobs/read\",\"Microsoft.RecoveryServices/Vaults/backupJobsExport/action\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupManagementMetaData/read\",\"Microsoft.RecoveryServices/Vaults/backupOperationResults/*\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupPolicies/operationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupPolicies/read\",\"Microsoft.RecoveryServices/Vaults/backupProtectableItems/*\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupProtectableItems/read\",\"Microsoft.RecoveryServices/Vaults/backupProtectedItems/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupProtectionContainers/read\",\"\
+        Microsoft.RecoveryServices/Vaults/extendedInformation/read\",\"Microsoft.RecoveryServices/Vaults/extendedInformation/write\"\
+        ,\"Microsoft.RecoveryServices/Vaults/read\",\"Microsoft.RecoveryServices/Vaults/refreshContainers/*\"\
+        ,\"Microsoft.RecoveryServices/Vaults/registeredIdentities/operationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/registeredIdentities/read\",\"Microsoft.RecoveryServices/Vaults/registeredIdentities/write\"\
+        ,\"Microsoft.RecoveryServices/Vaults/usages/read\",\"Microsoft.Resources/deployments/*\"\
+        ,\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/read\"\
+        ,\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/read\"\
+        ,\"Microsoft.Storage/storageAccounts/read\",\"Microsoft.Support/*\"],\"notActions\"\
+        :[]}],\"createdOn\":\"2017-01-03T13:21:11.8947640Z\",\"updatedOn\":\"2017-01-26T22:55:05.8565834Z\"\
+        ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/00c29273-979b-4161-815c-10b084fb9324\"\
+        ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"00c29273-979b-4161-815c-10b084fb9324\"\
+        },{\"properties\":{\"roleName\":\"Backup Reader\",\"type\":\"BuiltInRole\"\
+        ,\"description\":\"Can view backup services, but can't make changes\",\"assignableScopes\"\
+        :[\"/\"],\"permissions\":[{\"actions\":[\"Microsoft.RecoveryServices/Vaults/backupFabrics/operationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/operationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/operationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/operationStatus/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/protectedItems/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupFabrics/protectionContainers/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupJobs/operationResults/read\",\"\
+        Microsoft.RecoveryServices/Vaults/backupJobs/read\",\"Microsoft.RecoveryServices/Vaults/backupJobsExport/action\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupManagementMetaData/read\",\"Microsoft.RecoveryServices/Vaults/backupOperationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupPolicies/operationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupPolicies/read\",\"Microsoft.RecoveryServices/Vaults/backupProtectedItems/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/backupProtectionContainers/read\",\"\
+        Microsoft.RecoveryServices/Vaults/extendedInformation/read\",\"Microsoft.RecoveryServices/Vaults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/refreshContainers/read\",\"Microsoft.RecoveryServices/Vaults/registeredIdentities/operationResults/read\"\
+        ,\"Microsoft.RecoveryServices/Vaults/registeredIdentities/read\",\"Microsoft.RecoveryServices/Vaults/usages/read\"\
+        ],\"notActions\":[]}],\"createdOn\":\"2017-01-03T13:18:41.3893065Z\",\"updatedOn\"\
+        :\"2017-01-26T22:59:50.0629680Z\",\"createdBy\":null,\"updatedBy\":null},\"\
+        id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/a795c7a0-d4a2-40c1-ae25-d81f01202912\"\
+        ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"a795c7a0-d4a2-40c1-ae25-d81f01202912\"\
         },{\"properties\":{\"roleName\":\"BizTalk Contributor\",\"type\":\"BuiltInRole\"\
         ,\"description\":\"Lets you manage BizTalk services, but not access to them.\"\
         ,\"assignableScopes\":[\"/\"],\"permissions\":[{\"actions\":[\"Microsoft.Authorization/*/read\"\
@@ -1535,8 +1676,9 @@ interactions:
         description\":\"Lets you manage everything except access to resources.\",\"\
         assignableScopes\":[\"/\"],\"permissions\":[{\"actions\":[\"*\"],\"notActions\"\
         :[\"Microsoft.Authorization/*/Delete\",\"Microsoft.Authorization/*/Write\"\
-        ]}],\"createdOn\":\"0001-01-01T08:00:00.0000000Z\",\"updatedOn\":\"2016-05-31T23:13:58.6741320Z\"\
-        ,\"createdBy\":null,\"updatedBy\":null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c\"\
+        ,\"Microsoft.Authorization/elevateAccess/Action\"]}],\"createdOn\":\"0001-01-01T08:00:00.0000000Z\"\
+        ,\"updatedOn\":\"2016-12-14T02:04:45.1393855Z\",\"createdBy\":null,\"updatedBy\"\
+        :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"b24988ac-6180-42a0-ab88-20f7382dd24c\"\
         },{\"properties\":{\"roleName\":\"Data Factory Contributor\",\"type\":\"BuiltInRole\"\
         ,\"description\":\"Create and manage data factories, as well as child resources\
@@ -1569,19 +1711,19 @@ interactions:
         ,\"Microsoft.Compute/virtualMachines/*/read\",\"Microsoft.Compute/virtualMachines/deallocate/action\"\
         ,\"Microsoft.Compute/virtualMachines/read\",\"Microsoft.Compute/virtualMachines/restart/action\"\
         ,\"Microsoft.Compute/virtualMachines/start/action\",\"Microsoft.DevTestLab/*/read\"\
-        ,\"Microsoft.DevTestLab/labs/createEnvironment/action\",\"Microsoft.DevTestLab/labs/formulas/delete\"\
-        ,\"Microsoft.DevTestLab/labs/formulas/read\",\"Microsoft.DevTestLab/labs/formulas/write\"\
-        ,\"Microsoft.DevTestLab/labs/policySets/evaluatePolicies/action\",\"Microsoft.DevTestLab/labs/virtualMachines/claim/action\"\
-        ,\"Microsoft.Network/loadBalancers/backendAddressPools/join/action\",\"Microsoft.Network/loadBalancers/inboundNatRules/join/action\"\
-        ,\"Microsoft.Network/networkInterfaces/*/read\",\"Microsoft.Network/networkInterfaces/join/action\"\
-        ,\"Microsoft.Network/networkInterfaces/read\",\"Microsoft.Network/networkInterfaces/write\"\
-        ,\"Microsoft.Network/publicIPAddresses/*/read\",\"Microsoft.Network/publicIPAddresses/join/action\"\
-        ,\"Microsoft.Network/publicIPAddresses/read\",\"Microsoft.Network/virtualNetworks/subnets/join/action\"\
-        ,\"Microsoft.Resources/deployments/operations/read\",\"Microsoft.Resources/deployments/read\"\
-        ,\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/read\"\
+        ,\"Microsoft.DevTestLab/labs/claimAnyVm/action\",\"Microsoft.DevTestLab/labs/createEnvironment/action\"\
+        ,\"Microsoft.DevTestLab/labs/formulas/delete\",\"Microsoft.DevTestLab/labs/formulas/read\"\
+        ,\"Microsoft.DevTestLab/labs/formulas/write\",\"Microsoft.DevTestLab/labs/policySets/evaluatePolicies/action\"\
+        ,\"Microsoft.DevTestLab/labs/virtualMachines/claim/action\",\"Microsoft.Network/loadBalancers/backendAddressPools/join/action\"\
+        ,\"Microsoft.Network/loadBalancers/inboundNatRules/join/action\",\"Microsoft.Network/networkInterfaces/*/read\"\
+        ,\"Microsoft.Network/networkInterfaces/join/action\",\"Microsoft.Network/networkInterfaces/read\"\
+        ,\"Microsoft.Network/networkInterfaces/write\",\"Microsoft.Network/publicIPAddresses/*/read\"\
+        ,\"Microsoft.Network/publicIPAddresses/join/action\",\"Microsoft.Network/publicIPAddresses/read\"\
+        ,\"Microsoft.Network/virtualNetworks/subnets/join/action\",\"Microsoft.Resources/deployments/operations/read\"\
+        ,\"Microsoft.Resources/deployments/read\",\"Microsoft.Resources/subscriptions/00000000-0000-0000-0000-000000000000/read\"\
         ,\"Microsoft.Storage/storageAccounts/listKeys/action\"],\"notActions\":[\"\
         Microsoft.Compute/virtualMachines/vmSizes/read\"]}],\"createdOn\":\"2015-06-08T21:52:45.0657582Z\"\
-        ,\"updatedOn\":\"2016-11-10T02:51:04.6149820Z\",\"createdBy\":null,\"updatedBy\"\
+        ,\"updatedOn\":\"2017-02-02T02:38:38.2961026Z\",\"createdBy\":null,\"updatedBy\"\
         :null},\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/76283e04-6283-4c54-8f91-bcf1374a3c64\"\
         ,\"type\":\"Microsoft.Authorization/roleDefinitions\",\"name\":\"76283e04-6283-4c54-8f91-bcf1374a3c64\"\
         },{\"properties\":{\"roleName\":\"DNS Zone Contributor\",\"type\":\"BuiltInRole\"\
@@ -1869,7 +2011,7 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 09 Dec 2016 20:42:16 GMT']
+      Date: ['Thu, 23 Feb 2017 17:34:28 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
@@ -1879,11 +2021,10 @@ interactions:
       Vary: [Accept-Encoding]
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET]
-      content-length: ['46733']
+      content-length: ['53728']
     status: {code: 200, message: OK}
 - request:
-    body: '{"objectIds": ["cda5291d-37a9-44f0-8940-64717dc06cbd"], "includeDirectoryObjectReferences":
-      true}'
+    body: '{"includeDirectoryObjectReferences": true, "objectIds": ["75759c09-6804-4038-898d-1d41a6797d40"]}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -1891,26 +2032,26 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['97']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [e0761064-be4f-11e6-8c2b-64510658e3b3]
+      x-ms-client-request-id: [3a804da6-f9ee-11e6-9eee-64510658e3b3]
     method: POST
     uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/getObjectsByObjectIds?api-version=1.6-internal
   response:
-    body: {string: '{"odata.metadata":"https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/$metadata#directoryObjects","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"cda5291d-37a9-44f0-8940-64717dc06cbd","deletionTimestamp":null,"accountEnabled":true,"appBranding":null,"appCategory":null,"appData":null,"appDisplayName":"azure-cli-2016-12-09-20-41-40","appId":"7e7c7423-5658-478f-99ad-ad2e3e84e3b7","appMetadata":null,"appOwnerTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","appRoleAssignmentRequired":false,"appRoles":[],"authenticationPolicy":null,"displayName":"azure-cli-2016-12-09-20-41-40","errorUrl":null,"homepage":"http://azure-cli-2016-12-09-20-41-40","keyCredentials":[],"logoutUrl":null,"microsoftFirstParty":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
-        the application to access azure-cli-2016-12-09-20-41-40 on behalf of the signed-in
-        user.","adminConsentDisplayName":"Access azure-cli-2016-12-09-20-41-40","id":"8739fdcb-d0bf-4f77-93d9-3717c208bcc9","isEnabled":true,"lang":null,"origin":"Application","type":"User","userConsentDescription":"Allow
-        the application to access azure-cli-2016-12-09-20-41-40 on your behalf.","userConsentDisplayName":"Access
-        azure-cli-2016-12-09-20-41-40","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"AzureSDKTeam","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["http://cli_create_rbac_sp","7e7c7423-5658-478f-99ad-ad2e3e84e3b7"],"tags":[],"useCustomTokenSigningKey":null}]}'}
+    body: {string: '{"odata.metadata":"https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/$metadata#directoryObjects","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"75759c09-6804-4038-898d-1d41a6797d40","deletionTimestamp":null,"accountEnabled":true,"appBranding":null,"appCategory":null,"appData":null,"appDisplayName":"azure-cli-2017-02-23-17-33-50","appId":"cbd47edd-8cac-4a0b-97e4-edbab8c408b6","appMetadata":null,"appOwnerTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","appRoleAssignmentRequired":false,"appRoles":[],"authenticationPolicy":null,"displayName":"azure-cli-2017-02-23-17-33-50","errorUrl":null,"homepage":"http://azure-cli-2017-02-23-17-33-50","keyCredentials":[],"logoutUrl":null,"microsoftFirstParty":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
+        the application to access azure-cli-2017-02-23-17-33-50 on behalf of the signed-in
+        user.","adminConsentDisplayName":"Access azure-cli-2017-02-23-17-33-50","id":"a6c941b1-dbc2-4f8e-97d5-d04af3631c7d","isEnabled":true,"lang":null,"origin":"Application","type":"User","userConsentDescription":"Allow
+        the application to access azure-cli-2017-02-23-17-33-50 on your behalf.","userConsentDisplayName":"Access
+        azure-cli-2017-02-23-17-33-50","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"AzureSDKTeam","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["http://vcr_resource_group","cbd47edd-8cac-4a0b-97e4-edbab8c408b6"],"tags":[],"useCustomTokenSigningKey":null}]}'}
     headers:
       Access-Control-Allow-Origin: ['*']
       Cache-Control: [no-cache]
       Content-Length: ['1580']
       Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
       DataServiceVersion: [3.0;]
-      Date: ['Fri, 09 Dec 2016 20:42:17 GMT']
-      Duration: ['1983968']
+      Date: ['Thu, 23 Feb 2017 17:34:27 GMT']
+      Duration: ['972906']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
@@ -1918,9 +2059,9 @@ interactions:
       X-AspNet-Version: [4.0.30319]
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET, ASP.NET]
-      ocp-aad-diagnostics-server-name: [wUAYkBKal6oqagFY7aouGCtQCtmejpC9YPiTOfHJ8us=]
-      ocp-aad-session-key: [6RHX6ayjJn-u2wlQZt8cWPI1NOrFkKYXv6ZP7J9h39yhFJDoelSZCOXrvypxZ5sjMoQNCTrNTLk4opNh9Ka27t1f3FkxNNwQpomn0JeuEyVDKrdxb_qpkMR2o-cVtgaCgDieFSY1JLZ3ZgB7slqLyQ._sHIuE1YBJxAkUxuldXOGqXuryTGixQAmg3FfGTQ-XA]
-      request-id: [950f0ea9-14a9-4b95-bb86-ecc25d3b3bb8]
+      ocp-aad-diagnostics-server-name: [5sr4vO82qnV65er7rR9kfoSuPyyr4Aywa4wTYQx4vKA=]
+      ocp-aad-session-key: [71_YCJFhww18Ezs8EPher6lF-GjnK6aRPGvqMXrwCCtIOYP1vj9mh-YPAhkZKnDSoumJTN_RclEvQUQgg9dJemM-9KFYcu8m9EFsGw1lXsVdP2ouitYGyJt9cGqMQVdHWhgLE9GU5OUBcTYWJVn3BQ.6rI92e_EN0-w11cHpXylo3qlEqRG2kr8kkyfNnS5nVA]
+      request-id: [d3fb54bf-4180-498a-acd9-cee0dda8c18b]
       x-ms-dirapi-data-contract-version: [1.6-internal]
     status: {code: 200, message: OK}
 - request:
@@ -1931,36 +2072,35 @@ interactions:
       CommandName: [role assignment delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [e0761064-be4f-11e6-8c2b-64510658e3b3]
+      x-ms-client-request-id: [3a804da6-f9ee-11e6-9eee-64510658e3b3]
     method: GET
-    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%27http%3A%2F%2Fcli_create_rbac_sp%27%29&api-version=1.6
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%27http%3A%2F%2Fvcr_resource_group%27%29&api-version=1.6
   response:
-    body: {string: '{"odata.metadata":"https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"cda5291d-37a9-44f0-8940-64717dc06cbd","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"azure-cli-2016-12-09-20-41-40","appId":"7e7c7423-5658-478f-99ad-ad2e3e84e3b7","appOwnerTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"azure-cli-2016-12-09-20-41-40","errorUrl":null,"homepage":"http://azure-cli-2016-12-09-20-41-40","keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
-        the application to access azure-cli-2016-12-09-20-41-40 on behalf of the signed-in
-        user.","adminConsentDisplayName":"Access azure-cli-2016-12-09-20-41-40","id":"8739fdcb-d0bf-4f77-93d9-3717c208bcc9","isEnabled":true,"type":"User","userConsentDescription":"Allow
-        the application to access azure-cli-2016-12-09-20-41-40 on your behalf.","userConsentDisplayName":"Access
-        azure-cli-2016-12-09-20-41-40","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"AzureSDKTeam","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["http://cli_create_rbac_sp","7e7c7423-5658-478f-99ad-ad2e3e84e3b7"],"servicePrincipalType":"Application","tags":[]}]}'}
+    body: {string: '{"odata.metadata":"https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"75759c09-6804-4038-898d-1d41a6797d40","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"azure-cli-2017-02-23-17-33-50","appId":"cbd47edd-8cac-4a0b-97e4-edbab8c408b6","appOwnerTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"azure-cli-2017-02-23-17-33-50","errorUrl":null,"homepage":"http://azure-cli-2017-02-23-17-33-50","keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
+        the application to access azure-cli-2017-02-23-17-33-50 on behalf of the signed-in
+        user.","adminConsentDisplayName":"Access azure-cli-2017-02-23-17-33-50","id":"a6c941b1-dbc2-4f8e-97d5-d04af3631c7d","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        the application to access azure-cli-2017-02-23-17-33-50 on your behalf.","userConsentDisplayName":"Access
+        azure-cli-2017-02-23-17-33-50","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"AzureSDKTeam","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["http://vcr_resource_group","cbd47edd-8cac-4a0b-97e4-edbab8c408b6"],"servicePrincipalType":"Application","tags":[]}]}'}
     headers:
       Access-Control-Allow-Origin: ['*']
       Cache-Control: [no-cache]
       Content-Length: ['1502']
       Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
       DataServiceVersion: [3.0;]
-      Date: ['Fri, 09 Dec 2016 20:42:17 GMT']
-      Duration: ['1441756']
+      Date: ['Thu, 23 Feb 2017 17:34:28 GMT']
+      Duration: ['822387']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       X-AspNet-Version: [4.0.30319]
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET, ASP.NET]
-      ocp-aad-diagnostics-server-name: [lyW4+NGrYGveYCvHoTqqxn2sbznKoxnTkModdhBact8=]
-      ocp-aad-session-key: [zTh-QsHObVMlHiTmQl8Il0mEgtZAE-oSWC8j73cphmOuG_Kg4hG8jqXNqhhUjflEWZ30gLcnaxRn0G0m9oYpkY9_Jk5zaE6mnjxS5hFwZkU4oPZ-i8roYHDZycTQ4NMAds2yYRUEcWpZFAhyppJFWQ.qi7C4IJJ0HEqOiXxSOHkBpj_rE18PDhggC_RIXN55z0]
-      request-id: [7e9d15aa-fa73-48bd-8ec2-e93a17582e65]
+      ocp-aad-diagnostics-server-name: [Ue0m2ry87paBgn6wfB+K5tt5b2Dv1ZHncR3p21kT7JM=]
+      ocp-aad-session-key: [Cc81EW58tZYwlF7Tk6Gmy2GkVcpSJv5OT7TPjwN2zSJwBw87MIU8YQckuVP_BveQcMbUrgK7Ea7OVgVUYwmV_DuWd85Btkw1zo-YIJ43fo_2DqOszgFDnMf-Kr2j3qgb_sfvsA6jEJiJEgxKyPOssw.OLx6MKpYKvsGr2nKXs2EFV_oy7VVAW52jnkIWTuCLf8]
+      request-id: [6fe291e5-ba02-4a36-8eba-4406d0f9b47d]
       x-ms-dirapi-data-contract-version: ['1.6']
     status: {code: 200, message: OK}
 - request:
@@ -1970,18 +2110,18 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f9cd75e6-be4f-11e6-b303-64510658e3b3]
+      x-ms-client-request-id: [5496a7c8-f9ee-11e6-b388-64510658e3b3]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments?$filter=principalId%20eq%20%27cda5291d-37a9-44f0-8940-64717dc06cbd%27&api-version=2015-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments?$filter=principalId%20eq%20%2775759c09-6804-4038-898d-1d41a6797d40%27&api-version=2015-07-01
   response:
-    body: {string: '{"value":[{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"cda5291d-37a9-44f0-8940-64717dc06cbd","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleAssignments/3124b869-875b-420c-af90-2d67d98ed97e","type":"Microsoft.Authorization/roleAssignments","name":"3124b869-875b-420c-af90-2d67d98ed97e"},{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"cda5291d-37a9-44f0-8940-64717dc06cbd","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_create_rbac_sp","createdOn":"2016-12-09T20:42:14.0439349Z","updatedOn":"2016-12-09T20:42:14.0439349Z","createdBy":"e7e158d3-7cdc-47cd-8825-5859d7ab2b55","updatedBy":"e7e158d3-7cdc-47cd-8825-5859d7ab2b55"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_create_rbac_sp/providers/Microsoft.Authorization/roleAssignments/3de99cfa-402c-44e5-ae4d-89a379b36e47","type":"Microsoft.Authorization/roleAssignments","name":"3de99cfa-402c-44e5-ae4d-89a379b36e47"}],"nextLink":null}'}
+    body: {string: '{"value":[{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"75759c09-6804-4038-898d-1d41a6797d40","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleAssignments/f3d93f2d-dd32-4489-a0b3-661256828e82","type":"Microsoft.Authorization/roleAssignments","name":"f3d93f2d-dd32-4489-a0b3-661256828e82"},{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"75759c09-6804-4038-898d-1d41a6797d40","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vcr_resource_group","createdOn":"2017-02-23T17:34:24.6940853Z","updatedOn":"2017-02-23T17:34:24.6940853Z","createdBy":"e7e158d3-7cdc-47cd-8825-5859d7ab2b55","updatedBy":"e7e158d3-7cdc-47cd-8825-5859d7ab2b55"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vcr_resource_group/providers/Microsoft.Authorization/roleAssignments/cfaa2150-8df7-4145-9f8e-7d7c6f80272f","type":"Microsoft.Authorization/roleAssignments","name":"cfaa2150-8df7-4145-9f8e-7d7c6f80272f"}],"nextLink":null}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 09 Dec 2016 20:42:18 GMT']
+      Date: ['Thu, 23 Feb 2017 17:34:29 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
@@ -2001,18 +2141,18 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f9f36850-be4f-11e6-9fff-64510658e3b3]
+      x-ms-client-request-id: [54c45770-f9ee-11e6-bdf0-64510658e3b3]
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_create_rbac_sp/providers/Microsoft.Authorization/roleAssignments/3de99cfa-402c-44e5-ae4d-89a379b36e47?api-version=2015-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vcr_resource_group/providers/Microsoft.Authorization/roleAssignments/cfaa2150-8df7-4145-9f8e-7d7c6f80272f?api-version=2015-07-01
   response:
-    body: {string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"cda5291d-37a9-44f0-8940-64717dc06cbd","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_create_rbac_sp","createdOn":"2016-12-09T20:42:14.0439349Z","updatedOn":"2016-12-09T20:42:14.0439349Z","createdBy":"e7e158d3-7cdc-47cd-8825-5859d7ab2b55","updatedBy":"e7e158d3-7cdc-47cd-8825-5859d7ab2b55"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_create_rbac_sp/providers/Microsoft.Authorization/roleAssignments/3de99cfa-402c-44e5-ae4d-89a379b36e47","type":"Microsoft.Authorization/roleAssignments","name":"3de99cfa-402c-44e5-ae4d-89a379b36e47"}'}
+    body: {string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"75759c09-6804-4038-898d-1d41a6797d40","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vcr_resource_group","createdOn":"2017-02-23T17:34:24.6940853Z","updatedOn":"2017-02-23T17:34:24.6940853Z","createdBy":"e7e158d3-7cdc-47cd-8825-5859d7ab2b55","updatedBy":"e7e158d3-7cdc-47cd-8825-5859d7ab2b55"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/vcr_resource_group/providers/Microsoft.Authorization/roleAssignments/cfaa2150-8df7-4145-9f8e-7d7c6f80272f","type":"Microsoft.Authorization/roleAssignments","name":"cfaa2150-8df7-4145-9f8e-7d7c6f80272f"}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 09 Dec 2016 20:42:18 GMT']
+      Date: ['Thu, 23 Feb 2017 17:34:30 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
@@ -2023,7 +2163,7 @@ interactions:
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET]
       content-length: ['788']
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -2033,36 +2173,35 @@ interactions:
       CommandName: [role assignment delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [e0761064-be4f-11e6-8c2b-64510658e3b3]
+      x-ms-client-request-id: [3a804da6-f9ee-11e6-9eee-64510658e3b3]
     method: GET
-    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%27http%3A%2F%2Fcli_create_rbac_sp%27%29&api-version=1.6
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%27http%3A%2F%2Fvcr_resource_group%27%29&api-version=1.6
   response:
-    body: {string: '{"odata.metadata":"https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"cda5291d-37a9-44f0-8940-64717dc06cbd","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"azure-cli-2016-12-09-20-41-40","appId":"7e7c7423-5658-478f-99ad-ad2e3e84e3b7","appOwnerTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"azure-cli-2016-12-09-20-41-40","errorUrl":null,"homepage":"http://azure-cli-2016-12-09-20-41-40","keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
-        the application to access azure-cli-2016-12-09-20-41-40 on behalf of the signed-in
-        user.","adminConsentDisplayName":"Access azure-cli-2016-12-09-20-41-40","id":"8739fdcb-d0bf-4f77-93d9-3717c208bcc9","isEnabled":true,"type":"User","userConsentDescription":"Allow
-        the application to access azure-cli-2016-12-09-20-41-40 on your behalf.","userConsentDisplayName":"Access
-        azure-cli-2016-12-09-20-41-40","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"AzureSDKTeam","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["http://cli_create_rbac_sp","7e7c7423-5658-478f-99ad-ad2e3e84e3b7"],"servicePrincipalType":"Application","tags":[]}]}'}
+    body: {string: '{"odata.metadata":"https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"75759c09-6804-4038-898d-1d41a6797d40","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"azure-cli-2017-02-23-17-33-50","appId":"cbd47edd-8cac-4a0b-97e4-edbab8c408b6","appOwnerTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"azure-cli-2017-02-23-17-33-50","errorUrl":null,"homepage":"http://azure-cli-2017-02-23-17-33-50","keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
+        the application to access azure-cli-2017-02-23-17-33-50 on behalf of the signed-in
+        user.","adminConsentDisplayName":"Access azure-cli-2017-02-23-17-33-50","id":"a6c941b1-dbc2-4f8e-97d5-d04af3631c7d","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        the application to access azure-cli-2017-02-23-17-33-50 on your behalf.","userConsentDisplayName":"Access
+        azure-cli-2017-02-23-17-33-50","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"AzureSDKTeam","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["http://vcr_resource_group","cbd47edd-8cac-4a0b-97e4-edbab8c408b6"],"servicePrincipalType":"Application","tags":[]}]}'}
     headers:
       Access-Control-Allow-Origin: ['*']
       Cache-Control: [no-cache]
       Content-Length: ['1502']
       Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
       DataServiceVersion: [3.0;]
-      Date: ['Fri, 09 Dec 2016 20:42:19 GMT']
-      Duration: ['1505409']
+      Date: ['Thu, 23 Feb 2017 17:34:30 GMT']
+      Duration: ['739912']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       X-AspNet-Version: [4.0.30319]
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET, ASP.NET]
-      ocp-aad-diagnostics-server-name: [5q1QBvY4JEbYxExoTOFN8jS7rI6cNysIhk+BBVr0cFc=]
-      ocp-aad-session-key: [VHKDGRFNFQXjvm5gV_c3Tf4OkVsTGDfhAfHvbVINqP_ErqQJ8pmQasGyncOm60fs2Tw1hkLX_LkXUlbJcTs03psLva--KiyYwtMqua-73uB1to-3ZLat7ImyFW_C-LExVRAX2xfHn_Wx65Vl3VibTg.FGnjwEzar5PqUnhJn6RvaGlVs5S78IX1aUJ1IVPvNb4]
-      request-id: [c35438d9-0164-412f-b98f-15bc84b4dc47]
+      ocp-aad-diagnostics-server-name: [R+5lMh6N45vqXr8u5czDtA2s3YGt7KgN1DoL2Lt9swI=]
+      ocp-aad-session-key: [7xsosr2Ipxc3LNE2xTW_uHUhDN3mzLEdwRSfH9n7so7I5BfOoyDRaahba91M9eT2tRKC2bWkLF-_vlDesK4aZZRx51adis14jfF76qOPEFTFQiJosKlzq88zA6qqfnAKDqwmDvwdFnOfqgekE-pLdQ.vHCo-ytNNNq2fki-rkCtRrZehHPQDA1ryRFrvga43D8]
+      request-id: [675ee904-ed73-440e-b8df-efbbf2ca7eff]
       x-ms-dirapi-data-contract-version: ['1.6']
     status: {code: 200, message: OK}
 - request:
@@ -2072,18 +2211,18 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [fa8a6a6e-be4f-11e6-a423-64510658e3b3]
+      x-ms-client-request-id: [5591ffd0-f9ee-11e6-b19e-64510658e3b3]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments?$filter=principalId%20eq%20%27cda5291d-37a9-44f0-8940-64717dc06cbd%27&api-version=2015-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments?$filter=principalId%20eq%20%2775759c09-6804-4038-898d-1d41a6797d40%27&api-version=2015-07-01
   response:
-    body: {string: '{"value":[{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"cda5291d-37a9-44f0-8940-64717dc06cbd","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleAssignments/3124b869-875b-420c-af90-2d67d98ed97e","type":"Microsoft.Authorization/roleAssignments","name":"3124b869-875b-420c-af90-2d67d98ed97e"}],"nextLink":null}'}
+    body: {string: '{"value":[{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"75759c09-6804-4038-898d-1d41a6797d40","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleAssignments/f3d93f2d-dd32-4489-a0b3-661256828e82","type":"Microsoft.Authorization/roleAssignments","name":"f3d93f2d-dd32-4489-a0b3-661256828e82"}],"nextLink":null}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 09 Dec 2016 20:42:19 GMT']
+      Date: ['Thu, 23 Feb 2017 17:34:31 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
@@ -2103,18 +2242,18 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          authorizationmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/TEST/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [faace852-be4f-11e6-8df4-64510658e3b3]
+      x-ms-client-request-id: [55da35ec-f9ee-11e6-b03d-64510658e3b3]
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments/3124b869-875b-420c-af90-2d67d98ed97e?api-version=2015-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments/f3d93f2d-dd32-4489-a0b3-661256828e82?api-version=2015-07-01
   response:
-    body: {string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"cda5291d-37a9-44f0-8940-64717dc06cbd","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleAssignments/3124b869-875b-420c-af90-2d67d98ed97e","type":"Microsoft.Authorization/roleAssignments","name":"3124b869-875b-420c-af90-2d67d98ed97e"}'}
+    body: {string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"75759c09-6804-4038-898d-1d41a6797d40","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleAssignments/f3d93f2d-dd32-4489-a0b3-661256828e82","type":"Microsoft.Authorization/roleAssignments","name":"f3d93f2d-dd32-4489-a0b3-661256828e82"}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 09 Dec 2016 20:42:19 GMT']
+      Date: ['Thu, 23 Feb 2017 17:34:31 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
@@ -2125,7 +2264,7 @@ interactions:
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET]
       content-length: ['720']
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -2135,35 +2274,35 @@ interactions:
       CommandName: [ad app delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [e0761064-be4f-11e6-8c2b-64510658e3b3]
+      x-ms-client-request-id: [3a804da6-f9ee-11e6-9eee-64510658e3b3]
     method: GET
-    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/applications?$filter=identifierUris%2Fany%28s%3As%20eq%20%27http%3A%2F%2Fcli_create_rbac_sp%27%29&api-version=1.6
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/applications?$filter=identifierUris%2Fany%28s%3As%20eq%20%27http%3A%2F%2Fvcr_resource_group%27%29&api-version=1.6
   response:
-    body: {string: '{"odata.metadata":"https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/$metadata#directoryObjects","value":[{"odata.type":"Microsoft.DirectoryServices.Application","objectType":"Application","objectId":"aaca1d37-c997-4739-9ab8-e6af46321ee6","deletionTimestamp":null,"addIns":[],"appId":"7e7c7423-5658-478f-99ad-ad2e3e84e3b7","appRoles":[],"availableToOtherTenants":false,"displayName":"azure-cli-2016-12-09-20-41-40","errorUrl":null,"groupMembershipClaims":null,"homepage":"http://azure-cli-2016-12-09-20-41-40","identifierUris":["http://cli_create_rbac_sp"],"keyCredentials":[],"knownClientApplications":[],"mainLogo@odata.mediaEditLink":"directoryObjects/aaca1d37-c997-4739-9ab8-e6af46321ee6/Microsoft.DirectoryServices.Application/mainLogo","logoutUrl":null,"oauth2AllowImplicitFlow":false,"oauth2AllowUrlPathMatching":false,"oauth2Permissions":[{"adminConsentDescription":"Allow
-        the application to access azure-cli-2016-12-09-20-41-40 on behalf of the signed-in
-        user.","adminConsentDisplayName":"Access azure-cli-2016-12-09-20-41-40","id":"8739fdcb-d0bf-4f77-93d9-3717c208bcc9","isEnabled":true,"type":"User","userConsentDescription":"Allow
-        the application to access azure-cli-2016-12-09-20-41-40 on your behalf.","userConsentDisplayName":"Access
-        azure-cli-2016-12-09-20-41-40","value":"user_impersonation"}],"oauth2RequirePostResponse":false,"passwordCredentials":[{"customKeyIdentifier":null,"endDate":"2017-12-09T20:41:40.13883Z","keyId":"ab6e6f54-fd82-45e8-b61e-8651041d4c44","startDate":"2016-12-09T20:41:40.13883Z","value":null}],"publicClient":null,"recordConsentConditions":null,"replyUrls":[],"requiredResourceAccess":[],"samlMetadataUrl":null}]}'}
+    body: {string: '{"odata.metadata":"https://graph.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a/$metadata#directoryObjects/Microsoft.DirectoryServices.Application","value":[{"odata.type":"Microsoft.DirectoryServices.Application","objectType":"Application","objectId":"8578d509-5d2f-416b-94ce-23d53f9eb5ef","deletionTimestamp":null,"addIns":[],"appId":"cbd47edd-8cac-4a0b-97e4-edbab8c408b6","appRoles":[],"availableToOtherTenants":false,"displayName":"azure-cli-2017-02-23-17-33-50","errorUrl":null,"groupMembershipClaims":null,"homepage":"http://azure-cli-2017-02-23-17-33-50","identifierUris":["http://vcr_resource_group"],"keyCredentials":[],"knownClientApplications":[],"logoutUrl":null,"oauth2AllowImplicitFlow":false,"oauth2AllowUrlPathMatching":false,"oauth2Permissions":[{"adminConsentDescription":"Allow
+        the application to access azure-cli-2017-02-23-17-33-50 on behalf of the signed-in
+        user.","adminConsentDisplayName":"Access azure-cli-2017-02-23-17-33-50","id":"a6c941b1-dbc2-4f8e-97d5-d04af3631c7d","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        the application to access azure-cli-2017-02-23-17-33-50 on your behalf.","userConsentDisplayName":"Access
+        azure-cli-2017-02-23-17-33-50","value":"user_impersonation"}],"oauth2RequirePostResponse":false,"passwordCredentials":[{"customKeyIdentifier":null,"endDate":"2018-02-23T17:33:50.465795Z","keyId":"52d87eba-1a6f-4b7c-8b32-4123522c4de3","startDate":"2017-02-23T17:33:50.465795Z","value":null}],"publicClient":null,"recordConsentConditions":null,"replyUrls":[],"requiredResourceAccess":[],"samlMetadataUrl":null}]}'}
     headers:
       Access-Control-Allow-Origin: ['*']
       Cache-Control: [no-cache]
-      Content-Length: ['1670']
+      Content-Length: ['1576']
       Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
       DataServiceVersion: [3.0;]
-      Date: ['Fri, 09 Dec 2016 20:42:20 GMT']
-      Duration: ['1441560']
+      Date: ['Thu, 23 Feb 2017 17:34:32 GMT']
+      Duration: ['606540']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       X-AspNet-Version: [4.0.30319]
+      X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET, ASP.NET]
-      ocp-aad-diagnostics-server-name: [m9M7FwYn4nG+o6gcMPqNm7KXN8+wB02LW2dyryhOK00=]
-      ocp-aad-session-key: [gnINBA8ISUguIzEO33foY_eKGm1mzCUr7_sMXTwohnl5hMLku54JfzWjL6JfSC5SRS753SPqe7B13nZsxS1GIQH1MDSYwM8sN357MzjROUYIXAhPz2Mjy0phKFkQMton2eUWrn1qMhsxs__61-hWjw.XJ-LG97AWUbZHfOafyL7AmcEyVPK8QGON9HWN9M4KTc]
-      request-id: [1ba50d2b-b716-445d-b035-8118c7c43d87]
+      ocp-aad-diagnostics-server-name: [Ufk1wScvJwPf0Z+EQXO7gDddHlofh2ABvAGw0ei/oq4=]
+      ocp-aad-session-key: [kcbPeiHjVNb3-szuCjF02Fw0cGBhq9kZVTiCEPTWZIvbdIbt8hVl1YCsbRM5sxEk1oxix94hW-q9awwzO6tTcPcZ3Qb4G86eOV036EAWe5B_AmTJrMMJp5E2o1wdH7pFZy9aYS5UQmmQjNlZ3HZxog.gIaP28Ccn93czDrOTf3Wbdj2d3J7h9W4sX9YzyzMbcU]
+      request-id: [1b99df45-002e-4759-8680-60ea21680c1a]
       x-ms-dirapi-data-contract-version: ['1.6']
     status: {code: 200, message: OK}
 - request:
@@ -2175,30 +2314,29 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.5
-          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.0b10+dev]
+      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
+          graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python AZURECLI/0.1.2rc1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [e0761064-be4f-11e6-8c2b-64510658e3b3]
+      x-ms-client-request-id: [3a804da6-f9ee-11e6-9eee-64510658e3b3]
     method: DELETE
-    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/applications/aaca1d37-c997-4739-9ab8-e6af46321ee6?api-version=1.6
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/applications/8578d509-5d2f-416b-94ce-23d53f9eb5ef?api-version=1.6
   response:
     body: {string: ''}
     headers:
       Access-Control-Allow-Origin: ['*']
       Cache-Control: [no-cache]
       DataServiceVersion: [1.0;]
-      Date: ['Fri, 09 Dec 2016 20:42:21 GMT']
-      Duration: ['4364802']
+      Date: ['Thu, 23 Feb 2017 17:34:33 GMT']
+      Duration: ['1721382']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       X-AspNet-Version: [4.0.30319]
       X-Content-Type-Options: [nosniff]
       X-Powered-By: [ASP.NET, ASP.NET]
-      ocp-aad-diagnostics-server-name: [JVlo9m2eEzdwoyBD/e4ZM9GTtwNdqo5bFN6pbBiJspY=]
-      ocp-aad-session-key: [VTZFU6pLgpmVJZFwjyUsZwbD5Rv02fkqDhSb7Wi4QoOOSqApIRfMU3r9sKtcigUrqQheOsewIdxFL2Iay5Y0eTJFZaSdt-wnN4A2ld59m4fXHF18Iko7u0aTudz2w10iu4JjWIrfLAHF9njWMwyIVA.BvylAxGgCPaoNfAfODkcsLvAPKzOKR4fu33YITTHOME]
-      request-id: [ea0445fd-dc12-446e-b489-398110efcc37]
+      ocp-aad-diagnostics-server-name: [4CwCDhQ7biopU6QZ/lMLzQfBMWZK+89lPsbwB+wCngM=]
+      ocp-aad-session-key: [dRhkUaFI_T7BWRpxUyYWz5U7UsliSB2vgccSlT02iOsgrqNAHvF0pSWMzqrC6Nnr9kz4Ehad0cV0aeXCc3pn8Sm5o8dH7WwLUSF9RZQo5g6COWU51hTSszK-XtB5S80civa_Ow2U3bd8iVMUE1uKng.B1cosE38ItPWgzKBjpWd7mEB8-k_CjKJhgT09wnHZ_M]
+      request-id: [d9c5ccf1-a1e3-4119-bdf7-43bdd668b5c0]
       x-ms-dirapi-data-contract-version: ['1.6']
     status: {code: 204, message: No Content}
 version: 1
