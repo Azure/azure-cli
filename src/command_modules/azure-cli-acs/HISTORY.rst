@@ -3,6 +3,13 @@
 Release History
 ===============
 
+0.1.2rc2 (2017-02-22)
++++++++++++++++++++++
+
+* Rev compute package to 0.33.rc1 for new API version.
+* Documentation fixes.
+
+
 0.1.2rc1 (2017-02-17)
 +++++++++++++++++++++
 
