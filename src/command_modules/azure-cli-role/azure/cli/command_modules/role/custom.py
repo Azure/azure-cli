@@ -451,7 +451,7 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
     scopes = scopes or ['/subscriptions/' + role_client.config.subscription_id]
     sp_oid = None
     sp_created = False
-    _RETRY_TIMES = 24
+    _RETRY_TIMES = 36
 
     app_display_name = None
     if name and not '://' in name:
@@ -462,45 +462,44 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
         query_exp = 'servicePrincipalNames/any(x:x eq \'{}\')'.format(name)
         aad_sps = list(graph_client.service_principals.list(filter=query_exp))
         if aad_sps:
-            sp_oid = aad_sps[0].object_id
-            app_id = aad_sps[0].app_id
+            raise CLIError("'{}' already exists.".format(name))
 
     #pylint: disable=protected-access
-    if not sp_oid:
-        start_date = datetime.datetime.utcnow()
-        app_display_name = app_display_name or ('azure-cli-' +
-                                                start_date.strftime('%Y-%m-%d-%H-%M-%S'))
-        if name is None:
-            name = 'http://' + app_display_name # just a valid uri, no need to exist
 
-        end_date = start_date + relativedelta(years=years)
-        password = password or str(uuid.uuid4())
-        aad_application = create_application(graph_client.applications,
-                                             display_name=app_display_name, #pylint: disable=too-many-function-args
-                                             homepage='http://'+app_display_name,
-                                             identifier_uris=[name],
-                                             available_to_other_tenants=False,
-                                             password=password,
-                                             start_date=start_date,
-                                             end_date=end_date)
-        #pylint: disable=no-member
-        app_id = aad_application.app_id
-        #retry till server replication is done
-        for l in range(0, _RETRY_TIMES):
-            try:
-                aad_sp = _create_service_principal(app_id, resolve_app=False)
-                break
-            except Exception as ex: #pylint: disable=broad-except
-                #pylint: disable=line-too-long
-                if l < _RETRY_TIMES and 'The appId of the service principal does not reference a valid application object' in str(ex):
-                    time.sleep(5)
-                    logger.warning('Retrying service principal creation: %s/%s', l+1, _RETRY_TIMES)
-                else:
-                    logger.warning("Creating service principal failed for appid '%s'. Trace followed:\n%s",
-                                   name, ex.response.headers if hasattr(ex, 'response') else ex) #pylint: disable=no-member
-                    raise
-        sp_oid = aad_sp.object_id
-        sp_created = True
+    start_date = datetime.datetime.utcnow()
+    app_display_name = app_display_name or ('azure-cli-' +
+                                            start_date.strftime('%Y-%m-%d-%H-%M-%S'))
+    if name is None:
+        name = 'http://' + app_display_name # just a valid uri, no need to exist
+
+    end_date = start_date + relativedelta(years=years)
+    password = password or str(uuid.uuid4())
+    aad_application = create_application(graph_client.applications,
+                                         display_name=app_display_name, #pylint: disable=too-many-function-args
+                                         homepage='http://'+app_display_name,
+                                         identifier_uris=[name],
+                                         available_to_other_tenants=False,
+                                         password=password,
+                                         start_date=start_date,
+                                         end_date=end_date)
+    #pylint: disable=no-member
+    app_id = aad_application.app_id
+    #retry till server replication is done
+    for l in range(0, _RETRY_TIMES):
+        try:
+            aad_sp = _create_service_principal(app_id, resolve_app=False)
+            break
+        except Exception as ex: #pylint: disable=broad-except
+            #pylint: disable=line-too-long
+            if l < _RETRY_TIMES and 'The appId of the service principal does not reference a valid application object' in str(ex):
+                time.sleep(5)
+                logger.warning('Retrying service principal creation: %s/%s', l+1, _RETRY_TIMES)
+            else:
+                logger.warning("Creating service principal failed for appid '%s'. Trace followed:\n%s",
+                               name, ex.response.headers if hasattr(ex, 'response') else ex) #pylint: disable=no-member
+                raise
+    sp_oid = aad_sp.object_id
+    sp_created = True
 
     #retry while server replication is done
     if not skip_assignment:
