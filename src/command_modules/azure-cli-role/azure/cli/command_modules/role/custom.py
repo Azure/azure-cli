@@ -450,7 +450,6 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
     role_client = _auth_client_factory().role_assignments
     scopes = scopes or ['/subscriptions/' + role_client.config.subscription_id]
     sp_oid = None
-    sp_created = False
     _RETRY_TIMES = 36
 
     app_display_name = None
@@ -499,7 +498,6 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
                                name, ex.response.headers if hasattr(ex, 'response') else ex) #pylint: disable=no-member
                 raise
     sp_oid = aad_sp.object_id
-    sp_created = True
 
     #retry while server replication is done
     if not skip_assignment:
@@ -514,11 +512,11 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
                         time.sleep(5)
                         logger.warning('Retrying role assignment creation: %s/%s', l+1, _RETRY_TIMES)
                         continue
-                    elif sp_created:
+                    else:
                         #dump out history for diagnoses
-                        logger.warning('Role assignment creation failed. Traces followed:\n')
+                        logger.warning('Role assignment creation failed.\n')
                         if getattr(ex, 'response', None) is not None:
-                            logger.warning('role assignment response: %s\n', ex.response.headers) #pylint: disable=no-member
+                            logger.warning('role assignment response headers: %s\n', ex.response.headers) #pylint: disable=no-member
                     raise
 
     if expanded_view:
