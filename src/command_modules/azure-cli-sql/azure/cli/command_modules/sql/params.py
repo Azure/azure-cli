@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from ._util import ParametersContext, patch_arg_make_required
-
+from azure.cli.core.commands import register_cli_argument
 
 with ParametersContext(command='sql db') as c:
     c.register_alias('database_name', ('--name', '-n'))
@@ -66,6 +66,11 @@ with ParametersContext(command='sql db create') as c:
     from azure.mgmt.sql.models.database import Database
 
     c.expand('parameters', Database)
+
+    # [AaRoney] Overrinding one incorrect parameter.
+    register_cli_argument('sql db create', 'edition',
+                          options_list=('--edition',),
+                          help='The edition of the Azure SQL database.')
 
 with ParametersContext(command='sql elastic-pools create') as c:
     from azure.mgmt.sql.models.elastic_pool import ElasticPool
