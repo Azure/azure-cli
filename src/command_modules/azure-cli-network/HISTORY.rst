@@ -3,6 +3,15 @@
 Release History
 ===============
 
+0.1.2rc2 (2017-02-22)
++++++++++++++++++++++
+
+* Fix VPN connection create shared-key validator.
+* Add delete confirmation for DNS record-set delete.
+* Fix bug with local address prefixes.
+* Documentation updates.
+
+
 0.1.2rc1 (2017-02-17)
 +++++++++++++++++++++
 
