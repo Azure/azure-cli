@@ -45,3 +45,6 @@ with ParametersContext(command='monitor autoscale-settings create') as c:
         (AutoscaleSettingResource)
 
     c.expand('parameters', AutoscaleSettingResource)
+
+with ParametersContext(command='monitor metric-definitions list') as c:
+    c.argument('metric_names', None, nargs='+')
