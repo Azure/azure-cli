@@ -502,7 +502,7 @@ register_extra_cli_argument('network vnet-gateway update', 'address_prefixes', o
 
 # VPN connection
 register_cli_argument('network vpn-connection', 'virtual_network_gateway_connection_name', options_list=('--name', '-n'), metavar='NAME', id_part='name', help='Connection name.')
-register_cli_argument('network vpn-connection', 'shared_key', validator=load_cert_file('shared_key'), type=file_type, completer=FilesCompleter(), help='Shared IPSec key, base64 contents of the certificate file or file path.')
+register_cli_argument('network vpn-connection', 'shared_key', help='Shared IPSec key.')
 
 register_cli_argument('network vpn-connection create', 'connection_name', options_list=('--name', '-n'), metavar='NAME', help='Connection name.')
 register_cli_argument('network vpn-connection create', 'vnet_gateway1', validator=process_vpn_connection_create_namespace)

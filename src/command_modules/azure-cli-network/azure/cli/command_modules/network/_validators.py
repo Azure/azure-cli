@@ -572,7 +572,7 @@ def process_vpn_connection_create_namespace(namespace):
                 name=value)
         return value
 
-    if namespace.local_gateway2 or namespace.vnet_gateway2 and not namespace.shared_key:
+    if (namespace.local_gateway2 or namespace.vnet_gateway2) and not namespace.shared_key:
         raise CLIError('--shared-key is required for VNET-to-VNET or Site-to-Site connections.')
 
     if namespace.express_route_circuit2 and namespace.shared_key:
