@@ -19,10 +19,6 @@ def _list_metric_definitions_filter_builder(metric_names=None):
     '''
     filters = []
     if metric_names:
-        if "," in metric_names:
-            names = metric_names.split(",")
-            for metric_name in names:
-                filters.append("name.value eq '{}'".format(metric_name))
-        else:
-            filters.append("name.value eq '{}'".format(metric_names))
+        for metric_name in metric_names:
+            filters.append("name.value eq '{}'".format(metric_name))
     return ' or '.join(filters)
