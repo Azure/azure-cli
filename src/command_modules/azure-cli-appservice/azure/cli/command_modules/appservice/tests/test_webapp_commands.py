@@ -320,8 +320,8 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp, self.plan))
         #You can create and use any repros with the 3 files under "./sample_web" and with a 'staging 'branch
         slot = 'staging'
+        slot2 = 'dev'
         test_git_repo = 'https://github.com/yugangw-msft/azure-site-test'
-
 
         self.cmd('appservice web deployment slot create -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=[
             JMESPathCheck('name', self.webapp + '/' + slot)
@@ -331,6 +331,8 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('repoUrl', test_git_repo),
             JMESPathCheck('branch', slot)
             ])
+
+        self.cmd('appservice web deployment slot create -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2))
 
         import time
         time.sleep(30) # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
@@ -345,11 +347,15 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         time.sleep(30) # 30 seconds should be enough for the slot swap finished(Skipped under playback mode)
 
         r = requests.get('http://{}.azurewebsites.net'.format(self.webapp))
+
         #verify the web page contains content from the staging branch
         self.assertTrue('Staging' in str(r.content))
 
+        #verify we can switch with non production slot
+        self.cmd('appservice web deployment slot swap -g {} -n {} --slot {} --target-slot {}'.format(self.resource_group, self.webapp, slot, slot2), checks=NoneCheck())
+
         self.cmd('appservice web deployment slot list -g {} -n {}'.format(self.resource_group, self.webapp), checks=[
-            JMESPathCheck("length([])", 1),
+            JMESPathCheck("length([])", 2),
             JMESPathCheck('[0].name', self.webapp + '/' + slot),
             ])
         self.cmd('appservice web deployment slot delete -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=NoneCheck())

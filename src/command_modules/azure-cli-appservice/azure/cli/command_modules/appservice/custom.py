@@ -238,6 +238,18 @@ def config_source_control(resource_group_name, name, repo_url, repository_type=N
                                    'create_or_update_source_control',
                                    slot, source_control)
 
+
+def update_git_token(git_token=None):
+    '''
+    Update source control token cached in Azure app service. If no token is provided,
+    the command will clean up existing token.
+    '''
+    client = web_client_factory()
+    from azure.mgmt.web.models import SourceControl
+    sc = SourceControl('not-really-needed', name='GitHub', token=git_token or '')
+    return client.update_source_control('GitHub', sc)
+
+
 def show_source_control(resource_group_name, name, slot=None):
     return _generic_site_operation(resource_group_name, name, 'get_source_control', slot)
 
