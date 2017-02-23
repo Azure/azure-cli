@@ -5,11 +5,11 @@
 
 # AZURE CLI RBAC TEST DEFINITIONS
 import json
-import re
 import tempfile
 import time
 
 from azure.cli.core.test_utils.vcr_test_base import VCRTestBase, JMESPathCheck, ResourceGroupVCRTestBase, NoneCheck, MOCKED_SUBSCRIPTION_ID
+
 
 class RbacScenarioTest(ResourceGroupVCRTestBase):
 
@@ -25,13 +25,12 @@ class RbacScenarioTest(ResourceGroupVCRTestBase):
 
     def body(self):
         subscription_id = self.cmd('account list --query "[?isDefault].id" -o tsv')
-        self.cmd('ad sp create-for-rbac -n {} --password verySecret'.format(self.sp_name), checks=[
+        scope = '/subscriptions/{}'.format(subscription_id)
+        self.cmd('ad sp create-for-rbac -n {0} --scopes {1} {1}/resourceGroups/{2}'.format(self.sp_name, scope, self.resource_group), checks=[
             JMESPathCheck('name', self.sp_name)
             ])
-        self.cmd('ad sp create-for-rbac -n {} --scopes /subscriptions/{}/resourceGroups/{}'.format(self.sp_name, subscription_id, self.resource_group), checks=[
-            JMESPathCheck('name', self.sp_name)
-            ])
-        self.cmd('role assignment list --assignee {}'.format(self.sp_name), checks=[JMESPathCheck("length([])", 1)])
+        self.cmd('ad sp create-for-rbac -n {}'.format(self.sp_name), allowed_exceptions="'{}' already exists.".format(self.sp_name))
+        self.cmd('role assignment list --assignee {} --scope {}'.format(self.sp_name, scope), checks=[JMESPathCheck("length([])", 1)])
         self.cmd('role assignment list --assignee {} -g {}'.format(self.sp_name, self.resource_group), checks=[JMESPathCheck("length([])", 1)])
         self.cmd('role assignment delete --assignee {} -g {}'.format(self.sp_name, self.resource_group), checks=NoneCheck())
         self.cmd('role assignment delete --assignee {}'.format(self.sp_name), checks=NoneCheck())
