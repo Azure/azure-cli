@@ -18,6 +18,7 @@ sql_db_special_create_mode_params = ['create_mode', 'source_database_id', 'resto
 with ParametersContext(command='sql db') as c:
     c.register_alias('database_name', ('--name', '-n'))
     c.register_alias('server_name', ('--server', '-s'))
+    c.register_alias('elastic_pool_name', ('--elastic-pool',))
     c.register_alias('requested_service_objective_name', ('--service-objective-name',))
     c.register_alias('requested_service_objective_id', ('--service-objective-id',))
 
@@ -43,7 +44,7 @@ with ParametersContext(command='sql db copy') as c:
     configure_db_create_params(c)
     c.register_alias('requested_service_objective_name', ('--dest-service-objective-name',))
     c.register_alias('requested_service_objective_id', ('--dest-service-objective-id',))
-    c.register_alias('elastic_pool_name', ('--dest-elastic-pool-name',))
+    c.register_alias('elastic_pool_name', ('--dest-elastic-pool',))
     for i in sql_db_copy_ignored_params:
         c.ignore(i)
 
@@ -51,7 +52,7 @@ with ParametersContext(command='sql db create-secondary') as c:
     configure_db_create_params(c)
     c.register_alias('requested_service_objective_name', ('--secondary-service-objective-name',))
     c.register_alias('requested_service_objective_id', ('--secondary-service-objective-id',))
-    c.register_alias('elastic_pool_name', ('--secondary-elastic-pool-name',))
+    c.register_alias('elastic_pool_name', ('--secondary-elastic-pool',))
     for i in sql_db_copy_ignored_params:
         c.ignore(i)
 
@@ -62,7 +63,7 @@ with ParametersContext(command='sql db restore') as c:
     configure_db_create_params(c)
     c.register_alias('requested_service_objective_name', ('--dest-service-objective-name',))
     c.register_alias('requested_service_objective_id', ('--dest-service-objective-id',))
-    c.register_alias('elastic_pool_name', ('--dest-elastic-pool-name',))
+    c.register_alias('elastic_pool_name', ('--dest-elastic-pool',))
     for i in sql_db_restore_ignored_params:
         c.ignore(i)
 
@@ -116,7 +117,7 @@ with ParametersContext(command='sql elastic-pool') as c:
 #    c.register_alias('recommended_elastic_pool_name', ('--name', '-n'))
 
 #with ParametersContext(command='sql elastic-pool recommended db') as c:
-#    c.register_alias('recommended_elastic_pool_name', ('--recommended-elastic-pool-name',))
+#    c.register_alias('recommended_elastic_pool_name', ('--recommended-elastic-pool',))
 #    c.register_alias('database_name', ('--name', '-n'))
 
 with ParametersContext(command='sql elastic-pool') as c:

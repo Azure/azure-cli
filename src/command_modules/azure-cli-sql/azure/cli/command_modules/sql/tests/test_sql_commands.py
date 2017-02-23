@@ -375,7 +375,7 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # Create a database in an Azure sql elastic pool
         self.cmd('sql db create -g {} --server {} --name {} '
-                 '--elastic-pool-name {}'
+                 '--elastic-pool {}'
                  .format(rg, self.sql_server_name, self.database_name, self.pool_name),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
@@ -384,7 +384,7 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('status', 'Online')])
 
         # test sql elastic-pool db sub-group commands
-        #self.cmd('sql elastic-pool db list -g {} --server {} --elastic-pool-name {}'
+        #self.cmd('sql elastic-pool db list -g {} --server {} --elastic-pool {}'
         #         .format(rg, self.sql_server_name, self.pool_name),
         #         checks=[
         #             JMESPathCheck('length(@)', 1),
@@ -393,7 +393,7 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
         #             JMESPathCheck('[0].elasticPoolName', self.pool_name),
         #             JMESPathCheck('[0].status', 'Online')])
 
-        #self.cmd('sql elastic-pool db show -g {} --server {} --elastic-pool-name {} '
+        #self.cmd('sql elastic-pool db show -g {} --server {} --elastic-pool {} '
         #         '--name {}'
         #         .format(rg, self.sql_server_name, self.pool_name, self.database_name),
         #         checks=[
@@ -402,7 +402,7 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
         #             JMESPathCheck('elasticPoolName', self.pool_name),
         #             JMESPathCheck('status', 'Online')])
 
-        #self.cmd('sql elastic-pool db show-activity -g {} --server {} --elastic-pool-name {}'
+        #self.cmd('sql elastic-pool db show-activity -g {} --server {} --elastic-pool {}'
         #         .format(rg, self.sql_server_name, self.pool_name),
         #         checks=[
         #             JMESPathCheck('length(@)', 1),
