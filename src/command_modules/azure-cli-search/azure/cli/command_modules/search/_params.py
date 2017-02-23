@@ -1,0 +1,15 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
+from azure.cli.core.commands import CliArgumentType, register_cli_argument
+
+# pylint: disable=line-too-long
+
+query = CliArgumentType(
+    options_list=('--q', '-q'),
+    help='Query text to search for.'
+)
+
+register_cli_argument('search', 'criteria', query)

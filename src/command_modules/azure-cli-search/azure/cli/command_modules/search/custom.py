@@ -1,0 +1,106 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
+from __future__ import print_function
+
+import os
+import textwrap
+import shutil
+
+from whoosh.highlight import UppercaseFormatter, ContextFragmenter
+from whoosh.qparser import MultifieldParser
+from whoosh import index
+from whoosh.fields import TEXT, Schema
+
+from azure.cli.command_modules.search._gather_commands import build_command_table
+import azure.cli.core.azlogging as azlogging
+
+logger = azlogging.get_az_logger(__name__)
+
+INDEX_PATH = os.path.join(os.path.expanduser('~'), '.azure', 'search_index')
+
+schema = Schema(
+    cmd_name=TEXT(stored=True),
+    short_summary=TEXT(stored=True),
+    long_summary=TEXT(stored=True),
+    examples=TEXT(stored=True))
+
+
+def _cli_index_corpus():
+    return build_command_table()
+
+
+def _index_help():
+    ix = index.open_dir(INDEX_PATH)
+    writer = ix.writer()
+    for cmd, document in list(_cli_index_corpus().items()):
+        writer.add_document(
+            cmd_name=cmd,
+            short_summary=document.get('short-summary', ''),
+            long_summary=document.get('long-summary', ''),
+            examples=document.get('examples', '')
+        )
+    writer.commit()
+
+
+def _create_index():
+    if os.path.exists(INDEX_PATH):
+        shutil.rmtree(INDEX_PATH)
+
+    os.mkdir(INDEX_PATH)
+
+    index.create_in(INDEX_PATH, schema)
+    _index_help()
+
+
+def _ensure_index():
+    if not os.path.exists(INDEX_PATH):
+        _create_index()
+
+
+def _get_index():
+    _ensure_index()
+    return index.open_dir(INDEX_PATH)
+
+
+def _print_hit(hit):
+    def print_para(field):
+        if field not in hit:
+            print(hit)
+        print(textwrap.fill(
+            hit[field],
+            initial_indent='    ',
+            subsequent_indent='    '))
+
+    print('`az {0}`'.format(hit['cmd_name']))
+    print_para('short_summary')
+    if hit['long_summary']:
+        print_para('long_summary')
+    print('')
+
+
+def search(criteria, reindex=False):
+    """
+    You know, for search.
+    :param str criteria: Query text to search for.
+    :param bool reindex: Clear the current index and reindex the command modules.
+    :return:
+    :rtype: None
+    """
+    if reindex:
+        _create_index()
+
+    ix = _get_index()
+    qp = MultifieldParser(
+        ['cmd_name', 'short_summary', 'long_summary', 'examples'],
+        schema=schema
+    )
+    q = qp.parse(criteria)
+    with ix.searcher() as searcher:
+        results = searcher.search(q)
+        results.fragmenter = ContextFragmenter(maxchars=300, surround=200)
+        results.formatter = UppercaseFormatter()
+        for hit in results:
+            _print_hit(hit)
