@@ -4,7 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 from ._util import ParametersContext, patch_arg_make_required
-from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument
+from azure.cli.core.commands import CliArgumentType
+
+#####
+#           Reusable param type definitions
+#####
+
+server_param_type = CliArgumentType(options_list=('--server', '-s'), help='Name of the Azure SQL server.')
 
 ###############################################
 #                sql db                       #
@@ -16,8 +22,8 @@ from azure.cli.core.commands import register_cli_argument, register_extra_cli_ar
 sql_db_special_create_mode_params = ['create_mode', 'source_database_id', 'restorePointInTime']
 
 with ParametersContext(command='sql db') as c:
-    c.register_alias('database_name', ('--name', '-n'))
-    c.register_alias('server_name', ('--server', '-s'))
+    c.argument('database_name', options_list=('--name', '-n'), help='Name of the Azure SQL Database.')
+    c.argument('server_name', arg_type=server_param_type)
     c.register_alias('elastic_pool_name', ('--elastic-pool',))
     c.register_alias('requested_service_objective_name', ('--service-objective',))
     c.register_alias('requested_service_objective_id', ('--service-objective-id',))
@@ -28,7 +34,7 @@ def configure_db_create_params(c):
 
     # We have a wrapper function that determines server location so user doesn't need to specify it as param.
     # Also we have specific commands to special create modes which have their own required params, so
-    # database properties related to create mode can be ignores
+    # database properties related to create mode can be ignored
     ignores = ['location'] + sql_db_special_create_mode_params
     for p in ignores:
         c.ignore(p)
@@ -42,19 +48,26 @@ sql_db_copy_ignored_params = ['collation', 'edition', 'max_size_bytes']
 
 with ParametersContext(command='sql db copy') as c:
     configure_db_create_params(c)
-    c.register_alias('requested_service_objective_name', ('--dest-service-objective',))
-    c.register_alias('requested_service_objective_id', ('--dest-service-objective-id',))
-    c.register_alias('elastic_pool_name', ('--dest-elastic-pool',))
-    c.register_alias('dest_resource_group_name', ('--dest-resource-group',))
+
+    c.argument('elastic_pool_name', options_list=('--dest-elastic-pool',), help='Name of elastic pool to create the new database in.')
+    c.argument('dest_name', help='Name of the database that will be created as the copy destinaton.')
+    c.argument('dest_resource_group_name', options_list=('--dest-resource-group',), help='Name of the resouce group to create the copy in. If unspecified, defaults to the origin resource group.')
+    c.argument('dest_server_name', options_list=('--dest-server',), help='Name of the server to create the copy in. If unspecified, defaults to the origin server.')
+    c.argument('requested_service_objective_name', options_list=('--dest-service-objective',), help='Name of service objective for the new database.')
+    c.argument('requested_service_objective_id', options_list=('--dest-service-objective-id',), help='Id of service objective for the new database.')
+    
     for i in sql_db_copy_ignored_params:
         c.ignore(i)
 
 with ParametersContext(command='sql db create-secondary') as c:
     configure_db_create_params(c)
-    c.register_alias('requested_service_objective_name', ('--secondary-service-objective',))
-    c.register_alias('requested_service_objective_id', ('--secondary-service-objective-id',))
-    c.register_alias('elastic_pool_name', ('--secondary-elastic-pool',))
-    c.register_alias('dest_resource_group_name', ('--secondary-resource-group',))
+
+    c.argument('elastic_pool_name', options_list=('--dest-elastic-pool',), help='Name of elastic pool to create the new database in.')
+    c.argument('requested_service_objective_name', options_list=('--secondary-service-objective',), help='Name of service objective for the new secondary database.')
+    c.argument('requested_service_objective_id', options_list=('--secondary-service-objective-id',), help='Id of service objective for the new secondary database.')
+    c.argument('secondary_resource_group_name', options_list=('--secondary-resource-group',), help='Name of the resource group to create the new secondary database in. If unspecified, defaults to the origin resource group.')
+    c.argument('secondary_server_name', options_list=('--secondary-server',), help='Name of the server to create the new secondary database in.')
+
     for i in sql_db_copy_ignored_params:
         c.ignore(i)
 
@@ -113,7 +126,7 @@ with ParametersContext(command='sql db replication-link') as c:
 ###############################################
 
 with ParametersContext(command='sql elastic-pool') as c:
-    c.register_alias('elastic_pool_name', ('--name', '-n'))
+    c.argument('elastic_pool_name', options_list=('--name', '-n'), help='The name of the elastic pool.')
 
 ## Recommended elastic pools will not be included in the first batch of GA commands
 #with ParametersContext(command='sql elastic-pool recommended') as c:
@@ -124,7 +137,7 @@ with ParametersContext(command='sql elastic-pool') as c:
 #    c.register_alias('database_name', ('--name', '-n'))
 
 with ParametersContext(command='sql elastic-pool') as c:
-    c.register_alias('server_name', ('--server', '-s'))
+    c.argument('server_name', arg_type=server_param_type)
 
 with ParametersContext(command='sql elastic-pool create') as c:
     from azure.mgmt.sql.models.elastic_pool import ElasticPool
