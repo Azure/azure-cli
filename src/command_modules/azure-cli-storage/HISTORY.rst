@@ -3,6 +3,12 @@
 Release History
 ===============
 
+0.1.2rc2 (2017-02-22)
++++++++++++++++++++++
+
+* Enable copy in same storage account.
+* Documentation updates.
+
 0.1.2rc1 (2017-02-17)
 +++++++++++++++++++++
 

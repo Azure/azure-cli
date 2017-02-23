@@ -51,9 +51,9 @@ class AppServiceLongRunningOperation(LongRunningOperation): #pylint: disable=too
             detail = json.loads(ex.response.text)['Message']
             if self._creating_plan:
                 if 'Requested features are not supported in region' in detail:
-                    detail = ("Plan with linux worker is not supported in current region. " +
-                              "Run 'az appservice list-locations --linux-workers-enabled' " +
-                              "to cross check")
+                    detail = ("Plan with linux worker is not supported in current region. For " +
+                              "supported regions, please refer to https://docs.microsoft.com/en-us/"
+                              "azure/app-service-web/app-service-linux-intro")
                 elif 'Not enough available reserved instance servers to satisfy' in detail:
                     detail = ("Plan with Linux worker can only be created in a group " +
                               "which has never contained a Windows worker. Please use " +
@@ -494,7 +494,7 @@ def set_deployment_user(user_name, password=None):
             raise CLIError('Please specify both username and password in non-interactive mode.')
 
     user.publishing_password = password
-    result = client.provider.update_publishing_user(user)
+    result = client.update_publishing_user(user)
     return result
 
 def view_in_browser(resource_group_name, name, slot=None):
@@ -560,7 +560,8 @@ def swap_slot(resource_group_name, webapp, slot, target_slot=None):
     if target_slot is None:
         poller = client.web_apps.swap_slot_with_production(resource_group_name, webapp, slot, True)
     else:
-        poller = client.web_apps.swap_slots_slot(resource_group_name, webapp, slot, target_slot,)
+        poller = client.web_apps.swap_slot_slot(resource_group_name, webapp,
+                                                slot, target_slot, True)
 
     return AppServiceLongRunningOperation()(poller)
 

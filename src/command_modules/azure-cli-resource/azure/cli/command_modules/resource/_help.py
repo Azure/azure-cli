@@ -96,52 +96,52 @@ helps['resource list'] = """
 helps['resource show'] = """
     type: command
     short-summary: Get information about a resource.
-    long-summary: For example /subscriptions/0000/resourceGroups/myGroup/providers/Microsoft.Provider/resA/myA/resB/myB/resC/myC.
+    long-summary: For example /subscriptions/0000/resourceGroups/MyResourceGroup/providers/Microsoft.Provider/ResA/MyA/ResB/MyB/resC/MyC.
     examples:
         - name: Show a virtual machine.
           text: >
-            az vm show -g mygroup -n myvm --resource-type "Microsoft.Compute/virtualMachines"
+            az vm show -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
         - name: Show a web app using a resource identifier.
           text: >
-            az resource show --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myGroup/providers/Microsoft.Web/sites/myWebapp
+            az resource show --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp
         - name: Show a subnet.
           text: >
-            az resource show -g mygroup -n mysubnet --namespace microsoft.network --parent virtualnetworks/myvnet --resource-type subnets
+            az resource show -g MyResourceGroup -n MySubnet --namespace microsoft.network --parent virtualnetworks/MyVnet --resource-type subnets
         - name: Show a subnet using a resource identifier.
           text: >
-            az resource show --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myGroup/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/mysubnet
+            az resource show --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/MySubnet
         - name: Show an application gateway path rule.
           text: >
-            az resource show -g myGroup --namespace Microsoft.Network --parent applicationGateways/ag1/urlPathMaps/map1 --resource-type pathRules -n rule1  
+            az resource show -g MyResourceGroup --namespace Microsoft.Network --parent applicationGateways/ag1/urlPathMaps/map1 --resource-type pathRules -n rule1  
 """
 
 helps['resource delete'] = """
     type: command
     short-summary: Delete a resource. Reference the examples for help with arguments.
-    long-summary: For example, /subscriptions/0000/resourceGroups/myGroup/providers/Microsoft.Provider/resA/myA/resB/myB/resC/myC.
+    long-summary: For example, /subscriptions/0000/resourceGroups/MyResourceGroup/providers/Microsoft.Provider/ResA/MyA/ResB/MyB/ResC/MyC.
     examples:
         - name: Delete a virtual machine.
           text: >
-            az vm delete -g mygroup -n myvm --resource-type "Microsoft.Compute/virtualMachines"
+            az vm delete -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
         - name: Delete a web app using a resource identifier.
           text: >
-            az resource delete --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myGroup/providers/Microsoft.Web/sites/myWebapp
+            az resource delete --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp
         - name: Delete a subnet using a resource identifier.
           text: >
-            az resource delete --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myGroup/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/mysubnet
+            az resource delete --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/MySubnet
 """
 
 helps['resource tag'] = """
     type: command
     short-summary: Tag a resource. Reference the examples for help with arguments.
-    long-summary: For example, /subscriptions/0000/resourceGroups/myGroup/providers/Microsoft.Provider/resA/myA/resB/myB/resC/myC.
+    long-summary: For example, /subscriptions/0000/resourceGroups/MyResourceGroup/providers/Microsoft.Provider/ResA/MyA/ResB/MyB/resC/MyC.
     examples:
         - name: Tag a virtual machine.
           text: >
-            az resource tag --tags vmlist=vm1 -g mygroup -n myvm --resource-type "Microsoft.Compute/virtualMachines"
+            az resource tag --tags vmlist=vm1 -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
         - name: Tag a web app using a resource identifier.
           text: >
-            az resource tag --tags vmlist=vm1 --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myGroup/providers/Microsoft.Web/sites/myWebapp
+            az resource tag --tags vmlist=vm1 --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp
 """
 
 helps['resource update'] = """
@@ -153,10 +153,48 @@ helps['feature'] = """
     type: group
     short-summary: Manage resource provider features, such as previews.
 """
+
 helps['group'] = """
     type: group
     short-summary: Manage resource groups.
 """
+
+helps['group exists'] = """
+    type: command
+    short-summary: Checks whether resource group exists.
+    examples:
+        - name: Check group existence.
+          text: >
+            az group exists -n MyResourceGroup
+"""
+
+helps['group create'] = """
+    type: command
+    short-summary: Create a new resource group.
+    examples:
+        - name: Create a resource group in West US.
+          text: >
+            az group create -l westus -n MyResourceGroup
+"""
+
+helps['group delete'] = """
+    type: command
+    short-summary: Delete resource group.
+    examples:
+        - name: Delete a resource group.
+          text: >
+            az group delete -n MyResourceGroup
+"""
+
+helps['group list'] = """
+    type: command
+    short-summary: List resource groups, optionally filtered by a tag.
+    examples:
+        - name: List all resource groups for West US.
+          text: >
+            az group list --query "[?location=='westus']"
+"""
+
 helps['group update'] = """
     type: group
     short-summary: Update a resource group.
@@ -175,10 +213,10 @@ helps['group deployment create'] = """
     examples:
         - name: Create a deployment from a remote template file.
           text: >
-            az group deployment create -g mygroup --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+            az group deployment create -g MyResourceGroup --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
         - name: Create a deployment from a local template file and use parameter values in a string. 
           text: >
-            az group deployment create -g mygroup --template-file azuredeploy.json --parameters "{\\"location\\": {\\"value\\": \\"westus\\"}}"
+            az group deployment create -g MyResourceGroup --template-file azuredeploy.json --parameters "{\\"location\\": {\\"value\\": \\"westus\\"}}"
 """
 helps['group deployment export'] = """
     type: command

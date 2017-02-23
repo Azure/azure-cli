@@ -1415,7 +1415,7 @@ def convert_av_set_to_managed_disk(resource_group_name, availability_set_name):
 
 # pylint: disable=too-many-locals, unused-argument, too-many-statements
 def create_vm(vm_name, resource_group_name, image=None,
-              size='Standard_DS1', location=None, tags=None, no_wait=False,
+              size='Standard_DS1_v2', location=None, tags=None, no_wait=False,
               authentication_type=None, admin_password=None, admin_username=getpass.getuser(),
               ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
               availability_set=None,

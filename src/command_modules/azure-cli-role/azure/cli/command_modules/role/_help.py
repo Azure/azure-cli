@@ -12,9 +12,9 @@ helps['ad sp create-for-rbac'] = """
                 - name: Create role assignments with defaults.
                   text: az ad sp create-for-rbac
                 - name: Create role assignments with a custom name.
-                  text: az ad sp create-for-rbac -n "http://my-app"
+                  text: az ad sp create-for-rbac -n "http://MyApp"
                 - name: Create role assignments at the same time.
-                  text: az ad sp create-for-rbac -n "http://my-app" --role contributor --scopes /subscriptions/11111111-2222-3333-4444-555555555555/resourceGroups/mygroup /subscriptions/11111111-2222-3333-4444-666666666666/resourceGroups/my-another-group
+                  text: az ad sp create-for-rbac -n "http://MyApp" --role contributor --scopes /subscriptions/11111111-2222-3333-4444-555555555555/resourceGroups/MyResourceGroup /subscriptions/11111111-2222-3333-4444-666666666666/resourceGroups/MyAnotherResourceGroup
                 - name: Login with a service principal.
                   text: az login --service-principal -u <name> -p <password> --tenant <tenant>
                 - name: Reset credentials on expiration.
@@ -36,6 +36,9 @@ helps['role assignment'] = """
 helps['role assignment create'] = """
     type: command
     short-summary: Create a new role assignment.
+    examples:
+        - name: Create role assignment for a specified user, group, or service principal.
+          text: az role assignment create --assignee sp_name --role a_role
 """
 helps['role assignment delete'] = """
     type: command

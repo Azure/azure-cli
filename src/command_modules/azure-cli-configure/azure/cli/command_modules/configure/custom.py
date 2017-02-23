@@ -112,9 +112,9 @@ def _handle_global_configuration():
                                           'core', 'output', OUTPUT_LIST))
         answers['output_type_prompt'] = output_index
         answers['output_type_options'] = str(OUTPUT_LIST)
+        enable_file_logging = prompt_y_n(MSG_PROMPT_FILE_LOGGING, default='n')
         allow_telemetry = prompt_y_n(MSG_PROMPT_TELEMETRY, default='y')
         answers['telemetry_prompt'] = allow_telemetry
-        enable_file_logging = prompt_y_n(MSG_PROMPT_FILE_LOGGING, default='n')
         # save the global config
         try:
             global_config.add_section('core')

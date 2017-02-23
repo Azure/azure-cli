@@ -382,8 +382,8 @@ def process_ag_create_namespace(namespace):
         namespace.frontend_type = 'publicIp'
     else:
         namespace.frontend_type = 'privateIp'
-        namespace.private_ip_address_allocation = 'static' if namespace.private_ip_address \
-            else 'dynamic'
+        namespace.private_ip_address_allocation = 'Static' if namespace.private_ip_address \
+            else 'Dynamic'
 
     namespace.sku_tier = namespace.sku_name.split('_', 1)[0]
 
@@ -572,7 +572,7 @@ def process_vpn_connection_create_namespace(namespace):
                 name=value)
         return value
 
-    if namespace.local_gateway2 or namespace.vnet_gateway2 and not namespace.shared_key:
+    if (namespace.local_gateway2 or namespace.vnet_gateway2) and not namespace.shared_key:
         raise CLIError('--shared-key is required for VNET-to-VNET or Site-to-Site connections.')
 
     if namespace.express_route_circuit2 and namespace.shared_key:
