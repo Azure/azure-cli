@@ -48,6 +48,8 @@ cli_command(__name__, 'appservice web source-control config', 'azure.cli.command
 cli_command(__name__, 'appservice web source-control sync', 'azure.cli.command_modules.appservice.custom#sync_site_repo')
 cli_command(__name__, 'appservice web source-control show', 'azure.cli.command_modules.appservice.custom#show_source_control', exception_handler=empty_on_404)
 cli_command(__name__, 'appservice web source-control delete', 'azure.cli.command_modules.appservice.custom#delete_source_control')
+cli_command(__name__, 'appservice web source-control update-token', 'azure.cli.command_modules.appservice.custom#update_git_token')
+
 
 cli_command(__name__, 'appservice web log tail', 'azure.cli.command_modules.appservice.custom#get_streaming_log')
 cli_command(__name__, 'appservice web log download', 'azure.cli.command_modules.appservice.custom#download_historical_logs')
