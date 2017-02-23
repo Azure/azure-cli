@@ -29,7 +29,7 @@ class SqlServerMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # test create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l {} '
-                 '--admin-login {} --admin-password {}'
+                 '--admin-user {} --admin-password {}'
                  .format(rg, self.sql_server_names[0], loc, user, password), checks=[
                      JMESPathCheck('name', self.sql_server_names[0]),
                      JMESPathCheck('resourceGroup', rg),
@@ -47,7 +47,7 @@ class SqlServerMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # test create another sql server
         self.cmd('sql server create -g {} --name {} -l {} '
-                 '--admin-login {} --admin-password {}'
+                 '--admin-user {} --admin-password {}'
                  .format(rg, self.sql_server_names[1], loc, user, password), checks=[
                      JMESPathCheck('name', self.sql_server_names[1]),
                      JMESPathCheck('resourceGroup', rg),
@@ -102,7 +102,7 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # test create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l {} '
-                 '--admin-login {} --admin-password {}'
+                 '--admin-user {} --admin-password {}'
                  .format(rg, self.sql_server_name, loc, user, password), checks=[
                      JMESPathCheck('name', self.sql_server_name),
                      JMESPathCheck('resourceGroup', rg),
@@ -202,7 +202,7 @@ class SqlServerServiceObjectiveMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # test create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l {} '
-                 '--admin-login {} --admin-password {}'
+                 '--admin-user {} --admin-password {}'
                  .format(rg, self.sql_server_name, loc, user, password), checks=[
                      JMESPathCheck('name', self.sql_server_name),
                      JMESPathCheck('resourceGroup', rg),
@@ -249,7 +249,7 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l "{}" '
-                 '--admin-login {} --admin-password {}'
+                 '--admin-user {} --admin-password {}'
                  .format(rg, self.sql_server_name, loc_short, user, password), checks=[
                      JMESPathCheck('name', self.sql_server_name),
                      JMESPathCheck('resourceGroup', rg),
@@ -330,7 +330,7 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l {} '
-                 '--admin-login {} --admin-password {}'
+                 '--admin-user {} --admin-password {}'
                  .format(rg, self.sql_server_name, loc_short, user, password), checks=[
                      JMESPathCheck('name', self.sql_server_name),
                      JMESPathCheck('resourceGroup', rg),

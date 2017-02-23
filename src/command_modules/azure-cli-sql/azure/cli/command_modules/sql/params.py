@@ -141,7 +141,7 @@ with ParametersContext(command='sql elastic-pool update') as c:
 
 with ParametersContext(command='sql server') as c:
     c.register_alias('server_name', ('--name', '-n'))
-    c.register_alias('administrator_login', ('--admin-login', '-u'))
+    c.register_alias('administrator_login', ('--admin-user', '-u'))
     c.register_alias('administrator_login_password', ('--admin-password', '-p'))
 
 with ParametersContext(command='sql server create') as c:
