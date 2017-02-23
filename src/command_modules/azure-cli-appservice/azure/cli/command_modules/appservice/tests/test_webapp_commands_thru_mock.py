@@ -2,48 +2,85 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+import json
 import unittest
 import mock
 
-from azure.mgmt.web.models import User, SourceControl, HostNameBinding, Site
+from requests import Response
+
+from azure.mgmt.web.models import SourceControl, HostNameBinding, Site
+from azure.mgmt.web import WebSiteManagementClient
+from azure.cli.core.adal_authentication import AdalAuthentication
 from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_git_token, add_hostname)
 
+# pylint: disable=line-too-long
 
 class Test_Webapp_Mocked(unittest.TestCase):
-    # pylint: disable=no-self-argument,no-self-use
+
+    def setUp(self):
+        self.client = WebSiteManagementClient(AdalAuthentication(lambda: ('bearer',
+                                                                          'secretToken')),
+                                              '123455678')
+
+    # pylint: disable=no-self-argument,no-self-use,protected-access,no-member
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
-    def test_set_deployment_user_creds(self, mock_client_factory):
-        client = mock.MagicMock()
-        mock_client_factory.return_value = client
-        set_deployment_user('admin', 'verySecret1')
-        user = User('not-really-needed', publishing_user_name='admin',
-                    publishing_password='verySecret1')
-        client.update_publishing_user.assert_called_once_with(user)
+    def test_set_deployment_user_creds(self, client_factory_mock):
+        self.client._client = mock.MagicMock()
+        client_factory_mock.return_value = self.client
+        mock_response = mock.MagicMock()
+        mock_response.status_code = 200
+        self.client._client.send.return_value = mock_response
+
+        # action
+        result = set_deployment_user('admin', 'verySecret1')
+
+        # assert things get wired up with a result returned
+        self.assertIsNotNone(result)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
-    def test_set_source_control_token(self, mock_client_factory):
-        client = mock.MagicMock()
-        mock_client_factory.return_value = client
-        update_git_token('veryNiceToken')
+    def test_set_source_control_token(self, client_factory_mock):
+        client_factory_mock.return_value = self.client
+        self.client._client = mock.MagicMock()
         sc = SourceControl('not-really-needed', name='GitHub', token='veryNiceToken')
-        client.update_source_control.assert_called_once_with('GitHub', sc)
+        self.client._client.send.return_value = Test_Webapp_Mocked._make_response(sc.__dict__)
+
+        # action
+        result = update_git_token('veryNiceToken')
+
+        # assert things gets wired up
+        self.assertEqual(result.token, 'veryNiceToken')
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
-    def test_set_domain_name(self, mock_client_factory):
-        client = mock.MagicMock()
-        mock_client_factory.return_value = client
+    def test_set_domain_name(self, client_factory_mock):
+        client_factory_mock.return_value = self.client
+        # set up the return value for getting a webapp
         webapp = Site('westus')
         webapp.name = 'veryNiceWebApp'
-        client.web_apps.get.return_value = webapp
+        self.client.web_apps.get = lambda _, _1: webapp
+
+        # set up the result value of putting a domain name
         domain = 'veryNiceDomain'
-        resource_group_name = 'g1'
-        add_hostname(resource_group_name, webapp.name, domain)
-        binding = HostNameBinding(webapp.location, host_name_binding_name=domain,
-                                  site_name=webapp.name)
-        client.web_apps.create_or_update_host_name_binding.assert_called_once_with(
-            resource_group_name, webapp.name, domain, binding)
+        binding = HostNameBinding(webapp.location, name=domain,
+                                  custom_host_name_dns_record_type='A',
+                                  host_name_type='Managed')
+        self.client.web_apps._client = mock.MagicMock()
+        self.client.web_apps._client.send.return_value = Test_Webapp_Mocked._make_response(binding.__dict__)
+
+        # action
+        result = add_hostname('g1', webapp.name, domain)
+
+        # assert
+        self.assertEqual(result.name, domain)
+
+    @staticmethod
+    def _make_response(content_json):
+        resp = mock.create_autospec(Response)
+        resp.text = json.dumps(content_json)
+        resp.encoding = 'utf-8'
+        resp.status_code = 200
+        return resp
+
 
 if __name__ == '__main__':
     unittest.main()
