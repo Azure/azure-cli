@@ -19,7 +19,7 @@ with ParametersContext(command='sql db') as c:
     c.register_alias('database_name', ('--name', '-n'))
     c.register_alias('server_name', ('--server', '-s'))
     c.register_alias('elastic_pool_name', ('--elastic-pool',))
-    c.register_alias('requested_service_objective_name', ('--service-objective-name',))
+    c.register_alias('requested_service_objective_name', ('--service-objective',))
     c.register_alias('requested_service_objective_id', ('--service-objective-id',))
 
 def configure_db_create_params(c):
@@ -42,7 +42,7 @@ sql_db_copy_ignored_params = ['collation', 'edition', 'max_size_bytes']
 
 with ParametersContext(command='sql db copy') as c:
     configure_db_create_params(c)
-    c.register_alias('requested_service_objective_name', ('--dest-service-objective-name',))
+    c.register_alias('requested_service_objective_name', ('--dest-service-objective',))
     c.register_alias('requested_service_objective_id', ('--dest-service-objective-id',))
     c.register_alias('elastic_pool_name', ('--dest-elastic-pool',))
     for i in sql_db_copy_ignored_params:
@@ -50,7 +50,7 @@ with ParametersContext(command='sql db copy') as c:
 
 with ParametersContext(command='sql db create-secondary') as c:
     configure_db_create_params(c)
-    c.register_alias('requested_service_objective_name', ('--secondary-service-objective-name',))
+    c.register_alias('requested_service_objective_name', ('--secondary-service-objective',))
     c.register_alias('requested_service_objective_id', ('--secondary-service-objective-id',))
     c.register_alias('elastic_pool_name', ('--secondary-elastic-pool',))
     for i in sql_db_copy_ignored_params:
@@ -61,7 +61,7 @@ sql_db_restore_ignored_params = ['collation', 'max_size_bytes']
 
 with ParametersContext(command='sql db restore') as c:
     configure_db_create_params(c)
-    c.register_alias('requested_service_objective_name', ('--dest-service-objective-name',))
+    c.register_alias('requested_service_objective_name', ('--dest-service-objective',))
     c.register_alias('requested_service_objective_id', ('--dest-service-objective-id',))
     c.register_alias('elastic_pool_name', ('--dest-elastic-pool',))
     for i in sql_db_restore_ignored_params:
