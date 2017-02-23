@@ -853,7 +853,7 @@ helps['disk'] = """
 
 helps['snapshot'] = """
     type: group
-    short-summary: Manage snapshots of Virtual Machines.
+    short-summary: Manage point-in-time copies of a managed disk, native blobs, or another snapshots.
 """
 
 helps['image'] = """
