@@ -111,8 +111,8 @@ with ServiceGroup(__name__, get_monitor_metric_definitions_operation,
         c.command('list', 'list_metric_definitions')
 
 metrics_operations = create_service_adapter(
-    'azure.monitor.operations.metrics_operations', 'MetricsOperations')
+    'azure.cli.command_modules.monitor.custom')
 
 with ServiceGroup(__name__, get_monitor_metrics_operation, metrics_operations) as s:
     with s.group('monitor metrics') as c:
-        c.command('list', 'list')
+        c.command('list', 'list_metrics')
