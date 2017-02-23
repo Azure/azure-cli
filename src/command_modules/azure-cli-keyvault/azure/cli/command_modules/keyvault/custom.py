@@ -8,9 +8,21 @@ import json
 import os
 import re
 import time
+import datetime
 
 from OpenSSL import crypto
 from msrestazure.azure_exceptions import CloudError
+
+from azure.keyvault.generated.models import (CertificateAttributes,
+                                             CertificatePolicy,
+                                             IssuerParameters,
+                                             KeyProperties,
+                                             LifetimeAction,
+                                             SecretProperties,
+                                             X509CertificateProperties,
+                                             SubjectAlternativeNames,
+                                             Trigger,
+                                             Action)
 
 from azure.keyvault.key_vault_id import parse_secret_id
 from azure.mgmt.keyvault.models import (VaultCreateOrUpdateParameters,
@@ -34,10 +46,79 @@ from azure.cli.command_modules.keyvault._validators import secret_text_encoding_
 
 logger = azlogging.get_az_logger(__name__)
 
+
+def _default_certificate_profile():
+    return {
+        "attributes": {
+            "enabled": True,
+            "expires": None,
+            "not_before": None
+        },
+        "issuer_parameters": {
+            "name": "Self"
+        },
+        "key_properties": {
+            "exportable": True,
+            "key_size": 2048,
+            "key_type": "RSA",
+            "reuse_key": False
+        },
+        "lifetime_actions": [
+            {
+                "action": {
+                    "action_type": "AutoRenew"
+                },
+                "trigger": {
+                    "lifetime_percentage": 90
+                }
+            }
+        ],
+        "secret_properties": {
+            "content_type": "application/x-pkcs12"
+        },
+        "x509_certificate_properties": {
+            "ekus": None,
+            "key_usage": [
+                "digitalSignature",
+                "nonRepudiation",
+                "keyEncipherment",
+                "keyAgreement",
+                "keyCertSign"
+            ],
+            "subject": 'C=US, ST=WA, L=Redmon, O=Test Noodle, OU=TestNugget, '
+                       'CN=www.mytestdomain.com',
+            "subject_alternative_names": None,
+            "validity_in_months": 60
+        }
+    }
+
+
+def _scaffold_certificate_profile():
+    return CertificatePolicy(
+        key_properties=KeyProperties(),
+        secret_properties=SecretProperties(),
+        x509_certificate_properties=X509CertificateProperties(
+            key_usage=[],
+            subject_alternative_names=SubjectAlternativeNames(
+                emails=[],
+                dns_names=[],
+                upns=[]
+            )
+        ),
+        lifetime_actions=[LifetimeAction(
+            trigger=Trigger(),
+            action=Action()
+        )],
+        issuer_parameters=IssuerParameters(),
+        attributes=CertificateAttributes()
+    )
+
+
 def list_keyvault(client, resource_group_name=None):
     vault_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
         if resource_group_name else client.list()
     return list(vault_list)
+
 
 def _get_current_user_object_id(graph_client):
     try:
@@ -46,6 +127,7 @@ def _get_current_user_object_id(graph_client):
             return current_user.object_id #pylint:disable=no-member
     except CloudError:
         pass
+
 
 def _get_object_id_by_spn(graph_client, spn):
     accounts = list(graph_client.service_principals.list(
@@ -59,6 +141,7 @@ def _get_object_id_by_spn(graph_client, spn):
         return
     return accounts[0].object_id
 
+
 def _get_object_id_by_upn(graph_client, upn):
     accounts = list(graph_client.users.list(filter="userPrincipalName eq '{}'".format(upn)))
     if not accounts:
@@ -69,6 +152,7 @@ def _get_object_id_by_upn(graph_client, upn):
                        "You can avoid this by specifying object id.", upn)
         return
     return accounts[0].object_id
+
 
 def _get_object_id_from_subscription(graph_client, subscription):
     if subscription['user']:
@@ -81,6 +165,7 @@ def _get_object_id_from_subscription(graph_client, subscription):
     else:
         logger.warning('Current credentials are not from a user or service principal. '\
                        'Azure Key Vault does not work with certificate credentials.')
+
 
 def _get_object_id(graph_client, subscription=None, spn=None, upn=None):
     if spn:
@@ -134,50 +219,18 @@ def get_vm_format_secret(client, secrets, certificate_store=None):
     return formatted
 
 
-def get_default_policy(client): #pylint: disable=unused-argument
-    return {
-        "attributes": {
-            "enabled": True,
-            "expires": None,
-            "not_before": None
-        },
-        "issuer_parameters": {
-            "name": "Self"
-        },
-        "key_properties": {
-            "exportable": True,
-            "key_size": 2048,
-            "key_type": "RSA",
-            "reuse_key": False
-        },
-        "lifetime_actions": [
-            {
-                "action": {
-                    "action_type": "AutoRenew"
-                },
-                "trigger": {
-                    "lifetime_percentage": 90
-                }
-            }
-        ],
-        "secret_properties": {
-            "content_type": "application/x-pkcs12"
-        },
-        "x509_certificate_properties": {
-            "ekus": None,
-            "key_usage": [
-                "digitalSignature",
-                "nonRepudiation",
-                "keyEncipherment",
-                "keyAgreement",
-                "keyCertSign"
-            ],
-            "subject": 'C=US, ST=WA, L=Redmon, O=Test Noodle, OU=TestNugget, '
-                       'CN=www.mytestdomain.com',
-            "subject_alternative_names": None,
-            "validity_in_months": 60
-        }
-    }
+def get_default_policy(client, scaffold=False): #pylint: disable=unused-argument
+    """
+    Get a default certificate policy to be used with `az keyvault certificate create`
+    :param client:
+    :param bool scaffold: create a fully formed empty policy structure
+    :return: policy dict
+    :rtype: dict
+    """
+    if scaffold:
+        return _scaffold_certificate_profile()
+    else:
+        return _default_certificate_profile()
 
 
 def create_keyvault(client, resource_group_name, vault_name, location, #pylint:disable=too-many-arguments
@@ -235,6 +288,7 @@ def create_keyvault(client, resource_group_name, vault_name, location, #pylint:d
                                    parameters=parameters)
 create_keyvault.__doc__ = VaultProperties.__doc__
 
+
 def _object_id_args_helper(object_id, spn, upn):
     if not object_id:
         from azure.cli.core._profile import Profile, CLOUD
@@ -248,6 +302,7 @@ def _object_id_args_helper(object_id, spn, upn):
         if not object_id:
             raise CLIError('Unable to get object id from principal name.')
     return object_id
+
 
 def set_policy(client, resource_group_name, vault_name, #pylint:disable=too-many-arguments
                object_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
@@ -283,6 +338,7 @@ def set_policy(client, resource_group_name, vault_name, #pylint:disable=too-many
                                        tags=vault.tags,
                                        properties=vault.properties))
 
+
 def delete_policy(client, resource_group_name, vault_name, object_id=None, spn=None, upn=None): #pylint:disable=too-many-arguments
     """ Delete security policy settings for a Key Vault. """
     object_id = _object_id_args_helper(object_id, spn, upn)
@@ -301,6 +357,7 @@ def delete_policy(client, resource_group_name, vault_name, object_id=None, spn=N
                                        tags=vault.tags,
                                        properties=vault.properties))
 
+
 # pylint: disable=too-many-arguments
 def create_key(client, vault_base_url, key_name, destination, key_size=None, key_ops=None,
                disabled=False, expires=None, not_before=None, tags=None):
@@ -310,17 +367,20 @@ def create_key(client, vault_base_url, key_name, destination, key_size=None, key
         vault_base_url, key_name, destination, key_size, key_ops, key_attrs, tags)
 create_key.__doc__ = KeyVaultClient.create_key.__doc__
 
+
 def backup_key(client, vault_base_url, key_name, file_path):
     backup = client.backup_key(vault_base_url, key_name).value
     with open(file_path, 'wb') as output:
         output.write(backup)
 backup_key.__doc__ = KeyVaultClient.backup_key.__doc__
 
+
 def restore_key(client, vault_base_url, file_path):
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
     return client.restore_key(vault_base_url, data)
 restore_key.__doc__ = KeyVaultClient.restore_key.__doc__
+
 
 # pylint: disable=too-many-arguments,assignment-from-no-return,unused-variable
 def import_key(client, vault_base_url, key_name, destination=None, key_ops=None, disabled=False,
@@ -402,6 +462,7 @@ def import_key(client, vault_base_url, key_name, destination=None, key_ops=None,
     return client.import_key(
         vault_base_url, key_name, key_obj, destination == 'hsm', key_attrs, tags)
 
+
 def download_secret(client, vault_base_url, secret_name, file_path, encoding=None,
                     secret_version=''):
     """ Download a secret from a KeyVault. """
@@ -431,10 +492,9 @@ def download_secret(client, vault_base_url, secret_name, file_path, encoding=Non
             os.remove(file_path)
         raise ex
 
+
 def create_certificate(client, vault_base_url, certificate_name, certificate_policy,
                        disabled=False, expires=None, not_before=None, tags=None):
-    from azure.keyvault.generated.models import \
-        (CertificateAttributes)
     cert_attrs = CertificateAttributes(not disabled, not_before, expires)
     logger.info("Starting long running operation 'keyvault certificate create'")
     client.create_certificate(
@@ -470,6 +530,7 @@ def create_certificate(client, vault_base_url, certificate_name, certificate_pol
 
 create_certificate.__doc__ = KeyVaultClient.create_certificate.__doc__
 
+
 def download_certificate(client, vault_base_url, certificate_name, file_path,
                          encoding='binary', certificate_version=''):
     """ Download a certificate from a KeyVault. """
@@ -494,6 +555,7 @@ def download_certificate(client, vault_base_url, certificate_name, file_path,
             os.remove(file_path)
         raise ex
 
+
 def add_certificate_contact(client, vault_base_url, contact_email, contact_name=None,
                             contact_phone=None):
     """ Add a contact to the specified vault to receive notifications of certificate operations. """
@@ -509,6 +571,7 @@ def add_certificate_contact(client, vault_base_url, contact_email, contact_name=
     contacts.contact_list.append(contact)
     return client.set_certificate_contacts(vault_base_url, contacts.contact_list)
 
+
 def delete_certificate_contact(client, vault_base_url, contact_email):
     """ Remove a certificate contact from the specified vault. """
     from azure.keyvault.generated.models import \
@@ -521,6 +584,7 @@ def delete_certificate_contact(client, vault_base_url, contact_email):
         return client.set_certificate_contacts(vault_base_url, remaining.contact_list)
     else:
         return client.delete_certificate_contacts(vault_base_url)
+
 
 def create_certificate_issuer(client, vault_base_url, issuer_name, provider_name, account_id=None,
                               password=None, disabled=False, organization_id=None):
@@ -546,6 +610,7 @@ def create_certificate_issuer(client, vault_base_url, issuer_name, provider_name
     org_details = OrganizationDetails(organization_id, admin_details=[])
     return client.set_certificate_issuer(
         vault_base_url, issuer_name, provider_name, credentials, org_details, issuer_attrs)
+
 
 def update_certificate_issuer(client, vault_base_url, issuer_name, provider_name=None,
                               account_id=None, password=None, enabled=None, organization_id=None):
@@ -579,10 +644,12 @@ def update_certificate_issuer(client, vault_base_url, issuer_name, provider_name
         vault_base_url, issuer_name, issuer.provider, issuer.credentials,
         issuer.organization_details, issuer.attributes)
 
+
 def list_certificate_issuer_admins(client, vault_base_url, issuer_name):
     """ List admins for a specified certificate issuer. """
     return client.get_certificate_issuer(
         vault_base_url, issuer_name).organization_details.admin_details
+
 
 def add_certificate_issuer_admin(client, vault_base_url, issuer_name, email, first_name=None,
                                  last_name=None, phone=None):
@@ -605,6 +672,7 @@ def add_certificate_issuer_admin(client, vault_base_url, issuer_name, email, fir
         if x.email_address == email)
     return created_admin
 
+
 def delete_certificate_issuer_admin(client, vault_base_url, issuer_name, email):
     """ Remove admin details for the specified certificate issuer. """
     from azure.keyvault.generated.models import \
@@ -620,11 +688,8 @@ def delete_certificate_issuer_admin(client, vault_base_url, issuer_name, email):
         vault_base_url, issuer_name, issuer.provider, issuer.credentials, org_details,
         issuer.attributes)
 
+
 def certificate_policy_template():
-    from azure.keyvault.generated.models import \
-        (CertificatePolicy, CertificateAttributes, KeyProperties, SecretProperties,
-         X509CertificateProperties, SubjectAlternativeNames, LifetimeAction, Action, Trigger,
-         IssuerParameters)
     from azure.keyvault.generated.models.key_vault_client_enums \
         import ActionType, JsonWebKeyType, KeyUsageType
     # create sample policy
