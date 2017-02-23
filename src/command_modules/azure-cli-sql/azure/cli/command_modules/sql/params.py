@@ -45,6 +45,7 @@ with ParametersContext(command='sql db copy') as c:
     c.register_alias('requested_service_objective_name', ('--dest-service-objective',))
     c.register_alias('requested_service_objective_id', ('--dest-service-objective-id',))
     c.register_alias('elastic_pool_name', ('--dest-elastic-pool',))
+    c.register_alias('dest_resource_group_name', ('--dest-resource-group',))
     for i in sql_db_copy_ignored_params:
         c.ignore(i)
 
@@ -53,6 +54,7 @@ with ParametersContext(command='sql db create-secondary') as c:
     c.register_alias('requested_service_objective_name', ('--secondary-service-objective',))
     c.register_alias('requested_service_objective_id', ('--secondary-service-objective-id',))
     c.register_alias('elastic_pool_name', ('--secondary-elastic-pool',))
+    c.register_alias('dest_resource_group_name', ('--secondary-resource-group',))
     for i in sql_db_copy_ignored_params:
         c.ignore(i)
 
@@ -64,6 +66,7 @@ with ParametersContext(command='sql db restore') as c:
     c.register_alias('requested_service_objective_name', ('--dest-service-objective',))
     c.register_alias('requested_service_objective_id', ('--dest-service-objective-id',))
     c.register_alias('elastic_pool_name', ('--dest-elastic-pool',))
+    c.register_alias('dest_resource_group_name', ('--dest-resource-group',))
     for i in sql_db_restore_ignored_params:
         c.ignore(i)
 
