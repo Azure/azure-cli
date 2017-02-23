@@ -81,7 +81,7 @@ with ParametersContext(command='sql db update') as c:
 #####
 
 with ParametersContext(command='sql db replication-link') as c:
-    c.register_alias('database_name', ('--database-name', '-d'))
+    c.register_alias('database_name', ('--database', '-d'))
 
 #####
 #           sql db <<other subgroups>>
@@ -89,21 +89,21 @@ with ParametersContext(command='sql db replication-link') as c:
 
 ## Data Warehouse will not be included in the first batch of GA commands
 #with ParametersContext(command='sql db data-warehouse') as c:
-#    c.register_alias('database_name', ('--database-name',))
+#    c.register_alias('database_name', ('--database', '-d'))
 
 ## Data Warehouse will not be included in the first batch of GA commands
 ## (list_restore_points also applies to db, but it's not very useful. It's
 ## mainly useful for dw.)
 #with ParametersContext(command='sql db restore-point') as c:
-#    c.register_alias('database_name', ('--database-name', '-d'))
+#    c.register_alias('database_name', ('--database', '-d'))
 
 ## Service tier advisor will not be included in the first batch of GA commands
 #with ParametersContext(command='sql db service-tier-advisor') as c:
-#    c.register_alias('database_name', ('--database-name',))
+#    c.register_alias('database_name', ('--database', '-d'))
 
 ## TDE will not be included in the first batch of GA commands
 #with ParametersContext(command='sql db transparent-data-encryption') as c:
-#    c.register_alias('database_name', ('--database-name',))
+#    c.register_alias('database_name', ('--database', '-d'))
 
 ###############################################
 #                sql elastic-pool             #
