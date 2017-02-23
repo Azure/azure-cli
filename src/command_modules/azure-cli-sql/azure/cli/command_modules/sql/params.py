@@ -17,7 +17,7 @@ sql_db_special_create_mode_params = ['create_mode', 'source_database_id', 'resto
 
 with ParametersContext(command='sql db') as c:
     c.register_alias('database_name', ('--name', '-n'))
-    c.register_alias('server_name', ('--server-name', '-s'))
+    c.register_alias('server_name', ('--server', '-s'))
     c.register_alias('requested_service_objective_name', ('--service-objective-name',))
     c.register_alias('requested_service_objective_id', ('--service-objective-id',))
 
@@ -120,7 +120,7 @@ with ParametersContext(command='sql elastic-pool') as c:
 #    c.register_alias('database_name', ('--name', '-n'))
 
 with ParametersContext(command='sql elastic-pool') as c:
-    c.register_alias('server_name', ('--server-name', '-s'))
+    c.register_alias('server_name', ('--server', '-s'))
 
 with ParametersContext(command='sql elastic-pool create') as c:
     from azure.mgmt.sql.models.elastic_pool import ElasticPool
@@ -171,7 +171,7 @@ with ParametersContext(command='sql server update') as c:
 #####
 
 with ParametersContext(command='sql server firewall-rule') as c:
-    c.register_alias('server_name', ('--server-name', '-s'))
+    c.register_alias('server_name', ('--server', '-s'))
     c.register_alias('firewall_rule_name', ('--name', '-n'))
 
 #####
@@ -179,6 +179,6 @@ with ParametersContext(command='sql server firewall-rule') as c:
 #####
 
 with ParametersContext(command='sql server service-objective') as c:
-    c.register_alias('server_name', ('--server-name', '-s'))
+    c.register_alias('server_name', ('--server', '-s'))
     c.register_alias('service_objective_name', ('--name', '-n'))
 

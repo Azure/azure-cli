@@ -109,7 +109,7 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('administratorLogin', user)])
 
         # test sql server firewall-rule create
-        self.cmd('sql server firewall-rule create --name {} -g {} --server-name {} '
+        self.cmd('sql server firewall-rule create --name {} -g {} --server {} '
                  '--start-ip-address {} --end-ip-address {}'
                  .format(firewall_rule_1, rg, self.sql_server_name,
                          start_ip_address_1, end_ip_address_1), checks=[
@@ -119,7 +119,7 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
                              JMESPathCheck('endIpAddress', end_ip_address_1)])
 
         # test sql server firewall-rule show
-        self.cmd('sql server firewall-rule show --name {} -g {} --server-name {}'
+        self.cmd('sql server firewall-rule show --name {} -g {} --server {}'
                  .format(firewall_rule_1, rg, self.sql_server_name), checks=[
                      JMESPathCheck('name', firewall_rule_1),
                      JMESPathCheck('resourceGroup', rg),
@@ -127,7 +127,7 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('endIpAddress', end_ip_address_1)])
 
         # test sql server firewall-rule update
-        self.cmd('sql server firewall-rule update --name {} -g {} --server-name {} '
+        self.cmd('sql server firewall-rule update --name {} -g {} --server {} '
                  '--start-ip-address {} --end-ip-address {}'
                  .format(firewall_rule_1, rg, self.sql_server_name,
                          start_ip_address_2, end_ip_address_2), checks=[
@@ -137,7 +137,7 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
                              JMESPathCheck('endIpAddress', end_ip_address_2)])
 
         # test sql server firewall-rule create another rule
-        self.cmd('sql server firewall-rule create --name {} -g {} --server-name {} '
+        self.cmd('sql server firewall-rule create --name {} -g {} --server {} '
                  '--start-ip-address {} --end-ip-address {}'
                  .format(firewall_rule_2, rg, self.sql_server_name,
                          start_ip_address_2, end_ip_address_2), checks=[
@@ -147,11 +147,11 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
                              JMESPathCheck('endIpAddress', end_ip_address_2)])
 
         # test sql server firewall-rule list
-        self.cmd('sql server firewall-rule list -g {} --server-name {}'
+        self.cmd('sql server firewall-rule list -g {} --server {}'
                  .format(rg, self.sql_server_name), checks=[JMESPathCheck('length(@)', 2)])
 
         # test sql server firewall-rule create azure ip rule
-        self.cmd('sql server firewall-rule allow-all-azure-ips -g {} --server-name {} '
+        self.cmd('sql server firewall-rule allow-all-azure-ips -g {} --server {} '
                  .format(rg, self.sql_server_name), checks=[
                              JMESPathCheck('name', allow_all_azure_ips_rule),
                              JMESPathCheck('resourceGroup', rg),
@@ -159,21 +159,21 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
                              JMESPathCheck('endIpAddress', allow_all_azure_ips_address)])
 
         # test sql server firewall-rule list
-        self.cmd('sql server firewall-rule list -g {} --server-name {}'
+        self.cmd('sql server firewall-rule list -g {} --server {}'
                  .format(rg, self.sql_server_name), checks=[JMESPathCheck('length(@)', 3)])
 
         # test sql server firewall-rule delete
-        self.cmd('sql server firewall-rule delete --name {} -g {} --server-name {}'
+        self.cmd('sql server firewall-rule delete --name {} -g {} --server {}'
                  .format(allow_all_azure_ips_rule, rg, self.sql_server_name), checks=NoneCheck())
-        self.cmd('sql server firewall-rule list -g {} --server-name {}'
+        self.cmd('sql server firewall-rule list -g {} --server {}'
                  .format(rg, self.sql_server_name), checks=[JMESPathCheck('length(@)', 2)])
-        self.cmd('sql server firewall-rule delete --name {} -g {} --server-name {}'
+        self.cmd('sql server firewall-rule delete --name {} -g {} --server {}'
                  .format(firewall_rule_1, rg, self.sql_server_name), checks=NoneCheck())
-        self.cmd('sql server firewall-rule list -g {} --server-name {}'
+        self.cmd('sql server firewall-rule list -g {} --server {}'
                  .format(rg, self.sql_server_name), checks=[JMESPathCheck('length(@)', 1)])
-        self.cmd('sql server firewall-rule delete --name {} -g {} --server-name {}'
+        self.cmd('sql server firewall-rule delete --name {} -g {} --server {}'
                  .format(firewall_rule_2, rg, self.sql_server_name), checks=NoneCheck())
-        self.cmd('sql server firewall-rule list -g {} --server-name {}'
+        self.cmd('sql server firewall-rule list -g {} --server {}'
                  .format(rg, self.sql_server_name), checks=[JMESPathCheck('length(@)', 0)])
 
         # test delete sql server
@@ -209,12 +209,12 @@ class SqlServerServiceObjectiveMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('administratorLogin', user)])
 
         # test sql server service-objective list
-        service_objectives = self.cmd('sql server service-objective list -g {} --server-name {}'
+        service_objectives = self.cmd('sql server service-objective list -g {} --server {}'
                                       .format(rg, self.sql_server_name), checks=[
                                           JMESPathCheck('length(@)', 42)])
 
         # test sql server service-objective show
-        self.cmd('sql server service-objective show -g {} --server-name {} --name {}'
+        self.cmd('sql server service-objective show -g {} --server {} --name {}'
                  .format(rg, self.sql_server_name, service_objectives[0]['name']), checks=[
                      JMESPathCheck('name', service_objectives[0]['name']),
                      JMESPathCheck('resourceGroup', rg)])
@@ -257,7 +257,7 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('administratorLogin', user)])
 
         # test sql db commands
-        self.cmd('sql db create -g {} --server-name {} --name {}'
+        self.cmd('sql db create -g {} --server {} --name {}'
                  .format(rg, self.sql_server_name, self.database_name), checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.database_name),
@@ -265,7 +265,7 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('elasticPoolName', None),
                      JMESPathCheck('status', 'Online')])
 
-        self.cmd('sql db list -g {} --server-name {}'
+        self.cmd('sql db list -g {} --server {}'
                  .format(rg, self.sql_server_name), checks=[
                      JMESPathCheck('length(@)', 2),
                      JMESPathCheck('[1].name', 'master'),
@@ -273,31 +273,31 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('[0].name', self.database_name),
                      JMESPathCheck('[0].resourceGroup', rg)])
 
-        self.cmd('sql db show -g {} --server-name {} --name {}'
+        self.cmd('sql db show -g {} --server {} --name {}'
                  .format(rg, self.sql_server_name, self.database_name), checks=[
                      JMESPathCheck('name', self.database_name),
                      JMESPathCheck('resourceGroup', rg)])
 
         ## Usages will not be included in the first batch of GA commands
-        #self.cmd('sql db show-usage -g {} --server-name {} --name {}'
+        #self.cmd('sql db show-usage -g {} --server {} --name {}'
         #         .format(rg, self.sql_server_name, self.database_name), checks=[
         #             JMESPathCheck('[0].resourceName', self.database_name)])
 
-        self.cmd('sql db update -g {} --server-name {} --name {} '
+        self.cmd('sql db update -g {} --server {} --name {} '
                  '--set tags.key1=value1'
                  .format(rg, self.sql_server_name, self.database_name), checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.database_name),
                      JMESPathCheck('tags.key1', 'value1')])
 
-        self.cmd('sql db copy -g {} --server-name {} --name {} '
+        self.cmd('sql db copy -g {} --server {} --name {} '
                  '--dest-name {}'
                  .format(rg, self.sql_server_name, self.database_name, self.database_copy_name), checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.database_copy_name)
                 ])
 
-        self.cmd('sql db delete -g {} --server-name {} --name {}'
+        self.cmd('sql db delete -g {} --server {} --name {}'
                  .format(rg, self.sql_server_name, self.database_name), checks=[NoneCheck()])
 
         # delete sql server
@@ -338,26 +338,26 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('administratorLogin', user)])
 
         # test sql elastic-pool commands
-        self.cmd('sql elastic-pool create -g {} --server-name {} --name {}'
+        self.cmd('sql elastic-pool create -g {} --server {} --name {}'
                  .format(rg, self.sql_server_name, self.pool_name), checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
                      JMESPathCheck('location', loc_long),
                      JMESPathCheck('state', 'Ready')])
 
-        self.cmd('sql elastic-pool show -g {} --server-name {} --name {}'
+        self.cmd('sql elastic-pool show -g {} --server {} --name {}'
                  .format(rg, self.sql_server_name, self.pool_name), checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
                      JMESPathCheck('state', 'Ready')])
 
-        self.cmd('sql elastic-pool list -g {} --server-name {}'
+        self.cmd('sql elastic-pool list -g {} --server {}'
                  .format(rg, self.sql_server_name), checks=[
                      JMESPathCheck('[0].resourceGroup', rg),
                      JMESPathCheck('[0].name', self.pool_name),
                      JMESPathCheck('[0].state', 'Ready')])
 
-        self.cmd('sql elastic-pool update -g {} --server-name {} --name {} '
+        self.cmd('sql elastic-pool update -g {} --server {} --name {} '
                  '--set tags.key1=value1'
                  .format(rg, self.sql_server_name, self.pool_name), checks=[
                      JMESPathCheck('resourceGroup', rg),
@@ -365,7 +365,7 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('state', 'Ready'),
                      JMESPathCheck('tags.key1', 'value1')])
 
-        self.cmd('sql elastic-pool update -g {} --server-name {} --name {} '
+        self.cmd('sql elastic-pool update -g {} --server {} --name {} '
                  '--remove tags.key1'
                  .format(rg, self.sql_server_name, self.pool_name), checks=[
                      JMESPathCheck('resourceGroup', rg),
@@ -374,7 +374,7 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('tags', {})])
 
         # Create a database in an Azure sql elastic pool
-        self.cmd('sql db create -g {} --server-name {} --name {} '
+        self.cmd('sql db create -g {} --server {} --name {} '
                  '--elastic-pool-name {}'
                  .format(rg, self.sql_server_name, self.database_name, self.pool_name),
                  checks=[
@@ -384,7 +384,7 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('status', 'Online')])
 
         # test sql elastic-pool db sub-group commands
-        #self.cmd('sql elastic-pool db list -g {} --server-name {} --elastic-pool-name {}'
+        #self.cmd('sql elastic-pool db list -g {} --server {} --elastic-pool-name {}'
         #         .format(rg, self.sql_server_name, self.pool_name),
         #         checks=[
         #             JMESPathCheck('length(@)', 1),
@@ -393,7 +393,7 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
         #             JMESPathCheck('[0].elasticPoolName', self.pool_name),
         #             JMESPathCheck('[0].status', 'Online')])
 
-        #self.cmd('sql elastic-pool db show -g {} --server-name {} --elastic-pool-name {} '
+        #self.cmd('sql elastic-pool db show -g {} --server {} --elastic-pool-name {} '
         #         '--name {}'
         #         .format(rg, self.sql_server_name, self.pool_name, self.database_name),
         #         checks=[
@@ -402,7 +402,7 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
         #             JMESPathCheck('elasticPoolName', self.pool_name),
         #             JMESPathCheck('status', 'Online')])
 
-        #self.cmd('sql elastic-pool db show-activity -g {} --server-name {} --elastic-pool-name {}'
+        #self.cmd('sql elastic-pool db show-activity -g {} --server {} --elastic-pool-name {}'
         #         .format(rg, self.sql_server_name, self.pool_name),
         #         checks=[
         #             JMESPathCheck('length(@)', 1),
@@ -411,11 +411,11 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
         #             JMESPathCheck('[0].currentElasticPoolName', self.pool_name)])
 
         # delete sql server database
-        self.cmd('sql db delete -g {} --server-name {} --name {}'
+        self.cmd('sql db delete -g {} --server {} --name {}'
                  .format(rg, self.sql_server_name, self.database_name), checks=[NoneCheck()])
 
         # delete sql elastic pool
-        self.cmd('sql elastic-pool delete -g {} --server-name {} --name {}'
+        self.cmd('sql elastic-pool delete -g {} --server {} --name {}'
                  .format(rg, self.sql_server_name, self.pool_name), checks=[NoneCheck()])
 
         # delete sql server
