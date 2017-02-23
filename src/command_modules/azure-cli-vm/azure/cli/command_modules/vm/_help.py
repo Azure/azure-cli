@@ -853,7 +853,7 @@ helps['disk'] = """
 
 helps['snapshot'] = """
     type: group
-    short-summary: Manage Azure Snapshots.
+    short-summary: Manage snapshots of Virtual Machines.
 """
 
 helps['image'] = """
