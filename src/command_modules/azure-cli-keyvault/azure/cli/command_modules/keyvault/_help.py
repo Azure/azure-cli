@@ -59,7 +59,7 @@ helps['keyvault certificate get-default-policy'] = """
     short-summary: Get a default policy for a self-signed certificate
     long-summary: >
         This default policy can be used in conjunction with `az keyvault create` to create a self-signed certificate.
-        The policy can also be used as a base to manipulate to create other permutations of Key Vault certificates.
+        The default policy can also be used as a starting point to create derivative policies.
     examples:
         - name: Create a self-signed certificate with a the default policy
           text: >
@@ -77,19 +77,22 @@ helps['keyvault certificate create'] = """
     examples:
         - name: Create a self-signed certificate with a the default policy and add to a virtual machine
           text: >
-            az keyvault create -g group-name -n vaultname -l westus --enabled-for-deployment true \\
-              --enabled-for-template-deployment true
-
             az keyvault certificate create --vault-name vaultname -n cert1 \\
               -p "$(az keyvault certificate get-default-policy)"
 
-            az vm create -g group-name -n vm-name --admin-username deploy --image debian --secrets \'{secrets}\''
+            secrets=$(az keyvault secret list-versions --vault-name vaultname \\
+              -n cert1 --query "[?attributes.enabled]")
+
+            vm_secrets=$(az keyvault secret vm-format -s "$secrets") \n
+
+            az vm create -g group-name -n vm-name --admin-username deploy  \\
+              --image debian --secrets "$vm_secrets"
 """
 
 helps['keyvault secret vm-format'] = """
     type: command
     long-summary: >
-        Create a Key Vault certificate. Certificates can also be used as a secrets in provisioned virtual machines.
+        Transform secrets into a form consumed by VMs via --secrets.
     examples:
         - name: Create a self-signed certificate with a the default policy and add to a virtual machine
           text: >

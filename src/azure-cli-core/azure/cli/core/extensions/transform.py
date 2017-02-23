@@ -36,7 +36,8 @@ def _add_resource_group(obj):
         except (KeyError, IndexError, TypeError):
             pass
         for item_key in obj:
-            _add_resource_group(obj[item_key])
+            if item_key != 'sourceVault':
+                _add_resource_group(obj[item_key])
 
 
 def _add_x509_hex(obj):

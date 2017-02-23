@@ -5,7 +5,6 @@
 
 import os
 import re
-from json import JSONDecodeError
 
 from msrestazure.azure_exceptions import CloudError
 
@@ -88,7 +87,7 @@ def _validate_secrets(secrets, os_type):
 
     try:
         loaded_secret = load_json(secrets)
-    except JSONDecodeError as err:
+    except Exception as err:
         raise CLIError('Error decoding secrets: {0}'.format(err))
 
     for idx, secret in enumerate(loaded_secret):

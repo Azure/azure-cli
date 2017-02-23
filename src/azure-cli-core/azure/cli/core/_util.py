@@ -8,10 +8,10 @@ import re
 import sys
 import json
 import base64
+import binascii
 from datetime import datetime, timedelta
 from enum import Enum
 
-import binascii
 import six
 import azure.cli.core.azlogging as azlogging
 

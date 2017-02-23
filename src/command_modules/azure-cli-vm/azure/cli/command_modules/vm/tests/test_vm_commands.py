@@ -1233,7 +1233,7 @@ class VMCreateLinuxSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: dis
         self.vm_name = 'vm-name'
         self.secrets = None
         self.bad_secrets = json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': []}])
-        self.vault_name = 'vmcreatelinuxsecret007'
+        self.vault_name = 'vmcreatelinuxsecret7777'
         self.secret_name = 'mysecret'
 
     def test_vm_create_linux_secrets(self):
@@ -1266,13 +1266,8 @@ class VMCreateLinuxSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: dis
         self.cmd('keyvault certificate create --vault-name {} -n cert1 -p @"{}"'.format(
             self.vault_name,
             policy_path))
-
         secret_out = self.cmd('keyvault secret list-versions --vault-name {} -n cert1'.format(self.vault_name))[-1]
-
-        self.secrets = [{
-            'sourceVault': {'id': vault_out['id']},
-            'vaultCertificates': [{'certificateUrl': secret_out['id']}]
-        }]
+        vm_format = self.cmd('keyvault secret vm-format -s \'{0}\''.format(json.dumps(secret_out)))
 
         self.cmd('vm create -g {rg} -n {vm_name} --admin-username {admin} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' -l {location} --secrets \'{secrets}\''.format(
             rg=self.resource_group,
@@ -1282,7 +1277,7 @@ class VMCreateLinuxSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: dis
             auth_type=self.auth_type,
             ssh_key=TEST_SSH_KEY_PUB,
             location=self.location,
-            secrets=json.dumps(self.secrets)
+            secrets=json.dumps(vm_format)
         ))
 
         self.cmd('vm show -g {rg} -n {vm_name}'.format(rg=self.resource_group, vm_name=self.vm_name), checks=[
@@ -1301,9 +1296,8 @@ class VMCreateWindowsSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: d
         self.location = 'westus'
         self.vm_image = 'Win2012R2Datacenter'
         self.vm_name = 'vm-name'
-        self.secrets = None
         self.bad_secrets = json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': [{'certificateUrl': 'certurl'}]}])
-        self.vault_name = 'vmcreatewinsecret005'
+        self.vault_name = 'vmcreatewinsecret7777'
         self.secret_name = 'mysecret'
 
     def test_vm_create_windows_secrets(self):
@@ -1338,11 +1332,7 @@ class VMCreateWindowsSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: d
             policy_path))
 
         secret_out = self.cmd('keyvault secret list-versions --vault-name {} -n cert1'.format(self.vault_name))[-1]
-
-        self.secrets = [{
-            'sourceVault': {'id': vault_out['id']},
-            'vaultCertificates': [{'certificateUrl': secret_out['id'], 'certificateStore': 'My'}]
-        }]
+        vm_format = self.cmd('keyvault secret vm-format -s \'{0}\' --certificate-store "My"'.format(json.dumps(secret_out)))
 
         self.cmd('vm create -g {rg} -n {vm_name} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {location} --secrets \'{secrets}\''.format(
             rg=self.resource_group,
@@ -1350,7 +1340,7 @@ class VMCreateWindowsSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: d
             image=self.vm_image,
             vm_name=self.vm_name,
             location=self.location,
-            secrets=json.dumps(self.secrets)
+            secrets=json.dumps(vm_format)
         ))
 
         self.cmd('vm show -g {rg} -n {vm_name}'.format(rg=self.resource_group, vm_name=self.vm_name), checks=[
@@ -1557,9 +1547,8 @@ class VMSSCreateLinuxSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: d
     def __init__(self, test_method):
         super(VMSSCreateLinuxSecretsScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_vmss_create_linux_secrets')
         self.vmss_name = 'vmss1-name'
-        self.secrets = None
         self.bad_secrets = json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': []}])
-        self.vault_name = 'vmcreatelinuxsecret003'
+        self.vault_name = 'vmcreatelinuxsecret3333'
         self.secret_name = 'mysecret'
 
     def test_vmss_create_linux_secrets(self):
@@ -1581,17 +1570,13 @@ class VMSSCreateLinuxSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: d
             policy_path))
 
         secret_out = self.cmd('keyvault secret list-versions --vault-name {} -n cert1'.format(self.vault_name))[-1]
-
-        self.secrets = [{
-            'sourceVault': {'id': vault_out['id']},
-            'vaultCertificates': [{'certificateUrl': secret_out['id']}]
-        }]
+        vm_format = self.cmd('keyvault secret vm-format -s \'{0}\''.format(json.dumps(secret_out)))
 
         self.cmd('vmss create -n {name} -g {rg} --image Debian --admin-username deploy --ssh-key-value \'{ssh}\' --secrets \'{secrets}\''.format(
             name=self.vmss_name,
             rg=self.resource_group,
             ssh=TEST_SSH_KEY_PUB,
-            secrets=json.dumps(self.secrets)))
+            secrets=json.dumps(vm_format)))
 
         self.cmd('vmss show -n {} -g {}'.format(self.vmss_name, self.resource_group), checks=[
             JMESPathCheck('provisioningState', 'Succeeded'),

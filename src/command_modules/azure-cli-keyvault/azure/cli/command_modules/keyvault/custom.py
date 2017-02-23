@@ -131,16 +131,7 @@ def get_vm_format_secret(client, secrets, certificate_store=None):
                   'vaultCertificates': value['vaultCertificates']}
                  for _, value in list(grouped_secrets.items())]
 
-    # This is a hack to dump out json to STDOUT with the exact formatting we
-    # desire. The issue is that this JSON contains a resource id and the default
-    # output adds a resourceGroup to the keys upon formatting for output. We don't
-    # want that to be added since it would be different from what --secrets in vm
-    # and vmss create require.
-    #
-    # Also, vm-format should only produce JSON as it's the only format that makes
-    # sense for this cmd
-    print(json.dumps(formatted, sort_keys=True, indent=2))
-    return None
+    return formatted
 
 
 def get_default_policy(client): #pylint: disable=unused-argument
