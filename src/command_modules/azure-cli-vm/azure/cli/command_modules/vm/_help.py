@@ -853,7 +853,7 @@ helps['disk'] = """
 
 helps['snapshot'] = """
     type: group
-    short-summary: Manage point-in-time copies of a managed disk, native blobs, or another snapshots.
+    short-summary: Manage point-in-time copies of managed disks, native blobs, or other snapshots.
 """
 
 helps['image'] = """
