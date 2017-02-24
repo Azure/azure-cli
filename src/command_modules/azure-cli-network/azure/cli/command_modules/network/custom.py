@@ -870,46 +870,25 @@ create_vnet_peering.__doc__ = VirtualNetworkPeering.__doc__
 # pylint: disable=too-many-locals
 def create_vnet(resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
                 subnet_name=None, subnet_prefix=None, dns_servers=None,
-                location=None, tags=None, validate=False):
-    from azure.mgmt.resource.resources import ResourceManagementClient
-    from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
-    from azure.cli.core._util import random_string
-    from azure.cli.command_modules.network._template_builder import \
-        ArmTemplateBuilder, build_vnet_resource
-
+                location=None, tags=None):
+    from azure.mgmt.network.models import VirtualNetwork, DhcpOptions
+    client = _network_client_factory().virtual_networks
     tags = tags or {}
-
-    # Build up the ARM template
-    master_template = ArmTemplateBuilder()
-    vnet_resource = build_vnet_resource(
-        vnet_name, location, tags, vnet_prefixes, dns_servers, subnet_name,
-        subnet_prefix)
-    master_template.add_resource(vnet_resource)
-    master_template.add_output('newVNet', vnet_name, output_type='object')
-
-    template = master_template.build()
-
-    # deploy ARM template
-    deployment_name = 'vnet_deploy_' + random_string(32)
-    client = get_mgmt_service_client(ResourceManagementClient).deployments
-    properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
-    if validate:
-        from pprint import pprint
-        pprint(template)
-        return client.validate(resource_group_name, deployment_name, properties)
-
-    return client.create_or_update(resource_group_name, deployment_name, properties)
+    vnet = VirtualNetwork(
+        location=location, tags=tags,
+        dhcp_options=DhcpOptions(dns_servers),
+        address_space=AddressSpace(
+            vnet_prefixes if isinstance(vnet_prefixes, list) else [vnet_prefixes]))
+    if subnet_name:
+        vnet.subnets = [Subnet(name=subnet_name, address_prefix=subnet_prefix)]
+    return client.create_or_update(resource_group_name, vnet_name, vnet)
 
 
-def update_vnet(instance, address_prefixes=None):
-    '''update existing virtual network
-    :param address_prefixes: update address spaces. Use space separated address prefixes,
-        for example, "10.0.0.0/24 10.0.1.0/24"
-    '''
+def update_vnet(instance, vnet_prefixes=None):
     #server side validation reports pretty good error message on invalid CIDR,
     #so we don't validate at client side
-    if address_prefixes:
-        instance.address_space.address_prefixes = address_prefixes
+    if vnet_prefixes:
+        instance.address_space.address_prefixes = vnet_prefixes
     return instance
 
 def _set_route_table(ncf, resource_group_name, route_table, subnet):
