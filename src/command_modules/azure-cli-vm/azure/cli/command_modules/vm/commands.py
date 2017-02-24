@@ -227,7 +227,7 @@ cli_command(__name__, 'vmss start', custom_path.format('start_vmss'))
 cli_command(__name__, 'vmss update-instances', custom_path.format('update_vmss_instances'))
 cli_command(__name__, 'vmss reimage', custom_path.format('reimage_vmss'))
 cli_command(__name__, 'vmss scale', custom_path.format('scale_vmss'))
-cli_command(__name__, 'vmss list_instance_connection_info', custom_path.format('list_vmss_instance_connection_info'))
+cli_command(__name__, 'vmss list-instance-connection-info', custom_path.format('list_vmss_instance_connection_info'))
 
 # VM Size
 cli_command(__name__, 'vm list-sizes', mgmt_path.format('virtual_machine_sizes_operations', 'VirtualMachineSizesOperations', 'list'), cf_vm_sizes)
