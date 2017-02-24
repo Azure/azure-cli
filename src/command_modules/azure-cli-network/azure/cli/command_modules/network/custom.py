@@ -175,7 +175,8 @@ def update_ag_frontend_port(instance, parent, item_name, port=None): # pylint: d
     return parent
 
 def create_ag_http_listener(resource_group_name, application_gateway_name, item_name,
-                            frontend_ip, frontend_port, ssl_cert=None, no_wait=False):
+                            frontend_ip, frontend_port, host_name=None, ssl_cert=None,
+                            no_wait=False):
     from azure.mgmt.network.models import ApplicationGatewayHttpListener
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -183,6 +184,8 @@ def create_ag_http_listener(resource_group_name, application_gateway_name, item_
         name=item_name,
         frontend_ip_configuration=SubResource(frontend_ip),
         frontend_port=SubResource(frontend_port),
+        host_name=host_name,
+        require_server_name_indication=True if ssl_cert and host_name else None,
         protocol='https' if ssl_cert else 'http',
         ssl_certificate=SubResource(ssl_cert) if ssl_cert else None)
     _upsert(ag.http_listeners, new_listener, 'name', item_name)
@@ -190,15 +193,22 @@ def create_ag_http_listener(resource_group_name, application_gateway_name, item_
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 def update_ag_http_listener(instance, parent, item_name, frontend_ip=None, frontend_port=None, # pylint: disable=unused-argument
-                            protocol=None, ssl_cert=None):
+                            host_name=None, ssl_cert=None):
     if frontend_ip is not None:
         instance.frontend_ip_configuration = SubResource(frontend_ip)
     if frontend_port is not None:
         instance.frontend_port = SubResource(frontend_port)
-    if protocol is not None:
-        instance.protocol = protocol
     if ssl_cert is not None:
-        instance.ssl_certificate = SubResource(ssl_cert)
+        if ssl_cert:
+            instance.ssl_certificate = SubResource(ssl_cert)
+            instance.protocol = 'Https'
+        else:
+            instance.ssl_certificate = None
+            instance.protocol = 'Http'
+    if host_name is not None:
+        instance.host_name = host_name or None
+    instance.require_server_name_indication = instance.host_name and \
+        instance.protocol.lower() == 'https'
     return parent
 
 def create_ag_backend_http_settings_collection(resource_group_name, application_gateway_name,
@@ -1290,7 +1300,7 @@ def update_local_gateway(instance, gateway_ip_address=None, local_address_prefix
     if gateway_ip_address is not None:
         instance.gateway_ip_address = gateway_ip_address
     if local_address_prefix is not None:
-        instance.local_address_prefix = local_address_prefix
+        instance.local_network_address_space.address_prefixes = local_address_prefix
     if tags is not None:
         instance.tags = tags
     return instance

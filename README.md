@@ -140,9 +140,11 @@ $ pip install --pre azure-cli --extra-index-url https://azureclinightly.blob.cor
 
 - Builds happen at 21:00:00 PDT each night. They are published shortly afterwards.
 - Whilst all command modules are built each night, not all are included on install.
-- Install additional components with:
-    ```bash
+- Install additional components with:  
+    ```
     $ export AZURE_COMPONENT_PACKAGE_INDEX_URL=https://azureclinightly.blob.core.windows.net/packages
+    ```  
+    ```
     $ az component update --add <component_name> --private
     ```
 - To view the list of installed packages, run ``az component list``

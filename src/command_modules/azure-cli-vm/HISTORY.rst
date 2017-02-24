@@ -3,6 +3,14 @@
 Release History
 ===============
 
+0.1.2rc2 (2017-02-22)
++++++++++++++++++++++
+
+* VM: fix a casing issue on check os type (#2208)
+* Rev compute package to 0.33.rc1 for new API version (#2136)
+* Change default VM size to Standard_DS1_v2. (#2181)
+* Fix VM names in documentation. (#2183)
+
 0.1.2rc1 (2017-02-17)
 +++++++++++++++++++++
 

@@ -455,7 +455,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                                   ssh_key_value, admin_username=admin_username,
                                   agent_count=agent_count, agent_vm_size=agent_vm_size,
                                   location=location, service_principal=service_principal,
-                                  client_secret=client_secret)
+                                  client_secret=client_secret, master_count=master_count)
 
     ops = get_mgmt_service_client(ACSClient).acs
     return ops.create_or_update(resource_group_name, deployment_name, dns_name_prefix, name,
@@ -507,7 +507,7 @@ def load_acs_service_principals(config_path):
 
 def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value,
                        admin_username="azureuser", agent_count="3", agent_vm_size="Standard_D2_v2",
-                       location=None, service_principal=None, client_secret=None):
+                       location=None, service_principal=None, client_secret=None, master_count="1"):
     from azure.mgmt.resource.resources.models import DeploymentProperties
     if not location:
         location = '[resourceGroup().location]'
@@ -524,7 +524,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
         },
         "resources": [
             {
-                "apiVersion": "2016-09-30",
+                "apiVersion": "2017-01-31",
                 "location": location,
                 "type": "Microsoft.ContainerService/containerServices",
                 "name": name,
@@ -533,7 +533,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
                         "orchestratorType": "kubernetes"
                     },
                     "masterProfile": {
-                        "count": 1,
+                        "count": master_count,
                         "dnsPrefix": dns_name_prefix
                     },
                     "agentPoolProfiles": [
