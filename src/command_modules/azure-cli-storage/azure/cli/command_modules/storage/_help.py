@@ -30,8 +30,28 @@ helps['storage blob upload'] = """
     short-summary: Upload a specified file to a storage blob.
     long-summary: Creates a new blob from a file path, or updates the content of an existing blob, with automatic chunking and progress notifications.
     examples:
-        - name: Upload to a blob with all required fields
-          text: az storage blob upload -f $file_to_upload -c $container_name -n $blob_name
+        - name: Download a blob to a file destination with all required fields.
+          text: az storage blob upload -f /path/to/write/to -c MyContainer -n MyBlob
+"""
+
+helps['storage blob generate-sas'] = """
+    type: command
+    short-summary: Generates a shared access signature for a blob.
+    long-summary: Use the returned signature with the sas_token parameter of any Blob Service.
+    examples:
+        - name: Generate a shared access signature with all required fields.
+          text: az storage blob generate-sas -c MyContainer -n MyBlob
+        - name: Assign a read-only shared access signature  to a variable name.
+          readAccessSAS =$(az storage blob generate-sas -c container1 -n mypic3.png  --permissions r)
+"""
+
+helps['storage blob download'] = """
+    type: command
+    short-summary: Download a specified file from a storage blob.
+    long-summary: Downloads a blob to a file path, with automatic chunking and progress notifications.
+    examples:
+        - name: Download to a blob with all required fields.
+          text: az storage blob download -f /path/to/file -c MyContainer -n MyBlob
 """
 
 helps['storage file upload'] = """
@@ -39,17 +59,17 @@ helps['storage file upload'] = """
     short-summary: Upload a specified file to a file share that uses the standard SMB 3.0 protocol
     long-summary: Creates or updates an azure file from a source path with automatic chunking and progress notifications.
     examples:
-        - name: Upload to a file share with all required fields
-          text: az storage file upload -s $share_name -source $file_to_upload
+        - name: Upload to a file share with all required fields.
+          text: az storage file upload -s MyShare -source /path/to/file
 """
 
 helps['storage blob show'] = """
     type: command
-    short-summary: Returns properties for a named blob in a container in a storage account. 
+    short-summary: Returns properties for a named blob in a container in a storage account.
     long-summary: Blob properties only.  To show contents of a blob, use az storage blob list
     examples:
-        - name: Show properties of a blob with all required fields
-          text: az storage blob show -c $container_name -n $blob_name
+        - name: Show properties of a blob with all required fields.
+          text: az storage blob show -c MyContainer -n MyBlob
 """
 
 helps['storage blob delete'] = """
@@ -57,75 +77,77 @@ helps['storage blob delete'] = """
     short-summary: Marks the specified blob or snapshot for deletion.
     long-summary: The blob is marked for later deletion during garbage collection.  Note that in order to delete a blob, you must delete all of its snapshots. You can delete both at the same time with the Delete Blob operation.
     examples:
-        - name: Delete a blob with all required fields
-          text: az storage blob delete -c $container_name -n $blob_name
+        - name: Delete a blob with all required fields.
+          text: az storage blob delete -c MyContainer -n MyBlob
 """
 
 helps['storage account create'] = """
     type: command
     short-summary: Creates a storage account.
     examples:
-        - name: Create a storage account with minimal options
-          text: az storage account create -n $storage_account_name -g $resource_group_name -l $region --sku $sku
-        - name: Create a storage account saccount1 in resource group rg1 in the West US region with locally redundant storage
-          text: az storage account create -n $saccount1 -g $rg1 -l westus --sku Standard_LRS
+        - name: Create a storage account with minimal options.
+          text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --sku Standard_LRS
+        - name: Create a storage account saccount1 in resource group rg1 in the West US region with locally redundant storage.
+          text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --sku Standard_LRS
 """
 
 helps['storage container create'] = """
     type: command
     short-summary: Creates a container in a storage account.
     examples:
-        - name: Create a storage container in a storage account
-          text: az storage container create -n $storage_container_name 
-        - name: Create a storage container in a storage account and return an error if the container already exists
-          text: az storage container create -n $storage_container_name --fail-on-exist
+        - name: Create a storage container in a storage account.
+          text: az storage container create -n MyStorageContainer
+        - name: Create a storage container in a storage account and return an error if the container already exists.
+          text: az storage container create -n MyStorageContainer --fail-on-exist
 """
 
 helps['storage account list'] = """
     type: command
     short-summary: Lists storage accounts
     examples:
-        - name: List all storage accounts in a subscription
-          text: az storage account list 
-        - name: List all storage accounts in a region
-          text: az storage account list -g $resource_group_name
+        - name: List all storage accounts in a subscription.
+          text: az storage account list
+        - name: List all storage accounts in a region.
+          text: az storage account list -g MyResourceGroup
 """
 
 helps['storage account show'] = """
     type: command
     short-summary: Returns storage account properties
     examples:
-        - name: Show properties for a storage account using one or more resource ID
-          text: az storage account show --ids $storage_account_resource_id
-        - name: Show properties for a storage account using an account name and resource group
-          text: az storage account show -g $resource_group_name -n $storage_account_name
+        - name: Show properties for a storage account using one or more resource ID.
+          text: az storage account show --ids ${storage_account_resource_id}
+        - name: Show properties for a storage account using an account name and resource group.
+          text: az storage account show -g MyResourceGroup -n MyStorageAccount
 """
 
 helps['storage blob list'] = """
     type: command
-    short-summary: Lists storage blobs in a container
+    short-summary: Lists storage blobs in a container.
     examples:
-        - name: List all storage blobs in a container
-          text: az storage blob list -c $container_name
+        - name: List all storage blobs in a container.
+          text: az storage blob list -c MyContainer
 """
 
 helps['storage account delete'] = """
     type: command
     short-summary: Deletes a storage account.
     examples:
-        - name: Delete a storage account using one or more resource ID
-          text: az storage account delete --ids $storage_account_resource_id
-        - name: Delete a storage account using an account name and resource group
-          text: az storage account delete -n $storage_account_name -g $resource_group_name
+        - name: Delete a storage account using one or more resource ID.
+          text: az storage account delete --ids ${storage_account_resource_id}
+        - name: Delete a storage account using an account name and resource group.
+          text: az storage account delete -n MyStorageAccount -g MyResourceGroup
 """
 
 
-helps['storage account show connection string'] = """
+helps['storage account show-connection-string'] = """
     type: command
     short-summary: Returns the properties for the specified storage account.
     examples:
-        - name: Get a connection string for a storage account
-          text: az storage account show-connection-string -g $resource_group_name -n $storage_account_name
+        - name: Get a connection string for a storage account.
+          text: az storage account show-connection-string -g MyResourceGroup -n MyStorageAccount
+        - name: Set the AZURE_STORAGE_CONNECTION_STRING environment variable.
+          text: export AZURE_STORAGE_CONNECTION_STRING=$(az storage account show-connection-string -n MyStorageAccount -g MyResourceGroup)
 """
 
 helps['storage'] = """
@@ -152,8 +174,12 @@ helps['storage account keys list'] = """
     type: command
     short-summary: Lists the primary and secondary keys for a storage account.
     examples:
-        - name: List the primary and secondary keys for a storage account
-          text: az storage account keys list -g $resource_group_name -n $storage_account_name
+        - name: List the primary and secondary keys for a storage account.
+          text: az storage account keys list -g MyResourceGroup -n MyStorageAccount
+        - name: Set the AZURE_STORAGE_ACCESS_KEY environment variable using awk.
+          text: export AZURE_STORAGE_ACCESS_KEY=$( az storage account keys list -n MyStorageAccount -g MyResourceGroup -o tsv | awk '{if ($1=="key1") print $3;}')
+        - name: Set the AZURE_STORAGE_ACCESS_KEY environment variable using JMESPath.
+          text: export AZURE_STORAGE_ACCESS_KEY=$( az storage account keys list -n MyStorageAccounte -g MyResourceGroup --query "[].{keyName:keyName,value:value}|[?keyName=='key1']|[].value")
 """
 
 helps['storage blob'] = """
@@ -189,16 +215,27 @@ helps['storage blob service-properties'] = """
     type: group
     short-summary: Manage storage blob service properties.
 """
+
+helps['storage blob copy start'] = """
+    type: command
+    short-summary: Copies a blob asynchronously.
+    examples:
+        - name: copy a blob to another container in the same account.  Destination will be overwritten if it exists.
+          text: az storage blob copy start --source-blob MyBlob --source-container MyContainer --destination-blob 'newfile.txt' --destination-container TargetContainer
+        - name: copy a blob to a container from a URL.  Destination will be overwritten if it exists.
+          text: az storage blob copy start --source-uri http://SourceURL.org/file.txt --destination-blob 'newfile.txt' --destination-container TargetContainer
+"""
+
 helps['storage blob copy start-batch'] = """
     type: command
     short-summary: Copy multiple blobs or files to a blob container.
     parameters:
         - name: --destination-container
           type: string
-          short-summary: The blob container where the selected source files or blobs to be copied to.
+          short-summary: The blob container where the selected source files or blobs will be copied.
         - name: --pattern
           type: string
-          short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq', and '[!seq]'.
+          short-summary: The pattern used for files or blobs in the source. The supported patterns are '*', '?', '[seq', and '[!seq]'.
         - name: --dryrun
           type: bool
           short-summary: List of files or blobs to be uploaded. No actual data transfer will occur.
@@ -220,6 +257,11 @@ helps['storage blob copy start-batch'] = """
         - name: --source-sas
           type: string
           short-summary: The shared access signature for the source storage account.
+      examples:
+        - name: copy all files in a container to another container in the same storage account.
+          text: az storage blob copy start batch --source-container MyContainer --pattern '*' --destination-container TargetContainer
+        - name: Test a copy of files to a container from a URL.  Response will be a list of files that will be copied.
+          text: az storage blob copy start batch --dryrun --source-uri http://SourceURL.org/files/ --destination-container TargetContainer
 """
 helps['storage container'] = """
     type: group
