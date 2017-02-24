@@ -66,19 +66,59 @@ helps['datalake analytics catalog'] = """
     short-summary: Commands to manage Data Lake Analytics catalogs. 
 """
 
-helps['datalake analytics catalog item'] = """
+helps['datalake analytics catalog database'] = """
     type: group
-    short-summary: Commands to manage Data Lake Analytics catalog items. 
+    short-summary: Commands to manage Data Lake Analytics catalog databases. 
 """
 
-helps['datalake analytics catalog item show'] = """
-    type: command
-    short-summary: Retrieves the specified catalog item. 
+helps['datalake analytics catalog assembly'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics catalog assemblies. 
 """
 
-helps['datalake analytics catalog item list'] = """
-    type: command
-    short-summary: Lists the items of the specified type at the specified catalog path. 
+helps['datalake analytics catalog externaldatasource'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics catalog external data sources. 
+"""
+
+helps['datalake analytics catalog procedure'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics catalog stored procedures. 
+"""
+
+helps['datalake analytics catalog schema'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics catalog schemas. 
+"""
+
+helps['datalake analytics catalog table'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics catalog tables. 
+"""
+
+helps['datalake analytics catalog tablepartition'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics catalog table partitions. 
+"""
+
+helps['datalake analytics catalog tablestats'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics catalog table statistics. 
+"""
+
+helps['datalake analytics catalog tabletype'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics catalog table types. 
+"""
+
+helps['datalake analytics catalog tablevaluedfunction'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics catalog table valued functions, or TVFs. 
+"""
+
+helps['datalake analytics catalog view'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics catalog views. 
 """
 
 helps['datalake analytics catalog credential'] = """
@@ -88,12 +128,32 @@ helps['datalake analytics catalog credential'] = """
 
 helps['datalake analytics catalog credential create'] = """
     type: command
-    short-summary: Creates a new catalog credential for use with external data source. 
+    short-summary: Creates a new catalog credential for use with an external data source. 
+    parameters:
+        - name: --credential-name
+          type: string
+          short-summary: 'The name of the credential.'
+        - name: --database-name
+          type: string
+          short-summary: 'The name of the database in which to create the credential.'
+        - name: --credential-user-name
+          type: string
+          short-summary: 'The user name that will be used when authenticating with this credential'
 """
 
 helps['datalake analytics catalog credential update'] = """
     type: command
-    short-summary: Updates the specified catalog credential for use with external data source. 
+    short-summary: Updates the specified catalog credential for use with an external data source.
+    parameters:
+        - name: --credential-name
+          type: string
+          short-summary: 'The name of the credential to update.'
+        - name: --database-name
+          type: string
+          short-summary: 'The name of the database in which the credential exists.'
+        - name: --credential-user-name
+          type: string
+          short-summary: "The user name associated with the credential that will have it's password updated."
 """
 
 helps['datalake analytics catalog credential show'] = """
@@ -168,6 +228,16 @@ helps['datalake analytics account list'] = """
 helps['datalake analytics account delete'] = """
     type: command
     short-summary: Deletes the specified Data Lake Analytics account. 
+"""
+
+helps['datalake analytics account blob'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics account linked Azure Storage. 
+"""
+
+helps['datalake analytics account datalakestore'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics account linked Data Lake Store accounts. 
 """
 
 helps['datalake analytics account firewall'] = """

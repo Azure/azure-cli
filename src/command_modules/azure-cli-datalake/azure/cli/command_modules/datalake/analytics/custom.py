@@ -10,7 +10,7 @@ import time
 import uuid
 
 from OpenSSL import crypto
-
+from azure.cli.core.prompting import prompt_pass, NoTTYException
 from msrestazure.azure_exceptions import CloudError
 from azure.mgmt.datalake.analytics.account.models import (DataLakeAnalyticsAccountUpdateParameters,
                                         FirewallRule,
@@ -132,8 +132,15 @@ def create_adla_catalog_credential(client,
                                    database_name,
                                    credential_name,
                                    credential_user_name,
-                                   credential_user_password,
-                                   uri):
+                                   uri,
+                                   credential_user_password=None):
+
+    if not credential_user_password:
+        try:
+            credential_user_password = prompt_pass('Credential Password:')
+        except NoTTYException:
+            raise CLIError('Please specify both --credential-user-name and --password in non-interactive mode.')
+
     create_params = DataLakeAnalyticsCatalogCredentialCreateParameters(credential_user_password,
                                                                        uri,
                                                                        credential_user_name)
@@ -144,9 +151,21 @@ def update_adla_catalog_credential(client,
                                 database_name,
                                 credential_name,
                                 credential_user_name,
-                                credential_user_password,
-                                new_credential_user_password,
-                                uri):
+                                uri,
+                                credential_user_password=None,
+                                new_credential_user_password=None):
+    if not credential_user_password:
+        try:
+            credential_user_password = prompt_pass('Current Credential Password:')
+        except NoTTYException:
+            raise CLIError('Please specify --credential-user-name --password and --new-password in non-interactive mode.')
+
+    if not new_credential_user_password:
+        try:
+            new_credential_user_password = prompt_pass('New Credential Password:')
+        except NoTTYException:
+            raise CLIError('Please specify --credential-user-name --password and --new-password in non-interactive mode.')
+
     update_params = DataLakeAnalyticsCatalogCredentialUpdateParameters(credential_user_password,
                                                                        new_credential_user_password,
                                                                        uri,

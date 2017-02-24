@@ -36,3 +36,7 @@ register_cli_argument('datalake analytics account update', 'allow_azure_ips', he
 
 register_cli_argument('datalake analytics job submit', 'compile_mode', help='Optionally indicates the type of compilation to be done on this job. Valid values are: \'Semantic\' (Only performs semantic checks and necessary sanity checks), \'Full\' (full compilation) and \'SingleBox\' (Full compilation performed locally)', **enum_choice_list(CompileMode))
 register_cli_argument('datalake analytics job submit', 'compile_only', help='Indicates that the submission should only build the job and not execute if set to true.', action='store_true')
+
+register_cli_argument('datalake analytics catalog credential create', 'credential_user_password', options_list=('--password', '-p'), help='Password for the credential user. Will prompt if not given.')
+register_cli_argument('datalake analytics catalog credential update', 'credential_user_password', options_list=('--password', '-p'), help='Current password for the credential user. Will prompt if not given.')
+register_cli_argument('datalake analytics catalog credential update', 'new_credential_user_password', help='New password for the credential user. Will prompt if not given.')

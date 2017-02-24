@@ -140,8 +140,19 @@ def list_adls_items(account_name,
     return cf_datalake_store_filesystem(account_name).ls(path, detail=True)
 def create_adls_item(account_name,
                      path,
-                     content=None):
+                     content=None,
+                     folder=False,
+                     force=False):
     client = cf_datalake_store_filesystem(account_name)
+    if client.exists(path):
+        if force:
+            # only recurse if the user wants this to be a folder
+            # this prevents the user from unintentionally wiping out a folder
+            # when trying to create a file.
+            client.rm(path, recursive=folder)
+        else:
+            raise CLIError('An item at path: \'{}\' already exists. To overwrite the existing item, specify --force'.format(path))
+    
     if content:
         with client.open(path, mode='wb') as f:
             f.write(content)
@@ -152,6 +163,9 @@ def append_adls_item(account_name,
                      path,
                      content):
     client = cf_datalake_store_filesystem(account_name)
+    if not client.exists(path):
+        raise CLIError('File at path: \'{}\' does not exist. Create the file before attempting to append to it.'.format(path))
+    
     with client.open(path, mode='wb') as f:
         f.write(content)
 
@@ -186,6 +200,18 @@ def preview_adls_item(account_name,
                       offset=0,
                       force=False):
     client = cf_datalake_store_filesystem(account_name)
+    if length:
+        try:
+            length = long(length)
+        except NameError:
+            length = int(length)
+
+    if offset:
+        try:
+            offset = long(offset)
+        except NameError:
+            offset = int(offset)
+
     if not length or length <= 0:
         length = client.info(path).length - offset
         if length > 1*1024*1024 and not force:

@@ -60,6 +60,11 @@ helps['datalake store account delete'] = """
     short-summary: Deletes the specified Data Lake Store account. 
 """
 
+helps['datalake store account trustedprovider'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Store account trusted identity providers. 
+"""
+
 helps['datalake store account firewall'] = """
     type: group
     short-summary: Commands to manage Data Lake Store account firewall rules. 
@@ -128,4 +133,144 @@ helps['datalake store account provider list'] = """
 helps['datalake store account provider delete'] = """
     type: command
     short-summary: Deletes a trusted identity provider in the specified Data Lake Store account. 
+"""
+
+helps['datalake store filesystem'] = """
+    type: group
+    short-summary: Commands to manage a Data Lake Store filesystem. 
+"""
+
+helps['datalake store filesystem create'] = """
+    type: command
+    short-summary: Creates a file or folder in the specified Data Lake Store account at the specified path.
+    parameters:
+        - name: --content
+          type: string
+          short-summary: 'Optional content for the file to contain upon creation.'
+"""
+
+helps['datalake store filesystem show'] = """
+    type: command
+    short-summary: displays file or folder information in the specified Data Lake Store account at the specified path.
+"""
+
+helps['datalake store filesystem list'] = """
+    type: command
+    short-summary: displays the list of files and folder information under the specified folder in the specified Data Lake Store account.
+"""
+
+helps['datalake store filesystem append'] = """
+    type: command
+    short-summary: Appends content to a file in the specified Data Lake Store account at the specified path.
+    parameters:
+        - name: --content
+          type: string
+          short-summary: 'Content to be appended to the file.'
+"""
+
+helps['datalake store filesystem delete'] = """
+    type: command
+    short-summary: Deletes the file or folder in the specified Data Lake Store account at the specified path.
+"""
+
+helps['datalake store filesystem upload'] = """
+    type: command
+    short-summary: Uploads a file or folder to the specified Data Lake Store account at the specified destination path.
+    parameters:
+        - name: --source-path
+          type: string
+          short-summary: 'The full path to the file or folder to upload'
+        - name: --destination-path
+          type: string
+          short-summary: 'The full path in the Data Lake store filesystem to upload the file or folder to in the format /path/file.txt'
+        - name: --thread-count
+          type: int
+          short-summary: 'Optionally specify the parallelism of the upload. Default is the number of cores in the local machine.'
+"""
+
+helps['datalake store filesystem download'] = """
+    type: command
+    short-summary: Downloads a file or folder from the specified Data Lake Store account to the specified local destination path.
+    parameters:
+        - name: --source-path
+          type: string
+          short-summary: 'The full path in the Data Lake store filesystem to download the file or folder from in the format /path/file.txt'
+        - name: --destination-path
+          type: string
+          short-summary: 'The full local path where the file or folder will be downloaded to'
+        - name: --thread-count
+          type: int
+          short-summary: 'Optionally specify the parallelism of the download. Default is the number of cores in the local machine.'
+"""
+
+helps['datalake store filesystem test'] = """
+    type: command
+    short-summary: Tests the existence of the file or folder in the specified Data Lake Store account at the specified path.
+"""
+
+helps['datalake store filesystem preview'] = """
+    type: command
+    short-summary: Previews the content of the file in the specified Data Lake Store account at the specified path.
+    parameters:
+        - name: --length
+          type: long
+          short-summary: 'The optional amount of data to preview in bytes as a long. If not specified, will attempt to preview the full file. If the file is > 1MB --force must be specified'
+        - name: --offset
+          type: long
+          short-summary: 'The optional position in bytes as a long in the file to start the preview from'
+"""
+
+helps['datalake store filesystem join'] = """
+    type: command
+    short-summary: Joins the specified list of files in the specified Data Lake Store account into one file at the specified destination path.
+    parameters:
+        - name: --source-paths
+          type: list
+          short-summary: 'The list of files in the specified Data Lake Store account to join.'
+        - name: --destination-path
+          type: string
+          short-summary: 'The destination path in the Data Lake store account where the resulting joined files should be placed.'
+"""
+
+helps['datalake store filesystem move'] = """
+    type: command
+    short-summary: Moves the specified file or folder in the specified Data Lake Store account to the specified destination path.
+    parameters:
+        - name: --source-path
+          type: list
+          short-summary: 'The file or folder to move'
+        - name: --destination-path
+          type: string
+          short-summary: 'The destination path in the Data Lake store account where the file or folder should be moved to.'
+"""
+
+helps['datalake store filesystem owner'] = """
+    type: group
+    short-summary: Commands to manage a Data Lake Store filesystem file and folder owner permissions. 
+"""
+
+helps['datalake store filesystem owner set'] = """
+    type: command
+    short-summary: Sets the owner and or owning group for the specified file or folder in the specified Data Lake Store account.
+    parameters:
+        - name: --owner
+          type: string
+          short-summary: 'The user AAD object ID or UPN to set as the owner. If not specified the owner remains unchanged'
+        - name: --group
+          type: string
+          short-summary: 'The group AAD object ID or UPN to set as the owning group. If not specified the owning group remains unchanged'
+"""
+
+helps['datalake store filesystem permission'] = """
+    type: group
+    short-summary: Commands to manage a Data Lake Store filesystem file and folder permissions. 
+"""
+
+helps['datalake store filesystem permission set'] = """
+    type: command
+    short-summary: Sets the permission octal for the specified file or folder in the specified Data Lake Store account.
+    parameters:
+        - name: --permission
+          type: int
+          short-summary: 'The octal representation of the permissions for user, group and mask (for example: 777 is full rwx for all entities)'
 """

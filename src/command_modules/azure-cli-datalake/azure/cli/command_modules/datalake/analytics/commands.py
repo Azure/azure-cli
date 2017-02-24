@@ -34,9 +34,9 @@ cli_command(__name__, 'datalake analytics account firewall delete', adla_format_
 # todo: update to allow for inclusion of statistics/debug data in show
 # todo: add a polling command for jobs
 cli_command(__name__, 'datalake analytics job submit', adla_custom_format_path.format('submit_adla_job'), cf_datalake_analytics_job)
-cli_command(__name__, 'datalake analytics account show', adla_format_path.format('job', 'job_operations', 'JobOperations', 'get'), cf_datalake_analytics_job)
-cli_command(__name__, 'datalake analytics account cancel', adla_format_path.format('job', 'job_operations', 'JobOperations', 'cancel'), cf_datalake_analytics_job)
-cli_command(__name__, 'datalake analytics account list', adla_format_path.format('job', 'job_operations', 'JobOperations', 'list'), cf_datalake_analytics_job)
+cli_command(__name__, 'datalake analytics job show', adla_format_path.format('job', 'job_operations', 'JobOperations', 'get'), cf_datalake_analytics_job)
+cli_command(__name__, 'datalake analytics job cancel', adla_format_path.format('job', 'job_operations', 'JobOperations', 'cancel'), cf_datalake_analytics_job)
+cli_command(__name__, 'datalake analytics job list', adla_format_path.format('job', 'job_operations', 'JobOperations', 'list'), cf_datalake_analytics_job)
 
 # account data source operations
 cli_command(__name__, 'datalake analytics account blob show', adla_format_path.format('account', 'storage_accounts_operations', 'StorageAccountsOperations', 'get'), cf_datalake_analytics_account_storage)
@@ -52,9 +52,9 @@ cli_command(__name__, 'datalake analytics account datalakestore delete', adla_fo
 
 # catalog operations
 #credential
-cli_command(__name__, 'datalake analytics catalog credential create', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'create_credential'), cf_datalake_analytics_catalog)
+cli_command(__name__, 'datalake analytics catalog credential create', adla_custom_format_path.format('create_adla_catalog_credential'), cf_datalake_analytics_catalog)
 cli_command(__name__, 'datalake analytics catalog credential show', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'get_credential'), cf_datalake_analytics_catalog)
-cli_command(__name__, 'datalake analytics catalog credential update', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'update_credential'), cf_datalake_analytics_catalog)
+cli_command(__name__, 'datalake analytics catalog credential update', adla_custom_format_path.format('update_adla_catalog_credential'), cf_datalake_analytics_catalog)
 cli_command(__name__, 'datalake analytics catalog credential list', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'list_credentials'), cf_datalake_analytics_catalog)
 cli_command(__name__, 'datalake analytics catalog credential delete', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'delete_credential'), cf_datalake_analytics_catalog)
 
