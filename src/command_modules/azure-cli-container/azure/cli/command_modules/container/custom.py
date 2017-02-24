@@ -5,16 +5,16 @@
 
 import json
 import os
+import re
 import time
 import uuid
 from subprocess import CalledProcessError, check_output
 
 import requests
 import yaml
-
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._config import az_config
-from azure.cli.core._profile import Profile, CredsCache, _SERVICE_PRINCIPAL
+from azure.cli.core._profile import _SERVICE_PRINCIPAL, CredsCache, Profile
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long
 from azure.cli.core._util import CLIError
 
@@ -327,6 +327,19 @@ def _check_registry_information(registry_name, registry_resource_id):
     if registry_name and registry_resource_id:
         raise CLIError("Please provide only one of registry-name and registry-resource-id, not both.")
 
+    if registry_resource_id:
+        registry_id_pattern = "/subscriptions/[-a-z0-9]+/resourcegroups/[-a-z0-9_.()]+/providers/Microsoft.ContainerRegistry/registries/[a-z0-9]+"
+        if not re.match(registry_id_pattern, registry_resource_id, re.IGNORECASE):
+            raise CLIError("Invalid registry resource ID")
+    else:
+        if registry_name:
+            name_pattern = '[^0-9a-zA-Z]'
+            name_length = len(registry_name)
+            if re.search(name_pattern, registry_name) or\
+                    (name_length < 5 or name_length > 50):
+                raise CLIError(
+                    "Registry name '{}' is invalid. A valid registry name is between 5-50 characters and contains only alphanumeric values.".format(registry_name))
+
 def add_ci(
         target_name,
         target_resource_group,
@@ -391,4 +404,3 @@ def _get_service_token():
 
     service_token = "{} {}".format(scheme, token)
     return service_token
-    
