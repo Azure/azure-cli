@@ -62,6 +62,35 @@ class ArmTemplateBuilder(object):
         return json.loads(json.dumps(self.template))
 
 
+def build_vnet_resource(name, location, tags, address_prefixes, dns_servers, subnet_name,
+                        subnet_address_prefix):
+    vnet_properties = {
+        'addressSpace': {
+            'addressPrefixes': address_prefixes
+        },
+        'dhcpOptions': {
+            'dnsServers': dns_servers
+        }
+    }
+    if subnet_name or subnet_address_prefix:
+        vnet_properties['subnets'] = [{
+            'name': subnet_name,
+            'properties': {
+               'addressPrefix': subnet_prefix 
+            }
+        }]
+    vnet = {
+        'type': 'Microsoft.Network/virtualNetworks',
+        'name': name,
+        'location': location,
+        'tags': tags,
+        'apiVersion': '2015-06-15',
+        'dependsOn': [],
+        'properties': vnet_properties
+    }
+    return vnet_properties
+
+
 def build_vpn_connection_resource(name, location, tags, gateway1, gateway2, vpn_type,
                                   authorization_key, enable_bgp, routing_weight, shared_key):
     vpn_properties = {
