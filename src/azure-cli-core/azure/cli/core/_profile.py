@@ -112,7 +112,7 @@ class Profile(object):
         subscriptions = []
         if interactive:
             subscriptions = self._subscription_finder.find_through_interactive_flow(
-                self._management_resource_uri)
+                tenant, self._management_resource_uri)
         else:
             if is_service_principal:
                 if not tenant:
@@ -122,7 +122,7 @@ class Profile(object):
                     username, password, tenant, self._management_resource_uri)
             else:
                 subscriptions = self._subscription_finder.find_from_user_account(
-                    username, password, self._management_resource_uri)
+                    username, password, tenant, self._management_resource_uri)
 
         if not subscriptions:
             raise CLIError('No subscriptions found for this account.')
@@ -330,24 +330,32 @@ class SubscriptionFinder(object):
 
         self._arm_client_factory = create_arm_client_factory
 
-    def find_from_user_account(self, username, password, resource):
-        context = self._create_auth_context(_COMMON_TENANT)
+    def find_from_user_account(self, username, password, tenant, resource):
+        context = self._create_auth_context(tenant or _COMMON_TENANT)
         token_entry = context.acquire_token_with_username_password(
             resource,
             username,
             password,
             _CLIENT_ID)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
-        result = self._find_using_common_tenant(token_entry[_ACCESS_TOKEN], resource)
+
+        if tenant is None:
+            result = self._find_using_common_tenant(token_entry[_ACCESS_TOKEN], resource)
+        else:
+            result = self._find_using_specific_tenant(tenant, token_entry[_ACCESS_TOKEN])
         return result
 
-    def find_through_interactive_flow(self, resource):
-        context = self._create_auth_context(_COMMON_TENANT)
+    def find_through_interactive_flow(self, tenant, resource):
+
+        context = self._create_auth_context(tenant or _COMMON_TENANT)
         code = context.acquire_user_code(resource, _CLIENT_ID)
         logger.warning(code['message'])
         token_entry = context.acquire_token_with_device_code(resource, code, _CLIENT_ID)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
-        result = self._find_using_common_tenant(token_entry[_ACCESS_TOKEN], resource)
+        if tenant is None:
+            result = self._find_using_common_tenant(token_entry[_ACCESS_TOKEN], resource)
+        else:
+            result = self._find_using_specific_tenant(tenant, token_entry[_ACCESS_TOKEN])
         return result
 
     def find_from_service_principal_id(self, client_id, secret, tenant, resource):
