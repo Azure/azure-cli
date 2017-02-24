@@ -16,7 +16,7 @@ from ._util import (list_network_resource_property,
 from ._format import \
     (transform_local_gateway_table_output, transform_dns_record_set_output,
      transform_dns_record_set_table_output, transform_dns_zone_table_output,
-     transform_vnet_create_output)
+     transform_vnet_create_output, transform_public_ip_create_output)
 
 custom_path = 'azure.cli.command_modules.network.custom#{}'
 
@@ -247,16 +247,12 @@ cli_command(__name__, 'network nsg create',
 cli_command(__name__, 'network public-ip delete', 'azure.mgmt.network.operations.public_ip_addresses_operations#PublicIPAddressesOperations.delete', cf_public_ip_addresses)
 cli_command(__name__, 'network public-ip show', 'azure.mgmt.network.operations.public_ip_addresses_operations#PublicIPAddressesOperations.get', cf_public_ip_addresses, exception_handler=empty_on_404)
 cli_command(__name__, 'network public-ip list', custom_path.format('list_public_ips'))
+cli_command(__name__, 'network public-ip create', custom_path.format('create_public_ip'), transform=transform_public_ip_create_output)
 cli_generic_update_command(__name__, 'network public-ip update',
                            'azure.mgmt.network.operations.public_ip_addresses_operations#PublicIPAddressesOperations.get',
                            'azure.mgmt.network.operations.public_ip_addresses_operations#PublicIPAddressesOperations.create_or_update',
                            cf_public_ip_addresses,
                            custom_function_op=custom_path.format('update_public_ip'))
-
-cli_command(__name__, 'network public-ip create',
-            'azure.cli.command_modules.network.mgmt_public_ip.lib.operations.public_ip_operations#PublicIpOperations.create_or_update',
-            cf_public_ip_create,
-            transform=DeploymentOutputLongRunningOperation('Starting network public-ip create'))
 
 # RouteTablesOperations
 cli_command(__name__, 'network route-table create', 'azure.mgmt.network.operations.route_tables_operations#RouteTablesOperations.create_or_update', cf_route_tables)

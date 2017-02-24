@@ -226,12 +226,12 @@ class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
         rg = s.resource_group
         s.cmd('network public-ip create -g {} -n {} --dns-name {} --allocation-method static'.format(rg, public_ip_dns, dns), checks=[
             JMESPathCheck('publicIp.provisioningState', 'Succeeded'),
-            JMESPathCheck('publicIp.publicIPAllocationMethod', 'Static'),
+            JMESPathCheck('publicIp.publicIpAllocationMethod', 'Static'),
             JMESPathCheck('publicIp.dnsSettings.domainNameLabel', dns)
         ])
         s.cmd('network public-ip create -g {} -n {}'.format(rg, public_ip_no_dns), checks=[
             JMESPathCheck('publicIp.provisioningState', 'Succeeded'),
-            JMESPathCheck('publicIp.publicIPAllocationMethod', 'Dynamic'),
+            JMESPathCheck('publicIp.publicIpAllocationMethod', 'Dynamic'),
             JMESPathCheck('publicIp.dnsSettings', None)
         ])
         s.cmd('network public-ip update -g {} -n {} --allocation-method static --dns-name wowza --idle-timeout 10'.format(rg, public_ip_no_dns), checks=[
