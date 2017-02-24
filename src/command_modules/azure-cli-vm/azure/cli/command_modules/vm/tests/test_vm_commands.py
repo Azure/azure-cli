@@ -335,7 +335,7 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ResourceGroupVCRTestBase):
         vm1_info = self.cmd('vm show -g {} -n vm1'.format(self.resource_group))
         disk_uri = vm1_info['storageProfile']['osDisk']['vhd']['uri']
 
-        self.cmd('vm delete -g {} -n vm1'.format(self.resource_group))
+        self.cmd('vm delete -g {} -n vm1 -y'.format(self.resource_group))
 
         # create a vm by attaching the OS disk from the deleted VM
         self.cmd('vm create -g {} -n vm2 --attach-os-disk {} --os-type linux --use-unmanaged-disk'.format(self.resource_group, disk_uri), checks=[
