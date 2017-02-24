@@ -229,13 +229,15 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(SqlServerDbMgmtScenarioTest, self).__init__(
             __file__, test_method, resource_group='cli-test-sql-mgmt')
-        self.sql_server_name = 'cliautomation11'
+        self.sql_server_name = 'cliautomation14'
         self.location_short_name = 'westus'
         self.location_long_name = 'West US'
         self.admin_login = 'admin123'
         self.admin_password = 'SecretPassword123'
         self.database_name = "cliautomationdb01"
         self.database_copy_name = "cliautomationdb02"
+        self.update_service_objective = 'S1'
+        self.update_max_size_bytes = str(10 * 1024 * 1024 * 1024)
 
     def test_sql_db_mgmt(self):
         self.execute()
@@ -283,11 +285,12 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
         #         .format(rg, self.sql_server_name, self.database_name), checks=[
         #             JMESPathCheck('[0].resourceName', self.database_name)])
 
-        self.cmd('sql db update -g {} --server {} --name {} '
-                 '--set tags.key1=value1'
-                 .format(rg, self.sql_server_name, self.database_name), checks=[
+        self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --max-size-bytes {} --set tags.key1=value1'
+                 .format(rg, self.sql_server_name, self.database_name, self.update_service_objective, self.update_max_size_bytes), checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('requestedServiceObjectiveName', self.update_service_objective),
+                     JMESPathCheck('maxSizeBytes', self.update_max_size_bytes),
                      JMESPathCheck('tags.key1', 'value1')])
 
         self.cmd('sql db copy -g {} --server {} --name {} '

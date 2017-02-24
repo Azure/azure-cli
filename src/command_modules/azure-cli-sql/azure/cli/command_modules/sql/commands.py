@@ -27,7 +27,7 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
         ## Usages will not be included in the first batch of GA commands
         #c.command('show-usage', 'list_usages')
         c.command('delete', 'delete')
-        c.generic_update_command('update', 'get', 'create_or_update')
+        c.generic_update_command('update', 'get', 'create_or_update', custom_function_op='azure.cli.command_modules.sql.custom#db_update')
 
     with s.group('sql db replication-link') as c:
         c.command('list', 'list_replication_links')

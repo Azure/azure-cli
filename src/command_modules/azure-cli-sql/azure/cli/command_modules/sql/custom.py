@@ -180,6 +180,28 @@ def db_list(
             resource_group_name=resource_group_name,
             server_name=server_name)
 
+# Update database. Custom update function because we need to insert some helper code.
+def db_update(
+    instance,
+    #elastic_pool_name=None, # Unsupported for now until it's tested
+    max_size_bytes=None,
+    requested_service_objective_name=None):
+
+    # Verify that elastic_pool_name and requested_service_objective_name are consistent # TODO
+
+    # Null out requested_service_objective_id, because if requested_service_objective_id is
+    # specified then requested_service_objective_name is ignored.
+    instance.requested_service_objective_id = None
+
+    # Validation done - update the instance
+    # The base generic update command should be able to do this part, but
+    # it seems to not be working, so we just do this manually here.
+    #instance.elastic_pool_name = elastic_pool_name or instance.elastic_pool_name # Unsupported for now until it's tested
+    instance.max_size_bytes = max_size_bytes or instance.max_size_bytes
+    instance.requested_service_objective_name = requested_service_objective_name or instance.requested_service_objective_name
+
+    return instance
+
 ###############################################
 #                sql elastic-pool             #
 ###############################################

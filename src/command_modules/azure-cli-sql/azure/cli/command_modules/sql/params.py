@@ -87,13 +87,10 @@ with ParametersContext(command='sql db restore') as c:
         c.ignore(i)
 
 with ParametersContext(command='sql db update') as c:
-    from azure.mgmt.sql.models.database import Database
-    c.expand('parameters', Database)
-
-    # These parameters are applicable to create only, not update.
-    ignores = ['location', 'collation'] + sql_db_special_create_mode_params
-    for i in ignores:
-        c.ignore(i)
+    c.argument('requested_service_objective_name', options_list=('--service-objective',), help='The name of the new service objective.')
+    # Unsupported for now until it's tested
+    #c.argument('elastic_pool_name', options_list=('--elastic_pool',), help='The name of the elastic pool to move the database into.')
+    c.argument('max_size_bytes', options_list=('--max-size-bytes',), help='The new maximum size of the database expressed in bytes.')
 
 #####
 #           sql db replication-link
