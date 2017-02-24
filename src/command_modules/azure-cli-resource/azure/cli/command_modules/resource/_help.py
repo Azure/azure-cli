@@ -196,7 +196,7 @@ helps['group list'] = """
 """
 
 helps['group update'] = """
-    type: group
+    type: command
     short-summary: Update a resource group.
 """
 helps['group wait'] = """
