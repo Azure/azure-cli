@@ -235,7 +235,7 @@ def elastic_pool_create(
 
 # Creates a firewall rule with special start/end ip address value
 # that represents all azure ips.
-def firewall_allow_all_azure_ips(
+def firewall_rule_allow_all_azure_ips(
     client,
     server_name,
     resource_group_name):
@@ -252,3 +252,18 @@ def firewall_allow_all_azure_ips(
         firewall_rule_name=rule_name,
         start_ip_address=azure_ip_addr,
         end_ip_address=azure_ip_addr)
+
+## There's no way to implement update firewall rule - https://github.com/Azure/azure-cli/issues/2264
+## Update firewall rule. Custom update function to apply param values.
+#def firewall_rule_update(
+#    instance,
+#    start_ip_address=None,
+#    end_ip_address=None):
+
+#    # Validation done - update the instance
+#    # The base generic update command should be able to do this part, but
+#    # it seems to not be working, so we just do this manually here.
+#    instance.start_ip_address = start_ip_address or instance.start_ip_address
+#    instance.end_ip_address = end_ip_address or instance.end_ip_address
+
+#    return instance

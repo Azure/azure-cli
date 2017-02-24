@@ -112,9 +112,10 @@ with ServiceGroup(__name__, get_sql_servers_operation, server_operations) as s:
 
     with s.group('sql server firewall-rule') as c:
         c.command('create', 'create_or_update_firewall_rule')
-        c.command('update', 'create_or_update_firewall_rule')
+        ## There's no way to implement update firewall rule - https://github.com/Azure/azure-cli/issues/2264
+        #c.command('update', 'create_or_update_firewall_rule')
         c.command('delete', 'delete_firewall_rule')
         c.command('show', 'get_firewall_rule')
         c.command('list', 'list_firewall_rules')
         ## Keeping this command hidden for now. `firewall-rule create` will explain the special 0.0.0.0 rule.
-        #c.custom_command('allow-all-azure-ips', 'firewall_allow_all_azure_ips')
+        #c.custom_command('allow-all-azure-ips', 'firewall_rule_allow_all_azure_ips')
