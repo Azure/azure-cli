@@ -529,13 +529,13 @@ def process_tm_endpoint_create_namespace(namespace):
 
 def process_vnet_create_namespace(namespace):
 
+    validate_location(namespace)
+
     if namespace.subnet_prefix and not namespace.subnet_name:
         raise ValueError('incorrect usage: --subnet-name NAME [--subnet-prefix PREFIX]')
 
-    namespace.create_subnet = bool(namespace.subnet_name)
-
-    if namespace.create_subnet and not namespace.subnet_prefix:
-        prefix_components = namespace.virtual_network_prefix.split('/', 1)
+    if namespace.subnet_name and not namespace.subnet_prefix:
+        prefix_components = namespace.vnet_prefixes.split('/', 1)
         address = prefix_components[0]
         bit_mask = int(prefix_components[1])
         subnet_mask = 24 if bit_mask < 24 else bit_mask

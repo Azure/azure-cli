@@ -929,7 +929,7 @@ class NetworkRouteTableOperationScenarioTest(ResourceGroupVCRTestBase):
 class NetworkVNetScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkVNetScenarioTest, self).__init__(__file__, test_method, resource_group='cli_vnet_test1')
+        super(NetworkVNetScenarioTest, self).__init__(__file__, test_method, resource_group='cli_vnet_test', debug=True)
         self.vnet_name = 'test-vnet'
         self.vnet_subnet_name = 'test-subnet1'
         self.resource_type = 'Microsoft.Network/virtualNetworks'

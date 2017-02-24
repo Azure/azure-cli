@@ -868,11 +868,9 @@ create_vnet_peering.__doc__ = VirtualNetworkPeering.__doc__
 #region Vnet/Subnet commands
 
 # pylint: disable=too-many-locals
-def create_vnet(client, resource_group_name, location, tags, dns_servers,
-                virtual_network_name, virtual_network_prefix, subnet_name, subnet_prefix):
-    """
-    :param str vnet_gateway1: Name or ID of the source virtual network gateway.
-    """
+def create_vnet(resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
+                subnet_name=None, subnet_prefix=None, dns_servers=None,
+                location=None, tags=None, validate=False):
     from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
     from azure.cli.core._util import random_string
@@ -884,10 +882,10 @@ def create_vnet(client, resource_group_name, location, tags, dns_servers,
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
     vnet_resource = build_vnet_resource(
-        virtual_network_name, location, tags, virtual_network_prefix, dns_servers, subnet_name,
-        subnet_address_prefix)
+        vnet_name, location, tags, vnet_prefixes, dns_servers, subnet_name,
+        subnet_prefix)
     master_template.add_resource(vnet_resource)
-    master_template.add_output('resource', virtual_network_name, output_type='object')
+    master_template.add_output('newVNet', vnet_name, output_type='object')
 
     template = master_template.build()
 
@@ -900,8 +898,7 @@ def create_vnet(client, resource_group_name, location, tags, dns_servers,
         pprint(template)
         return client.validate(resource_group_name, deployment_name, properties)
 
-    return LongRunningOperation()(client.create_or_update(
-        resource_group_name, deployment_name, properties))
+    return client.create_or_update(resource_group_name, deployment_name, properties)
 
 
 def update_vnet(instance, address_prefixes=None):

@@ -62,21 +62,26 @@ class ArmTemplateBuilder(object):
         return json.loads(json.dumps(self.template))
 
 
-def build_vnet_resource(name, location, tags, address_prefixes, dns_servers, subnet_name,
-                        subnet_address_prefix):
+def build_vnet_resource(name, location, tags, vnet_prefixes, dns_servers, subnet_name,
+                        subnet_prefix):
+    if isinstance(vnet_prefixes, str):
+        vnet_prefixes = [vnet_prefixes]
+    if isinstance(dns_servers, str):
+        dns_servers = [dns_servers]
+
     vnet_properties = {
         'addressSpace': {
-            'addressPrefixes': address_prefixes
+            'addressPrefixes': vnet_prefixes
         },
         'dhcpOptions': {
             'dnsServers': dns_servers
         }
     }
-    if subnet_name or subnet_address_prefix:
+    if subnet_name and subnet_prefix:
         vnet_properties['subnets'] = [{
             'name': subnet_name,
             'properties': {
-               'addressPrefix': subnet_prefix 
+               'addressPrefix': subnet_prefix
             }
         }]
     vnet = {
@@ -88,7 +93,7 @@ def build_vnet_resource(name, location, tags, address_prefixes, dns_servers, sub
         'dependsOn': [],
         'properties': vnet_properties
     }
-    return vnet_properties
+    return vnet
 
 
 def build_vpn_connection_resource(name, location, tags, gateway1, gateway2, vpn_type,
