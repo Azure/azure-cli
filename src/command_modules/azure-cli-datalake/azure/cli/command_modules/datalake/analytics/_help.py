@@ -6,7 +6,6 @@
 from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 #pylint: disable=line-too-long
-# TODO: Understand the pattern for help. Is it allowed to have ADLA and ADLS in the same "command"?
 helps['datalake'] = """
     type: group
     short-summary: Access to Data Lake Store and Analytics management
@@ -235,7 +234,7 @@ helps['datalake analytics account blob'] = """
     short-summary: Commands to manage Data Lake Analytics account linked Azure Storage. 
 """
 
-helps['datalake analytics account datalakestore'] = """
+helps['datalake analytics account datalake-store'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics account linked Data Lake Store accounts. 
 """

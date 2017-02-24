@@ -25,12 +25,10 @@ datalake_store_name_type = CliArgumentType(help='Name of the Data Lake Store acc
 register_cli_argument('datalake store', 'account_name', datalake_store_name_type, options_list=('--account', '-n'))
 register_cli_argument('datalake store account', 'resource_group_name', resource_group_name_type, completer=None, validator=None)
 register_cli_argument('datalake store account create', 'location', location_type)
-register_cli_argument('datalake store account create', 'tags', tags_type)
-register_cli_argument('datalake store account create', 'tier', help='The desired commitment tier for this account to use.', **enum_choice_list(TierType))
+register_cli_argument('datalake store account', 'tags', tags_type)
+register_cli_argument('datalake store account', 'tier', help='The desired commitment tier for this account to use.', **enum_choice_list(TierType))
 register_cli_argument('datalake store account create', 'encryption_type', help='Indicates what type of encryption to provision the account with. By default, encryption is ServiceManaged. If no encryption is desired, it must be explicitly set with the --disable-encryption flag.', **enum_choice_list(EncryptionConfigType))
 register_cli_argument('datalake store account create', 'disable_encryption', help='Indicates that the account will not have any form of encryption applied to it.', action='store_true')
-register_cli_argument('datalake store account update', 'tags', tags_type)
-register_cli_argument('datalake store account update', 'tier', help='The desired commitment tier for this account to use.', **enum_choice_list(TierType))
 register_cli_argument('datalake store account update', 'trusted_id_provider_state', help='Optionally enable/disable the existing trusted ID providers.', **enum_choice_list(TrustedIdProviderState))
 register_cli_argument('datalake store account update', 'firewall_state', help='Optionally enable/disable existing firewall rules.', **enum_choice_list(FirewallState))
 register_cli_argument('datalake store account update', 'allow_azure_ips', help='Optionally allow/block Azure originating IPs through the firewall', **enum_choice_list(FirewallAllowAzureIpsState))
@@ -48,6 +46,6 @@ register_cli_argument('datalake store filesystem preview', 'force', help='Indica
 register_cli_argument('datalake store filesystem join', 'force', help='Indicates that, if the destination file already exists, it should be overwritten', action='store_true')
 register_cli_argument('datalake store filesystem join', 'source_paths', help='The list of files in the specified Data Lake Store account to join.', nargs='+')
 register_cli_argument('datalake store filesystem move', 'force', help='Indicates that, if the destination file or folder already exists, it should be overwritten and replaced with the file or folder being moved.', action='store_true')
-register_cli_argument('datalake store filesystem permission set', 'permission', help='The octal representation of the permissions for user, group and mask (for example: 777 is full rwx for all entities)', type=int)
+register_cli_argument('datalake store filesystem set-permission', 'permission', help='The octal representation of the permissions for user, group and mask (for example: 777 is full rwx for all entities)', type=int)
 
 

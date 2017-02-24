@@ -60,7 +60,7 @@ helps['datalake store account delete'] = """
     short-summary: Deletes the specified Data Lake Store account. 
 """
 
-helps['datalake store account trustedprovider'] = """
+helps['datalake store account trusted-provider'] = """
     type: group
     short-summary: Commands to manage Data Lake Store account trusted identity providers. 
 """
@@ -244,12 +244,7 @@ helps['datalake store filesystem move'] = """
           short-summary: 'The destination path in the Data Lake store account where the file or folder should be moved to.'
 """
 
-helps['datalake store filesystem owner'] = """
-    type: group
-    short-summary: Commands to manage a Data Lake Store filesystem file and folder owner permissions. 
-"""
-
-helps['datalake store filesystem owner set'] = """
+helps['datalake store filesystem set-owner'] = """
     type: command
     short-summary: Sets the owner and or owning group for the specified file or folder in the specified Data Lake Store account.
     parameters:
@@ -261,12 +256,7 @@ helps['datalake store filesystem owner set'] = """
           short-summary: 'The group AAD object ID or UPN to set as the owning group. If not specified the owning group remains unchanged'
 """
 
-helps['datalake store filesystem permission'] = """
-    type: group
-    short-summary: Commands to manage a Data Lake Store filesystem file and folder permissions. 
-"""
-
-helps['datalake store filesystem permission set'] = """
+helps['datalake store filesystem set-permission '] = """
     type: command
     short-summary: Sets the permission octal for the specified file or folder in the specified Data Lake Store account.
     parameters:

@@ -45,10 +45,10 @@ cli_command(__name__, 'datalake analytics account blob update', adla_format_path
 cli_command(__name__, 'datalake analytics account blob delete', adla_format_path.format('account', 'storage_accounts_operations', 'StorageAccountsOperations', 'delete'), cf_datalake_analytics_account_storage)
 cli_command(__name__, 'datalake analytics account blob list', adla_format_path.format('account', 'storage_accounts_operations', 'StorageAccountsOperations', 'list_by_account'), cf_datalake_analytics_account_storage)
 
-cli_command(__name__, 'datalake analytics account datalakestore show', adla_format_path.format('account', 'data_lake_store_accounts_operations', 'DataLakeStoreAccountsOperations', 'get'), cf_datalake_analytics_account_adls)
-cli_command(__name__, 'datalake analytics account datalakestore list', adla_format_path.format('account', 'data_lake_store_accounts_operations', 'DataLakeStoreAccountsOperations', 'list_by_account'), cf_datalake_analytics_account_adls)
-cli_command(__name__, 'datalake analytics account datalakestore add', adla_format_path.format('account', 'data_lake_store_accounts_operations', 'DataLakeStoreAccountsOperations', 'add'), cf_datalake_analytics_account_adls)
-cli_command(__name__, 'datalake analytics account datalakestore delete', adla_format_path.format('account', 'data_lake_store_accounts_operations', 'DataLakeStoreAccountsOperations', 'delete'), cf_datalake_analytics_account_adls)
+cli_command(__name__, 'datalake analytics account datalake-store show', adla_format_path.format('account', 'data_lake_store_accounts_operations', 'DataLakeStoreAccountsOperations', 'get'), cf_datalake_analytics_account_adls)
+cli_command(__name__, 'datalake analytics account datalake-store list', adla_format_path.format('account', 'data_lake_store_accounts_operations', 'DataLakeStoreAccountsOperations', 'list_by_account'), cf_datalake_analytics_account_adls)
+cli_command(__name__, 'datalake analytics account datalake-store add', adla_format_path.format('account', 'data_lake_store_accounts_operations', 'DataLakeStoreAccountsOperations', 'add'), cf_datalake_analytics_account_adls)
+cli_command(__name__, 'datalake analytics account datalake-store delete', adla_format_path.format('account', 'data_lake_store_accounts_operations', 'DataLakeStoreAccountsOperations', 'delete'), cf_datalake_analytics_account_adls)
 
 # catalog operations
 #credential

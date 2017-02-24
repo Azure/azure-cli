@@ -27,10 +27,8 @@ datalake_analytics_name_type = CliArgumentType(help='Name of the Data Lake Analy
 register_cli_argument('datalake analytics', 'account_name', datalake_analytics_name_type, options_list=('--account', '-n'))
 register_cli_argument('datalake analytics account', 'resource_group_name', resource_group_name_type, completer=None, validator=None)
 register_cli_argument('datalake analytics account create', 'location', location_type)
-register_cli_argument('datalake analytics account create', 'tags', tags_type)
-register_cli_argument('datalake analytics account create', 'tier', help='The desired commitment tier for this account to use.', **enum_choice_list(TierType))
-register_cli_argument('datalake analytics account update', 'tags', tags_type)
-register_cli_argument('datalake analytics account update', 'tier', help='The desired commitment tier for this account to use.', **enum_choice_list(TierType))
+register_cli_argument('datalake analytics account', 'tags', tags_type)
+register_cli_argument('datalake analytics account', 'tier', help='The desired commitment tier for this account to use.', **enum_choice_list(TierType))
 register_cli_argument('datalake analytics account update', 'firewall_state', help='Optionally enable/disable existing firewall rules.', **enum_choice_list(FirewallState))
 register_cli_argument('datalake analytics account update', 'allow_azure_ips', help='Optionally allow/block Azure originating IPs through the firewall', **enum_choice_list(FirewallAllowAzureIpsState))
 

@@ -38,15 +38,17 @@ def list_adls_account(client, resource_group_name=None):
 def create_adls_account(client, 
                         resource_group_name,
                         account_name,
-                        location,
+                        location = None,
                         default_group = None,
                         tags = None,
-                        encryption_type = None,
+                        encryption_type = EncryptionConfigType.service_managed,
                         key_vault_id = None,
                         key_name = None,
                         key_version = None,
                         disable_encryption = False,
                         tier = None):
+    
+    location = location or get_resource_group_location(resource_group_name)
     create_params = DataLakeStoreAccount(location)
     if tags:
         create_params.tags = tags
@@ -59,9 +61,6 @@ def create_adls_account(client,
     if not disable_encryption:
         identity = EncryptionIdentity()
         config = EncryptionConfig()
-        if not encryption_type:
-            logger.warning('No Encryption type passed in, defaulting to Service managed encryption. To opt out, explicitly pass in --disable_encryption')
-            encryption_type = EncryptionConfigType.service_managed
         if encryption_type == EncryptionConfigType.user_managed:
             if not key_name or not key_vault_id or not key_version:
                 raise CLIError('For user managed encryption, --key_vault_id, --key_name and --key_version are required parameters and must be supplied.')
@@ -281,3 +280,9 @@ def _get_resource_group_by_account_name(client, account_name):
     raise CLIError(
         'Could not find account: \'{}\' in any resource group in the currently selected subscription: {}. Please ensure this account exists and that the current user has access to it.'
         .format(account_name, client.subscription_id))
+
+def get_resource_group_location(resource_group_name):
+    from azure.mgmt.resource.resources import ResourceManagementClient
+    client = get_mgmt_service_client(ResourceManagementClient)
+    # pylint: disable=no-member
+    return client.resource_groups.get(resource_group_name).location

@@ -43,8 +43,8 @@ def list_adla_account(client, resource_group_name=None):
 def create_adla_account(client, 
                         resource_group_name,
                         account_name,
-                        location,
                         default_datalake_store,
+                        location = None,
                         tags = None,
                         max_degree_of_parallelism = 30,
                         max_job_count = 3,
@@ -52,9 +52,10 @@ def create_adla_account(client,
                         tier = None):
     adls_list = list()
     adls_list.append(DataLakeStoreAccountInfo(default_datalake_store))
+    location = location or get_resource_group_location(resource_group_name)
     create_params = DataLakeAnalyticsAccount(location,
                                              default_datalake_store,
-                                             adls_list)
+                                            adls_list)
     if tags:
         create_params.tags = tags
 
@@ -226,3 +227,9 @@ def _get_resource_group_by_account_name(client, account_name):
     raise CLIError(
         'Could not find account: \'{}\' in any resource group in the currently selected subscription: {}. Please ensure this account exists and that the current user has access to it.'
         .format(account_name, client.subscription_id))
+
+def get_resource_group_location(resource_group_name):
+    from azure.mgmt.resource.resources import ResourceManagementClient
+    client = get_mgmt_service_client(ResourceManagementClient)
+    # pylint: disable=no-member
+    return client.resource_groups.get(resource_group_name).location

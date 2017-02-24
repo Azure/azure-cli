@@ -28,11 +28,11 @@ cli_command(__name__, 'datalake store account firewall show', adls_format_path.f
 cli_command(__name__, 'datalake store account firewall delete', adls_format_path.format('firewall_rules_operations', 'FirewallRulesOperations', 'delete'), cf_datalake_store_account_firewall)
 
 # account trusted id provider operations
-cli_command(__name__, 'datalake store account trustedprovider create', adls_format_path.format('trusted_id_providers_operations', 'TrustedIdProvidersOperations', 'create_or_update'), cf_datalake_store_account_trusted_provider)
-cli_command(__name__, 'datalake store account trustedprovider update', adls_format_path.format('trusted_id_providers_operations', 'TrustedIdProvidersOperations', 'update'), cf_datalake_store_account_trusted_provider)
-cli_command(__name__, 'datalake store account trustedprovider list', adls_format_path.format('trusted_id_providers_operations', 'TrustedIdProvidersOperations', 'list_by_account'), cf_datalake_store_account_trusted_provider)
-cli_command(__name__, 'datalake store account trustedprovider show', adls_format_path.format('trusted_id_providers_operations', 'TrustedIdProvidersOperations', 'get'), cf_datalake_store_account_trusted_provider)
-cli_command(__name__, 'datalake store account trustedprovider delete', adls_format_path.format('trusted_id_providers_operations', 'TrustedIdProvidersOperations', 'delete'), cf_datalake_store_account_trusted_provider)
+cli_command(__name__, 'datalake store account trusted-provider create', adls_format_path.format('trusted_id_providers_operations', 'TrustedIdProvidersOperations', 'create_or_update'), cf_datalake_store_account_trusted_provider)
+cli_command(__name__, 'datalake store account trusted-provider update', adls_format_path.format('trusted_id_providers_operations', 'TrustedIdProvidersOperations', 'update'), cf_datalake_store_account_trusted_provider)
+cli_command(__name__, 'datalake store account trusted-provider list', adls_format_path.format('trusted_id_providers_operations', 'TrustedIdProvidersOperations', 'list_by_account'), cf_datalake_store_account_trusted_provider)
+cli_command(__name__, 'datalake store account trusted-provider show', adls_format_path.format('trusted_id_providers_operations', 'TrustedIdProvidersOperations', 'get'), cf_datalake_store_account_trusted_provider)
+cli_command(__name__, 'datalake store account trusted-provider delete', adls_format_path.format('trusted_id_providers_operations', 'TrustedIdProvidersOperations', 'delete'), cf_datalake_store_account_trusted_provider)
 
 # filesystem operations
 cli_command(__name__, 'datalake store filesystem show', adls_custom_format_path.format('get_adls_item'))
@@ -51,5 +51,5 @@ cli_command(__name__, 'datalake store filesystem move', adls_custom_format_path.
 
 # filesystem permission operations
 # todo: implement acl CRUD when available
-cli_command(__name__, 'datalake store filesystem permission set', adls_custom_format_path.format('set_adls_item_permissions'))
-cli_command(__name__, 'datalake store filesystem owner set', adls_custom_format_path.format('set_adls_item_owner'))
+cli_command(__name__, 'datalake store filesystem set-permission', adls_custom_format_path.format('set_adls_item_permissions'))
+cli_command(__name__, 'datalake store filesystem set-owner', adls_custom_format_path.format('set_adls_item_owner'))
