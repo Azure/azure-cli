@@ -38,15 +38,14 @@ def list_metrics(client, resource_uri, time_grain,
     '''Lists the metric values for a resource.
     :param str resource_uri: The identifier of the resource
     :param str time_grain: The time grain. Granularity of the metric data returned in ISO 8601
-                           duration format, eg "duration'PT1M'"
+                           duration format, eg "PT1M"
     :param str start_time: The start time of the query. In ISO format with explicit indication of
                            timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500
     :param str end_time: The end time of the query. In ISO format with explicit indication of
                          timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500
-    :param str metric_names: The list of metric names
+    :param str metric_names: The space separated list of metric names
     '''
     odata_filter = _metrics_odata_filter_builder(time_grain, start_time, end_time, metric_names)
-    print(odata_filter)
     metrics = client.list(resource_uri, filter=odata_filter)
     return list(metrics)
 
