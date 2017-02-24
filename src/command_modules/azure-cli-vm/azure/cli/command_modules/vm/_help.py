@@ -669,8 +669,8 @@ helps['vmss diagnostics'] = """
     short-summary: Configure the Azure Virtual Machine Scale Set diagnostics extension.
 """
 
-helps['vmss list_instance_connection_info'] = """
-    type: group
+helps['vmss list-instance-connection-info'] = """
+    type: command
     short-summary: Get the IP address and port number used to connect to individual instances.
 """
 
