@@ -112,8 +112,7 @@ with ServiceGroup(__name__, get_sql_servers_operation, server_operations) as s:
 
     with s.group('sql server firewall-rule') as c:
         c.command('create', 'create_or_update_firewall_rule')
-        ## There's no way to implement update firewall rule - https://github.com/Azure/azure-cli/issues/2264
-        #c.command('update', 'create_or_update_firewall_rule')
+        c.custom_command('update', 'firewall_rule_update')
         c.command('delete', 'delete_firewall_rule')
         c.command('show', 'get_firewall_rule')
         c.command('list', 'list_firewall_rules')

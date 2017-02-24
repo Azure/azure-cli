@@ -245,7 +245,7 @@ def firewall_rule_allow_all_azure_ips(
     
     # Special start/end IP that represents allowing all azure ips
     azure_ip_addr = '0.0.0.0'
-    
+
     return client.create_or_update_firewall_rule(
         resource_group_name=resource_group_name,
         server_name=server_name,
@@ -253,17 +253,25 @@ def firewall_rule_allow_all_azure_ips(
         start_ip_address=azure_ip_addr,
         end_ip_address=azure_ip_addr)
 
-## There's no way to implement update firewall rule - https://github.com/Azure/azure-cli/issues/2264
-## Update firewall rule. Custom update function to apply param values.
-#def firewall_rule_update(
-#    instance,
-#    start_ip_address=None,
-#    end_ip_address=None):
+# Update firewall rule. Custom update function is required, see https://github.com/Azure/azure-cli/issues/2264
+def firewall_rule_update(
+    client,
+    firewall_rule_name,
+    server_name,
+    resource_group_name,
+    start_ip_address=None,
+    end_ip_address=None):
 
-#    # Validation done - update the instance
-#    # The base generic update command should be able to do this part, but
-#    # it seems to not be working, so we just do this manually here.
-#    instance.start_ip_address = start_ip_address or instance.start_ip_address
-#    instance.end_ip_address = end_ip_address or instance.end_ip_address
+    # Get existing instance
+    instance = client.get_firewall_rule(
+        firewall_rule_name=firewall_rule_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name)
 
-#    return instance
+    # Send update
+    return client.create_or_update_firewall_rule(
+        firewall_rule_name=firewall_rule_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        start_ip_address = start_ip_address or instance.start_ip_address,
+        end_ip_address = end_ip_address or instance.end_ip_address)

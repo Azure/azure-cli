@@ -188,8 +188,11 @@ with ParametersContext(command='sql server update') as c:
 #####
 
 with ParametersContext(command='sql server firewall-rule') as c:
-    c.register_alias('server_name', ('--server', '-s'))
-    c.register_alias('firewall_rule_name', ('--name', '-n'))
+    # Help text needs to be specified because 'sql server firewall-rule update' is a custom command.
+    c.argument('server_name', options_list=('--server', '-s'), help='The name of the Azure SQL server.')
+    c.argument('firewall_rule_name', options_list=('--name', '-n'), help='The name of the firewall rule.')
+    c.argument('start_ip_address', options_list=('--start-ip-address',), help='The start IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses.')
+    c.argument('end_ip_address', options_list=('--end-ip-address',), help='The end IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses.')
 
 #####
 #           sql server service-objective
