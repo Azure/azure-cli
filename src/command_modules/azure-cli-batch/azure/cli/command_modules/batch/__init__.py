@@ -20,4 +20,3 @@ def load_commands():
         import azure.cli.command_modules.batch_extensions.commands
     except ImportError:
         pass  # Optional Batch Extensions not installed
-    
