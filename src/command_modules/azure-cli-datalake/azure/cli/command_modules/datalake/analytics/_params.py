@@ -5,7 +5,7 @@
 from azure.cli.core.commands import \
     (register_cli_argument, CliArgumentType)
 from azure.cli.core.commands.parameters import \
-    (tags_type, location_type, resource_group_name_type,
+    (tags_type,
      get_resource_name_completion_list,
      enum_choice_list)
 
@@ -25,8 +25,6 @@ datalake_analytics_name_type = CliArgumentType(help='Name of the Data Lake Analy
 
 # PARAMETER REGISTRATIONS
 register_cli_argument('datalake analytics', 'account_name', datalake_analytics_name_type, options_list=('--account', '-n'))
-register_cli_argument('datalake analytics account', 'resource_group_name', resource_group_name_type, completer=None, validator=None)
-register_cli_argument('datalake analytics account create', 'location', location_type)
 register_cli_argument('datalake analytics account', 'tags', tags_type)
 register_cli_argument('datalake analytics account', 'tier', help='The desired commitment tier for this account to use.', **enum_choice_list(TierType))
 register_cli_argument('datalake analytics account update', 'firewall_state', help='Optionally enable/disable existing firewall rules.', **enum_choice_list(FirewallState))
