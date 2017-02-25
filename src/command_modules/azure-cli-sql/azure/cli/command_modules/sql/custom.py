@@ -73,7 +73,14 @@ def _db_create_special(
         resource_group_name=source_db.resource_group_name)
 
     # Set create mode properties
-    from urllib.parse import quote
+    # url parse package has different names in Python 2 and 3.
+    # So we have to import it differently depending on Python version.
+    import sys
+    if sys.version_info >= (3,):
+        from urllib.parse import quote
+    else:
+        from urllib import quote
+
     subscription_id = get_subscription_id()
     kwargs['source_database_id'] = (
         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}'
