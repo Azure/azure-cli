@@ -18,12 +18,12 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
         c.custom_command('create', 'db_create')
         c.custom_command('copy', 'db_copy')
         c.custom_command('create-secondary', 'db_create_secondary')
-        ## Commented out for now because restorePointInTime property is not yet in Swagger spec
-        #c.custom_command('restore', 'db_restore')
+        # # Commented out for now because restorePointInTime property is not yet in Swagger spec
+        # c.custom_command('restore', 'db_restore')
         c.command('show', 'get')
         c.custom_command('list', 'db_list')
-        ## Usages will not be included in the first batch of GA commands
-        #c.command('show-usage', 'list_usages')
+        # # Usages will not be included in the first batch of GA commands
+        # c.command('show-usage', 'list_usages')
         c.command('delete', 'delete')
         c.generic_update_command('update', 'get', 'create_or_update', custom_func_name='db_update')
 
@@ -34,27 +34,27 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
         c.command('failover', 'failover_replication_link')
         c.command('force-failover', 'failover_replication_link_allow_data_loss')
 
-    ## Data Warehouse will not be included in the first batch of GA commands
-    #with s.group('sql db data-warehouse') as c:
-    #    c.command('pause', 'pause_data_warehouse')
-    #    c.command('resume', 'resume_data_warehouse')
+    # Data Warehouse will not be included in the first batch of GA commands
+    # with s.group('sql db data-warehouse') as c:
+    #     c.command('pause', 'pause_data_warehouse')
+    #     c.command('resume', 'resume_data_warehouse')
 
-    ## Data Warehouse will not be included in the first batch of GA commands
-    ## (list_restore_points also applies to db, but it's not very useful. It's
-    ## mainly useful for dw.)
-    #with s.group('sql db restore-point') as c:
-    #    c.command('list', 'list_restore_points')
+    # Data Warehouse will not be included in the first batch of GA commands
+    # (list_restore_points also applies to db, but it's not very useful. It's
+    # mainly useful for dw.)
+    # with s.group('sql db restore-point') as c:
+    #     c.command('list', 'list_restore_points')
 
-    ## TDE will not be included in the first batch of GA commands
-    #with s.group('sql db transparent-data-encryption') as c:
-    #    c.command('create', 'create_or_update_transparent_data_encryption_configuration')
-    #    c.command('show-configuration', 'get_transparent_data_encryption_configuration')
-    #    c.command('show-activity', 'list_transparent_data_encryption_activity')
+    # TDE will not be included in the first batch of GA commands
+    # with s.group('sql db transparent-data-encryption') as c:
+    #     c.command('create', 'create_or_update_transparent_data_encryption_configuration')
+    #     c.command('show-configuration', 'get_transparent_data_encryption_configuration')
+    #     c.command('show-activity', 'list_transparent_data_encryption_activity')
 
-    ## Service tier advisor will not be included in the first batch of GA commands
-    #with s.group('sql db service-tier-advisor') as c:
-    #    c.command('list', 'list_service_tier_advisors')
-    #    c.command('show', 'get_service_tier_advisor')
+    # Service tier advisor will not be included in the first batch of GA commands
+    # with s.group('sql db service-tier-advisor') as c:
+    #     c.command('list', 'list_service_tier_advisors')
+    #     c.command('show', 'get_service_tier_advisor')
 
 ###############################################
 #                sql elastic-pool             #
@@ -77,17 +77,17 @@ recommanded_elastic_pools_ops = \
     create_service_adapter('azure.mgmt.sql.operations.recommended_elastic_pools_operations',
                            'RecommendedElasticPoolsOperations')
 
-#with ServiceGroup(__name__, get_sql_recommended_elastic_pools_operations,
-#                  recommanded_elastic_pools_ops) as s:
-    ## Recommended elastic pools will not be included in the first batch of GA commands
-    #with s.group('sql elastic-pool recommended') as c:
-    #    c.command('show', 'get')
-    #    c.command('show-metrics', 'list_metrics')
-    #    c.command('list', 'list')
+# Recommended elastic pools will not be included in the first batch of GA commands
+# with ServiceGroup(__name__, get_sql_recommended_elastic_pools_operations,
+#                   recommanded_elastic_pools_ops) as s:
+#    with s.group('sql elastic-pool recommended') as c:
+#        c.command('show', 'get')
+#        c.command('show-metrics', 'list_metrics')
+#        c.command('list', 'list')
 
-    #with s.group('sql elastic-pool recommended db') as c:
-    #    c.command('show', 'get_databases')
-    #    c.command('list', 'list_databases')
+#    with s.group('sql elastic-pool recommended db') as c:
+#        c.command('show', 'get_databases')
+#        c.command('list', 'list_databases')
 
 ###############################################
 #                sql server                   #
@@ -101,8 +101,8 @@ with ServiceGroup(__name__, get_sql_servers_operation, server_operations) as s:
         c.command('create', 'create_or_update')
         c.command('delete', 'delete')
         c.command('show', 'get_by_resource_group')
-        ## Usages will not be included in the first batch of GA commands
-        #c.command('show-usage', 'list_usages')
+        # Usages will not be included in the first batch of GA commands
+        # c.command('show-usage', 'list_usages')
         c.command('list', 'list_by_resource_group')
         c.generic_update_command('update', 'get_by_resource_group', 'create_or_update',
                                  custom_func_name='server_update')
@@ -117,6 +117,6 @@ with ServiceGroup(__name__, get_sql_servers_operation, server_operations) as s:
         c.command('delete', 'delete_firewall_rule')
         c.command('show', 'get_firewall_rule')
         c.command('list', 'list_firewall_rules')
-        ## Keeping this command hidden for now. `firewall-rule create` will explain the special
-        ## 0.0.0.0 rule.
-        #c.custom_command('allow-all-azure-ips', 'firewall_rule_allow_all_azure_ips')
+        # Keeping this command hidden for now. `firewall-rule create` will explain the special
+        # 0.0.0.0 rule.
+        # c.custom_command('allow-all-azure-ips', 'firewall_rule_allow_all_azure_ips')

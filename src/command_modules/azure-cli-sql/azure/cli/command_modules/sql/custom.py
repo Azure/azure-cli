@@ -16,6 +16,7 @@ from azure.cli.core._util import CLIError
 #                Common funcs                 #
 ###############################################
 
+
 # Determines server location
 def get_server_location(server_name, resource_group_name):
     server_client = get_sql_servers_operation(None)
@@ -24,9 +25,11 @@ def get_server_location(server_name, resource_group_name):
         server_name=server_name,
         resource_group_name=resource_group_name).location
 
+
 ###############################################
 #                sql db                       #
 ###############################################
+
 
 # Creates a database. Wrapper function which uses the server location so that the user doesn't
 # need to specify location.
@@ -49,11 +52,13 @@ def db_create(
         database_name=database_name,
         parameters=kwargs)
 
-class DatabaseIdentity(object): # pylint: disable=too-few-public-methods
+
+class DatabaseIdentity(object):  # pylint: disable=too-few-public-methods
     def __init__(self, database_name, server_name, resource_group_name):
         self.database_name = database_name
         self.server_name = server_name
         self.resource_group_name = resource_group_name
+
 
 # Common code for special db create modes.
 def _db_create_special(
@@ -84,6 +89,7 @@ def _db_create_special(
         database_name=dest_db.database_name,
         parameters=kwargs)
 
+
 # Copies a database. Wrapper function to make create mode more convenient.
 def db_copy(  # pylint: disable=too-many-arguments
         client,
@@ -108,8 +114,9 @@ def db_copy(  # pylint: disable=too-many-arguments
         DatabaseIdentity(dest_name, dest_server_name, dest_resource_group_name),
         kwargs)
 
+
 # Copies a secondary replica. Wrapper function to make create mode more convenient.
-def db_create_secondary( # pylint: disable=too-many-arguments
+def db_create_secondary(  # pylint: disable=too-many-arguments
         client,
         database_name,
         server_name,
@@ -132,36 +139,38 @@ def db_create_secondary( # pylint: disable=too-many-arguments
         DatabaseIdentity(database_name, secondary_server_name, secondary_resource_group_name),
         kwargs)
 
+
 # Creates a database from a database point in time backup.
 # Wrapper function to make create mode more convenient.
-#def db_restore(
-#    client,
-#    database_name,
-#    server_name,
-#    resource_group_name,
-#    restore_point_in_time,
-#    dest_name,
-#    dest_server_name=None,
-#    dest_resource_group_name=None,
-#    **kwargs):
+# def db_restore(
+#     client,
+#     database_name,
+#     server_name,
+#     resource_group_name,
+#     restore_point_in_time,
+#     dest_name,
+#     dest_server_name=None,
+#     dest_resource_group_name=None,
+#     **kwargs):
 
-#    # Determine optional values
-#    dest_resource_group_name = dest_resource_group_name or resource_group_name
-#    dest_server_name = dest_server_name or server_name
+#     # Determine optional values
+#     dest_resource_group_name = dest_resource_group_name or resource_group_name
+#     dest_server_name = dest_server_name or server_name
 
-#    # Set create mode: TODO - doesn't yet work because restorePointInTime is not yet in Swagger
-#    kwargs['create_mode'] = 'PointInTimeRestore'
-#    #kwargs['restore_point_in_time'] = restore_point_in_time
+#     # Set create mode: TODO - doesn't yet work because restorePointInTime is not yet in Swagger
+#     kwargs['create_mode'] = 'PointInTimeRestore'
+#     #kwargs['restore_point_in_time'] = restore_point_in_time
 
-#    return _db_create_special(
-#        client,
-#        database_name,
-#        server_name,
-#        resource_group_name,
-#        dest_name,
-#        dest_server_name,
-#        dest_resource_group_name,
-#        kwargs)
+#     return _db_create_special(
+#         client,
+#         database_name,
+#         server_name,
+#         resource_group_name,
+#         dest_name,
+#         dest_server_name,
+#         dest_resource_group_name,
+#         kwargs)
+
 
 # Lists databases in a server or elastic pool.
 def db_list(
@@ -183,6 +192,7 @@ def db_list(
             resource_group_name=resource_group_name,
             server_name=server_name)
 
+
 # Update database. Custom update function to apply parameters to instance.
 def db_update(
         instance,
@@ -199,9 +209,9 @@ def db_update(
     # they are inconsistent (i.e. service objective is not 'ElasticPool'), then the service
     # actually ignores the value of service objective name (!!). We are trying to protect the CLI
     # user from this unintuitive behavior.
-    if (elastic_pool_name
-            and requested_service_objective_name
-            and requested_service_objective_name != 'ElasticPool'):
+    if (elastic_pool_name and
+            requested_service_objective_name and
+            requested_service_objective_name != 'ElasticPool'):
         raise CLIError('If elastic pool is specified, service objective must be'
                        ' unspecified or equal \'ElasticPool\'.')
 
@@ -225,9 +235,11 @@ def db_update(
 
     return instance
 
+
 ###############################################
 #                sql elastic-pool             #
 ###############################################
+
 
 # Creates an elastic pool. Wrapper function which uses the server location so that the user doesn't
 # need to specify location.
@@ -250,6 +262,7 @@ def elastic_pool_create(
         elastic_pool_name=elastic_pool_name,
         parameters=kwargs)
 
+
 # Update elastic pool. Custom update function to apply parameters to instance.
 def elastic_pool_update(
         instance,
@@ -266,9 +279,11 @@ def elastic_pool_update(
 
     return instance
 
+
 ###############################################
 #                sql server                   #
 ###############################################
+
 
 # Update server. Custom update function to apply parameters to instance.
 def server_update(
@@ -281,9 +296,11 @@ def server_update(
 
     return instance
 
+
 #####
 #           sql server firewall-rule
 #####
+
 
 # Creates a firewall rule with special start/end ip address value
 # that represents all azure ips.
@@ -305,9 +322,10 @@ def firewall_rule_allow_all_azure_ips(
         start_ip_address=azure_ip_addr,
         end_ip_address=azure_ip_addr)
 
+
 # Update firewall rule. Custom update function is required,
 # see https://github.com/Azure/azure-cli/issues/2264
-def firewall_rule_update( # pylint: disable=too-many-arguments
+def firewall_rule_update(  # pylint: disable=too-many-arguments
         client,
         firewall_rule_name,
         server_name,

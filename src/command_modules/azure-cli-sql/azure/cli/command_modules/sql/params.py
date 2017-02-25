@@ -34,6 +34,7 @@ with ParametersContext(command='sql db') as c:
     c.register_alias('requested_service_objective_name', ('--service-objective',))
     c.register_alias('requested_service_objective_id', ('--service-objective-id',))
 
+
 def configure_db_create_params(cmd):
     from azure.mgmt.sql.models.database import Database
     cmd.expand('parameters', Database)
@@ -49,6 +50,7 @@ def configure_db_create_params(cmd):
     ignores = ['location'] + sql_db_special_create_mode_params
     for p in ignores:
         cmd.ignore(p)
+
 
 with ParametersContext(command='sql db create') as c:
     configure_db_create_params(c)
@@ -147,23 +149,23 @@ with ParametersContext(command='sql db replication-link') as c:
 #           sql db <<other subgroups>>
 #####
 
-## Data Warehouse will not be included in the first batch of GA commands
-#with ParametersContext(command='sql db data-warehouse') as c:
-#    c.register_alias('database_name', ('--database', '-d'))
+# Data Warehouse will not be included in the first batch of GA commands
+# with ParametersContext(command='sql db data-warehouse') as c:
+#     c.register_alias('database_name', ('--database', '-d'))
 
-## Data Warehouse will not be included in the first batch of GA commands
-## (list_restore_points also applies to db, but it's not very useful. It's
-## mainly useful for dw.)
-#with ParametersContext(command='sql db restore-point') as c:
-#    c.register_alias('database_name', ('--database', '-d'))
+# Data Warehouse will not be included in the first batch of GA commands
+# (list_restore_points also applies to db, but it's not very useful. It's
+# mainly useful for dw.)
+# with ParametersContext(command='sql db restore-point') as c:
+#     c.register_alias('database_name', ('--database', '-d'))
 
-## Service tier advisor will not be included in the first batch of GA commands
-#with ParametersContext(command='sql db service-tier-advisor') as c:
-#    c.register_alias('database_name', ('--database', '-d'))
+# Service tier advisor will not be included in the first batch of GA commands
+# with ParametersContext(command='sql db service-tier-advisor') as c:
+#     c.register_alias('database_name', ('--database', '-d'))
 
-## TDE will not be included in the first batch of GA commands
-#with ParametersContext(command='sql db transparent-data-encryption') as c:
-#    c.register_alias('database_name', ('--database', '-d'))
+# TDE will not be included in the first batch of GA commands
+# with ParametersContext(command='sql db transparent-data-encryption') as c:
+#     c.register_alias('database_name', ('--database', '-d'))
 
 ###############################################
 #                sql elastic-pool             #
@@ -174,13 +176,13 @@ with ParametersContext(command='sql elastic-pool') as c:
                options_list=('--name', '-n'),
                help='The name of the elastic pool.')
 
-## Recommended elastic pools will not be included in the first batch of GA commands
-#with ParametersContext(command='sql elastic-pool recommended') as c:
-#    c.register_alias('recommended_elastic_pool_name', ('--name', '-n'))
+# Recommended elastic pools will not be included in the first batch of GA commands
+# with ParametersContext(command='sql elastic-pool recommended') as c:
+#     c.register_alias('recommended_elastic_pool_name', ('--name', '-n'))
 
-#with ParametersContext(command='sql elastic-pool recommended db') as c:
-#    c.register_alias('recommended_elastic_pool_name', ('--recommended-elastic-pool',))
-#    c.register_alias('database_name', ('--name', '-n'))
+# with ParametersContext(command='sql elastic-pool recommended db') as c:
+#     c.register_alias('recommended_elastic_pool_name', ('--recommended-elastic-pool',))
+#     c.register_alias('database_name', ('--name', '-n'))
 
 with ParametersContext(command='sql elastic-pool') as c:
     c.argument('server_name', arg_type=server_param_type)
@@ -209,7 +211,7 @@ with ParametersContext(command='sql server') as c:
     c.register_alias('administrator_login_password', ('--admin-password', '-p'))
 
 with ParametersContext(command='sql server create') as c:
-    # - Both administrator_login and administrator_login_password are required for server creation.
+    # Both administrator_login and administrator_login_password are required for server creation.
     # However these two parameters are given default value in the create_or_update function
     # signature, therefore, they can't be automatically converted to requirement arguments.
     patches = {
@@ -256,4 +258,3 @@ with ParametersContext(command='sql server firewall-rule') as c:
 with ParametersContext(command='sql server service-objective') as c:
     c.register_alias('server_name', ('--server', '-s'))
     c.register_alias('service_objective_name', ('--name', '-n'))
-

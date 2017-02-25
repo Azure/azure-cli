@@ -104,8 +104,8 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
         firewall_rule_2 = 'rule2'
         start_ip_address_2 = '123.123.123.123'
         end_ip_address_2 = '123.123.123.124'
-        #allow_all_azure_ips_rule = 'AllowAllAzureIPs'
-        #allow_all_azure_ips_address = '0.0.0.0'
+        # allow_all_azure_ips_rule = 'AllowAllAzureIPs'
+        # allow_all_azure_ips_address = '0.0.0.0'
 
         # test create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l {} '
@@ -182,23 +182,23 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('sql server firewall-rule list -g {} --server {}'
                  .format(rg, self.sql_server_name), checks=[JMESPathCheck('length(@)', 2)])
 
-        ## test sql server firewall-rule create azure ip rule
-        #self.cmd('sql server firewall-rule allow-all-azure-ips -g {} --server {} '
-        #         .format(rg, self.sql_server_name), checks=[
-        #                     JMESPathCheck('name', allow_all_azure_ips_rule),
-        #                     JMESPathCheck('resourceGroup', rg),
-        #                     JMESPathCheck('startIpAddress', allow_all_azure_ips_address),
-        #                     JMESPathCheck('endIpAddress', allow_all_azure_ips_address)])
+        # # test sql server firewall-rule create azure ip rule
+        # self.cmd('sql server firewall-rule allow-all-azure-ips -g {} --server {} '
+        #          .format(rg, self.sql_server_name), checks=[
+        #                      JMESPathCheck('name', allow_all_azure_ips_rule),
+        #                      JMESPathCheck('resourceGroup', rg),
+        #                      JMESPathCheck('startIpAddress', allow_all_azure_ips_address),
+        #                      JMESPathCheck('endIpAddress', allow_all_azure_ips_address)])
 
-        ## test sql server firewall-rule list
-        #self.cmd('sql server firewall-rule list -g {} --server {}'
-        #         .format(rg, self.sql_server_name), checks=[JMESPathCheck('length(@)', 3)])
+        # # test sql server firewall-rule list
+        # self.cmd('sql server firewall-rule list -g {} --server {}'
+        #          .format(rg, self.sql_server_name), checks=[JMESPathCheck('length(@)', 3)])
 
-        # test sql server firewall-rule delete
-        #self.cmd('sql server firewall-rule delete --name {} -g {} --server {}'
-        #         .format(allow_all_azure_ips_rule, rg, self.sql_server_name), checks=NoneCheck())
-        #self.cmd('sql server firewall-rule list -g {} --server {}'
-        #         .format(rg, self.sql_server_name), checks=[JMESPathCheck('length(@)', 2)])
+        # # test sql server firewall-rule delete
+        # self.cmd('sql server firewall-rule delete --name {} -g {} --server {}'
+        #          .format(allow_all_azure_ips_rule, rg, self.sql_server_name), checks=NoneCheck())
+        # self.cmd('sql server firewall-rule list -g {} --server {}'
+        #          .format(rg, self.sql_server_name), checks=[JMESPathCheck('length(@)', 2)])
         self.cmd('sql server firewall-rule delete --name {} -g {} --server {}'
                  .format(firewall_rule_1, rg, self.sql_server_name), checks=NoneCheck())
         self.cmd('sql server firewall-rule list -g {} --server {}'
@@ -319,10 +319,10 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('name', self.database_name),
                      JMESPathCheck('resourceGroup', rg)])
 
-        ## Usages will not be included in the first batch of GA commands
-        #self.cmd('sql db show-usage -g {} --server {} --name {}'
-        #         .format(rg, self.sql_server_name, self.database_name), checks=[
-        #             JMESPathCheck('[0].resourceName', self.database_name)])
+        # # Usages will not be included in the first batch of GA commands
+        # self.cmd('sql db show-usage -g {} --server {} --name {}'
+        #          .format(rg, self.sql_server_name, self.database_name), checks=[
+        #              JMESPathCheck('[0].resourceName', self.database_name)])
 
         self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --max-size-bytes {}'
                  ' --set tags.key1=value1'
@@ -542,32 +542,32 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('requestedServiceObjectiveName', 'ElasticPool'),
                      JMESPathCheck('status', 'Online')])
 
-        # test sql elastic-pool db sub-group commands
-        #self.cmd('sql elastic-pool db list -g {} --server {} --elastic-pool {}'
-        #         .format(rg, self.sql_server_name, self.pool_name),
-        #         checks=[
-        #             JMESPathCheck('length(@)', 1),
-        #             JMESPathCheck('[0].resourceGroup', rg),
-        #             JMESPathCheck('[0].name', self.database_name),
-        #             JMESPathCheck('[0].elasticPoolName', self.pool_name),
-        #             JMESPathCheck('[0].status', 'Online')])
+        # # test sql elastic-pool db sub-group commands
+        # self.cmd('sql elastic-pool db list -g {} --server {} --elastic-pool {}'
+        #          .format(rg, self.sql_server_name, self.pool_name),
+        #          checks=[
+        #              JMESPathCheck('length(@)', 1),
+        #              JMESPathCheck('[0].resourceGroup', rg),
+        #              JMESPathCheck('[0].name', self.database_name),
+        #              JMESPathCheck('[0].elasticPoolName', self.pool_name),
+        #              JMESPathCheck('[0].status', 'Online')])
 
-        #self.cmd('sql elastic-pool db show -g {} --server {} --elastic-pool {} '
-        #         '--name {}'
-        #         .format(rg, self.sql_server_name, self.pool_name, self.database_name),
-        #         checks=[
-        #             JMESPathCheck('resourceGroup', rg),
-        #             JMESPathCheck('name', self.database_name),
-        #             JMESPathCheck('elasticPoolName', self.pool_name),
-        #             JMESPathCheck('status', 'Online')])
+        # self.cmd('sql elastic-pool db show -g {} --server {} --elastic-pool {} '
+        #          '--name {}'
+        #          .format(rg, self.sql_server_name, self.pool_name, self.database_name),
+        #          checks=[
+        #              JMESPathCheck('resourceGroup', rg),
+        #              JMESPathCheck('name', self.database_name),
+        #              JMESPathCheck('elasticPoolName', self.pool_name),
+        #              JMESPathCheck('status', 'Online')])
 
-        #self.cmd('sql elastic-pool db show-activity -g {} --server {} --elastic-pool {}'
-        #         .format(rg, self.sql_server_name, self.pool_name),
-        #         checks=[
-        #             JMESPathCheck('length(@)', 1),
-        #             JMESPathCheck('[0].resourceGroup', rg),
-        #             JMESPathCheck('[0].serverName', self.sql_server_name),
-        #             JMESPathCheck('[0].currentElasticPoolName', self.pool_name)])
+        # self.cmd('sql elastic-pool db show-activity -g {} --server {} --elastic-pool {}'
+        #          .format(rg, self.sql_server_name, self.pool_name),
+        #          checks=[
+        #              JMESPathCheck('length(@)', 1),
+        #              JMESPathCheck('[0].resourceGroup', rg),
+        #              JMESPathCheck('[0].serverName', self.sql_server_name),
+        #              JMESPathCheck('[0].currentElasticPoolName', self.pool_name)])
 
         # activities = self.cmd('sql elastic-pools db show-activity -g {} '
         #                       '--server-name {} --elastic-pool-name {}'

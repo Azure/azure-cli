@@ -39,22 +39,22 @@ helps['sql db replication-link'] = """
             type: group
             short-summary: Manage database replication links.
             """
-#helps['sql db data-warehouse'] = """
-#            type: group
-#            short-summary: Manage database data warehouse.
-#            """
-#helps['sql db restore-point'] = """
-#            type: group
-#            short-summary: Manage database restore points.
-#            """
-#helps['sql db transparent-data-encryption'] = """
-#            type: group
-#            short-summary: Manage database transparent data encryption.
-#            """
-#helps['sql db service-tier-advisor'] = """
-#            type: group
-#            short-summary: Manage database service tier advisors.
-#            """
+# helps['sql db data-warehouse'] = """
+#             type: group
+#             short-summary: Manage database data warehouse.
+#             """
+# helps['sql db restore-point'] = """
+#             type: group
+#             short-summary: Manage database restore points.
+#             """
+# helps['sql db transparent-data-encryption'] = """
+#             type: group
+#             short-summary: Manage database transparent data encryption.
+#             """
+# helps['sql db service-tier-advisor'] = """
+#             type: group
+#             short-summary: Manage database service tier advisors.
+#             """
 helps['sql elastic-pool'] = """
             type: group
             short-summary: Manage elastic pools. An elastic pool is an allocation of CPU, IO, and memory resources. Databases inside the pool share these resources.
@@ -67,18 +67,18 @@ helps['sql elastic-pool update'] = """
             type: command
             short-summary: Updates an elastic pool.
             """
-#helps['sql elastic-pool db'] = """
-#            type: group
-#            short-summary: Command to manage databases activities in database elastic pools.
-#            """
-#helps['sql elastic-pool recommended'] = """
-#            type: group
-#            short-summary: Get information about an Azure SQL Recommended Elastic Pool.
-#            """
-#helps['sql elastic-pool recommended db'] = """
-#            type: group
-#            short-summary: Get information about an Azure SQL Database inside of Recommended Elastic Pool.
-#            """
+# helps['sql elastic-pool db'] = """
+#             type: group
+#             short-summary: Command to manage databases activities in database elastic pools.
+#             """
+# helps['sql elastic-pool recommended'] = """
+#             type: group
+#             short-summary: Get information about an Azure SQL Recommended Elastic Pool.
+#             """
+# helps['sql elastic-pool recommended db'] = """
+#             type: group
+#             short-summary: Get information about an Azure SQL Database inside of Recommended Elastic Pool.
+#             """
 helps['sql server'] = """
             type: group
             short-summary: Manage servers.
@@ -99,10 +99,10 @@ helps['sql server firewall-rule'] = """
             type: group
             short-summary: Manage Azure SQL server's firewall rules.
             """
-#helps['sql server firewall-rule allow-all-azure-ips'] = """
-#            type: command
-#            short-summary: Create a firewall rule that allows all Azure IP addresses to access the server.
-#            """
+# helps['sql server firewall-rule allow-all-azure-ips'] = """
+#             type: command
+#             short-summary: Create a firewall rule that allows all Azure IP addresses to access the server.
+#             """
 helps['sql server firewall-rule create'] = """
             type: command
             short-summary: Creates an Azure SQL server firewall rule.
