@@ -19,7 +19,7 @@ RUN pip install --upgrade pip wheel jmespath-terminal
 # openssh - included for ssh-keygen
 # ca-certificates 
 # wget - required for installing jp
-RUN apk update && apk add bash gcc openssl-dev libffi-dev musl-dev jq openssh ca-certificates wget openssl && update-ca-certificates
+RUN apk update && apk add bash gcc openssl-dev libffi-dev musl-dev jq openssh ca-certificates wget openssl && update-ca-certificates git
 # We also, install jp
 RUN wget https://github.com/jmespath/jp/releases/download/0.1.2/jp-linux-amd64 -qO /usr/local/bin/jp && chmod +x /usr/local/bin/jp
 
