@@ -27,7 +27,7 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
         ## Usages will not be included in the first batch of GA commands
         #c.command('show-usage', 'list_usages')
         c.command('delete', 'delete')
-        c.generic_update_command('update', 'get', 'create_or_update', custom_function_op='azure.cli.command_modules.sql.custom#db_update')
+        c.generic_update_command('update', 'get', 'create_or_update', custom_func_name='db_update')
 
     with s.group('sql db replication-link') as c:
         c.command('list', 'list_replication_links')
@@ -71,7 +71,7 @@ with ServiceGroup(__name__, get_sql_elasticpools_operations, elasticpools_ops) a
         c.command('delete', 'delete')
         c.command('show', 'get')
         c.command('list', 'list_by_server')
-        c.generic_update_command('update', 'get', 'create_or_update')
+        c.generic_update_command('update', 'get', 'create_or_update', custom_func_name='elastic_pool_update')
 
 recommanded_elastic_pools_ops = \
     create_service_adapter('azure.mgmt.sql.operations.recommended_elastic_pools_operations',
@@ -104,7 +104,7 @@ with ServiceGroup(__name__, get_sql_servers_operation, server_operations) as s:
         ## Usages will not be included in the first batch of GA commands
         #c.command('show-usage', 'list_usages')
         c.command('list', 'list_by_resource_group')
-        c.generic_update_command('update', 'get_by_resource_group', 'create_or_update')
+        c.generic_update_command('update', 'get_by_resource_group', 'create_or_update', custom_func_name='server_update')
 
     with s.group('sql server service-objective') as c:
         c.command('list', 'list_service_objectives')

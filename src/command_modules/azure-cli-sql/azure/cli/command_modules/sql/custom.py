@@ -11,6 +11,8 @@ from ._util import (
 
 from azure.cli.core.commands.client_factory import get_subscription_id
 
+from azure.cli.core._util import CLIError
+
 ###############################################
 #                Common funcs                 #
 ###############################################
@@ -180,25 +182,41 @@ def db_list(
             resource_group_name=resource_group_name,
             server_name=server_name)
 
-# Update database. Custom update function because we need to insert some helper code.
+# Update database. Custom update function to apply parameters to instance.
 def db_update(
     instance,
-    #elastic_pool_name=None, # Unsupported for now until it's tested
+    elastic_pool_name=None,
     max_size_bytes=None,
     requested_service_objective_name=None):
 
-    # Verify that elastic_pool_name and requested_service_objective_name are consistent # TODO
+    # Null out slo/edition related values. The service will choose correct values based on inputs provided.
+    instance.edition = None
+
+    # Verify that elastic_pool_name and requested_service_objective_name param values are not totally inconsistent.
+    # If elastic pool and service objective name are both specified, and they are inconsistent (i.e. service objective
+    # is not 'ElasticPool'), then the service actually ignores the value of service objective name (!!). We are trying
+    # to protect the CLI user from this unintuitive behavior.
+    if (elastic_pool_name
+        and requested_service_objective_name 
+        and requested_service_objective_name != 'ElasticPool'):
+        raise CLIError('If elastic pool is specified, service objective must be unspecified or \'ElasticPool\'.')
+
+    # Update instance pool and service objective. The service treats these properties like PATCH,
+    # so if either of these properties is null then the service will keep the property unchanged - except
+    # if pool is null/empty and service objective is a standalone SLO value (e.g. 'S0', 'S1', etc), in which case
+    # the pool being null/empty is meaningful - it means remove from pool.
+    instance.elastic_pool_name = elastic_pool_name
+    instance.requested_service_objective_name = requested_service_objective_name
 
     # Null out requested_service_objective_id, because if requested_service_objective_id is
     # specified then requested_service_objective_name is ignored.
     instance.requested_service_objective_id = None
 
-    # Validation done - update the instance
-    # The base generic update command should be able to do this part, but
-    # it seems to not be working, so we just do this manually here.
-    #instance.elastic_pool_name = elastic_pool_name or instance.elastic_pool_name # Unsupported for now until it's tested
+    # Null out edition so that edition gets chosen automatically by choice of SLO/pool
+    instance.edition = None
+
+    # Set other properties
     instance.max_size_bytes = max_size_bytes or instance.max_size_bytes
-    instance.requested_service_objective_name = requested_service_objective_name or instance.requested_service_objective_name
 
     return instance
 
@@ -225,9 +243,35 @@ def elastic_pool_create(
         elastic_pool_name=elastic_pool_name,
         parameters=kwargs)
 
+# Update elastic pool. Custom update function to apply parameters to instance.
+def elastic_pool_update(
+    instance,
+    database_dtu_max=None,
+    database_dtu_min=None,
+    dtu=None,
+    storage_mb=None):
+
+    # Apply params to instance
+    instance.database_dtu_max = database_dtu_max or instance.database_dtu_max
+    instance.database_dtu_min = database_dtu_min or instance.database_dtu_min
+    instance.dtu = dtu or instance.dtu
+    instance.storage_mb = storage_mb or instance.storage_mb
+
+    return instance
+
 ###############################################
 #                sql server                   #
 ###############################################
+
+# Update server. Custom update function to apply parameters to instance.
+def server_update(
+    instance,
+    administrator_login_password=None):
+
+    # Apply params to instance
+    instance.administrator_login_password = administrator_login_password or instance.administrator_login_password
+
+    return instance
 
 #####
 #           sql server firewall-rule

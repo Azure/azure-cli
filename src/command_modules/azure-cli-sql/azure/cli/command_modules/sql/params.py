@@ -87,10 +87,9 @@ with ParametersContext(command='sql db restore') as c:
         c.ignore(i)
 
 with ParametersContext(command='sql db update') as c:
-    c.argument('requested_service_objective_name', options_list=('--service-objective',), help='The name of the new service objective.')
-    # Unsupported for now until it's tested
-    #c.argument('elastic_pool_name', options_list=('--elastic_pool',), help='The name of the elastic pool to move the database into.')
-    c.argument('max_size_bytes', options_list=('--max-size-bytes',), help='The new maximum size of the database expressed in bytes.')
+    c.argument('requested_service_objective_name', help='The name of the new service objective. If this is a standalone db service objective and the db is currently in an elastic pool, then the db is removed from the pool.')
+    c.argument('elastic_pool_name', help='The name of the elastic pool to move the database into.')
+    c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
 
 #####
 #           sql db replication-link
@@ -138,6 +137,8 @@ with ParametersContext(command='sql elastic-pool') as c:
 
 with ParametersContext(command='sql elastic-pool') as c:
     c.argument('server_name', arg_type=server_param_type)
+    c.register_alias('database_dtu_max', ('--db-dtu-max',))
+    c.register_alias('database_dtu_min', ('--db-dtu-min',))
 
 with ParametersContext(command='sql elastic-pool create') as c:
     from azure.mgmt.sql.models.elastic_pool import ElasticPool
@@ -146,10 +147,10 @@ with ParametersContext(command='sql elastic-pool create') as c:
     c.ignore('location')
 
 with ParametersContext(command='sql elastic-pool update') as c:
-    from azure.mgmt.sql.models.elastic_pool import ElasticPool
-    c.expand('parameters', ElasticPool)
-    # We have a wrapper function that determines server location so user doesn't need to specify it as param.
-    c.ignore('location')
+    c.argument('database_dtu_max', help='The maximum DTU any one database can consume.')
+    c.argument('database_dtu_min', help='The minimum DTU all databases are guaranteed.')
+    c.argument('dtu', help='TThe total shared DTU for the elastic eool.')
+    c.argument('storage_mb', help='Storage limit for the elastic pool in MB.')
 
 ###############################################
 #                sql server                   #
@@ -175,13 +176,7 @@ with ParametersContext(command='sql server create') as c:
     c.ignore('version')
 
 with ParametersContext(command='sql server update') as c:
-    from azure.mgmt.sql.models.server import Server
-    c.expand('parameters', Server)
-
-    # location and administrator_login cannot be updated.
-    # 12.0 is the only server version allowed and it's already the default.
-    for i in ['location', 'administrator_login', 'version']:
-        c.ignore(i)
+    c.argument('administrator_login_password', help='The administrator login password.')
 
 #####
 #           sql server firewall-rule

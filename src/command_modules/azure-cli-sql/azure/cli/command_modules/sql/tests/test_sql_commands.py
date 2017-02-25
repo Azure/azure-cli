@@ -33,7 +33,8 @@ class SqlServerMgmtScenarioTest(ResourceGroupVCRTestBase):
                  .format(rg, self.sql_server_names[0], loc, user, password), checks=[
                      JMESPathCheck('name', self.sql_server_names[0]),
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('administratorLogin', user)])
+                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('administratorLoginPassword', password)])
 
         # test list sql server should be 1
         self.cmd('sql server list -g {}'.format(rg), checks=[JMESPathCheck('length(@)', 1)])
@@ -43,7 +44,8 @@ class SqlServerMgmtScenarioTest(ResourceGroupVCRTestBase):
                  .format(rg, self.sql_server_names[0], password_updated), checks=[
                      JMESPathCheck('name', self.sql_server_names[0]),
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('administratorLogin', user)])
+                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('administratorLoginPassword', password_updated)])
 
         # test create another sql server
         self.cmd('sql server create -g {} --name {} -l {} '
@@ -51,7 +53,8 @@ class SqlServerMgmtScenarioTest(ResourceGroupVCRTestBase):
                  .format(rg, self.sql_server_names[1], loc, user, password), checks=[
                      JMESPathCheck('name', self.sql_server_names[1]),
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('administratorLogin', user)])
+                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('administratorLoginPassword', password)])
 
         # test list sql server should be 2
         self.cmd('sql server list -g {}'.format(rg), checks=[JMESPathCheck('length(@)', 2)])
@@ -331,13 +334,25 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(SqlElasticPoolsMgmtScenarioTest, self).__init__(
             __file__, test_method, resource_group='cli-test-sql-mgmt')
-        self.sql_server_name = 'cliautomation09'
+        self.sql_server_name = 'cliautomation20'
         self.location_short_name = 'westus'
         self.location_long_name = 'West US'
         self.admin_login = 'admin123'
         self.admin_password = 'SecretPassword123'
         self.database_name = "cliautomationdb02"
         self.pool_name = "cliautomationpool01"
+        self.pool_name2 = "cliautomationpool02"
+        self.edition = 'Standard'
+
+        self.dtu = 100
+        self.db_dtu_min = 10
+        self.db_dtu_max = 50
+
+        self.updated_dtu = 50
+        self.updated_db_dtu_min = 10
+        self.updated_db_dtu_max = 50
+
+        self.db_service_objective = 'S1'
 
     def test_sql_elastic_pools_mgmt(self):
         self.execute()
@@ -379,31 +394,59 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('administratorLogin', user)])
 
         # test sql elastic-pool commands
-        self.cmd('sql elastic-pool create -g {} --server {} --name {}'
-                 .format(rg, self.sql_server_name, self.pool_name), checks=[
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} '
+                 '--dtu {} --edition {} --db-dtu-min {} --db-dtu-max {}'
+                 .format(rg, self.sql_server_name, self.pool_name, self.dtu, 
+                         self.edition, self.db_dtu_min, self.db_dtu_max), checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
                      JMESPathCheck('location', loc_long),
-                     JMESPathCheck('state', 'Ready')])
+                     JMESPathCheck('state', 'Ready'),
+                     JMESPathCheck('dtu', self.dtu),
+                     JMESPathCheck('databaseDtuMin', self.db_dtu_min),
+                     JMESPathCheck('databaseDtuMax', self.db_dtu_max),
+                     JMESPathCheck('edition', self.edition)])
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
                  .format(rg, self.sql_server_name, self.pool_name), checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
-                     JMESPathCheck('state', 'Ready')])
+                     JMESPathCheck('state', 'Ready'),
+                     JMESPathCheck('databaseDtuMin', self.db_dtu_min),
+                     JMESPathCheck('databaseDtuMax', self.db_dtu_max),
+                     JMESPathCheck('edition', self.edition)])
 
         self.cmd('sql elastic-pool list -g {} --server {}'
                  .format(rg, self.sql_server_name), checks=[
                      JMESPathCheck('[0].resourceGroup', rg),
                      JMESPathCheck('[0].name', self.pool_name),
-                     JMESPathCheck('[0].state', 'Ready')])
+                     JMESPathCheck('[0].state', 'Ready'),
+                     JMESPathCheck('[0].databaseDtuMin', self.db_dtu_min),
+                     JMESPathCheck('[0].databaseDtuMax', self.db_dtu_max),
+                     JMESPathCheck('[0].edition', self.edition)])
 
         self.cmd('sql elastic-pool update -g {} --server {} --name {} '
-                 '--set tags.key1=value1'
-                 .format(rg, self.sql_server_name, self.pool_name), checks=[
+                 '--dtu {} --set tags.key1=value1'
+                 .format(rg, self.sql_server_name, self.pool_name, self.updated_dtu), checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
                      JMESPathCheck('state', 'Ready'),
+                     JMESPathCheck('dtu', self.updated_dtu),
+                     JMESPathCheck('edition', self.edition),
+                     JMESPathCheck('databaseDtuMin', self.db_dtu_min),
+                     JMESPathCheck('databaseDtuMax', self.db_dtu_max),
+                     JMESPathCheck('tags.key1', 'value1')])
+
+        self.cmd('sql elastic-pool update -g {} --server {} --name {} '
+                 '--dtu {} --db-dtu-min {} --db-dtu-max {}'
+                 .format(rg, self.sql_server_name, self.pool_name, self.dtu,
+                         self.updated_db_dtu_min, self.updated_db_dtu_max), checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', self.pool_name),
+                     JMESPathCheck('state', 'Ready'),
+                     JMESPathCheck('dtu', self.dtu),
+                     JMESPathCheck('databaseDtuMin', self.updated_db_dtu_min),
+                     JMESPathCheck('databaseDtuMax', self.updated_db_dtu_max),
                      JMESPathCheck('tags.key1', 'value1')])
 
         self.cmd('sql elastic-pool update -g {} --server {} --name {} '
@@ -414,7 +457,17 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('state', 'Ready'),
                      JMESPathCheck('tags', {})])
 
-        # Create a database in an Azure sql elastic pool
+        # create a second pool with minimal params
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} '
+                 .format(rg, self.sql_server_name, self.pool_name2), checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', self.pool_name2),
+                     JMESPathCheck('location', loc_long),
+                     JMESPathCheck('state', 'Ready')])
+
+        self.cmd('sql elastic-pool list -g {} -s {}'.format(rg, self.sql_server_name), checks=[JMESPathCheck('length(@)', 2)])
+
+        # Create a database directly in an Azure sql elastic pool
         self.cmd('sql db create -g {} --server {} --name {} '
                  '--elastic-pool {}'
                  .format(rg, self.sql_server_name, self.database_name, self.pool_name),
@@ -422,6 +475,37 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.database_name),
                      JMESPathCheck('elasticPoolName', self.pool_name),
+                     JMESPathCheck('requestedServiceObjectiveName', 'ElasticPool'),
+                     JMESPathCheck('status', 'Online')])
+
+        # Move database to second pool. Specify service objective just for fun
+        self.cmd('sql db update -g {} -s {} -n {} --elastic-pool {} --service-objective ElasticPool'
+                 .format(rg, self.sql_server_name, self.database_name, self.pool_name2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('elasticPoolName', self.pool_name2),
+                     JMESPathCheck('requestedServiceObjectiveName', 'ElasticPool'),
+                     JMESPathCheck('status', 'Online')])
+
+        # Remove database from pool
+        self.cmd('sql db update -g {} -s {} -n {} --service-objective {}'
+                 .format(rg, self.sql_server_name, self.database_name, self.db_service_objective),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('requestedServiceObjectiveName', self.db_service_objective),
+                     JMESPathCheck('status', 'Online')])
+
+        # Move database back into pool
+        self.cmd('sql db update -g {} -s {} -n {} --elastic-pool {} --service-objective ElasticPool'
+                 .format(rg, self.sql_server_name, self.database_name, self.pool_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('elasticPoolName', self.pool_name),
+                     JMESPathCheck('requestedServiceObjectiveName', 'ElasticPool'),
                      JMESPathCheck('status', 'Online')])
 
         # test sql elastic-pool db sub-group commands
