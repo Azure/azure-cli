@@ -30,7 +30,8 @@ class SqlServerMgmtScenarioTest(ResourceGroupVCRTestBase):
         # test create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l {} '
                  '--admin-user {} --admin-password {}'
-                 .format(rg, self.sql_server_names[0], loc, user, password), checks=[
+                 .format(rg, self.sql_server_names[0], loc, user, password),
+                 checks=[
                      JMESPathCheck('name', self.sql_server_names[0]),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('administratorLogin', user),
@@ -41,7 +42,8 @@ class SqlServerMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # test update sql server
         self.cmd('sql server update -g {} --name {} --admin-password {}'
-                 .format(rg, self.sql_server_names[0], password_updated), checks=[
+                 .format(rg, self.sql_server_names[0], password_updated),
+                 checks=[
                      JMESPathCheck('name', self.sql_server_names[0]),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('administratorLogin', user),
@@ -50,7 +52,8 @@ class SqlServerMgmtScenarioTest(ResourceGroupVCRTestBase):
         # test create another sql server
         self.cmd('sql server create -g {} --name {} -l {} '
                  '--admin-user {} --admin-password {}'
-                 .format(rg, self.sql_server_names[1], loc, user, password), checks=[
+                 .format(rg, self.sql_server_names[1], loc, user, password),
+                 checks=[
                      JMESPathCheck('name', self.sql_server_names[1]),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('administratorLogin', user),
@@ -61,7 +64,8 @@ class SqlServerMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # test show sql server
         self.cmd('sql server show -g {} --name {}'
-                 .format(rg, self.sql_server_names[0]), checks=[
+                 .format(rg, self.sql_server_names[0]),
+                 checks=[
                      JMESPathCheck('name', self.sql_server_names[0]),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('administratorLogin', user)])
@@ -100,13 +104,14 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
         firewall_rule_2 = 'rule2'
         start_ip_address_2 = '123.123.123.123'
         end_ip_address_2 = '123.123.123.124'
-        allow_all_azure_ips_rule = 'AllowAllAzureIPs'
-        allow_all_azure_ips_address = '0.0.0.0'
+        #allow_all_azure_ips_rule = 'AllowAllAzureIPs'
+        #allow_all_azure_ips_address = '0.0.0.0'
 
         # test create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l {} '
                  '--admin-user {} --admin-password {}'
-                 .format(rg, self.sql_server_name, loc, user, password), checks=[
+                 .format(rg, self.sql_server_name, loc, user, password),
+                 checks=[
                      JMESPathCheck('name', self.sql_server_name),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('administratorLogin', user)])
@@ -115,15 +120,17 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('sql server firewall-rule create --name {} -g {} --server {} '
                  '--start-ip-address {} --end-ip-address {}'
                  .format(firewall_rule_1, rg, self.sql_server_name,
-                         start_ip_address_1, end_ip_address_1), checks=[
-                             JMESPathCheck('name', firewall_rule_1),
-                             JMESPathCheck('resourceGroup', rg),
-                             JMESPathCheck('startIpAddress', start_ip_address_1),
-                             JMESPathCheck('endIpAddress', end_ip_address_1)])
+                         start_ip_address_1, end_ip_address_1),
+                 checks=[
+                     JMESPathCheck('name', firewall_rule_1),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('startIpAddress', start_ip_address_1),
+                     JMESPathCheck('endIpAddress', end_ip_address_1)])
 
         # test sql server firewall-rule show
         self.cmd('sql server firewall-rule show --name {} -g {} --server {}'
-                 .format(firewall_rule_1, rg, self.sql_server_name), checks=[
+                 .format(firewall_rule_1, rg, self.sql_server_name),
+                 checks=[
                      JMESPathCheck('name', firewall_rule_1),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('startIpAddress', start_ip_address_1),
@@ -133,39 +140,43 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('sql server firewall-rule update --name {} -g {} --server {} '
                  '--start-ip-address {} --end-ip-address {}'
                  .format(firewall_rule_1, rg, self.sql_server_name,
-                         start_ip_address_2, end_ip_address_2), checks=[
-                             JMESPathCheck('name', firewall_rule_1),
-                             JMESPathCheck('resourceGroup', rg),
-                             JMESPathCheck('startIpAddress', start_ip_address_2),
-                             JMESPathCheck('endIpAddress', end_ip_address_2)])
+                         start_ip_address_2, end_ip_address_2),
+                 checks=[
+                     JMESPathCheck('name', firewall_rule_1),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('startIpAddress', start_ip_address_2),
+                     JMESPathCheck('endIpAddress', end_ip_address_2)])
 
         self.cmd('sql server firewall-rule update --name {} -g {} --server {} '
                  '--start-ip-address {}'
                  .format(firewall_rule_1, rg, self.sql_server_name,
-                         start_ip_address_1), checks=[
-                             JMESPathCheck('name', firewall_rule_1),
-                             JMESPathCheck('resourceGroup', rg),
-                             JMESPathCheck('startIpAddress', start_ip_address_1),
-                             JMESPathCheck('endIpAddress', end_ip_address_2)])
+                         start_ip_address_1),
+                 checks=[
+                     JMESPathCheck('name', firewall_rule_1),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('startIpAddress', start_ip_address_1),
+                     JMESPathCheck('endIpAddress', end_ip_address_2)])
 
         self.cmd('sql server firewall-rule update --name {} -g {} --server {} '
-            '--end-ip-address {}'
-            .format(firewall_rule_1, rg, self.sql_server_name,
-                    end_ip_address_1), checks=[
-                        JMESPathCheck('name', firewall_rule_1),
-                        JMESPathCheck('resourceGroup', rg),
-                        JMESPathCheck('startIpAddress', start_ip_address_1),
-                        JMESPathCheck('endIpAddress', end_ip_address_1)])
+                 '--end-ip-address {}'
+                 .format(firewall_rule_1, rg, self.sql_server_name,
+                         end_ip_address_1),
+                 checks=[
+                     JMESPathCheck('name', firewall_rule_1),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('startIpAddress', start_ip_address_1),
+                     JMESPathCheck('endIpAddress', end_ip_address_1)])
 
         # test sql server firewall-rule create another rule
         self.cmd('sql server firewall-rule create --name {} -g {} --server {} '
                  '--start-ip-address {} --end-ip-address {}'
                  .format(firewall_rule_2, rg, self.sql_server_name,
-                         start_ip_address_2, end_ip_address_2), checks=[
-                             JMESPathCheck('name', firewall_rule_2),
-                             JMESPathCheck('resourceGroup', rg),
-                             JMESPathCheck('startIpAddress', start_ip_address_2),
-                             JMESPathCheck('endIpAddress', end_ip_address_2)])
+                         start_ip_address_2, end_ip_address_2),
+                 checks=[
+                     JMESPathCheck('name', firewall_rule_2),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('startIpAddress', start_ip_address_2),
+                     JMESPathCheck('endIpAddress', end_ip_address_2)])
 
         # test sql server firewall-rule list
         self.cmd('sql server firewall-rule list -g {} --server {}'
@@ -224,19 +235,22 @@ class SqlServerServiceObjectiveMgmtScenarioTest(ResourceGroupVCRTestBase):
         # test create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l {} '
                  '--admin-user {} --admin-password {}'
-                 .format(rg, self.sql_server_name, loc, user, password), checks=[
+                 .format(rg, self.sql_server_name, loc, user, password),
+                 checks=[
                      JMESPathCheck('name', self.sql_server_name),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('administratorLogin', user)])
 
         # test sql server service-objective list
         service_objectives = self.cmd('sql server service-objective list -g {} --server {}'
-                                      .format(rg, self.sql_server_name), checks=[
+                                      .format(rg, self.sql_server_name),
+                                      checks=[
                                           JMESPathCheck('length(@)', 42)])
 
         # test sql server service-objective show
         self.cmd('sql server service-objective show -g {} --server {} --name {}'
-                 .format(rg, self.sql_server_name, service_objectives[0]['name']), checks=[
+                 .format(rg, self.sql_server_name, service_objectives[0]['name']),
+                 checks=[
                      JMESPathCheck('name', service_objectives[0]['name']),
                      JMESPathCheck('resourceGroup', rg)])
 
@@ -246,7 +260,7 @@ class SqlServerServiceObjectiveMgmtScenarioTest(ResourceGroupVCRTestBase):
 
 
 class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
-
+    # pylint: disable=too-many-instance-attributes
     def __init__(self, test_method):
         super(SqlServerDbMgmtScenarioTest, self).__init__(
             __file__, test_method, resource_group='cli-test-sql-mgmt')
@@ -273,7 +287,8 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
         # create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l "{}" '
                  '--admin-user {} --admin-password {}'
-                 .format(rg, self.sql_server_name, loc_short, user, password), checks=[
+                 .format(rg, self.sql_server_name, loc_short, user, password),
+                 checks=[
                      JMESPathCheck('name', self.sql_server_name),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('location', loc_long),
@@ -281,7 +296,8 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # test sql db commands
         self.cmd('sql db create -g {} --server {} --name {}'
-                 .format(rg, self.sql_server_name, self.database_name), checks=[
+                 .format(rg, self.sql_server_name, self.database_name),
+                 checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.database_name),
                      JMESPathCheck('location', loc_long),
@@ -289,7 +305,8 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('status', 'Online')])
 
         self.cmd('sql db list -g {} --server {}'
-                 .format(rg, self.sql_server_name), checks=[
+                 .format(rg, self.sql_server_name),
+                 checks=[
                      JMESPathCheck('length(@)', 2),
                      JMESPathCheck('[1].name', 'master'),
                      JMESPathCheck('[1].resourceGroup', rg),
@@ -297,7 +314,8 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('[0].resourceGroup', rg)])
 
         self.cmd('sql db show -g {} --server {} --name {}'
-                 .format(rg, self.sql_server_name, self.database_name), checks=[
+                 .format(rg, self.sql_server_name, self.database_name),
+                 checks=[
                      JMESPathCheck('name', self.database_name),
                      JMESPathCheck('resourceGroup', rg)])
 
@@ -306,8 +324,11 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
         #         .format(rg, self.sql_server_name, self.database_name), checks=[
         #             JMESPathCheck('[0].resourceName', self.database_name)])
 
-        self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --max-size-bytes {} --set tags.key1=value1'
-                 .format(rg, self.sql_server_name, self.database_name, self.update_service_objective, self.update_max_size_bytes), checks=[
+        self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --max-size-bytes {}'
+                 ' --set tags.key1=value1'
+                 .format(rg, self.sql_server_name, self.database_name,
+                         self.update_service_objective, self.update_max_size_bytes),
+                 checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.database_name),
                      JMESPathCheck('requestedServiceObjectiveName', self.update_service_objective),
@@ -316,13 +337,15 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('sql db copy -g {} --server {} --name {} '
                  '--dest-name {}'
-                 .format(rg, self.sql_server_name, self.database_name, self.database_copy_name), checks=[
+                 .format(rg, self.sql_server_name, self.database_name, self.database_copy_name),
+                 checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.database_copy_name)
-                ])
+                 ])
 
         self.cmd('sql db delete -g {} --server {} --name {}'
-                 .format(rg, self.sql_server_name, self.database_name), checks=[NoneCheck()])
+                 .format(rg, self.sql_server_name, self.database_name),
+                 checks=[NoneCheck()])
 
         # delete sql server
         self.cmd('sql server delete -g {} --name {}'
@@ -330,7 +353,7 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
 
 
 class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
-
+    # pylint: disable=too-many-instance-attributes
     def __init__(self, test_method):
         super(SqlElasticPoolsMgmtScenarioTest, self).__init__(
             __file__, test_method, resource_group='cli-test-sql-mgmt')
@@ -387,7 +410,8 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
         # create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l {} '
                  '--admin-user {} --admin-password {}'
-                 .format(rg, self.sql_server_name, loc_short, user, password), checks=[
+                 .format(rg, self.sql_server_name, loc_short, user, password),
+                 checks=[
                      JMESPathCheck('name', self.sql_server_name),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('location', loc_long),
@@ -396,8 +420,9 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
         # test sql elastic-pool commands
         self.cmd('sql elastic-pool create -g {} --server {} --name {} '
                  '--dtu {} --edition {} --db-dtu-min {} --db-dtu-max {}'
-                 .format(rg, self.sql_server_name, self.pool_name, self.dtu, 
-                         self.edition, self.db_dtu_min, self.db_dtu_max), checks=[
+                 .format(rg, self.sql_server_name, self.pool_name, self.dtu,
+                         self.edition, self.db_dtu_min, self.db_dtu_max),
+                 checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
                      JMESPathCheck('location', loc_long),
@@ -408,7 +433,8 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('edition', self.edition)])
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
-                 .format(rg, self.sql_server_name, self.pool_name), checks=[
+                 .format(rg, self.sql_server_name, self.pool_name),
+                 checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
                      JMESPathCheck('state', 'Ready'),
@@ -417,7 +443,8 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('edition', self.edition)])
 
         self.cmd('sql elastic-pool list -g {} --server {}'
-                 .format(rg, self.sql_server_name), checks=[
+                 .format(rg, self.sql_server_name),
+                 checks=[
                      JMESPathCheck('[0].resourceGroup', rg),
                      JMESPathCheck('[0].name', self.pool_name),
                      JMESPathCheck('[0].state', 'Ready'),
@@ -427,7 +454,8 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('sql elastic-pool update -g {} --server {} --name {} '
                  '--dtu {} --set tags.key1=value1'
-                 .format(rg, self.sql_server_name, self.pool_name, self.updated_dtu), checks=[
+                 .format(rg, self.sql_server_name, self.pool_name, self.updated_dtu),
+                 checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
                      JMESPathCheck('state', 'Ready'),
@@ -440,7 +468,8 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('sql elastic-pool update -g {} --server {} --name {} '
                  '--dtu {} --db-dtu-min {} --db-dtu-max {}'
                  .format(rg, self.sql_server_name, self.pool_name, self.dtu,
-                         self.updated_db_dtu_min, self.updated_db_dtu_max), checks=[
+                         self.updated_db_dtu_min, self.updated_db_dtu_max),
+                 checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
                      JMESPathCheck('state', 'Ready'),
@@ -451,7 +480,8 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('sql elastic-pool update -g {} --server {} --name {} '
                  '--remove tags.key1'
-                 .format(rg, self.sql_server_name, self.pool_name), checks=[
+                 .format(rg, self.sql_server_name, self.pool_name),
+                 checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
                      JMESPathCheck('state', 'Ready'),
@@ -459,13 +489,15 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # create a second pool with minimal params
         self.cmd('sql elastic-pool create -g {} --server {} --name {} '
-                 .format(rg, self.sql_server_name, self.pool_name2), checks=[
+                 .format(rg, self.sql_server_name, self.pool_name2),
+                 checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name2),
                      JMESPathCheck('location', loc_long),
                      JMESPathCheck('state', 'Ready')])
 
-        self.cmd('sql elastic-pool list -g {} -s {}'.format(rg, self.sql_server_name), checks=[JMESPathCheck('length(@)', 2)])
+        self.cmd('sql elastic-pool list -g {} -s {}'.format(rg, self.sql_server_name),
+                 checks=[JMESPathCheck('length(@)', 2)])
 
         # Create a database directly in an Azure sql elastic pool
         self.cmd('sql db create -g {} --server {} --name {} '
@@ -479,7 +511,8 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('status', 'Online')])
 
         # Move database to second pool. Specify service objective just for fun
-        self.cmd('sql db update -g {} -s {} -n {} --elastic-pool {} --service-objective ElasticPool'
+        self.cmd('sql db update -g {} -s {} -n {} --elastic-pool {}'
+                 ' --service-objective ElasticPool'
                  .format(rg, self.sql_server_name, self.database_name, self.pool_name2),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
@@ -499,7 +532,8 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('status', 'Online')])
 
         # Move database back into pool
-        self.cmd('sql db update -g {} -s {} -n {} --elastic-pool {} --service-objective ElasticPool'
+        self.cmd('sql db update -g {} -s {} -n {} --elastic-pool {}'
+                 ' --service-objective ElasticPool'
                  .format(rg, self.sql_server_name, self.database_name, self.pool_name),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
@@ -543,11 +577,13 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # delete sql server database
         self.cmd('sql db delete -g {} --server {} --name {}'
-                 .format(rg, self.sql_server_name, self.database_name), checks=[NoneCheck()])
+                 .format(rg, self.sql_server_name, self.database_name),
+                 checks=[NoneCheck()])
 
         # delete sql elastic pool
         self.cmd('sql elastic-pool delete -g {} --server {} --name {}'
-                 .format(rg, self.sql_server_name, self.pool_name), checks=[NoneCheck()])
+                 .format(rg, self.sql_server_name, self.pool_name),
+                 checks=[NoneCheck()])
 
         # delete sql server
         self.cmd('sql server delete -g {} --name {}'

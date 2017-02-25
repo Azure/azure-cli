@@ -4,9 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from ._util import (get_sql_servers_operation, get_sql_database_operations,
-                    get_sql_elasticpools_operations, get_sql_recommended_elastic_pools_operations,
-                    ServiceGroup, create_service_adapter)
-from azure.cli.core.commands import cli_command
+                    get_sql_elasticpools_operations, create_service_adapter, ServiceGroup)
 
 ###############################################
 #                sql db                       #
@@ -71,7 +69,9 @@ with ServiceGroup(__name__, get_sql_elasticpools_operations, elasticpools_ops) a
         c.command('delete', 'delete')
         c.command('show', 'get')
         c.command('list', 'list_by_server')
-        c.generic_update_command('update', 'get', 'create_or_update', custom_func_name='elastic_pool_update')
+        c.generic_update_command(
+            'update', 'get', 'create_or_update',
+            custom_func_name='elastic_pool_update')
 
 recommanded_elastic_pools_ops = \
     create_service_adapter('azure.mgmt.sql.operations.recommended_elastic_pools_operations',
@@ -104,7 +104,8 @@ with ServiceGroup(__name__, get_sql_servers_operation, server_operations) as s:
         ## Usages will not be included in the first batch of GA commands
         #c.command('show-usage', 'list_usages')
         c.command('list', 'list_by_resource_group')
-        c.generic_update_command('update', 'get_by_resource_group', 'create_or_update', custom_func_name='server_update')
+        c.generic_update_command('update', 'get_by_resource_group', 'create_or_update',
+                                 custom_func_name='server_update')
 
     with s.group('sql server service-objective') as c:
         c.command('list', 'list_service_objectives')
@@ -116,5 +117,6 @@ with ServiceGroup(__name__, get_sql_servers_operation, server_operations) as s:
         c.command('delete', 'delete_firewall_rule')
         c.command('show', 'get_firewall_rule')
         c.command('list', 'list_firewall_rules')
-        ## Keeping this command hidden for now. `firewall-rule create` will explain the special 0.0.0.0 rule.
+        ## Keeping this command hidden for now. `firewall-rule create` will explain the special
+        ## 0.0.0.0 rule.
         #c.custom_command('allow-all-azure-ips', 'firewall_rule_allow_all_azure_ips')
