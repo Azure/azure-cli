@@ -75,7 +75,7 @@ def _db_create_special(
     # Set create mode properties
     # url parse package has different names in Python 2 and 3.
     # So we have to import it differently depending on Python version.
-    # pylint: disable=no-name-in-module
+    # pylint: disable=no-name-in-module, import-error
     import sys
     if sys.version_info >= (3,):
         from urllib.parse import quote
