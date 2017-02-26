@@ -131,7 +131,7 @@ def read_file_content(file_path, allow_binary=False):
 def todict(obj):  # pylint: disable=too-many-return-statements
 
     if isinstance(obj, dict):
-        return {k: todict(v) for (k, v) in obj.items()}
+        return {to_camelcase(k): todict(v) for (k, v) in obj.items()}
     elif isinstance(obj, list):
         return [todict(a) for a in obj]
     elif isinstance(obj, Enum):
