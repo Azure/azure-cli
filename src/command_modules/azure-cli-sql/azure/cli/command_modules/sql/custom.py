@@ -124,7 +124,7 @@ def db_copy(  # pylint: disable=too-many-arguments
 
 
 # Copies a secondary replica. Wrapper function to make create mode more convenient.
-def db_create_secondary(  # pylint: disable=too-many-arguments
+def db_create_replica(  # pylint: disable=too-many-arguments
         client,
         database_name,
         server_name,

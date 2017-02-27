@@ -90,7 +90,7 @@ with ParametersContext(command='sql db copy') as c:
     for i in sql_db_copy_ignored_params:
         c.ignore(i)
 
-with ParametersContext(command='sql db create-secondary') as c:
+with ParametersContext(command='sql db create-replica') as c:
     configure_db_create_params(c)
 
     c.argument('elastic_pool_name',
@@ -139,11 +139,12 @@ with ParametersContext(command='sql db update') as c:
     c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
 
 #####
-#           sql db replication-link
+#           sql db replica-link
 #####
 
-with ParametersContext(command='sql db replication-link') as c:
+with ParametersContext(command='sql db replica-link') as c:
     c.register_alias('database_name', ('--database', '-d'))
+    c.register_alias('link_id', ('--name', '-n'))
 
 #####
 #           sql db <<other subgroups>>

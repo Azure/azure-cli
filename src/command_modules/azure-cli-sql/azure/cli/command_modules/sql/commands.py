@@ -17,7 +17,7 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
     with s.group('sql db') as c:
         c.custom_command('create', 'db_create')
         c.custom_command('copy', 'db_copy')
-        c.custom_command('create-secondary', 'db_create_secondary')
+        c.custom_command('create-replica', 'db_create_replica')
         # # Commented out for now because restorePointInTime property is not yet in Swagger spec
         # c.custom_command('restore', 'db_restore')
         c.command('show', 'get')
@@ -27,7 +27,7 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
         c.command('delete', 'delete')
         c.generic_update_command('update', 'get', 'create_or_update', custom_func_name='db_update')
 
-    with s.group('sql db replication-link') as c:
+    with s.group('sql db replica-link') as c:
         c.command('list', 'list_replication_links')
         c.command('show', 'get_replication_link')
         c.command('delete', 'delete_replication_link')

@@ -23,7 +23,7 @@ helps['sql db create'] = """
             type: command
             short-summary: Creates an Azure SQL Database.
             """
-helps['sql db create-secondary'] = """
+helps['sql db create-replica'] = """
             type: command
             short-summary: Creates a readable secondary replica of an existing Azure SQL Database.
             """
@@ -35,9 +35,9 @@ helps['sql db update'] = """
             type: command
             short-summary: Updates an Azure SQL Database.
             """
-helps['sql db replication-link'] = """
+helps['sql db replica-link'] = """
             type: group
-            short-summary: Manage database replication links.
+            short-summary: Manage links between database replicas.
             """
 # helps['sql db data-warehouse'] = """
 #             type: group
