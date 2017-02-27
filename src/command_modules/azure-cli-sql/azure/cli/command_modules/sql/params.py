@@ -135,6 +135,10 @@ with ParametersContext(command='sql db show') as c:
     # of GA commands.
     c.ignore('expand')
 
+with ParametersContext(command='sql db list') as c:
+    c.argument('elastic_pool_name',
+               help='If specified, lists only the databases in this elastic pool')
+
 with ParametersContext(command='sql db update') as c:
     c.argument('requested_service_objective_name',
                help='The name of the new service objective. If this is a standalone db service'
