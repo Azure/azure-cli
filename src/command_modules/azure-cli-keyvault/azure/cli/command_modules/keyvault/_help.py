@@ -59,7 +59,9 @@ helps['keyvault certificate get-default-policy'] = """
     short-summary: Get a default policy for a self-signed certificate
     long-summary: >
         This default policy can be used in conjunction with `az keyvault create` to create a self-signed certificate.
-        The default policy can also be used as a starting point to create derivative policies.
+        The default policy can also be used as a starting point to create derivative policies. \n
+
+        Also see: https://docs.microsoft.com/en-us/rest/api/keyvault/certificates-and-policies
     examples:
         - name: Create a self-signed certificate with a the default policy
           text: >

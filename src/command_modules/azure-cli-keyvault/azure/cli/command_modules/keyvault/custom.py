@@ -8,11 +8,9 @@ import json
 import os
 import re
 import time
-import datetime
 
 from OpenSSL import crypto
 from msrestazure.azure_exceptions import CloudError
-
 from azure.keyvault.generated.models import (CertificateAttributes,
                                              CertificatePolicy,
                                              IssuerParameters,
@@ -23,7 +21,7 @@ from azure.keyvault.generated.models import (CertificateAttributes,
                                              SubjectAlternativeNames,
                                              Trigger,
                                              Action)
-
+from azure.keyvault.generated.models.key_vault_client_enums import ActionType, KeyUsageType
 from azure.keyvault.key_vault_id import parse_secret_id
 from azure.mgmt.keyvault.models import (VaultCreateOrUpdateParameters,
                                         VaultProperties,
@@ -35,11 +33,9 @@ from azure.mgmt.keyvault.models import (VaultCreateOrUpdateParameters,
                                         Sku,
                                         SkuName)
 from azure.graphrbac import GraphRbacManagementClient
-
 import azure.cli.core.telemetry as telemetry
 from azure.cli.core._util import CLIError
 import azure.cli.core.azlogging as azlogging
-
 from azure.keyvault import KeyVaultClient
 from azure.cli.command_modules.keyvault._validators import secret_text_encoding_values, \
     _get_resource_group_from_vault_name
@@ -48,70 +44,103 @@ logger = azlogging.get_az_logger(__name__)
 
 
 def _default_certificate_profile():
-    return {
-        "attributes": {
-            "enabled": True,
-            "expires": None,
-            "not_before": None
-        },
-        "issuer_parameters": {
-            "name": "Self"
-        },
-        "key_properties": {
-            "exportable": True,
-            "key_size": 2048,
-            "key_type": "RSA",
-            "reuse_key": False
-        },
-        "lifetime_actions": [
-            {
-                "action": {
-                    "action_type": "AutoRenew"
-                },
-                "trigger": {
-                    "lifetime_percentage": 90
-                }
-            }
-        ],
-        "secret_properties": {
-            "content_type": "application/x-pkcs12"
-        },
-        "x509_certificate_properties": {
-            "ekus": None,
-            "key_usage": [
-                "digitalSignature",
-                "nonRepudiation",
-                "keyEncipherment",
-                "keyAgreement",
-                "keyCertSign"
+    template = CertificatePolicy(
+        key_properties=KeyProperties(
+            exportable=True,
+            key_type='RSA',
+            key_size=2048,
+            reuse_key=True
+        ),
+        secret_properties=SecretProperties(
+            content_type='application/x-pkcs12'
+        ),
+        x509_certificate_properties=X509CertificateProperties(
+            key_usage=[
+                KeyUsageType.c_rl_sign,
+                KeyUsageType.data_encipherment,
+                KeyUsageType.digital_signature,
+                KeyUsageType.key_encipherment,
+                KeyUsageType.key_agreement,
+                KeyUsageType.key_cert_sign
             ],
-            "subject": 'C=US, ST=WA, L=Redmon, O=Test Noodle, OU=TestNugget, '
-                       'CN=www.mytestdomain.com',
-            "subject_alternative_names": None,
-            "validity_in_months": 60
-        }
-    }
+            subject='C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=www.contoso.com',
+            ekus=[]
+        ),
+        lifetime_actions=[LifetimeAction(
+            trigger=Trigger(
+                days_before_expiry=90
+            ),
+            action=Action(
+                action_type=ActionType.auto_renew
+            )
+        )],
+        issuer_parameters=IssuerParameters(
+            name='Self',
+        ),
+        attributes=CertificateAttributes(
+            enabled=True
+        )
+    )
+    del template.id
+    del template.attributes.created
+    del template.attributes.updated
+    del template.issuer_parameters.certificate_type
+    del template.lifetime_actions[0].trigger.lifetime_percentage
+    del template.x509_certificate_properties.subject_alternative_names
+    del template.x509_certificate_properties.validity_in_months
+    del template.x509_certificate_properties.ekus
+    return template
 
 
 def _scaffold_certificate_profile():
-    return CertificatePolicy(
-        key_properties=KeyProperties(),
-        secret_properties=SecretProperties(),
+    template = CertificatePolicy(
+        key_properties=KeyProperties(
+            exportable=True,
+            key_type='(optional) RSA or RSA-HSM (default RSA)',
+            key_size=2048,
+            reuse_key=True
+        ),
+        secret_properties=SecretProperties(
+            content_type='application/x-pkcs12 or application/x-pem-file'
+        ),
         x509_certificate_properties=X509CertificateProperties(
-            key_usage=[],
+            key_usage=[
+                KeyUsageType.c_rl_sign,
+                KeyUsageType.data_encipherment,
+                KeyUsageType.digital_signature,
+                KeyUsageType.key_encipherment,
+                KeyUsageType.key_agreement,
+                KeyUsageType.key_cert_sign
+            ],
             subject_alternative_names=SubjectAlternativeNames(
-                emails=[],
-                dns_names=[],
+                emails=['hello@contoso.com'],
+                dns_names=['hr.contoso.com', 'm.contoso.com'],
                 upns=[]
-            )
+            ),
+            subject='C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=www.contoso.com',
+            ekus=['1.3.6.1.5.5.7.3.1'],
+            validity_in_months=24
         ),
         lifetime_actions=[LifetimeAction(
-            trigger=Trigger(),
-            action=Action()
+            trigger=Trigger(
+                days_before_expiry=90
+            ),
+            action=Action(
+                action_type=ActionType.auto_renew
+            )
         )],
-        issuer_parameters=IssuerParameters(),
-        attributes=CertificateAttributes()
+        issuer_parameters=IssuerParameters(
+            name='Unknown, Self, or {IssuerName}',
+            certificate_type='(optional) DigiCert, GlobalSign or WoSign'
+        ),
+        attributes=CertificateAttributes(
+            enabled=True
+        )
     )
+    del template.id
+    del template.attributes.created
+    del template.attributes.updated
+    return template
 
 
 def list_keyvault(client, resource_group_name=None):
@@ -223,7 +252,7 @@ def get_default_policy(client, scaffold=False): #pylint: disable=unused-argument
     """
     Get a default certificate policy to be used with `az keyvault certificate create`
     :param client:
-    :param bool scaffold: create a fully formed empty policy structure
+    :param bool scaffold: create a fully formed policy structure with default values
     :return: policy dict
     :rtype: dict
     """
@@ -675,8 +704,6 @@ def add_certificate_issuer_admin(client, vault_base_url, issuer_name, email, fir
 
 def delete_certificate_issuer_admin(client, vault_base_url, issuer_name, email):
     """ Remove admin details for the specified certificate issuer. """
-    from azure.keyvault.generated.models import \
-        (AdministratorDetails, KeyVaultErrorException)
     issuer = client.get_certificate_issuer(vault_base_url, issuer_name)
     org_details = issuer.organization_details
     admins = org_details.admin_details
@@ -687,43 +714,3 @@ def delete_certificate_issuer_admin(client, vault_base_url, issuer_name, email):
     client.set_certificate_issuer(
         vault_base_url, issuer_name, issuer.provider, issuer.credentials, org_details,
         issuer.attributes)
-
-
-def certificate_policy_template():
-    from azure.keyvault.generated.models.key_vault_client_enums \
-        import ActionType, JsonWebKeyType, KeyUsageType
-    # create sample policy
-    template = CertificatePolicy(
-        key_properties=KeyProperties(
-            exportable=False,
-            key_type='{{ {} }}'.format(' | '.join([x.value for x in JsonWebKeyType])),
-            key_size=2048,
-            reuse_key=False),
-        secret_properties=SecretProperties('text/plain'),
-        x509_certificate_properties=X509CertificateProperties(
-            subject_alternative_names=SubjectAlternativeNames(
-                emails=['admin@mydomain.com', 'user@mydomain.com'],
-                dns_names=['www.mydomain.com'],
-                upns=['principal-name']
-            ),
-            subject='X509 Distinguished Name',
-            ekus=['ekus'],
-            key_usage=['{{ {} }}'.format(' | '.join([x.value for x in KeyUsageType]))],
-            validity_in_months=60
-        ),
-        lifetime_actions=[
-            LifetimeAction(
-                Trigger(lifetime_percentage=90, days_before_expiry=7),
-                Action(action_type='{{ {} }}'.format(' | '.join([x.value for x in ActionType])))
-            )
-        ],
-        issuer_parameters=IssuerParameters(name='issuer-name'),
-        attributes=CertificateAttributes(
-            enabled=True
-        )
-    )
-    # remove properties which are read only
-    del template.id
-    del template.attributes.created
-    del template.attributes.updated
-    return template
