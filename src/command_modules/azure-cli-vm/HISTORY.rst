@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.0.0 (2017-02-27)
+++++++++++++++++++
+
+* GA release
+* Fix vmss list-instance-connection-info naming
+* Snapshot description update
+
 0.1.2rc2 (2017-02-22)
 +++++++++++++++++++++
 
