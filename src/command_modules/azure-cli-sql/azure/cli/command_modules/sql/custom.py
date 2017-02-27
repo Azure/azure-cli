@@ -69,8 +69,8 @@ def _db_create_special(
 
     # Determine server location
     kwargs['location'] = get_server_location(
-        server_name=source_db.server_name,
-        resource_group_name=source_db.resource_group_name)
+        server_name=dest_db.server_name,
+        resource_group_name=dest_db.resource_group_name)
 
     # Set create mode properties
     # url parse package has different names in Python 2 and 3.
