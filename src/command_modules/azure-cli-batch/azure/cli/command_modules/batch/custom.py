@@ -228,8 +228,8 @@ def resize_pool(client, pool_id, target_dedicated=None,  # pylint:disable=too-ma
 
 @transfer_doc(PoolUpdatePropertiesParameter, StartTask)
 def update_pool(client, pool_id, json_file=None, start_task_command_line=None,  # pylint:disable=too-many-arguments
-                certificate_references=None, application_package_references=None, metadata=None,
-                start_task_run_elevated=None, start_task_environment_settings=None,
+                certificate_references=None, application_package_references=None,
+                metadata=None, start_task_environment_settings=None,
                 start_task_wait_for_success=None, start_task_max_task_retry_count=None):
     def action():
         client.update_properties(pool_id=pool_id, pool_update_properties_parameter=param)
@@ -266,7 +266,6 @@ def update_pool(client, pool_id, json_file=None, start_task_command_line=None,  
         if start_task_command_line:
             param.start_task = StartTask(start_task_command_line,
                                          environment_settings=start_task_environment_settings,
-                                         run_elevated=start_task_run_elevated,
                                          wait_for_success=start_task_wait_for_success,
                                          max_task_retry_count=start_task_max_task_retry_count)
     return _handle_batch_exception(action)
@@ -293,7 +292,7 @@ def list_job(client, job_schedule_id=None, filter=None, select=None, expand=None
 def create_task(client, job_id, json_file=None, task_id=None, command_line=None,  # pylint:disable=too-many-arguments
                 resource_files=None, environment_settings=None, affinity_info=None,
                 max_wall_clock_time=None, retention_time=None, max_task_retry_count=None,
-                run_elevated=None, application_package_references=None):
+                application_package_references=None):
     def action():
         if task is not None:
             client.add(job_id=job_id, task=task)
@@ -318,7 +317,6 @@ def create_task(client, job_id, json_file=None, task_id=None, command_line=None,
                                 resource_files=resource_files,
                                 environment_settings=environment_settings,
                                 affinity_info=affinity_info,
-                                run_elevated=run_elevated,
                                 application_package_references=application_package_references)
         if max_wall_clock_time is not None or retention_time is not None \
                 or max_task_retry_count is not None:

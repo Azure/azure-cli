@@ -66,8 +66,6 @@ register_cli_argument('batch pool reset', 'certificate_references', nargs='+', t
 register_cli_argument('batch pool reset', 'metadata', nargs='+', type=metadata_item_format, arg_group='Pool')
 register_cli_argument('batch pool reset', 'start_task_command_line', arg_group='Pool: Start Task',
                       help='The command line of the start task. The command line does not run under a shell, and therefore cannot take advantage of shell features such as environment variable expansion. If you want to take advantage of such features, you should invoke the shell in the command line, for example using "cmd /c MyCommand" in Windows or "/bin/sh -c MyCommand" in Linux.')
-register_cli_argument('batch pool reset', 'start_task_run_elevated', action='store_true', arg_group='Pool: Start Task',
-                      help='Whether to run the start task in elevated mode. The default value is false. True if flag present, otherwise defaults to False.')
 register_cli_argument('batch pool reset', 'start_task_wait_for_success', action='store_true', arg_group='Pool: Start Task',
                       help='Whether the Batch service should wait for the start task to complete successfully (that is, to exit with exit code 0) before scheduling any tasks on the compute node. True if flag present, otherwise defaults to False.')
 register_cli_argument('batch pool reset', 'start_task_max_task_retry_count', arg_group='Pool: Start Task',
@@ -83,6 +81,7 @@ for command in ['job create', 'job set', 'job reset', 'job-schedule create', 'jo
     register_cli_argument('batch {}'.format(command), 'pool_id', options_list=('--pool-id',), help='The id of an existing pool. All the tasks of the job will run on the specified pool.')
 
 register_cli_argument('batch pool create', 'os_family', **enum_choice_list(['2', '3', '4', '5']))
+register_cli_argument('batch pool create', 'auto_scale_formula', help='A formula for the desired number of compute nodes in the pool. The formula is checked for validity before the pool is created. If the formula is not valid, the Batch service rejects the request with detailed error information. For more information about specifying this formula, see https://azure.microsoft.com/documentation/articles/batch-automatic-scaling/.')
 register_extra_cli_argument('batch pool create', 'image', completer=load_node_agent_skus, arg_group="Pool: Virtual Machine Configuration",
                             help="OS image URN in 'publisher:offer:sku[:version]' format. Version is optional and if omitted latest will be used.\n\tValues from 'az batch pool node-agent-skus list'.\n\tExample: 'MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest'")
 
@@ -98,7 +97,6 @@ register_cli_argument('batch task create', 'job_id', help='The ID of the job con
 register_cli_argument('batch task create', 'task_id', help='The ID of the task.')
 register_cli_argument('batch task create', 'command_line', help='The command line of the task. The command line does not run under a shell, and therefore cannot take advantage of shell features such as environment variable expansion. If you want to take advantage of such features, you should invoke the shell in the command line, for example using "cmd /c MyCommand" in Windows or "/bin/sh -c MyCommand" in Linux.')
 register_cli_argument('batch task create', 'environment_settings', nargs='+', help='A list of environment variable settings for the task. Space separated values in \'key=value\' format.', type=environment_setting_format)
-register_cli_argument('batch task create', 'run_elevated', action='store_true', help='Whether to run the task in elevated mode. True if flag present, otherwise defaults to False.')
 register_cli_argument('batch task create', 'resource_files', nargs='+', help='A list of files that the Batch service will download to the compute node before running the command line. Space separated resource references in filename=blobsource format.', type=resource_file_format)
 
 for item in ['batch certificate delete', 'batch certificate create', 'batch pool resize', 'batch pool reset', 'batch job list', 'batch task create']:

@@ -63,7 +63,6 @@ QUALIFIED_PROPERTIES = [  # Common argument names the should always be prefixed 
     'display_name',
     'command_line',
     'environment_settings',
-    'run_elevated',
     'wait_for_success',
     'max_task_retry_count',
     'constraints_max_task_retry_count',
@@ -72,7 +71,8 @@ QUALIFIED_PROPERTIES = [  # Common argument names the should always be prefixed 
     'retention_time',
     'constraints_retention_time',
     'application_package_references',
-    'resource_files'
+    'resource_files',
+    'user_name'
 ]
 
 
@@ -384,7 +384,7 @@ class BatchArgumentTree(object):
                     self._help(name, "Specify either 'true' or 'false' to update the property.")
                 else:
                     details['options']['action'] = 'store_true'
-                    self._help(name, "True if flag present, otherwise defaults to False.")
+                    self._help(name, "True if flag present.")
             elif self._is_list(name):
                 details['options']['nargs'] = '+'
             elif self._is_datetime(name):
