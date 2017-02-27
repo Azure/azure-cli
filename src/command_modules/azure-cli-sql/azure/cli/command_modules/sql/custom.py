@@ -30,34 +30,70 @@ def get_server_location(server_name, resource_group_name):
 #                sql db                       #
 ###############################################
 
-
-# Creates a database. Wrapper function which uses the server location so that the user doesn't
-# need to specify location.
-def db_create(
-        client,
-        server_name,
-        resource_group_name,
-        database_name,
-        **kwargs):
-
-    # Determine server location
-    kwargs['location'] = get_server_location(
-        server_name=server_name,
-        resource_group_name=resource_group_name)
-
-    # Create
-    return client.create_or_update(
-        server_name=server_name,
-        resource_group_name=resource_group_name,
-        database_name=database_name,
-        parameters=kwargs)
-
-
+# Helper class to bundle up database identity properties
 class DatabaseIdentity(object):  # pylint: disable=too-few-public-methods
     def __init__(self, database_name, server_name, resource_group_name):
         self.database_name = database_name
         self.server_name = server_name
         self.resource_group_name = resource_group_name
+
+
+# Creates a database or datawarehouse. Wrapper function which uses the server location so that
+# the user doesn't need to specify location.
+def _db_dw_create(
+        client,
+        db_id,
+        kwargs):
+
+    # Determine server location
+    kwargs['location'] = get_server_location(
+        server_name=db_id.server_name,
+        resource_group_name=db_id.resource_group_name)
+
+    # Create
+    return client.create_or_update(
+        server_name=db_id.server_name,
+        resource_group_name=db_id.resource_group_name,
+        database_name=db_id.database_name,
+        parameters=kwargs)
+
+
+# Creates a database. Wrapper function which uses the server location so that the user doesn't
+# need to specify location.
+def db_create(
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        **kwargs):
+
+    # Verify edition
+    if 'Edition' in kwargs and kwargs['Edition'].lower() == 'datawarehouse':
+        raise CLIError('SQL Data Warehouse can be created with the command `az sql dw create`.')
+
+    return _db_dw_create(
+        client,
+        DatabaseIdentity(database_name, server_name, resource_group_name),
+        kwargs)
+
+
+# Creates a datawarehouse. Wrapper function which uses the server location so that the user doesn't
+# need to specify location.
+def dw_create(
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        **kwargs):
+
+    # Set edition
+    kwargs['Edition'] = 'DataWarehouse'
+
+    # Create
+    return _db_dw_create(
+        client,
+        DatabaseIdentity(database_name, server_name, resource_group_name),
+        kwargs)
 
 
 # Common code for special db create modes.
