@@ -696,6 +696,11 @@ def _mkdir_p(path):
 def update_acs(client, resource_group_name, container_service_name, new_agent_count):
     instance = client.get(resource_group_name, container_service_name)
     instance.agent_pool_profiles[0].count = new_agent_count  # pylint: disable=no-member
+
+    # null out the service principal because otherwise validation complains
+    if instance.orchestrator_profile.orchestrator_type == ContainerServiceOchestratorTypes.kubernetes:
+        instance.service_principal_profile = None
+
     return client.create_or_update(resource_group_name, container_service_name, instance)
 
 
