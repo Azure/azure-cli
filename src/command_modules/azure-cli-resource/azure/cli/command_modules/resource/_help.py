@@ -6,6 +6,10 @@
 from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 #pylint: disable=line-too-long
+helps['lock'] = """
+    type: group
+    short-summary: Manage Azure locks.
+"""
 helps['policy'] = """
     type: group
     short-summary: Manage resource policies.
