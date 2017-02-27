@@ -3,6 +3,12 @@
 Release History
 ===============
 
+0.1.1b4 (2017-02-27)
++++++++++++++++++++++
+
+* Validate Azure Container Registry name/resource ID before running container release create
+
+
 0.1.1b3 (2017-02-22)
 +++++++++++++++++++++
 
