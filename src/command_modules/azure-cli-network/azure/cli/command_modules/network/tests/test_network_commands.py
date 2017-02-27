@@ -280,7 +280,7 @@ class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
             allowed_exceptions='An error occured.')
         self.cmd('network express-route peering show -g {} --circuit-name {} -n MicrosoftPeering'.format(rg, circuit), checks=[
             JMESPathCheck('microsoftPeeringConfig.advertisedPublicPrefixes[0]', '104.0.0.0/30'),
-            JMESPathCheck('microsoftPeeringConfig.advertisedPublicPrefixesState', 'NotConfigured'),
+            JMESPathCheck('microsoftPeeringConfig.advertisedPublicPrefixesState', 'ValidationNeeded'),
             JMESPathCheck('microsoftPeeringConfig.customerAsn', 10000),
             JMESPathCheck('microsoftPeeringConfig.routingRegistryName', 'LEVEL3')
         ])

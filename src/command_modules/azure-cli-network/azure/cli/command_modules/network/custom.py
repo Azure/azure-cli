@@ -14,7 +14,8 @@ from azure.mgmt.network.models import \
      NetworkInterfaceIPConfiguration, Route, VpnClientRootCertificate, VpnClientConfiguration,
      AddressSpace, VpnClientRevokedCertificate, SubResource, VirtualNetworkPeering,
      ApplicationGatewayFirewallMode, SecurityRuleAccess, SecurityRuleDirection,
-     SecurityRuleProtocol, IPAllocationMethod, IPVersion)
+     SecurityRuleProtocol, IPAllocationMethod, IPVersion,
+     ExpressRouteCircuitSkuTier, ExpressRouteCircuitSkuFamily)
 
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands import LongRunningOperation
@@ -1177,6 +1178,22 @@ def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None
 # endregion
 
 # region Express Route commands
+
+def create_express_route(circuit_name, resource_group_name, bandwidth_in_mbps, peering_location,
+                         service_provider_name, location=None, tags=None,
+                         sku_family=ExpressRouteCircuitSkuFamily.metered_data.value,
+                         sku_tier=ExpressRouteCircuitSkuTier.standard.value):
+    from azure.mgmt.network.models import \
+        (ExpressRouteCircuit, ExpressRouteCircuitSku, ExpressRouteCircuitServiceProviderProperties)
+    client = _network_client_factory().express_route_circuits
+    sku_name = '{}_{}'.format(sku_tier, sku_family)
+    circuit = ExpressRouteCircuit(
+        location=location, tags=tags,
+        service_provider_properties=ExpressRouteCircuitServiceProviderProperties(
+            service_provider_name, peering_location, bandwidth_in_mbps),
+        sku=ExpressRouteCircuitSku(sku_name, sku_tier, sku_family)
+    )
+    return client.create_or_update(resource_group_name, circuit_name, circuit)
 
 def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None,
                          service_provider_name=None, sku_family=None, sku_tier=None, tags=None):
