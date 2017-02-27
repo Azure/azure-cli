@@ -130,6 +130,11 @@ with ParametersContext(command='sql db restore') as c:
     for i in sql_db_restore_ignored_params:
         c.ignore(i)
 
+with ParametersContext(command='sql db show') as c:
+    # Service tier advisors and transparent data encryption are not included in the first batch
+    # of GA commands.
+    c.ignore('expand')
+
 with ParametersContext(command='sql db update') as c:
     c.argument('requested_service_objective_name',
                help='The name of the new service objective. If this is a standalone db service'
