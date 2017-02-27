@@ -29,19 +29,12 @@ def run_tests(modules, parallel, run_live):
         os.environ['AZURE_CLI_TEST_RUN_LIVE'] = 'True'
 
     # run tests
-    passed = True
-    module_results = []
-    for name, _, test_path in modules:
-        result, start, end, _ = run_nose(name, test_path)
-        passed &= result
-        record = (name, start.strftime('%H:%M:%D'), str((end - start).total_seconds()),
-                  'Pass' if result else 'Fail')
+    test_folders = [test_path for _, _, test_path in modules]
+    result, test_result = run_nose(test_folders)
 
-        module_results.append(record)
+    print('Test report: {}'.format(test_result))
 
-    print_records(module_results, title='test results')
-
-    return passed
+    return result
 
 
 if __name__ == '__main__':
