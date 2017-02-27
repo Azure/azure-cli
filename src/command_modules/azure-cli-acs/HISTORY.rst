@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.0.0 (2017-02-27)
+++++++++++++++++++
+
+* GA release
+* Add customizable master_count for Kubernetes cluster create
+
+
 0.1.2rc2 (2017-02-22)
 +++++++++++++++++++++
 
