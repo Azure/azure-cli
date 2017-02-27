@@ -27,9 +27,13 @@ helps['sql db create-replica'] = """
             type: command
             short-summary: Creates a readable secondary replica of an existing database.
             """
+helps['sql db delete'] = """
+            type: command
+            short-summary: Deletes a database.
+            """
 helps['sql db list'] = """
             type: command
-            short-summary: Lists all databases in a server.
+            short-summary: Lists all databases in a server, or all databases in an elastic pool.
             """
 helps['sql db update'] = """
             type: command
