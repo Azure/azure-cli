@@ -28,8 +28,6 @@ from azure.cli.command_modules.network.mgmt_app_gateway.lib.operations.app_gatew
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.network.mgmt_nic.lib.operations.nic_operations import NicOperations
-from azure.mgmt.trafficmanager import TrafficManagerManagementClient
-from azure.mgmt.trafficmanager.models import Endpoint
 from azure.mgmt.dns import DnsManagementClient
 from azure.mgmt.dns.operations import RecordSetsOperations
 from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CnameRecord, MxRecord,
@@ -1364,6 +1362,22 @@ def list_traffic_manager_profiles(resource_group_name=None):
     else:
         return ncf.list_all()
 
+
+def create_traffic_manager_profile(traffic_manager_profile_name, resource_group_name,
+                                   routing_method, unique_dns_name, monitor_path='/',
+                                   monitor_port=80, monitor_protocol='http', status='enabled',
+                                   ttl=30, tags=None):
+    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
+    from azure.mgmt.trafficmanager.models import Profile, DnsConfig, MonitorConfig
+    client = get_mgmt_service_client(TrafficManagerManagementClient).profiles
+    profile = Profile(location='global', tags=tags, profile_status=status,
+                      traffic_routing_method=routing_method,
+                      dns_config=DnsConfig(unique_dns_name, None, ttl),
+                      monitor_config=MonitorConfig(None, monitor_protocol,
+                                                   monitor_port, monitor_path))
+    return client.create_or_update(resource_group_name, traffic_manager_profile_name, profile)
+
+
 def update_traffic_manager_profile(instance, profile_status=None, routing_method=None, tags=None,
                                    monitor_protocol=None, monitor_port=None, monitor_path=None,
                                    ttl=None):
@@ -1390,6 +1404,8 @@ def create_traffic_manager_endpoint(resource_group_name, profile_name, endpoint_
                                     endpoint_status=None, weight=None, priority=None,
                                     endpoint_location=None, endpoint_monitor_status=None,
                                     min_child_endpoints=None):
+    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
+    from azure.mgmt.trafficmanager.models import Endpoint
     ncf = get_mgmt_service_client(TrafficManagerManagementClient).endpoints
 
     endpoint = Endpoint(target_resource_id=target_resource_id, target=target,

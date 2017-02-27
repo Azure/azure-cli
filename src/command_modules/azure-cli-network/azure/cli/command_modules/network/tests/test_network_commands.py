@@ -1174,7 +1174,7 @@ class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('network traffic-manager profile check-dns -n myfoobar1')
         self.cmd('network traffic-manager profile create -n {} -g {} --routing-method weighted --unique-dns-name {}'.format(tm_name, self.resource_group, unique_dns_name),
-            checks=JMESPathCheck('trafficManagerProfile.trafficRoutingMethod', 'Weighted'))
+            checks=JMESPathCheck('TrafficManagerProfile.trafficRoutingMethod', 'Weighted'))
         self.cmd('network traffic-manager profile show -g {} -n {}'.format(self.resource_group, tm_name),
             checks=JMESPathCheck('dnsConfig.relativeName', unique_dns_name))
 

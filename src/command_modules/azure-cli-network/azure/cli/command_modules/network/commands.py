@@ -16,7 +16,8 @@ from ._util import (list_network_resource_property,
 from ._format import \
     (transform_local_gateway_table_output, transform_dns_record_set_output,
      transform_dns_record_set_table_output, transform_dns_zone_table_output,
-     transform_vnet_create_output, transform_public_ip_create_output)
+     transform_vnet_create_output, transform_public_ip_create_output,
+     transform_traffic_manager_create_output)
 
 custom_path = 'azure.cli.command_modules.network.custom#{}'
 
@@ -368,16 +369,13 @@ cli_command(__name__, 'network traffic-manager profile check-dns', 'azure.mgmt.t
 cli_command(__name__, 'network traffic-manager profile show', 'azure.mgmt.trafficmanager.operations.profiles_operations#ProfilesOperations.get', cf_traffic_manager_mgmt_profiles, exception_handler=empty_on_404)
 cli_command(__name__, 'network traffic-manager profile delete', 'azure.mgmt.trafficmanager.operations.profiles_operations#ProfilesOperations.delete', cf_traffic_manager_mgmt_profiles)
 cli_command(__name__, 'network traffic-manager profile list', custom_path.format('list_traffic_manager_profiles'))
+cli_command(__name__, 'network traffic-manager profile create', custom_path.format('create_traffic_manager_profile'), transform=transform_traffic_manager_create_output)
 cli_generic_update_command(__name__, 'network traffic-manager profile update',
                            'azure.mgmt.trafficmanager.operations.profiles_operations#ProfilesOperations.get',
                            'azure.mgmt.trafficmanager.operations.profiles_operations#ProfilesOperations.create_or_update',
                            cf_traffic_manager_mgmt_profiles,
                            custom_function_op=custom_path.format('update_traffic_manager_profile'))
 
-cli_command(__name__, 'network traffic-manager profile create',
-            'azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib.operations.traffic_manager_profile_operations#TrafficManagerProfileOperations.create_or_update',
-            cf_traffic_manager_profile_create,
-            transform=DeploymentOutputLongRunningOperation('Starting network traffic-manager profile create'))
 
 # Traffic Manager EndpointOperations
 cli_command(__name__, 'network traffic-manager endpoint show', 'azure.mgmt.trafficmanager.operations.endpoints_operations#EndpointsOperations.get', cf_traffic_manager_mgmt_endpoints, exception_handler=empty_on_404)
