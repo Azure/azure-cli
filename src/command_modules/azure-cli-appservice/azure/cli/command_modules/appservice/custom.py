@@ -234,9 +234,12 @@ def config_source_control(resource_group_name, name, repo_url, repository_type=N
     source_control = SiteSourceControl(location, repo_url=repo_url, branch=branch,
                                        is_manual_integration=manual_integration,
                                        is_mercurial=(repository_type != 'git'))
-    return _generic_site_operation(resource_group_name, name,
-                                   'create_or_update_source_control',
-                                   slot, source_control)
+    result = _generic_site_operation(resource_group_name, name,
+                                     'create_or_update_source_control',
+                                     slot, source_control)
+    if manual_integration is not None:
+        return result
+    return '{} \n {}'.format(result, sync_site_repo(resource_group_name, name, slot))
 
 
 def update_git_token(git_token=None):
