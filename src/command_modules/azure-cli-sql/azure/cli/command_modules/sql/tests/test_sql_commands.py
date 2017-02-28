@@ -355,7 +355,7 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(SqlElasticPoolsMgmtScenarioTest, self).__init__(
             __file__, test_method, resource_group='cli-test-sql-mgmt')
-        self.sql_server_name = 'cliautomation20'
+        self.sql_server_name = 'cliautomation21'
         self.location_short_name = 'westus'
         self.location_long_name = 'West US'
         self.admin_login = 'admin123'
@@ -540,24 +540,23 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('requestedServiceObjectiveName', 'ElasticPool'),
                      JMESPathCheck('status', 'Online')])
 
-        # # test sql elastic-pool db sub-group commands
-        # self.cmd('sql elastic-pool db list -g {} --server {} --elastic-pool {}'
-        #          .format(rg, self.sql_server_name, self.pool_name),
-        #          checks=[
-        #              JMESPathCheck('length(@)', 1),
-        #              JMESPathCheck('[0].resourceGroup', rg),
-        #              JMESPathCheck('[0].name', self.database_name),
-        #              JMESPathCheck('[0].elasticPoolName', self.pool_name),
-        #              JMESPathCheck('[0].status', 'Online')])
+        # List databases in a pool
+        self.cmd('sql elastic-pool list-dbs -g {} -s {} -n {}'
+                 .format(rg, self.sql_server_name, self.pool_name),
+                 checks=[
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].resourceGroup', rg),
+                     JMESPathCheck('[0].name', self.database_name),
+                     JMESPathCheck('[0].elasticPoolName', self.pool_name)])
 
-        # self.cmd('sql elastic-pool db show -g {} --server {} --elastic-pool {} '
-        #          '--name {}'
-        #          .format(rg, self.sql_server_name, self.pool_name, self.database_name),
-        #          checks=[
-        #              JMESPathCheck('resourceGroup', rg),
-        #              JMESPathCheck('name', self.database_name),
-        #              JMESPathCheck('elasticPoolName', self.pool_name),
-        #              JMESPathCheck('status', 'Online')])
+        # List databases in a pool - alternative command
+        self.cmd('sql db list -g {} -s {} --elastic-pool {}'
+                 .format(rg, self.sql_server_name, self.pool_name),
+                 checks=[
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].resourceGroup', rg),
+                     JMESPathCheck('[0].name', self.database_name),
+                     JMESPathCheck('[0].elasticPoolName', self.pool_name)])
 
         # self.cmd('sql elastic-pool db show-activity -g {} --server {} --elastic-pool {}'
         #          .format(rg, self.sql_server_name, self.pool_name),

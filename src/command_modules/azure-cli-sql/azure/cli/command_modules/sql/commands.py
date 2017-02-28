@@ -68,6 +68,7 @@ with ServiceGroup(__name__, get_sql_elasticpools_operations, elasticpools_ops) a
         c.command('delete', 'delete')
         c.command('show', 'get')
         c.command('list', 'list_by_server')
+        c.command('list-dbs', 'list_databases')
         c.generic_update_command(
             'update', 'get', 'create_or_update',
             custom_func_name='elastic_pool_update')
