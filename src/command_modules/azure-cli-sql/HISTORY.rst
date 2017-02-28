@@ -3,14 +3,24 @@
 Release History
 ===============
 
+0.1.1b5 (2017-02-27)
+++++++++++++++++++++
+
+* Parameter help fix.
+
+0.1.1b4 (2017-02-22)
+++++++++++++++++++++
+
+* Documentation updates.
+
 0.1.1b3 (2017-01-30)
-+++++++++++++++++++++
+++++++++++++++++++++
 
 * Fix SQL command aliases.
 * Support Python 3.6.
 
 0.1.1b2 (2017-01-19)
-+++++++++++++++++++++
+++++++++++++++++++++
 
 * Fix incorrect sql parameter register
 * Expanding ElasticPool while creating elastic-pool

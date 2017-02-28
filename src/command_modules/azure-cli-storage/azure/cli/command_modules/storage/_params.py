@@ -192,6 +192,8 @@ def register_source_uri_arguments(scope):
     register_extra_cli_argument(scope, 'source_container', default=None, help='The container name for the source storage account.', arg_group='Copy Source')
     register_extra_cli_argument(scope, 'source_blob', default=None, help='The blob name for the source storage account.', arg_group='Copy Source')
     register_extra_cli_argument(scope, 'source_snapshot', default=None, help='The blob snapshot for the source storage account.', arg_group='Copy Source')
+    register_extra_cli_argument(scope, 'source_account_name', default=None, help='The storage account name of the source blob.', arg_group='Copy Source')
+    register_extra_cli_argument(scope, 'source_account_key', default=None, help='The storage account key of the source blob.', arg_group='Copy Source')
 
 
 # CUSTOM CHOICE LISTS
@@ -276,9 +278,6 @@ register_cli_argument('storage blob copy', 'container_name', container_name_type
 register_cli_argument('storage blob copy', 'blob_name', blob_name_type, options_list=('--destination-blob', '-b'), help='Name of the destination blob. If the exists, it will be overwritten.')
 register_cli_argument('storage blob copy', 'source_lease_id', arg_group='Copy Source')
 
-register_cli_argument('storage blob copy start-batch', 'prefix', validator=process_blob_copy_batch_namespace)
-# Enable after https://github.com/Azure/azure-cli/issues/1414 is fixed.
-register_cli_argument('storage blob copy start-batch', 'blob_type', ignore_type)
 
 register_cli_argument('storage blob delete', 'delete_snapshots', **enum_choice_list(list(delete_snapshot_types.keys())))
 
@@ -335,6 +334,20 @@ register_cli_argument('storage blob upload-batch', 'content_cache_control', arg_
 register_cli_argument('storage blob upload-batch', 'content_language', arg_group='Content Control')
 register_cli_argument('storage blob upload-batch', 'max_connections', type=int)
 
+# BLOB COPY-BATCH PARAMETERS
+
+with CommandContext('storage blob copy start-batch') as c:
+    c.reg_arg('source_client', ignore_type, validator=get_source_file_or_blob_service_client)
+
+    with c.arg_group('Copy Source') as group:
+        group.reg_extra_arg('source_account_name')
+        group.reg_extra_arg('source_account_key')
+        group.reg_extra_arg('source_uri')
+        group.reg_arg('source_sas')
+        group.reg_arg('source_container')
+        group.reg_arg('source_share')
+        group.reg_arg('prefix', validator=process_blob_copy_batch_namespace)
+
 # TODO: Remove workaround when Python storage SDK issue #190 is fixed.
 for item in ['upload', 'upload-batch']:
     register_cli_argument('storage blob {}'.format(item), 'max_connections', type=int, help='Maximum number of parallel connections to use when the blob size exceeds 64MB.', default=1)
@@ -364,9 +377,9 @@ with CommandContext('storage file download-batch') as c:
 with CommandContext('storage file copy start-batch') as c:
     c.reg_arg('source_client', ignore_type, validator=get_source_file_or_blob_service_client)
 
-    with c.arg_group('Copy Source Arguments') as group:
-        group.reg_extra_arg('source_account')
-        group.reg_extra_arg('source_key')
+    with c.arg_group('Copy Source') as group:
+        group.reg_extra_arg('source_account_name')
+        group.reg_extra_arg('source_account_key')
         group.reg_extra_arg('source_uri')
         group.reg_arg('source_sas')
         group.reg_arg('source_container')

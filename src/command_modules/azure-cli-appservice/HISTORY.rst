@@ -3,6 +3,28 @@
 Release History
 ===============
 
+0.1.1b5 (2017-02-27)
+++++++++++++++++++++
+
+* Expose git token reset command and add more test coverage
+
+
+0.1.1b4 (2017-02-22)
+++++++++++++++++++++
+
+* Documentation fixes.
+
+
+0.1.1b3 (2017-02-17)
+++++++++++++++++++++
+
+* Add backup and restore commands
+* Add App Service SSL commands
+* Fixes bug with adding hostname to web app
+* Prompts for yes / no use the -y option rather than --force
+* Show commands return empty string with exit code 0 for 404 responses
+
+
 0.1.1b2 (2017-01-30)
 ++++++++++++++++++++
 

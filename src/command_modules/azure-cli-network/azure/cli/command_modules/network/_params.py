@@ -194,6 +194,7 @@ register_cli_argument('network application-gateway http-listener', 'frontend_ip'
 register_cli_argument('network application-gateway http-listener', 'frontend_port', help='The name or ID of the frontend port.', completer=get_ag_subresource_completion_list('frontend_ports'))
 register_cli_argument('network application-gateway http-listener', 'ssl_cert', help='The name or ID of the SSL certificate to use.', completer=get_ag_subresource_completion_list('ssl_certificates'))
 register_cli_argument('network application-gateway http-listener', 'protocol', ignore_type)
+register_cli_argument('network application-gateway http-listener', 'host_name', help='Host name to use for multisite gateways.')
 
 register_cli_argument('network application-gateway http-settings', 'cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable cookie based affinity.')
 register_cli_argument('network application-gateway http-settings', 'timeout', help='Request timeout in seconds.')
@@ -222,10 +223,10 @@ register_cli_argument('network application-gateway url-path-map create', 'defaul
 register_cli_argument('network application-gateway url-path-map update', 'default_address_pool', help='The name or ID of the default backend address pool.', validator=process_ag_url_path_map_create_namespace, completer=get_ag_subresource_completion_list('backend_address_pools'))
 register_cli_argument('network application-gateway url-path-map update', 'default_http_settings', help='The name or ID of the default HTTP settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
 
-register_cli_argument('network application-gateway url-path-map', 'rule_name', help='The name of the url-path-map rule.')
-register_cli_argument('network application-gateway url-path-map', 'paths', nargs='+', help='Space separated list of paths to associate with the rule. Valid paths start and end with "/" (ex: "/bar/")')
-register_cli_argument('network application-gateway url-path-map', 'address_pool', help='The name or ID of the backend address pool to use with the created rule.', completer=get_ag_subresource_completion_list('backend_address_pools'))
-register_cli_argument('network application-gateway url-path-map', 'http_settings', help='The name or ID of the HTTP settings to use with the created rule.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
+register_cli_argument('network application-gateway url-path-map', 'rule_name', help='The name of the url-path-map rule.', arg_group='First Rule')
+register_cli_argument('network application-gateway url-path-map', 'paths', nargs='+', help='Space separated list of paths to associate with the rule. Valid paths start and end with "/" (ex: "/bar/")', arg_group='First Rule')
+register_cli_argument('network application-gateway url-path-map', 'address_pool', help='The name or ID of the backend address pool to use with the created rule.', completer=get_ag_subresource_completion_list('backend_address_pools'), arg_group='First Rule')
+register_cli_argument('network application-gateway url-path-map', 'http_settings', help='The name or ID of the HTTP settings to use with the created rule.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'), arg_group='First Rule')
 
 register_cli_argument('network application-gateway url-path-map rule', 'item_name', options_list=('--name', '-n'), help='The name of the url-path-map rule.', completer=get_ag_url_map_rule_completion_list(), id_part='grandchild_name')
 register_cli_argument('network application-gateway url-path-map rule create', 'item_name', options_list=('--name', '-n'), help='The name of the url-path-map rule.', completer=None)
@@ -501,7 +502,7 @@ register_extra_cli_argument('network vnet-gateway update', 'address_prefixes', o
 
 # VPN connection
 register_cli_argument('network vpn-connection', 'virtual_network_gateway_connection_name', options_list=('--name', '-n'), metavar='NAME', id_part='name', help='Connection name.')
-register_cli_argument('network vpn-connection', 'shared_key', validator=load_cert_file('shared_key'), type=file_type, completer=FilesCompleter(), help='Shared IPSec key, base64 contents of the certificate file or file path.')
+register_cli_argument('network vpn-connection', 'shared_key', help='Shared IPSec key.')
 
 register_cli_argument('network vpn-connection create', 'connection_name', options_list=('--name', '-n'), metavar='NAME', help='Connection name.')
 register_cli_argument('network vpn-connection create', 'vnet_gateway1', validator=process_vpn_connection_create_namespace)
@@ -571,6 +572,7 @@ register_cli_argument('network dns record-set create', 'if_none_match', help='Cr
 for item in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
     register_cli_argument('network dns record-set {} add-record'.format(item), 'record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
     register_cli_argument('network dns record-set {} remove-record'.format(item), 'record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone.')
+    register_cli_argument('network dns record-set {} remove-record'.format(item), 'keep_empty_record_set', action='store_true', help='Keep the empty record set if the last record is removed.')
 register_cli_argument('network dns record-set cname set-record', 'record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
 
 register_cli_argument('network dns record-set soa', 'relative_record_set_name', ignore_type, default='@')

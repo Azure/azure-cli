@@ -121,7 +121,7 @@ create_ag_backend_address_pool.__doc__ = AppGatewayOperations.create_or_update._
 
 def update_ag_backend_address_pool(instance, parent, item_name, servers=None): # pylint: disable=unused-argument
     if servers is not None:
-        instance.servers = servers
+        instance.backend_addresses = servers
     return parent
 
 def create_ag_frontend_ip_configuration(resource_group_name, application_gateway_name, item_name,
@@ -131,12 +131,16 @@ def create_ag_frontend_ip_configuration(resource_group_name, application_gateway
     from azure.mgmt.network.models import ApplicationGatewayFrontendIPConfiguration
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    new_config = ApplicationGatewayFrontendIPConfiguration(
-        name=item_name,
-        private_ip_address=private_ip_address if private_ip_address else None,
-        private_ip_allocation_method='static' if private_ip_address else 'dynamic',
-        public_ip_address=SubResource(public_ip_address) if public_ip_address else None,
-        subnet=SubResource(subnet) if subnet else None)
+    if public_ip_address:
+        new_config = ApplicationGatewayFrontendIPConfiguration(
+            name=item_name,
+            public_ip_address=SubResource(public_ip_address))
+    else:
+        new_config = ApplicationGatewayFrontendIPConfiguration(
+            name=item_name,
+            private_ip_address=private_ip_address if private_ip_address else None,
+            private_ip_allocation_method='Static' if private_ip_address else 'Dynamic',
+            subnet=SubResource(subnet))
     _upsert(ag.frontend_ip_configurations, new_config, 'name', item_name)
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
@@ -151,7 +155,7 @@ def update_ag_frontend_ip_configuration(instance, parent, item_name, public_ip_a
         instance.subnet = SubResource(subnet)
     if private_ip_address is not None:
         instance.private_ip_address = private_ip_address
-        instance.private_ip_address_allocation = 'static'
+        instance.private_ip_allocation_method = 'Static'
     return parent
 update_ag_frontend_ip_configuration.__doc__ = AppGatewayOperations.create_or_update.__doc__
 
@@ -171,7 +175,8 @@ def update_ag_frontend_port(instance, parent, item_name, port=None): # pylint: d
     return parent
 
 def create_ag_http_listener(resource_group_name, application_gateway_name, item_name,
-                            frontend_ip, frontend_port, ssl_cert=None, no_wait=False):
+                            frontend_ip, frontend_port, host_name=None, ssl_cert=None,
+                            no_wait=False):
     from azure.mgmt.network.models import ApplicationGatewayHttpListener
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -179,6 +184,8 @@ def create_ag_http_listener(resource_group_name, application_gateway_name, item_
         name=item_name,
         frontend_ip_configuration=SubResource(frontend_ip),
         frontend_port=SubResource(frontend_port),
+        host_name=host_name,
+        require_server_name_indication=True if ssl_cert and host_name else None,
         protocol='https' if ssl_cert else 'http',
         ssl_certificate=SubResource(ssl_cert) if ssl_cert else None)
     _upsert(ag.http_listeners, new_listener, 'name', item_name)
@@ -186,15 +193,22 @@ def create_ag_http_listener(resource_group_name, application_gateway_name, item_
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 def update_ag_http_listener(instance, parent, item_name, frontend_ip=None, frontend_port=None, # pylint: disable=unused-argument
-                            protocol=None, ssl_cert=None):
+                            host_name=None, ssl_cert=None):
     if frontend_ip is not None:
         instance.frontend_ip_configuration = SubResource(frontend_ip)
     if frontend_port is not None:
         instance.frontend_port = SubResource(frontend_port)
-    if protocol is not None:
-        instance.protocol = protocol
     if ssl_cert is not None:
-        instance.ssl_certificate = SubResource(ssl_cert)
+        if ssl_cert:
+            instance.ssl_certificate = SubResource(ssl_cert)
+            instance.protocol = 'Https'
+        else:
+            instance.ssl_certificate = None
+            instance.protocol = 'Http'
+    if host_name is not None:
+        instance.host_name = host_name or None
+    instance.require_server_name_indication = instance.host_name and \
+        instance.protocol.lower() == 'https'
     return parent
 
 def create_ag_backend_http_settings_collection(resource_group_name, application_gateway_name,
@@ -227,7 +241,7 @@ def update_ag_backend_http_settings_collection(instance, parent, item_name, port
     if cookie_based_affinity is not None:
         instance.cookie_based_affinity = cookie_based_affinity
     if timeout is not None:
-        instance.timeout = timeout
+        instance.request_timeout = timeout
     return parent
 
 def create_ag_probe(resource_group_name, application_gateway_name, item_name, protocol, host,
@@ -259,8 +273,8 @@ def update_ag_probe(instance, parent, item_name, protocol=None, host=None, path=
         instance.interval = interval
     if timeout is not None:
         instance.timeout = timeout
-    if threshold is None:
-        instance.threshold = threshold
+    if threshold is not None:
+        instance.unhealthy_threshold = threshold
     return parent
 
 def create_ag_request_routing_rule(resource_group_name, application_gateway_name, item_name,
@@ -1286,7 +1300,7 @@ def update_local_gateway(instance, gateway_ip_address=None, local_address_prefix
     if gateway_ip_address is not None:
         instance.gateway_ip_address = gateway_ip_address
     if local_address_prefix is not None:
-        instance.local_address_prefix = local_address_prefix
+        instance.local_network_address_space.address_prefixes = local_address_prefix
     if tags is not None:
         instance.tags = tags
     return instance
@@ -1388,9 +1402,9 @@ def create_dns_zone(client, resource_group_name, zone_name, location='global', t
 def list_dns_zones(resource_group_name=None):
     ncf = get_mgmt_service_client(DnsManagementClient).zones
     if resource_group_name:
-        return ncf.list_in_resource_group(resource_group_name)
+        return ncf.list_by_resource_group(resource_group_name)
     else:
-        return ncf.list_in_subscription()
+        return ncf.list()
 
 def create_dns_record_set(resource_group_name, zone_name, record_set_name, record_set_type,
                           metadata=None, if_match=None, if_none_match=None, ttl=3600):
@@ -1405,7 +1419,7 @@ def list_dns_record_set(client, resource_group_name, zone_name, record_type=None
     if record_type:
         return client.list_by_type(resource_group_name, zone_name, record_type)
     else:
-        return client.list_all_in_resource_group(resource_group_name, zone_name)
+        return client.list_by_dns_zone(resource_group_name, zone_name)
 
 def update_dns_record_set(instance, metadata=None):
     if metadata is not None:
@@ -1434,7 +1448,7 @@ def export_zone(resource_group_name, zone_name):
     from time import localtime, strftime
 
     client = get_mgmt_service_client(DnsManagementClient)
-    record_sets = client.record_sets.list_all_in_resource_group(resource_group_name, zone_name)
+    record_sets = client.record_sets.list_by_dns_zone(resource_group_name, zone_name)
 
     zone_obj = OrderedDict({
         '$origin': zone_name.rstrip('.') + '.',
@@ -1529,6 +1543,7 @@ def _build_record(data):
 # pylint: disable=too-many-statements
 def import_zone(resource_group_name, zone_name, file_name):
     from azure.cli.core._util import read_file_content
+    import sys
     file_text = read_file_content(file_name)
     zone_obj = parse_zone_file(file_text, zone_name)
 
@@ -1568,7 +1583,7 @@ def import_zone(resource_group_name, zone_name, file_name):
     cum_records = 0
 
     client = get_mgmt_service_client(DnsManagementClient)
-    print('== BEGINNING ZONE IMPORT: {} ==\n'.format(zone_name))
+    print('== BEGINNING ZONE IMPORT: {} ==\n'.format(zone_name), file=sys.stderr)
     client.zones.create_or_update(resource_group_name, zone_name, Zone('global'))
     for rs in record_sets.values():
 
@@ -1588,16 +1603,17 @@ def import_zone(resource_group_name, zone_name, file_name):
             root_ns.ttl = rs.ttl
             rs = root_ns
             rs.type = rs.type.rsplit('/', 1)[1]
-        print("Importing {} records of type '{}' and name '{}'"
-              .format(record_count, rs.type, rs.name))
         try:
             client.record_sets.create_or_update(
                 resource_group_name, zone_name, rs.name, rs.type, rs)
             cum_records += record_count
+            print("({}/{}) Imported {} records of type '{}' and name '{}'"
+                  .format(cum_records, total_records, record_count, rs.type, rs.name),
+                  file=sys.stderr)
         except CloudError as ex:
             logger.error(ex)
     print("\n== {}/{} RECORDS IMPORTED SUCCESSFULLY: '{}' =="
-          .format(cum_records, total_records, zone_name))
+          .format(cum_records, total_records, zone_name), file=sys.stderr)
 
 
 def add_dns_aaaa_record(resource_group_name, zone_name, record_set_name, ipv6_address):
@@ -1675,55 +1691,61 @@ def add_dns_txt_record(resource_group_name, zone_name, record_set_name, value):
     assert original_len == final_len
     return _add_save_record(record, record_type, record_set_name, resource_group_name, zone_name)
 
-def remove_dns_aaaa_record(resource_group_name, zone_name, record_set_name, ipv6_address):
+def remove_dns_aaaa_record(resource_group_name, zone_name, record_set_name, ipv6_address,
+                           keep_empty_record_set=False):
     record = AaaaRecord(ipv6_address)
     record_type = 'aaaa'
-    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name)
+    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
+                          keep_empty_record_set=keep_empty_record_set)
 
-def remove_dns_a_record(resource_group_name, zone_name, record_set_name, ipv4_address):
+def remove_dns_a_record(resource_group_name, zone_name, record_set_name, ipv4_address,
+                        keep_empty_record_set=False):
     record = ARecord(ipv4_address)
     record_type = 'a'
-    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name)
+    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
+                          keep_empty_record_set=keep_empty_record_set)
 
-def remove_dns_cname_record(resource_group_name, zone_name, record_set_name, cname):
+def remove_dns_cname_record(resource_group_name, zone_name, record_set_name, cname,
+                            keep_empty_record_set=False):
     record = CnameRecord(cname)
     record_type = 'cname'
     return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
-                          is_list=False)
+                          is_list=False, keep_empty_record_set=keep_empty_record_set)
 
-def remove_dns_mx_record(resource_group_name, zone_name, record_set_name, preference, exchange):
+def remove_dns_mx_record(resource_group_name, zone_name, record_set_name, preference, exchange,
+                         keep_empty_record_set=False):
     record = MxRecord(int(preference), exchange)
     record_type = 'mx'
-    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name)
+    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
+                          keep_empty_record_set=keep_empty_record_set)
 
-def remove_dns_ns_record(resource_group_name, zone_name, record_set_name, dname):
+def remove_dns_ns_record(resource_group_name, zone_name, record_set_name, dname,
+                         keep_empty_record_set=False):
     record = NsRecord(dname)
     record_type = 'ns'
-    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name)
+    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
+                          keep_empty_record_set=keep_empty_record_set)
 
-def remove_dns_ptr_record(resource_group_name, zone_name, record_set_name, dname):
+def remove_dns_ptr_record(resource_group_name, zone_name, record_set_name, dname,
+                          keep_empty_record_set=False):
     record = PtrRecord(dname)
     record_type = 'ptr'
-    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name)
-
-def remove_dns_soa_record(resource_group_name, zone_name, record_set_name, host, email,
-                          serial_number, refresh_time, retry_time, expire_time, minimum_ttl):
-    record = SoaRecord(host, email, serial_number, refresh_time, retry_time, expire_time,
-                       minimum_ttl)
-    record_type = 'soa'
     return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
-                          is_list=False)
+                          keep_empty_record_set=keep_empty_record_set)
 
 def remove_dns_srv_record(resource_group_name, zone_name, record_set_name, priority, weight,
-                          port, target):
+                          port, target, keep_empty_record_set=False):
     record = SrvRecord(priority, weight, port, target)
     record_type = 'srv'
-    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name)
+    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
+                          keep_empty_record_set=keep_empty_record_set)
 
-def remove_dns_txt_record(resource_group_name, zone_name, record_set_name, value):
+def remove_dns_txt_record(resource_group_name, zone_name, record_set_name, value,
+                          keep_empty_record_set=False):
     record = TxtRecord(value)
     record_type = 'txt'
-    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name)
+    return _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
+                          keep_empty_record_set=keep_empty_record_set)
 
 def _add_record(record_set, record, record_type, is_list=False):
 
@@ -1752,7 +1774,7 @@ def _add_save_record(record, record_type, record_set_name, resource_group_name, 
                                 record_type, record_set)
 
 def _remove_record(record, record_type, record_set_name, resource_group_name, zone_name,
-                   is_list=True):
+                   keep_empty_record_set, is_list=True):
     ncf = get_mgmt_service_client(DnsManagementClient).record_sets
     record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     record_property = _type_to_property_name(record_type)
@@ -1768,8 +1790,17 @@ def _remove_record(record, record_type, record_set_name, resource_group_name, zo
     else:
         setattr(record_set, record_property, None)
 
-    return ncf.create_or_update(resource_group_name, zone_name, record_set_name,
-                                record_type, record_set)
+    if is_list:
+        records_remaining = len(getattr(record_set, record_property))
+    else:
+        records_remaining = 1 if getattr(record_set, record_property) is not None else 0
+
+    if not records_remaining and not keep_empty_record_set:
+        logger.info('Removing empty %s record set: %s', record_type, record_set_name)
+        return ncf.delete(resource_group_name, zone_name, record_set_name, record_type)
+    else:
+        return ncf.create_or_update(resource_group_name, zone_name, record_set_name,
+                                    record_type, record_set)
 
 def dict_matches_filter(d, filter_dict):
     sentinel = object()

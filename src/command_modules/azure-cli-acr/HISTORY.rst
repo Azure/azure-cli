@@ -3,6 +3,20 @@
 Release History
 ===============
 
+0.1.1b4 (2017-02-22)
+^^^^^^^^^^^^^^^^^^^^
+
+* Documentation fixes.
+
+
+0.1.1b3 (2017-02-17)
+^^^^^^^^^^^^^^^^^^^^
+
+* Polish error messages for repository/credential commands
+* Storage account sku validation
+* Show commands return empty string with exit code 0 for 404 responses
+
+
 0.1.1b2 (2017-01-30)
 ^^^^^^^^^^^^^^^^^^^^
 

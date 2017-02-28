@@ -8,6 +8,7 @@
 
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
+from azure.cli.core._util import empty_on_404
 
 from ._client_factory import keyvault_client_factory
 from ._command_type import cli_keyvault_data_plane_command
@@ -20,7 +21,7 @@ mgmt_path = 'azure.mgmt.keyvault.operations.vaults_operations#{}'
 factory = lambda args: keyvault_client_factory(**args).vaults
 cli_command(__name__, 'keyvault create', custom_path.format('create_keyvault'), factory)
 cli_command(__name__, 'keyvault list', custom_path.format('list_keyvault'), factory)
-cli_command(__name__, 'keyvault show', mgmt_path.format('VaultsOperations.get'), factory)
+cli_command(__name__, 'keyvault show', mgmt_path.format('VaultsOperations.get'), factory, exception_handler=empty_on_404)
 cli_command(__name__, 'keyvault delete', mgmt_path.format('VaultsOperations.delete'), factory)
 
 cli_command(__name__, 'keyvault set-policy', custom_path.format('set_policy'), factory)

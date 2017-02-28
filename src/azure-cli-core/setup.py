@@ -9,7 +9,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup
 
-VERSION = "0.1.1b3+dev"
+VERSION = "2.0.0+dev"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -30,7 +30,7 @@ else:
         sys.exit(1)
 
 CLASSIFIERS = [
-    'Development Status :: 4 - Beta',
+    'Development Status :: 5 - Production/Stable',
     'Intended Audience :: Developers',
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
@@ -49,8 +49,6 @@ DEPENDENCIES = [
     'applicationinsights',
     'argcomplete>=1.8.0',
     'azure-cli-nspkg',
-    'azure-mgmt-trafficmanager==0.30.0rc6',
-    'azure-mgmt-dns==0.30.0rc6',
     'colorama',
     'jmespath',
     'msrest>=0.4.4',

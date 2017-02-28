@@ -14,6 +14,28 @@ __all__ = ['print_detailed_help', 'print_welcome_message', 'GroupHelpFile', 'Com
 
 FIRST_LINE_PREFIX = ': '
 
+PRIVACY_STATEMENT = """
+Welcome to Azure CLI!
+---------------------
+Use `az -h` to see available commands or go to https://aka.ms/cli.
+
+Telemetry
+---------
+The Azure CLI collects usage data in order to improve your experience.
+The data is anonymous and does not include commandline argument values.
+The data is collected by Microsoft.
+
+You can change your telemetry settings with `az configure`.
+"""
+
+
+def show_privacy_statement():
+    from azure.cli.core._config import az_config, set_global_config_value
+    first_ran = az_config.getboolean('core', 'first_run', fallback=False)
+    if not first_ran:
+        print(PRIVACY_STATEMENT, file=sys.stdout)
+        set_global_config_value('core', 'first_run', 'yes')
+
 
 def show_help(nouns, parser, is_group):
     delimiters = ' '.join(nouns)
@@ -31,6 +53,7 @@ def show_help(nouns, parser, is_group):
 
 
 def show_welcome(parser):
+    show_privacy_statement()
     print_welcome_message()
 
     help_file = GroupHelpFile('', parser)

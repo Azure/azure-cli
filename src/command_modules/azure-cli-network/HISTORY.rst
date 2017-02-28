@@ -3,6 +3,29 @@
 Release History
 ===============
 
+2.0.0 (2017-02-27)
+++++++++++++++++++
+
+* GA release.
+
+
+0.1.2rc2 (2017-02-22)
++++++++++++++++++++++
+
+* Fix VPN connection create shared-key validator.
+* Add delete confirmation for DNS record-set delete.
+* Fix bug with local address prefixes.
+* Documentation updates.
+
+
+0.1.2rc1 (2017-02-17)
++++++++++++++++++++++
+
+* DNS/Application-Gateway Fixes
+* Show commands return empty string with exit code 0 for 404 responses (#2117)'
+* DNS Zone Import/Export (#2040)
+* Restructure DNS Commands (#2112)
+
 0.1.1b2 (2017-01-30)
 +++++++++++++++++++++
 

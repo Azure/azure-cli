@@ -3,6 +3,18 @@
 Release History
 ===============
 
+0.1.1b5 (2017-02-22)
++++++++++++++++++++++
+
+* Documentation updates.
+
+
+0.1.1b4 (2017-02-17)
++++++++++++++++++++++
+
+* Show commands return empty string with exit code 0 for 404 responses
+
+
 0.1.1b3 (2017-01-30)
 +++++++++++++++++++++
 
@@ -10,6 +22,7 @@ Release History
 * Add path expansion to file type parameters.
 * Support UTC datettime with seconds as accepted format. (e.g. 2017-12-31T01:11:59Z).
 * Support Python 3.6.
+
 
 0.1.1b2 (2017-01-19)
 +++++++++++++++++++++

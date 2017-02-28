@@ -94,9 +94,18 @@ class NetworkAppGatewayExistingSubnetScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
     def body(self):
+        from azure.cli.core._util import CLIError
         rg = self.resource_group
         vnet = self.cmd('network vnet create -g {} -n vnet2 --subnet-name subnet1'.format(rg))
         subnet_id = vnet['newVNet']['subnets'][0]['id']
+
+        with self.assertRaises(CLIError):
+            # make sure it fails
+            self.cmd('network application-gateway create -g {} -n ag2 --subnet {} --subnet-address-prefix 10.0.0.0/28'.format(rg, subnet_id), checks=[
+                JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+                JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.subnet.id', subnet_id)
+            ])
+        # now verify it succeeds
         self.cmd('network application-gateway create -g {} -n ag2 --subnet {} --servers 172.0.0.1 www.mydomain.com'.format(rg, subnet_id), checks=[
             JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
             JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.subnet.id', subnet_id)
@@ -165,7 +174,7 @@ class NetworkAppGatewayPublicIpScenarioTest(ResourceGroupVCRTestBase):
     def body(self):
         rg = self.resource_group
         public_ip_name = 'publicip4'
-        self.cmd('network application-gateway create -g {} -n test4 --subnet subnet1 --vnet-name vnet4 --public-ip-address {}'.format(rg, public_ip_name), checks=[
+        self.cmd('network application-gateway create -g {} -n test4 --subnet subnet1 --vnet-name vnet4 --vnet-address-prefix 10.0.0.1/16 --subnet-address-prefix 10.0.0.1/28 --public-ip-address {}'.format(rg, public_ip_name), checks=[
             JMESPathCheck("applicationGateway.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{}')".format(public_ip_name), True),
             JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic')
         ])
@@ -1186,12 +1195,15 @@ class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
         zone_name = 'myzone.com'
         rg = self.resource_group
 
+        self.cmd('network dns zone list')  # just verify is works (no Exception raised)
         self.cmd('network dns zone create -n {} -g {}'.format(zone_name, rg))
+        self.cmd('network dns zone list -g {}'.format(rg),
+            checks=JMESPathCheck('length(@)', 1))
 
         base_record_sets = 2
         self.cmd('network dns zone show -n {} -g {}'.format(zone_name, rg), checks=[
             JMESPathCheck('numberOfRecordSets', base_record_sets)
-            ])
+        ])
 
         args = {
             'a': '--ipv4-address 10.0.0.10',
@@ -1252,15 +1264,17 @@ class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('network dns record-set {0} remove-record -g {1} --zone-name {2} --record-set-name myrs{0} {3}'
                      .format('a', rg, zone_name, '--ipv4-address 10.0.0.11'))
-        self.cmd('network dns record-set {0} show -n myrs{0} -g {1} --zone-name {2}'
-                 .format('a', rg, zone_name), checks=[
-                     JMESPathCheck('arecords', None)
-                     ])
 
-        self.cmd('network dns record-set {0} delete -n myrs{0} -g {1} --zone-name {2}'
+        self.cmd('network dns record-set {0} show -n myrs{0} -g {1} --zone-name {2}'.format('a', rg, zone_name),
+            checks=NoneCheck())
+
+        self.cmd('network dns record-set {0} delete -n myrs{0} -g {1} --zone-name {2} -y'
                  .format('a', rg, zone_name))
         self.cmd('network dns record-set {0} show -n myrs{0} -g {1} --zone-name {2}'
                  .format('a', rg, zone_name), allowed_exceptions='does not exist in resource group')
+
+        self.cmd('network dns zone delete -g {} -n {} -y'.format(rg, zone_name),
+            checks=JMESPathCheck('status', 'Succeeded'))
 
 class NetworkZoneImportExportTest(ResourceGroupVCRTestBase):
 

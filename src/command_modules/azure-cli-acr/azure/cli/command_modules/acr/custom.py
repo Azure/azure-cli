@@ -134,7 +134,7 @@ def acr_update_custom(instance,
                       storage_account_name=None,
                       tags=None):
     if admin_enabled is not None:
-        instance.admin_user_enabled = admin_enabled == 'true'
+        instance.admin_user_enabled = admin_enabled == ['true']
 
     if tags is not None:
         instance.tags = tags

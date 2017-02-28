@@ -7,9 +7,21 @@ from azure.cli.core.help_files import helps
 
 helps['acs'] = """
      type: group
-     short-summary: Commands to manage Azure container services
- """
+     short-summary: Manage Azure container services.
+"""
 helps['acs dcos'] = """
     type: group
-    short-summary: Commands to manage a DCOS orchestrated Azure container service.
+    short-summary: Manage a DCOS orchestrated Azure container service.
+"""
+helps['acs kubernetes'] = """
+    type: group
+    short-summary: Manage a Kubernetes orchestrated Azure Container service.
+"""
+helps['acs scale'] = """
+    type: command
+    short-summary: Change the private agent count of a container service.
+"""
+helps['acs install-cli'] = """
+    type: command
+    short-summary: Download the DCOS/Kubernetes command line.
 """

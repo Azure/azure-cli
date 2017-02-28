@@ -20,10 +20,7 @@ def install_modules():
 
     for name, path in all_modules:
         try:
-            if os.listdir(path):
-                subprocess.check_call(INSTALL_COMMAND.format(path).split())
-            else:
-                print('{0} is empty... skipping it.'.format(path))
+            subprocess.check_call(INSTALL_COMMAND.format(path).split())
         except subprocess.CalledProcessError as err:
             # exit code is not zero
             failures.append('Failed to install {}. Error message: {}'.format(name, err.output))

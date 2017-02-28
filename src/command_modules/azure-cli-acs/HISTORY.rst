@@ -3,6 +3,28 @@
 Release History
 ===============
 
+2.0.0 (2017-02-27)
+++++++++++++++++++
+
+* GA release
+* Add customizable master_count for Kubernetes cluster create
+
+
+0.1.2rc2 (2017-02-22)
++++++++++++++++++++++
+
+* Rev compute package to 0.33.rc1 for new API version.
+* Documentation fixes.
+
+
+0.1.2rc1 (2017-02-17)
++++++++++++++++++++++
+
+* Move acs commands from vm to acs module
+* Rev kubectl default version
+* Show commands return empty string with exit code 0 for 404 responses
+
+
 0.1.1b3 (2017-02-08)
 +++++++++++++++++++++
 

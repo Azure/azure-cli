@@ -6,17 +6,21 @@
 from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 #pylint: disable=line-too-long
+helps['lock'] = """
+    type: group
+    short-summary: Manage Azure locks.
+"""
 helps['policy'] = """
     type: group
-    short-summary: Commands to manage resource policies
+    short-summary: Manage resource policies.
 """
 helps['policy definition'] = """
     type: group
-    short-summary: manage resource policy definitions
+    short-summary: Manage resource policy definitions.
 """
 helps['policy definition create'] = """
             type: command
-            short-summary: Creates a policy definition
+            short-summary: Create a policy definition.
             parameters:
                 - name: --rules
                   type: string
@@ -38,128 +42,166 @@ helps['policy definition create'] = """
             """
 helps['policy definition delete'] = """
     type: command
-    short-summary: deletes a policy definition
+    short-summary: Delete a policy definition.
 """
 helps['policy definition update'] = """
     type: command
-    short-summary: updates a policy definition
+    short-summary: Update a policy definition.
 """
 helps['policy definition list'] = """
     type: command
-    short-summary: lists policy definitions
+    short-summary: List policy definitions.
 """
 helps['policy assignment'] = """
     type: group
-    short-summary: manage resource policy assignments
+    short-summary: Manage resource policy assignments.
 """
 helps['policy assignment create'] = """
     type: command
-    short-summary: creates a resource policy assignment
+    short-summary: Create a resource policy assignment.
 """
 helps['policy assignment delete'] = """
     type: command
-    short-summary: deletes a resource policy assignment
+    short-summary: Delete a resource policy assignment.
 """
 helps['policy assignment show'] = """
     type: command
-    short-summary: shows a resource policy assignment
+    short-summary: Show a resource policy assignment.
 """
 helps['policy assignment list'] = """
     type: command
-    short-summary: list resource policy assignments
+    short-summary: list resource policy assignments.
 """
 helps['resource'] = """
     type: group
-    short-summary: Generic commands to manage Azure resources
+    short-summary: Manage Azure resources.
 """
 helps['resource list'] = """
     type: command
-    short-summary: list resource
+    short-summary: List resources.
     examples:
-        - name: list all resource in a region
+        - name: List all resource in a region.
           text: >
             az resource list --location westus
-        - name: list resource with a name
+        - name: List resource using a name.
           text: >
             az resource list --name thename
-        - name: list resources with a tag
+        - name: List resources using a tag.
           text: >
              az resource list --tag something
-        - name: list resource with a tag with a particular prefix
+        - name: List resources using a tag with a particular prefix.
           text: >
             az resource list --tag some*
-        - name: list resource with a tag value
+        - name: List resources using a tag value.
           text: >
             az resource list --tag something=else
 """
 
 helps['resource show'] = """
     type: command
-    short-summary: display a resource detail
-    long-summary: Get details of a resource like /subscriptions/0000/resourceGroups/myGroup/providers/Microsoft.Provider/resA/myA/resB/myB/resC/myC
+    short-summary: Get information about a resource.
+    long-summary: For example /subscriptions/0000/resourceGroups/MyResourceGroup/providers/Microsoft.Provider/ResA/MyA/ResB/MyB/resC/MyC.
     examples:
-        - name: show a virtual machine
+        - name: Show a virtual machine.
           text: >
-            az vm show -g mygroup -n myvm --resource-type "Microsoft.Compute/virtualMachines"
-        - name: show a webapp using resource id
+            az vm show -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
+        - name: Show a web app using a resource identifier.
           text: >
-            az resource show --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myGroup/providers/Microsoft.Web/sites/myWebapp
-        - name: show a subnet
+            az resource show --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp
+        - name: Show a subnet.
           text: >
-            az resource show -g mygroup -n mysubnet --namespace microsoft.network --parent virtualnetworks/myvnet --resource-type subnets
-        - name: show a subnet using id
+            az resource show -g MyResourceGroup -n MySubnet --namespace microsoft.network --parent virtualnetworks/MyVnet --resource-type subnets
+        - name: Show a subnet using a resource identifier.
           text: >
-            az resource show --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myGroup/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/mysubnet
-        - name: show an app gateway path rule
+            az resource show --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/MySubnet
+        - name: Show an application gateway path rule.
           text: >
-            az resource show -g myGroup --namespace Microsoft.Network --parent applicationGateways/ag1/urlPathMaps/map1 --resource-type pathRules -n rule1  
+            az resource show -g MyResourceGroup --namespace Microsoft.Network --parent applicationGateways/ag1/urlPathMaps/map1 --resource-type pathRules -n rule1  
 """
 
 helps['resource delete'] = """
     type: command
-    short-summary: delete a resource. Reference the examples for help with arguments.
-    long-summary: delete a resource like /subscriptions/0000/resourceGroups/myGroup/providers/Microsoft.Provider/resA/myA/resB/myB/resC/myC
+    short-summary: Delete a resource. Reference the examples for help with arguments.
+    long-summary: For example, /subscriptions/0000/resourceGroups/MyResourceGroup/providers/Microsoft.Provider/ResA/MyA/ResB/MyB/ResC/MyC.
     examples:
-        - name: delete a virtual machine
+        - name: Delete a virtual machine.
           text: >
-            az vm delete -g mygroup -n myvm --resource-type "Microsoft.Compute/virtualMachines"
-        - name: delete a webapp using resource id
+            az vm delete -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
+        - name: Delete a web app using a resource identifier.
           text: >
-            az resource delete --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myGroup/providers/Microsoft.Web/sites/myWebapp
-        - name: delete a subnet using id
+            az resource delete --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp
+        - name: Delete a subnet using a resource identifier.
           text: >
-            az resource delete --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myGroup/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/mysubnet
+            az resource delete --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/MySubnet
 """
 
 helps['resource tag'] = """
     type: command
-    short-summary: tag a resource. Reference the examples for help with arguments.
-    long-summary: tag a resource like /subscriptions/0000/resourceGroups/myGroup/providers/Microsoft.Provider/resA/myA/resB/myB/resC/myC
+    short-summary: Tag a resource. Reference the examples for help with arguments.
+    long-summary: For example, /subscriptions/0000/resourceGroups/MyResourceGroup/providers/Microsoft.Provider/ResA/MyA/ResB/MyB/resC/MyC.
     examples:
-        - name: tag a virtual machine
+        - name: Tag a virtual machine.
           text: >
-            az resource tag --tags vmlist=vm1 -g mygroup -n myvm --resource-type "Microsoft.Compute/virtualMachines"
-        - name: tag a webapp using resource id
+            az resource tag --tags vmlist=vm1 -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
+        - name: Tag a web app using a resource identifier.
           text: >
-            az resource tag --tags vmlist=vm1 --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myGroup/providers/Microsoft.Web/sites/myWebapp
+            az resource tag --tags vmlist=vm1 --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp
 """
 
 helps['resource update'] = """
     type: command
-    short-summary: update a resource
+    short-summary: Update a resource.
 """
 
 helps['feature'] = """
     type: group
-    short-summary: Commands to manage resource provider features, such as previews
+    short-summary: Manage resource provider features, such as previews.
 """
+
 helps['group'] = """
     type: group
-    short-summary: Commands to manage resource groups
+    short-summary: Manage resource groups.
 """
+
+helps['group exists'] = """
+    type: command
+    short-summary: Checks whether resource group exists.
+    examples:
+        - name: Check group existence.
+          text: >
+            az group exists -n MyResourceGroup
+"""
+
+helps['group create'] = """
+    type: command
+    short-summary: Create a new resource group.
+    examples:
+        - name: Create a resource group in West US.
+          text: >
+            az group create -l westus -n MyResourceGroup
+"""
+
+helps['group delete'] = """
+    type: command
+    short-summary: Delete resource group.
+    examples:
+        - name: Delete a resource group.
+          text: >
+            az group delete -n MyResourceGroup
+"""
+
+helps['group list'] = """
+    type: command
+    short-summary: List resource groups, optionally filtered by a tag.
+    examples:
+        - name: List all resource groups for West US.
+          text: >
+            az group list --query "[?location=='westus']"
+"""
+
 helps['group update'] = """
-    type: group
-    short-summary: Update a resource group
+    type: command
+    short-summary: Update a resource group.
 """
 helps['group wait'] = """
     type: command
@@ -167,26 +209,26 @@ helps['group wait'] = """
 """
 helps['group deployment'] = """
     type: group
-    short-summary: Commands to execute or manage ARM deployments
+    short-summary: Manage Azure Resource Manager deployments.
 """
 helps['group deployment create'] = """
     type: command
-    short-summary: start a deployment
+    short-summary: Start a deployment.
     examples:
-        - name: create a deployment from a remote template file
+        - name: Create a deployment from a remote template file.
           text: >
-            az group deployment create -g mygroup --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
-        - name: create a deployment from a local template file and use parameter values in string 
+            az group deployment create -g MyResourceGroup --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+        - name: Create a deployment from a local template file and use parameter values in a string. 
           text: >
-            az group deployment create -g mygroup --template-file azuredeploy.json --parameters "{\\"location\\": {\\"value\\": \\"westus\\"}}"
+            az group deployment create -g MyResourceGroup --template-file azuredeploy.json --parameters "{\\"location\\": {\\"value\\": \\"westus\\"}}"
 """
 helps['group deployment export'] = """
     type: command
-    short-summary: Exports the template used for specified deployment
+    short-summary: Export the template used for the specified deployment.
 """
 helps['group deployment validate'] = """
     type: command
-    short-summary: Validates whether the specified template is syntactically correct and will be accepted by Azure Resource Manager
+    short-summary: Validate whether the specified template is syntactically correct and will be accepted by Azure Resource Manager.
 """
 helps['group deployment wait'] = """
     type: command
@@ -194,21 +236,21 @@ helps['group deployment wait'] = """
 """
 helps['group deployment operation'] = """
     type: group
-    short-summary: Commands to manage deployment operations
+    short-summary: Manage deployment operations.
 """
 helps['provider'] = """
     type: group
-    short-summary: Manage resource providers
+    short-summary: Manage resource providers.
 """
 helps['provider register'] = """
     type: command
-    short-summary: Register a provider
+    short-summary: Register a provider.
 """
 helps['provider unregister'] = """
     type: command
-    short-summary: Unregister a provider
+    short-summary: Unregister a provider.
 """
 helps['tag'] = """
     type: group
-    short-summary: Manage resource tags
+    short-summary: Manage resource tags.
 """

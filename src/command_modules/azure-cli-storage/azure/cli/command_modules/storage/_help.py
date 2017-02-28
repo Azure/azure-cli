@@ -9,8 +9,8 @@ from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
 helps['storage entity insert'] = """
     type: command
-    short-summary: Insert a new entity into the table.
-    long-summary: Inserts a new entity into the table. When inserting an entity into a table, you must specify values for the PartitionKey and RowKey system properties. Together, these properties form the primary key and must be unique within the table. Both the PartitionKey and RowKey values may be up to 64 KB in size. If you are using an integer value as a key, you should convert the integer to a fixed-width string, because they are canonically sorted. For example, you should convert the value 1 to 0000001 to ensure proper sorting.
+    short-summary: Insert an entity into the table.
+    long-summary: Inserts an entity into the table. When inserting an entity into a table, you must specify values for the PartitionKey and RowKey system properties. Together, these properties form the primary key and must be unique within the table. Both the PartitionKey and RowKey values may be up to 64 KB in size. If you are using an integer value as a key, you should convert the integer to a fixed-width string, because they are canonically sorted. For example, you should convert the value 1 to 0000001 to ensure proper sorting.
     parameters:
         - name: --table-name -t
           type: string
@@ -25,9 +25,112 @@ helps['storage entity insert'] = """
           short-summary: The server timeout, expressed in seconds.
 """
 
+helps['storage blob upload'] = """
+    type: command
+    short-summary: Upload a specified file to a storage blob.
+    long-summary: Creates a new blob from a file path, or updates the content of an existing blob, with automatic chunking and progress notifications.
+    examples:
+        - name: Upload to a blob with all required fields.
+          text: az storage blob upload -f /path/to/file -c MyContainer -n MyBlob
+"""
+
+helps['storage file upload'] = """
+    type: command
+    short-summary: Upload a specified file to a file share that uses the standard SMB 3.0 protocol
+    long-summary: Creates or updates an azure file from a source path with automatic chunking and progress notifications.
+    examples:
+        - name: Upload to a file share with all required fields.
+          text: az storage file upload -s MyShare -source /path/to/file
+"""
+
+helps['storage blob show'] = """
+    type: command
+    short-summary: Returns properties for a named blob in a container in a storage account.
+    long-summary: Blob properties only.  To show contents of a blob, use az storage blob list
+    examples:
+        - name: Show properties of a blob with all required fields.
+          text: az storage blob show -c MyContainer -n MyBlob
+"""
+
+helps['storage blob delete'] = """
+    type: command
+    short-summary: Marks the specified blob or snapshot for deletion.
+    long-summary: The blob is marked for later deletion during garbage collection.  Note that in order to delete a blob, you must delete all of its snapshots. You can delete both at the same time with the Delete Blob operation.
+    examples:
+        - name: Delete a blob with all required fields.
+          text: az storage blob delete -c MyContainer -n MyBlob
+"""
+
+helps['storage account create'] = """
+    type: command
+    short-summary: Creates a storage account.
+    examples:
+        - name: Create a storage account with minimal options.
+          text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --sku Standard_LRS
+        - name: Create a storage account saccount1 in resource group rg1 in the West US region with locally redundant storage.
+          text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --sku Standard_LRS
+"""
+
+helps['storage container create'] = """
+    type: command
+    short-summary: Creates a container in a storage account.
+    examples:
+        - name: Create a storage container in a storage account.
+          text: az storage container create -n MyStorageContainer
+        - name: Create a storage container in a storage account and return an error if the container already exists.
+          text: az storage container create -n MyStorageContainer --fail-on-exist
+"""
+
+helps['storage account list'] = """
+    type: command
+    short-summary: Lists storage accounts
+    examples:
+        - name: List all storage accounts in a subscription.
+          text: az storage account list
+        - name: List all storage accounts in a region.
+          text: az storage account list -g MyResourceGroup
+"""
+
+helps['storage account show'] = """
+    type: command
+    short-summary: Returns storage account properties
+    examples:
+        - name: Show properties for a storage account using one or more resource ID.
+          text: az storage account show --ids ${storage_account_resource_id}
+        - name: Show properties for a storage account using an account name and resource group.
+          text: az storage account show -g MyResourceGroup -n MyStorageAccount
+"""
+
+helps['storage blob list'] = """
+    type: command
+    short-summary: Lists storage blobs in a container.
+    examples:
+        - name: List all storage blobs in a container.
+          text: az storage blob list -c MyContainer
+"""
+
+helps['storage account delete'] = """
+    type: command
+    short-summary: Deletes a storage account.
+    examples:
+        - name: Delete a storage account using one or more resource ID.
+          text: az storage account delete --ids ${storage_account_resource_id}
+        - name: Delete a storage account using an account name and resource group.
+          text: az storage account delete -n MyStorageAccount -g MyResourceGroup
+"""
+
+
+helps['storage account show-connection-string'] = """
+    type: command
+    short-summary: Returns the properties for the specified storage account.
+    examples:
+        - name: Get a connection string for a storage account.
+          text: az storage account show-connection-string -g MyResourceGroup -n MyStorageAccount
+"""
+
 helps['storage'] = """
     type: group
-    short-summary: Durable, highly available, and massively scalable cloud storage
+    short-summary: Durable, highly available, and massively scalable cloud storage.
 """
 
 helps['storage account'] = """
@@ -45,14 +148,22 @@ helps['storage account keys'] = """
     short-summary: Manage storage account keys.
 """
 
+helps['storage account keys list'] = """
+    type: command
+    short-summary: Lists the primary and secondary keys for a storage account.
+    examples:
+        - name: List the primary and secondary keys for a storage account.
+          text: az storage account keys list -g MyResourceGroup -n MyStorageAccount
+"""
+
 helps['storage blob'] = """
     type: group
-    short-summary: Object storage for unstructured data
+    short-summary: Object storage for unstructured data.
 """
 
 helps['storage blob exists'] = """
     type: command
-    short-summary: Returns a boolean indicating whether the blob exists.
+    short-summary: Indicates whether the blob exists.
 """
 
 helps['storage blob list'] = """
@@ -78,7 +189,38 @@ helps['storage blob service-properties'] = """
     type: group
     short-summary: Manage storage blob service properties.
 """
-
+helps['storage blob copy start-batch'] = """
+    type: command
+    short-summary: Copy multiple blobs or files to a blob container.
+    parameters:
+        - name: --destination-container
+          type: string
+          short-summary: The blob container where the selected source files or blobs to be copied to.
+        - name: --pattern
+          type: string
+          short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq', and '[!seq]'.
+        - name: --dryrun
+          type: bool
+          short-summary: List of files or blobs to be uploaded. No actual data transfer will occur.
+        - name: --source-account-name
+          type: string
+          short-summary: The source storage account from which the files or blobs are copied to the destination. If omitted, it is assumed that source is in the same storage account as destination.
+        - name: --source-account-key
+          type: string
+          short-summary: The account key for the source storage account.
+        - name: --source-container
+          type: string
+          short-summary: The source container from which the blobs are copied to the destination.
+        - name: --source-share
+          type: string
+          short-summary: The source share from which the files are copied to the destination.
+        - name: --source-uri
+          type: string
+          short-summary: A URI specifies an file share or blob container from which the files or blobs are copied to the destination. If the source is in another account, the source must either be public or must be authenticated by using a shared access signature. If the source is public, no authentication is required.
+        - name: --source-sas
+          type: string
+          short-summary: The shared access signature for the source storage account.
+"""
 helps['storage container'] = """
     type: group
     short-summary: Manage blob storage containers.
@@ -86,7 +228,7 @@ helps['storage container'] = """
 
 helps['storage container exists'] = """
     type: command
-    short-summary: Returns a boolean indicating whether the container exists.
+    short-summary: Indicates whether the container exists.
 """
 
 helps['storage container list'] = """
@@ -111,7 +253,7 @@ helps['storage container policy'] = """
 
 helps['storage cors'] = """
     type: group
-    short-summary: Manage Storage service Cross-Orgin Resource Sharing (CORS)
+    short-summary: Manage Storage service Cross-Origin Resource Sharing (CORS).
 """
 
 helps['storage cors add'] = """
@@ -136,7 +278,7 @@ helps['storage directory'] = """
 
 helps['storage directory exists'] = """
     type: command
-    short-summary: Returns a boolean indicating whether the directory exists.
+    short-summary: Indicates whether the directory exists.
 """
 
 helps['storage directory metadata'] = """
@@ -162,12 +304,12 @@ helps['storage entity query'] = """
 
 helps['storage file'] = """
     type: group
-    short-summary: File shares that use the standard SMB 3.0 protocol
+    short-summary: File shares that use the standard SMB 3.0 protocol.
 """
 
 helps['storage file exists'] = """
     type: command
-    short-summary: Returns a boolean indicating whether the file exists.
+    short-summary: Indicates whether the file exists.
 """
 
 helps['storage file list'] = """
@@ -191,109 +333,84 @@ helps['storage file metadata'] = """
 
 helps['storage file upload-batch'] = """
     type: command
-    short-summary: Upload files from local directory to Azure Storage File Share in batch
+    short-summary: Upload files from a local directory to an Azure Storage File Share in batch.
     parameters:
         - name: --source -s
           type: string
-          short-summary: The directory from which the files should to be uploaded.
+          short-summary: The directory from which the files should be uploaded.
         - name: --destination -d
           type: string
-          short-summary: The string represents the destination of this upload operation. The
-                         destination can be the file share URL or the share name. When the
-                         destination is the share URL, the storage account name will parsed
-                         from the URL.
+          short-summary: The destination of the upload operation. The destination can be the file share URL or the share name. When the destination is the share URL, the storage account name is parsed from the URL.
         - name: --pattern
           type: string
-          short-summary: The pattern is used for files globbing. The supported patterns are '*',
-                         '?', '[seq', and '[!seq]'.
+          short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq', and '[!seq]'.
         - name: --dryrun
           type: bool
-          short-summary: Output the list of files which would be uploaded. No actual data transfer
-                         will occur.
+          short-summary: The list of files to upload. No actual data transfer occurs.
         - name: --max-connections
           type: integer
-          short-summary: Maximum number of parallel connections to use. Default value is 1.
+          short-summary: The maximum number of parallel connections to use. Default value is 1.
         - name: --validate-content
           type: bool
-          short-summary: If set, calculates an MD5 hash for each range of the file. The storage
-                         service checks the hash of the content that has arrived with the hash that
-                         was sent. This is primarily valuable for detecting bitflips on the wire if
-                         using http instead of https as https (the default) will already validate.
-                         Note that this MD5 hash is not stored with the file.
+          short-summary: If set, calculates an MD5 hash for each range of the file. The Storage service checks the hash of the content that has arrived with the hash that was sent. This is primarily valuable for detecting bitflips on the wire if using http instead of https as https (the default) will already validate. Note that this MD5 hash is not stored with the file.
 """
 
 helps['storage file download-batch'] = """
     type: command
-    short-summary: Download files from Azure Storage File Share to a local directory in batch
+    short-summary: Download files from an Azure Storage File Share to a local directory in batch.
     parameters:
         - name: --source -s
           type: string
-          short-summary: The string represents the source of this file download operation. The
-                         source can be the file share URL or the share name. When the source is
-                         the share URL, the storage account name will parsed from the URL.
+          short-summary: The source of the file download operation. The source can be the file share URL or the share name. When the source is the share URL, the storage account name is parsed from the URL.
         - name: --destination -d
           type: string
-          short-summary: The directory where the files to be downloaded. The directory must exist.
+          short-summary: The directory where the files are downloaded. The directory must exist.
         - name: --pattern
           type: string
-          short-summary: The pattern is used for files globbing. The supported patterns are '*',
-                         '?', '[seq', and '[!seq]'.
+          short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq', and '[!seq]'.
         - name: --dryrun
           type: bool
-          short-summary: Output the list of files which would be downloaded. No actual data transfer
-                         will occur.
+          short-summary: The list of files to be downloaded. No actual data transfer occurs.
         - name: --max-connections
           type: integer
-          short-summary: Maximum number of parallel connections to use. Default value is 1.
+          short-summary: The maximum number of parallel connections to use. Default value is 1.
         - name: --validate-content
           type: bool
-          short-summary: If set, calculates an MD5 hash for each range of the file. The storage
-                         service checks the hash of the content that has arrived with the hash that
-                         was sent. This is primarily valuable for detecting bitflips on the wire if
-                         using http instead of https as https (the default) will already validate.
-                         Note that this MD5 hash is not stored with the file.
+          short-summary: If set, calculates an MD5 hash for each range of the file. The Storage service checks the hash of the content that has arrived with the hash that was sent. This is primarily valuable for detecting bitflips on the wire if using http instead of https as https (the default) will already validate. Note that this MD5 hash is not stored with the file.
 """
 
 helps['storage file copy start-batch'] = """
     type: command
-    short-summary: Copy multiple files to file share asynchronously.
+    short-summary: Copy multiple files or blobs to a file share.
     parameters:
         - name: --destination-share
           type: string
-          short-summary: The file share where the specified source files or blobs to be copied to.
+          short-summary: The file share where the specified source files or blobs are to be copied to.
         - name: --destination-path
           type: string
-          short-summary: The directory where the specified source files or blobs to be copied to. If
-                         omitted, the files or blobs will be copied to the root directory.
+          short-summary: The directory where the specified source files or blobs are to be copied to. If omitted, the files or blobs are copied to the root directory.
         - name: --pattern
           type: string
-          short-summary: The pattern is used for globbing files or blobs in the source. The
-                         supported patterns are '*', '?', '[seq', and '[!seq]'.
+          short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq', and '[!seq]'.
         - name: --dryrun
           type: bool
-          short-summary: Output the list of files or blobs which would be uploaded. No actual data
-                         transfer will occur.
-        - name: --source-account
+
+          short-summary: The list of files or blobs to be uploaded. No actual data transfer occurs.
+        - name: --source-account-name
           type: string
-          short-summary: The source storage account from which the files or blobs will be copied to
-                         the destination. If omitted, it is assumed that source is in the same
-                         storage account as destination
-        - name: --source-key
+          short-summary: The source storage account from which the files or blobs are copied to the destination. If omitted, it is assumed that source is in the same storage account as destination.
+        - name: --source-account-key
           type: string
-          short-summary: The account key for the source storage account.
+          short-summary: The account key for the source storage account. If it is omitted, the command will try to query the key using the current log in.
         - name: --source-container
           type: string
-          short-summary: The source container from which the blobs will be copied to the destination
+          short-summary: The source container from which the blobs are copied to the destination.
         - name: --source-share
           type: string
-          short-summary: The source share from which the files will be copied to the destination
+          short-summary: The source share from which the files are copied to the destination.
         - name: --source-uri
           type: string
-          short-summary: A URI specifies an file share or blob container from which the files or
-                         blobs will be copied to the destination. If the source is in another
-                         account, the source must either be public or must be authenticated via a
-                         shared access signature. If the source is public, no authentication is
-                         required.
+          short-summary: A URI that specifies a file share or blob container from which files or blobs are copied to the destination. If the source is in another account, the source must either be public or must be authenticated via a shared access signature. If the source is public, no authentication is required.
         - name: --source-sas
           type: string
           short-summary: The shared access signature for the source storage account.
@@ -336,7 +453,7 @@ helps['storage metrics update'] = """
 
 helps['storage queue'] = """
     type: group
-    short-summary: Effectively scale apps according to traffic using queues.
+    short-summary: Use queues to effectively scale applications according to traffic.
 """
 
 helps['storage queue list'] = """
@@ -346,12 +463,12 @@ helps['storage queue list'] = """
 
 helps['storage queue metadata'] = """
     type: group
-    short-summary: Manage storage queue metadata.
+    short-summary: Manage the metadata for a storage queue.
 """
 
 helps['storage queue policy'] = """
     type: group
-    short-summary: Manage storage queue shared access policies.
+    short-summary: Manage shared access policies for a storage queue.
 """
 
 helps['storage share'] = """
@@ -371,12 +488,12 @@ helps['storage share list'] = """
 
 helps['storage share metadata'] = """
     type: group
-    short-summary: Manage file share metadata.
+    short-summary: Manage the metadata of a file share.
 """
 
 helps['storage share policy'] = """
     type: group
-    short-summary: Manage storage file share shared access policies.
+    short-summary: Manage shared access policies of a storage file share.
 """
 
 helps['storage table'] = """
@@ -391,5 +508,5 @@ helps['storage table list'] = """
 
 helps['storage table policy'] = """
     type: group
-    short-summary: Manage storage table shared access policies.
+    short-summary: Manage shared access policies of a storage table.
 """

@@ -8,10 +8,10 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.1.1b3+dev'
+VERSION = '2.0.0+dev'
 
 CLASSIFIERS = [
-    'Development Status :: 4 - Beta',
+    'Development Status :: 5 - Production/Stable',
     'Intended Audience :: Developers',
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
@@ -26,7 +26,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-mgmt-authorization==0.30.0rc6',
-    'azure-mgmt-compute==0.33.0',
+    'azure-mgmt-compute==0.33.1rc1',
     'azure-graphrbac==0.30.0rc6',
     'azure-cli-core',
     'paramiko',
