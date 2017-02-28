@@ -243,9 +243,7 @@ class SqlServerServiceObjectiveMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # test sql server service-objective list
         service_objectives = self.cmd('sql server service-objective list -g {} --server {}'
-                                      .format(rg, self.sql_server_name),
-                                      checks=[
-                                          JMESPathCheck('length(@)', 42)])
+                                      .format(rg, self.sql_server_name))
 
         # test sql server service-objective show
         self.cmd('sql server service-objective show -g {} --server {} --name {}'
