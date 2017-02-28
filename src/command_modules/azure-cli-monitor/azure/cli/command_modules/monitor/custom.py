@@ -152,7 +152,6 @@ def list_activity_logs(client, correlation_id=None, resource_group=None, resourc
         max_events = int(max_events)
 
     select_filter = _activity_logs_select_filter_builder(select)
-    print(odata_filters)
     activity_logs = client.list(filter=odata_filters, select=select_filter)
     return _limit_results(activity_logs, max_events)
 
