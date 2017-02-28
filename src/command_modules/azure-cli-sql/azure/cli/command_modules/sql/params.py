@@ -5,6 +5,7 @@
 
 from ._util import ParametersContext, patch_arg_make_required
 from azure.cli.core.commands import CliArgumentType
+from azure.mgmt.sql.models.database import Database
 from azure.mgmt.sql.models.elastic_pool import ElasticPool
 from azure.mgmt.sql.models.server import Server
 
@@ -20,11 +21,6 @@ server_param_type = CliArgumentType(
 #                sql db                       #
 ###############################################
 
-# sql db params that are used for non-default create modes. These are ignored
-# for regular create (because we have custom commands for special create modes)
-# and ignored for update (because they are not applicable to update)
-sql_db_special_create_mode_params = ['create_mode', 'source_database_id', 'restorePointInTime']
-
 with ParametersContext(command='sql db') as c:
     c.argument('database_name',
                options_list=('--name', '-n'),
@@ -32,35 +28,40 @@ with ParametersContext(command='sql db') as c:
     c.argument('server_name', arg_type=server_param_type)
     c.register_alias('elastic_pool_name', ('--elastic-pool',))
     c.register_alias('requested_service_objective_name', ('--service-objective',))
-    c.register_alias('requested_service_objective_id', ('--service-objective-id',))
-
-
-def configure_db_create_params(cmd):
-    from azure.mgmt.sql.models.database import Database
-    cmd.expand('parameters', Database)
 
     # Adjust help text.
-    cmd.argument('edition',
-                 options_list=('--edition',),
-                 help='The edition of the Azure SQL database.')
+    c.argument('edition',
+               options_list=('--edition',),
+               help='The edition of the Azure SQL database.')
 
-    # We have a wrapper function that determines server location so user doesn't need to specify
-    # it as param. Also we have specific commands to special create modes which have their own
-    # required params, so database properties related to create mode can be ignored
-    ignores = ['location'] + sql_db_special_create_mode_params
-    for p in ignores:
-        cmd.ignore(p)
+    # sql db params that are always ignored because their values are filled in by customer wrapper
+    # functions where appropriate for each command
+    c.ignore('location')
+    c.ignore('create_mode')
+    c.ignore('source_database_id')
+
+    # Read scale is a preview feature and will be not exposed for now
+    c.ignore('read_scale')
+
+    # Service objective id is not user-friendly and won't be exposed.
+    # Better to use service objective name instead.
+    c.ignore('requested_service_objective_id')
 
 
 with ParametersContext(command='sql db create') as c:
-    configure_db_create_params(c)
+    c.expand('parameters', Database)
 
-# The following params are ignored when creating a copy or secondary because their
-# values are determined by the source db
-sql_db_copy_ignored_params = ['collation', 'edition', 'max_size_bytes']
+    # Only applicable to point in time restore create mode.
+    c.ignore('restore_point_in_time')
+
+# 'collation', 'edition', and 'max_size_bytes' are ignored (or rejected) when creating a copy or
+# secondary because their values are determined by the source db. 'sample_name' is only for default
+# create mode. 'restore_point_in_time' is only for restore create mode.
+sql_db_copy_ignored_params = \
+    ['collation', 'edition', 'max_size_bytes', 'sample_name', 'restore_point_in_time']
 
 with ParametersContext(command='sql db copy') as c:
-    configure_db_create_params(c)
+    c.expand('parameters', Database)
 
     c.argument('elastic_pool_name',
                options_list=('--dest-elastic-pool',),
@@ -83,27 +84,19 @@ with ParametersContext(command='sql db copy') as c:
                options_list=('--dest-service-objective',),
                help='Name of service objective for the new database.')
 
-    c.argument('requested_service_objective_id',
-               options_list=('--dest-service-objective-id',),
-               help='Id of service objective for the new database.')
-
     for i in sql_db_copy_ignored_params:
         c.ignore(i)
 
 with ParametersContext(command='sql db create-replica') as c:
-    configure_db_create_params(c)
+    c.expand('parameters', Database)
 
     c.argument('elastic_pool_name',
-               options_list=('--dest-elastic-pool',),
+               options_list=('--secondary-elastic-pool',),
                help='Name of elastic pool to create the new database in.')
 
     c.argument('requested_service_objective_name',
                options_list=('--secondary-service-objective',),
                help='Name of service objective for the new secondary database.')
-
-    c.argument('requested_service_objective_id',
-               options_list=('--secondary-service-objective-id',),
-               help='Id of service objective for the new secondary database.')
 
     c.argument('secondary_resource_group_name',
                options_list=('--secondary-resource-group',),
@@ -117,16 +110,17 @@ with ParametersContext(command='sql db create-replica') as c:
     for i in sql_db_copy_ignored_params:
         c.ignore(i)
 
-# The following params are ignored when restoring because their values are determined by the
-# source db
-sql_db_restore_ignored_params = ['collation', 'max_size_bytes']
+# collation and max_size_bytes are ignored when restoring because their values are determined by
+# the source db. 'sample_name' is only for default create mode.
+sql_db_restore_ignored_params = ['collation', 'max_size_bytes', 'sample_name']
 
 with ParametersContext(command='sql db restore') as c:
-    configure_db_create_params(c)
+    c.expand('parameters', Database)
+
     c.register_alias('requested_service_objective_name', ('--dest-service-objective',))
-    c.register_alias('requested_service_objective_id', ('--dest-service-objective-id',))
     c.register_alias('elastic_pool_name', ('--dest-elastic-pool',))
     c.register_alias('dest_resource_group_name', ('--dest-resource-group',))
+
     for i in sql_db_restore_ignored_params:
         c.ignore(i)
 
