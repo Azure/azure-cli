@@ -30,7 +30,7 @@ from msrestazure.azure_exceptions import CloudError
 
 import azure.cli.core.azlogging as azlogging
 from azure.cli.command_modules.acs import acs_client, proxy
-from azure.cli.command_modules.vm._validators import _is_valid_ssh_rsa_public_key
+from azure.cli.command_modules.acs._actions import _is_valid_ssh_rsa_public_key
 from azure.cli.command_modules.acs.mgmt_acs.lib import \
     AcsCreationClient as ACSClient
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,line-too-long
