@@ -113,17 +113,17 @@ def _parse_image_argument(namespace):
 
 def _get_storage_profile_description(profile):
     if profile == StorageProfile.SACustomImage:
-        return 'unmanaged disk from custom image'
+        return 'create unmanaged OS disk created from generalized VHD'
     elif profile == StorageProfile.SAPirImage:
-        return 'unmanaged disk from PIR image'
+        return 'create unmanaged OS disk from Azure Marketplace image'
     elif profile == StorageProfile.SASpecializedOSDisk:
-        return 'unmanaged VHD OS disk'
+        return 'attach to existing unmanaged OS disk'
     elif profile == StorageProfile.ManagedCustomImage:
-        return 'managed disk from custom image'
+        return 'create managed OS disk from custom image'
     elif profile == StorageProfile.ManagedPirImage:
-        return 'managed disk from PIR image'
+        return 'create managed OS disk from Azure Marketplace image'
     elif profile == StorageProfile.ManagedSpecializedOSDisk:
-        return 'specialized managed disk'
+        return 'attach existing managed OS disk'
 
 
 storage_profile_param_options = {
@@ -159,7 +159,7 @@ def _validate_required_forbidden_parameters(namespace, required, forbidden):
 def _validate_managed_disk_sku(sku):
 
     allowed_skus = ['Premium_LRS', 'Standard_LRS']
-    if sku.lower() not in [x.lower() for x in allowed_skus]:
+    if sku and sku.lower() not in [x.lower() for x in allowed_skus]:
         raise CLIError("invalid storage SKU '{}': allowed values: '{}'".format(sku, allowed_skus))
 
 
@@ -216,7 +216,7 @@ def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
     elif namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
         required = ['os_type', 'attach_os_disk']
         forbidden = ['os_disk_name', 'storage_caching', 'storage_account',
-                     'storage_container_name', 'use_unmanaged_disk']
+                     'storage_container_name', 'use_unmanaged_disk', 'storage_sku']
         _validate_managed_disk_sku(namespace.storage_sku)
 
     elif namespace.storage_profile == StorageProfile.SAPirImage:
@@ -230,7 +230,7 @@ def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
     elif namespace.storage_profile == StorageProfile.SASpecializedOSDisk:
         required = ['os_type', 'attach_os_disk', 'use_unmanaged_disk']
         forbidden = ['os_disk_name', 'storage_caching', 'image', 'storage_account',
-                     'storage_container_name', 'data_disk_sizes_gb']
+                     'storage_container_name', 'data_disk_sizes_gb', 'storage_sku']
 
     else:
         raise CLIError('Unrecognized storage profile: {}'.format(namespace.storage_profile))
@@ -243,6 +243,11 @@ def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
                 required.remove(prop)
             if prop in forbidden:
                 forbidden.remove(prop)
+
+    # set default storage SKU if not provided and using an image based OS
+    if not namespace.storage_sku and namespace.storage_profile \
+        not in [StorageProfile.ManagedSpecializedOSDisk, StorageProfile.SASpecializedOSDisk]:
+        namespace.storage_sku = 'Standard_LRS'
 
     # Now verify that the status of required and forbidden parameters
     _validate_required_forbidden_parameters(namespace, required, forbidden)

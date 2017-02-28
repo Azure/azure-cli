@@ -1425,7 +1425,7 @@ def create_vm(vm_name, resource_group_name, image=None,
               public_ip_address_dns_name=None,
               os_disk_name=None, os_type=None, storage_account=None,
               storage_caching=None, storage_container_name=None,
-              storage_sku='Premium_LRS', use_unmanaged_disk=False,
+              storage_sku=None, use_unmanaged_disk=False,
               attach_os_disk=None, data_disk_sizes_gb=None, image_data_disks=None,
               vnet_name=None, vnet_address_prefix='10.0.0.0/16',
               subnet=None, subnet_address_prefix='10.0.0.0/24', storage_profile=None,
@@ -1551,10 +1551,9 @@ def create_vm(vm_name, resource_group_name, image=None,
     client = get_mgmt_service_client(ResourceManagementClient).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     if validate:
-        from pprint import pprint
-        import sys
-        pprint(template, sys.stderr)
-        return client.validate(resource_group_name, deployment_name, properties, raw=no_wait)
+        from azure.cli.command_modules.vm._vm_utils import log_pprint_template
+        log_pprint_template(template)
+        return client.validate(resource_group_name, deployment_name, properties)
 
     # creates the VM deployment
     if no_wait:
@@ -1577,7 +1576,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                 public_ip_address=None, public_ip_address_allocation='dynamic',
                 public_ip_address_dns_name=None,
                 storage_caching=None,
-                storage_container_name=None, storage_sku='Standard_LRS',
+                storage_container_name=None, storage_sku=None,
                 os_type=None, os_disk_name=None,
                 use_unmanaged_disk=False, data_disk_sizes_gb=None, image_data_disks=None,
                 vnet_name=None, vnet_address_prefix='10.0.0.0/16',
@@ -1711,9 +1710,8 @@ def create_vmss(vmss_name, resource_group_name, image,
     client = get_mgmt_service_client(ResourceManagementClient).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     if validate:
-        from pprint import pprint
-        import sys
-        pprint(template, sys.stderr)
+        from azure.cli.command_modules.vm._vm_utils import log_pprint_template
+        log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties, raw=no_wait)
 
     # creates the VMSS deployment

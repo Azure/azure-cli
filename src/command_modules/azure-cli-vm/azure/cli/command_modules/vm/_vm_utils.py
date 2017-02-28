@@ -46,6 +46,19 @@ def _resolve_api_version(provider_namespace, resource_type, parent_path):
             .format(resource_type))
 
 
+def log_pprint_template(template):
+    import azure.cli.core.azlogging as azlogging
+    from pprint import pprint
+    import sys
+    from six import StringIO
+
+    logger = azlogging.get_az_logger(__name__)
+    io = StringIO()
+    pprint(template, io)
+    logger.warning(io.getvalue())
+    io.close()
+
+
 # pylint: disable=too-many-arguments
 def check_existence(value, resource_group, provider_namespace, resource_type,
                     parent_name=None, parent_type=None):
