@@ -30,7 +30,7 @@ from msrestazure.azure_exceptions import CloudError
 
 import azure.cli.core.azlogging as azlogging
 from azure.cli.command_modules.acs import acs_client, proxy
-from azure.cli.command_modules.vm._validators import _is_valid_ssh_rsa_public_key
+from azure.cli.command_modules.acs._actions import _is_valid_ssh_rsa_public_key
 from azure.cli.command_modules.acs.mgmt_acs.lib import \
     AcsCreationClient as ACSClient
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,line-too-long
@@ -443,7 +443,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                 logger.info('Created a service principal: %s', service_principal)
                 store_acs_service_principal(subscription_id, client_secret, service_principal)
             # Either way, update the role assignment, this fixes things if we fail part-way through
-            if not _add_role_assignment('Owner', service_principal):
+            if not _add_role_assignment('Contributor', service_principal):
                 raise CLIError(
                     'Could not create a service principal with the right permissions. Are you an Owner on this project?')
         else:
@@ -696,6 +696,11 @@ def _mkdir_p(path):
 def update_acs(client, resource_group_name, container_service_name, new_agent_count):
     instance = client.get(resource_group_name, container_service_name)
     instance.agent_pool_profiles[0].count = new_agent_count  # pylint: disable=no-member
+
+    # null out the service principal because otherwise validation complains
+    if instance.orchestrator_profile.orchestrator_type == ContainerServiceOchestratorTypes.kubernetes:
+        instance.service_principal_profile = None
+
     return client.create_or_update(resource_group_name, container_service_name, instance)
 
 

@@ -10,6 +10,7 @@ set -e
 scripts_root=$(cd $(dirname $0); pwd)
 
 export PYTHONPATH=$PATHONPATH:./src
+
 python -m azure.cli -h
 
 # PyLint does not yet support Python 3.6 https://github.com/PyCQA/pylint/issues/1241
@@ -21,7 +22,17 @@ else
     check_style --ci;
 fi
 
-run_tests
+if [ "$CODE_COVERAGE" == "True" ]; then
+    echo "Run tests with code coverage."
+    pip install -qqq coverage codecov
+    coverage run -m automation.tests.run
+
+    coverage combine
+    coverage report
+    codecov
+else
+    python -m automation.tests.run
+fi
 
 if [[ "$CI" == "true" ]]; then
     $scripts_root/package_verify.sh

@@ -3,6 +3,12 @@
 Release History
 ===============
 
+0.1.1b5 (2017-02-27)
+++++++++++++++++++++
+
+* Expose git token reset command and add more test coverage
+
+
 0.1.1b4 (2017-02-22)
 ++++++++++++++++++++
 

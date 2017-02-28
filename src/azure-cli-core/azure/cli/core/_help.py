@@ -23,7 +23,7 @@ Telemetry
 ---------
 The Azure CLI collects usage data in order to improve your experience.
 The data is anonymous and does not include commandline argument values.
-The data is collected by Microsoft and shared with the community.
+The data is collected by Microsoft.
 
 You can change your telemetry settings with `az configure`.
 """

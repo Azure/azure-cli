@@ -8,10 +8,10 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.1.1rc2+dev'
+VERSION = '2.0.0+dev'
 
 CLASSIFIERS = [
-    'Development Status :: 4 - Beta',
+    'Development Status :: 5 - Production/Stable',
     'Intended Audience :: Developers',
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
