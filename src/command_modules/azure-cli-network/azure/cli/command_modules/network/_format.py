@@ -23,6 +23,7 @@ def transform_dns_record_set_output(result):
 
     return result
 
+
 def transform_dns_record_set_table_output(result):
     table_output = []
 
