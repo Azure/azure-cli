@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import itertools
 from ._util import ParametersContext, patch_arg_make_required
 from azure.cli.core.commands import CliArgumentType
 from azure.mgmt.sql.models.database import Database
@@ -17,6 +18,39 @@ server_param_type = CliArgumentType(
     options_list=('--server', '-s'),
     help='Name of the Azure SQL server.')
 
+
+#####
+#           SizeWithUnitConverter - consider moving to common code (azure.cli.commands.parameters)
+#####
+
+class SizeWithUnitConverter(object):  # pylint: disable=too-few-public-methods
+
+    def __init__(
+            self,
+            unit='kb',
+            result_type=int,
+            unit_map=None):
+        self.unit = unit
+        self.result_type = result_type
+        self.unit_map = unit_map or dict(b=1, kb=1024, Mb=1024 * 1024, Gb=1024 * 1024 * 1024)
+
+    def __call__(self, value):
+        numeric_part = ''.join(itertools.takewhile(str.isdigit, value))
+        unit_part = value[len(numeric_part):]
+
+        try:
+            uvals = (self.unit_map[unit_part] if unit_part else 1) / \
+                (self.unit_map[self.unit] if self.unit else 1)
+            return self.result_type(uvals) * self.result_type(numeric_part)
+        except KeyError:
+            raise ValueError()
+
+    def __repr__(self):
+        return 'Size (in {}) - valid units are {}.'.format(
+            self.unit,
+            ', '.join(sorted(self.unit_map, key=self.unit_map.__getitem__)))
+
+
 ###############################################
 #                sql db                       #
 ###############################################
@@ -28,6 +62,13 @@ with ParametersContext(command='sql db') as c:
     c.argument('server_name', arg_type=server_param_type)
     c.register_alias('elastic_pool_name', ('--elastic-pool',))
     c.register_alias('requested_service_objective_name', ('--service-objective',))
+
+    c.argument('max_size_bytes', options_list=('--storage',),
+               type=SizeWithUnitConverter('b', result_type=int),
+               help='The max storage of the database. Only the following'
+               ' sizes are supported (in addition to limitations being placed on'
+               ' each edition): 100Mb, 500Mb, 1Gb, 5Gb, 10Gb, 20Gb,'
+               ' 30Gb, 150Gb, 200Gb, 500Gb. If no unit is specified, defaults to bytes.')
 
     # Adjust help text.
     c.argument('edition',
@@ -192,6 +233,11 @@ with ParametersContext(command='sql elastic-pool') as c:
     c.argument('server_name', arg_type=server_param_type)
     c.register_alias('database_dtu_max', ('--db-dtu-max',))
     c.register_alias('database_dtu_min', ('--db-dtu-min',))
+
+    c.argument('storage_mb', options_list=('--storage',),
+               type=SizeWithUnitConverter('Mb', result_type=int),
+               help='The max storage size of the elastic pool. If no unit is specified, defaults'
+               ' to Mb.')
 
 with ParametersContext(command='sql elastic-pool create') as c:
     c.expand('parameters', ElasticPool)

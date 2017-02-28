@@ -270,7 +270,8 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
         self.database_name = "cliautomationdb01"
         self.database_copy_name = "cliautomationdb02"
         self.update_service_objective = 'S1'
-        self.update_max_size_bytes = str(10 * 1024 * 1024 * 1024)
+        self.update_storage = '10Gb'
+        self.update_storage_bytes = str(10 * 1024 * 1024 * 1024)
 
     def test_sql_db_mgmt(self):
         self.execute()
@@ -322,15 +323,15 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
         #          .format(rg, self.sql_server_name, self.database_name), checks=[
         #              JMESPathCheck('[0].resourceName', self.database_name)])
 
-        self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --max-size-bytes {}'
+        self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --storage {}'
                  ' --set tags.key1=value1'
                  .format(rg, self.sql_server_name, self.database_name,
-                         self.update_service_objective, self.update_max_size_bytes),
+                         self.update_service_objective, self.update_storage),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.database_name),
                      JMESPathCheck('requestedServiceObjectiveName', self.update_service_objective),
-                     JMESPathCheck('maxSizeBytes', self.update_max_size_bytes),
+                     JMESPathCheck('maxSizeBytes', self.update_storage_bytes),
                      JMESPathCheck('tags.key1', 'value1')])
 
         self.cmd('sql db copy -g {} --server {} --name {} '
@@ -355,7 +356,7 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(SqlElasticPoolsMgmtScenarioTest, self).__init__(
             __file__, test_method, resource_group='cli-test-sql-mgmt')
-        self.sql_server_name = 'cliautomation21'
+        self.sql_server_name = 'cliautomation22'
         self.location_short_name = 'westus'
         self.location_long_name = 'West US'
         self.admin_login = 'admin123'
@@ -365,13 +366,17 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
         self.pool_name2 = "cliautomationpool02"
         self.edition = 'Standard'
 
-        self.dtu = 100
+        self.dtu = 1200
         self.db_dtu_min = 10
         self.db_dtu_max = 50
+        self.storage = '1200Gb'
+        self.storage_mb = 1228800
 
         self.updated_dtu = 50
         self.updated_db_dtu_min = 10
         self.updated_db_dtu_max = 50
+        self.updated_storage = '50Gb'
+        self.updated_storage_mb = 51200
 
         self.db_service_objective = 'S1'
 
@@ -417,9 +422,10 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # test sql elastic-pool commands
         self.cmd('sql elastic-pool create -g {} --server {} --name {} '
-                 '--dtu {} --edition {} --db-dtu-min {} --db-dtu-max {}'
+                 '--dtu {} --edition {} --db-dtu-min {} --db-dtu-max {} '
+                 '--storage {}'
                  .format(rg, self.sql_server_name, self.pool_name, self.dtu,
-                         self.edition, self.db_dtu_min, self.db_dtu_max),
+                         self.edition, self.db_dtu_min, self.db_dtu_max, self.storage),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
@@ -428,7 +434,8 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('dtu', self.dtu),
                      JMESPathCheck('databaseDtuMin', self.db_dtu_min),
                      JMESPathCheck('databaseDtuMax', self.db_dtu_max),
-                     JMESPathCheck('edition', self.edition)])
+                     JMESPathCheck('edition', self.edition),
+                     JMESPathCheck('storageMb', self.storage_mb)])
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
                  .format(rg, self.sql_server_name, self.pool_name),
@@ -438,7 +445,8 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('state', 'Ready'),
                      JMESPathCheck('databaseDtuMin', self.db_dtu_min),
                      JMESPathCheck('databaseDtuMax', self.db_dtu_max),
-                     JMESPathCheck('edition', self.edition)])
+                     JMESPathCheck('edition', self.edition),
+                     JMESPathCheck('storageMb', self.storage_mb)])
 
         self.cmd('sql elastic-pool list -g {} --server {}'
                  .format(rg, self.sql_server_name),
@@ -448,11 +456,13 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('[0].state', 'Ready'),
                      JMESPathCheck('[0].databaseDtuMin', self.db_dtu_min),
                      JMESPathCheck('[0].databaseDtuMax', self.db_dtu_max),
-                     JMESPathCheck('[0].edition', self.edition)])
+                     JMESPathCheck('[0].edition', self.edition),
+                     JMESPathCheck('[0].storageMb', self.storage_mb)])
 
         self.cmd('sql elastic-pool update -g {} --server {} --name {} '
-                 '--dtu {} --set tags.key1=value1'
-                 .format(rg, self.sql_server_name, self.pool_name, self.updated_dtu),
+                 '--dtu {} --storage {} --set tags.key1=value1'
+                 .format(rg, self.sql_server_name, self.pool_name,
+                         self.updated_dtu, self.updated_storage),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
@@ -461,12 +471,14 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('edition', self.edition),
                      JMESPathCheck('databaseDtuMin', self.db_dtu_min),
                      JMESPathCheck('databaseDtuMax', self.db_dtu_max),
+                     JMESPathCheck('storageMb', self.updated_storage_mb),
                      JMESPathCheck('tags.key1', 'value1')])
 
         self.cmd('sql elastic-pool update -g {} --server {} --name {} '
-                 '--dtu {} --db-dtu-min {} --db-dtu-max {}'
+                 '--dtu {} --db-dtu-min {} --db-dtu-max {} --storage {}'
                  .format(rg, self.sql_server_name, self.pool_name, self.dtu,
-                         self.updated_db_dtu_min, self.updated_db_dtu_max),
+                         self.updated_db_dtu_min, self.updated_db_dtu_max,
+                         self.storage),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
@@ -474,6 +486,7 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('dtu', self.dtu),
                      JMESPathCheck('databaseDtuMin', self.updated_db_dtu_min),
                      JMESPathCheck('databaseDtuMax', self.updated_db_dtu_max),
+                     JMESPathCheck('storageMb', self.storage_mb),
                      JMESPathCheck('tags.key1', 'value1')])
 
         self.cmd('sql elastic-pool update -g {} --server {} --name {} '
