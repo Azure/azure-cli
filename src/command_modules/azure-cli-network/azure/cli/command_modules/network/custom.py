@@ -27,7 +27,6 @@ from azure.cli.command_modules.network.mgmt_app_gateway.lib.operations.app_gatew
     import AppGatewayOperations
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.command_modules.network.mgmt_nic.lib.operations.nic_operations import NicOperations
 from azure.mgmt.dns import DnsManagementClient
 from azure.mgmt.dns.operations import RecordSetsOperations
 from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CnameRecord, MxRecord,
@@ -618,8 +617,40 @@ def set_lb_rule(
 
 #region NIC commands
 
-def set_nic(instance, network_security_group=None, enable_ip_forwarding=None,
-            internal_dns_name_label=None):
+# pylint: disable=unused-argument
+def create_nic(resource_group_name, network_interface_name, subnet, location=None, tags=None,
+               internal_dns_name_label=None, enable_ip_forwarding=False,
+               load_balancer_backend_address_pool_ids=None,
+               load_balancer_inbound_nat_rule_ids=None,
+               load_balancer_name=None, network_security_group=None,
+               private_ip_address=None, private_ip_address_version=IPVersion.ipv4.value,
+               public_ip_address=None, virtual_network_name=None):
+    from azure.mgmt.network.models import NetworkInterface
+    client = _network_client_factory().network_interfaces
+    nic = NetworkInterface(location=location, tags=tags, enable_ip_forwarding=enable_ip_forwarding)
+    if internal_dns_name_label:
+        from azure.mgmt.network.models import NetworkInterfaceDnsSettings
+        nic.dns_settings = NetworkInterfaceDnsSettings(
+            internal_dns_name_label=internal_dns_name_label)
+    if network_security_group:
+        nic.network_security_group = NetworkSecurityGroup(id=network_security_group)
+    ip_config = NetworkInterfaceIPConfiguration(
+        name='ipconfig1',
+        load_balancer_backend_address_pools=load_balancer_backend_address_pool_ids,
+        load_balancer_inbound_nat_rules=load_balancer_inbound_nat_rule_ids,
+        private_ip_allocation_method='Static' if private_ip_address else 'Dynamic',
+        private_ip_address=private_ip_address,
+        private_ip_address_version=private_ip_address_version,
+        subnet=Subnet(id=subnet)
+    )
+    if public_ip_address:
+        ip_config.public_ip_address = PublicIPAddress(id=public_ip_address)
+    nic.ip_configurations = [ip_config]
+    return client.create_or_update(resource_group_name, network_interface_name, nic)
+
+
+def update_nic(instance, network_security_group=None, enable_ip_forwarding=None,
+               internal_dns_name_label=None):
 
     if enable_ip_forwarding is not None:
         instance.enable_ip_forwarding = enable_ip_forwarding == 'true'
@@ -635,7 +666,7 @@ def set_nic(instance, network_security_group=None, enable_ip_forwarding=None,
         instance.dns_settings.internal_dns_name_label = internal_dns_name_label
 
     return instance
-set_nic.__doc__ = NicOperations.create_or_update.__doc__
+
 
 def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_name, subnet=None,
                          virtual_network_name=None, public_ip_address=None, load_balancer_name=None, # pylint: disable=unused-argument
@@ -668,7 +699,6 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
     poller = ncf.network_interfaces.create_or_update(
         resource_group_name, network_interface_name, nic)
     return _get_property(poller.result().ip_configurations, ip_config_name)
-create_nic_ip_config.__doc__ = NicOperations.create_or_update.__doc__
 
 def set_nic_ip_config(instance, parent, ip_config_name, subnet=None, # pylint: disable=unused-argument
                       virtual_network_name=None, public_ip_address=None, load_balancer_name=None, # pylint: disable=unused-argument
@@ -712,7 +742,6 @@ def set_nic_ip_config(instance, parent, ip_config_name, subnet=None, # pylint: d
         instance.load_balancer_inbound_nat_rules = load_balancer_inbound_nat_rule_ids
 
     return parent
-set_nic_ip_config.__doc__ = NicOperations.create_or_update.__doc__
 
 def _get_nic_ip_config(nic, name):
     if nic.ip_configurations:
@@ -1235,15 +1264,14 @@ def create_express_route_peering(
     """
     from azure.mgmt.network.models import \
         (ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig)
-    from azure.mgmt.network.models import ExpressRouteCircuitPeeringType as PeeringType
-    from azure.mgmt.network.models import ExpressRouteCircuitSkuTier as SkuTier
+    from azure.mgmt.network.models import ExpressRouteCircuitPeeringType
 
     # TODO: Remove workaround when issue #1574 is fixed in the service
     # region Issue #1574 workaround
     circuit = _network_client_factory().express_route_circuits.get(
         resource_group_name, circuit_name)
-    if peering_type == PeeringType.microsoft_peering.value and \
-        circuit.sku.tier == SkuTier.standard.value:
+    if peering_type == ExpressRouteCircuitPeeringType.microsoft_peering.value and \
+        circuit.sku.tier == ExpressRouteCircuitSkuTier.standard.value:
         raise CLIError("MicrosoftPeering cannot be created on a 'Standard' SKU circuit")
     for peering in circuit.peerings:
         if peering.vlan_id == vlan_id:
@@ -1255,7 +1283,7 @@ def create_express_route_peering(
         advertised_public_prefixes=advertised_public_prefixes,
         customer_asn=customer_asn,
         routing_registry_name=routing_registry_name) \
-            if peering_type == PeeringType.microsoft_peering.value else None
+            if peering_type == ExpressRouteCircuitPeeringType.microsoft_peering.value else None
     peering = ExpressRouteCircuitPeering(
         peering_type=peering_type, peer_asn=peer_asn, vlan_id=vlan_id,
         primary_peer_address_prefix=primary_peer_address_prefix,
@@ -1356,11 +1384,12 @@ def update_local_gateway(instance, gateway_ip_address=None, local_address_prefix
 #region Traffic Manager Commands
 
 def list_traffic_manager_profiles(resource_group_name=None):
-    ncf = get_mgmt_service_client(TrafficManagerManagementClient).profiles
+    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
+    client = get_mgmt_service_client(TrafficManagerManagementClient).profiles
     if resource_group_name:
-        return ncf.list_all_in_resource_group(resource_group_name)
+        return client.list_all_in_resource_group(resource_group_name)
     else:
-        return ncf.list_all()
+        return client.list_all()
 
 
 def create_traffic_manager_profile(traffic_manager_profile_name, resource_group_name,
@@ -1443,8 +1472,9 @@ def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_locat
     return instance
 
 def list_traffic_manager_endpoints(resource_group_name, profile_name, endpoint_type=None):
-    ncf = get_mgmt_service_client(TrafficManagerManagementClient).profiles
-    profile = ncf.get(resource_group_name, profile_name)
+    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
+    client = get_mgmt_service_client(TrafficManagerManagementClient).profiles
+    profile = client.get(resource_group_name, profile_name)
     return [e for e in profile.endpoints if not endpoint_type or e.type.endswith(endpoint_type)]
 #endregion
 

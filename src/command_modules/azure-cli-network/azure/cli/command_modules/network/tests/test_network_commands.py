@@ -647,30 +647,30 @@ class NetworkNicScenarioTest(ResourceGroupVCRTestBase):
 
         # create with minimum parameters
         self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {}'.format(rg, nic, subnet, vnet), checks=[
-            JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
-            JMESPathCheck('newNIC.provisioningState', 'Succeeded')
+            JMESPathCheck('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
+            JMESPathCheck('NewNIC.provisioningState', 'Succeeded')
         ])
         # exercise optional parameters
         self.cmd('network nic create -g {} -n {} --subnet {} --ip-forwarding --private-ip-address {} --public-ip-address {} --internal-dns-name test --lb-address-pools {} --lb-inbound-nat-rules {}'.format(rg, nic, subnet_id, private_ip, public_ip_name, address_pool_ids, rule_ids), checks=[
-            JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAllocationMethod', 'Static'),
-            JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAddress', private_ip),
-            JMESPathCheck('newNIC.enableIPForwarding', True),
-            JMESPathCheck('newNIC.provisioningState', 'Succeeded'),
-            JMESPathCheck('newNIC.dnsSettings.internalDnsNameLabel', 'test')
+            JMESPathCheck('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Static'),
+            JMESPathCheck('NewNIC.ipConfigurations[0].privateIpAddress', private_ip),
+            JMESPathCheck('NewNIC.enableIpForwarding', True),
+            JMESPathCheck('NewNIC.provisioningState', 'Succeeded'),
+            JMESPathCheck('NewNIC.dnsSettings.internalDnsNameLabel', 'test')
         ])
         # exercise creating with NSG
         self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {} --network-security-group {}'.format(rg, nic, subnet, vnet, nsg), checks=[
-            JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
-            JMESPathCheck('newNIC.enableIPForwarding', False),
-            JMESPathCheck("newNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
-            JMESPathCheck('newNIC.provisioningState', 'Succeeded')
+            JMESPathCheck('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
+            JMESPathCheck('NewNIC.enableIpForwarding', False),
+            JMESPathCheck("NewNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
+            JMESPathCheck('NewNIC.provisioningState', 'Succeeded')
         ])
         # exercise creating with NSG and Public IP
         self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {} --network-security-group {} --public-ip-address {}'.format(rg, nic, subnet, vnet, nsg_id, public_ip_id), checks=[
-            JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
-            JMESPathCheck('newNIC.enableIPForwarding', False),
-            JMESPathCheck("newNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
-            JMESPathCheck('newNIC.provisioningState', 'Succeeded')
+            JMESPathCheck('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
+            JMESPathCheck('NewNIC.enableIpForwarding', False),
+            JMESPathCheck("NewNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
+            JMESPathCheck('NewNIC.provisioningState', 'Succeeded')
         ])
         self.cmd('network nic list', checks=[
             JMESPathCheck('type(@)', 'array'),
@@ -791,7 +791,7 @@ class NetworkNicConvenienceCommandsScenarioTest(ResourceGroupVCRTestBase):
         super(NetworkNicConvenienceCommandsScenarioTest, self).set_up()
         rg = self.resource_group
         vm = self.vm_name
-        self.cmd('vm create -g {} -n {} --image UbuntuLTS --admin-password aBcD1234!@#$ --authentication-type password'.format(rg, vm))
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --admin-username admin1 --admin-password aBcD1234!@#$ --authentication-type password'.format(rg, vm))
 
     def body(self):
         rg = self.resource_group

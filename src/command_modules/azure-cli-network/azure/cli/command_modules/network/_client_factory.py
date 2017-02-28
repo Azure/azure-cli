@@ -32,11 +32,6 @@ def cf_express_route_circuit_peerings(_):
 def cf_express_route_circuits(_):
     return _network_client_factory().express_route_circuits
 
-def cf_express_route_circuit_create(_):
-    from azure.cli.command_modules.network.mgmt_express_route_circuit.lib import ExpressRouteCircuitCreationClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(ExpressRouteCircuitCreationClient).express_route_circuit
-
 def cf_express_route_service_providers(_):
     return _network_client_factory().express_route_service_providers
 
@@ -55,11 +50,6 @@ def cf_local_gateway_create(_):
     from azure.cli.command_modules.network.mgmt_local_gateway.lib import LocalGatewayCreationClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(LocalGatewayCreationClient).local_gateway
-
-def cf_nic_create(_):
-    from azure.cli.command_modules.network.mgmt_nic.lib import NicCreationClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(NicCreationClient).nic
 
 def cf_network_interfaces(_):
     return _network_client_factory().network_interfaces
@@ -111,11 +101,6 @@ def cf_traffic_manager_mgmt_profiles(_):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(TrafficManagerManagementClient).profiles
-
-def cf_traffic_manager_profile_create(_):
-    from azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib import TrafficManagerProfileCreationClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(TrafficManagerProfileCreationClient).traffic_manager_profile
 
 def cf_traffic_manager_mgmt_endpoints(_):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient

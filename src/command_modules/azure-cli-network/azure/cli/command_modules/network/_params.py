@@ -43,11 +43,8 @@ from azure.cli.command_modules.network._validators import \
      get_public_ip_validator, get_nsg_validator, get_subnet_validator,
      get_virtual_network_validator)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
-from azure.cli.command_modules.network.mgmt_nic.lib.models.nic_creation_client_enums import privateIpAddressVersion
 from azure.cli.command_modules.network.mgmt_vnet_gateway.lib.models.vnet_gateway_creation_client_enums import \
     (gatewayType, sku, vpnType)
-from azure.cli.command_modules.network.mgmt_traffic_manager_profile.lib.models.traffic_manager_profile_creation_client_enums \
-    import routingMethod, status
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
 
 # CHOICE LISTS
@@ -131,7 +128,7 @@ register_cli_argument('network', 'subnet_name', subnet_name_type)
 register_cli_argument('network', 'virtual_network_name', virtual_network_name_type, id_part='name')
 register_cli_argument('network', 'network_security_group_name', nsg_name_type, id_part='name')
 register_cli_argument('network', 'private_ip_address', private_ip_address_type)
-register_cli_argument('network', 'private_ip_address_version', **enum_choice_list(privateIpAddressVersion))
+register_cli_argument('network', 'private_ip_address_version', **enum_choice_list(IPVersion))
 register_cli_argument('network', 'tags', tags_type)
 
 register_cli_argument('network application-gateway', 'application_gateway_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
@@ -284,27 +281,23 @@ for item in ['local-gateway', 'vnet-gateway']:
 # NIC
 
 register_cli_argument('network nic', 'network_interface_name', nic_type, options_list=('--name', '-n'))
-register_cli_argument('network nic', 'internal_dns_name_label', options_list=('--internal-dns-name',))
+register_cli_argument('network nic', 'internal_dns_name_label', options_list=('--internal-dns-name',), help='The internal DNS name label.')
 
-register_cli_argument('network nic create', 'enable_ip_forwarding', options_list=('--ip-forwarding',), action='store_true')
+register_cli_argument('network nic create', 'enable_ip_forwarding', options_list=('--ip-forwarding',), help='Enable IP forwarding.', action='store_true')
 register_cli_argument('network nic create', 'network_interface_name', nic_type, options_list=('--name', '-n'), id_part=None, validator=process_nic_create_namespace)
-register_cli_argument('network nic create', 'private_ip_address_allocation', ignore_type)
-register_cli_argument('network nic create', 'use_dns_settings', ignore_type)
+register_cli_argument('network nic create', 'private_ip_address_version', help='The private IP address version to use.')
 
 public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, default_none=True)
 register_cli_argument('network nic create', 'public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
-register_cli_argument('network nic create', 'public_ip_address_type', ignore_type)
 
 nsg_help = get_folded_parameter_help_string('network security group', allow_none=True, default_none=True)
 register_cli_argument('network nic create', 'network_security_group', help=nsg_help, completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
-register_cli_argument('network nic create', 'network_security_group_type', ignore_type)
 
 subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name')
 register_cli_argument('network nic create', 'subnet', help=subnet_help, completer=get_subnet_completion_list())
-register_cli_argument('network nic create', 'subnet_type', ignore_type)
 
 register_cli_argument('network nic update', 'enable_ip_forwarding', options_list=('--ip-forwarding',), **enum_choice_list(['true', 'false']))
-register_cli_argument('network nic update', 'network_security_group', validator=get_nsg_validator(), completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
+register_cli_argument('network nic update', 'network_security_group', help='Name or ID of the associated network security group.', validator=get_nsg_validator(), completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
 
 for item in ['create', 'ip-config update', 'ip-config create']:
     register_extra_cli_argument('network nic {}'.format(item), 'load_balancer_name', options_list=('--lb-name',), completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), help='The name of the load balancer to use when adding NAT rules or address pools by name (ignored when IDs are specified).')
@@ -317,7 +310,8 @@ register_cli_argument('network nic ip-config', 'resource_name', options_list=('-
 register_cli_argument('network nic ip-config', 'item_name', options_list=('--name', '-n'), metavar='IP_CONFIG_NAME', help='The name of the IP configuration.', id_part='child_name')
 register_cli_argument('network nic ip-config', 'subnet', validator=get_subnet_validator(), help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.')
 register_cli_argument('network nic ip-config', 'virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', id_part=None, metavar='')
-register_cli_argument('network nic ip-config', 'public_ip_address', validator=get_public_ip_validator())
+register_cli_argument('network nic ip-config', 'public_ip_address', help='Name or ID of the public IP to use.', validator=get_public_ip_validator())
+register_cli_argument('network nic ip-config', 'private_ip_address_allocation', ignore_type)
 register_cli_argument('network nic ip-config', 'make_primary', action='store_true', help='Set to make this configuration the primary one for the NIC.')
 
 for item in ['address-pool', 'inbound-nat-rule']:
@@ -526,11 +520,11 @@ register_cli_argument('network traffic-manager profile', 'monitor_path', help='P
 register_cli_argument('network traffic-manager profile', 'monitor_port', help='Port to monitor.', type=int)
 register_cli_argument('network traffic-manager profile', 'monitor_protocol', help='Monitor protocol.')
 register_cli_argument('network traffic-manager profile', 'profile_status', options_list=('--status',), help='Status of the Traffic Manager profile.', **enum_choice_list(['Enabled', 'Disabled']))
-register_cli_argument('network traffic-manager profile', 'routing_method', help='Routing method.', **enum_choice_list(routingMethod))
+register_cli_argument('network traffic-manager profile', 'routing_method', help='Routing method.', **enum_choice_list(['Performance', 'Weighted', 'Priority']))
 register_cli_argument('network traffic-manager profile', 'unique_dns_name', help="Relative DNS name for the traffic manager profile. Resulting FQDN will be '<unique-dns-name>.trafficmanager.net' and must be globally unique.")
 register_cli_argument('network traffic-manager profile', 'ttl', help='DNS config time-to-live in seconds.', type=int)
 
-register_cli_argument('network traffic-manager profile create', 'status', help='Create an enabled or disabled profile.', **enum_choice_list(status))
+register_cli_argument('network traffic-manager profile create', 'status', help='Create an enabled or disabled profile.', **enum_choice_list(['Enabled', 'Disabled']))
 
 register_cli_argument('network traffic-manager profile check-dns', 'name', name_arg_type, help='DNS prefix to verify availability for.', required=True)
 register_cli_argument('network traffic-manager profile check-dns', 'type', help=argparse.SUPPRESS, default='Microsoft.Network/trafficManagerProfiles')

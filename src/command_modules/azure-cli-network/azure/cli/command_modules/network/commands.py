@@ -17,7 +17,7 @@ from ._format import \
     (transform_local_gateway_table_output, transform_dns_record_set_output,
      transform_dns_record_set_table_output, transform_dns_zone_table_output,
      transform_vnet_create_output, transform_public_ip_create_output,
-     transform_traffic_manager_create_output)
+     transform_traffic_manager_create_output, transform_nic_create_output)
 
 custom_path = 'azure.cli.command_modules.network.custom#{}'
 
@@ -195,11 +195,7 @@ cli_command(__name__, 'network local-gateway create',
             transform=DeploymentOutputLongRunningOperation('Starting network local-gateway create'))
 
 # NetworkInterfacesOperations
-cli_command(__name__, 'network nic create',
-            'azure.cli.command_modules.network.mgmt_nic.lib.operations.nic_operations#NicOperations.create_or_update',
-            cf_nic_create,
-            transform=DeploymentOutputLongRunningOperation('Starting network nic create'))
-
+cli_command(__name__, 'network nic create', custom_path.format('create_nic'), transform=transform_nic_create_output)
 cli_command(__name__, 'network nic delete', 'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.delete', cf_network_interfaces)
 cli_command(__name__, 'network nic show', 'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.get', cf_network_interfaces, exception_handler=empty_on_404)
 cli_command(__name__, 'network nic list', custom_path.format('list_nics'))
@@ -207,7 +203,7 @@ cli_generic_update_command(__name__, 'network nic update',
                            'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.get',
                            'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.create_or_update',
                            cf_network_interfaces,
-                           custom_function_op=custom_path.format('set_nic'))
+                           custom_function_op=custom_path.format('update_nic'))
 cli_command(__name__, 'network nic show-effective-route-table', 'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.get_effective_route_table', cf_network_interfaces)
 cli_command(__name__, 'network nic list-effective-nsg', 'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.list_effective_network_security_groups', cf_network_interfaces)
 

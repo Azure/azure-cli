@@ -174,7 +174,7 @@ def validate_peering_type(namespace):
                 'missing required MicrosoftPeering parameter --advertised-public-prefixes')
 
 def validate_private_ip_address(namespace):
-    if namespace.private_ip_address:
+    if namespace.private_ip_address and hasattr(namespace, 'private_ip_address_allocation'):
         namespace.private_ip_address_allocation = 'static'
 
 def get_public_ip_validator(has_type_field=False, allow_none=False, allow_new=False,
@@ -445,16 +445,17 @@ def process_local_gateway_create_namespace(namespace):
 
 def process_nic_create_namespace(namespace):
 
-    # process folded parameters
-    get_subnet_validator(has_type_field=True)(namespace)
-    get_public_ip_validator(has_type_field=True, allow_none=True, default_none=True)(namespace)
-    get_nsg_validator(has_type_field=True, allow_none=True, default_none=True)(namespace)
+    validate_location(namespace)
 
-    if namespace.internal_dns_name_label:
-        namespace.use_dns_settings = 'true'
+    # process folded parameters
+    get_subnet_validator(has_type_field=False)(namespace)
+    get_public_ip_validator(has_type_field=False, allow_none=True, default_none=True)(namespace)
+    get_nsg_validator(has_type_field=False, allow_none=True, default_none=True)(namespace)
+
 
 def process_public_ip_create_namespace(namespace):
     validate_location(namespace)
+
 
 def process_route_table_create_namespace(namespace):
     from azure.mgmt.network.models import RouteTable
