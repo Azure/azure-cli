@@ -176,12 +176,10 @@ class VMImageListOffersScenarioTest(VCRTestBase):
         self.execute()
 
     def body(self):
-        self.cmd('vm image list-offers --location {} --publisher {}'.format(
-            self.location, self.publisher_name), checks=[
-                JMESPathCheck('type(@)', 'array'),
-                JMESPathCheck("length([?location == '{}']) == length(@)".format(self.location), True),
-                JMESPathCheck("length([].id.contains(@, '/Publishers/{}'))".format(self.publisher_name), 6),
-        ])
+        result = self.cmd('vm image list-offers --location {} --publisher {}'.format(
+            self.location, self.publisher_name))
+        self.assertTrue(len(result) > 0)
+        self.assertFalse([i for i in result if i['location'].lower() != self.location])
 
 
 class VMImageListPublishersScenarioTest(VCRTestBase):
@@ -748,7 +746,7 @@ class VMBootDiagnostics(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(VMBootDiagnostics, self).__init__(__file__, test_method, resource_group='cli_test_vm_diagnostics')
         self.vm_name = 'myvm'
-        self.storage_name = 'ae94nvfl1k1'
+        self.storage_name = 'clitestbootdiag20170227'
 
     def test_vm_boot_diagnostics(self):
         self.execute()
@@ -781,7 +779,7 @@ class VMSSExtensionInstallTest(ResourceGroupVCRTestBase):
 
     def set_up(self):
         super(VMSSExtensionInstallTest, self).set_up()
-        self.cmd('vmss create -n {} -g {} --image UbuntuLTS --authentication-type password --admin-password TestPass1@'.format(self.vmss_name, self.resource_group))
+        self.cmd('vmss create -n {} -g {} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password TestPass1@'.format(self.vmss_name, self.resource_group))
 
     def test_vmss_extension(self):
         self.execute()
@@ -825,7 +823,7 @@ class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(DiagnosticsExtensionInstallTest, self).__init__(__file__, test_method, resource_group='cli_test_vm_vmss_diagnostics_extension')
-        self.storage_account = 'diagextensionsa'
+        self.storage_account = 'clitestdiagextsa20170227'
         self.vm = 'testdiagvm'
         self.vmss = 'testdiagvmss'
 
@@ -1498,7 +1496,7 @@ class VMSSVMsScenarioTest(ResourceGroupVCRTestBase):
 
     def set_up(self):
         super(VMSSVMsScenarioTest, self).set_up()
-        self.cmd('vmss create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-password TestTest12#$ --instance-count {}'.format(self.resource_group, self.ss_name, self.vm_count))
+        self.cmd('vmss create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password TestTest12#$ --instance-count {}'.format(self.resource_group, self.ss_name, self.vm_count))
 
     def test_vmss_vms(self):
         self.execute()
@@ -1566,7 +1564,7 @@ class VMSSNicScenarioTest(ResourceGroupVCRTestBase):
 
     def set_up(self):
         super(VMSSNicScenarioTest, self).set_up()
-        self.cmd('vmss create -g {} -n {} --authentication-type password --admin-password PasswordPassword1!  --image Win2012R2Datacenter'.format(self.resource_group, self.vmss_name))
+        self.cmd('vmss create -g {} -n {} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter'.format(self.resource_group, self.vmss_name))
 
     def body(self):
         self.cmd('vmss nic list -g {} --vmss-name {}'.format(self.resource_group, self.vmss_name), checks=[
