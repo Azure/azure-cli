@@ -16,7 +16,8 @@ except ImportError:
     from urlparse import urlparse  # pylint: disable=import-error
 
 from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import
-
+from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
+from azure.keyvault.key_vault_id import parse_secret_id
 from azure.mgmt.compute.models import (VirtualHardDisk,
                                        VirtualMachineScaleSet,
                                        VirtualMachineCaptureParameters,
@@ -1757,3 +1758,48 @@ def create_av_set(availability_set_name, resource_group_name,
         resource_group_name, deployment_name, properties, raw=no_wait))
     compute_client = _compute_client_factory()
     return compute_client.availability_sets.get(resource_group_name, availability_set_name)
+
+
+def _get_vault_id_from_name(client, vault_name):
+    group_name = _get_resource_group_from_vault_name(vault_name)
+    vault = client.get(group_name, vault_name)
+    return vault.id
+
+
+def get_vm_format_secret(secrets, certificate_store=None):
+    """
+    Format secrets to be used in `az vm create --secrets`
+    :param dict secrets: array of secrets to be formatted
+    :param str certificate_store: certificate store the secret will be applied (Windows only)
+    :return: formatted secrets as an array
+    :rtype: list
+    """
+    from azure.mgmt.keyvault import KeyVaultManagementClient
+    client = get_mgmt_service_client(KeyVaultManagementClient).vaults
+    grouped_secrets = {}
+    if isinstance(secrets, dict):
+        secrets = [secrets]
+
+    # group secrets by source vault
+    for secret in secrets:
+        parsed = parse_secret_id(secret['id'])
+        match = re.search('://(.+?)\\.', parsed.vault)
+        vault_name = match.group(1)
+        if vault_name not in grouped_secrets:
+            grouped_secrets[vault_name] = {
+                'vaultCertificates': [],
+                'id': _get_vault_id_from_name(client, vault_name)
+            }
+
+        vault_cert = {'certificateUrl': secret['id']}
+        if certificate_store:
+            vault_cert['certificateStore'] = certificate_store
+
+        grouped_secrets[vault_name]['vaultCertificates'].append(vault_cert)
+
+    # transform the reduced map to vm format
+    formatted = [{'sourceVault': {'id': value['id']},
+                  'vaultCertificates': value['vaultCertificates']}
+                 for _, value in list(grouped_secrets.items())]
+
+    return formatted

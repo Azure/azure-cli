@@ -182,5 +182,3 @@ register_cli_argument('keyvault certificate issuer', 'admin_first_name', arg_gro
 register_cli_argument('keyvault certificate issuer', 'admin_last_name', arg_group='Organization Detail')
 register_cli_argument('keyvault certificate issuer', 'admin_email', arg_group='Organization Detail')
 register_cli_argument('keyvault certificate issuer', 'admin_phone', arg_group='Organization Detail')
-
-register_cli_argument('keyvault secret vm-format', 'secrets', options_list=('--secrets', '-s'), type=get_json_object, help='JSON encoded secrets. Use @{file} to load from a file.')

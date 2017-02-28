@@ -8,8 +8,8 @@ import re
 
 from msrestazure.azure_exceptions import CloudError
 
+from azure.mgmt.keyvault import KeyVaultManagementClient
 from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid_resource_id
-from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core._util import CLIError, random_string
 from ._client_factory import _compute_client_factory
 from azure.cli.command_modules.vm._vm_utils import check_existence, load_json
@@ -24,7 +24,24 @@ def validate_nsg_name(namespace):
         or '{}_NSG_{}'.format(namespace.vm_name, random_string(8))
 
 
+def _get_resource_group_from_vault_name(vault_name):
+    """
+    Fetch resource group from vault name
+    :param str vault_name: name of the key vault
+    :return: resource group name or None
+    :rtype: str
+    """
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    client = get_mgmt_service_client(KeyVaultManagementClient).vaults
+    for vault in client.list():
+        id_comps = parse_resource_id(vault.id)
+        if id_comps['name'] == vault_name:
+            return id_comps['resource_group']
+    return None
+
+
 def _get_resource_id(val, resource_group, resource_type, resource_namespace):
+    from azure.cli.core.commands.client_factory import get_subscription_id
     if is_valid_resource_id(val):
         return val
     else:
@@ -347,7 +364,7 @@ def _validate_vm_create_storage_account(namespace):
 
 
 def _validate_vm_create_availability_set(namespace):
-
+    from azure.cli.core.commands.client_factory import get_subscription_id
     if namespace.availability_set:
         as_id = parse_resource_id(namespace.availability_set)
         name = as_id['name']
@@ -476,6 +493,7 @@ def _validate_vmss_create_public_ip(namespace):
 
 
 def _validate_vm_create_nics(namespace):
+    from azure.cli.core.commands.client_factory import get_subscription_id
     nics_value = namespace.nics
     nics = []
 

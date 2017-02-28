@@ -22,6 +22,25 @@ name_group_example = """        - name: {0} by Name and Group
           text: az {1} -n name -g MyResourceGroup
 """
 
+helps['vm format-secret'] = """
+    type: command
+    long-summary: >
+        Transform secrets into a form consumed by VMs and VMSS create via --secrets.
+    examples:
+        - name: Create a self-signed certificate with a the default policy and add to a virtual machine
+          text: >
+            az keyvault certificate create --vault-name vaultname -n cert1 \\
+              -p "$(az keyvault certificate get-default-policy)"
+
+            secrets=$(az keyvault secret list-versions --vault-name vaultname \\
+              -n cert1 --query "[?attributes.enabled]")
+
+            vm_secrets=$(az vm format-secret -s "$secrets") \n
+
+            az vm create -g group-name -n vm-name --admin-username deploy  \\
+              --image debian --secrets "$vm_secrets"
+"""
+
 helps['vm create'] = """
     type: command
     short-summary: Create an Azure Virtual Machine.
@@ -76,7 +95,7 @@ helps['vm create'] = """
             secrets=$(az keyvault secret list-versions --vault-name vaultname \\
               -n cert1 --query "[?attributes.enabled]")
 
-            vm_secrets=$(az keyvault secret vm-format -s "$secrets") \n
+            vm_secrets=$(az vm format-secret -s "$secrets") \n
 
             az vm create -g group-name -n vm-name --admin-username deploy  \\
               --image debian --secrets "$vm_secrets"
@@ -115,7 +134,7 @@ helps['vmss create'] = """
             secrets=$(az keyvault secret list-versions --vault-name vaultname \\
               -n cert1 --query "[?attributes.enabled]")
 
-            vm_secrets=$(az keyvault secret vm-format -s "$secrets") \n
+            vm_secrets=$(az vm format-secret -s "$secrets") \n
 
             az vmss create -g group-name -n vm-name --admin-username deploy  \\
               --image debian --secrets "$vm_secrets"

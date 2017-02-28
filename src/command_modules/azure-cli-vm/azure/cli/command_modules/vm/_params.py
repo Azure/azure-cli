@@ -9,6 +9,8 @@ from argcomplete.completers import FilesCompleter
 from azure.mgmt.compute.models import (CachingTypes,
                                        UpgradeMode)
 from azure.mgmt.storage.models import SkuName
+
+from azure.cli.core._util import get_json_object
 from azure.cli.core.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
 from azure.cli.core.commands.parameters import \
     (location_type, get_one_of_subscription_locations,
@@ -271,3 +273,5 @@ for scope in ['disk', 'snapshot']:
     register_cli_argument(scope, 'source_snapshot', ignore_type)
     register_cli_argument(scope, 'size_gb', options_list=('--size-gb', '-z'), help='size in GB.')
     register_cli_argument(scope, 'duration_in_seconds', help='Time duration in seconds until the SAS access expires')
+
+register_cli_argument('vm format-secret', 'secrets', options_list=('--secrets', '-s'), type=get_json_object, help='JSON encoded secrets as an array of secrets [], or a single secret {}. Use @{file} to load from a file.')

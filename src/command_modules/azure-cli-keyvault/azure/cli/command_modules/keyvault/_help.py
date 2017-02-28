@@ -85,26 +85,7 @@ helps['keyvault certificate create'] = """
             secrets=$(az keyvault secret list-versions --vault-name vaultname \\
               -n cert1 --query "[?attributes.enabled]")
 
-            vm_secrets=$(az keyvault secret vm-format -s "$secrets") \n
-
-            az vm create -g group-name -n vm-name --admin-username deploy  \\
-              --image debian --secrets "$vm_secrets"
-"""
-
-helps['keyvault secret vm-format'] = """
-    type: command
-    long-summary: >
-        Transform secrets into a form consumed by VMs via --secrets.
-    examples:
-        - name: Create a self-signed certificate with a the default policy and add to a virtual machine
-          text: >
-            az keyvault certificate create --vault-name vaultname -n cert1 \\
-              -p "$(az keyvault certificate get-default-policy)"
-
-            secrets=$(az keyvault secret list-versions --vault-name vaultname \\
-              -n cert1 --query "[?attributes.enabled]")
-
-            vm_secrets=$(az keyvault secret vm-format -s "$secrets") \n
+            vm_secrets=$(az vm format-secret -s "$secrets") \n
 
             az vm create -g group-name -n vm-name --admin-username deploy  \\
               --image debian --secrets "$vm_secrets"

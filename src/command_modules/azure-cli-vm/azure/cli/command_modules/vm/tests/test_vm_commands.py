@@ -1267,7 +1267,7 @@ class VMCreateLinuxSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: dis
             self.vault_name,
             policy_path))
         secret_out = self.cmd('keyvault secret list-versions --vault-name {} -n cert1'.format(self.vault_name))[-1]
-        vm_format = self.cmd('keyvault secret vm-format -s \'{0}\''.format(json.dumps(secret_out)))
+        vm_format = self.cmd('vm format-secret -s \'{0}\''.format(json.dumps(secret_out)))
 
         self.cmd('vm create -g {rg} -n {vm_name} --admin-username {admin} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' -l {location} --secrets \'{secrets}\''.format(
             rg=self.resource_group,
@@ -1332,7 +1332,7 @@ class VMCreateWindowsSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: d
             policy_path))
 
         secret_out = self.cmd('keyvault secret list-versions --vault-name {} -n cert1'.format(self.vault_name))[-1]
-        vm_format = self.cmd('keyvault secret vm-format -s \'{0}\' --certificate-store "My"'.format(json.dumps(secret_out)))
+        vm_format = self.cmd('vm format-secret -s \'{0}\' --certificate-store "My"'.format(json.dumps(secret_out)))
 
         self.cmd('vm create -g {rg} -n {vm_name} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {location} --secrets \'{secrets}\''.format(
             rg=self.resource_group,
@@ -1570,7 +1570,7 @@ class VMSSCreateLinuxSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: d
             policy_path))
 
         secret_out = self.cmd('keyvault secret list-versions --vault-name {} -n cert1'.format(self.vault_name))[-1]
-        vm_format = self.cmd('keyvault secret vm-format -s \'{0}\''.format(json.dumps(secret_out)))
+        vm_format = self.cmd('vm format-secret -s \'{0}\''.format(json.dumps(secret_out)))
 
         self.cmd('vmss create -n {name} -g {rg} --image Debian --admin-username deploy --ssh-key-value \'{ssh}\' --secrets \'{secrets}\''.format(
             name=self.vmss_name,

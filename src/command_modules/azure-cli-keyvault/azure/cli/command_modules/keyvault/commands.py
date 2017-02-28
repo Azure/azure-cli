@@ -111,6 +111,3 @@ cli_keyvault_data_plane_command('keyvault certificate issuer admin delete', cust
 
 # default policy document
 cli_keyvault_data_plane_command('keyvault certificate get-default-policy', custom_path.format('get_default_policy'))
-
-# secret vm formatter
-cli_command(__name__, 'keyvault secret vm-format', custom_path.format('get_vm_format_secret'), factory)

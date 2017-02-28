@@ -22,7 +22,6 @@ from azure.keyvault.generated.models import (CertificateAttributes,
                                              Trigger,
                                              Action)
 from azure.keyvault.generated.models.key_vault_client_enums import ActionType, KeyUsageType
-from azure.keyvault.key_vault_id import parse_secret_id
 from azure.mgmt.keyvault.models import (VaultCreateOrUpdateParameters,
                                         VaultProperties,
                                         AccessPolicyEntry,
@@ -37,8 +36,7 @@ import azure.cli.core.telemetry as telemetry
 from azure.cli.core._util import CLIError
 import azure.cli.core.azlogging as azlogging
 from azure.keyvault import KeyVaultClient
-from azure.cli.command_modules.keyvault._validators import secret_text_encoding_values, \
-    _get_resource_group_from_vault_name
+from azure.cli.command_modules.keyvault._validators import secret_text_encoding_values
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -202,50 +200,6 @@ def _get_object_id(graph_client, subscription=None, spn=None, upn=None):
     if upn:
         return _get_object_id_by_upn(graph_client, upn)
     return _get_object_id_from_subscription(graph_client, subscription)
-
-
-def _get_vault_id_from_name(client, vault_name):
-    group_name = _get_resource_group_from_vault_name(vault_name)
-    vault = client.get(group_name, vault_name)
-    return vault.id
-
-
-def get_vm_format_secret(client, secrets, certificate_store=None):
-    """
-    Format secrets to be used in `az vm create --secrets`
-    :param client: management api client
-    :param dict secrets: array of secrets to be formatted
-    :param str certificate_store: certificate store the secret will be applied (Windows only)
-    :return: formatted secrets as an array
-    :rtype: list
-    """
-    grouped_secrets = {}
-    if isinstance(secrets, dict):
-        secrets = [secrets]
-
-    # group secrets by source vault
-    for secret in secrets:
-        parsed = parse_secret_id(secret['id'])
-        match = re.search('://(.+?)\\.', parsed.vault)
-        vault_name = match.group(1)
-        if vault_name not in grouped_secrets:
-            grouped_secrets[vault_name] = {
-                'vaultCertificates': [],
-                'id': _get_vault_id_from_name(client, vault_name)
-            }
-
-        vault_cert = {'certificateUrl': secret['id']}
-        if certificate_store:
-            vault_cert['certificateStore'] = certificate_store
-
-        grouped_secrets[vault_name]['vaultCertificates'].append(vault_cert)
-
-    # transform the reduced map to vm format
-    formatted = [{'sourceVault': {'id': value['id']},
-                  'vaultCertificates': value['vaultCertificates']}
-                 for _, value in list(grouped_secrets.items())]
-
-    return formatted
 
 
 def get_default_policy(client, scaffold=False): #pylint: disable=unused-argument
