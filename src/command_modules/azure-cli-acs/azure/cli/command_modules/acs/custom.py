@@ -443,7 +443,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                 logger.info('Created a service principal: %s', service_principal)
                 store_acs_service_principal(subscription_id, client_secret, service_principal)
             # Either way, update the role assignment, this fixes things if we fail part-way through
-            if not _add_role_assignment('Owner', service_principal):
+            if not _add_role_assignment('Contributor', service_principal):
                 raise CLIError(
                     'Could not create a service principal with the right permissions. Are you an Owner on this project?')
         else:
