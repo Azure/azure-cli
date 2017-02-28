@@ -237,10 +237,9 @@ def config_source_control(resource_group_name, name, repo_url, repository_type=N
     result = _generic_site_operation(resource_group_name, name,
                                      'create_or_update_source_control',
                                      slot, source_control)
-    if manual_integration is not None:
-        return result
-    return '{} \n {}'.format(result, sync_site_repo(resource_group_name, name, slot))
-
+    if manual_integration is None:
+        sync_site_repo(resource_group_name, name, slot)
+    return result
 
 def update_git_token(git_token=None):
     '''
