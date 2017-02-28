@@ -237,7 +237,7 @@ def config_source_control(resource_group_name, name, repo_url, repository_type=N
     result = _generic_site_operation(resource_group_name, name,
                                      'create_or_update_source_control',
                                      slot, source_control)
-    if manual_integration is None:
+    if not manual_integration:
         sync_site_repo(resource_group_name, name, slot)
     return result
 
