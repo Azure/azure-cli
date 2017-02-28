@@ -76,13 +76,17 @@ class BatchPoolTest(BatchDataPlaneTestBase):
         # test create pool with missing optional parameters
         try:
             self.cmd('batch pool create --id missing-optional-test --vm-size small --os-family' +
-                     ' 4 --run-elevated')
+                     ' 4 --start-task-wait-for-success')
             raise AssertionError("Excepted exception to be raised.")
         except SystemExit as exp:
             self.assertEqual(exp.code, 2)
 
         # test create pool from JSON file
         self.cmd('batch pool create --json-file {}'.format(self.data_dir.format('create')))
+        from_json = self.cmd('batch pool show --pool-id azure-cli-test-json')
+        self.assertEqual(len(from_json['userAccounts']), 1)
+        self.assertEqual(from_json['userAccounts'][0]['name'], 'cliTestUser')
+        self.assertEqual(from_json['startTask']['userIdentity']['userName'], 'cliTestUser')
 
         # test create pool from non-existant JSON file
         try:

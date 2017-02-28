@@ -571,7 +571,7 @@ class TestBatchLoader(unittest.TestCase):
         attrs = list(self.command_job._get_attrs(models.ResourceFile, 'task.resource_files'))
         self.assertEqual(len(attrs), 3)
         attrs = list(self.command_job._get_attrs(models.JobManagerTask, 'job.job_manager_task'))
-        self.assertEqual(len(attrs), 10)
+        self.assertEqual(len(attrs), 11)
         attrs = list(self.command_job._get_attrs(models.JobAddParameter, 'job'))
         self.assertEqual(len(attrs), 10)
 
@@ -579,7 +579,7 @@ class TestBatchLoader(unittest.TestCase):
         # pylint: disable=too-many-statements
         handler = operations.pool_operations.PoolOperations.add
         args = list(self.command_pool._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 30)
+        self.assertEqual(len(args), 32)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
@@ -595,7 +595,7 @@ class TestBatchLoader(unittest.TestCase):
         self.assertFalse('destination' in [a for a, _ in args])
         handler = operations.task_operations.TaskOperations.add
         args = list(self.command_task._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 8)
+        self.assertEqual(len(args), 7)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
@@ -619,7 +619,7 @@ class TestBatchLoader(unittest.TestCase):
         self.assertFalse('destination' in [a for a, _ in args])
         handler = operations.job_schedule_operations.JobScheduleOperations.add
         args = list(self.command_conflicts._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 44)
+        self.assertEqual(len(args), 46)
         self.assertTrue('id' in [a for a, _ in args])
         self.assertTrue('job_manager_task_id' in [a for a, _ in args])
         self.assertTrue('job_manager_task_max_wall_clock_time' in [a for a, _ in args])
