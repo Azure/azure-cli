@@ -23,6 +23,7 @@ def transform_dns_record_set_output(result):
 
     return result
 
+
 def transform_dns_record_set_table_output(result):
     table_output = []
 
@@ -75,3 +76,9 @@ def transform_local_gateway_table_output(result):
         new_item['AddressPrefixes'] = prefix_val
         final_result.append(new_item)
     return final_result
+
+def transform_vnet_create_output(result):
+    try:
+        return {'newVNet': result.result()}
+    except Exception:  # pylint: disable=broad-except
+        return result
