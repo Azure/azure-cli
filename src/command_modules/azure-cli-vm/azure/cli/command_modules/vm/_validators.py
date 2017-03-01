@@ -68,106 +68,202 @@ def validate_location(namespace):
 
 # region VM Create Validators
 
-def _validate_vm_create_storage_profile(namespace, for_scale_set=False):  # pylint: disable=too-many-branches, too-many-statements
+def _parse_image_argument(namespace):
+    """ Systematically determines what type is supplied for the --image parameter. Updates the
+        namespace and returns the type for subsequent processing. """
+    # 1 - easy check for URI
+    if namespace.image.lower().endswith('.vhd'):
+        return 'uri'
 
+    # 2 - attempt to match an URN alias (most likely)
     from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
+    images = load_images_from_aliases_doc()
+    matched = next((x for x in images if x['urnAlias'].lower() == namespace.image.lower()), None)
+    if matched:
+        namespace.os_publisher = matched['publisher']
+        namespace.os_offer = matched['offer']
+        namespace.os_sku = matched['sku']
+        namespace.os_version = matched['version']
+        return 'urn'
 
-    image = namespace.image or ''
-
-    # do VM specific validating
-    if not for_scale_set:
-        if namespace.managed_os_disk:
-            if namespace.image:
-                raise CLIError("'--image' is not applicable when attach to an existing os disk")
-            if not namespace.os_type:
-                raise CLIError('--os-type TYPE is required when attach to an existing os disk')
-        else:
-            if not image:
-                raise CLIError("Please provide parameter value to '--image'")
-
-    if image.lower().endswith('.vhd'):
-        if not namespace.os_type:
-            raise CLIError('--os-type TYPE is required for a native OS VHD disk.')
-
-    valid_managed_skus = ['premium_lrs', 'standard_lrs']
-    valid_unmanaged_skus = valid_managed_skus + ['standard_grs', 'standard_ragrs', 'standard_zrs']
-
-    if namespace.use_unmanaged_disk:
-        if namespace.storage_sku.lower() not in valid_unmanaged_skus:
-            raise CLIError("Invalid storage sku '{}', please choose from '{}'".format(
-                namespace.storage_sku, valid_unmanaged_skus))
-        if namespace.data_disk_sizes_gb:
-            raise CLIError("'--data-disk-sizes-gb' is only applicable when use managed disks")
-        if '/images/' in namespace.image.lower():
-            raise CLIError("VM/VMSS created from a managed custom image must use managed disks")
-        if not for_scale_set and namespace.managed_os_disk:
-            raise CLIError("'--use-unmanaged-disk' is ignored when attach to a managed os disk")
-    else:
-        if namespace.storage_sku.lower() not in valid_managed_skus:
-            err = "invalid storage sku '{}' to use for managed os disks, please choose from '{}'"
-            raise CLIError(err.format(namespace.storage_sku, valid_managed_skus))
-        if for_scale_set and namespace.os_disk_name:
-            raise CLIError("'--os-disk-name' is not allowed for scale sets using managed disks")
-        if not for_scale_set and namespace.storage_account:
-            raise CLIError("'--storage-account' is only applicable when use unmanaged disk."
-                           " Please either remove it or turn on '--use-unmanaged-disk'")
-
-    # attempt to parse an URN
-    urn_match = re.match('([^:]*):([^:]*):([^:]*):([^:]*)', image)
+    # 3 - attempt to match an URN pattern
+    urn_match = re.match('([^:]*):([^:]*):([^:]*):([^:]*)', namespace.image)
     if urn_match:
         namespace.os_publisher = urn_match.group(1)
         namespace.os_offer = urn_match.group(2)
         namespace.os_sku = urn_match.group(3)
         namespace.os_version = urn_match.group(4)
-        namespace.storage_profile = (StorageProfile.SAPirImage
-                                     if namespace.use_unmanaged_disk
-                                     else StorageProfile.ManagedPirImage)
-    elif is_valid_resource_id(image):
-        namespace.storage_profile = StorageProfile.ManagedCustomImage
-    elif image.lower().endswith('.vhd'):
-        # pylint: disable=redefined-variable-type
-        namespace.storage_profile = StorageProfile.SACustomImage
-    elif not for_scale_set and namespace.managed_os_disk:
-        res = parse_resource_id(namespace.managed_os_disk)
-        name = res['name']
-        rg = res.get('resource_group', namespace.resource_group_name)
-        namespace.managed_os_disk = resource_id(
-            subscription=get_subscription_id(),
-            resource_group=rg,
-            namespace='Microsoft.Compute',
-            type='disks',
-            name=name)
-        namespace.storage_profile = StorageProfile.ManagedSpecializedOSDisk
-    else:
-        images = load_images_from_aliases_doc()
-        matched = next((x for x in images if x['urnAlias'].lower() == image.lower()), None)
-        if matched:
-            namespace.os_publisher = matched['publisher']
-            namespace.os_offer = matched['offer']
-            namespace.os_sku = matched['sku']
-            namespace.os_version = matched['version']
-            namespace.storage_profile = (StorageProfile.SAPirImage
-                                         if namespace.use_unmanaged_disk
-                                         else StorageProfile.ManagedPirImage)
+        return 'urn'
+
+    # 4 - check if a fully-qualified ID (assumes it is an image ID)
+    if is_valid_resource_id(namespace.image):
+        return 'image_id'
+
+    # 5 - check if an existing managed disk image resource
+    compute_client = _compute_client_factory()
+    try:
+        compute_client.images.get(namespace.resource_group_name, namespace.image)
+        namespace.image = _get_resource_id(namespace.image, namespace.resource_group_name,
+                                           'images', 'Microsoft.Compute')
+        return 'image_id'
+    except CloudError:
+        err = 'Invalid image "{}". Use a custom image name, id, or pick one from {}'
+        raise CLIError(err.format(namespace.image, [x['urnAlias'] for x in images]))
+
+
+def _get_storage_profile_description(profile):
+    if profile == StorageProfile.SACustomImage:
+        return 'create unmanaged OS disk created from generalized VHD'
+    elif profile == StorageProfile.SAPirImage:
+        return 'create unmanaged OS disk from Azure Marketplace image'
+    elif profile == StorageProfile.SASpecializedOSDisk:
+        return 'attach to existing unmanaged OS disk'
+    elif profile == StorageProfile.ManagedCustomImage:
+        return 'create managed OS disk from custom image'
+    elif profile == StorageProfile.ManagedPirImage:
+        return 'create managed OS disk from Azure Marketplace image'
+    elif profile == StorageProfile.ManagedSpecializedOSDisk:
+        return 'attach existing managed OS disk'
+
+
+storage_profile_param_options = {
+    'os_disk_name': '--os-disk-name',
+    'storage_caching': '--storage-caching',
+    'os_type': '--os-type',
+    'attach_os_disk': '--attach-os-disk',
+    'image': '--image',
+    'storage_account': '--storage-account',
+    'storage_container_name': '--storage-container-name',
+    'storage_sku': '--storage-sku',
+    'use_unmanaged_disk': '--use-unmanaged-disk'
+}
+
+
+def _validate_required_forbidden_parameters(namespace, required, forbidden):
+    missing_required = [x for x in required if not getattr(namespace, x)]
+    included_forbidden = [x for x in forbidden if getattr(namespace, x)]
+    if missing_required or included_forbidden:
+        error = 'invalid usage for storage profile: {}:'.format(
+            _get_storage_profile_description(namespace.storage_profile))
+        if missing_required:
+            missing_string = ', '.join(
+                storage_profile_param_options[x] for x in missing_required)
+            error = '{}\n\tmissing: {}'.format(error, missing_string)
+        if included_forbidden:
+            forbidden_string = ', '.join(
+                storage_profile_param_options[x] for x in included_forbidden)
+            error = '{}\n\tnot applicable: {}'.format(error, forbidden_string)
+        raise CLIError(error)
+
+
+def _validate_managed_disk_sku(sku):
+
+    allowed_skus = ['Premium_LRS', 'Standard_LRS']
+    if sku and sku.lower() not in [x.lower() for x in allowed_skus]:
+        raise CLIError("invalid storage SKU '{}': allowed values: '{}'".format(sku, allowed_skus))
+
+
+# pylint: disable=too-many-branches, too-many-statements, redefined-variable-type
+def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
+
+    # use minimal parameters to resolve the expected storage profile
+    if getattr(namespace, 'attach_os_disk', None) and not namespace.image:
+        if namespace.use_unmanaged_disk:
+            # STORAGE PROFILE #3
+            namespace.storage_profile = StorageProfile.SASpecializedOSDisk
         else:
-            # last try: is it a custom image name?
-            compute_client = _compute_client_factory()
-            try:
-                compute_client.images.get(namespace.resource_group_name, image)
-                image = namespace.image = _get_resource_id(image, namespace.resource_group_name,
-                                                           'images', 'Microsoft.Compute')
-                namespace.storage_profile = StorageProfile.ManagedCustomImage
-            except CloudError:
-                err = 'Invalid image "{}". Use a custom image name, id, or pick one from {}'
-                raise CLIError(err.format(image, [x['urnAlias'] for x in images]))
+            # STORAGE PROFILE #6
+            namespace.storage_profile = StorageProfile.ManagedSpecializedOSDisk
+    elif namespace.image and not getattr(namespace, 'attach_os_disk', None):
+        image_type = _parse_image_argument(namespace)
+        if image_type == 'uri':
+            # STORAGE PROFILE #2
+            namespace.storage_profile = StorageProfile.SACustomImage
+        elif image_type == 'image_id':
+            # STORAGE PROFILE #5
+            namespace.storage_profile = StorageProfile.ManagedCustomImage
+        elif image_type == 'urn':
+            if namespace.use_unmanaged_disk:
+                # STORAGE PROFILE #1
+                namespace.storage_profile = StorageProfile.SAPirImage
+            else:
+                # STORAGE PROFILE #4
+                namespace.storage_profile = StorageProfile.ManagedPirImage
+        else:
+            raise CLIError('Unrecognized image type: {}'.format(image_type))
+    else:
+        # did not specify image XOR attach-os-disk
+        raise CLIError('incorrect usage: --image IMAGE | --attach-os-disk DISK')
+
+    # perform parameter validation for the specific storage profile
+    # start with the required/forbidden parameters for VM
+    if namespace.storage_profile == StorageProfile.ManagedPirImage:
+        required = ['image']
+        forbidden = ['os_type', 'attach_os_disk', 'storage_account',
+                     'storage_container_name', 'use_unmanaged_disk']
+        if for_scale_set:
+            forbidden.append('os_disk_name')
+        _validate_managed_disk_sku(namespace.storage_sku)
+
+    elif namespace.storage_profile == StorageProfile.ManagedCustomImage:
+        required = ['image']
+        forbidden = ['os_type', 'attach_os_disk', 'storage_account',
+                     'storage_container_name', 'use_unmanaged_disk']
+        if for_scale_set:
+            forbidden.append('os_disk_name')
+        _validate_managed_disk_sku(namespace.storage_sku)
+
+    elif namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
+        required = ['os_type', 'attach_os_disk']
+        forbidden = ['os_disk_name', 'storage_caching', 'storage_account',
+                     'storage_container_name', 'use_unmanaged_disk', 'storage_sku']
+        _validate_managed_disk_sku(namespace.storage_sku)
+
+    elif namespace.storage_profile == StorageProfile.SAPirImage:
+        required = ['image', 'use_unmanaged_disk']
+        forbidden = ['os_type', 'attach_os_disk', 'data_disk_sizes_gb']
+
+    elif namespace.storage_profile == StorageProfile.SACustomImage:
+        required = ['image', 'os_type', 'use_unmanaged_disk']
+        forbidden = ['attach_os_disk', 'data_disk_sizes_gb']
+
+    elif namespace.storage_profile == StorageProfile.SASpecializedOSDisk:
+        required = ['os_type', 'attach_os_disk', 'use_unmanaged_disk']
+        forbidden = ['os_disk_name', 'storage_caching', 'image', 'storage_account',
+                     'storage_container_name', 'data_disk_sizes_gb', 'storage_sku']
+
+    else:
+        raise CLIError('Unrecognized storage profile: {}'.format(namespace.storage_profile))
+
+    if for_scale_set:
+        # VMSS lacks some parameters, so scrub these out
+        props_to_remove = ['attach_os_disk', 'storage_account']
+        for prop in props_to_remove:
+            if prop in required:
+                required.remove(prop)
+            if prop in forbidden:
+                forbidden.remove(prop)
+
+    # set default storage SKU if not provided and using an image based OS
+    if not namespace.storage_sku and namespace.storage_profile not in [StorageProfile.ManagedSpecializedOSDisk, StorageProfile.SASpecializedOSDisk]:  # pylint: disable=line-too-long
+        namespace.storage_sku = 'Standard_LRS' if for_scale_set else 'Premium_LRS'
+
+    # Now verify that the status of required and forbidden parameters
+    _validate_required_forbidden_parameters(namespace, required, forbidden)
 
     if namespace.storage_profile == StorageProfile.ManagedCustomImage:
-        res = parse_resource_id(image)
+        # extract additional information from a managed custom image
+        res = parse_resource_id(namespace.image)
         compute_client = _compute_client_factory()
         image_info = compute_client.images.get(res['resource_group'], res['name'])
         # pylint: disable=no-member
         namespace.os_type = image_info.storage_profile.os_disk.os_type.value
         namespace.image_data_disks = image_info.storage_profile.data_disks
+
+    elif namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
+        # accept disk name or ID
+        namespace.attach_os_disk = _get_resource_id(
+            namespace.attach_os_disk, namespace.resource_group_name, 'disks', 'Microsoft.Compute')
 
     if not namespace.os_type:
         namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
@@ -362,7 +458,8 @@ def _validate_vm_create_nics(namespace):
 
 
 def _validate_vm_create_auth(namespace):
-    if namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
+    if namespace.storage_profile in [StorageProfile.ManagedSpecializedOSDisk,
+                                     StorageProfile.SASpecializedOSDisk]:
         return
 
     if len(namespace.admin_username) < 6 or namespace.admin_username.lower() == 'root':
