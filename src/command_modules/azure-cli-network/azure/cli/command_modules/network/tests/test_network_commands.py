@@ -383,8 +383,8 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
         private_ip = '10.0.0.15'
         vnet = self.cmd('network vnet create -n {} -g {} --subnet-name default'.format(vnet_name, self.resource_group))
         subnet_id = vnet['newVNet']['subnets'][0]['id']
-        self.cmd('network lb create -n {}3 -g {} --vnet-name {} --subnet {} --private-ip-address {}'.format(
-            self.lb_name, self.resource_group, vnet_name, subnet_id, private_ip), checks=[
+        self.cmd('network lb create -n {}3 -g {} --subnet {} --private-ip-address {}'.format(
+            self.lb_name, self.resource_group, subnet_id, private_ip), checks=[
                 JMESPathCheck('loadBalancer.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Static'),
                 JMESPathCheck('loadBalancer.frontendIPConfigurations[0].properties.privateIPAddress', private_ip),
                 JMESPathCheck('loadBalancer.frontendIPConfigurations[0].resourceGroup', self.resource_group),
