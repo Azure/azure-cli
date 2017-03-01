@@ -27,12 +27,12 @@ class SizeWithUnitConverter(object):  # pylint: disable=too-few-public-methods
 
     def __init__(
             self,
-            unit='kb',
+            unit='kB',
             result_type=int,
             unit_map=None):
         self.unit = unit
         self.result_type = result_type
-        self.unit_map = unit_map or dict(b=1, kb=1024, Mb=1024 * 1024, Gb=1024 * 1024 * 1024)
+        self.unit_map = unit_map or dict(B=1, kB=1024, MB=1024 * 1024, GB=1024 * 1024 * 1024)
 
     def __call__(self, value):
         numeric_part = ''.join(itertools.takewhile(str.isdigit, value))
@@ -64,11 +64,11 @@ with ParametersContext(command='sql db') as c:
     c.register_alias('requested_service_objective_name', ('--service-objective',))
 
     c.argument('max_size_bytes', options_list=('--storage',),
-               type=SizeWithUnitConverter('b', result_type=int),
+               type=SizeWithUnitConverter('B', result_type=int),
                help='The max storage of the database. Only the following'
                ' sizes are supported (in addition to limitations being placed on'
-               ' each edition): 100Mb, 500Mb, 1Gb, 5Gb, 10Gb, 20Gb,'
-               ' 30Gb, 150Gb, 200Gb, 500Gb. If no unit is specified, defaults to bytes.')
+               ' each edition): 100MB, 500MB, 1GB, 5GB, 10GB, 20GB,'
+               ' 30GB, 150GB, 200GB, 500GB. If no unit is specified, defaults to bytes (B).')
 
     # Adjust help text.
     c.argument('edition',
@@ -235,9 +235,9 @@ with ParametersContext(command='sql elastic-pool') as c:
     c.register_alias('database_dtu_min', ('--db-dtu-min',))
 
     c.argument('storage_mb', options_list=('--storage',),
-               type=SizeWithUnitConverter('Mb', result_type=int),
+               type=SizeWithUnitConverter('MB', result_type=int),
                help='The max storage size of the elastic pool. If no unit is specified, defaults'
-               ' to Mb.')
+               ' to megabytes (MB).')
 
 with ParametersContext(command='sql elastic-pool create') as c:
     c.expand('parameters', ElasticPool)

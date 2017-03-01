@@ -270,7 +270,7 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
         self.database_name = "cliautomationdb01"
         self.database_copy_name = "cliautomationdb02"
         self.update_service_objective = 'S1'
-        self.update_storage = '10Gb'
+        self.update_storage = '10GB'
         self.update_storage_bytes = str(10 * 1024 * 1024 * 1024)
 
     def test_sql_db_mgmt(self):
@@ -369,13 +369,13 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
         self.dtu = 1200
         self.db_dtu_min = 10
         self.db_dtu_max = 50
-        self.storage = '1200Gb'
+        self.storage = '1200GB'
         self.storage_mb = 1228800
 
         self.updated_dtu = 50
         self.updated_db_dtu_min = 10
         self.updated_db_dtu_max = 50
-        self.updated_storage = '50Gb'
+        self.updated_storage = '50GB'
         self.updated_storage_mb = 51200
 
         self.db_service_objective = 'S1'
