@@ -193,19 +193,24 @@ def db_list(
         resource_group_name,
         elastic_pool_name=None):
 
+    # OData filter expression to exclude DataWarehouse
+    filter = "properties/edition ne 'DataWarehouse'"
+
     if elastic_pool_name:
         # List all databases in the elastic pool
         pool_client = get_sql_elasticpools_operations(None)
         return pool_client.list_databases(
             server_name=server_name,
             resource_group_name=resource_group_name,
-            elastic_pool_name=elastic_pool_name)
+            elastic_pool_name=elastic_pool_name,
+            filter=filter)
     else:
         # List all databases in the server
         # TODO: Filter out DataWarehouse edition
         return client.list_by_server(
             resource_group_name=resource_group_name,
-            server_name=server_name)
+            server_name=server_name,
+            filter=filter)
 
 
 # Update database. Custom update function to apply parameters to instance.
@@ -280,10 +285,14 @@ def dw_list(
         client,
         server_name,
         resource_group_name):
-    # TODO: Filter for DataWarehouse edition
+
+    # OData filter expression to include only DataWarehouse
+    filter = "properties/edition eq 'DataWarehouse'"
+
     return client.list_by_server(
         resource_group_name=resource_group_name,
-        server_name=server_name)
+        server_name=server_name,
+        filter=filter)
 
 
 # Update data warehouse. Custom update function to apply parameters to instance.
