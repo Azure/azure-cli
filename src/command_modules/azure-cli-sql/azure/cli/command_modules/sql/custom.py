@@ -77,25 +77,6 @@ def db_create(
         kwargs)
 
 
-# Creates a datawarehouse. Wrapper function which uses the server location so that the user doesn't
-# need to specify location.
-def dw_create(
-        client,
-        database_name,
-        server_name,
-        resource_group_name,
-        **kwargs):
-
-    # Set edition
-    kwargs['Edition'] = 'DataWarehouse'
-
-    # Create
-    return _db_dw_create(
-        client,
-        DatabaseIdentity(database_name, server_name, resource_group_name),
-        kwargs)
-
-
 # Common code for special db create modes.
 def _db_create_special(
         client,
@@ -221,6 +202,7 @@ def db_list(
             elastic_pool_name=elastic_pool_name)
     else:
         # List all databases in the server
+        # TODO: Filter out DataWarehouse edition
         return client.list_by_server(
             resource_group_name=resource_group_name,
             server_name=server_name)
@@ -268,6 +250,50 @@ def db_update(
 
     return instance
 
+
+###############################################
+#                sql dw                       #
+###############################################
+
+
+# Creates a datawarehouse. Wrapper function which uses the server location so that the user doesn't
+# need to specify location.
+def dw_create(
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        **kwargs):
+
+    # Set edition
+    kwargs['Edition'] = 'DataWarehouse'
+
+    # Create
+    return _db_dw_create(
+        client,
+        DatabaseIdentity(database_name, server_name, resource_group_name),
+        kwargs)
+
+
+# Lists databases in a server or elastic pool.
+def dw_list(
+        client,
+        server_name,
+        resource_group_name):
+    # TODO: Filter for DataWarehouse edition
+    return client.list_by_server(
+        resource_group_name=resource_group_name,
+        server_name=server_name)
+
+# Update data warehouse. Custom update function to apply parameters to instance.
+def dw_update(
+        instance,
+        max_size_bytes=None,
+        requested_service_objective_name=None):
+
+    # TODO
+
+    return instance
 
 ###############################################
 #                sql elastic-pool             #

@@ -33,12 +33,16 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
         c.command('failover', 'failover_replication_link')
         c.command('force-failover', 'failover_replication_link_allow_data_loss')
 
-    # Data Warehouse will not be included in the first batch of GA commands
-    # with s.group('sql db data-warehouse') as c:
-    #     c.command('pause', 'pause_data_warehouse')
-    #     c.command('resume', 'resume_data_warehouse')
+    with s.group('sql dw') as c:
+        c.custom_command('create', 'dw_create')
+        c.command('show', 'get')
+        c.custom_command('list', 'dw_list')
+        c.command('delete', 'delete')
+        c.command('pause', 'pause_data_warehouse')
+        c.command('resume', 'resume_data_warehouse')
+        c.generic_update_command('update', 'get', 'create_or_update', custom_func_name='dw_update')
 
-    # Data Warehouse will not be included in the first batch of GA commands
+    # Data Warehouse restore will not be included in the first batch of GA commands
     # (list_restore_points also applies to db, but it's not very useful. It's
     # mainly useful for dw.)
     # with s.group('sql db restore-point') as c:
