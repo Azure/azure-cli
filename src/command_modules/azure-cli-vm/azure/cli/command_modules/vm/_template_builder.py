@@ -70,9 +70,10 @@ class ArmTemplateBuilder(object):
 class StorageProfile(Enum):
     SAPirImage = 1
     SACustomImage = 2
-    ManagedPirImage = 3  # this would be the main scenarios
-    ManagedCustomImage = 4
-    ManagedSpecializedOSDisk = 5
+    SASpecializedOSDisk = 3
+    ManagedPirImage = 4  # this would be the main scenarios
+    ManagedCustomImage = 5
+    ManagedSpecializedOSDisk = 6
 
 
 def build_deployment_resource(name, template, dependencies=None):
@@ -254,7 +255,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         image_reference=None, os_disk_name=None, custom_image_os_type=None,
         storage_caching=None, storage_sku=None,
         os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
-        managed_os_disk=None, data_disk_sizes_gb=None, image_data_disks=None,
+        attach_os_disk=None, data_disk_sizes_gb=None, image_data_disks=None,
         custom_data=None):
 
     def _build_os_profile():
@@ -312,6 +313,14 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                     'version': os_version
                 }
             },
+            'SASpecializedOSDisk': {
+                'osDisk': {
+                    'createOption': 'attach',
+                    'osType': custom_image_os_type,
+                    'name': os_disk_name,
+                    'vhd': {'uri': attach_os_disk}
+                }
+            },
             'ManagedPirImage': {
                 'osDisk': {
                     'createOption': 'fromImage',
@@ -342,7 +351,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                     'createOption': 'attach',
                     'osType': custom_image_os_type,
                     'managedDisk': {
-                        "id": managed_os_disk
+                        'id': attach_os_disk
                     }
                 }
             }
@@ -361,7 +370,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
     if availability_set_id:
         vm_properties['availabilitySet'] = {'id': availability_set_id}
 
-    if not managed_os_disk:
+    if not attach_os_disk:
         vm_properties['osProfile'] = _build_os_profile()
 
     vm = {
