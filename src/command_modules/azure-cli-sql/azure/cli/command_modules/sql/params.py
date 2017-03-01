@@ -4,11 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 import itertools
+from enum import Enum
 from ._util import ParametersContext, patch_arg_make_required
 from azure.cli.core.commands import CliArgumentType
 from azure.mgmt.sql.models.database import Database
 from azure.mgmt.sql.models.elastic_pool import ElasticPool
 from azure.mgmt.sql.models.server import Server
+from azure.mgmt.sql.models.sql_management_client_enums import CreateMode
 
 #####
 #           Reusable param type definitions
@@ -55,6 +57,77 @@ class SizeWithUnitConverter(object):  # pylint: disable=too-few-public-methods
 #                sql db                       #
 ###############################################
 
+
+class Engine(Enum):
+    db = 'db'
+    dw = 'dw'
+
+
+def _configure_db_create_params(
+        cmd,
+        engine,
+        create_mode):
+    """
+    Configures params for db/dw create/update commands.
+
+    engine: Engine enum value (e.g. 'db', 'dw')
+    create_mode: Valid CreateMode enum value (e.g. 'Default', 'Copy', etc)
+    """
+
+    # DW does not support all create modes. Check that engine and create_mode are consistent.
+    if engine == Engine.dw and create_mode not in [
+            CreateMode.default,
+            CreateMode.point_in_time_restore,
+            CreateMode.restore]:
+        raise ValueError('Engine {} does not support create mode {}'.format(engine, create_mode))
+
+    # Include all Database params as a starting point. We will filter from there.
+    cmd.expand('parameters', Database)
+
+    # The following params are always ignored because their values are filled in by wrapper
+    # functions.
+    cmd.ignore('location')
+    cmd.ignore('create_mode')
+    cmd.ignore('source_database_id')
+
+    # Read scale is only applicable to sql db (not dw). However it is a preview feature and will
+    # be not exposed for now.
+    cmd.ignore('read_scale')
+
+    # Service objective id is not user-friendly and won't be exposed.
+    # Better to use service objective name instead.
+    cmd.ignore('requested_service_objective_id')
+
+    # Only applicable to default create mode. Also only applicable to db.
+    if create_mode != CreateMode.default or engine != Engine.db:
+        cmd.ignore('sample_name')
+
+    # Only applicable to point in time restore create mode.
+    if create_mode != CreateMode.point_in_time_restore:
+        cmd.ignore('restore_point_in_time')
+
+    # 'collation', 'edition', and 'max_size_bytes' are ignored (or rejected) when creating a copy
+    # or secondary because their values are determined by the source db.
+    if create_mode in [CreateMode.copy, CreateMode.non_readable_secondary,
+                       CreateMode.online_secondary]:
+        cmd.ignore('collation')
+        cmd.ignore('edition')
+        cmd.ignore('max_size_bytes')
+
+    # collation and max_size_bytes are ignored when restoring because their values are determined by
+    # the source db.
+    if create_mode == CreateMode.restore:
+        cmd.ignore('collation')
+        cmd.ignore('max_size_bytes')
+
+    if engine == Engine.dw:
+        # Elastic pool is only for SQL DB.
+        c.ignore('elastic_pool_name')
+
+        # Edition is always 'DataWarehouse'
+        c.ignore('edition')
+
+
 with ParametersContext(command='sql db') as c:
     c.argument('database_name',
                options_list=('--name', '-n'),
@@ -73,36 +146,13 @@ with ParametersContext(command='sql db') as c:
     # Adjust help text.
     c.argument('edition',
                options_list=('--edition',),
-               help='The edition of the Azure SQL database.')
-
-    # sql db params that are always ignored because their values are filled in by customer wrapper
-    # functions where appropriate for each command
-    c.ignore('location')
-    c.ignore('create_mode')
-    c.ignore('source_database_id')
-
-    # Read scale is a preview feature and will be not exposed for now
-    c.ignore('read_scale')
-
-    # Service objective id is not user-friendly and won't be exposed.
-    # Better to use service objective name instead.
-    c.ignore('requested_service_objective_id')
-
+               help='The edition of the database.')
 
 with ParametersContext(command='sql db create') as c:
-    c.expand('parameters', Database)
-
-    # Only applicable to point in time restore create mode.
-    c.ignore('restore_point_in_time')
-
-# 'collation', 'edition', and 'max_size_bytes' are ignored (or rejected) when creating a copy or
-# secondary because their values are determined by the source db. 'sample_name' is only for default
-# create mode. 'restore_point_in_time' is only for restore create mode.
-sql_db_copy_ignored_params = \
-    ['collation', 'edition', 'max_size_bytes', 'sample_name', 'restore_point_in_time']
+    _configure_db_create_params(c, Engine.db, CreateMode.default)
 
 with ParametersContext(command='sql db copy') as c:
-    c.expand('parameters', Database)
+    _configure_db_create_params(c, Engine.db, CreateMode.copy)
 
     c.argument('elastic_pool_name',
                options_list=('--dest-elastic-pool',),
@@ -125,11 +175,8 @@ with ParametersContext(command='sql db copy') as c:
                options_list=('--dest-service-objective',),
                help='Name of service objective for the new database.')
 
-    for i in sql_db_copy_ignored_params:
-        c.ignore(i)
-
 with ParametersContext(command='sql db create-replica') as c:
-    c.expand('parameters', Database)
+    _configure_db_create_params(c, Engine.db, CreateMode.online_secondary)
 
     c.argument('elastic_pool_name',
                options_list=('--secondary-elastic-pool',),
@@ -148,22 +195,12 @@ with ParametersContext(command='sql db create-replica') as c:
                options_list=('--secondary-server',),
                help='Name of the server to create the new secondary database in.')
 
-    for i in sql_db_copy_ignored_params:
-        c.ignore(i)
-
-# collation and max_size_bytes are ignored when restoring because their values are determined by
-# the source db. 'sample_name' is only for default create mode.
-sql_db_restore_ignored_params = ['collation', 'max_size_bytes', 'sample_name']
-
 with ParametersContext(command='sql db restore') as c:
-    c.expand('parameters', Database)
+    _configure_db_create_params(c, Engine.db, CreateMode.point_in_time_restore)
 
     c.register_alias('requested_service_objective_name', ('--dest-service-objective',))
     c.register_alias('elastic_pool_name', ('--dest-elastic-pool',))
     c.register_alias('dest_resource_group_name', ('--dest-resource-group',))
-
-    for i in sql_db_restore_ignored_params:
-        c.ignore(i)
 
 with ParametersContext(command='sql db show') as c:
     # Service tier advisors and transparent data encryption are not included in the first batch
@@ -211,6 +248,33 @@ with ParametersContext(command='sql db replica-link') as c:
 # TDE will not be included in the first batch of GA commands
 # with ParametersContext(command='sql db transparent-data-encryption') as c:
 #     c.register_alias('database_name', ('--database', '-d'))
+
+
+###############################################
+#                sql dw                       #
+###############################################
+
+with ParametersContext(command='sql dw') as c:
+    c.argument('database_name', options_list=('--name', '-n'),
+               help='Name of the data warehouse.')
+
+    c.argument('server_name', arg_type=server_param_type)
+
+    c.argument('max_size_bytes', options_list=('--storage',),
+               type=SizeWithUnitConverter('B', result_type=int),
+               help='The max storage of the data warehouse. If no unit is specified, defaults to'
+               ' bytes (B).')
+
+    c.argument('requested_service_objective_name',
+               options_list=('--service-objective',),
+               help='The service objective of the data warehouse')
+
+    c.argument('collation',
+               options_list=('--collation',),
+               help='The collation of the data warehouse.')
+
+with ParametersContext(command='sql dw create') as c:
+    _configure_db_create_params(c, Engine.dw, CreateMode.default)
 
 ###############################################
 #                sql elastic-pool             #

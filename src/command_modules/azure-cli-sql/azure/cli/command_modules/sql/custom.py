@@ -285,8 +285,9 @@ def dw_list(
         resource_group_name=resource_group_name,
         server_name=server_name)
 
+
 # Update data warehouse. Custom update function to apply parameters to instance.
-def dw_update(
+def dw_update(  # pylint: disable=unused-argument
         instance,
         max_size_bytes=None,
         requested_service_objective_name=None):
