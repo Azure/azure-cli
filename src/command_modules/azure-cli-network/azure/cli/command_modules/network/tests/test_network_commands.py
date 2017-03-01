@@ -226,12 +226,12 @@ class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
         rg = s.resource_group
         s.cmd('network public-ip create -g {} -n {} --dns-name {} --allocation-method static'.format(rg, public_ip_dns, dns), checks=[
             JMESPathCheck('publicIp.provisioningState', 'Succeeded'),
-            JMESPathCheck('publicIp.publicIPAllocationMethod', 'Static'),
+            JMESPathCheck('publicIp.publicIpAllocationMethod', 'Static'),
             JMESPathCheck('publicIp.dnsSettings.domainNameLabel', dns)
         ])
         s.cmd('network public-ip create -g {} -n {}'.format(rg, public_ip_no_dns), checks=[
             JMESPathCheck('publicIp.provisioningState', 'Succeeded'),
-            JMESPathCheck('publicIp.publicIPAllocationMethod', 'Dynamic'),
+            JMESPathCheck('publicIp.publicIpAllocationMethod', 'Dynamic'),
             JMESPathCheck('publicIp.dnsSettings', None)
         ])
         s.cmd('network public-ip update -g {} -n {} --allocation-method static --dns-name wowza --idle-timeout 10'.format(rg, public_ip_no_dns), checks=[
@@ -383,8 +383,8 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
         private_ip = '10.0.0.15'
         vnet = self.cmd('network vnet create -n {} -g {} --subnet-name default'.format(vnet_name, self.resource_group))
         subnet_id = vnet['newVNet']['subnets'][0]['id']
-        self.cmd('network lb create -n {}3 -g {} --vnet-name {} --subnet {} --private-ip-address {}'.format(
-            self.lb_name, self.resource_group, vnet_name, subnet_id, private_ip), checks=[
+        self.cmd('network lb create -n {}3 -g {} --subnet {} --private-ip-address {}'.format(
+            self.lb_name, self.resource_group, subnet_id, private_ip), checks=[
                 JMESPathCheck('loadBalancer.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Static'),
                 JMESPathCheck('loadBalancer.frontendIPConfigurations[0].properties.privateIPAddress', private_ip),
                 JMESPathCheck('loadBalancer.frontendIPConfigurations[0].resourceGroup', self.resource_group),

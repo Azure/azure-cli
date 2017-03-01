@@ -75,11 +75,6 @@ def cf_nsg_create(_):
 def cf_public_ip_addresses(_):
     return _network_client_factory().public_ip_addresses
 
-def cf_public_ip_create(_):
-    from azure.cli.command_modules.network.mgmt_public_ip.lib import PublicIpCreationClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(PublicIpCreationClient).public_ip
-
 def cf_route_tables(_):
     return _network_client_factory().route_tables
 

@@ -14,7 +14,7 @@ from azure.mgmt.network.models import \
      NetworkInterfaceIPConfiguration, Route, VpnClientRootCertificate, VpnClientConfiguration,
      AddressSpace, VpnClientRevokedCertificate, SubResource, VirtualNetworkPeering,
      ApplicationGatewayFirewallMode, SecurityRuleAccess, SecurityRuleDirection,
-     SecurityRuleProtocol)
+     SecurityRuleProtocol, IPAllocationMethod, IPVersion)
 
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands import LongRunningOperation
@@ -815,6 +815,21 @@ update_nsg_rule.__doc__ = SecurityRule.__doc__
 #endregion
 
 #region Public IP commands
+
+def create_public_ip(resource_group_name, public_ip_address_name, location=None, tags=None,
+                     allocation_method=IPAllocationMethod.dynamic.value, dns_name=None,
+                     idle_timeout=4, reverse_fqdn=None, version=IPVersion.ipv4.value):
+    client = _network_client_factory().public_ip_addresses
+    public_ip = PublicIPAddress(
+        location=location, tags=tags, public_ip_allocation_method=allocation_method,
+        idle_timeout_in_minutes=idle_timeout, public_ip_address_version=version,
+        dns_settings=None)
+    if dns_name or reverse_fqdn:
+        from azure.mgmt.network.models import PublicIPAddressDnsSettings
+        public_ip.dns_settings = PublicIPAddressDnsSettings(
+            domain_name_label=dns_name,
+            reverse_fqdn=reverse_fqdn)
+    return client.create_or_update(resource_group_name, public_ip_address_name, public_ip)
 
 def update_public_ip(instance, dns_name=None, allocation_method=None, version=None,
                      idle_timeout=None, reverse_fqdn=None, tags=None):
