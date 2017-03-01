@@ -3,48 +3,51 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# AZURE CLI ACR TEST DEFINITIONS
-#pylint: disable=line-too-long
+from azure.cli.tests import (ScenarioTest, JMESPathCheck, JMESPathCheckExists, NoneCheck,
+                             StorageAccountPreparer, ResourceGroupPreparer)
 
-from azure.cli.core.test_utils.vcr_test_base import (
-    ResourceGroupVCRTestBase,
-    JMESPathCheck,
-    NoneCheck
-)
 
-class ACRTest(ResourceGroupVCRTestBase):
+class AcrCommandsTests(ScenarioTest):
+    def test_check_name_availability(self):
+        # the chance of this randomly generated name has a duplication is rare
+        name = self.create_random_name('clireg', 50)
+        self.cmd('acr check-name -n {}'.format(name), checks=JMESPathCheck('nameAvailable', True))
 
-    def __init__(self, test_method):
-        super(ACRTest, self).__init__(__file__, test_method, resource_group='acr_resource_group')
-        self.registry_name_1 = 'acrtestregistry1'
-        self.registry_name_2 = 'acrtestregistry2'
-        self.storage_account_1 = 'acrteststorage1'
-        self.storage_account_2 = 'acrteststorage2'
-        self.location = 'southcentralus'
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_update')
+    def test_acr_create_without_existing_storage(self, resource_group, resource_group_location,
+                                                 storage_account_for_update):
+        self._core_create_scenario(resource_group, resource_group_location,
+                                   storage_account_for_update)
 
-    def test_acr(self):
-        self.execute()
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    @StorageAccountPreparer(parameter_name='storage_account_for_update')
+    def test_acr_create_with_existing_storage(self, resource_group, resource_group_location,
+                                              storage_account_for_update,
+                                              storage_account_for_create):
+        self._core_create_scenario(resource_group, resource_group_location,
+                                   storage_account_for_update,
+                                   storage_account_for_create)
 
-    def _test_acr(self, registry_name, storage_account_for_update, storage_account_for_create=None):
-        resource_group = self.resource_group
-        location = self.location
-        # test acr create
-        self.cmd('acr check-name -n {}'.format(registry_name), checks=[
-            JMESPathCheck('nameAvailable', True)
-        ])
+    def _core_create_scenario(self, resource_group, location, storage_account_for_update,
+                              storage_account_for_create=None):
+        registry_name = self.create_random_name('clireg', 50)
+
         if storage_account_for_create is None:
-            self.cmd('acr create -n {} -g {} -l {}'.format(registry_name, resource_group, location), checks=[
+            self.cmd('acr create -n {} -g {} -l {}'.format(
+                registry_name, resource_group, location), checks=[
                 JMESPathCheck('name', registry_name),
                 JMESPathCheck('location', location),
-                JMESPathCheck('adminUserEnabled', False)
-            ])
+                JMESPathCheck('adminUserEnabled', False)])
         else:
-            self.cmd('acr create -n {} -g {} -l {} --storage-account-name {}'.format(registry_name, resource_group, location, storage_account_for_create), checks=[
+            self.cmd('acr create -n {} -g {} -l {} --storage-account-name {}'.format(
+                registry_name, resource_group, location, storage_account_for_create), checks=[
                 JMESPathCheck('name', registry_name),
                 JMESPathCheck('location', location),
                 JMESPathCheck('adminUserEnabled', False),
-                JMESPathCheck('storageAccount.name', storage_account_for_create)
-            ])
+                JMESPathCheck('storageAccount.name', storage_account_for_create)])
+
         self.cmd('acr check-name -n {}'.format(registry_name), checks=[
             JMESPathCheck('nameAvailable', False),
             JMESPathCheck('reason', 'AlreadyExists')
@@ -60,55 +63,40 @@ class ACRTest(ResourceGroupVCRTestBase):
             JMESPathCheck('adminUserEnabled', False)
         ])
         # enable admin user
-        self.cmd('acr update -n {} -g {} --admin-enabled true'.format(registry_name, resource_group), checks=[
-            JMESPathCheck('name', registry_name),
-            JMESPathCheck('location', location),
-            JMESPathCheck('adminUserEnabled', True)
-        ])
+        self.cmd(
+            'acr update -n {} -g {} --admin-enabled true'.format(registry_name, resource_group),
+            checks=[
+                JMESPathCheck('name', registry_name),
+                JMESPathCheck('location', location),
+                JMESPathCheck('adminUserEnabled', True)
+            ])
         # test credential module
-        credential = self.cmd('acr credential show -n {} -g {}'.format(registry_name, resource_group))
+        credential = self.cmd('acr credential show -n {} -g {}'
+                              .format(registry_name, resource_group)).get_output_in_json()
         username = credential['username']
         password = credential['password']
         assert username and password
-        credential = self.cmd('acr credential renew -n {} -g {}'.format(registry_name, resource_group))
+        credential = self.cmd('acr credential renew -n {} -g {}'
+                              .format(registry_name, resource_group)).get_output_in_json()
         renewed_username = credential['username']
         renewed_password = credential['password']
         assert renewed_username and renewed_password
         assert username == renewed_username
         assert password != renewed_password
         # test repository module
-        login_server = self.cmd('acr show -n {} -g {}'.format(registry_name, resource_group))['loginServer']
-        assert login_server
+        self.cmd('acr show -n {} -g {}'.format(registry_name, resource_group),
+                 checks=JMESPathCheckExists('loginServer'))
         self.cmd('acr repository list -n {}'.format(registry_name), checks=NoneCheck())
         # test acr update
-        self.cmd('acr update -n {} -g {} --tags foo=bar cat --admin-enabled false --storage-account-name {}'.format(registry_name, resource_group, storage_account_for_update), checks=[
-            JMESPathCheck('name', registry_name),
-            JMESPathCheck('location', location),
-            JMESPathCheck('tags', {'cat':'', 'foo':'bar'}),
-            JMESPathCheck('adminUserEnabled', False),
-            JMESPathCheck('storageAccount.name', storage_account_for_update)
-        ])
+        self.cmd(
+            'acr update -n {} -g {} --tags foo=bar cat --admin-enabled false '
+            '--storage-account-name {}'.format(registry_name, resource_group,
+                                               storage_account_for_update), checks=[
+                JMESPathCheck('name', registry_name),
+                JMESPathCheck('location', location),
+                JMESPathCheck('tags', {'cat': '', 'foo': 'bar'}),
+                JMESPathCheck('adminUserEnabled', False),
+                JMESPathCheck('storageAccount.name', storage_account_for_update)
+            ])
         # test acr delete
         self.cmd('acr delete -n {} -g {}'.format(registry_name, resource_group))
-
-    def body(self):
-        self._test_acr(self.registry_name_1, self.storage_account_1, self.storage_account_2)
-        self._test_acr(self.registry_name_2, self.storage_account_1)
-
-    def set_up(self):
-        super(ACRTest, self).set_up()
-        self.cmd('storage account create -n {} -g {} -l {} --sku Standard_LRS '.format(self.storage_account_1, self.resource_group, self.location), checks=[
-            JMESPathCheck('name', self.storage_account_1),
-            JMESPathCheck('resourceGroup', self.resource_group),
-            JMESPathCheck('location', self.location),
-            JMESPathCheck('sku.name', 'Standard_LRS')
-        ])
-        self.cmd('storage account create -n {} -g {} -l {} --sku Standard_LRS '.format(self.storage_account_2, self.resource_group, self.location), checks=[
-            JMESPathCheck('name', self.storage_account_2),
-            JMESPathCheck('resourceGroup', self.resource_group),
-            JMESPathCheck('location', self.location),
-            JMESPathCheck('sku.name', 'Standard_LRS')
-        ])
-
-    def tear_down(self):
-        super(ACRTest, self).tear_down()

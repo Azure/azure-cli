@@ -292,7 +292,7 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
                 f.write('\n')
 
     def _before_record_request(self, request):  # pylint: disable=no-self-use
-        # scrub subscription from the uri
+        # scrub subscription from the uri,vc
         request.uri = re.sub('/subscriptions/([^/]+)/',
                              '/subscriptions/{}/'.format(MOCKED_SUBSCRIPTION_ID), request.uri)
         request.uri = re.sub('/graph.windows.net/([^/]+)/',
