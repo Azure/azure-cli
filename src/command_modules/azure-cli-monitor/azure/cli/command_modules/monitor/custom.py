@@ -121,6 +121,34 @@ def list_activity_logs(client, correlation_id=None, resource_group=None, resourc
         raise CLIError("usage error: [--correlation-id ID | --resource-group NAME | "
                        "--resource-id ID | --resource-provider PROVIDER]")
 
+    odata_filters = _build_activity_logs_odata_filter(correlation_id, resource_group,
+                                                      resource_id, resource_provider,
+                                                      start_time, end_time,
+                                                      caller, status)
+
+    if max_events:
+        max_events = int(max_events)
+
+    select_filters = _activity_logs_select_filter_builder(select)
+    activity_logs = client.list(filter=odata_filters, select=select_filters)
+    return _limit_results(activity_logs, max_events)
+
+
+def _build_activity_logs_odata_filter(correlation_id=None, resource_group=None, resource_id=None,
+                                      resource_provider=None, start_time=None, end_time=None,
+                                      caller=None, status=None):
+    '''Builds odata filter string.
+    :param str correlation_id: The correlation id of the query
+    :param str resource_group: The resource group
+    :param str resource_id: The identifier of the resource
+    :param str resource_provider: The resource provider
+    :param str start_time: The start time of the query. In ISO format with explicit indication of
+                           timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500
+    :param str end_time: The end time of the query. In ISO format with explicit indication of
+                         timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500
+    :param str caller: The caller to look for when querying
+    :param str status: The status value to query (ex: Failed)
+    '''
     formatter = "eventTimestamp ge {} and eventTimestamp le {}"
     odata_filters = _validate_time_range_and_add_defaults(start_time, end_time,
                                                           formatter=formatter)
@@ -143,12 +171,8 @@ def list_activity_logs(client, correlation_id=None, resource_group=None, resourc
     if status:
         odata_filters = _build_odata_filter(odata_filters, 'status',
                                             status, 'status')
-    if max_events:
-        max_events = int(max_events)
 
-    select_filter = _activity_logs_select_filter_builder(select)
-    activity_logs = client.list(filter=odata_filters, select=select_filter)
-    return _limit_results(activity_logs, max_events)
+    return odata_filters
 
 
 def _activity_logs_select_filter_builder(events=None):
