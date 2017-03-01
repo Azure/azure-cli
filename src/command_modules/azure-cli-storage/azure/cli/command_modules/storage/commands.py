@@ -57,7 +57,7 @@ cli_command(__name__, 'storage account keys renew', mgmt_path + 'regenerate_key'
 cli_command(__name__, 'storage account keys list', mgmt_path + 'list_keys', factory, transform=lambda x: x.keys)
 cli_generic_update_command(__name__, 'storage account update',
                            mgmt_path + 'get_properties',
-                           mgmt_path + 'create', factory,
+                           mgmt_path + 'update', factory,
                            custom_function_op=custom_path + 'update_storage_account')
 cli_storage_data_plane_command('storage account generate-sas', 'azure.storage.cloudstorageaccount#CloudStorageAccount.generate_shared_access_signature', cloud_storage_account_service_factory)
 
