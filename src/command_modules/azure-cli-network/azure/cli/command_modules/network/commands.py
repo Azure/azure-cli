@@ -15,7 +15,8 @@ from ._util import (list_network_resource_property,
                     delete_network_resource_property_entry)
 from ._format import \
     (transform_local_gateway_table_output, transform_dns_record_set_output,
-     transform_dns_record_set_table_output, transform_dns_zone_table_output)
+     transform_dns_record_set_table_output, transform_dns_zone_table_output,
+     transform_vnet_create_output)
 
 custom_path = 'azure.cli.command_modules.network.custom#{}'
 
@@ -349,16 +350,12 @@ cli_command(__name__, 'network vnet delete', 'azure.mgmt.network.operations.virt
 cli_command(__name__, 'network vnet show', 'azure.mgmt.network.operations.virtual_networks_operations#VirtualNetworksOperations.get', cf_virtual_networks, exception_handler=empty_on_404)
 cli_command(__name__, 'network vnet list', custom_path.format('list_vnet'))
 cli_command(__name__, 'network vnet check-ip-address', 'azure.mgmt.network.operations.virtual_networks_operations#VirtualNetworksOperations.check_ip_address_availability', cf_virtual_networks)
+cli_command(__name__, 'network vnet create', custom_path.format('create_vnet'), transform=transform_vnet_create_output)
 cli_generic_update_command(__name__, 'network vnet update',
                            'azure.mgmt.network.operations.virtual_networks_operations#VirtualNetworksOperations.get',
                            'azure.mgmt.network.operations.virtual_networks_operations#VirtualNetworksOperations.create_or_update',
                            cf_virtual_networks,
                            custom_function_op=custom_path.format('update_vnet'))
-
-cli_command(__name__, 'network vnet create',
-            'azure.cli.command_modules.network.mgmt_vnet.lib.operations.vnet_operations#VnetOperations.create_or_update',
-            cf_vnet_create,
-            transform=DeploymentOutputLongRunningOperation('Starting network vnet create'))
 
 # VNET Peering Operations
 cli_command(__name__, 'network vnet peering create', custom_path.format('create_vnet_peering'))

@@ -867,15 +867,28 @@ create_vnet_peering.__doc__ = VirtualNetworkPeering.__doc__
 
 #region Vnet/Subnet commands
 
-def update_vnet(instance, address_prefixes=None):
-    '''update existing virtual network
-    :param address_prefixes: update address spaces. Use space separated address prefixes,
-        for example, "10.0.0.0/24 10.0.1.0/24"
-    '''
+# pylint: disable=too-many-locals
+def create_vnet(resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
+                subnet_name=None, subnet_prefix=None, dns_servers=None,
+                location=None, tags=None):
+    from azure.mgmt.network.models import VirtualNetwork, DhcpOptions
+    client = _network_client_factory().virtual_networks
+    tags = tags or {}
+    vnet = VirtualNetwork(
+        location=location, tags=tags,
+        dhcp_options=DhcpOptions(dns_servers),
+        address_space=AddressSpace(
+            vnet_prefixes if isinstance(vnet_prefixes, list) else [vnet_prefixes]))
+    if subnet_name:
+        vnet.subnets = [Subnet(name=subnet_name, address_prefix=subnet_prefix)]
+    return client.create_or_update(resource_group_name, vnet_name, vnet)
+
+
+def update_vnet(instance, vnet_prefixes=None):
     #server side validation reports pretty good error message on invalid CIDR,
     #so we don't validate at client side
-    if address_prefixes:
-        instance.address_space.address_prefixes = address_prefixes
+    if vnet_prefixes:
+        instance.address_space.address_prefixes = vnet_prefixes
     return instance
 
 def _set_route_table(ncf, resource_group_name, route_table, subnet):

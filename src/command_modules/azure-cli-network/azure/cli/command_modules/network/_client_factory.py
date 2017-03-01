@@ -109,11 +109,6 @@ def cf_vnet_gateway_create(_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(VnetGatewayCreationClient).vnet_gateway
 
-def cf_vnet_create(_):
-    from azure.cli.command_modules.network.mgmt_vnet.lib import VnetCreationClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(VnetCreationClient).vnet
-
 def cf_virtual_network_peerings(_):
     return _network_client_factory().virtual_network_peerings
 
