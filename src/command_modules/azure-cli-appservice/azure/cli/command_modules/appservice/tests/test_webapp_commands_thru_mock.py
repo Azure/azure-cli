@@ -2,11 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import json
 import unittest
 import mock
-
-from requests import Response
 
 from azure.mgmt.web.models import SourceControl, HostNameBinding, Site
 from azure.mgmt.web import WebSiteManagementClient
@@ -43,7 +40,9 @@ class Test_Webapp_Mocked(unittest.TestCase):
         client_factory_mock.return_value = self.client
         self.client._client = mock.MagicMock()
         sc = SourceControl('not-really-needed', name='GitHub', token='veryNiceToken')
-        self.client._client.send.return_value = Test_Webapp_Mocked._make_response(sc.__dict__)
+        self.client._client.send.return_value = FakedResponse(200)
+        self.client._deserialize = mock.MagicMock()
+        self.client._deserialize.return_value = sc
 
         # action
         result = update_git_token('veryNiceToken')
@@ -65,21 +64,19 @@ class Test_Webapp_Mocked(unittest.TestCase):
                                   custom_host_name_dns_record_type='A',
                                   host_name_type='Managed')
         self.client.web_apps._client = mock.MagicMock()
-        self.client.web_apps._client.send.return_value = Test_Webapp_Mocked._make_response(binding.__dict__)
-
+        self.client.web_apps._client.send.return_value = FakedResponse(200)
+        self.client.web_apps._deserialize = mock.MagicMock()
+        self.client.web_apps._deserialize.return_value = binding
         # action
         result = add_hostname('g1', webapp.name, domain)
 
         # assert
         self.assertEqual(result.name, domain)
 
-    @staticmethod
-    def _make_response(content_json):
-        resp = mock.create_autospec(Response)
-        resp.text = json.dumps(content_json)
-        resp.encoding = 'utf-8'
-        resp.status_code = 200
-        return resp
+
+class FakedResponse(object):  # pylint: disable=too-few-public-methods
+    def __init__(self, status_code):
+        self.status_code = status_code
 
 
 if __name__ == '__main__':
