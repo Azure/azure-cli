@@ -406,7 +406,7 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # py
         self.vm_name = 'vm-state-mod'
         self.nsg_name = 'mynsg'
         self.ip_name = 'mypubip'
-        self.storage_name = 'ab394fvkdj40'
+        self.storage_name = 'clitestvmcreate20170301'
         self.vnet_name = 'myvnet'
 
     def test_vm_create_state_modifications(self):
@@ -854,7 +854,7 @@ class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
     def set_up(self):
         super(DiagnosticsExtensionInstallTest, self).set_up()
         self.cmd('storage account create -g {} -n {} -l westus --sku Standard_LRS'.format(self.resource_group, self.storage_account))
-        self.cmd('vmss create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-password TestTest12#$'.format(self.resource_group, self.vmss))
+        self.cmd('vmss create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password TestTest12#$'.format(self.resource_group, self.vmss))
         self.cmd('vm create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password TestTest12#$ --use-unmanaged-disk'.format(self.resource_group, self.vm))
 
     def test_diagnostics_extension_install(self):
