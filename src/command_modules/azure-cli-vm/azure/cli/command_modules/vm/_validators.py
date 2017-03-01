@@ -245,9 +245,8 @@ def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
                 forbidden.remove(prop)
 
     # set default storage SKU if not provided and using an image based OS
-    if not namespace.storage_sku and namespace.storage_profile \
-        not in [StorageProfile.ManagedSpecializedOSDisk, StorageProfile.SASpecializedOSDisk]:
-        namespace.storage_sku = 'Standard_LRS'
+    if not namespace.storage_sku and namespace.storage_profile not in [StorageProfile.ManagedSpecializedOSDisk, StorageProfile.SASpecializedOSDisk]:  # pylint: disable=line-too-long
+        namespace.storage_sku = 'Standard_LRS' if for_scale_set else 'Premium_LRS'
 
     # Now verify that the status of required and forbidden parameters
     _validate_required_forbidden_parameters(namespace, required, forbidden)

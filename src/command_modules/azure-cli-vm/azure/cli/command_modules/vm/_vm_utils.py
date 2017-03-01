@@ -48,15 +48,11 @@ def _resolve_api_version(provider_namespace, resource_type, parent_path):
 
 def log_pprint_template(template):
     import azure.cli.core.azlogging as azlogging
-    from pprint import pprint
-    import sys
-    from six import StringIO
 
     logger = azlogging.get_az_logger(__name__)
-    io = StringIO()
-    pprint(template, io)
-    logger.warning(io.getvalue())
-    io.close()
+    logger.info('==== BEGIN TEMPLATE ====')
+    logger.info(json.dumps(template, indent=2))
+    logger.info('==== END TEMPLATE ====')
 
 
 # pylint: disable=too-many-arguments
