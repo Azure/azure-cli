@@ -82,3 +82,9 @@ def transform_vnet_create_output(result):
         return {'newVNet': result.result()}
     except Exception:  # pylint: disable=broad-except
         return result
+
+def transform_public_ip_create_output(result):
+    try:
+        return {'publicIp': result.result()}
+    except Exception:  # pylint: disable=broad-except
+        return result
