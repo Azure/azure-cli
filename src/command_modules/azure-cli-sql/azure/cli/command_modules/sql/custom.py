@@ -30,6 +30,7 @@ def get_server_location(server_name, resource_group_name):
 #                sql db                       #
 ###############################################
 
+
 # Helper class to bundle up database identity properties
 class DatabaseIdentity(object):  # pylint: disable=too-few-public-methods
     def __init__(self, database_name, server_name, resource_group_name):
@@ -68,8 +69,10 @@ def db_create(
         **kwargs):
 
     # Verify edition
-    if 'Edition' in kwargs and kwargs['Edition'].lower() == 'datawarehouse':
-        raise CLIError('SQL Data Warehouse can be created with the command `az sql dw create`.')
+    edition = kwargs.get('edition')  # kwags['edition'] throws KeyError if not in dictionary
+    if edition and edition.lower() == 'datawarehouse':
+        raise CLIError('Azure SQL Data Warehouse can be created with the command'
+                       ' `az sql dw create`.')
 
     return _db_dw_create(
         client,
@@ -193,9 +196,6 @@ def db_list(
         resource_group_name,
         elastic_pool_name=None):
 
-    # OData filter expression to exclude DataWarehouse
-    filter = "properties/edition ne 'DataWarehouse'"
-
     if elastic_pool_name:
         # List all databases in the elastic pool
         pool_client = get_sql_elasticpools_operations(None)
@@ -206,11 +206,9 @@ def db_list(
             filter=filter)
     else:
         # List all databases in the server
-        # TODO: Filter out DataWarehouse edition
         return client.list_by_server(
             resource_group_name=resource_group_name,
-            server_name=server_name,
-            filter=filter)
+            server_name=server_name)
 
 
 # Update database. Custom update function to apply parameters to instance.
@@ -219,6 +217,11 @@ def db_update(
         elastic_pool_name=None,
         max_size_bytes=None,
         requested_service_objective_name=None):
+
+    # Verify edition
+    if instance.edition.lower() == 'datawarehouse':
+        raise CLIError('Azure SQL Data Warehouse can be updated with the command'
+                       ' `az sql dw update`.')
 
     # Null out edition. The service will choose correct edition based on service objective and
     # elastic pool.
@@ -271,7 +274,7 @@ def dw_create(
         **kwargs):
 
     # Set edition
-    kwargs['Edition'] = 'DataWarehouse'
+    kwargs['edition'] = 'DataWarehouse'
 
     # Create
     return _db_dw_create(
@@ -286,24 +289,29 @@ def dw_list(
         server_name,
         resource_group_name):
 
-    # OData filter expression to include only DataWarehouse
-    filter = "properties/edition eq 'DataWarehouse'"
-
     return client.list_by_server(
         resource_group_name=resource_group_name,
         server_name=server_name,
-        filter=filter)
+        filter="properties/edition eq 'DataWarehouse'")  # OData filter to include only DW's
 
 
 # Update data warehouse. Custom update function to apply parameters to instance.
-def dw_update(  # pylint: disable=unused-argument
+def dw_update(
         instance,
         max_size_bytes=None,
         requested_service_objective_name=None):
 
-    # TODO
+    # Null out requested_service_objective_id, because if requested_service_objective_id is
+    # specified then requested_service_objective_name is ignored.
+    instance.requested_service_objective_id = None
+
+    # Apply param values to instance
+    instance.max_size_bytes = max_size_bytes or instance.max_size_bytes
+    instance.requested_service_objective_name = (
+        requested_service_objective_name or requested_service_objective_name)
 
     return instance
+
 
 ###############################################
 #                sql elastic-pool             #
