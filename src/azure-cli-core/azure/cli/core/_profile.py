@@ -11,6 +11,7 @@ import json
 import os.path
 from pprint import pformat
 from enum import Enum
+from copy import deepcopy
 
 import adal
 import azure.cli.core.azlogging as azlogging
@@ -137,7 +138,8 @@ class Profile(object):
                                                      subscriptions,
                                                      is_service_principal)
         self._set_subscriptions(consolidated)
-        return consolidated
+        # use deepcopy as we don't want to persist these changes to file.
+        return deepcopy(consolidated)
 
     @staticmethod
     def _normalize_properties(user, subscriptions, is_service_principal):
@@ -224,8 +226,10 @@ class Profile(object):
     def load_cached_subscriptions(self, all_clouds=False):
         subscriptions = self._storage.get(_SUBSCRIPTIONS) or []
         active_cloud = get_active_cloud()
-        return [sub for sub in subscriptions
+        cached_subscriptions = [sub for sub in subscriptions
                 if all_clouds or sub[_ENVIRONMENT_NAME] == active_cloud.name]
+        # use deepcopy as we don't want to persist these changes to file.
+        return deepcopy(cached_subscriptions)
 
     def get_current_account_user(self):
         try:
