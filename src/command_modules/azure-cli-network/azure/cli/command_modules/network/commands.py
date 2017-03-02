@@ -17,7 +17,8 @@ from ._format import \
     (transform_local_gateway_table_output, transform_dns_record_set_output,
      transform_dns_record_set_table_output, transform_dns_zone_table_output,
      transform_vnet_create_output, transform_public_ip_create_output,
-     transform_traffic_manager_create_output, transform_nic_create_output)
+     transform_traffic_manager_create_output, transform_nic_create_output,
+     transform_nsg_create_output)
 
 custom_path = 'azure.cli.command_modules.network.custom#{}'
 
@@ -229,15 +230,12 @@ cli_command(__name__, 'network nic ip-config inbound-nat-rule remove', custom_pa
 cli_command(__name__, 'network nsg delete', 'azure.mgmt.network.operations.network_security_groups_operations#NetworkSecurityGroupsOperations.delete', cf_network_security_groups)
 cli_command(__name__, 'network nsg show', 'azure.mgmt.network.operations.network_security_groups_operations#NetworkSecurityGroupsOperations.get', cf_network_security_groups, exception_handler=empty_on_404)
 cli_command(__name__, 'network nsg list', custom_path.format('list_nsgs'))
+cli_command(__name__, 'network nsg create', custom_path.format('create_nsg'), transform=transform_nsg_create_output)
 cli_generic_update_command(__name__, 'network nsg update',
                            'azure.mgmt.network.operations.network_security_groups_operations#NetworkSecurityGroupsOperations.get',
                            'azure.mgmt.network.operations.network_security_groups_operations#NetworkSecurityGroupsOperations.create_or_update',
                            cf_network_security_groups)
 
-cli_command(__name__, 'network nsg create',
-            'azure.cli.command_modules.network.mgmt_nsg.lib.operations.nsg_operations#NsgOperations.create_or_update',
-            cf_nsg_create,
-            transform=DeploymentOutputLongRunningOperation('Starting network nsg create'))
 
 # PublicIPAddressesOperations
 cli_command(__name__, 'network public-ip delete', 'azure.mgmt.network.operations.public_ip_addresses_operations#PublicIPAddressesOperations.delete', cf_public_ip_addresses)

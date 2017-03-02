@@ -672,12 +672,13 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
                          virtual_network_name=None, public_ip_address=None, load_balancer_name=None, # pylint: disable=unused-argument
                          load_balancer_backend_address_pool_ids=None,
                          load_balancer_inbound_nat_rule_ids=None,
-                         private_ip_address=None, private_ip_address_allocation='dynamic',
-                         private_ip_address_version='ipv4', make_primary=False):
+                         private_ip_address=None,
+                         private_ip_address_allocation=IPAllocationMethod.dynamic.value,
+                         private_ip_address_version=IPVersion.ipv4.value, make_primary=False):
     ncf = _network_client_factory()
     nic = ncf.network_interfaces.get(resource_group_name, network_interface_name)
 
-    if private_ip_address_version == 'ipv4' and not subnet:
+    if private_ip_address_version == IPVersion.ipv4.value and not subnet:
         primary_config = next(x for x in nic.ip_configurations if x.primary)
         subnet = primary_config.subnet.id
 
@@ -804,6 +805,13 @@ def remove_nic_ip_config_inbound_nat_rule(
 #endregion
 
 #region Network Security Group commands
+
+def create_nsg(resource_group_name, network_security_group_name, location=None, tags=None):
+    from azure.mgmt.network.models import NetworkSecurityGroup
+    client = _network_client_factory().network_security_groups
+    nsg = NetworkSecurityGroup(location=location, tags=tags)
+    return client.create_or_update(resource_group_name, network_security_group_name, nsg)
+
 
 def create_nsg_rule(resource_group_name, network_security_group_name, security_rule_name,
                     priority, description=None, protocol=SecurityRuleProtocol.asterisk.value,

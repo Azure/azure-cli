@@ -102,3 +102,10 @@ def transform_nic_create_output(result):
         return {'NewNIC': result.result()}
     except Exception:  # pylint: disable=broad-except
         return result
+
+
+def transform_nsg_create_output(result):
+    try:
+        return {'NewNSG': result.result()}
+    except Exception:  # pylint: disable=broad-except
+        return result

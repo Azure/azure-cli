@@ -330,6 +330,7 @@ register_cli_argument('network nic ip-config inbound-nat-rule', 'inbound_nat_rul
 # NSG
 register_cli_argument('network nsg', 'network_security_group_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'), id_part='name')
 register_cli_argument('network nsg create', 'name', name_arg_type)
+register_cli_argument('network nsg create', 'location', location_type, validator=validate_location)
 
 # NSG Rule
 register_cli_argument('network nsg rule', 'security_rule_name', name_arg_type, id_part='child_name', help='Name of the network security group rule')
