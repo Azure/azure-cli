@@ -10,8 +10,8 @@ import errno
 import json
 import os.path
 from pprint import pformat
-from enum import Enum
 from copy import deepcopy
+from enum import Enum
 
 import adal
 import azure.cli.core.azlogging as azlogging
@@ -227,7 +227,7 @@ class Profile(object):
         subscriptions = self._storage.get(_SUBSCRIPTIONS) or []
         active_cloud = get_active_cloud()
         cached_subscriptions = [sub for sub in subscriptions
-                if all_clouds or sub[_ENVIRONMENT_NAME] == active_cloud.name]
+                                if all_clouds or sub[_ENVIRONMENT_NAME] == active_cloud.name]
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(cached_subscriptions)
 
@@ -286,7 +286,6 @@ class Profile(object):
             result[_ENVIRONMENT_NAME] = CLOUD.name
             result['subscriptionName'] = account[_SUBSCRIPTION_NAME]
         else:  # has logged in through cli
-            from copy import deepcopy
             result = deepcopy(account)
             user_type = account[_USER_ENTITY].get(_USER_TYPE)
             if user_type == _SERVICE_PRINCIPAL:
