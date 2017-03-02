@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 import datetime
+from azure.cli.core._util import CLIError
 
 
 # 1 hour in milliseconds
@@ -13,13 +14,13 @@ DEFAULT_QUERY_TIME_RANGE = 3600000
 DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
 
-def list_metric_definitions(client, resource_uri, metric_names=None):
+def list_metric_definitions(client, resource_id, metric_names=None):
     '''Commands to manage metric definitions.
-    :param str resource_uri: The identifier of the resource
+    :param str resource_id: The identifier of the resource
     :param str metric_names: The list of metric names
     '''
     odata_filter = _metric_names_filter_builder(metric_names)
-    metric_definitions = client.list(resource_uri, filter=odata_filter)
+    metric_definitions = client.list(resource_id, filter=odata_filter)
     return list(metric_definitions)
 
 
@@ -33,10 +34,10 @@ def _metric_names_filter_builder(metric_names=None):
     return ' or '.join(filters)
 
 
-def list_metrics(client, resource_uri, time_grain,
+def list_metrics(client, resource_id, time_grain,
                  start_time=None, end_time=None, metric_names=None):
     '''Lists the metric values for a resource.
-    :param str resource_uri: The identifier of the resource
+    :param str resource_id: The identifier of the resource
     :param str time_grain: The time grain. Granularity of the metric data returned in ISO 8601
                            duration format, eg "PT1M"
     :param str start_time: The start time of the query. In ISO format with explicit indication of
@@ -46,7 +47,7 @@ def list_metrics(client, resource_uri, time_grain,
     :param str metric_names: The space separated list of metric names
     '''
     odata_filter = _metrics_odata_filter_builder(time_grain, start_time, end_time, metric_names)
-    metrics = client.list(resource_uri, filter=odata_filter)
+    metrics = client.list(resource_id, filter=odata_filter)
     return list(metrics)
 
 
@@ -66,12 +67,12 @@ def _metrics_odata_filter_builder(time_grain, start_time=None, end_time=None,
     return ' and '.join(filters)
 
 
-def _validate_time_range_and_add_defaults(start_time, end_time):
+def _validate_time_range_and_add_defaults(start_time, end_time,
+                                          formatter='startTime eq {} and endTime eq {}'):
     end_time = _validate_end_time(end_time)
     start_time = _validate_start_time(start_time, end_time)
-    time_range = "startTime eq {} and endTime eq {}".format(
-        start_time.strftime('%Y-%m-%dT%H:%M:%SZ'),
-        end_time.strftime('%Y-%m-%dT%H:%M:%SZ'))
+    time_range = formatter.format(start_time.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                                  end_time.strftime('%Y-%m-%dT%H:%M:%SZ'))
     return time_range
 
 
@@ -97,3 +98,110 @@ def _validate_start_time(start_time, end_time):
         raise ValueError("start_time '{}' is later than Now {}.".format(start_time, now))
 
     return result_time
+
+
+def list_activity_logs(client, correlation_id=None, resource_group=None, resource_id=None,
+                       resource_provider=None, start_time=None, end_time=None,
+                       caller=None, status=None, max_events=50, select=None):
+    '''Provides the list of activity logs.
+    :param str correlation_id: The correlation id of the query
+    :param str resource_group: The resource group
+    :param str resource_id: The identifier of the resource
+    :param str resource_provider: The resource provider
+    :param str start_time: The start time of the query. In ISO format with explicit indication of
+                           timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500
+    :param str end_time: The end time of the query. In ISO format with explicit indication of
+                         timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500
+    :param str caller: The caller to look for when querying
+    :param str status: The status value to query (ex: Failed)
+    :param str max_events: The maximum number of records to be returned by the command
+    :param str select: The list of event names
+    '''
+    if len([x for x in [correlation_id, resource_group, resource_id, resource_provider] if x]) > 1:
+        raise CLIError("usage error: [--correlation-id ID | --resource-group NAME | "
+                       "--resource-id ID | --resource-provider PROVIDER]")
+
+    odata_filters = _build_activity_logs_odata_filter(correlation_id, resource_group,
+                                                      resource_id, resource_provider,
+                                                      start_time, end_time,
+                                                      caller, status)
+
+    if max_events:
+        max_events = int(max_events)
+
+    select_filters = _activity_logs_select_filter_builder(select)
+    activity_logs = client.list(filter=odata_filters, select=select_filters)
+    return _limit_results(activity_logs, max_events)
+
+
+def _build_activity_logs_odata_filter(correlation_id=None, resource_group=None, resource_id=None,
+                                      resource_provider=None, start_time=None, end_time=None,
+                                      caller=None, status=None):
+    '''Builds odata filter string.
+    :param str correlation_id: The correlation id of the query
+    :param str resource_group: The resource group
+    :param str resource_id: The identifier of the resource
+    :param str resource_provider: The resource provider
+    :param str start_time: The start time of the query. In ISO format with explicit indication of
+                           timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500
+    :param str end_time: The end time of the query. In ISO format with explicit indication of
+                         timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500
+    :param str caller: The caller to look for when querying
+    :param str status: The status value to query (ex: Failed)
+    '''
+    formatter = "eventTimestamp ge {} and eventTimestamp le {}"
+    odata_filters = _validate_time_range_and_add_defaults(start_time, end_time,
+                                                          formatter=formatter)
+
+    if correlation_id:
+        odata_filters = _build_odata_filter(odata_filters, 'correlation_id',
+                                            correlation_id, 'correlationId')
+    elif resource_group:
+        odata_filters = _build_odata_filter(odata_filters, 'resource_group',
+                                            resource_group, 'resourceGroupName')
+    elif resource_id:
+        odata_filters = _build_odata_filter(odata_filters, 'resource_id',
+                                            resource_id, 'resourceId')
+    elif resource_provider:
+        odata_filters = _build_odata_filter(odata_filters, 'resource_provider',
+                                            resource_provider, 'resourceProvider')
+    if caller:
+        odata_filters = _build_odata_filter(odata_filters, 'caller',
+                                            caller, 'caller')
+    if status:
+        odata_filters = _build_odata_filter(odata_filters, 'status',
+                                            status, 'status')
+
+    return odata_filters
+
+
+def _activity_logs_select_filter_builder(events=None):
+    '''Build up select filter string from events
+    '''
+    if events:
+        return ' , '.join(events)
+    return None
+
+
+def _build_odata_filter(default_filter, field_name, field_value, field_label):
+    if not field_value:
+        raise CLIError('Value for {} can not be empty.'.format(field_name))
+
+    return _add_condition(default_filter, field_label, field_value)
+
+
+def _add_condition(default_filter, field_label, field_value):
+    if not field_value:
+        return default_filter
+
+    return "{} and {} eq '{}'".format(default_filter, field_label, field_value)
+
+
+def _limit_results(paged, limit):
+    results = []
+    for index, item in enumerate(paged):
+        if index < limit:
+            results.append(item)
+        else:
+            break
+    return list(results)

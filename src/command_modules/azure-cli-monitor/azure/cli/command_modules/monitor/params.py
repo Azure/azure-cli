@@ -51,3 +51,15 @@ with ParametersContext(command='monitor metric-definitions list') as c:
 
 with ParametersContext(command='monitor metrics list') as c:
     c.argument('metric_names', nargs='+')
+    c.argument('metric_names', None, nargs='+')
+
+with ParametersContext(command='monitor metrics list') as c:
+    c.argument('metric_names', None, nargs='+')
+
+with ParametersContext(command='monitor activity-logs list') as c:
+    c.register_alias('resource_group', ('--resource-group', '-g'))
+    c.argument('select', None, nargs='+')
+
+with ParametersContext(command='monitor tenant-activity-logs list') as c:
+    c.register_alias('resource_group', ('--resource-group', '-g'))
+    c.argument('select', None, nargs='+')
