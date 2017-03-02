@@ -31,6 +31,10 @@ helps['sql db delete'] = """
             type: command
             short-summary: Deletes a database.
             """
+helps['sql db failover'] = """
+            type: command
+            short-summary: Fails over to a secondary replica. The secondary becomes the new primary.
+            """
 helps['sql db list'] = """
             type: command
             short-summary: Lists all databases in a server, or all databases in an elastic pool.
@@ -39,9 +43,9 @@ helps['sql db update'] = """
             type: command
             short-summary: Updates a database.
             """
-helps['sql db replica-link'] = """
-            type: group
-            short-summary: Manage links between database replicas.
+helps['sql db stop-replication'] = """
+            type: command
+            short-summary: Permanently stops data replication to a secondary replica.
             """
 # helps['sql db data-warehouse'] = """
 #             type: group

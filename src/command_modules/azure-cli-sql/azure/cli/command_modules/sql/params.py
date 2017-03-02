@@ -182,13 +182,15 @@ with ParametersContext(command='sql db update') as c:
     c.argument('elastic_pool_name', help='The name of the elastic pool to move the database into.')
     c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
 
-#####
-#           sql db replica-link
-#####
-
-with ParametersContext(command='sql db replica-link') as c:
-    c.register_alias('database_name', ('--database', '-d'))
-    c.register_alias('link_id', ('--name', '-n'))
+with ParametersContext(command='sql db failover') as c:
+    c.argument('database_name', help='Name of the database to fail over.')
+    c.argument('server_name',
+               help='Name of the secondary replica\'s server that will become the new primary.')
+    c.argument('resource_group_name',
+               help='Name of the secondary replica\'s resource group that will become the'
+               ' new primary.')
+    c.argument('allow_data_loss',
+               help='If specified, the failover operation will allow data loss.')
 
 #####
 #           sql db <<other subgroups>>

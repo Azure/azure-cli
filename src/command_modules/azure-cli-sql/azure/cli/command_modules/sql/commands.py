@@ -25,13 +25,9 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
         # c.command('show-usage', 'list_usages')
         c.command('delete', 'delete')
         c.generic_update_command('update', 'get', 'create_or_update', custom_func_name='db_update')
-
-    with s.group('sql db replica-link') as c:
-        c.command('list', 'list_replication_links')
-        c.command('show', 'get_replication_link')
-        c.command('delete', 'delete_replication_link')
-        c.command('failover', 'failover_replication_link')
-        c.command('force-failover', 'failover_replication_link_allow_data_loss')
+        c.command('list-replica-links', 'list_replication_links')
+        c.command('stop-replication', 'delete_replication_link')
+        c.custom_command('failover', 'db_failover')
 
     # Data Warehouse will not be included in the first batch of GA commands
     # with s.group('sql db data-warehouse') as c:

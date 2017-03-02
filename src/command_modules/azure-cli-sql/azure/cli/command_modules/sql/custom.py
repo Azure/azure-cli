@@ -9,8 +9,8 @@ from ._util import (
 )
 
 from azure.cli.core.commands.client_factory import get_subscription_id
-
 from azure.cli.core._util import CLIError
+from azure.mgmt.sql.models.sql_management_client_enums import ReplicationRole
 
 ###############################################
 #                Common funcs                 #
@@ -203,6 +203,44 @@ def db_restore(  # pylint: disable=too-many-arguments
         DatabaseIdentity(database_name, server_name, resource_group_name),
         DatabaseIdentity(dest_name, dest_server_name, dest_resource_group_name),
         kwargs)
+
+
+# Fails over a database. Wrapper function which uses the server location so that the user doesn't
+# need to specify replication link id.
+def db_failover(
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        allow_data_loss=False):
+
+    # List replication links on the secondary
+    links = list(client.list_replication_links(
+        database_name=database_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name))
+
+    # A secondary can only have one link at a time, and that link should be to the primary.
+    if len(links) != 1:
+        raise CLIError('The specified database did not have exactly one replication link.')
+
+    link = links[0]
+    if link.role not in (ReplicationRole.secondary,
+                         ReplicationRole.non_readable_secondary):
+        raise CLIError('The specified database is not a secondary replica.')
+
+    # Choose which failover method to use
+    if allow_data_loss:
+        failover_func = client.failover_replication_link_allow_data_loss
+    else:
+        failover_func = client.failover_replication_link
+
+    # Execute failover
+    return failover_func(
+        database_name=database_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        link_id=link.name)
 
 
 # Lists databases in a server or elastic pool.
