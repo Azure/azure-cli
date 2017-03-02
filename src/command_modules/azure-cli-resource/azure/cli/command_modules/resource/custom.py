@@ -19,6 +19,7 @@ from azure.mgmt.resource.locks.models import ManagementLockObject
 from azure.mgmt.resource.links.models import ResourceLinkProperties
 
 from azure.cli.core.parser import IncorrectUsageError
+from azure.cli.core.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int
 from azure.cli.core._util import CLIError, get_file_json
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -102,6 +103,56 @@ def validate_arm_template(resource_group_name, template_file=None, template_uri=
     return _deploy_arm_template_core(resource_group_name, template_file, template_uri,
                                      'deployment_dry_run', parameters, mode, validate_only=True)
 
+def _find_missing_parameters(parameters, template):
+    if template is None:
+        return {}
+    template_parameters = template.get('parameters', None)
+    if template_parameters is None:
+        return {}
+
+    missing = {}
+    for parameter_name in template_parameters:
+        parameter = template_parameters[parameter_name]
+        if parameter.get('defaultValue', None) is not None:
+            continue
+        if parameters is not None and parameters.get(parameter_name, None) is not None:
+            continue
+        missing[parameter_name] = parameter
+    return missing
+
+def _prompt_for_parameters(missing_parameters):
+    result = {}
+    for param_name in missing_parameters:
+        prompt_str = 'Please provide a value for \'{}\' (? for help): '.format(param_name)
+        param = missing_parameters[param_name]
+        param_type = param.get('type', 'string')
+        description = 'Missing description'
+        metadata = param.get('metadata', None)
+        if metadata is not None:
+            description = metadata.get('description', description)
+        allowed_values = param.get('allowedValues', None)
+
+        while True:
+            if allowed_values is not None:
+                ix = prompt_choice_list(prompt_str, allowed_values, help_string=description)
+                result[param_name] = allowed_values[ix]
+                break
+            elif param_type == 'securestring':
+                value = prompt_pass(prompt_str, help_string=description)
+            elif param_type == 'int':
+                int_value = prompt_int(prompt_str, help_string=description)
+                result[param_name] = int_value
+                break
+            elif param_type == 'bool':
+                value = prompt_t_f(prompt_str, help_string=description)
+                result[param_name] = value
+                break
+            else:
+                value = prompt(prompt_str, help_string=description)
+            if len(value) > 0:
+                break
+    return {}
+
 def _deploy_arm_template_core(resource_group_name, template_file=None, template_uri=None,
                               deployment_name=None, parameters=None, mode='incremental',
                               validate_only=False, no_wait=False):
@@ -121,6 +172,12 @@ def _deploy_arm_template_core(resource_group_name, template_file=None, template_
         template_link = TemplateLink(uri=template_uri)
     else:
         template = get_file_json(template_file)
+
+    missing = _find_missing_parameters(parameters, template)
+    if len(missing) > 0:
+        prompt_parameters = _prompt_for_parameters(missing)
+        for param_name in prompt_parameters:
+            parameters[param_name] = prompt_parameters[param_name]
 
     properties = DeploymentProperties(template=template, template_link=template_link,
                                       parameters=parameters, mode=mode)

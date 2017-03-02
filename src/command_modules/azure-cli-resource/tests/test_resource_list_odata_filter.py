@@ -4,8 +4,44 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-from azure.cli.command_modules.resource.custom import _list_resources_odata_filter_builder
+from azure.cli.command_modules.resource.custom import (_list_resources_odata_filter_builder,
+                                                       _find_missing_parameters)
 from azure.cli.core.parser import IncorrectUsageError
+
+class TestDeployResource(unittest.TestCase):
+
+    def test_find_missing_parameters_none(self):
+        template = {
+            "parameters": {
+                "foo": {
+                    "defaultValue": "blah"
+                },
+                "bar": {},
+                "baz": {},
+            }
+        }
+
+        missing = _find_missing_parameters(None, template)
+        self.assertEqual(2, len(missing))
+
+    def test_find_missing_parameters(self):
+        parameters = {
+            "foo": "value1",
+            "bar": "value2"
+        }
+
+        template = {
+            "parameters": {
+                "foo": {
+                    "defaultValue": "blah"
+                },
+                "bar": {},
+                "baz": {},
+            }
+        }
+
+        missing = _find_missing_parameters(parameters, template)
+        self.assertEqual(1, len(missing))
 
 class TestListResources(unittest.TestCase):
 
