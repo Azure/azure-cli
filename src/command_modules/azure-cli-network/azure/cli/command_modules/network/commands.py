@@ -18,7 +18,7 @@ from ._format import \
      transform_dns_record_set_table_output, transform_dns_zone_table_output,
      transform_vnet_create_output, transform_public_ip_create_output,
      transform_traffic_manager_create_output, transform_nic_create_output,
-     transform_nsg_create_output)
+     transform_nsg_create_output, transform_vnet_gateway_create_output)
 
 custom_path = 'azure.cli.command_modules.network.custom#{}'
 
@@ -184,16 +184,12 @@ cli_generic_update_command(__name__, 'network lb probe update',
 cli_command(__name__, 'network local-gateway delete', 'azure.mgmt.network.operations.local_network_gateways_operations#LocalNetworkGatewaysOperations.delete', cf_local_network_gateways)
 cli_command(__name__, 'network local-gateway show', 'azure.mgmt.network.operations.local_network_gateways_operations#LocalNetworkGatewaysOperations.get', cf_local_network_gateways, exception_handler=empty_on_404)
 cli_command(__name__, 'network local-gateway list', 'azure.mgmt.network.operations.local_network_gateways_operations#LocalNetworkGatewaysOperations.list', cf_local_network_gateways, table_transformer=transform_local_gateway_table_output)
+cli_command(__name__, 'network local-gateway create', custom_path.format('create_local_gateway'))
 cli_generic_update_command(__name__, 'network local-gateway update',
                            'azure.mgmt.network.operations.local_network_gateways_operations#LocalNetworkGatewaysOperations.get',
                            'azure.mgmt.network.operations.local_network_gateways_operations#LocalNetworkGatewaysOperations.create_or_update',
                            cf_local_network_gateways,
                            custom_function_op=custom_path.format('update_local_gateway'))
-
-cli_command(__name__, 'network local-gateway create',
-            'azure.cli.command_modules.network.mgmt_local_gateway.lib.operations.local_gateway_operations#LocalGatewayOperations.create_or_update',
-            cf_local_gateway_create,
-            transform=DeploymentOutputLongRunningOperation('Starting network local-gateway create'))
 
 # NetworkInterfacesOperations
 cli_command(__name__, 'network nic create', custom_path.format('create_nic'), transform=transform_nic_create_output)
@@ -320,6 +316,7 @@ cli_command(__name__, 'network vnet-gateway delete', 'azure.mgmt.network.operati
 cli_command(__name__, 'network vnet-gateway show', 'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.get', cf_virtual_network_gateways, exception_handler=empty_on_404)
 cli_command(__name__, 'network vnet-gateway list', 'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.list', cf_virtual_network_gateways)
 cli_command(__name__, 'network vnet-gateway reset', 'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.reset', cf_virtual_network_gateways)
+cli_command(__name__, 'network vnet-gateway create', custom_path.format('create_vnet_gateway'), no_wait_param='no_wait', transform=transform_vnet_gateway_create_output)
 cli_generic_update_command(__name__, 'network vnet-gateway update',
                            'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.get',
                            'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.create_or_update',
@@ -331,8 +328,7 @@ cli_command(__name__, 'network vnet-gateway root-cert delete', custom_path.forma
 cli_command(__name__, 'network vnet-gateway revoked-cert create', custom_path.format('create_vnet_gateway_revoked_cert'))
 cli_command(__name__, 'network vnet-gateway revoked-cert delete', custom_path.format('delete_vnet_gateway_revoked_cert'))
 
-cli_command(__name__, 'network vnet-gateway create', 'azure.cli.command_modules.network.mgmt_vnet_gateway.lib.operations.vnet_gateway_operations#VnetGatewayOperations.create_or_update', cf_vnet_gateway_create, transform=DeploymentOutputLongRunningOperation('Starting network vnet-gateway create'),
-            no_wait_param='raw')
+
 cli_generic_wait_command(__name__, 'network vnet-gateway wait', 'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.get', cf_virtual_network_gateways)
 
 # VirtualNetworksOperations

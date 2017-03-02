@@ -15,7 +15,8 @@ from azure.mgmt.network.models import \
      AddressSpace, VpnClientRevokedCertificate, SubResource, VirtualNetworkPeering,
      ApplicationGatewayFirewallMode, SecurityRuleAccess, SecurityRuleDirection,
      SecurityRuleProtocol, IPAllocationMethod, IPVersion,
-     ExpressRouteCircuitSkuTier, ExpressRouteCircuitSkuFamily)
+     ExpressRouteCircuitSkuTier, ExpressRouteCircuitSkuFamily,
+     VirtualNetworkGatewayType, VirtualNetworkGatewaySkuName, VpnType)
 
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands import LongRunningOperation
@@ -807,7 +808,6 @@ def remove_nic_ip_config_inbound_nat_rule(
 #region Network Security Group commands
 
 def create_nsg(resource_group_name, network_security_group_name, location=None, tags=None):
-    from azure.mgmt.network.models import NetworkSecurityGroup
     client = _network_client_factory().network_security_groups
     nsg = NetworkSecurityGroup(location=location, tags=tags)
     return client.create_or_update(resource_group_name, network_security_group_name, nsg)
@@ -1167,6 +1167,36 @@ def _prep_cert_create(gateway_name, resource_group_name):
 
     return config, gateway, ncf
 
+
+def create_vnet_gateway(resource_group_name, virtual_network_gateway_name, public_ip_address,
+                        virtual_network, location=None, tags=None, address_prefixes=None,
+                        no_wait=False, gateway_type=VirtualNetworkGatewayType.vpn.value,
+                        sku=VirtualNetworkGatewaySkuName.basic.value,
+                        vpn_type=VpnType.route_based.value,
+                        asn=None, bgp_peering_address=None, peer_weight=None):
+    from azure.mgmt.network.models import \
+        (VirtualNetworkGateway, BgpSettings, VirtualNetworkGatewayIPConfiguration,
+         VirtualNetworkGatewaySku)
+
+    client = _network_client_factory().virtual_network_gateways
+    subnet = virtual_network + '/subnets/GatewaySubnet'
+    ip_configuration = VirtualNetworkGatewayIPConfiguration(
+        SubResource(subnet),
+        SubResource(public_ip_address),
+        private_ip_allocation_method='Dynamic', name='vnetGatewayConfig')
+    vnet_gateway = VirtualNetworkGateway(
+        [ip_configuration], gateway_type, vpn_type, location=location, tags=tags,
+        sku=VirtualNetworkGatewaySku(sku, sku))
+    if asn or bgp_peering_address or peer_weight:
+        vnet_gateway.enable_bgp = True
+        vnet_gateway.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
+    if address_prefixes:
+        vnet_gateway.vpn_client_configuration = VpnClientConfiguration()
+        vnet_gateway.vpn_client_configuration.address_prefixes = address_prefixes
+    return client.create_or_update(
+        resource_group_name, virtual_network_gateway_name, vnet_gateway, raw=no_wait)
+
+
 def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None,
                         public_ip_address=None, gateway_type=None, enable_bgp=None,
                         asn=None, bgp_peering_address=None, peer_weight=None, virtual_network=None,
@@ -1373,6 +1403,18 @@ update_route.__doc__ = Route.__doc__
 #endregion
 
 #region Local Gateway commands
+
+def create_local_gateway(resource_group_name, local_network_gateway_name, gateway_ip_address,
+                         location=None, tags=None, local_address_prefix=None, asn=None,
+                         bgp_peering_address=None, peer_weight=None):
+    from azure.mgmt.network.models import LocalNetworkGateway, BgpSettings
+    client = _network_client_factory().local_network_gateways
+    local_gateway = LocalNetworkGateway(
+        local_address_prefix or [], location=location, tags=tags,
+        gateway_ip_address=gateway_ip_address)
+    if bgp_peering_address or asn or peer_weight:
+        local_gateway.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
+    return client.create_or_update(resource_group_name, local_network_gateway_name, local_gateway)
 
 def update_local_gateway(instance, gateway_ip_address=None, local_address_prefix=None, asn=None,
                          bgp_peering_address=None, peer_weight=None, tags=None):

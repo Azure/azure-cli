@@ -109,3 +109,9 @@ def transform_nsg_create_output(result):
         return {'NewNSG': result.result()}
     except Exception:  # pylint: disable=broad-except
         return result
+
+def transform_vnet_gateway_create_output(result):
+    try:
+        return {'vnetGateway': result.result()}
+    except Exception:  # pylint: disable=broad-except
+        return result

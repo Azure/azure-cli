@@ -9,6 +9,7 @@
 #pylint: disable=too-many-lines
 import os
 
+from azure.cli.core._util import CLIError
 from azure.cli.core.commands.arm import resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
@@ -94,7 +95,6 @@ class NetworkAppGatewayExistingSubnetScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
     def body(self):
-        from azure.cli.core._util import CLIError
         rg = self.resource_group
         vnet = self.cmd('network vnet create -g {} -n vnet2 --subnet-name subnet1'.format(rg))
         subnet_id = vnet['newVNet']['subnets'][0]['id']
@@ -607,9 +607,13 @@ class NetworkLocalGatewayScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('resourceGroup', self.resource_group),
             JMESPathCheck('name', self.name)
         ])
-        self.cmd('network local-gateway delete --resource-group {} --name {}'.format(self.resource_group, self.name))
-        # Expecting no results as we just deleted the only local gateway in the resource group
-        self.cmd('network local-gateway list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
+        try:
+            self.cmd('network local-gateway delete --resource-group {} --name {}'.format(self.resource_group, self.name))
+            # Expecting no results as we just deleted the only local gateway in the resource group
+            self.cmd('network local-gateway list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
+        except CLIError:
+            # TODO: Remove this once https://github.com/Azure/azure-sdk-for-python/issues/1016 is fixed
+            pass
 
 class NetworkNicScenarioTest(ResourceGroupVCRTestBase):
 

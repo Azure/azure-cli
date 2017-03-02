@@ -438,8 +438,9 @@ def process_lb_frontend_ip_namespace(namespace):
 
 def process_local_gateway_create_namespace(namespace):
     ns = namespace
-    ns.use_bgp_settings = any([ns.asn or ns.bgp_peering_address or ns.peer_weight])
-    if ns.use_bgp_settings and (not ns.asn or not ns.bgp_peering_address):
+    validate_location(ns)
+    use_bgp_settings = any([ns.asn or ns.bgp_peering_address or ns.peer_weight])
+    if use_bgp_settings and (not ns.asn or not ns.bgp_peering_address):
         raise ValueError(
             'incorrect usage: --bgp-peering-address IP --asn ASN [--peer-weight WEIGHT]')
 
@@ -527,7 +528,9 @@ def process_vnet_create_namespace(namespace):
         raise ValueError('incorrect usage: --subnet-name NAME [--subnet-prefix PREFIX]')
 
     if namespace.subnet_name and not namespace.subnet_prefix:
-        prefix_components = namespace.vnet_prefixes.split('/', 1)
+        if isinstance(namespace.vnet_prefixes, str):
+            namespace.vnet_prefixes = [namespace.vnet_prefixes]
+        prefix_components = namespace.vnet_prefixes[0].split('/', 1)
         address = prefix_components[0]
         bit_mask = int(prefix_components[1])
         subnet_mask = 24 if bit_mask < 24 else bit_mask
@@ -535,9 +538,9 @@ def process_vnet_create_namespace(namespace):
 
 def process_vnet_gateway_create_namespace(namespace):
     ns = namespace
-    ns.enable_bgp = any([ns.asn or ns.bgp_peering_address or ns.peer_weight])
-    ns.create_client_configuration = any(ns.address_prefixes or [])
-    if ns.enable_bgp and not ns.asn:
+    validate_location(ns)
+    enable_bgp = any([ns.asn or ns.bgp_peering_address or ns.peer_weight])
+    if enable_bgp and not ns.asn:
         raise ValueError(
             'incorrect usage: --asn ASN [--peer-weight WEIGHT --bgp-peering-address IP ]')
 
