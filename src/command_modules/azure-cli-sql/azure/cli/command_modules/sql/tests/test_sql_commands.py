@@ -208,7 +208,7 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('sql server firewall-rule list -g {} --server {}'
                  .format(rg, self.sql_server_name), checks=[JMESPathCheck('length(@)', 0)])
 
-        # test delete sql server
+        # test delete sql serverd
         self.cmd('sql server delete -g {} --name {}'
                  .format(rg, self.sql_server_name), checks=NoneCheck())
 
@@ -356,30 +356,108 @@ class SqlServerDbReplicaMgmtScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(SqlServerDbReplicaMgmtScenarioTest, self).__init__(
             __file__, test_method, resource_group='cli-test-sql-mgmt',
-            additional_resource_group_count=1)
-        self.sql_server_name = 'cliautomation25'
-        self.location_short_name = 'westus'
-        self.location_long_name = 'West US'
+            additional_resource_group_count=1, debug=True)
         self.admin_login = 'admin123'
         self.admin_password = 'SecretPassword123'
         self.database_name = "cliautomationdb01"
-        self.database_copy_name = "cliautomationdb02"
-        self.update_service_objective = 'S1'
-        self.update_storage = '10GB'
-        self.update_storage_bytes = str(10 * 1024 * 1024 * 1024)
+        self.service_objective = 'S1'
 
     def test_sql_db_replica_mgmt(self):
         self.execute()
 
     def body(self):
-        # create sql server with minimal required parameters
-        self.cmd('sql server create -g {} --name {} -l "{}" '
-                 '--admin-user {} --admin-password {}'
-                 .format(self.resource_groups[0], self.sql_server_name, self.location,
-                         self.admin_login, self.admin_password),
+        # helper class so that it's clear which servers are in which groups
+        class ServerInfo(object):  # pylint: disable=too-few-public-methods
+            def __init__(self, name, group):
+                self.name = name
+                self.group = group
+
+        # create 2 servers in the same resource group, and 1 server in a different resource group
+        s1 = ServerInfo('cliautomation34', self.resource_groups[0])
+        s2 = ServerInfo('cliautomation35', self.resource_groups[0])
+        s3 = ServerInfo('cliautomation36', self.resource_groups[1])
+
+        for s in (s1, s2, s3):
+            self.cmd('sql server create -g {} -n {} -l "{}" '
+                     '--admin-user {} --admin-password {}'
+                     .format(s.group, s.name, self.location, self.admin_login,
+                             self.admin_password),
+                     checks=[
+                         JMESPathCheck('name', s.name),
+                         JMESPathCheck('resourceGroup', s.group)])
+
+        # create db in first server
+        self.cmd('sql db create -g {} -s {} -n {}'
+                 .format(s1.group, s1.name, self.database_name),
                  checks=[
-                     JMESPathCheck('name', self.sql_server_name),
-                     JMESPathCheck('resourceGroup', self.resource_groups[0])])
+                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('resourceGroup', s1.group)])
+
+        # create replica in second server with min params
+        # secondary resouce group unspecified because s1.group == s2.group
+        self.cmd('sql db create-replica -g {} -s {} -n {} --secondary-server {}'
+                 .format(s1.group, s1.name, self.database_name,
+                         s2.name),
+                 checks=[
+                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('resourceGroup', s2.group)])
+
+        # check that the replica was created in the correct server
+        self.cmd('sql db show -g {} -s {} -n {}'
+                 .format(s2.group, s2.name, self.database_name),
+                 checks=[
+                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('resourceGroup', s2.group)])
+
+        # create replica in third server with max params
+        # --elastic-pool is untested
+        self.cmd('sql db create-replica -g {} -s {} -n {} --secondary-server {}'
+                 ' --secondary-resource-group {} --secondary-service-objective {}'
+                 .format(s1.group, s1.name, self.database_name,
+                         s3.name, s3.group, self.service_objective),
+                 checks=[
+                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('resourceGroup', s3.group),
+                     JMESPathCheck('requestedServiceObjectiveName', self.service_objective)])
+
+        # check that the replica was created in the correct server
+        self.cmd('sql db show -g {} -s {} -n {}'
+                 .format(s3.group, s3.name, self.database_name),
+                 checks=[
+                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('resourceGroup', s3.group)])
+
+        # list replica links on s1 - it should link to s2 and s3
+        links = self.cmd('sql db list-replica-links -g {} -s {} -n {}  --debug'
+                         .format(s1.group, s1.name, self.database_name),
+                         checks=[JMESPathCheck('length(@)', 2)])
+
+        print(links)
+
+        # list replica links on s3 - it should link only to s1
+        self.cmd('sql db list-replica-links -g {} -s {} -n {} --debug'
+                         .format(s3.group, s3.name, self.database_name),
+                         checks=[JMESPathCheck('length(@)', 1)])
+
+        # Failover to s3
+        self.cmd('sql db failover -g {} -s {} -n {}  --debug'
+                 .format(s3.group, s3.name, self.database_name),
+                 checks=[NoneCheck()])
+
+        # Force failover back to s1
+        self.cmd('sql db failover -g {} -s {} -n {}, --allow-data-loss  --debug'
+                 .format(s1.group, s1.name, self.database_name),
+                 checks=[NoneCheck()])
+
+        # Stop replication
+        self.cmd('sql db delete-replica-link -g {} -s {} -n {} --link-id {}  --debug'
+                 .format(s1.group, s1.name, self.database_name, links[0]['name']),
+                 checks=[NoneCheck()])
+
+        # Verify link was deleted
+        self.cmd('sql db list-replica-links -g {} -s {} -n {} --debug'
+                         .format(s1.group, s1.name, self.database_name),
+                         checks=[JMESPathCheck('length(@)', 1)])
 
 
 class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):

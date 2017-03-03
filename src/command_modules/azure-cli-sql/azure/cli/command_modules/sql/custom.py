@@ -30,6 +30,7 @@ def get_server_location(server_name, resource_group_name):
 #                sql db                       #
 ###############################################
 
+
 # Helper class to bundle up database identity properties
 class DatabaseIdentity(object):  # pylint: disable=too-few-public-methods
     def __init__(self, database_name, server_name, resource_group_name):
@@ -220,14 +221,15 @@ def db_failover(
         server_name=server_name,
         resource_group_name=resource_group_name))
 
-    # A secondary can only have one link at a time, and that link should be to the primary.
-    if len(links) != 1:
-        raise CLIError('The specified database did not have exactly one replication link.')
+    if len(links) == 0:
+        raise CLIError('The specified database has no replication links.')
 
-    link = links[0]
-    if link.role not in (ReplicationRole.secondary,
-                         ReplicationRole.non_readable_secondary):
-        raise CLIError('The specified database is not a secondary replica.')
+    # A secondary can only have only primary link at a time. Get that primary link.
+    try:
+        primary_link = next(l for l in links if l.partner_role == ReplicationRole.primary)
+    except StopIteration:
+        raise CLIError('No replication link from a primary replica to the specified database was'
+                       ' found.')
 
     # Choose which failover method to use
     if allow_data_loss:
@@ -235,12 +237,12 @@ def db_failover(
     else:
         failover_func = client.failover_replication_link
 
-    # Execute failover
+    # Execute failover from the primary to this database
     return failover_func(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
-        link_id=link.name)
+        link_id=primary_link.name)
 
 
 # Lists databases in a server or elastic pool.

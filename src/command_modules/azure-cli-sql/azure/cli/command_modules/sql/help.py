@@ -43,7 +43,7 @@ helps['sql db update'] = """
             type: command
             short-summary: Updates a database.
             """
-helps['sql db stop-replication'] = """
+helps['sql db delete-replica-link'] = """
             type: command
             short-summary: Permanently stops data replication to a secondary replica.
             """
