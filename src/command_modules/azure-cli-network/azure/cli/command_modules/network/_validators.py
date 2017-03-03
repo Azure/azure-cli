@@ -537,7 +537,7 @@ def process_vnet_create_namespace(namespace):
 def process_vnet_gateway_create_namespace(namespace):
     ns = namespace
     validate_location(ns)
-    enable_bgp = any([ns.asn or ns.bgp_peering_address or ns.peer_weight])
+    enable_bgp = any([ns.asn, ns.bgp_peering_address, ns.peer_weight])
     if enable_bgp and not ns.asn:
         raise ValueError(
             'incorrect usage: --asn ASN [--peer-weight WEIGHT --bgp-peering-address IP ]')
