@@ -86,28 +86,14 @@ def update_adla_account(client,
     if not resource_group_name:
         resource_group_name = _get_resource_group_by_account_name(client, account_name)
 
-    update_params = DataLakeAnalyticsAccountUpdateParameters()
-
-    if tags:
-        update_params.tags = tags
-
-    if max_degree_of_parallelism:
-        update_params.max_degree_of_parallelism = max_degree_of_parallelism
-
-    if max_job_count:
-        update_params.max_job_count = max_job_count
-
-    if query_store_retention:
-        update_params.query_store_retention = query_store_retention
-
-    if tier:
-        update_params.new_tier = tier
-
-    if firewall_state:
-        update_params.firewall_state = firewall_state
-
-    if allow_azure_ips:
-        update_params.firewall_allow_azure_ips = allow_azure_ips
+    update_params = DataLakeAnalyticsAccountUpdateParameters(
+        tags=tags,
+        max_degree_of_parallelism = max_degree_of_parallelism,
+        max_job_count=max_job_count,
+        query_store_retention=query_store_retention,
+        new_tier=tier,
+        firewall_state=firewall_state,
+        firewall_allow_azure_ips=allow_azure_ips)
 
     return client.update(resource_group_name, account_name, update_params)
 

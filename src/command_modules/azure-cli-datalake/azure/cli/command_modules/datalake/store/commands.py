@@ -35,21 +35,21 @@ cli_command(__name__, 'datalake store account trusted-provider show', adls_forma
 cli_command(__name__, 'datalake store account trusted-provider delete', adls_format_path.format('trusted_id_providers_operations', 'TrustedIdProvidersOperations', 'delete'), cf_datalake_store_account_trusted_provider)
 
 # filesystem operations
-cli_command(__name__, 'datalake store filesystem show', adls_custom_format_path.format('get_adls_item'))
-cli_command(__name__, 'datalake store filesystem list', adls_custom_format_path.format('list_adls_items'))
-cli_command(__name__, 'datalake store filesystem create', adls_custom_format_path.format('create_adls_item'))
-cli_command(__name__, 'datalake store filesystem append', adls_custom_format_path.format('append_adls_item'))
-cli_command(__name__, 'datalake store filesystem delete', adls_custom_format_path.format('remove_adls_item'))
-cli_command(__name__, 'datalake store filesystem upload', adls_custom_format_path.format('upload_to_adls'))
-cli_command(__name__, 'datalake store filesystem download', adls_custom_format_path.format('download_from_adls'))
-cli_command(__name__, 'datalake store filesystem download', adls_custom_format_path.format('download_from_adls'))
-cli_command(__name__, 'datalake store filesystem test', adls_custom_format_path.format('test_adls_item'))
-cli_command(__name__, 'datalake store filesystem preview', adls_custom_format_path.format('preview_adls_item'))
-cli_command(__name__, 'datalake store filesystem join', adls_custom_format_path.format('join_adls_items'))
-cli_command(__name__, 'datalake store filesystem move', adls_custom_format_path.format('move_adls_item'))
+cli_command(__name__, 'datalake store file show', adls_custom_format_path.format('get_adls_item'))
+cli_command(__name__, 'datalake store file list', adls_custom_format_path.format('list_adls_items'))
+cli_command(__name__, 'datalake store file create', adls_custom_format_path.format('create_adls_item'))
+cli_command(__name__, 'datalake store file append', adls_custom_format_path.format('append_adls_item'))
+cli_command(__name__, 'datalake store file delete', adls_custom_format_path.format('remove_adls_item'))
+cli_command(__name__, 'datalake store file upload', adls_custom_format_path.format('upload_to_adls'))
+cli_command(__name__, 'datalake store file download', adls_custom_format_path.format('download_from_adls'))
+cli_command(__name__, 'datalake store file download', adls_custom_format_path.format('download_from_adls'))
+cli_command(__name__, 'datalake store file test', adls_custom_format_path.format('test_adls_item'))
+cli_command(__name__, 'datalake store file preview', adls_custom_format_path.format('preview_adls_item'))
+cli_command(__name__, 'datalake store file join', adls_custom_format_path.format('join_adls_items'))
+cli_command(__name__, 'datalake store file move', adls_custom_format_path.format('move_adls_item'))
 # todo implement set expiry when it is available
 
 # filesystem permission operations
 # todo: implement acl CRUD when available
-cli_command(__name__, 'datalake store filesystem set-permission', adls_custom_format_path.format('set_adls_item_permissions'))
-cli_command(__name__, 'datalake store filesystem set-owner', adls_custom_format_path.format('set_adls_item_owner'))
+cli_command(__name__, 'datalake store file set-permission', adls_custom_format_path.format('set_adls_item_permissions'))
+cli_command(__name__, 'datalake store file set-owner', adls_custom_format_path.format('set_adls_item_owner'))

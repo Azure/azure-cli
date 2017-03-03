@@ -60,7 +60,7 @@ def create_adls_account(client,
         create_params.new_tier = tier
     if not disable_encryption:
         identity = EncryptionIdentity()
-        config = EncryptionConfig()
+        config = EncryptionConfig(type=encryption_type)
         if encryption_type == EncryptionConfigType.user_managed:
             if not key_name or not key_vault_id or not key_version:
                 raise CLIError('For user managed encryption, --key_vault_id, --key_name and --key_version are required parameters and must be supplied.')
@@ -69,7 +69,6 @@ def create_adls_account(client,
             if key_name or key_vault_id or key_version:
                 logger.warning('User supplied Key Vault information. For service managed encryption user supplied Key Vault information is ignored.')
         
-        config.type = encryption_type
         create_params.encryption_config = config
         create_params.identity = identity
     else:
@@ -91,25 +90,13 @@ def update_adls_account(client,
     if not resource_group_name:
         resource_group_name = _get_resource_group_by_account_name(client, account_name)
 
-    update_params = DataLakeStoreAccountUpdateParameters()
-
-    if tags:
-        update_params.tags = tags
-
-    if default_group:
-        update_params.default_group = default_group
-
-    if firewall_state:
-        update_params.firewall_state = firewall_state
-
-    if allow_azure_ips:
-        update_params.allow_azure_ips = allow_azure_ips
-
-    if trusted_id_provider_state:
-        update_params.trusted_id_provider_state = trusted_id_provider_state
-
-    if tier:
-        update_params.new_tier = tier
+    update_params = DataLakeStoreAccountUpdateParameters(
+        tags=tags,
+        default_group=default_group,
+        firewall_state=firewall_state,
+        firewall_allow_azure_ips=allow_azure_ips,
+        trusted_id_provider_state=trusted_id_provider_state,
+        new_tier=tier)
 
     return client.update(resource_group_name, account_name, update_params)
 

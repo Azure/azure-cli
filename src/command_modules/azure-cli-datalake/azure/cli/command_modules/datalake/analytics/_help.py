@@ -24,7 +24,7 @@ helps['datalake analytics job'] = """
 
 helps['datalake analytics job submit'] = """
     type: command
-    short-summary: submits the specified job to the specified Data Lake analytics account. 
+    short-summary: submits the job to the Data Lake analytics account. 
     parameters:
         - name: --job-name
           type: string
@@ -47,17 +47,17 @@ helps['datalake analytics job submit'] = """
 
 helps['datalake analytics job cancel'] = """
     type: command
-    short-summary: cancels the specified job in the specified Data Lake analytics account. 
+    short-summary: cancels the job in the Data Lake analytics account. 
 """
 
 helps['datalake analytics job show'] = """
     type: command
-    short-summary: Retrieves the specified job in the specified Data Lake analytics account. 
+    short-summary: Retrieves the job in the Data Lake analytics account. 
 """
 
 helps['datalake analytics job list'] = """
     type: command
-    short-summary: lists jobs in the specified Data Lake analytics account. 
+    short-summary: lists jobs in the Data Lake analytics account. 
 """
 
 helps['datalake analytics catalog'] = """
@@ -142,7 +142,7 @@ helps['datalake analytics catalog credential create'] = """
 
 helps['datalake analytics catalog credential update'] = """
     type: command
-    short-summary: Updates the specified catalog credential for use with an external data source.
+    short-summary: Updates the catalog credential for use with an external data source.
     parameters:
         - name: --credential-name
           type: string
@@ -157,7 +157,7 @@ helps['datalake analytics catalog credential update'] = """
 
 helps['datalake analytics catalog credential show'] = """
     type: command
-    short-summary: Retrieves the specified catalog credential. 
+    short-summary: Retrieves the catalog credential. 
 """
 
 helps['datalake analytics catalog credential list'] = """
@@ -167,7 +167,7 @@ helps['datalake analytics catalog credential list'] = """
 
 helps['datalake analytics catalog credential delete'] = """
     type: command
-    short-summary: deletes the specified catalog credential. 
+    short-summary: deletes the catalog credential. 
 """
 
 helps['datalake analytics account'] = """
@@ -216,7 +216,7 @@ helps['datalake analytics account update'] = """
 
 helps['datalake analytics account show'] = """
     type: command
-    short-summary: Retrieves the specified Data Lake Analytics account. 
+    short-summary: Retrieves the Data Lake Analytics account. 
 """
 
 helps['datalake analytics account list'] = """
@@ -226,7 +226,7 @@ helps['datalake analytics account list'] = """
 
 helps['datalake analytics account delete'] = """
     type: command
-    short-summary: Deletes the specified Data Lake Analytics account. 
+    short-summary: Deletes the Data Lake Analytics account. 
 """
 
 helps['datalake analytics account blob'] = """
@@ -246,7 +246,7 @@ helps['datalake analytics account firewall'] = """
 
 helps['datalake analytics account firewall create'] = """
     type: command
-    short-summary: Creates a firewall rule in the specified Data Lake Analytics account.
+    short-summary: Creates a firewall rule in the Data Lake Analytics account.
     parameters:
         - name: --end-ip-address
           type: string
@@ -261,22 +261,22 @@ helps['datalake analytics account firewall create'] = """
 
 helps['datalake analytics account firewall update'] = """
     type: command
-    short-summary: Updates a firewall rule in the specified Data Lake Analytics account. 
+    short-summary: Updates a firewall rule in the Data Lake Analytics account. 
 """
 
 helps['datalake analytics account firewall show'] = """
     type: command
-    short-summary: Retrieves a firewall rule in the specified Data Lake Analytics account. 
+    short-summary: Retrieves a firewall rule in the Data Lake Analytics account. 
 """
 
 helps['datalake analytics account firewall list'] = """
     type: command
-    short-summary: Lists firewall rules in the specified Data Lake Analytics account. 
+    short-summary: Lists firewall rules in the Data Lake Analytics account. 
 """
 
 helps['datalake analytics account firewall delete'] = """
     type: command
-    short-summary: Deletes a firewall rule in the specified Data Lake Analytics account. 
+    short-summary: Deletes a firewall rule in the Data Lake Analytics account. 
 """
 
 helps['datalake analytics account data source'] = """
@@ -286,25 +286,25 @@ helps['datalake analytics account data source'] = """
 
 helps['datalake analytics account data source add'] = """
     type: command
-    short-summary: Adds a data source to the specified Data Lake Analytics account. 
+    short-summary: Adds a data source to the Data Lake Analytics account. 
 """
 
 helps['datalake analytics account data source update'] = """
     type: command
-    short-summary: Updates a data source in the specified Data Lake Analytics account. 
+    short-summary: Updates a data source in the Data Lake Analytics account. 
 """
 
 helps['datalake analytics account data source show'] = """
     type: command
-    short-summary: Retrieves a data source in the specified Data Lake Analytics account. 
+    short-summary: Retrieves a data source in the Data Lake Analytics account. 
 """
 
 helps['datalake analytics account data source list'] = """
     type: command
-    short-summary: Lists data sources in the specified Data Lake Analytics account. 
+    short-summary: Lists data sources in the Data Lake Analytics account. 
 """
 
 helps['datalake analytics account data source delete'] = """
     type: command
-    short-summary: Deletes a data source in the specified Data Lake Analytics account. 
+    short-summary: Deletes a data source in the Data Lake Analytics account. 
 """

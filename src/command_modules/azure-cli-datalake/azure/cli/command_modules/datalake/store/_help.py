@@ -47,7 +47,7 @@ helps['datalake store account update'] = """
 
 helps['datalake store account show'] = """
     type: command
-    short-summary: Retrieves the specified Data Lake Store account. 
+    short-summary: Retrieves the Data Lake Store account. 
 """
 
 helps['datalake store account list'] = """
@@ -57,7 +57,7 @@ helps['datalake store account list'] = """
 
 helps['datalake store account delete'] = """
     type: command
-    short-summary: Deletes the specified Data Lake Store account. 
+    short-summary: Deletes the Data Lake Store account. 
 """
 
 helps['datalake store account trusted-provider'] = """
@@ -72,7 +72,7 @@ helps['datalake store account firewall'] = """
 
 helps['datalake store account firewall create'] = """
     type: command
-    short-summary: Creates a firewall rule in the specified Data Lake Store account.
+    short-summary: Creates a firewall rule in the Data Lake Store account.
     parameters:
         - name: --end-ip-address
           type: string
@@ -87,22 +87,22 @@ helps['datalake store account firewall create'] = """
 
 helps['datalake store account firewall update'] = """
     type: command
-    short-summary: Updates a firewall rule in the specified Data Lake Store account. 
+    short-summary: Updates a firewall rule in the Data Lake Store account. 
 """
 
 helps['datalake store account firewall show'] = """
     type: command
-    short-summary: Retrieves a firewall rule in the specified Data Lake Store account. 
+    short-summary: Retrieves a firewall rule in the Data Lake Store account. 
 """
 
 helps['datalake store account firewall list'] = """
     type: command
-    short-summary: Lists firewall rules in the specified Data Lake Store account. 
+    short-summary: Lists firewall rules in the Data Lake Store account. 
 """
 
 helps['datalake store account firewall delete'] = """
     type: command
-    short-summary: Deletes a firewall rule in the specified Data Lake Store account. 
+    short-summary: Deletes a firewall rule in the Data Lake Store account. 
 """
 
 helps['datalake store account provider'] = """
@@ -112,70 +112,70 @@ helps['datalake store account provider'] = """
 
 helps['datalake store account provider add'] = """
     type: command
-    short-summary: Adds a trusted identity provider to the specified Data Lake Store account. 
+    short-summary: Adds a trusted identity provider to the Data Lake Store account. 
 """
 
 helps['datalake store account provider update'] = """
     type: command
-    short-summary: Updates a trusted identity provider in the specified Data Lake Store account. 
+    short-summary: Updates a trusted identity provider in the Data Lake Store account. 
 """
 
 helps['datalake store account provider show'] = """
     type: command
-    short-summary: Retrieves a trusted identity provider in the specified Data Lake Store account. 
+    short-summary: Retrieves a trusted identity provider in the Data Lake Store account. 
 """
 
 helps['datalake store account provider list'] = """
     type: command
-    short-summary: Lists trusted identity providers in the specified Data Lake Store account. 
+    short-summary: Lists trusted identity providers in the Data Lake Store account. 
 """
 
 helps['datalake store account provider delete'] = """
     type: command
-    short-summary: Deletes a trusted identity provider in the specified Data Lake Store account. 
+    short-summary: Deletes a trusted identity provider in the Data Lake Store account. 
 """
 
-helps['datalake store filesystem'] = """
+helps['datalake store file'] = """
     type: group
     short-summary: Commands to manage a Data Lake Store filesystem. 
 """
 
-helps['datalake store filesystem create'] = """
+helps['datalake store file create'] = """
     type: command
-    short-summary: Creates a file or folder in the specified Data Lake Store account at the specified path.
+    short-summary: Creates a file or folder in the Data Lake Store account at the path.
     parameters:
         - name: --content
           type: string
           short-summary: 'Optional content for the file to contain upon creation.'
 """
 
-helps['datalake store filesystem show'] = """
+helps['datalake store file show'] = """
     type: command
-    short-summary: displays file or folder information in the specified Data Lake Store account at the specified path.
+    short-summary: displays file or folder information in the Data Lake Store account at the path.
 """
 
-helps['datalake store filesystem list'] = """
+helps['datalake store file list'] = """
     type: command
-    short-summary: displays the list of files and folder information under the specified folder in the specified Data Lake Store account.
+    short-summary: displays the list of files and folder information under the folder in the Data Lake Store account.
 """
 
-helps['datalake store filesystem append'] = """
+helps['datalake store file append'] = """
     type: command
-    short-summary: Appends content to a file in the specified Data Lake Store account at the specified path.
+    short-summary: Appends content to a file in the Data Lake Store account at the path.
     parameters:
         - name: --content
           type: string
           short-summary: 'Content to be appended to the file.'
 """
 
-helps['datalake store filesystem delete'] = """
+helps['datalake store file delete'] = """
     type: command
-    short-summary: Deletes the file or folder in the specified Data Lake Store account at the specified path.
+    short-summary: Deletes the file or folder in the Data Lake Store account at the path.
 """
 
-helps['datalake store filesystem upload'] = """
+helps['datalake store file upload'] = """
     type: command
-    short-summary: Uploads a file or folder to the specified Data Lake Store account at the specified destination path.
+    short-summary: Uploads a file or folder to the Data Lake Store account at the destination path.
     parameters:
         - name: --source-path
           type: string
@@ -188,9 +188,9 @@ helps['datalake store filesystem upload'] = """
           short-summary: 'Optionally specify the parallelism of the upload. Default is the number of cores in the local machine.'
 """
 
-helps['datalake store filesystem download'] = """
+helps['datalake store file download'] = """
     type: command
-    short-summary: Downloads a file or folder from the specified Data Lake Store account to the specified local destination path.
+    short-summary: Downloads a file or folder from the Data Lake Store account to the local destination path.
     parameters:
         - name: --source-path
           type: string
@@ -203,14 +203,14 @@ helps['datalake store filesystem download'] = """
           short-summary: 'Optionally specify the parallelism of the download. Default is the number of cores in the local machine.'
 """
 
-helps['datalake store filesystem test'] = """
+helps['datalake store file test'] = """
     type: command
-    short-summary: Tests the existence of the file or folder in the specified Data Lake Store account at the specified path.
+    short-summary: Tests the existence of the file or folder in the Data Lake Store account at the path.
 """
 
-helps['datalake store filesystem preview'] = """
+helps['datalake store file preview'] = """
     type: command
-    short-summary: Previews the content of the file in the specified Data Lake Store account at the specified path.
+    short-summary: Previews the content of the file in the Data Lake Store account at the path.
     parameters:
         - name: --length
           type: long
@@ -220,21 +220,21 @@ helps['datalake store filesystem preview'] = """
           short-summary: 'The optional position in bytes as a long in the file to start the preview from'
 """
 
-helps['datalake store filesystem join'] = """
+helps['datalake store file join'] = """
     type: command
-    short-summary: Joins the specified list of files in the specified Data Lake Store account into one file at the specified destination path.
+    short-summary: Joins the list of files in the Data Lake Store account into one file at the destination path.
     parameters:
         - name: --source-paths
           type: list
-          short-summary: 'The list of files in the specified Data Lake Store account to join.'
+          short-summary: 'The list of files in the Data Lake Store account to join.'
         - name: --destination-path
           type: string
           short-summary: 'The destination path in the Data Lake store account where the resulting joined files should be placed.'
 """
 
-helps['datalake store filesystem move'] = """
+helps['datalake store file move'] = """
     type: command
-    short-summary: Moves the specified file or folder in the specified Data Lake Store account to the specified destination path.
+    short-summary: Moves the file or folder in the Data Lake Store account to the destination path.
     parameters:
         - name: --source-path
           type: list
@@ -244,9 +244,9 @@ helps['datalake store filesystem move'] = """
           short-summary: 'The destination path in the Data Lake store account where the file or folder should be moved to.'
 """
 
-helps['datalake store filesystem set-owner'] = """
+helps['datalake store file set-owner'] = """
     type: command
-    short-summary: Sets the owner and or owning group for the specified file or folder in the specified Data Lake Store account.
+    short-summary: Sets the owner and or owning group for the file or folder in the Data Lake Store account.
     parameters:
         - name: --owner
           type: string
@@ -256,9 +256,9 @@ helps['datalake store filesystem set-owner'] = """
           short-summary: 'The group AAD object ID or UPN to set as the owning group. If not specified the owning group remains unchanged'
 """
 
-helps['datalake store filesystem set-permission '] = """
+helps['datalake store file set-permission '] = """
     type: command
-    short-summary: Sets the permission octal for the specified file or folder in the specified Data Lake Store account.
+    short-summary: Sets the permission octal for the file or folder in the Data Lake Store account.
     parameters:
         - name: --permission
           type: int
