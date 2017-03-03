@@ -256,6 +256,9 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
         self.cassette_path = os.path.join(self.recording_dir, '{}.yaml'.format(test_name))
         self.playback = os.path.isfile(self.cassette_path)
 
+        # Dictionary: original value -> scrubbed value
+        self.post_recording_scrub_replacements = {}
+
         if os.environ.get(LIVE_TEST_CONTROL_ENV, None) == 'True':
             self.run_live = True
         else:
@@ -381,9 +384,8 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
         t = tempfile.NamedTemporaryFile('r+')
         with open(src_path, 'r') as f:
             for line in f:
-                # scrub resource group names
-                if rg_name != rg_original:
-                    line = line.replace(rg_name, rg_original)
+                for key in self.post_recording_scrub_replacements:
+                    line = line.replace(key, self.post_recording_scrub_replacements[key])
                 # omit bearer tokens
                 if 'authorization:' not in line.lower():
                     t.write(line)
@@ -468,23 +470,44 @@ class ResourceGroupVCRTestBase(VCRTestBase):
     # pylint: disable=too-many-arguments
 
     def __init__(self, test_file, test_name, resource_group='vcr_resource_group', run_live=False,
-                 debug=False, debug_vcr=False, skip_setup=False, skip_teardown=False):
+                 debug=False, debug_vcr=False, skip_setup=False, skip_teardown=False,
+                 additional_resource_group_count=0):
         super(ResourceGroupVCRTestBase, self).__init__(test_file, test_name, run_live=run_live,
                                                        debug=debug, debug_vcr=debug_vcr,
                                                        skip_setup=skip_setup,
                                                        skip_teardown=skip_teardown)
-        self.resource_group_original = resource_group
-        random_tag = '_{}_'.format(''.join((choice(ascii_lowercase + digits) for _ in range(4))))
-        self.resource_group = '{}{}'.format(resource_group, '' if self.playback else random_tag)
+
+        def _uniqueify_resource_group(base_name):
+            if self.playback:
+                return base_name
+
+            random_tag = ''.join((choice(ascii_lowercase + digits) for _ in range(4)))
+            name = '{}_{}_'.format(base_name, random_tag)
+
+            # Replace name with base_name after recording
+            self.post_recording_scrub_replacements[name] = base_name
+            return name
+
+        # Most tests only use a single resource group, so make that most convenient to access
+        self.resource_group = _uniqueify_resource_group(resource_group)
+
+        # Tests that use multiple resource groups can access their names via array
+        self.resource_groups = [self.resource_group]
+        for i in range(additional_resource_group_count):
+            # The first additional resource group is named like 'resource_group2' and so on.
+            self.resource_groups.append(_uniqueify_resource_group(resource_group + str(i + 2)))
+
         self.location = 'westus'
 
+
     def set_up(self):
-        self.cmd('group create --location {} --name {} --tags use=az-test'.format(
-            self.location, self.resource_group))
+        for g in self.resource_groups:
+            self.cmd('group create --location {} --name {} --tags use=az-test'.format(
+                self.location, g))
 
     def tear_down(self):
-        self.cmd('group delete --name {} --no-wait --yes'.format(self.resource_group))
-
+        for g in self.resource_groups:
+            self.cmd('group delete --name {} --no-wait --yes'.format(g))
 
 class StorageAccountVCRTestBase(VCRTestBase):
     account_location = 'westus'

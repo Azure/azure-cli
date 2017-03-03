@@ -351,6 +351,37 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
                  .format(rg, self.sql_server_name), checks=NoneCheck())
 
 
+class SqlServerDbReplicaMgmtScenarioTest(ResourceGroupVCRTestBase):
+    # pylint: disable=too-many-instance-attributes
+    def __init__(self, test_method):
+        super(SqlServerDbReplicaMgmtScenarioTest, self).__init__(
+            __file__, test_method, resource_group='cli-test-sql-mgmt',
+            additional_resource_group_count=1)
+        self.sql_server_name = 'cliautomation25'
+        self.location_short_name = 'westus'
+        self.location_long_name = 'West US'
+        self.admin_login = 'admin123'
+        self.admin_password = 'SecretPassword123'
+        self.database_name = "cliautomationdb01"
+        self.database_copy_name = "cliautomationdb02"
+        self.update_service_objective = 'S1'
+        self.update_storage = '10GB'
+        self.update_storage_bytes = str(10 * 1024 * 1024 * 1024)
+
+    def test_sql_db_replica_mgmt(self):
+        self.execute()
+
+    def body(self):
+        # create sql server with minimal required parameters
+        self.cmd('sql server create -g {} --name {} -l "{}" '
+                 '--admin-user {} --admin-password {}'
+                 .format(self.resource_groups[0], self.sql_server_name, self.location,
+                         self.admin_login, self.admin_password),
+                 checks=[
+                     JMESPathCheck('name', self.sql_server_name),
+                     JMESPathCheck('resourceGroup', self.resource_groups[0])])
+
+
 class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
     # pylint: disable=too-many-instance-attributes
     def __init__(self, test_method):
@@ -416,9 +447,7 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                  .format(rg, self.sql_server_name, loc_short, user, password),
                  checks=[
                      JMESPathCheck('name', self.sql_server_name),
-                     JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('location', loc_long),
-                     JMESPathCheck('administratorLogin', user)])
+                     JMESPathCheck('resourceGroup', rg)])
 
         # test sql elastic-pool commands
         self.cmd('sql elastic-pool create -g {} --server {} --name {} '
