@@ -10,6 +10,7 @@ import errno
 import json
 import os.path
 from pprint import pformat
+from copy import deepcopy
 from enum import Enum
 
 import adal
@@ -137,7 +138,8 @@ class Profile(object):
                                                      subscriptions,
                                                      is_service_principal)
         self._set_subscriptions(consolidated)
-        return consolidated
+        # use deepcopy as we don't want to persist these changes to file.
+        return deepcopy(consolidated)
 
     @staticmethod
     def _normalize_properties(user, subscriptions, is_service_principal):
@@ -224,8 +226,10 @@ class Profile(object):
     def load_cached_subscriptions(self, all_clouds=False):
         subscriptions = self._storage.get(_SUBSCRIPTIONS) or []
         active_cloud = get_active_cloud()
-        return [sub for sub in subscriptions
-                if all_clouds or sub[_ENVIRONMENT_NAME] == active_cloud.name]
+        cached_subscriptions = [sub for sub in subscriptions
+                                if all_clouds or sub[_ENVIRONMENT_NAME] == active_cloud.name]
+        # use deepcopy as we don't want to persist these changes to file.
+        return deepcopy(cached_subscriptions)
 
     def get_current_account_user(self):
         try:
@@ -282,7 +286,6 @@ class Profile(object):
             result[_ENVIRONMENT_NAME] = CLOUD.name
             result['subscriptionName'] = account[_SUBSCRIPTION_NAME]
         else:  # has logged in through cli
-            from copy import deepcopy
             result = deepcopy(account)
             user_type = account[_USER_ENTITY].get(_USER_TYPE)
             if user_type == _SERVICE_PRINCIPAL:
