@@ -61,7 +61,7 @@ class SizeWithUnitConverter(object):  # pylint: disable=too-few-public-methods
 ###############################################
 
 
-class Engine(Enum):
+class Engine(Enum):  # pylint: disable=too-few-public-methods
     """SQL RDBMS engine type."""
     db = 'db'
     dw = 'dw'
