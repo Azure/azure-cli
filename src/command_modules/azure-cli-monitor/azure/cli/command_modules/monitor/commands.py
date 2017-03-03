@@ -76,6 +76,14 @@ with ServiceGroup(__name__, get_monitor_autoscale_settings_operation,
         c.command('list', 'list_by_resource_group')
         c.generic_update_command('update', 'get', 'create_or_update')
 
+autoscale_settings_scaffold = create_service_adapter(
+    'azure.cli.command_modules.monitor.custom')
+
+with ServiceGroup(__name__, get_monitor_autoscale_settings_operation,
+                  autoscale_settings_scaffold) as s:
+    with s.group('monitor autoscale-settings') as c:
+        c.command('get-parameters-template', 'scaffold_autoscale_settings_parameters')
+
 
 # DATA COMMANDS
 event_categories_operations = create_service_adapter(

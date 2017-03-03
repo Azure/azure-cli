@@ -41,10 +41,10 @@ with ParametersContext(command='monitor log-profiles create') as c:
     c.expand('parameters', LogProfileProperties)
 
 with ParametersContext(command='monitor autoscale-settings create') as c:
-    from azure.mgmt.monitor.models.autoscale_setting_resource import \
-        (AutoscaleSettingResource)
-
-    c.expand('parameters', AutoscaleSettingResource)
+    c.register('parameters', ('--parameters',),
+               type=json.loads,
+               help='JSON encoded parameters configuration. Use @{file} to load from a file.'
+                    'Use az autoscale-settings get-parameters-template to export json template.')
 
 with ParametersContext(command='monitor metric-definitions list') as c:
     c.argument('metric_names', nargs='+')
