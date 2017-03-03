@@ -157,13 +157,11 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
                                                      False)
         profile._set_subscriptions(consolidated)
 
-        subscription1 = storage_mock['subscriptions'][0]
-        subscription2 = storage_mock['subscriptions'][1]
-        self.assertTrue(subscription2['isDefault'])
+        self.assertTrue(storage_mock['subscriptions'][1]['isDefault'])
 
-        profile.set_active_subscription(subscription1['id'])
-        self.assertFalse(subscription2['isDefault'])
-        self.assertTrue(subscription1['isDefault'])
+        profile.set_active_subscription(storage_mock['subscriptions'][0]['id'])
+        self.assertFalse(storage_mock['subscriptions'][1]['isDefault'])
+        self.assertTrue(storage_mock['subscriptions'][0]['isDefault'])
 
     def test_get_subscription(self):
         storage_mock = {'subscriptions': None}
