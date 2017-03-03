@@ -15,7 +15,6 @@ from azure.cli.core._util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.mgmt.storage import StorageManagementClient
-from azure.mgmt.storage.models import CustomDomain
 from azure.storage.sharedaccesssignature import SharedAccessSignature
 from azure.storage.blob import Include, PublicAccess
 from azure.storage.blob.baseblobservice import BaseBlobService
@@ -275,11 +274,8 @@ def get_content_setting_validator(settings_class, update):
 
 
 def validate_custom_domain(namespace):
-    if namespace.custom_domain:
-        namespace.custom_domain = CustomDomain(namespace.custom_domain, namespace.subdomain)
-    if namespace.subdomain and not namespace.custom_domain:
-        raise ValueError("must specify '--custom-domain' to use the '--use-subdomain' flag")
-    del namespace.subdomain
+    if namespace.use_subdomain and not namespace.custom_domain:
+        raise ValueError('usage error: --custom-domain DOMAIN [--use-subdomain]')
 
 
 def validate_encryption(namespace):
