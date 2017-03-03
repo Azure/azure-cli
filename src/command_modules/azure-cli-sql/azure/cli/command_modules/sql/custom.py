@@ -9,8 +9,9 @@ from ._util import (
 )
 
 from azure.cli.core.commands.client_factory import get_subscription_id
-
 from azure.cli.core._util import CLIError
+from azure.mgmt.sql.models.sql_management_client_enums import (
+    DatabaseEditions, ServiceObjectiveName)
 
 ###############################################
 #                Common funcs                 #
@@ -70,7 +71,7 @@ def db_create(
 
     # Verify edition
     edition = kwargs.get('edition')  # kwags['edition'] throws KeyError if not in dictionary
-    if edition and edition.lower() == 'datawarehouse':
+    if edition and edition.lower() == DatabaseEditions.data_warehouse.value.lower():
         raise CLIError('Azure SQL Data Warehouse can be created with the command'
                        ' `az sql dw create`.')
 
@@ -219,7 +220,7 @@ def db_update(
         requested_service_objective_name=None):
 
     # Verify edition
-    if instance.edition.lower() == 'datawarehouse':
+    if instance.edition.lower() == DatabaseEditions.data_warehouse.value.lower():
         raise CLIError('Azure SQL Data Warehouse can be updated with the command'
                        ' `az sql dw update`.')
 
@@ -234,9 +235,10 @@ def db_update(
     # user from this unintuitive behavior.
     if (elastic_pool_name and
             requested_service_objective_name and
-            requested_service_objective_name != 'ElasticPool'):
+            requested_service_objective_name != ServiceObjectiveName.elastic_pool.value):
         raise CLIError('If elastic pool is specified, service objective must be'
-                       ' unspecified or equal \'ElasticPool\'.')
+                       ' unspecified or equal \'{}\'.'.format(
+                           ServiceObjectiveName.elastic_pool.value))
 
     # Update instance pool and service objective. The service treats these properties like PATCH,
     # so if either of these properties is null then the service will keep the property unchanged -
@@ -274,7 +276,7 @@ def dw_create(
         **kwargs):
 
     # Set edition
-    kwargs['edition'] = 'DataWarehouse'
+    kwargs['edition'] = DatabaseEditions.data_warehouse.value
 
     # Create
     return _db_dw_create(
@@ -292,7 +294,8 @@ def dw_list(
     return client.list_by_server(
         resource_group_name=resource_group_name,
         server_name=server_name,
-        filter="properties/edition eq 'DataWarehouse'")  # OData filter to include only DW's
+        # OData filter to include only DW's
+        filter="properties/edition eq '{}'".format(DatabaseEditions.data_warehouse.value))
 
 
 # Update data warehouse. Custom update function to apply parameters to instance.
