@@ -445,7 +445,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ResourceGroupVCRTestBase):
                  checks=[NoneCheck()])
 
         # Force failover back to s1
-        self.cmd('sql db failover -g {} -s {} -n {}, --allow-data-loss  --debug'
+        self.cmd('sql db failover -g {} -s {} -n {} --allow-data-loss  --debug'
                  .format(s1.group, s1.name, self.database_name),
                  checks=[NoneCheck()])
 
