@@ -460,11 +460,9 @@ def process_public_ip_create_namespace(namespace):
 
 def process_route_table_create_namespace(namespace):
     from azure.mgmt.network.models import RouteTable
-    namespace.parameters = RouteTable()
     validate_location(namespace)
     validate_tags(namespace)
-    if hasattr(namespace, 'tags'):
-        namespace.parameters.tags = namespace.tags
+    namespace.parameters = RouteTable(location=namespace.location, tags=namespace.tags)
 
 def process_tm_endpoint_create_namespace(namespace):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client

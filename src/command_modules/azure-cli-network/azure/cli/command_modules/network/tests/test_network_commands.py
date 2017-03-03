@@ -612,7 +612,7 @@ class NetworkLocalGatewayScenarioTest(ResourceGroupVCRTestBase):
             # Expecting no results as we just deleted the only local gateway in the resource group
             self.cmd('network local-gateway list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
         except CLIError:
-            # TODO: Remove this once https://github.com/Azure/azure-sdk-for-python/issues/1016 is fixed
+            # TODO: Remove this once https://github.com/Azure/azure-cli/issues/2373 is fixed
             pass
 
 class NetworkNicScenarioTest(ResourceGroupVCRTestBase):
