@@ -283,6 +283,12 @@ with ParametersContext(command='sql dw create') as c:
     _configure_db_create_params(c, Engine.dw, CreateMode.default)
 
 
+with ParametersContext(command='sql dw show') as c:
+    # Service tier advisors and transparent data encryption are not included in the first batch
+    # of GA commands.
+    c.ignore('expand')
+
+
 # Data Warehouse restore will not be included in the first batch of GA commands
 # (list_restore_points also applies to db, but it's not very useful. It's
 # mainly useful for dw.)
