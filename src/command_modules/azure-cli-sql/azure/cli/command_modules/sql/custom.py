@@ -10,7 +10,10 @@ from ._util import (
 
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core._util import CLIError
-from azure.mgmt.sql.models.sql_management_client_enums import ReplicationRole
+from azure.mgmt.sql.models.sql_management_client_enums import (
+    CreateMode,
+    ReplicationRole,
+)
 
 ###############################################
 #                Common funcs                 #
@@ -153,28 +156,28 @@ def db_copy(  # pylint: disable=too-many-arguments
         kwargs)
 
 
-# Copies a secondary replica. Wrapper function to make create mode more convenient.
+# Copies a replica database. Wrapper function to make create mode more convenient.
 def db_create_replica(  # pylint: disable=too-many-arguments
         client,
         database_name,
         server_name,
         resource_group_name,
         # Replica must have the same database name as the source db
-        secondary_server_name,
-        secondary_resource_group_name=None,
+        partner_server_name,
+        partner_resource_group_name=None,
         **kwargs):
 
     # Determine optional values
-    secondary_resource_group_name = secondary_resource_group_name or resource_group_name
+    partner_resource_group_name = partner_resource_group_name or resource_group_name
 
     # Set create mode
-    kwargs['create_mode'] = 'OnlineSecondary'
+    kwargs['create_mode'] = CreateMode.online_secondary.value
 
     # Replica must have the same database name as the source db
     return _db_create_special(
         client,
         DatabaseIdentity(database_name, server_name, resource_group_name),
-        DatabaseIdentity(database_name, secondary_server_name, secondary_resource_group_name),
+        DatabaseIdentity(database_name, partner_server_name, partner_resource_group_name),
         kwargs)
 
 
@@ -215,7 +218,7 @@ def db_failover(
         resource_group_name,
         allow_data_loss=False):
 
-    # List replication links on the secondary
+    # List replication links
     links = list(client.list_replication_links(
         database_name=database_name,
         server_name=server_name,
@@ -224,8 +227,8 @@ def db_failover(
     if len(links) == 0:
         raise CLIError('The specified database has no replication links.')
 
-    # If a replica is primary, then it has 1 or more links (to its secondaries).
-    # If a replica is secondary, then it has exactly 1 link (to its primary).
+    # If a replica database is primary, then it has 1 or more links (to its secondaries).
+    # If a replica database is secondary, then it has exactly 1 link (to its primary).
     primary_link = next((l for l in links if l.partner_role == ReplicationRole.primary), None)
     if not primary_link:
         # No link to a primary, so this must already be a primary. Do nothing.

@@ -25,7 +25,7 @@ helps['sql db create'] = """
             """
 helps['sql db create-replica'] = """
             type: command
-            short-summary: Creates a readable secondary replica of an existing database.
+            short-summary: Creates a readable secondary replica database of an existing database.
             """
 helps['sql db delete'] = """
             type: command

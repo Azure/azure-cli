@@ -394,8 +394,8 @@ class SqlServerDbReplicaMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('resourceGroup', s1.group)])
 
         # create replica in second server with min params
-        # secondary resouce group unspecified because s1.group == s2.group
-        self.cmd('sql db create-replica -g {} -s {} -n {} --secondary-server {}'
+        # partner resouce group unspecified because s1.group == s2.group
+        self.cmd('sql db create-replica -g {} -s {} -n {} --partner-server {}'
                  .format(s1.group, s1.name, self.database_name,
                          s2.name),
                  checks=[
@@ -411,8 +411,8 @@ class SqlServerDbReplicaMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # create replica in third server with max params
         # --elastic-pool is untested
-        self.cmd('sql db create-replica -g {} -s {} -n {} --secondary-server {}'
-                 ' --secondary-resource-group {} --secondary-service-objective {}'
+        self.cmd('sql db create-replica -g {} -s {} -n {} --partner-server {}'
+                 ' --partner-resource-group {} --partner-service-objective {}'
                  .format(s1.group, s1.name, self.database_name,
                          s3.name, s3.group, self.service_objective),
                  checks=[

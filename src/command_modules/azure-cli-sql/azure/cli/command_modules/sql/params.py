@@ -55,6 +55,7 @@ class SizeWithUnitConverter(object):  # pylint: disable=too-few-public-methods
 #                sql db                       #
 ###############################################
 
+
 with ParametersContext(command='sql db') as c:
     c.argument('database_name',
                options_list=('--name', '-n'),
@@ -132,21 +133,21 @@ with ParametersContext(command='sql db create-replica') as c:
     c.expand('parameters', Database)
 
     c.argument('elastic_pool_name',
-               options_list=('--secondary-elastic-pool',),
-               help='Name of elastic pool to create the new database in.')
+               options_list=('--partner-elastic-pool',),
+               help='Name of elastic pool to create the new replica database in.')
 
     c.argument('requested_service_objective_name',
-               options_list=('--secondary-service-objective',),
-               help='Name of service objective for the new secondary database.')
+               options_list=('--partner-service-objective',),
+               help='Name of service objective for the new replica database.')
 
-    c.argument('secondary_resource_group_name',
-               options_list=('--secondary-resource-group',),
-               help='Name of the resource group to create the new secondary database in.'
+    c.argument('partner_resource_group_name',
+               options_list=('--partner-resource-group',),
+               help='Name of the resource group to create the new replica database in.'
                ' If unspecified, defaults to the origin resource group.')
 
-    c.argument('secondary_server_name',
-               options_list=('--secondary-server',),
-               help='Name of the server to create the new secondary database in.')
+    c.argument('partner_server_name',
+               options_list=('--partner-server',),
+               help='Name of the server to create the new replica database in.')
 
     for i in sql_db_copy_ignored_params:
         c.ignore(i)
@@ -185,10 +186,11 @@ with ParametersContext(command='sql db update') as c:
 with ParametersContext(command='sql db failover') as c:
     c.argument('database_name', help='Name of the database to fail over.')
     c.argument('server_name',
-               help='Name of the secondary replica\'s server that will become the new primary.')
+               help='Name of the server containing the secondary replica database that will become'
+               ' the new primary.')
     c.argument('resource_group_name',
-               help='Name of the secondary replica\'s resource group that will become the'
-               ' new primary.')
+               help='Name of the resource group containing the secondary replica database that'
+              ' will become the new primary.')
     c.argument('allow_data_loss',
                help='If specified, the failover operation will allow data loss.')
 
