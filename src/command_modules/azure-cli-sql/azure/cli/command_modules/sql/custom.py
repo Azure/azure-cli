@@ -224,12 +224,13 @@ def db_failover(
     if len(links) == 0:
         raise CLIError('The specified database has no replication links.')
 
-    # A secondary can only have only primary link at a time. Get that primary link.
+    # If a replica is primary, then it has 1 or more links (to its secondaries).
+    # If a replica is secondary, then it has exactly 1 link (to its primary).
     try:
         primary_link = next(l for l in links if l.partner_role == ReplicationRole.primary)
     except StopIteration:
-        raise CLIError('No replication link from a primary replica to the specified database was'
-                       ' found.')
+        # No link to a primary, so this must already be a primary. Do nothing.
+        return
 
     # Choose which failover method to use
     if allow_data_loss:
@@ -243,6 +244,40 @@ def db_failover(
         server_name=server_name,
         resource_group_name=resource_group_name,
         link_id=primary_link.name)
+
+
+def db_delete_replica_link(
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        # Partner dbs must have the same name as one another
+        partner_server_name,
+        partner_resource_group_name=None):
+
+    # Determine optional values
+    partner_resource_group_name = partner_resource_group_name or resource_group_name
+
+    # Find the replication link
+    links = list(client.list_replication_links(
+        database_name=database_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name))
+
+    try:
+        # The link doesn't tell us the partner resource group name, so we just have to count on
+        # partner server name being unique
+        link = next(l for l in links 
+                    if l.partner_server == partner_server_name)
+    except StopIteration:
+        # No link exists, nothing to be done
+        return None
+
+    return client.delete_replication_link(
+        database_name=database_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        link_id=link.name)
 
 
 # Lists databases in a server or elastic pool.

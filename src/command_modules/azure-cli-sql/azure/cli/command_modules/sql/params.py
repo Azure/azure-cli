@@ -192,6 +192,15 @@ with ParametersContext(command='sql db failover') as c:
     c.argument('allow_data_loss',
                help='If specified, the failover operation will allow data loss.')
 
+with ParametersContext(command='sql db delete-replica-link') as c:
+    c.argument('partner_server_name',
+               options_list=('--partner-server',),
+               help='Name of the server that the other replica is in.')
+    c.argument('partner_resource_group_name',
+               options_list=('--partner-resource-group',),
+               help='Name of the resource group that the other replica is in. If unspecified,'
+               ' defaults to the first database\'s resource group.')
+
 #####
 #           sql db <<other subgroups>>
 #####
