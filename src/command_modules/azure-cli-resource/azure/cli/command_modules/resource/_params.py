@@ -7,6 +7,7 @@
 from argcomplete.completers import FilesCompleter
 
 from azure.mgmt.resource.resources.models import DeploymentMode
+from azure.mgmt.resource.locks.models import LockLevel
 from azure.cli.core.commands import register_cli_argument, CliArgumentType
 from azure.cli.core.commands.parameters import (ignore_type, resource_group_name_type, tag_type,
                                                 tags_type, get_resource_group_completion_list,
@@ -75,3 +76,6 @@ register_cli_argument('group create', 'resource_group_name', completer=None)
 
 register_cli_argument('tag', 'tag_name', options_list=('--name', '-n'))
 register_cli_argument('tag', 'tag_value', options_list=('--value',))
+
+register_cli_argument('lock', 'name', options_list=('--name', '-n'))
+register_cli_argument('lock create', 'level', options_list=('--lock-type', '-t'), required=True, **enum_choice_list(LockLevel))
