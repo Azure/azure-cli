@@ -119,7 +119,3 @@ helps['sql server firewall-rule list'] = """
             type: command
             short-summary: Lists the firewall rules.
             """
-helps['sql server service-objective'] = """
-            type: group
-            short-summary: Show a server's service objectives.
-            """
