@@ -34,6 +34,7 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
         self.account_name = 'clibatchtest1'
         self.location = 'brazilsouth'
         self.storage_account_name = 'clibatchteststorage1'
+        self.keyvault_name = 'clibatchtestkeyvault1'
 
     def test_batch_account_mgmt(self):
         self.execute()
@@ -51,6 +52,16 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
                                   JMESPathCheck('resourceGroup', rg)])
         sid = result['id']
 
+        # test create keyvault for use with BYOS account
+        keyvault = self.cmd('keyvault create -g {} -n {} -l {}'.
+                            format(rg, self.keyvault_name, loc),
+                            checks=[JMESPathCheck('name', kv),
+                                    JMESPathCheck('location', loc),
+                                    JMESPathCheck('resourceGroup', rg),
+                                    JMESPathCheck('type(properties.accessPolicies)', 'array'),
+                                    JMESPathCheck('length(properties.accessPolicies)', 1),
+                                    JMESPathCheck('properties.sku.name', 'standard')])
+
         # test create account with default set
         self.cmd('batch account create -g {} -n {} -l {}'.format(rg, name, loc), checks=[
             JMESPathCheck('name', name),
@@ -58,8 +69,8 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('resourceGroup', rg)
         ])
 
-        self.cmd('batch account set -g {} -n {} --storage-account {}'.
-                 format(rg, name, self.storage_account_name),
+        self.cmd('batch account set -g {} -n {} --storage-account {} --keyvault {}'.
+                 format(rg, name, self.storage_account_name, self.keyvault_name),
                  checks=[JMESPathCheck('name', name),
                          JMESPathCheck('location', loc),
                          JMESPathCheck('resourceGroup', rg)])

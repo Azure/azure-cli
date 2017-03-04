@@ -18,7 +18,7 @@ from azure.cli.core.commands.parameters import \
 from azure.cli.command_modules.batch._validators import \
     (application_enabled, datetime_format, storage_account_id, application_package_reference_format,
      validate_client_parameters, validate_pool_resize_parameters, metadata_item_format,
-     certificate_reference_format, validate_json_file, validate_cert_file,
+     certificate_reference_format, validate_json_file, validate_cert_file, keyvault_id,
      environment_setting_format, validate_cert_settings, resource_file_format, load_node_agent_skus)
 
 # pylint: disable=line-too-long
@@ -33,8 +33,10 @@ register_cli_argument('batch account', 'account_name', batch_name_type, options_
 register_cli_argument('batch account create', 'location', location_type, help='The region in which to create the account.')
 register_cli_argument('batch account create', 'tags', tags_type, help="Space separated tags in 'key[=value]' format.")
 register_extra_cli_argument('batch account create', 'storage_account', help='The storage account name or resource ID to be used for auto storage.', validator=storage_account_id)
+register_extra_cli_argument('batch account create', 'keyvault', help='The keyvault name or resource ID to be used for an account with a pool allocation mode of \'User Subscription\'.', validator=keyvault_id)
 register_cli_argument('batch account set', 'tags', tags_type)
 register_extra_cli_argument('batch account set', 'storage_account', help='The storage account name or resource ID to be used for auto storage.', validator=storage_account_id)
+register_extra_cli_argument('batch account set', 'keyvault', help='The keyvault name or resource ID to be used for an account with a pool allocation mode of \'User Subscription\'.', validator=keyvault_id)
 register_cli_argument('batch account keys renew', 'key_name', **enum_choice_list(AccountKeyType))
 register_cli_argument('batch account login', 'shared_key_auth', action='store_true', help='Using Shared Key authentication, if not specified, it will use Azure Active Directory authentication.')
 

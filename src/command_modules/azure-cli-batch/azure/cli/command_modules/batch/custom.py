@@ -10,6 +10,7 @@ from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
 from msrest.exceptions import DeserializationError, ValidationError, ClientRequestError
 from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.batch.models import (BatchAccountCreateParameters,
+                                     BatchAccountUpdateParameters,
                                      AutoStorageBaseProperties,
                                      UpdateApplicationParameters)
 from azure.mgmt.batch.operations import (ApplicationPackageOperations)
@@ -47,12 +48,18 @@ def list_accounts(client, resource_group_name=None):
 
 @transfer_doc(AutoStorageBaseProperties)
 def create_account(client, resource_group_name, account_name, location,  # pylint:disable=too-many-arguments
-                   tags=None, storage_account=None):
+                   tags=None, storage_account=None, keyvault=None):
+    from azure.cli.core._profile import CLOUD
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
     parameters = BatchAccountCreateParameters(location=location,
                                               tags=tags,
                                               auto_storage=properties)
+    if keyvault:
+        vault = keyvault.split('Microsoft.KeyVault/vaults/')[-1]
+        url = 'https://{}{}'.format(vault, CLOUD.suffixes.keyvault_dns)
+        parameters.key_vault_reference = {'id': keyvault, 'url': url}
+        parameters.pool_allocation_mode = 'UserSubscription'
 
     return client.create(resource_group_name=resource_group_name,
                          account_name=account_name,
@@ -61,14 +68,20 @@ def create_account(client, resource_group_name, account_name, location,  # pylin
 
 @transfer_doc(AutoStorageBaseProperties)
 def update_account(client, resource_group_name, account_name,  # pylint:disable=too-many-arguments
-                   tags=None, storage_account=None):
+                   tags=None, storage_account=None, keyvault=None):
+    from azure.cli.core._profile import CLOUD
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
+    parameters = BatchAccountUpdateParameters(tags=tags, auto_storage=properties)
+    if keyvault:
+        vault = keyvault.split('Microsoft.KeyVault/vaults/')[-1]
+        url = 'https://{}{}'.format(vault, CLOUD.suffixes.keyvault_dns)
+        parameters.key_vault_reference = {'id': keyvault, 'url': url}
+        parameters.pool_allocation_mode = 'UserSubscription'
 
     return client.update(resource_group_name=resource_group_name,
                          account_name=account_name,
-                         tags=tags,
-                         auto_storage=properties)
+                         parameters=parameters)
 
 
 def login_account(client, resource_group_name, account_name, shared_key_auth=False):

@@ -140,9 +140,24 @@ def storage_account_id(namespace):
         acc = storage_client.storage_accounts.get_properties(namespace.resource_group_name,
                                                              namespace.storage_account)
         if not acc:
-            raise ValueError("Batch account named '{}' not found in the resource group '{}'.".
+            raise ValueError("Storage account named '{}' not found in the resource group '{}'.".
                              format(namespace.storage_account, namespace.resource_group_name))
         namespace.storage_account = acc.id  # pylint: disable=no-member
+
+
+def keyvault_id(namespace):
+    """Validate storage account name"""
+    from azure.mgmt.keyvault import KeyVaultManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
+    if namespace.keyvault and not \
+             '/providers/Microsoft.KeyVault/vaults/' in namespace.keyvault:
+        keyvault_client = get_mgmt_service_client(KeyVaultManagementClient)
+        vault = keyvault_client.vaults.get(namespace.resource_group_name, namespace.keyvault)
+        if not vault:
+            raise ValueError("KeyVault named '{}' not found in the resource group '{}'.".
+                             format(namespace.storage_account, namespace.resource_group_name))
+        namespace.keyvault = vault.id  # pylint: disable=no-member
 
 
 def application_enabled(namespace):
