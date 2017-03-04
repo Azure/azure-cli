@@ -156,7 +156,7 @@ def db_copy(  # pylint: disable=too-many-arguments
         kwargs)
 
 
-# Copies a replica database. Wrapper function to make create mode more convenient.
+# Copies a replica. Wrapper function to make create mode more convenient.
 def db_create_replica(  # pylint: disable=too-many-arguments
         client,
         database_name,
@@ -227,8 +227,8 @@ def db_failover(
     if len(links) == 0:
         raise CLIError('The specified database has no replication links.')
 
-    # If a replica database is primary, then it has 1 or more links (to its secondaries).
-    # If a replica database is secondary, then it has exactly 1 link (to its primary).
+    # If a replica is primary, then it has 1 or more links (to its secondaries).
+    # If a replica is secondary, then it has exactly 1 link (to its primary).
     primary_link = next((l for l in links if l.partner_role == ReplicationRole.primary), None)
     if not primary_link:
         # No link to a primary, so this must already be a primary. Do nothing.

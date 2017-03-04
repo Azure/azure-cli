@@ -25,19 +25,23 @@ helps['sql db create'] = """
             """
 helps['sql db create-replica'] = """
             type: command
-            short-summary: Creates a readable secondary replica database of an existing database.
+            short-summary: Creates a readable secondary replica of an existing database.
             """
 helps['sql db delete'] = """
             type: command
             short-summary: Deletes a database.
             """
-helps['sql db failover'] = """
+helps['sql db set-primary-replica'] = """
             type: command
-            short-summary: Fails over to a secondary replica. The secondary becomes the new primary.
+            short-summary: Fails over to a secondary replica, making it the new primary replica.
             """
 helps['sql db list'] = """
             type: command
             short-summary: Lists all databases in a server, or all databases in an elastic pool.
+            """
+helps['sql db list-replica-links'] = """
+            type: command
+            short-summary: Lists the replicas of a database and corresponding replication status.
             """
 helps['sql db update'] = """
             type: command

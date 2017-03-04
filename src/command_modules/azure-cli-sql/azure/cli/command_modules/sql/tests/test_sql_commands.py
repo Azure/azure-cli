@@ -441,7 +441,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('[0].partnerRole', 'Primary')])
 
         # Failover to s3.
-        self.cmd('sql db failover -g {} -s {} -n {}'
+        self.cmd('sql db set-primary-replica -g {} -s {} -n {}'
                  .format(s3.group, s3.name, self.database_name),
                  checks=[NoneCheck()])
 
@@ -467,7 +467,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ResourceGroupVCRTestBase):
                          JMESPathCheck('[0].partnerRole', 'Secondary')])
 
         # Failover to s3 again (should be no-op, it's already primary)
-        self.cmd('sql db failover -g {} -s {} -n {} --allow-data-loss'
+        self.cmd('sql db set-primary-replica -g {} -s {} -n {} --allow-data-loss'
                  .format(s3.group, s3.name, self.database_name),
                  checks=[NoneCheck()])
 
@@ -480,7 +480,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('[0].partnerRole', 'Secondary')])
 
         # Force failover back to s1
-        self.cmd('sql db failover -g {} -s {} -n {} --allow-data-loss'
+        self.cmd('sql db set-primary-replica -g {} -s {} -n {} --allow-data-loss'
                  .format(s1.group, s1.name, self.database_name),
                  checks=[NoneCheck()])
 

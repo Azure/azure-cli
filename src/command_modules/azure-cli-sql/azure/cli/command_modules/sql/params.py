@@ -134,20 +134,20 @@ with ParametersContext(command='sql db create-replica') as c:
 
     c.argument('elastic_pool_name',
                options_list=('--partner-elastic-pool',),
-               help='Name of elastic pool to create the new replica database in.')
+               help='Name of elastic pool to create the new replica in.')
 
     c.argument('requested_service_objective_name',
                options_list=('--partner-service-objective',),
-               help='Name of service objective for the new replica database.')
+               help='Name of service objective for the new replica.')
 
     c.argument('partner_resource_group_name',
                options_list=('--partner-resource-group',),
-               help='Name of the resource group to create the new replica database in.'
+               help='Name of the resource group to create the new replica in.'
                ' If unspecified, defaults to the origin resource group.')
 
     c.argument('partner_server_name',
                options_list=('--partner-server',),
-               help='Name of the server to create the new replica database in.')
+               help='Name of the server to create the new replica in.')
 
     for i in sql_db_copy_ignored_params:
         c.ignore(i)
@@ -183,13 +183,13 @@ with ParametersContext(command='sql db update') as c:
     c.argument('elastic_pool_name', help='The name of the elastic pool to move the database into.')
     c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
 
-with ParametersContext(command='sql db failover') as c:
+with ParametersContext(command='sql db set-primary-replica') as c:
     c.argument('database_name', help='Name of the database to fail over.')
     c.argument('server_name',
-               help='Name of the server containing the secondary replica database that will become'
+               help='Name of the server containing the secondary replica that will become'
                ' the new primary.')
     c.argument('resource_group_name',
-               help='Name of the resource group containing the secondary replica database that'
+               help='Name of the resource group containing the secondary replica that'
                ' will become the new primary.')
     c.argument('allow_data_loss',
                help='If specified, the failover operation will allow data loss.')
