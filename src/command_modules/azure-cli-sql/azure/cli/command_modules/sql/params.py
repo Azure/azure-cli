@@ -190,7 +190,7 @@ with ParametersContext(command='sql db failover') as c:
                ' the new primary.')
     c.argument('resource_group_name',
                help='Name of the resource group containing the secondary replica database that'
-              ' will become the new primary.')
+               ' will become the new primary.')
     c.argument('allow_data_loss',
                help='If specified, the failover operation will allow data loss.')
 
