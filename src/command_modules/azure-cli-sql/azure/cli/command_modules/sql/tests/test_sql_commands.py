@@ -429,16 +429,16 @@ class SqlServerDbReplicaMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # list replica links on s1 - it should link to s2 and s3
         self.cmd('sql db list-replica-links -g {} -s {} -n {}'
-                         .format(s1.group, s1.name, self.database_name),
-                         checks=[JMESPathCheck('length(@)', 2)])
+                 .format(s1.group, s1.name, self.database_name),
+                 checks=[JMESPathCheck('length(@)', 2)])
 
         # list replica links on s3 - it should link only to s1
         self.cmd('sql db list-replica-links -g {} -s {} -n {}'
-                         .format(s3.group, s3.name, self.database_name),
-                         checks=[
-                             JMESPathCheck('length(@)', 1),
-                             JMESPathCheck('[0].role', 'Secondary'),
-                             JMESPathCheck('[0].partnerRole', 'Primary')])
+                 .format(s3.group, s3.name, self.database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].role', 'Secondary'),
+                     JMESPathCheck('[0].partnerRole', 'Primary')])
 
         # Failover to s3.
         self.cmd('sql db failover -g {} -s {} -n {}'
@@ -460,11 +460,11 @@ class SqlServerDbReplicaMgmtScenarioTest(ResourceGroupVCRTestBase):
 
             # Verify link was deleted. s3 should still be the primary.
             self.cmd('sql db list-replica-links -g {} -s {} -n {}'
-                             .format(s3.group, s3.name, self.database_name),
-                             checks=[
-                                 JMESPathCheck('length(@)', 1),
-                                 JMESPathCheck('[0].role', 'Primary'),
-                                 JMESPathCheck('[0].partnerRole', 'Secondary')])
+                     .format(s3.group, s3.name, self.database_name),
+                     checks=[
+                         JMESPathCheck('length(@)', 1),
+                         JMESPathCheck('[0].role', 'Primary'),
+                         JMESPathCheck('[0].partnerRole', 'Secondary')])
 
         # Failover to s3 again (should be no-op, it's already primary)
         self.cmd('sql db failover -g {} -s {} -n {} --allow-data-loss'
@@ -473,11 +473,11 @@ class SqlServerDbReplicaMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # s3 should still be the primary.
         self.cmd('sql db list-replica-links -g {} -s {} -n {}'
-                         .format(s3.group, s3.name, self.database_name),
-                         checks=[
-                             JMESPathCheck('length(@)', 1),
-                             JMESPathCheck('[0].role', 'Primary'),
-                             JMESPathCheck('[0].partnerRole', 'Secondary')])
+                 .format(s3.group, s3.name, self.database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].role', 'Primary'),
+                     JMESPathCheck('[0].partnerRole', 'Secondary')])
 
         # Force failover back to s1
         self.cmd('sql db failover -g {} -s {} -n {} --allow-data-loss'

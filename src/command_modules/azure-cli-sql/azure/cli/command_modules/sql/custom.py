@@ -226,9 +226,8 @@ def db_failover(
 
     # If a replica is primary, then it has 1 or more links (to its secondaries).
     # If a replica is secondary, then it has exactly 1 link (to its primary).
-    try:
-        primary_link = next(l for l in links if l.partner_role == ReplicationRole.primary)
-    except StopIteration:
+    primary_link = next((l for l in links if l.partner_role == ReplicationRole.primary), None)
+    if not primary_link:
         # No link to a primary, so this must already be a primary. Do nothing.
         return
 
@@ -246,7 +245,7 @@ def db_failover(
         link_id=primary_link.name)
 
 
-def db_delete_replica_link(
+def db_delete_replica_link(  # pylint: disable=too-many-arguments
         client,
         database_name,
         server_name,
@@ -264,14 +263,12 @@ def db_delete_replica_link(
         server_name=server_name,
         resource_group_name=resource_group_name))
 
-    try:
-        # The link doesn't tell us the partner resource group name, so we just have to count on
-        # partner server name being unique
-        link = next(l for l in links 
-                    if l.partner_server == partner_server_name)
-    except StopIteration:
+    # The link doesn't tell us the partner resource group name, so we just have to count on
+    # partner server name being unique
+    link = next((l for l in links if l.partner_server == partner_server_name), None)
+    if not link:
         # No link exists, nothing to be done
-        return None
+        return
 
     return client.delete_replication_link(
         database_name=database_name,
