@@ -323,41 +323,38 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         slot2 = 'dev'
         test_git_repo = 'https://github.com/yugangw-msft/azure-site-test'
 
-        self.cmd('appservice web deployment slot create -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=[
-            JMESPathCheck('name', self.webapp + '/' + slot)
-            ])
+        # create a few app-settings to test they can be cloned
+        self.cmd('appservice web config appsettings update -g {} -n {} --settings s1=v1  --slot-settings s2=v2'.format(self.resource_group, self.webapp))
 
-        self.cmd('appservice web source-control config -g {} -n {} --repo-url {} --branch {} --slot {}'.format(self.resource_group, self.webapp, test_git_repo, slot, slot), checks=[
-            JMESPathCheck('repoUrl', test_git_repo),
-            JMESPathCheck('branch', slot)
-            ])
+        # create an empty slot
+        self.cmd('appservice web deployment slot create -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
+        self.cmd('appservice web source-control config -g {} -n {} --repo-url {} --branch {} --slot {}'.format(self.resource_group, self.webapp, test_git_repo, slot, slot))
 
-        self.cmd('appservice web deployment slot create -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2))
-
+        #verify the slot wires up the git repo/branch
         import time
         time.sleep(30) # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
-
         import requests
         r = requests.get('http://{}-{}.azurewebsites.net'.format(self.webapp, slot))
-        #verify the web page contains content from the staging branch
         self.assertTrue('Staging' in str(r.content))
 
+        # swap with prod and verify the git branch also switched
         self.cmd('appservice web deployment slot swap -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
-
         time.sleep(30) # 30 seconds should be enough for the slot swap finished(Skipped under playback mode)
-
         r = requests.get('http://{}.azurewebsites.net'.format(self.webapp))
-
-        #verify the web page contains content from the staging branch
         self.assertTrue('Staging' in str(r.content))
+        self.cmd('appservice web config appsettings show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
+
+        # create a new slot by cloning from prod slot
+        self.cmd('appservice web deployment slot create -g {} -n {} --slot {} --configuration-source {}'.format(self.resource_group, self.webapp, slot2, self.webapp))
+        self.cmd('appservice web config appsettings show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2))
+        self.cmd('appservice web config appsettings update -g {} -n {} --slot {} --settings s3=v3 --slot-settings s4=v4'.format(self.resource_group, self.webapp, slot2))
 
         #verify we can switch with non production slot
         self.cmd('appservice web deployment slot swap -g {} -n {} --slot {} --target-slot {}'.format(self.resource_group, self.webapp, slot, slot2), checks=NoneCheck())
+        self.cmd('appservice web config appsettings show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2))
+        self.cmd('appservice web config appsettings show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
 
-        self.cmd('appservice web deployment slot list -g {} -n {}'.format(self.resource_group, self.webapp), checks=[
-            JMESPathCheck("length([])", 2),
-            JMESPathCheck('[0].name', self.webapp + '/' + slot),
-            ])
+        self.cmd('appservice web deployment slot list -g {} -n {}'.format(self.resource_group, self.webapp))
         self.cmd('appservice web deployment slot delete -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=NoneCheck())
 
 class WebappSSLCertTest(ResourceGroupVCRTestBase):

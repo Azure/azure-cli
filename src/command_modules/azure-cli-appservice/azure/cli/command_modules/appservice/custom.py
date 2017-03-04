@@ -111,7 +111,7 @@ def get_app_settings(resource_group_name, name, slot=None):
     client = web_client_factory()
     slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
     result = [{'name': p, 'value': result.properties[p],
-               'slotSetting': str(p in slot_cfg_names.app_setting_names)} for p in result.properties]  # pylint: disable=line-too-long
+               'slotSetting': str(p in (slot_cfg_names.app_setting_names or []))} for p in result.properties]  # pylint: disable=line-too-long
     return result
 
 #for any modifications to the non-optional parameters, adjust the reflection logic accordingly
@@ -160,6 +160,7 @@ def update_app_settings(resource_group_name, name, settings=None, slot=None, slo
         client = web_client_factory()
         new_slot_setting_names = [n.split('=', 1)[0] for n in slot_settings]
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
+        slot_cfg_names.app_setting_names = slot_cfg_names.app_setting_names or []
         slot_cfg_names.app_setting_names += new_slot_setting_names
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
@@ -174,7 +175,7 @@ def delete_app_settings(resource_group_name, name, setting_names, slot=None):
     is_slot_settings = False
     for setting_name in setting_names:
         app_settings.properties.pop(setting_name, None)
-        if setting_name in slot_cfg_names.app_setting_names:
+        if setting_name in (slot_cfg_names.app_setting_names or []):
             slot_cfg_names.app_setting_names.remove(setting_name)
             is_slot_settings = True
 
@@ -256,7 +257,7 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
         app_settings = _generic_site_operation(resource_group_name, webapp,
                                                'list_application_settings',
                                                src_slot)
-        for a in slot_cfg_names.app_setting_names:
+        for a in (slot_cfg_names.app_setting_names or []):
             app_settings.properties.pop(a, None)
 
         connection_strings = _generic_site_operation(resource_group_name, webapp,
