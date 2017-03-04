@@ -12,13 +12,31 @@ import paramiko
 from sshtunnel import SSHTunnelForwarder
 from scp import SCPClient
 
+from azure.cli.core._util import CLIError
+from azure.cli.core.prompting import prompt_pass
 
-def SecureCopy(user, host, src, dest,
+
+def _load_key(key_filename):
+    pkey = None
+    try:
+        pkey = paramiko.RSAKey.from_private_key_file(key_filename, None)
+    except paramiko.PasswordRequiredException:
+        key_pass = prompt_pass('Password:')
+        pkey = paramiko.RSAKey.from_private_key_file(key_filename, key_pass)
+    if pkey is None:
+        raise CLIError('failed to load key: {}'.format(key_filename))
+    return pkey
+
+
+def SecureCopy(user, host, src, dest,  # pylint: disable=too-many-arguments
                key_filename=os.path.join(os.path.expanduser("~"), '.ssh', 'id_rsa')):
     ssh = paramiko.SSHClient()
     ssh.load_system_host_keys()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(host, username=user, key_filename=key_filename)
+
+    pkey = _load_key(key_filename)
+
+    ssh.connect(host, username=user, pkey=pkey)
 
     scp = SCPClient(ssh.get_transport())
 
@@ -43,7 +61,7 @@ class ACSClient(object):
         if self.tunnel_server is not None:
             self.tunnel_server.close_tunnel()
 
-    def connect(self, host, username, port=2200,
+    def connect(self, host, username, port=2200,  # pylint: disable=too-many-arguments
                 key_filename=os.path.join(os.path.expanduser("~"), '.ssh', 'id_rsa')):
         """
         Creates a connection to the remote server.
@@ -72,11 +90,13 @@ class ACSClient(object):
         if self.client is None:
             self.client = paramiko.SSHClient()
             self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+            pkey = _load_key(key_filename)
             self.client.connect(
                 hostname=host,
                 port=port,
                 username=username,
-                key_filename=key_filename)
+                pkey=pkey)
 
         self.transport = self.client.get_transport()
         return self.transport is not None
