@@ -86,7 +86,7 @@ register_cli_argument('appservice web log tail', 'provider', help="scope the liv
 register_cli_argument('appservice web log download', 'log_file', default='webapp_logs.zip', type=file_type, completer=FilesCompleter(), help='the downloaded zipped log file path')
 
 register_cli_argument('appservice web config appsettings', 'settings', nargs='+', help="space separated app settings in a format of <name>=<value>")
-register_cli_argument('appservice web config appsettings', 'slot_specific_settings', nargs='+', help="space separated slot specific app settings in a format of <name>=<value>")
+register_cli_argument('appservice web config appsettings', 'slot_settings', nargs='+', help="space separated slot app settings in a format of <name>=<value>")
 register_cli_argument('appservice web config appsettings', 'setting_names', nargs='+', help="space separated app setting names")
 
 register_cli_argument('appservice web config container', 'docker_registry_server_url', options_list=('--docker-registry-server-url', '-r'), help='the container registry server url')
