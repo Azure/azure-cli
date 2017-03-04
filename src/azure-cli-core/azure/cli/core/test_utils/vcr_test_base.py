@@ -378,8 +378,6 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
         """ Perform post-recording cleanup on the YAML file that can't be accomplished with the
         VCR recording hooks. """
         src_path = self.cassette_path
-        rg_name = getattr(self, 'resource_group', None)
-        rg_original = getattr(self, 'resource_group_original', None)
 
         t = tempfile.NamedTemporaryFile('r+')
         with open(src_path, 'r') as f:
@@ -499,7 +497,6 @@ class ResourceGroupVCRTestBase(VCRTestBase):
 
         self.location = 'westus'
 
-
     def set_up(self):
         for g in self.resource_groups:
             self.cmd('group create --location {} --name {} --tags use=az-test'.format(
@@ -508,6 +505,7 @@ class ResourceGroupVCRTestBase(VCRTestBase):
     def tear_down(self):
         for g in self.resource_groups:
             self.cmd('group delete --name {} --no-wait --yes'.format(g))
+
 
 class StorageAccountVCRTestBase(VCRTestBase):
     account_location = 'westus'
