@@ -70,6 +70,7 @@ register_cli_argument('appservice web deployment slot', 'webapp', arg_type=name_
 register_cli_argument('appservice web deployment slot', 'auto_swap_slot', help='target slot to auto swap', default='production')
 register_cli_argument('appservice web deployment slot', 'disable', help='disable auto swap', action='store_true')
 register_cli_argument('appservice web deployment slot', 'target_slot', help="target slot to swap, default to 'production'")
+register_cli_argument('appservice web deployment slot create', 'configuration_source', help="source slot to clone configurations from. Use webapp's name to refer to the product slot")
 
 
 two_states_switch = ['true', 'false']
@@ -85,6 +86,7 @@ register_cli_argument('appservice web log tail', 'provider', help="scope the liv
 register_cli_argument('appservice web log download', 'log_file', default='webapp_logs.zip', type=file_type, completer=FilesCompleter(), help='the downloaded zipped log file path')
 
 register_cli_argument('appservice web config appsettings', 'settings', nargs='+', help="space separated app settings in a format of <name>=<value>")
+register_cli_argument('appservice web config appsettings', 'slot_specific_settings', nargs='+', help="space separated slot specific app settings in a format of <name>=<value>")
 register_cli_argument('appservice web config appsettings', 'setting_names', nargs='+', help="space separated app setting names")
 
 register_cli_argument('appservice web config container', 'docker_registry_server_url', options_list=('--docker-registry-server-url', '-r'), help='the container registry server url')

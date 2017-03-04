@@ -134,16 +134,29 @@ def update_site_configs(resource_group_name, name, slot=None,
 
     return _generic_site_operation(resource_group_name, name, 'update_configuration', slot, configs)
 
-def update_app_settings(resource_group_name, name, settings, slot=None):
+def update_app_settings(resource_group_name, name, settings, slot=None, slot_specific_settings=[]):
+    if slot_specific_settings and not slot:
+        raise CLIError('Usage Error: --slot is required to use with --slot-specific-settings')
+
     app_settings = _generic_site_operation(resource_group_name, name,
                                            'list_application_settings', slot)
-    for name_value in settings:
+    for name_value in settings + slot_specific_settings:
         #split at the first '=', appsetting should not have '=' in the name
         settings_name, value = name_value.split('=', 1)
         app_settings.properties[settings_name] = value
 
+
     result = _generic_site_operation(resource_group_name, name, 'update_application_settings',
                                      slot, app_settings)
+
+    if slot_specific_settings:
+        new_slot_specific_names = [n.split('=', 1)[0] for n in slot_specific_settings]
+        existing_slot_configuration_names = _generic_site_operation(resource_group_name, name, 'list_slot_configuration_names')
+
+        existing_slot_configuration_names.app_setting_names += new_slot_specific_names
+        _generic_site_operation(resource_group_name, name, 'update_slot_configuration_names', None,
+                                existing_slot_configuration_names)
+
     return result.properties
 
 def delete_app_settings(resource_group_name, name, setting_names, slot=None):
@@ -206,20 +219,40 @@ def list_hostnames(resource_group_name, webapp_name, slot=None):
     return _generic_site_operation(resource_group_name, webapp_name, 'list_host_name_bindings',
                                    slot)
 
-#TODO: figure out the 'configuration_source' and add related param descriptions
 def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=None):
     client = web_client_factory()
     site = client.web_apps.get(resource_group_name, webapp)
     location = site.location
-    if configuration_source is None:
-        slot_def = Site(server_farm_id=site.server_farm_id, location=location)
-    elif configuration_source.lower() == webapp.lower(): #clone from production
-        slot_def = site #pylint: disable=redefined-variable-type
-    else: # from other slot
-        slot_def = client.web_apps.get_slot(resource_group_name, webapp, slot)
+    slot_def = Site(server_farm_id=site.server_farm_id, location=location)
+    if configuration_source:
+        is_prod_slot = configuration_source.lower() == webapp.lower()
+        slot_def.site_config = get_site_configs(resource_group_name, webapp,
+                                                None if is_prod_slot else configuration_source)
 
     poller = client.web_apps.create_or_update_slot(resource_group_name, webapp, slot_def, slot)
-    return AppServiceLongRunningOperation()(poller)
+    result = AppServiceLongRunningOperation()(poller)
+
+    # slot create doesn't clone over the app-settings and connection-strings, so we do it here
+    # also make sure slot specific doesn't get propagated.
+    if configuration_source:
+        slot_specific = client.web_apps.list_slot_configuration_names(resource_group_name, webapp)
+
+        app_settings = _generic_site_operation(resource_group_name, webapp, 'list_application_settings',
+                                               configuration_source)
+        for a in slot_specific.app_setting_names:
+            app_settings.properties.pop(a, None)
+
+        connection_strings =  _generic_site_operation(resource_group_name, webapp, 'list_connection_strings',
+                                                      configuration_source)
+        for a in slot_specific.connection_string_names:
+            connection_strings.properties.pop(a, None)
+
+        _generic_site_operation(resource_group_name, webapp, 'update_application_settings',
+                                slot, app_settings)
+        _generic_site_operation(resource_group_name, webapp, 'update_connection_strings',
+                                slot, connection_strings)
+
+    return result
 
 
 def config_source_control(resource_group_name, name, repo_url, repository_type=None, branch=None,
@@ -276,9 +309,15 @@ def sync_site_repo(resource_group_name, name, slot=None):
 def list_app_service_plans(resource_group_name=None):
     client = web_client_factory()
     if resource_group_name is None:
-        return client.app_service_plans.list()
+        plans = client.app_service_plans.list()
     else:
-        return client.app_service_plans.list_by_resource_group(resource_group_name)
+        plans = client.app_service_plans.list_by_resource_group(resource_group_name)
+    for plan in plans:
+        # prune a few useless fields
+        del plan.app_service_plan_name
+        del plan.geo_region
+        del plan.subscription
+    return plans
 
 def create_app_service_plan(resource_group_name, name, is_linux, sku='B1', number_of_workers=None,
                             location=None):
@@ -566,6 +605,16 @@ def config_slot_auto_swap(resource_group_name, webapp, slot, auto_swap_slot=None
     site_config = client.web_apps.get_configuration_slot(resource_group_name, webapp, slot)
     site_config.auto_swap_slot_name = '' if disable else (auto_swap_slot or 'production')
     return client.web_apps.update_configuration_slot(resource_group_name, webapp, site_config, slot)
+
+def list_slots(resource_group_name, webapp):
+    client = web_client_factory()
+    slots = client.web_apps.list_slots(resource_group_name, webapp)
+    site = show_webapp(resource_group_name, webapp)
+    service_plan = parse_resource_id(site.app_service_plan_id)['name']
+    for slot in slots:
+        slot.name = slot.name.split('/')[-1]
+        setattr(slot, 'app_service_plan', service_plan)
+    return slots
 
 def swap_slot(resource_group_name, webapp, slot, target_slot=None):
     client = web_client_factory()
