@@ -253,20 +253,15 @@ class LinuxWebappSceanrioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('appCommandLine', 'process.json')
             ])
         self.cmd('appservice web config container update -g {} -n {} --docker-custom-image-name {} --docker-registry-server-password {} --docker-registry-server-user {} --docker-registry-server-url {}'.format(
-            self.resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url'), checks=[
-                JMESPathCheck('DOCKER_CUSTOM_IMAGE_NAME', 'foo-image'),
-                JMESPathCheck('DOCKER_REGISTRY_SERVER_URL', 'foo-url'),
-                JMESPathCheck('DOCKER_REGISTRY_SERVER_USERNAME', 'foo-user'),
-                JMESPathCheck('DOCKER_REGISTRY_SERVER_PASSWORD', 'foo-password')
-                ])
-        self.cmd('appservice web config container show -g {} -n {} '.format(self.resource_group, webapp), checks=[
-            JMESPathCheck('DOCKER_CUSTOM_IMAGE_NAME', 'foo-image'),
-            JMESPathCheck('DOCKER_REGISTRY_SERVER_URL', 'foo-url'),
-            JMESPathCheck('DOCKER_REGISTRY_SERVER_USERNAME', 'foo-user'),
-            JMESPathCheck('DOCKER_REGISTRY_SERVER_PASSWORD', 'foo-password')
-            ])
+            self.resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url'))
+        result = self.cmd('appservice web config container show -g {} -n {} '.format(self.resource_group, webapp))
+        self.assertEqual(set(x['name'] for x in result), set(['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME', 'DOCKER_CUSTOM_IMAGE_NAME', 'DOCKER_REGISTRY_SERVER_PASSWORD']))
+        sample = next((x for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_URL'))
+        self.assertEqual(sample, {'name': 'DOCKER_REGISTRY_SERVER_URL', 'slotSetting': 'False', 'value': 'foo-url'})
         self.cmd('appservice web config container delete -g {} -n {}'.format(self.resource_group, webapp))
-        self.cmd('appservice web config container show -g {} -n {} '.format(self.resource_group, webapp), checks=NoneCheck())
+        result2 = self.cmd('appservice web config container show -g {} -n {} '.format(self.resource_group, webapp), checks=NoneCheck())
+        self.assertEqual(result2, [])
+
 
 class WebappGitScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
@@ -332,7 +327,7 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('appservice web deployment slot create -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=[
             JMESPathCheck('name', slot)
             ])
-        self.cmd('appservice web source-control config -g {} -n {} --repo-url {} --branch {} --slot {}'.format(self.resource_group, self.webapp, test_git_repo, slot, slot), checks=[
+        self.cmd('appservice web source-control config -g {} -n {} --repo-url {} --branch {} -s {}'.format(self.resource_group, self.webapp, test_git_repo, slot, slot), checks=[
             JMESPathCheck('repoUrl', test_git_repo),
             JMESPathCheck('branch', slot)
             ])
@@ -345,11 +340,11 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         self.assertTrue('Staging' in str(r.content))
 
         # swap with prod and verify the git branch also switched
-        self.cmd('appservice web deployment slot swap -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
+        self.cmd('appservice web deployment slot swap -g {} -n {} -s {}'.format(self.resource_group, self.webapp, slot))
         time.sleep(30) # 30 seconds should be enough for the slot swap finished(Skipped under playback mode)
         r = requests.get('http://{}.azurewebsites.net'.format(self.webapp))
         self.assertTrue('Staging' in str(r.content))
-        result = self.cmd('appservice web config appsettings show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
+        result = self.cmd('appservice web config appsettings show -g {} -n {} -s {}'.format(self.resource_group, self.webapp, slot))
         self.assertEqual(set([x['name'] for x in result]), set(['WEBSITE_NODE_DEFAULT_VERSION', 's1']))
 
         # create a new slot by cloning from prod slot

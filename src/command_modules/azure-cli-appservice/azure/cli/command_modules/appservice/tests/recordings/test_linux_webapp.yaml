@@ -6,10 +6,11 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
-          resourcemanagementclient/0.30.2 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.10586-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.0+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [03819702-ee88-11e6-a1f6-64510658e3b3]
+      x-ms-client-request-id: [aacbd106-014f-11e7-a43a-f4b7e2e85440]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-webapp-linux2?api-version=2016-09-01
   response:
@@ -17,7 +18,7 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 09 Feb 2017 05:24:21 GMT']
+      Date: ['Sun, 05 Mar 2017 02:58:53 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
@@ -25,29 +26,28 @@ interactions:
       content-length: ['224']
     status: {code: 200, message: OK}
 - request:
-    body: '{"location": "westus", "properties": {"perSiteScaling": false, "name":
-      "webapp-linux-plan", "reserved": true}, "sku": {"name": "S1", "capacity": 1,
-      "tier": "STANDARD"}}'
+    body: '{"location": "westus", "sku": {"name": "S1", "capacity": 1, "tier": "STANDARD"},
+      "properties": {"perSiteScaling": false, "reserved": true, "name": "webapp-linux-plan"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['168']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
-          websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.10586-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [03a4ffde-ee88-11e6-a526-64510658e3b3]
+      x-ms-client-request-id: [aae97c4c-014f-11e7-ac67-f4b7e2e85440]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/serverfarms/webapp-linux-plan?api-version=2016-09-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/serverfarms/webapp-linux-plan","name":"webapp-linux-plan","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/serverfarms/webapp-linux-plan","name":"webapp-linux-plan","type":"Microsoft.Web/serverfarms","kind":"linux","location":"West
         US","tags":null,"properties":{"serverFarmId":0,"name":"webapp-linux-plan","workerSize":"Small","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Small","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli-webapp-linux2-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"tags":null,"kind":"app","resourceGroup":"cli-webapp-linux2","reserved":true,"mdmId":"waws-prod-bay-063_1489","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"tags":null,"kind":"linux","resourceGroup":"cli-webapp-linux2","reserved":true,"mdmId":"waws-prod-bay-063_1912","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json]
-      Date: ['Thu, 09 Feb 2017 05:24:37 GMT']
+      Date: ['Sun, 05 Mar 2017 02:59:07 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -56,8 +56,8 @@ interactions:
       Vary: [Accept-Encoding]
       X-AspNet-Version: [4.0.30319]
       X-Powered-By: [ASP.NET]
-      content-length: ['1171']
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      content-length: ['1175']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -66,20 +66,20 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
-          websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.10586-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [0d69d252-ee88-11e6-ad51-64510658e3b3]
+      x-ms-client-request-id: [b3beb030-014f-11e7-a54d-f4b7e2e85440]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/serverfarms/webapp-linux-plan?api-version=2016-09-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/serverfarms/webapp-linux-plan","name":"webapp-linux-plan","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/serverfarms/webapp-linux-plan","name":"webapp-linux-plan","type":"Microsoft.Web/serverfarms","kind":"linux","location":"West
         US","tags":null,"properties":{"serverFarmId":0,"name":"webapp-linux-plan","workerSize":"Small","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Small","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli-webapp-linux2-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"tags":null,"kind":"app","resourceGroup":"cli-webapp-linux2","reserved":true,"mdmId":"waws-prod-bay-063_1489","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"tags":null,"kind":"linux","resourceGroup":"cli-webapp-linux2","reserved":true,"mdmId":"waws-prod-bay-063_1912","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json]
-      Date: ['Thu, 09 Feb 2017 05:24:39 GMT']
+      Date: ['Sun, 05 Mar 2017 02:59:08 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -88,30 +88,31 @@ interactions:
       Vary: [Accept-Encoding]
       X-AspNet-Version: [4.0.30319]
       X-Powered-By: [ASP.NET]
-      content-length: ['1171']
+      content-length: ['1175']
     status: {code: 200, message: OK}
 - request:
-    body: '{"location": "West US", "properties": {"microService": "false", "serverFarmId":
-      "webapp-linux-plan", "reserved": false, "scmSiteAlsoStopped": false}}'
+    body: '{"location": "West US", "properties": {"scmSiteAlsoStopped": false, "reserved":
+      false, "serverFarmId": "webapp-linux-plan", "microService": "false"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['149']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
-          websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.10586-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [0e013e58-ee88-11e6-a5ed-64510658e3b3]
+      x-ms-client-request-id: [b433dac8-014f-11e7-9f88-f4b7e2e85440]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/sites/webapp-linux1?api-version=2016-08-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/sites/webapp-linux1","name":"webapp-linux1","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","tags":null,"properties":{"name":"webapp-linux1","state":"Running","hostNames":["webapp-linux1.azurewebsites.net"],"webSpace":"cli-webapp-linux2-WestUSwebspace","selfLink":"https://waws-prod-bay-063.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/cli-webapp-linux2-WestUSwebspace/sites/webapp-linux1","repositorySiteName":"webapp-linux1","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-linux1.azurewebsites.net","webapp-linux1.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-linux1.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-linux1.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/serverfarms/webapp-linux-plan","reserved":true,"lastModifiedTimeUtc":"2017-02-09T05:24:42.1","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-linux1","trafficManagerHostNames":null,"sku":"Standard","premiumAppDeployed":null,"scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"microService":"false","gatewaySiteName":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"13.93.220.109,40.118.249.44,104.42.108.136,40.112.255.56,13.93.230.131","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-063","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"cli-webapp-linux2","defaultHostName":"webapp-linux1.azurewebsites.net","slotSwapStatus":null}}'}
+        US","tags":null,"properties":{"name":"webapp-linux1","state":"Running","hostNames":["webapp-linux1.azurewebsites.net"],"webSpace":"cli-webapp-linux2-WestUSwebspace","selfLink":"https://waws-prod-bay-063.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/cli-webapp-linux2-WestUSwebspace/sites/webapp-linux1","repositorySiteName":"webapp-linux1","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-linux1.azurewebsites.net","webapp-linux1.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-linux1.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-linux1.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/serverfarms/webapp-linux-plan","reserved":true,"lastModifiedTimeUtc":"2017-03-05T02:59:09.9833333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-linux1","trafficManagerHostNames":null,"sku":"Standard","premiumAppDeployed":null,"scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"microService":"false","gatewaySiteName":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"13.93.220.109,13.64.108.119,13.64.198.87,13.64.192.142,13.64.109.132","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-063","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"cli-webapp-linux2","defaultHostName":"webapp-linux1.azurewebsites.net","slotSwapStatus":null}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json]
-      Date: ['Thu, 09 Feb 2017 05:24:45 GMT']
+      Date: ['Sun, 05 Mar 2017 02:59:21 GMT']
+      ETag: ['"1D2955C7657E28B"']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -120,8 +121,8 @@ interactions:
       Vary: [Accept-Encoding]
       X-AspNet-Version: [4.0.30319]
       X-Powered-By: [ASP.NET]
-      content-length: ['2653']
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      content-length: ['2657']
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -130,19 +131,19 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
-          websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.10586-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [11c719d0-ee88-11e6-8c6e-64510658e3b3]
+      x-ms-client-request-id: [bc6364a4-014f-11e7-8824-f4b7e2e85440]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/sites/webapp-linux1/config/web?api-version=2016-08-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/sites/webapp-linux1/config/web","name":"webapp-linux1","type":"Microsoft.Web/sites/config","location":"West
-        US","tags":null,"properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"","pythonVersion":"","nodeVersion":"","linuxFxVersion":"","requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":null,"httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$webapp-linux1","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":false,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"httpApiPrefixPath":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"ipSecurityRestrictions":null}}'}
+        US","tags":null,"properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"","pythonVersion":"","nodeVersion":"","linuxFxVersion":"","requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":null,"httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$webapp-linux1","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":false,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"ipSecurityRestrictions":null}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json]
-      Date: ['Thu, 09 Feb 2017 05:24:46 GMT']
+      Date: ['Sun, 05 Mar 2017 02:59:23 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -151,38 +152,40 @@ interactions:
       Vary: [Accept-Encoding]
       X-AspNet-Version: [4.0.30319]
       X-Powered-By: [ASP.NET]
-      content-length: ['2354']
+      content-length: ['2329']
     status: {code: 200, message: OK}
 - request:
-    body: '{"name": "webapp-linux1", "properties": {"managedPipelineMode": "Integrated",
-      "scmType": "None", "experiments": {"rampUpRules": []}, "publishingUsername":
-      "$webapp-linux1", "linuxFxVersion": "", "virtualApplications": [{"virtualPath":
-      "/", "preloadEnabled": false, "physicalPath": "site\\wwwroot"}], "appCommandLine":
-      "process.json", "defaultDocuments": ["Default.htm", "Default.html", "Default.asp",
-      "index.htm", "index.html", "iisstart.htm", "default.aspx", "index.php", "hostingstart.html"],
-      "localMySqlEnabled": false, "requestTracingEnabled": false, "loadBalancing":
-      "LeastRequests", "logsDirectorySizeLimit": 35, "numberOfWorkers": 1, "vnetName":
-      "", "httpLoggingEnabled": false, "detailedErrorLoggingEnabled": false}, "location":
-      "West US", "type": "Microsoft.Web/sites/config"}'
+    body: '{"type": "Microsoft.Web/sites/config", "location": "West US", "name": "webapp-linux1",
+      "properties": {"remoteDebuggingEnabled": false, "publishingUsername": "$webapp-linux1",
+      "virtualApplications": [{"virtualPath": "/", "physicalPath": "site\\wwwroot",
+      "preloadEnabled": false}], "autoHealEnabled": false, "httpLoggingEnabled": false,
+      "logsDirectorySizeLimit": 35, "localMySqlEnabled": false, "managedPipelineMode":
+      "Integrated", "alwaysOn": false, "experiments": {"rampUpRules": []}, "detailedErrorLoggingEnabled":
+      false, "requestTracingEnabled": false, "numberOfWorkers": 1, "loadBalancing":
+      "LeastRequests", "linuxFxVersion": "", "use32BitWorkerProcess": false, "appCommandLine":
+      "process.json", "webSocketsEnabled": false, "vnetName": "", "scmType": "None",
+      "defaultDocuments": ["Default.htm", "Default.html", "Default.asp", "index.htm",
+      "index.html", "iisstart.htm", "default.aspx", "index.php", "hostingstart.html"]}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Length: ['785']
+      Content-Length: ['923']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
-          websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.10586-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [12306a0c-ee88-11e6-8cca-64510658e3b3]
+      x-ms-client-request-id: [bcbef9d8-014f-11e7-bc28-f4b7e2e85440]
     method: PATCH
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/sites/webapp-linux1/config/web?api-version=2016-08-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/sites/webapp-linux1","name":"webapp-linux1","type":"Microsoft.Web/sites","location":"West
-        US","tags":null,"properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"","pythonVersion":"","nodeVersion":"","linuxFxVersion":"","requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":null,"httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$webapp-linux1","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"process.json","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":false,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":{"triggers":null,"actions":null},"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"httpApiPrefixPath":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"ipSecurityRestrictions":null}}'}
+        US","tags":null,"properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"","pythonVersion":"","nodeVersion":"","linuxFxVersion":"","requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":"VS2012","httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$webapp-linux1","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":false,"webSocketsEnabled":false,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"process.json","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":false,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":{"triggers":null,"actions":null},"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"ipSecurityRestrictions":null}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json]
-      Date: ['Thu, 09 Feb 2017 05:24:47 GMT']
+      Date: ['Sun, 05 Mar 2017 02:59:24 GMT']
+      ETag: ['"1D2955C7E46D46B"']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -191,8 +194,8 @@ interactions:
       Vary: [Accept-Encoding]
       X-AspNet-Version: [4.0.30319]
       X-Powered-By: [ASP.NET]
-      content-length: ['2376']
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      content-length: ['2356']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -202,10 +205,10 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
-          websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.10586-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [137fba0c-ee88-11e6-bb43-64510658e3b3]
+      x-ms-client-request-id: [bded3a06-014f-11e7-8873-f4b7e2e85440]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/sites/webapp-linux1/config/appsettings/list?api-version=2016-08-01
   response:
@@ -214,7 +217,7 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json]
-      Date: ['Thu, 09 Feb 2017 05:24:49 GMT']
+      Date: ['Sun, 05 Mar 2017 02:59:25 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -224,32 +227,33 @@ interactions:
       X-AspNet-Version: [4.0.30319]
       X-Powered-By: [ASP.NET]
       content-length: ['306']
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['11979']
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
     status: {code: 200, message: OK}
 - request:
-    body: '{"name": "appsettings", "properties": {"DOCKER_REGISTRY_SERVER_USERNAME":
-      "foo-user", "DOCKER_CUSTOM_IMAGE_NAME": "foo-image", "DOCKER_REGISTRY_SERVER_URL":
-      "foo-url", "DOCKER_REGISTRY_SERVER_PASSWORD": "foo-password", "WEBSITE_NODE_DEFAULT_VERSION":
-      "6.9.1"}, "location": "West US", "type": "Microsoft.Web/sites/config"}'
+    body: '{"location": "West US", "type": "Microsoft.Web/sites/config", "name": "appsettings",
+      "properties": {"DOCKER_REGISTRY_SERVER_PASSWORD": "foo-password", "DOCKER_CUSTOM_IMAGE_NAME":
+      "foo-image", "DOCKER_REGISTRY_SERVER_URL": "foo-url", "WEBSITE_NODE_DEFAULT_VERSION":
+      "6.9.1", "DOCKER_REGISTRY_SERVER_USERNAME": "foo-user"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['321']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
-          websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.10586-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [13df6d1e-ee88-11e6-a715-64510658e3b3]
+      x-ms-client-request-id: [be4d6646-014f-11e7-ba37-f4b7e2e85440]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/sites/webapp-linux1/config/appsettings?api-version=2016-08-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/sites/webapp-linux1/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","tags":null,"properties":{"DOCKER_REGISTRY_SERVER_USERNAME":"foo-user","DOCKER_CUSTOM_IMAGE_NAME":"foo-image","DOCKER_REGISTRY_SERVER_URL":"foo-url","DOCKER_REGISTRY_SERVER_PASSWORD":"foo-password","WEBSITE_NODE_DEFAULT_VERSION":"6.9.1"}}'}
+        US","tags":null,"properties":{"DOCKER_REGISTRY_SERVER_PASSWORD":"foo-password","DOCKER_CUSTOM_IMAGE_NAME":"foo-image","DOCKER_REGISTRY_SERVER_URL":"foo-url","WEBSITE_NODE_DEFAULT_VERSION":"6.9.1","DOCKER_REGISTRY_SERVER_USERNAME":"foo-user"}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json]
-      Date: ['Thu, 09 Feb 2017 05:24:50 GMT']
+      Date: ['Sun, 05 Mar 2017 02:59:27 GMT']
+      ETag: ['"1D2955C7FEC7B20"']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -269,19 +273,19 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
-          websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.10586-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [14c74a74-ee88-11e6-9ca2-64510658e3b3]
+      x-ms-client-request-id: [bf3a299a-014f-11e7-8f2c-f4b7e2e85440]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/sites/webapp-linux1/config/appsettings/list?api-version=2016-08-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/sites/webapp-linux1/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","tags":null,"properties":{"DOCKER_REGISTRY_SERVER_USERNAME":"foo-user","DOCKER_CUSTOM_IMAGE_NAME":"foo-image","DOCKER_REGISTRY_SERVER_URL":"foo-url","DOCKER_REGISTRY_SERVER_PASSWORD":"foo-password","WEBSITE_NODE_DEFAULT_VERSION":"6.9.1"}}'}
+        US","tags":null,"properties":{"DOCKER_REGISTRY_SERVER_PASSWORD":"foo-password","DOCKER_CUSTOM_IMAGE_NAME":"foo-image","DOCKER_REGISTRY_SERVER_URL":"foo-url","WEBSITE_NODE_DEFAULT_VERSION":"6.9.1","DOCKER_REGISTRY_SERVER_USERNAME":"foo-user"}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json]
-      Date: ['Thu, 09 Feb 2017 05:24:51 GMT']
+      Date: ['Sun, 05 Mar 2017 02:59:27 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -291,7 +295,37 @@ interactions:
       X-AspNet-Version: [4.0.30319]
       X-Powered-By: [ASP.NET]
       content-length: ['478']
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['11970']
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['11997']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.10586-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [bf8ffbfa-014f-11e7-9aab-f4b7e2e85440]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/sites/webapp-linux1/config/slotConfigNames?api-version=2016-08-01
+  response:
+    body: {string: '{"id":null,"name":"webapp-linux1","type":"Microsoft.Web/sites","location":"West
+        US","tags":null,"properties":{"connectionStringNames":null,"appSettingNames":null}}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json]
+      Date: ['Sun, 05 Mar 2017 02:59:28 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-IIS/8.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: [Accept-Encoding]
+      X-AspNet-Version: [4.0.30319]
+      X-Powered-By: [ASP.NET]
+      content-length: ['163']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -301,19 +335,19 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
-          websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.10586-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [154fda86-ee88-11e6-863d-64510658e3b3]
+      x-ms-client-request-id: [c0673a9a-014f-11e7-a825-f4b7e2e85440]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/sites/webapp-linux1/config/appsettings/list?api-version=2016-08-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/sites/webapp-linux1/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","tags":null,"properties":{"DOCKER_REGISTRY_SERVER_USERNAME":"foo-user","DOCKER_CUSTOM_IMAGE_NAME":"foo-image","DOCKER_REGISTRY_SERVER_URL":"foo-url","DOCKER_REGISTRY_SERVER_PASSWORD":"foo-password","WEBSITE_NODE_DEFAULT_VERSION":"6.9.1"}}'}
+        US","tags":null,"properties":{"DOCKER_REGISTRY_SERVER_PASSWORD":"foo-password","DOCKER_CUSTOM_IMAGE_NAME":"foo-image","DOCKER_REGISTRY_SERVER_URL":"foo-url","WEBSITE_NODE_DEFAULT_VERSION":"6.9.1","DOCKER_REGISTRY_SERVER_USERNAME":"foo-user"}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json]
-      Date: ['Thu, 09 Feb 2017 05:24:52 GMT']
+      Date: ['Sun, 05 Mar 2017 02:59:29 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -323,21 +357,113 @@ interactions:
       X-AspNet-Version: [4.0.30319]
       X-Powered-By: [ASP.NET]
       content-length: ['478']
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['11968']
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
     status: {code: 200, message: OK}
 - request:
-    body: '{"name": "appsettings", "properties": {"WEBSITE_NODE_DEFAULT_VERSION":
-      "6.9.1"}, "location": "West US", "type": "Microsoft.Web/sites/config"}'
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.10586-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [c0a517d4-014f-11e7-a090-f4b7e2e85440]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/sites/webapp-linux1/config/slotConfigNames?api-version=2016-08-01
+  response:
+    body: {string: '{"id":null,"name":"webapp-linux1","type":"Microsoft.Web/sites","location":"West
+        US","tags":null,"properties":{"connectionStringNames":null,"appSettingNames":null}}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json]
+      Date: ['Sun, 05 Mar 2017 02:59:29 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-IIS/8.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: [Accept-Encoding]
+      X-AspNet-Version: [4.0.30319]
+      X-Powered-By: [ASP.NET]
+      content-length: ['163']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.10586-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [c13e57b6-014f-11e7-816d-f4b7e2e85440]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/sites/webapp-linux1/config/appsettings/list?api-version=2016-08-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/sites/webapp-linux1/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
+        US","tags":null,"properties":{"DOCKER_REGISTRY_SERVER_PASSWORD":"foo-password","DOCKER_CUSTOM_IMAGE_NAME":"foo-image","DOCKER_REGISTRY_SERVER_URL":"foo-url","WEBSITE_NODE_DEFAULT_VERSION":"6.9.1","DOCKER_REGISTRY_SERVER_USERNAME":"foo-user"}}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json]
+      Date: ['Sun, 05 Mar 2017 02:59:31 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-IIS/8.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: [Accept-Encoding]
+      X-AspNet-Version: [4.0.30319]
+      X-Powered-By: [ASP.NET]
+      content-length: ['478']
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.10586-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [c177a6e4-014f-11e7-8f71-f4b7e2e85440]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/sites/webapp-linux1/config/slotConfigNames?api-version=2016-08-01
+  response:
+    body: {string: '{"id":null,"name":"webapp-linux1","type":"Microsoft.Web/sites","location":"West
+        US","tags":null,"properties":{"connectionStringNames":null,"appSettingNames":null}}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json]
+      Date: ['Sun, 05 Mar 2017 02:59:31 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-IIS/8.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: [Accept-Encoding]
+      X-AspNet-Version: [4.0.30319]
+      X-Powered-By: [ASP.NET]
+      content-length: ['163']
+    status: {code: 200, message: OK}
+- request:
+    body: '{"location": "West US", "type": "Microsoft.Web/sites/config", "name": "appsettings",
+      "properties": {"WEBSITE_NODE_DEFAULT_VERSION": "6.9.1"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['141']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
-          websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.10586-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [15911714-ee88-11e6-a1db-64510658e3b3]
+      x-ms-client-request-id: [c1aba1d8-014f-11e7-9845-f4b7e2e85440]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/sites/webapp-linux1/config/appsettings?api-version=2016-08-01
   response:
@@ -346,7 +472,8 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json]
-      Date: ['Thu, 09 Feb 2017 05:24:52 GMT']
+      Date: ['Sun, 05 Mar 2017 02:59:32 GMT']
+      ETag: ['"1D2955C832EA0CB"']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -356,7 +483,7 @@ interactions:
       X-AspNet-Version: [4.0.30319]
       X-Powered-By: [ASP.NET]
       content-length: ['306']
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -366,10 +493,10 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
-          websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.10586-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [16591674-ee88-11e6-a081-64510658e3b3]
+      x-ms-client-request-id: [c2d0bdf0-014f-11e7-912a-f4b7e2e85440]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/sites/webapp-linux1/config/appsettings/list?api-version=2016-08-01
   response:
@@ -378,7 +505,7 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json]
-      Date: ['Thu, 09 Feb 2017 05:24:53 GMT']
+      Date: ['Sun, 05 Mar 2017 02:59:33 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -388,6 +515,36 @@ interactions:
       X-AspNet-Version: [4.0.30319]
       X-Powered-By: [ASP.NET]
       content-length: ['306']
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['11976']
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['11998']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.10586-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.0+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [c306deb0-014f-11e7-8dcf-f4b7e2e85440]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-webapp-linux2/providers/Microsoft.Web/sites/webapp-linux1/config/slotConfigNames?api-version=2016-08-01
+  response:
+    body: {string: '{"id":null,"name":"webapp-linux1","type":"Microsoft.Web/sites","location":"West
+        US","tags":null,"properties":{"connectionStringNames":null,"appSettingNames":null}}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json]
+      Date: ['Sun, 05 Mar 2017 02:59:34 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-IIS/8.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: [Accept-Encoding]
+      X-AspNet-Version: [4.0.30319]
+      X-Powered-By: [ASP.NET]
+      content-length: ['163']
     status: {code: 200, message: OK}
 version: 1

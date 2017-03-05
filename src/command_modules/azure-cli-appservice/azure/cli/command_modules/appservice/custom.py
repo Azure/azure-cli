@@ -31,7 +31,7 @@ from ._params import web_client_factory, _generic_site_operation
 
 logger = azlogging.get_az_logger(__name__)
 
-#pylint:disable=no-member
+#pylint:disable=no-member,superfluous-parens
 
 #workaround that app service's error doesn't comform to LRO spec
 class AppServiceLongRunningOperation(LongRunningOperation): #pylint: disable=too-few-public-methods
@@ -199,7 +199,8 @@ def update_container_settings(resource_group_name, name, docker_registry_server_
         settings.append('DOCKER_REGISTRY_SERVER_PASSWORD=' + docker_registry_server_password)
     if docker_custom_image_name is not None:
         settings.append('DOCKER_CUSTOM_IMAGE_NAME=' + docker_custom_image_name)
-    settings = update_app_settings(resource_group_name, name, settings, slot)
+    update_app_settings(resource_group_name, name, settings, slot)
+    settings = get_app_settings(resource_group_name, name, slot)
     return _filter_for_container_settings(settings)
 
 def delete_container_settings(resource_group_name, name, slot=None):
@@ -545,7 +546,7 @@ def _get_local_git_url(client, resource_group_name, name, slot=None):
 def _get_scm_url(resource_group_name, name, slot=None):
     from azure.mgmt.web.models import HostType
     webapp = show_webapp(resource_group_name, name, slot=slot)
-    for host in webapp.host_name_ssl_states or []:
+    for host in (webapp.host_name_ssl_states or []):
         if host.host_type == HostType.repository:
             return "https://{}".format(host.name)
 
