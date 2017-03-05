@@ -1007,6 +1007,32 @@ def _get_private_config(resource_group_name, storage_account):
     return private_config
 
 
+def _merge_secrets(secrets):
+    """
+    Merge a list of secrets. Each secret should be a dict fitting the following JSON structure:
+    [{ "sourceVault": { "id": "value" },
+        "vaultCertificates": [{ "certificateUrl": "value",
+        "certificateStore": "cert store name (only on windows)"}] }]
+    The array of secrets is merged on sourceVault.id.
+    :param secrets:
+    :return:
+    """
+    merged = {}
+    vc_name = 'vaultCertificates'
+    for outer in secrets:
+        for secret in outer:
+            if secret['sourceVault']['id'] not in merged:
+                merged[secret['sourceVault']['id']] = []
+            merged[secret['sourceVault']['id']] = \
+                secret[vc_name] + merged[secret['sourceVault']['id']]
+
+    # transform the reduced map to vm format
+    formatted = [{'sourceVault': {'id': source_id},
+                  'vaultCertificates': value}
+                 for source_id, value in list(merged.items())]
+    return formatted
+
+
 def show_default_diagnostics_configuration(is_windows_os=False):
     '''show the default config file which defines data to be collected'''
     return get_default_diag_config(is_windows_os)
@@ -1537,7 +1563,7 @@ def create_vm(vm_name, resource_group_name, image=None,
         custom_data = read_content_if_is_file(custom_data)
 
     if secrets:
-        secrets = load_json(secrets)
+        secrets = _merge_secrets([load_json(secret) for secret in secrets])
 
     vm_resource = build_vm_resource(
         vm_name, location, tags, size, storage_profile, nics, admin_username, availability_set,
@@ -1683,7 +1709,7 @@ def create_vmss(vmss_name, resource_group_name, image,
         custom_data = read_content_if_is_file(custom_data)
 
     if secrets:
-        secrets = load_json(secrets)
+        secrets = _merge_secrets([load_json(secret) for secret in secrets])
 
     vmss_resource = build_vmss_resource(vmss_name, naming_prefix, location, tags,
                                         not disable_overprovision, upgrade_policy_mode,

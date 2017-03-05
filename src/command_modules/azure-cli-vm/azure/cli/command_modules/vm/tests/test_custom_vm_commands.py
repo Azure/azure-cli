@@ -8,7 +8,8 @@ import mock
 
 from azure.cli.core._util import CLIError
 
-from azure.cli.command_modules.vm.custom import enable_boot_diagnostics, disable_boot_diagnostics
+from azure.cli.command_modules.vm.custom import enable_boot_diagnostics, disable_boot_diagnostics, \
+    _merge_secrets
 from azure.cli.command_modules.vm.custom import (_get_access_extension_upgrade_info,
                                                  _LINUX_ACCESS_EXT,
                                                  _WINDOWS_ACCESS_EXT)
@@ -261,6 +262,60 @@ class Test_Vm_Custom(unittest.TestCase):
         # works fine to disable encryption on daat disk when OS disk is never encrypted
         vm_extension.instance_view.substatuses[0].message = '{}'
         disable('rg1', 'vm1', 'DATA')
+
+    def test_merge_secrets(self):
+        secret1 = [{
+            'sourceVault': {'id': '123'},
+            'vaultCertificates': [
+                {
+                    'certificateUrl': 'abc',
+                    'certificateStore': 'My'
+                }
+            ]}]
+
+        secret2 = [{
+            'sourceVault': {'id': '123'},
+            'vaultCertificates': [
+                {
+                    'certificateUrl': 'def',
+                    'certificateStore': 'Machine'
+                },
+                {
+                    'certificateUrl': 'xyz',
+                    'certificateStore': 'My'
+                }
+            ]}]
+
+        secret3 = [{
+            'sourceVault': {'id': '456'},
+            'vaultCertificates': [
+                {
+                    'certificateUrl': 'abc',
+                    'certificateStore': 'My'
+                }
+            ]}]
+        merged = _merge_secrets([secret1, secret2, secret3])
+        self.assertIn('456', [item['sourceVault']['id'] for item in merged])
+        self.assertIn('123', [item['sourceVault']['id'] for item in merged])
+        vault123 = [item['vaultCertificates'] for item in merged
+                    if item['sourceVault']['id'] == '123'][0]
+        vault123.sort(key=lambda x: x['certificateUrl'])
+        vault123Expected = [
+            {
+                'certificateUrl': 'abc',
+                'certificateStore': 'My'
+            },
+            {
+                'certificateUrl': 'def',
+                'certificateStore': 'Machine'
+            },
+            {
+                'certificateUrl': 'xyz',
+                'certificateStore': 'My'
+            }
+        ]
+        vault123Expected.sort(key=lambda x: x['certificateUrl'])
+        self.assertListEqual(vault123Expected, vault123)
 
 
 class FakedVM:  # pylint: disable=too-few-public-methods,old-style-class

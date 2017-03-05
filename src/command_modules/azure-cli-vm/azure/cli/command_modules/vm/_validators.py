@@ -103,29 +103,34 @@ def _validate_secrets(secrets, os_type):
     errors = []
 
     try:
-        loaded_secret = load_json(secrets)
+        loaded_secret = [load_json(secret) for secret in secrets]
     except Exception as err:
         raise CLIError('Error decoding secrets: {0}'.format(err))
 
-    for idx, secret in enumerate(loaded_secret):
-        if 'sourceVault' not in secret:
-            errors.append('Secret is missing sourceVault key at index {0}'.format(idx))
-        if 'sourceVault' in secret and 'id' not in secret['sourceVault']:
-            errors.append('Secret is missing sourceVault.id key at index {0}'.format(idx))
-        if 'vaultCertificates' not in secret or not secret['vaultCertificates']:
-            err = 'Secret is missing vaultCertificates array or it is empty at index {0}'
-            errors.append(err.format(idx))
-        else:
-            for jdx, cert in enumerate(secret['vaultCertificates']):
-                message = 'Secret is missing {0} within vaultCertificates array at secret ' \
-                          'index {1} and vaultCertificate index {2}'
-                if 'certificateUrl' not in cert:
-                    errors.append(message.format('certificateUrl', idx, jdx))
-                if is_windows and 'certificateStore' not in cert:
-                    errors.append(message.format('certificateStore', idx, jdx))
+    for idx_arg, narg_secret in enumerate(loaded_secret):
+        for idx, secret in enumerate(narg_secret):
+            if 'sourceVault' not in secret:
+                errors.append(
+                    'Secret is missing sourceVault key at index {0} in arg {1}'.format(
+                        idx, idx_arg))
+            if 'sourceVault' in secret and 'id' not in secret['sourceVault']:
+                errors.append(
+                    'Secret is missing sourceVault.id key at index {0}  in arg {1}'.format(
+                        idx, idx_arg))
+            if 'vaultCertificates' not in secret or not secret['vaultCertificates']:
+                err = 'Secret is missing vaultCertificates array or it is empty at index {0} in ' \
+                      'arg {1} '
+                errors.append(err.format(idx, idx_arg))
+            else:
+                for jdx, cert in enumerate(secret['vaultCertificates']):
+                    message = 'Secret is missing {0} within vaultCertificates array at secret ' \
+                              'index {1} and vaultCertificate index {2} in arg {3}'
+                    if 'certificateUrl' not in cert:
+                        errors.append(message.format('certificateUrl', idx, jdx, idx_arg))
+                    if is_windows and 'certificateStore' not in cert:
+                        errors.append(message.format('certificateStore', idx, jdx, idx_arg))
 
     if errors:
-        errors.append(secrets)
         raise CLIError('\n'.join(errors))
 
 
