@@ -1777,12 +1777,10 @@ def get_vm_format_secret(secrets, certificate_store=None):
     from azure.mgmt.keyvault import KeyVaultManagementClient
     client = get_mgmt_service_client(KeyVaultManagementClient).vaults
     grouped_secrets = {}
-    if isinstance(secrets, dict):
-        secrets = [secrets]
 
     # group secrets by source vault
     for secret in secrets:
-        parsed = parse_secret_id(secret['id'])
+        parsed = parse_secret_id(secret)
         match = re.search('://(.+?)\\.', parsed.vault)
         vault_name = match.group(1)
         if vault_name not in grouped_secrets:
@@ -1791,7 +1789,7 @@ def get_vm_format_secret(secrets, certificate_store=None):
                 'id': _get_vault_id_from_name(client, vault_name)
             }
 
-        vault_cert = {'certificateUrl': secret['id']}
+        vault_cert = {'certificateUrl': secret}
         if certificate_store:
             vault_cert['certificateStore'] = certificate_store
 

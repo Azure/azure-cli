@@ -1266,8 +1266,8 @@ class VMCreateLinuxSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: dis
         self.cmd('keyvault certificate create --vault-name {} -n cert1 -p @"{}"'.format(
             self.vault_name,
             policy_path))
-        secret_out = self.cmd('keyvault secret list-versions --vault-name {} -n cert1'.format(self.vault_name))[-1]
-        vm_format = self.cmd('vm format-secret -s \'{0}\''.format(json.dumps(secret_out)))
+        secret_out = self.cmd('keyvault secret list-versions --vault-name {} -n cert1 --query "[?attributes.enabled].id" -o tsv'.format(self.vault_name))
+        vm_format = self.cmd('vm format-secret -s {0}'.format(secret_out))
 
         self.cmd('vm create -g {rg} -n {vm_name} --admin-username {admin} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' -l {location} --secrets \'{secrets}\''.format(
             rg=self.resource_group,
@@ -1283,7 +1283,7 @@ class VMCreateLinuxSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: dis
         self.cmd('vm show -g {rg} -n {vm_name}'.format(rg=self.resource_group, vm_name=self.vm_name), checks=[
             JMESPathCheck('provisioningState', 'Succeeded'),
             JMESPathCheck('osProfile.secrets[0].sourceVault.id', vault_out['id']),
-            JMESPathCheck('osProfile.secrets[0].vaultCertificates[0].certificateUrl', secret_out['id'])
+            JMESPathCheck('osProfile.secrets[0].vaultCertificates[0].certificateUrl', secret_out)
         ])
 
 
@@ -1331,8 +1331,8 @@ class VMCreateWindowsSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: d
             self.vault_name,
             policy_path))
 
-        secret_out = self.cmd('keyvault secret list-versions --vault-name {} -n cert1'.format(self.vault_name))[-1]
-        vm_format = self.cmd('vm format-secret -s \'{0}\' --certificate-store "My"'.format(json.dumps(secret_out)))
+        secret_out = self.cmd('keyvault secret list-versions --vault-name {} -n cert1 --query "[?attributes.enabled].id" -o tsv'.format(self.vault_name))
+        vm_format = self.cmd('vm format-secret -s {0} --certificate-store "My"'.format(secret_out))
 
         self.cmd('vm create -g {rg} -n {vm_name} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {location} --secrets \'{secrets}\''.format(
             rg=self.resource_group,
@@ -1346,7 +1346,7 @@ class VMCreateWindowsSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: d
         self.cmd('vm show -g {rg} -n {vm_name}'.format(rg=self.resource_group, vm_name=self.vm_name), checks=[
             JMESPathCheck('provisioningState', 'Succeeded'),
             JMESPathCheck('osProfile.secrets[0].sourceVault.id', vault_out['id']),
-            JMESPathCheck('osProfile.secrets[0].vaultCertificates[0].certificateUrl', secret_out['id']),
+            JMESPathCheck('osProfile.secrets[0].vaultCertificates[0].certificateUrl', secret_out),
             JMESPathCheck('osProfile.secrets[0].vaultCertificates[0].certificateStore', 'My')
         ])
 
@@ -1569,8 +1569,8 @@ class VMSSCreateLinuxSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: d
             self.vault_name,
             policy_path))
 
-        secret_out = self.cmd('keyvault secret list-versions --vault-name {} -n cert1'.format(self.vault_name))[-1]
-        vm_format = self.cmd('vm format-secret -s \'{0}\''.format(json.dumps(secret_out)))
+        secret_out = self.cmd('keyvault secret list-versions --vault-name {} -n cert1 --query "[?attributes.enabled].id" -o tsv'.format(self.vault_name))
+        vm_format = self.cmd('vm format-secret -s {0}'.format(secret_out))
 
         self.cmd('vmss create -n {name} -g {rg} --image Debian --admin-username deploy --ssh-key-value \'{ssh}\' --secrets \'{secrets}\''.format(
             name=self.vmss_name,
@@ -1581,7 +1581,7 @@ class VMSSCreateLinuxSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: d
         self.cmd('vmss show -n {} -g {}'.format(self.vmss_name, self.resource_group), checks=[
             JMESPathCheck('provisioningState', 'Succeeded'),
             JMESPathCheck('virtualMachineProfile.osProfile.secrets[0].sourceVault.id', vault_out['id']),
-            JMESPathCheck('virtualMachineProfile.osProfile.secrets[0].vaultCertificates[0].certificateUrl', secret_out['id'])
+            JMESPathCheck('virtualMachineProfile.osProfile.secrets[0].vaultCertificates[0].certificateUrl', secret_out)
         ])
 
 

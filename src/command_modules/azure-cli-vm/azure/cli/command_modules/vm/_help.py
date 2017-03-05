@@ -33,7 +33,7 @@ helps['vm format-secret'] = """
               -p "$(az keyvault certificate get-default-policy)"
 
             secrets=$(az keyvault secret list-versions --vault-name vaultname \\
-              -n cert1 --query "[?attributes.enabled]")
+              -n cert1 --query "[?attributes.enabled].id" -o tsv)
 
             vm_secrets=$(az vm format-secret -s "$secrets") \n
 
@@ -93,7 +93,7 @@ helps['vm create'] = """
               -p "$(az keyvault certificate get-default-policy)"
 
             secrets=$(az keyvault secret list-versions --vault-name vaultname \\
-              -n cert1 --query "[?attributes.enabled]")
+              -n cert1 --query "[?attributes.enabled].id" -o tsv)
 
             vm_secrets=$(az vm format-secret -s "$secrets") \n
 
@@ -132,7 +132,7 @@ helps['vmss create'] = """
               -p "$(az keyvault certificate get-default-policy)"
 
             secrets=$(az keyvault secret list-versions --vault-name vaultname \\
-              -n cert1 --query "[?attributes.enabled]")
+              -n cert1 --query "[?attributes.enabled].id" -o tsv)
 
             vm_secrets=$(az vm format-secret -s "$secrets") \n
 
