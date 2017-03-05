@@ -245,6 +245,8 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
         clone_from_prod = configuration_source.lower() == webapp.lower()
         slot_def.site_config = get_site_configs(
             resource_group_name, webapp, None if clone_from_prod else configuration_source)
+    else:
+        slot_def.site_config = SiteConfig(location)
 
     poller = client.web_apps.create_or_update_slot(resource_group_name, webapp, slot_def, slot)
     result = AppServiceLongRunningOperation()(poller)
@@ -270,7 +272,7 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
                                 slot, app_settings)
         _generic_site_operation(resource_group_name, webapp, 'update_connection_strings',
                                 slot, connection_strings)
-
+    result.name = result.name.split('/')[-1]
     return result
 
 
