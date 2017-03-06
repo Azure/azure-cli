@@ -300,11 +300,3 @@ with ParametersContext(command='sql server firewall-rule') as c:
                options_list=('--end-ip-address',),
                help='The end IP address of the firewall rule. Must be IPv4 format. Use value'
                ' \'0.0.0.0\' to represent all Azure-internal IP addresses.')
-
-#####
-#           sql server service-objective
-#####
-
-with ParametersContext(command='sql server service-objective') as c:
-    c.register_alias('server_name', ('--server', '-s'))
-    c.register_alias('service_objective_name', ('--name', '-n'))

@@ -107,10 +107,6 @@ with ServiceGroup(__name__, get_sql_servers_operation, server_operations) as s:
         c.generic_update_command('update', 'get_by_resource_group', 'create_or_update',
                                  custom_func_name='server_update')
 
-    with s.group('sql server service-objective') as c:
-        c.command('list', 'list_service_objectives')
-        c.command('show', 'get_service_objective')
-
     with s.group('sql server firewall-rule') as c:
         c.command('create', 'create_or_update_firewall_rule')
         c.custom_command('update', 'firewall_rule_update')
