@@ -323,7 +323,7 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
         #          .format(rg, self.sql_server_name, self.database_name), checks=[
         #              JMESPathCheck('[0].resourceName', self.database_name)])
 
-        self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --storage {}'
+        self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --max-size {}'
                  ' --set tags.key1=value1'
                  .format(rg, self.sql_server_name, self.database_name,
                          self.update_service_objective, self.update_storage),
@@ -456,7 +456,7 @@ class SqlServerDwMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('status', 'Online')])
 
         # Update DW storage
-        self.cmd('sql dw update -g {} -s {} -n {} --storage {}'
+        self.cmd('sql dw update -g {} -s {} -n {} --max-size {}'
                  ' --set tags.key1=value1'
                  .format(rg, self.sql_server_name, self.database_name, self.update_storage),
                  checks=[

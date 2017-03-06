@@ -153,9 +153,9 @@ with ParametersContext(command='sql db') as c:
     c.register_alias('elastic_pool_name', ('--elastic-pool',))
     c.register_alias('requested_service_objective_name', ('--service-objective',))
 
-    c.argument('max_size_bytes', options_list=('--storage',),
+    c.argument('max_size_bytes', options_list=('--max-size',),
                type=SizeWithUnitConverter('B', result_type=int),
-               help='The max storage of the database. Only the following'
+               help='The max storage size of the database. Only the following'
                ' sizes are supported (in addition to limitations being placed on'
                ' each edition): 100MB, 500MB, 1GB, 5GB, 10GB, 20GB,'
                ' 30GB, 150GB, 200GB, 500GB. If no unit is specified, defaults to bytes (B).')
@@ -278,10 +278,10 @@ with ParametersContext(command='sql dw') as c:
 
     c.argument('server_name', arg_type=server_param_type)
 
-    c.argument('max_size_bytes', options_list=('--storage',),
+    c.argument('max_size_bytes', options_list=('--max-size',),
                type=SizeWithUnitConverter('B', result_type=int),
-               help='The max storage of the data warehouse. If no unit is specified, defaults to'
-               ' bytes (B).')
+               help='The max storage size of the data warehouse. If no unit is specified, defaults'
+               'to bytes (B).')
 
     c.argument('requested_service_objective_name',
                options_list=('--service-objective',),
