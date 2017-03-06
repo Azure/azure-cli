@@ -45,6 +45,9 @@ def _upsert(parent, collection_name, obj_to_add, key_name):
     collection = getattr(parent, collection_name, None)
 
     value = getattr(obj_to_add, key_name)
+    if value is None:
+        raise CLIError(
+            "Unable to resolve a value for key '{}' with which to match.".format(key_name))
     match = next((x for x in collection if getattr(x, key_name, None) == value), None)
     if match:
         logger.warning("Item '%s' already exists. Replacing with new values.", value)
@@ -763,7 +766,7 @@ def add_nic_ip_config_address_pool(
     ip_config = _get_nic_ip_config(nic, ip_config_name)
     _upsert(ip_config, 'load_balancer_backend_address_pools',
             BackendAddressPool(backend_address_pool),
-            'name')
+            'id')
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
     return _get_property(poller.result().ip_configurations, ip_config_name)
 
@@ -788,7 +791,7 @@ def add_nic_ip_config_inbound_nat_rule(
     ip_config = _get_nic_ip_config(nic, ip_config_name)
     _upsert(ip_config, 'load_balancer_inbound_nat_rules',
             InboundNatRule(inbound_nat_rule),
-            'name')
+            'id')
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
     return  _get_property(poller.result().ip_configurations, ip_config_name)
 
