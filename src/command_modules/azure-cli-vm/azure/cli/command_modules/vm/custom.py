@@ -593,11 +593,11 @@ def set_user(resource_group_name, vm_name, username, password=None, ssh_key_valu
     '''
     vm = get_vm(resource_group_name, vm_name, 'instanceView')
     if _is_linux_vm(vm):
-        return _set_linux_user(vm, resource_group_name, vm_name, username, password, ssh_key_value)
+        return _set_linux_user(vm, resource_group_name, username, password, ssh_key_value)
     else:
         if ssh_key_value:
             raise CLIError('SSH key is not appliable on a Windows VM')
-        return _reset_windows_admin(resource_group_name, vm, username, password)
+        return _reset_windows_admin(vm, resource_group_name, username, password)
 
 
 def delete_user(
@@ -608,7 +608,7 @@ def delete_user(
     vm = get_vm(resource_group_name, vm_name, 'instanceView')
     if not _is_linux_vm(vm):
         raise CLIError('Deleting a user is not supported on Windows VM')
-    poller = _update_linux_access_extension(vm, resource_group_name, vm_name,
+    poller = _update_linux_access_extension(vm, resource_group_name,
                                             {'remove_user': username})
     return ExtensionUpdateLongRunningOperation('deleting user', 'done')(poller)
 
@@ -618,7 +618,7 @@ def reset_linux_ssh(resource_group_name, vm_name):
     vm = get_vm(resource_group_name, vm_name, 'instanceView')
     if not _is_linux_vm(vm):
         raise CLIError('Resetting SSH is not supported in Windows VM')
-    poller = _update_linux_access_extension(vm, resource_group_name, vm_name,
+    poller = _update_linux_access_extension(vm, resource_group_name,
                                             {'reset_ssh': True})
     return ExtensionUpdateLongRunningOperation('resetting SSH', 'done')(poller)
 
@@ -628,7 +628,7 @@ def _is_linux_vm(vm):
     return os_type.lower() == 'linux'
 
 
-def _set_linux_user(vm_instance, resource_group_name, vm_name, username,
+def _set_linux_user(vm_instance, resource_group_name, username,
                     password=None, ssh_key_value=None):
     protected_settings = {}
     protected_settings['username'] = username
@@ -640,30 +640,28 @@ def _set_linux_user(vm_instance, resource_group_name, vm_name, username,
     if ssh_key_value:
         protected_settings['ssh_key'] = read_content_if_is_file(ssh_key_value)
 
-    poller = _update_linux_access_extension(vm_instance, resource_group_name, vm_name,
+    poller = _update_linux_access_extension(vm_instance, resource_group_name,
                                             protected_settings)
     return ExtensionUpdateLongRunningOperation('setting user', 'done')(poller)
 
 
-def _reset_windows_admin(
-        resource_group_name, vm, username, password):
+def _reset_windows_admin(vm_instance, resource_group_name, username, password):
     '''Update the password.
     You can only change the password. Adding a new user is not supported.
     '''
-    vm = get_vm(resource_group_name, vm, 'instanceView')
     client = _compute_client_factory()
 
     from azure.mgmt.compute.models import VirtualMachineExtension
 
     publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
-        vm.resources, _WINDOWS_ACCESS_EXT)
+        vm_instance.resources, _WINDOWS_ACCESS_EXT)
     # pylint: disable=no-member
-    instance_name = _get_extension_instance_name(vm.instance_view,
+    instance_name = _get_extension_instance_name(vm_instance.instance_view,
                                                  publisher,
                                                  _WINDOWS_ACCESS_EXT,
                                                  _ACCESS_EXT_HANDLER_NAME)
 
-    ext = VirtualMachineExtension(vm.location,  # pylint: disable=no-member
+    ext = VirtualMachineExtension(vm_instance.location,  # pylint: disable=no-member
                                   publisher=publisher,
                                   virtual_machine_extension_type=_WINDOWS_ACCESS_EXT,
                                   protected_settings={'Password': password},
@@ -671,12 +669,13 @@ def _reset_windows_admin(
                                   settings={'UserName': username},
                                   auto_upgrade_minor_version=auto_upgrade)
 
-    poller = client.virtual_machine_extensions.create_or_update(resource_group_name, vm.name,
+    poller = client.virtual_machine_extensions.create_or_update(resource_group_name,
+                                                                vm_instance.name,
                                                                 instance_name, ext)
     return ExtensionUpdateLongRunningOperation('resetting admin', 'done')(poller)
 
 
-def _update_linux_access_extension(vm_instance, resource_group_name, vm_name, protected_settings):
+def _update_linux_access_extension(vm_instance, resource_group_name, protected_settings):
     client = _compute_client_factory()
 
     from azure.mgmt.compute.models import VirtualMachineExtension
@@ -697,7 +696,8 @@ def _update_linux_access_extension(vm_instance, resource_group_name, vm_name, pr
                                   settings={},
                                   auto_upgrade_minor_version=auto_upgrade)
 
-    poller = client.virtual_machine_extensions.create_or_update(resource_group_name, vm_name,
+    poller = client.virtual_machine_extensions.create_or_update(resource_group_name,
+                                                                vm_instance.name,
                                                                 instance_name, ext)
     return poller
 
@@ -838,7 +838,7 @@ def set_extension(
         protected_settings=None, no_auto_upgrade=False):
     '''create/update extensions for a VM in a resource group. You can use
     'extension image list' to get extension details
-    :param vm_extension_name: the type name of the extension
+    :param vm_extension_name: the name of the extension
     :param publisher: the name of extension publisher
     :param version: the version of extension.
     :param settings: extension settings in json format. A json file path is also eccepted
@@ -898,8 +898,7 @@ def set_vmss_extension(
     if extension_profile:
         extensions = extension_profile.extensions
         if extensions:
-            full_type = publisher + '.' + extension_name
-            extension_profile.extensions = [x for x in extensions if x.type.lower() != full_type.lower()]  # pylint: disable=line-too-long
+            extension_profile.extensions = [x for x in extensions if x.type.lower() != extension_name.lower() or x.publisher.lower() != publisher.lower()]  # pylint: disable=line-too-long
 
     ext = VirtualMachineScaleSetExtension(name=extension_name,
                                           publisher=publisher,
