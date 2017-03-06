@@ -213,50 +213,6 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
                  .format(rg, self.sql_server_name), checks=NoneCheck())
 
 
-class SqlServerServiceObjectiveMgmtScenarioTest(ResourceGroupVCRTestBase):
-
-    def __init__(self, test_method):
-        super(SqlServerServiceObjectiveMgmtScenarioTest, self).__init__(
-            __file__, test_method, resource_group='cli-test-sql-mgmt')
-        self.sql_server_name = 'cliautomation04'
-        self.location = "westus"
-        self.admin_login = 'admin123'
-        self.admin_password = 'SecretPassword123'
-
-    def test_sql_service_objective_mgmt(self):
-        self.execute()
-
-    def body(self):
-        rg = self.resource_group
-        loc = self.location
-        user = self.admin_login
-        password = self.admin_password
-
-        # test create sql server with minimal required parameters
-        self.cmd('sql server create -g {} --name {} -l {} '
-                 '--admin-user {} --admin-password {}'
-                 .format(rg, self.sql_server_name, loc, user, password),
-                 checks=[
-                     JMESPathCheck('name', self.sql_server_name),
-                     JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('administratorLogin', user)])
-
-        # test sql server service-objective list
-        service_objectives = self.cmd('sql server service-objective list -g {} --server {}'
-                                      .format(rg, self.sql_server_name))
-
-        # test sql server service-objective show
-        self.cmd('sql server service-objective show -g {} --server {} --name {}'
-                 .format(rg, self.sql_server_name, service_objectives[0]['name']),
-                 checks=[
-                     JMESPathCheck('name', service_objectives[0]['name']),
-                     JMESPathCheck('resourceGroup', rg)])
-
-        # test delete sql server
-        self.cmd('sql server delete -g {} --name {}'
-                 .format(rg, self.sql_server_name), checks=NoneCheck())
-
-
 class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
     # pylint: disable=too-many-instance-attributes
     def __init__(self, test_method):
