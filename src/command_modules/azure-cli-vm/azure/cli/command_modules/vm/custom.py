@@ -592,8 +592,8 @@ def set_user(resource_group_name, vm_name, username, password=None, ssh_key_valu
     :param ssh_key_value: SSH public key file value or public key file path
     '''
     vm = get_vm(resource_group_name, vm_name, 'instanceView')
-    if _is_linx_vm(vm):
-        return _set_linux_user(resource_group_name, vm_name, username, password, ssh_key_value)
+    if _is_linux_vm(vm):
+        return _set_linux_user(vm, resource_group_name, vm_name, username, password, ssh_key_value)
     else:
         if ssh_key_value:
             raise CLIError('SSH key is not appliable on a Windows VM')
@@ -606,9 +606,9 @@ def delete_user(
     :param username: user name
     '''
     vm = get_vm(resource_group_name, vm_name, 'instanceView')
-    if not _is_linx_vm(vm):
+    if not _is_linux_vm(vm):
         raise CLIError('Deleting a user is not supported on Windows VM')
-    poller = _update_linux_access_extension(resource_group_name, vm_name,
+    poller = _update_linux_access_extension(vm, resource_group_name, vm_name,
                                             {'remove_user': username})
     return ExtensionUpdateLongRunningOperation('deleting user', 'done')(poller)
 
@@ -616,20 +616,20 @@ def delete_user(
 def reset_linux_ssh(resource_group_name, vm_name):
     '''Reset the SSH configuration In Linux VM'''
     vm = get_vm(resource_group_name, vm_name, 'instanceView')
-    if not _is_linx_vm(vm):
+    if not _is_linux_vm(vm):
         raise CLIError('Resetting SSH is not supported in Windows VM')
-    poller = _update_linux_access_extension(resource_group_name, vm_name,
+    poller = _update_linux_access_extension(vm, resource_group_name, vm_name,
                                             {'reset_ssh': True})
     return ExtensionUpdateLongRunningOperation('resetting SSH', 'done')(poller)
 
 
-def _is_linx_vm(vm):
+def _is_linux_vm(vm):
     os_type = vm.storage_profile.os_disk.os_type.value
     return os_type.lower() == 'linux'
 
 
-def _set_linux_user(
-        resource_group_name, vm_name, username, password=None, ssh_key_value=None):
+def _set_linux_user(vm_instance, resource_group_name, vm_name, username,
+                    password=None, ssh_key_value=None):
     protected_settings = {}
     protected_settings['username'] = username
     if password:
@@ -640,7 +640,7 @@ def _set_linux_user(
     if ssh_key_value:
         protected_settings['ssh_key'] = read_content_if_is_file(ssh_key_value)
 
-    poller = _update_linux_access_extension(resource_group_name, vm_name,
+    poller = _update_linux_access_extension(vm_instance, resource_group_name, vm_name,
                                             protected_settings)
     return ExtensionUpdateLongRunningOperation('setting user', 'done')(poller)
 
@@ -650,48 +650,68 @@ def _reset_windows_admin(
     '''Update the password.
     You can only change the password. Adding a new user is not supported.
     '''
+    vm = get_vm(resource_group_name, vm, 'instanceView')
     client = _compute_client_factory()
 
     from azure.mgmt.compute.models import VirtualMachineExtension
 
-    extension_name = _WINDOWS_ACCESS_EXT
     publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
-        vm.resources, extension_name)
+        vm.resources, _WINDOWS_ACCESS_EXT)
+    # pylint: disable=no-member
+    instance_name = _get_extension_instance_name(vm.instance_view,
+                                                 publisher,
+                                                 _WINDOWS_ACCESS_EXT,
+                                                 _ACCESS_EXT_HANDLER_NAME)
 
     ext = VirtualMachineExtension(vm.location,  # pylint: disable=no-member
                                   publisher=publisher,
-                                  virtual_machine_extension_type=extension_name,
+                                  virtual_machine_extension_type=_WINDOWS_ACCESS_EXT,
                                   protected_settings={'Password': password},
                                   type_handler_version=version,
                                   settings={'UserName': username},
                                   auto_upgrade_minor_version=auto_upgrade)
 
     poller = client.virtual_machine_extensions.create_or_update(resource_group_name, vm.name,
-                                                                _ACCESS_EXT_HANDLER_NAME, ext)
+                                                                instance_name, ext)
     return ExtensionUpdateLongRunningOperation('resetting admin', 'done')(poller)
 
 
-def _update_linux_access_extension(resource_group_name, vm_name, protected_settings):
-    vm = get_vm(resource_group_name, vm_name, 'instanceView')
+def _update_linux_access_extension(vm_instance, resource_group_name, vm_name, protected_settings):
     client = _compute_client_factory()
 
     from azure.mgmt.compute.models import VirtualMachineExtension
+    # pylint: disable=no-member
+    instance_name = _get_extension_instance_name(vm_instance.instance_view,
+                                                 extension_mappings[_LINUX_ACCESS_EXT]['publisher'],
+                                                 _LINUX_ACCESS_EXT,
+                                                 _ACCESS_EXT_HANDLER_NAME)
 
-    extension_name = _LINUX_ACCESS_EXT
     publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
-        vm.resources, extension_name)
+        vm_instance.resources, _LINUX_ACCESS_EXT)
 
-    ext = VirtualMachineExtension(vm.location,  # pylint: disable=no-member
+    ext = VirtualMachineExtension(vm_instance.location,  # pylint: disable=no-member
                                   publisher=publisher,
-                                  virtual_machine_extension_type=extension_name,
+                                  virtual_machine_extension_type=_LINUX_ACCESS_EXT,
                                   protected_settings=protected_settings,
                                   type_handler_version=version,
                                   settings={},
                                   auto_upgrade_minor_version=auto_upgrade)
 
     poller = client.virtual_machine_extensions.create_or_update(resource_group_name, vm_name,
-                                                                _ACCESS_EXT_HANDLER_NAME, ext)
+                                                                instance_name, ext)
     return poller
+
+
+def _get_extension_instance_name(instance_view, publisher, extension_type_name,
+                                 suggested_name=None):
+    extension_instance_name = suggested_name or extension_type_name
+    full_type_name = '.'.join([publisher, extension_type_name])
+    if instance_view.extensions:
+        ext = next((x for x in instance_view.extensions
+                    if x.type.lower() == full_type_name.lower()))
+        if ext:
+            extension_instance_name = ext.name
+    return extension_instance_name
 
 
 def disable_boot_diagnostics(resource_group_name, vm_name):
@@ -818,7 +838,7 @@ def set_extension(
         protected_settings=None, no_auto_upgrade=False):
     '''create/update extensions for a VM in a resource group. You can use
     'extension image list' to get extension details
-    :param vm_extension_name: the name of the extension
+    :param vm_extension_name: the type name of the extension
     :param publisher: the name of extension publisher
     :param version: the version of extension.
     :param settings: extension settings in json format. A json file path is also eccepted
@@ -828,17 +848,17 @@ def set_extension(
     for the specified version number, and will not auto update to the latest build/revision number
     on any VM updates in future.
     '''
-    vm = get_vm(resource_group_name, vm_name)
+    vm = get_vm(resource_group_name, vm_name, 'instanceView')
     client = _compute_client_factory()
 
     from azure.mgmt.compute.models import VirtualMachineExtension
 
     protected_settings = load_json(protected_settings) if protected_settings else {}
     settings = load_json(settings) if settings else None
-
+    # pylint: disable=no-member
+    instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name)
     # pylint: disable=no-member
     version = _normalize_extension_version(publisher, vm_extension_name, version, vm.location)
-
     ext = VirtualMachineExtension(vm.location,
                                   publisher=publisher,
                                   virtual_machine_extension_type=vm_extension_name,
@@ -847,7 +867,7 @@ def set_extension(
                                   settings=settings,
                                   auto_upgrade_minor_version=(not no_auto_upgrade))
     return client.virtual_machine_extensions.create_or_update(
-        resource_group_name, vm_name, vm_extension_name, ext)
+        resource_group_name, vm_name, instance_name, ext)
 
 
 def set_vmss_extension(
@@ -874,6 +894,12 @@ def set_vmss_extension(
 
     # pylint: disable=no-member
     version = _normalize_extension_version(publisher, extension_name, version, vmss.location)
+    extension_profile = vmss.virtual_machine_profile.extension_profile
+    if extension_profile:
+        extensions = extension_profile.extensions
+        if extensions:
+            full_type = publisher + '.' + extension_name
+            extension_profile.extensions = [x for x in extensions if x.type.lower() != full_type.lower()]  # pylint: disable=line-too-long
 
     ext = VirtualMachineScaleSetExtension(name=extension_name,
                                           publisher=publisher,
