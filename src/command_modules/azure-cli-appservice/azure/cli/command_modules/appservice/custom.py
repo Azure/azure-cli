@@ -133,7 +133,7 @@ def update_site_configs(resource_group_name, name, slot=None,
     #and no simple functional replacement for this deprecating method for 3.5
     args, _, _, values = inspect.getargvalues(frame) #pylint: disable=deprecated-method
     for arg in args[3:]:
-        if arg is not None:
+        if values.get(arg, None):
             setattr(configs, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 
     return _generic_site_operation(resource_group_name, name, 'update_configuration', slot, configs)
