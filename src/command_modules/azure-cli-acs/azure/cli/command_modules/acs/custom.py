@@ -435,7 +435,6 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     rg = groups.get(resource_group_name)
 
     if orchestrator_type == 'Kubernetes' or orchestrator_type == 'kubernetes':
-        from azure.cli.command_modules.role.custom import _graph_client_factory
         # TODO: This really needs to be broken out and unit tested.
         client = _graph_client_factory()
         if not service_principal:

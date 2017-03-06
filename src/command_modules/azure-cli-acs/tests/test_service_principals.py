@@ -71,7 +71,6 @@ class AcsServicePrincipalTest(unittest.TestCase):
         os.remove(store_file.name)
 
 
-class AcsServicePrincipalTest(unittest.TestCase):
     def test_validate_service_principal_ok(self):
         client = mock.MagicMock()
         client.service_principals = mock.Mock()
