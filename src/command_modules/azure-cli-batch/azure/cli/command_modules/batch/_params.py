@@ -36,7 +36,6 @@ register_extra_cli_argument('batch account create', 'storage_account', help='The
 register_extra_cli_argument('batch account create', 'keyvault', help='The keyvault name or resource ID to be used for an account with a pool allocation mode of \'User Subscription\'.', validator=keyvault_id)
 register_cli_argument('batch account set', 'tags', tags_type)
 register_extra_cli_argument('batch account set', 'storage_account', help='The storage account name or resource ID to be used for auto storage.', validator=storage_account_id)
-register_extra_cli_argument('batch account set', 'keyvault', help='The keyvault name or resource ID to be used for an account with a pool allocation mode of \'User Subscription\'.', validator=keyvault_id)
 register_cli_argument('batch account keys renew', 'key_name', **enum_choice_list(AccountKeyType))
 register_cli_argument('batch account login', 'shared_key_auth', action='store_true', help='Using Shared Key authentication, if not specified, it will use Azure Active Directory authentication.')
 
