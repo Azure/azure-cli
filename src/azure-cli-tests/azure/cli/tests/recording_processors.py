@@ -87,10 +87,15 @@ class GeneralNameReplacer(RecordingProcessor):
             except (KeyError, AttributeError, TypeError):
                 pass
 
-            try:
-                response['headers']['location'] = \
-                    [l.replace(old, new) for l in response['headers']['location']]
-            except (KeyError, AttributeError, TypeError):
-                pass
+            self._replace_in_header(response, 'location', old, new)
+            self._replace_in_header(response, 'azure-asyncoperation', old, new)
 
         return response
+
+    @classmethod
+    def _replace_in_header(cls, response, header_name, old, new):
+        try:
+            response['headers'][header_name] = \
+                [l.replace(old, new) for l in response['headers'][header_name]]
+        except (KeyError, AttributeError, TypeError):
+            pass

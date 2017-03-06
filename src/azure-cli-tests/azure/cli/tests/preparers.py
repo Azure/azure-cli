@@ -55,6 +55,7 @@ class AbstractPreparer(object):
                 pass
 
             fn(test_class_instance, **kwargs)
+
         return _preparer_wrapper
 
     @property
@@ -99,16 +100,20 @@ class RecordingProcessorMixin(RecordingProcessor):
         except (KeyError, AttributeError):
             pass
 
-        try:
-            response['headers']['location'] = \
-                [self.replace(l) for l in response['headers']['location']]
-        except (KeyError, AttributeError):
-            pass
+        self._replace_in_header(response, 'location')
+        self._replace_in_header(response, 'azure-asyncoperation')
 
         return response
 
     def replace(self, original_value):
         return original_value.replace(self.random_name, self.moniker)
+
+    def _replace_in_header(self, response, header_name):
+        try:
+            response['headers'][header_name] = [l.replace(self.random_name, self.moniker) for l in
+                                                response['headers'][header_name]]
+        except (KeyError, AttributeError, TypeError):
+            pass
 
 
 # Resource Group Preparer and its shorthand decorator
