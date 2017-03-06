@@ -10,8 +10,8 @@ from azure.cli.core._util import empty_on_404
 
 from ._client_factory import web_client_factory
 
-def output_slots_In_table(slots):
-    return [{'name': s['name'], 'status': s['state'], 'app service plan': s['appServicePlan']} for s in slots]
+def output_slots_in_table(slots):
+    return [{'name': s['name'], 'status': s['state'], 'plan': s['appServicePlan']} for s in slots]
 
 cli_command(__name__, 'appservice web create', 'azure.cli.command_modules.appservice.custom#create_webapp')
 cli_command(__name__, 'appservice web list', 'azure.cli.command_modules.appservice.custom#list_webapp')
@@ -58,7 +58,7 @@ cli_command(__name__, 'appservice web log download', 'azure.cli.command_modules.
 cli_command(__name__, 'appservice web log config', 'azure.cli.command_modules.appservice.custom#config_diagnostics')
 cli_command(__name__, 'appservice web browse', 'azure.cli.command_modules.appservice.custom#view_in_browser')
 
-cli_command(__name__, 'appservice web deployment slot list', 'azure.cli.command_modules.appservice.custom#list_slots', table_transformer=output_slots_In_table)
+cli_command(__name__, 'appservice web deployment slot list', 'azure.cli.command_modules.appservice.custom#list_slots', table_transformer=output_slots_in_table)
 cli_command(__name__, 'appservice web deployment slot delete', 'azure.cli.command_modules.appservice.custom#delete_slot')
 cli_command(__name__, 'appservice web deployment slot auto-swap', 'azure.cli.command_modules.appservice.custom#config_slot_auto_swap')
 cli_command(__name__, 'appservice web deployment slot swap', 'azure.cli.command_modules.appservice.custom#swap_slot')
