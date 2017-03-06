@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import datetime
 import unittest
 import os.path
 import inspect
@@ -14,7 +15,8 @@ import shlex
 from azure.cli.tests.patches import (patch_load_cached_subscriptions, patch_main_exception_handler,
                                      patch_retrieve_token_for_user)
 from azure.cli.tests.exceptions import CliExecutionError
-from azure.cli.tests.const import ENV_LIVE_TEST, ENV_SKIP_ASSERT, MOCKED_SUBSCRIPTION_ID
+from azure.cli.tests.const import (ENV_LIVE_TEST, ENV_SKIP_ASSERT, ENV_TEST_DIAGNOSE,
+                                   MOCKED_SUBSCRIPTION_ID)
 from azure.cli.tests.recording_processors import (SubscriptionRecordingProcessor,
                                                   OAuthRequestResponsesFilter,
                                                   GeneralNameReplacer)
@@ -46,6 +48,7 @@ class ScenarioTest(unittest.TestCase):
         if live_test and os.path.exists(self.recording_file):
             os.remove(self.recording_file)
 
+        self.diagnose = os.environ.get(ENV_TEST_DIAGNOSE, None) == 'True'
         self.skip_assert = os.environ.get(ENV_SKIP_ASSERT, None) == 'True'
         self.in_recording = live_test or not os.path.exists(self.recording_file)
         self.test_resources_count = 0
@@ -76,7 +79,16 @@ class ScenarioTest(unittest.TestCase):
             return moniker
 
     def cmd(self, command, checks=None):
+        if self.diagnose:
+            begin = datetime.datetime.now()
+            print('\nExecuting command: {}'.format(command))
+
         result = execute(command)
+
+        if self.diagnose:
+            duration = datetime.datetime.now() - begin
+            print('\nCommand accomplished in {} s. Exit code {}.\n{}'.format(
+                duration.total_seconds(), result.exit_code, result.output))
 
         if not checks:
             checks = []
