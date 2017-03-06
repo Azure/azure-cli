@@ -74,8 +74,21 @@ def _configure_db_create_params(
     """
     Configures params for db/dw create/update commands.
 
-    engine: Engine enum value (e.g. 'db', 'dw')
-    create_mode: Valid CreateMode enum value (e.g. 'Default', 'Copy', etc)
+    The PUT database REST API has many parameters and many modes (`create_mode`) that control
+    which parameters are valid. To make it easier for CLI users to get the param combinations
+    correct, these create modes are separated into different commands (e.g.: create, copy,
+    restore, etc).
+
+    On top of that, some create modes and some params are not allowed if the database edition is
+    DataWarehouse. For this reason, regular database commands are separated from datawarehouse
+    commands (`db` vs `dw`.)
+
+    As a result, the param combination matrix is a little complicated. This function configures
+    which params are ignored for a PUT database command based on a command's SQL engine type and
+    create mode.
+
+    engine: Engine enum value (e.g. `db`, `dw`)
+    create_mode: Valid CreateMode enum value (e.g. `default`, `copy`, etc)
     """
 
     # DW does not support all create modes. Check that engine and create_mode are consistent.
