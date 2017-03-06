@@ -8,11 +8,11 @@ import re
 
 from msrestazure.azure_exceptions import CloudError
 
+from azure.mgmt.keyvault import KeyVaultManagementClient
 from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid_resource_id
-from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core._util import CLIError, random_string
 from ._client_factory import _compute_client_factory
-from azure.cli.command_modules.vm._vm_utils import check_existence
+from azure.cli.command_modules.vm._vm_utils import check_existence, load_json
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.azlogging as azlogging
 
@@ -24,7 +24,24 @@ def validate_nsg_name(namespace):
         or '{}_NSG_{}'.format(namespace.vm_name, random_string(8))
 
 
+def _get_resource_group_from_vault_name(vault_name):
+    """
+    Fetch resource group from vault name
+    :param str vault_name: name of the key vault
+    :return: resource group name or None
+    :rtype: str
+    """
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    client = get_mgmt_service_client(KeyVaultManagementClient).vaults
+    for vault in client.list():
+        id_comps = parse_resource_id(vault.id)
+        if id_comps['name'] == vault_name:
+            return id_comps['resource_group']
+    return None
+
+
 def _get_resource_id(val, resource_group, resource_type, resource_namespace):
+    from azure.cli.core.commands.client_factory import get_subscription_id
     if is_valid_resource_id(val):
         return val
     else:
@@ -64,6 +81,57 @@ def validate_location(namespace):
         resource_client = get_mgmt_service_client(ResourceManagementClient)
         rg = resource_client.resource_groups.get(namespace.resource_group_name)
         namespace.location = rg.location  # pylint: disable=no-member
+
+
+def _validate_secrets(secrets, os_type):
+    """
+    Validates a parsed JSON array containing secrets for use in VM Creation
+    Secrets JSON structure
+    [{
+        "sourceVault": { "id": "value" },
+        "vaultCertificates": [{
+            "certificateUrl": "value",
+            "certificateStore": "cert store name (only on windows)"
+        }]
+    }]
+    :param dict secrets: Dict fitting the JSON description above
+    :param string os_type: the type of OS (linux or windows)
+    :return: errors if any were found
+    :rtype: list
+    """
+    is_windows = os_type == 'windows'
+    errors = []
+
+    try:
+        loaded_secret = [load_json(secret) for secret in secrets]
+    except Exception as err:
+        raise CLIError('Error decoding secrets: {0}'.format(err))
+
+    for idx_arg, narg_secret in enumerate(loaded_secret):
+        for idx, secret in enumerate(narg_secret):
+            if 'sourceVault' not in secret:
+                errors.append(
+                    'Secret is missing sourceVault key at index {0} in arg {1}'.format(
+                        idx, idx_arg))
+            if 'sourceVault' in secret and 'id' not in secret['sourceVault']:
+                errors.append(
+                    'Secret is missing sourceVault.id key at index {0}  in arg {1}'.format(
+                        idx, idx_arg))
+            if 'vaultCertificates' not in secret or not secret['vaultCertificates']:
+                err = 'Secret is missing vaultCertificates array or it is empty at index {0} in ' \
+                      'arg {1} '
+                errors.append(err.format(idx, idx_arg))
+            else:
+                for jdx, cert in enumerate(secret['vaultCertificates']):
+                    message = 'Secret is missing {0} within vaultCertificates array at secret ' \
+                              'index {1} and vaultCertificate index {2} in arg {3}'
+                    if 'certificateUrl' not in cert:
+                        errors.append(message.format('certificateUrl', idx, jdx, idx_arg))
+                    if is_windows and 'certificateStore' not in cert:
+                        errors.append(message.format('certificateStore', idx, jdx, idx_arg))
+
+    if errors:
+        raise CLIError('\n'.join(errors))
 
 
 # region VM Create Validators
@@ -301,7 +369,7 @@ def _validate_vm_create_storage_account(namespace):
 
 
 def _validate_vm_create_availability_set(namespace):
-
+    from azure.cli.core.commands.client_factory import get_subscription_id
     if namespace.availability_set:
         as_id = parse_resource_id(namespace.availability_set)
         name = as_id['name']
@@ -430,6 +498,7 @@ def _validate_vmss_create_public_ip(namespace):
 
 
 def _validate_vm_create_nics(namespace):
+    from azure.cli.core.commands.client_factory import get_subscription_id
     nics_value = namespace.nics
     nics = []
 
@@ -590,6 +659,8 @@ def process_vm_create_namespace(namespace):
     _validate_vm_create_public_ip(namespace)
     _validate_vm_create_nics(namespace)
     _validate_vm_create_auth(namespace)
+    if namespace.secrets:
+        _validate_secrets(namespace.secrets, namespace.os_type)
 
 
 # endregion

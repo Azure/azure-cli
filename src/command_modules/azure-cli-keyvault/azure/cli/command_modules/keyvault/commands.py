@@ -108,3 +108,6 @@ cli_keyvault_data_plane_command('keyvault certificate issuer delete', convenienc
 cli_keyvault_data_plane_command('keyvault certificate issuer admin list', custom_path.format('list_certificate_issuer_admins'))
 cli_keyvault_data_plane_command('keyvault certificate issuer admin add', custom_path.format('add_certificate_issuer_admin'))
 cli_keyvault_data_plane_command('keyvault certificate issuer admin delete', custom_path.format('delete_certificate_issuer_admin'))
+
+# default policy document
+cli_keyvault_data_plane_command('keyvault certificate get-default-policy', custom_path.format('get_default_policy'))
