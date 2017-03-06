@@ -70,7 +70,7 @@ register_cli_argument('appservice web deployment slot', 'webapp', arg_type=name_
 register_cli_argument('appservice web deployment slot', 'auto_swap_slot', help='target slot to auto swap', default='production')
 register_cli_argument('appservice web deployment slot', 'disable', help='disable auto swap', action='store_true')
 register_cli_argument('appservice web deployment slot', 'target_slot', help="target slot to swap, default to 'production'")
-register_cli_argument('appservice web deployment slot create', 'configuration_source', help="source slot to clone configurations from. Use webapp's name to refer to the product slot")
+register_cli_argument('appservice web deployment slot create', 'configuration_source', help="source slot to clone configurations from. Use webapp's name to refer to the production slot")
 
 
 two_states_switch = ['true', 'false']
