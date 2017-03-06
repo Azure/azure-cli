@@ -57,7 +57,7 @@ def create_account(client, resource_group_name, account_name, location,  # pylin
                                               auto_storage=properties)
     if keyvault:
         vault = keyvault.split('Microsoft.KeyVault/vaults/')[-1]
-        url = 'https://{}{}'.format(vault, CLOUD.suffixes.keyvault_dns)
+        url = 'https://{}{}/'.format(vault, CLOUD.suffixes.keyvault_dns)
         parameters.key_vault_reference = {'id': keyvault, 'url': url}
         parameters.pool_allocation_mode = 'UserSubscription'
 
@@ -75,7 +75,7 @@ def update_account(client, resource_group_name, account_name,  # pylint:disable=
     parameters = BatchAccountUpdateParameters(tags=tags, auto_storage=properties)
     if keyvault:
         vault = keyvault.split('Microsoft.KeyVault/vaults/')[-1]
-        url = 'https://{}{}'.format(vault, CLOUD.suffixes.keyvault_dns)
+        url = 'https://{}{}/'.format(vault, CLOUD.suffixes.keyvault_dns)
         parameters.key_vault_reference = {'id': keyvault, 'url': url}
         parameters.pool_allocation_mode = 'UserSubscription'
 

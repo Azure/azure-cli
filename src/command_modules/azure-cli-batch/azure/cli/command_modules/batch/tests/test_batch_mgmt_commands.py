@@ -32,9 +32,12 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
         self.config_path = os.path.join(self.config_dir, CONFIG_FILE_NAME)
         self.resource_group = 'vcr_resource_group'
         self.account_name = 'clibatchtest1'
+        self.byos_account_name = 'clibatchtestuser1'
         self.location = 'brazilsouth'
+        self.byos_location = 'uksouth'
         self.storage_account_name = 'clibatchteststorage1'
         self.keyvault_name = 'clibatchtestkeyvault1'
+        self.object_id = 'f520d84c-3fd3-4cc8-88d4-2ed25b00d27a'
 
     def test_batch_account_mgmt(self):
         self.execute()
@@ -53,14 +56,17 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
         sid = result['id']
 
         # test create keyvault for use with BYOS account
-        keyvault = self.cmd('keyvault create -g {} -n {} -l {}'.
-                            format(rg, self.keyvault_name, loc),
-                            checks=[JMESPathCheck('name', kv),
-                                    JMESPathCheck('location', loc),
+        keyvault = self.cmd('keyvault create -g {} -n {} -l {} --enabled-for-deployment true '
+                            '--enabled-for-disk-encryption true --enabled-for-template-deployment'
+                            ' true'.format(rg, self.keyvault_name, self.byos_location),
+                            checks=[JMESPathCheck('name', self.keyvault_name),
+                                    JMESPathCheck('location', self.byos_location),
                                     JMESPathCheck('resourceGroup', rg),
                                     JMESPathCheck('type(properties.accessPolicies)', 'array'),
                                     JMESPathCheck('length(properties.accessPolicies)', 1),
                                     JMESPathCheck('properties.sku.name', 'standard')])
+        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions all '
+                 '--secret-permissions all'.format(rg, self.keyvault_name, self.object_id))
 
         # test create account with default set
         self.cmd('batch account create -g {} -n {} -l {}'.format(rg, name, loc), checks=[
@@ -69,8 +75,15 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('resourceGroup', rg)
         ])
 
-        self.cmd('batch account set -g {} -n {} --storage-account {} --keyvault {}'.
-                 format(rg, name, self.storage_account_name, self.keyvault_name),
+        # test create account with BYOS
+        self.cmd('batch account create -g {} -n {} -l {} --keyvault {}'.
+                 format(rg, self.byos_account_name, self.byos_location, self.keyvault_name),
+                 checks=[JMESPathCheck('name', self.byos_account_name),
+                         JMESPathCheck('location', self.byos_location),
+                         JMESPathCheck('resourceGroup', rg)])
+
+        self.cmd('batch account set -g {} -n {} --storage-account {}'.
+                 format(rg, name, self.storage_account_name),
                  checks=[JMESPathCheck('name', name),
                          JMESPathCheck('location', loc),
                          JMESPathCheck('resourceGroup', rg)])
@@ -110,6 +123,7 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
 
         # test batch account delete
         self.cmd('batch account delete -g {} -n {} --yes'.format(rg, name))
+        self.cmd('batch account delete -g {} -n {} --yes'.format(rg, self.byos_account_name))
         self.cmd('batch account list -g {}'.format(rg), checks=NoneCheck())
 
         self.cmd('batch location quotas show -l {}'.format(loc),
