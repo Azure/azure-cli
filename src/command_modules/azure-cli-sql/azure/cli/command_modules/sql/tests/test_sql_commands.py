@@ -395,7 +395,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # create replica in second server with min params
         # partner resouce group unspecified because s1.group == s2.group
-        self.cmd('sql db create-replica -g {} -s {} -n {} --partner-server {}'
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
                  .format(s1.group, s1.name, self.database_name,
                          s2.name),
                  checks=[
@@ -411,7 +411,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # create replica in third server with max params
         # --elastic-pool is untested
-        self.cmd('sql db create-replica -g {} -s {} -n {} --partner-server {}'
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
                  ' --partner-resource-group {} --partner-service-objective {}'
                  .format(s1.group, s1.name, self.database_name,
                          s3.name, s3.group, self.service_objective),
@@ -428,12 +428,12 @@ class SqlServerDbReplicaMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('resourceGroup', s3.group)])
 
         # list replica links on s1 - it should link to s2 and s3
-        self.cmd('sql db list-replica-links -g {} -s {} -n {}'
+        self.cmd('sql db replica list-links -g {} -s {} -n {}'
                  .format(s1.group, s1.name, self.database_name),
                  checks=[JMESPathCheck('length(@)', 2)])
 
         # list replica links on s3 - it should link only to s1
-        self.cmd('sql db list-replica-links -g {} -s {} -n {}'
+        self.cmd('sql db replica list-links -g {} -s {} -n {}'
                  .format(s3.group, s3.name, self.database_name),
                  checks=[
                      JMESPathCheck('length(@)', 1),
@@ -441,25 +441,25 @@ class SqlServerDbReplicaMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('[0].partnerRole', 'Primary')])
 
         # Failover to s3.
-        self.cmd('sql db set-primary-replica -g {} -s {} -n {}'
+        self.cmd('sql db replica set-primary -g {} -s {} -n {}'
                  .format(s3.group, s3.name, self.database_name),
                  checks=[NoneCheck()])
 
         # list replica links on s3 - it should link to s1 and s2
-        self.cmd('sql db list-replica-links -g {} -s {} -n {}'
+        self.cmd('sql db replica list-links -g {} -s {} -n {}'
                  .format(s3.group, s3.name, self.database_name),
                  checks=[JMESPathCheck('length(@)', 2)])
 
         # Stop replication from s3 to s2 twice. Second time should be no-op.
         for _ in range(2):
             # Delete link
-            self.cmd('sql db delete-replica-link -g {} -s {} -n {} --partner-resource-group {}'
+            self.cmd('sql db replica delete-link -g {} -s {} -n {} --partner-resource-group {}'
                      ' --partner-server {}'
                      .format(s3.group, s3.name, self.database_name, s2.group, s2.name),
                      checks=[NoneCheck()])
 
             # Verify link was deleted. s3 should still be the primary.
-            self.cmd('sql db list-replica-links -g {} -s {} -n {}'
+            self.cmd('sql db replica list-links -g {} -s {} -n {}'
                      .format(s3.group, s3.name, self.database_name),
                      checks=[
                          JMESPathCheck('length(@)', 1),
@@ -467,12 +467,12 @@ class SqlServerDbReplicaMgmtScenarioTest(ResourceGroupVCRTestBase):
                          JMESPathCheck('[0].partnerRole', 'Secondary')])
 
         # Failover to s3 again (should be no-op, it's already primary)
-        self.cmd('sql db set-primary-replica -g {} -s {} -n {} --allow-data-loss'
+        self.cmd('sql db replica set-primary -g {} -s {} -n {} --allow-data-loss'
                  .format(s3.group, s3.name, self.database_name),
                  checks=[NoneCheck()])
 
         # s3 should still be the primary.
-        self.cmd('sql db list-replica-links -g {} -s {} -n {}'
+        self.cmd('sql db replica list-links -g {} -s {} -n {}'
                  .format(s3.group, s3.name, self.database_name),
                  checks=[
                      JMESPathCheck('length(@)', 1),
@@ -480,7 +480,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ResourceGroupVCRTestBase):
                      JMESPathCheck('[0].partnerRole', 'Secondary')])
 
         # Force failover back to s1
-        self.cmd('sql db set-primary-replica -g {} -s {} -n {} --allow-data-loss'
+        self.cmd('sql db replica set-primary -g {} -s {} -n {} --allow-data-loss'
                  .format(s1.group, s1.name, self.database_name),
                  checks=[NoneCheck()])
 

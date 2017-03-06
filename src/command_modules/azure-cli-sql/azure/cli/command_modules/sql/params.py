@@ -129,7 +129,7 @@ with ParametersContext(command='sql db copy') as c:
     for i in sql_db_copy_ignored_params:
         c.ignore(i)
 
-with ParametersContext(command='sql db create-replica') as c:
+with ParametersContext(command='sql db replica create') as c:
     c.expand('parameters', Database)
 
     c.argument('elastic_pool_name',
@@ -183,7 +183,7 @@ with ParametersContext(command='sql db update') as c:
     c.argument('elastic_pool_name', help='The name of the elastic pool to move the database into.')
     c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
 
-with ParametersContext(command='sql db set-primary-replica') as c:
+with ParametersContext(command='sql db replica set-primary') as c:
     c.argument('database_name', help='Name of the database to fail over.')
     c.argument('server_name',
                help='Name of the server containing the secondary replica that will become'
@@ -194,7 +194,7 @@ with ParametersContext(command='sql db set-primary-replica') as c:
     c.argument('allow_data_loss',
                help='If specified, the failover operation will allow data loss.')
 
-with ParametersContext(command='sql db delete-replica-link') as c:
+with ParametersContext(command='sql db replica delete-link') as c:
     c.argument('partner_server_name',
                options_list=('--partner-server',),
                help='Name of the server that the other replica is in.')

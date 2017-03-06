@@ -17,7 +17,6 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
     with s.group('sql db') as c:
         c.custom_command('create', 'db_create')
         c.custom_command('copy', 'db_copy')
-        c.custom_command('create-replica', 'db_create_replica')
         c.custom_command('restore', 'db_restore')
         c.command('show', 'get')
         c.custom_command('list', 'db_list')
@@ -25,9 +24,12 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
         # c.command('show-usage', 'list_usages')
         c.command('delete', 'delete')
         c.generic_update_command('update', 'get', 'create_or_update', custom_func_name='db_update')
-        c.command('list-replica-links', 'list_replication_links')
-        c.custom_command('delete-replica-link', 'db_delete_replica_link')
-        c.custom_command('set-primary-replica', 'db_failover')
+
+    with s.group('sql db replica') as c:
+        c.custom_command('create', 'db_create_replica')
+        c.command('list-links', 'list_replication_links')
+        c.custom_command('delete-link', 'db_delete_replica_link')
+        c.custom_command('set-primary', 'db_failover')
 
     # Data Warehouse will not be included in the first batch of GA commands
     # with s.group('sql db data-warehouse') as c:
