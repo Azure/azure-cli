@@ -5,11 +5,12 @@
 import unittest
 import mock
 
-from azure.mgmt.web.models import SourceControl, HostNameBinding, Site
+from azure.mgmt.web.models import SourceControl, HostNameBinding, Site, SiteConfig
 from azure.mgmt.web import WebSiteManagementClient
 from azure.cli.core.adal_authentication import AdalAuthentication
 from azure.cli.command_modules.appservice.custom import (set_deployment_user,
-                                                         update_git_token, add_hostname)
+                                                         update_git_token, add_hostname,
+                                                         update_site_configs)
 
 # pylint: disable=line-too-long
 
@@ -72,6 +73,19 @@ class Test_Webapp_Mocked(unittest.TestCase):
 
         # assert
         self.assertEqual(result.name, domain)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_update_site_config(self, site_op_mock):
+        site_config = SiteConfig('antarctica')
+        site_op_mock.side_effect = [site_config, None]
+        # action
+        update_site_configs('myRG', 'myweb', java_version='1.8')
+        # assert
+        config_for_set = site_op_mock.call_args_list[1][0][4]
+        self.assertEqual(config_for_set.java_version, '1.8')
+        # point check some unrelated properties should stay at None
+        self.assertEqual(config_for_set.use32_bit_worker_process, None)
+        self.assertEqual(config_for_set.java_container, None)
 
 
 class FakedResponse(object):  # pylint: disable=too-few-public-methods
