@@ -244,7 +244,7 @@ def get_clouds():
                 setattr(c.suffixes, option.replace('suffix_', ''), config.get(section, option))
         if c.profile is None:
             # If profile isn't set, use latest
-            c.profile = 'latest'
+            c.profile = 'latest'  # pylint: disable=redefined-variable-type
         clouds.append(c)
     active_cloud_name = get_active_cloud_name()
     for c in clouds:
