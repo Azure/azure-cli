@@ -5,11 +5,12 @@
 import json
 
 from azure.cli.core.commands import register_cli_argument
-
 from azure.cli.core.cloud import get_clouds, get_custom_clouds, get_active_cloud_name
 
+from azure.cli.core.profiles import API_PROFILES
 
 # pylint: disable=line-too-long
+
 
 def get_cloud_name_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
     return [c.name for c in get_clouds()]
@@ -29,11 +30,19 @@ register_cli_argument('cloud show', 'cloud_name',
                       help='Name of a registered cloud.', default=active_cloud_name)
 register_cli_argument('cloud update', 'cloud_name',
                       help='Name of a registered cloud.', default=active_cloud_name)
+register_cli_argument('cloud list-profiles', 'cloud_name',
+                      help='Name of a registered cloud.', default=active_cloud_name)
+register_cli_argument('cloud list-profiles', 'show_all',
+                      help='Show all available profiles supported in the CLI.', action='store_true')
 
 register_cli_argument('cloud register', 'cloud_name', completer=None)
 
 register_cli_argument('cloud unregister', 'cloud_name',
                       completer=get_custom_cloud_name_completion_list)
+
+register_cli_argument('cloud', 'profile',
+                      help='Profile to use for this cloud',
+                      choices=list(API_PROFILES))
 
 register_cli_argument('cloud', 'cloud_config', options_list=('--cloud-config',),
                       help='JSON encoded cloud configuration. Use @{file} to load from a file.',

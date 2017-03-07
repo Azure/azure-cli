@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+from pprint import pformat
 from six.moves import configparser
 
 import azure.cli.core.azlogging as azlogging
@@ -66,6 +67,13 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
         self.active_directory_resource_id = active_directory_resource_id
         self.active_directory_graph_resource_id = active_directory_graph_resource_id
 
+    def has_endpoint_set(self, endpoint_name):
+        try:
+            getattr(self, endpoint_name)
+            return True
+        except Exception:  # pylint: disable=broad-except
+            return False
+
     def __getattribute__(self, name):
         val = object.__getattribute__(self, name)
         if val is None:
@@ -105,11 +113,22 @@ class Cloud(object):  # pylint: disable=too-few-public-methods
                  name,
                  endpoints=None,
                  suffixes=None,
+                 profile=None,
                  is_active=False):
         self.name = name
         self.endpoints = endpoints or CloudEndpoints()
         self.suffixes = suffixes or CloudSuffixes()
+        self.profile = profile
         self.is_active = is_active
+
+    def __str__(self):
+        o = {}
+        o['profile'] = self.profile
+        o['name'] = self.name
+        o['is_active'] = self.is_active
+        o['endpoints'] = vars(self.endpoints)
+        o['suffixes'] = vars(self.suffixes)
+        return pformat(o)
 
 
 AZURE_PUBLIC_CLOUD = Cloud(
@@ -224,10 +243,19 @@ def get_clouds():
     for section in config.sections():
         c = Cloud(section)
         for option in config.options(section):
+            if option == 'profile':
+                c.profile = config.get(section, option)
             if option.startswith('endpoint_'):
                 setattr(c.endpoints, option.replace('endpoint_', ''), config.get(section, option))
             elif option.startswith('suffix_'):
                 setattr(c.suffixes, option.replace('suffix_', ''), config.get(section, option))
+        if c.profile is None:
+            # If profile isn't set, use latest
+            c.profile = 'latest'  # pylint: disable=redefined-variable-type
+        if not c.endpoints.has_endpoint_set('management') and \
+                c.endpoints.has_endpoint_set('resource_manager'):
+            # If management endpoint not set, use resource manager endpoint
+            c.endpoints.management = c.endpoints.resource_manager
         clouds.append(c)
     active_cloud_name = get_active_cloud_name()
     for c in clouds:
@@ -313,6 +341,8 @@ def _save_cloud(cloud, overwrite=False):
     except configparser.DuplicateSectionError:
         if not overwrite:
             raise CloudAlreadyRegisteredException(cloud.name)
+    if cloud.profile:
+        config.set(cloud.name, 'profile', cloud.profile)
     for k, v in cloud.endpoints.__dict__.items():
         if v is not None:
             config.set(cloud.name, 'endpoint_{}'.format(k), v)
