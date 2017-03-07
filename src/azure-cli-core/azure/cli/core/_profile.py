@@ -9,7 +9,6 @@ import collections
 import errno
 import json
 import os.path
-from pprint import pformat
 from copy import deepcopy
 from enum import Enum
 
@@ -67,9 +66,7 @@ _AUTH_CTX_FACTORY = _authentication_context_factory
 
 CLOUD = get_active_cloud()
 
-logger.debug("Current active cloud '%s'", CLOUD.name)
-logger.debug(pformat(vars(CLOUD.endpoints)))
-logger.debug(pformat(vars(CLOUD.suffixes)))
+logger.debug(str(CLOUD))
 
 
 def get_authority_url(tenant=None):
