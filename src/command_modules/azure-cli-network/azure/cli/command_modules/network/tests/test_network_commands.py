@@ -1018,9 +1018,9 @@ class NetworkVNetPeeringScenarioTest(ResourceGroupVCRTestBase):
         # create supporting resources for gateway
         self.cmd('network public-ip create -g {} -n ip1'.format(rg))
         ip_id = self.cmd('network public-ip show -g {} -n ip1 --query id'.format(rg))
-        subnet_id = self.cmd('network vnet subnet show -g {} -n GatewaySubnet --vnet-name vnet2 --query id'.format(rg))
+        vnet_id = self.cmd('network vnet show -g {} -n vnet2 --query id'.format(rg))
         # create the gateway on vnet2
-        self.cmd('network vnet-gateway create -g {} -n gateway1 --public-ip-address {} --subnet-id {}'.format(rg, ip_id, subnet_id))
+        self.cmd('network vnet-gateway create -g {} -n gateway1 --public-ip-address {} --vnet {}'.format(rg, ip_id, vnet_id))
 
     def body(self):
         rg = self.resource_group
