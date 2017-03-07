@@ -12,6 +12,7 @@ from azure.cli.core.cloud import (Cloud,
                                   CloudEndpoints,
                                   CloudSuffixes,
                                   add_cloud,
+                                  get_clouds,
                                   get_custom_clouds,
                                   remove_cloud,
                                   get_active_cloud_name,
@@ -55,6 +56,33 @@ class TestCloud(unittest.TestCase):
                 remove_cloud(c.name)
             custom_clouds = get_custom_clouds()
             self.assertEqual(len(custom_clouds), 0)
+
+    def test_add_get_cloud_with_profile(self):
+        endpoint_rm = 'http://management.contoso.com'
+        endpoints = CloudEndpoints(resource_manager=endpoint_rm)
+        profile = '2017-01-01-test'
+        c = Cloud('MyOwnCloud', endpoints=endpoints, profile=profile)
+        with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
+                config_file:
+            add_cloud(c)
+            config = configparser.SafeConfigParser()
+            config.read(config_file)
+            self.assertTrue(c.name in config.sections())
+            self.assertEqual(config.get(c.name, 'endpoint_resource_manager'), endpoint_rm)
+            self.assertEqual(config.get(c.name, 'profile'), profile)
+            custom_clouds = get_custom_clouds()
+            self.assertEqual(len(custom_clouds), 1)
+            self.assertEqual(custom_clouds[0].name, c.name)
+            self.assertEqual(custom_clouds[0].endpoints.resource_manager,
+                             c.endpoints.resource_manager)
+            self.assertEqual(custom_clouds[0].profile,
+                             c.profile)
+
+    def test_get_default_latest_profile(self):
+        with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]):
+            clouds = get_clouds()
+            for c in clouds:
+                self.assertEqual(c.profile, 'latest')
 
     def test_get_active_cloud_name_default(self):
         expected = AZURE_PUBLIC_CLOUD.name

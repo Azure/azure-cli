@@ -39,6 +39,8 @@ def _build_cloud(cloud_name, cloud_config=None, cloud_args=None):
         cloud_args = cloud_config
     c = Cloud(cloud_name)
     for arg in cloud_args:
+        if arg == 'profile' and cloud_args[arg] is not None:
+            c.profile = cloud_args[arg]
         if arg.startswith('endpoint_') and cloud_args[arg] is not None:
             setattr(c.endpoints, arg.replace('endpoint_', ''), cloud_args[arg])
         elif arg.startswith('suffix_') and cloud_args[arg] is not None:
@@ -50,6 +52,7 @@ def _build_cloud(cloud_name, cloud_config=None, cloud_args=None):
 
 def register_cloud(cloud_name,
                    cloud_config=None,
+                   profile=None,
                    endpoint_management=None,
                    endpoint_resource_manager=None,
                    endpoint_sql_management=None,
@@ -72,6 +75,7 @@ def register_cloud(cloud_name,
 
 def modify_cloud(cloud_name=None,
                  cloud_config=None,
+                 profile=None,
                  endpoint_management=None,
                  endpoint_resource_manager=None,
                  endpoint_sql_management=None,
@@ -108,3 +112,14 @@ def set_cloud(cloud_name):
         switch_active_cloud(cloud_name)
     except CloudNotRegisteredException as e:
         raise CLIError(e)
+
+
+def list_profiles(cloud_name=None, show_all=False):
+    from azure.cli.core.profiles import API_PROFILES
+    if not cloud_name:
+        cloud_name = get_active_cloud_name()
+    if show_all:
+        return list(API_PROFILES)
+    else:
+        # TODO Query cloud endpoint to get supported profiles.
+        return list(API_PROFILES)
