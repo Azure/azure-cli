@@ -67,6 +67,13 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
         self.active_directory_resource_id = active_directory_resource_id
         self.active_directory_graph_resource_id = active_directory_graph_resource_id
 
+    def has_endpoint_set(self, endpoint_name):
+        try:
+            getattr(self, endpoint_name)
+            return True
+        except Exception:  # pylint: disable=broad-except
+            return False
+
     def __getattribute__(self, name):
         val = object.__getattribute__(self, name)
         if val is None:
@@ -245,7 +252,8 @@ def get_clouds():
         if c.profile is None:
             # If profile isn't set, use latest
             c.profile = 'latest'  # pylint: disable=redefined-variable-type
-        if not hasattr(c.endpoints, 'management') and hasattr(c.endpoints, 'resource_manager'):
+        if not c.endpoints.has_endpoint_set('management') and \
+                c.endpoints.has_endpoint_set('resource_manager'):
             # If management endpoint not set, use resource manager endpoint
             c.endpoints.management = c.endpoints.resource_manager
         clouds.append(c)
