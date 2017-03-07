@@ -5,12 +5,17 @@
 import unittest
 import mock
 
-from azure.mgmt.web.models import SourceControl, HostNameBinding, Site, SiteConfig
+from msrestazure.azure_exceptions import CloudError
+from azure.mgmt.web.models import (SourceControl, HostNameBinding, Site, SiteConfig,
+                                   HostNameSslState, SslState)
 from azure.mgmt.web import WebSiteManagementClient
 from azure.cli.core.adal_authentication import AdalAuthentication
+from azure.cli.core._util import CLIError
 from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_git_token, add_hostname,
-                                                         update_site_configs)
+                                                         update_site_configs,
+                                                         view_in_browser,
+                                                         sync_site_repo)
 
 # pylint: disable=line-too-long
 
@@ -87,6 +92,32 @@ class Test_Webapp_Mocked(unittest.TestCase):
         self.assertEqual(config_for_set.use32_bit_worker_process, None)
         self.assertEqual(config_for_set.java_container, None)
 
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_streaming_log', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._open_page_in_browser', autospec=True)
+    def test_browse_with_trace(self, webbrowser_mock, log_mock, site_op_mock):
+        site = Site('antarctica')
+        site.default_host_name = 'haha.com'
+        site.host_name_ssl_states = [HostNameSslState('does not matter',
+                                                      ssl_state=SslState.ip_based_enabled)]
+
+        site_op_mock.return_value = site
+        # action
+        view_in_browser('myRG', 'myweb', start_trace=True)
+        # assert
+        webbrowser_mock.assert_called_with('https://haha.com')
+        log_mock.assert_called_with('myRG', 'myweb', None, None)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_sync_repository_with_error(self, site_op_mock):
+        resp = FakedResponse(400)
+        setattr(resp, 'text', '{"Message": "nice error"}')
+        site_op_mock.side_effect = CloudError(resp, error='error1')
+        # action
+        with self.assertRaises(CLIError) as ex:
+            sync_site_repo('myRG', 'myweb')
+        # assert
+        self.assertEqual("nice error", str(ex.exception))
 
 class FakedResponse(object):  # pylint: disable=too-few-public-methods
     def __init__(self, status_code):

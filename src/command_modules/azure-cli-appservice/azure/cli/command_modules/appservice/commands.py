@@ -82,8 +82,7 @@ cli_generic_update_command(__name__, 'appservice plan update', 'azure.mgmt.web.o
 cli_command(__name__, 'appservice plan list', 'azure.cli.command_modules.appservice.custom#list_app_service_plans')
 cli_command(__name__, 'appservice plan show', 'azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.get', factory, exception_handler=empty_on_404)
 factory = lambda _: web_client_factory()
-cli_command(__name__, 'appservice list-locations', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.list_geo_regions',
-            factory)
+cli_command(__name__, 'appservice list-locations', 'azure.cli.command_modules.appservice.custom#list_locations')
 
 
 #Not for ignite release
