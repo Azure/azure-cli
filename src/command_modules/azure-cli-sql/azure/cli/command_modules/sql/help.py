@@ -29,11 +29,15 @@ helps['sql db create-replica'] = """
             """
 helps['sql db delete'] = """
             type: command
-            short-summary: Deletes a database.
+            short-summary: Deletes a database or data warehouse.
             """
 helps['sql db list'] = """
             type: command
-            short-summary: Lists all databases in a server, or all databases in an elastic pool.
+            short-summary: Lists all databases and data warehouses in a server, or all databases in an elastic pool.
+            """
+helps['sql db show'] = """
+            type: command
+            short-summary: Gets a database or data warehouse.
             """
 helps['sql db update'] = """
             type: command
@@ -65,7 +69,7 @@ helps['sql dw create'] = """
              """
 helps['sql dw delete'] = """
              type: command
-             short-summary: Deletes a data warehouse.
+             short-summary: Deletes a database or data warehouse.
              """
 helps['sql dw list'] = """
              type: command
@@ -73,7 +77,7 @@ helps['sql dw list'] = """
              """
 helps['sql dw show'] = """
              type: command
-             short-summary: Gets a data warehouse.
+             short-summary: Gets a database or data warehouse.
              """
 helps['sql dw update'] = """
              type: command
