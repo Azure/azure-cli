@@ -155,8 +155,9 @@ class StorageAccountPreparer(AbstractPreparer, RecordingProcessorMixin):
         return {self.parameter_name: name}
 
     def remove_resource(self, name, **kwargs):
-        group = self._get_resource_group(**kwargs)
-        execute('az storage account delete -n {} -g {} --yes'.format(name, group))
+        if not self.skip_delete:
+            group = self._get_resource_group(**kwargs)
+            execute('az storage account delete -n {} -g {} --yes'.format(name, group))
 
     def _get_resource_group(self, **kwargs):
         try:
