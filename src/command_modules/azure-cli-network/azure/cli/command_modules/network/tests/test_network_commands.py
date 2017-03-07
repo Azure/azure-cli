@@ -795,7 +795,7 @@ class NetworkNicConvenienceCommandsScenarioTest(ResourceGroupVCRTestBase):
         super(NetworkNicConvenienceCommandsScenarioTest, self).set_up()
         rg = self.resource_group
         vm = self.vm_name
-        self.cmd('vm create -g {} -n {} --image UbuntuLTS --admin-username admin1 --admin-password aBcD1234!@#$ --authentication-type password'.format(rg, vm))
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --admin-username myusername --admin-password aBcD1234!@#$ --authentication-type password'.format(rg, vm))
 
     def body(self):
         rg = self.resource_group
