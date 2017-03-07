@@ -9,6 +9,7 @@ from argcomplete.completers import FilesCompleter
 from azure.mgmt.compute.models import (CachingTypes,
                                        UpgradeMode)
 from azure.mgmt.storage.models import SkuName
+
 from azure.cli.core.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
 from azure.cli.core.commands.parameters import \
     (location_type, get_one_of_subscription_locations,
@@ -137,7 +138,7 @@ for scope in ['vm diagnostics', 'vmss diagnostics']:
 
 for scope in ['vm', 'vmss']:
     register_cli_argument(scope, 'no_auto_upgrade', action='store_true', help='by doing this, extension system will not pick the highest minor version for the specified version number, and will not auto update to the latest build/revision number on any scale set updates in future.')
-    register_cli_argument('{} create'.format(scope), 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing')
+    register_cli_argument('{} create'.format(scope), 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing', arg_group='Authentication')
 
 
 register_cli_argument('vm image list', 'image_location', location_type)
@@ -189,9 +190,8 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'os_disk_name', help='The name of the new VM OS disk.', arg_group='Storage')
     register_cli_argument(scope, 'os_type', help='Type of OS installed on a custom VHD. Do not use when specifying an URN or URN alias.', arg_group='Storage', **enum_choice_list(['windows', 'linux']))
     register_cli_argument(scope, 'storage_account', help="Only applicable when use with '--use-unmanaged-disk'. The name to use when creating a new storage account or referencing an existing one. If omitted, an appropriate storage account in the same resource group and location will be used, or a new one will be created.", arg_group='Storage')
-    register_cli_argument(scope, 'storage_caching', help='Storage caching type for the VM OS disk', arg_group='Storage', **enum_choice_list(['ReadWrite', 'ReadOnly']))
     register_cli_argument(scope, 'storage_sku', help='The sku of storage account to persist VM. By default, only Standard_LRS and Premium_LRS are allowed. Using with --use-unmanaged-disk, all are available.', arg_group='Storage', **enum_choice_list(SkuName))
-    register_cli_argument(scope, 'storage_container_name', help="Only applicable when use with '--use-unmanaged-disk'. Name of the storage container for the VM OS disk.", arg_group='Storage')
+    register_cli_argument(scope, 'storage_container_name', help="Only applicable when use with '--use-unmanaged-disk'. Name of the storage container for the VM OS disk. Default: vhds", arg_group='Storage')
     register_cli_argument(scope, 'os_publisher', ignore_type)
     register_cli_argument(scope, 'os_offer', ignore_type)
     register_cli_argument(scope, 'os_sku', ignore_type)
@@ -214,10 +214,12 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'public_ip_address', help='Name of the public IP address when creating one (default) or referencing an existing one. Can also reference an existing public IP by ID or specify "" for None.', arg_group='Network')
     register_cli_argument(scope, 'public_ip_address_allocation', help=None, arg_group='Network', **enum_choice_list(['dynamic', 'static']))
     register_cli_argument(scope, 'public_ip_address_dns_name', help='Globally unique DNS name for a newly created Public IP.', arg_group='Network')
+    register_cli_argument(scope, 'secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via \'@<file path>\' containing \'[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]\'', type=file_type, completer=FilesCompleter())
 
 register_cli_argument('vm create', 'vm_name', name_arg_type, id_part=None, help='Name of the virtual machine.', validator=process_vm_create_namespace)
+register_cli_argument('vm create', 'attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
 register_cli_argument('vm create', 'availability_set', help='Name or ID of an existing availability set to add the VM to. None by default.')
-register_cli_argument('vm create', 'managed_os_disk', options_list=('--attach-os-disk',), help='create VM by attaching to an existing managed OS disk', arg_group='Storage')
+register_cli_argument('vm create', 'storage_caching', help='Storage caching type for the VM OS disk. Default: ReadWrite.', arg_group='Storage', **enum_choice_list(['ReadWrite', 'ReadOnly']))
 
 register_cli_argument('vmss create', 'vmss_name', name_arg_type, id_part=None, help='Name of the virtual machine scale set.', validator=process_vmss_create_namespace)
 register_cli_argument('vmss create', 'load_balancer', help='Name to use when creating a new load balancer (default) or referencing an existing one. Can also reference an existing load balancer by ID or specify "" for none.', arg_group='Load Balancer')
@@ -228,6 +230,7 @@ register_cli_argument('vmss create', 'instance_count', help='Number of VMs in th
 register_cli_argument('vmss create', 'disable_overprovision', help='Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details).', action='store_true')
 register_cli_argument('vmss create', 'upgrade_policy_mode', help=None, **enum_choice_list(UpgradeMode))
 register_cli_argument('vmss create', 'vm_sku', help='Size of VMs in the scale set.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
+register_cli_argument('vmss create', 'storage_caching', help='Storage caching type for the VM OS disk. Default: ReadOnly.', arg_group='Storage', **enum_choice_list(['ReadWrite', 'ReadOnly']))
 
 register_cli_argument('vm encryption', 'volume_type', help='Type of volume that the encryption operation is performed on', **enum_choice_list(['DATA', 'OS', 'ALL']))
 register_cli_argument('vm encryption', 'force', action='store_true', help='continue with encryption operations regardless of the warnings')
@@ -269,3 +272,5 @@ for scope in ['disk', 'snapshot']:
     register_cli_argument(scope, 'source_snapshot', ignore_type)
     register_cli_argument(scope, 'size_gb', options_list=('--size-gb', '-z'), help='size in GB.')
     register_cli_argument(scope, 'duration_in_seconds', help='Time duration in seconds until the SAS access expires')
+
+register_cli_argument('vm format-secret', 'secrets', multi_ids_type, options_list=('--secrets', '-s'), help='Space separated list of Key Vault secret URIs. Perhaps, produced by \'az keyvault secret list-versions --vault-name vaultname -n cert1 --query "[?attributes.enabled].id" -o tsv\'')

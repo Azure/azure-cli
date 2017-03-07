@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from copy import deepcopy
 import requests
 from adal.adal_error import AdalError
 from azure.cli.core.prompting import prompt_pass, NoTTYException
@@ -85,8 +84,7 @@ def login(username=None, password=None, service_principal=None, tenant=None):
         raise CLIError(err)
     except requests.exceptions.ConnectionError as err:
         raise CLIError('Please ensure you have network connection. Error detail: ' + str(err))
-    # use deepcopy as we don't want to persist these changes to file.
-    all_subscriptions = deepcopy(subscriptions)
+    all_subscriptions = list(subscriptions)
     for sub in all_subscriptions:
         sub['cloudName'] = sub.pop('environmentName', None)
     return all_subscriptions

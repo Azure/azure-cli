@@ -14,7 +14,6 @@ from azure.cli.core._util import CLIError
 from azure.cli.core.commands.template_create import get_folded_parameter_validator
 from azure.cli.core.commands.validators import SPECIFIED_SENTINEL
 from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.cli.command_modules.network._client_factory import resource_client_factory
 
 # PARAMETER VALIDATORS
 
@@ -175,7 +174,7 @@ def validate_peering_type(namespace):
                 'missing required MicrosoftPeering parameter --advertised-public-prefixes')
 
 def validate_private_ip_address(namespace):
-    if namespace.private_ip_address:
+    if namespace.private_ip_address and hasattr(namespace, 'private_ip_address_allocation'):
         namespace.private_ip_address_allocation = 'static'
 
 def get_public_ip_validator(has_type_field=False, allow_none=False, allow_new=False,
@@ -439,39 +438,31 @@ def process_lb_frontend_ip_namespace(namespace):
 
 def process_local_gateway_create_namespace(namespace):
     ns = namespace
-    ns.use_bgp_settings = any([ns.asn or ns.bgp_peering_address or ns.peer_weight])
-    if ns.use_bgp_settings and (not ns.asn or not ns.bgp_peering_address):
+    validate_location(ns)
+    use_bgp_settings = any([ns.asn or ns.bgp_peering_address or ns.peer_weight])
+    if use_bgp_settings and (not ns.asn or not ns.bgp_peering_address):
         raise ValueError(
             'incorrect usage: --bgp-peering-address IP --asn ASN [--peer-weight WEIGHT]')
 
 def process_nic_create_namespace(namespace):
 
-    # process folded parameters
-    get_subnet_validator(has_type_field=True)(namespace)
-    get_public_ip_validator(has_type_field=True, allow_none=True, default_none=True)(namespace)
-    get_nsg_validator(has_type_field=True, allow_none=True, default_none=True)(namespace)
+    validate_location(namespace)
 
-    if namespace.internal_dns_name_label:
-        namespace.use_dns_settings = 'true'
+    # process folded parameters
+    get_subnet_validator(has_type_field=False)(namespace)
+    get_public_ip_validator(has_type_field=False, allow_none=True, default_none=True)(namespace)
+    get_nsg_validator(has_type_field=False, allow_none=True, default_none=True)(namespace)
+
 
 def process_public_ip_create_namespace(namespace):
-    if namespace.dns_name:
-        namespace.dns_name_type = 'new'
+    validate_location(namespace)
+
 
 def process_route_table_create_namespace(namespace):
     from azure.mgmt.network.models import RouteTable
-    namespace.parameters = RouteTable()
-
-    if namespace.location:
-        namespace.parameters.location = namespace.location
-    else:
-        resource_group = resource_client_factory().resource_groups.get(
-            namespace.resource_group_name)
-        namespace.parameters.location = resource_group.location # pylint: disable=no-member
-
+    validate_location(namespace)
     validate_tags(namespace)
-    if hasattr(namespace, 'tags'):
-        namespace.parameters.tags = namespace.tags
+    namespace.parameters = RouteTable(location=namespace.location, tags=namespace.tags)
 
 def process_tm_endpoint_create_namespace(namespace):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -529,13 +520,15 @@ def process_tm_endpoint_create_namespace(namespace):
 
 def process_vnet_create_namespace(namespace):
 
+    validate_location(namespace)
+
     if namespace.subnet_prefix and not namespace.subnet_name:
         raise ValueError('incorrect usage: --subnet-name NAME [--subnet-prefix PREFIX]')
 
-    namespace.create_subnet = bool(namespace.subnet_name)
-
-    if namespace.create_subnet and not namespace.subnet_prefix:
-        prefix_components = namespace.virtual_network_prefix.split('/', 1)
+    if namespace.subnet_name and not namespace.subnet_prefix:
+        if isinstance(namespace.vnet_prefixes, str):
+            namespace.vnet_prefixes = [namespace.vnet_prefixes]
+        prefix_components = namespace.vnet_prefixes[0].split('/', 1)
         address = prefix_components[0]
         bit_mask = int(prefix_components[1])
         subnet_mask = 24 if bit_mask < 24 else bit_mask
@@ -543,9 +536,9 @@ def process_vnet_create_namespace(namespace):
 
 def process_vnet_gateway_create_namespace(namespace):
     ns = namespace
-    ns.enable_bgp = any([ns.asn or ns.bgp_peering_address or ns.peer_weight])
-    ns.create_client_configuration = any(ns.address_prefixes or [])
-    if ns.enable_bgp and not ns.asn:
+    validate_location(ns)
+    enable_bgp = any([ns.asn, ns.bgp_peering_address, ns.peer_weight])
+    if enable_bgp and not ns.asn:
         raise ValueError(
             'incorrect usage: --asn ASN [--peer-weight WEIGHT --bgp-peering-address IP ]')
 

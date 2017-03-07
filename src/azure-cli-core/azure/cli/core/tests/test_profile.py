@@ -157,13 +157,11 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
                                                      False)
         profile._set_subscriptions(consolidated)
 
-        subscription1 = storage_mock['subscriptions'][0]
-        subscription2 = storage_mock['subscriptions'][1]
-        self.assertTrue(subscription2['isDefault'])
+        self.assertTrue(storage_mock['subscriptions'][1]['isDefault'])
 
-        profile.set_active_subscription(subscription1['id'])
-        self.assertFalse(subscription2['isDefault'])
-        self.assertTrue(subscription1['isDefault'])
+        profile.set_active_subscription(storage_mock['subscriptions'][0]['id'])
+        self.assertFalse(storage_mock['subscriptions'][1]['isDefault'])
+        self.assertTrue(storage_mock['subscriptions'][0]['isDefault'])
 
     def test_get_subscription(self):
         storage_mock = {'subscriptions': None}
@@ -375,7 +373,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
                                     lambda _: mock_arm_client)
         mgmt_resource = 'https://management.core.windows.net/'
         # action
-        subs = finder.find_from_user_account(self.user1, 'bar', mgmt_resource)
+        subs = finder.find_from_user_account(self.user1, 'bar', None, mgmt_resource)
 
         # assert
         self.assertEqual([self.subscription1], subs)
@@ -383,6 +381,24 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
             mgmt_resource, self.user1, 'bar', mock.ANY)
         mock_auth_context.acquire_token.assert_called_once_with(
             mgmt_resource, self.user1, mock.ANY)
+
+    @mock.patch('adal.AuthenticationContext', autospec=True)
+    def test_find_subscriptions_from_particular_tenent(self, mock_auth_context):
+        def just_raise(ex):
+            raise ex
+
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.tenants.list.side_effect = lambda: just_raise(
+            ValueError("'tenants.list' should not occur"))
+        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        finder = SubscriptionFinder(lambda _, _2: mock_auth_context,
+                                    None,
+                                    lambda _: mock_arm_client)
+        # action
+        subs = finder.find_from_user_account(self.user1, 'bar', 'NiceTenant', 'http://someresource')
+
+        # assert
+        self.assertEqual([self.subscription1], subs)
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_find_subscriptions_through_interactive_flow(self, mock_auth_context):
@@ -397,7 +413,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
                                     lambda _: mock_arm_client)
         mgmt_resource = 'https://management.core.windows.net/'
         # action
-        subs = finder.find_through_interactive_flow(mgmt_resource)
+        subs = finder.find_through_interactive_flow(None, mgmt_resource)
 
         # assert
         self.assertEqual([self.subscription1], subs)
@@ -407,6 +423,24 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
             mgmt_resource, test_nonsense_code, mock.ANY)
         mock_auth_context.acquire_token.assert_called_once_with(
             mgmt_resource, self.user1, mock.ANY)
+
+    @mock.patch('adal.AuthenticationContext', autospec=True)
+    def test_find_subscriptions_interactive_from_particular_tenent(self, mock_auth_context):
+        def just_raise(ex):
+            raise ex
+
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.tenants.list.side_effect = lambda: just_raise(
+            ValueError("'tenants.list' should not occur"))
+        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        finder = SubscriptionFinder(lambda _, _2: mock_auth_context,
+                                    None,
+                                    lambda _: mock_arm_client)
+        # action
+        subs = finder.find_through_interactive_flow('NiceTenant', 'http://someresource')
+
+        # assert
+        self.assertEqual([self.subscription1], subs)
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_find_subscriptions_from_service_principal_id(self, mock_auth_context):

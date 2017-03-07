@@ -20,28 +20,21 @@ def run_tests(modules, parallel, run_live):
     # create test results folder
     test_results_folder = get_test_results_dir(with_timestamp=True, prefix='tests')
 
-    # get test runner
-    run_nose = get_nose_runner(test_results_folder, xunit_report=True, exclude_integration=True,
-                               parallel=parallel)
-
     # set environment variable
     if run_live:
         os.environ['AZURE_CLI_TEST_RUN_LIVE'] = 'True'
 
+    # get test runner
+    run_nose = get_nose_runner(test_results_folder, xunit_report=True, exclude_integration=True,
+                               parallel=parallel, process_timeout=3600 if run_live else 600)
+
     # run tests
-    passed = True
-    module_results = []
-    for name, _, test_path in modules:
-        result, start, end, _ = run_nose(name, test_path)
-        passed &= result
-        record = (name, start.strftime('%H:%M:%D'), str((end - start).total_seconds()),
-                  'Pass' if result else 'Fail')
+    test_folders = [test_path for _, _, test_path in modules]
+    result, test_result = run_nose(test_folders)
 
-        module_results.append(record)
+    print('Test report: {}'.format(test_result))
 
-    print_records(module_results, title='test results')
-
-    return passed
+    return result
 
 
 if __name__ == '__main__':

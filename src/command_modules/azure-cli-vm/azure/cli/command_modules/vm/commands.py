@@ -59,8 +59,8 @@ def transform_vm_create_output(result):
                             ('macAddress', result.mac_addresses),
                             ('location', result.location)])
     except AttributeError:
-        # ClientRawResponse (when using --no-wait) will not have this info
-        return None
+        from msrest.pipeline import ClientRawResponse
+        return None if isinstance(result, ClientRawResponse) else result
 
 
 def transform_vm_list(vm_list):
@@ -100,6 +100,7 @@ cli_command(__name__, 'vm list', custom_path.format('list_vm'), table_transforme
 cli_command(__name__, 'vm resize', custom_path.format('resize_vm'))
 cli_command(__name__, 'vm capture', custom_path.format('capture_vm'))
 cli_command(__name__, 'vm open-port', custom_path.format('vm_open_port'))
+cli_command(__name__, 'vm format-secret', custom_path.format('get_vm_format_secret'))
 cli_generic_update_command(__name__, 'vm update',
                            mgmt_path.format(op_var, op_class, 'get'),
                            mgmt_path.format(op_var, op_class, 'create_or_update'),

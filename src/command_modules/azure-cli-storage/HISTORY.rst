@@ -3,6 +3,16 @@
 Release History
 ===============
 
+2.0.1 (2017-03-02)
+++++++++++++++++++
+* Fix issue with storage account custom domain setting and updating. (#2346)
+* Fix regression in storage copy across accounts
+
+2.0.0 (2017-02-27)
+++++++++++++++++++
+
+* GA release.
+
 0.1.2rc2 (2017-02-22)
 +++++++++++++++++++++
 
