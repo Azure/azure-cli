@@ -6,14 +6,14 @@
 
 class CliTestError(Exception):
     def __init__(self, error_message):
-        super(CliTestError, self).__init__(error_message)
+        message = 'An error caused by the CLI test harness failed the test: {}'
+        super(CliTestError, self).__init__(message.format(error_message))
 
 
 class CliExecutionError(Exception):
     def __init__(self, exception):
         self.exception = exception
-        message = 'An exception thrown during CLI execution indicates the command will fail. The ' \
-                  'exception was designed to be swallowed. Exception: [{}] {}.'
+        message = 'The CLI throws exception {} during execution and fails the command.'
         super(CliExecutionError, self).__init__(message.format(exception.__class__.__name__,
                                                                exception))
 
