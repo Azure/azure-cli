@@ -24,6 +24,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    'azure-cli-core',
     'azure-cli',
     'jmespath',
     'mock',
