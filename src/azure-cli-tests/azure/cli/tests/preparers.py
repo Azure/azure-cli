@@ -119,9 +119,9 @@ class RecordingProcessorMixin(RecordingProcessor):
 # Resource Group Preparer and its shorthand decorator
 
 class ResourceGroupPreparer(AbstractPreparer, RecordingProcessorMixin):
-    def __init__(self, parameter_name='resource_group',
+    def __init__(self, name_prefix='clitest.rg', parameter_name='resource_group',
                  parameter_name_for_location='resource_group_location', location='westus'):
-        super(ResourceGroupPreparer, self).__init__('clitest.rg.', 90)
+        super(ResourceGroupPreparer, self).__init__(name_prefix, 90)
         self.location = location
         self.parameter_name = parameter_name
         self.parameter_name_for_location = parameter_name_for_location
@@ -138,10 +138,10 @@ class ResourceGroupPreparer(AbstractPreparer, RecordingProcessorMixin):
 # Storage Account Preparer and its shorthand decorator
 
 class StorageAccountPreparer(AbstractPreparer, RecordingProcessorMixin):
-    def __init__(self, sku='Standard_LRS', location='westus',
+    def __init__(self, name_prefix='clitest', sku='Standard_LRS', location='westus',
                  parameter_name='storage_account',
                  resource_group_parameter_name='resource_group', skip_delete=True):
-        super(StorageAccountPreparer, self).__init__('clitest', 24)
+        super(StorageAccountPreparer, self).__init__(name_prefix, 24)
         self.location = location
         self.sku = sku
         self.resource_group_parameter_name = resource_group_parameter_name
