@@ -26,12 +26,7 @@ def get_storage_service_client():
 def get_acr_service_client():
     '''Returns the client for managing container registries.
     '''
-    customized_api_version = get_acr_api_version()
-    if customized_api_version:
-        return get_mgmt_service_client(ContainerRegistryManagementClient,
-                                       api_version=customized_api_version)
-    else:
-        return get_mgmt_service_client(ContainerRegistryManagementClient)
+    return get_mgmt_service_client(ContainerRegistryManagementClient)
 
 def get_acr_api_version():
     '''Returns the api version for container registry

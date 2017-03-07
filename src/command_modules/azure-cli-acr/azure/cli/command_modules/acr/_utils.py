@@ -70,7 +70,7 @@ def get_registry_by_name(registry_name, resource_group_name=None):
 
     client = get_acr_service_client().registries
 
-    return client.get_properties(resource_group_name, registry_name), resource_group_name
+    return client.get(resource_group_name, registry_name), resource_group_name
 
 def get_access_key_by_storage_account_name(storage_account_name, resource_group_name=None):
     '''Returns access key for the storage account.
@@ -81,87 +81,123 @@ def get_access_key_by_storage_account_name(storage_account_name, resource_group_
         resource_group_name = get_resource_group_name_by_storage_account_name(storage_account_name)
 
     client = get_storage_service_client().storage_accounts
-    storage_account = client.get_properties(resource_group_name, storage_account_name)
-
-    from azure.mgmt.storage.models import SkuTier
-
-    if storage_account.sku.tier == SkuTier.premium: #pylint: disable=no-member
-        raise CLIError('Premium storage account {} is currently not supported. ' \
-                       'Please use standard storage account.'.format(storage_account_name))
 
     return client.list_keys(resource_group_name, storage_account_name).keys[0].value #pylint: disable=no-member
 
-def arm_deploy_template(resource_group_name,
-                        registry_name,
-                        location,
-                        storage_account_name,
-                        admin_user_enabled):
+def arm_deploy_template_new_storage(resource_group_name, #pylint: disable=too-many-arguments
+                                    registry_name,
+                                    location,
+                                    sku,
+                                    storage_account_name,
+                                    admin_user_enabled,
+                                    deployment_name=None):
     '''Deploys ARM template to create a container registry with a new storage account.
     :param str resource_group_name: The name of resource group
     :param str registry_name: The name of container registry
     :param str location: The name of location
+    :param str sku: The SKU of the container registry
     :param str storage_account_name: The name of storage account
     :param bool admin_user_enabled: Enable admin user
+    :param str deployment_name: The name of the deployment
     '''
     from azure.mgmt.resource.resources.models import DeploymentProperties
     from azure.cli.core._util import get_file_json
     import os
 
-    parameters = _parameters(registry_name, location, storage_account_name, admin_user_enabled)
+    parameters = _parameters(
+        registry_name=registry_name,
+        location=location,
+        sku=sku,
+        admin_user_enabled=admin_user_enabled,
+        storage_account_name=storage_account_name)
 
     file_path = os.path.join(os.path.dirname(__file__), 'template.json')
     template = get_file_json(file_path)
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
 
     return _arm_deploy_template(
-        get_arm_service_client().deployments, resource_group_name, properties)
+        get_arm_service_client().deployments, resource_group_name, deployment_name, properties)
+
+def arm_deploy_template_existing_storage(resource_group_name, #pylint: disable=too-many-arguments
+                                         registry_name,
+                                         location,
+                                         sku,
+                                         storage_account_name,
+                                         admin_user_enabled,
+                                         deployment_name=None):
+    '''Deploys ARM template to create a container registry with an existing storage account.
+    :param str resource_group_name: The name of resource group
+    :param str registry_name: The name of container registry
+    :param str location: The name of location
+    :param str sku: The SKU of the container registry
+    :param str storage_account_name: The name of storage account
+    :param bool admin_user_enabled: Enable admin user
+    :param str deployment_name: The name of the deployment
+    '''
+    from azure.mgmt.resource.resources.models import DeploymentProperties
+    from azure.cli.core._util import get_file_json
+    import os
+
+    storage_account_resource_group = \
+    get_resource_group_name_by_storage_account_name(storage_account_name)
+
+    parameters = _parameters(
+        registry_name=registry_name,
+        location=location,
+        sku=sku,
+        admin_user_enabled=admin_user_enabled,
+        storage_account_name=storage_account_name,
+        storage_account_resource_group=storage_account_resource_group)
+
+    file_path = os.path.join(os.path.dirname(__file__), 'template_existing_storage.json')
+    template = get_file_json(file_path)
+    properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
+
+    return _arm_deploy_template(
+        get_arm_service_client().deployments, resource_group_name, deployment_name, properties)
 
 def _arm_deploy_template(deployments_client,
                          resource_group_name,
-                         properties,
-                         index=0):
+                         deployment_name,
+                         properties):
     '''Deploys ARM template to create a container registry.
     :param obj deployments_client: ARM deployments service client
     :param str resource_group_name: The name of resource group
+    :param str deployment_name: The name of the deployment
     :param DeploymentProperties properties: The properties of a deployment
-    :param int index: The index added to deployment name to avoid conflict
     '''
-    if index == 0:
-        deployment_name = ACR_RESOURCE_PROVIDER
-    elif index > 9: # Just a number to avoid infinite loops
-        raise CLIError(
-            'The resource group {} has too many deployments'.format(resource_group_name))
-    else:
-        deployment_name = ACR_RESOURCE_PROVIDER + '_' + str(index)
+    if deployment_name is None:
+        import random
+        deployment_name = '{0}_{1}'.format(ACR_RESOURCE_PROVIDER, random.randint(100, 800))
 
-    try:
-        deployments_client.validate(
-            resource_group_name, deployment_name, properties)
-        return deployments_client.create_or_update(
-            resource_group_name, deployment_name, properties)
-    except: #pylint: disable=bare-except
-        return _arm_deploy_template(
-            deployments_client, resource_group_name, properties, index + 1)
+    return deployments_client.create_or_update(resource_group_name, deployment_name, properties)
 
-def _parameters(registry_name,
+def _parameters(registry_name, #pylint: disable=too-many-arguments
                 location,
+                sku,
+                admin_user_enabled,
                 storage_account_name,
-                admin_user_enabled):
+                storage_account_resource_group=None):
     '''Returns a dict of deployment parameters.
     :param str registry_name: The name of container registry
     :param str location: The name of location
-    :param str storage_account_name: The name of storage account
+    :param str sku: The SKU of the container registry
     :param bool admin_user_enabled: Enable admin user
+    :param str storage_account_name: The name of storage account
+    :param str storage_account_resource_group: The resource group of storage account
     '''
     parameters = {
         'registryName': {'value': registry_name},
         'registryLocation': {'value': location},
-        'storageAccountName': {'value': storage_account_name},
+        'registrySku': {'value': sku},
         'adminUserEnabled': {'value': admin_user_enabled},
+        'storageAccountName': {'value': storage_account_name}
     }
     customized_api_version = get_acr_api_version()
     if customized_api_version:
         parameters['registryApiVersion'] = {'value': customized_api_version}
+    if storage_account_resource_group:
+        parameters['storageAccountResourceGroup'] = {'value': storage_account_resource_group}
     return parameters
 
 def random_storage_account_name(registry_name):
