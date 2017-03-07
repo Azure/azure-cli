@@ -25,9 +25,8 @@ class AbstractPreparer(object):
         @mark_preparer
         def _preparer_wrapper(test_class_instance, **kwargs):
             if not isinstance(test_class_instance, ScenarioTest):
-                raise CliTestError('Decorator use_resource_group can be only used on the '
-                                   'methods of class derived from {}'
-                                   .format(ScenarioTest.__name__))
+                raise CliTestError('The preparer decorator can be only used on the methods of '
+                                   'class derived from {}'.format(ScenarioTest.__name__))
             self.test_class_instance = test_class_instance
 
             if test_class_instance.in_recording:
@@ -163,9 +162,10 @@ class StorageAccountPreparer(AbstractPreparer, RecordingProcessorMixin):
         try:
             return kwargs.get(self.resource_group_parameter_name)
         except KeyError:
-            raise CliTestError('Storage account requires a resource group. Please decorator '
-                               'use_resource_group and add parameter {} to the test method'
-                               .format(self.resource_group_parameter_name))
+            raise CliTestError('To create a storage account a resource group is required. Please '
+                               'add decorator @{} in front of this storage account preparer.'
+                               .format(ResourceGroupPreparer.__name__,
+                                       self.resource_group_parameter_name))
 
 
 # Utility
