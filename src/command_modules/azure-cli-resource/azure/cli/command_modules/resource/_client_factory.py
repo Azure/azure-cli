@@ -5,28 +5,28 @@
 
 def _resource_client_factory(**_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.resource.resources import ResourceManagementClient
-    return get_mgmt_service_client(ResourceManagementClient)
+    from azure.cli.core.profiles.shared import ResourceType
+    return get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
 
 def _resource_feature_client_factory(**_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.resource.features  import FeatureClient
-    return get_mgmt_service_client(FeatureClient)
+    from azure.cli.core.profiles.shared import ResourceType
+    return get_mgmt_service_client(ResourceType.MGMT_RESOURCE_FEATURES)
 
 def _resource_policy_client_factory(**_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.resource.policy import PolicyClient
-    return get_mgmt_service_client(PolicyClient)
+    from azure.cli.core.profiles.shared import ResourceType
+    return get_mgmt_service_client(ResourceType.MGMT_RESOURCE_POLICY)
 
 def _resource_lock_client_factory(**_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.resource.locks import ManagementLockClient
-    return get_mgmt_service_client(ManagementLockClient)
+    from azure.cli.core.profiles.shared import ResourceType
+    return get_mgmt_service_client(ResourceType.MGMT_RESOURCE_LOCKS)
 
 def _resource_links_client_factory(**_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.resource.links import ManagementLinkClient
-    return get_mgmt_service_client(ManagementLinkClient)
+    from azure.cli.core.profiles.shared import ResourceType
+    return get_mgmt_service_client(ResourceType.MGMT_RESOURCE_LINKS)
 
 def cf_resource_groups(_):
     return _resource_client_factory().resource_groups

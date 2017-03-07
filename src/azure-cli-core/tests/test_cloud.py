@@ -65,7 +65,7 @@ class TestCloud(unittest.TestCase):
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
                 config_file:
             add_cloud(c)
-            config = configparser.SafeConfigParser()
+            config = get_config_parser()
             config.read(config_file)
             self.assertTrue(c.name in config.sections())
             self.assertEqual(config.get(c.name, 'endpoint_resource_manager'), endpoint_rm)

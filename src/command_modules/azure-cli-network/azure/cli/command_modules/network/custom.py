@@ -111,7 +111,7 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
                                subnet='default', subnet_address_prefix='10.0.0.0/24',
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                                public_ip_address_type=None, subnet_type=None, validate=False):
-    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
     from azure.cli.core.util import random_string
     from azure.cli.command_modules.network._template_builder import \
@@ -519,7 +519,7 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
                          virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                          public_ip_address_type=None, subnet_type=None, validate=False,
                          no_wait=False):
-    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
     from azure.cli.core.util import random_string
     from azure.cli.command_modules.network._template_builder import \
@@ -1171,7 +1171,7 @@ def create_vpn_connection(client, resource_group_name, connection_name, vnet_gat
     :param bool no_wait: Do not wait for the long running operation to finish.
     :param bool validate: Display and validate the ARM template but do not create any resources.
     """
-    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
     from azure.cli.core.util import random_string
     from azure.cli.command_modules.network._template_builder import \

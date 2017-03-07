@@ -9,7 +9,7 @@ from argcomplete.completers import FilesCompleter
 
 from azure.mgmt.network.models import \
     (IPAllocationMethod, RouteNextHopType)
-from azure.mgmt.network.models.network_management_client_enums import \
+from azure.mgmt.network.models import \
     (ApplicationGatewaySkuName, ApplicationGatewayCookieBasedAffinity,
      ApplicationGatewayFirewallMode, ApplicationGatewayProtocol,
      ApplicationGatewayRequestRoutingRuleType, ExpressRouteCircuitSkuFamily,

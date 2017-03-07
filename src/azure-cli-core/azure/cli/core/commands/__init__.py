@@ -334,9 +334,10 @@ def _patch_mgmt_operation(operation):
                       azure.mgmt.storage.v2016_12_01.operations.storage_accounts_operations
     """
     for rt in ResourceType:
-        if operation.startswith(rt.sdk_module):
-            return operation.replace(rt.sdk_module,
-                                     rt.sdk_module + '.v' + get_api_version(rt).replace('-', '_'))
+        if operation.startswith(rt.operations_path):
+            return operation.replace(rt.operations_path,
+                                     rt.operations_path + '.v' +
+                                     get_api_version(rt).replace('-', '_'))
     return operation
 
 
