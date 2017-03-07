@@ -94,6 +94,7 @@ setup(
         'azure.cli.core',
         'azure.cli.core.commands',
         'azure.cli.core.extensions',
+        'azure.cli.core.profiles',
     ],
     install_requires=DEPENDENCIES
 )
