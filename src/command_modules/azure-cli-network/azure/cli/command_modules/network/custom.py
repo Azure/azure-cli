@@ -8,16 +8,6 @@ from collections import Counter, OrderedDict
 from msrestazure.azure_exceptions import CloudError
 
 # pylint: disable=no-self-use,too-many-arguments,no-member,too-many-lines
-from azure.mgmt.network.models import \
-    (Subnet, SecurityRule, PublicIPAddress, NetworkSecurityGroup, InboundNatRule, InboundNatPool,
-     FrontendIPConfiguration, BackendAddressPool, Probe, LoadBalancingRule,
-     NetworkInterfaceIPConfiguration, Route, VpnClientRootCertificate, VpnClientConfiguration,
-     AddressSpace, VpnClientRevokedCertificate, SubResource, VirtualNetworkPeering,
-     ApplicationGatewayFirewallMode, SecurityRuleAccess, SecurityRuleDirection,
-     SecurityRuleProtocol, IPAllocationMethod, IPVersion,
-     ExpressRouteCircuitSkuTier, ExpressRouteCircuitSkuFamily,
-     VirtualNetworkGatewayType, VirtualNetworkGatewaySkuName, VpnType, ApplicationGatewaySkuName)
-
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -33,6 +23,8 @@ from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CnameRecord, 
 
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
+from azure.cli.core.profiles.shared import ResourceType
+from azure.cli.core.profiles import get_versioned_models, get_api_version
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -41,6 +33,37 @@ def _log_pprint_template(template):
     logger.info('==== BEGIN TEMPLATE ====')
     logger.info(json.dumps(template, indent=2))
     logger.info('==== END TEMPLATE ====')
+
+VirtualNetworkPeering, ApplicationGatewayFirewallMode, \
+    ApplicationGatewaySkuName, IPVersion = get_versioned_models(
+        ResourceType.MGMT_NETWORK,
+        'VirtualNetworkPeering', 'ApplicationGatewayFirewallMode',
+        'ApplicationGatewaySkuName', 'IPVersion')
+
+PublicIPAddress, PublicIPAddressDnsSettings, VirtualNetwork, DhcpOptions, \
+    AddressSpace, Subnet, NetworkSecurityGroup, NetworkInterfaceIPConfiguration, \
+    InboundNatPool, InboundNatRule, SubResource = get_versioned_models(
+        ResourceType.MGMT_NETWORK,
+        'PublicIPAddress', 'PublicIPAddressDnsSettings',
+        'VirtualNetwork', 'DhcpOptions', 'AddressSpace',
+        'Subnet', 'NetworkSecurityGroup', 'NetworkInterfaceIPConfiguration',
+        'InboundNatPool', 'InboundNatRule', 'SubResource')
+
+BackendAddressPool, LoadBalancingRule, VirtualNetworkGatewayType, \
+    VirtualNetworkGatewaySkuName, SecurityRule, FrontendIPConfiguration, \
+    Route, VpnClientRootCertificate, SecurityRuleAccess = get_versioned_models(
+        ResourceType.MGMT_NETWORK,
+        'BackendAddressPool', 'LoadBalancingRule', 'VirtualNetworkGatewayType',
+        'VirtualNetworkGatewaySkuName', 'SecurityRule', 'FrontendIPConfiguration',
+        'Route', 'VpnClientRootCertificate', 'SecurityRuleAccess')
+
+SecurityRuleDirection, Probe, VpnClientConfiguration, VpnClientRevokedCertificate, \
+    SecurityRuleProtocol, IPAllocationMethod, ExpressRouteCircuitSkuTier, \
+    ExpressRouteCircuitSkuFamily, VpnType = get_versioned_models(
+        ResourceType.MGMT_NETWORK,
+        'SecurityRuleDirection', 'Probe', 'VpnClientConfiguration',
+        'VpnClientRevokedCertificate', 'SecurityRuleProtocol', 'IPAllocationMethod',
+        'ExpressRouteCircuitSkuTier', 'ExpressRouteCircuitSkuFamily', 'VpnType')
 
 
 def _upsert(parent, collection_name, obj_to_add, key_name):
@@ -110,13 +133,14 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
                                subnet='default', subnet_address_prefix='10.0.0.0/24',
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                                public_ip_address_type=None, subnet_type=None, validate=False):
-    from azure.mgmt.resource.resources import ResourceManagementClient
-    from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
+    from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.util import random_string
     from azure.cli.command_modules.network._template_builder import \
         (ArmTemplateBuilder, build_application_gateway_resource, build_public_ip_resource,
          build_vnet_resource)
 
+    DeploymentProperties = get_versioned_models(ResourceType.MGMT_RESOURCE_RESOURCES,
+                                                'DeploymentProperties')
     tags = tags or {}
     sku_tier = sku.split('_', 1)[0]
     http_listener_protocol = 'https' if cert_data else 'http'
@@ -171,7 +195,7 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
 
     # deploy ARM template
     deployment_name = 'ag_deploy_' + random_string(32)
-    client = get_mgmt_service_client(ResourceManagementClient).deployments
+    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     if validate:
         _log_pprint_template(template)
@@ -192,7 +216,8 @@ def update_application_gateway(instance, sku=None, capacity=None, tags=None):
 
 def create_ag_authentication_certificate(resource_group_name, application_gateway_name, item_name,
                                          cert_data, no_wait=False):
-    from azure.mgmt.network.models import ApplicationGatewayAuthenticationCertificate as AuthCert
+    AuthCert = get_versioned_models(ResourceType.MGMT_NETWORK,
+                                    'ApplicationGatewayAuthenticationCertificate')
     ncf = _network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     new_cert = AuthCert(data=cert_data, name=item_name)
@@ -205,7 +230,9 @@ def update_ag_authentication_certificate(instance, parent, item_name, cert_data)
 
 def create_ag_backend_address_pool(resource_group_name, application_gateway_name, item_name,
                                    servers, no_wait=False):
-    from azure.mgmt.network.models import ApplicationGatewayBackendAddressPool
+    ApplicationGatewayBackendAddressPool = get_versioned_models(
+        ResourceType.MGMT_NETWORK,
+        'ApplicationGatewayBackendAddressPool')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_pool = ApplicationGatewayBackendAddressPool(name=item_name, backend_addresses=servers)
@@ -222,7 +249,9 @@ def create_ag_frontend_ip_configuration(resource_group_name, application_gateway
                                         public_ip_address=None, subnet=None,
                                         virtual_network_name=None, private_ip_address=None, # pylint: disable=unused-argument
                                         private_ip_address_allocation=None, no_wait=False): # pylint: disable=unused-argument
-    from azure.mgmt.network.models import ApplicationGatewayFrontendIPConfiguration
+    ApplicationGatewayFrontendIPConfiguration = get_versioned_models(
+        ResourceType.MGMT_NETWORK,
+        'ApplicationGatewayFrontendIPConfiguration')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     if public_ip_address:
@@ -253,7 +282,9 @@ def update_ag_frontend_ip_configuration(instance, parent, item_name, public_ip_a
 
 def create_ag_frontend_port(resource_group_name, application_gateway_name, item_name, port,
                             no_wait=False):
-    from azure.mgmt.network.models import ApplicationGatewayFrontendPort
+    ApplicationGatewayFrontendPort = get_versioned_models(
+        ResourceType.MGMT_NETWORK,
+        'ApplicationGatewayFrontendPort')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_port = ApplicationGatewayFrontendPort(name=item_name, port=port)
@@ -269,7 +300,9 @@ def update_ag_frontend_port(instance, parent, item_name, port=None): # pylint: d
 def create_ag_http_listener(resource_group_name, application_gateway_name, item_name,
                             frontend_ip, frontend_port, host_name=None, ssl_cert=None,
                             no_wait=False):
-    from azure.mgmt.network.models import ApplicationGatewayHttpListener
+    ApplicationGatewayHttpListener = get_versioned_models(
+        ResourceType.MGMT_NETWORK,
+        'ApplicationGatewayHttpListener')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_listener = ApplicationGatewayHttpListener(
@@ -307,7 +340,9 @@ def create_ag_backend_http_settings_collection(resource_group_name, application_
                                                item_name, port, probe=None, protocol='http',
                                                cookie_based_affinity=None, timeout=None,
                                                no_wait=False):
-    from azure.mgmt.network.models import ApplicationGatewayBackendHttpSettings
+    ApplicationGatewayBackendHttpSettings = get_versioned_models(
+        ResourceType.MGMT_NETWORK,
+        'ApplicationGatewayBackendHttpSettings')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_settings = ApplicationGatewayBackendHttpSettings(
@@ -338,7 +373,9 @@ def update_ag_backend_http_settings_collection(instance, parent, item_name, port
 
 def create_ag_probe(resource_group_name, application_gateway_name, item_name, protocol, host,
                     path, interval=30, timeout=120, threshold=8, no_wait=False):
-    from azure.mgmt.network.models import ApplicationGatewayProbe
+    ApplicationGatewayProbe = get_versioned_models(
+        ResourceType.MGMT_NETWORK,
+        'ApplicationGatewayProbe')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_probe = ApplicationGatewayProbe(
@@ -372,7 +409,9 @@ def update_ag_probe(instance, parent, item_name, protocol=None, host=None, path=
 def create_ag_request_routing_rule(resource_group_name, application_gateway_name, item_name,
                                    address_pool, http_settings, http_listener, url_path_map=None,
                                    rule_type='Basic', no_wait=False):
-    from azure.mgmt.network.models import ApplicationGatewayRequestRoutingRule
+    ApplicationGatewayRequestRoutingRule = get_versioned_models(
+        ResourceType.MGMT_NETWORK,
+        'ApplicationGatewayRequestRoutingRule')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_rule = ApplicationGatewayRequestRoutingRule(
@@ -403,7 +442,9 @@ def update_ag_request_routing_rule(instance, parent, item_name, address_pool=Non
 
 def create_ag_ssl_certificate(resource_group_name, application_gateway_name, item_name, cert_data,
                               cert_password, no_wait=False):
-    from azure.mgmt.network.models import ApplicationGatewaySslCertificate
+    ApplicationGatewaySslCertificate = get_versioned_models(
+        ResourceType.MGMT_NETWORK,
+        'ApplicationGatewaySslCertificate')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_cert = ApplicationGatewaySslCertificate(
@@ -421,7 +462,9 @@ def update_ag_ssl_certificate(instance, parent, item_name, cert_data=None, cert_
 
 def set_ag_ssl_policy(resource_group_name, application_gateway_name, disabled_ssl_protocols=None,
                       clear=False, no_wait=False):
-    from azure.mgmt.network.models import ApplicationGatewaySslPolicy
+    ApplicationGatewaySslPolicy = get_versioned_models(
+        ResourceType.MGMT_NETWORK,
+        'ApplicationGatewaySslPolicy')
     ncf = _network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     ag.ssl_policy = None if clear else ApplicationGatewaySslPolicy(disabled_ssl_protocols)
@@ -434,7 +477,9 @@ def show_ag_ssl_policy(resource_group_name, application_gateway_name):
 def create_ag_url_path_map(resource_group_name, application_gateway_name, item_name,
                            paths, address_pool, http_settings, rule_name='default',
                            default_address_pool=None, default_http_settings=None, no_wait=False): # pylint: disable=unused-argument
-    from azure.mgmt.network.models import ApplicationGatewayUrlPathMap, ApplicationGatewayPathRule
+    ApplicationGatewayUrlPathMap, ApplicationGatewayPathRule = get_versioned_models(
+        ResourceType.MGMT_NETWORK,
+        'ApplicationGatewayUrlPathMap', 'ApplicationGatewayPathRule')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_map = ApplicationGatewayUrlPathMap(
@@ -464,7 +509,9 @@ def update_ag_url_path_map(instance, parent, item_name, default_address_pool=Non
 def create_ag_url_path_map_rule(resource_group_name, application_gateway_name, url_path_map_name,
                                 item_name, paths, address_pool=None, http_settings=None,
                                 no_wait=False):
-    from azure.mgmt.network.models import ApplicationGatewayPathRule
+    ApplicationGatewayPathRule = get_versioned_models(
+        ResourceType.MGMT_NETWORK,
+        'ApplicationGatewayPathRule')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     url_map = next((x for x in ag.url_path_maps if x.name == url_path_map_name), None)
@@ -495,7 +542,9 @@ def delete_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
 
 def set_ag_waf_config(resource_group_name, application_gateway_name, enabled,
                       firewall_mode=ApplicationGatewayFirewallMode.detection.value, no_wait=False):
-    from azure.mgmt.network.models import ApplicationGatewayWebApplicationFirewallConfiguration
+    ApplicationGatewayWebApplicationFirewallConfiguration = get_versioned_models(
+        ResourceType.MGMT_NETWORK,
+        'ApplicationGatewayWebApplicationFirewallConfiguration')
     ncf = _network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     ag.web_application_firewall_configuration = \
@@ -518,13 +567,13 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
                          virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                          public_ip_address_type=None, subnet_type=None, validate=False,
                          no_wait=False):
-    from azure.mgmt.resource.resources import ResourceManagementClient
-    from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
     from azure.cli.core.util import random_string
     from azure.cli.command_modules.network._template_builder import \
         (ArmTemplateBuilder, build_load_balancer_resource, build_public_ip_resource,
          build_vnet_resource)
 
+    DeploymentProperties = get_versioned_models(ResourceType.MGMT_RESOURCE_RESOURCES,
+                                                'DeploymentProperties')
     tags = tags or {}
     public_ip_address = public_ip_address or 'PublicIP{}'.format(load_balancer_name)
     backend_pool_name = backend_pool_name or '{}bepool'.format(load_balancer_name)
@@ -571,7 +620,7 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
 
     # deploy ARM template
     deployment_name = 'lb_deploy_' + random_string(32)
-    client = get_mgmt_service_client(ResourceManagementClient).deployments
+    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     if validate:
         _log_pprint_template(template)
@@ -780,24 +829,30 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
                load_balancer_name=None, network_security_group=None,
                private_ip_address=None, private_ip_address_version=IPVersion.ipv4.value,
                public_ip_address=None, virtual_network_name=None):
-    from azure.mgmt.network.models import NetworkInterface
     client = _network_client_factory().network_interfaces
+    NetworkInterface = get_versioned_models(ResourceType.MGMT_NETWORK, 'NetworkInterface')
+    NetworkInterfaceDnsSettings = get_versioned_models(
+        ResourceType.MGMT_NETWORK,
+        'NetworkInterfaceDnsSettings')
     nic = NetworkInterface(location=location, tags=tags, enable_ip_forwarding=enable_ip_forwarding)
     if internal_dns_name_label:
-        from azure.mgmt.network.models import NetworkInterfaceDnsSettings
         nic.dns_settings = NetworkInterfaceDnsSettings(
             internal_dns_name_label=internal_dns_name_label)
     if network_security_group:
         nic.network_security_group = NetworkSecurityGroup(id=network_security_group)
-    ip_config = NetworkInterfaceIPConfiguration(
-        name='ipconfig1',
-        load_balancer_backend_address_pools=load_balancer_backend_address_pool_ids,
-        load_balancer_inbound_nat_rules=load_balancer_inbound_nat_rule_ids,
-        private_ip_allocation_method='Static' if private_ip_address else 'Dynamic',
-        private_ip_address=private_ip_address,
-        private_ip_address_version=private_ip_address_version,
-        subnet=Subnet(id=subnet)
-    )
+
+    ip_config_args = {
+        'name': 'ipconfig1',
+        'load_balancer_backend_address_pools': load_balancer_backend_address_pool_ids,
+        'load_balancer_inbound_nat_rules': load_balancer_inbound_nat_rule_ids,
+        'private_ip_allocation_method': 'Static' if private_ip_address else 'Dynamic',
+        'private_ip_address': private_ip_address,
+        'subnet': Subnet(id=subnet)
+    }
+    if get_api_version(ResourceType.MGMT_NETWORK) in ['2016-09-01']:
+        ip_config_args['private_ip_address_version'] = private_ip_address_version
+    ip_config = NetworkInterfaceIPConfiguration(**ip_config_args)
+
     if public_ip_address:
         ip_config.public_ip_address = PublicIPAddress(id=public_ip_address)
     nic.ip_configurations = [ip_config]
@@ -829,28 +884,33 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
                          load_balancer_inbound_nat_rule_ids=None,
                          private_ip_address=None,
                          private_ip_address_allocation=IPAllocationMethod.dynamic.value,
-                         private_ip_address_version=IPVersion.ipv4.value, make_primary=False):
+                         private_ip_address_version=IPVersion.ipv4.value,
+                         make_primary=False):
     ncf = _network_client_factory()
     nic = ncf.network_interfaces.get(resource_group_name, network_interface_name)
 
-    if private_ip_address_version == IPVersion.ipv4.value and not subnet:
-        primary_config = next(x for x in nic.ip_configurations if x.primary)
-        subnet = primary_config.subnet.id
+    if get_api_version(ResourceType.MGMT_NETWORK) in ['2016-09-01']:
+        if private_ip_address_version == IPVersion.ipv4.value and not subnet:
+            primary_config = next(x for x in nic.ip_configurations if x.primary)
+            subnet = primary_config.subnet.id
+        if make_primary:
+            for config in nic.ip_configurations:
+                config.primary = False
 
-    if make_primary:
-        for config in nic.ip_configurations:
-            config.primary = False
+    new_config_args = {
+        'name': ip_config_name,
+        'subnet': Subnet(subnet) if subnet else None,
+        'public_ip_address': PublicIPAddress(public_ip_address) if public_ip_address else None,
+        'load_balancer_backend_address_pools': load_balancer_backend_address_pool_ids,
+        'load_balancer_inbound_nat_rules': load_balancer_inbound_nat_rule_ids,
+        'private_ip_address': private_ip_address,
+        'private_ip_allocation_method': private_ip_address_allocation,
+    }
+    if get_api_version(ResourceType.MGMT_NETWORK) in ['2016-09-01']:
+        new_config_args['private_ip_address_version'] = private_ip_address_version
+        new_config_args['primary'] = make_primary
+    new_config = NetworkInterfaceIPConfiguration(**new_config_args)
 
-    new_config = NetworkInterfaceIPConfiguration(
-        name=ip_config_name,
-        subnet=Subnet(subnet) if subnet else None,
-        public_ip_address=PublicIPAddress(public_ip_address) if public_ip_address else None,
-        load_balancer_backend_address_pools=load_balancer_backend_address_pool_ids,
-        load_balancer_inbound_nat_rules=load_balancer_inbound_nat_rule_ids,
-        private_ip_address=private_ip_address,
-        private_ip_allocation_method=private_ip_address_allocation,
-        private_ip_address_version=private_ip_address_version,
-        primary=make_primary)
     _upsert(nic, 'ip_configurations', new_config, 'name')
     poller = ncf.network_interfaces.create_or_update(
         resource_group_name, network_interface_name, nic)
@@ -870,7 +930,8 @@ def set_nic_ip_config(instance, parent, ip_config_name, subnet=None, # pylint: d
     if private_ip_address == '':
         instance.private_ip_address = None
         instance.private_ip_allocation_method = 'dynamic'
-        instance.private_ip_address_version = 'ipv4'
+        if get_api_version(ResourceType.MGMT_NETWORK) in ['2016-09-01']:
+            instance.private_ip_address_version = 'ipv4'
     elif private_ip_address is not None:
         instance.private_ip_address = private_ip_address
         instance.private_ip_allocation_method = 'static'
@@ -1013,12 +1074,19 @@ def create_public_ip(resource_group_name, public_ip_address_name, location=None,
                      allocation_method=IPAllocationMethod.dynamic.value, dns_name=None,
                      idle_timeout=4, reverse_fqdn=None, version=IPVersion.ipv4.value):
     client = _network_client_factory().public_ip_addresses
-    public_ip = PublicIPAddress(
-        location=location, tags=tags, public_ip_allocation_method=allocation_method,
-        idle_timeout_in_minutes=idle_timeout, public_ip_address_version=version,
-        dns_settings=None)
+
+    public_ip_args = {
+        'location': location,
+        'tags': tags,
+        'public_ip_allocation_method': allocation_method,
+        'idle_timeout_in_minutes': idle_timeout,
+        'dns_settings': None
+    }
+    if get_api_version(ResourceType.MGMT_NETWORK) in ['2016-09-01']:
+        public_ip_args['public_ip_address_version'] = version
+    public_ip = PublicIPAddress(**public_ip_args)
+
     if dns_name or reverse_fqdn:
-        from azure.mgmt.network.models import PublicIPAddressDnsSettings
         public_ip.dns_settings = PublicIPAddressDnsSettings(
             domain_name_label=dns_name,
             reverse_fqdn=reverse_fqdn)
@@ -1027,7 +1095,6 @@ def create_public_ip(resource_group_name, public_ip_address_name, location=None,
 def update_public_ip(instance, dns_name=None, allocation_method=None, version=None,
                      idle_timeout=None, reverse_fqdn=None, tags=None):
     if dns_name is not None or reverse_fqdn is not None:
-        from azure.mgmt.network.models import PublicIPAddressDnsSettings
         if instance.dns_settings:
             if dns_name is not None:
                 instance.dns_settings.domain_name_label = dns_name
@@ -1078,7 +1145,6 @@ create_vnet_peering.__doc__ = VirtualNetworkPeering.__doc__
 def create_vnet(resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
                 subnet_name=None, subnet_prefix=None, dns_servers=None,
                 location=None, tags=None):
-    from azure.mgmt.network.models import VirtualNetwork, DhcpOptions
     client = _network_client_factory().virtual_networks
     tags = tags or {}
     vnet = VirtualNetwork(
@@ -1170,12 +1236,13 @@ def create_vpn_connection(client, resource_group_name, connection_name, vnet_gat
     :param bool no_wait: Do not wait for the long running operation to finish.
     :param bool validate: Display and validate the ARM template but do not create any resources.
     """
-    from azure.mgmt.resource.resources import ResourceManagementClient
-    from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
+    from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.util import random_string
     from azure.cli.command_modules.network._template_builder import \
         ArmTemplateBuilder, build_vpn_connection_resource
 
+    DeploymentProperties = get_versioned_models(ResourceType.MGMT_RESOURCE_RESOURCES,
+                                                'DeploymentProperties')
     tags = tags or {}
 
     # Build up the ARM template
@@ -1191,7 +1258,7 @@ def create_vpn_connection(client, resource_group_name, connection_name, vnet_gat
 
     # deploy ARM template
     deployment_name = 'vpn_connection_deploy_' + random_string(32)
-    client = get_mgmt_service_client(ResourceManagementClient).deployments
+    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     if validate:
         _log_pprint_template(template)
@@ -1245,7 +1312,7 @@ def _validate_bgp_peering(instance, asn, bgp_peering_address, peer_weight):
             if bgp_peering_address is not None:
                 instance.bgp_settings.bgp_peering_address = bgp_peering_address
         elif asn:
-            from azure.mgmt.network.models import BgpSettings
+            BgpSettings = get_versioned_models(ResourceType.MGMT_NETWORK, 'BgpSettings')
             instance.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
         else:
             raise CLIError(
@@ -1326,9 +1393,13 @@ def create_vnet_gateway(resource_group_name, virtual_network_gateway_name, publi
                         sku=VirtualNetworkGatewaySkuName.basic.value,
                         vpn_type=VpnType.route_based.value,
                         asn=None, bgp_peering_address=None, peer_weight=None):
-    from azure.mgmt.network.models import \
-        (VirtualNetworkGateway, BgpSettings, VirtualNetworkGatewayIPConfiguration,
-         VirtualNetworkGatewaySku)
+    VirtualNetworkGateway, BgpSettings, VirtualNetworkGatewayIPConfiguration, \
+        VirtualNetworkGatewaySku = get_versioned_models(
+            ResourceType.MGMT_NETWORK,
+            'VirtualNetworkGateway',
+            'BgpSettings',
+            'VirtualNetworkGatewayIPConfiguration',
+            'VirtualNetworkGatewaySku')
 
     client = _network_client_factory().virtual_network_gateways
     subnet = virtual_network + '/subnets/GatewaySubnet'
@@ -1356,7 +1427,9 @@ def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None
                         public_ip_address=None, gateway_type=None, enable_bgp=None,
                         asn=None, bgp_peering_address=None, peer_weight=None, virtual_network=None,
                         tags=None):
-    from azure.mgmt.network.models import VirtualNetworkGatewayIPConfiguration
+    VirtualNetworkGatewayIPConfiguration = get_versioned_models(
+        ResourceType.MGMT_NETWORK,
+        'VirtualNetworkGatewayIPConfiguration')
 
     if address_prefixes is not None:
         if not instance.vpn_client_configuration:
@@ -1420,8 +1493,12 @@ def create_express_route(circuit_name, resource_group_name, bandwidth_in_mbps, p
                          service_provider_name, location=None, tags=None, no_wait=False,
                          sku_family=ExpressRouteCircuitSkuFamily.metered_data.value,
                          sku_tier=ExpressRouteCircuitSkuTier.standard.value):
-    from azure.mgmt.network.models import \
-        (ExpressRouteCircuit, ExpressRouteCircuitSku, ExpressRouteCircuitServiceProviderProperties)
+    ExpressRouteCircuit, ExpressRouteCircuitSku, \
+    ExpressRouteCircuitServiceProviderProperties = get_versioned_models(
+        ResourceType.MGMT_NETWORK,
+        'ExpressRouteCircuit',
+        'ExpressRouteCircuitSku',
+        'ExpressRouteCircuitServiceProviderProperties')
     client = _network_client_factory().express_route_circuits
     sku_name = '{}_{}'.format(sku_tier, sku_family)
     circuit = ExpressRouteCircuit(
@@ -1472,9 +1549,12 @@ def create_express_route_peering(
     :param str customer_asn: Autonomous system number of the customer.
     :param str routing_registry_name: Internet Routing Registry / Regional Internet Registry
     """
-    from azure.mgmt.network.models import \
-        (ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig)
-    from azure.mgmt.network.models import ExpressRouteCircuitPeeringType
+    ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig, \
+    ExpressRouteCircuitPeeringType = get_versioned_models(
+        ResourceType.MGMT_NETWORK,
+        'ExpressRouteCircuitPeering',
+        'ExpressRouteCircuitPeeringConfig',
+        'ExpressRouteCircuitPeeringType')
 
     # TODO: Remove workaround when issue #1574 is fixed in the service
     # region Issue #1574 workaround
@@ -1579,7 +1659,9 @@ update_route.__doc__ = Route.__doc__
 def create_local_gateway(resource_group_name, local_network_gateway_name, gateway_ip_address,
                          location=None, tags=None, local_address_prefix=None, asn=None,
                          bgp_peering_address=None, peer_weight=None, no_wait=False):
-    from azure.mgmt.network.models import LocalNetworkGateway, BgpSettings
+    LocalNetworkGateway = get_versioned_models(ResourceType.MGMT_NETWORK, "LocalNetworkGateway")
+    BgpSettings = get_versioned_models(ResourceType.MGMT_NETWORK, "BgpSettings")
+
     client = _network_client_factory().local_network_gateways
     local_gateway = LocalNetworkGateway(
         AddressSpace(local_address_prefix or []), location=location, tags=tags,

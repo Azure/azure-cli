@@ -19,16 +19,13 @@ from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-err
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
 from azure.cli.core.commands.validators import validate_file_or_dict
 from azure.keyvault.key_vault_id import parse_secret_id
-from azure.mgmt.compute.models import (VirtualHardDisk,
-                                       VirtualMachineScaleSet,
-                                       VirtualMachineCaptureParameters,
-                                       VirtualMachineScaleSetExtension,
-                                       VirtualMachineScaleSetExtensionProfile)
+
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.arm import parse_resource_id, resource_id, is_valid_resource_id
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core.util import CLIError
 import azure.cli.core.azlogging as azlogging
+from azure.cli.core.profiles import get_sdk_attr
 from ._vm_utils import read_content_if_is_file
 from ._vm_diagnostics_templates import get_default_diag_config
 
@@ -36,13 +33,24 @@ from ._actions import (load_images_from_aliases_doc,
                        load_extension_images_thru_services,
                        load_images_thru_services)
 from ._client_factory import _compute_client_factory
+from azure.cli.core.profiles.shared import ResourceType
+from azure.cli.core.profiles import get_versioned_models
 
 logger = azlogging.get_az_logger(__name__)
 
+VirtualHardDisk, VirtualMachineScaleSet, \
+    VirtualMachineCaptureParameters, VirtualMachineScaleSetExtension, \
+    VirtualMachineScaleSetExtensionProfile = get_versioned_models(
+        ResourceType.MGMT_COMPUTE,
+        'VirtualHardDisk',
+        'VirtualMachineScaleSet',
+        'VirtualMachineCaptureParameters',
+        'VirtualMachineScaleSetExtension',
+        'VirtualMachineScaleSetExtensionProfile')
+
 
 def get_resource_group_location(resource_group_name):
-    from azure.mgmt.resource.resources import ResourceManagementClient
-    client = get_mgmt_service_client(ResourceManagementClient)
+    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
     # pylint: disable=no-member
     return client.resource_groups.get(resource_group_name).location
 
@@ -124,8 +132,7 @@ def _get_access_extension_upgrade_info(extensions, name):
 
 
 def _get_storage_management_client():
-    from azure.mgmt.storage import StorageManagementClient
-    return get_mgmt_service_client(StorageManagementClient)
+    return get_mgmt_service_client(ResourceType.MGMT_STORAGE)
 
 
 def _trim_away_build_number(version):
@@ -165,9 +172,8 @@ def show_vm(resource_group_name, vm_name, show_details=False):
 
 
 def get_vm_details(resource_group_name, vm_name):
-    from azure.mgmt.network import NetworkManagementClient
     result = get_instance_view(resource_group_name, vm_name)
-    network_client = get_mgmt_service_client(NetworkManagementClient)
+    network_client = get_mgmt_service_client(ResourceType.MGMT_NETWORK)
     public_ips = []
     fqdns = []
     private_ips = []
@@ -239,15 +245,13 @@ def list_ip_addresses(resource_group_name=None, vm_name=None):
     :param str resource_group_name:Name of resource group.
     :param str vm_name:Name of virtual machine.
     '''
-    from azure.mgmt.network import NetworkManagementClient
-
     # We start by getting NICs as they are the smack in the middle of all data that we
     # want to collect for a VM (as long as we don't need any info on the VM than what
     # is available in the Id, we don't need to make any calls to the compute RP)
     #
     # Since there is no guarantee that a NIC is in the same resource group as a given
     # Virtual Machine, we can't constrain the lookup to only a single group...
-    network_client = get_mgmt_service_client(NetworkManagementClient)
+    network_client = get_mgmt_service_client(ResourceType.MGMT_NETWORK)
     nics = network_client.network_interfaces.list_all()
     public_ip_addresses = network_client.public_ip_addresses.list_all()
 
@@ -515,7 +519,7 @@ def create_image(resource_group_name, name, os_type=None, location=None,  # pyli
 def attach_unmanaged_data_disk(resource_group_name, vm_name, new=False, vhd_uri=None, lun=None,
                                disk_name=None, size_gb=1023, caching=None):
     ''' Attach an unmanaged disk'''
-    from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
+    from azure.mgmt.compute.models import DiskCreateOptionTypes
     from azure.mgmt.compute.models import DataDisk
     if not new and not disk_name:
         raise CLIError('Pleae provide the name of the existing disk to attach')
@@ -664,8 +668,8 @@ def _reset_windows_admin(vm_instance, resource_group_name, username, password, n
     You can only change the password. Adding a new user is not supported.
     '''
     client = _compute_client_factory()
-
-    from azure.mgmt.compute.models import VirtualMachineExtension
+    VirtualMachineExtension = get_versioned_models(ResourceType.MGMT_COMPUTE,
+                                                   "VirtualMachineExtension")
 
     publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
         vm_instance.resources, _WINDOWS_ACCESS_EXT)
@@ -697,7 +701,9 @@ def _update_linux_access_extension(vm_instance, resource_group_name, protected_s
                                    no_wait=False):
     client = _compute_client_factory()
 
-    from azure.mgmt.compute.models import VirtualMachineExtension
+    VirtualMachineExtension = get_versioned_models(ResourceType.MGMT_COMPUTE,
+                                                   "VirtualMachineExtension")
+
     # pylint: disable=no-member
     instance_name = _get_extension_instance_name(vm_instance.instance_view,
                                                  extension_mappings[_LINUX_ACCESS_EXT]['publisher'],
@@ -771,7 +777,10 @@ def enable_boot_diagnostics(resource_group_name, vm_name, storage):
             vm.diagnostics_profile.boot_diagnostics.storage_uri.lower() == storage_uri.lower()):
         return
 
-    from azure.mgmt.compute.models import DiagnosticsProfile, BootDiagnostics
+    DiagnosticsProfile, BootDiagnostics = get_versioned_models(ResourceType.MGMT_COMPUTE,
+                                                               "DiagnosticsProfile",
+                                                               "BootDiagnostics")
+
     boot_diag = BootDiagnostics(True, storage_uri)
     if vm.diagnostics_profile is None:
         vm.diagnostics_profile = DiagnosticsProfile(boot_diag)
@@ -786,7 +795,7 @@ def enable_boot_diagnostics(resource_group_name, vm_name, storage):
 def get_boot_log(resource_group_name, vm_name):
     import sys
     from azure.cli.core._profile import CLOUD
-    from azure.storage.blob import BlockBlobService
+    BlockBlobService = get_sdk_attr('azure.multiapi.storage.blob.blockblobservice#BlockBlobService')
 
     client = _compute_client_factory()
 
@@ -869,8 +878,8 @@ def set_extension(
     vm = get_vm(resource_group_name, vm_name, 'instanceView')
     client = _compute_client_factory()
 
-    from azure.mgmt.compute.models import VirtualMachineExtension
-
+    VirtualMachineExtension = get_versioned_models(ResourceType.MGMT_COMPUTE,
+                                                   "VirtualMachineExtension")
     # pylint: disable=no-member
     instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name)
     # pylint: disable=no-member
@@ -1082,8 +1091,7 @@ def vm_show_nic(resource_group_name, vm_name, nic):
         (n for n in vm.network_profile.network_interfaces if nic.lower() == n.id.lower()), None  # pylint: disable=no-member
     )
     if found:
-        from azure.mgmt.network import NetworkManagementClient
-        network_client = get_mgmt_service_client(NetworkManagementClient)
+        network_client = get_mgmt_service_client(ResourceType.MGMT_NETWORK)
         nic_name = parse_resource_id(found.id)['name']
         return network_client.network_interfaces.get(resource_group_name, nic_name)
     else:
@@ -1150,8 +1158,7 @@ def vm_open_port(resource_group_name, vm_name, port, priority=900, network_secur
     will overwrite an existing rule with this name. For multi-NIC VMs, or for more fine
     grained control, use the appropriate network commands directly (nsg rule create, etc).
     """
-    from azure.mgmt.network import NetworkManagementClient
-    network = get_mgmt_service_client(NetworkManagementClient)
+    network = get_mgmt_service_client(ResourceType.MGMT_NETWORK)
 
     vm = get_vm(resource_group_name, vm_name)
     location = vm.location
@@ -1215,12 +1222,11 @@ def vm_open_port(resource_group_name, vm_name, port, priority=900, network_secur
 
 
 def _build_nic_list(nic_ids):
-    from azure.mgmt.network import NetworkManagementClient
     from azure.mgmt.compute.models import NetworkInterfaceReference
     nic_list = []
     if nic_ids:
         # pylint: disable=no-member
-        network_client = get_mgmt_service_client(NetworkManagementClient)
+        network_client = get_mgmt_service_client(ResourceType.MGMT_NETWORK)
         for nic_id in nic_ids:
             rg, name = _parse_rg_name(nic_id)
             nic = network_client.network_interfaces.get(rg, name)
@@ -1451,8 +1457,7 @@ def list_vmss_instance_connection_info(resource_group_name, vm_scale_set_name):
     lb_rg = lb_info['resource_group']
 
     # get public ip
-    from azure.mgmt.network import NetworkManagementClient
-    network_client = get_mgmt_service_client(NetworkManagementClient)
+    network_client = get_mgmt_service_client(ResourceType.MGMT_NETWORK)
     lb = network_client.load_balancers.get(lb_rg, lb_name)
     res_id = lb.frontend_ip_configurations[0].public_ip_address.id  # TODO: will this always work?
     public_ip_info = parse_resource_id(res_id)
@@ -1523,8 +1528,6 @@ def create_vm(vm_name, resource_group_name, image=None,
         build_output_deployment_resource, build_deployment_resource, StorageProfile)
 
     from azure.cli.core._profile import CLOUD
-    from azure.mgmt.resource.resources import ResourceManagementClient
-    from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
 
     network_id_template = resource_id(
         subscription=get_subscription_id(), resource_group=resource_group_name,
@@ -1640,7 +1643,9 @@ def create_vm(vm_name, resource_group_name, image=None,
 
     # deploy ARM template
     deployment_name = 'vm_deploy_' + random_string(32)
-    client = get_mgmt_service_client(ResourceManagementClient).deployments
+    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+    DeploymentProperties = get_versioned_models(ResourceType.MGMT_RESOURCE_RESOURCES,
+                                                'DeploymentProperties')
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     if validate:
         from azure.cli.command_modules.vm._vm_utils import log_pprint_template
@@ -1689,8 +1694,6 @@ def create_vmss(vmss_name, resource_group_name, image,
         build_vmss_storage_account_pool_resource, build_application_gateway_resource)
 
     from azure.cli.core._profile import CLOUD
-    from azure.mgmt.resource.resources import ResourceManagementClient
-    from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
     from azure.mgmt.compute.models import CachingTypes
 
     network_id_template = resource_id(
@@ -1874,7 +1877,9 @@ def create_vmss(vmss_name, resource_group_name, image,
 
     # deploy ARM template
     deployment_name = 'vmss_deploy_' + random_string(32)
-    client = get_mgmt_service_client(ResourceManagementClient).deployments
+    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+    DeploymentProperties = get_versioned_models(ResourceType.MGMT_RESOURCE_RESOURCES,
+                                                'DeploymentProperties')
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     if validate:
         from azure.cli.command_modules.vm._vm_utils import log_pprint_template
@@ -1889,8 +1894,6 @@ def create_av_set(availability_set_name, resource_group_name,
                   platform_update_domain_count, platform_fault_domain_count,
                   location=None, no_wait=False,
                   unmanaged=False, tags=None, validate=False):
-    from azure.mgmt.resource.resources import ResourceManagementClient
-    from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
     from azure.cli.core.util import random_string
     from azure.cli.command_modules.vm._template_builder import (ArmTemplateBuilder,
                                                                 build_av_set_resource)
@@ -1909,7 +1912,9 @@ def create_av_set(availability_set_name, resource_group_name,
 
     # deploy ARM template
     deployment_name = 'av_set_deploy_' + random_string(32)
-    client = get_mgmt_service_client(ResourceManagementClient).deployments
+    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+    DeploymentProperties = get_versioned_models(ResourceType.MGMT_RESOURCE_RESOURCES,
+                                                'DeploymentProperties')
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     if validate:
         return client.validate(resource_group_name, deployment_name, properties)

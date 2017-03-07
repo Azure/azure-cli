@@ -21,6 +21,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.application import APPLICATION
 from azure.cli.core.prompting import prompt_y_n, NoTTYException
 from azure.cli.core._config import az_config, DEFAULTS_SECTION
+from azure.cli.core.profiles import get_versioned_sdk_path
 
 from ._introspection import (extract_args_from_signature,
                              extract_full_summary_from_signature)
@@ -326,6 +327,7 @@ def cli_command(module_name, name, operation,
 
 def get_op_handler(operation):
     """ Import and load the operation handler """
+    operation = get_versioned_sdk_path(operation)
     try:
         mod_to_import, attr_path = operation.split('#')
         op = import_module(mod_to_import)

@@ -6,6 +6,9 @@
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core.commands import CLIError
 from azure.cli.core._profile import CLOUD
+from azure.cli.core.profiles.shared import ResourceType
+from azure.cli.core.profiles import get_sdk_attr
+
 
 NO_CREDENTIALS_ERROR_MESSAGE = """
 No credentials specifed to access storage service. Please provide any of the following:
@@ -33,7 +36,8 @@ def generic_data_service_factory(service, name=None, key=None, connection_string
     try:
         return get_storage_data_service_client(service, name, key, connection_string, sas_token)
     except ValueError as val_exception:
-        from azure.storage._error import _ERROR_STORAGE_MISSING_INFO
+        _ERROR_STORAGE_MISSING_INFO = \
+            get_sdk_attr('azure.multiapi.storage._error#_ERROR_STORAGE_MISSING_INFO')
         message = str(val_exception)
         if message == _ERROR_STORAGE_MISSING_INFO:
             message = NO_CREDENTIALS_ERROR_MESSAGE
@@ -41,12 +45,11 @@ def generic_data_service_factory(service, name=None, key=None, connection_string
 
 
 def storage_client_factory(**_):
-    from azure.mgmt.storage import StorageManagementClient
-    return get_mgmt_service_client(StorageManagementClient)
+    return get_mgmt_service_client(ResourceType.MGMT_STORAGE)
 
 
 def file_data_service_factory(kwargs):
-    from azure.storage.file import FileService
+    FileService = get_sdk_attr('azure.multiapi.storage.file#FileService')
     return generic_data_service_factory(
         FileService,
         kwargs.pop('account_name', None),
@@ -56,7 +59,7 @@ def file_data_service_factory(kwargs):
 
 
 def page_blob_service_factory(kwargs):
-    from azure.storage.blob.pageblobservice import PageBlobService
+    PageBlobService = get_sdk_attr('azure.multiapi.storage.blob.pageblobservice#PageBlobService')
     return generic_data_service_factory(
         PageBlobService,
         kwargs.pop('account_name', None),
@@ -66,7 +69,7 @@ def page_blob_service_factory(kwargs):
 
 
 def blob_data_service_factory(kwargs):
-    from azure.storage.blob import BlockBlobService
+    BlockBlobService = get_sdk_attr('azure.multiapi.storage.blob#BlockBlobService')
     from ._params import blob_types
     blob_type = kwargs.get('blob_type')
     blob_service = blob_types.get(blob_type, BlockBlobService)
@@ -79,7 +82,7 @@ def blob_data_service_factory(kwargs):
 
 
 def table_data_service_factory(kwargs):
-    from azure.storage.table import TableService
+    TableService = get_sdk_attr('azure.multiapi.storage.table#TableService')
     return generic_data_service_factory(
         TableService,
         kwargs.pop('account_name', None),
@@ -89,7 +92,7 @@ def table_data_service_factory(kwargs):
 
 
 def queue_data_service_factory(kwargs):
-    from azure.storage.queue import QueueService
+    QueueService = get_sdk_attr('azure.multiapi.storage.queue#QueueService')
     return generic_data_service_factory(
         QueueService,
         kwargs.pop('account_name', None),
@@ -99,7 +102,7 @@ def queue_data_service_factory(kwargs):
 
 
 def cloud_storage_account_service_factory(kwargs):
-    from azure.storage import CloudStorageAccount
+    CloudStorageAccount = get_sdk_attr('azure.multiapi.storage#CloudStorageAccount')
     account_name = kwargs.pop('account_name', None)
     account_key = kwargs.pop('account_key', None)
     sas_token = kwargs.pop('sas_token', None)

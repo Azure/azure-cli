@@ -11,11 +11,8 @@ import os
 import re
 import uuid
 
-from azure.mgmt.resource.resources import ResourceManagementClient
-from azure.mgmt.resource.resources.models.resource_group import ResourceGroup
 from azure.mgmt.resource.resources.models import GenericResource
 
-from azure.mgmt.resource.policy.models import (PolicyAssignment, PolicyDefinition)
 from azure.mgmt.resource.locks.models import ManagementLockObject
 from azure.mgmt.resource.links.models import ResourceLinkProperties
 
@@ -25,6 +22,8 @@ from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
+from azure.cli.core.profiles import get_versioned_models
+from azure.cli.core.profiles.shared import ResourceType
 
 from ._client_factory import (_resource_client_factory,
                               _resource_policy_client_factory,
@@ -58,6 +57,7 @@ def create_resource_group(rg_name, location, tags=None):
     '''
     rcf = _resource_client_factory()
 
+    ResourceGroup = get_versioned_models(ResourceType.MGMT_RESOURCE_RESOURCES, 'ResourceGroup')
     parameters = ResourceGroup(
         location=location,
         tags=tags
@@ -171,6 +171,10 @@ def _deploy_arm_template_core(resource_group_name, template_file=None, template_
                               validate_only=False, no_wait=False):
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
 
+    DeploymentProperties, TemplateLink = get_versioned_models(ResourceType.MGMT_RESOURCE_RESOURCES,
+                                                              'DeploymentProperties',
+                                                              'TemplateLink')
+
     if bool(template_uri) == bool(template_file):
         raise CLIError('please provide either template file path or uri, but not both')
 
@@ -192,7 +196,7 @@ def _deploy_arm_template_core(resource_group_name, template_file=None, template_
     properties = DeploymentProperties(template=template, template_link=template_link,
                                       parameters=parameters, mode=mode)
 
-    smc = get_mgmt_service_client(ResourceManagementClient)
+    smc = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
     if validate_only:
         return smc.deployments.validate(resource_group_name, deployment_name,
                                         properties, raw=no_wait)
@@ -202,7 +206,7 @@ def _deploy_arm_template_core(resource_group_name, template_file=None, template_
 
 
 def export_deployment_as_template(resource_group_name, deployment_name):
-    smc = get_mgmt_service_client(ResourceManagementClient)
+    smc = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
     result = smc.deployments.export_template(resource_group_name, deployment_name)
     print(json.dumps(result.template, indent=2))#pylint: disable=no-member
 
@@ -382,6 +386,7 @@ def create_policy_assignment(policy, name=None, display_name=None,
     scope = _build_policy_scope(policy_client.config.subscription_id,
                                 resource_group_name, scope)
     policy_id = _resolve_policy_id(policy, policy_client)
+    PolicyAssignment = get_versioned_models(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyAssignment')
     assignment = PolicyAssignment(display_name, policy_id, scope)
     return policy_client.policy_assignments.create(scope,
                                                    name or uuid.uuid4(),
@@ -461,6 +466,7 @@ def create_policy_definition(name, rules, display_name=None, description=None):
         rules = shell_safe_json_parse(rules)
 
     policy_client = _resource_policy_client_factory()
+    PolicyDefinition = get_versioned_models(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyDefinition')
     parameters = PolicyDefinition(policy_rule=rules, description=description,
                                   display_name=display_name)
     return policy_client.policy_definitions.create_or_update(name, parameters)
@@ -476,6 +482,7 @@ def update_policy_definition(policy_definition_name, rules=None,
     policy_client = _resource_policy_client_factory()
     definition = policy_client.policy_definitions.get(policy_definition_name)
     #pylint: disable=line-too-long,no-member
+    PolicyDefinition = get_versioned_models(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyDefinition')
     parameters = PolicyDefinition(policy_rule=rules if rules is not None else definition.policy_rule,
                                   description=description if description is not None else definition.description,
                                   display_name=display_name if display_name is not None else definition.display_name)
@@ -530,7 +537,7 @@ def get_lock(name, resource_group_name=None):
     '''
     lock_client = _resource_lock_client_factory()
     if resource_group_name is None:
-        return lock_client.management_locks.get(name)
+        return lock_client.management_locks.get_at_subscription_level(name)
     return lock_client.management_locks.get_at_resource_group_level(resource_group_name, name)
 
 def delete_lock(name, resource_group_name=None, resource_provider_namespace=None,

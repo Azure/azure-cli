@@ -9,7 +9,6 @@ import collections
 import errno
 import json
 import os.path
-from pprint import pformat
 from copy import deepcopy
 from enum import Enum
 
@@ -66,9 +65,7 @@ _AUTH_CTX_FACTORY = _authentication_context_factory
 
 CLOUD = get_active_cloud()
 
-logger.debug("Current active cloud '%s'", CLOUD.name)
-logger.debug(pformat(vars(CLOUD.endpoints)))
-logger.debug(pformat(vars(CLOUD.suffixes)))
+logger.debug(str(CLOUD))
 
 
 def get_authority_url(tenant=None):
@@ -101,7 +98,7 @@ class Profile(object):
         factory = auth_ctx_factory or _AUTH_CTX_FACTORY
         self._creds_cache = CredsCache(factory)
         self._subscription_finder = SubscriptionFinder(factory, self._creds_cache.adal_token_cache)
-        self._management_resource_uri = CLOUD.endpoints.management
+        self._ad_resource_uri = CLOUD.endpoints.active_directory_resource_id
 
     def find_subscriptions_on_login(self,  # pylint: disable=too-many-arguments
                                     interactive,
@@ -114,17 +111,17 @@ class Profile(object):
         subscriptions = []
         if interactive:
             subscriptions = self._subscription_finder.find_through_interactive_flow(
-                tenant, self._management_resource_uri)
+                tenant, self._ad_resource_uri)
         else:
             if is_service_principal:
                 if not tenant:
                     raise CLIError('Please supply tenant using "--tenant"')
                 sp_auth = ServicePrincipalAuth(password)
                 subscriptions = self._subscription_finder.find_from_service_principal_id(
-                    username, sp_auth, tenant, self._management_resource_uri)
+                    username, sp_auth, tenant, self._ad_resource_uri)
             else:
                 subscriptions = self._subscription_finder.find_from_user_account(
-                    username, password, tenant, self._management_resource_uri)
+                    username, password, tenant, self._ad_resource_uri)
 
         if not subscriptions:
             raise CLIError('No subscriptions found for this account.')
@@ -259,7 +256,7 @@ class Profile(object):
             raise CLIError("Please run 'az account set' to select active account.")
         return result[0]
 
-    def get_login_credentials(self, resource=CLOUD.endpoints.management,
+    def get_login_credentials(self, resource=CLOUD.endpoints.active_directory_resource_id,
                               subscription_id=None):
         account = self.get_subscription(subscription_id)
         user_type = account[_USER_ENTITY][_USER_TYPE]
@@ -325,8 +322,8 @@ class SubscriptionFinder(object):
     '''finds all subscriptions for a user or service principal'''
 
     def __init__(self, auth_context_factory, adal_token_cache, arm_client_factory=None):
-        from azure.mgmt.resource.subscriptions import SubscriptionClient
-        from azure.cli.core._debug import allow_debug_connection
+        from azure.mgmt.resource import SubscriptionClient
+        from azure.cli.core._debug import change_ssl_cert_verification
 
         self._adal_token_cache = adal_token_cache
         self._auth_context_factory = auth_context_factory
@@ -336,7 +333,7 @@ class SubscriptionFinder(object):
             if arm_client_factory:
                 return arm_client_factory(config)
             else:
-                return allow_debug_connection(SubscriptionClient(
+                return change_ssl_cert_verification(SubscriptionClient(
                     config, base_url=CLOUD.endpoints.resource_manager))
 
         self._arm_client_factory = create_arm_client_factory

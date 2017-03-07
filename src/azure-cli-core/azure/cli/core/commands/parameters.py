@@ -11,11 +11,13 @@ from azure.cli.core.commands import CliArgumentType, register_cli_argument
 from azure.cli.core.commands.validators import validate_tag, validate_tags
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands.validators import generate_deployment_name
+from azure.cli.core.profiles import get_versioned_models
+from azure.cli.core.profiles.shared import ResourceType
 
 
 def get_subscription_locations():
     from azure.cli.core.commands.client_factory import get_subscription_service_client
-    from azure.mgmt.resource.subscriptions import SubscriptionClient
+    from azure.mgmt.resource import SubscriptionClient
     subscription_client, subscription_id = get_subscription_service_client(SubscriptionClient)
     return list(subscription_client.subscriptions.list_locations(subscription_id))
 
@@ -48,8 +50,7 @@ def get_one_of_subscription_locations():
 
 def get_resource_groups():
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.resource.resources import ResourceManagementClient
-    rcf = get_mgmt_service_client(ResourceManagementClient)
+    rcf = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
     return list(rcf.resource_groups.list())
 
 
@@ -60,16 +61,14 @@ def get_resource_group_completion_list(prefix, **kwargs):  # pylint: disable=unu
 
 def get_resources_in_resource_group(resource_group_name, resource_type=None):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.resource.resources import ResourceManagementClient
-    rcf = get_mgmt_service_client(ResourceManagementClient)
+    rcf = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
     filter_str = "resourceType eq '{}'".format(resource_type) if resource_type else None
     return list(rcf.resource_groups.list_resources(resource_group_name, filter=filter_str))
 
 
 def get_resources_in_subscription(resource_type=None):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.resource.resources import ResourceManagementClient
-    rcf = get_mgmt_service_client(ResourceManagementClient)
+    rcf = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
     filter_str = "resourceType eq '{}'".format(resource_type) if resource_type else None
     return list(rcf.resources.list(filter=filter_str))
 
@@ -96,9 +95,16 @@ class CaseInsensitiveList(list):  # pylint: disable=too-few-public-methods
         return next((True for x in self if other.lower() == x.lower()), False)
 
 
+def model_choice_list(resource_type, model_name):
+    model = get_versioned_models(resource_type, model_name)
+    return enum_choice_list(model) if model else {}
+
+
 def enum_choice_list(data):
     """ Creates the argparse choices and type kwargs for a supplied enum type or list of strings. """
     # transform enum types, otherwise assume list of string choices
+    if not data:
+        return {}
     try:
         choices = [x.value for x in data]
     except AttributeError:
@@ -111,6 +117,14 @@ def enum_choice_list(data):
         'type': _type
     }
     return params
+
+
+def enum_default(resource_type, enum_name, enum_val_name):
+    mod = get_versioned_models(resource_type, enum_name)
+    try:
+        return getattr(mod, enum_val_name).value
+    except AttributeError:
+        return None
 
 
 def three_state_flag(positive_label='true', negative_label='false'):

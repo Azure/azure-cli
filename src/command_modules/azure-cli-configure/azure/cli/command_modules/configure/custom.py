@@ -49,7 +49,7 @@ def _print_cur_configuration(file_config):
 def _config_env_public_azure(_):
     from adal.adal_error import AdalError
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core._profile import Profile
     # Determine if user logged in
     try:

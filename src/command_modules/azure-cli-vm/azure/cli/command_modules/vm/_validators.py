@@ -392,9 +392,9 @@ def _validate_vm_create_storage_account(namespace):
             # 2 - params for new storage account specified
             namespace.storage_account_type = 'new'
     else:
-        from azure.mgmt.storage import StorageManagementClient
+        from azure.cli.core.profiles.shared import ResourceType
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        storage_client = get_mgmt_service_client(StorageManagementClient).storage_accounts
+        storage_client = get_mgmt_service_client(ResourceType.MGMT_STORAGE).storage_accounts  # pylint: disable=line-too-long
 
         # find storage account in target resource group that matches the VM's location
         sku_tier = 'Premium' if 'Premium' in namespace.storage_sku else 'Standard'
@@ -439,9 +439,9 @@ def _validate_vm_create_vnet(namespace, for_scale_set=False):
 
     if not vnet and not subnet and not nics:  # pylint: disable=too-many-nested-blocks
         # if nothing specified, try to find an existing vnet and subnet in the target resource group
-        from azure.mgmt.network import NetworkManagementClient
+        from azure.cli.core.profiles.shared import ResourceType
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        client = get_mgmt_service_client(NetworkManagementClient).virtual_networks
+        client = get_mgmt_service_client(ResourceType.MGMT_NETWORK).virtual_networks
 
         # find VNET in target resource group that matches the VM's location with a matching subnet
         for vnet_match in (v for v in client.list(rg) if v.location == location and v.subnets):

@@ -11,11 +11,14 @@ from datetime import datetime, timedelta
 from azure.cli.core.util import CLIError
 from azure.cli.core._profile import CLOUD
 from azure.cli.core._config import az_config
+from azure.cli.core.profiles import get_versioned_models, get_sdk_attr
+from azure.cli.core.profiles.shared import ResourceType
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
 
-
-from ._factory import get_storage_data_service_client, storage_client_factory
+from ._factory import get_storage_data_service_client
 from .util import glob_files_locally
+
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
@@ -23,7 +26,7 @@ storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 # Utilities
 
 def _query_account_key(account_name):
-    scf = storage_client_factory()
+    scf = get_mgmt_service_client(ResourceType.MGMT_STORAGE)
     acc = next((x for x in scf.storage_accounts.list() if x.name == account_name), None)
     if acc:
         from azure.cli.core.commands.arm import parse_resource_id
@@ -34,8 +37,9 @@ def _query_account_key(account_name):
 
 
 def _create_short_lived_blob_sas(account_name, account_key, container, blob):
-    from azure.storage.sharedaccesssignature import SharedAccessSignature
-    from azure.storage.blob.models import BlobPermissions
+    SharedAccessSignature = \
+        get_sdk_attr('azure.multiapi.storage.sharedaccesssignature#SharedAccessSignature')
+    BlobPermissions = get_sdk_attr('azure.multiapi.storage.blob.models#BlobPermissions')
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     sas = SharedAccessSignature(account_name, account_key)
     return sas.generate_blob(container, blob, permission=BlobPermissions(read=True), expiry=expiry,
@@ -43,8 +47,9 @@ def _create_short_lived_blob_sas(account_name, account_key, container, blob):
 
 
 def _create_short_lived_file_sas(account_name, account_key, share, directory_name, file_name):
-    from azure.storage.sharedaccesssignature import SharedAccessSignature
-    from azure.storage.blob.models import BlobPermissions
+    SharedAccessSignature = \
+        get_sdk_attr('azure.multiapi.storage.sharedaccesssignature#SharedAccessSignature')
+    BlobPermissions = get_sdk_attr('azure.multiapi.storage.blob.models#BlobPermissions')
     # if dir is empty string change it to None
     directory_name = directory_name if directory_name else None
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -56,7 +61,7 @@ def _create_short_lived_file_sas(account_name, account_key, share, directory_nam
 # region PARAMETER VALIDATORS
 
 def validate_accept(namespace):
-    from azure.storage.table import TablePayloadFormat
+    TablePayloadFormat = get_sdk_attr('azure.multiapi.storage.table#TablePayloadFormat')
     if namespace.accept:
         formats = {
             'none': TablePayloadFormat.JSON_NO_METADATA,
@@ -290,10 +295,11 @@ def get_content_setting_validator(settings_class, update):
         return class_type.__module__ + "." + class_type.__class__.__name__
 
     def validator(namespace):
-        from azure.storage.blob.baseblobservice import BaseBlobService
-        from azure.storage.file.models import ContentSettings as FileContentSettings
-        from azure.storage.blob.models import ContentSettings as BlobContentSettings
-        from azure.storage.file import FileService
+        BaseBlobService = get_sdk_attr('azure.multiapi.storage.blob.baseblobservice#BaseBlobService')  # pylint: disable=line-too-long
+        FileService = get_sdk_attr('azure.multiapi.storage.file#FileService')
+        BlobContentSettings = get_sdk_attr('azure.multiapi.storage.blob.models#ContentSettings')
+        FileContentSettings = get_sdk_attr('azure.multiapi.storage.file.models#ContentSettings')
+
         # must run certain validators first for an update
         if update:
             validate_client_parameters(namespace)
@@ -358,7 +364,8 @@ def validate_encryption(namespace):
     ''' Builds up the encryption object for storage account operations based on the
     list of services passed in. '''
     if namespace.encryption:
-        from azure.mgmt.storage.models import Encryption, EncryptionServices, EncryptionService
+        rt = ResourceType.MGMT_STORAGE
+        Encryption, EncryptionServices, EncryptionService = get_versioned_models(rt, 'Encryption', 'EncryptionServices', 'EncryptionService')  # pylint: disable=line-too-long
         services = {service: EncryptionService(True) for service in namespace.encryption}
         namespace.encryption = Encryption(EncryptionServices(**services))
 
@@ -428,7 +435,7 @@ def validate_included_datasets(namespace):
         if set(include) - set('cms'):
             help_string = '(c)opy-info (m)etadata (s)napshots'
             raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
-        from azure.storage.blob import Include
+        Include = get_sdk_attr('azure.multiapi.storage.blob#Include')
         namespace.include = Include('s' in include, 'm' in include, False, 'c' in include)
 
 
@@ -463,7 +470,7 @@ def get_permission_validator(permission_class):
 
 def table_permission_validator(namespace):
     """ A special case for table because the SDK associates the QUERY permission with 'r' """
-    from azure.storage.table import TablePermissions
+    TablePermissions = get_sdk_attr('azure.multiapi.storage.table#TablePermissions')
     if namespace.permission:
         if set(namespace.permission) - set('raud'):
             help_string = '(r)ead/query (a)dd (u)pdate (d)elete'
@@ -472,7 +479,7 @@ def table_permission_validator(namespace):
 
 
 def validate_public_access(namespace):
-    from azure.storage.blob.baseblobservice import BaseBlobService
+    BaseBlobService = get_sdk_attr('azure.multiapi.storage.blob.baseblobservice#BaseBlobService')
     from ._params import public_access_types
 
     if namespace.public_access:
@@ -505,7 +512,8 @@ def get_source_file_or_blob_service_client(namespace):
     indicates that user want to copy files or blobs in the same storage account, therefore the
     destination client will be set None hence the command will use destination client.
     """
-    from azure.storage.file import FileService
+    FileService = get_sdk_attr('azure.multiapi.storage.file#FileService')
+    BlockBlobService = get_sdk_attr('azure.multiapi.storage.blob.blockblobservice#BlockBlobService')
     usage_string = 'invalid usage: supply only one of the following argument sets:' + \
                    '\n\t   --source-uri' + \
                    '\n\tOR --source-container' + \
@@ -557,7 +565,6 @@ def get_source_file_or_blob_service_client(namespace):
             source_key = _query_account_key(source_account)
 
         if source_container:
-            from azure.storage.blob.blockblobservice import BlockBlobService
             ns['source_client'] = BlockBlobService(account_name=source_account,
                                                    account_key=source_key,
                                                    sas_token=source_sas)
@@ -582,7 +589,6 @@ def get_source_file_or_blob_service_client(namespace):
                 identifier.filename or nor_container_or_share:
             raise ValueError('incorrect usage: --source-uri has to be blob container or file share')
         elif identifier.container:
-            from azure.storage.blob.blockblobservice import BlockBlobService
             ns['source_client'] = BlockBlobService(account_name=identifier.account_name,
                                                    sas_token=identifier.sas_token)
         elif identifier.share:
@@ -777,7 +783,7 @@ def ipv4_range_type(string):
 def resource_type_type(string):
     ''' Validates that resource types string contains only a combination
     of (s)ervice, (c)ontainer, (o)bject '''
-    from azure.storage.models import ResourceTypes
+    ResourceTypes = get_sdk_attr('azure.multiapi.storage.models#ResourceTypes')
     if set(string) - set("sco"):
         raise ValueError
     return ResourceTypes(_str=''.join(set(string)))
@@ -786,7 +792,7 @@ def resource_type_type(string):
 def services_type(string):
     ''' Validates that services string contains only a combination
     of (b)lob, (q)ueue, (t)able, (f)ile '''
-    from azure.storage.models import Services
+    Services = get_sdk_attr('azure.multiapi.storage.models#Services')
     if set(string) - set("bqtf"):
         raise ValueError
     return Services(_str=''.join(set(string)))
