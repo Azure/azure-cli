@@ -16,7 +16,8 @@ except ImportError:
     from urlparse import urlparse  # pylint: disable=import-error
 
 from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import
-
+from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
+from azure.keyvault.key_vault_id import parse_secret_id
 from azure.mgmt.compute.models import (VirtualHardDisk,
                                        VirtualMachineScaleSet,
                                        VirtualMachineCaptureParameters,
@@ -1006,6 +1007,32 @@ def _get_private_config(resource_group_name, storage_account):
     return private_config
 
 
+def _merge_secrets(secrets):
+    """
+    Merge a list of secrets. Each secret should be a dict fitting the following JSON structure:
+    [{ "sourceVault": { "id": "value" },
+        "vaultCertificates": [{ "certificateUrl": "value",
+        "certificateStore": "cert store name (only on windows)"}] }]
+    The array of secrets is merged on sourceVault.id.
+    :param secrets:
+    :return:
+    """
+    merged = {}
+    vc_name = 'vaultCertificates'
+    for outer in secrets:
+        for secret in outer:
+            if secret['sourceVault']['id'] not in merged:
+                merged[secret['sourceVault']['id']] = []
+            merged[secret['sourceVault']['id']] = \
+                secret[vc_name] + merged[secret['sourceVault']['id']]
+
+    # transform the reduced map to vm format
+    formatted = [{'sourceVault': {'id': source_id},
+                  'vaultCertificates': value}
+                 for source_id, value in list(merged.items())]
+    return formatted
+
+
 def show_default_diagnostics_configuration(is_windows_os=False):
     '''show the default config file which defines data to be collected'''
     return get_default_diag_config(is_windows_os)
@@ -1431,7 +1458,7 @@ def create_vm(vm_name, resource_group_name, image=None,
               subnet=None, subnet_address_prefix='10.0.0.0/24', storage_profile=None,
               os_publisher=None, os_offer=None, os_sku=None, os_version=None,
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_type=None,
-              nic_type=None, validate=False, custom_data=None):
+              nic_type=None, validate=False, custom_data=None, secrets=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core._util import random_string
     from azure.cli.command_modules.vm._template_builder import (
@@ -1535,11 +1562,14 @@ def create_vm(vm_name, resource_group_name, image=None,
     if custom_data:
         custom_data = read_content_if_is_file(custom_data)
 
+    if secrets:
+        secrets = _merge_secrets([load_json(secret) for secret in secrets])
+
     vm_resource = build_vm_resource(
         vm_name, location, tags, size, storage_profile, nics, admin_username, availability_set,
         admin_password, ssh_key_value, ssh_dest_key_path, image, os_disk_name,
         os_type, storage_caching, storage_sku, os_publisher, os_offer, os_sku, os_version,
-        os_vhd_uri, attach_os_disk, data_disk_sizes_gb, image_data_disks, custom_data)
+        os_vhd_uri, attach_os_disk, data_disk_sizes_gb, image_data_disks, custom_data, secrets)
     vm_resource['dependsOn'] = vm_dependencies
 
     master_template.add_resource(vm_resource)
@@ -1583,7 +1613,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                 subnet=None, subnet_address_prefix=None,
                 os_offer=None, os_publisher=None, os_sku=None, os_version=None,
                 load_balancer_type=None, vnet_type=None, public_ip_type=None, storage_profile=None,
-                single_placement_group=None, custom_data=None):
+                single_placement_group=None, custom_data=None, secrets=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core._util import random_string
     from azure.cli.command_modules.vm._template_builder import (
@@ -1678,6 +1708,9 @@ def create_vmss(vmss_name, resource_group_name, image,
     if custom_data:
         custom_data = read_content_if_is_file(custom_data)
 
+    if secrets:
+        secrets = _merge_secrets([load_json(secret) for secret in secrets])
+
     vmss_resource = build_vmss_resource(vmss_name, naming_prefix, location, tags,
                                         not disable_overprovision, upgrade_policy_mode,
                                         vm_sku, instance_count,
@@ -1690,7 +1723,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                                         os_publisher, os_offer, os_sku, os_version,
                                         backend_address_pool_id, inbound_nat_pool_id,
                                         single_placement_group=single_placement_group,
-                                        custom_data=custom_data)
+                                        custom_data=custom_data, secrets=secrets)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     master_template.add_resource(vmss_resource)
@@ -1751,3 +1784,46 @@ def create_av_set(availability_set_name, resource_group_name,
         resource_group_name, deployment_name, properties, raw=no_wait))
     compute_client = _compute_client_factory()
     return compute_client.availability_sets.get(resource_group_name, availability_set_name)
+
+
+def _get_vault_id_from_name(client, vault_name):
+    group_name = _get_resource_group_from_vault_name(vault_name)
+    vault = client.get(group_name, vault_name)
+    return vault.id
+
+
+def get_vm_format_secret(secrets, certificate_store=None):
+    """
+    Format secrets to be used in `az vm create --secrets`
+    :param dict secrets: array of secrets to be formatted
+    :param str certificate_store: certificate store the secret will be applied (Windows only)
+    :return: formatted secrets as an array
+    :rtype: list
+    """
+    from azure.mgmt.keyvault import KeyVaultManagementClient
+    client = get_mgmt_service_client(KeyVaultManagementClient).vaults
+    grouped_secrets = {}
+
+    # group secrets by source vault
+    for secret in secrets:
+        parsed = parse_secret_id(secret)
+        match = re.search('://(.+?)\\.', parsed.vault)
+        vault_name = match.group(1)
+        if vault_name not in grouped_secrets:
+            grouped_secrets[vault_name] = {
+                'vaultCertificates': [],
+                'id': _get_vault_id_from_name(client, vault_name)
+            }
+
+        vault_cert = {'certificateUrl': secret}
+        if certificate_store:
+            vault_cert['certificateStore'] = certificate_store
+
+        grouped_secrets[vault_name]['vaultCertificates'].append(vault_cert)
+
+    # transform the reduced map to vm format
+    formatted = [{'sourceVault': {'id': value['id']},
+                  'vaultCertificates': value['vaultCertificates']}
+                 for _, value in list(grouped_secrets.items())]
+
+    return formatted

@@ -15,7 +15,6 @@ from azure.cli.core._util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.mgmt.storage import StorageManagementClient
-from azure.mgmt.storage.models import CustomDomain
 from azure.storage.sharedaccesssignature import SharedAccessSignature
 from azure.storage.blob import Include, PublicAccess
 from azure.storage.blob.baseblobservice import BaseBlobService
@@ -154,16 +153,19 @@ def validate_source_uri(namespace):  # pylint: disable=too-many-statements
     validate_client_parameters(namespace)  # must run first to resolve storage account
 
     # determine if the copy will happen in the same storage account
+    same_account = False
     if not source_account_name and source_account_key:
         raise ValueError(usage_string.format('Source account key is given but account name is not'))
     elif not source_account_name and not source_account_key:
         # neither source account name or key is given, assume that user intends to copy blob in
         # the same account
+        same_account = True
         source_account_name = ns.get('account_name', None)
         source_account_key = ns.get('account_key', None)
     elif source_account_name and not source_account_key:
         if source_account_name == ns.get('account_name', None):
             # the source account name is same as the destination account name
+            same_account = True
             source_account_key = ns.get('account_key', None)
         else:
             # the source account is different from destination account but the key is missing
@@ -180,11 +182,11 @@ def validate_source_uri(namespace):  # pylint: disable=too-many-statements
     if not sas:
         # generate a sas token even in the same account when the source and destination are not the
         # same kind.
-        if valid_file_source and ns.get('container_name', None):
+        if valid_file_source and (ns.get('container_name', None) or not same_account):
             dir_name, file_name = os.path.split(path) if path else (None, '')
             sas = _create_short_lived_file_sas(source_account_name, source_account_key, share,
                                                dir_name, file_name)
-        elif valid_blob_source and ns.get('share_name', None):
+        elif valid_blob_source and (ns.get('share_name', None) or not same_account):
             sas = _create_short_lived_blob_sas(source_account_name, source_account_key, container,
                                                blob)
 
@@ -272,11 +274,8 @@ def get_content_setting_validator(settings_class, update):
 
 
 def validate_custom_domain(namespace):
-    if namespace.custom_domain:
-        namespace.custom_domain = CustomDomain(namespace.custom_domain, namespace.subdomain)
-    if namespace.subdomain and not namespace.custom_domain:
-        raise ValueError("must specify '--custom-domain' to use the '--use-subdomain' flag")
-    del namespace.subdomain
+    if namespace.use_subdomain and not namespace.custom_domain:
+        raise ValueError('usage error: --custom-domain DOMAIN [--use-subdomain]')
 
 
 def validate_encryption(namespace):

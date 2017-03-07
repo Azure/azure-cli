@@ -237,7 +237,7 @@ def get_command_table(module_name=None):
     If the module is not found, all commands are loaded.
     '''
     loaded = False
-    if module_name and module_name != 'acs' and module_name not in BLACKLISTED_MODS:
+    if module_name and module_name not in BLACKLISTED_MODS:
         try:
             import_module('azure.cli.command_modules.' + module_name).load_commands()
             logger.debug("Successfully loaded command table from module '%s'.", module_name)

@@ -13,29 +13,12 @@ import time
 
 from azure.cli.core._util import CLIError
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck,
-                                                     NoneCheck, VCRTestBase)
+                                                     NoneCheck)
 
-from azure.keyvault import HttpBearerChallenge
-from azure.keyvault.key_vault_authentication import \
-    (KeyVaultAuthBase)
 from azure.cli.command_modules.keyvault._params import secret_encoding_values
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
-def _before_record_response(response):
-    for key in VCRTestBase.FILTER_HEADERS:
-        if key in response['headers']:
-            del response['headers'][key]
-    # ignore any 401 responses during playback
-    if response['status']['code'] == 401:
-        response = None
-    return response
-
-
-def _mock_key_vault_auth_base(self, request):
-    challenge = HttpBearerChallenge(request.url, 'Bearer authorization=fake-url,resource=https://vault.azure.net')
-    self.set_authorization_header(request, challenge)
-    return request
 
 def _create_keyvault(test, vault_name, resource_group, location, retry_wait=30, max_retries=10): # pylint: disable=too-many-arguments
     # need premium KeyVault to store keys in HSM
@@ -60,6 +43,7 @@ def _create_keyvault(test, vault_name, resource_group, location, retry_wait=30, 
                 time.sleep(retry_wait)
             else:
                 raise ex
+
 
 class KeyVaultMgmtScenarioTest(ResourceGroupVCRTestBase):
 
@@ -134,24 +118,19 @@ class KeyVaultMgmtScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('properties.sku.name', 'premium')
         ])
 
+
 class KeyVaultKeyScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(KeyVaultKeyScenarioTest, self).__init__(__file__, test_method, resource_group='cli-test-keyvault-key')
-        self.my_vcr.before_record_response = _before_record_response
-        if self.playback:
-            KeyVaultAuthBase.__call__ = _mock_key_vault_auth_base
         self.keyvault_name = 'cli-keyvault-test-key'
         self.location = 'westus'
-
-    def set_up(self):
-        super(KeyVaultKeyScenarioTest, self).set_up()
-        _create_keyvault(self, self.keyvault_name, self.resource_group, self.location)
 
     def test_keyvault_key(self):
         self.execute()
 
     def body(self):
+        _create_keyvault(self, self.keyvault_name, self.resource_group, self.location)
         kv = self.keyvault_name
         # create a key
         key = self.cmd('keyvault key create --vault-name {} -n key1 -p software'.format(kv),
@@ -212,19 +191,13 @@ class KeyVaultKeyScenarioTest(ResourceGroupVCRTestBase):
         byok_key_file = os.path.join(TEST_DIR, 'TestBYOK-NA.byok')
         self.cmd('keyvault key import --vault-name {} -n import-key-byok --byok-file "{}"'.format(kv, byok_key_file))
 
+
 class KeyVaultSecretScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(KeyVaultSecretScenarioTest, self).__init__(__file__, test_method, resource_group='cli-test-keyvault-secret')
-        self.my_vcr.before_record_response = _before_record_response
-        if self.playback:
-            KeyVaultAuthBase.__call__ = _mock_key_vault_auth_base
         self.keyvault_name = 'cli-test-keyvault-secret'
         self.location = 'westus'
-
-    def set_up(self):
-        super(KeyVaultSecretScenarioTest, self).set_up()
-        _create_keyvault(self, self.keyvault_name, self.resource_group, self.location)
 
     def test_keyvault_secret(self):
         self.execute()
@@ -248,6 +221,7 @@ class KeyVaultSecretScenarioTest(ResourceGroupVCRTestBase):
             _test_set_and_download(encoding)
 
     def body(self):
+        _create_keyvault(self, self.keyvault_name, self.resource_group, self.location)
         kv = self.keyvault_name
         # create a secret
         secret = self.cmd('keyvault secret set --vault-name {} -n secret1 --value ABC123'.format(kv),
@@ -292,19 +266,13 @@ class KeyVaultSecretScenarioTest(ResourceGroupVCRTestBase):
 
         self._test_download_secret()
 
+
 class KeyVaultCertificateScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(KeyVaultCertificateScenarioTest, self).__init__(__file__, test_method, resource_group='cli-test-keyvault-cert')
-        self.my_vcr.before_record_response = _before_record_response
-        if self.playback:
-            KeyVaultAuthBase.__call__ = _mock_key_vault_auth_base
-        self.keyvault_name = 'cli-test-keyvault-cert'
+        super(KeyVaultCertificateScenarioTest, self).__init__(__file__, test_method, resource_group='cli-test-keyvault-cert', debug=True)
+        self.keyvault_name = 'cli-test-keyvault-cert1'
         self.location = 'westus'
-
-    def set_up(self):
-        super(KeyVaultCertificateScenarioTest, self).set_up()
-        _create_keyvault(self, self.keyvault_name, self.resource_group, self.location)
 
     def test_keyvault_certificate(self):
         self.execute()
@@ -405,11 +373,11 @@ class KeyVaultCertificateScenarioTest(ResourceGroupVCRTestBase):
 
         dest_binary = os.path.join(TEST_DIR, 'download-binary')
         dest_string = os.path.join(TEST_DIR, 'download-string')
-        self.cmd('keyvault certificate download --vault-name {} -n pem-cert1 --file "{}"'.format(kv, dest_binary))
-        self.cmd('keyvault certificate download --vault-name {} -n pem-cert1 --file "{}" -e string'.format(kv, dest_string))
-        self.cmd('keyvault certificate delete --vault-name {} -n pem-cert1'.format(kv))
 
         try:
+            self.cmd('keyvault certificate download --vault-name {} -n pem-cert1 --file "{}"'.format(kv, dest_binary))
+            self.cmd('keyvault certificate download --vault-name {} -n pem-cert1 --file "{}" -e string'.format(kv, dest_string))
+            self.cmd('keyvault certificate delete --vault-name {} -n pem-cert1'.format(kv))
             with open(dest_binary, 'rb') as f:
                 import base64
                 downloaded_binary = base64.b64encode(f.read()).decode('utf-8')
@@ -417,17 +385,20 @@ class KeyVaultCertificateScenarioTest(ResourceGroupVCRTestBase):
             with open(dest_string, 'r') as f:
                 downloaded_string = f.read().replace('\r\n', '\n').replace('\n', '')
         finally:
-            os.remove(dest_binary)
-            os.remove(dest_string)
+            if os.path.exists(dest_binary):
+                os.remove(dest_binary)
+            if os.path.exists(dest_string):
+                os.remove(dest_string)
 
         self.assertEqual(cert_data, downloaded_string)
         self.assertEqual(cert_data, downloaded_binary)
 
     def body(self):
+        _create_keyvault(self, self.keyvault_name, self.resource_group, self.location)
+
         kv = self.keyvault_name
 
         self._test_certificate_download()
-
         policy_path = os.path.join(TEST_DIR, 'policy.json')
         policy2_path = os.path.join(TEST_DIR, 'policy2.json')
 

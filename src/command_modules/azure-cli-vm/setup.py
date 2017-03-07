@@ -26,6 +26,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-mgmt-compute==0.33.1rc1',
+    'azure-mgmt-keyvault==0.30.0',
     'azure-keyvault==0.1.0',
     'azure-mgmt-network==0.30.0',
     'azure-mgmt-resource==0.30.2',

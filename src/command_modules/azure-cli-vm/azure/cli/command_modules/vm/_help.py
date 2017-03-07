@@ -22,6 +22,25 @@ name_group_example = """        - name: {0} by Name and Group
           text: az {1} -n name -g MyResourceGroup
 """
 
+helps['vm format-secret'] = """
+    type: command
+    long-summary: >
+        Transform secrets into a form consumed by VMs and VMSS create via --secrets.
+    examples:
+        - name: Create a self-signed certificate with a the default policy and add to a virtual machine
+          text: >
+            az keyvault certificate create --vault-name vaultname -n cert1 \\
+              -p "$(az keyvault certificate get-default-policy)"
+
+            secrets=$(az keyvault secret list-versions --vault-name vaultname \\
+              -n cert1 --query "[?attributes.enabled].id" -o tsv)
+
+            vm_secrets=$(az vm format-secret -s "$secrets") \n
+
+            az vm create -g group-name -n vm-name --admin-username deploy  \\
+              --image debian --secrets "$vm_secrets"
+"""
+
 helps['vm create'] = """
     type: command
     short-summary: Create an Azure Virtual Machine.
@@ -68,6 +87,18 @@ helps['vm create'] = """
             az vm create -n MyVm -g MyResourceGroup
             --public-ip-address-dns-name MyUniqueDnsName --image ubuntults --data-disk-sizes-gb 10 20
             --size Standard_DS2_v2 --generate-ssh-keys
+        - name: Create an Debian VM and with Key Vault secrets. The secrets are placed in /var/lib/waagent and each certificate file is named with the hex thumbprint.
+          text: >
+            az keyvault certificate create --vault-name vaultname -n cert1 \\
+              -p "$(az keyvault certificate get-default-policy)"
+
+            secrets=$(az keyvault secret list-versions --vault-name vaultname \\
+              -n cert1 --query "[?attributes.enabled].id" -o tsv)
+
+            vm_secrets=$(az vm format-secret -s "$secrets") \n
+
+            az vm create -g group-name -n vm-name --admin-username deploy  \\
+              --image debian --secrets "$vm_secrets"
 """.format(image_long_summary)
 
 helps['vmss create'] = """
@@ -95,6 +126,18 @@ helps['vmss create'] = """
         - name: Create a Linux VM scale set with a cloud-init script (https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init).
           text: >
             az vmss create -g MyResourceGroup -n MyVmss --image debian --custom_data MyCloudInitScript.yml
+        - name: Create an Debian VM scaleset and with Key Vault secrets. The secrets are placed in /var/lib/waagent and each certificate file is named with the hex thumbprint.
+          text: >
+            az keyvault certificate create --vault-name vaultname -n cert1 \\
+              -p "$(az keyvault certificate get-default-policy)"
+
+            secrets=$(az keyvault secret list-versions --vault-name vaultname \\
+              -n cert1 --query "[?attributes.enabled].id" -o tsv)
+
+            vm_secrets=$(az vm format-secret -s "$secrets") \n
+
+            az vmss create -g group-name -n vm-name --admin-username deploy  \\
+              --image debian --secrets "$vm_secrets"
 """.format(image_long_summary)
 
 helps['vm availability-set create'] = """

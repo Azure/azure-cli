@@ -250,10 +250,9 @@ for item in ['create', 'update']:
 
 register_cli_argument('storage account create', 'access_tier', help='Required for StandardBlob accounts. The access tier used for billing. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types.', **enum_choice_list(AccessTier))
 register_cli_argument('storage account update', 'access_tier', help='The access tier used for billing StandardBlob accounts. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types.', **enum_choice_list(AccessTier))
-register_cli_argument('storage account create', 'custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.', validator=validate_custom_domain)
+register_cli_argument('storage account create', 'custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.')
 register_cli_argument('storage account update', 'custom_domain', help='User domain assigned to the storage account. Name is the CNAME source. Use "" to clear existing value.', validator=validate_custom_domain)
-register_extra_cli_argument('storage account create', 'subdomain', options_list=('--use-subdomain',), help='Specify to enable indirect CNAME validation.', action='store_true')
-register_extra_cli_argument('storage account update', 'subdomain', options_list=('--use-subdomain',), help='Specify whether to use indirect CNAME validation.', default=None, **enum_choice_list(['true', 'false']))
+register_cli_argument('storage account update', 'use_subdomain', help='Specify whether to use indirect CNAME validation.', **enum_choice_list(['true', 'false']))
 
 register_cli_argument('storage account update', 'tags', tags_type, default=None)
 

@@ -59,6 +59,7 @@ def transform_dns_zone_table_output(result):
 
     return final_result if is_list else final_result[0]
 
+
 def transform_local_gateway_table_output(result):
     final_result = []
     for item in result:
@@ -77,14 +78,40 @@ def transform_local_gateway_table_output(result):
         final_result.append(new_item)
     return final_result
 
+
 def transform_vnet_create_output(result):
     try:
         return {'newVNet': result.result()}
     except Exception:  # pylint: disable=broad-except
         return result
 
+
 def transform_public_ip_create_output(result):
     try:
         return {'publicIp': result.result()}
+    except Exception:  # pylint: disable=broad-except
+        return result
+
+
+def transform_traffic_manager_create_output(result):
+    return {'TrafficManagerProfile': result}
+
+
+def transform_nic_create_output(result):
+    try:
+        return {'NewNIC': result.result()}
+    except Exception:  # pylint: disable=broad-except
+        return result
+
+
+def transform_nsg_create_output(result):
+    try:
+        return {'NewNSG': result.result()}
+    except Exception:  # pylint: disable=broad-except
+        return result
+
+def transform_vnet_gateway_create_output(result):
+    try:
+        return {'vnetGateway': result.result()}
     except Exception:  # pylint: disable=broad-except
         return result
