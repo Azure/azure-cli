@@ -204,7 +204,22 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
 
     def update_argument(self, param_name, argtype):
         arg = self.arguments[param_name]
+        CliCommand._resolve_default_value_from_cfg_file(arg, argtype)
         arg.type.update(other=argtype)
+
+    @staticmethod
+    def _resolve_default_value_from_cfg_file(arg, overrides):
+        if 'default_configuration' in overrides.settings:
+            def_config = overrides.settings.get('default_configuration', None)
+            if (arg.type.settings.get('required', False) or
+                    overrides.settings.get('required', False)):
+                parts = def_config.split('/')
+                section = 'core' if len(parts) == 1 else parts[0]
+                config_name = parts[-1]
+                config_value = az_config.get(section, config_name, None)
+                if config_value:
+                    overrides.settings['default'] = config_value
+            overrides.settings.pop('default_configuration')
 
     def execute(self, **kwargs):
         return self.handler(**kwargs)
