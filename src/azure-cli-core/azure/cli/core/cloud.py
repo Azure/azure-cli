@@ -341,7 +341,7 @@ def _save_cloud(cloud, overwrite=False):
     except configparser.DuplicateSectionError:
         if not overwrite:
             raise CloudAlreadyRegisteredException(cloud.name)
-    if cloud.profile is not None:
+    if cloud.profile:
         config.set(cloud.name, 'profile', cloud.profile)
     for k, v in cloud.endpoints.__dict__.items():
         if v is not None:
