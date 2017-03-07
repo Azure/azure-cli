@@ -118,7 +118,6 @@ class TestCloud(unittest.TestCase):
             self.assertEqual(custom_clouds[0].endpoints.management,
                              c.endpoints.resource_manager)
 
-
     def test_get_active_cloud_name_default(self):
         expected = AZURE_PUBLIC_CLOUD.name
         actual = get_active_cloud_name()
