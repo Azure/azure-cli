@@ -5,29 +5,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 from codecs import open
 from setuptools import setup
 
 VERSION = "0.1.0+dev"
-
-# If we have source, validate that our version numbers match
-# This should prevent uploading releases with mismatched versions.
-try:
-    with open('azure/cli/tests/__init__.py', 'r', encoding='utf-8') as f:
-        content = f.read()
-except OSError:
-    pass
-else:
-    import re
-    import sys
-    m = re.search(r'__version__\s*=\s*[\'"](.+?)[\'"]', content)
-    if not m:
-        print('Could not find __version__ in azure/cli/tests/__init__.py')
-        sys.exit(1)
-    if m.group(1) != VERSION:
-        print('Expected __version__ = "{}"; found "{}"'.format(VERSION, m.group(1)))
-        sys.exit(1)
 
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
