@@ -245,6 +245,9 @@ def get_clouds():
         if c.profile is None:
             # If profile isn't set, use latest
             c.profile = 'latest'  # pylint: disable=redefined-variable-type
+        if not hasattr(c.endpoints, 'management') and hasattr(c.endpoints, 'resource_manager'):
+            # If management endpoint not set, use resource manager endpoint
+            c.endpoints.management = c.endpoints.resource_manager
         clouds.append(c)
     active_cloud_name = get_active_cloud_name()
     for c in clouds:
