@@ -139,11 +139,16 @@ def create_adls_item(account_name,
         else:
             raise CLIError('An item at path: \'{}\' already exists. To overwrite the existing item, specify --force'.format(path))
     
+    if folder:
+        return client.mkdir(path)
+
     if content:
+        if type(content) is str:
+            content = str.encode(content) # turn content into bytes with UTF-8 encoding if it is just a string
         with client.open(path, mode='wb') as f:
-            f.write(content)
+            return f.write(content)
     else:
-        client.touch(path)
+        return client.touch(path)
 
 def append_adls_item(account_name,
                      path,
@@ -152,7 +157,9 @@ def append_adls_item(account_name,
     if not client.exists(path):
         raise CLIError('File at path: \'{}\' does not exist. Create the file before attempting to append to it.'.format(path))
     
-    with client.open(path, mode='wb') as f:
+    with client.open(path, mode='ab') as f:
+        if type(content) is str:
+            content = str.encode(content)
         f.write(content)
 
 def remove_adls_item(account_name,
@@ -166,7 +173,7 @@ def upload_to_adls(account_name,
                    thread_count=None,
                    overwrite=False):
     client = cf_datalake_store_filesystem(account_name)
-    upload = ADLUploader(client, destination_path, source_path, int(thread_count), overwrite=overwrite)
+    upload = ADLUploader(client, destination_path, source_path, thread_count, overwrite=overwrite)
 
 def download_from_adls(account_name,
                    source_path,
@@ -174,7 +181,7 @@ def download_from_adls(account_name,
                    thread_count=None,
                    overwrite=False):
     client = cf_datalake_store_filesystem(account_name)
-    download = ADLDownloader(client, source_path, destination_path, int(thread_count), overwrite=overwrite)
+    download = ADLDownloader(client, source_path, destination_path, thread_count, overwrite=overwrite)
 
 def test_adls_item(account_name,
                    path):
@@ -199,7 +206,7 @@ def preview_adls_item(account_name,
             offset = int(offset)
 
     if not length or length <= 0:
-        length = client.info(path).length - offset
+        length = client.info(path)['length'] - offset
         if length > 1*1024*1024 and not force:
             raise CLIError('The remaining data to preview is greater than {} bytes. Please specify a length or use the --force parameter to preview the entire file. The length of the file that would have been previewed: {}'.format(str(1*1024*1024), str(length)))
 
@@ -228,7 +235,7 @@ def set_adls_item_expiry(account_name,
                          path,
                          expiration_time):
     client = cf_datalake_store_filesystem(account_name)
-    if client.info(path).type != 'FILE':
+    if client.info(path)['type'] != 'FILE':
         raise CLIError('The specified path does not exist or is not a file. Please ensure the path points to a file and it exists. Path supplied: {}'.format(path))
     print('todo')
 

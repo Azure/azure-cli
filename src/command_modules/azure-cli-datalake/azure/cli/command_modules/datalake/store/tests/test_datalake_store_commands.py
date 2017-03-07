@@ -11,6 +11,7 @@ from __future__ import print_function
 import os
 import time
 
+from shutil import rmtree
 from azure.cli.core._util import CLIError
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck,
                                                      NoneCheck, VCRTestBase)
@@ -18,25 +19,171 @@ from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, J
 class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(DataLakeStoreFileScenarioTest, self).__init__(__file__, test_method, resource_group='cli-test-adls-mgmt')
-        self.adls_name = 'cliadls123450'
+        super(DataLakeStoreFileScenarioTest, self).__init__(__file__, test_method, resource_group='test-adls-file')
+        self.adls_name = 'cliadls123416'
         self.location = 'eastus2'
+        self.local_folder = os.path.join(os.getcwd(), 'adls_resources')
+        self.local_file = os.path.join(self.local_folder, 'sample_file.txt')
+        self.local_file_content = 'Local File Content'
 
     def test_datalake_store_file_mgmt(self):
         self.execute()
 
     def set_up(self):
         super(DataLakeStoreFileScenarioTest, self).set_up()
+        # create local file
+        if os.path.exists(self.local_folder):
+            rmtree(self.local_folder)
+
+        os.makedirs(self.local_folder)
+        with open(self.local_file, 'w') as f:
+            f.write(self.local_file_content)
+
         # create ADLS account
-        self.cmd('datalake store account create -g {} -n {} -l {} --disable-encryption'.format(self.resource_group, self.adls_names[0], self.location))
+        self.cmd('datalake store account create -g {} -n {} -l {} --disable-encryption'.format(self.resource_group, self.adls_name, self.location))
+        result = self.cmd('datalake store account show -g {} -n {}'.format(self.resource_group, self.adls_name))
+        while result['provisioningState'] != 'Succeeded' and result['provisioningState'] != 'Failed':
+            time.sleep(5)
+            result = self.cmd('datalake store account show -g {} -n {}'.format(self.resource_group, self.adls_name))
+
+        if result['provisioningState'] == 'Failed':
+            raise CLIError('Failed to create the adls account, tests cannot proceed!')
+    def tear_down(self):
+        super(DataLakeStoreFileScenarioTest, self).tear_down()
+        if os.path.exists(self.local_folder):
+            rmtree(self.local_folder)
 
     def body(self):
         rg = self.resource_group
         adls = self.adls_name
         loc = self.location
+        folder_name = 'adltestfolder01'
+        move_folder_name = 'adltestfolder02'
+        file_name = 'adltestfile01'
+        upload_file_name = 'adltestfile02'
+        join_file_name = 'adltestfile03'
+        download_file_name = 'adltestfile04'
+        file_content = '123456'
         # file and folder manipulation
+        # create a folder
+        self.cmd('datalake store file create -n {} --path "{}" --folder --force --debug'.format(adls, folder_name), debug=True)
+        # get the folder
+        self.cmd('datalake store file show -n {} --path "{}"'.format(adls, folder_name), checks=[
+            JMESPathCheck('name', folder_name),
+            JMESPathCheck('type', 'DIRECTORY'),
+            JMESPathCheck('length', 0),
+        ])
+
+        # create a file
+        self.cmd('datalake store file create -n {} --path "{}/{}" --content {}'.format(adls, folder_name, file_name, file_content))
+        # get the file
+        self.cmd('datalake store file show -n {} --path "{}/{}"'.format(adls, folder_name, file_name), checks=[
+            JMESPathCheck('pathSuffix', file_name),
+            JMESPathCheck('type', 'FILE'),
+            JMESPathCheck('length', len(file_content)),
+        ])
+
+        # move the file
+        # this requires that the folder exists
+        self.cmd('datalake store file create -n {} --path "{}" --folder --force'.format(adls, move_folder_name))
+        self.cmd('datalake store file move -n {} --source-path "{}/{}" --destination-path "{}/{}"'.format(adls, folder_name, file_name, move_folder_name, file_name))
+        # get the file at the new location
+        self.cmd('datalake store file show -n {} --path "{}/{}"'.format(adls, move_folder_name, file_name), checks=[
+            JMESPathCheck('pathSuffix', file_name),
+            JMESPathCheck('type', 'FILE'),
+            JMESPathCheck('length', len(file_content)),
+        ])
+
+        # preview the file
+        result = self.cmd('datalake store file preview -n {} --path "{}/{}"'.format(adls, move_folder_name, file_name))
+        assert result == file_content
+
+        # partial file preview
+        result = self.cmd('datalake store file preview -n {} --path "{}/{}" --length 1 --offset 3'.format(adls, move_folder_name, file_name))
+        assert len(result) == 1
+        assert result == '4'
+
+        # list the directory, which contains just the one file
+        self.cmd('datalake store file list -n {} --path "{}"'.format(adls, move_folder_name), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].pathSuffix', file_name),
+            JMESPathCheck('[0].type', 'FILE'),
+            JMESPathCheck('[0].length', len(file_content)),
+        ])
+        
+        # set the owner and owning group for the file and confirm them
+        group_id = '80a3ed5f-959e-4696-ba3c-d3c8b2db6766'
+        user_id = '6361e05d-c381-4275-a932-5535806bb323'
+        self.cmd('datalake store file set-owner -n {} --path "{}/{}" --group {} --owner {}'.format(adls, move_folder_name, file_name, group_id, user_id))
+
+        # get the file and confirm those values
+        result = self.cmd('datalake store file show -n {} --path "{}/{}"'.format(adls, move_folder_name, file_name), checks=[
+            JMESPathCheck('pathSuffix', file_name),
+            JMESPathCheck('type', 'FILE'),
+            JMESPathCheck('length', len(file_content)),
+            JMESPathCheck('owner', user_id),
+            JMESPathCheck('group', group_id),
+        ])
+        
+        # set the permissions on the file
+        self.cmd('datalake store file set-permission -n {} --path "{}/{}" --permission {}'.format(adls, move_folder_name, file_name, 777))
+        # get the file and confirm those values
+        result = self.cmd('datalake store file show -n {} --path "{}/{}"'.format(adls, move_folder_name, file_name), checks=[
+            JMESPathCheck('pathSuffix', file_name),
+            JMESPathCheck('type', 'FILE'),
+            JMESPathCheck('length', len(file_content)),
+            JMESPathCheck('permission', '777'),
+        ])
+
+        # append content to a file
+        self.cmd('datalake store file append -n {} --path "{}/{}" --content {}'.format(adls, move_folder_name, file_name, file_content))
+        # get the file
+        self.cmd('datalake store file show -n {} --path "{}/{}"'.format(adls, move_folder_name, file_name), checks=[
+            JMESPathCheck('pathSuffix', file_name),
+            JMESPathCheck('type', 'FILE'),
+            JMESPathCheck('length', len(file_content) * 2),
+        ])
+
+        # upload a file
+        self.cmd('datalake store file upload -n {} --destination-path "{}/{}" --source-path "{}"'.format(adls, folder_name, upload_file_name, self.local_file))
+        # get the file
+        self.cmd('datalake store file show -n {} --path "{}/{}"'.format(adls, folder_name, upload_file_name), checks=[
+            JMESPathCheck('pathSuffix', upload_file_name),
+            JMESPathCheck('type', 'FILE'),
+            JMESPathCheck('length', len(self.local_file_content)),
+        ])
+        # join the uploaded file to the created file
+        self.cmd('datalake store file join -n {} --destination-path "{}/{}" --source-paths "{}/{}","{}/{}"'.format(adls, folder_name, join_file_name, folder_name, upload_file_name, move_folder_name, file_name))
+        self.cmd('datalake store file show -n {} --path "{}/{}"'.format(adls, folder_name, join_file_name), checks=[
+            JMESPathCheck('pathSuffix', join_file_name),
+            JMESPathCheck('type', 'FILE'),
+            JMESPathCheck('length', len(self.local_file_content) + (len(file_content)*2)),
+        ])
+        
+        # download the joined file
+        self.cmd('datalake store file download -n {} --destination-path "{}" --source-path "{}/{}"'.format(adls, os.path.join(self.local_folder, download_file_name), folder_name, join_file_name))
+        assert os.path.getsize(os.path.join(self.local_folder, download_file_name)) == len(self.local_file_content) + (len(file_content)*2)
+
+        # delete the file and confirm it is gone.
+        self.cmd('datalake store file delete -n {} --path "{}/{}"'.format(adls, folder_name, join_file_name))
+        self.cmd('datalake store file list -n {} --path "{}"'.format(adls, folder_name), checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck('length(@)', 0),
+        ])
+
+        # delete a folder that has contents and confirm it is gone.
+        self.cmd('datalake store file create -n {} --path "{}" --folder'.format(adls, move_folder_name))
+        self.cmd('datalake store file create -n {} --path "{}/{}"'.format(adls, move_folder_name, 'tempfile01.txt'))
+        self.cmd('datalake store file delete -n {} --path "{}" --recurse'.format(adls, move_folder_name))
+        # test that the path is gone
+        assert self.cmd('datalake store file test -n {} --path "{}"'.format(adls, move_folder_name)) == False
+
+        # test that the other folder still exists
+        assert self.cmd('datalake store file test -n {} --path "{}"'.format(adls, folder_name)) == True
+
+        # TODO once there are commands for them:
         # file expiration
-        # permissions
         # acl management
 
 class DataLakeStoreAccountScenarioTest(ResourceGroupVCRTestBase):
