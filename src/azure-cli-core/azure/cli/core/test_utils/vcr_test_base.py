@@ -60,6 +60,10 @@ def patch_vcr_connection_request(*args, **kwargs):
 vcr.stubs.VCRConnection.request = patch_vcr_connection_request
 
 
+def _mock_get_uuid_str():
+    return '00000000-0000-0000-0000-000000000000'
+
+
 def _mock_get_mgmt_service_client(client_type, subscription_bound=True, subscription_id=None,
                                   api_version=None, base_url_bound=None, **kwargs):
     # version of _get_mgmt_service_client to use when recording or playing tests
@@ -303,6 +307,9 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
         # scrub subscription from the uri
         request.uri = re.sub('/subscriptions/([^/]+)/',
                              '/subscriptions/{}/'.format(MOCKED_SUBSCRIPTION_ID), request.uri)
+        # scrub jobId from uri, required for ADLA
+        request.uri = re.sub('/Jobs/([^/]+)',
+                             '/Jobs/{}'.format(MOCKED_SUBSCRIPTION_ID), request.uri)
         request.uri = re.sub('/graph.windows.net/([^/]+)/',
                              '/graph.windows.net/{}/'.format(MOCKED_TENANT_ID), request.uri)
         request.uri = re.sub('/sig=([^/]+)&', '/sig=0000&', request.uri)
@@ -327,6 +334,8 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
         def _scrub_body_parameters(value):
             value = re.sub('/subscriptions/([^/]+)/',
                            '/subscriptions/{}/'.format(MOCKED_SUBSCRIPTION_ID), value)
+            value = re.sub('\"jobId\": \"([^/]+)\"',
+                           '\"jobId\": \"{}\"'.format(MOCKED_SUBSCRIPTION_ID), value)
             return value
 
         for key in response['body']:
@@ -362,6 +371,8 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
             if callable(tear_down) and not self.skip_teardown:
                 self.tear_down()
 
+    @mock.patch('azure.cli.command_modules.datalake.analytics.custom._get_uuid_str',
+                _mock_get_uuid_str)
     @mock.patch('azure.cli.core._profile.Profile.load_cached_subscriptions', _mock_subscriptions)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user',
                 _mock_user_access_token)  # pylint: disable=line-too-long

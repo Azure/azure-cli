@@ -38,7 +38,7 @@ def create_adls_account(client,
                         disable_encryption=False,
                         tier=None):
 
-    location = location or get_resource_group_location(resource_group_name)
+    location = location or _get_resource_group_location(resource_group_name)
     create_params = DataLakeStoreAccount(location)
     if tags:
         create_params.tags = tags
@@ -73,16 +73,13 @@ def create_adls_account(client,
 # pylint: disable=too-many-arguments
 def update_adls_account(client,
                         account_name,
+                        resource_group_name,
                         tags=None,
-                        resource_group_name=None,
                         default_group=None,
                         firewall_state=None,
                         allow_azure_ips=None,
                         trusted_id_provider_state=None,
                         tier=None):
-    if not resource_group_name:
-        resource_group_name = _get_resource_group_by_account_name(client, account_name)
-
     update_params = DataLakeStoreAccountUpdateParameters(
         tags=tags,
         default_group=default_group,
@@ -100,10 +97,7 @@ def add_adls_firewall_rule(client,
                            firewall_rule_name,
                            start_ip_address,
                            end_ip_address,
-                           resource_group_name=None):
-    if not resource_group_name:
-        resource_group_name = _get_resource_group_by_account_name(client, account_name)
-
+                           resource_group_name):
     create_params = FirewallRule(start_ip_address, end_ip_address)
     return client.create_or_update(resource_group_name,
                                    account_name,
@@ -266,20 +260,7 @@ def set_adls_item_permissions(account_name,
     cf_datalake_store_filesystem(account_name).chmod(path, permission)
 
 # helpers
-def _get_resource_group_by_account_name(client, account_name):
-    accts = list_adla_account(client)
-    for item in accts:
-        if item.name.lower() == account_name.lower():
-            item_id = item.id
-            rg_start = item_id.lower().index('resourcegroups/') + len('resourcegroups/')
-            rg_length = item_id.lower().index('/providers/') - rg_start
-            return item_id[rg_start:rg_length + rg_start]
-    # pylint: disable=line-too-long
-    raise CLIError(
-        'Could not find account: \'{}\' in any resource group in the currently selected subscription: {}. Please ensure this account exists and that the current user has access to it.'
-        .format(account_name, client.subscription_id))
-
-def get_resource_group_location(resource_group_name):
+def _get_resource_group_location(resource_group_name):
     from azure.mgmt.resource.resources import ResourceManagementClient
     client = get_mgmt_service_client(ResourceManagementClient)
     # pylint: disable=no-member

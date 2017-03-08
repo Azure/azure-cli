@@ -6,8 +6,9 @@ from azure.cli.core.commands import \
     (register_cli_argument, CliArgumentType)
 
 from azure.cli.core.commands.parameters import \
-    (tags_type, get_resource_name_completion_list, enum_choice_list)
+    (tags_type, get_resource_name_completion_list, resource_group_name_type, enum_choice_list)
 
+from azure.cli.command_modules.datalake.store._validators import validate_resource_group_name
 from azure.mgmt.datalake.store.models.data_lake_store_account_management_client_enums \
     import(FirewallState,
            TrustedIdProviderState,
@@ -21,17 +22,19 @@ from azure.mgmt.datalake.store.models import (EncryptionConfigType)
 datalake_store_name_type = CliArgumentType(help='Name of the Data Lake Store account.', options_list=('--account_name',), completer=get_resource_name_completion_list('Microsoft.DataLakeStore/accounts'), id_part=None)
 
 # PARAMETER REGISTRATIONS
+register_cli_argument('datalake store', 'resource_group_name', resource_group_name_type, id_part=None, required=False, help='If not specified, will attempt to discover the resource group for the specified Data Lake Store account.', validator=validate_resource_group_name)
 register_cli_argument('datalake store account show', 'name', datalake_store_name_type, options_list=('--account', '-n'))
 register_cli_argument('datalake store account delete', 'name', datalake_store_name_type, options_list=('--account', '-n'))
 register_cli_argument('datalake store', 'account_name', datalake_store_name_type, options_list=('--account', '-n'))
 register_cli_argument('datalake store account', 'tags', tags_type)
 register_cli_argument('datalake store account', 'tier', help='The desired commitment tier for this account to use.', **enum_choice_list(TierType))
+register_cli_argument('datalake store account create', 'resource_group_name', resource_group_name_type, completer=None, validator=None)
 register_cli_argument('datalake store account create', 'encryption_type', help='Indicates what type of encryption to provision the account with. By default, encryption is ServiceManaged. If no encryption is desired, it must be explicitly set with the --disable-encryption flag.', **enum_choice_list(EncryptionConfigType))
 register_cli_argument('datalake store account create', 'disable_encryption', help='Indicates that the account will not have any form of encryption applied to it.', action='store_true')
 register_cli_argument('datalake store account update', 'trusted_id_provider_state', help='Optionally enable/disable the existing trusted ID providers.', **enum_choice_list(TrustedIdProviderState))
 register_cli_argument('datalake store account update', 'firewall_state', help='Optionally enable/disable existing firewall rules.', **enum_choice_list(FirewallState))
 register_cli_argument('datalake store account update', 'allow_azure_ips', help='Optionally allow/block Azure originating IPs through the firewall', **enum_choice_list(FirewallAllowAzureIpsState))
-
+register_cli_argument('datalake store account list', 'resource_group_name', resource_group_name_type, validator=None)
 # file system params
 register_cli_argument('datalake store file', 'path', help='The path in the specified Data Lake Store account where the action should take place. In the format \'/folder/file.txt\', where the first \'/\' after the DNS indicates the root of the file system.')
 register_cli_argument('datalake store file create', 'force', help='Indicates that, if the file or folder exists, it should be overwritten', action='store_true')

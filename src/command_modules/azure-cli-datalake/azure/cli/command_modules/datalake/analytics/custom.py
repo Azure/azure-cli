@@ -2,10 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
-
-
-
 import time
 import uuid
 
@@ -46,7 +42,7 @@ def create_adla_account(client,
                         tier=None):
     adls_list = list()
     adls_list.append(DataLakeStoreAccountInfo(default_datalake_store))
-    location = location or get_resource_group_location(resource_group_name)
+    location = location or _get_resource_group_location(resource_group_name)
     create_params = DataLakeAnalyticsAccount(location,
                                              default_datalake_store,
                                              adls_list)
@@ -70,17 +66,14 @@ def create_adla_account(client,
 # pylint: disable=too-many-arguments
 def update_adla_account(client,
                         account_name,
+                        resource_group_name,
                         tags=None,
-                        resource_group_name=None,
                         max_degree_of_parallelism=None,
                         max_job_count=None,
                         query_store_retention=None,
                         tier=None,
                         firewall_state=None,
                         allow_azure_ips=None):
-    if not resource_group_name:
-        resource_group_name = _get_resource_group_by_account_name(client, account_name)
-
     update_params = DataLakeAnalyticsAccountUpdateParameters(
         tags=tags,
         max_degree_of_parallelism=max_degree_of_parallelism,
@@ -99,10 +92,7 @@ def add_adla_firewall_rule(client,
                            firewall_rule_name,
                            start_ip_address,
                            end_ip_address,
-                           resource_group_name=None):
-    if not resource_group_name:
-        resource_group_name = _get_resource_group_by_account_name(client, account_name)
-
+                           resource_group_name):
     create_params = FirewallRule(start_ip_address, end_ip_address)
     return client.create_or_update(resource_group_name,
                                    account_name,
@@ -231,21 +221,7 @@ def wait_adla_job(client,
 def _get_uuid_str():
     return str(uuid.uuid1())
 
-def _get_resource_group_by_account_name(client, account_name):
-    accts = list_adla_account(client)
-    for item in accts:
-        if item.name.lower() == account_name.lower():
-            item_id = item.id
-            rg_start = item_id.lower().index('resourcegroups/') + len('resourcegroups/')
-            rg_length = item_id.lower().index('/providers/') - rg_start
-            return item_id[rg_start:rg_length + rg_start]
-
-    raise CLIError(
-        # pylint: disable=line-too-long
-        'Could not find account: \'{}\' in any resource group in the currently selected subscription: {}. Please ensure this account exists and that the current user has access to it.'
-        .format(account_name, client.subscription_id))
-
-def get_resource_group_location(resource_group_name):
+def _get_resource_group_location(resource_group_name):
     from azure.mgmt.resource.resources import ResourceManagementClient
     client = get_mgmt_service_client(ResourceManagementClient)
     # pylint: disable=no-member

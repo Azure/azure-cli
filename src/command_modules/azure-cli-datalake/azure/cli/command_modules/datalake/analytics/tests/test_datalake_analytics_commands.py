@@ -8,15 +8,7 @@
 #pylint: disable=bad-continuation
 from __future__ import print_function
 
-try:
-    import unittest.mock as mock
-except ImportError:
-    import mock
-
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck)
-
-def _mock_get_uuid_str():
-    return '00000000-0000-0000-0000-000000000000'
 
 #pylint: disable=too-many-instance-attributes
 class DataLakeAnalyticsCatalogScenarioTest(ResourceGroupVCRTestBase):
@@ -154,7 +146,6 @@ class DataLakeAnalyticsCatalogScenarioTest(ResourceGroupVCRTestBase):
         ])
 
 class DataLakeAnalyticsJobScenarioTest(ResourceGroupVCRTestBase):
-    @mock.patch('azure.cli.command_modules.datalake.analytics.custom._get_uuid_str', _mock_get_uuid_str)
     def __init__(self, test_method):
         super(DataLakeAnalyticsJobScenarioTest, self).__init__(__file__, test_method, resource_group='test-adla-job-mgmt')
         self.adls_name = 'cliadls1234531'
