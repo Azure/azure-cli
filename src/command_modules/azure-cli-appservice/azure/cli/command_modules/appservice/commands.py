@@ -13,6 +13,7 @@ from ._client_factory import web_client_factory
 def output_slots_in_table(slots):
     return [{'name': s['name'], 'status': s['state'], 'plan': s['appServicePlan']} for s in slots]
 
+cli_command(__name__, 'appservice configure', 'azure.cli.command_modules.appservice.custom#configure')
 cli_command(__name__, 'appservice web create', 'azure.cli.command_modules.appservice.custom#create_webapp')
 cli_command(__name__, 'appservice web list', 'azure.cli.command_modules.appservice.custom#list_webapp')
 cli_command(__name__, 'appservice web show', 'azure.cli.command_modules.appservice.custom#show_webapp', exception_handler=empty_on_404)

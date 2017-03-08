@@ -23,6 +23,7 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan,
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
 from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core._config import set_global_config_value
 
 from azure.cli.core.prompting import prompt_pass, NoTTYException
 import azure.cli.core.azlogging as azlogging
@@ -61,6 +62,19 @@ class AppServiceLongRunningOperation(LongRunningOperation): #pylint: disable=too
             return CLIError(detail)
         except: #pylint: disable=bare-except
             return ex
+
+def configure(default_resource_group_name=None, default_webapp_name=None):
+    '''
+    configure common arg default vaules. Use '' or "" to clear up
+    '''
+    if default_resource_group_name:
+        _set_configure('core', 'default_resource_group_name', default_resource_group_name)
+    if default_webapp_name:
+        _set_configure('appservice', 'default_webapp_name', default_webapp_name)
+
+def _set_configure(section, name, value):
+    null_values = ["''", '""']
+    set_global_config_value(section, name, '' if value in null_values else value)
 
 def create_webapp(resource_group_name, name, plan):
     client = web_client_factory()
