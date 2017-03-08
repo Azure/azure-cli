@@ -24,13 +24,31 @@ from azure.keyvault.generated.models.key_vault_client_enums \
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
 secret_binary_encoding_values = ['base64', 'hex']
 
+
 def _extract_version(item_id):
     return item_id.split('/')[-1]
 
+
+def _get_resource_group_from_vault_name(vault_name):
+    """
+    Fetch resource group from vault name
+    :param str vault_name: name of the key vault
+    :return: resource group name or None
+    :rtype: str
+    """
+    client = get_mgmt_service_client(KeyVaultManagementClient).vaults
+    for vault in client.list():
+        id_comps = parse_resource_id(vault.id)
+        if id_comps['name'] == vault_name:
+            return id_comps['resource_group']
+    return None
+
 # COMMAND NAMESPACE VALIDATORS
+
 
 def process_certificate_cancel_namespace(namespace):
     namespace.cancellation_requested = True
+
 
 def process_secret_set_namespace(namespace):
 
@@ -85,6 +103,7 @@ def process_secret_set_namespace(namespace):
 
 # PARAMETER NAMESPACE VALIDATORS
 
+
 def get_attribute_validator(name, attribute_class, create=False):
 
     def validator(ns):
@@ -98,6 +117,7 @@ def get_attribute_validator(name, attribute_class, create=False):
 
     return validator
 
+
 def validate_key_import_source(ns):
     byok_file = ns.byok_file
     pem_file = ns.pem_file
@@ -109,11 +129,13 @@ def validate_key_import_source(ns):
     if pem_password and not pem_file:
         raise ValueError('--pem-password must be used with --pem-file')
 
+
 def validate_key_ops(ns):
     allowed = [x.value.lower() for x in JsonWebKeyOperation]
     for p in ns.key_ops or []:
         if p not in allowed:
             raise ValueError("unrecognized key operation '{}'".format(p))
+
 
 def validate_key_type(ns):
     if ns.destination:
@@ -124,6 +146,7 @@ def validate_key_type(ns):
         ns.destination = dest_to_type_map[ns.destination]
         if ns.destination == 'RSA' and hasattr(ns, 'byok_file') and ns.byok_file:
             raise CLIError('BYOK keys are hardware protected. Omit --protection')
+
 
 def validate_policy_permissions(ns):
     key_perms = ns.key_permissions
@@ -152,24 +175,25 @@ def validate_policy_permissions(ns):
         if p not in cert_allowed:
             raise ValueError("unrecognized cert permission '{}'".format(p))
 
+
 def validate_principal(ns):
     num_set = sum(1 for p in [ns.object_id, ns.spn, ns.upn] if p)
     if num_set != 1:
         raise argparse.ArgumentError(
             None, 'specify exactly one: --object-id, --spn, --upn')
 
+
 def validate_resource_group_name(ns):
     if not ns.resource_group_name:
         vault_name = ns.vault_name
-        client = get_mgmt_service_client(KeyVaultManagementClient).vaults
-        for vault in client.list():
-            id_comps = parse_resource_id(vault.id)
-            if id_comps['name'] == vault_name:
-                ns.resource_group_name = id_comps['resource_group']
-                return
-        raise CLIError(
-            "The Resource 'Microsoft.KeyVault/vaults/{}'".format(vault_name) + \
-            " not found within subscription")
+        group_name = _get_resource_group_from_vault_name(vault_name)
+        if group_name:
+            ns.resource_group_name = group_name
+        else:
+            raise CLIError(
+                "The Resource 'Microsoft.KeyVault/vaults/{}'".format(vault_name) + \
+                " not found within subscription")
+
 
 def validate_x509_certificate_chain(ns):
     def _load_certificate_as_bytes(file_name):
@@ -185,6 +209,7 @@ def validate_x509_certificate_chain(ns):
 
 # ARGUMENT TYPES
 
+
 def base64_encoded_certificate_type(string):
     """ Loads file and outputs contents as base64 encoded string. """
     with open(string, 'rb') as f:
@@ -195,6 +220,7 @@ def base64_encoded_certificate_type(string):
     except UnicodeDecodeError:
         cert_data = binascii.b2a_base64(cert_data).decode('utf-8')
     return cert_data
+
 
 def datetime_type(string):
     """ Validates UTC datettime in accepted format. Examples: 2017-12-31T01:11:59Z,
@@ -207,6 +233,7 @@ def datetime_type(string):
         except ValueError: # checks next format
             pass
     raise ValueError("Input '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(string))
+
 
 def vault_base_url_type(name):
     from azure.cli.core._profile import CLOUD

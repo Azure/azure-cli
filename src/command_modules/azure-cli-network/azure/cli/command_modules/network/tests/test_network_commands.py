@@ -9,6 +9,7 @@
 #pylint: disable=too-many-lines
 import os
 
+from azure.cli.core._util import CLIError
 from azure.cli.core.commands.arm import resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
@@ -94,7 +95,6 @@ class NetworkAppGatewayExistingSubnetScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
     def body(self):
-        from azure.cli.core._util import CLIError
         rg = self.resource_group
         vnet = self.cmd('network vnet create -g {} -n vnet2 --subnet-name subnet1'.format(rg))
         subnet_id = vnet['newVNet']['subnets'][0]['id']
@@ -226,12 +226,12 @@ class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
         rg = s.resource_group
         s.cmd('network public-ip create -g {} -n {} --dns-name {} --allocation-method static'.format(rg, public_ip_dns, dns), checks=[
             JMESPathCheck('publicIp.provisioningState', 'Succeeded'),
-            JMESPathCheck('publicIp.publicIPAllocationMethod', 'Static'),
+            JMESPathCheck('publicIp.publicIpAllocationMethod', 'Static'),
             JMESPathCheck('publicIp.dnsSettings.domainNameLabel', dns)
         ])
         s.cmd('network public-ip create -g {} -n {}'.format(rg, public_ip_no_dns), checks=[
             JMESPathCheck('publicIp.provisioningState', 'Succeeded'),
-            JMESPathCheck('publicIp.publicIPAllocationMethod', 'Dynamic'),
+            JMESPathCheck('publicIp.publicIpAllocationMethod', 'Dynamic'),
             JMESPathCheck('publicIp.dnsSettings', None)
         ])
         s.cmd('network public-ip update -g {} -n {} --allocation-method static --dns-name wowza --idle-timeout 10'.format(rg, public_ip_no_dns), checks=[
@@ -280,7 +280,7 @@ class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
             allowed_exceptions='An error occured.')
         self.cmd('network express-route peering show -g {} --circuit-name {} -n MicrosoftPeering'.format(rg, circuit), checks=[
             JMESPathCheck('microsoftPeeringConfig.advertisedPublicPrefixes[0]', '104.0.0.0/30'),
-            JMESPathCheck('microsoftPeeringConfig.advertisedPublicPrefixesState', 'NotConfigured'),
+            JMESPathCheck('microsoftPeeringConfig.advertisedPublicPrefixesState', 'ValidationNeeded'),
             JMESPathCheck('microsoftPeeringConfig.customerAsn', 10000),
             JMESPathCheck('microsoftPeeringConfig.routingRegistryName', 'LEVEL3')
         ])
@@ -383,8 +383,8 @@ class NetworkLoadBalancerScenarioTest(ResourceGroupVCRTestBase):
         private_ip = '10.0.0.15'
         vnet = self.cmd('network vnet create -n {} -g {} --subnet-name default'.format(vnet_name, self.resource_group))
         subnet_id = vnet['newVNet']['subnets'][0]['id']
-        self.cmd('network lb create -n {}3 -g {} --vnet-name {} --subnet {} --private-ip-address {}'.format(
-            self.lb_name, self.resource_group, vnet_name, subnet_id, private_ip), checks=[
+        self.cmd('network lb create -n {}3 -g {} --subnet {} --private-ip-address {}'.format(
+            self.lb_name, self.resource_group, subnet_id, private_ip), checks=[
                 JMESPathCheck('loadBalancer.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Static'),
                 JMESPathCheck('loadBalancer.frontendIPConfigurations[0].properties.privateIPAddress', private_ip),
                 JMESPathCheck('loadBalancer.frontendIPConfigurations[0].resourceGroup', self.resource_group),
@@ -607,9 +607,13 @@ class NetworkLocalGatewayScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('resourceGroup', self.resource_group),
             JMESPathCheck('name', self.name)
         ])
-        self.cmd('network local-gateway delete --resource-group {} --name {}'.format(self.resource_group, self.name))
-        # Expecting no results as we just deleted the only local gateway in the resource group
-        self.cmd('network local-gateway list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
+        try:
+            self.cmd('network local-gateway delete --resource-group {} --name {}'.format(self.resource_group, self.name))
+            # Expecting no results as we just deleted the only local gateway in the resource group
+            self.cmd('network local-gateway list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
+        except CLIError:
+            # TODO: Remove this once https://github.com/Azure/azure-cli/issues/2373 is fixed
+            pass
 
 class NetworkNicScenarioTest(ResourceGroupVCRTestBase):
 
@@ -647,30 +651,30 @@ class NetworkNicScenarioTest(ResourceGroupVCRTestBase):
 
         # create with minimum parameters
         self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {}'.format(rg, nic, subnet, vnet), checks=[
-            JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
-            JMESPathCheck('newNIC.provisioningState', 'Succeeded')
+            JMESPathCheck('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
+            JMESPathCheck('NewNIC.provisioningState', 'Succeeded')
         ])
         # exercise optional parameters
         self.cmd('network nic create -g {} -n {} --subnet {} --ip-forwarding --private-ip-address {} --public-ip-address {} --internal-dns-name test --lb-address-pools {} --lb-inbound-nat-rules {}'.format(rg, nic, subnet_id, private_ip, public_ip_name, address_pool_ids, rule_ids), checks=[
-            JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAllocationMethod', 'Static'),
-            JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAddress', private_ip),
-            JMESPathCheck('newNIC.enableIPForwarding', True),
-            JMESPathCheck('newNIC.provisioningState', 'Succeeded'),
-            JMESPathCheck('newNIC.dnsSettings.internalDnsNameLabel', 'test')
+            JMESPathCheck('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Static'),
+            JMESPathCheck('NewNIC.ipConfigurations[0].privateIpAddress', private_ip),
+            JMESPathCheck('NewNIC.enableIpForwarding', True),
+            JMESPathCheck('NewNIC.provisioningState', 'Succeeded'),
+            JMESPathCheck('NewNIC.dnsSettings.internalDnsNameLabel', 'test')
         ])
         # exercise creating with NSG
         self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {} --network-security-group {}'.format(rg, nic, subnet, vnet, nsg), checks=[
-            JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
-            JMESPathCheck('newNIC.enableIPForwarding', False),
-            JMESPathCheck("newNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
-            JMESPathCheck('newNIC.provisioningState', 'Succeeded')
+            JMESPathCheck('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
+            JMESPathCheck('NewNIC.enableIpForwarding', False),
+            JMESPathCheck("NewNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
+            JMESPathCheck('NewNIC.provisioningState', 'Succeeded')
         ])
         # exercise creating with NSG and Public IP
         self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {} --network-security-group {} --public-ip-address {}'.format(rg, nic, subnet, vnet, nsg_id, public_ip_id), checks=[
-            JMESPathCheck('newNIC.ipConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
-            JMESPathCheck('newNIC.enableIPForwarding', False),
-            JMESPathCheck("newNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
-            JMESPathCheck('newNIC.provisioningState', 'Succeeded')
+            JMESPathCheck('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
+            JMESPathCheck('NewNIC.enableIpForwarding', False),
+            JMESPathCheck("NewNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
+            JMESPathCheck('NewNIC.provisioningState', 'Succeeded')
         ])
         self.cmd('network nic list', checks=[
             JMESPathCheck('type(@)', 'array'),
@@ -791,7 +795,7 @@ class NetworkNicConvenienceCommandsScenarioTest(ResourceGroupVCRTestBase):
         super(NetworkNicConvenienceCommandsScenarioTest, self).set_up()
         rg = self.resource_group
         vm = self.vm_name
-        self.cmd('vm create -g {} -n {} --image UbuntuLTS --admin-password aBcD1234!@#$ --authentication-type password'.format(rg, vm))
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --admin-username admin1 --admin-password aBcD1234!@#$ --authentication-type password'.format(rg, vm))
 
     def body(self):
         rg = self.resource_group
@@ -929,7 +933,7 @@ class NetworkRouteTableOperationScenarioTest(ResourceGroupVCRTestBase):
 class NetworkVNetScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(NetworkVNetScenarioTest, self).__init__(__file__, test_method, resource_group='cli_vnet_test1')
+        super(NetworkVNetScenarioTest, self).__init__(__file__, test_method, resource_group='cli_vnet_test')
         self.vnet_name = 'test-vnet'
         self.vnet_subnet_name = 'test-subnet1'
         self.resource_type = 'Microsoft.Network/virtualNetworks'
@@ -1174,7 +1178,7 @@ class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('network traffic-manager profile check-dns -n myfoobar1')
         self.cmd('network traffic-manager profile create -n {} -g {} --routing-method weighted --unique-dns-name {}'.format(tm_name, self.resource_group, unique_dns_name),
-            checks=JMESPathCheck('trafficManagerProfile.trafficRoutingMethod', 'Weighted'))
+            checks=JMESPathCheck('TrafficManagerProfile.trafficRoutingMethod', 'Weighted'))
         self.cmd('network traffic-manager profile show -g {} -n {}'.format(self.resource_group, tm_name),
             checks=JMESPathCheck('dnsConfig.relativeName', unique_dns_name))
 

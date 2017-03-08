@@ -70,6 +70,8 @@ register_cli_argument('acs create', 'name', arg_type=name_arg_type, validator=va
 register_extra_cli_argument('acs create', 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing')
 register_cli_argument('acs create', 'agent_vm_size', completer=get_vm_size_completion_list)
 
+register_cli_argument('acs create', 'windows', action='store_true', help='If true, deploy a windows container cluster.')
+
 register_cli_argument('acs', 'disable_browser', help='Do not open browser after opening a proxy to the cluster web user interface')
 register_cli_argument('acs dcos browse', 'name', name_arg_type)
 register_cli_argument('acs dcos install-cli', 'install_location',

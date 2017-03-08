@@ -70,9 +70,10 @@ class ArmTemplateBuilder(object):
 class StorageProfile(Enum):
     SAPirImage = 1
     SACustomImage = 2
-    ManagedPirImage = 3  # this would be the main scenarios
-    ManagedCustomImage = 4
-    ManagedSpecializedOSDisk = 5
+    SASpecializedOSDisk = 3
+    ManagedPirImage = 4  # this would be the main scenarios
+    ManagedCustomImage = 5
+    ManagedSpecializedOSDisk = 6
 
 
 def build_deployment_resource(name, template, dependencies=None):
@@ -254,8 +255,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         image_reference=None, os_disk_name=None, custom_image_os_type=None,
         storage_caching=None, storage_sku=None,
         os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
-        managed_os_disk=None, data_disk_sizes_gb=None, image_data_disks=None,
-        custom_data=None):
+        attach_os_disk=None, data_disk_sizes_gb=None, image_data_disks=None,
+        custom_data=None, secrets=None):
 
     def _build_os_profile():
 
@@ -282,6 +283,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                     ]
                 }
             }
+
+        if secrets:
+            os_profile['secrets'] = secrets
 
         return os_profile
 
@@ -310,6 +314,14 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                     'offer': os_offer,
                     'sku': os_sku,
                     'version': os_version
+                }
+            },
+            'SASpecializedOSDisk': {
+                'osDisk': {
+                    'createOption': 'attach',
+                    'osType': custom_image_os_type,
+                    'name': os_disk_name,
+                    'vhd': {'uri': attach_os_disk}
                 }
             },
             'ManagedPirImage': {
@@ -342,7 +354,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                     'createOption': 'attach',
                     'osType': custom_image_os_type,
                     'managedDisk': {
-                        "id": managed_os_disk
+                        'id': attach_os_disk
                     }
                 }
             }
@@ -361,7 +373,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
     if availability_set_id:
         vm_properties['availabilitySet'] = {'id': availability_set_id}
 
-    if not managed_os_disk:
+    if not attach_os_disk:
         vm_properties['osProfile'] = _build_os_profile()
 
     vm = {
@@ -490,7 +502,7 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
                         image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
                         backend_address_pool_id=None, inbound_nat_pool_id=None,
-                        single_placement_group=None, custom_data=None):
+                        single_placement_group=None, custom_data=None, secrets=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -572,6 +584,9 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
 
     if custom_data:
         os_profile['customData'] = b64encode(custom_data)
+
+    if secrets:
+        os_profile['secrets'] = secrets
 
     if single_placement_group is None:  # this should never happen, but just in case
         raise ValueError('single_placement_group was not set by validators')

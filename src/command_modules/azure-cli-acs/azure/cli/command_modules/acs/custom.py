@@ -350,7 +350,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                content_version=None, admin_username="azureuser", agent_count="3",
                agent_vm_size="Standard_D2_v2", location=None, master_count="3",
                orchestrator_type="dcos", service_principal=None, client_secret=None, tags=None,
-               custom_headers=None, raw=False,
+               custom_headers=None, windows=False, admin_password="", raw=False,
                **operation_config):  # pylint: disable=too-many-locals
     """Create a new Acs.
     :param resource_group_name: The name of the resource group. The name
@@ -399,6 +399,10 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     :param tags: Tags object.
     :type tags: object
     :param dict custom_headers: headers that will be added to the request
+    :param windows: If true, the cluster will be built for running Windows container.
+    :type windows: bool
+    :param admin_password: The adminstration password for Windows nodes. Only available if --windows=true
+    :type admin_password: str
     :param bool raw: returns the direct response alongside the
      deserialized response
     :rtype:
@@ -455,7 +459,10 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                                   ssh_key_value, admin_username=admin_username,
                                   agent_count=agent_count, agent_vm_size=agent_vm_size,
                                   location=location, service_principal=service_principal,
-                                  client_secret=client_secret, master_count=master_count)
+                                  client_secret=client_secret, master_count=master_count,
+                                  windows=windows, admin_password=admin_password)
+    if windows:
+        raise CLIError('--windows is only supported for Kubernetes clusters')
 
     ops = get_mgmt_service_client(ACSClient).acs
     return ops.create_or_update(resource_group_name, deployment_name, dns_name_prefix, name,
@@ -507,10 +514,24 @@ def load_acs_service_principals(config_path):
 
 def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value,
                        admin_username="azureuser", agent_count="3", agent_vm_size="Standard_D2_v2",
-                       location=None, service_principal=None, client_secret=None, master_count="1"):
+                       location=None, service_principal=None, client_secret=None, master_count="1",
+                       windows=False, admin_password=''):
     from azure.mgmt.resource.resources.models import DeploymentProperties
     if not location:
         location = '[resourceGroup().location]'
+    windows_profile = None
+    os_type = 'Linux'
+    if windows:
+        if len(admin_password) == 0:
+            raise CLIError('--admin-password is required.')
+        if len(admin_password) < 6:
+            raise CLIError('--admin-password must be at least 6 characters')
+        windows_profile = {
+            "adminUsername": admin_username,
+            "adminPassword": admin_password,
+        }
+        os_type = 'Windows'
+
     template = {
         "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
         "contentVersion": "1.0.0.0",
@@ -541,7 +562,8 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
                             "name": "agentpools",
                             "count": agent_count,
                             "vmSize": agent_vm_size,
-                            "dnsPrefix": dns_name_prefix + '-k8s-agents'
+                            "dnsPrefix": dns_name_prefix + '-k8s-agents',
+                            "osType": os_type,
                         }
                     ],
                     "linuxProfile": {
@@ -554,6 +576,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
                         },
                         "adminUsername": admin_username
                     },
+                    "windowsProfile": windows_profile,
                     "servicePrincipalProfile": {
                         "ClientId": service_principal,
                         "Secret": "[parameters('clientSecret')]"
