@@ -173,7 +173,8 @@ def get_vm_details(resource_group_name, vm_name):
     mac_addresses = []
     # pylint: disable=line-too-long,no-member
     for nic_ref in result.network_profile.network_interfaces:
-        nic = network_client.network_interfaces.get(resource_group_name, nic_ref.id.split('/')[-1])
+        nic_parts = parse_resource_id(nic_ref.id)
+        nic = network_client.network_interfaces.get(nic_parts['resource_group'], nic_parts['name'])
         if nic.mac_address:
             mac_addresses.append(nic.mac_address)
         for ip_configuration in nic.ip_configurations:
