@@ -133,11 +133,11 @@ with ParametersContext(command='sql db replica create') as c:
     c.expand('parameters', Database)
 
     c.argument('elastic_pool_name',
-               options_list=('--partner-elastic-pool',),
+               options_list=('--elastic-pool',),
                help='Name of elastic pool to create the new replica in.')
 
     c.argument('requested_service_objective_name',
-               options_list=('--partner-service-objective',),
+               options_list=('--service-objective',),
                help='Name of service objective for the new replica.')
 
     c.argument('partner_resource_group_name',

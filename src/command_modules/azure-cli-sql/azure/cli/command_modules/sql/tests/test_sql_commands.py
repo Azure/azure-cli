@@ -412,7 +412,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ResourceGroupVCRTestBase):
         # create replica in third server with max params
         # --elastic-pool is untested
         self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
-                 ' --partner-resource-group {} --partner-service-objective {}'
+                 ' --partner-resource-group {} --service-objective {}'
                  .format(s1.group, s1.name, self.database_name,
                          s3.name, s3.group, self.service_objective),
                  checks=[
