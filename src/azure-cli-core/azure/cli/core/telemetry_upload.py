@@ -6,6 +6,7 @@
 import os
 import sys
 import json
+import six
 import azure.cli.core.decorators as decorators
 
 DIAGNOSTICS_TELEMETRY_ENV_NAME = 'AZURE_CLI_DIAGNOSTICS_TELEMETRY'
@@ -39,12 +40,25 @@ def upload(data_to_save):
             sys.stdout.write('Raw [{}]/n'.format(data_to_save))
 
     for record in data_to_save:
-        client.track_event(record['name'], record['properties'])
+        name = record['name']
+        raw_properties = record['properties']
+        properties = {}
+        measurements = {}
+        for k in raw_properties:
+            v = raw_properties[k]
+            if isinstance(v, six.string_types):
+                properties[k] = v
+            else:
+                measurements[k] = v
+        client.track_event(record['name'], properties, measurements)
+
+        if in_diagnostic_mode():
+            sys.stdout.write('\nTrack Event: {}\nProperties: {}\nMeasurements: {}'.format(
+                name, json.dumps(properties), json.dumps(measurements)))
 
     client.flush()
 
     if in_diagnostic_mode():
-        json.dump(data_to_save, sys.stdout, indent=2, sort_keys=True)
         sys.stdout.write('\nTelemetry upload completes\n')
 
 
