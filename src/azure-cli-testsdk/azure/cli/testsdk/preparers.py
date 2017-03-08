@@ -45,13 +45,11 @@ class AbstractPreparer(object):
             if not is_preparer_func(fn):
                 # the next function is the actual test function. the kwargs need to be trimmed so
                 # that parameters which are not required will not be passed to it.
-                args, _, kw, _ = inspect.getargspec(fn)
+                args, _, kw, _ = inspect.getargspec(fn)  # pylint: disable=deprecated-method
                 if kw is None:
                     args = set(args)
                     for key in [k for k in kwargs.keys() if k not in args]:
                         del kwargs[key]
-
-                pass
 
             fn(test_class_instance, **kwargs)
 
@@ -73,15 +71,16 @@ class AbstractPreparer(object):
             self.resource_random_name = create_random_name(self.name_prefix, self.name_len)
         return self.resource_random_name
 
-    def create_resource(self, name, **kwargs):
+    def create_resource(self, name, **kwargs):  # pylint: disable=unused-argument,no-self-use
         return {}
 
-    def remove_resource(self, name, **kwargs):
+    def remove_resource(self, name, **kwargs):  # pylint: disable=unused-argument
         pass
 
 
 # TODO: replaced by GeneralNameReplacer
 class SingleValueReplacer(RecordingProcessor):
+    # pylint: disable=no-member
     def process_request(self, request):
         request.uri = request.uri.replace(self.random_name, self.moniker)
         if request.body:
@@ -124,9 +123,10 @@ class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
 # Storage Account Preparer and its shorthand decorator
 
 class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest', sku='Standard_LRS', location='westus',
-                 parameter_name='storage_account',
-                 resource_group_parameter_name='resource_group', skip_delete=True):
+    def __init__(self,  # pylint: disable=too-many-arguments
+                 name_prefix='clitest', sku='Standard_LRS', location='westus',
+                 parameter_name='storage_account', resource_group_parameter_name='resource_group',
+                 skip_delete=True):
         super(StorageAccountPreparer, self).__init__(name_prefix, 24)
         self.location = location
         self.sku = sku
@@ -149,10 +149,10 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
         try:
             return kwargs.get(self.resource_group_parameter_name)
         except KeyError:
-            raise CliTestError('To create a storage account a resource group is required. Please '
-                               'add decorator @{} in front of this storage account preparer.'
-                               .format(ResourceGroupPreparer.__name__,
-                                       self.resource_group_parameter_name))
+            template = 'To create a storage account a resource group is required. Please add ' \
+                       'decorator @{} in front of this storage account preparer.'
+            raise CliTestError(template.format(ResourceGroupPreparer.__name__,
+                                               self.resource_group_parameter_name))
 
 
 # Utility

@@ -3,15 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import six
-from .exceptions import CliTestError
-
 
 class RecordingProcessor(object):
-    def process_request(self, request):
+    def process_request(self, request):  # pylint: disable=no-self-use
         return request
 
-    def process_response(self, response):
+    def process_response(self, response):  # pylint: disable=no-self-use
         return response
 
     @classmethod
