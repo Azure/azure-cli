@@ -89,14 +89,9 @@ helps['appservice web config ssl'] = """
     short-summary: Configure SSL certificates.
 """
 
-helps['appservice web config ssl upload'] = """
-    type: command
-    short-summary: Upload an SSL certificate to a web app.
-"""
-
 helps['appservice web config ssl list'] = """
     type: command
-    short-summary: List SSL certificates.
+    short-summary: List ssl certificates within a resource group
 """
 
 helps['appservice web config ssl bind'] = """
@@ -114,34 +109,9 @@ helps['appservice web config ssl delete'] = """
     short-summary: Delete an SSL certificate from a web app.
 """
 
-helps['appservice web config ssl'] = """
-    type: group
-    short-summary: commands to configure ssl certs
-"""
-
 helps['appservice web config ssl upload'] = """
     type: command
-    short-summary: Upload an ssl certificate to the webapp
-"""
-
-helps['appservice web config ssl list'] = """
-    type: command
-    short-summary: List ssl certificates within a resource group
-"""
-
-helps['appservice web config ssl bind'] = """
-    type: command
-    short-summary: Bind an ssl certificate to the webapp
-"""
-
-helps['appservice web config ssl unbind'] = """
-    type: command
-    short-summary: Unbind an ssl certificate from the webapp
-"""
-
-helps['appservice web config ssl delete'] = """
-    type: command
-    short-summary: Delete an ssl certificate from the webapp
+    short-summary: Upload an SSL certificate to a web app.
 """
 
 helps['appservice web deployment'] = """
