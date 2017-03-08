@@ -9,12 +9,13 @@ import os
 import textwrap
 import shutil
 
+import re
 from whoosh.highlight import UppercaseFormatter, ContextFragmenter
 from whoosh.qparser import MultifieldParser
 from whoosh import index
 from whoosh.fields import TEXT, Schema
 
-from azure.cli.command_modules.search._gather_commands import build_command_table
+from azure.cli.command_modules.find._gather_commands import build_command_table
 import azure.cli.core.azlogging as azlogging
 
 logger = azlogging.get_az_logger(__name__)
@@ -81,9 +82,9 @@ def _print_hit(hit):
     print('')
 
 
-def search(criteria, reindex=False):
+def find(criteria, reindex=False):
     """
-    You know, for search.
+    Search for Azure CLI commands
     :param str criteria: Query text to search for.
     :param bool reindex: Clear the current index and reindex the command modules.
     :return:
@@ -97,7 +98,14 @@ def search(criteria, reindex=False):
         ['cmd_name', 'short_summary', 'long_summary', 'examples'],
         schema=schema
     )
-    q = qp.parse(criteria)
+
+    if 'OR' in criteria or 'AND' in criteria:
+        # looks more advanced, let's trust them to make a great query
+        q = qp.parse(" ".join(criteria))
+    else:
+        # let's help out with some OR's to provide a less restrictive search
+        q = qp.parse(" OR ".join(criteria))
+
     with ix.searcher() as searcher:
         results = searcher.search(q)
         results.fragmenter = ContextFragmenter(maxchars=300, surround=200)

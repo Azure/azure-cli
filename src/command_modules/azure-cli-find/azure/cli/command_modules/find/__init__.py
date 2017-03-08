@@ -3,6 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands import cli_command
+import azure.cli.command_modules.find._help  # pylint: disable=unused-import
 
-cli_command(__name__, 'search', 'azure.cli.command_modules.search.custom#search')
+
+def load_params(_):
+    import azure.cli.command_modules.find._params  # pylint: disable=redefined-outer-name
+
+
+def load_commands():
+    import azure.cli.command_modules.find.commands  # pylint: disable=redefined-outer-name

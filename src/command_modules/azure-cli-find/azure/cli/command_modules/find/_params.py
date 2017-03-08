@@ -3,9 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps
+from azure.cli.core.commands import CliArgumentType, register_cli_argument
 
-helps['search'] = """
-    type: command
-    short-summary: You know, for search
-"""
+# pylint: disable=line-too-long
+
+query = CliArgumentType(
+    options_list=('--q', '-q'),
+    help='Query text to find.',
+    nargs='+'
+)
+
+register_cli_argument('find', 'criteria', query)

@@ -36,9 +36,9 @@ with open('HISTORY.rst', 'r', encoding='utf-8') as f:
     HISTORY = f.read()
 
 setup(
-    name='azure-cli-search',
+    name='azure-cli-find',
     version=VERSION,
-    description='Microsoft Azure Command-Line Tools Search Command Module',
+    description='Microsoft Azure Command-Line Tools Find Command Module',
     long_description=README + '\n\n' + HISTORY,
     license='MIT',
     author='Microsoft Corporation',
@@ -51,7 +51,7 @@ setup(
         'azure.cli.command_modules',
     ],
     packages=[
-        'azure.cli.command_modules.search',
+        'azure.cli.command_modules.find',
     ],
     install_requires=DEPENDENCIES,
 )
