@@ -19,7 +19,7 @@ def _before_record_response(response):
     return response
 
 
-class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
+class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
 
     def tear_down(self):
         rg = self.resource_group
@@ -56,15 +56,15 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):
         sid = result['id']
 
         # test create keyvault for use with BYOS account
-        keyvault = self.cmd('keyvault create -g {} -n {} -l {} --enabled-for-deployment true '
-                            '--enabled-for-disk-encryption true --enabled-for-template-deployment'
-                            ' true'.format(rg, self.keyvault_name, self.byos_location),
-                            checks=[JMESPathCheck('name', self.keyvault_name),
-                                    JMESPathCheck('location', self.byos_location),
-                                    JMESPathCheck('resourceGroup', rg),
-                                    JMESPathCheck('type(properties.accessPolicies)', 'array'),
-                                    JMESPathCheck('length(properties.accessPolicies)', 1),
-                                    JMESPathCheck('properties.sku.name', 'standard')])
+        self.cmd('keyvault create -g {} -n {} -l {} --enabled-for-deployment true '
+                 '--enabled-for-disk-encryption true --enabled-for-template-deployment'
+                 ' true'.format(rg, self.keyvault_name, self.byos_location),
+                 checks=[JMESPathCheck('name', self.keyvault_name),
+                         JMESPathCheck('location', self.byos_location),
+                         JMESPathCheck('resourceGroup', rg),
+                         JMESPathCheck('type(properties.accessPolicies)', 'array'),
+                         JMESPathCheck('length(properties.accessPolicies)', 1),
+                         JMESPathCheck('properties.sku.name', 'standard')])
         self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions all '
                  '--secret-permissions all'.format(rg, self.keyvault_name, self.object_id))
 

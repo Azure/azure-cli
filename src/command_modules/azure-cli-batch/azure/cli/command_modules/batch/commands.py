@@ -73,7 +73,7 @@ cli_batch_data_plane_command('batch pool create', data_path.format('pool', 'Pool
                                      'pool.auto_scale_evaluation_interval', 'pool.enable_auto_scale', 'pool.max_tasks_per_node', 'pool.network_configuration',
                                      'pool.cloud_service_configuration.target_os_version', 'pool.task_scheduling_policy', 'pool.virtual_machine_configuration.os_disk',
                                      'pool.start_task.max_task_retry_count', 'pool.start_task.environment_settings', 'pool.start_task.user_identity'],
-                                     silent=['pool.virtual_machine_configuration.image_reference'])
+                             silent=['pool.virtual_machine_configuration.image_reference'])
 cli_batch_data_plane_command('batch pool list', data_path.format('pool', 'PoolOperations.list'), pool_client_factory)
 cli_batch_data_plane_command('batch pool delete', data_path.format('pool', 'PoolOperations.delete'), pool_client_factory)
 cli_batch_data_plane_command('batch pool show', data_path.format('pool', 'PoolOperations.get'), pool_client_factory)

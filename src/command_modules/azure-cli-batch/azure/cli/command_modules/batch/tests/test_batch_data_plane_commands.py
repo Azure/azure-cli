@@ -190,7 +190,7 @@ class BatchTaskAddScenarioTest(BatchDataPlaneTestBase):
                          JMESPathCheck('commandLine', 'cmd /c dir /s')])
 
         task = self.cmd('batch task show --job-id {} --task-id {}'.format(
-                        self.job_id, self.task_id))
+            self.job_id, self.task_id))
         self.assertEqual(task['userIdentity']['autoUser']['scope'], 'pool')
         self.assertEqual(task['authenticationTokenSettings']['access'][0], 'job')
 
