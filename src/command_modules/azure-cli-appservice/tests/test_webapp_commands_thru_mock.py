@@ -103,7 +103,7 @@ class Test_Webapp_Mocked(unittest.TestCase):
 
         site_op_mock.return_value = site
         # action
-        view_in_browser('myRG', 'myweb', start_trace=True)
+        view_in_browser('myRG', 'myweb', logs=True)
         # assert
         webbrowser_mock.assert_called_with('https://haha.com')
         log_mock.assert_called_with('myRG', 'myweb', None, None)

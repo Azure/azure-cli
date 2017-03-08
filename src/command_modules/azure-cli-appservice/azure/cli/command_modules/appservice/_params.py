@@ -61,7 +61,7 @@ register_cli_argument('appservice web', 'name', arg_type=name_arg_type, complete
 register_cli_argument('appservice web create', 'name', options_list=('--name', '-n'), help='name of the new webapp')
 register_cli_argument('appservice web create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                       help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
-register_cli_argument('appservice web browse', 'start_trace', action='store_true', help='start live tracing')
+register_cli_argument('appservice web browse', 'logs', options_list=('--logs', '-l'), action='store_true', help='Enable viewing the log stream immediately after launching the web app')
 
 register_cli_argument('appservice web deployment user', 'user_name', help='user name')
 register_cli_argument('appservice web deployment user', 'password', help='password, will prompt if not specified')

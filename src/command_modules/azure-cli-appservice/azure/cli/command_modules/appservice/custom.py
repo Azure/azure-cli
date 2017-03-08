@@ -586,14 +586,14 @@ def set_deployment_user(user_name, password=None):
     result = client.update_publishing_user(user)
     return result
 
-def view_in_browser(resource_group_name, name, slot=None, start_trace=False):
+def view_in_browser(resource_group_name, name, slot=None, logs=False):
     site = _generic_site_operation(resource_group_name, name, 'get', slot)
     url = site.default_host_name
     ssl_host = next((h for h in site.host_name_ssl_states
                      if h.ssl_state != SslState.disabled), None)
     url = ('https' if ssl_host else 'http') + '://' + url
     _open_page_in_browser(url)
-    if start_trace:
+    if logs:
         get_streaming_log(resource_group_name, name, provider=None, slot=slot)
 
 def _open_page_in_browser(url):
