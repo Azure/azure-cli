@@ -11,6 +11,7 @@ from azure.cli.core.commands import CliArgumentType, register_cli_argument
 from azure.cli.core.commands.validators import validate_tag, validate_tags
 from azure.cli.core._util import CLIError
 from azure.cli.core.commands.validators import generate_deployment_name
+from azure.cli.core._config import DEFAULT_RESOURCE_GROUP_CONFIG_VAR
 
 
 def get_subscription_locations():
@@ -133,7 +134,7 @@ resource_group_name_type = CliArgumentType(
     completer=get_resource_group_completion_list,
     id_part='resource_group',
     help='Name of resource group',
-    configured_default='default_resource_group_name')
+    configured_default=DEFAULT_RESOURCE_GROUP_CONFIG_VAR)
 
 name_type = CliArgumentType(options_list=('--name', '-n'), help='the primary resource name')
 

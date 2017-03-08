@@ -211,8 +211,7 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
     def _resolve_default_value_from_cfg_file(arg, overrides):
         if 'configured_default' in overrides.settings:
             def_config = overrides.settings.get('configured_default', None)
-            if (arg.type.settings.get('required', False) or
-                    overrides.settings.get('required', False)):
+            if arg.type.settings.get('required', False):
                 setattr(arg.type, 'configured_default_applied', True)
                 parts = def_config.split('/')
                 section = 'core' if len(parts) == 1 else parts[0]
