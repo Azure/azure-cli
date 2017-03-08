@@ -280,12 +280,13 @@ class WebappGitScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, plan))
         self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, webapp, plan))
 
-        self.cmd('appservice web source-control config -g {} -n {} --repo-url {} --branch {}'.format(self.resource_group, webapp, test_git_repo, 'master'), checks=[
+        self.cmd('appservice web source-control config -g {} -n {} --repo-url {} --branch {} --manual-integration'.format(self.resource_group, webapp, test_git_repo, 'master'), checks=[
             JMESPathCheck('repoUrl', test_git_repo),
             JMESPathCheck('isMercurial', False),
             JMESPathCheck('branch', 'master')
             ])
 
+        '''
         import time
         time.sleep(30) # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
 
@@ -293,6 +294,7 @@ class WebappGitScenarioTest(ResourceGroupVCRTestBase):
         r = requests.get('http://{}.azurewebsites.net'.format(webapp))
         #verify the web page
         self.assertTrue('Hello world' in str(r.content))
+        '''
 
         self.cmd('appservice web source-control show -g {} -n {}'.format(self.resource_group, webapp), checks=[
             JMESPathCheck('repoUrl', test_git_repo),
