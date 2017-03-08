@@ -80,7 +80,3 @@ def set_global_config_value(section, option, value):
         pass
     config.set(section, option, value)
     set_global_config(config)
-
-
-def configure_default_resource_group_name(resource_group_name):
-    set_global_config_value('core', DEFAULT_RESOURCE_GROUP_CONFIG_VAR, resource_group_name)

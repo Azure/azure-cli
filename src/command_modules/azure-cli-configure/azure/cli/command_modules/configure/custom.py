@@ -9,7 +9,8 @@ from six.moves import configparser  # pylint: disable=redefined-builtin
 from adal.adal_error import AdalError
 
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._config import (GLOBAL_CONFIG_PATH, ENV_VAR_PREFIX, set_global_config)
+from azure.cli.core._config import (GLOBAL_CONFIG_PATH, ENV_VAR_PREFIX, set_global_config,
+                                    set_global_config_value)
 from azure.cli.core._util import CLIError
 from azure.cli.core.prompting import (prompt,
                                       prompt_y_n,
@@ -129,7 +130,30 @@ def _handle_global_configuration():
         global_config.set('logging', 'enable_log_file', 'yes' if enable_file_logging else 'no')
         set_global_config(global_config)
 
-def handle_configure():
+def handle_configure(section=None, name=None, value=None, default_resource_group=None):
+    '''
+    configure common settings
+    :param str section: configuration section
+    :param str name:    configuration variable name
+    :param str value:   configuration variable value
+    :param str default_resource_group: default resource group
+    '''
+    if any([section, name, value, default_resource_group]):
+        c = [x for x in [section, name, value] if x]
+        if len(c) in range(1, 3):
+            raise CLIError('usage error: --section STRING --name STRING --value STRING')
+
+        if c:
+            set_global_config_value(section, name,
+                                    _normalize_config_value(value))
+        if default_resource_group:
+            from azure.cli.core._config import DEFAULT_RESOURCE_GROUP_CONFIG_VAR
+            set_global_config_value('core', DEFAULT_RESOURCE_GROUP_CONFIG_VAR,
+                                    _normalize_config_value(default_resource_group))
+
+        return
+
+    # if nothing supplifed, we go interactively
     try:
         print(MSG_INTRO)
         _handle_global_configuration()
@@ -139,3 +163,10 @@ def handle_configure():
         raise CLIError('This command is interactive and no tty available.')
     except (EOFError, KeyboardInterrupt):
         print()
+
+
+def _normalize_config_value(value):
+    if value:
+        value = '' if value in ["''", '""'] else value
+    return value
+

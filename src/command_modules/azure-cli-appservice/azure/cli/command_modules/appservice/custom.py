@@ -62,23 +62,6 @@ class AppServiceLongRunningOperation(LongRunningOperation): #pylint: disable=too
         except: #pylint: disable=bare-except
             return ex
 
-def configure(default_resource_group_name=None, default_webapp_name=None):
-    '''
-    set common argument default vaules. Use '' or "" to clear up
-    '''
-    from azure.cli.core._config import (set_global_config_value,
-                                        configure_default_resource_group_name)
-    if default_resource_group_name:
-        configure_default_resource_group_name(_normalize_config_value(default_resource_group_name))
-    if default_webapp_name:
-        set_global_config_value('appservice', 'default_webapp_name',
-                                _normalize_config_value(default_webapp_name))
-
-def _normalize_config_value(value):
-    if value:
-        value = '' if value in ["''", '""'] else value
-    return value
-
 def create_webapp(resource_group_name, name, plan):
     client = web_client_factory()
     if is_valid_resource_id(plan):

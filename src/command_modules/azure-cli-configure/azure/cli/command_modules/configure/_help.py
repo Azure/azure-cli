@@ -10,4 +10,12 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 helps['configure'] = """
             type: command
             short-summary: Configure Azure CLI 2.0 Preview or view your configuration. The command is interactive, so just type `az configure` and respond to the prompts.
+            examples:
+                - name: configure a default resource group
+                  text: >
+                    az configure --default-resource-group myRG
+                - name: configure a default webapp
+                  text: >
+                    az configure --section appservice --name default_webapp_name --value myweb1
+
 """
