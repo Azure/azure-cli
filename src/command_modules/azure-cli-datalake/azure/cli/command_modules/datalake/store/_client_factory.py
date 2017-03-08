@@ -23,4 +23,7 @@ def cf_datalake_store_filesystem(account_name):
     profile = Profile()
     subscription_id = None
     cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id)
-    return core.AzureDLFileSystem(token=cred, store_name=account_name, url_suffix=CLOUD.suffixes.azure_datalake_store_file_system_endpoint)
+    return core.AzureDLFileSystem(
+        token=cred,
+        store_name=account_name,
+        url_suffix=CLOUD.suffixes.azure_datalake_store_file_system_endpoint)

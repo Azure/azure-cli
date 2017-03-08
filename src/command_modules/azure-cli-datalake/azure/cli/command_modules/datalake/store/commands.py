@@ -8,8 +8,7 @@
 from azure.cli.core.commands import cli_command
 from azure.cli.command_modules.datalake.store._client_factory import (cf_datalake_store_account,
                                                                       cf_datalake_store_account_firewall,
-                                                                      cf_datalake_store_account_trusted_provider,
-                                                                      cf_datalake_store_filesystem)
+                                                                      cf_datalake_store_account_trusted_provider)
 adls_format_path = 'azure.mgmt.datalake.store.operations.{}#{}.{}'
 adls_custom_format_path = 'azure.cli.command_modules.datalake.store.custom#{}'
 

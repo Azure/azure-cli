@@ -13,8 +13,7 @@ import time
 
 from shutil import rmtree
 from azure.cli.core._util import CLIError
-from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck,
-                                                     NoneCheck, VCRTestBase)
+from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck)
 
 class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
 
@@ -31,13 +30,6 @@ class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
 
     def set_up(self):
         super(DataLakeStoreFileScenarioTest, self).set_up()
-        # create local file
-        if os.path.exists(self.local_folder):
-            rmtree(self.local_folder)
-
-        os.makedirs(self.local_folder)
-        with open(self.local_file, 'w') as f:
-            f.write(self.local_file_content)
 
         # create ADLS account
         self.cmd('datalake store account create -g {} -n {} -l {} --disable-encryption'.format(self.resource_group, self.adls_name, self.location))
@@ -54,9 +46,7 @@ class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
             rmtree(self.local_folder)
 
     def body(self):
-        rg = self.resource_group
         adls = self.adls_name
-        loc = self.location
         folder_name = 'adltestfolder01'
         move_folder_name = 'adltestfolder02'
         file_name = 'adltestfile01'
@@ -64,9 +54,18 @@ class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
         join_file_name = 'adltestfile03'
         download_file_name = 'adltestfile04'
         file_content = '123456'
+
+        # create local file
+        if os.path.exists(self.local_folder):
+            rmtree(self.local_folder)
+
+        os.makedirs(self.local_folder)
+        with open(self.local_file, 'w') as f:
+            f.write(self.local_file_content)
+
         # file and folder manipulation
         # create a folder
-        self.cmd('datalake store file create -n {} --path "{}" --folder --force --debug'.format(adls, folder_name), debug=True)
+        self.cmd('datalake store file create -n {} --path "{}" --folder --force'.format(adls, folder_name))
         # get the folder
         self.cmd('datalake store file show -n {} --path "{}"'.format(adls, folder_name), checks=[
             JMESPathCheck('name', folder_name),
@@ -111,7 +110,7 @@ class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('[0].type', 'FILE'),
             JMESPathCheck('[0].length', len(file_content)),
         ])
-        
+
         # set the owner and owning group for the file and confirm them
         group_id = '80a3ed5f-959e-4696-ba3c-d3c8b2db6766'
         user_id = '6361e05d-c381-4275-a932-5535806bb323'
@@ -125,7 +124,7 @@ class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('owner', user_id),
             JMESPathCheck('group', group_id),
         ])
-        
+
         # set the permissions on the file
         self.cmd('datalake store file set-permission -n {} --path "{}/{}" --permission {}'.format(adls, move_folder_name, file_name, 777))
         # get the file and confirm those values
@@ -160,7 +159,7 @@ class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('type', 'FILE'),
             JMESPathCheck('length', len(self.local_file_content) + (len(file_content)*2)),
         ])
-        
+
         # download the joined file
         self.cmd('datalake store file download -n {} --destination-path "{}" --source-path "{}/{}"'.format(adls, os.path.join(self.local_folder, download_file_name), folder_name, join_file_name))
         assert os.path.getsize(os.path.join(self.local_folder, download_file_name)) == len(self.local_file_content) + (len(file_content)*2)
@@ -177,10 +176,13 @@ class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('datalake store file create -n {} --path "{}/{}"'.format(adls, move_folder_name, 'tempfile01.txt'))
         self.cmd('datalake store file delete -n {} --path "{}" --recurse'.format(adls, move_folder_name))
         # test that the path is gone
-        assert self.cmd('datalake store file test -n {} --path "{}"'.format(adls, move_folder_name)) == False
+        assert not self.cmd('datalake store file test -n {} --path "{}"'.format(adls, move_folder_name))
 
         # test that the other folder still exists
-        assert self.cmd('datalake store file test -n {} --path "{}"'.format(adls, folder_name)) == True
+        assert self.cmd('datalake store file test -n {} --path "{}"'.format(adls, folder_name))
+
+        if os.path.exists(self.local_folder):
+            rmtree(self.local_folder)
 
         # TODO once there are commands for them:
         # file expiration
@@ -204,7 +206,7 @@ class DataLakeStoreAccountScenarioTest(ResourceGroupVCRTestBase):
         adls = self.adls_name
         loc = self.location
         # test create keyvault with default access policy set
-        adls_acct = self.cmd('datalake store account create -g {} -n {} -l {}'.format(rg, adls, loc), checks=[
+        self.cmd('datalake store account create -g {} -n {} -l {}'.format(rg, adls, loc), checks=[
             JMESPathCheck('name', adls),
             JMESPathCheck('location', loc),
             JMESPathCheck('resourceGroup', rg),
@@ -224,9 +226,9 @@ class DataLakeStoreAccountScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('[0].resourceGroup', rg),
         ])
         result = self.cmd('datalake store account list')
-        assert type(result) == list
+        assert isinstance(result, list)
         assert len(result) >= 1
-        
+
         # test update acct
         self.cmd('datalake store account update -g {} -n {} --firewall-state Enabled --trusted-id-provider-state Enabled'.format(rg, adls))
         self.cmd('datalake store account show -n {} -g {}'.format(adls, rg), checks=[

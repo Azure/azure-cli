@@ -55,6 +55,15 @@ helps['datalake analytics job show'] = """
     short-summary: Retrieves the job in the Data Lake analytics account. 
 """
 
+helps['datalake analytics job wait'] = """
+    type: command
+    short-summary: Waits for the job in the Data Lake analytics account to finish, returning the job once finished
+    parameters:
+        - name: --job-id
+          type: string
+          short-summary: 'Job ID for the job to poll'
+"""
+
 helps['datalake analytics job list'] = """
     type: command
     short-summary: lists jobs in the Data Lake analytics account. 

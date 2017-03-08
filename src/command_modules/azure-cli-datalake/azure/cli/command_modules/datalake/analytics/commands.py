@@ -34,6 +34,7 @@ cli_command(__name__, 'datalake analytics account firewall delete', adla_format_
 # todo: update to allow for inclusion of statistics/debug data in show
 # todo: add a polling command for jobs
 cli_command(__name__, 'datalake analytics job submit', adla_custom_format_path.format('submit_adla_job'), cf_datalake_analytics_job)
+cli_command(__name__, 'datalake analytics job wait', adla_custom_format_path.format('wait_adla_job'), cf_datalake_analytics_job)
 cli_command(__name__, 'datalake analytics job show', adla_format_path.format('job', 'job_operations', 'JobOperations', 'get'), cf_datalake_analytics_job)
 cli_command(__name__, 'datalake analytics job cancel', adla_format_path.format('job', 'job_operations', 'JobOperations', 'cancel'), cf_datalake_analytics_job)
 cli_command(__name__, 'datalake analytics job list', adla_format_path.format('job', 'job_operations', 'JobOperations', 'list'), cf_datalake_analytics_job)
