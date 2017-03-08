@@ -20,10 +20,11 @@ from azure.cli.core._util import CLIError, todict
 
 logger = azlogging.get_az_logger(__name__)
 
-regex = re.compile('/subscriptions/(?P<subscription>[^/]*)/resourceGroups/(?P<resource_group>[^/]*)'
-                   '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)'
-                   '(/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?'
-                   '(/(?P<grandchild_type>[^/]*)/(?P<grandchild_name>[^/]*))?')
+regex = re.compile(
+    '/subscriptions/(?P<subscription>[^/]*)/resource[gG]roups/(?P<resource_group>[^/]*)'
+    '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)'
+    '(/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?'
+    '(/(?P<grandchild_type>[^/]*)/(?P<grandchild_name>[^/]*))?')
 
 
 def resource_id(**kwargs):
