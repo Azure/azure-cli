@@ -183,6 +183,7 @@ def test_adls_item(account_name,
                    path):
     return cf_datalake_store_filesystem(account_name).exists(path)
 
+# pylint: disable=redefined-variable-type
 def preview_adls_item(account_name,
                       path,
                       length=None,
@@ -228,6 +229,7 @@ def move_adls_item(account_name,
         client.rm(destination_path)
     client.mv(source_path, destination_path)
 
+# pylint: disable=superfluous-parens
 def set_adls_item_expiry(account_name,
                          path,
                          expiration_time):
@@ -238,16 +240,22 @@ def set_adls_item_expiry(account_name,
     print('todo: {}'.format(expiration_time))
 
 # filesystem permissions customizations
+# pylint: disable=superfluous-parens
 def get_adls_item_acl():
     print('todo')
+# pylint: disable=superfluous-parens
 def remove_adls_item_acl():
     print('todo')
+# pylint: disable=superfluous-parens
 def remove_adls_item_acl_entry():
     print('todo')
+# pylint: disable=superfluous-parens
 def set_adls_item_acl():
     print('todo')
+# pylint: disable=superfluous-parens
 def set_adls_item_acl_entry():
     print('todo')
+
 def set_adls_item_owner(account_name,
                         path,
                         owner=None,

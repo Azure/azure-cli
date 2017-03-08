@@ -105,36 +105,6 @@ helps['datalake store account firewall delete'] = """
     short-summary: Deletes a firewall rule in the Data Lake Store account. 
 """
 
-helps['datalake store account provider'] = """
-    type: group
-    short-summary: Commands to manage Data Lake Store account trusted identity providers. 
-"""
-
-helps['datalake store account provider add'] = """
-    type: command
-    short-summary: Adds a trusted identity provider to the Data Lake Store account. 
-"""
-
-helps['datalake store account provider update'] = """
-    type: command
-    short-summary: Updates a trusted identity provider in the Data Lake Store account. 
-"""
-
-helps['datalake store account provider show'] = """
-    type: command
-    short-summary: Retrieves a trusted identity provider in the Data Lake Store account. 
-"""
-
-helps['datalake store account provider list'] = """
-    type: command
-    short-summary: Lists trusted identity providers in the Data Lake Store account. 
-"""
-
-helps['datalake store account provider delete'] = """
-    type: command
-    short-summary: Deletes a trusted identity provider in the Data Lake Store account. 
-"""
-
 helps['datalake store file'] = """
     type: group
     short-summary: Commands to manage a Data Lake Store filesystem. 
@@ -256,7 +226,7 @@ helps['datalake store file set-owner'] = """
           short-summary: 'The group AAD object ID or UPN to set as the owning group. If not specified the owning group remains unchanged'
 """
 
-helps['datalake store file set-permission '] = """
+helps['datalake store file set-permission'] = """
     type: command
     short-summary: Sets the permission octal for the file or folder in the Data Lake Store account.
     parameters:

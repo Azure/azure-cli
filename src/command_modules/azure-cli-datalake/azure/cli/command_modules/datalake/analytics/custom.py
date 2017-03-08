@@ -195,6 +195,7 @@ def submit_adla_job(client,
 
     return client.create(account_name, job_id, submit_params)
 
+# pylint: disable=superfluous-parens
 def wait_adla_job(client,
                   account_name,
                   job_id,

@@ -287,33 +287,3 @@ helps['datalake analytics account firewall delete'] = """
     type: command
     short-summary: Deletes a firewall rule in the Data Lake Analytics account. 
 """
-
-helps['datalake analytics account data source'] = """
-    type: group
-    short-summary: Commands to manage Data Lake Analytics account data source. 
-"""
-
-helps['datalake analytics account data source add'] = """
-    type: command
-    short-summary: Adds a data source to the Data Lake Analytics account. 
-"""
-
-helps['datalake analytics account data source update'] = """
-    type: command
-    short-summary: Updates a data source in the Data Lake Analytics account. 
-"""
-
-helps['datalake analytics account data source show'] = """
-    type: command
-    short-summary: Retrieves a data source in the Data Lake Analytics account. 
-"""
-
-helps['datalake analytics account data source list'] = """
-    type: command
-    short-summary: Lists data sources in the Data Lake Analytics account. 
-"""
-
-helps['datalake analytics account data source delete'] = """
-    type: command
-    short-summary: Deletes a data source in the Data Lake Analytics account. 
-"""
