@@ -133,7 +133,7 @@ resource_group_name_type = CliArgumentType(
     completer=get_resource_group_completion_list,
     id_part='resource_group',
     help='Name of resource group',
-    default_configuration='default_resource_group_name')
+    configured_default='default_resource_group_name')
 
 name_type = CliArgumentType(options_list=('--name', '-n'), help='the primary resource name')
 

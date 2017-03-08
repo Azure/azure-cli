@@ -126,10 +126,11 @@ def add_id_parameters(command_table):
                                 existing_values.append(parts[arg.id_part])
                             else:
                                 if isinstance(existing_values, str):
-                                    logger.warning(
-                                        "Property '%s=%s' being overriden by value '%s' from IDs parameter.",  # pylint: disable=line-too-long
-                                        arg.name, existing_values, parts[arg.id_part]
-                                    )
+                                    if not getattr(arg.type, 'configured_default_applied', None):
+                                        logger.warning(
+                                            "Property '%s=%s' being overriden by value '%s' from IDs parameter.",  # pylint: disable=line-too-long
+                                            arg.name, existing_values, parts[arg.id_part]
+                                        )
                                     existing_values = IterateValue()
                                 existing_values.append(parts[arg.id_part])
                             setattr(namespace, arg.name, existing_values)
