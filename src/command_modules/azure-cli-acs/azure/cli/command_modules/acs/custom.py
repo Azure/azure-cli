@@ -317,7 +317,8 @@ def _build_service_principal(client, name, url, client_secret):
             _create_service_principal(client, service_principal)
             break
         # TODO figure out what exception AAD throws here sometimes.
-        except:  # pylint: disable=bare-except
+        except Exception as ex:  # pylint: disable=bare-except
+            print(ex)
             sys.stdout.write('.')
             sys.stdout.flush()
             time.sleep(2 + 2 * x)
@@ -915,12 +916,11 @@ def _build_application_creds(password=None, key_value=None, key_type=None,
 
 
 def create_service_principal(identifier):
-    return _create_service_principal(identifier)
-
-
-def _create_service_principal(identifier, resolve_app=True):
     client = _graph_client_factory()
+    return _create_service_principal(client, identifier)
 
+
+def _create_service_principal(client, identifier, resolve_app=True):
     if resolve_app:
         try:
             uuid.UUID(identifier)

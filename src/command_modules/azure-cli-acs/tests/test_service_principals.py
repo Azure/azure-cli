@@ -13,6 +13,8 @@ from azure.cli.command_modules.acs.custom import _validate_service_principal, \
     load_acs_service_principal, store_acs_service_principal, \
     _build_service_principal
 
+from azure.graphrbac.models import ApplicationCreateParameters
+
 
 class AcsServicePrincipalTest(unittest.TestCase):
     def test_load_non_existent_service_principal(self):
@@ -108,9 +110,19 @@ class AcsServicePrincipalTest(unittest.TestCase):
 
         self.assertTrue(client.applications.create.called)
         self.assertTrue(client.applications.list.called)
+        self.assertTrue(client.service_principals.create.called)
 
         expected_calls = [
             mock.call(
                 filter="appId eq '{}'".format(app_id))
         ]
         client.applications.list.assert_has_calls(expected_calls)
+
+        expected_calls = [
+            mock.call(ApplicationCreateParameters(False, name, [url],
+                                homepage=url,
+                                reply_urls=None,
+                                key_credentials=None,
+                                password_credentials=None))
+        ]
+        client.applications.create.assert_has_calls(expected_calls)
