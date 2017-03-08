@@ -39,5 +39,6 @@ exec_command('python -m automation.setup.install_modules')
 
 # azure cli has dependencies on the above packages so install this one last
 exec_command('pip install -e src/azure-cli')
+exec_command('pip install -e src/azure-cli-testsdk')
 
 print('Finished dev setup.')
