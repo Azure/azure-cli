@@ -795,7 +795,7 @@ class NetworkNicConvenienceCommandsScenarioTest(ResourceGroupVCRTestBase):
         super(NetworkNicConvenienceCommandsScenarioTest, self).set_up()
         rg = self.resource_group
         vm = self.vm_name
-        self.cmd('vm create -g {} -n {} --image UbuntuLTS --admin-username admin1 --admin-password aBcD1234!@#$ --authentication-type password'.format(rg, vm))
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --admin-username myusername --admin-password aBcD1234!@#$ --authentication-type password'.format(rg, vm))
 
     def body(self):
         rg = self.resource_group
@@ -1018,9 +1018,9 @@ class NetworkVNetPeeringScenarioTest(ResourceGroupVCRTestBase):
         # create supporting resources for gateway
         self.cmd('network public-ip create -g {} -n ip1'.format(rg))
         ip_id = self.cmd('network public-ip show -g {} -n ip1 --query id'.format(rg))
-        subnet_id = self.cmd('network vnet subnet show -g {} -n GatewaySubnet --vnet-name vnet2 --query id'.format(rg))
+        vnet_id = self.cmd('network vnet show -g {} -n vnet2 --query id'.format(rg))
         # create the gateway on vnet2
-        self.cmd('network vnet-gateway create -g {} -n gateway1 --public-ip-address {} --subnet-id {}'.format(rg, ip_id, subnet_id))
+        self.cmd('network vnet-gateway create -g {} -n gateway1 --public-ip-address {} --vnet {}'.format(rg, ip_id, vnet_id))
 
     def body(self):
         rg = self.resource_group
