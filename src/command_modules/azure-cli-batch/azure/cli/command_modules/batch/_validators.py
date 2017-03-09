@@ -149,15 +149,25 @@ def keyvault_id(namespace):
     """Validate storage account name"""
     from azure.mgmt.keyvault import KeyVaultManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-
-    if namespace.keyvault and not \
-             '/providers/Microsoft.KeyVault/vaults/' in namespace.keyvault:
+    if not namespace.keyvault:
+        return
+    if '/providers/Microsoft.KeyVault/vaults/' in namespace.keyvault:
+        resource = namespace.keyvault.split('/')
+        kv_name = resource[resource.index('Microsoft.KeyVault') + 2]
+        kv_rg = resource[resource.index('resourceGroups') + 1]
+    else:
+        kv_name = namespace.keyvault
+        kv_rg = namespace.resource_group_name
+    try:
         keyvault_client = get_mgmt_service_client(KeyVaultManagementClient)
-        vault = keyvault_client.vaults.get(namespace.resource_group_name, namespace.keyvault)
+        vault = keyvault_client.vaults.get(kv_rg, kv_name)
         if not vault:
             raise ValueError("KeyVault named '{}' not found in the resource group '{}'.".
-                             format(namespace.storage_account, namespace.resource_group_name))
+                             format(kv_name, kv_rg))
         namespace.keyvault = vault.id  # pylint: disable=no-member
+        namespace.keyvault_url = vault.properties.vault_uri
+    except Exception as exp:
+        raise ValueError('Invalid KeyVault reference: {}\n{}'.format(namespace.keyvault, exp))
 
 
 def application_enabled(namespace):

@@ -12,7 +12,7 @@ from azure.batch.models.batch_service_client_enums import \
 from azure.cli.core.commands import \
     (register_cli_argument, CliArgumentType, register_extra_cli_argument)
 from azure.cli.core.commands.parameters import \
-    (tags_type, location_type, resource_group_name_type,
+    (tags_type, location_type, resource_group_name_type, ignore_type,
      get_resource_name_completion_list, enum_choice_list, file_type)
 
 from azure.cli.command_modules.batch._validators import \
@@ -32,10 +32,11 @@ register_cli_argument('batch', 'resource_group_name', resource_group_name_type, 
 register_cli_argument('batch account', 'account_name', batch_name_type, options_list=('--name', '-n'))
 register_cli_argument('batch account create', 'location', location_type, help='The region in which to create the account.')
 register_cli_argument('batch account create', 'tags', tags_type, help="Space separated tags in 'key[=value]' format.")
-register_extra_cli_argument('batch account create', 'storage_account', help='The storage account name or resource ID to be used for auto storage.', validator=storage_account_id)
-register_extra_cli_argument('batch account create', 'keyvault', help='The keyvault name or resource ID to be used for an account with a pool allocation mode of \'User Subscription\'.', validator=keyvault_id)
+register_cli_argument('batch account create', 'storage_account', help='The storage account name or resource ID to be used for auto storage.', validator=storage_account_id)
+register_cli_argument('batch account create', 'keyvault', help='The KeyVault name or resource ID to be used for an account with a pool allocation mode of \'User Subscription\'.', validator=keyvault_id)
+register_cli_argument('batch account create', 'keyvault_url', ignore_type)
 register_cli_argument('batch account set', 'tags', tags_type)
-register_extra_cli_argument('batch account set', 'storage_account', help='The storage account name or resource ID to be used for auto storage.', validator=storage_account_id)
+register_cli_argument('batch account set', 'storage_account', help='The storage account name or resource ID to be used for auto storage.', validator=storage_account_id)
 register_cli_argument('batch account keys renew', 'key_name', **enum_choice_list(AccountKeyType))
 register_cli_argument('batch account login', 'shared_key_auth', action='store_true', help='Using Shared Key authentication, if not specified, it will use Azure Active Directory authentication.')
 
