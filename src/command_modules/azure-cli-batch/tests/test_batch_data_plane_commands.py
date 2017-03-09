@@ -6,8 +6,7 @@
 import os
 
 from azure.cli.core.test_utils.vcr_test_base import (JMESPathCheck)
-from azure.cli.command_modules.batch.tests.test_batch_data_plane_command_base import (
-    BatchDataPlaneTestBase)
+from .test_batch_data_plane_command_base import (BatchDataPlaneTestBase)
 
 
 class BatchCertificateScenarioTest(BatchDataPlaneTestBase):
@@ -96,7 +95,8 @@ class BatchPoolScenarioTest(BatchDataPlaneTestBase):
         self.cmd('batch pool show --pool-id {}'.format(self.create_pool_id),
                  checks=[JMESPathCheck('allocationState', 'steady'),
                          JMESPathCheck('id', self.create_pool_id),
-                         JMESPathCheck('startTask.commandLine', "cmd /c echo test")])
+                         JMESPathCheck('startTask.commandLine', "cmd /c echo test"),
+                         JMESPathCheck('startTask.userIdentity.autoUser.elevationLevel', "admin")])
 
         self.cmd('batch pool reset --pool-id {} --json-file "{}"'.
                  format(self.create_pool_id, self.update_pool_file_path),
@@ -187,6 +187,11 @@ class BatchTaskAddScenarioTest(BatchDataPlaneTestBase):
                  format(self.job_id, self.create_task_file_path),
                  checks=[JMESPathCheck('id', self.task_id),
                          JMESPathCheck('commandLine', 'cmd /c dir /s')])
+
+        task = self.cmd('batch task show --job-id {} --task-id {}'.format(
+            self.job_id, self.task_id))
+        self.assertEqual(task['userIdentity']['autoUser']['scope'], 'pool')
+        self.assertEqual(task['authenticationTokenSettings']['access'][0], 'job')
 
         self.cmd('batch task delete --job-id {} --task-id {} --yes'.
                  format(self.job_id, self.task_id))

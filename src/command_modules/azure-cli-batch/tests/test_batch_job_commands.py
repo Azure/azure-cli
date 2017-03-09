@@ -7,8 +7,7 @@ import datetime
 import os
 
 from azure.cli.core._util import CLIError
-from azure.cli.command_modules.batch.tests.test_batch_data_plane_command_base import (
-    BatchDataPlaneTestBase)
+from .test_batch_data_plane_command_base import (BatchDataPlaneTestBase)
 
 
 class BatchJobTest(BatchDataPlaneTestBase):
@@ -44,12 +43,12 @@ class BatchJobTest(BatchDataPlaneTestBase):
         # test create job with missing parameters
         with self.assertRaises(SystemExit):
             self.cmd('batch job create --id {} --metadata test=value '
-                     '--job-max-task-retry-count 5 '
-                     '--job-manager-task-run-elevated'.format(self.job1))
+                     '--job-manager-task-environment-settings a=b '
+                     '--job-max-task-retry-count 5 '.format(self.job1))
 
         # test create job
         self.cmd('batch job create --id {} --metadata test=value --job-max-task-retry-count 5 '
-                 '--job-manager-task-run-elevated --job-manager-task-id JobManager '
+                 '--job-manager-task-id JobManager '
                  '--job-manager-task-command-line "cmd /c set AZ_BATCH_TASK_ID" '
                  '--job-manager-task-environment-settings '
                  'CLI_TEST_VAR=CLI_TEST_VAR_VALUE --pool-id {}'.format(self.job1, self.pool_paas))

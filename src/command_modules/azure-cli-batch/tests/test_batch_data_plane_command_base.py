@@ -13,12 +13,12 @@ class BatchDataPlaneTestBase(VCRTestBase):
 
     def __init__(self, test_file, test_method):
         super(BatchDataPlaneTestBase, self).__init__(test_file, test_method)
-        self.account_name = 'test1'
+        self.account_name = 'clitest1'
         if not self.playback:
             self.account_key = os.environ['AZURE_BATCH_ACCESS_KEY']
         else:
             self.account_key = 'ZmFrZV9hY29jdW50X2tleQ=='
-        self.account_endpoint = 'https://test1.westus.batch.azure.com/'
+        self.account_endpoint = 'https://clitest1.uksouth.batch.azure.com/'
 
     def cmd(self, command, checks=None, allowed_exceptions=None,
             debug=False):
