@@ -3,4 +3,5 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 def load_params(_):
-    import azure.cli.command_modules.datalake.analytics._params #pylint: disable=redefined-outer-name
+    #pylint: disable=redefined-outer-name
+    import azure.cli.command_modules.datalake.analytics._params
