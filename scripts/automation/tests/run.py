@@ -29,12 +29,14 @@ def run_tests(modules, parallel, run_live):
                                parallel=parallel, process_timeout=3600 if run_live else 600)
 
     # run tests
-    test_folders = [test_path for _, _, test_path in modules]
-    result, test_result = run_nose(test_folders)
+    overall_result = True
+    for name, _, test_path in modules:
+        print('\n\n==== Test module {} ===='.format(name))
+        result, test_result = run_nose([test_path])
+        overall_result &= result
+        print('==== Test module {} result ====\n{}\n==========\n'.format(name, test_result))
 
-    print('Test report: {}'.format(test_result))
-
-    return result
+    return overall_result
 
 
 if __name__ == '__main__':
