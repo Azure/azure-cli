@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"vmSize": "small", "cloudServiceConfiguration": {"osFamily": "4"}, "id":
+    body: '{"cloudServiceConfiguration": {"osFamily": "4"}, "vmSize": "small", "id":
       "azure-cli-test-paas"}'
     headers:
       Accept: [application/json]
@@ -8,61 +8,62 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['96']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 batchserviceclient/1.1.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 batchserviceclient/2.0.0 Azure-SDK-For-Python]
       accept-language: [en-US]
-      client-request-id: [e3c749d4-ee46-11e6-a33d-54ee750f2fc7]
-      ocp-date: ['Wed, 08 Feb 2017 21:38:11 GMT']
+      client-request-id: [01d04f8c-fd49-11e6-87dd-54ee750f2fc7]
+      ocp-date: ['Tue, 28 Feb 2017 00:01:08 GMT']
+      return-client-request-id: ['false']
     method: POST
-    uri: https://test1.westus.batch.azure.com/pools?api-version=2016-07-01.3.1&timeout=30
+    uri: https://clitest1.uksouth.batch.azure.com/pools?timeout=30&api-version=2017-01-01.4.0
   response:
     body: {string: ''}
     headers:
-      DataServiceId: ['https://test1.westus.batch.azure.com/pools/azure-cli-test-paas']
+      DataServiceId: ['https://clitest1.uksouth.batch.azure.com/pools/azure-cli-test-paas']
       DataServiceVersion: ['3.0']
-      Date: ['Wed, 08 Feb 2017 21:38:12 GMT']
-      ETag: ['0x8D4506AC8C286F8']
-      Last-Modified: ['Wed, 08 Feb 2017 21:38:13 GMT']
-      Location: ['https://test1.westus.batch.azure.com/pools/azure-cli-test-paas']
+      Date: ['Tue, 28 Feb 2017 00:01:10 GMT']
+      ETag: ['0x8D45F6CE5ABFBB9']
+      Last-Modified: ['Tue, 28 Feb 2017 00:01:08 GMT']
+      Location: ['https://clitest1.uksouth.batch.azure.com/pools/azure-cli-test-paas']
       Server: [Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
       X-Content-Type-Options: [nosniff]
-      request-id: [ef22a3a2-8c22-4c49-bc18-be1e5d443e8a]
+      request-id: [8989d0a6-61df-45d3-8ee8-4901771088d7]
     status: {code: 201, message: Created}
 - request:
-    body: '{"metadata": [{"name": "test", "value": "value"}], "jobManagerTask": {"environmentSettings":
-      [{"name": "CLI_TEST_VAR", "value": "CLI_TEST_VAR_VALUE"}], "runElevated": true,
-      "id": "JobManager", "commandLine": "cmd /c set AZ_BATCH_TASK_ID"}, "poolInfo":
-      {"poolId": "azure-cli-test-paas"}, "id": "cli-test-job-1", "constraints": {"maxTaskRetryCount":
-      5}}'
+    body: '{"metadata": [{"name": "test", "value": "value"}], "poolInfo": {"poolId":
+      "azure-cli-test-paas"}, "jobManagerTask": {"id": "JobManager", "environmentSettings":
+      [{"name": "CLI_TEST_VAR", "value": "CLI_TEST_VAR_VALUE"}], "commandLine": "cmd
+      /c set AZ_BATCH_TASK_ID"}, "constraints": {"maxTaskRetryCount": 5}, "id": "cli-test-job-1"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Length: ['351']
+      Content-Length: ['330']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 batchserviceclient/1.1.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 batchserviceclient/2.0.0 Azure-SDK-For-Python]
       accept-language: [en-US]
-      client-request-id: [e4721f10-ee46-11e6-8a4a-54ee750f2fc7]
-      ocp-date: ['Wed, 08 Feb 2017 21:38:12 GMT']
+      client-request-id: [02f5c136-fd49-11e6-913c-54ee750f2fc7]
+      ocp-date: ['Tue, 28 Feb 2017 00:01:10 GMT']
+      return-client-request-id: ['false']
     method: POST
-    uri: https://test1.westus.batch.azure.com/jobs?api-version=2016-07-01.3.1&timeout=30
+    uri: https://clitest1.uksouth.batch.azure.com/jobs?timeout=30&api-version=2017-01-01.4.0
   response:
     body: {string: ''}
     headers:
-      DataServiceId: ['https://test1.westus.batch.azure.com/jobs/job-1']
+      DataServiceId: ['https://clitest1.uksouth.batch.azure.com/jobs/job-1']
       DataServiceVersion: ['3.0']
-      Date: ['Wed, 08 Feb 2017 21:38:11 GMT']
-      ETag: ['0x8D4506AC8AFDDC7']
-      Last-Modified: ['Wed, 08 Feb 2017 21:38:12 GMT']
-      Location: ['https://test1.westus.batch.azure.com/jobs/job-1']
+      Date: ['Tue, 28 Feb 2017 00:01:09 GMT']
+      ETag: ['0x8D45F6CE58C454B']
+      Last-Modified: ['Tue, 28 Feb 2017 00:01:07 GMT']
+      Location: ['https://clitest1.uksouth.batch.azure.com/jobs/job-1']
       Server: [Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
       X-Content-Type-Options: [nosniff]
-      request-id: [1fa09551-0e22-4141-af65-9d3764d28ff6]
+      request-id: [7155ec87-2771-451d-b05b-47f841ef904d]
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -71,72 +72,76 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 batchserviceclient/1.1.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 batchserviceclient/2.0.0 Azure-SDK-For-Python]
       accept-language: [en-US]
-      client-request-id: [e4c2664a-ee46-11e6-8cb5-54ee750f2fc7]
-      ocp-date: ['Wed, 08 Feb 2017 21:38:13 GMT']
+      client-request-id: [039efc12-fd49-11e6-80d3-54ee750f2fc7]
+      ocp-date: ['Tue, 28 Feb 2017 00:01:11 GMT']
+      return-client-request-id: ['false']
     method: GET
-    uri: https://test1.westus.batch.azure.com/jobs/cli-test-job-1?api-version=2016-07-01.3.1&timeout=30
+    uri: https://clitest1.uksouth.batch.azure.com/jobs/cli-test-job-1?timeout=30&api-version=2017-01-01.4.0
   response:
-    body: {string: "{\r\n  \"odata.metadata\":\"https://test1.westus.batch.azure.com/$metadata#jobs/@Element\"\
-        ,\"id\":\"cli-test-job-1\",\"url\":\"https://test1.westus.batch.azure.com/jobs/cli-test-job-1\"\
-        ,\"eTag\":\"0x8D4506AC8AFDDC7\",\"lastModified\":\"2017-02-08T21:38:12.9806791Z\"\
-        ,\"creationTime\":\"2017-02-08T21:38:12.9027025Z\",\"state\":\"active\",\"\
-        stateTransitionTime\":\"2017-02-08T21:38:12.9806791Z\",\"priority\":0,\"usesTaskDependencies\"\
+    body: {string: "{\r\n  \"odata.metadata\":\"https://clitest1.uksouth.batch.azure.com/$metadata#jobs/@Element\"\
+        ,\"id\":\"cli-test-job-1\",\"url\":\"https://clitest1.uksouth.batch.azure.com/jobs/cli-test-job-1\"\
+        ,\"eTag\":\"0x8D45F6CE58C454B\",\"lastModified\":\"2017-02-28T00:01:07.8364491Z\"\
+        ,\"creationTime\":\"2017-02-28T00:01:07.8120094Z\",\"state\":\"active\",\"\
+        stateTransitionTime\":\"2017-02-28T00:01:07.8364491Z\",\"priority\":0,\"usesTaskDependencies\"\
         :false,\"constraints\":{\r\n    \"maxWallClockTime\":\"P10675199DT2H48M5.4775807S\"\
         ,\"maxTaskRetryCount\":5\r\n  },\"jobManagerTask\":{\r\n    \"id\":\"JobManager\"\
         ,\"commandLine\":\"cmd /c set AZ_BATCH_TASK_ID\",\"environmentSettings\":[\r\
         \n      {\r\n        \"name\":\"CLI_TEST_VAR\",\"value\":\"CLI_TEST_VAR_VALUE\"\
         \r\n      }\r\n    ],\"constraints\":{\r\n      \"maxWallClockTime\":\"P10675199DT2H48M5.4775807S\"\
         ,\"retentionTime\":\"P10675199DT2H48M5.4775807S\",\"maxTaskRetryCount\":5\r\
-        \n    },\"runElevated\":true,\"runExclusive\":true,\"killJobOnCompletion\"\
-        :true\r\n  },\"poolInfo\":{\r\n    \"poolId\":\"azure-cli-test-paas\"\r\n\
-        \  },\"metadata\":[\r\n    {\r\n      \"name\":\"test\",\"value\":\"value\"\
-        \r\n    }\r\n  ],\"executionInfo\":{\r\n    \"startTime\":\"2017-02-08T21:38:12.9806791Z\"\
-        ,\"poolId\":\"azure-cli-test-paas\"\r\n  },\"onAllTasksComplete\":\"noaction\"\
-        ,\"onTaskFailure\":\"noaction\"\r\n}"}
+        \n    },\"userIdentity\":{\r\n      \"autoUser\":{\r\n        \"scope\":\"\
+        task\",\"elevationLevel\":\"nonadmin\"\r\n      }\r\n    },\"runExclusive\"\
+        :true,\"killJobOnCompletion\":true\r\n  },\"poolInfo\":{\r\n    \"poolId\"\
+        :\"azure-cli-test-paas\"\r\n  },\"metadata\":[\r\n    {\r\n      \"name\"\
+        :\"test\",\"value\":\"value\"\r\n    }\r\n  ],\"executionInfo\":{\r\n    \"\
+        startTime\":\"2017-02-28T00:01:07.8364491Z\",\"poolId\":\"azure-cli-test-paas\"\
+        \r\n  },\"onAllTasksComplete\":\"noaction\",\"onTaskFailure\":\"noaction\"\
+        \r\n}"}
     headers:
       Content-Type: [application/json;odata=minimalmetadata]
       DataServiceVersion: ['3.0']
-      Date: ['Wed, 08 Feb 2017 21:38:11 GMT']
-      ETag: ['0x8D4506AC8AFDDC7']
-      Last-Modified: ['Wed, 08 Feb 2017 21:38:12 GMT']
+      Date: ['Tue, 28 Feb 2017 00:01:12 GMT']
+      ETag: ['0x8D45F6CE58C454B']
+      Last-Modified: ['Tue, 28 Feb 2017 00:01:07 GMT']
       Server: [Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
       X-Content-Type-Options: [nosniff]
-      request-id: [139b03af-faf1-4ebe-ade0-335b30fa8837]
+      request-id: [a34ef7ce-9450-433f-8620-3db814f33653]
     status: {code: 200, message: OK}
 - request:
-    body: '{"constraints": {"maxWallClockTime": "P3Y6M4DT12H30M5S"}, "onAllTasksComplete":
-      "terminateJob"}'
+    body: '{"onAllTasksComplete": "terminateJob", "constraints": {"maxWallClockTime":
+      "P3Y6M4DT12H30M5S"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['95']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 batchserviceclient/1.1.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 batchserviceclient/2.0.0 Azure-SDK-For-Python]
       accept-language: [en-US]
-      client-request-id: [e5074734-ee46-11e6-906c-54ee750f2fc7]
-      ocp-date: ['Wed, 08 Feb 2017 21:38:13 GMT']
+      client-request-id: [04613d8c-fd49-11e6-8c3d-54ee750f2fc7]
+      ocp-date: ['Tue, 28 Feb 2017 00:01:12 GMT']
+      return-client-request-id: ['false']
     method: PATCH
-    uri: https://test1.westus.batch.azure.com/jobs/cli-test-job-1?api-version=2016-07-01.3.1&timeout=30
+    uri: https://clitest1.uksouth.batch.azure.com/jobs/cli-test-job-1?timeout=30&api-version=2017-01-01.4.0
   response:
     body: {string: ''}
     headers:
-      DataServiceId: ['https://test1.westus.batch.azure.com/jobs/cli-test-job-1']
+      DataServiceId: ['https://clitest1.uksouth.batch.azure.com/jobs/cli-test-job-1']
       DataServiceVersion: ['3.0']
-      Date: ['Wed, 08 Feb 2017 21:38:13 GMT']
-      ETag: ['0x8D4506AC938D753']
-      Last-Modified: ['Wed, 08 Feb 2017 21:38:13 GMT']
+      Date: ['Tue, 28 Feb 2017 00:01:13 GMT']
+      ETag: ['0x8D45F6CE6EB0980']
+      Last-Modified: ['Tue, 28 Feb 2017 00:01:10 GMT']
       Server: [Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
       X-Content-Type-Options: [nosniff]
-      request-id: [1bc56a8d-83a9-4157-98fe-e4c73ce3d9e5]
+      request-id: [ab306f8c-7851-4d81-af3a-7e3fd8616e65]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -145,104 +150,109 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 batchserviceclient/1.1.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 batchserviceclient/2.0.0 Azure-SDK-For-Python]
       accept-language: [en-US]
-      client-request-id: [e54dbdee-ee46-11e6-baf4-54ee750f2fc7]
-      ocp-date: ['Wed, 08 Feb 2017 21:38:14 GMT']
+      client-request-id: [0572dd92-fd49-11e6-b068-54ee750f2fc7]
+      ocp-date: ['Tue, 28 Feb 2017 00:01:14 GMT']
+      return-client-request-id: ['false']
     method: GET
-    uri: https://test1.westus.batch.azure.com/jobs/cli-test-job-1?api-version=2016-07-01.3.1&timeout=30
+    uri: https://clitest1.uksouth.batch.azure.com/jobs/cli-test-job-1?timeout=30&api-version=2017-01-01.4.0
   response:
-    body: {string: "{\r\n  \"odata.metadata\":\"https://test1.westus.batch.azure.com/$metadata#jobs/@Element\"\
-        ,\"id\":\"cli-test-job-1\",\"url\":\"https://test1.westus.batch.azure.com/jobs/cli-test-job-1\"\
-        ,\"eTag\":\"0x8D4506AC938D753\",\"lastModified\":\"2017-02-08T21:38:13.8783571Z\"\
-        ,\"creationTime\":\"2017-02-08T21:38:12.9027025Z\",\"state\":\"active\",\"\
-        stateTransitionTime\":\"2017-02-08T21:38:12.9806791Z\",\"priority\":0,\"usesTaskDependencies\"\
+    body: {string: "{\r\n  \"odata.metadata\":\"https://clitest1.uksouth.batch.azure.com/$metadata#jobs/@Element\"\
+        ,\"id\":\"cli-test-job-1\",\"url\":\"https://clitest1.uksouth.batch.azure.com/jobs/cli-test-job-1\"\
+        ,\"eTag\":\"0x8D45F6CE6EB0980\",\"lastModified\":\"2017-02-28T00:01:10.135232Z\"\
+        ,\"creationTime\":\"2017-02-28T00:01:07.8120094Z\",\"state\":\"active\",\"\
+        stateTransitionTime\":\"2017-02-28T00:01:07.8364491Z\",\"priority\":0,\"usesTaskDependencies\"\
         :false,\"constraints\":{\r\n    \"maxWallClockTime\":\"P1279DT12H30M5S\",\"\
         maxTaskRetryCount\":0\r\n  },\"jobManagerTask\":{\r\n    \"id\":\"JobManager\"\
         ,\"commandLine\":\"cmd /c set AZ_BATCH_TASK_ID\",\"environmentSettings\":[\r\
         \n      {\r\n        \"name\":\"CLI_TEST_VAR\",\"value\":\"CLI_TEST_VAR_VALUE\"\
         \r\n      }\r\n    ],\"constraints\":{\r\n      \"maxWallClockTime\":\"P10675199DT2H48M5.4775807S\"\
         ,\"retentionTime\":\"P10675199DT2H48M5.4775807S\",\"maxTaskRetryCount\":5\r\
-        \n    },\"runElevated\":true,\"runExclusive\":true,\"killJobOnCompletion\"\
-        :true\r\n  },\"poolInfo\":{\r\n    \"poolId\":\"azure-cli-test-paas\"\r\n\
-        \  },\"metadata\":[\r\n    {\r\n      \"name\":\"test\",\"value\":\"value\"\
-        \r\n    }\r\n  ],\"executionInfo\":{\r\n    \"startTime\":\"2017-02-08T21:38:12.9806791Z\"\
-        ,\"poolId\":\"azure-cli-test-paas\"\r\n  },\"onAllTasksComplete\":\"terminatejob\"\
-        ,\"onTaskFailure\":\"noaction\"\r\n}"}
+        \n    },\"userIdentity\":{\r\n      \"autoUser\":{\r\n        \"scope\":\"\
+        task\",\"elevationLevel\":\"nonadmin\"\r\n      }\r\n    },\"runExclusive\"\
+        :true,\"killJobOnCompletion\":true\r\n  },\"poolInfo\":{\r\n    \"poolId\"\
+        :\"azure-cli-test-paas\"\r\n  },\"metadata\":[\r\n    {\r\n      \"name\"\
+        :\"test\",\"value\":\"value\"\r\n    }\r\n  ],\"executionInfo\":{\r\n    \"\
+        startTime\":\"2017-02-28T00:01:07.8364491Z\",\"poolId\":\"azure-cli-test-paas\"\
+        \r\n  },\"onAllTasksComplete\":\"terminatejob\",\"onTaskFailure\":\"noaction\"\
+        \r\n}"}
     headers:
       Content-Type: [application/json;odata=minimalmetadata]
       DataServiceVersion: ['3.0']
-      Date: ['Wed, 08 Feb 2017 21:38:12 GMT']
-      ETag: ['0x8D4506AC938D753']
-      Last-Modified: ['Wed, 08 Feb 2017 21:38:13 GMT']
+      Date: ['Tue, 28 Feb 2017 00:01:13 GMT']
+      ETag: ['0x8D45F6CE6EB0980']
+      Last-Modified: ['Tue, 28 Feb 2017 00:01:10 GMT']
       Server: [Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
       X-Content-Type-Options: [nosniff]
-      request-id: [e14b2955-e45b-48e7-bfaf-36e92a9e795f]
+      request-id: [9cb1abc6-c3e4-4b46-8ab0-a2e083d7e133]
     status: {code: 200, message: OK}
 - request:
-    body: '{"poolInfo": {"poolId": "azure-cli-test-paas"}, "onAllTasksComplete": "terminateJob"}'
+    body: '{"onAllTasksComplete": "terminateJob", "poolInfo": {"poolId": "azure-cli-test-paas"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['85']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      If-Unmodified-Since: ['Wed, 08 Feb 2017 13:38:12 GMT']
-      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 batchserviceclient/1.1.0 Azure-SDK-For-Python]
+      If-Unmodified-Since: ['Mon, 27 Feb 2017 16:01:10 GMT']
+      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 batchserviceclient/2.0.0 Azure-SDK-For-Python]
       accept-language: [en-US]
-      client-request-id: [e5811fba-ee46-11e6-8a07-54ee750f2fc7]
-      ocp-date: ['Wed, 08 Feb 2017 21:38:14 GMT']
+      client-request-id: [05ff090c-fd49-11e6-bf0c-54ee750f2fc7]
+      ocp-date: ['Tue, 28 Feb 2017 00:01:15 GMT']
+      return-client-request-id: ['false']
     method: PUT
-    uri: https://test1.westus.batch.azure.com/jobs/cli-test-job-1?api-version=2016-07-01.3.1&timeout=30
+    uri: https://clitest1.uksouth.batch.azure.com/jobs/cli-test-job-1?timeout=30&api-version=2017-01-01.4.0
   response:
-    body: {string: "{\r\n  \"odata.metadata\":\"https://test1.westus.batch.azure.com/$metadata#Microsoft.Azure.Batch.Protocol.Entities.Container.errors/@Element\"\
+    body: {string: "{\r\n  \"odata.metadata\":\"https://clitest1.uksouth.batch.azure.com/$metadata#Microsoft.Azure.Batch.Protocol.Entities.Container.errors/@Element\"\
         ,\"code\":\"ConditionNotMet\",\"message\":{\r\n    \"lang\":\"en-US\",\"value\"\
         :\"The condition specified using HTTP conditional header(s) is not met.\\\
-        nRequestId:39832922-88f7-426d-b9a4-b944e8099a57\\nTime:2017-02-08T21:38:13.7493928Z\"\
+        nRequestId:dfdd40c5-cc4c-40a8-b9b6-b611c02692b9\\nTime:2017-02-28T00:01:14.3759486Z\"\
         \r\n  }\r\n}"}
     headers:
-      Content-Length: ['376']
+      Content-Length: ['367']
       Content-Type: [application/json;odata=minimalmetadata]
       DataServiceVersion: ['3.0']
-      Date: ['Wed, 08 Feb 2017 21:38:13 GMT']
+      Date: ['Tue, 28 Feb 2017 00:01:13 GMT']
       Server: [Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       X-Content-Type-Options: [nosniff]
-      request-id: [39832922-88f7-426d-b9a4-b944e8099a57]
+      request-id: [dfdd40c5-cc4c-40a8-b9b6-b611c02692b9]
     status: {code: 412, message: The condition specified using HTTP conditional header(s)
         is not met.}
 - request:
-    body: '{"poolInfo": {"poolId": "azure-cli-test-paas"}, "onAllTasksComplete": "terminateJob"}'
+    body: '{"onAllTasksComplete": "terminateJob", "poolInfo": {"poolId": "azure-cli-test-paas"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['85']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 batchserviceclient/1.1.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 batchserviceclient/2.0.0 Azure-SDK-For-Python]
       accept-language: [en-US]
-      client-request-id: [e5c222d8-ee46-11e6-a7fe-54ee750f2fc7]
-      ocp-date: ['Wed, 08 Feb 2017 21:38:15 GMT']
+      client-request-id: [06ab0f4a-fd49-11e6-ac85-54ee750f2fc7]
+      ocp-date: ['Tue, 28 Feb 2017 00:01:16 GMT']
+      return-client-request-id: ['false']
     method: PUT
-    uri: https://test1.westus.batch.azure.com/jobs/cli-test-job-1?api-version=2016-07-01.3.1&timeout=30
+    uri: https://clitest1.uksouth.batch.azure.com/jobs/cli-test-job-1?timeout=30&api-version=2017-01-01.4.0
   response:
     body: {string: ''}
     headers:
-      DataServiceId: ['https://test1.westus.batch.azure.com/jobs/cli-test-job-1']
+      DataServiceId: ['https://clitest1.uksouth.batch.azure.com/jobs/cli-test-job-1']
       DataServiceVersion: ['3.0']
-      Date: ['Wed, 08 Feb 2017 21:38:15 GMT']
-      ETag: ['0x8D4506AC9EDB09C']
-      Last-Modified: ['Wed, 08 Feb 2017 21:38:15 GMT']
+      Date: ['Tue, 28 Feb 2017 00:01:17 GMT']
+      ETag: ['0x8D45F6CE92A21F3']
+      Last-Modified: ['Tue, 28 Feb 2017 00:01:13 GMT']
       Server: [Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
       X-Content-Type-Options: [nosniff]
-      request-id: [fd599e48-ba28-49b6-829c-5ad9f451a719]
+      request-id: [47140b11-ced1-4833-82a6-ddb51937170c]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -251,40 +261,42 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 batchserviceclient/1.1.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 batchserviceclient/2.0.0 Azure-SDK-For-Python]
       accept-language: [en-US]
-      client-request-id: [e5f67a3e-ee46-11e6-bf0e-54ee750f2fc7]
-      ocp-date: ['Wed, 08 Feb 2017 21:38:15 GMT']
+      client-request-id: [073d93a4-fd49-11e6-bccd-54ee750f2fc7]
+      ocp-date: ['Tue, 28 Feb 2017 00:01:17 GMT']
+      return-client-request-id: ['false']
     method: GET
-    uri: https://test1.westus.batch.azure.com/jobs/cli-test-job-1?api-version=2016-07-01.3.1&timeout=30
+    uri: https://clitest1.uksouth.batch.azure.com/jobs/cli-test-job-1?timeout=30&api-version=2017-01-01.4.0
   response:
-    body: {string: "{\r\n  \"odata.metadata\":\"https://test1.westus.batch.azure.com/$metadata#jobs/@Element\"\
-        ,\"id\":\"cli-test-job-1\",\"url\":\"https://test1.westus.batch.azure.com/jobs/cli-test-job-1\"\
-        ,\"eTag\":\"0x8D4506AC9EDB09C\",\"lastModified\":\"2017-02-08T21:38:15.0635676Z\"\
-        ,\"creationTime\":\"2017-02-08T21:38:12.9027025Z\",\"state\":\"active\",\"\
-        stateTransitionTime\":\"2017-02-08T21:38:12.9806791Z\",\"priority\":0,\"usesTaskDependencies\"\
+    body: {string: "{\r\n  \"odata.metadata\":\"https://clitest1.uksouth.batch.azure.com/$metadata#jobs/@Element\"\
+        ,\"id\":\"cli-test-job-1\",\"url\":\"https://clitest1.uksouth.batch.azure.com/jobs/cli-test-job-1\"\
+        ,\"eTag\":\"0x8D45F6CE92A21F3\",\"lastModified\":\"2017-02-28T00:01:13.9041779Z\"\
+        ,\"creationTime\":\"2017-02-28T00:01:07.8120094Z\",\"state\":\"active\",\"\
+        stateTransitionTime\":\"2017-02-28T00:01:07.8364491Z\",\"priority\":0,\"usesTaskDependencies\"\
         :false,\"constraints\":{\r\n    \"maxWallClockTime\":\"P10675199DT2H48M5.4775807S\"\
         ,\"maxTaskRetryCount\":0\r\n  },\"jobManagerTask\":{\r\n    \"id\":\"JobManager\"\
         ,\"commandLine\":\"cmd /c set AZ_BATCH_TASK_ID\",\"environmentSettings\":[\r\
         \n      {\r\n        \"name\":\"CLI_TEST_VAR\",\"value\":\"CLI_TEST_VAR_VALUE\"\
         \r\n      }\r\n    ],\"constraints\":{\r\n      \"maxWallClockTime\":\"P10675199DT2H48M5.4775807S\"\
         ,\"retentionTime\":\"P10675199DT2H48M5.4775807S\",\"maxTaskRetryCount\":5\r\
-        \n    },\"runElevated\":true,\"runExclusive\":true,\"killJobOnCompletion\"\
-        :true\r\n  },\"poolInfo\":{\r\n    \"poolId\":\"azure-cli-test-paas\"\r\n\
-        \  },\"executionInfo\":{\r\n    \"startTime\":\"2017-02-08T21:38:12.9806791Z\"\
-        ,\"poolId\":\"azure-cli-test-paas\"\r\n  },\"onAllTasksComplete\":\"terminatejob\"\
-        ,\"onTaskFailure\":\"noaction\"\r\n}"}
+        \n    },\"userIdentity\":{\r\n      \"autoUser\":{\r\n        \"scope\":\"\
+        task\",\"elevationLevel\":\"nonadmin\"\r\n      }\r\n    },\"runExclusive\"\
+        :true,\"killJobOnCompletion\":true\r\n  },\"poolInfo\":{\r\n    \"poolId\"\
+        :\"azure-cli-test-paas\"\r\n  },\"executionInfo\":{\r\n    \"startTime\":\"\
+        2017-02-28T00:01:07.8364491Z\",\"poolId\":\"azure-cli-test-paas\"\r\n  },\"\
+        onAllTasksComplete\":\"terminatejob\",\"onTaskFailure\":\"noaction\"\r\n}"}
     headers:
       Content-Type: [application/json;odata=minimalmetadata]
       DataServiceVersion: ['3.0']
-      Date: ['Wed, 08 Feb 2017 21:38:13 GMT']
-      ETag: ['0x8D4506AC9EDB09C']
-      Last-Modified: ['Wed, 08 Feb 2017 21:38:15 GMT']
+      Date: ['Tue, 28 Feb 2017 00:01:16 GMT']
+      ETag: ['0x8D45F6CE92A21F3']
+      Last-Modified: ['Tue, 28 Feb 2017 00:01:13 GMT']
       Server: [Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
       X-Content-Type-Options: [nosniff]
-      request-id: [1aeb8ba4-ee1a-4857-8151-642e54c87c13]
+      request-id: [c7c4b8f4-89cf-430e-8f98-28bd7f57f9cf]
     status: {code: 200, message: OK}
 version: 1
