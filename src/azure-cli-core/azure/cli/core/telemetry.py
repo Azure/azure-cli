@@ -53,7 +53,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         details = {
             'Reserved.DataModel.EntityType': 'Fault',
             'Reserved.DataModel.Fault.Description': description or fault_type,
-            'Reserved.DataModel.Correlation.1': '{},UserTask'.format(self.correlation_id),
+            'Reserved.DataModel.Correlation.1': '{},UserTask,'.format(self.correlation_id),
             'Reserved.DataModel.Fault.TypeString': exception.__class__.__name__,
             'Reserved.DataModel.Fault.Exception.Message': _remove_cmd_chars(
                 message or str(exception)),
