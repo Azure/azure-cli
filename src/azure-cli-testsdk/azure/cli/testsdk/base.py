@@ -7,10 +7,10 @@ import datetime
 import unittest
 import os.path
 import inspect
-import vcr
 import subprocess
 import json
 import shlex
+import vcr
 import six
 
 from .patches import (patch_load_cached_subscriptions, patch_main_exception_handler,
@@ -22,7 +22,7 @@ from .recording_processors import (SubscriptionRecordingProcessor, OAuthRequestR
 from .utilities import create_random_name
 
 
-class ScenarioTest(unittest.TestCase):
+class ScenarioTest(unittest.TestCase):  # pylint: disable=too-many-instance-attributes
     FILTER_HEADERS = [
         'authorization',
         'client-request-id',
@@ -149,7 +149,7 @@ class ScenarioTest(unittest.TestCase):
         return response
 
 
-class ExecutionResult(object):
+class ExecutionResult(object):  # pylint: disable=too-few-public-methods
     def __init__(self, command, expect_failure=False, in_process=True):
         if in_process:
             self._in_process_execute(command)

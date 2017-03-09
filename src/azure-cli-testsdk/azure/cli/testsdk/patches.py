@@ -22,7 +22,7 @@ def patch_main_exception_handler(unit_test):
 
 
 def patch_load_cached_subscriptions(unit_test):
-    def _handle_load_cached_subscription(*args, **kwargs):
+    def _handle_load_cached_subscription(*args, **kwargs):  # pylint: disable=unused-argument
 
         return [{
             "id": MOCKED_SUBSCRIPTION_ID,
@@ -41,7 +41,7 @@ def patch_load_cached_subscriptions(unit_test):
 
 
 def patch_retrieve_token_for_user(unit_test):
-    def _retrieve_token_for_user(*args, **kwargs):
+    def _retrieve_token_for_user(*args, **kwargs):  # pylint: disable=unused-argument
         return 'Bearer', 'top-secret-token-for-you'
 
     _mock_in_unit_test(unit_test,
@@ -50,7 +50,7 @@ def patch_retrieve_token_for_user(unit_test):
 
 
 def patch_long_run_operation_delay(unit_test):
-    def _shortcut_long_run_operation(*args, **kwargs):
+    def _shortcut_long_run_operation(*args, **kwargs):  # pylint: disable=unused-argument
         return
 
 
