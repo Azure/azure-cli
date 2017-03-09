@@ -8,7 +8,7 @@ from azure.cli.core.commands import CliArgumentType, register_cli_argument
 # pylint: disable=line-too-long
 
 query = CliArgumentType(
-    options_list=('--q', '-q'),
+    options_list=('--search-query', '-q'),
     help='Query text to find.',
     nargs='+'
 )

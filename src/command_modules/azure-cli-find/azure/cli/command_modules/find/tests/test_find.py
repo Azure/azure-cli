@@ -11,9 +11,12 @@ import unittest
 import sys
 
 import six
+from nose import with_setup
 from six import StringIO
 
 from azure.cli.main import main as cli_main
+from azure.cli.command_modules.find.custom import _remove_index
+
 
 @contextlib.contextmanager
 def capture():
@@ -28,7 +31,7 @@ def capture():
         out[1] = out[1].getvalue()
 
 
-def exec(cmd):
+def execute(cmd):
     cmd_list = shlex.split(cmd)
     with capture() as out:
         cli_main(cmd_list)
@@ -37,18 +40,22 @@ def exec(cmd):
 
 
 def exec_json(cmd):
-    json.loads(exec(cmd))
+    json.loads(execute(cmd))
 
 
 class SearchIndexTest(unittest.TestCase):
+
+    def setUp(self):
+        _remove_index()
+
     def test_search_index(self):
         six.assertRegex(
             self,
-            exec('find -q keyvault list'),
+            execute('find -q keyvault list'),
             'az keyvault certificate list-versions')
 
     def test_search_reindex(self):
         six.assertRegex(
             self,
-            exec('find -q keyvault list --reindex'),
+            execute('find -q keyvault list --reindex'),
             'az keyvault certificate list-versions')

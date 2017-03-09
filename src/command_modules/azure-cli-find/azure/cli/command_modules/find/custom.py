@@ -9,7 +9,7 @@ import os
 import textwrap
 import shutil
 
-import re
+import six
 from whoosh.highlight import UppercaseFormatter, ContextFragmenter
 from whoosh.qparser import MultifieldParser
 from whoosh import index
@@ -17,10 +17,11 @@ from whoosh.fields import TEXT, Schema
 
 from azure.cli.command_modules.find._gather_commands import build_command_table
 import azure.cli.core.azlogging as azlogging
+from azure.cli.core._environment import get_config_dir
 
 logger = azlogging.get_az_logger(__name__)
 
-INDEX_PATH = os.path.join(os.path.expanduser('~'), '.azure', 'search_index')
+INDEX_PATH = os.path.join(get_config_dir(), 'search_index')
 
 schema = Schema(
     cmd_name=TEXT(stored=True),
@@ -38,20 +39,22 @@ def _index_help():
     writer = ix.writer()
     for cmd, document in list(_cli_index_corpus().items()):
         writer.add_document(
-            cmd_name=cmd,
-            short_summary=document.get('short-summary', ''),
-            long_summary=document.get('long-summary', ''),
-            examples=document.get('examples', '')
+            cmd_name=six.u(cmd),
+            short_summary=six.u(document.get('short-summary', '')),
+            long_summary=six.u(document.get('long-summary', '')),
+            examples=six.u(document.get('examples', ''))
         )
     writer.commit()
 
 
-def _create_index():
+def _remove_index():
     if os.path.exists(INDEX_PATH):
         shutil.rmtree(INDEX_PATH)
 
-    os.mkdir(INDEX_PATH)
 
+def _create_index():
+    _remove_index()
+    os.mkdir(INDEX_PATH)
     index.create_in(INDEX_PATH, schema)
     _index_help()
 

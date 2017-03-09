@@ -25,7 +25,6 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'applicationinsights',
     'azure-cli-core',
     'whoosh'
 ]

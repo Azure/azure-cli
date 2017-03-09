@@ -77,7 +77,7 @@ def build_command_table():
         if 'examples' in diction_help:
             string_example = ''
             for example in diction_help['examples']:
-                string_example += example['name'] + '\n' + example['text'] + '\n'
+                string_example += example.get('name', '') + '\n' + example.get('text', '') + '\n'
             data[cmd]['examples'] = string_example
 
     return data

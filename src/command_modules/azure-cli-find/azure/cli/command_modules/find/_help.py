@@ -5,7 +5,11 @@
 
 from azure.cli.core.help_files import helps
 
-helps['search'] = """
+helps['find'] = """
     type: command
     short-summary: Find Azure CLI commands based on a given query
+    examples:
+      - name: Search for things containing 'vm' or 'secret'
+        text: >
+            az find -q vm secret
 """
