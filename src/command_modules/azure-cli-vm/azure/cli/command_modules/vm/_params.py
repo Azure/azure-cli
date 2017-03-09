@@ -41,8 +41,15 @@ def get_vm_size_completion_list(prefix, action, parsed_args, **kwargs):  # pylin
 
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 multi_ids_type = CliArgumentType(nargs='+')
-existing_vm_name = CliArgumentType(overrides=name_arg_type, help='The name of the Virtual Machine', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'), id_part='name')
-vmss_name_type = CliArgumentType(name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), help='Scale set name.', id_part='name')
+existing_vm_name = CliArgumentType(overrides=name_arg_type,
+                                   configured_default='compute/vm',
+                                   help='The name of the Virtual Machine',
+                                   completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'), id_part='name')
+vmss_name_type = CliArgumentType(name_arg_type,
+                                 configured_default='compute/vmss',
+                                 completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'),
+                                 help='Scale set name.',
+                                 id_part='name')
 disk_sku = CliArgumentType(required=False, help='underlying storage sku', **enum_choice_list(['Premium_LRS', 'Standard_LRS']))
 
 # ARGUMENT REGISTRATION
@@ -166,9 +173,11 @@ register_cli_argument('network nic scale-set list', 'virtual_machine_scale_set_n
 
 # VM CREATE PARAMETER CONFIGURATION
 
-register_cli_argument('vm create', 'name', name_arg_type, validator=_resource_not_exists('Microsoft.Compute/virtualMachines'))
+register_cli_argument('vm create', 'new_vm_name', options_list=('--name', '-n'), metavar='NAME',
+                      validator=_resource_not_exists('Microsoft.Compute/virtualMachines'),
+                      help='name of the new virtual machine')
 
-register_cli_argument('vmss create', 'name', name_arg_type)
+register_cli_argument('vmss create', 'new_vmss_name', options_list=('--name', '-n'), metavar='NAME', help='name of the new virtual machine scale set')
 register_cli_argument('vmss create', 'nat_backend_port', default=None, help='Backend port to open with NAT rules.  Defaults to 22 on Linux and 3389 on Windows.')
 register_cli_argument('vmss create', 'single_placement_group', default=None, help="Enable single placement group. This flag will default to True if instance count <=100, and default to False for instance count >100.", **enum_choice_list(['true', 'false']))
 

@@ -130,26 +130,20 @@ def _handle_global_configuration():
         global_config.set('logging', 'enable_log_file', 'yes' if enable_file_logging else 'no')
         set_global_config(global_config)
 
-def handle_configure(section=None, name=None, value=None, default_resource_group=None):
+def handle_configure(setting=None, value=None):
     '''
     configure common settings
-    :param str section: configuration section
-    :param str name:    configuration variable name
+    :param str setting: configuration variable, e.g. resource-group, appservice/webapp, compute/vm
     :param str value:   configuration variable value
-    :param str default_resource_group: default resource group
     '''
-    if any([section, name, value, default_resource_group]):
-        c = [x for x in [section, name, value] if x]
-        if len(c) in range(1, 3):
-            raise CLIError('usage error: --section STRING --name STRING --value STRING')
+    if setting or value:
+        if bool(setting) != bool(value):
+            raise CLIError('usage error: --setting STRING --value STRING')
+        parts = setting.split('/', 1)
+        section = 'core' if len(parts) == 1 else parts[0]
+        name = parts[0] if len(parts) == 1 else parts[1]
 
-        if c:
-            set_global_config_value(section, name,
-                                    _normalize_config_value(value))
-        if default_resource_group:
-            from azure.cli.core._config import DEFAULT_RESOURCE_GROUP_CONFIG_VAR
-            set_global_config_value('core', DEFAULT_RESOURCE_GROUP_CONFIG_VAR,
-                                    _normalize_config_value(default_resource_group))
+        set_global_config_value(section, name, _normalize_config_value(value))
 
         return
 

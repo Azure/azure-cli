@@ -13,9 +13,9 @@ helps['configure'] = """
             examples:
                 - name: configure a default resource group
                   text: >
-                    az configure --default-resource-group myRG
+                    az configure --setting resource_group myRG
                 - name: configure a default webapp
                   text: >
-                    az configure --section appservice --name default_webapp_name --value myweb1
+                    az configure --section compute/vm --value myvm
 
 """

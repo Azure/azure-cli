@@ -11,7 +11,6 @@ GLOBAL_CONFIG_DIR = get_config_dir()
 CONFIG_FILE_NAME = 'config'
 GLOBAL_CONFIG_PATH = os.path.join(GLOBAL_CONFIG_DIR, CONFIG_FILE_NAME)
 ENV_VAR_PREFIX = 'AZURE_'
-DEFAULT_RESOURCE_GROUP_CONFIG_VAR = 'default_resource_group_name'
 
 _UNSET = object()
 _ENV_VAR_FORMAT = ENV_VAR_PREFIX + '{section}_{option}'

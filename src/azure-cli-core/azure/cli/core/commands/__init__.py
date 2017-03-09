@@ -219,6 +219,7 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
                 config_value = az_config.get(section, config_name, None)
                 if config_value:
                     overrides.settings['default'] = config_value
+                    overrides.settings['required'] = False
             overrides.settings.pop('configured_default')
 
     def execute(self, **kwargs):
