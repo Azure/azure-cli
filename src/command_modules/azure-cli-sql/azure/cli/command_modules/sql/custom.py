@@ -175,13 +175,7 @@ def db_restore(  # pylint: disable=too-many-arguments
         resource_group_name,
         restore_point_in_time,
         dest_name,
-        dest_server_name=None,
-        dest_resource_group_name=None,
         **kwargs):
-
-    # Determine optional values
-    dest_resource_group_name = dest_resource_group_name or resource_group_name
-    dest_server_name = dest_server_name or server_name
 
     # Set create mode properties
     kwargs['create_mode'] = 'PointInTimeRestore'
@@ -190,7 +184,8 @@ def db_restore(  # pylint: disable=too-many-arguments
     return _db_create_special(
         client,
         DatabaseIdentity(database_name, server_name, resource_group_name),
-        DatabaseIdentity(dest_name, dest_server_name, dest_resource_group_name),
+        # Cross-server restore is not supported. So dest server/group must be the same as source.
+        DatabaseIdentity(dest_name, server_name, resource_group_name),
         kwargs)
 
 

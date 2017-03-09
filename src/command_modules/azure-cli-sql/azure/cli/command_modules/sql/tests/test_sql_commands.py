@@ -307,6 +307,89 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
                  .format(rg, self.sql_server_name), checks=NoneCheck())
 
 
+class SqlServerDbRestoreScenarioTest(ResourceGroupVCRTestBase):
+    def __init__(self, test_method):
+        super(SqlServerDbRestoreScenarioTest, self).__init__(
+            __file__, test_method, resource_group='cli-test-sql-mgmt')
+
+    def test_sql_db_restore(self):
+        self.execute()
+
+    def body(self):
+        from datetime import datetime
+        from time import sleep
+
+        rg = self.resource_group
+        server_name = 'cliautomation44'
+        location = 'westus'
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        database_name = 'cliautomationdb01'
+
+        # Standalone db
+        restore_service_objective = 'S1'
+        restore_edition = 'Standard'
+        restore_standalone_database_name = 'cliautomationdb01restore1'
+
+        restore_pool_database_name = 'cliautomationdb01restore2'
+        elastic_pool = 'cliautomationpool1'
+
+        # create server
+        self.cmd('sql server create -g {} --name {} -l "{}" '
+                 '--admin-user {} --admin-password {}'
+                 .format(rg, server_name, location, admin_login, admin_password),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', rg)])
+
+        # create db
+        db = self.cmd('sql db create -g {} --server {} --name {}'
+                      .format(rg, server_name, database_name),
+                      checks=[
+                          JMESPathCheck('resourceGroup', rg),
+                          JMESPathCheck('name', database_name),
+                          JMESPathCheck('status', 'Online')])
+
+        # create elastic pool
+        self.cmd('sql elastic-pool create -g {} -s {} -n {}'
+                 .format(rg, server_name, elastic_pool))
+
+        # Wait until earliestRestoreDate is in the past. When run live, this will take at least
+        # 10 minutes. Unforunately there's no way to speed this up.
+        earliest_restore_date = datetime.strptime(db['earliestRestoreDate'],
+                                                  "%Y-%m-%dT%H:%M:%S.%f+00:00")
+        while datetime.utcnow() <= earliest_restore_date:
+            sleep(10)  # seconds
+
+        # Restore to standalone db
+        db = self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {}'
+                      ' --service-objective {} --edition {}'
+                      .format(rg, server_name, database_name, datetime.utcnow().isoformat(),
+                              restore_standalone_database_name, restore_service_objective,
+                              restore_edition),
+                      checks=[
+                          JMESPathCheck('resourceGroup', rg),
+                          JMESPathCheck('name', restore_standalone_database_name),
+                          JMESPathCheck('requestedServiceObjectiveName',
+                                        restore_service_objective),
+                          JMESPathCheck('status', 'Online')])
+
+        # Restore to db into pool
+        db = self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {}'
+                      ' --elastic-pool {}'
+                      .format(rg, server_name, database_name, datetime.utcnow().isoformat(),
+                              restore_pool_database_name, elastic_pool),
+                      checks=[
+                          JMESPathCheck('resourceGroup', rg),
+                          JMESPathCheck('name', restore_pool_database_name),
+                          JMESPathCheck('elasticPoolName', elastic_pool),
+                          JMESPathCheck('status', 'Online')])
+
+        # delete sql server
+        self.cmd('sql server delete -g {} --name {}'
+                 .format(rg, server_name), checks=NoneCheck())
+
+
 class SqlServerDwMgmtScenarioTest(ResourceGroupVCRTestBase):
     # pylint: disable=too-many-instance-attributes
     def __init__(self, test_method):

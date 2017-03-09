@@ -59,6 +59,10 @@ helps['sql db replica delete-link'] = """
             type: command
             short-summary: Permanently stops data replication between two database replicas.
             """
+helps['sql db restore'] = """
+            type: command
+            short-summary: Creates a new database by restoring from a database backup.
+            """
 # helps['sql db restore-point'] = """
 #             type: group
 #             short-summary: Manage database restore points.
