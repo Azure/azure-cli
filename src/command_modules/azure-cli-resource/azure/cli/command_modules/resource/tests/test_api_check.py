@@ -11,7 +11,7 @@ except ImportError:
 
 from azure.cli.core._util import CLIError
 # pylint: disable=line-too-long
-from azure.cli.command_modules.resource.custom  import _ResourceUtils, _validate_resource_inputs
+from azure.cli.command_modules.resource.custom  import _ResourceUtils, _validate_resource_inputs, parse_resource_id
 
 class TestApiCheck(unittest.TestCase):
 
@@ -28,6 +28,15 @@ class TestApiCheck(unittest.TestCase):
 
     def tearDown(self):
         pass
+
+
+    def test_parse_resource(self):
+        parts = parse_resource_id('/subscriptions/00000/resourcegroups/bocconitestlabrg138089/providers/microsoft.devtestlab/labs/bocconitestlab/virtualmachines/tasktest1')
+        self.assertIsNotNone(parts.get('type'))
+
+    def test_parse_resource_capital(self):
+        parts = parse_resource_id('/subscriptions/00000/resourceGroups/bocconitestlabrg138089/providers/microsoft.devtestlab/labs/bocconitestlab/virtualmachines/tasktest1')
+        self.assertIsNotNone(parts.get('type'))
 
     def test_validate_resource_inputs(self):
         self.assertRaises(CLIError, _validate_resource_inputs, None, None, None, None)

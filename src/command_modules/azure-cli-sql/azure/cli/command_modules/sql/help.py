@@ -9,7 +9,7 @@ from azure.cli.core.help_files import helps
 
 helps['sql'] = """
             type: group
-            short-summary: Manage databases.
+            short-summary: Manage Azure SQL Databases and Data Warehouses.
             """
 helps['sql db'] = """
             type: group
@@ -25,11 +25,15 @@ helps['sql db create'] = """
             """
 helps['sql db delete'] = """
             type: command
-            short-summary: Deletes a database.
+            short-summary: Deletes a database or data warehouse.
             """
 helps['sql db list'] = """
             type: command
-            short-summary: Lists all databases in a server, or all databases in an elastic pool.
+            short-summary: Lists all databases and data warehouses in a server, or all databases in an elastic pool.
+            """
+helps['sql db show'] = """
+            type: command
+            short-summary: Gets a database or data warehouse.
             """
 helps['sql db update'] = """
             type: command
@@ -55,10 +59,6 @@ helps['sql db replica delete-link'] = """
             type: command
             short-summary: Permanently stops data replication between two database replicas.
             """
-# helps['sql db data-warehouse'] = """
-#             type: group
-#             short-summary: Manage database data warehouse.
-#             """
 # helps['sql db restore-point'] = """
 #             type: group
 #             short-summary: Manage database restore points.
@@ -71,6 +71,30 @@ helps['sql db replica delete-link'] = """
 #             type: group
 #             short-summary: Manage database service tier advisors.
 #             """
+helps['sql dw'] = """
+             type: group
+             short-summary: Manage data warehouses.
+             """
+helps['sql dw create'] = """
+             type: command
+             short-summary: Creates a data warehouse.
+             """
+helps['sql dw delete'] = """
+             type: command
+             short-summary: Deletes a database or data warehouse.
+             """
+helps['sql dw list'] = """
+             type: command
+             short-summary: Lists all data warehouses in a server.
+             """
+helps['sql dw show'] = """
+             type: command
+             short-summary: Gets a database or data warehouse.
+             """
+helps['sql dw update'] = """
+             type: command
+             short-summary: Updates a data warehouse.
+             """
 helps['sql elastic-pool'] = """
             type: group
             short-summary: Manage elastic pools. An elastic pool is an allocation of CPU, IO, and memory resources. Databases inside the pool share these resources.
@@ -93,7 +117,7 @@ helps['sql elastic-pool update'] = """
 #             """
 helps['sql server'] = """
             type: group
-            short-summary: Manage servers.
+            short-summary: Manage servers. Servers contain databases, data warehouses, and elastic pools.
             """
 helps['sql server create'] = """
             type: command
@@ -130,8 +154,4 @@ helps['sql server firewall-rule show'] = """
 helps['sql server firewall-rule list'] = """
             type: command
             short-summary: Lists the firewall rules.
-            """
-helps['sql server service-objective'] = """
-            type: group
-            short-summary: Show a server's service objectives.
             """

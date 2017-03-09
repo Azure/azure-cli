@@ -5,9 +5,12 @@
 
 import re
 
+from azure.cli.core._util import b64_to_hex
+
 
 def register(application):
     application.register(application.TRANSFORM_RESULT, _resource_group_transform)
+    application.register(application.TRANSFORM_RESULT, _x509_from_base64_to_hex_transform)
 
 
 def _parse_id(strid):
@@ -33,8 +36,28 @@ def _add_resource_group(obj):
         except (KeyError, IndexError, TypeError):
             pass
         for item_key in obj:
-            _add_resource_group(obj[item_key])
+            if item_key != 'sourceVault':
+                _add_resource_group(obj[item_key])
+
+
+def _add_x509_hex(obj):
+    if isinstance(obj, list):
+        for array_item in obj:
+            _add_x509_hex(array_item)
+    elif isinstance(obj, dict):
+        try:
+            if 'x509ThumbprintHex' not in obj:
+                if obj['x509Thumbprint']:
+                    obj['x509ThumbprintHex'] = b64_to_hex(obj['x509Thumbprint'])
+        except (KeyError, IndexError, TypeError):
+            pass
+        for item_key in obj:
+            _add_x509_hex(obj[item_key])
 
 
 def _resource_group_transform(**kwargs):
     _add_resource_group(kwargs['event_data']['result'])
+
+
+def _x509_from_base64_to_hex_transform(**kwargs):
+    _add_x509_hex(kwargs['event_data']['result'])

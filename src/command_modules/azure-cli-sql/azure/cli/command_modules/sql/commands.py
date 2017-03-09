@@ -31,12 +31,16 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
         c.custom_command('delete-link', 'db_delete_replica_link')
         c.custom_command('set-primary', 'db_failover')
 
-    # Data Warehouse will not be included in the first batch of GA commands
-    # with s.group('sql db data-warehouse') as c:
-    #     c.command('pause', 'pause_data_warehouse')
-    #     c.command('resume', 'resume_data_warehouse')
+    with s.group('sql dw') as c:
+        c.custom_command('create', 'dw_create')
+        c.command('show', 'get')
+        c.custom_command('list', 'dw_list')
+        c.command('delete', 'delete')
+        c.command('pause', 'pause_data_warehouse')
+        c.command('resume', 'resume_data_warehouse')
+        c.generic_update_command('update', 'get', 'create_or_update', custom_func_name='dw_update')
 
-    # Data Warehouse will not be included in the first batch of GA commands
+    # Data Warehouse restore will not be included in the first batch of GA commands
     # (list_restore_points also applies to db, but it's not very useful. It's
     # mainly useful for dw.)
     # with s.group('sql db restore-point') as c:
@@ -104,10 +108,6 @@ with ServiceGroup(__name__, get_sql_servers_operation, server_operations) as s:
         c.command('list', 'list_by_resource_group')
         c.generic_update_command('update', 'get_by_resource_group', 'create_or_update',
                                  custom_func_name='server_update')
-
-    with s.group('sql server service-objective') as c:
-        c.command('list', 'list_service_objectives')
-        c.command('show', 'get_service_objective')
 
     with s.group('sql server firewall-rule') as c:
         c.command('create', 'create_or_update_firewall_rule')

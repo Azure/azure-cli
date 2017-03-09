@@ -105,7 +105,7 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
     def set_up(self):
         super(WebappConfigureTest, self).set_up()
         plan = 'webapp-config-plan'
-        self.cmd('appservice plan create -g {} -n {} --sku B1'.format(self.resource_group, plan))
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, plan))
         self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, plan))
 
     def body(self):
@@ -132,31 +132,33 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
             JMESPathCheck('use32BitWorkerProcess', False),
             JMESPathCheck('webSocketsEnabled', True)
             ]
-        result = self.cmd('appservice web config update -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.0 --net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false --web-sockets-enabled=true'.format(
+        self.cmd('appservice web config update -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.0 --net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false --web-sockets-enabled=true'.format(
             self.resource_group, self.webapp_name), checks=checks)
-        result = self.cmd('appservice web config show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=checks)
+        self.cmd('appservice web config show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=checks)
 
         #site appsettings testing
 
         #update
-        result = self.cmd('appservice web config appsettings update -g {} -n {} --settings s1=foo s2=bar s3=bar2'.format(self.resource_group, self.webapp_name), checks=[
+        self.cmd('appservice web config appsettings update -g {} -n {} --settings s1=foo s2=bar s3=bar2'.format(self.resource_group, self.webapp_name), checks=[
             JMESPathCheck('s1', 'foo'),
             JMESPathCheck('s2', 'bar'),
             JMESPathCheck('s3', 'bar2')
             ])
-        result = self.cmd('appservice web config appsettings show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
-            JMESPathCheck('s1', 'foo'),
-            JMESPathCheck('s2', 'bar'),
-            JMESPathCheck('s3', 'bar2')
-            ])
+
+        #show
+        result = self.cmd('appservice web config appsettings show -g {} -n {}'.format(self.resource_group, self.webapp_name))
+        s2 = next((x for x in result if x['name'] == 's2'))
+        self.assertEqual(s2['name'], 's2')
+        self.assertEqual(s2['slotSetting'], 'False')
+        self.assertEqual(s2['value'], 'bar')
+        self.assertEqual(set([x['name'] for x in result]), set(['s1', 's2', 's3', 'WEBSITE_NODE_DEFAULT_VERSION']))
 
         #delete
         self.cmd('appservice web config appsettings delete -g {} -n {} --setting-names s1 s2'.format(self.resource_group, self.webapp_name))
         result = self.cmd('appservice web config appsettings show -g {} -n {}'.format(self.resource_group, self.webapp_name))
-        self.assertTrue('s1' not in result)
-        self.assertTrue('s2' not in result)
-        self.assertTrue('s3' in result)
+        self.assertEqual(set([x['name'] for x in result]), set(['s3', 'WEBSITE_NODE_DEFAULT_VERSION']))
 
+        # hostnames
         self.cmd('appservice web config hostname list -g {} --webapp-name {}'.format(self.resource_group, self.webapp_name), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', '{0}/{0}.azurewebsites.net'.format(self.webapp_name))
@@ -251,20 +253,15 @@ class LinuxWebappSceanrioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('appCommandLine', 'process.json')
             ])
         self.cmd('appservice web config container update -g {} -n {} --docker-custom-image-name {} --docker-registry-server-password {} --docker-registry-server-user {} --docker-registry-server-url {}'.format(
-            self.resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url'), checks=[
-                JMESPathCheck('DOCKER_CUSTOM_IMAGE_NAME', 'foo-image'),
-                JMESPathCheck('DOCKER_REGISTRY_SERVER_URL', 'foo-url'),
-                JMESPathCheck('DOCKER_REGISTRY_SERVER_USERNAME', 'foo-user'),
-                JMESPathCheck('DOCKER_REGISTRY_SERVER_PASSWORD', 'foo-password')
-                ])
-        self.cmd('appservice web config container show -g {} -n {} '.format(self.resource_group, webapp), checks=[
-            JMESPathCheck('DOCKER_CUSTOM_IMAGE_NAME', 'foo-image'),
-            JMESPathCheck('DOCKER_REGISTRY_SERVER_URL', 'foo-url'),
-            JMESPathCheck('DOCKER_REGISTRY_SERVER_USERNAME', 'foo-user'),
-            JMESPathCheck('DOCKER_REGISTRY_SERVER_PASSWORD', 'foo-password')
-            ])
+            self.resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url'))
+        result = self.cmd('appservice web config container show -g {} -n {} '.format(self.resource_group, webapp))
+        self.assertEqual(set(x['name'] for x in result), set(['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME', 'DOCKER_CUSTOM_IMAGE_NAME', 'DOCKER_REGISTRY_SERVER_PASSWORD']))
+        sample = next((x for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_URL'))
+        self.assertEqual(sample, {'name': 'DOCKER_REGISTRY_SERVER_URL', 'slotSetting': 'False', 'value': 'foo-url'})
         self.cmd('appservice web config container delete -g {} -n {}'.format(self.resource_group, webapp))
-        self.cmd('appservice web config container show -g {} -n {} '.format(self.resource_group, webapp), checks=NoneCheck())
+        result2 = self.cmd('appservice web config container show -g {} -n {} '.format(self.resource_group, webapp), checks=NoneCheck())
+        self.assertEqual(result2, [])
+
 
 class WebappGitScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
@@ -323,40 +320,53 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         slot2 = 'dev'
         test_git_repo = 'https://github.com/yugangw-msft/azure-site-test'
 
-        self.cmd('appservice web deployment slot create -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=[
-            JMESPathCheck('name', self.webapp + '/' + slot)
-            ])
+        # create a few app-settings to test they can be cloned
+        self.cmd('appservice web config appsettings update -g {} -n {} --settings s1=v1 --slot-settings s2=v2'.format(self.resource_group, self.webapp))
 
-        self.cmd('appservice web source-control config -g {} -n {} --repo-url {} --branch {} --slot {}'.format(self.resource_group, self.webapp, test_git_repo, slot, slot), checks=[
+        # create an empty slot
+        self.cmd('appservice web deployment slot create -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=[
+            JMESPathCheck('name', slot)
+            ])
+        self.cmd('appservice web source-control config -g {} -n {} --repo-url {} --branch {} -s {}'.format(self.resource_group, self.webapp, test_git_repo, slot, slot), checks=[
             JMESPathCheck('repoUrl', test_git_repo),
             JMESPathCheck('branch', slot)
             ])
 
-        self.cmd('appservice web deployment slot create -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2))
-
+        #verify the slot wires up the git repo/branch
         import time
         time.sleep(30) # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
-
         import requests
         r = requests.get('http://{}-{}.azurewebsites.net'.format(self.webapp, slot))
-        #verify the web page contains content from the staging branch
         self.assertTrue('Staging' in str(r.content))
 
-        self.cmd('appservice web deployment slot swap -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
-
+        # swap with prod and verify the git branch also switched
+        self.cmd('appservice web deployment slot swap -g {} -n {} -s {}'.format(self.resource_group, self.webapp, slot))
         time.sleep(30) # 30 seconds should be enough for the slot swap finished(Skipped under playback mode)
-
         r = requests.get('http://{}.azurewebsites.net'.format(self.webapp))
-
-        #verify the web page contains content from the staging branch
         self.assertTrue('Staging' in str(r.content))
+        result = self.cmd('appservice web config appsettings show -g {} -n {} -s {}'.format(self.resource_group, self.webapp, slot))
+        self.assertEqual(set([x['name'] for x in result]), set(['WEBSITE_NODE_DEFAULT_VERSION', 's1']))
 
-        #verify we can switch with non production slot
+        # create a new slot by cloning from prod slot
+        self.cmd('appservice web deployment slot create -g {} -n {} --slot {} --configuration-source {}'.format(self.resource_group, self.webapp, slot2, self.webapp))
+        self.cmd('appservice web config appsettings show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2), checks=[
+            JMESPathCheck("length([])", 1),
+            JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION')
+            ])
+        self.cmd('appservice web config appsettings update -g {} -n {} --slot {} --settings s3=v3 --slot-settings s4=v4'.format(self.resource_group, self.webapp, slot2))
+
+        #verify we can swap with non production slot
         self.cmd('appservice web deployment slot swap -g {} -n {} --slot {} --target-slot {}'.format(self.resource_group, self.webapp, slot, slot2), checks=NoneCheck())
+        result = self.cmd('appservice web config appsettings show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2))
+        self.assertEqual(set([x['name'] for x in result]), set(['WEBSITE_NODE_DEFAULT_VERSION', 's1', 's4']))
+
+        result = self.cmd('appservice web config appsettings show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
+        self.assertEqual(set([x['name'] for x in result]), set(['WEBSITE_NODE_DEFAULT_VERSION', 's3']))
 
         self.cmd('appservice web deployment slot list -g {} -n {}'.format(self.resource_group, self.webapp), checks=[
             JMESPathCheck("length([])", 2),
-            JMESPathCheck('[0].name', self.webapp + '/' + slot),
+            JMESPathCheck('[0].name', slot2),
+            JMESPathCheck('[1].name', slot),
             ])
         self.cmd('appservice web deployment slot delete -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=NoneCheck())
 

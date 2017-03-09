@@ -14,6 +14,7 @@ import re
 import shlex
 import sys
 import tempfile
+import traceback
 from random import choice
 from string import digits, ascii_lowercase
 
@@ -452,6 +453,7 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
                 print('RECORDING: {}'.format(self.test_name))
                 self._execute_live_or_recording()
         except Exception as ex:
+            traceback.print_exc()
             raise ex
         finally:
             if not self.success and not self.playback and os.path.isfile(self.cassette_path):

@@ -10,6 +10,9 @@ import platform
 import tempfile
 import unittest
 
+import six
+
+from azure.cli.core._util import CLIError
 from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase,
                                                      ResourceGroupVCRTestBase,
                                                      JMESPathCheck,
@@ -406,7 +409,7 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # py
         self.vm_name = 'vm-state-mod'
         self.nsg_name = 'mynsg'
         self.ip_name = 'mypubip'
-        self.storage_name = 'ab394fvkdj40'
+        self.storage_name = 'clitestvmcreate20170301'
         self.vnet_name = 'myvnet'
 
     def test_vm_create_state_modifications(self):
@@ -854,7 +857,7 @@ class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
     def set_up(self):
         super(DiagnosticsExtensionInstallTest, self).set_up()
         self.cmd('storage account create -g {} -n {} -l westus --sku Standard_LRS'.format(self.resource_group, self.storage_account))
-        self.cmd('vmss create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-password TestTest12#$'.format(self.resource_group, self.vmss))
+        self.cmd('vmss create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password TestTest12#$'.format(self.resource_group, self.vmss))
         self.cmd('vm create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password TestTest12#$ --use-unmanaged-disk'.format(self.resource_group, self.vm))
 
     def test_diagnostics_extension_install(self):
@@ -1040,7 +1043,7 @@ class VMCreateCustomIP(ResourceGroupVCRTestBase):
         vm_name = 'vrfvmz'
         dns_name = 'vrfmyvm00110011z'
 
-        self.cmd('vm create -n {vm_name} -g {resource_group} --image openSUSE --admin-username user11'
+        self.cmd('vm create -n {vm_name} -g {resource_group} --image openSUSE-Leap --admin-username user11'
                  ' --private-ip-address 10.0.0.5 --public-ip-address-allocation static'
                  ' --public-ip-address-dns-name {dns_name} --ssh-key-value \'{key_value}\''
                  .format(vm_name=vm_name, resource_group=self.resource_group, dns_name=dns_name, key_value=TEST_SSH_KEY_PUB))
@@ -1148,38 +1151,10 @@ class VMUnmanagedDataDiskTest(ResourceGroupVCRTestBase):
 
         # now attach to existing
         self.cmd('vm unmanaged-disk attach -g {} --vm-name {} -n {} --vhd {} --caching ReadOnly'.format(
-            self.resource_group, self.vm_name, disk_name, vhd_uri))
-
-        # make it fun, let us migrate the data disk to managed image
-        self.cmd('vm stop -g {} -n {}'.format(self.resource_group, self.vm_name))
-        self.cmd('vm generalize -g {} --n {}'.format(self.resource_group, self.vm_name), checks=NoneCheck())
-        self.cmd('vm show -g {} --n {}'.format(self.resource_group, self.vm_name))
-        self.cmd('vm capture -g {} -n {} --vhd-name-prefix vmtest'.format(self.resource_group, self.vm_name),
-                 checks=NoneCheck())
-
-        # capture to a custom image
-        image_name = 'myImage'
-        new_vm_name = 'vm2'
-        self.cmd('image create -g {} -n {} --source {}'.format(self.resource_group, image_name, self.vm_name))
-
-        # use the new image to create a vm
-        self.cmd('vm create -g {0} -n {1} --admin-username ubuntu --admin-password testPassword0 --authentication-type password '
-                 '--image {2} --data-disk-sizes-gb 1 --size Standard_D2_v2'.format(self.resource_group, new_vm_name, image_name))
-        self.cmd('vm show -g {} -n {}'.format(self.resource_group, new_vm_name), checks=[
-            JMESPathCheck('length(storageProfile.dataDisks)', 2),
-            JMESPathCheck('storageProfile.dataDisks[0].diskSizeGb', 8),
-            JMESPathCheck('storageProfile.dataDisks[1].diskSizeGb', 1),
-            JMESPathCheck('storageProfile.osDisk.osType', 'Linux')
+            self.resource_group, self.vm_name, disk_name, vhd_uri), checks=[
+                JMESPathCheck('storageProfile.dataDisks[0].name', disk_name),
+                JMESPathCheck('storageProfile.dataDisks[0].createOption', 'attach')
         ])
-        # use it to create a vmss
-        vmss_name = 'vmss2'
-        self.cmd('vmss create -g {0} -n {1} --admin-username ubuntu --admin-password testPassword0 --authentication-type password '
-                 '--image {2} --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2'.format(self.resource_group, vmss_name, image_name), checks=[
-                     JMESPathCheck('length(vmss.virtualMachineProfile.storageProfile.dataDisks)', 2),
-                     JMESPathCheck('vmss.virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGB', 8),
-                     JMESPathCheck('vmss.virtualMachineProfile.storageProfile.dataDisks[1].diskSizeGB', 1),
-                     JMESPathCheck('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage')
-                 ])
 
 
 class VMCreateCustomDataScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
@@ -1215,6 +1190,136 @@ class VMCreateCustomDataScenarioTest(ResourceGroupVCRTestBase):  # pylint: disab
         self.cmd('vm show -g {rg} -n {vm_name}'.format(rg=self.resource_group, vm_name=self.vm_name), checks=[
             JMESPathCheck('provisioningState', 'Succeeded'),
             JMESPathCheck('osProfile.customData', 'I2Nsb3VkLWNvbmZpZwpob3N0bmFtZTogbXlWTWhvc3RuYW1l')
+        ])
+
+
+class VMCreateLinuxSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
+
+    def __init__(self, test_method):
+        super(VMCreateLinuxSecretsScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_create_vm_linux_secrets')
+        self.deployment_name = 'azcli-test-dep-vm-create-linux-secret'
+        self.admin_username = 'ubuntu'
+        self.location = 'westus'
+        self.vm_image = 'UbuntuLTS'
+        self.auth_type = 'ssh'
+        self.vm_name = 'vm-name'
+        self.secrets = None
+        self.bad_secrets = json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': []}])
+        self.vault_name = 'vmcreatelinuxsecret7777'
+        self.secret_name = 'mysecret'
+
+    def test_vm_create_linux_secrets(self):
+        self.execute()
+
+    def set_up(self):
+        super(VMCreateLinuxSecretsScenarioTest, self).set_up()
+
+    def body(self):
+        message = 'Secret is missing vaultCertificates array or it is empty at index 0'
+        with six.assertRaisesRegex(self, CLIError, message):
+            self.cmd('vm create -g {rg} -n {vm_name} --admin-username {admin} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' -l {location} --secrets \'{secrets}\''.format(
+                rg=self.resource_group,
+                admin=self.admin_username,
+                image=self.vm_image,
+                vm_name=self.vm_name,
+                auth_type=self.auth_type,
+                ssh_key=TEST_SSH_KEY_PUB,
+                location=self.location,
+                secrets=self.bad_secrets
+            ))
+
+        vault_out = self.cmd('keyvault create -g {rg} -n {name} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true'.format(
+            rg=self.resource_group,
+            name=self.vault_name,
+            loc=self.location
+        ))
+
+        policy_path = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
+        self.cmd('keyvault certificate create --vault-name {} -n cert1 -p @"{}"'.format(
+            self.vault_name,
+            policy_path))
+        secret_out = self.cmd('keyvault secret list-versions --vault-name {} -n cert1 --query "[?attributes.enabled].id" -o tsv'.format(self.vault_name))
+        vm_format = self.cmd('vm format-secret -s {0}'.format(secret_out))
+
+        self.cmd('vm create -g {rg} -n {vm_name} --admin-username {admin} --authentication-type {auth_type} --image {image} --ssh-key-value \'{ssh_key}\' -l {location} --secrets \'{secrets}\''.format(
+            rg=self.resource_group,
+            admin=self.admin_username,
+            image=self.vm_image,
+            vm_name=self.vm_name,
+            auth_type=self.auth_type,
+            ssh_key=TEST_SSH_KEY_PUB,
+            location=self.location,
+            secrets=json.dumps(vm_format)
+        ))
+
+        self.cmd('vm show -g {rg} -n {vm_name}'.format(rg=self.resource_group, vm_name=self.vm_name), checks=[
+            JMESPathCheck('provisioningState', 'Succeeded'),
+            JMESPathCheck('osProfile.secrets[0].sourceVault.id', vault_out['id']),
+            JMESPathCheck('osProfile.secrets[0].vaultCertificates[0].certificateUrl', secret_out)
+        ])
+
+
+class VMCreateWindowsSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
+
+    def __init__(self, test_method):
+        super(VMCreateWindowsSecretsScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_create_vm_windows_secrets')
+        self.deployment_name = 'azcli-test-dep-vm-create-win-secret'
+        self.admin_username = 'windowsUser'
+        self.location = 'westus'
+        self.vm_image = 'Win2012R2Datacenter'
+        self.vm_name = 'vm-name'
+        self.bad_secrets = json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': [{'certificateUrl': 'certurl'}]}])
+        self.vault_name = 'vmcreatewinsecret7777'
+        self.secret_name = 'mysecret'
+
+    def test_vm_create_windows_secrets(self):
+        self.execute()
+
+    def set_up(self):
+        super(VMCreateWindowsSecretsScenarioTest, self).set_up()
+
+    def body(self):
+        message = 'Secret is missing certificateStore within vaultCertificates array at secret index 0 and ' \
+                  'vaultCertificate index 0'
+        with six.assertRaisesRegex(self, CLIError, message):
+            self.cmd('vm create -g {rg} -n {vm_name} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {location} --secrets \'{secrets}\''.format(
+                rg=self.resource_group,
+                admin=self.admin_username,
+                image=self.vm_image,
+                vm_name=self.vm_name,
+                location=self.location,
+                secrets=self.bad_secrets
+            ))
+
+        vault_out = self.cmd(
+            'keyvault create -g {rg} -n {name} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true'.format(
+                rg=self.resource_group,
+                name=self.vault_name,
+                loc=self.location
+            ))
+
+        policy_path = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
+        self.cmd('keyvault certificate create --vault-name {} -n cert1 -p @"{}"'.format(
+            self.vault_name,
+            policy_path))
+
+        secret_out = self.cmd('keyvault secret list-versions --vault-name {} -n cert1 --query "[?attributes.enabled].id" -o tsv'.format(self.vault_name))
+        vm_format = self.cmd('vm format-secret -s {0} --certificate-store "My"'.format(secret_out))
+
+        self.cmd('vm create -g {rg} -n {vm_name} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {location} --secrets \'{secrets}\''.format(
+            rg=self.resource_group,
+            admin=self.admin_username,
+            image=self.vm_image,
+            vm_name=self.vm_name,
+            location=self.location,
+            secrets=json.dumps(vm_format)
+        ))
+
+        self.cmd('vm show -g {rg} -n {vm_name}'.format(rg=self.resource_group, vm_name=self.vm_name), checks=[
+            JMESPathCheck('provisioningState', 'Succeeded'),
+            JMESPathCheck('osProfile.secrets[0].sourceVault.id', vault_out['id']),
+            JMESPathCheck('osProfile.secrets[0].vaultCertificates[0].certificateUrl', secret_out),
+            JMESPathCheck('osProfile.secrets[0].vaultCertificates[0].certificateStore', 'My')
         ])
 
 
@@ -1407,6 +1512,49 @@ class VMSSCreateNoneOptionsTest(ResourceGroupVCRTestBase):  # pylint: disable=to
             JMESPathCheck('virtualMachineProfile.networkProfile.networkInterfaceConfigurations.ipConfigurations.loadBalancerBackendAddressPools', None)
         ])
         self.cmd('network public-ip show -n {}PublicIP -g {}'.format(vmss_name, self.resource_group), checks=NoneCheck(), allowed_exceptions='was not found')
+
+
+class VMSSCreateLinuxSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
+
+    def __init__(self, test_method):
+        super(VMSSCreateLinuxSecretsScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_vmss_create_linux_secrets')
+        self.vmss_name = 'vmss1-name'
+        self.bad_secrets = json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': []}])
+        self.vault_name = 'vmcreatelinuxsecret3333'
+        self.secret_name = 'mysecret'
+
+    def test_vmss_create_linux_secrets(self):
+        self.execute()
+
+    def set_up(self):
+        super(VMSSCreateLinuxSecretsScenarioTest, self).set_up()
+
+    def body(self):
+        vault_out = self.cmd('keyvault create -g {rg} -n {name} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true'.format(
+            rg=self.resource_group,
+            name=self.vault_name,
+            loc=self.location
+        ))
+
+        policy_path = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
+        self.cmd('keyvault certificate create --vault-name {} -n cert1 -p @"{}"'.format(
+            self.vault_name,
+            policy_path))
+
+        secret_out = self.cmd('keyvault secret list-versions --vault-name {} -n cert1 --query "[?attributes.enabled].id" -o tsv'.format(self.vault_name))
+        vm_format = self.cmd('vm format-secret -s {0}'.format(secret_out))
+
+        self.cmd('vmss create -n {name} -g {rg} --image Debian --admin-username deploy --ssh-key-value \'{ssh}\' --secrets \'{secrets}\''.format(
+            name=self.vmss_name,
+            rg=self.resource_group,
+            ssh=TEST_SSH_KEY_PUB,
+            secrets=json.dumps(vm_format)))
+
+        self.cmd('vmss show -n {} -g {}'.format(self.vmss_name, self.resource_group), checks=[
+            JMESPathCheck('provisioningState', 'Succeeded'),
+            JMESPathCheck('virtualMachineProfile.osProfile.secrets[0].sourceVault.id', vault_out['id']),
+            JMESPathCheck('virtualMachineProfile.osProfile.secrets[0].vaultCertificates[0].certificateUrl', secret_out)
+        ])
 
 
 class VMSSCreateExistingOptions(ResourceGroupVCRTestBase):
