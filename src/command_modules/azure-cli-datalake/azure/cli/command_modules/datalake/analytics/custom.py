@@ -152,22 +152,11 @@ def submit_adla_job(client,
                     compile_only=False,
                     degree_of_parallelism=1,
                     priority=1000):
-    contents = None
-    # script can be either script contents or a path to a script
-    # we attempt to always open the script path first, if that fails
-    # then treat it as contents
-    try:
-        with open(script, 'r') as f:
-            contents = f.read()
-    #pylint: disable=broad-except
-    except Exception:
-        contents = script
-
-    if not contents:
+    if not script:
         # pylint: disable=line-too-long
         raise CLIError('Could not read script content from the supplied --script param. It is either empty or an invalid file. value: {}'.format(script))
 
-    job_properties = USqlJobProperties(contents)
+    job_properties = USqlJobProperties(script)
     if runtime_version:
         job_properties.runtime_version = runtime_version
 

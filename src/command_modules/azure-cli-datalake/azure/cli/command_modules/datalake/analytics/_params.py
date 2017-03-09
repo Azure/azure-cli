@@ -10,6 +10,7 @@ from azure.cli.core.commands.parameters import \
      resource_group_name_type,
      enum_choice_list)
 
+from argcomplete.completers import FilesCompleter
 from azure.cli.command_modules.datalake.analytics._validators import validate_resource_group_name
 
 # pylint: disable=line-too-long
@@ -44,6 +45,7 @@ register_cli_argument('datalake analytics account list', 'resource_group_name', 
 # pylint: disable=line-too-long
 register_cli_argument('datalake analytics job submit', 'compile_mode', help='Optionally indicates the type of compilation to be done on this job. Valid values are: \'Semantic\' (Only performs semantic checks and necessary sanity checks), \'Full\' (full compilation) and \'SingleBox\' (Full compilation performed locally)', **enum_choice_list(CompileMode))
 register_cli_argument('datalake analytics job submit', 'compile_only', help='Indicates that the submission should only build the job and not execute if set to true.', action='store_true')
+register_cli_argument('datalake analytics job submit', 'script', completer=FilesCompleter(), help='The script to submit. This is either the script contents or use \'@<file path\' to load the script from a file')
 register_cli_argument('datalake analytics job wait', 'max_wait_time_sec', help='The maximum amount of time to wait before erroring out. Default value is to never timeout. Any value <= 0 means never timeout', type=int)
 register_cli_argument('datalake analytics job wait', 'wait_interval_sec', help='The polling interval between checks for the job status, in seconds.', type=int)
 # credential params
