@@ -5,9 +5,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-pip freeze
-python -c "import azure.cli.tests"
-
 set -e
 
 scripts_root=$(cd $(dirname $0); pwd)
