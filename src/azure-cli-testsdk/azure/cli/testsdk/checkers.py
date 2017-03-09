@@ -8,7 +8,7 @@ import jmespath
 from .exceptions import JMESPathCheckAssertionError
 
 
-class JMESPathCheck(object):
+class JMESPathCheck(object):  # pylint: disable=too-few-public-methods
     def __init__(self, query, expected_result):
         self._query = query
         self._expected_result = expected_result
@@ -25,7 +25,7 @@ class JMESPathCheck(object):
                                               execution_result.output)
 
 
-class JMESPathCheckExists(object):
+class JMESPathCheckExists(object):  # pylint: disable=too-few-public-methods
     def __init__(self, query):
         self._query = query
 
