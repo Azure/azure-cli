@@ -91,7 +91,7 @@ helps['appservice web config ssl'] = """
 
 helps['appservice web config ssl list'] = """
     type: command
-    short-summary: List ssl certificates within a resource group
+    short-summary: List SSL certificates within a resource group
 """
 
 helps['appservice web config ssl bind'] = """

@@ -114,6 +114,10 @@ def get_app_settings(resource_group_name, name, slot=None):
                'slotSetting': str(p in (slot_cfg_names.app_setting_names or []))} for p in result.properties]  # pylint: disable=line-too-long
     return result
 
+def _add_linux_fx_version(resource_group_name, name, custom_image_name):
+    fx_version = '{}|{}'.format('DOCKER', custom_image_name)
+    update_site_configs(resource_group_name, name, linux_fx_version=fx_version)
+
 #for any modifications to the non-optional parameters, adjust the reflection logic accordingly
 #in the method
 def update_site_configs(resource_group_name, name, slot=None,
@@ -199,6 +203,7 @@ def update_container_settings(resource_group_name, name, docker_registry_server_
         settings.append('DOCKER_REGISTRY_SERVER_PASSWORD=' + docker_registry_server_password)
     if docker_custom_image_name is not None:
         settings.append('DOCKER_CUSTOM_IMAGE_NAME=' + docker_custom_image_name)
+        _add_linux_fx_version(resource_group_name, name, docker_custom_image_name)
     update_app_settings(resource_group_name, name, settings, slot)
     settings = get_app_settings(resource_group_name, name, slot)
     return _filter_for_container_settings(settings)
