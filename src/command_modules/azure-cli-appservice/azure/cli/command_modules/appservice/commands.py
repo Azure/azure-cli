@@ -13,6 +13,9 @@ from ._client_factory import web_client_factory
 def output_slots_in_table(slots):
     return [{'name': s['name'], 'status': s['state'], 'plan': s['appServicePlan']} for s in slots]
 
+def transform_list_location_output(result):
+    return [{'name': x.name} for x in result]
+
 cli_command(__name__, 'appservice web create', 'azure.cli.command_modules.appservice.custom#create_webapp')
 cli_command(__name__, 'appservice web list', 'azure.cli.command_modules.appservice.custom#list_webapp')
 cli_command(__name__, 'appservice web show', 'azure.cli.command_modules.appservice.custom#show_webapp', exception_handler=empty_on_404)
@@ -82,8 +85,7 @@ cli_generic_update_command(__name__, 'appservice plan update', 'azure.mgmt.web.o
 cli_command(__name__, 'appservice plan list', 'azure.cli.command_modules.appservice.custom#list_app_service_plans')
 cli_command(__name__, 'appservice plan show', 'azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.get', factory, exception_handler=empty_on_404)
 factory = lambda _: web_client_factory()
-cli_command(__name__, 'appservice list-locations', 'azure.cli.command_modules.appservice.custom#list_locations')
-
+cli_command(__name__, 'appservice list-locations', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.list_geo_regions', factory, transform=transform_list_location_output)
 
 #Not for ignite release
 #cli_command(__name__, 'webapp plan update-vnet-route',

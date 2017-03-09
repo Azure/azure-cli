@@ -62,11 +62,6 @@ class AppServiceLongRunningOperation(LongRunningOperation): #pylint: disable=too
         except: #pylint: disable=bare-except
             return ex
 
-def list_locations(sku):
-    client = web_client_factory()
-    result = client.list_geo_regions(sku)
-    return [{'name': x.name} for x in result]
-
 def create_webapp(resource_group_name, name, plan):
     client = web_client_factory()
     if is_valid_resource_id(plan):
@@ -341,7 +336,7 @@ def _extract_real_error(ex):
     try:
         err = json.loads(ex.response.text)
         return CLIError(err['Message'])
-    except:  # pylint: disable=bare-except
+    except Exception:  # pylint: disable=broad-except
         return ex
 
 def list_app_service_plans(resource_group_name=None):
