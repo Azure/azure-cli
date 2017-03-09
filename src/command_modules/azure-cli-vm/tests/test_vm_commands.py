@@ -38,9 +38,10 @@ class VMImageListByAliasesScenarioTest(VCRTestBase):
 
     def body(self):
         result = self.cmd('vm image list --offer ubuntu')
-        self.assertTrue(len(result)>=1)
+        self.assertTrue(len(result) >= 1)
         self.assertEqual(result[0]['publisher'], 'Canonical')
         self.assertTrue(result[0]['sku'].endswith('LTS'))
+
 
 class VMUsageScenarioTest(VCRTestBase):
 
@@ -265,7 +266,6 @@ class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
 
         # capture to a custom image
         image_name = 'myImage'
-        new_vm_name = 'vm2'
         self.cmd('image create -g {} -n {} --source {}'.format(self.resource_group, image_name, self.vm_name), checks=[
             JMESPathCheck('name', image_name),
             JMESPathCheck('sourceVirtualMachine.id', vm['id'])
