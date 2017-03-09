@@ -3,26 +3,20 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.test_utils.vcr_test_base import (
-    ResourceGroupVCRTestBase, JMESPathCheck, NoneCheck)
+from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, JMESPathCheckExists, NoneCheck,
+                               StorageAccountPreparer, ResourceGroupPreparer)
 
 
-class SqlServerMgmtScenarioTest(ResourceGroupVCRTestBase):
+class SqlServerMgmtScenarioTest(ScenarioTest):
 
-    def __init__(self, test_method):
-        super(SqlServerMgmtScenarioTest, self).__init__(__file__, test_method,
-                                                        resource_group='cli-test-sql-mgmt')
+    @ResourceGroupPreparer()
+    def test_sql_server_mgmt(self, resource_group, resource_group_location):
         self.sql_server_names = ['cliautomation01', 'cliautomation02']
-        self.location = "westus"
         self.admin_login = 'admin123'
         self.admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
-    def test_sql_server_mgmt(self):
-        self.execute()
-
-    def body(self):
-        rg = self.resource_group
-        loc = self.location
+        rg = resource_group
+        loc = resource_group_location
         user = self.admin_login
         password = self.admin_passwords[0]
         password_updated = self.admin_passwords[1]
@@ -80,22 +74,17 @@ class SqlServerMgmtScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('sql server list -g {}'.format(rg), checks=[JMESPathCheck('length(@)', 0)])
 
 
-class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
+class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
 
-    def __init__(self, test_method):
-        super(SqlServerFirewallMgmtScenarioTest, self).__init__(__file__, test_method,
-                                                                resource_group='cli-test-sql-mgmt')
+    @ResourceGroupPreparer()
+    def test_sql_firewall_mgmt(self, resource_group, resource_group_location):
         self.sql_server_name = 'cliautomation10'
         self.location = "westus"
         self.admin_login = 'admin123'
         self.admin_password = 'SecretPassword123'
 
-    def test_sql_firewall_mgmt(self):
-        self.execute()
-
-    def body(self):
-        rg = self.resource_group
-        loc = self.location
+        rg = resource_group
+        loc = resource_group_location
         user = self.admin_login
         password = self.admin_password
         firewall_rule_1 = 'rule1'
@@ -213,13 +202,10 @@ class SqlServerFirewallMgmtScenarioTest(ResourceGroupVCRTestBase):
                  .format(rg, self.sql_server_name), checks=NoneCheck())
 
 
-class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
-    # pylint: disable=too-many-instance-attributes
-    def __init__(self, test_method):
-        super(SqlServerDbMgmtScenarioTest, self).__init__(
-            __file__, test_method, resource_group='cli-test-sql-mgmt')
+class SqlServerDbMgmtScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_sql_db_mgmt(self, resource_group, resource_group_location):
         self.sql_server_name = 'cliautomation14'
-        self.location_short_name = 'westus'
         self.location_long_name = 'West US'
         self.admin_login = 'admin123'
         self.admin_password = 'SecretPassword123'
@@ -229,24 +215,20 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
         self.update_storage = '10GB'
         self.update_storage_bytes = str(10 * 1024 * 1024 * 1024)
 
-    def test_sql_db_mgmt(self):
-        self.execute()
-
-    def body(self):
-        rg = self.resource_group
-        loc_short = self.location_short_name
-        loc_long = self.location_long_name
+        rg = resource_group
+        loc = resource_group_location
+        loc_display = self.location_long_name
         user = self.admin_login
         password = self.admin_password
 
         # create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l "{}" '
                  '--admin-user {} --admin-password {}'
-                 .format(rg, self.sql_server_name, loc_short, user, password),
+                 .format(rg, self.sql_server_name, loc, user, password),
                  checks=[
                      JMESPathCheck('name', self.sql_server_name),
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('location', loc_long),
+                     JMESPathCheck('location', loc_display),
                      JMESPathCheck('administratorLogin', user)])
 
         # test sql db commands
@@ -255,7 +237,7 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.database_name),
-                     JMESPathCheck('location', loc_long),
+                     JMESPathCheck('location', loc_display),
                      JMESPathCheck('elasticPoolName', None),
                      JMESPathCheck('status', 'Online')])
 
@@ -307,19 +289,13 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
                  .format(rg, self.sql_server_name), checks=NoneCheck())
 
 
-class SqlServerDbRestoreScenarioTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(SqlServerDbRestoreScenarioTest, self).__init__(
-            __file__, test_method, resource_group='cli-test-sql-mgmt')
-
-    def test_sql_db_restore(self):
-        self.execute()
-
-    def body(self):
+class SqlServerDbRestoreScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_sql_db_restore(self, resource_group, resource_group_location):
         from datetime import datetime
         from time import sleep
 
-        rg = self.resource_group
+        rg = resource_group
         server_name = 'cliautomation44'
         location = 'westus'
         admin_login = 'admin123'
@@ -390,13 +366,11 @@ class SqlServerDbRestoreScenarioTest(ResourceGroupVCRTestBase):
                  .format(rg, server_name), checks=NoneCheck())
 
 
-class SqlServerDwMgmtScenarioTest(ResourceGroupVCRTestBase):
+class SqlServerDwMgmtScenarioTest(ScenarioTest):
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, test_method):
-        super(SqlServerDwMgmtScenarioTest, self).__init__(
-            __file__, test_method, resource_group='cli-test-sql-mgmt')
+    @ResourceGroupPreparer()
+    def test_sql_dw_mgmt(self, resource_group, resource_group_location):
         self.sql_server_name = 'cliautomation24'
-        self.location_short_name = 'westus'
         self.location_long_name = 'West US'
         self.admin_login = 'admin123'
         self.admin_password = 'SecretPassword123'
@@ -407,24 +381,20 @@ class SqlServerDwMgmtScenarioTest(ResourceGroupVCRTestBase):
         self.update_storage = '20TB'
         self.update_storage_bytes = str(20 * 1024 * 1024 * 1024 * 1024)
 
-    def test_sql_dw_mgmt(self):
-        self.execute()
-
-    def body(self):
-        rg = self.resource_group
-        loc_short = self.location_short_name
-        loc_long = self.location_long_name
+        rg = resource_group
+        loc = self.location_short_name
+        loc_display = self.location_long_name
         user = self.admin_login
         password = self.admin_password
 
         # create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l "{}" '
                  '--admin-user {} --admin-password {}'
-                 .format(rg, self.sql_server_name, loc_short, user, password),
+                 .format(rg, self.sql_server_name, loc, user, password),
                  checks=[
                      JMESPathCheck('name', self.sql_server_name),
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('location', loc_long),
+                     JMESPathCheck('location', loc_display),
                      JMESPathCheck('administratorLogin', user)])
 
         # test sql db commands
@@ -433,7 +403,7 @@ class SqlServerDwMgmtScenarioTest(ResourceGroupVCRTestBase):
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.database_name),
-                     JMESPathCheck('location', loc_long),
+                     JMESPathCheck('location', loc_display),
                      JMESPathCheck('edition', 'DataWarehouse'),
                      JMESPathCheck('maxSizeBytes', self.storage_bytes),
                      JMESPathCheck('status', 'Online')])
@@ -525,36 +495,33 @@ class SqlServerDwMgmtScenarioTest(ResourceGroupVCRTestBase):
                  .format(rg, self.sql_server_name), checks=NoneCheck())
 
 
-class SqlServerDbReplicaMgmtScenarioTest(ResourceGroupVCRTestBase):
-    # pylint: disable=too-many-instance-attributes
-    def __init__(self, test_method):
-        super(SqlServerDbReplicaMgmtScenarioTest, self).__init__(
-            __file__, test_method, resource_group='cli-test-sql-mgmt',
-            additional_resource_group_count=1)
+class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(parameter_name="resource_group2", parameter_name_for_location="resource_group_location2")
+    def test_sql_db_replica_mgmt(self, resource_group, resource_group_location,
+                                 resource_group2, resource_group_location2):
+        
         self.admin_login = 'admin123'
         self.admin_password = 'SecretPassword123'
         self.database_name = "cliautomationdb01"
         self.service_objective = 'S1'
 
-    def test_sql_db_replica_mgmt(self):
-        self.execute()
-
-    def body(self):
         # helper class so that it's clear which servers are in which groups
         class ServerInfo(object):  # pylint: disable=too-few-public-methods
-            def __init__(self, name, group):
+            def __init__(self, name, group, location):
                 self.name = name
                 self.group = group
+                self.location = location
 
         # create 2 servers in the same resource group, and 1 server in a different resource group
-        s1 = ServerInfo('cliautomation37', self.resource_groups[0])
-        s2 = ServerInfo('cliautomation38', self.resource_groups[0])
-        s3 = ServerInfo('cliautomation39', self.resource_groups[1])
+        s1 = ServerInfo('cliautomation37', resource_group, resource_group_location)
+        s2 = ServerInfo('cliautomation38', resource_group, resource_group_location)
+        s3 = ServerInfo('cliautomation39', resource_group2, resource_group_location2)
 
         for s in (s1, s2, s3):
             self.cmd('sql server create -g {} -n {} -l "{}" '
                      '--admin-user {} --admin-password {}'
-                     .format(s.group, s.name, self.location, self.admin_login,
+                     .format(s.group, s.name, s.location, self.admin_login,
                              self.admin_password),
                      checks=[
                          JMESPathCheck('name', s.name),
@@ -659,11 +626,29 @@ class SqlServerDbReplicaMgmtScenarioTest(ResourceGroupVCRTestBase):
                  checks=[NoneCheck()])
 
 
-class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
-    # pylint: disable=too-many-instance-attributes
-    def __init__(self, test_method):
-        super(SqlElasticPoolsMgmtScenarioTest, self).__init__(
-            __file__, test_method, resource_group='cli-test-sql-mgmt')
+class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
+    def verify_activities(self, activities, resource_group):
+        if isinstance(activities, list.__class__):
+            raise AssertionError("Actual value '{}' expected to be list class."
+                                 .format(activities))
+
+        for activity in activities:
+            if isinstance(activity, dict.__class__):
+                raise AssertionError("Actual value '{}' expected to be dict class"
+                                     .format(activities))
+            if activity['resourceGroup'] != resource_group:
+                raise AssertionError("Actual value '{}' != Expected value {}"
+                                     .format(activity['resourceGroup'], resource_group))
+            elif activity['serverName'] != self.sql_server_name:
+                raise AssertionError("Actual value '{}' != Expected value {}"
+                                     .format(activity['serverName'], self.sql_server_name))
+            elif activity['currentElasticPoolName'] != self.pool_name:
+                raise AssertionError("Actual value '{}' != Expected value {}"
+                                     .format(activity['currentElasticPoolName'], self.pool_name))
+        return True
+
+    @ResourceGroupPreparer()
+    def test_sql_elastic_pools_mgmt(self, resource_group, resource_group_location):
         self.sql_server_name = 'cliautomation22'
         self.location_short_name = 'westus'
         self.location_long_name = 'West US'
@@ -688,40 +673,16 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         self.db_service_objective = 'S1'
 
-    def test_sql_elastic_pools_mgmt(self):
-        self.execute()
-
-    def verify_activities(self, activities):
-        if isinstance(activities, list.__class__):
-            raise AssertionError("Actual value '{}' expected to be list class."
-                                 .format(activities))
-
-        for activity in activities:
-            if isinstance(activity, dict.__class__):
-                raise AssertionError("Actual value '{}' expected to be dict class"
-                                     .format(activities))
-            if activity['resourceGroup'] != self.resource_group:
-                raise AssertionError("Actual value '{}' != Expected value {}"
-                                     .format(activity['resourceGroup'], self.resource_group))
-            elif activity['serverName'] != self.sql_server_name:
-                raise AssertionError("Actual value '{}' != Expected value {}"
-                                     .format(activity['serverName'], self.sql_server_name))
-            elif activity['currentElasticPoolName'] != self.pool_name:
-                raise AssertionError("Actual value '{}' != Expected value {}"
-                                     .format(activity['currentElasticPoolName'], self.pool_name))
-        return True
-
-    def body(self):
-        rg = self.resource_group
-        loc_short = self.location_short_name
-        loc_long = self.location_long_name
+        rg = resource_group
+        loc = self.location_short_name
+        loc_display = self.location_long_name
         user = self.admin_login
         password = self.admin_password
 
         # create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l {} '
                  '--admin-user {} --admin-password {}'
-                 .format(rg, self.sql_server_name, loc_short, user, password),
+                 .format(rg, self.sql_server_name, loc, user, password),
                  checks=[
                      JMESPathCheck('name', self.sql_server_name),
                      JMESPathCheck('resourceGroup', rg)])
@@ -735,7 +696,7 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
-                     JMESPathCheck('location', loc_long),
+                     JMESPathCheck('location', loc_display),
                      JMESPathCheck('state', 'Ready'),
                      JMESPathCheck('dtu', self.dtu),
                      JMESPathCheck('databaseDtuMin', self.db_dtu_min),
@@ -810,7 +771,7 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name2),
-                     JMESPathCheck('location', loc_long),
+                     JMESPathCheck('location', loc_display),
                      JMESPathCheck('state', 'Ready')])
 
         self.cmd('sql elastic-pool list -g {} -s {}'.format(rg, self.sql_server_name),
@@ -889,7 +850,7 @@ class SqlElasticPoolsMgmtScenarioTest(ResourceGroupVCRTestBase):
         #                       '--server-name {} --elastic-pool-name {}'
         #                       .format(rg, self.sql_server_name, self.pool_name),
         #                       checks=[JMESPathCheck('type(@)', 'array')])
-        # self.verify_activities(activities)
+        # self.verify_activities(activities, resource_group)
 
         # delete sql server database
         self.cmd('sql db delete -g {} --server {} --name {}'
