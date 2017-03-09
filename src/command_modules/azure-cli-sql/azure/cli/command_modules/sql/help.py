@@ -47,6 +47,10 @@ helps['sql db replica-link'] = """
             type: group
             short-summary: Manage links between database replicas.
             """
+helps['sql db restore'] = """
+            type: command
+            short-summary: Creates a new database by restoring from a database backup.
+            """
 # helps['sql db restore-point'] = """
 #             type: group
 #             short-summary: Manage database restore points.
