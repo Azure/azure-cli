@@ -9,8 +9,9 @@ from ._util import (
 )
 
 from azure.cli.core.commands.client_factory import get_subscription_id
-
 from azure.cli.core._util import CLIError
+from azure.mgmt.sql.models.sql_management_client_enums import (
+    DatabaseEditions, ServiceObjectiveName)
 
 ###############################################
 #                Common funcs                 #
@@ -29,6 +30,7 @@ def get_server_location(server_name, resource_group_name):
 ###############################################
 #                sql db                       #
 ###############################################
+
 
 # Helper class to bundle up database identity properties
 class DatabaseIdentity(object):  # pylint: disable=too-few-public-methods
@@ -68,28 +70,11 @@ def db_create(
         **kwargs):
 
     # Verify edition
-    if 'Edition' in kwargs and kwargs['Edition'].lower() == 'datawarehouse':
-        raise CLIError('SQL Data Warehouse can be created with the command `az sql dw create`.')
+    edition = kwargs.get('edition')  # kwags['edition'] throws KeyError if not in dictionary
+    if edition and edition.lower() == DatabaseEditions.data_warehouse.value.lower():
+        raise CLIError('Azure SQL Data Warehouse can be created with the command'
+                       ' `az sql dw create`.')
 
-    return _db_dw_create(
-        client,
-        DatabaseIdentity(database_name, server_name, resource_group_name),
-        kwargs)
-
-
-# Creates a datawarehouse. Wrapper function which uses the server location so that the user doesn't
-# need to specify location.
-def dw_create(
-        client,
-        database_name,
-        server_name,
-        resource_group_name,
-        **kwargs):
-
-    # Set edition
-    kwargs['Edition'] = 'DataWarehouse'
-
-    # Create
     return _db_dw_create(
         client,
         DatabaseIdentity(database_name, server_name, resource_group_name),
@@ -218,7 +203,8 @@ def db_list(
         return pool_client.list_databases(
             server_name=server_name,
             resource_group_name=resource_group_name,
-            elastic_pool_name=elastic_pool_name)
+            elastic_pool_name=elastic_pool_name,
+            filter=filter)
     else:
         # List all databases in the server
         return client.list_by_server(
@@ -233,6 +219,11 @@ def db_update(
         max_size_bytes=None,
         requested_service_objective_name=None):
 
+    # Verify edition
+    if instance.edition.lower() == DatabaseEditions.data_warehouse.value.lower():
+        raise CLIError('Azure SQL Data Warehouse can be updated with the command'
+                       ' `az sql dw update`.')
+
     # Null out edition. The service will choose correct edition based on service objective and
     # elastic pool.
     instance.edition = None
@@ -244,9 +235,10 @@ def db_update(
     # user from this unintuitive behavior.
     if (elastic_pool_name and
             requested_service_objective_name and
-            requested_service_objective_name != 'ElasticPool'):
+            requested_service_objective_name != ServiceObjectiveName.elastic_pool.value):
         raise CLIError('If elastic pool is specified, service objective must be'
-                       ' unspecified or equal \'ElasticPool\'.')
+                       ' unspecified or equal \'{}\'.'.format(
+                           ServiceObjectiveName.elastic_pool.value))
 
     # Update instance pool and service objective. The service treats these properties like PATCH,
     # so if either of these properties is null then the service will keep the property unchanged -
@@ -265,6 +257,61 @@ def db_update(
 
     # Set other properties
     instance.max_size_bytes = max_size_bytes or instance.max_size_bytes
+
+    return instance
+
+
+###############################################
+#                sql dw                       #
+###############################################
+
+
+# Creates a datawarehouse. Wrapper function which uses the server location so that the user doesn't
+# need to specify location.
+def dw_create(
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        **kwargs):
+
+    # Set edition
+    kwargs['edition'] = DatabaseEditions.data_warehouse.value
+
+    # Create
+    return _db_dw_create(
+        client,
+        DatabaseIdentity(database_name, server_name, resource_group_name),
+        kwargs)
+
+
+# Lists databases in a server or elastic pool.
+def dw_list(
+        client,
+        server_name,
+        resource_group_name):
+
+    return client.list_by_server(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        # OData filter to include only DW's
+        filter="properties/edition eq '{}'".format(DatabaseEditions.data_warehouse.value))
+
+
+# Update data warehouse. Custom update function to apply parameters to instance.
+def dw_update(
+        instance,
+        max_size_bytes=None,
+        requested_service_objective_name=None):
+
+    # Null out requested_service_objective_id, because if requested_service_objective_id is
+    # specified then requested_service_objective_name is ignored.
+    instance.requested_service_objective_id = None
+
+    # Apply param values to instance
+    instance.max_size_bytes = max_size_bytes or instance.max_size_bytes
+    instance.requested_service_objective_name = (
+        requested_service_objective_name or requested_service_objective_name)
 
     return instance
 
