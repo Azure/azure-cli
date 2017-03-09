@@ -185,7 +185,7 @@ with ParametersContext(command='sql db copy') as c:
                help='Name of the elastic pool to create the new database in.')
 
     c.argument('dest_name',
-               help='Name of the database that will be created as the copy destinaton.')
+               help='Name of the database that will be created as the copy destination.')
 
     c.argument('dest_resource_group_name',
                options_list=('--dest-resource-group',),
