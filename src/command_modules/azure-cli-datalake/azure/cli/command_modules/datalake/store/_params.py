@@ -19,7 +19,7 @@ from azure.mgmt.datalake.store.models import (EncryptionConfigType)
 
 # ARGUMENT DEFINITIONS
 # pylint: disable=line-too-long
-datalake_store_name_type = CliArgumentType(help='Name of the Data Lake Store account.', options_list=('--account_name',), completer=get_resource_name_completion_list('Microsoft.DataLakeStore/accounts'), id_part=None)
+datalake_store_name_type = CliArgumentType(help='Name of the Data Lake Store account.', options_list=('--account_name',), completer=get_resource_name_completion_list('Microsoft.DataLakeStore/accounts'), id_part='name')
 
 # PARAMETER REGISTRATIONS
 register_cli_argument('datalake store', 'resource_group_name', resource_group_name_type, id_part=None, required=False, help='If not specified, will attempt to discover the resource group for the specified Data Lake Store account.', validator=validate_resource_group_name)
@@ -28,7 +28,8 @@ register_cli_argument('datalake store account delete', 'name', datalake_store_na
 register_cli_argument('datalake store', 'account_name', datalake_store_name_type, options_list=('--account', '-n'))
 register_cli_argument('datalake store account', 'tags', tags_type)
 register_cli_argument('datalake store account', 'tier', help='The desired commitment tier for this account to use.', **enum_choice_list(TierType))
-register_cli_argument('datalake store account create', 'resource_group_name', resource_group_name_type, completer=None, validator=None)
+register_cli_argument('datalake store account create', 'resource_group_name', resource_group_name_type, validator=None)
+register_cli_argument('datalake store account create', 'account_name', datalake_store_name_type, options_list=('--account', '-n'), completer=None)
 register_cli_argument('datalake store account create', 'encryption_type', help='Indicates what type of encryption to provision the account with. By default, encryption is ServiceManaged. If no encryption is desired, it must be explicitly set with the --disable-encryption flag.', **enum_choice_list(EncryptionConfigType))
 register_cli_argument('datalake store account create', 'disable_encryption', help='Indicates that the account will not have any form of encryption applied to it.', action='store_true')
 register_cli_argument('datalake store account update', 'trusted_id_provider_state', help='Optionally enable/disable the existing trusted ID providers.', **enum_choice_list(TrustedIdProviderState))

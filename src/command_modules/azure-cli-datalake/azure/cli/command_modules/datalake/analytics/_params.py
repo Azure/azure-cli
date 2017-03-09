@@ -24,7 +24,7 @@ from azure.mgmt.datalake.analytics.job.models.data_lake_analytics_job_management
 
 # ARGUMENT DEFINITIONS
 # pylint: disable=line-too-long
-datalake_analytics_name_type = CliArgumentType(help='Name of the Data Lake Analytics account.', options_list=('--account_name',), completer=get_resource_name_completion_list('Microsoft.DataLakeAnalytics/accounts'), id_part=None)
+datalake_analytics_name_type = CliArgumentType(help='Name of the Data Lake Analytics account.', options_list=('--account_name',), completer=get_resource_name_completion_list('Microsoft.DataLakeAnalytics/accounts'), id_part='name')
 
 # PARAMETER REGISTRATIONS
 # account params
@@ -32,7 +32,8 @@ register_cli_argument('datalake analytics', 'resource_group_name', resource_grou
 register_cli_argument('datalake analytics', 'account_name', datalake_analytics_name_type, options_list=('--account', '-n'))
 register_cli_argument('datalake analytics account', 'tags', tags_type)
 register_cli_argument('datalake analytics account', 'tier', help='The desired commitment tier for this account to use.', **enum_choice_list(TierType))
-register_cli_argument('datalake analytics account create', 'resource_group_name', resource_group_name_type, completer=None, validator=None)
+register_cli_argument('datalake analytics account create', 'resource_group_name', resource_group_name_type, validator=None)
+register_cli_argument('datalake analytics account create', 'account_name', datalake_analytics_name_type, options_list=('--account', '-n'), completer=None)
 register_cli_argument('datalake analytics account update', 'firewall_state', help='Optionally enable/disable existing firewall rules.', **enum_choice_list(FirewallState))
 register_cli_argument('datalake analytics account update', 'allow_azure_ips', help='Optionally allow/block Azure originating IPs through the firewall', **enum_choice_list(FirewallAllowAzureIpsState))
 register_cli_argument('datalake analytics account update', 'max_job_count', help='The maximum supported jobs running under the account at the same time.', type=int)
@@ -47,5 +48,7 @@ register_cli_argument('datalake analytics job wait', 'max_wait_time_sec', help='
 register_cli_argument('datalake analytics job wait', 'wait_interval_sec', help='The polling interval between checks for the job status, in seconds.', type=int)
 # credential params
 register_cli_argument('datalake analytics catalog credential create', 'credential_user_password', options_list=('--password', '-p'), help='Password for the credential user. Will prompt if not given.')
+register_cli_argument('datalake analytics catalog credential create', 'credential_user_name', options_list=('--user-name'))
+register_cli_argument('datalake analytics catalog credential update', 'credential_user_name', options_list=('--user-name'))
 register_cli_argument('datalake analytics catalog credential update', 'credential_user_password', options_list=('--password', '-p'), help='Current password for the credential user. Will prompt if not given.')
-register_cli_argument('datalake analytics catalog credential update', 'new_credential_user_password', help='New password for the credential user. Will prompt if not given.')
+register_cli_argument('datalake analytics catalog credential update', 'new_credential_user_password', options_list=('--new-password'), help='New password for the credential user. Will prompt if not given.')

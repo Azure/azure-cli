@@ -31,7 +31,7 @@ def create_adls_account(client,
                         location=None,
                         default_group=None,
                         tags=None,
-                        encryption_type=EncryptionConfigType.service_managed,
+                        encryption_type=EncryptionConfigType.service_managed.value,
                         key_vault_id=None,
                         key_name=None,
                         key_version=None,
@@ -39,15 +39,11 @@ def create_adls_account(client,
                         tier=None):
 
     location = location or _get_resource_group_location(resource_group_name)
-    create_params = DataLakeStoreAccount(location)
-    if tags:
-        create_params.tags = tags
+    create_params = DataLakeStoreAccount(location,
+                                         tags=tags,
+                                         default_group=default_group,
+                                         new_tier=tier)
 
-    if default_group:
-        create_params.default_group = default_group
-
-    if tier:
-        create_params.new_tier = tier
     if not disable_encryption:
         identity = EncryptionIdentity()
         config = EncryptionConfig(type=encryption_type)
@@ -112,6 +108,7 @@ def get_adls_item(account_name,
 def list_adls_items(account_name,
                     path):
     return cf_datalake_store_filesystem(account_name).ls(path, detail=True)
+
 def create_adls_item(account_name,
                      path,
                      content=None,
@@ -237,24 +234,23 @@ def set_adls_item_expiry(account_name,
     if client.info(path)['type'] != 'FILE':
         # pylint: disable=line-too-long
         raise CLIError('The specified path does not exist or is not a file. Please ensure the path points to a file and it exists. Path supplied: {}'.format(path))
-    print('todo: {}'.format(expiration_time))
+    raise CLIError('Not implemented: {}'.format(expiration_time))
 
 # filesystem permissions customizations
-# pylint: disable=superfluous-parens
 def get_adls_item_acl():
-    print('todo')
-# pylint: disable=superfluous-parens
+    raise CLIError('Not implemented')
+
 def remove_adls_item_acl():
-    print('todo')
-# pylint: disable=superfluous-parens
+    raise CLIError('Not implemented')
+
 def remove_adls_item_acl_entry():
-    print('todo')
-# pylint: disable=superfluous-parens
+    raise CLIError('Not implemented')
+
 def set_adls_item_acl():
-    print('todo')
-# pylint: disable=superfluous-parens
+    raise CLIError('Not implemented')
+
 def set_adls_item_acl_entry():
-    print('todo')
+    raise CLIError('Not implemented')
 
 def set_adls_item_owner(account_name,
                         path,

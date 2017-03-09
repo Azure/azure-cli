@@ -45,21 +45,12 @@ def create_adla_account(client,
     location = location or _get_resource_group_location(resource_group_name)
     create_params = DataLakeAnalyticsAccount(location,
                                              default_datalake_store,
-                                             adls_list)
-    if tags:
-        create_params.tags = tags
-
-    if max_degree_of_parallelism:
-        create_params.max_degree_of_parallelism = max_degree_of_parallelism
-
-    if max_job_count:
-        create_params.max_job_count = max_job_count
-
-    if query_store_retention:
-        create_params.query_store_retention = query_store_retention
-
-    if tier:
-        create_params.new_tier = tier
+                                             adls_list,
+                                             tags=tags,
+                                             max_degree_of_parallelism=max_degree_of_parallelism,
+                                             max_job_count=max_job_count,
+                                             query_store_retention=query_store_retention,
+                                             new_tier=tier)
 
     return client.create(resource_group_name, account_name, create_params)
 
@@ -111,10 +102,10 @@ def create_adla_catalog_credential(client,
 
     if not credential_user_password:
         try:
-            credential_user_password = prompt_pass('Credential Password:')
+            credential_user_password = prompt_pass('Password:', confirm=True)
         except NoTTYException:
             # pylint: disable=line-too-long
-            raise CLIError('Please specify both --credential-user-name and --password in non-interactive mode.')
+            raise CLIError('Please specify both --user-name and --password in non-interactive mode.')
 
     create_params = DataLakeAnalyticsCatalogCredentialCreateParameters(credential_user_password,
                                                                        uri,
@@ -132,17 +123,17 @@ def update_adla_catalog_credential(client,
                                    new_credential_user_password=None):
     if not credential_user_password:
         try:
-            credential_user_password = prompt_pass('Current Credential Password:')
+            credential_user_password = prompt_pass('Current Password:', confirm=True)
         except NoTTYException:
             # pylint: disable=line-too-long
-            raise CLIError('Please specify --credential-user-name --password and --new-password in non-interactive mode.')
+            raise CLIError('Please specify --user-name --password and --new-password in non-interactive mode.')
 
     if not new_credential_user_password:
         try:
-            new_credential_user_password = prompt_pass('New Credential Password:')
+            new_credential_user_password = prompt_pass('New Password:', confirm=True)
         except NoTTYException:
             # pylint: disable=line-too-long
-            raise CLIError('Please specify --credential-user-name --password and --new-password in non-interactive mode.')
+            raise CLIError('Please specify --user-name --password and --new-password in non-interactive mode.')
 
     update_params = DataLakeAnalyticsCatalogCredentialUpdateParameters(credential_user_password,
                                                                        new_credential_user_password,
@@ -203,8 +194,7 @@ def wait_adla_job(client,
                   max_wait_time_sec=-1):
     if wait_interval_sec < 1:
         # pylint: disable=line-too-long
-        logger.warning('wait times must be positive when polling jobs, setting to the default value of 5 seconds')
-        wait_interval_sec = 5
+        raise CLIError('wait times must be greater than 0 when polling jobs. Value specified: {}'.format(wait_interval_sec))
 
     job = client.get(account_name, job_id)
     time_waited_sec = 0
@@ -212,7 +202,7 @@ def wait_adla_job(client,
         if max_wait_time_sec > 0 and time_waited_sec >= max_wait_time_sec:
             # pylint: disable=line-too-long
             raise CLIError('Data Lake Analytics Job with ID: {0} has not completed in {1} seconds. Check job runtime or increase the value of --max-wait-time-sec'.format(job_id, time_waited_sec))
-        print('Job is not yet done. Current job state: \'{0}\''.format(job.state))
+        logger.info('Job is not yet done. Current job state: \'%s\'', job.state)
         time.sleep(wait_interval_sec)
         job = client.get(account_name, job_id)
 

@@ -19,7 +19,9 @@ def _get_resource_group_from_account_name(client, account_name):
         id_comps = parse_resource_id(acct.id)
         if id_comps['name'] == account_name:
             return id_comps['resource_group']
-    return None
+    raise CLIError(
+        "The Resource 'Microsoft.DataLakeStore/accounts/{}'".format(account_name) + \
+        " not found within subscription: {}".format(client.config.subscription_id))
 
 # COMMAND NAMESPACE VALIDATORS
 def validate_resource_group_name(ns):
@@ -30,9 +32,4 @@ def validate_resource_group_name(ns):
             account_name = ns.account_name
         client = get_mgmt_service_client(DataLakeStoreAccountManagementClient).account
         group_name = _get_resource_group_from_account_name(client, account_name)
-        if group_name:
-            ns.resource_group_name = group_name
-        else:
-            raise CLIError(
-                "The Resource 'Microsoft.DataLakeStore/accounts/{}'".format(account_name) + \
-                " not found within subscription: {}".format(client.config.subscription_id))
+        ns.resource_group_name = group_name
