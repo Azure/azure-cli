@@ -639,17 +639,49 @@ def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file):
             logger.warning('The credentials have been saved to %s', path_candidate)
 
 
+def _handle_merge(existing, addition, key):
+    if addition[key]:
+        if existing[key] is None:
+            existing[key] = addition[key]
+            return
+
+        for i in addition[key]:
+            if i not in existing[key]:
+                existing[key].append(i)
+
+
 def merge_kubernetes_configurations(existing_file, addition_file):
-    with open(existing_file) as stream:
-        existing = yaml.load(stream)
+    try:
+        with open(existing_file) as stream:
+            existing = yaml.safe_load(stream)
+    except (IOError, OSError) as ex:
+        if getattr(ex, 'errno', 0) == errno.ENOENT:
+            raise CLIError('{} does not exist'.format(existing_file))
+        else:
+            raise
+    except yaml.parser.ParserError as ex:
+        raise CLIError('Error parsing {} ({})'.format(existing_file, str(ex)))
 
-    with open(addition_file) as stream:
-        addition = yaml.load(stream)
+    if existing is None:
+        raise CLIError('failed to load existing configuration from {}'.format(existing_file))
 
-    # TODO: this will always add, we should only add if not present
-    existing['clusters'].extend(addition['clusters'])
-    existing['users'].extend(addition['users'])
-    existing['contexts'].extend(addition['contexts'])
+    try:
+        with open(addition_file) as stream:
+            addition = yaml.safe_load(stream)
+    except (IOError, OSError) as ex:
+        if getattr(ex, 'errno', 0) == errno.ENOENT:
+            raise CLIError('{} does not exist'.format(existing_file))
+        else:
+            raise
+    except yaml.parser.ParserError as ex:
+        raise CLIError('Error parsing {} ({})'.format(addition_file, str(ex)))
+
+    if addition is None:
+        raise CLIError('failed to load additional configuration from {}'.format(addition_file))
+
+    _handle_merge(existing, addition, 'clusters')
+    _handle_merge(existing, addition, 'users')
+    _handle_merge(existing, addition, 'contexts')
     existing['current-context'] = addition['current-context']
 
     with open(existing_file, 'w+') as stream:
