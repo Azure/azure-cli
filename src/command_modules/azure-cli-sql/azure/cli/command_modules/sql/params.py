@@ -98,8 +98,16 @@ def _configure_db_create_params(
             CreateMode.restore]:
         raise ValueError('Engine {} does not support create mode {}'.format(engine, create_mode))
 
+    # Make restore point in time required for restore mode only
+    if create_mode in [CreateMode.restore, CreateMode.point_in_time_restore]:
+        patches = {
+            'restore_point_in_time': patch_arg_make_required
+        }
+    else:
+        patches = {}
+
     # Include all Database params as a starting point. We will filter from there.
-    cmd.expand('parameters', Database)
+    cmd.expand('parameters', Database, patches=patches)
 
     # The following params are always ignored because their values are filled in by wrapper
     # functions.
@@ -120,7 +128,7 @@ def _configure_db_create_params(
         cmd.ignore('sample_name')
 
     # Only applicable to point in time restore create mode.
-    if create_mode != CreateMode.point_in_time_restore:
+    if create_mode not in [CreateMode.restore, CreateMode.point_in_time_restore]:
         cmd.ignore('restore_point_in_time')
 
     # 'collation', 'edition', and 'max_size_bytes' are ignored (or rejected) when creating a copy
@@ -133,7 +141,7 @@ def _configure_db_create_params(
 
     # collation and max_size_bytes are ignored when restoring because their values are determined by
     # the source db.
-    if create_mode == CreateMode.restore:
+    if create_mode in [CreateMode.restore, CreateMode.point_in_time_restore]:
         cmd.ignore('collation')
         cmd.ignore('max_size_bytes')
 
@@ -174,8 +182,7 @@ with ParametersContext(command='sql db copy') as c:
     _configure_db_create_params(c, Engine.db, CreateMode.copy)
 
     c.argument('elastic_pool_name',
-               options_list=('--dest-elastic-pool',),
-               help='Name of elastic pool to create the new database in.')
+               help='Name of the elastic pool to create the new database in.')
 
     c.argument('dest_name',
                help='Name of the database that will be created as the copy destinaton.')
@@ -191,20 +198,19 @@ with ParametersContext(command='sql db copy') as c:
                ' If unspecified, defaults to the origin server.')
 
     c.argument('requested_service_objective_name',
-               options_list=('--dest-service-objective',),
-               help='Name of service objective for the new database.')
+               options_list=('--service-objective',),
+               help='Name of the service objective for the new database.')
 
 
 with ParametersContext(command='sql db create-replica') as c:
     _configure_db_create_params(c, Engine.db, CreateMode.online_secondary)
 
     c.argument('elastic_pool_name',
-               options_list=('--secondary-elastic-pool',),
-               help='Name of elastic pool to create the new database in.')
+               help='Name of the elastic pool to create the new database in.')
 
     c.argument('requested_service_objective_name',
-               options_list=('--secondary-service-objective',),
-               help='Name of service objective for the new secondary database.')
+               options_list=('--service-objective',),
+               help='Name of the service objective for the new secondary database.')
 
     c.argument('secondary_resource_group_name',
                options_list=('--secondary-resource-group',),
@@ -219,9 +225,21 @@ with ParametersContext(command='sql db create-replica') as c:
 with ParametersContext(command='sql db restore') as c:
     _configure_db_create_params(c, Engine.db, CreateMode.point_in_time_restore)
 
-    c.register_alias('requested_service_objective_name', ('--dest-service-objective',))
-    c.register_alias('elastic_pool_name', ('--dest-elastic-pool',))
-    c.register_alias('dest_resource_group_name', ('--dest-resource-group',))
+    c.argument('dest_name',
+               help='Name of the database that will be created as the restore destinaton.')
+
+    c.argument('restore_point_in_time',
+               options_list=('--time', '-t'),
+               help='The point in time of the source database that will be restored to create the'
+               ' new database. Must be greater than or equal to the source database\'s'
+               ' earliestRestoreDate value.')
+
+    c.argument('edition',
+               help='The edition for the new database.')
+    c.argument('elastic_pool_name',
+               help='Name of the elastic pool to create the new database in.')
+    c.argument('requested_service_objective_name',
+               help='Name of service objective for the new database.')
 
 
 with ParametersContext(command='sql db show') as c:
@@ -285,7 +303,7 @@ with ParametersContext(command='sql dw') as c:
 
     c.argument('requested_service_objective_name',
                options_list=('--service-objective',),
-               help='The service objective of the data warehouse')
+               help='The service objective of the data warehouse.')
 
     c.argument('collation',
                options_list=('--collation',),
@@ -370,11 +388,10 @@ with ParametersContext(command='sql server create') as c:
     # Both administrator_login and administrator_login_password are required for server creation.
     # However these two parameters are given default value in the create_or_update function
     # signature, therefore, they can't be automatically converted to requirement arguments.
-    patches = {
+    c.expand('parameters', Server, group_name='Authentication', patches={
         'administrator_login': patch_arg_make_required,
         'administrator_login_password': patch_arg_make_required
-    }
-    c.expand('parameters', Server, group_name='Authentication', patches=patches)
+    })
 
     # 12.0 is the only server version allowed and it's already the default.
     c.ignore('version')
