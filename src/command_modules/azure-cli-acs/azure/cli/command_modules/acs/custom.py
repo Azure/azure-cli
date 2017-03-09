@@ -348,7 +348,7 @@ def _get_subscription_id():
 
 def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None,
                content_version=None, admin_username="azureuser", agent_count="3",
-               agent_vm_size="Standard_D2_v2", location=None, master_count="3",
+               agent_vm_size="Standard_D2_v2", location=None, master_count="1",
                orchestrator_type="dcos", service_principal=None, client_secret=None, tags=None,
                custom_headers=None, windows=False, admin_password="", raw=False,
                **operation_config):  # pylint: disable=too-many-locals
