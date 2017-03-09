@@ -37,9 +37,10 @@ class VMImageListByAliasesScenarioTest(VCRTestBase):
         self.execute()
 
     def body(self):
-        result = self.cmd('vm image list --offer ubuntu -o tsv')
-        assert result.index('14.04.4-LTS') >= 0
-
+        result = self.cmd('vm image list --offer ubuntu')
+        self.assertTrue(len(result)>=1)
+        self.assertEqual(result[0]['publisher'], 'Canonical')
+        self.assertTrue(result[0]['sku'].endswith('LTS'))
 
 class VMUsageScenarioTest(VCRTestBase):
 
@@ -269,24 +270,6 @@ class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('name', image_name),
             JMESPathCheck('sourceVirtualMachine.id', vm['id'])
         ])
-
-        # use the new image to create a vm
-        self.cmd('vm create -g {0} -n {1} --admin-username ubuntu --admin-password testPassword0 --authentication-type password '
-                 '--image {2} --data-disk-sizes-gb 1 --size Standard_D2_v2'.format(self.resource_group, new_vm_name, image_name))
-        self.cmd('vm show -g {} -n {}'.format(self.resource_group, new_vm_name), checks=[
-            JMESPathCheck('length(storageProfile.dataDisks)', 1),
-            JMESPathCheck('storageProfile.dataDisks[0].diskSizeGb', 1),
-            JMESPathCheck('storageProfile.osDisk.osType', 'Linux')
-        ])
-        # use it to create a vmss
-        vmss_name = 'vmss2'
-        self.cmd('vmss create -g {0} -n {1} --admin-username ubuntu --admin-password testPassword0 --authentication-type password '
-                 '--image {2} --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2'.format(self.resource_group, vmss_name, image_name),
-                 checks=[
-                     JMESPathCheck('length(vmss.virtualMachineProfile.storageProfile.dataDisks)', 1),
-                     JMESPathCheck('vmss.virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGB', 1),
-                     JMESPathCheck('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage')
-                 ])
 
     def test_vm_generalize(self):
         self.execute()
@@ -1356,7 +1339,6 @@ class AzureContainerServiceScenarioTest(ResourceGroupVCRTestBase):  # pylint: di
         self.cmd('acs show -g {} -n {}'.format(self.resource_group, acs_name), checks=[
             JMESPathCheck('agentPoolProfiles[0].count', 3),
             JMESPathCheck('agentPoolProfiles[0].vmSize', 'Standard_D2_v2'),
-            JMESPathCheck('masterProfile.count', 3),
             JMESPathCheck('masterProfile.dnsPrefix', dns_prefix + 'mgmt'),
             JMESPathCheck('orchestratorProfile.orchestratorType', 'DCOS'),
             JMESPathCheck('name', acs_name),
