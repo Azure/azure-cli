@@ -226,7 +226,7 @@ with ParametersContext(command='sql db restore') as c:
     _configure_db_create_params(c, Engine.db, CreateMode.point_in_time_restore)
 
     c.argument('dest_name',
-               help='Name of the database that will be created as the restore destinaton.')
+               help='Name of the database that will be created as the restore destination.')
 
     c.argument('restore_point_in_time',
                options_list=('--time', '-t'),
