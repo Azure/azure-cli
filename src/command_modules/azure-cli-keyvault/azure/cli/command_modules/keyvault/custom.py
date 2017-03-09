@@ -244,9 +244,7 @@ def create_keyvault(client, resource_group_name, vault_name, location, #pylint:d
                                         KeyPermissions.restore],
                                   secrets=[SecretPermissions.all],
                                   certificates=[CertificatePermissions.all])
-        object_id = _get_current_user_object_id(graph_client)
-        if not object_id:
-            object_id = _get_object_id(graph_client, subscription=subscription)
+        object_id = _get_object_id(graph_client, subscription=subscription)
         if not object_id:
             raise CLIError('Cannot create vault.\n'
                            'Unable to query active directory for information '\
