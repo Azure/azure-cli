@@ -279,7 +279,7 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
         #          .format(rg, self.sql_server_name, self.database_name), checks=[
         #              JMESPathCheck('[0].resourceName', self.database_name)])
 
-        self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --storage {}'
+        self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --max-size {}'
                  ' --set tags.key1=value1'
                  .format(rg, self.sql_server_name, self.database_name,
                          self.update_service_objective, self.update_storage),
@@ -299,6 +299,141 @@ class SqlServerDbMgmtScenarioTest(ResourceGroupVCRTestBase):
                  ])
 
         self.cmd('sql db delete -g {} --server {} --name {}'
+                 .format(rg, self.sql_server_name, self.database_name),
+                 checks=[NoneCheck()])
+
+        # delete sql server
+        self.cmd('sql server delete -g {} --name {}'
+                 .format(rg, self.sql_server_name), checks=NoneCheck())
+
+
+class SqlServerDwMgmtScenarioTest(ResourceGroupVCRTestBase):
+    # pylint: disable=too-many-instance-attributes
+    def __init__(self, test_method):
+        super(SqlServerDwMgmtScenarioTest, self).__init__(
+            __file__, test_method, resource_group='cli-test-sql-mgmt')
+        self.sql_server_name = 'cliautomation24'
+        self.location_short_name = 'westus'
+        self.location_long_name = 'West US'
+        self.admin_login = 'admin123'
+        self.admin_password = 'SecretPassword123'
+        self.database_name = "cliautomationdb01"
+        self.database_copy_name = "cliautomationdb02"
+        self.update_service_objective = 'DW200'
+        self.storage_bytes = str(10 * 1024 * 1024 * 1024 * 1024)
+        self.update_storage = '20TB'
+        self.update_storage_bytes = str(20 * 1024 * 1024 * 1024 * 1024)
+
+    def test_sql_dw_mgmt(self):
+        self.execute()
+
+    def body(self):
+        rg = self.resource_group
+        loc_short = self.location_short_name
+        loc_long = self.location_long_name
+        user = self.admin_login
+        password = self.admin_password
+
+        # create sql server with minimal required parameters
+        self.cmd('sql server create -g {} --name {} -l "{}" '
+                 '--admin-user {} --admin-password {}'
+                 .format(rg, self.sql_server_name, loc_short, user, password),
+                 checks=[
+                     JMESPathCheck('name', self.sql_server_name),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('location', loc_long),
+                     JMESPathCheck('administratorLogin', user)])
+
+        # test sql db commands
+        self.cmd('sql dw create -g {} --server {} --name {}'
+                 .format(rg, self.sql_server_name, self.database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('location', loc_long),
+                     JMESPathCheck('edition', 'DataWarehouse'),
+                     JMESPathCheck('maxSizeBytes', self.storage_bytes),
+                     JMESPathCheck('status', 'Online')])
+
+        # DataWarehouse is a little quirky and is considered to be both a database and its
+        # separate own type of thing. (Why? Because it has the same REST endpoint as regular
+        # database, so it must be a database. However it has only a subset of supported operations,
+        # so to clarify which operations are supported by dw we group them under `sql dw`.) So the
+        # dw shows up under both `db list` and `dw list`.
+        self.cmd('sql db list -g {} --server {}'
+                 .format(rg, self.sql_server_name),
+                 checks=[
+                     JMESPathCheck('length(@)', 2),  # includes dw and master
+                     JMESPathCheck('[1].name', 'master'),
+                     JMESPathCheck('[1].resourceGroup', rg),
+                     JMESPathCheck('[0].name', self.database_name),
+                     JMESPathCheck('[0].resourceGroup', rg)])
+
+        self.cmd('sql dw list -g {} --server {}'
+                 .format(rg, self.sql_server_name),
+                 checks=[
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].name', self.database_name),
+                     JMESPathCheck('[0].resourceGroup', rg)])
+
+        self.cmd('sql db show -g {} --server {} --name {}'
+                 .format(rg, self.sql_server_name, self.database_name),
+                 checks=[
+                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('resourceGroup', rg)])
+
+        self.cmd('sql dw show -g {} --server {} --name {}'
+                 .format(rg, self.sql_server_name, self.database_name),
+                 checks=[
+                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('resourceGroup', rg)])
+
+        # pause/resume
+        self.cmd('sql dw pause -g {} --server {} --name {}'
+                 .format(rg, self.sql_server_name, self.database_name),
+                 checks=[NoneCheck()])
+
+        self.cmd('sql dw show -g {} --server {} --name {}'
+                 .format(rg, self.sql_server_name, self.database_name),
+                 checks=[
+                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('status', 'Paused')])
+
+        self.cmd('sql dw resume -g {} --server {} --name {}'
+                 .format(rg, self.sql_server_name, self.database_name),
+                 checks=[NoneCheck()])
+
+        self.cmd('sql dw show -g {} --server {} --name {}'
+                 .format(rg, self.sql_server_name, self.database_name),
+                 checks=[
+                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('status', 'Online')])
+
+        # Update DW storage
+        self.cmd('sql dw update -g {} -s {} -n {} --max-size {}'
+                 ' --set tags.key1=value1'
+                 .format(rg, self.sql_server_name, self.database_name, self.update_storage),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('maxSizeBytes', self.update_storage_bytes),
+                     JMESPathCheck('tags.key1', 'value1')])
+
+        # Update DW service objective
+        self.cmd('sql dw update -g {} -s {} -n {} --service-objective {}'
+                 .format(rg, self.sql_server_name, self.database_name,
+                         self.update_service_objective),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('requestedServiceObjectiveName', self.update_service_objective),
+                     JMESPathCheck('maxSizeBytes', self.update_storage_bytes),
+                     JMESPathCheck('tags.key1', 'value1')])
+
+        # Delete DW
+        self.cmd('sql dw delete -g {} --server {} --name {}'
                  .format(rg, self.sql_server_name, self.database_name),
                  checks=[NoneCheck()])
 
