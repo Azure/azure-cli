@@ -5,6 +5,7 @@
 
 import unittest
 import mock
+import os.path
 from six import StringIO
 
 from azure.cli.command_modules.resource._validators import validate_deployment_name
@@ -31,7 +32,7 @@ class Test_resource_validators(unittest.TestCase):
         namespace.template_uri = None
         namespace.deployment_name = None
         validate_deployment_name(namespace)
-        self.assertEqual('test_validators', namespace.deployment_name)
+        self.assertEqual(os.path.basename(__file__)[:-3], namespace.deployment_name)
 
         #verify use default if get a file content
         namespace = mock.MagicMock()
