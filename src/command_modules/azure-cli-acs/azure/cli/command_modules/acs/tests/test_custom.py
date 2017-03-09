@@ -17,6 +17,7 @@ from azure.cli.command_modules.acs.custom import (merge_kubernetes_configuration
                                                   _acs_browse_internal, _add_role_assignment)
 from azure.mgmt.compute.models import (ContainerServiceOchestratorTypes, ContainerService,
                                        ContainerServiceOrchestratorProfile)
+from azure.cli.core._util import CLIError
 
 
 class AcsCustomCommandTest(unittest.TestCase):
@@ -89,6 +90,37 @@ class AcsCustomCommandTest(unittest.TestCase):
             _acs_browse_internal(acs_info, 'resource-group', 'name', False, 'ssh/key/file')
             dcos_browse.assert_called_with(acs_info, False, 'ssh/key/file')
 
+    def test_merge_credentials_non_existent(self):
+        self.assertRaises(CLIError, merge_kubernetes_configurations, 'non', 'existent')
+
+    def test_merge_credentials_broken_yaml(self):
+        existing = tempfile.NamedTemporaryFile(delete=False)
+        existing.close()
+        addition = tempfile.NamedTemporaryFile(delete=False)
+        addition.close()
+        with open(existing.name, 'w+') as stream:
+            stream.write('{ broken')
+        self.addCleanup(os.remove, existing.name)
+
+        obj2 = {
+            'clusters': [
+                'cluster2'
+            ],
+            'contexts': [
+                'context2'
+            ],
+            'users': [
+                'user2'
+            ],
+            'current-context': 'cluster2',
+        }
+
+        with open(addition.name, 'w+') as stream:
+            yaml.dump(obj2, stream)
+        self.addCleanup(os.remove, addition.name)
+
+        self.assertRaises(CLIError, merge_kubernetes_configurations, existing.name, addition.name)
+
     def test_merge_credentials(self):
         existing = tempfile.NamedTemporaryFile(delete=False)
         existing.close()
@@ -103,6 +135,105 @@ class AcsCustomCommandTest(unittest.TestCase):
             ],
             'users': [
                 'user1'
+            ],
+            'current-context': 'cluster1',
+        }
+        with open(existing.name, 'w+') as stream:
+            yaml.dump(obj1, stream)
+        self.addCleanup(os.remove, existing.name)
+
+        obj2 = {
+            'clusters': [
+                'cluster2'
+            ],
+            'contexts': [
+                'context2'
+            ],
+            'users': [
+                'user2'
+            ],
+            'current-context': 'cluster2',
+        }
+
+        with open(addition.name, 'w+') as stream:
+            yaml.dump(obj2, stream)
+        self.addCleanup(os.remove, addition.name)
+
+        merge_kubernetes_configurations(existing.name, addition.name)
+
+        with open(existing.name, 'r') as stream:
+            merged = yaml.load(stream)
+        self.assertEqual(len(merged['clusters']), 2)
+        self.assertEqual(merged['clusters'], ['cluster1', 'cluster2'])
+        self.assertEqual(len(merged['contexts']), 2)
+        self.assertEqual(merged['contexts'], ['context1', 'context2'])
+        self.assertEqual(len(merged['users']), 2)
+        self.assertEqual(merged['users'], ['user1', 'user2'])
+        self.assertEqual(merged['current-context'], obj2['current-context'])
+
+    def test_merge_credentials_missing(self):
+        existing = tempfile.NamedTemporaryFile(delete=False)
+        existing.close()
+        addition = tempfile.NamedTemporaryFile(delete=False)
+        addition.close()
+        obj1 = {
+            'clusters': None,
+            'contexts': [
+                'context1'
+            ],
+            'users': [
+                'user1'
+            ],
+            'current-context': 'cluster1',
+        }
+        with open(existing.name, 'w+') as stream:
+            yaml.dump(obj1, stream)
+        self.addCleanup(os.remove, existing.name)
+
+        obj2 = {
+            'clusters': [
+                'cluster2'
+            ],
+            'contexts': [
+                'context2'
+            ],
+            'users': None,
+            'current-context': 'cluster2',
+        }
+
+        with open(addition.name, 'w+') as stream:
+            yaml.dump(obj2, stream)
+        self.addCleanup(os.remove, addition.name)
+
+        merge_kubernetes_configurations(existing.name, addition.name)
+
+        with open(existing.name, 'r') as stream:
+            merged = yaml.load(stream)
+        self.assertEqual(len(merged['clusters']), 1)
+        self.assertEqual(merged['clusters'], ['cluster2'])
+        self.assertEqual(len(merged['contexts']), 2)
+        self.assertEqual(merged['contexts'], ['context1', 'context2'])
+        self.assertEqual(len(merged['users']), 1)
+        self.assertEqual(merged['users'], ['user1'])
+        self.assertEqual(merged['current-context'], obj2['current-context'])
+
+    def test_merge_credentials_already_present(self):
+        existing = tempfile.NamedTemporaryFile(delete=False)
+        existing.close()
+        addition = tempfile.NamedTemporaryFile(delete=False)
+        addition.close()
+        obj1 = {
+            'clusters': [
+                'cluster1',
+                'cluster2'
+            ],
+            'contexts': [
+                'context1',
+                'context2'
+            ],
+            'users': [
+                'user1',
+                'user2'
             ],
             'current-context': 'cluster1',
         }
@@ -125,9 +256,12 @@ class AcsCustomCommandTest(unittest.TestCase):
         with open(addition.name, 'w+') as stream:
             yaml.dump(obj2, stream)
         merge_kubernetes_configurations(existing.name, addition.name)
+        self.addCleanup(os.remove, addition.name)
 
         with open(existing.name, 'r') as stream:
             merged = yaml.load(stream)
+        self.addCleanup(os.remove, existing.name)
+
         self.assertEqual(len(merged['clusters']), 2)
         self.assertEqual(merged['clusters'], ['cluster1', 'cluster2'])
         self.assertEqual(len(merged['contexts']), 2)
@@ -135,6 +269,3 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertEqual(len(merged['users']), 2)
         self.assertEqual(merged['users'], ['user1', 'user2'])
         self.assertEqual(merged['current-context'], obj2['current-context'])
-
-        os.remove(existing.name)
-        os.remove(addition.name)
