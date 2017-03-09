@@ -7,8 +7,7 @@ import datetime
 import os
 
 from azure.cli.core._util import CLIError
-from azure.cli.command_modules.batch.tests.test_batch_data_plane_command_base import (
-    BatchDataPlaneTestBase)
+from .test_batch_data_plane_command_base import (BatchDataPlaneTestBase)
 
 
 class BatchJobTest(BatchDataPlaneTestBase):
