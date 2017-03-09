@@ -8,7 +8,15 @@
 #pylint: disable=bad-continuation
 from __future__ import print_function
 
+try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
+
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck)
+
+def _mock_get_uuid_str():
+    return '00000000-0000-0000-0000-000000000000'
 
 #pylint: disable=too-many-instance-attributes
 class DataLakeAnalyticsCatalogScenarioTest(ResourceGroupVCRTestBase):
@@ -123,7 +131,7 @@ class DataLakeAnalyticsCatalogScenarioTest(ResourceGroupVCRTestBase):
 
         # credential crud
         # create a credential
-        self.cmd('datalake analytics catalog credential create -n {} --database-name {} --credential-name {} --credential-user-name {} --password {} --uri "http://adl.contoso.com:443"'.format(adla, self.db_name, self.cred_name, self.cred_user_name, self.cred_user_pwd))
+        self.cmd('datalake analytics catalog credential create -n {} --database-name {} --credential-name {} --user-name {} --password {} --uri "http://adl.contoso.com:443"'.format(adla, self.db_name, self.cred_name, self.cred_user_name, self.cred_user_pwd))
 
         # list credentials
         self.cmd('datalake analytics catalog credential list -n {} --database-name {}'.format(adla, self.db_name), checks=[
@@ -157,6 +165,11 @@ class DataLakeAnalyticsJobScenarioTest(ResourceGroupVCRTestBase):
 
     def set_up(self):
         super(DataLakeAnalyticsJobScenarioTest, self).set_up()
+
+    @mock.patch('azure.cli.command_modules.datalake.analytics.custom._get_uuid_str',
+                _mock_get_uuid_str)
+    def _execute_playback(self):
+        return super(DataLakeAnalyticsJobScenarioTest, self)._execute_playback()
 
     def body(self):
         rg = self.resource_group
