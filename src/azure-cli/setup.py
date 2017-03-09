@@ -54,6 +54,7 @@ DEPENDENCIES = [
     'azure-cli-core',
     'azure-cli-documentdb',
     'azure-cli-feedback',
+    'azure-cli-find',
     'azure-cli-iot',
     'azure-cli-keyvault',
     'azure-cli-network',
