@@ -46,6 +46,7 @@ register_cli_argument('appservice', 'resource_group_name', arg_type=resource_gro
 register_cli_argument('appservice', 'location', arg_type=location_type)
 
 register_cli_argument('appservice list-locations', 'linux_workers_enabled', action='store_true', help='get regions which support hosting webapps on Linux workers')
+register_cli_argument('appservice list-locations', 'sku', arg_type=sku_arg_type)
 register_cli_argument('appservice plan', 'name', arg_type=name_arg_type, help='The name of the app service plan', completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'), id_part='name')
 register_cli_argument('appservice plan create', 'name', options_list=('--name', '-n'), help="Name of the new app service plan", completer=None)
 register_cli_argument('appservice plan create', 'sku', arg_type=sku_arg_type)
@@ -60,6 +61,7 @@ register_cli_argument('appservice web', 'name', arg_type=name_arg_type, complete
 register_cli_argument('appservice web create', 'name', options_list=('--name', '-n'), help='name of the new webapp')
 register_cli_argument('appservice web create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                       help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
+register_cli_argument('appservice web browse', 'logs', options_list=('--logs', '-l'), action='store_true', help='Enable viewing the log stream immediately after launching the web app')
 
 register_cli_argument('appservice web deployment user', 'user_name', help='user name')
 register_cli_argument('appservice web deployment user', 'password', help='password, will prompt if not specified')

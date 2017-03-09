@@ -294,12 +294,10 @@ def config_source_control(resource_group_name, name, repo_url, repository_type=N
     source_control = SiteSourceControl(location, repo_url=repo_url, branch=branch,
                                        is_manual_integration=manual_integration,
                                        is_mercurial=(repository_type != 'git'))
-    result = _generic_site_operation(resource_group_name, name,
+    poller = _generic_site_operation(resource_group_name, name,
                                      'create_or_update_source_control',
                                      slot, source_control)
-    if not manual_integration:
-        sync_site_repo(resource_group_name, name, slot)
-    return result
+    return AppServiceLongRunningOperation()(poller)
 
 def update_git_token(git_token=None):
     '''
@@ -332,8 +330,18 @@ def enable_local_git(resource_group_name, name, slot=None):
     return {'url' : _get_local_git_url(client, resource_group_name, name, slot)}
 
 def sync_site_repo(resource_group_name, name, slot=None):
-    return _generic_site_operation(resource_group_name, name, 'sync_repository',
-                                   slot)
+    try:
+        return _generic_site_operation(resource_group_name, name, 'sync_repository', slot)
+    except CloudError as ex:
+        raise _extract_real_error(ex)
+
+# webapp service's error payload doesn't follow ARM's error format, so we had to sniff out
+def _extract_real_error(ex):
+    try:
+        err = json.loads(ex.response.text)
+        return CLIError(err['Message'])
+    except Exception:  # pylint: disable=broad-except
+        return ex
 
 def list_app_service_plans(resource_group_name=None):
     client = web_client_factory()
@@ -577,13 +585,18 @@ def set_deployment_user(user_name, password=None):
     result = client.update_publishing_user(user)
     return result
 
-def view_in_browser(resource_group_name, name, slot=None):
-    import webbrowser
+def view_in_browser(resource_group_name, name, slot=None, logs=False):
     site = _generic_site_operation(resource_group_name, name, 'get', slot)
     url = site.default_host_name
     ssl_host = next((h for h in site.host_name_ssl_states
                      if h.ssl_state != SslState.disabled), None)
     url = ('https' if ssl_host else 'http') + '://' + url
+    _open_page_in_browser(url)
+    if logs:
+        get_streaming_log(resource_group_name, name, provider=None, slot=slot)
+
+def _open_page_in_browser(url):
+    import webbrowser
     webbrowser.open(url, new=2) # 2 means: open in a new tab, if possible
 
 #TODO: expose new blob suport
