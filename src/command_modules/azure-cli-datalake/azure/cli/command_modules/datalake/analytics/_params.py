@@ -53,4 +53,4 @@ register_cli_argument('datalake analytics catalog credential create', 'credentia
 register_cli_argument('datalake analytics catalog credential create', 'credential_user_name', options_list=('--user-name',))
 register_cli_argument('datalake analytics catalog credential update', 'credential_user_name', options_list=('--user-name',))
 register_cli_argument('datalake analytics catalog credential update', 'credential_user_password', options_list=('--password', '-p'), help='Current password for the credential user. Will prompt if not given.')
-register_cli_argument('datalake analytics catalog credential update', 'new_credential_user_password', options_list=('--new-password'), help='New password for the credential user. Will prompt if not given.')
+register_cli_argument('datalake analytics catalog credential update', 'new_credential_user_password', options_list=('--new-password',), help='New password for the credential user. Will prompt if not given.')
