@@ -490,7 +490,7 @@ class WebappBackupRestoreScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, plan))
 
     def body(self):
-        sas_url = 'https://azureclistore.blob.core.windows.net/sitebackups?sv=2015-04-05&sr=c&sig=%2FjH1lEtbm3uFqtMI%2BfFYwgrntOs1qhGnpGv9uRibJ7A%3D&se=2017-02-14T04%3A53%3A28Z&sp=rwdl'
+        sas_url = 'https://azureclistore.blob.core.windows.net/sitebackups?sv=2015-04-05&sr=c&sig=PJpE6swgZ6oZNFTlUz0GOIl87KKdvvgX7Ap8YXKHRp8%3D&se=2017-03-10T23%3A40%3A24Z&sp=rwdl'
         db_conn_str = 'Server=tcp:cli-backup.database.windows.net,1433;Initial Catalog=cli-db;Persist Security Info=False;User ID=cliuser;Password=cli!password1;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
         database_name = 'cli-db'
         database_type = 'SqlAzure'
@@ -518,6 +518,6 @@ class WebappBackupRestoreScenarioTest(ResourceGroupVCRTestBase):
         import time
         time.sleep(300) # Allow plenty of time for a backup to finish -- database backup takes a while (skipped in playback)
 
-        self.cmd('appservice web config backup restore -g {} --webapp-name {} --container-url {} --backup-name {} --db-connection-string "{}" --db-name {} --db-type {} --ignore-hostname-conflict --overwrite'
+        self.cmd('appservice web config backup restore -g {} --webapp-name {} --container-url {} --backup-name {} --db-connection-string "{}" --db-name {} --db-type {} --ignore-hostname-conflict --overwrite --debug'
                  .format(self.resource_group, self.webapp_name, sas_url, backup_name, db_conn_str, database_name, database_type), checks=JMESPathCheck('name', self.webapp_name))
 
