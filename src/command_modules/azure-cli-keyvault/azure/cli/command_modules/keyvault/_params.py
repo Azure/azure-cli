@@ -97,15 +97,15 @@ register_cli_argument('keyvault', 'object_id', help='a GUID that identifies the 
 register_cli_argument('keyvault', 'spn', help='name of a service principal that will receive permissions')
 register_cli_argument('keyvault', 'upn', help='name of a user principal that will receive permissions')
 register_cli_argument('keyvault', 'tags', tags_type)
+register_cli_argument('keyvault', 'enabled_for_deployment', help='Allow Virtual Machines to retrieve certificates stored as secrets from the vault.', **three_state_flag())
+register_cli_argument('keyvault', 'enabled_for_disk_encryption', help='Allow Disk Encryption to retrieve secrets from the vault and unwrap keys.', **three_state_flag())
+register_cli_argument('keyvault', 'enabled_for_template_deployment', help='Allow Resource Manager to retrieve secrets from the vault.', **three_state_flag())
 
 register_cli_argument('keyvault create', 'resource_group_name', resource_group_name_type, required=True, completer=None, validator=None)
 register_cli_argument('keyvault create', 'vault_name', completer=None)
 register_cli_argument('keyvault create', 'sku', **enum_choice_list(SkuName))
 register_cli_argument('keyvault create', 'no_self_perms', help="Don't add permissions for the current user/service principal in the new vault", **three_state_flag())
 register_cli_argument('keyvault create', 'location', validator=get_default_location_from_resource_group)
-register_cli_argument('keyvault create', 'enabled_for_deployment', help='Allow Virtual Machines to retrieve certificates stored as secrets from the vault.', **three_state_flag())
-register_cli_argument('keyvault create', 'enabled_for_disk_encryption', help='Allow Disk Encryption to retrieve secrets from the vault and unwrap keys.', **three_state_flag())
-register_cli_argument('keyvault create', 'enabled_for_template_deployment', help='Allow Resource Manager to retrieve secrets from the vault.', **three_state_flag())
 
 register_cli_argument('keyvault list', 'resource_group_name', resource_group_name_type, validator=None)
 

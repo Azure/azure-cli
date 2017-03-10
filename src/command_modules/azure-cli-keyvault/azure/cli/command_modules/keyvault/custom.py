@@ -270,6 +270,30 @@ def create_keyvault(client, resource_group_name, vault_name, location=None, #pyl
 create_keyvault.__doc__ = VaultProperties.__doc__
 
 
+def update_keyvault_setter(client, parameters, resource_group_name, vault_name):
+    from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   vault_name=vault_name,
+                                   parameters=VaultCreateOrUpdateParameters(
+                                       location=parameters.location,
+                                       properties=parameters.properties))
+
+
+def update_keyvault(instance, enabled_for_deployment=None, enabled_for_disk_encryption=None,
+                    enabled_for_template_deployment=None):
+
+    if enabled_for_deployment is not None:
+        instance.properties.enabled_for_deployment = enabled_for_deployment
+
+    if enabled_for_disk_encryption is not None:
+        instance.properties.enabled_for_disk_encryption = enabled_for_disk_encryption
+
+    if enabled_for_template_deployment is not None:
+        instance.properties.enabled_for_template_deployment = enabled_for_template_deployment
+
+    return instance
+
+
 def _object_id_args_helper(object_id, spn, upn):
     if not object_id:
         from azure.cli.core._profile import Profile, CLOUD
