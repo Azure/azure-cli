@@ -202,6 +202,11 @@ def _scrub_deployment_name(uri):
     return re.sub('/deployments/([^/?]+)', '/deployments/mock-deployment', uri)
 
 
+def _scrub_service_principal_name(uri):
+    return re.sub('userPrincipalName%20eq%20%27(.+)%27',
+                  'userPrincipalName%20eq%20%27example%40example.com%27', uri)
+
+
 def _search_result_by_jmespath(json_data, query):
     if not json_data:
         json_data = '{}'
@@ -310,6 +315,7 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
                              '/graph.windows.net/{}/'.format(MOCKED_TENANT_ID), request.uri)
         request.uri = re.sub('/sig=([^/]+)&', '/sig=0000&', request.uri)
         request.uri = _scrub_deployment_name(request.uri)
+        request.uri = _scrub_service_principal_name(request.uri)
 
         # replace random storage account name with dummy name
         request.uri = re.sub(r'(vcrstorage[\d]+)', MOCKED_STORAGE_ACCOUNT, request.uri)
