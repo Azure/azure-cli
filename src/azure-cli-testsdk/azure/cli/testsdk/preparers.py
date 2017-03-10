@@ -154,7 +154,6 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
 
-
 # Utility
 
 def is_preparer_func(fn):
