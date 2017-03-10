@@ -92,8 +92,7 @@ Update a container registry
         --admin-enabled       : Indicates whether the admin user is enabled.
 		                        Allowed values: false, true.
         --resource-group -g   : Name of resource group.
-        --storage-account-name: Default: A new storage account will be created. 
-                                Provide the name of an existing storage account if
+        --storage-account-name: Provide the name of an existing storage account if
                                 you're recreating a container registry over a previous 
                                 registry created storage account.
         --tags                : Space separated tags in 'key[=value]' format. Use "" to clear existing
