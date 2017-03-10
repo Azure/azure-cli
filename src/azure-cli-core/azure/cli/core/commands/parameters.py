@@ -90,7 +90,7 @@ def get_generic_completion_list(generic_list):
     return completer
 
 
-class CaseInsenstiveList(list):  # pylint: disable=too-few-public-methods
+class CaseInsensitiveList(list):  # pylint: disable=too-few-public-methods
 
     def __contains__(self, other):
         return next((True for x in self if other.lower() == x.lower()), False)
@@ -107,8 +107,28 @@ def enum_choice_list(data):
     def _type(value):
         return next((x for x in choices if x.lower() == value.lower()), value) if value else value
     params = {
-        'choices': CaseInsenstiveList(choices),
+        'choices': CaseInsensitiveList(choices),
         'type': _type
+    }
+    return params
+
+def three_state_flag(none_default=True, use_enabled_disabled=False):
+
+    choices = ['enabled', 'disabled'] if use_enabled_disabled else ['true', 'false']
+    none_defaults_to = choices[0] if none_default else choices[1]  # default to enabled/true
+
+    class ThreeStateAction(argparse.Action):
+        def __init__(self, **kw):
+            super().__init__(**kw)    
+        def __call__(self, parser, namespace, values, option_string=None):
+            setattr(namespace, self.dest, values.lower() if values else none_defaults_to)
+            val = getattr(namespace, self.dest, None)
+            setattr(namespace, self.dest, val in ['true', 'enabled'])
+
+    params = {
+        'choices': CaseInsensitiveList(choices),
+        'nargs': '?',
+        'action': ThreeStateAction
     }
     return params
 

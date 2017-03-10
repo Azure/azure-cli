@@ -221,7 +221,7 @@ def create_keyvault(client, resource_group_name, vault_name, location=None, #pyl
                     enabled_for_deployment=None,
                     enabled_for_disk_encryption=None,
                     enabled_for_template_deployment=None,
-                    no_self_perms=False,
+                    no_self_perms=None,
                     tags=None):
     from azure.cli.core._profile import Profile, CLOUD
     profile = Profile()
