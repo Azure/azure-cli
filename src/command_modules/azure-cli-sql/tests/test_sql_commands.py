@@ -59,46 +59,44 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_sql_server_mgmt(self, resource_group, resource_group_location):
         servers = ['cliautomation51', 'cliautomation52']  # TODO: Server names should be randomized
-        self.admin_login = 'admin123'
-        self.admin_passwords = ['SecretPassword123', 'SecretPassword456']
+        admin_login = 'admin123'
+        admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
         rg = resource_group
         loc = resource_group_location
-        user = self.admin_login
-        password = self.admin_passwords[0]
-        password_updated = self.admin_passwords[1]
+        user = admin_login
 
         # test create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l {} '
                  '--admin-user {} --admin-password {}'
-                 .format(rg, servers[0], loc, user, password),
+                 .format(rg, servers[0], loc, user, admin_passwords[0]),
                  checks=[
                      JMESPathCheck('name', servers[0]),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('administratorLogin', user),
-                     JMESPathCheck('administratorLoginPassword', password)])
+                     JMESPathCheck('administratorLoginPassword', admin_passwords[0])])
 
         # test list sql server should be 1
         self.cmd('sql server list -g {}'.format(rg), checks=[JMESPathCheck('length(@)', 1)])
 
         # test update sql server
         self.cmd('sql server update -g {} --name {} --admin-password {}'
-                 .format(rg, servers[0], password_updated),
+                 .format(rg, servers[0], admin_passwords[1]),
                  checks=[
                      JMESPathCheck('name', servers[0]),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('administratorLogin', user),
-                     JMESPathCheck('administratorLoginPassword', password_updated)])
+                     JMESPathCheck('administratorLoginPassword', admin_passwords[1])])
 
         # test create another sql server
         self.cmd('sql server create -g {} --name {} -l {} '
                  '--admin-user {} --admin-password {}'
-                 .format(rg, servers[1], loc, user, password),
+                 .format(rg, servers[1], loc, user, admin_passwords[0]),
                  checks=[
                      JMESPathCheck('name', servers[1]),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('administratorLogin', user),
-                     JMESPathCheck('administratorLoginPassword', password)])
+                     JMESPathCheck('administratorLoginPassword', admin_passwords[0])])
 
         # test list sql server should be 2
         self.cmd('sql server list -g {}'.format(rg), checks=[JMESPathCheck('length(@)', 2)])
@@ -233,22 +231,21 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlServerPreparer()
     def test_sql_db_mgmt(self, resource_group, resource_group_location, server):
-        self.location_long_name = 'West US'
-        self.database_name = "cliautomationdb01"
-        self.database_copy_name = "cliautomationdb02"
-        self.update_service_objective = 'S1'
-        self.update_storage = '10GB'
-        self.update_storage_bytes = str(10 * 1024 * 1024 * 1024)
+        database_name = "cliautomationdb01"
+        database_copy_name = "cliautomationdb02"
+        update_service_objective = 'S1'
+        update_storage = '10GB'
+        update_storage_bytes = str(10 * 1024 * 1024 * 1024)
 
         rg = resource_group
-        loc_display = self.location_long_name
+        loc_display = 'West US'
 
         # test sql db commands
         self.cmd('sql db create -g {} --server {} --name {}'
-                 .format(rg, server, self.database_name),
+                 .format(rg, server, database_name),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('name', database_name),
                      JMESPathCheck('location', loc_display),
                      JMESPathCheck('elasticPoolName', None),
                      JMESPathCheck('status', 'Online')])
@@ -259,41 +256,41 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('length(@)', 2),
                      JMESPathCheck('[1].name', 'master'),
                      JMESPathCheck('[1].resourceGroup', rg),
-                     JMESPathCheck('[0].name', self.database_name),
+                     JMESPathCheck('[0].name', database_name),
                      JMESPathCheck('[0].resourceGroup', rg)])
 
         self.cmd('sql db show -g {} --server {} --name {}'
-                 .format(rg, server, self.database_name),
+                 .format(rg, server, database_name),
                  checks=[
-                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', rg)])
 
         # # Usages will not be included in the first batch of GA commands
         # self.cmd('sql db show-usage -g {} --server {} --name {}'
-        #          .format(rg, server, self.database_name), checks=[
-        #              JMESPathCheck('[0].resourceName', self.database_name)])
+        #          .format(rg, server, database_name), checks=[
+        #              JMESPathCheck('[0].resourceName', database_name)])
 
         self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --max-size {}'
                  ' --set tags.key1=value1'
-                 .format(rg, server, self.database_name,
-                         self.update_service_objective, self.update_storage),
+                 .format(rg, server, database_name,
+                         update_service_objective, update_storage),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('name', self.database_name),
-                     JMESPathCheck('requestedServiceObjectiveName', self.update_service_objective),
-                     JMESPathCheck('maxSizeBytes', self.update_storage_bytes),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('requestedServiceObjectiveName', update_service_objective),
+                     JMESPathCheck('maxSizeBytes', update_storage_bytes),
                      JMESPathCheck('tags.key1', 'value1')])
 
         self.cmd('sql db copy -g {} --server {} --name {} '
                  '--dest-name {}'
-                 .format(rg, server, self.database_name, self.database_copy_name),
+                 .format(rg, server, database_name, database_copy_name),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('name', self.database_copy_name)
+                     JMESPathCheck('name', database_copy_name)
                  ])
 
         self.cmd('sql db delete -g {} --server {} --name {}'
-                 .format(rg, server, self.database_name),
+                 .format(rg, server, database_name),
                  checks=[NoneCheck()])
 
 
@@ -364,26 +361,24 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlServerPreparer()
     def test_sql_dw_mgmt(self, resource_group, resource_group_location, server):
-        self.location_long_name = 'West US'
-        self.database_name = "cliautomationdb01"
-        self.database_copy_name = "cliautomationdb02"
-        self.update_service_objective = 'DW200'
-        self.storage_bytes = str(10 * 1024 * 1024 * 1024 * 1024)
-        self.update_storage = '20TB'
-        self.update_storage_bytes = str(20 * 1024 * 1024 * 1024 * 1024)
+        database_name = "cliautomationdb01"
+        update_service_objective = 'DW200'
+        storage_bytes = str(10 * 1024 * 1024 * 1024 * 1024)
+        update_storage = '20TB'
+        update_storage_bytes = str(20 * 1024 * 1024 * 1024 * 1024)
 
         rg = resource_group
-        loc_display = self.location_long_name
+        loc_display = 'West US'
 
         # test sql db commands
         self.cmd('sql dw create -g {} --server {} --name {}'
-                 .format(rg, server, self.database_name),
+                 .format(rg, server, database_name),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('name', database_name),
                      JMESPathCheck('location', loc_display),
                      JMESPathCheck('edition', 'DataWarehouse'),
-                     JMESPathCheck('maxSizeBytes', self.storage_bytes),
+                     JMESPathCheck('maxSizeBytes', storage_bytes),
                      JMESPathCheck('status', 'Online')])
 
         # DataWarehouse is a little quirky and is considered to be both a database and its
@@ -397,98 +392,99 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('length(@)', 2),  # includes dw and master
                      JMESPathCheck('[1].name', 'master'),
                      JMESPathCheck('[1].resourceGroup', rg),
-                     JMESPathCheck('[0].name', self.database_name),
+                     JMESPathCheck('[0].name', database_name),
                      JMESPathCheck('[0].resourceGroup', rg)])
 
         self.cmd('sql dw list -g {} --server {}'
                  .format(rg, server),
                  checks=[
                      JMESPathCheck('length(@)', 1),
-                     JMESPathCheck('[0].name', self.database_name),
+                     JMESPathCheck('[0].name', database_name),
                      JMESPathCheck('[0].resourceGroup', rg)])
 
         self.cmd('sql db show -g {} --server {} --name {}'
-                 .format(rg, server, self.database_name),
+                 .format(rg, server, database_name),
                  checks=[
-                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', rg)])
 
         self.cmd('sql dw show -g {} --server {} --name {}'
-                 .format(rg, server, self.database_name),
+                 .format(rg, server, database_name),
                  checks=[
-                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', rg)])
 
         # pause/resume
         self.cmd('sql dw pause -g {} --server {} --name {}'
-                 .format(rg, server, self.database_name),
+                 .format(rg, server, database_name),
                  checks=[NoneCheck()])
 
         self.cmd('sql dw show -g {} --server {} --name {}'
-                 .format(rg, server, self.database_name),
+                 .format(rg, server, database_name),
                  checks=[
-                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('status', 'Paused')])
 
         self.cmd('sql dw resume -g {} --server {} --name {}'
-                 .format(rg, server, self.database_name),
+                 .format(rg, server, database_name),
                  checks=[NoneCheck()])
 
         self.cmd('sql dw show -g {} --server {} --name {}'
-                 .format(rg, server, self.database_name),
+                 .format(rg, server, database_name),
                  checks=[
-                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('status', 'Online')])
 
         # Update DW storage
         self.cmd('sql dw update -g {} -s {} -n {} --max-size {}'
                  ' --set tags.key1=value1'
-                 .format(rg, server, self.database_name, self.update_storage),
+                 .format(rg, server, database_name, update_storage),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('name', self.database_name),
-                     JMESPathCheck('maxSizeBytes', self.update_storage_bytes),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('maxSizeBytes', update_storage_bytes),
                      JMESPathCheck('tags.key1', 'value1')])
 
         # Update DW service objective
         self.cmd('sql dw update -g {} -s {} -n {} --service-objective {}'
-                 .format(rg, server, self.database_name,
-                         self.update_service_objective),
+                 .format(rg, server, database_name,
+                         update_service_objective),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('name', self.database_name),
-                     JMESPathCheck('requestedServiceObjectiveName', self.update_service_objective),
-                     JMESPathCheck('maxSizeBytes', self.update_storage_bytes),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('requestedServiceObjectiveName', update_service_objective),
+                     JMESPathCheck('maxSizeBytes', update_storage_bytes),
                      JMESPathCheck('tags.key1', 'value1')])
 
         # Delete DW
         self.cmd('sql dw delete -g {} --server {} --name {}'
-                 .format(rg, server, self.database_name),
+                 .format(rg, server, database_name),
                  checks=[NoneCheck()])
 
 
 class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
 
     # create 2 servers in the same resource group, and 1 server in a different resource group
+    # pylint: disable=too-many-arguments
     @ResourceGroupPreparer(parameter_name="resource_group_1",
                            parameter_name_for_location="resource_group_location_1")
     @ResourceGroupPreparer(parameter_name="resource_group_2",
                            parameter_name_for_location="resource_group_location_2")
-    @SqlServerPreparer(parameter_name="server_name_1", 
+    @SqlServerPreparer(parameter_name="server_name_1",
                        resource_group_parameter_name="resource_group_1")
     @SqlServerPreparer(parameter_name="server_name_2",
                        resource_group_parameter_name="resource_group_1")
     @SqlServerPreparer(parameter_name="server_name_3",
                        resource_group_parameter_name="resource_group_2")
-    def test_sql_db_replica_mgmt(self, 
+    def test_sql_db_replica_mgmt(self,
                                  resource_group_1, resource_group_location_1,
                                  resource_group_2, resource_group_location_2,
                                  server_name_1, server_name_2, server_name_3):
 
-        self.database_name = "cliautomationdb01"
-        self.service_objective = 'S1'
+        database_name = "cliautomationdb01"
+        service_objective = 'S1'
 
         # helper class so that it's clear which servers are in which groups
         class ServerInfo(object):  # pylint: disable=too-few-public-methods
@@ -511,53 +507,53 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
 
         # create db in first server
         self.cmd('sql db create -g {} -s {} -n {}'
-                 .format(s1.group, s1.name, self.database_name),
+                 .format(s1.group, s1.name, database_name),
                  checks=[
-                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', s1.group)])
 
         # create replica in second server with min params
         # partner resouce group unspecified because s1.group == s2.group
         self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
-                 .format(s1.group, s1.name, self.database_name,
+                 .format(s1.group, s1.name, database_name,
                          s2.name),
                  checks=[
-                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', s2.group)])
 
         # check that the replica was created in the correct server
         self.cmd('sql db show -g {} -s {} -n {}'
-                 .format(s2.group, s2.name, self.database_name),
+                 .format(s2.group, s2.name, database_name),
                  checks=[
-                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', s2.group)])
 
         # create replica in third server with max params
         # --elastic-pool is untested
         self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
                  ' --partner-resource-group {} --service-objective {}'
-                 .format(s1.group, s1.name, self.database_name,
-                         s3.name, s3.group, self.service_objective),
+                 .format(s1.group, s1.name, database_name,
+                         s3.name, s3.group, service_objective),
                  checks=[
-                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', s3.group),
-                     JMESPathCheck('requestedServiceObjectiveName', self.service_objective)])
+                     JMESPathCheck('requestedServiceObjectiveName', service_objective)])
 
         # check that the replica was created in the correct server
         self.cmd('sql db show -g {} -s {} -n {}'
-                 .format(s3.group, s3.name, self.database_name),
+                 .format(s3.group, s3.name, database_name),
                  checks=[
-                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', s3.group)])
 
         # list replica links on s1 - it should link to s2 and s3
         self.cmd('sql db replica list-links -g {} -s {} -n {}'
-                 .format(s1.group, s1.name, self.database_name),
+                 .format(s1.group, s1.name, database_name),
                  checks=[JMESPathCheck('length(@)', 2)])
 
         # list replica links on s3 - it should link only to s1
         self.cmd('sql db replica list-links -g {} -s {} -n {}'
-                 .format(s3.group, s3.name, self.database_name),
+                 .format(s3.group, s3.name, database_name),
                  checks=[
                      JMESPathCheck('length(@)', 1),
                      JMESPathCheck('[0].role', 'Secondary'),
@@ -565,12 +561,12 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
 
         # Failover to s3.
         self.cmd('sql db replica set-primary -g {} -s {} -n {}'
-                 .format(s3.group, s3.name, self.database_name),
+                 .format(s3.group, s3.name, database_name),
                  checks=[NoneCheck()])
 
         # list replica links on s3 - it should link to s1 and s2
         self.cmd('sql db replica list-links -g {} -s {} -n {}'
-                 .format(s3.group, s3.name, self.database_name),
+                 .format(s3.group, s3.name, database_name),
                  checks=[JMESPathCheck('length(@)', 2)])
 
         # Stop replication from s3 to s2 twice. Second time should be no-op.
@@ -578,12 +574,12 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
             # Delete link
             self.cmd('sql db replica delete-link -g {} -s {} -n {} --partner-resource-group {}'
                      ' --partner-server {}'
-                     .format(s3.group, s3.name, self.database_name, s2.group, s2.name),
+                     .format(s3.group, s3.name, database_name, s2.group, s2.name),
                      checks=[NoneCheck()])
 
             # Verify link was deleted. s3 should still be the primary.
             self.cmd('sql db replica list-links -g {} -s {} -n {}'
-                     .format(s3.group, s3.name, self.database_name),
+                     .format(s3.group, s3.name, database_name),
                      checks=[
                          JMESPathCheck('length(@)', 1),
                          JMESPathCheck('[0].role', 'Primary'),
@@ -591,12 +587,12 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
 
         # Failover to s3 again (should be no-op, it's already primary)
         self.cmd('sql db replica set-primary -g {} -s {} -n {} --allow-data-loss'
-                 .format(s3.group, s3.name, self.database_name),
+                 .format(s3.group, s3.name, database_name),
                  checks=[NoneCheck()])
 
         # s3 should still be the primary.
         self.cmd('sql db replica list-links -g {} -s {} -n {}'
-                 .format(s3.group, s3.name, self.database_name),
+                 .format(s3.group, s3.name, database_name),
                  checks=[
                      JMESPathCheck('length(@)', 1),
                      JMESPathCheck('[0].role', 'Primary'),
@@ -604,11 +600,15 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
 
         # Force failover back to s1
         self.cmd('sql db replica set-primary -g {} -s {} -n {} --allow-data-loss'
-                 .format(s1.group, s1.name, self.database_name),
+                 .format(s1.group, s1.name, database_name),
                  checks=[NoneCheck()])
 
 
 class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
+    def __init__(self, method_name):
+        super(SqlElasticPoolsMgmtScenarioTest, self).__init__(method_name)
+        self.pool_name = "cliautomationpool01"
+
     def verify_activities(self, activities, resource_group, server):
         if isinstance(activities, list.__class__):
             raise AssertionError("Actual value '{}' expected to be list class."
@@ -632,45 +632,43 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlServerPreparer()
     def test_sql_elastic_pools_mgmt(self, resource_group, resource_group_location, server):
-        self.location_long_name = 'West US'
-        self.database_name = "cliautomationdb02"
-        self.pool_name = "cliautomationpool01"
-        self.pool_name2 = "cliautomationpool02"
-        self.edition = 'Standard'
+        database_name = "cliautomationdb02"
+        pool_name2 = "cliautomationpool02"
+        edition = 'Standard'
 
-        self.dtu = 1200
-        self.db_dtu_min = 10
-        self.db_dtu_max = 50
-        self.storage = '1200GB'
-        self.storage_mb = 1228800
+        dtu = 1200
+        db_dtu_min = 10
+        db_dtu_max = 50
+        storage = '1200GB'
+        storage_mb = 1228800
 
-        self.updated_dtu = 50
-        self.updated_db_dtu_min = 10
-        self.updated_db_dtu_max = 50
-        self.updated_storage = '50GB'
-        self.updated_storage_mb = 51200
+        updated_dtu = 50
+        updated_db_dtu_min = 10
+        updated_db_dtu_max = 50
+        updated_storage = '50GB'
+        updated_storage_mb = 51200
 
-        self.db_service_objective = 'S1'
+        db_service_objective = 'S1'
 
         rg = resource_group
-        loc_display = self.location_long_name
+        loc_display = 'West US'
 
         # test sql elastic-pool commands
         self.cmd('sql elastic-pool create -g {} --server {} --name {} '
                  '--dtu {} --edition {} --db-dtu-min {} --db-dtu-max {} '
                  '--storage {}'
-                 .format(rg, server, self.pool_name, self.dtu,
-                         self.edition, self.db_dtu_min, self.db_dtu_max, self.storage),
+                 .format(rg, server, self.pool_name, dtu,
+                         edition, db_dtu_min, db_dtu_max, storage),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
                      JMESPathCheck('location', loc_display),
                      JMESPathCheck('state', 'Ready'),
-                     JMESPathCheck('dtu', self.dtu),
-                     JMESPathCheck('databaseDtuMin', self.db_dtu_min),
-                     JMESPathCheck('databaseDtuMax', self.db_dtu_max),
-                     JMESPathCheck('edition', self.edition),
-                     JMESPathCheck('storageMb', self.storage_mb)])
+                     JMESPathCheck('dtu', dtu),
+                     JMESPathCheck('databaseDtuMin', db_dtu_min),
+                     JMESPathCheck('databaseDtuMax', db_dtu_max),
+                     JMESPathCheck('edition', edition),
+                     JMESPathCheck('storageMb', storage_mb)])
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
                  .format(rg, server, self.pool_name),
@@ -678,10 +676,10 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
                      JMESPathCheck('state', 'Ready'),
-                     JMESPathCheck('databaseDtuMin', self.db_dtu_min),
-                     JMESPathCheck('databaseDtuMax', self.db_dtu_max),
-                     JMESPathCheck('edition', self.edition),
-                     JMESPathCheck('storageMb', self.storage_mb)])
+                     JMESPathCheck('databaseDtuMin', db_dtu_min),
+                     JMESPathCheck('databaseDtuMax', db_dtu_max),
+                     JMESPathCheck('edition', edition),
+                     JMESPathCheck('storageMb', storage_mb)])
 
         self.cmd('sql elastic-pool list -g {} --server {}'
                  .format(rg, server),
@@ -689,39 +687,39 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('[0].resourceGroup', rg),
                      JMESPathCheck('[0].name', self.pool_name),
                      JMESPathCheck('[0].state', 'Ready'),
-                     JMESPathCheck('[0].databaseDtuMin', self.db_dtu_min),
-                     JMESPathCheck('[0].databaseDtuMax', self.db_dtu_max),
-                     JMESPathCheck('[0].edition', self.edition),
-                     JMESPathCheck('[0].storageMb', self.storage_mb)])
+                     JMESPathCheck('[0].databaseDtuMin', db_dtu_min),
+                     JMESPathCheck('[0].databaseDtuMax', db_dtu_max),
+                     JMESPathCheck('[0].edition', edition),
+                     JMESPathCheck('[0].storageMb', storage_mb)])
 
         self.cmd('sql elastic-pool update -g {} --server {} --name {} '
                  '--dtu {} --storage {} --set tags.key1=value1'
                  .format(rg, server, self.pool_name,
-                         self.updated_dtu, self.updated_storage),
+                         updated_dtu, updated_storage),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
                      JMESPathCheck('state', 'Ready'),
-                     JMESPathCheck('dtu', self.updated_dtu),
-                     JMESPathCheck('edition', self.edition),
-                     JMESPathCheck('databaseDtuMin', self.db_dtu_min),
-                     JMESPathCheck('databaseDtuMax', self.db_dtu_max),
-                     JMESPathCheck('storageMb', self.updated_storage_mb),
+                     JMESPathCheck('dtu', updated_dtu),
+                     JMESPathCheck('edition', edition),
+                     JMESPathCheck('databaseDtuMin', db_dtu_min),
+                     JMESPathCheck('databaseDtuMax', db_dtu_max),
+                     JMESPathCheck('storageMb', updated_storage_mb),
                      JMESPathCheck('tags.key1', 'value1')])
 
         self.cmd('sql elastic-pool update -g {} --server {} --name {} '
                  '--dtu {} --db-dtu-min {} --db-dtu-max {} --storage {}'
-                 .format(rg, server, self.pool_name, self.dtu,
-                         self.updated_db_dtu_min, self.updated_db_dtu_max,
-                         self.storage),
+                 .format(rg, server, self.pool_name, dtu,
+                         updated_db_dtu_min, updated_db_dtu_max,
+                         storage),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
                      JMESPathCheck('state', 'Ready'),
-                     JMESPathCheck('dtu', self.dtu),
-                     JMESPathCheck('databaseDtuMin', self.updated_db_dtu_min),
-                     JMESPathCheck('databaseDtuMax', self.updated_db_dtu_max),
-                     JMESPathCheck('storageMb', self.storage_mb),
+                     JMESPathCheck('dtu', dtu),
+                     JMESPathCheck('databaseDtuMin', updated_db_dtu_min),
+                     JMESPathCheck('databaseDtuMax', updated_db_dtu_max),
+                     JMESPathCheck('storageMb', storage_mb),
                      JMESPathCheck('tags.key1', 'value1')])
 
         self.cmd('sql elastic-pool update -g {} --server {} --name {} '
@@ -735,10 +733,10 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
 
         # create a second pool with minimal params
         self.cmd('sql elastic-pool create -g {} --server {} --name {} '
-                 .format(rg, server, self.pool_name2),
+                 .format(rg, server, pool_name2),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('name', self.pool_name2),
+                     JMESPathCheck('name', pool_name2),
                      JMESPathCheck('location', loc_display),
                      JMESPathCheck('state', 'Ready')])
 
@@ -748,10 +746,10 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
         # Create a database directly in an Azure sql elastic pool
         self.cmd('sql db create -g {} --server {} --name {} '
                  '--elastic-pool {}'
-                 .format(rg, server, self.database_name, self.pool_name),
+                 .format(rg, server, database_name, self.pool_name),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('name', database_name),
                      JMESPathCheck('elasticPoolName', self.pool_name),
                      JMESPathCheck('requestedServiceObjectiveName', 'ElasticPool'),
                      JMESPathCheck('status', 'Online')])
@@ -759,31 +757,31 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
         # Move database to second pool. Specify service objective just for fun
         self.cmd('sql db update -g {} -s {} -n {} --elastic-pool {}'
                  ' --service-objective ElasticPool'
-                 .format(rg, server, self.database_name, self.pool_name2),
+                 .format(rg, server, database_name, pool_name2),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('name', self.database_name),
-                     JMESPathCheck('elasticPoolName', self.pool_name2),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('elasticPoolName', pool_name2),
                      JMESPathCheck('requestedServiceObjectiveName', 'ElasticPool'),
                      JMESPathCheck('status', 'Online')])
 
         # Remove database from pool
         self.cmd('sql db update -g {} -s {} -n {} --service-objective {}'
-                 .format(rg, server, self.database_name, self.db_service_objective),
+                 .format(rg, server, database_name, db_service_objective),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('name', database_name),
                      JMESPathCheck('elasticPoolName', None),
-                     JMESPathCheck('requestedServiceObjectiveName', self.db_service_objective),
+                     JMESPathCheck('requestedServiceObjectiveName', db_service_objective),
                      JMESPathCheck('status', 'Online')])
 
         # Move database back into pool
         self.cmd('sql db update -g {} -s {} -n {} --elastic-pool {}'
                  ' --service-objective ElasticPool'
-                 .format(rg, server, self.database_name, self.pool_name),
+                 .format(rg, server, database_name, self.pool_name),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('name', self.database_name),
+                     JMESPathCheck('name', database_name),
                      JMESPathCheck('elasticPoolName', self.pool_name),
                      JMESPathCheck('requestedServiceObjectiveName', 'ElasticPool'),
                      JMESPathCheck('status', 'Online')])
@@ -794,7 +792,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('length(@)', 1),
                      JMESPathCheck('[0].resourceGroup', rg),
-                     JMESPathCheck('[0].name', self.database_name),
+                     JMESPathCheck('[0].name', database_name),
                      JMESPathCheck('[0].elasticPoolName', self.pool_name)])
 
         # List databases in a pool - alternative command
@@ -803,26 +801,26 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('length(@)', 1),
                      JMESPathCheck('[0].resourceGroup', rg),
-                     JMESPathCheck('[0].name', self.database_name),
+                     JMESPathCheck('[0].name', database_name),
                      JMESPathCheck('[0].elasticPoolName', self.pool_name)])
 
         # self.cmd('sql elastic-pool db show-activity -g {} --server {} --elastic-pool {}'
-        #          .format(rg, server, self.pool_name),
+        #          .format(rg, server, pool_name),
         #          checks=[
         #              JMESPathCheck('length(@)', 1),
         #              JMESPathCheck('[0].resourceGroup', rg),
         #              JMESPathCheck('[0].serverName', server),
-        #              JMESPathCheck('[0].currentElasticPoolName', self.pool_name)])
+        #              JMESPathCheck('[0].currentElasticPoolName', pool_name)])
 
         # activities = self.cmd('sql elastic-pools db show-activity -g {} '
         #                       '--server-name {} --elastic-pool-name {}'
-        #                       .format(rg, server, self.pool_name),
+        #                       .format(rg, server, pool_name),
         #                       checks=[JMESPathCheck('type(@)', 'array')])
         # self.verify_activities(activities, resource_group)
 
         # delete sql server database
         self.cmd('sql db delete -g {} --server {} --name {}'
-                 .format(rg, server, self.database_name),
+                 .format(rg, server, database_name),
                  checks=[NoneCheck()])
 
         # delete sql elastic pool
