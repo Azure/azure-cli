@@ -99,7 +99,7 @@ class Profile(object):
         factory = auth_ctx_factory or _AUTH_CTX_FACTORY
         self._creds_cache = CredsCache(factory)
         self._subscription_finder = SubscriptionFinder(factory, self._creds_cache.adal_token_cache)
-        self._management_resource_uri = CLOUD.endpoints.management
+        self._ad_resource_uri = CLOUD.endpoints.active_directory_resource_id
 
     def find_subscriptions_on_login(self,  # pylint: disable=too-many-arguments
                                     interactive,
@@ -112,17 +112,17 @@ class Profile(object):
         subscriptions = []
         if interactive:
             subscriptions = self._subscription_finder.find_through_interactive_flow(
-                tenant, self._management_resource_uri)
+                tenant, self._ad_resource_uri)
         else:
             if is_service_principal:
                 if not tenant:
                     raise CLIError('Please supply tenant using "--tenant"')
                 sp_auth = ServicePrincipalAuth(password)
                 subscriptions = self._subscription_finder.find_from_service_principal_id(
-                    username, sp_auth, tenant, self._management_resource_uri)
+                    username, sp_auth, tenant, self._ad_resource_uri)
             else:
                 subscriptions = self._subscription_finder.find_from_user_account(
-                    username, password, tenant, self._management_resource_uri)
+                    username, password, tenant, self._ad_resource_uri)
 
         if not subscriptions:
             raise CLIError('No subscriptions found for this account.')
@@ -251,7 +251,7 @@ class Profile(object):
             raise CLIError("Please run 'az account set' to select active account.")
         return result[0]
 
-    def get_login_credentials(self, resource=CLOUD.endpoints.management,
+    def get_login_credentials(self, resource=CLOUD.endpoints.active_directory_resource_id,
                               subscription_id=None):
         account = self.get_subscription(subscription_id)
         user_type = account[_USER_ENTITY][_USER_TYPE]
