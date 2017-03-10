@@ -23,10 +23,6 @@ helps['sql db create'] = """
             type: command
             short-summary: Creates a database.
             """
-helps['sql db create-replica'] = """
-            type: command
-            short-summary: Creates a readable secondary replica of an existing database.
-            """
 helps['sql db delete'] = """
             type: command
             short-summary: Deletes a database or data warehouse.
@@ -43,9 +39,25 @@ helps['sql db update'] = """
             type: command
             short-summary: Updates a database.
             """
-helps['sql db replica-link'] = """
+helps['sql db replica'] = """
             type: group
-            short-summary: Manage links between database replicas.
+            short-summary: Manage replication between databases.
+            """
+helps['sql db replica create'] = """
+            type: command
+            short-summary: Creates a database as a readable secondary replica of an existing database.
+            """
+helps['sql db replica set-primary'] = """
+            type: command
+            short-summary: Sets which replica database is primary by failing over from the current primary replica database.
+            """
+helps['sql db replica list-links'] = """
+            type: command
+            short-summary: Lists the replicas of a database and corresponding replication status.
+            """
+helps['sql db replica delete-link'] = """
+            type: command
+            short-summary: Permanently stops data replication between two database replicas.
             """
 helps['sql db restore'] = """
             type: command
