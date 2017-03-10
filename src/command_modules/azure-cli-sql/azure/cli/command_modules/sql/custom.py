@@ -11,7 +11,11 @@ from ._util import (
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core._util import CLIError
 from azure.mgmt.sql.models.sql_management_client_enums import (
-    DatabaseEditions, ServiceObjectiveName)
+    CreateMode,
+    DatabaseEditions,
+    ReplicationRole,
+    ServiceObjectiveName,
+)
 
 ###############################################
 #                Common funcs                 #
@@ -137,28 +141,28 @@ def db_copy(  # pylint: disable=too-many-arguments
         kwargs)
 
 
-# Copies a secondary replica. Wrapper function to make create mode more convenient.
+# Copies a replica. Wrapper function to make create mode more convenient.
 def db_create_replica(  # pylint: disable=too-many-arguments
         client,
         database_name,
         server_name,
         resource_group_name,
         # Replica must have the same database name as the source db
-        secondary_server_name,
-        secondary_resource_group_name=None,
+        partner_server_name,
+        partner_resource_group_name=None,
         **kwargs):
 
     # Determine optional values
-    secondary_resource_group_name = secondary_resource_group_name or resource_group_name
+    partner_resource_group_name = partner_resource_group_name or resource_group_name
 
     # Set create mode
-    kwargs['create_mode'] = 'OnlineSecondary'
+    kwargs['create_mode'] = CreateMode.online_secondary.value
 
     # Replica must have the same database name as the source db
     return _db_create_special(
         client,
         DatabaseIdentity(database_name, server_name, resource_group_name),
-        DatabaseIdentity(database_name, secondary_server_name, secondary_resource_group_name),
+        DatabaseIdentity(database_name, partner_server_name, partner_resource_group_name),
         kwargs)
 
 
@@ -183,6 +187,77 @@ def db_restore(  # pylint: disable=too-many-arguments
         # Cross-server restore is not supported. So dest server/group must be the same as source.
         DatabaseIdentity(dest_name, server_name, resource_group_name),
         kwargs)
+
+
+# Fails over a database. Wrapper function which uses the server location so that the user doesn't
+# need to specify replication link id.
+def db_failover(
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        allow_data_loss=False):
+
+    # List replication links
+    links = list(client.list_replication_links(
+        database_name=database_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name))
+
+    if len(links) == 0:
+        raise CLIError('The specified database has no replication links.')
+
+    # If a replica is primary, then it has 1 or more links (to its secondaries).
+    # If a replica is secondary, then it has exactly 1 link (to its primary).
+    primary_link = next((l for l in links if l.partner_role == ReplicationRole.primary), None)
+    if not primary_link:
+        # No link to a primary, so this must already be a primary. Do nothing.
+        return
+
+    # Choose which failover method to use
+    if allow_data_loss:
+        failover_func = client.failover_replication_link_allow_data_loss
+    else:
+        failover_func = client.failover_replication_link
+
+    # Execute failover from the primary to this database
+    return failover_func(
+        database_name=database_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        link_id=primary_link.name)
+
+
+def db_delete_replica_link(  # pylint: disable=too-many-arguments
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        # Partner dbs must have the same name as one another
+        partner_server_name,
+        partner_resource_group_name=None):
+
+    # Determine optional values
+    partner_resource_group_name = partner_resource_group_name or resource_group_name
+
+    # Find the replication link
+    links = list(client.list_replication_links(
+        database_name=database_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name))
+
+    # The link doesn't tell us the partner resource group name, so we just have to count on
+    # partner server name being unique
+    link = next((l for l in links if l.partner_server == partner_server_name), None)
+    if not link:
+        # No link exists, nothing to be done
+        return
+
+    return client.delete_replication_link(
+        database_name=database_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        link_id=link.name)
 
 
 # Lists databases in a server or elastic pool.
