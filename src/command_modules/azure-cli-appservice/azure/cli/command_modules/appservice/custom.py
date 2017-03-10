@@ -62,13 +62,13 @@ class AppServiceLongRunningOperation(LongRunningOperation): #pylint: disable=too
         except: #pylint: disable=bare-except
             return ex
 
-def create_webapp(resource_group_name, new_webapp_name, plan):
+def create_webapp(resource_group_name, name, plan):
     client = web_client_factory()
     if is_valid_resource_id(plan):
         plan = parse_resource_id(plan)['name']
     location = _get_location_from_app_service_plan(client, resource_group_name, plan)
     webapp_def = Site(server_farm_id=plan, location=location)
-    poller = client.web_apps.create_or_update(resource_group_name, new_webapp_name, webapp_def)
+    poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
     return AppServiceLongRunningOperation()(poller)
 
 def show_webapp(resource_group_name, name, slot=None):

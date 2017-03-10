@@ -45,8 +45,6 @@ sku_arg_type = CliArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Share
 register_cli_argument('appservice', 'resource_group_name', arg_type=resource_group_name_type)
 register_cli_argument('appservice', 'location', arg_type=location_type)
 
-register_cli_argument('appservice set-defaults', 'clear_all', action='store_true')
-
 register_cli_argument('appservice list-locations', 'linux_workers_enabled', action='store_true', help='get regions which support hosting webapps on Linux workers')
 register_cli_argument('appservice plan', 'name', arg_type=name_arg_type, help='The name of the app service plan', completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'), id_part='name')
 register_cli_argument('appservice plan create', 'name', options_list=('--name', '-n'), help="Name of the new app service plan")
@@ -58,10 +56,10 @@ register_cli_argument('appservice plan', 'number_of_workers', help='Number of wo
 register_cli_argument('appservice plan', 'admin_site_name', help='The name of the admin web app.')
 
 register_cli_argument('appservice web', 'slot', options_list=('--slot', '-s'), help="the name of the slot. Default to the productions slot if not specified")
-register_cli_argument('appservice web', 'name', configured_default='appservice/webapp',
+register_cli_argument('appservice web', 'name', configured_default='appservice/webname',
                       arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
-                      help="name of the web. You can configure the default web using 'az configure --section appservice --name default_webapp_name'")
-register_cli_argument('appservice web create', 'new_webapp_name', options_list=('--name', '-n'), help='name of the new webapp')
+                      help="name of the web. You can configure the default web using 'az configure --settings appservice/webname=myweb'")
+register_cli_argument('appservice web create', 'name', options_list=('--name', '-n'), help='name of the new webapp')
 register_cli_argument('appservice web create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                       help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
 

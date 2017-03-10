@@ -1441,7 +1441,7 @@ def convert_av_set_to_managed_disk(resource_group_name, availability_set_name):
 
 
 # pylint: disable=too-many-locals, unused-argument, too-many-statements
-def create_vm(new_vm_name, resource_group_name, image=None,
+def create_vm(vm_name, resource_group_name, image=None,
               size='Standard_DS1_v2', location=None, tags=None, no_wait=False,
               authentication_type=None, admin_password=None, admin_username=getpass.getuser(),
               ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
@@ -1493,25 +1493,25 @@ def create_vm(new_vm_name, resource_group_name, image=None,
 
     nic_name = None
     if nic_type == 'new':
-        nic_name = '{}VMNic'.format(new_vm_name)
+        nic_name = '{}VMNic'.format(vm_name)
         vm_dependencies.append('Microsoft.Network/networkInterfaces/{}'.format(nic_name))
 
         nic_dependencies = []
         if vnet_type == 'new':
-            vnet_name = vnet_name or '{}VNET'.format(new_vm_name)
-            subnet = subnet or '{}Subnet'.format(new_vm_name)
+            vnet_name = vnet_name or '{}VNET'.format(vm_name)
+            subnet = subnet or '{}Subnet'.format(vm_name)
             nic_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
             master_template.add_resource(build_vnet_resource(
                 vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix))
 
         if nsg_type == 'new':
             nsg_rule_type = 'rdp' if os_type.lower() == 'windows' else 'ssh'
-            nsg = nsg or '{}NSG'.format(new_vm_name)
+            nsg = nsg or '{}NSG'.format(vm_name)
             nic_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg))
             master_template.add_resource(build_nsg_resource(nsg, location, tags, nsg_rule_type))
 
         if public_ip_type == 'new':
-            public_ip_address = public_ip_address or '{}PublicIP'.format(new_vm_name)
+            public_ip_address = public_ip_address or '{}PublicIP'.format(vm_name)
             nic_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(
                 public_ip_address))
             master_template.add_resource(build_public_ip_resource(public_ip_address, location,
@@ -1536,7 +1536,7 @@ def create_vm(new_vm_name, resource_group_name, image=None,
             {'id': '{}/networkInterfaces/{}'.format(network_id_template, nic_name)}
         ]
         nic_resource = build_nic_resource(
-            nic_name, location, tags, new_vm_name, subnet_id, private_ip_address, nsg_id,
+            nic_name, location, tags, vm_name, subnet_id, private_ip_address, nsg_id,
             public_ip_address_id)
         nic_resource['dependsOn'] = nic_dependencies
         master_template.add_resource(nic_resource)
@@ -1566,7 +1566,7 @@ def create_vm(new_vm_name, resource_group_name, image=None,
         secrets = _merge_secrets([load_json(secret) for secret in secrets])
 
     vm_resource = build_vm_resource(
-        new_vm_name, location, tags, size, storage_profile, nics, admin_username, availability_set,
+        vm_name, location, tags, size, storage_profile, nics, admin_username, availability_set,
         admin_password, ssh_key_value, ssh_dest_key_path, image, os_disk_name,
         os_type, storage_caching, storage_sku, os_publisher, os_offer, os_sku, os_version,
         os_vhd_uri, attach_os_disk, data_disk_sizes_gb, image_data_disks, custom_data, secrets)
@@ -1592,11 +1592,11 @@ def create_vm(new_vm_name, resource_group_name, image=None,
     else:
         LongRunningOperation()(client.create_or_update(
             resource_group_name, deployment_name, properties, raw=no_wait))
-    return get_vm_details(resource_group_name, new_vm_name)
+    return get_vm_details(resource_group_name, vm_name)
 
 
 # pylint: disable=too-many-locals, too-many-statements
-def create_vmss(new_vmss_name, resource_group_name, image,
+def create_vmss(vmss_name, resource_group_name, image,
                 disable_overprovision=False, instance_count=2,
                 location=None, tags=None, upgrade_policy_mode='manual', validate=False,
                 admin_username=getpass.getuser(), admin_password=None, authentication_type=None,
@@ -1641,8 +1641,8 @@ def create_vmss(new_vmss_name, resource_group_name, image,
 
     vmss_dependencies = []
     if vnet_type == 'new':
-        vnet_name = vnet_name or '{}VNET'.format(new_vmss_name)
-        subnet = subnet or '{}Subnet'.format(new_vmss_name)
+        vnet_name = vnet_name or '{}VNET'.format(vmss_name)
+        subnet = subnet or '{}Subnet'.format(vmss_name)
         vmss_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
         master_template.add_resource(build_vnet_resource(
             vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix))
@@ -1651,7 +1651,7 @@ def create_vmss(new_vmss_name, resource_group_name, image,
         '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
 
     if load_balancer_type == 'new':
-        load_balancer = load_balancer or '{}LB'.format(new_vmss_name)
+        load_balancer = load_balancer or '{}LB'.format(vmss_name)
         vmss_dependencies.append('Microsoft.Network/loadBalancers/{}'.format(load_balancer))
 
         lb_dependencies = []
@@ -1684,7 +1684,7 @@ def create_vmss(new_vmss_name, resource_group_name, image,
             'storageLoop', location, tags, storage_sku))
         vmss_dependencies.append('storageLoop')
 
-    scrubbed_name = new_vmss_name.replace('-', '').lower()[:5]
+    scrubbed_name = vmss_name.replace('-', '').lower()[:5]
     naming_prefix = '{}{}'.format(scrubbed_name,
                                   random_string(9 - len(scrubbed_name), force_lower=True))
     backend_address_pool_id = None
@@ -1711,7 +1711,7 @@ def create_vmss(new_vmss_name, resource_group_name, image,
     if secrets:
         secrets = _merge_secrets([load_json(secret) for secret in secrets])
 
-    vmss_resource = build_vmss_resource(new_vmss_name, naming_prefix, location, tags,
+    vmss_resource = build_vmss_resource(vmss_name, naming_prefix, location, tags,
                                         not disable_overprovision, upgrade_policy_mode,
                                         vm_sku, instance_count,
                                         ip_config_name, nic_name, subnet_id, admin_username,
@@ -1734,7 +1734,7 @@ def create_vmss(new_vmss_name, resource_group_name, image,
         "[concat('https://', variables('storageAccountNames')[{}], '.blob.{}/{}')]".format(
             x, CLOUD.suffixes.storage_endpoint, storage_container_name) for x in range(5)
     ])
-    master_template.add_output('VMSS', new_vmss_name, 'Microsoft.Compute', 'virtualMachineScaleSets',
+    master_template.add_output('VMSS', vmss_name, 'Microsoft.Compute', 'virtualMachineScaleSets',
                                output_type='object')
     template = master_template.build()
 

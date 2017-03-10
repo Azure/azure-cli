@@ -3,11 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps #pylint: disable=unused-import
+from azure.cli.core.commands import register_cli_argument
 
-#pylint: disable=line-too-long
-
-helps['configure'] = """
-            type: command
-            short-summary: Configure Azure CLI 2.0 Preview or view your configuration. The command is interactive, so just type `az configure` and respond to the prompts.
-"""
+# pylint: disable=line-too-long
+register_cli_argument('configure', 'settings', nargs='+', help="space separated 'name=value' pairs for new configurations")

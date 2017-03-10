@@ -20,7 +20,7 @@ import azure.cli.core.telemetry as telemetry
 from azure.cli.core._util import CLIError
 from azure.cli.core.application import APPLICATION
 from azure.cli.core.prompting import prompt_y_n, NoTTYException
-from azure.cli.core._config import az_config
+from azure.cli.core._config import az_config, parse_config_name
 
 from ._introspection import (extract_args_from_signature,
                              extract_full_summary_from_signature)
@@ -204,23 +204,22 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
 
     def update_argument(self, param_name, argtype):
         arg = self.arguments[param_name]
-        CliCommand._resolve_default_value_from_cfg_file(arg, argtype)
+        self._resolve_default_value_from_cfg_file(arg, argtype)
         arg.type.update(other=argtype)
-
-    @staticmethod
-    def _resolve_default_value_from_cfg_file(arg, overrides):
+    
+    def _resolve_default_value_from_cfg_file(self, arg, overrides):
         if 'configured_default' in overrides.settings:
-            def_config = overrides.settings.get('configured_default', None)
+            def_config = overrides.settings.pop('configured_default', None)
+            # same blunt mechanism like we handled id-parts, for create command, no name default
+            if self.name.split()[-1] == 'create' and overrides.settings.get('id_part', None) == 'name':
+                return
             if arg.type.settings.get('required', False):
                 setattr(arg.type, 'configured_default_applied', True)
-                parts = def_config.split('/')
-                section = 'core' if len(parts) == 1 else parts[0]
-                config_name = parts[-1]
+                section, config_name = parse_config_name(def_config)
                 config_value = az_config.get(section, config_name, None)
                 if config_value:
                     overrides.settings['default'] = config_value
                     overrides.settings['required'] = False
-            overrides.settings.pop('configured_default')
 
     def execute(self, **kwargs):
         return self.handler(**kwargs)

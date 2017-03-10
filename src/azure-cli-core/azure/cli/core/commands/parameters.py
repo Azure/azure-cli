@@ -132,8 +132,8 @@ resource_group_name_type = CliArgumentType(
     options_list=('--resource-group', '-g'),
     completer=get_resource_group_completion_list,
     id_part='resource_group',
-    help='Name of resource group',
-    configured_default='resource_group')
+    help="Name of resource group. To configure default group, run 'az configure --settings group=<name>'",
+    configured_default='group')
 
 name_type = CliArgumentType(options_list=('--name', '-n'), help='the primary resource name')
 
@@ -141,7 +141,8 @@ location_type = CliArgumentType(
     options_list=('--location', '-l'),
     completer=get_location_completion_list,
     type=location_name_type,
-    help='Location.', metavar='LOCATION',
+    help="Location. To configure default location, run 'az configure --settings location=<location>'",
+    metavar='LOCATION',
     configured_default='location')
 
 deployment_name_type = CliArgumentType(
