@@ -79,9 +79,9 @@ certificate_file_encoding_values = ['binary', 'string']
 def register_attributes_argument(scope, name, attr_class, create=False):
     register_cli_argument(scope, '{}_attributes'.format(name), ignore_type, validator=get_attribute_validator(name, attr_class, create))
     if create:
-        register_extra_cli_argument(scope, 'disabled', action='store_true', help='Create {} in disabled state.'.format(name))
+        register_extra_cli_argument(scope, 'disabled', help='Create {} in disabled state.'.format(name), **three_state_flag())
     else:
-        register_extra_cli_argument(scope, 'enabled', default=None, choices=['true', 'false'], help='Enable the {}.'.format(name))
+        register_extra_cli_argument(scope, 'enabled', help='Enable the {}.'.format(name), **three_state_flag())
     register_extra_cli_argument(scope, 'expires', default=None, help='Expiration UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
     register_extra_cli_argument(scope, 'not_before', default=None, help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
 
@@ -179,7 +179,8 @@ register_cli_argument('keyvault certificate issuer admin', 'name', options_list=
 register_cli_argument('keyvault certificate issuer admin', 'phone', options_list=('--phone',), help='Amin phone number.')
 
 register_cli_argument('keyvault certificate issuer', 'issuer_name', help='Certificate issuer name.')
-register_cli_argument('keyvault certificate issuer', 'disabled', action='store_true', help='Set issuer to disabled state.')
+register_cli_argument('keyvault certificate issuer', 'disabled', help='Set issuer to disabled state.', **three_state_flag())
+register_cli_argument('keyvault certificate issuer', 'enabled', help='Set issuer enabled state.', **three_state_flag())
 register_cli_argument('keyvault certificate issuer', 'account_id', arg_group='Issuer Credential')
 register_cli_argument('keyvault certificate issuer', 'password', arg_group='Issuer Credential')
 register_cli_argument('keyvault certificate issuer', 'organization_id', arg_group='Organization Detail')

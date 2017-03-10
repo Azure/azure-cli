@@ -108,7 +108,7 @@ def get_attribute_validator(name, attribute_class, create=False):
 
     def validator(ns):
         ns_dict = ns.__dict__
-        enabled = not ns_dict.pop('disabled') if create else ns_dict.pop('enabled') == 'true'
+        enabled = not ns_dict.pop('disabled') if create else ns_dict.pop('enabled')
         attributes = attribute_class(
             enabled,
             ns_dict.pop('not_before'),

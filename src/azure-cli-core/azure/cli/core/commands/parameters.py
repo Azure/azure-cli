@@ -112,14 +112,15 @@ def enum_choice_list(data):
     }
     return params
 
+
 def three_state_flag(none_default=True, use_enabled_disabled=False):
 
     choices = ['enabled', 'disabled'] if use_enabled_disabled else ['true', 'false']
     none_defaults_to = choices[0] if none_default else choices[1]  # default to enabled/true
 
+    # pylint: disable=too-few-public-methods
     class ThreeStateAction(argparse.Action):
-        def __init__(self, **kw):
-            super().__init__(**kw)    
+
         def __call__(self, parser, namespace, values, option_string=None):
             setattr(namespace, self.dest, values.lower() if values else none_defaults_to)
             val = getattr(namespace, self.dest, None)
