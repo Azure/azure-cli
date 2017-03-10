@@ -472,9 +472,25 @@ def delete_lock(name, resource_group_name=None, resource_provider_namespace=None
 
 def create_lock(name, resource_group_name=None, resource_provider_namespace=None,
                 parent_resource_path=None, resource_type=None, resource_name=None,
-                level=None, notes=None, lock_id=None, lock_type=None):
-    parameters = ManagementLockObject(
-        level=level, notes=notes, id=lock_id, type=lock_type, name=name)
+                level=None, notes=None):
+    '''
+    :param name: The name of the lock.
+    :type name: str
+    :param resource_provider_namespace: Name of a resource provider.
+    :type resource_provider_namespace: str
+    :param parent_resource_path: Path to a parent resource
+    :type parent_resource_path: str
+    :param resource_type: The type for the resource with the lock.
+    :type resource_type: str
+    :param resource_name: Name of a resource that has a lock.
+    :type resource_name: str
+    :param notes: Notes about this lock.
+    :type notes: str
+    '''
+    if level != 'ReadOnly' and level != 'CanNotDelete':
+        raise CLIError('--level must be one of "ReadOnly" or "CanNotDelete"')
+    parameters = ManagementLockObject(level=level, notes=notes, name=name)
+
     lock_client = _resource_lock_client_factory()
     if resource_group_name is None:
         return lock_client.management_locks.create_or_update_at_subscription_level(name, parameters)
