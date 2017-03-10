@@ -216,7 +216,7 @@ def get_default_policy(client, scaffold=False): #pylint: disable=unused-argument
         return _default_certificate_profile()
 
 
-def create_keyvault(client, resource_group_name, vault_name, location, #pylint:disable=too-many-arguments
+def create_keyvault(client, resource_group_name, vault_name, location=None, #pylint:disable=too-many-arguments
                     sku=SkuName.standard.value,
                     enabled_for_deployment=None,
                     enabled_for_disk_encryption=None,

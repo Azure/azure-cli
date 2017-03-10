@@ -11,6 +11,7 @@ from azure.mgmt.keyvault.models.key_vault_management_client_enums import \
 from azure.cli.core.commands import \
     (register_cli_argument, register_extra_cli_argument, CliArgumentType)
 import azure.cli.core.commands.arm # pylint: disable=unused-import
+from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list, resource_group_name_type,
     tags_type, ignore_type, enum_choice_list, file_type)
@@ -97,10 +98,11 @@ register_cli_argument('keyvault', 'spn', help='name of a service principal that 
 register_cli_argument('keyvault', 'upn', help='name of a user principal that will receive permissions')
 register_cli_argument('keyvault', 'tags', tags_type)
 
-register_cli_argument('keyvault create', 'resource_group_name', resource_group_name_type, completer=None, validator=None)
+register_cli_argument('keyvault create', 'resource_group_name', resource_group_name_type, required=True, completer=None, validator=None)
 register_cli_argument('keyvault create', 'vault_name', completer=None)
 register_cli_argument('keyvault create', 'sku', **enum_choice_list(SkuName))
 register_cli_argument('keyvault create', 'no_self_perms', action='store_true', help="If specified, don't add permissions for the current user in the new vault")
+register_cli_argument('keyvault create', 'location', validator=get_default_location_from_resource_group)
 
 register_cli_argument('keyvault list', 'resource_group_name', resource_group_name_type, validator=None)
 
