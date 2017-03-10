@@ -11,6 +11,7 @@ GLOBAL_CONFIG_DIR = get_config_dir()
 CONFIG_FILE_NAME = 'config'
 GLOBAL_CONFIG_PATH = os.path.join(GLOBAL_CONFIG_DIR, CONFIG_FILE_NAME)
 ENV_VAR_PREFIX = 'AZURE_'
+DEFAULTS_SECTION = 'defaults'
 
 _UNSET = object()
 _ENV_VAR_FORMAT = ENV_VAR_PREFIX + '{section}_{option}'
@@ -79,13 +80,3 @@ def set_global_config_value(section, option, value):
         pass
     config.set(section, option, value)
     set_global_config(config)
-
-
-def parse_config_name(config_full_name):
-    # the config_full_name could contain '/', say 'vm/name'
-    parts = config_full_name.split('/', 1)
-    section = 'core' if len(parts) == 1 else parts[0]
-    name = parts[0] if len(parts) == 1 else parts[1]
-    return (section, name)
-
-

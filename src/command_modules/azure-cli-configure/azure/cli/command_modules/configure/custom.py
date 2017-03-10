@@ -10,7 +10,7 @@ from adal.adal_error import AdalError
 
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._config import (GLOBAL_CONFIG_PATH, ENV_VAR_PREFIX, set_global_config,
-                                    set_global_config_value, parse_config_name)
+                                    set_global_config_value, DEFAULTS_SECTION)
 from azure.cli.core._util import CLIError
 from azure.cli.core.prompting import (prompt,
                                       prompt_y_n,
@@ -130,14 +130,13 @@ def _handle_global_configuration():
         global_config.set('logging', 'enable_log_file', 'yes' if enable_file_logging else 'no')
         set_global_config(global_config)
 
-def handle_configure(settings=None):
-    if settings:
-        for setting in settings:
-            parts = setting.split('=', 1)
+def handle_configure(defaults=None):
+    if defaults:
+        for default in defaults:
+            parts = default.split('=', 1)
             if len(parts) == 1:
-                raise CLIError('usage error: --settings STRING=STRING STRING=STRING ...')
-            section, name = parse_config_name(parts[0])
-            set_global_config_value(section, name, _normalize_config_value(parts[1]))
+                raise CLIError('usage error: --defaults STRING=STRING STRING=STRING ...')
+            set_global_config_value(DEFAULTS_SECTION, parts[0], _normalize_config_value(parts[1]))
         return
 
     # if nothing supplied, we go interactively
