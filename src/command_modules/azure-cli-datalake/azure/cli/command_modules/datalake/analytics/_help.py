@@ -144,7 +144,7 @@ helps['datalake analytics catalog credential create'] = """
         - name: --database-name
           type: string
           short-summary: 'The name of the database in which to create the credential.'
-        - name: --credential-user-name
+        - name: --user-name
           type: string
           short-summary: 'The user name that will be used when authenticating with this credential'
 """
@@ -159,7 +159,7 @@ helps['datalake analytics catalog credential update'] = """
         - name: --database-name
           type: string
           short-summary: 'The name of the database in which the credential exists.'
-        - name: --credential-user-name
+        - name: --user-name
           type: string
           short-summary: "The user name associated with the credential that will have it's password updated."
 """
