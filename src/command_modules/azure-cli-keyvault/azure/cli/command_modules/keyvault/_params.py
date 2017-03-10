@@ -86,7 +86,7 @@ def register_attributes_argument(scope, name, attr_class, create=False):
 
 # ARGUMENT DEFINITIONS
 
-vault_name_type = CliArgumentType(help='Name of the key vault.', options_list=('--vault-name',), completer=get_resource_name_completion_list('Microsoft.KeyVault/vaults'), id_part=None)
+vault_name_type = CliArgumentType(help='Name of the key vault.', options_list=('--vault-name',), metavar='NAME', completer=get_resource_name_completion_list('Microsoft.KeyVault/vaults'), id_part=None)
 
 # PARAMETER REGISTRATIONS
 
