@@ -43,12 +43,12 @@ name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 multi_ids_type = CliArgumentType(nargs='+')
 existing_vm_name = CliArgumentType(overrides=name_arg_type,
                                    configured_default='vm',
-                                   help="The name of the Virtual Machine. You can configure the default using 'az configure --defaults vm=myvm'",
+                                   help="The name of the Virtual Machine. You can configure the default using 'az configure --defaults vm=<name>'",
                                    completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'), id_part='name')
 vmss_name_type = CliArgumentType(name_arg_type,
                                  configured_default='vmss',
                                  completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'),
-                                 help="Scale set name. You can configure the default using 'az configure --defaults vmss=myvmss'",
+                                 help="Scale set name. You can configure the default using 'az configure --defaults vmss=<name>'",
                                  id_part='name')
 disk_sku = CliArgumentType(required=False, help='underlying storage sku', **enum_choice_list(['Premium_LRS', 'Standard_LRS']))
 
