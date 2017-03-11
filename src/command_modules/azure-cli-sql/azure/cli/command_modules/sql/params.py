@@ -6,11 +6,15 @@
 import itertools
 from enum import Enum
 from ._util import ParametersContext, patch_arg_make_required
-from azure.cli.core.commands import CliArgumentType
+from azure.cli.core.commands import CliArgumentType, register_cli_argument
+from azure.cli.core.commands.parameters import enum_choice_list
 from azure.mgmt.sql.models.database import Database
 from azure.mgmt.sql.models.elastic_pool import ElasticPool
 from azure.mgmt.sql.models.server import Server
+from azure.mgmt.sql.models.import_request_parameters import ImportRequestParameters
 from azure.mgmt.sql.models.sql_management_client_enums import CreateMode
+from azure.mgmt.sql.models.sql_management_client_enums import StorageKeyType
+from azure.mgmt.sql.models.sql_management_client_enums import AuthenticationType
 
 #####
 #           Reusable param type definitions
@@ -20,7 +24,6 @@ from azure.mgmt.sql.models.sql_management_client_enums import CreateMode
 server_param_type = CliArgumentType(
     options_list=('--server', '-s'),
     help='Name of the Azure SQL server.')
-
 
 #####
 #           SizeWithUnitConverter - consider moving to common code (azure.cli.commands.parameters)
@@ -260,6 +263,26 @@ with ParametersContext(command='sql db update') as c:
                ' the pool.')
     c.argument('elastic_pool_name', help='The name of the elastic pool to move the database into.')
     c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
+
+with ParametersContext(command='sql db import-new') as c:
+    c.expand('parameters', ImportRequestParameters, patches={
+        'administrator_login': patch_arg_make_required,
+        'administrator_login_password': patch_arg_make_required,
+        'storage_key': patch_arg_make_required,
+        'storage_key_type': patch_arg_make_required,
+        'storage_uri': patch_arg_make_required,
+        'database_name': patch_arg_make_required,
+        'edition': patch_arg_make_required,
+        'service_objective_name': patch_arg_make_required,
+        'max_size_bytes': patch_arg_make_required,
+    })
+    c.register_alias('administrator_login', ('--admin-user','-u'))
+    c.register_alias('administrator_login_password', ('--admin-password','-p'))
+    c.register_alias('authentication_type', ('--auth-type',))
+    
+register_cli_argument('sql db import-new','storage_key_type',**enum_choice_list(StorageKeyType))
+register_cli_argument('sql db import-new','authentication_type',**enum_choice_list(AuthenticationType))
+
 
 
 #####

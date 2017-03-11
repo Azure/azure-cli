@@ -51,6 +51,10 @@ helps['sql db restore'] = """
             type: command
             short-summary: Creates a new database by restoring from a database backup.
             """
+helps['sql db import'] = """
+            type: command
+            short-summary: Imports a bacpac into an existing database.
+            """
 # helps['sql db restore-point'] = """
 #             type: group
 #             short-summary: Manage database restore points.
