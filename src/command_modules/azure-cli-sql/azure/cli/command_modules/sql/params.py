@@ -263,25 +263,14 @@ with ParametersContext(command='sql db update') as c:
                ' the pool.')
     c.argument('elastic_pool_name', help='The name of the elastic pool to move the database into.')
     c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
-
+    
 with ParametersContext(command='sql db import-new') as c:
-    c.expand('parameters', ImportRequestParameters, patches={
-        'administrator_login': patch_arg_make_required,
-        'administrator_login_password': patch_arg_make_required,
-        'storage_key': patch_arg_make_required,
-        'storage_key_type': patch_arg_make_required,
-        'storage_uri': patch_arg_make_required,
-        'database_name': patch_arg_make_required,
-        'edition': patch_arg_make_required,
-        'service_objective_name': patch_arg_make_required,
-        'max_size_bytes': patch_arg_make_required,
-    })
+    c.expand('parameters', ImportRequestParameters)
     c.register_alias('administrator_login', ('--admin-user','-u'))
     c.register_alias('administrator_login_password', ('--admin-password','-p'))
-    c.register_alias('authentication_type', ('--auth-type',))
+    c.argument('authentication_type',options_list=('--auth_type',),**enum_choice_list(AuthenticationType))
+    c.argument('storage_key_type',**enum_choice_list(StorageKeyType))
     
-register_cli_argument('sql db import-new','storage_key_type',**enum_choice_list(StorageKeyType))
-register_cli_argument('sql db import-new','authentication_type',**enum_choice_list(AuthenticationType))
 
 
 
