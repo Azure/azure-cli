@@ -3,7 +3,7 @@
 Release History
 ===============
 
-0.1.1b3 (2017-01-30)
+0.0.1b1 (2017-03-10)
 +++++++++++++++++++++
 
 * Initial Preview Release for Azure Data Lake Store and Analytics commands
