@@ -136,4 +136,4 @@ class ParametersContext(object):
 
         self.argument(argument_name,
                       arg_type=ignore_type,
-                      validator=get_complex_argument_processor(expanded_arguments, model_type))
+                      validator=get_complex_argument_processor(expanded_arguments, argument_name, model_type))
