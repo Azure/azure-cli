@@ -493,6 +493,74 @@ def build_vmss_storage_account_pool_resource(loop_name, location, tags, storage_
     return storage_resource
 
 
+def build_vmss_autoscale_resource(vmss_name, location, tags, start_count,
+                                  scale_in_cpu, scale_in_increment, scale_in_min,
+                                  scale_out_cpu, scale_out_increment, scale_out_max):
+    autoscale_properties = {
+        'name': 'cpuautoscale',
+        'enabled': True,
+        'targetResourceUri': "[resourceId('Microsoft.Compute/virtualMachineScaleSets/', '{}')]".format(vmss_name),
+        'profiles': [
+            {
+                'name': 'Profile1',
+                'capacity': {
+                    'minimum': scale_in_min,
+                    'maximum': scale_out_max,
+                    'default': start_count
+                },
+                'rules': [
+                    {
+                        'metricTrigger': {
+                            'metricName': 'Percentage CPU',
+                            'metricResourceUri': "[resourceId('Microsoft.Compute/virtualMachineScaleSets/', '{}')]".format(vmss_name),
+                            'timeGrain': 'PT1M',
+                            'statistic': 'Average',
+                            'timeWindow': 'PT5M',
+                            'timeAggregation': 'Average',
+                            'operator': 'GreaterThan',
+                            'threshold': scale_out_cpu
+                        },
+                        'scaleAction': {
+                            'direction': 'Increase',
+                            'type': 'ChangeCount',
+                            'value': scale_out_increment,
+                            'cooldown': 'PT1M'
+                        }
+                    },
+                    {
+                        'metricTrigger': {
+                            'metricName': 'Percentage CPU',
+                            'metricResourceUri': "[resourceId('Microsoft.Compute/virtualMachineScaleSets/', '{}')]".format(vmss_name),
+                            'timeGrain': 'PT1M',
+                            'statistic': 'Average',
+                            'timeWindow': 'PT5M',
+                            'timeAggregation': 'Average',
+                            'operator': 'LessThan',
+                            'threshold': scale_in_cpu
+                        },
+                        'scaleAction': {
+                            'direction': 'Decrease',
+                            'type': 'ChangeCount',
+                            'value': scale_in_increment,
+                            'cooldown': 'PT1M'
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+    autoscale_resource = {
+        'name': 'cpuautoscale',
+        'location': location,
+        'tags': tags,
+        'type': 'Microsoft.Insights/autoscaleSettings',
+        'apiVersion': '2015-04-01',
+        'dependsOn': [ 'Microsoft.Compute/virtualMachineScaleSets/{}'.format(vmss_name) ],
+        'properties': autoscale_properties
+    }
+    return autoscale_resource
+
+
 # pylint: disable=too-many-locals
 def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgrade_policy_mode,
                         vm_sku, instance_count, ip_config_name, nic_name, subnet_id,

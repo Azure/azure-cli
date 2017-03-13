@@ -1641,14 +1641,17 @@ def create_vmss(vmss_name, resource_group_name, image,
                 subnet=None, subnet_address_prefix=None,
                 os_offer=None, os_publisher=None, os_sku=None, os_version=None,
                 load_balancer_type=None, vnet_type=None, public_ip_type=None, storage_profile=None,
-                single_placement_group=None, custom_data=None, secrets=None):
+                single_placement_group=None, custom_data=None, secrets=None,
+                scale_in_min=1, scale_in_cpu=25, scale_in_increment=1,
+                scale_out_max=10, scale_out_cpu=75, scale_out_increment=1,
+                enable_autoscale=False):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core._util import random_string
     from azure.cli.command_modules.vm._template_builder import (
         ArmTemplateBuilder, StorageProfile, build_vmss_resource, build_storage_account_resource,
         build_vnet_resource, build_public_ip_resource, build_load_balancer_resource,
         build_output_deployment_resource, build_deployment_resource,
-        build_vmss_storage_account_pool_resource)
+        build_vmss_storage_account_pool_resource, build_vmss_autoscale_resource)
 
     from azure.cli.core._profile import CLOUD
     from azure.mgmt.resource.resources import ResourceManagementClient
@@ -1738,6 +1741,14 @@ def create_vmss(vmss_name, resource_group_name, image,
 
     if secrets:
         secrets = _merge_secrets([load_json(secret) for secret in secrets])
+
+    if any((enable_autoscale, scale_in_cpu, scale_in_increment, scale_in_increment,
+            scale_out_cpu, scale_out_increment, scale_out_max)):
+        autoscale_resource = build_vmss_autoscale_resource(
+            vmss_name, location, tags, instance_count,
+            scale_in_cpu, scale_in_increment, scale_in_min,
+            scale_out_cpu, scale_out_increment, scale_out_max)
+        master_template.add_resource(autoscale_resource)
 
     vmss_resource = build_vmss_resource(vmss_name, naming_prefix, location, tags,
                                         not disable_overprovision, upgrade_policy_mode,
