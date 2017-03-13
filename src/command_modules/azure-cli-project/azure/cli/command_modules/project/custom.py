@@ -9,27 +9,24 @@ import glob
 import json
 import os
 import platform
-import stat
 import sys
 from subprocess import PIPE, CalledProcessError, Popen, check_output
-
-import azure.cli.core.azlogging as azlogging
 import requests
+
+import azure.cli.command_modules.project.settings as settings
+import azure.cli.command_modules.project.utils as utils
+import azure.cli.core.azlogging as azlogging  # pylint: disable=invalid-name
+from azure.cli.command_modules.project.jenkins import Jenkins
+from azure.cli.command_modules.project.spinnaker import Spinnaker
 from azure.cli.core._util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.compute import ComputeManagementClient
 
-import settings
-import utils
-from jenkins import Jenkins
-from spinnaker import Spinnaker
+logger = azlogging.get_az_logger(__name__) # pylint: disable=invalid-name
+project_settings = settings.Project() # pylint: disable=invalid-name
 
-logger = azlogging.get_az_logger(__name__)
-project_settings = settings.Project()
-
-# TODO: Remove and switch to SSH once templates
-# are updated
-admin_password = 'Mindaro@Pass1!'
+# TODO: Remove and switch to SSH once templates are updated
+admin_password = 'Mindaro@Pass1!' # pylint: disable=invalid-name
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long,broad-except
 
 def create_continuous_deployment(remote_access_token): # pylint: disable=unused-argument
@@ -43,10 +40,7 @@ def create_continuous_deployment(remote_access_token): # pylint: disable=unused-
     # Wait for deployments to complete
     spinnaker_deployment.wait()
     jenkins_deployment.wait()
-    jenkins_deployment_result = jenkins_deployment.result()
-
-    jenkins_url = jenkins_deployment_result.properties.outputs[
-        'jenkinsVmDns']['value']
+    _ = jenkins_deployment.result()
     jenkins_resource.configure()
 
     spinnaker_deployment_result = spinnaker_deployment.result()
@@ -57,13 +51,13 @@ def create_continuous_deployment(remote_access_token): # pylint: disable=unused-
 
     # TODO: Spinnker won't trigger pipeline if ACR is entire empty
     # TODO: how do we provide a correct service port when configuring Spinnaker
-    print 'Done.'
+    utils.writeline('Done.')
 
 def _configure_spinnaker(spinnaker_resource, spinnaker_hostname):
     """
     Configures the Spinnaker resource
     """
-    print 'Configuring Spinnaker...'
+    utils.writeline('Configuring Spinnaker...')
     client_id = project_settings.client_id
     client_secret = project_settings.client_secret
     cluster_name = project_settings.cluster_name
@@ -78,7 +72,7 @@ def _deploy_jenkins():
     """
     Starts the Jenkins deployment and returns the resource and AzurePollerOperation
     """
-    print 'Deploying Jenkins ...'
+    utils.writeline('Deploying Jenkins ...')
     git_repo = _get_git_remote_url()
     resource_group = project_settings.resource_group
     client_id = project_settings.client_id
@@ -99,7 +93,7 @@ def _deploy_spinnaker():
     """
     Starts the Spinnaker deployment and returns the resource and AzurePollerOperation
     """
-    print 'Deploying Spinnaker...'
+    utils.writeline('Deploying Spinnaker...')
     resource_group = project_settings.resource_group
     admin_username = project_settings.admin_username
     public_ssh_key_filename = os.path.join(
@@ -139,15 +133,15 @@ def _get_git_remote_url():
         else:
             remote_url = check_output(
                 ['git', 'remote', 'get-url', 'origin']).strip()
-    except ValueError as e:
-        logger.debug(e)
+    except ValueError as value_error:
+        logger.debug(value_error)
         raise CLIError(
             "A default remote was not found for the current folder. \
             Please run this command in a git repository folder with \
             an 'origin' remote or specify a remote using '--remote-url'")
-    except CalledProcessError as e:
+    except CalledProcessError as called_process_err:
         raise CLIError(
-            'Please ensure git version 2.7.0 or greater is installed.\n' + e)
+            'Please ensure git version 2.7.0 or greater is installed.\n' + called_process_err)
     return remote_url.decode()
 
 def setup(dns_prefix, location, user_name):
@@ -285,14 +279,14 @@ def _cluster_configured(dns_prefix, user_name): # pylint: disable=too-many-retur
     if not os.path.exists(settings_json_file_path):
         logger.warning(workspace_err_message)
         return False
-    settings = json.load(codecs.open(settings_json_file_path, 'r', 'utf-8-sig'))
+    cluster_settings = json.load(codecs.open(settings_json_file_path, 'r', 'utf-8-sig'))
 
-    default_workspace_name = settings["DefaultWorkspace"]
+    default_workspace_name = cluster_settings["DefaultWorkspace"]
     if not default_workspace_name:
         logger.warning(workspace_err_message)
         return False
 
-    default_workspace = settings["Workspaces"][default_workspace_name]
+    default_workspace = cluster_settings["Workspaces"][default_workspace_name]
     if not default_workspace:
         logger.warning(workspace_err_message)
         return False

@@ -1,14 +1,14 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
 
-import os
 import tempfile
-
 import paramiko
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.mgmt.compute import ComputeManagementClient
 
-from deployments import DeployableResource
+from azure.cli.command_modules.project.deployments import DeployableResource
 
-
+# pylint: disable=line-too-long, too-many-arguments
 class Spinnaker(DeployableResource):
     """
     Deals with creating and configuring Spinnaker
@@ -89,7 +89,7 @@ class Spinnaker(DeployableResource):
         configure_k8s_script_url = \
             'https://raw.githubusercontent.com/Azure/azure-devops-utils/{}/spinnaker/configure_k8s/configure_k8s.sh'.format(
                 self.script_version)
-        command = self._create_script_execute_command(
+        command = Spinnaker._create_script_execute_command(
             configure_k8s_script_url, args)
         _, stdout, stderr = ssh.exec_command(command)
         for line in stdout.readlines():
@@ -98,7 +98,8 @@ class Spinnaker(DeployableResource):
             print 'ERR: ' + line
         ssh.close()
 
-    def _create_script_execute_command(self, script_url, args):
+    @staticmethod
+    def _create_script_execute_command(script_url, args):
         """
         Creates a command that when executed will download the script,
         make it executable, and run it with the provided arguments.
