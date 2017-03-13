@@ -160,7 +160,7 @@ helps['feature'] = """
 
 helps['group'] = """
     type: group
-    short-summary: Manage resource groups.
+    short-summary: Manage resource groups and template deployments.
 """
 
 helps['group exists'] = """
