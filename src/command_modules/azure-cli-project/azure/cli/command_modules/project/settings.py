@@ -1,3 +1,8 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
 import json
 import os
 
@@ -15,8 +20,8 @@ class Project(object):
         self.settings_file = os.path.join(
             os.path.expanduser('~'), '.azure', 'projectResource.json')
         if os.path.exists(self.settings_file):
-            with open(self.settings_file) as f:
-                self.settings = json.load(f)
+            with open(self.settings_file) as file_object:
+                self.settings = json.load(file_object)
         else:
             self.settings = None
 

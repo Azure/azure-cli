@@ -1,15 +1,22 @@
-
-from azure.mgmt.resource.resources.models import DeploymentProperties
-from azure.mgmt.resource.resources import ResourceManagementClient
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
 
 import requests
-import random
-import string
-import utils
+
+import azure.cli.command_modules.project.utils as utils
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.mgmt.resource.resources import ResourceManagementClient
+from azure.mgmt.resource.resources.models import DeploymentProperties
 
 
+# pylint: disable=too-few-public-methods
 class DeployableResource(object):
+    """
+    Class represents a resource, that's deployable to Azure
+    using ARM
+    """
     completed_deployment = None
 
     def __init__(self, resource_group, deployment_name=None):
@@ -28,10 +35,10 @@ class DeployableResource(object):
         if not template_url:
             raise ValueError('ARM template URL not provided')
 
-        template_json = self._get_template_json(template_url)
+        template_json = DeployableResource._get_template_json(template_url)
         properties = DeploymentProperties(template=template_json, template_link=None,
                                           parameters=parameters, mode='incremental')
-        client = self._get_resource_mgmt_client()
+        client = DeployableResource._get_resource_mgmt_client()
         deployment = client.deployments.create_or_update(
             self.resource_group, self.deployment_name, properties)
         deployment.add_done_callback(self._deployment_completed)
@@ -42,16 +49,18 @@ class DeployableResource(object):
         Called when deployment is completed
         """
         self.completed_deployment = completed_deployment
-        print 'Deployment "{}" to resource group "{}" completed.'.format(
-            self.deployment_name, self.resource_group)
+        utils.writeline('Deployment "{}" to resource group "{}" completed.'.format(
+            self.deployment_name, self.resource_group))
 
-    def _get_resource_mgmt_client(self):
+    @staticmethod
+    def _get_resource_mgmt_client():
         """
         Gets the resource management client
         """
         return get_mgmt_service_client(ResourceManagementClient)
 
-    def _get_template_json(self, template_url):
+    @staticmethod
+    def _get_template_json(template_url):
         """
         Gets the ARM template JSON from the provided URL
         """
