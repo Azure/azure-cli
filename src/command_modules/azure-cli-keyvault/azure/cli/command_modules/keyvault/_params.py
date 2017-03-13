@@ -115,7 +115,7 @@ for item in ['key', 'secret', 'certificate']:
 # TODO: Fix once service side issue is fixed that there is no way to list pending certificates
 register_cli_argument('keyvault certificate pending', 'certificate_name', options_list=('--name', '-n'), help='Name of the pending certificate.', id_part='child_name', completer=None)
 
-register_cli_argument('keyvault key', 'key_ops', options_list=('--ops',), nargs='*', help='Space separated list of permitted JSON web key operations. Possible values: {}'.format(json_web_key_op_values), validator=validate_key_ops, type=str.lower)
+register_cli_argument('keyvault key', 'key_ops', options_list=('--ops'), nargs='*', help='Space separated list of permitted JSON web key operations. Possible values: {}'.format(json_web_key_op_values), validator=validate_key_ops, type=str.lower)
 register_cli_argument('keyvault key', 'key_version', options_list=('--version', '-v'), help='The key version. If omitted, uses the latest version.', default='', required=False, completer=get_keyvault_version_completion_list('key'))
 
 for item in ['create', 'import']:

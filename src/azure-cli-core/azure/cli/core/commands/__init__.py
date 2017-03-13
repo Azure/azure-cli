@@ -41,6 +41,9 @@ class CliArgumentType(object):
     def __init__(self, overrides=None, **kwargs):
         if isinstance(overrides, str):
             raise ValueError("Overrides has to be a CliArgumentType (cannot be a string)")
+        options_list = kwargs.get('options_list', None)
+        if options_list and isinstance(options_list, str):
+            kwargs['options_list'] = [options_list]
         self.settings = {}
         self.update(overrides, **kwargs)
 
