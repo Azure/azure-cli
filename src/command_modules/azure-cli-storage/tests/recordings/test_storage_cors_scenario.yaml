@@ -1,0 +1,601 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.0 (Windows-10-10.0.15025-SP0) requests/2.9.1 msrest/0.4.4
+          msrest_azure/0.4.7 storagemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b3+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [c4c81576-ee79-11e6-aaa8-5cf37075d24b]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_cors_scenario_test/providers/Microsoft.Storage/storageAccounts/dummystorage/listKeys?api-version=2016-12-01
+  response:
+    body: {string: '{"keys":[{"keyName":"key1","permissions":"Full","value":"9ONs+1Kh3s78lYPe9AAXuAtliEpls5DrAry32lrPQfdcCmKeBJnWvcAh5ydnirJOWsVZb2Jr+OP0M4ZfGLwq4Q=="},{"keyName":"key2","permissions":"Full","value":"cfxO/jpMCKHKNjwW8B84DbK1f+eS2Vg6tb5Efv9wdKflNKw2sKJlH7n40KllZRe8Xq+0AlvsUpos701ldNbpBQ=="}]}
+
+        '}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json]
+      Date: ['Thu, 09 Feb 2017 03:42:24 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: [Accept-Encoding]
+      content-length: ['289']
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:26 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.blob.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>false</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors\
+        \ /></StorageServiceProperties>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 Feb 2017 03:42:26 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:26 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.file.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><HourMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors\
+        \ /></StorageServiceProperties>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 Feb 2017 03:42:26 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:26 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.queue.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>false</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors\
+        \ /></StorageServiceProperties>"}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 Feb 2017 03:42:26 GMT']
+      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:26 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>false</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors\
+        \ /></StorageServiceProperties>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 Feb 2017 03:42:26 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:27 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.blob.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>false</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors\
+        \ /></StorageServiceProperties>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 Feb 2017 03:42:27 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <StorageServiceProperties><Cors><CorsRule><AllowedOrigins>http://example.com</AllowedOrigins><AllowedMethods>POST</AllowedMethods><MaxAgeInSeconds>60</MaxAgeInSeconds><ExposedHeaders
+      /><AllowedHeaders /></CorsRule></Cors></StorageServiceProperties>'
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['287']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:27 GMT']
+      x-ms-version: ['2015-07-08']
+    method: PUT
+    uri: https://dummystorage.blob.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Thu, 09 Feb 2017 03:42:27 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:27 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.file.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><HourMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors\
+        \ /></StorageServiceProperties>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 Feb 2017 03:42:27 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <StorageServiceProperties><Cors><CorsRule><AllowedOrigins>http://example.com</AllowedOrigins><AllowedMethods>POST</AllowedMethods><MaxAgeInSeconds>60</MaxAgeInSeconds><ExposedHeaders
+      /><AllowedHeaders /></CorsRule></Cors></StorageServiceProperties>'
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['287']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:27 GMT']
+      x-ms-version: ['2015-07-08']
+    method: PUT
+    uri: https://dummystorage.file.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Thu, 09 Feb 2017 03:42:27 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:28 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.queue.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>false</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors\
+        \ /></StorageServiceProperties>"}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 Feb 2017 03:42:28 GMT']
+      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <StorageServiceProperties><Cors><CorsRule><AllowedOrigins>http://example.com</AllowedOrigins><AllowedMethods>POST</AllowedMethods><MaxAgeInSeconds>60</MaxAgeInSeconds><ExposedHeaders
+      /><AllowedHeaders /></CorsRule></Cors></StorageServiceProperties>'
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['287']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:28 GMT']
+      x-ms-version: ['2015-07-08']
+    method: PUT
+    uri: https://dummystorage.queue.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Thu, 09 Feb 2017 03:42:28 GMT']
+      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:28 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.blob.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>false</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors><CorsRule><AllowedMethods>POST</AllowedMethods><AllowedOrigins>http://example.com</AllowedOrigins><AllowedHeaders\
+        \ /><ExposedHeaders /><MaxAgeInSeconds>60</MaxAgeInSeconds></CorsRule></Cors></StorageServiceProperties>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 Feb 2017 03:42:28 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      Vary: [Origin]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:28 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.file.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><HourMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors><CorsRule><AllowedMethods>POST</AllowedMethods><AllowedOrigins>http://example.com</AllowedOrigins><AllowedHeaders\
+        \ /><ExposedHeaders /><MaxAgeInSeconds>60</MaxAgeInSeconds></CorsRule></Cors></StorageServiceProperties>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 Feb 2017 03:42:28 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      Vary: [Origin]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:29 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.queue.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>false</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors><CorsRule><AllowedMethods>POST</AllowedMethods><AllowedOrigins>http://example.com</AllowedOrigins><AllowedHeaders\
+        \ /><ExposedHeaders /><MaxAgeInSeconds>60</MaxAgeInSeconds></CorsRule></Cors></StorageServiceProperties>"}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 Feb 2017 03:42:29 GMT']
+      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      Vary: [Origin]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:29 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>false</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors\
+        \ /></StorageServiceProperties>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 Feb 2017 03:42:28 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <StorageServiceProperties><Cors /></StorageServiceProperties>'
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['100']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:29 GMT']
+      x-ms-version: ['2015-07-08']
+    method: PUT
+    uri: https://dummystorage.blob.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Thu, 09 Feb 2017 03:42:29 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 202, message: Accepted}
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <StorageServiceProperties><Cors /></StorageServiceProperties>'
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['100']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:29 GMT']
+      x-ms-version: ['2015-07-08']
+    method: PUT
+    uri: https://dummystorage.file.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Thu, 09 Feb 2017 03:42:29 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:30 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.blob.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>false</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors\
+        \ /></StorageServiceProperties>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 Feb 2017 03:42:30 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:30 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.file.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><HourMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors\
+        \ /></StorageServiceProperties>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 Feb 2017 03:42:30 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:30 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.queue.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>false</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors><CorsRule><AllowedMethods>POST</AllowedMethods><AllowedOrigins>http://example.com</AllowedOrigins><AllowedHeaders\
+        \ /><ExposedHeaders /><MaxAgeInSeconds>60</MaxAgeInSeconds></CorsRule></Cors></StorageServiceProperties>"}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 Feb 2017 03:42:30 GMT']
+      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      Vary: [Origin]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:30 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>false</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors\
+        \ /></StorageServiceProperties>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 Feb 2017 03:42:30 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <StorageServiceProperties><Cors /></StorageServiceProperties>'
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['100']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:31 GMT']
+      x-ms-version: ['2015-07-08']
+    method: PUT
+    uri: https://dummystorage.blob.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Thu, 09 Feb 2017 03:42:31 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 202, message: Accepted}
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <StorageServiceProperties><Cors /></StorageServiceProperties>'
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['100']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:31 GMT']
+      x-ms-version: ['2015-07-08']
+    method: PUT
+    uri: https://dummystorage.file.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Thu, 09 Feb 2017 03:42:31 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 202, message: Accepted}
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <StorageServiceProperties><Cors /></StorageServiceProperties>'
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['100']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:31 GMT']
+      x-ms-version: ['2015-07-08']
+    method: PUT
+    uri: https://dummystorage.queue.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Thu, 09 Feb 2017 03:42:31 GMT']
+      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:32 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.blob.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>false</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors\
+        \ /></StorageServiceProperties>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 Feb 2017 03:42:32 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:32 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.file.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><HourMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors\
+        \ /></StorageServiceProperties>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 Feb 2017 03:42:31 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:32 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.queue.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>false</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors\
+        \ /></StorageServiceProperties>"}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 Feb 2017 03:42:32 GMT']
+      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.6.0; Windows 10) AZURECLI/0.1.1b3+dev]
+      x-ms-client-request-id: [b511567e-ee79-11e6-b542-5cf37075d24b]
+      x-ms-date: ['Thu, 09 Feb 2017 03:42:32 GMT']
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>false</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors\
+        \ /></StorageServiceProperties>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 Feb 2017 03:42:32 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2015-07-08']
+    status: {code: 200, message: OK}
+version: 1

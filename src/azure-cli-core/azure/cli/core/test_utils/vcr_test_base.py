@@ -14,6 +14,7 @@ import re
 import shlex
 import sys
 import tempfile
+import traceback
 from random import choice
 from string import digits, ascii_lowercase
 
@@ -35,7 +36,7 @@ from azure.cli.main import main as cli_main
 
 from azure.cli.core import __version__ as core_version
 import azure.cli.core._debug as _debug
-from azure.cli.core._profile import Profile
+from azure.cli.core._profile import Profile, CLOUD
 from azure.cli.core._util import CLIError, random_string
 
 LIVE_TEST_CONTROL_ENV = 'AZURE_CLI_TEST_RUN_LIVE'
@@ -60,16 +61,23 @@ vcr.stubs.VCRConnection.request = patch_vcr_connection_request
 
 
 def _mock_get_mgmt_service_client(client_type, subscription_bound=True, subscription_id=None,
-                                  api_version=None):
+                                  api_version=None, base_url_bound=None, **kwargs):
     # version of _get_mgmt_service_client to use when recording or playing tests
     profile = Profile()
     cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id)
+    client_kwargs = {}
+
+    if base_url_bound:
+        client_kwargs = {'base_url': CLOUD.endpoints.resource_manager}
+    if api_version:
+        client_kwargs['api_version'] = api_version
+    if kwargs:
+        client_kwargs.update(kwargs)
+
     if subscription_bound:
-        client = client_type(cred, subscription_id, api_version=api_version) \
-            if api_version else client_type(cred, subscription_id)
+        client = client_type(cred, subscription_id, **client_kwargs)
     else:
-        client = client_type(cred, api_version=api_version) \
-            if api_version else client_type(cred)
+        client = client_type(cred, **client_kwargs)
 
     client = _debug.allow_debug_connection(client)
 
@@ -194,6 +202,11 @@ def _scrub_deployment_name(uri):
     return re.sub('/deployments/([^/?]+)', '/deployments/mock-deployment', uri)
 
 
+def _scrub_service_principal_name(uri):
+    return re.sub('userPrincipalName%20eq%20%27(.+)%27',
+                  'userPrincipalName%20eq%20%27example%40example.com%27', uri)
+
+
 def _search_result_by_jmespath(json_data, query):
     if not json_data:
         json_data = '{}'
@@ -295,10 +308,14 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
         # scrub subscription from the uri
         request.uri = re.sub('/subscriptions/([^/]+)/',
                              '/subscriptions/{}/'.format(MOCKED_SUBSCRIPTION_ID), request.uri)
+        # scrub jobId from uri, required for ADLA
+        request.uri = re.sub('/Jobs/([^/]+)',
+                             '/Jobs/{}'.format(MOCKED_SUBSCRIPTION_ID), request.uri)
         request.uri = re.sub('/graph.windows.net/([^/]+)/',
                              '/graph.windows.net/{}/'.format(MOCKED_TENANT_ID), request.uri)
         request.uri = re.sub('/sig=([^/]+)&', '/sig=0000&', request.uri)
         request.uri = _scrub_deployment_name(request.uri)
+        request.uri = _scrub_service_principal_name(request.uri)
 
         # replace random storage account name with dummy name
         request.uri = re.sub(r'(vcrstorage[\d]+)', MOCKED_STORAGE_ACCOUNT, request.uri)
@@ -319,6 +336,8 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
         def _scrub_body_parameters(value):
             value = re.sub('/subscriptions/([^/]+)/',
                            '/subscriptions/{}/'.format(MOCKED_SUBSCRIPTION_ID), value)
+            value = re.sub('\"jobId\": \"([^/]+)\"',
+                           '\"jobId\": \"{}\"'.format(MOCKED_SUBSCRIPTION_ID), value)
             return value
 
         for key in response['body']:
@@ -452,6 +471,7 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
                 print('RECORDING: {}'.format(self.test_name))
                 self._execute_live_or_recording()
         except Exception as ex:
+            traceback.print_exc()
             raise ex
         finally:
             if not self.success and not self.playback and os.path.isfile(self.cassette_path):

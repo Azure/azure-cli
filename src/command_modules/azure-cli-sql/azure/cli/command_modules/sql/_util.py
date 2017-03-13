@@ -64,6 +64,7 @@ class CommandGroup(object):
         self._group_name = group_name
         self._client_factory = client_factory
         self._service_adapter = service_adapter or (lambda name: name)
+        self._custom_path = 'azure.cli.command_modules.sql.custom#{}'
 
     def __enter__(self):
         return self
@@ -77,13 +78,25 @@ class CommandGroup(object):
                     self._service_adapter(method_name),
                     client_factory=self._client_factory)
 
-    def generic_update_command(self, name, getter_op, setter_op):
+    def custom_command(self, name, custom_func_name):
+        cli_command(self._scope,
+                    '{} {}'.format(self._group_name, name),
+                    self._custom_path.format(custom_func_name),
+                    client_factory=self._client_factory)
+
+    def generic_update_command(self, name, getter_op, setter_op, custom_func_name=None):
+        if custom_func_name:
+            custom_function_op = self._custom_path.format(custom_func_name)
+        else:
+            custom_function_op = None
+
         cli_generic_update_command(
             self._scope,
             '{} {}'.format(self._group_name, name),
             self._service_adapter(getter_op),
             self._service_adapter(setter_op),
-            factory=self._client_factory)
+            factory=self._client_factory,
+            custom_function_op=custom_function_op)
 
 
 # PARAMETERS UTILITIES

@@ -1,0 +1,302 @@
+interactions:
+- request:
+    body: '{"cloudServiceConfiguration": {"osFamily": "4"}, "vmSize": "small", "id":
+      "azure-cli-test-paas"}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['96']
+      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
+      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 batchserviceclient/2.0.0 Azure-SDK-For-Python]
+      accept-language: [en-US]
+      client-request-id: [01d04f8c-fd49-11e6-87dd-54ee750f2fc7]
+      ocp-date: ['Tue, 28 Feb 2017 00:01:08 GMT']
+      return-client-request-id: ['false']
+    method: POST
+    uri: https://clitest1.uksouth.batch.azure.com/pools?timeout=30&api-version=2017-01-01.4.0
+  response:
+    body: {string: ''}
+    headers:
+      DataServiceId: ['https://clitest1.uksouth.batch.azure.com/pools/azure-cli-test-paas']
+      DataServiceVersion: ['3.0']
+      Date: ['Tue, 28 Feb 2017 00:01:10 GMT']
+      ETag: ['0x8D45F6CE5ABFBB9']
+      Last-Modified: ['Tue, 28 Feb 2017 00:01:08 GMT']
+      Location: ['https://clitest1.uksouth.batch.azure.com/pools/azure-cli-test-paas']
+      Server: [Microsoft-HTTPAPI/2.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      request-id: [8989d0a6-61df-45d3-8ee8-4901771088d7]
+    status: {code: 201, message: Created}
+- request:
+    body: '{"metadata": [{"name": "test", "value": "value"}], "poolInfo": {"poolId":
+      "azure-cli-test-paas"}, "jobManagerTask": {"id": "JobManager", "environmentSettings":
+      [{"name": "CLI_TEST_VAR", "value": "CLI_TEST_VAR_VALUE"}], "commandLine": "cmd
+      /c set AZ_BATCH_TASK_ID"}, "constraints": {"maxTaskRetryCount": 5}, "id": "cli-test-job-1"}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['330']
+      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
+      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 batchserviceclient/2.0.0 Azure-SDK-For-Python]
+      accept-language: [en-US]
+      client-request-id: [02f5c136-fd49-11e6-913c-54ee750f2fc7]
+      ocp-date: ['Tue, 28 Feb 2017 00:01:10 GMT']
+      return-client-request-id: ['false']
+    method: POST
+    uri: https://clitest1.uksouth.batch.azure.com/jobs?timeout=30&api-version=2017-01-01.4.0
+  response:
+    body: {string: ''}
+    headers:
+      DataServiceId: ['https://clitest1.uksouth.batch.azure.com/jobs/job-1']
+      DataServiceVersion: ['3.0']
+      Date: ['Tue, 28 Feb 2017 00:01:09 GMT']
+      ETag: ['0x8D45F6CE58C454B']
+      Last-Modified: ['Tue, 28 Feb 2017 00:01:07 GMT']
+      Location: ['https://clitest1.uksouth.batch.azure.com/jobs/job-1']
+      Server: [Microsoft-HTTPAPI/2.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      request-id: [7155ec87-2771-451d-b05b-47f841ef904d]
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
+      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 batchserviceclient/2.0.0 Azure-SDK-For-Python]
+      accept-language: [en-US]
+      client-request-id: [039efc12-fd49-11e6-80d3-54ee750f2fc7]
+      ocp-date: ['Tue, 28 Feb 2017 00:01:11 GMT']
+      return-client-request-id: ['false']
+    method: GET
+    uri: https://clitest1.uksouth.batch.azure.com/jobs/cli-test-job-1?timeout=30&api-version=2017-01-01.4.0
+  response:
+    body: {string: "{\r\n  \"odata.metadata\":\"https://clitest1.uksouth.batch.azure.com/$metadata#jobs/@Element\"\
+        ,\"id\":\"cli-test-job-1\",\"url\":\"https://clitest1.uksouth.batch.azure.com/jobs/cli-test-job-1\"\
+        ,\"eTag\":\"0x8D45F6CE58C454B\",\"lastModified\":\"2017-02-28T00:01:07.8364491Z\"\
+        ,\"creationTime\":\"2017-02-28T00:01:07.8120094Z\",\"state\":\"active\",\"\
+        stateTransitionTime\":\"2017-02-28T00:01:07.8364491Z\",\"priority\":0,\"usesTaskDependencies\"\
+        :false,\"constraints\":{\r\n    \"maxWallClockTime\":\"P10675199DT2H48M5.4775807S\"\
+        ,\"maxTaskRetryCount\":5\r\n  },\"jobManagerTask\":{\r\n    \"id\":\"JobManager\"\
+        ,\"commandLine\":\"cmd /c set AZ_BATCH_TASK_ID\",\"environmentSettings\":[\r\
+        \n      {\r\n        \"name\":\"CLI_TEST_VAR\",\"value\":\"CLI_TEST_VAR_VALUE\"\
+        \r\n      }\r\n    ],\"constraints\":{\r\n      \"maxWallClockTime\":\"P10675199DT2H48M5.4775807S\"\
+        ,\"retentionTime\":\"P10675199DT2H48M5.4775807S\",\"maxTaskRetryCount\":5\r\
+        \n    },\"userIdentity\":{\r\n      \"autoUser\":{\r\n        \"scope\":\"\
+        task\",\"elevationLevel\":\"nonadmin\"\r\n      }\r\n    },\"runExclusive\"\
+        :true,\"killJobOnCompletion\":true\r\n  },\"poolInfo\":{\r\n    \"poolId\"\
+        :\"azure-cli-test-paas\"\r\n  },\"metadata\":[\r\n    {\r\n      \"name\"\
+        :\"test\",\"value\":\"value\"\r\n    }\r\n  ],\"executionInfo\":{\r\n    \"\
+        startTime\":\"2017-02-28T00:01:07.8364491Z\",\"poolId\":\"azure-cli-test-paas\"\
+        \r\n  },\"onAllTasksComplete\":\"noaction\",\"onTaskFailure\":\"noaction\"\
+        \r\n}"}
+    headers:
+      Content-Type: [application/json;odata=minimalmetadata]
+      DataServiceVersion: ['3.0']
+      Date: ['Tue, 28 Feb 2017 00:01:12 GMT']
+      ETag: ['0x8D45F6CE58C454B']
+      Last-Modified: ['Tue, 28 Feb 2017 00:01:07 GMT']
+      Server: [Microsoft-HTTPAPI/2.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      request-id: [a34ef7ce-9450-433f-8620-3db814f33653]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"onAllTasksComplete": "terminateJob", "constraints": {"maxWallClockTime":
+      "P3Y6M4DT12H30M5S"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['95']
+      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
+      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 batchserviceclient/2.0.0 Azure-SDK-For-Python]
+      accept-language: [en-US]
+      client-request-id: [04613d8c-fd49-11e6-8c3d-54ee750f2fc7]
+      ocp-date: ['Tue, 28 Feb 2017 00:01:12 GMT']
+      return-client-request-id: ['false']
+    method: PATCH
+    uri: https://clitest1.uksouth.batch.azure.com/jobs/cli-test-job-1?timeout=30&api-version=2017-01-01.4.0
+  response:
+    body: {string: ''}
+    headers:
+      DataServiceId: ['https://clitest1.uksouth.batch.azure.com/jobs/cli-test-job-1']
+      DataServiceVersion: ['3.0']
+      Date: ['Tue, 28 Feb 2017 00:01:13 GMT']
+      ETag: ['0x8D45F6CE6EB0980']
+      Last-Modified: ['Tue, 28 Feb 2017 00:01:10 GMT']
+      Server: [Microsoft-HTTPAPI/2.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      request-id: [ab306f8c-7851-4d81-af3a-7e3fd8616e65]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
+      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 batchserviceclient/2.0.0 Azure-SDK-For-Python]
+      accept-language: [en-US]
+      client-request-id: [0572dd92-fd49-11e6-b068-54ee750f2fc7]
+      ocp-date: ['Tue, 28 Feb 2017 00:01:14 GMT']
+      return-client-request-id: ['false']
+    method: GET
+    uri: https://clitest1.uksouth.batch.azure.com/jobs/cli-test-job-1?timeout=30&api-version=2017-01-01.4.0
+  response:
+    body: {string: "{\r\n  \"odata.metadata\":\"https://clitest1.uksouth.batch.azure.com/$metadata#jobs/@Element\"\
+        ,\"id\":\"cli-test-job-1\",\"url\":\"https://clitest1.uksouth.batch.azure.com/jobs/cli-test-job-1\"\
+        ,\"eTag\":\"0x8D45F6CE6EB0980\",\"lastModified\":\"2017-02-28T00:01:10.135232Z\"\
+        ,\"creationTime\":\"2017-02-28T00:01:07.8120094Z\",\"state\":\"active\",\"\
+        stateTransitionTime\":\"2017-02-28T00:01:07.8364491Z\",\"priority\":0,\"usesTaskDependencies\"\
+        :false,\"constraints\":{\r\n    \"maxWallClockTime\":\"P1279DT12H30M5S\",\"\
+        maxTaskRetryCount\":0\r\n  },\"jobManagerTask\":{\r\n    \"id\":\"JobManager\"\
+        ,\"commandLine\":\"cmd /c set AZ_BATCH_TASK_ID\",\"environmentSettings\":[\r\
+        \n      {\r\n        \"name\":\"CLI_TEST_VAR\",\"value\":\"CLI_TEST_VAR_VALUE\"\
+        \r\n      }\r\n    ],\"constraints\":{\r\n      \"maxWallClockTime\":\"P10675199DT2H48M5.4775807S\"\
+        ,\"retentionTime\":\"P10675199DT2H48M5.4775807S\",\"maxTaskRetryCount\":5\r\
+        \n    },\"userIdentity\":{\r\n      \"autoUser\":{\r\n        \"scope\":\"\
+        task\",\"elevationLevel\":\"nonadmin\"\r\n      }\r\n    },\"runExclusive\"\
+        :true,\"killJobOnCompletion\":true\r\n  },\"poolInfo\":{\r\n    \"poolId\"\
+        :\"azure-cli-test-paas\"\r\n  },\"metadata\":[\r\n    {\r\n      \"name\"\
+        :\"test\",\"value\":\"value\"\r\n    }\r\n  ],\"executionInfo\":{\r\n    \"\
+        startTime\":\"2017-02-28T00:01:07.8364491Z\",\"poolId\":\"azure-cli-test-paas\"\
+        \r\n  },\"onAllTasksComplete\":\"terminatejob\",\"onTaskFailure\":\"noaction\"\
+        \r\n}"}
+    headers:
+      Content-Type: [application/json;odata=minimalmetadata]
+      DataServiceVersion: ['3.0']
+      Date: ['Tue, 28 Feb 2017 00:01:13 GMT']
+      ETag: ['0x8D45F6CE6EB0980']
+      Last-Modified: ['Tue, 28 Feb 2017 00:01:10 GMT']
+      Server: [Microsoft-HTTPAPI/2.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      request-id: [9cb1abc6-c3e4-4b46-8ab0-a2e083d7e133]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"onAllTasksComplete": "terminateJob", "poolInfo": {"poolId": "azure-cli-test-paas"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['85']
+      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
+      If-Unmodified-Since: ['Mon, 27 Feb 2017 16:01:10 GMT']
+      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 batchserviceclient/2.0.0 Azure-SDK-For-Python]
+      accept-language: [en-US]
+      client-request-id: [05ff090c-fd49-11e6-bf0c-54ee750f2fc7]
+      ocp-date: ['Tue, 28 Feb 2017 00:01:15 GMT']
+      return-client-request-id: ['false']
+    method: PUT
+    uri: https://clitest1.uksouth.batch.azure.com/jobs/cli-test-job-1?timeout=30&api-version=2017-01-01.4.0
+  response:
+    body: {string: "{\r\n  \"odata.metadata\":\"https://clitest1.uksouth.batch.azure.com/$metadata#Microsoft.Azure.Batch.Protocol.Entities.Container.errors/@Element\"\
+        ,\"code\":\"ConditionNotMet\",\"message\":{\r\n    \"lang\":\"en-US\",\"value\"\
+        :\"The condition specified using HTTP conditional header(s) is not met.\\\
+        nRequestId:dfdd40c5-cc4c-40a8-b9b6-b611c02692b9\\nTime:2017-02-28T00:01:14.3759486Z\"\
+        \r\n  }\r\n}"}
+    headers:
+      Content-Length: ['367']
+      Content-Type: [application/json;odata=minimalmetadata]
+      DataServiceVersion: ['3.0']
+      Date: ['Tue, 28 Feb 2017 00:01:13 GMT']
+      Server: [Microsoft-HTTPAPI/2.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      X-Content-Type-Options: [nosniff]
+      request-id: [dfdd40c5-cc4c-40a8-b9b6-b611c02692b9]
+    status: {code: 412, message: The condition specified using HTTP conditional header(s)
+        is not met.}
+- request:
+    body: '{"onAllTasksComplete": "terminateJob", "poolInfo": {"poolId": "azure-cli-test-paas"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['85']
+      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
+      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 batchserviceclient/2.0.0 Azure-SDK-For-Python]
+      accept-language: [en-US]
+      client-request-id: [06ab0f4a-fd49-11e6-ac85-54ee750f2fc7]
+      ocp-date: ['Tue, 28 Feb 2017 00:01:16 GMT']
+      return-client-request-id: ['false']
+    method: PUT
+    uri: https://clitest1.uksouth.batch.azure.com/jobs/cli-test-job-1?timeout=30&api-version=2017-01-01.4.0
+  response:
+    body: {string: ''}
+    headers:
+      DataServiceId: ['https://clitest1.uksouth.batch.azure.com/jobs/cli-test-job-1']
+      DataServiceVersion: ['3.0']
+      Date: ['Tue, 28 Feb 2017 00:01:17 GMT']
+      ETag: ['0x8D45F6CE92A21F3']
+      Last-Modified: ['Tue, 28 Feb 2017 00:01:13 GMT']
+      Server: [Microsoft-HTTPAPI/2.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      request-id: [47140b11-ced1-4833-82a6-ddb51937170c]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
+      User-Agent: [python/3.5.1 (Windows-8.1-6.3.9600-SP0) requests/2.9.1 msrest/0.4.5
+          msrest_azure/0.4.7 batchserviceclient/2.0.0 Azure-SDK-For-Python]
+      accept-language: [en-US]
+      client-request-id: [073d93a4-fd49-11e6-bccd-54ee750f2fc7]
+      ocp-date: ['Tue, 28 Feb 2017 00:01:17 GMT']
+      return-client-request-id: ['false']
+    method: GET
+    uri: https://clitest1.uksouth.batch.azure.com/jobs/cli-test-job-1?timeout=30&api-version=2017-01-01.4.0
+  response:
+    body: {string: "{\r\n  \"odata.metadata\":\"https://clitest1.uksouth.batch.azure.com/$metadata#jobs/@Element\"\
+        ,\"id\":\"cli-test-job-1\",\"url\":\"https://clitest1.uksouth.batch.azure.com/jobs/cli-test-job-1\"\
+        ,\"eTag\":\"0x8D45F6CE92A21F3\",\"lastModified\":\"2017-02-28T00:01:13.9041779Z\"\
+        ,\"creationTime\":\"2017-02-28T00:01:07.8120094Z\",\"state\":\"active\",\"\
+        stateTransitionTime\":\"2017-02-28T00:01:07.8364491Z\",\"priority\":0,\"usesTaskDependencies\"\
+        :false,\"constraints\":{\r\n    \"maxWallClockTime\":\"P10675199DT2H48M5.4775807S\"\
+        ,\"maxTaskRetryCount\":0\r\n  },\"jobManagerTask\":{\r\n    \"id\":\"JobManager\"\
+        ,\"commandLine\":\"cmd /c set AZ_BATCH_TASK_ID\",\"environmentSettings\":[\r\
+        \n      {\r\n        \"name\":\"CLI_TEST_VAR\",\"value\":\"CLI_TEST_VAR_VALUE\"\
+        \r\n      }\r\n    ],\"constraints\":{\r\n      \"maxWallClockTime\":\"P10675199DT2H48M5.4775807S\"\
+        ,\"retentionTime\":\"P10675199DT2H48M5.4775807S\",\"maxTaskRetryCount\":5\r\
+        \n    },\"userIdentity\":{\r\n      \"autoUser\":{\r\n        \"scope\":\"\
+        task\",\"elevationLevel\":\"nonadmin\"\r\n      }\r\n    },\"runExclusive\"\
+        :true,\"killJobOnCompletion\":true\r\n  },\"poolInfo\":{\r\n    \"poolId\"\
+        :\"azure-cli-test-paas\"\r\n  },\"executionInfo\":{\r\n    \"startTime\":\"\
+        2017-02-28T00:01:07.8364491Z\",\"poolId\":\"azure-cli-test-paas\"\r\n  },\"\
+        onAllTasksComplete\":\"terminatejob\",\"onTaskFailure\":\"noaction\"\r\n}"}
+    headers:
+      Content-Type: [application/json;odata=minimalmetadata]
+      DataServiceVersion: ['3.0']
+      Date: ['Tue, 28 Feb 2017 00:01:16 GMT']
+      ETag: ['0x8D45F6CE92A21F3']
+      Last-Modified: ['Tue, 28 Feb 2017 00:01:13 GMT']
+      Server: [Microsoft-HTTPAPI/2.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      request-id: [c7c4b8f4-89cf-430e-8f98-28bd7f57f9cf]
+    status: {code: 200, message: OK}
+version: 1

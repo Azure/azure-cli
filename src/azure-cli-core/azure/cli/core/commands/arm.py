@@ -20,10 +20,11 @@ from azure.cli.core._util import CLIError, todict
 
 logger = azlogging.get_az_logger(__name__)
 
-regex = re.compile('/subscriptions/(?P<subscription>[^/]*)/resourceGroups/(?P<resource_group>[^/]*)'
-                   '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)'
-                   '(/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?'
-                   '(/(?P<grandchild_type>[^/]*)/(?P<grandchild_name>[^/]*))?')
+regex = re.compile(
+    '/subscriptions/(?P<subscription>[^/]*)/resource[gG]roups/(?P<resource_group>[^/]*)'
+    '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)'
+    '(/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?'
+    '(/(?P<grandchild_type>[^/]*)/(?P<grandchild_name>[^/]*))?')
 
 
 def resource_id(**kwargs):
@@ -126,10 +127,11 @@ def add_id_parameters(command_table):
                                 existing_values.append(parts[arg.id_part])
                             else:
                                 if isinstance(existing_values, str):
-                                    logger.warning(
-                                        "Property '%s=%s' being overriden by value '%s' from IDs parameter.",  # pylint: disable=line-too-long
-                                        arg.name, existing_values, parts[arg.id_part]
-                                    )
+                                    if not getattr(arg.type, 'configured_default_applied', None):
+                                        logger.warning(
+                                            "Property '%s=%s' being overriden by value '%s' from IDs parameter.",  # pylint: disable=line-too-long
+                                            arg.name, existing_values, parts[arg.id_part]
+                                        )
                                     existing_values = IterateValue()
                                 existing_values.append(parts[arg.id_part])
                             setattr(namespace, arg.name, existing_values)

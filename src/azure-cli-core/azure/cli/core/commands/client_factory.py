@@ -18,9 +18,9 @@ UA_AGENT = "AZURECLI/{}".format(core_version)
 ENV_ADDITIONAL_USER_AGENT = 'AZURE_HTTP_USER_AGENT'
 
 
-def get_mgmt_service_client(client_type, subscription_id=None, api_version=None):
+def get_mgmt_service_client(client_type, subscription_id=None, api_version=None, **kwargs):
     client, _ = _get_mgmt_service_client(client_type, subscription_id=subscription_id,
-                                         api_version=api_version)
+                                         api_version=api_version, **kwargs)
     return client
 
 
@@ -51,13 +51,18 @@ def configure_common_settings(client):
 
 
 def _get_mgmt_service_client(client_type, subscription_bound=True, subscription_id=None,
-                             api_version=None):
+                             api_version=None, base_url_bound=True, **kwargs):
     logger.debug('Getting management service client client_type=%s', client_type.__name__)
     profile = Profile()
     cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id)
-    client_kwargs = {'base_url': CLOUD.endpoints.resource_manager}
+    client_kwargs = {}
+    if base_url_bound:
+        client_kwargs = {'base_url': CLOUD.endpoints.resource_manager}
     if api_version:
         client_kwargs['api_version'] = api_version
+    if kwargs:
+        client_kwargs.update(kwargs)
+
     if subscription_bound:
         client = client_type(cred, subscription_id, **client_kwargs)
     else:
