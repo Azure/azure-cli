@@ -9,23 +9,146 @@ import glob
 import json
 import os
 import platform
-from subprocess import PIPE, CalledProcessError, Popen
+import stat
 import sys
-import requests
+from subprocess import PIPE, CalledProcessError, Popen, check_output
 
 import azure.cli.core.azlogging as azlogging
+import requests
 from azure.cli.core._util import CLIError
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.mgmt.compute import ComputeManagementClient
 
+import settings
+import utils
+from jenkins import Jenkins
+from spinnaker import Spinnaker
+
+logger = azlogging.get_az_logger(__name__)
+project_settings = settings.Project()
+
+# TODO: Remove and switch to SSH once templates
+# are updated
+admin_password = 'Mindaro@Pass1!'
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long,broad-except
-
-logger = azlogging.get_az_logger(__name__) # pylint: disable=invalid-name
 
 def create_continuous_deployment(remote_access_token): # pylint: disable=unused-argument
     """
     Provisions Jenkins and Spinnaker, configures CI and CD pipelines, kicks off initial build-deploy
     and saves the CI/CD information to a local project file.
     """
-    pass
+    jenkins_resource, jenkins_deployment = _deploy_jenkins()
+    spinnaker_resource, spinnaker_deployment = _deploy_spinnaker()
+
+    # Wait for deployments to complete
+    spinnaker_deployment.wait()
+    jenkins_deployment.wait()
+    jenkins_deployment_result = jenkins_deployment.result()
+
+    jenkins_url = jenkins_deployment_result.properties.outputs[
+        'jenkinsVmDns']['value']
+    jenkins_resource.configure()
+
+    spinnaker_deployment_result = spinnaker_deployment.result()
+    spinnaker_hostname = spinnaker_deployment_result.properties.outputs[
+        'hostname']['value']
+
+    _configure_spinnaker(spinnaker_resource, spinnaker_hostname)
+
+    # TODO: Spinnker won't trigger pipeline if ACR is entire empty
+    # TODO: how do we provide a correct service port when configuring Spinnaker
+    print 'Done.'
+
+def _configure_spinnaker(spinnaker_resource, spinnaker_hostname):
+    """
+    Configures the Spinnaker resource
+    """
+    print 'Configuring Spinnaker...'
+    client_id = project_settings.client_id
+    client_secret = project_settings.client_secret
+    cluster_name = project_settings.cluster_name
+    cluster_resource_group = project_settings.cluster_resource_group
+    container_registry_url = project_settings.container_registry_url
+
+    acs_info = _get_acs_info(cluster_name, cluster_resource_group)
+    spinnaker_resource.configure(
+        spinnaker_hostname, acs_info, container_registry_url, 'myrepo/peterj', client_id, client_secret)
+
+def _deploy_jenkins():
+    """
+    Starts the Jenkins deployment and returns the resource and AzurePollerOperation
+    """
+    print 'Deploying Jenkins ...'
+    git_repo = _get_git_remote_url()
+    resource_group = project_settings.resource_group
+    client_id = project_settings.client_id
+    client_secret = project_settings.client_secret
+    admin_username = project_settings.admin_username
+    container_registry_url = project_settings.container_registry_url
+
+    jenkins_dns_prefix = 'jenkins-' + utils.get_random_string()
+    jenkins_resource = Jenkins(
+        resource_group, admin_username,
+        admin_password, client_id, client_secret,
+        git_repo, jenkins_dns_prefix,
+        container_registry_url)
+    return (jenkins_resource, jenkins_resource.deploy())
+
+
+def _deploy_spinnaker():
+    """
+    Starts the Spinnaker deployment and returns the resource and AzurePollerOperation
+    """
+    print 'Deploying Spinnaker...'
+    resource_group = project_settings.resource_group
+    admin_username = project_settings.admin_username
+    public_ssh_key_filename = os.path.join(
+        os.path.expanduser("~"), '.ssh', 'id_rsa.pub')
+
+    spinnaker_dns_prefix = 'spinnaker-' + utils.get_random_string()
+    spinnaker_resource = Spinnaker(
+        resource_group, admin_username, public_ssh_key_filename, spinnaker_dns_prefix)
+    return (spinnaker_resource, spinnaker_resource.deploy())
+
+
+def _get_acs_info(name, resource_group_name):
+    """
+    Gets the ContainerService object from Azure REST API.
+
+    :param name: ACS resource name
+    :type name: String
+    :param resource_group_name: Resource group name
+    :type resource_group_name: String
+    """
+    mgmt_client = get_mgmt_service_client(ComputeManagementClient)
+    return mgmt_client.container_services.get(resource_group_name, name)
+
+
+def _get_git_remote_url():
+    """
+    Tries to find a remote for the repo in the current folder.
+    If only one remote is present return that remote,
+    if more than one remote is present it looks for origin.
+    """
+    try:
+        remotes = check_output(['git', 'remote']).strip().splitlines()
+        remote_url = ''
+        if len(remotes) == 1:
+            remote_url = check_output(
+                ['git', 'remote', 'get-url', remotes[0].decode()]).strip()
+        else:
+            remote_url = check_output(
+                ['git', 'remote', 'get-url', 'origin']).strip()
+    except ValueError as e:
+        logger.debug(e)
+        raise CLIError(
+            "A default remote was not found for the current folder. \
+            Please run this command in a git repository folder with \
+            an 'origin' remote or specify a remote using '--remote-url'")
+    except CalledProcessError as e:
+        raise CLIError(
+            'Please ensure git version 2.7.0 or greater is installed.\n' + e)
+    return remote_url.decode()
 
 def setup(dns_prefix, location, user_name):
     """
