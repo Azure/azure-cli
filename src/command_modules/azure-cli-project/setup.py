@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.1.1b4+dev'
+VERSION = '2.0.1+dev'
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -26,6 +26,10 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'pyyaml',
+    'requests',
+    'paramiko',
+    'scp',
+    'sshtunnel'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
