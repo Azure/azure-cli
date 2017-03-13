@@ -1469,7 +1469,8 @@ class VMSSCreateOptions(ResourceGroupVCRTestBase):
         self.cmd('vmss disk detach -g {} -n {} --lun 1'.format(self.resource_group, vmss_name))
         self.cmd('vmss show -g {} -n {}'.format(self.resource_group, vmss_name), checks=[
             JMESPathCheck('length(virtualMachineProfile.storageProfile.dataDisks)', 1),
-            JMESPathCheck('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGb', 3)
+            JMESPathCheck('virtualMachineProfile.storageProfile.dataDisks[0].lun', 0),
+            JMESPathCheck('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGb', 1)
         ])
 
 
