@@ -76,7 +76,7 @@ def _configure_cluster(dns_prefix, location, user_name): # pylint: disable=too-m
         sys.stdout.write('\n Preparing ARM configuration\n')
         _prepare_arm_k8(dns_prefix)
 
-        sys.stdout.write('\n Creating Resources')
+        sys.stdout.write('\n Creating Resources\n')
         sys.stdout.write(' This is going to take a while. Sit back and relax.\n')
         deployment_command = "az group deployment create --template-file {0}/k8.deploy.json --parameters \
         '@{0}/k8.deploy.parameters.tmp.json' -g {1} -n {2}".format(kubernetes_path, resource_group, dns_prefix)
@@ -371,6 +371,10 @@ def _get_creds_from_master(dns_prefix, location, user_name):
     Copies azure.json file from the master host on the Kubernetes cluster to local system.
     Provides the json data from the file.
     """
+    tenx_dir = _get_tenx_dir()
+    if not os.path.exists(tenx_dir):
+        os.mkdir(tenx_dir)
+
     azure_json_file = _get_creds_file()
     if os.path.exists(azure_json_file):
         os.remove(azure_json_file)
@@ -381,18 +385,25 @@ def _get_creds_from_master(dns_prefix, location, user_name):
         creds = json.load(credentials_file)
     return creds
 
+def _get_tenx_dir():
+    """
+    Provides the local path of .tenx dir.
+    """
+    tenx_dir = os.path.join(os.path.expanduser('~'), '.tenx')
+    return tenx_dir
+
 def _get_creds_file():
     """
     Provides the local path of azure.json file, copied from the master host on the Kubernetes cluster.
     """
-    azure_json_file = os.path.join(os.path.expanduser('~'), '.tenx', 'azure.json')
+    azure_json_file = os.path.join(_get_tenx_dir(), 'azure.json')
     return azure_json_file
 
 def _get_workspace_settings_file():
     """
     Provides settings.json file path.
     """
-    workspace_settings_file = os.path.join(os.path.expanduser('~'), '.tenx', 'settings.json')
+    workspace_settings_file = os.path.join(_get_tenx_dir(), 'settings.json')
     return workspace_settings_file
 
 def _get_ssh_private_key():
