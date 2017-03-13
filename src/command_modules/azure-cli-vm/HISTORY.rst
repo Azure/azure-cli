@@ -3,6 +3,18 @@
 Release History
 ===============
 
+2.0.1 (2017-03-13)
+++++++++++++++++++
+
+* vmss: support * to list instance view across vms (#2467)
+* core: support setting default values for common arguments like default resource group, default web, default vm (#2414)
+* no dynamic completion on vm create name (#2451)
+* VM/VMSS: reuse existing extension instance name on update (#2395)
+* Fix bug in vm show. (#2415)
+* Add --secrets for VM and VMSS (#2212)
+* Allow VM creation with specialized VHD (#2256)
+* vm/vmss: move generate_ssh_keys to 'Authentication' group (#2296)
+
 2.0.0 (2017-02-27)
 ++++++++++++++++++
 
