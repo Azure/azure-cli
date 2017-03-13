@@ -14,7 +14,7 @@ from azure.cli.command_modules.vm.custom import (_get_access_extension_upgrade_i
                                                  _LINUX_ACCESS_EXT,
                                                  _WINDOWS_ACCESS_EXT)
 from azure.cli.command_modules.vm.custom import \
-    (attach_unmanaged_data_disk, detach_data_disk)
+    (attach_unmanaged_data_disk, detach_data_disk, get_vmss_instance_view)
 from azure.cli.command_modules.vm.disk_encryption import enable, disable
 from azure.mgmt.compute.models import (NetworkProfile, StorageProfile, DataDisk, OSDisk,
                                        OperatingSystemTypes, InstanceViewStatus,
@@ -195,6 +195,17 @@ class Test_Vm_Custom(unittest.TestCase):
         self.assertTrue(mock_vm_get.called)
         mock_vm_set.assert_called_once_with(vm)
         self.assertEqual(len(vm.storage_profile.data_disks), 0)
+
+    @mock.patch('azure.cli.command_modules.vm.custom._compute_client_factory')
+    def test_show_vmss_instance_view(self, factory_mock):
+        vm_client = mock.MagicMock()
+        factory_mock.return_value = vm_client
+
+        # execute
+        get_vmss_instance_view('rg1', 'vmss1', '*')
+        # assert
+        vm_client.virtual_machine_scale_set_vms.list.assert_called_once_with('rg1', 'vmss1', expand='instanceView',
+                                                                             select='instanceView')
 
     # pylint: disable=line-too-long
     @mock.patch('azure.cli.command_modules.vm.disk_encryption._compute_client_factory', autospec=True)

@@ -52,15 +52,10 @@ def get_module_paths_with_tests(modules):
         if not os.path.exists(test_folder):
             # fallback, will be obsolete eventually when all tests folder are moved to the root of
             # it's module source folder.
-            if name == 'azure-cli':
-                test_folder = os.path.join(path, 'azure', 'cli', 'tests')
-            elif name == 'azure-cli-core':
-                test_folder = os.path.join(path, 'azure', 'cli', 'core', 'tests')
-            else:
-                name = name.replace(COMMAND_MODULE_PREFIX, '')
-                test_folder = os.path.join(path, 'azure', 'cli', 'command_modules', name, 'tests')
-                if not os.path.exists(test_folder):
-                    test_folder = None
+            name = name.replace(COMMAND_MODULE_PREFIX, '')
+            test_folder = os.path.join(path, 'azure', 'cli', 'command_modules', name, 'tests')
+            if not os.path.exists(test_folder):
+                test_folder = None
 
         if test_folder:
             yield name, path, test_folder

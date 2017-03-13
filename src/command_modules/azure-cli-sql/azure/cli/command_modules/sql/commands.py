@@ -17,7 +17,6 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
     with s.group('sql db') as c:
         c.custom_command('create', 'db_create')
         c.custom_command('copy', 'db_copy')
-        c.custom_command('create-replica', 'db_create_replica')
         c.custom_command('restore', 'db_restore')
         c.command('show', 'get')
         c.custom_command('list', 'db_list')
@@ -26,12 +25,11 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
         c.command('delete', 'delete')
         c.generic_update_command('update', 'get', 'create_or_update', custom_func_name='db_update')
 
-    with s.group('sql db replica-link') as c:
-        c.command('list', 'list_replication_links')
-        c.command('show', 'get_replication_link')
-        c.command('delete', 'delete_replication_link')
-        c.command('failover', 'failover_replication_link')
-        c.command('force-failover', 'failover_replication_link_allow_data_loss')
+    with s.group('sql db replica') as c:
+        c.custom_command('create', 'db_create_replica')
+        c.command('list-links', 'list_replication_links')
+        c.custom_command('delete-link', 'db_delete_replica_link')
+        c.custom_command('set-primary', 'db_failover')
 
     with s.group('sql dw') as c:
         c.custom_command('create', 'dw_create')
