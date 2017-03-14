@@ -3,6 +3,14 @@
 Release History
 ===============
 
+2.0.1 (2017-03-13)
+++++++++++++++++++
+
+* Improve docs to point at template deployments command. (#2466)
+* core: support setting default values for common arguments like default resource group, default web, default vm (#2414)
+* Add some docs for az lock, remove an unused flag, rename another. (#2382)
+
+
 2.0.0 (2017-02-27)
 ++++++++++++++++++
 

@@ -48,7 +48,7 @@ def list_resource_groups(tag=None): # pylint: disable=no-self-use
     groups = rcf.resource_groups.list(filter=filter_text)
     return list(groups)
 
-def create_resource_group(resource_group_name, location, tags=None):
+def create_resource_group(rg_name, location, tags=None):
     ''' Create a new resource group.
     :param str resource_group_name:the desired resource group name
     :param str location:the resource group location
@@ -60,7 +60,7 @@ def create_resource_group(resource_group_name, location, tags=None):
         location=location,
         tags=tags
     )
-    return rcf.resource_groups.create_or_update(resource_group_name, parameters)
+    return rcf.resource_groups.create_or_update(rg_name, parameters)
 
 def export_group_as_template(
         resource_group_name, include_comments=False, include_parameter_default_value=False):
@@ -472,9 +472,25 @@ def delete_lock(name, resource_group_name=None, resource_provider_namespace=None
 
 def create_lock(name, resource_group_name=None, resource_provider_namespace=None,
                 parent_resource_path=None, resource_type=None, resource_name=None,
-                level=None, notes=None, lock_id=None, lock_type=None):
-    parameters = ManagementLockObject(
-        level=level, notes=notes, id=lock_id, type=lock_type, name=name)
+                level=None, notes=None):
+    '''
+    :param name: The name of the lock.
+    :type name: str
+    :param resource_provider_namespace: Name of a resource provider.
+    :type resource_provider_namespace: str
+    :param parent_resource_path: Path to a parent resource
+    :type parent_resource_path: str
+    :param resource_type: The type for the resource with the lock.
+    :type resource_type: str
+    :param resource_name: Name of a resource that has a lock.
+    :type resource_name: str
+    :param notes: Notes about this lock.
+    :type notes: str
+    '''
+    if level != 'ReadOnly' and level != 'CanNotDelete':
+        raise CLIError('--level must be one of "ReadOnly" or "CanNotDelete"')
+    parameters = ManagementLockObject(level=level, notes=notes, name=name)
+
     lock_client = _resource_lock_client_factory()
     if resource_group_name is None:
         return lock_client.management_locks.create_or_update_at_subscription_level(name, parameters)

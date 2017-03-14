@@ -54,6 +54,43 @@ helps['keyvault certificate'] = """
     short-summary: Manage certificates.
 """
 
+helps['keyvault certificate get-default-policy'] = """
+    type: command
+    short-summary: Get a default policy for a self-signed certificate
+    long-summary: >
+        This default policy can be used in conjunction with `az keyvault create` to create a self-signed certificate.
+        The default policy can also be used as a starting point to create derivative policies. \n
+
+        Also see: https://docs.microsoft.com/en-us/rest/api/keyvault/certificates-and-policies
+    examples:
+        - name: Create a self-signed certificate with a the default policy
+          text: >
+            az keyvault create -g group-name -n vaultname -l westus --enabled-for-deployment true \\
+              --enabled-for-template-deployment true
+
+            az keyvault certificate create --vault-name vaultname -n cert1 \\
+              -p "$(az keyvault certificate get-default-policy)"
+"""
+
+helps['keyvault certificate create'] = """
+    type: command
+    long-summary: >
+        Create a Key Vault certificate. Certificates can also be used as a secrets in provisioned virtual machines.
+    examples:
+        - name: Create a self-signed certificate with a the default policy and add to a virtual machine
+          text: >
+            az keyvault certificate create --vault-name vaultname -n cert1 \\
+              -p "$(az keyvault certificate get-default-policy)"
+
+            secrets=$(az keyvault secret list-versions --vault-name vaultname \\
+              -n cert1 --query "[?attributes.enabled].id" -o tsv)
+
+            vm_secrets=$(az vm format-secret -s "$secrets") \n
+
+            az vm create -g group-name -n vm-name --admin-username deploy  \\
+              --image debian --secrets "$vm_secrets"
+"""
+
 helps['keyvault certificate pending'] = """
     type: group
     short-summary: Manage pending certificate creation operations.

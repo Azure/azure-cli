@@ -6,7 +6,7 @@
 import azure.cli.command_modules.configure._help # pylint: disable=unused-import
 
 def load_params(_):
-    pass
+    import azure.cli.command_modules.configure._params #pylint: disable=redefined-outer-name
 
 def load_commands():
     import azure.cli.command_modules.configure.commands #pylint: disable=redefined-outer-name

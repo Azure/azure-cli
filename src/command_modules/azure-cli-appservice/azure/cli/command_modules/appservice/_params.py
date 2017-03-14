@@ -46,8 +46,9 @@ register_cli_argument('appservice', 'resource_group_name', arg_type=resource_gro
 register_cli_argument('appservice', 'location', arg_type=location_type)
 
 register_cli_argument('appservice list-locations', 'linux_workers_enabled', action='store_true', help='get regions which support hosting webapps on Linux workers')
+register_cli_argument('appservice list-locations', 'sku', arg_type=sku_arg_type)
 register_cli_argument('appservice plan', 'name', arg_type=name_arg_type, help='The name of the app service plan', completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'), id_part='name')
-register_cli_argument('appservice plan create', 'name', options_list=('--name', '-n'), help="Name of the new app service plan")
+register_cli_argument('appservice plan create', 'name', options_list=('--name', '-n'), help="Name of the new app service plan", completer=None)
 register_cli_argument('appservice plan create', 'sku', arg_type=sku_arg_type)
 register_cli_argument('appservice plan create', 'is_linux', action='store_true', required=False, help='host webapp on Linux worker')
 register_cli_argument('appservice plan update', 'sku', arg_type=sku_arg_type)
@@ -55,11 +56,14 @@ register_cli_argument('appservice plan update', 'allow_pending_state', ignore_ty
 register_cli_argument('appservice plan', 'number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
 register_cli_argument('appservice plan', 'admin_site_name', help='The name of the admin web app.')
 
-register_cli_argument('appservice web', 'slot', help="the name of the slot. Default to the productions slot if not specified")
-register_cli_argument('appservice web', 'name', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name', help='name of the web')
+register_cli_argument('appservice web', 'slot', options_list=('--slot', '-s'), help="the name of the slot. Default to the productions slot if not specified")
+register_cli_argument('appservice web', 'name', configured_default='web',
+                      arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
+                      help="name of the web. You can configure the default using 'az configure --defaults web=<name>'")
 register_cli_argument('appservice web create', 'name', options_list=('--name', '-n'), help='name of the new webapp')
 register_cli_argument('appservice web create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                       help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
+register_cli_argument('appservice web browse', 'logs', options_list=('--logs', '-l'), action='store_true', help='Enable viewing the log stream immediately after launching the web app')
 
 register_cli_argument('appservice web deployment user', 'user_name', help='user name')
 register_cli_argument('appservice web deployment user', 'password', help='password, will prompt if not specified')
@@ -70,6 +74,7 @@ register_cli_argument('appservice web deployment slot', 'webapp', arg_type=name_
 register_cli_argument('appservice web deployment slot', 'auto_swap_slot', help='target slot to auto swap', default='production')
 register_cli_argument('appservice web deployment slot', 'disable', help='disable auto swap', action='store_true')
 register_cli_argument('appservice web deployment slot', 'target_slot', help="target slot to swap, default to 'production'")
+register_cli_argument('appservice web deployment slot create', 'configuration_source', help="source slot to clone configurations from. Use webapp's name to refer to the production slot")
 
 
 two_states_switch = ['true', 'false']
@@ -85,6 +90,7 @@ register_cli_argument('appservice web log tail', 'provider', help="scope the liv
 register_cli_argument('appservice web log download', 'log_file', default='webapp_logs.zip', type=file_type, completer=FilesCompleter(), help='the downloaded zipped log file path')
 
 register_cli_argument('appservice web config appsettings', 'settings', nargs='+', help="space separated app settings in a format of <name>=<value>")
+register_cli_argument('appservice web config appsettings', 'slot_settings', nargs='+', help="space separated slot app settings in a format of <name>=<value>")
 register_cli_argument('appservice web config appsettings', 'setting_names', nargs='+', help="space separated app setting names")
 
 register_cli_argument('appservice web config container', 'docker_registry_server_url', options_list=('--docker-registry-server-url', '-r'), help='the container registry server url')
@@ -101,6 +107,7 @@ register_cli_argument('appservice web config update', 'node_version', help='The 
 register_cli_argument('appservice web config update', 'php_version', help='The version used to run your web app if using PHP, e.g., 5.5, 5.6, 7.0')
 register_cli_argument('appservice web config update', 'python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
 register_cli_argument('appservice web config update', 'net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")
+register_cli_argument('appservice web config update', 'linux_fx_version', help="The runtime stack used for your linux-based webapp, e.g., \"RUBY|2.3\", \"NODE|6.6\", \"PHP|5.6\", \"DOTNETCORE|1.1.0\". See https://aka.ms/linux-stacks for more info.")
 register_cli_argument('appservice web config update', 'java_version', help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
 register_cli_argument('appservice web config update', 'java_container', help="The java container, e.g., Tomcat, Jetty")
 register_cli_argument('appservice web config update', 'java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
