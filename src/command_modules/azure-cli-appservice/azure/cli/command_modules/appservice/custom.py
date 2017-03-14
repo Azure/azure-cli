@@ -585,19 +585,26 @@ def set_deployment_user(user_name, password=None):
     result = client.update_publishing_user(user)
     return result
 
-def get_publish_profile(resource_group_name, name, slot=None):
-    from azure.mgmt.web.models import PublishingProfileFormat 
-    client = web_client_factory()
-    if slot is None:
-        content = client.web_apps.list_publishing_profile_xml_with_secrets(resource_group_name, name, PublishingProfileFormat)
-    else:
-        content = client.web_apps.list_publishing_profile_xml_with_secrets(resource_group_name, name, slot, PublishingProfileFormat)
+def list_publish_profiles(resource_group_name, name, slot=None):
+    from azure.mgmt.web.models import PublishingProfileFormat
+    import xmltodict
 
-    return {
-        'raw':str(content)
-        }
+    content = _generic_site_operation(resource_group_name, name,
+                                      'list_publishing_profile_xml_with_secrets', slot)
+    full_xml = ''
+    for f in content:
+        full_xml += f.decode()
 
+    profiles = xmltodict.parse(full_xml, xml_attribs=True)['publishData']['publishProfile']
+    converted = []
+    for profile in profiles:
+        new = {}
+        for key in profile:
+            # strip the leading '@' xmltodict put in for attributes
+            new[key.lstrip('@')] = profile[key]
+        converted.append(new)
 
+    return converted
 
 def view_in_browser(resource_group_name, name, slot=None, logs=False):
     site = _generic_site_operation(resource_group_name, name, 'get', slot)

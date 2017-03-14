@@ -144,9 +144,9 @@ helps['appservice web deployment'] = """
     short-summary: Manage web application deployments.
 """
 
-helps['appservice web deployment list-site-credentials'] = """
+helps['appservice web deployment list-publishing-profiles'] = """
     type: command
-    short-summary: Show site-level deployment credentials.
+    short-summary: get publishing endpoints, credentials, database connection strings, etc
 """
 
 helps['appservice web deployment slot auto-swap'] = """
