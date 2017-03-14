@@ -466,8 +466,7 @@ def _execute_command(command, ignore_failure=False):
     if ignore_failure:
         for err in process.stderr:
             logger.warning(err)
-
-    if not ignore_failure:
+    else:
         if process.returncode != 0:
             raise CLIError(CalledProcessError(process.returncode, command))
 
