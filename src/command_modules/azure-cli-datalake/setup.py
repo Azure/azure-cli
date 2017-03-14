@@ -55,6 +55,7 @@ setup(
         'azure.cli.command_modules',
     ],
     packages=[
+        'azure.cli.command_modules.datalake',
         'azure.cli.command_modules.datalake.store',
         'azure.cli.command_modules.datalake.analytics',
     ],
