@@ -69,7 +69,9 @@ def enable(resource_group_name, vm_name,  # pylint: disable=too-many-arguments,t
     if is_linux:
         image_reference = getattr(vm.storage_profile, 'image_reference', None)
         if image_reference:
-            _check_encrypt_is_supported(image_reference, volume_type)
+            result, message = _check_encrypt_is_supported(image_reference, volume_type)
+            if not result:
+                logger.warning(message)
 
     # sequence_version should be unique
     sequence_version = uuid.uuid4()
@@ -310,7 +312,7 @@ def _check_encrypt_is_supported(image_reference, volume_type):
 
     # custom image?
     if not offer or not publisher or not sku:
-        return True
+        return (True, None)
 
     supported = [
         {
@@ -347,11 +349,12 @@ def _check_encrypt_is_supported(image_reference, volume_type):
         },)
 
     for image in supported:
-        if (image['publisher'] == publisher and
-                image['sku'] == sku and
-                image['offer'].lower().startswith(offer.lower())):
-            return True
+        if (image['publisher'].lower() == publisher.lower() and
+                sku.lower().startswith(image['sku'].lower()) and
+                offer.lower().startswith(image['offer'].lower())):
+            return (True, None)
 
     sku_list = ['{} {}'.format(a['offer'], a['sku']) for a in supported]
-    message = "Encryption is not suppored for current VM. Supported are '{}'".format(sku_list)
-    raise CLIError(message)
+    # pylint: disable=line-too-long
+    message = "Encryption might fail as current VM uses a distro not in the known list, which are '{}'".format(sku_list)
+    return (False, message)
