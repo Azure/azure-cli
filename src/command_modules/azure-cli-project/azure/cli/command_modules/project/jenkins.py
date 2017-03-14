@@ -5,6 +5,7 @@
 
 import paramiko
 
+import azure.cli.command_modules.project.utils as utils
 from azure.cli.command_modules.project.deployments import DeployableResource
 # pylint: disable=line-too-long, too-many-arguments
 
@@ -99,9 +100,9 @@ class Jenkins(DeployableResource):
         if output:
             _, stdout, stderr = ssh.exec_command(command)
             for line in stdout.readlines():
-                print line
+                utils.writeline(line)
             for line in stderr.readlines():
-                print 'ERR: ' + line
+                utils.writeline('ERR: ' + line)
         ssh.close()
         return stdout, stderr
 
