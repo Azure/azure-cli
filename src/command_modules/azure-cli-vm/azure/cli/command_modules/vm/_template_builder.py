@@ -493,11 +493,12 @@ def build_vmss_storage_account_pool_resource(loop_name, location, tags, storage_
     return storage_resource
 
 
+# pylint: disable=line-too-long
 def build_vmss_autoscale_resource(vmss_name, location, tags, start_count,
                                   scale_in_cpu, scale_in_increment, scale_in_min,
                                   scale_out_cpu, scale_out_increment, scale_out_max):
     autoscale_properties = {
-        'name': 'cpuautoscale',
+        'name': 'cpuautoscale_{}'.format(vmss_name),
         'enabled': True,
         'targetResourceUri': "[resourceId('Microsoft.Compute/virtualMachineScaleSets/', '{}')]".format(vmss_name),
         'profiles': [
@@ -550,12 +551,12 @@ def build_vmss_autoscale_resource(vmss_name, location, tags, start_count,
         ]
     }
     autoscale_resource = {
-        'name': 'cpuautoscale',
+        'name': 'cpuautoscale_{}'.format(vmss_name),
         'location': location,
         'tags': tags,
         'type': 'Microsoft.Insights/autoscaleSettings',
         'apiVersion': '2015-04-01',
-        'dependsOn': [ 'Microsoft.Compute/virtualMachineScaleSets/{}'.format(vmss_name) ],
+        'dependsOn': ['Microsoft.Compute/virtualMachineScaleSets/{}'.format(vmss_name)],
         'properties': autoscale_properties
     }
     return autoscale_resource

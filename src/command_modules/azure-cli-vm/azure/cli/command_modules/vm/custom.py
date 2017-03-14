@@ -1742,8 +1742,7 @@ def create_vmss(vmss_name, resource_group_name, image,
     if secrets:
         secrets = _merge_secrets([load_json(secret) for secret in secrets])
 
-    if any((enable_autoscale, scale_in_cpu, scale_in_increment, scale_in_increment,
-            scale_out_cpu, scale_out_increment, scale_out_max)):
+    if enable_autoscale:
         autoscale_resource = build_vmss_autoscale_resource(
             vmss_name, location, tags, instance_count,
             scale_in_cpu, scale_in_increment, scale_in_min,
@@ -1791,8 +1790,10 @@ def create_vmss(vmss_name, resource_group_name, image,
 
 
 def create_vmss_autoscale(vmss_name, resource_group_name, location=None, tags=None,
+                          validate=False, no_wait=False,
                           scale_in_min=1, scale_in_cpu=25, scale_in_increment=1,
-                          scale_out_max=10, scale_out_cpu=75, scale_out_increment=1):
+                          scale_out_max=10, scale_out_cpu=75, scale_out_increment=1,
+                          enable_autoscale=True):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core._util import random_string
     from azure.cli.command_modules.vm._template_builder import (
@@ -1807,12 +1808,13 @@ def create_vmss_autoscale(vmss_name, resource_group_name, location=None, tags=No
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
     autoscale_resource = build_vmss_autoscale_resource(
-        vmss_name, location, scale_in_min,
+        vmss_name, location, tags, scale_in_min,
         scale_in_cpu, scale_in_increment, scale_in_min,
         scale_out_cpu, scale_out_increment, scale_out_max)
+    autoscale_resource['dependsOn'] = []
     master_template.add_resource(autoscale_resource)
-    master_template.add_output('Autoscale', vmss_name, 'Microsoft.Insights', 'autoscaleSettings',
-                               output_type='object')
+    master_template.add_output('Autoscale', 'cpuautoscale_{}'.format(vmss_name),
+                               'Microsoft.Insights', 'autoscaleSettings', output_type='object')
     template = master_template.build()
 
     # deploy ARM template
@@ -1825,7 +1827,7 @@ def create_vmss_autoscale(vmss_name, resource_group_name, location=None, tags=No
         return client.validate(resource_group_name, deployment_name, properties, raw=no_wait)
 
     # creates the VMSS deployment
-    return client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)                
+    return client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
 
 
 def create_av_set(availability_set_name, resource_group_name,

@@ -16,7 +16,7 @@ from azure.cli.core.commands.parameters import \
     (location_type, get_one_of_subscription_locations,
      get_resource_name_completion_list, tags_type, file_type, enum_choice_list, ignore_type)
 from azure.cli.command_modules.vm._actions import \
-    (load_images_from_aliases_doc, get_vm_sizes, _resource_not_exists)
+    (load_images_from_aliases_doc, get_vm_sizes, _resource_not_exists, VmssAutoScaleEnableAction)
 from azure.cli.command_modules.vm._validators import \
     (validate_nsg_name, validate_vm_nics, validate_vm_nic, process_vm_create_namespace,
      process_vmss_create_namespace, process_image_create_namespace,
@@ -148,6 +148,14 @@ for scope in ['vm', 'vmss']:
     register_cli_argument(scope, 'no_auto_upgrade', action='store_true', help='by doing this, extension system will not pick the highest minor version for the specified version number, and will not auto update to the latest build/revision number on any scale set updates in future.')
     register_cli_argument('{} create'.format(scope), 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing', arg_group='Authentication')
 
+register_cli_argument('vmss', 'enable_autoscale', arg_group='Autoscale', action='store_true', help='Create with CPU-based autoscale settings. Assumed if one or more scaling arguments are supplied.')
+register_cli_argument('vmss', 'scale_out_cpu', arg_group='Autoscale', action=VmssAutoScaleEnableAction, help='CPU percentage at which which to scale out.')
+register_cli_argument('vmss', 'scale_out_increment', arg_group='Autoscale', action=VmssAutoScaleEnableAction, help='Number of VM instances to add when scaling out.')
+register_cli_argument('vmss', 'scale_out_max', arg_group='Autoscale', action=VmssAutoScaleEnableAction, help='Maximum number of VMs to provision.')
+register_cli_argument('vmss', 'scale_in_cpu', arg_group='Autoscale', action=VmssAutoScaleEnableAction, help='CPU percentage at which to scale in.')
+register_cli_argument('vmss', 'scale_in_increment', arg_group='Autoscale', action=VmssAutoScaleEnableAction, help='Number of VM instances to remove when scaling in.')
+register_cli_argument('vmss', 'scale_in_min', arg_group='Autoscale', action=VmssAutoScaleEnableAction, help='Minimum number of VMs to keep provisioned.')
+register_cli_argument('vmss autoscale create', 'location', location_type, validator=get_default_location_from_resource_group)
 
 register_cli_argument('vm image list', 'image_location', location_type)
 register_cli_argument('vm image', 'publisher_name', options_list=('--publisher', '-p'))
@@ -178,14 +186,6 @@ register_cli_argument('vm create', 'name', name_arg_type, validator=_resource_no
 register_cli_argument('vmss create', 'name', name_arg_type)
 register_cli_argument('vmss create', 'nat_backend_port', default=None, help='Backend port to open with NAT rules.  Defaults to 22 on Linux and 3389 on Windows.')
 register_cli_argument('vmss create', 'single_placement_group', default=None, help="Enable single placement group. This flag will default to True if instance count <=100, and default to False for instance count >100.", **enum_choice_list(['true', 'false']))
-
-register_cli_argument('vmss', 'enable_autoscale', arg_group='Autoscale', action='store_true', help='Create with CPU-based autoscale settings. Assumed if one or more scaling arguments are supplied.')
-register_cli_argument('vmss', 'scale_out_cpu', arg_group='Autoscale', help='CPU percentage at which which to scale out.')
-register_cli_argument('vmss', 'scale_out_increment', arg_group='Autoscale', help='Number of VM instances to add when scaling out.')
-register_cli_argument('vmss', 'scale_out_max', arg_group='Autoscale', help='Maximum number of VMs to provision.')
-register_cli_argument('vmss', 'scale_in_cpu', arg_group='Autoscale', help='CPU percentage at which to scale in.')
-register_cli_argument('vmss', 'scale_in_increment', arg_group='Autoscale', help='Number of VM instances to remove when scaling in.')
-register_cli_argument('vmss', 'scale_in_min', arg_group='Autoscale', help='Minimum number of VMs to keep provisioned.')
 
 for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'location', location_type, help='Location in which to create VM and related resources. Defaults to the resource group\'s location.')
