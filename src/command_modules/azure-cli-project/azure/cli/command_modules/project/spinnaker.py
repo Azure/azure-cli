@@ -6,6 +6,7 @@
 import tempfile
 import paramiko
 
+import azure.cli.command_modules.project.utils as utils
 from azure.cli.command_modules.project.deployments import DeployableResource
 
 # pylint: disable=line-too-long, too-many-arguments
@@ -63,11 +64,10 @@ class Spinnaker(DeployableResource):
         command = 'curl --silent {} | sudo bash -s -- -an {} -rg {} -rp {}'.format(
             add_pipeline_script_url, registry_account_name, registry_url, registry_repository)
         _, stdout, stderr = ssh.exec_command(command)
-        print 'COMMAND: ', command
         for line in stdout.readlines():
-            print line
+            utils.writeline(line)
         for line in stderr.readlines():
-            print 'ERR: ' + line
+            utils.writeline('ERR: ' + line)
         ssh.close()
 
     def _configure_registry(self, spinnaker_hostname, registry_url, client_id, client_secret):
@@ -93,9 +93,9 @@ class Spinnaker(DeployableResource):
             configure_k8s_script_url, args)
         _, stdout, stderr = ssh.exec_command(command)
         for line in stdout.readlines():
-            print line
+            utils.writeline(line)
         for line in stderr.readlines():
-            print 'ERR: ' + line
+            utils.writeline('ERR: ' + line)
         ssh.close()
 
     @staticmethod
