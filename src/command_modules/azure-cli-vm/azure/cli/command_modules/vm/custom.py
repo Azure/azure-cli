@@ -1790,6 +1790,44 @@ def create_vmss(vmss_name, resource_group_name, image,
     return client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
 
 
+def create_vmss_autoscale(vmss_name, resource_group_name, location=None, tags=None,
+                          scale_in_min=1, scale_in_cpu=25, scale_in_increment=1,
+                          scale_out_max=10, scale_out_cpu=75, scale_out_increment=1):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from azure.cli.core._util import random_string
+    from azure.cli.command_modules.vm._template_builder import (
+        ArmTemplateBuilder, build_vmss_autoscale_resource)
+
+    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
+
+    # determine final defaults and calculated values
+    tags = tags or {}
+
+    # Build up the ARM template
+    master_template = ArmTemplateBuilder()
+    autoscale_resource = build_vmss_autoscale_resource(
+        vmss_name, location, scale_in_min,
+        scale_in_cpu, scale_in_increment, scale_in_min,
+        scale_out_cpu, scale_out_increment, scale_out_max)
+    master_template.add_resource(autoscale_resource)
+    master_template.add_output('Autoscale', vmss_name, 'Microsoft.Insights', 'autoscaleSettings',
+                               output_type='object')
+    template = master_template.build()
+
+    # deploy ARM template
+    deployment_name = 'vmss_autoscale_deploy_' + random_string(32)
+    client = get_mgmt_service_client(ResourceManagementClient).deployments
+    properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
+    if validate:
+        from azure.cli.command_modules.vm._vm_utils import log_pprint_template
+        log_pprint_template(template)
+        return client.validate(resource_group_name, deployment_name, properties, raw=no_wait)
+
+    # creates the VMSS deployment
+    return client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)                
+
+
 def create_av_set(availability_set_name, resource_group_name,
                   platform_update_domain_count, platform_fault_domain_count,
                   location=None, no_wait=False,
