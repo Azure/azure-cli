@@ -194,13 +194,8 @@ def _configure_cluster(dns_prefix, location, user_name): # pylint: disable=too-m
         utils.writeline('Preparing ARM configuration')
         _prepare_arm_k8(dns_prefix)
 
-<<<<<<< 16a30ebdec7b4ebdcb5ff06dc536112ff2441326
-        sys.stdout.write('\n Creating Resources\n')
-        sys.stdout.write(' This is going to take a while. Sit back and relax.\n')
-=======
         utils.writeline('Creating Resources')
         utils.writeline('This is going to take a while. Sit back and relax.')
->>>>>>> PR feedback + making code run in both 2.7 and python3
         deployment_command = "az group deployment create --template-file {0}/k8.deploy.json --parameters \
         '@{0}/k8.deploy.parameters.tmp.json' -g {1} -n {2}".format(kubernetes_path, resource_group, dns_prefix)
         _execute_command(deployment_command)
