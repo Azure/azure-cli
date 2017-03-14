@@ -295,8 +295,6 @@ class KeyVaultCertificateScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('provider', 'Test'),
             JMESPathCheck('attributes.enabled', True)
         ])
-        with self.assertRaises(CLIError):
-            self.cmd('keyvault certificate issuer create --vault-name {} --issuer-name issuer1 --provider-name Test'.format(kv))
         self.cmd('keyvault certificate issuer show --vault-name {} --issuer-name issuer1'.format(kv), checks=[
             JMESPathCheck('provider', 'Test'),
             JMESPathCheck('attributes.enabled', True)

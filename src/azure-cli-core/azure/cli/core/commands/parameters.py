@@ -90,7 +90,7 @@ def get_generic_completion_list(generic_list):
     return completer
 
 
-class CaseInsenstiveList(list):  # pylint: disable=too-few-public-methods
+class CaseInsensitiveList(list):  # pylint: disable=too-few-public-methods
 
     def __contains__(self, other):
         return next((True for x in self if other.lower() == x.lower()), False)
@@ -107,8 +107,33 @@ def enum_choice_list(data):
     def _type(value):
         return next((x for x in choices if x.lower() == value.lower()), value) if value else value
     params = {
-        'choices': CaseInsenstiveList(choices),
+        'choices': CaseInsensitiveList(choices),
         'type': _type
+    }
+    return params
+
+
+def three_state_flag(positive_label='true', negative_label='false'):
+    """ Creates a flag-like argument that can also accept positive/negative values. This allows
+    consistency between create commands that typically use flags and update commands that require
+    positive/negative values without introducing breaking changes. Flag-like behavior always
+    implies the affirmative.
+    - positive_label: label for the positive value (ex: 'enabled')
+    - negative_label: label for the negative value (ex: 'disabled')
+    """
+    choices = [positive_label, negative_label]
+
+    # pylint: disable=too-few-public-methods
+    class ThreeStateAction(argparse.Action):
+
+        def __call__(self, parser, namespace, values, option_string=None):
+            values = values or positive_label
+            setattr(namespace, self.dest, values == positive_label)
+
+    params = {
+        'choices': CaseInsensitiveList(choices),
+        'nargs': '?',
+        'action': ThreeStateAction
     }
     return params
 
