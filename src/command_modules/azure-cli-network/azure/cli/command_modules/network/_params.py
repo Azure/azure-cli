@@ -22,7 +22,8 @@ from azure.cli.core.commands import \
 from azure.cli.core.commands.parameters import (location_type, get_resource_name_completion_list,
                                                 enum_choice_list, tags_type, ignore_type,
                                                 get_generic_completion_list, file_type)
-from azure.cli.core.commands.validators import MarkSpecifiedAction
+from azure.cli.core.commands.validators import \
+    (MarkSpecifiedAction, get_default_location_from_resource_group)
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
 from azure.cli.command_modules.network._client_factory import _network_client_factory
 from azure.cli.command_modules.network._validators import \
@@ -39,7 +40,7 @@ from azure.cli.command_modules.network._validators import \
      validate_auth_cert, validate_cert, validate_inbound_nat_rule_id_list,
      validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
      validate_address_pool_name_or_id, validate_servers, load_cert_file, validate_metadata,
-     validate_peering_type, validate_dns_record_type, validate_location,
+     validate_peering_type, validate_dns_record_type,
      get_public_ip_validator, get_nsg_validator, get_subnet_validator,
      get_virtual_network_validator)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
@@ -244,7 +245,7 @@ register_cli_argument('network express-route', 'service_provider_name', options_
 register_cli_argument('network express-route', 'peering_location', help="Name of the peering location. It must exactly match one of the available peering locations from the 'list-service-providers' command.")
 register_cli_argument('network express-route', 'device_path', options_list=('--path',), **enum_choice_list(device_path_values))
 register_cli_argument('network express-route', 'vlan_id', type=int)
-register_cli_argument('network express-route', 'location', location_type, validator=validate_location)
+register_cli_argument('network express-route', 'location', location_type, validator=get_default_location_from_resource_group)
 
 register_cli_argument('network express-route auth', 'circuit_name', circuit_name_type)
 register_cli_argument('network express-route auth', 'authorization_name', name_arg_type, id_part='child_name', help='Authorization name')
@@ -328,7 +329,7 @@ register_cli_argument('network nic ip-config inbound-nat-rule', 'inbound_nat_rul
 # NSG
 register_cli_argument('network nsg', 'network_security_group_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'), id_part='name')
 register_cli_argument('network nsg create', 'name', name_arg_type)
-register_cli_argument('network nsg create', 'location', location_type, validator=validate_location)
+register_cli_argument('network nsg create', 'location', location_type, validator=get_default_location_from_resource_group)
 
 # NSG Rule
 register_cli_argument('network nsg rule', 'security_rule_name', name_arg_type, id_part='child_name', help='Name of the network security group rule')

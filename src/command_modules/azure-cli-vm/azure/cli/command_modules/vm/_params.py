@@ -11,6 +11,7 @@ from azure.mgmt.compute.models import (CachingTypes,
 from azure.mgmt.storage.models import SkuName
 
 from azure.cli.core.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
+from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import \
     (location_type, get_one_of_subscription_locations,
      get_resource_name_completion_list, tags_type, file_type, enum_choice_list, ignore_type)
@@ -19,7 +20,7 @@ from azure.cli.command_modules.vm._actions import \
 from azure.cli.command_modules.vm._validators import \
     (validate_nsg_name, validate_vm_nics, validate_vm_nic, process_vm_create_namespace,
      process_vmss_create_namespace, process_image_create_namespace,
-     process_disk_or_snapshot_create_namespace, validate_vm_disk, validate_location,
+     process_disk_or_snapshot_create_namespace, validate_vm_disk,
      process_disk_encryption_namespace)
 
 
@@ -86,7 +87,7 @@ register_cli_argument('vm disk', 'lun', type=int, help='0-based logical unit num
 
 register_cli_argument('vm availability-set', 'availability_set_name', name_arg_type, id_part='name',
                       completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'), help='Name of the availability set')
-register_cli_argument('vm availability-set create', 'availability_set_name', name_arg_type, validator=validate_location, help='Name of the availability set')
+register_cli_argument('vm availability-set create', 'availability_set_name', name_arg_type, validator=get_default_location_from_resource_group, help='Name of the availability set')
 register_cli_argument('vm availability-set create', 'unmanaged', action='store_true', help='contained VMs should use unmanaged disks')
 register_cli_argument('vm availability-set create', 'platform_update_domain_count', type=int, help='Update Domain count. Example: 2')
 register_cli_argument('vm availability-set create', 'platform_fault_domain_count', type=int, help='Fault Domain count. Example: 2')
