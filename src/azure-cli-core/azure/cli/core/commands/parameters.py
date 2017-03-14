@@ -113,18 +113,22 @@ def enum_choice_list(data):
     return params
 
 
-def three_state_flag(none_default=True, use_enabled_disabled=False):
-
-    choices = ['enabled', 'disabled'] if use_enabled_disabled else ['true', 'false']
-    none_defaults_to = choices[0] if none_default else choices[1]  # default to enabled/true
+def three_state_flag(positive_label='true', negative_label='false'):
+    """ Creates a flag-like argument that can also accept positive/negative values. This allows
+    consistency between create commands that typically use flags and update commands that require
+    positive/negative values without introducing breaking changes. Flag-like behavior always
+    implies the affirmative.
+    - positive_label: label for the positive value (ex: 'enabled')
+    - negative_label: label for the negative value (ex: 'disabled')
+    """
+    choices = [positive_label, negative_label]
 
     # pylint: disable=too-few-public-methods
     class ThreeStateAction(argparse.Action):
 
         def __call__(self, parser, namespace, values, option_string=None):
-            setattr(namespace, self.dest, values.lower() if values else none_defaults_to)
-            val = getattr(namespace, self.dest, None)
-            setattr(namespace, self.dest, val in ['true', 'enabled'])
+            values = values or positive_label
+            setattr(namespace, self.dest, values == positive_label)
 
     params = {
         'choices': CaseInsensitiveList(choices),
