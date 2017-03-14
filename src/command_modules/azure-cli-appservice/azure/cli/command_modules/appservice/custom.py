@@ -585,6 +585,20 @@ def set_deployment_user(user_name, password=None):
     result = client.update_publishing_user(user)
     return result
 
+def get_publish_profile(resource_group_name, name, slot=None):
+    from azure.mgmt.web.models import PublishingProfileFormat 
+    client = web_client_factory()
+    if slot is None:
+        content = client.web_apps.list_publishing_profile_xml_with_secrets(resource_group_name, name, PublishingProfileFormat)
+    else:
+        content = client.web_apps.list_publishing_profile_xml_with_secrets(resource_group_name, name, slot, PublishingProfileFormat)
+
+    return {
+        'raw':str(content)
+        }
+
+
+
 def view_in_browser(resource_group_name, name, slot=None, logs=False):
     site = _generic_site_operation(resource_group_name, name, 'get', slot)
     url = site.default_host_name
