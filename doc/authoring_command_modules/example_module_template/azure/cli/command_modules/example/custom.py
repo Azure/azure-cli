@@ -3,10 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import azure.cli.command_modules.example._help #pylint: disable=unused-import
+import azure.cli.core.azlogging as azlogging
+logger = azlogging.get_az_logger(__name__)
 
-def load_params(_):
-    import azure.cli.command_modules.example._params #pylint: disable=redefined-outer-name
+def example_custom(example_param=None):
+    result = {'example_param': example_param}
+    return result
 
-def load_commands():
-    import azure.cli.command_modules.example.commands #pylint: disable=redefined-outer-name
+
+def example_custom_two():
+    return ['hello', 'world']
