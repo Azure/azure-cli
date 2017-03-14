@@ -7,6 +7,8 @@ Release History
 ++++++++++++++++++
 
 * Return 200 if webhook is skipped by the bot instead of 400.
+* Create release on async thread to prevent GitHub webhook timeouts.
+* Clone and tag the correct commit to prevent race conditions with multiple merges to the repo at once.
 
 0.1.0 (2017-01-13)
 ++++++++++++++++++
