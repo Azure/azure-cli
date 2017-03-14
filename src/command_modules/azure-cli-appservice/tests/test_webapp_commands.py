@@ -22,7 +22,7 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
     def body(self):
         webapp_name = 'webapp-e2e3'
         plan = 'webapp-e2e-plan'
-        result = self.cmd('appservice plan create -g {} -n {}'.format(self.resource_group, plan))
+        self.cmd('appservice plan create -g {} -n {}'.format(self.resource_group, plan))
         self.cmd('appservice plan list -g {}'.format(self.resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', plan),
@@ -42,17 +42,17 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
             JMESPathCheck('sku.name', 'S1')
             ])
 
-        result = self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, webapp_name, plan), checks=[
+        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, webapp_name, plan), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', webapp_name),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
             ])
-        result = self.cmd('appservice web list -g {}'.format(self.resource_group), checks=[
+        self.cmd('appservice web list -g {}'.format(self.resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', webapp_name),
             JMESPathCheck('[0].hostNames[0]', webapp_name + '.azurewebsites.net')
             ])
-        result = self.cmd('appservice web show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
+        self.cmd('appservice web show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
             JMESPathCheck('name', webapp_name),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
             ])
@@ -67,13 +67,17 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
         test_cmd = ('appservice web log config -g {} -n {} --level verbose'.format(self.resource_group, webapp_name) + ' '
                     '--application-logging true --detailed-error-messages true --failed-request-tracing true --web-server-logging filesystem')
         self.cmd(test_cmd)
-        result = self.cmd('appservice web config show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
+        self.cmd('appservice web config show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
             JMESPathCheck('detailedErrorLoggingEnabled', True),
             JMESPathCheck('httpLoggingEnabled', True),
             JMESPathCheck('scmType', 'LocalGit'),
             JMESPathCheck('requestTracingEnabled', True)
             #TODO: contact webapp team for where to retrieve 'level'
             ])
+
+        # show publish profile info
+        result = self.cmd('appservice web deployment list-publishing-profiles -g {} -n {}'.format(self.resource_group, webapp_name))
+        self.assertTrue(result[1]['publishUrl'].startswith('ftp://'))
 
         self.cmd('appservice web stop -g {} -n {}'.format(self.resource_group, webapp_name))
         self.cmd('appservice web show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
