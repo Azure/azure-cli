@@ -10,11 +10,13 @@ from azure.cli.core.help_files import helps
 helps['batch'] = """
     type: group
     short-summary: Manage Azure Batch.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch account'] = """
     type: group
     short-summary: Manage your Batch accounts.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch account list'] = """
@@ -35,11 +37,13 @@ helps['batch account set'] = """
 helps['batch account autostorage-keys'] = """
     type: group
     short-summary: Manage the access keys for the auto storage account configured for your Batch account.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch account keys'] = """
     type: group
     short-summary: Manage your Batch account keys.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch account login'] = """
@@ -50,6 +54,7 @@ helps['batch account login'] = """
 helps['batch application'] = """
     type: group
     short-summary: Manage your Batch applications.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch application set'] = """
@@ -60,6 +65,7 @@ helps['batch application set'] = """
 helps['batch application package'] = """
     type: group
     short-summary: Manage your Batch application packages.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch application package create'] = """
@@ -75,26 +81,31 @@ helps['batch application package activate'] = """
 helps['batch application summary'] = """
     type: group
     short-summary: View a summary of your Batch application packages.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch location'] = """
     type: group
     short-summary: Manage Batch service options for a subscription at the region level.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch location quotas'] = """
     type: group
     short-summary: Manage Batch service quotas at the region level.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch certificate'] = """
     type: group
     short-summary: Manage your Batch certificates.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch task file'] = """
     type: group
     short-summary: Manage your Batch task files.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch task file download'] = """
@@ -105,6 +116,7 @@ helps['batch task file download'] = """
 helps['batch node file'] = """
     type: group
     short-summary: Manage your Batch compute node files.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch node file download'] = """
@@ -115,11 +127,13 @@ helps['batch node file download'] = """
 helps['batch job'] = """
     type: group
     short-summary: Manage your Batch jobs.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch job all-statistics'] = """
     type: group
     short-summary: View statistics of all the jobs under your Batch account.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch job all-statistics show'] = """
@@ -130,16 +144,19 @@ helps['batch job all-statistics show'] = """
 helps['batch job prep-release-status'] = """
     type: group
     short-summary: View the status of your job preparation and release tasks.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch job-schedule'] = """
     type: group
     short-summary: Manage your Batch job schedules.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch node user'] = """
     type: group
     short-summary: Manage the user accounts of your Batch compute node.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch node user create'] = """
@@ -155,41 +172,49 @@ helps['batch node user reset'] = """
 helps['batch node'] = """
     type: group
     short-summary: Manage your Batch compute nodes.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch node remote-login-settings'] = """
     type: group
     short-summary: Retrieve the remote login settings for a Batch compute node.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch node remote-desktop'] = """
     type: group
     short-summary: Retrieve the remote desktop protocol for a Batch compute node.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch node scheduling'] = """
     type: group
     short-summary: Manage task scheduling for a Batch compute node.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch pool'] = """
     type: group
     short-summary: Manage your Batch pools.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch pool os'] = """
     type: group
     short-summary: Manage the operating system of your Batch pools.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch pool autoscale'] = """
     type: group
     short-summary: Manage automatic scaling of your Batch pools.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch pool all-statistics'] = """
     type: group
     short-summary: View statistics of all pools under your Batch account.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch pool all-statistics show'] = """
@@ -200,21 +225,25 @@ helps['batch pool all-statistics show'] = """
 helps['batch pool usage-metrics'] = """
     type: group
     short-summary: View usage metrics of your Batch pools.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch pool node-agent-skus'] = """
     type: group
     short-summary: Retrieve node agent SKUs of pools using a Virtual Machine Configuration.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch task'] = """
     type: group
     short-summary: Manage your Batch tasks.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch task subtask'] = """
     type: group
     short-summary: Manage subtask information of your Batch task.
+    long-summary: These commmands are in preview.
 """
 
 helps['batch certificate create'] = """
