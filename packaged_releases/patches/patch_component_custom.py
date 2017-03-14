@@ -5,8 +5,14 @@
 
 from azure.cli.core._util import CLIError
 
+MSG_TMPL = """
+az component and subcommands are not available with the current Azure CLI installation.
+If installed with apt-get, please use apt-get to update this installation.
+{}
+"""
+
 def _raise_error(msg):
-    raise CLIError("This operation is not available in this packaged version of the CLI.\n{}".format(msg))
+    raise CLIError(MSG_TMPL.format(msg))
 
 def list_components():
     """ List the installed components """
