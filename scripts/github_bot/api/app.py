@@ -15,7 +15,7 @@ from flask import Flask, jsonify, request, Response
 from subprocess import check_call, CalledProcessError
 from uritemplate import URITemplate, expand
 
-VERSION = '0.1.0'
+VERSION = '0.1.1'
 
 # GitHub API constants
 GITHUB_UA_PREFIX = 'GitHub-Hookshot/'
@@ -198,9 +198,9 @@ def handle_github_webhook():
         elif event == GITHUB_EVENT_NAME_PR:
             return _handle_pr_event(payload)
         else:
-            return jsonify(error="Event '{}' not supported.".format(event)), 400
+            return jsonify(error="Event '{}' not supported.".format(event))
     except AssertionError as e:
-        return jsonify(error=str(e)), 400
+        return jsonify(error=str(e))
     return jsonify(error='Unable to handle request.'), 500
 
 if __name__ == "__main__":
