@@ -32,6 +32,14 @@ def get_sql_recommended_elastic_pools_operations(kwargs):
     return get_sql_management_client(kwargs).recommended_elastic_pools
 
 
+def get_sql_database_blob_auditing_policies_operations(kwargs):
+    return get_sql_management_client(kwargs).database_blob_auditing_policies
+
+
+def get_sql_database_threat_detection_policies_operations(kwargs):
+    return get_sql_management_client(kwargs).database_threat_detection_policies
+    
+
 # COMMANDS UTILITIES
 
 def create_service_adapter(service_model, service_class):
