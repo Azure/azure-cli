@@ -254,7 +254,7 @@ def show(resource_group_name, vm_name):
     if is_linux:
         try:
             message_object = json.loads(substatus_message)
-        except json.decoder.JSONDecodeError:
+        except Exception:  # pylint: disable=broad-except
             message_object = None  # might be from outdated extension
 
         if message_object and ('os' in message_object):
