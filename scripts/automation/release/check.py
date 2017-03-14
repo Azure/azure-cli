@@ -18,13 +18,15 @@ def error_exit(msg):
     print('ERROR: '+msg, file=sys.stderr)
     sys.exit(1)
 
-def check_component_revisions(component_name, r_start, r_end):
+def check_component_revisions(component_name, r_start, r_end, git_log_verbose=False):
     for comp_name, comp_path in get_all_module_paths():
         if comp_name == component_name:
             revision_range = "{}..{}".format(r_start, r_end)
             try:
+                log_format = '%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' \
+                            if git_log_verbose else '* %s'
                 check_call(["git", "log",
-                            "--pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s'",
+                            "--pretty=format:{}".format(log_format),
                             revision_range, "--", comp_path, ":(exclude)*/tests/*"],
                            cwd=get_repo_root())
             except CalledProcessError as e:
@@ -33,10 +35,10 @@ def check_component_revisions(component_name, r_start, r_end):
     raise error_exit("No component found with name '{}'".format(component_name))
 
 
-def check_all_component_revisions(r_start, r_end):
+def check_all_component_revisions(r_start, r_end, git_log_verbose=False):
     for comp_name, _ in get_all_module_paths():
         print('<<< {} >>>'.format(comp_name))
-        check_component_revisions(comp_name, r_start, r_end)
+        check_component_revisions(comp_name, r_start, r_end, git_log_verbose)
         print()
 
 
@@ -53,13 +55,17 @@ if __name__ == '__main__':
                              "(e.g. release-azure-cli-vm-0.1.0)")
     parser.add_argument('--git-revision-end', '-e', default='HEAD',
                         help='Git tag (or commit) to use as the end of the revision range.')
+    parser.add_argument('--git-log-verbose', action='store_true',
+                        help='Full git log format with timestamp, author etc.')
     args = parser.parse_args()
     if args.git_revision_start.startswith('azure-cli') and not args.component:
         args.component = re.match(REGEX_COMPONENT_NAME, args.git_revision_start).group(1)
     if args.component:
         check_component_revisions(args.component,
                                   args.git_revision_start,
-                                  args.git_revision_end)
+                                  args.git_revision_end,
+                                  args.git_log_verbose)
     else:
         check_all_component_revisions(args.git_revision_start,
-                                      args.git_revision_end)
+                                      args.git_revision_end,
+                                      args.git_log_verbose)
