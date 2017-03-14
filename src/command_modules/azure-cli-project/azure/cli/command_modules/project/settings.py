@@ -21,7 +21,10 @@ class Project(object):
             os.path.expanduser('~'), '.azure', 'projectResource.json')
         if os.path.exists(self.settings_file):
             with open(self.settings_file) as file_object:
-                self.settings = json.load(file_object)
+                try:
+                    self.settings = json.load(file_object)
+                except ValueError:
+                    pass
         else:
             self.settings = None
 
