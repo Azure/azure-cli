@@ -97,7 +97,7 @@ def _parse_pr_title(title):
 def create_release(component_name, release_assets_dir, merge_commit_sha):
     working_dir = tempfile.mkdtemp()
     check_call(['git', 'clone', 'https://github.com/{}'.format(ENV_REPO_NAME), working_dir])
-    check_call(['git', 'checkout', merge_commit_sha])
+    check_call(['git', 'checkout', merge_commit_sha], cwd=working_dir)
     check_call(['pip', 'install', '-e', 'scripts'], cwd=working_dir)
     check_call(['python', '-m', 'scripts.automation.release.run', '-c', component_name,
                 '-r', ENV_PYPI_REPO, '--dest', release_assets_dir], cwd=working_dir)
