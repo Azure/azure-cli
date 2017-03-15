@@ -5,8 +5,10 @@
 
 import azure.cli.command_modules.example._help #pylint: disable=unused-import
 
+
 def load_params(_):
     import azure.cli.command_modules.example._params #pylint: disable=redefined-outer-name
+
 
 def load_commands():
     import azure.cli.command_modules.example.commands #pylint: disable=redefined-outer-name

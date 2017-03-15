@@ -7,5 +7,6 @@
 
 from azure.cli.core.commands import cli_command
 
+
 cli_command(__name__, 'example command1', 'azure.cli.command_modules.example.custom#example_custom')
 cli_command(__name__, 'example command2', 'azure.cli.command_modules.example.custom#example_custom_two')
