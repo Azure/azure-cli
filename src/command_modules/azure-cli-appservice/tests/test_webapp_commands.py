@@ -22,7 +22,7 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
     def body(self):
         webapp_name = 'webapp-e2e3'
         plan = 'webapp-e2e-plan'
-        self.cmd('appservice plan create -g {} -n {}'.format(self.resource_group, plan))
+        plan_result = self.cmd('appservice plan create -g {} -n {}'.format(self.resource_group, plan))
         self.cmd('appservice plan list -g {}'.format(self.resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', plan),
@@ -42,7 +42,7 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
             JMESPathCheck('sku.name', 'S1')
             ])
 
-        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, webapp_name, plan), checks=[
+        self.cmd('appservice web create -g {} -n {} --plan {} -l {}'.format(self.resource_group, webapp_name, plan_result['id'], self.location), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', webapp_name),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
@@ -57,8 +57,8 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
             ])
 
-        result = self.cmd('appservice web source-control config-local-git -g {} -n {}'.format(self.resource_group, webapp_name))
-        self.assertTrue(result['url'].endswith(webapp_name + '.git'))
+        plan_result = self.cmd('appservice web source-control config-local-git -g {} -n {}'.format(self.resource_group, webapp_name))
+        self.assertTrue(plan_result['url'].endswith(webapp_name + '.git'))
         self.cmd('appservice web source-control show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
             JMESPathCheck('repoUrl', 'https://{}.scm.azurewebsites.net'.format(webapp_name))
             ])
@@ -76,8 +76,8 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
             ])
 
         # show publish profile info
-        result = self.cmd('appservice web deployment list-publishing-profiles -g {} -n {}'.format(self.resource_group, webapp_name))
-        self.assertTrue(result[1]['publishUrl'].startswith('ftp://'))
+        plan_result = self.cmd('appservice web deployment list-publishing-profiles -g {} -n {}'.format(self.resource_group, webapp_name))
+        self.assertTrue(plan_result[1]['publishUrl'].startswith('ftp://'))
 
         self.cmd('appservice web stop -g {} -n {}'.format(self.resource_group, webapp_name))
         self.cmd('appservice web show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
@@ -93,9 +93,50 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
 
         self.cmd('appservice web delete -g {} -n {}'.format(self.resource_group, webapp_name))
         #test empty service plan should be automatically deleted.
-        result = self.cmd('appservice plan list -g {}'.format(self.resource_group), checks=[
+        plan_result = self.cmd('appservice plan list -g {}'.format(self.resource_group), checks=[
             JMESPathCheck('length(@)', 0)
             ])
+
+class WebappSimpleCreateTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(WebappSimpleCreateTest, self).__init__(__file__, test_method, resource_group='azurecli-webapp-simple')
+
+    def test_webapp_simple_create(self):
+        self.execute()
+
+    def body(self):
+        webapp_name = 'cli-webapp-simple'
+        webapp_name2 = 'cli-webapp-simple2'
+        webapp_name3 = 'cli-webapp-simple3'
+
+        # create web 1
+        result = self.cmd('appservice web create -g {} -n {} --is-linux'.format(self.resource_group, webapp_name))
+        self.assertEqual(webapp_name, result['name'])
+        self.assertTrue(result['serverFarmId'].endswith('/' + webapp_name + '_plan'))
+        
+        # create web 2
+        result = self.cmd('appservice web create -g {} -n {} --is-linux'.format(self.resource_group, webapp_name2))
+        self.assertEqual(webapp_name2, result['name'])
+        self.assertTrue(result['serverFarmId'].endswith('/' + webapp_name + '_plan'))
+
+        # verify we reuse the plan for second web
+        self.cmd('resource list -g {}'.format(self.resource_group), checks=[
+            JMESPathCheck('length([])', 3),
+            JMESPathCheck("length([?name=='{}_plan'])".format(webapp_name), 1)
+            ])
+
+        # create web 3 which explictly calls out the plan name
+        result = self.cmd('appservice web create -g {} -n {} --plan winplan --is-linux --sku b1'.format(self.resource_group, webapp_name3))
+        self.assertEqual(webapp_name3, result['name'])
+        self.assertTrue(result['serverFarmId'].endswith('/winplan'))
+
+        # verify we create a new plan
+        self.cmd('resource list -g {}'.format(self.resource_group), checks=[
+            JMESPathCheck('length([])', 5),
+            JMESPathCheck("length([?name=='winplan'])".format(webapp_name), 1)
+            ])
+
 
 class WebappConfigureTest(ResourceGroupVCRTestBase):
 
@@ -109,8 +150,8 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
     def set_up(self):
         super(WebappConfigureTest, self).set_up()
         plan = 'webapp-config-plan'
-        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, plan))
-        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, plan))
+        plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, plan))
+        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, plan_result['id']))
 
     def body(self):
         #site config testing
@@ -222,9 +263,7 @@ class AppServiceBadErrorPolishTest(ResourceGroupVCRTestBase):
     def set_up(self):
         super(AppServiceBadErrorPolishTest, self).set_up()
         self.cmd('group create -n {} -l westus'.format(self.resource_group2))
-        self.cmd('appservice plan create -g {} -n {} --sku b1'.format(self.resource_group, self.plan))
-        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, self.plan))
-        self.cmd('appservice plan create -g {} -n {} --sku b1'.format(self.resource_group2, self.plan))
+        self.cmd('appservice web create -g {} -n {}'.format(self.resource_group, self.webapp_name))
 
     def tear_down(self):
         super(AppServiceBadErrorPolishTest, self).tear_down()
@@ -232,7 +271,7 @@ class AppServiceBadErrorPolishTest(ResourceGroupVCRTestBase):
 
     def body(self):
         # we will try to produce an error by try creating 2 webapp with same name in different groups
-        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group2, self.webapp_name, self.plan),
+        self.cmd('appservice web create -g {} -n {}'.format(self.resource_group2, self.webapp_name),
                  allowed_exceptions='Website with given name {} already exists'.format(self.webapp_name))
 
 #this test doesn't contain the ultimate verification which you need to manually load the frontpage in a browser
@@ -246,11 +285,11 @@ class LinuxWebappSceanrioTest(ResourceGroupVCRTestBase):
     def body(self):
         plan = 'webapp-linux-plan'
         webapp = 'webapp-linux1'
-        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(self.resource_group, plan), checks=[
+        plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(self.resource_group, plan), checks=[
             JMESPathCheck('reserved', True), #this weird field means it is a linux
             JMESPathCheck('sku.name', 'S1'),
             ])
-        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, webapp, plan), checks=[
+        self.cmd('appservice web create -g {} -n {} --plan {} -l {}'.format(self.resource_group, webapp, plan_result['id'], self.location), checks=[
             JMESPathCheck('name', webapp),
             ])
         self.cmd('appservice web config update -g {} -n {} --startup-file {}'.format(self.resource_group, webapp, 'process.json'), checks=[
@@ -275,14 +314,12 @@ class WebappGitScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
     def body(self):
-        plan = 'webapp-git-plan5'
         webapp = 'web-git-test2'
 
         #You can create and use any repros with the 3 files under "./sample_web"
         test_git_repo = 'https://github.com/yugangw-msft/azure-site-test'
 
-        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, plan))
-        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, webapp, plan))
+        self.cmd('appservice web create -g {} -n {}'.format(self.resource_group, webapp))
 
         self.cmd('appservice web source-control config -g {} -n {} --repo-url {} --branch {} --manual-integration'.format(self.resource_group, webapp, test_git_repo, 'master'), checks=[
             JMESPathCheck('repoUrl', test_git_repo),
@@ -319,8 +356,8 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
     def body(self):
-        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, self.plan))
-        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp, self.plan))
+        plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, self.plan))
+        self.cmd('appservice web create -g {} -n {} --plan {} -l {}'.format(self.resource_group, self.webapp, plan_result['id'], self.location))
         #You can create and use any repros with the 3 files under "./sample_web" and with a 'staging 'branch
         slot = 'staging'
         slot2 = 'dev'
@@ -396,8 +433,8 @@ class WebappSSLCertTest(ResourceGroupVCRTestBase):
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = 'DB2BA6898D0B330A93E7F69FF505C61EF39921B6'
-        self.cmd('appservice plan create -g {} -n {} --sku B1'.format(self.resource_group, plan))
-        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, plan))
+        plan_result = self.cmd('appservice plan create -g {} -n {} --sku B1'.format(self.resource_group, plan))
+        self.cmd('appservice web create -g {} -n {} --plan {} -l {}'.format(self.resource_group, self.webapp_name, plan_result['id'], self.location))
         self.cmd('appservice web config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {}'.format(self.resource_group, self.webapp_name, pfx_file, cert_password), checks=[
             JMESPathCheck('thumbprint', cert_thumbprint)
             ])
@@ -423,8 +460,8 @@ class WebappBackupConfigScenarioTest(ResourceGroupVCRTestBase):
     def set_up(self):
         super(WebappBackupConfigScenarioTest, self).set_up()
         plan = 'webapp-backup-plan'
-        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, plan))
-        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, plan))
+        plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, plan))
+        self.cmd('appservice web create -g {} -n {} --plan {} -l {}'.format(self.resource_group, self.webapp_name, plan_result['id'], self.location))
 
     def body(self):
         sas_url = 'https://azureclistore.blob.core.windows.net/sitebackups?sv=2015-04-05&sr=c&sig=%2FjH1lEtbm3uFqtMI%2BfFYwgrntOs1qhGnpGv9uRibJ7A%3D&se=2017-02-14T04%3A53%3A28Z&sp=rwdl'
@@ -490,8 +527,8 @@ class WebappBackupRestoreScenarioTest(ResourceGroupVCRTestBase):
     def set_up(self):
         super(WebappBackupRestoreScenarioTest, self).set_up()
         plan = 'webapp-backup-plan'
-        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, plan))
-        self.cmd('appservice web create -g {} -n {} --plan {}'.format(self.resource_group, self.webapp_name, plan))
+        plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(self.resource_group, plan))
+        self.cmd('appservice web create -g {} -n {} --plan {} -l {}'.format(self.resource_group, self.webapp_name, plan_result['id'], self.location))
 
     def body(self):
         sas_url = 'https://azureclistore.blob.core.windows.net/sitebackups?sv=2015-04-05&sr=c&sig=PJpE6swgZ6oZNFTlUz0GOIl87KKdvvgX7Ap8YXKHRp8%3D&se=2017-03-10T23%3A40%3A24Z&sp=rwdl'
