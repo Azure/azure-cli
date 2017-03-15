@@ -16,7 +16,7 @@ helps['keyvault'] = """
 helps['keyvault create'] = """
     type: command
     short-summary: Create a key vault.
-    long-summary: Default permissions are created for the current user or service principal unless the --no-self-perms flag is specified. These commands are in preview.
+    long-summary: Default permissions are created for the current user or service principal unless the --no-self-perms flag is specified.
 """
 
 helps['keyvault delete'] = """
