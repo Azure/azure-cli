@@ -843,7 +843,7 @@ def set_extension(
     :param vm_extension_name: the name of the extension
     :param publisher: the name of extension publisher
     :param version: the version of extension.
-    :param settings: extension settings in json format. A json file path is also eccepted
+    :param settings: extension settings in json format. A json file path is also accepted
     :param protected_settings: protected settings in json format for sensitive information like
     credentials. A json file path is also accepted.
     :param no_auto_upgrade: by doing this, extension system will not pick the highest minor version
