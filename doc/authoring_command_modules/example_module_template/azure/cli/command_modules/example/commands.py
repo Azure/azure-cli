@@ -3,12 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import azure.cli.command_modules.example._help #pylint: disable=unused-import
+#pylint: disable=line-too-long
+
+from azure.cli.core.commands import cli_command
 
 
-def load_params(_):
-    import azure.cli.command_modules.example._params #pylint: disable=redefined-outer-name
-
-
-def load_commands():
-    import azure.cli.command_modules.example.commands #pylint: disable=redefined-outer-name
+cli_command(__name__, 'example command1', 'azure.cli.command_modules.example.custom#example_custom')
+cli_command(__name__, 'example command2', 'azure.cli.command_modules.example.custom#example_custom_two')
