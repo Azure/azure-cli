@@ -99,6 +99,8 @@ class CaseInsensitiveList(list):  # pylint: disable=too-few-public-methods
 def enum_choice_list(data):
     """ Creates the argparse choices and type kwargs for a supplied enum type or list of strings. """
     # transform enum types, otherwise assume list of string choices
+    if not data:
+        return {}
     try:
         choices = [x.value for x in data]
     except AttributeError:
