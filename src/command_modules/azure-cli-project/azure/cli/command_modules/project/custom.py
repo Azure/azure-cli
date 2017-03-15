@@ -41,7 +41,6 @@ def create_continuous_deployment(remote_access_token): # pylint: disable=unused-
     # Wait for deployments to complete
     spinnaker_deployment.wait()
     jenkins_deployment.wait()
-    _ = jenkins_deployment.result()
     jenkins_resource.configure()
 
     spinnaker_deployment_result = spinnaker_deployment.result()
@@ -65,9 +64,10 @@ def _configure_spinnaker(spinnaker_resource, spinnaker_hostname):
     cluster_resource_group = project_settings.cluster_resource_group
     container_registry_url = project_settings.container_registry_url
 
+    repo_name = '{}/{}'.format(project_settings.admin_username, 'myfirstapp')
     acs_info = _get_acs_info(cluster_name, cluster_resource_group)
     spinnaker_resource.configure(
-        spinnaker_hostname, acs_info, container_registry_url, 'myrepo/peterj', client_id, client_secret)
+        spinnaker_hostname, acs_info, container_registry_url, repo_name, client_id, client_secret)
 
 def _deploy_jenkins():
     """
