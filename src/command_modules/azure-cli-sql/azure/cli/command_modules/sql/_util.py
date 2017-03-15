@@ -38,7 +38,7 @@ def get_sql_database_blob_auditing_policies_operations(kwargs):
 
 def get_sql_database_threat_detection_policies_operations(kwargs):
     return get_sql_management_client(kwargs).database_threat_detection_policies
-    
+
 
 # COMMANDS UTILITIES
 

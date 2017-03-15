@@ -67,7 +67,7 @@ database_blob_auditing_policy_operations = create_service_adapter(
     'azure.mgmt.sql.operations.database_blob_auditing_policies_operations',
     'DatabaseBlobAuditingPoliciesOperations')
 
-with ServiceGroup(__name__, 
+with ServiceGroup(__name__,
                   get_sql_database_blob_auditing_policies_operations,
                   database_blob_auditing_policy_operations) as s:
     with s.group('sql db audit-policy') as c:
@@ -78,7 +78,7 @@ database_threat_detection_policy_operations = create_service_adapter(
     'azure.mgmt.sql.operations.database_threat_detection_policies_operations',
     'DatabaseThreatDetectionPoliciesOperations')
 
-with ServiceGroup(__name__, 
+with ServiceGroup(__name__,
                   get_sql_database_threat_detection_policies_operations,
                   database_threat_detection_policy_operations) as s:
     with s.group('sql db threat-detection-policy') as c:

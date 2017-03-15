@@ -131,6 +131,9 @@ def _configure_db_create_params(
     if create_mode not in [CreateMode.restore, CreateMode.point_in_time_restore]:
         cmd.ignore('restore_point_in_time')
 
+    # Only applicable to restore create mode. However using this from CLI isn't tested yet.
+    cmd.ignore('source_database_deletion_date')
+
     # 'collation', 'edition', and 'max_size_bytes' are ignored (or rejected) when creating a copy
     # or secondary because their values are determined by the source db.
     if create_mode in [CreateMode.copy, CreateMode.non_readable_secondary,
@@ -151,6 +154,10 @@ def _configure_db_create_params(
 
         # Edition is always 'DataWarehouse'
         c.ignore('edition')
+
+    # recovery_services_recovery_point_resource_id is only for long-term-retention restore
+    if create_mode != CreateMode.restore_long_term_retention_backup:
+        c.ignore('recovery_services_recovery_point_resource_id')
 
 
 with ParametersContext(command='sql db') as c:
