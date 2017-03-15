@@ -3,12 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import azure.cli.command_modules.example._help #pylint: disable=unused-import
+from azure.cli.core.help_files import helps
 
+# pylint: disable=line-too-long
 
-def load_params(_):
-    import azure.cli.command_modules.example._params #pylint: disable=redefined-outer-name
-
-
-def load_commands():
-    import azure.cli.command_modules.example.commands #pylint: disable=redefined-outer-name
+helps['example'] = """
+            type: group
+            short-summary: Example group description.
+            """

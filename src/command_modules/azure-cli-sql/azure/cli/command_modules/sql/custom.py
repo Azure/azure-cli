@@ -235,7 +235,12 @@ def db_delete_replica_link(  # pylint: disable=too-many-arguments
         resource_group_name,
         # Partner dbs must have the same name as one another
         partner_server_name,
-        partner_resource_group_name=None):
+        partner_resource_group_name=None,
+        # Base command code handles confirmation, but it passes '--yes' parameter to us if
+        # provided. We don't care about this parameter and it gets handled weirdly if we
+        # expliclty specify it with default value here (e.g. `yes=None` or `yes=True`), receiving
+        # it in kwargs seems to work.
+        **kwargs):  # pylint: disable=unused-argument
 
     # Determine optional values
     partner_resource_group_name = partner_resource_group_name or resource_group_name
