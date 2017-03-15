@@ -7,6 +7,7 @@ import paramiko
 
 import azure.cli.command_modules.project.utils as utils
 from azure.cli.command_modules.project.deployments import DeployableResource
+import azure.cli.core.azlogging as azlogging  # pylint: disable=invalid-name
 logger = azlogging.get_az_logger(__name__) # pylint: disable=invalid-name
 # pylint: disable=line-too-long, too-many-arguments
 
