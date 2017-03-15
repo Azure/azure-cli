@@ -10,13 +10,13 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 helps['keyvault'] = """
     type: group
     short-summary: Safeguard and maintain control of keys, secrets, and certificates.
-    long-summary: If you don't have the keyvault component installed, add it with `az component update --add keyvault`
+    long-summary: If you don't have the keyvault component installed, add it with `az component update --add keyvault`.
 """
 
 helps['keyvault create'] = """
     type: command
     short-summary: Create a key vault.
-    long-summary: Default permissions are created for the current user or service principal unless the --no-self-perms flag is specified.
+    long-summary: "Default permissions are created for the current user or service principal unless the --no-self-perms flag is specified."
 """
 
 helps['keyvault delete'] = """
