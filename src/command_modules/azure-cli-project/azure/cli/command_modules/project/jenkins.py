@@ -7,6 +7,7 @@ import paramiko
 
 import azure.cli.command_modules.project.utils as utils
 from azure.cli.command_modules.project.deployments import DeployableResource
+logger = azlogging.get_az_logger(__name__) # pylint: disable=invalid-name
 # pylint: disable=line-too-long, too-many-arguments
 
 class Jenkins(DeployableResource):
@@ -55,16 +56,19 @@ class Jenkins(DeployableResource):
         """
         Adds a docker build job to Jenkins instance
         """
+        initial_password = self._get_initial_password()
         add_build_job_script_url = \
             'https://raw.githubusercontent.com/Azure/azure-devops-utils/v0.2.0/jenkins/add-docker-build-job.sh'
         args = ' '.join([
-            '-j {}'.format('http://localhost:8080'),
+            '-j {}'.format('http://127.0.0.1:8080'),
             '-ju {}'.format('admin'),
-            '-jp {}'.format(self._get_initial_password()),
+            '-jp {}'.format(initial_password),
             '-g {}'.format(self.git_repo_url),
             '-r {}'.format(self.container_registry_url),
             '-ru {}'.format(self.client_id),
             '-rp {}'.format(self.client_secret),
+            '-sps {}'.format('"* * * * *"'),
+            # TODO: Pull the registry repository name out of here 
             '-rr {}/{}'.format(self.admin_username, 'myfirstapp')])
         command = 'curl --silent {} | sudo bash -s -- {}'.format(add_build_job_script_url, args)
         self._run_remote_command(command)
@@ -75,7 +79,7 @@ class Jenkins(DeployableResource):
         """
         command = 'sudo cat /var/lib/jenkins/secrets/initialAdminPassword'
         stdout, _ = self._run_remote_command(command, False)
-        return stdout.readline().strip()
+        return stdout[0].strip()
 
     def _unsecure_instance(self):
         """
@@ -94,23 +98,24 @@ class Jenkins(DeployableResource):
         ssh = paramiko.SSHClient()
         ssh.load_system_host_keys()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect('{}@{}.westus.cloudapp.com'.format(self.dns_prefix, self.admin_username),
+        ssh.connect('{}.westus.cloudapp.azure.com'.format(self.dns_prefix),
                     username=self.admin_username,
                     password=self.admin_password)
+
+        _, stdout, stderr = ssh.exec_command(command)
+        stdout_lines = stdout.readlines()
+        stderr_lines = stderr.readlines()
         if output:
-            _, stdout, stderr = ssh.exec_command(command)
-            for line in stdout.readlines():
+            for line in stdout_lines:
                 utils.writeline(line)
-            for line in stderr.readlines():
-                utils.writeline('ERR: ' + line)
-        ssh.close()
-        return stdout, stderr
+            for line in stderr_lines:
+                logger.debug(line)
+        return stdout_lines, stderr_lines
 
     def _create_params(self):
         """
         Creates parameters for ARM deployment
         """
-        # TODO: USE BASIC ARM TEMPLATE!!
         return {
             'adminUsername': {
                 'value': self.admin_username
@@ -120,14 +125,5 @@ class Jenkins(DeployableResource):
             },
             'jenkinsDnsLabelPrefix': {
                 'value': self.dns_prefix
-            },
-            'servicePrincipalClientId': {
-                'value': self.client_id
-            },
-            'servicePrincipalClientSecret': {
-                'value': self.client_secret
-            },
-            'gitRepository': {
-                'value': self.git_repo_url
             }
         }
