@@ -10,19 +10,16 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 helps['appservice'] = """
     type: group
     short-summary: Manage your Azure Web apps and App Service plans.
-    long-summary: These commands are in preview.
 """
 
 helps['appservice web'] = """
     type: group
     short-summary: Manage web apps.
-    long-summary: These commands are in preview.
 """
 
 helps['appservice web config'] = """
     type: group
     short-summary: Configure a web app.
-    long-summary: These commands are in preview.
 """
 
 helps['appservice web config show'] = """
@@ -38,7 +35,6 @@ helps['appservice web config update'] = """
 helps['appservice web config appsettings'] = """
     type: group
     short-summary: Configure web app settings.
-    long-summary: These commands are in preview.
 """
 
 helps['appservice web config appsettings show'] = """
@@ -66,7 +62,6 @@ helps['appservice web config appsettings delete'] = """
 helps['appservice web config container'] = """
     type: group
     short-summary: Configure container specific settings.
-    long-summary: These commands are in preview.
 """
 
 helps['appservice web config container show'] = """
@@ -87,13 +82,11 @@ helps['appservice web config container delete'] = """
 helps['appservice web config hostname'] = """
     type: group
     short-summary: Configure hostnames.
-    long-summary: These commands are in preview.
 """
 
 helps['appservice web config ssl'] = """
     type: group
     short-summary: Configure SSL certificates.
-    long-summary: These commands are in preview.
 """
 
 helps['appservice web config ssl list'] = """
@@ -124,25 +117,21 @@ helps['appservice web config ssl upload'] = """
 helps['appservice web deployment'] = """
     type: group
     short-summary: Manage web app deployments.
-    long-summary: These commands are in preview.
 """
 
 helps['appservice web deployment slot'] = """
     type: group
     short-summary: Manage web app deployment slots.
-    long-summary: These commands are in preview.
 """
 
 helps['appservice web deployment slot auto-swap'] = """
     type: group
     short-summary: Enable or disable auto-swap for a web app deployment slot.
-    long-summary: These commands are in preview.
 """
 
 helps['appservice web log'] = """
     type: group
     short-summary: Manage web app logs.
-    long-summary: These commands are in preview.
 """
 
 helps['appservice web log config'] = """
@@ -153,7 +142,6 @@ helps['appservice web log config'] = """
 helps['appservice web deployment'] = """
     type: group
     short-summary: Manage web application deployments.
-    long-summary: These commands are in preview.
 """
 
 helps['appservice web deployment list-publishing-profiles'] = """
@@ -197,7 +185,6 @@ helps['appservice web deployment slot delete'] = """
 helps['appservice web deployment user'] = """
     type: group
     short-summary: Manage user credentials for a deployment.
-    long-summary: These commands are in preview.
 """
 
 helps['appservice web deployment user set'] = """
@@ -215,13 +202,11 @@ helps['appservice web deployment user set'] = """
 helps['appservice web deployment slot'] = """
     type: group
     short-summary: Manage deployment slots.
-    long-summary: These commands are in preview.
 """
 
 helps['appservice web source-control'] = """
     type: group
     short-summary: Manage source control systems.
-    long-summary: These commands are in preview.
 """
 
 helps['appservice web source-control config'] = """
@@ -261,7 +246,6 @@ helps['appservice web source-control sync'] = """
 helps['appservice plan'] = """
     type: group
     short-summary: Manage App Service plans.
-    long-summary: These commands are in preview.
 """
 
 helps['appservice plan update'] = """

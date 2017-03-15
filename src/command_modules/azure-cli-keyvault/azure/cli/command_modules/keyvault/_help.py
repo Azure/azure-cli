@@ -10,7 +10,7 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 helps['keyvault'] = """
     type: group
     short-summary: Safeguard and maintain control of keys, secrets, and certificates.
-    long-summary: If you don't have the keyvault component installed, add it with `az component update --add keyvault`. These commands are in preview.
+    long-summary: If you don't have the keyvault component installed, add it with `az component update --add keyvault`
 """
 
 helps['keyvault create'] = """
@@ -42,19 +42,16 @@ helps['keyvault update'] = """
 helps['keyvault key'] = """
     type: group
     short-summary: Manage keys.
-    long-summary: These commands are in preview.
 """
 
 helps['keyvault secret'] = """
     type: group
     short-summary: Manage secrets.
-    long-summary: These commands are in preview.
 """
 
 helps['keyvault certificate'] = """
     type: group
     short-summary: Manage certificates.
-    long-summary: These commands are in preview.
 """
 
 helps['keyvault certificate get-default-policy'] = """
@@ -97,23 +94,19 @@ helps['keyvault certificate create'] = """
 helps['keyvault certificate pending'] = """
     type: group
     short-summary: Manage pending certificate creation operations.
-    long-summary: These commands are in preview.
 """
 
 helps['keyvault certificate contact'] = """
     type: group
     short-summary: Manage contacts for certificate management.
-    long-summary: These commands are in preview.
 """
 
 helps['keyvault certificate issuer'] = """
     type: group
     short-summary: Manage certificate issuer information.
-    long-summary: These commands are in preview.
 """
 
 helps['keyvault certificate issuer admin'] = """
     type: group
     short-summary: Manage admin information for certificate issuers.
-    long-summary: These commands are in preview.
 """
