@@ -5,11 +5,13 @@
 
 # pylint: disable=protected-access, unsubscriptable-object
 import json
+import os
 import unittest
 import mock
 from azure.mgmt.resource.subscriptions.models import (SubscriptionState, Subscription,
                                                       SubscriptionPolicies, spendingLimit)
-from azure.cli.core._profile import Profile, CredsCache, SubscriptionFinder, CLOUD
+from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
+                                     ServicePrincipalAuth, CLOUD)
 from azure.cli.core._util import CLIError
 
 
@@ -452,7 +454,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
                                     lambda _: mock_arm_client)
         mgmt_resource = 'https://management.core.windows.net/'
         # action
-        subs = finder.find_from_service_principal_id('my app', 'my secret',
+        subs = finder.find_from_service_principal_id('my app', ServicePrincipalAuth('my secret'),
                                                      self.tenant_id, mgmt_resource)
 
         # assert
@@ -462,8 +464,32 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         mock_auth_context.acquire_token_with_client_credentials.assert_called_once_with(
             mgmt_resource, 'my app', 'my secret')
 
+    @mock.patch('adal.AuthenticationContext', autospec=True)
+    def test_find_subscriptions_from_service_principal_using_cert(self, mock_auth_context):
+        mock_auth_context.acquire_token_with_client_certificate.return_value = self.token_entry1
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        finder = SubscriptionFinder(lambda _, _2: mock_auth_context,
+                                    None,
+                                    lambda _: mock_arm_client)
+        mgmt_resource = 'https://management.core.windows.net/'
+
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        test_cert_file = os.path.join(curr_dir, 'sp_cert.pem')
+
+        # action
+        subs = finder.find_from_service_principal_id('my app', ServicePrincipalAuth(test_cert_file),
+                                                     self.tenant_id, mgmt_resource)
+
+        # assert
+        self.assertEqual([self.subscription1], subs)
+        mock_arm_client.tenants.list.assert_not_called()
+        mock_auth_context.acquire_token.assert_not_called()
+        mock_auth_context.acquire_token_with_client_certificate.assert_called_once_with(
+            mgmt_resource, 'my app', mock.ANY, mock.ANY)
+
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
-    def test_credscache_load_tokens_and_sp_creds(self, mock_read_file):
+    def test_credscache_load_tokens_and_sp_creds_with_secret(self, mock_read_file):
         test_sp = {
             "servicePrincipalId": "myapp",
             "servicePrincipalTenant": "mytenant",
@@ -477,6 +503,21 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         # assert
         token_entries = [entry for _, entry in creds_cache.adal_token_cache.read_items()]
         self.assertEqual(token_entries, [self.token_entry1])
+        self.assertEqual(creds_cache._service_principal_creds, [test_sp])
+
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
+    def test_credscache_load_tokens_and_sp_creds_with_cert(self, mock_read_file):
+        test_sp = {
+            "servicePrincipalId": "myapp",
+            "servicePrincipalTenant": "mytenant",
+            "certificateFile": 'junkcert.pem'
+        }
+        mock_read_file.return_value = [test_sp]
+
+        # action
+        creds_cache = CredsCache()
+
+        # assert
         self.assertEqual(creds_cache._service_principal_creds, [test_sp])
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
@@ -498,10 +539,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         creds_cache = CredsCache()
 
         # action
-        creds_cache.save_service_principal_cred(
-            test_sp2['servicePrincipalId'],
-            test_sp2['accessToken'],
-            test_sp2['servicePrincipalTenant'])
+        creds_cache.save_service_principal_cred(test_sp2)
 
         # assert
         token_entries = [e for _, e in creds_cache.adal_token_cache.read_items()]  # noqa: F812
@@ -575,6 +613,28 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         mock_open_for_write.assert_called_with(mock.ANY, 'w+')
         self.assertEqual(token, 'new token')
         self.assertEqual(token_type, token_entry2['tokenType'])
+
+    def test_service_principal_auth_client_secret(self):
+        sp_auth = ServicePrincipalAuth('verySecret!')
+        result = sp_auth.get_entry_to_persist('sp_id1', 'tenant1')
+        self.assertEqual(result, {
+            'servicePrincipalId': 'sp_id1',
+            'servicePrincipalTenant': 'tenant1',
+            'accessToken': 'verySecret!'
+        })
+
+    def test_service_principal_auth_client_cert(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        test_cert_file = os.path.join(curr_dir, 'sp_cert.pem')
+        sp_auth = ServicePrincipalAuth(test_cert_file)
+
+        result = sp_auth.get_entry_to_persist('sp_id1', 'tenant1')
+        self.assertEqual(result, {
+            'servicePrincipalId': 'sp_id1',
+            'servicePrincipalTenant': 'tenant1',
+            'certificateFile': test_cert_file,
+            'thumbprint': 'F0:6A:53:84:8B:BE:71:4A:42:90:D6:9D:33:52:79:C1:D0:10:73:FD'
+        })
 
 
 class FileHandleStub(object):  # pylint: disable=too-few-public-methods
