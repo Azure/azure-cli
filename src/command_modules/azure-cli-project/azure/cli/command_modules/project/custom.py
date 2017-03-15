@@ -350,9 +350,8 @@ def _enumerate_k8_agents(innerloop_client_path):
                     parts = list(filter(None, parts))
                     if len(parts) > 2 and parts[1] == "Ready" and "agent" in parts[0]:
                         hosts_file.write(parts[0] + '\n')
-    except OSError as error:
-        if error.errno == errno.ENOENT:
-            raise CLIError(error)
+    except FileNotFoundError as error:
+        raise CLIError(error)
 
 def _deploy_secrets_share_k8(acr_server, resource_group, dns_prefix, client_id, client_secret, location, user_name):
     """
@@ -396,9 +395,8 @@ def _install_k8_secret(acr, dns_prefix, user_name, password, location, cluster_u
         tmp_tenx_private_yaml_path = os.path.join(innerloop_client_path, 'setup', 'Kubernetes', 'tenxPrivate.tmp.yaml')
         with open(tmp_tenx_private_yaml_path, "w") as tmp_tenx_private_yaml_file:
             tmp_tenx_private_yaml_file.write(tmp_tenx_private_yaml)
-    except OSError as error:
-        if error.errno == errno.ENOENT:
-            raise CLIError(error)
+    except FileNotFoundError as error:
+        raise CLIError(error)
 
 def _install_k8_shares(resource_group, dns_prefix):
     """
@@ -460,13 +458,13 @@ def _execute_command(command, ignore_failure=False):
     """
     Executes a command.
     """
-    process = Popen(command, shell=True, stdout=PIPE, stderr=PIPE, bufsize=1, universal_newlines=True)
-    for line in process.stdout:
-        logger.info(line)
-    if ignore_failure:
-        for err in process.stderr:
-            logger.warning(err)
-    else:
+    with Popen(command, shell=True, stdout=PIPE, stderr=PIPE, bufsize=1, universal_newlines=True) as process:
+        for line in process.stdout:
+            logger.info(line)
+        if ignore_failure:
+            for err in process.stderr:
+                logger.warning(err)
+
         if process.returncode != 0:
             raise CLIError(CalledProcessError(process.returncode, command))
 
@@ -476,9 +474,9 @@ def _get_command_output(command):
     """
     encoding = "utf-8"
     output = ''
-    process = Popen(command, shell=True, stdout=PIPE, stderr=PIPE)
-    for line in process.stdout:
-        output = output +(line.rstrip().decode(encoding)) + '\n'
+    with Popen(command, shell=True, stdout=PIPE, stderr=PIPE) as process:
+        for line in process.stdout:
+            output = output +(line.rstrip().decode(encoding)) + '\n'
     if process.returncode != 0:
         raise CLIError(CalledProcessError(process.returncode, command))
 
@@ -551,9 +549,8 @@ def _prepare_arm_k8(dns_prefix):
         new_k8_parameters_file_path = os.path.join(innerloop_client_path, 'setup', 'Kubernetes', 'k8.deploy.parameters.tmp.json')
         with open(new_k8_parameters_file_path, "w") as new_k8_parameters_file:
             new_k8_parameters_file.write(new_k8_parameters)
-    except OSError as error:
-        if error.errno == errno.ENOENT:
-            raise CLIError(error)
+    except FileNotFoundError as error:
+        raise CLIError(error)
 
 def _initialize_workspace(
         dns_prefix,
@@ -638,9 +635,9 @@ def run_innerloop_command(*args):
         cmd = cmd + ' ' + ' '.join(args)
 
         # Prints subprocess output while process is running
-        process = Popen(cmd, shell=True, stdout=PIPE, bufsize=1, universal_newlines=True)
-        for line in process.stdout:
-            sys.stdout.write(line)
+        with Popen(cmd, shell=True, stdout=PIPE, bufsize=1, universal_newlines=True) as process:
+            for line in process.stdout:
+                sys.stdout.write(line)
 
         if process.returncode != 0:
             raise CLIError(CalledProcessError(process.returncode, cmd))
