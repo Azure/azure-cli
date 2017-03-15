@@ -157,6 +157,9 @@ register_cli_argument('keyvault certificate', 'certificate_version', options_lis
 register_attributes_argument('keyvault certificate create', 'certificate', CertificateAttributes, True)
 register_attributes_argument('keyvault certificate import', 'certificate', CertificateAttributes, True)
 register_attributes_argument('keyvault certificate set-attributes', 'certificate', CertificateAttributes)
+register_cli_argument('keyvault certificate set-attributes', 'expires', ignore_type)
+register_cli_argument('keyvault certificate set-attributes', 'not_before', ignore_type)
+
 for item in ['create', 'set-attributes', 'import']:
     register_cli_argument('keyvault certificate {}'.format(item), 'certificate_policy', options_list=('--policy', '-p'), help='JSON encoded policy defintion. Use @{file} to load from a file.', type=get_json_object)
 
