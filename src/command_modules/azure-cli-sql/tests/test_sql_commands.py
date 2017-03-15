@@ -110,9 +110,9 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', user)])
 
         # test delete sql server
-        self.cmd('sql server delete -g {} --name {}'
+        self.cmd('sql server delete -g {} --name {} --yes'
                  .format(rg, servers[0]), checks=NoneCheck())
-        self.cmd('sql server delete -g {} --name {}'
+        self.cmd('sql server delete -g {} --name {} --yes'
                  .format(rg, servers[1]), checks=NoneCheck())
 
         # test list sql server should be 0
@@ -280,7 +280,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('maxSizeBytes', update_storage_bytes),
                      JMESPathCheck('tags.key1', 'value1')])
 
-        self.cmd('sql db delete -g {} --server {} --name {}'
+        self.cmd('sql db delete -g {} --server {} --name {} --yes'
                  .format(rg, server, database_name),
                  checks=[NoneCheck()])
 
@@ -498,7 +498,7 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('tags.key1', 'value1')])
 
         # Delete DW
-        self.cmd('sql dw delete -g {} --server {} --name {}'
+        self.cmd('sql dw delete -g {} --server {} --name {} --yes'
                  .format(rg, server, database_name),
                  checks=[NoneCheck()])
 
@@ -612,7 +612,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
         for _ in range(2):
             # Delete link
             self.cmd('sql db replica delete-link -g {} -s {} -n {} --partner-resource-group {}'
-                     ' --partner-server {}'
+                     ' --partner-server {} --yes'
                      .format(s3.group, s3.name, database_name, s2.group, s2.name),
                      checks=[NoneCheck()])
 
@@ -858,7 +858,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
         # self.verify_activities(activities, resource_group)
 
         # delete sql server database
-        self.cmd('sql db delete -g {} --server {} --name {}'
+        self.cmd('sql db delete -g {} --server {} --name {} --yes'
                  .format(rg, server, database_name),
                  checks=[NoneCheck()])
 
