@@ -31,5 +31,5 @@ helps['redis update-settings'] = """
 helps['redis patch-schedule'] = """
     type: group
     short-summary: Manage redis patch schedules.
-    long-summary: These commmands are in preview.
+    long-summary: These commands are in preview.
 """

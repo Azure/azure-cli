@@ -15,13 +15,13 @@ helps['datalake'] = """
 helps['datalake store'] = """
     type: group
     short-summary: Commands to manage Data Lake Store accounts, and filesystems. 
-    long-summary: These commmands are in preview.
+    long-summary: These commands are in preview.
 """
 
 helps['datalake store account'] = """
     type: group
     short-summary: Commands to manage Data Lake Store accounts. 
-    long-summary: These commmands are in preview.
+    long-summary: These commands are in preview.
 """
 
 helps['datalake store account create'] = """
@@ -65,13 +65,13 @@ helps['datalake store account delete'] = """
 helps['datalake store account trusted-provider'] = """
     type: group
     short-summary: Commands to manage Data Lake Store account trusted identity providers. 
-    long-summary: These commmands are in preview.
+    long-summary: These commands are in preview.
 """
 
 helps['datalake store account firewall'] = """
     type: group
     short-summary: Commands to manage Data Lake Store account firewall rules. 
-    long-summary: These commmands are in preview.
+    long-summary: These commands are in preview.
 """
 
 helps['datalake store account firewall create'] = """
@@ -112,7 +112,7 @@ helps['datalake store account firewall delete'] = """
 helps['datalake store file'] = """
     type: group
     short-summary: Commands to manage a Data Lake Store filesystem. 
-    long-summary: These commmands are in preview.
+    long-summary: These commands are in preview.
 """
 
 helps['datalake store file create'] = """
