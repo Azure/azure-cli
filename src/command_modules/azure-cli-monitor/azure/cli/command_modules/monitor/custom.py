@@ -43,9 +43,11 @@ def list_metrics(client, resource_id, time_grain,
     :param str time_grain: The time grain. Granularity of the metric data returned in ISO 8601
                            duration format, eg "PT1M"
     :param str start_time: The start time of the query. In ISO format with explicit indication of
-                           timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500
+                           timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500. Defaults to
+                           1 Hour prior to the current time.
     :param str end_time: The end time of the query. In ISO format with explicit indication of
-                         timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500
+                         timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500. Defaults to
+                         current time.
     :param str metric_names: The space separated list of metric names
     '''
     odata_filter = _metrics_odata_filter_builder(time_grain, start_time, end_time, metric_names)
@@ -103,31 +105,39 @@ def _validate_start_time(start_time, end_time):
 
 
 # pylint: disable=too-many-arguments
-def list_activity_logs(client, correlation_id=None, resource_group=None, resource_id=None,
-                       resource_provider=None, start_time=None, end_time=None,
+def list_activity_logs(client, filters=None, correlation_id=None, resource_group=None,
+                       resource_id=None, resource_provider=None, start_time=None, end_time=None,
                        caller=None, status=None, max_events=50, select=None):
     '''Provides the list of activity logs.
+    :param str filters: The OData filter for the list activity logs. If this argument is provided
+                        OData Filter Arguments will be ignored
     :param str correlation_id: The correlation id of the query
     :param str resource_group: The resource group
     :param str resource_id: The identifier of the resource
     :param str resource_provider: The resource provider
     :param str start_time: The start time of the query. In ISO format with explicit indication of
-                           timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500
+                           timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500. Defaults to
+                           1 Hour prior to the current time.
     :param str end_time: The end time of the query. In ISO format with explicit indication of
-                         timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500
+                         timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500. Defaults to
+                         current time.
     :param str caller: The caller to look for when querying
     :param str status: The status value to query (ex: Failed)
     :param str max_events: The maximum number of records to be returned by the command
     :param str select: The list of event names
     '''
-    if len([x for x in [correlation_id, resource_group, resource_id, resource_provider] if x]) > 1:
-        raise CLIError("usage error: [--correlation-id ID | --resource-group NAME | "
-                       "--resource-id ID | --resource-provider PROVIDER]")
+    if filters:
+        odata_filters = filters
+    else:
+        collection = [correlation_id, resource_group, resource_id, resource_provider]
+        if not _single(collection):
+            raise CLIError("usage error: [--correlation-id ID | --resource-group NAME | "
+                           "--resource-id ID | --resource-provider PROVIDER]")
 
-    odata_filters = _build_activity_logs_odata_filter(correlation_id, resource_group,
-                                                      resource_id, resource_provider,
-                                                      start_time, end_time,
-                                                      caller, status)
+        odata_filters = _build_activity_logs_odata_filter(correlation_id, resource_group,
+                                                          resource_id, resource_provider,
+                                                          start_time, end_time,
+                                                          caller, status)
 
     if max_events:
         max_events = int(max_events)
@@ -135,6 +145,10 @@ def list_activity_logs(client, correlation_id=None, resource_group=None, resourc
     select_filters = _activity_logs_select_filter_builder(select)
     activity_logs = client.list(filter=odata_filters, select=select_filters)
     return _limit_results(activity_logs, max_events)
+
+
+def _single(collection):
+    return len([x for x in collection if x]) == 1
 
 
 # pylint: disable=too-many-arguments
@@ -149,7 +163,7 @@ def _build_activity_logs_odata_filter(correlation_id=None, resource_group=None, 
     :param str start_time: The start time of the query. In ISO format with explicit indication of
                            timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500
     :param str end_time: The end time of the query. In ISO format with explicit indication of
-                         timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500
+                         timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500.
     :param str caller: The caller to look for when querying
     :param str status: The status value to query (ex: Failed)
     '''
