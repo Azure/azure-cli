@@ -90,7 +90,7 @@ def get_generic_completion_list(generic_list):
     return completer
 
 
-class CaseInsenstiveList(list):  # pylint: disable=too-few-public-methods
+class CaseInsensitiveList(list):  # pylint: disable=too-few-public-methods
 
     def __contains__(self, other):
         return next((True for x in self if other.lower() == x.lower()), False)
@@ -107,8 +107,33 @@ def enum_choice_list(data):
     def _type(value):
         return next((x for x in choices if x.lower() == value.lower()), value) if value else value
     params = {
-        'choices': CaseInsenstiveList(choices),
+        'choices': CaseInsensitiveList(choices),
         'type': _type
+    }
+    return params
+
+
+def three_state_flag(positive_label='true', negative_label='false'):
+    """ Creates a flag-like argument that can also accept positive/negative values. This allows
+    consistency between create commands that typically use flags and update commands that require
+    positive/negative values without introducing breaking changes. Flag-like behavior always
+    implies the affirmative.
+    - positive_label: label for the positive value (ex: 'enabled')
+    - negative_label: label for the negative value (ex: 'disabled')
+    """
+    choices = [positive_label, negative_label]
+
+    # pylint: disable=too-few-public-methods
+    class ThreeStateAction(argparse.Action):
+
+        def __call__(self, parser, namespace, values, option_string=None):
+            values = values or positive_label
+            setattr(namespace, self.dest, values == positive_label)
+
+    params = {
+        'choices': CaseInsensitiveList(choices),
+        'nargs': '?',
+        'action': ThreeStateAction
     }
     return params
 
@@ -132,7 +157,8 @@ resource_group_name_type = CliArgumentType(
     options_list=('--resource-group', '-g'),
     completer=get_resource_group_completion_list,
     id_part='resource_group',
-    help='Name of resource group')
+    help="Name of resource group. You can configure the default group using 'az configure --defaults group=<name>'",
+    configured_default='group')
 
 name_type = CliArgumentType(options_list=('--name', '-n'), help='the primary resource name')
 
@@ -140,7 +166,9 @@ location_type = CliArgumentType(
     options_list=('--location', '-l'),
     completer=get_location_completion_list,
     type=location_name_type,
-    help='Location.', metavar='LOCATION')
+    help="Location. You can configure the default location using 'az configure --defaults location=<location>'",
+    metavar='LOCATION',
+    configured_default='location')
 
 deployment_name_type = CliArgumentType(
     help=argparse.SUPPRESS,

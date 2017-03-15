@@ -27,19 +27,13 @@ cli_command(__name__, 'keyvault delete', mgmt_path.format('VaultsOperations.dele
 cli_command(__name__, 'keyvault set-policy', custom_path.format('set_policy'), factory)
 cli_command(__name__, 'keyvault delete-policy', custom_path.format('delete_policy'), factory)
 
-def keyvault_update_setter(client, resource_group_name, vault_name, parameters):
-    from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   vault_name=vault_name,
-                                   parameters=VaultCreateOrUpdateParameters(
-                                       location=parameters.location,
-                                       properties=parameters.properties))
 
 cli_generic_update_command(__name__,
                            'keyvault update',
                            mgmt_path.format('VaultsOperations.get'),
-                           'azure.cli.command_modules.keyvault.commands#keyvault_update_setter',
-                           lambda: keyvault_client_factory().vaults)
+                           custom_path.format('update_keyvault_setter'),
+                           lambda: keyvault_client_factory().vaults,
+                           custom_function_op=custom_path.format('update_keyvault'))
 
 # Data Plane Commands
 

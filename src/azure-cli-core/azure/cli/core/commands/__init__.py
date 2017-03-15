@@ -20,7 +20,7 @@ import azure.cli.core.telemetry as telemetry
 from azure.cli.core._util import CLIError
 from azure.cli.core.application import APPLICATION
 from azure.cli.core.prompting import prompt_y_n, NoTTYException
-from azure.cli.core._config import az_config
+from azure.cli.core._config import az_config, DEFAULTS_SECTION
 
 from ._introspection import (extract_args_from_signature,
                              extract_full_summary_from_signature)
@@ -41,6 +41,9 @@ class CliArgumentType(object):
     def __init__(self, overrides=None, **kwargs):
         if isinstance(overrides, str):
             raise ValueError("Overrides has to be a CliArgumentType (cannot be a string)")
+        options_list = kwargs.get('options_list', None)
+        if options_list and isinstance(options_list, str):
+            kwargs['options_list'] = [options_list]
         self.settings = {}
         self.update(overrides, **kwargs)
 
@@ -51,7 +54,7 @@ class CliArgumentType(object):
 
 
 class CliCommandArgument(object):
-    _NAMED_ARGUMENTS = ('options_list', 'validator', 'completer', 'id_part', 'arg_group')
+    _NAMED_ARGUMENTS = ('options_list', 'validator', 'completer', 'id_part', 'arg_group', 'choices')
 
     def __init__(self, dest=None, argtype=None, **kwargs):
         self.type = CliArgumentType(overrides=argtype, **kwargs)
@@ -204,7 +207,22 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
 
     def update_argument(self, param_name, argtype):
         arg = self.arguments[param_name]
+        self._resolve_default_value_from_cfg_file(arg, argtype)
         arg.type.update(other=argtype)
+
+    def _resolve_default_value_from_cfg_file(self, arg, overrides):
+        if 'configured_default' in overrides.settings:
+            def_config = overrides.settings.pop('configured_default', None)
+            # same blunt mechanism like we handled id-parts, for create command, no name default
+            if (self.name.split()[-1] == 'create' and
+                    overrides.settings.get('metavar', None) == 'NAME'):
+                return
+            if arg.type.settings.get('required', False):
+                setattr(arg.type, 'configured_default_applied', True)
+                config_value = az_config.get(DEFAULTS_SECTION, def_config, None)
+                if config_value:
+                    overrides.settings['default'] = config_value
+                    overrides.settings['required'] = False
 
     def execute(self, **kwargs):
         return self.handler(**kwargs)

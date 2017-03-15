@@ -15,7 +15,8 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_git_token, add_hostname,
                                                          update_site_configs,
                                                          view_in_browser,
-                                                         sync_site_repo)
+                                                         sync_site_repo,
+                                                         list_publish_profiles)
 
 # pylint: disable=line-too-long
 
@@ -91,6 +92,15 @@ class Test_Webapp_Mocked(unittest.TestCase):
         # point check some unrelated properties should stay at None
         self.assertEqual(config_for_set.use32_bit_worker_process, None)
         self.assertEqual(config_for_set.java_container, None)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_list_publish_profiles_on_slots(self, site_op_mock):
+        site_op_mock.return_value = [b'<publishData><publishProfile publishUrl="ftp://123"/><publishProfile publishUrl="ftp://1234"/></publishData>']
+        # action
+        result = list_publish_profiles('myRG', 'myweb', 'slot1')
+        # assert
+        site_op_mock.assert_called_with('myRG', 'myweb', 'list_publishing_profile_xml_with_secrets', 'slot1')
+        self.assertTrue(result[0]['publishUrl'].startswith('ftp://123'))
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.get_streaming_log', autospec=True)

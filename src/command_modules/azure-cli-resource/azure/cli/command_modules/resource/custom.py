@@ -48,7 +48,7 @@ def list_resource_groups(tag=None): # pylint: disable=no-self-use
     groups = rcf.resource_groups.list(filter=filter_text)
     return list(groups)
 
-def create_resource_group(resource_group_name, location, tags=None):
+def create_resource_group(rg_name, location, tags=None):
     ''' Create a new resource group.
     :param str resource_group_name:the desired resource group name
     :param str location:the resource group location
@@ -60,7 +60,7 @@ def create_resource_group(resource_group_name, location, tags=None):
         location=location,
         tags=tags
     )
-    return rcf.resource_groups.create_or_update(resource_group_name, parameters)
+    return rcf.resource_groups.create_or_update(rg_name, parameters)
 
 def export_group_as_template(
         resource_group_name, include_comments=False, include_parameter_default_value=False):

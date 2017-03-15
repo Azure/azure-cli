@@ -3,6 +3,15 @@
 Release History
 ===============
 
+0.1.1b6 (2017-03-13)
+++++++++++++++++++++
+
+* Design changes and tests for SQL DB replication commands (#2379)
+* Design tweaks and functional test for SQL db restore command (#2423)
+* Implemented and tested SQL Data Warehouse commands (#2351)
+* Removed service-objective commands. (#2380)
+* SQL core commands (server, db, and elastic pool) (#2253)
+
 0.1.1b5 (2017-02-27)
 ++++++++++++++++++++
 

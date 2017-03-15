@@ -22,11 +22,14 @@ from azure.mgmt.datalake.store.models import (EncryptionConfigType)
 datalake_store_name_type = CliArgumentType(help='Name of the Data Lake Store account.', options_list=('--account_name',), completer=get_resource_name_completion_list('Microsoft.DataLakeStore/accounts'), id_part='name')
 
 # PARAMETER REGISTRATIONS
-register_cli_argument('datalake store', 'resource_group_name', resource_group_name_type, id_part=None, required=False, help='If not specified, will attempt to discover the resource group for the specified Data Lake Store account.', validator=validate_resource_group_name)
+# global params
+register_cli_argument('datalake store', 'account_name', datalake_store_name_type, options_list=('--account', '-n'))
+# global account params
+register_cli_argument('datalake store account', 'tags', tags_type)
+register_cli_argument('datalake store account', 'resource_group_name', resource_group_name_type, id_part=None, required=False, help='If not specified, will attempt to discover the resource group for the specified Data Lake Store account.', validator=validate_resource_group_name)
+# account params
 register_cli_argument('datalake store account show', 'name', datalake_store_name_type, options_list=('--account', '-n'))
 register_cli_argument('datalake store account delete', 'name', datalake_store_name_type, options_list=('--account', '-n'))
-register_cli_argument('datalake store', 'account_name', datalake_store_name_type, options_list=('--account', '-n'))
-register_cli_argument('datalake store account', 'tags', tags_type)
 register_cli_argument('datalake store account', 'tier', help='The desired commitment tier for this account to use.', **enum_choice_list(TierType))
 register_cli_argument('datalake store account create', 'resource_group_name', resource_group_name_type, validator=None)
 register_cli_argument('datalake store account create', 'account_name', datalake_store_name_type, options_list=('--account', '-n'), completer=None)

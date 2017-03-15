@@ -232,7 +232,6 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
     @SqlServerPreparer()
     def test_sql_db_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
-        database_copy_name = "cliautomationdb02"
         update_service_objective = 'S1'
         update_storage = '10GB'
         update_storage_bytes = str(10 * 1024 * 1024 * 1024)
@@ -281,17 +280,57 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('maxSizeBytes', update_storage_bytes),
                      JMESPathCheck('tags.key1', 'value1')])
 
+        self.cmd('sql db delete -g {} --server {} --name {}'
+                 .format(rg, server, database_name),
+                 checks=[NoneCheck()])
+
+
+class SqlServerDbCopyScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(parameter_name='resource_group_1')
+    @ResourceGroupPreparer(parameter_name='resource_group_2')
+    @SqlServerPreparer(parameter_name='server_1', resource_group_parameter_name='resource_group_1')
+    @SqlServerPreparer(parameter_name='server_2', resource_group_parameter_name='resource_group_2')
+    def test_sql_db_copy(self, resource_group_1, resource_group_2,
+                         resource_group_location,
+                         server_1, server_2):
+
+        database_name = "cliautomationdb01"
+        database_copy_name = "cliautomationdb02"
+        service_objective = 'S1'
+
+        rg = resource_group_1
+        loc_display = 'West US'
+
+        # create database
+        self.cmd('sql db create -g {} --server {} --name {}'
+                 .format(rg, server_1, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('location', loc_display),
+                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('status', 'Online')])
+
+        # copy database to same server (min parameters)
         self.cmd('sql db copy -g {} --server {} --name {} '
                  '--dest-name {}'
-                 .format(rg, server, database_name, database_copy_name),
+                 .format(rg, server_1, database_name, database_copy_name),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_copy_name)
                  ])
 
-        self.cmd('sql db delete -g {} --server {} --name {}'
-                 .format(rg, server, database_name),
-                 checks=[NoneCheck()])
+        # copy database to other server (max parameters)
+        self.cmd('sql db copy -g {} --server {} --name {} '
+                 '--dest-name {} --dest-resource-group {} --dest-server {} '
+                 '--service-objective {}'
+                 .format(rg, server_1, database_name, database_copy_name,
+                         resource_group_2, server_2, service_objective),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group_2),
+                     JMESPathCheck('name', database_copy_name),
+                     JMESPathCheck('requestedServiceObjectiveName', service_objective)
+                 ])
 
 
 class SqlServerDbRestoreScenarioTest(ScenarioTest):

@@ -9,7 +9,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.0.1b1+dev'
+VERSION = '0.0.1b2+dev'
 
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -55,6 +55,7 @@ setup(
         'azure.cli.command_modules',
     ],
     packages=[
+        'azure.cli.command_modules.datalake',
         'azure.cli.command_modules.datalake.store',
         'azure.cli.command_modules.datalake.analytics',
     ],
