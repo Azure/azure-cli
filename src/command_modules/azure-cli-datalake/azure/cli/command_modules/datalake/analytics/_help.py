@@ -9,17 +9,19 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 helps['datalake'] = """
     type: group
     short-summary: Access to Data Lake Store and Analytics management
-    long-summary: If you don't have the datalake component installed, add it with `az component update --add datalake`
+    long-summary: If you don't have the datalake component installed, add it with `az component update --add datalake`. These commands are in preview.
 """
 
 helps['datalake analytics'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics accounts, jobs and catalogs. 
+    long-summary: These commands are in preview.
 """
 
 helps['datalake analytics job'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics jobs. 
+    long-summary: These commands are in preview.
 """
 
 helps['datalake analytics job submit'] = """
@@ -72,66 +74,79 @@ helps['datalake analytics job list'] = """
 helps['datalake analytics catalog'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalogs. 
+    long-summary: These commands are in preview.
 """
 
 helps['datalake analytics catalog database'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog databases. 
+    long-summary: These commands are in preview.
 """
 
 helps['datalake analytics catalog assembly'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog assemblies. 
+    long-summary: These commands are in preview.
 """
 
 helps['datalake analytics catalog externaldatasource'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog external data sources. 
+    long-summary: These commands are in preview.
 """
 
 helps['datalake analytics catalog procedure'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog stored procedures. 
+    long-summary: These commands are in preview.
 """
 
 helps['datalake analytics catalog schema'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog schemas. 
+    long-summary: These commands are in preview.
 """
 
 helps['datalake analytics catalog table'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog tables. 
+    long-summary: These commands are in preview.
 """
 
 helps['datalake analytics catalog tablepartition'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog table partitions. 
+    long-summary: These commands are in preview.
 """
 
 helps['datalake analytics catalog tablestats'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog table statistics. 
+    long-summary: These commands are in preview.
 """
 
 helps['datalake analytics catalog tabletype'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog table types. 
+    long-summary: These commands are in preview.
 """
 
 helps['datalake analytics catalog tablevaluedfunction'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog table valued functions, or TVFs. 
+    long-summary: These commands are in preview.
 """
 
 helps['datalake analytics catalog view'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog views. 
+    long-summary: These commands are in preview.
 """
 
 helps['datalake analytics catalog credential'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog credentials. 
+    long-summary: These commands are in preview.
 """
 
 helps['datalake analytics catalog credential create'] = """
@@ -182,6 +197,7 @@ helps['datalake analytics catalog credential delete'] = """
 helps['datalake analytics account'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics accounts. 
+    long-summary: These commands are in preview.
 """
 
 helps['datalake analytics account create'] = """
@@ -241,16 +257,19 @@ helps['datalake analytics account delete'] = """
 helps['datalake analytics account blob'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics account linked Azure Storage. 
+    long-summary: These commands are in preview.
 """
 
 helps['datalake analytics account datalake-store'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics account linked Data Lake Store accounts. 
+    long-summary: These commands are in preview.
 """
 
 helps['datalake analytics account firewall'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics account firewall rules. 
+    long-summary: These commands are in preview.
 """
 
 helps['datalake analytics account firewall create'] = """
