@@ -409,13 +409,9 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                                     ' --query primaryEndpoints.blob'
                                     .format(resource_group, storage_account)).get_output_in_json()
 
-        print(storage_endpoint)
-
         # get storage account key
         key = self.cmd('storage account keys list -g {} -n {} --query [0].value'
                         .format(resource_group, storage_account)).get_output_in_json()
-
-        print(key)
 
         # create db
         self.cmd('sql db create -g {} -s {} -n {}'
