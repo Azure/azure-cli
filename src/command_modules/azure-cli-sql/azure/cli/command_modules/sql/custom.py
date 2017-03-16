@@ -379,6 +379,7 @@ def _get_storage_key(
     index = 1 if use_secondary_key else 0
     return keys.keys[index].value  # pylint: disable=no-member
 
+
 # Common code for updating audit and threat detection policy
 def _db_security_policy_update(  # pylint: disable=too-many-arguments
         instance,
