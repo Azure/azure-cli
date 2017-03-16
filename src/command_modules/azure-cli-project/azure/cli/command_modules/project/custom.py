@@ -114,7 +114,7 @@ def create_project(resource_group, name, location):
     project_settings.cluster_name = kube_cluster_name
     project_settings.cluster_resource_group = resource_group
     project_settings.admin_username = default_user_name
-    project_settings.container_registry_url = registry.login_server
+    project_settings.container_registry_url = 'https://' + registry.login_server
     project_settings.location = location
     project_settings.project_name = name
     utils.writeline('Project "{}" created.'.format(name))
@@ -139,8 +139,9 @@ def create_continuous_deployment(remote_access_token):  # pylint: disable=unused
 
     # TODO: Spinnker won't trigger pipeline if ACR is entire empty
     # TODO: how do we provide a correct service port when configuring Spinnaker
-    utils.writeline('Jenkins hostname: {}@{}.{}.cloudapp.azure.com'.format(
-        jenkins_resource.admin_username, jenkins_resource.dns_prefix, jenkins_resource.location))
+    utils.writeline('Jenkins hostname: {}.{}.cloudapp.azure.com'.format(
+        jenkins_resource.dns_prefix, jenkins_resource.location))
+    utils.writeline('Spinnaker hostname: {}'.format(spinnaker_hostname))
     utils.writeline('Done.')
 
 def _get_service_principal():

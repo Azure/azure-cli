@@ -52,7 +52,6 @@ class Jenkins(DeployableResource):
         # TODO: We could check the completed_deployment to see
         # if it failed or succeeded
         utils.writeline('Jenkins deployment completed.')
-        print(completed_deployment)
         self.configure()
 
     def configure(self):
@@ -104,7 +103,7 @@ class Jenkins(DeployableResource):
         Gets the initial Jenkins password from
         """
         command = 'sudo cat /var/lib/jenkins/secrets/initialAdminPassword'
-        stdout, _ = self._run_remote_command(command, False)
+        stdout, _ = self._run_remote_command(command)
         return stdout[0].strip()
 
     def _unsecure_instance(self):
@@ -117,7 +116,7 @@ class Jenkins(DeployableResource):
         command = 'curl --silent {} | sudo bash -s --'.format(unsecure_script_url)
         self._run_remote_command(command)
 
-    def _run_remote_command(self, command, output=True):
+    def _run_remote_command(self, command):
         """
         Runs a command on remote Jenkins instance
         """
@@ -131,11 +130,10 @@ class Jenkins(DeployableResource):
         _, stdout, stderr = ssh.exec_command(command)
         stdout_lines = stdout.readlines()
         stderr_lines = stderr.readlines()
-        if output:
-            for line in stdout_lines:
-                utils.writeline(line)
-            for line in stderr_lines:
-                logger.debug(line)
+        for line in stdout_lines:
+            logger.debug(line)
+        for line in stderr_lines:
+            logger.debug(line)
         return stdout_lines, stderr_lines
 
     def _create_params(self):
