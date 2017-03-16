@@ -14,7 +14,9 @@ from azure.mgmt.sql.models.server import Server
 from azure.mgmt.sql.models.sql_management_client_enums import (
     BlobAuditingPolicyState,
     CreateMode,
-    SecurityAlertPolicyState)
+    SecurityAlertPolicyState,
+    SecurityAlertPolicyEmailAccountAdmins,
+    SecurityAlertPolicyUseServerDefault)
 
 #####
 #           Reusable param type definitions
@@ -378,7 +380,10 @@ with ParametersContext(command='sql db threat-detection-policy update') as c:
 
     c.argument('email_account_admins',
                options_list=('--email-account-admins',),
-               help='Whether the alert is sent to the account administrators.')
+               help='Whether the alert is sent to the account administrators.',
+               **enum_choice_list(SecurityAlertPolicyEmailAccountAdmins))
+
+    # TODO: use server default
 
 ###############################################
 #                sql dw                       #
