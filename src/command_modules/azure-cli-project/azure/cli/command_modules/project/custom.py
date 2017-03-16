@@ -544,6 +544,7 @@ def _enumerate_k8_agents(innerloop_client_path):
         raise CLIError(error)
 
 
+
 def _deploy_secrets_share_k8(acr_server, resource_group, dns_prefix, client_id, client_secret, location, user_name):
     """
     Install cluster/registry secrets and creates sahre on the file storage.
@@ -596,6 +597,7 @@ def _install_k8_secret(acr, dns_prefix, user_name, password, location, cluster_u
             tmp_tenx_private_yaml_file.write(tmp_tenx_private_yaml)
     except FileNotFoundError as error:
         raise CLIError(error)
+
 
 
 def _install_k8_shares(resource_group, dns_prefix):
@@ -763,6 +765,7 @@ def _prepare_arm_k8(dns_prefix):
         raise CLIError(error)
 
 
+
 def _initialize_workspace(
         dns_prefix,
         storage_account_name,
@@ -840,6 +843,7 @@ def _service_run():
     Run implicitly builds the service in the cluster and starts the service.
     """
     run_innerloop_command('run -t')
+
 
 
 def run_innerloop_command(*args):
