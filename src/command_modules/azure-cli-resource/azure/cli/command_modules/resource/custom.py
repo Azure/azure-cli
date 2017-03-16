@@ -19,6 +19,7 @@ from azure.mgmt.resource.locks.models import ManagementLockObject
 from azure.mgmt.resource.links.models import ResourceLinkProperties
 
 from azure.cli.core.parser import IncorrectUsageError
+from azure.cli.core.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int
 from azure.cli.core._util import CLIError, get_file_json
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -48,7 +49,7 @@ def list_resource_groups(tag=None): # pylint: disable=no-self-use
     groups = rcf.resource_groups.list(filter=filter_text)
     return list(groups)
 
-def create_resource_group(resource_group_name, location, tags=None):
+def create_resource_group(rg_name, location, tags=None):
     ''' Create a new resource group.
     :param str resource_group_name:the desired resource group name
     :param str location:the resource group location
@@ -60,7 +61,7 @@ def create_resource_group(resource_group_name, location, tags=None):
         location=location,
         tags=tags
     )
-    return rcf.resource_groups.create_or_update(resource_group_name, parameters)
+    return rcf.resource_groups.create_or_update(rg_name, parameters)
 
 def export_group_as_template(
         resource_group_name, include_comments=False, include_parameter_default_value=False):
@@ -102,6 +103,56 @@ def validate_arm_template(resource_group_name, template_file=None, template_uri=
     return _deploy_arm_template_core(resource_group_name, template_file, template_uri,
                                      'deployment_dry_run', parameters, mode, validate_only=True)
 
+def _find_missing_parameters(parameters, template):
+    if template is None:
+        return {}
+    template_parameters = template.get('parameters', None)
+    if template_parameters is None:
+        return {}
+
+    missing = {}
+    for parameter_name in template_parameters:
+        parameter = template_parameters[parameter_name]
+        if parameter.get('defaultValue', None) is not None:
+            continue
+        if parameters is not None and parameters.get(parameter_name, None) is not None:
+            continue
+        missing[parameter_name] = parameter
+    return missing
+
+def _prompt_for_parameters(missing_parameters):
+    result = {}
+    for param_name in missing_parameters:
+        prompt_str = 'Please provide a value for \'{}\' (? for help): '.format(param_name)
+        param = missing_parameters[param_name]
+        param_type = param.get('type', 'string')
+        description = 'Missing description'
+        metadata = param.get('metadata', None)
+        if metadata is not None:
+            description = metadata.get('description', description)
+        allowed_values = param.get('allowedValues', None)
+
+        while True:
+            if allowed_values is not None:
+                ix = prompt_choice_list(prompt_str, allowed_values, help_string=description)
+                result[param_name] = allowed_values[ix]
+                break
+            elif param_type == 'securestring':
+                value = prompt_pass(prompt_str, help_string=description)
+            elif param_type == 'int':
+                int_value = prompt_int(prompt_str, help_string=description)
+                result[param_name] = int_value
+                break
+            elif param_type == 'bool':
+                value = prompt_t_f(prompt_str, help_string=description)
+                result[param_name] = value
+                break
+            else:
+                value = prompt(prompt_str, help_string=description)
+            if len(value) > 0:
+                break
+    return {}
+
 def _deploy_arm_template_core(resource_group_name, template_file=None, template_uri=None,
                               deployment_name=None, parameters=None, mode='incremental',
                               validate_only=False, no_wait=False):
@@ -121,6 +172,12 @@ def _deploy_arm_template_core(resource_group_name, template_file=None, template_
         template_link = TemplateLink(uri=template_uri)
     else:
         template = get_file_json(template_file)
+
+    missing = _find_missing_parameters(parameters, template)
+    if len(missing) > 0:
+        prompt_parameters = _prompt_for_parameters(missing)
+        for param_name in prompt_parameters:
+            parameters[param_name] = prompt_parameters[param_name]
 
     properties = DeploymentProperties(template=template, template_link=template_link,
                                       parameters=parameters, mode=mode)
@@ -472,9 +529,25 @@ def delete_lock(name, resource_group_name=None, resource_provider_namespace=None
 
 def create_lock(name, resource_group_name=None, resource_provider_namespace=None,
                 parent_resource_path=None, resource_type=None, resource_name=None,
-                level=None, notes=None, lock_id=None, lock_type=None):
-    parameters = ManagementLockObject(
-        level=level, notes=notes, id=lock_id, type=lock_type, name=name)
+                level=None, notes=None):
+    '''
+    :param name: The name of the lock.
+    :type name: str
+    :param resource_provider_namespace: Name of a resource provider.
+    :type resource_provider_namespace: str
+    :param parent_resource_path: Path to a parent resource
+    :type parent_resource_path: str
+    :param resource_type: The type for the resource with the lock.
+    :type resource_type: str
+    :param resource_name: Name of a resource that has a lock.
+    :type resource_name: str
+    :param notes: Notes about this lock.
+    :type notes: str
+    '''
+    if level != 'ReadOnly' and level != 'CanNotDelete':
+        raise CLIError('--level must be one of "ReadOnly" or "CanNotDelete"')
+    parameters = ManagementLockObject(level=level, notes=notes, name=name)
+
     lock_client = _resource_lock_client_factory()
     if resource_group_name is None:
         return lock_client.management_locks.create_or_update_at_subscription_level(name, parameters)

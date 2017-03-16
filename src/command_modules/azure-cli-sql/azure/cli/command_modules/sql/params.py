@@ -275,13 +275,50 @@ with ParametersContext(command='sql db import-new') as c:
 
 
 #####
-#           sql db replica-link
+#           sql db replica
 #####
 
 
-with ParametersContext(command='sql db replica-link') as c:
-    c.register_alias('database_name', ('--database', '-d'))
-    c.register_alias('link_id', ('--name', '-n'))
+with ParametersContext(command='sql db replica create') as c:
+    _configure_db_create_params(c, Engine.db, CreateMode.online_secondary)
+
+    c.argument('elastic_pool_name',
+               options_list=('--elastic-pool',),
+               help='Name of elastic pool to create the new replica in.')
+
+    c.argument('requested_service_objective_name',
+               options_list=('--service-objective',),
+               help='Name of service objective for the new replica.')
+
+    c.argument('partner_resource_group_name',
+               options_list=('--partner-resource-group',),
+               help='Name of the resource group to create the new replica in.'
+               ' If unspecified, defaults to the origin resource group.')
+
+    c.argument('partner_server_name',
+               options_list=('--partner-server',),
+               help='Name of the server to create the new replica in.')
+
+
+with ParametersContext(command='sql db replica set-primary') as c:
+    c.argument('database_name', help='Name of the database to fail over.')
+    c.argument('server_name',
+               help='Name of the server containing the secondary replica that will become'
+               ' the new primary.')
+    c.argument('resource_group_name',
+               help='Name of the resource group containing the secondary replica that'
+               ' will become the new primary.')
+    c.argument('allow_data_loss',
+               help='If specified, the failover operation will allow data loss.')
+
+with ParametersContext(command='sql db replica delete-link') as c:
+    c.argument('partner_server_name',
+               options_list=('--partner-server',),
+               help='Name of the server that the other replica is in.')
+    c.argument('partner_resource_group_name',
+               options_list=('--partner-resource-group',),
+               help='Name of the resource group that the other replica is in. If unspecified,'
+               ' defaults to the first database\'s resource group.')
 
 
 #####

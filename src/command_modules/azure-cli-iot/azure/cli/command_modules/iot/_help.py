@@ -9,16 +9,19 @@ helps['iot'] = """
     type: group
     short-summary: Connect, monitor, and control millions of IoT assets.
     long-summary: If you don't have the iot component installed, add it with `az component update --add iot`.
+    long-summary: These commands are in preview.
 """
 
 helps['iot device'] = """
     type: group
     short-summary: Manage devices in your Azure IoT hub.
+    long-summary: These commands are in preview.
 """
 
 helps['iot hub'] = """
     type: group
     short-summary: Manage Azure IoT Hubs.
+    long-summary: These commands are in preview.
 """
 
 helps['iot hub create'] = """
@@ -85,6 +88,7 @@ helps['iot hub delete'] = """
 helps['iot hub consumer-group'] = """
     type: group
     short-summary: Manage event hub consumer groups of an IoT Hub.
+    long-summary: These commands are in preview.
 """
 
 helps['iot hub consumer-group create'] = """
@@ -117,6 +121,7 @@ helps['iot hub consumer-group delete'] = """
 helps['iot hub policy'] = """
     type: group
     short-summary: Manage shared access policies of an IoT Hub.
+    long-summary: These commands are in preview.
 """
 
 helps['iot hub policy list'] = """
@@ -151,6 +156,7 @@ helps['iot hub list-skus'] = """
 helps['iot hub job'] = """
     type: group
     short-summary: Manage jobs in an IoT Hub.
+    long-summary: These commands are in preview.
 """
 
 helps['iot hub job list'] = """
@@ -245,6 +251,7 @@ helps['iot device show-connection-string'] = """
 helps['iot device message'] = """
     type: group
     short-summary: Manage IoT device messaging.
+    long-summary: These commands are in preview.
 """
 
 helps['iot device message send'] = """

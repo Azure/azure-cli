@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from __future__ import print_function
 import sys
 import getpass
 from six.moves import input  # pylint: disable=redefined-builtin
@@ -22,28 +23,64 @@ def _verify_is_a_tty():
         raise NoTTYException()
 
 
-def prompt(msg):
+def prompt(msg, help_string=None):
     _verify_is_a_tty()
-    return input(msg)
+    while True:
+        val = input(msg)
+        if val == '?' and help_string is not None:
+            print(help_string)
+            continue
+        return val
 
 
-def prompt_pass(msg='Password: ', confirm=False):
+def prompt_int(msg, help_string=None):
     _verify_is_a_tty()
-    password = getpass.getpass(msg)
-    if confirm:
-        password2 = getpass.getpass('Confirm ' + msg)
-        assert password == password2, 'Passwords do not match.'
-    return password
+
+    while True:
+        value = input(msg)
+        if value == '?' and help_string is not None:
+            print(help_string)
+            continue
+        try:
+            return int(value)
+        except ValueError:
+            logger.warning('%s is not a valid number', value)
 
 
-def prompt_y_n(msg, default=None):
+def prompt_pass(msg='Password: ', confirm=False, help_string=None):
     _verify_is_a_tty()
-    if default not in [None, 'y', 'n']:
-        raise ValueError("Valid values for default are 'y', 'n' or None")
-    y = 'Y' if default == 'y' else 'y'
-    n = 'N' if default == 'n' else 'n'
+    while True:
+        password = getpass.getpass(msg)
+        if password == '?' and help_string is not None:
+            print(help_string)
+            continue
+        if confirm:
+            password2 = getpass.getpass('Confirm ' + msg)
+            if password != password2:
+                logger.warning('Passwords do not match.')
+                continue
+        return password
+
+
+def prompt_y_n(msg, default=None, help_string=None):
+    return _prompt_bool(msg, 'y', 'n', default=default, help_string=help_string)
+
+
+def prompt_t_f(msg, default=None, help_string=None):
+    return _prompt_bool(msg, 't', 'f', default=default, help_string=help_string)
+
+
+def _prompt_bool(msg, true_str, false_str, default=None, help_string=None):
+    _verify_is_a_tty()
+    if default not in [None, true_str, false_str]:
+        raise ValueError("Valid values for default are {}, {} or None".format(true_str, false_str))
+    y = true_str.upper() if default == true_str else true_str
+    n = false_str.upper() if default == false_str else false_str
     while True:
         ans = input('{} ({}/{}): '.format(msg, y, n))
+        if ans == '?' and help_string is not None:
+            print(help_string)
+            continue
         if ans.lower() == n.lower():
             return False
         if ans.lower() == y.lower():
@@ -52,7 +89,7 @@ def prompt_y_n(msg, default=None):
             return default == y.lower()
 
 
-def prompt_choice_list(msg, a_list, default=1):
+def prompt_choice_list(msg, a_list, default=1, help_string=None):
     '''Prompt user to select from a list of possible choices.
     :param str msg:A message displayed to the user before the choice list
     :param str a_list:The list of choices (list of strings or list of dicts with 'name' & 'desc')
@@ -67,9 +104,14 @@ def prompt_choice_list(msg, a_list, default=1):
                          for i, x in enumerate(a_list)])
     allowed_vals = list(range(1, len(a_list) + 1))
     while True:
+        val = input('{}\n{}\nPlease enter a choice [{}]: '.format(msg, options, default))
+        if val == '?' and help_string is not None:
+            print(help_string)
+            continue
+        if len(val) == 0:
+            val = '{}'.format(default)
         try:
-            ans = int(input('{}\n{}\nPlease enter a choice [{}]: '.format(msg, options, default)) or
-                      default)
+            ans = int(val)
             if ans in allowed_vals:
                 # array index is 0-based, user input is 1-based
                 return ans - 1

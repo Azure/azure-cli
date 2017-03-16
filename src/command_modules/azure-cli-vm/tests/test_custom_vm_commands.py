@@ -14,8 +14,8 @@ from azure.cli.command_modules.vm.custom import (_get_access_extension_upgrade_i
                                                  _LINUX_ACCESS_EXT,
                                                  _WINDOWS_ACCESS_EXT)
 from azure.cli.command_modules.vm.custom import \
-    (attach_unmanaged_data_disk, detach_data_disk)
-from azure.cli.command_modules.vm.disk_encryption import enable, disable
+    (attach_unmanaged_data_disk, detach_data_disk, get_vmss_instance_view)
+from azure.cli.command_modules.vm.disk_encryption import enable, disable, _check_encrypt_is_supported
 from azure.mgmt.compute.models import (NetworkProfile, StorageProfile, DataDisk, OSDisk,
                                        OperatingSystemTypes, InstanceViewStatus,
                                        VirtualMachineExtensionInstanceView,
@@ -196,6 +196,17 @@ class Test_Vm_Custom(unittest.TestCase):
         mock_vm_set.assert_called_once_with(vm)
         self.assertEqual(len(vm.storage_profile.data_disks), 0)
 
+    @mock.patch('azure.cli.command_modules.vm.custom._compute_client_factory')
+    def test_show_vmss_instance_view(self, factory_mock):
+        vm_client = mock.MagicMock()
+        factory_mock.return_value = vm_client
+
+        # execute
+        get_vmss_instance_view('rg1', 'vmss1', '*')
+        # assert
+        vm_client.virtual_machine_scale_set_vms.list.assert_called_once_with('rg1', 'vmss1', expand='instanceView',
+                                                                             select='instanceView')
+
     # pylint: disable=line-too-long
     @mock.patch('azure.cli.command_modules.vm.disk_encryption._compute_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.vm.disk_encryption._get_keyvault_key_url', autospec=True)
@@ -222,13 +233,6 @@ class Test_Vm_Custom(unittest.TestCase):
             enable('rg1', 'vm1', 'client_id', faked_keyvault)
 
         self.assertTrue("--aad-client-id or --aad-client-cert-thumbprint" in str(context.exception))
-
-        # throw when the linux image does not support encryptions
-        vm.storage_profile.image_reference = ImageReference(publisher='OpenLogic', offer='centos', sku='7.1')
-        with self.assertRaises(CLIError) as context:
-            enable('rg1', 'vm1', 'client_id', faked_keyvault, 'client_secret', volume_type='DATA')
-
-        self.assertTrue("Encryption is not suppored for current VM. Supported are" in str(context.exception))
 
     @mock.patch('azure.cli.command_modules.vm.disk_encryption.set_vm', autospec=True)
     @mock.patch('azure.cli.command_modules.vm.disk_encryption._compute_client_factory', autospec=True)
@@ -262,6 +266,27 @@ class Test_Vm_Custom(unittest.TestCase):
         # works fine to disable encryption on daat disk when OS disk is never encrypted
         vm_extension.instance_view.substatuses[0].message = '{}'
         disable('rg1', 'vm1', 'DATA')
+
+    def test_encryption_distro_check(self):
+        image = ImageReference(None, 'canonical', 'ubuntuserver', '16.04.0-LTS')
+        result, msg = _check_encrypt_is_supported(image, 'data')
+        self.assertTrue(result)
+        self.assertEqual(None, msg)
+
+        image = ImageReference(None, 'OpenLogic', 'CentOS', '7.2n')
+        result, msg = _check_encrypt_is_supported(image, 'data')
+        self.assertTrue(result)
+        self.assertEqual(None, msg)
+
+        image = ImageReference(None, 'OpenLogic', 'CentOS', '7.2')
+        result, msg = _check_encrypt_is_supported(image, 'all')
+        self.assertFalse(result)
+        self.assertEqual(msg,
+                         "Encryption might fail as current VM uses a distro not in the known list, which are '['RHEL 7.2', 'RHEL 7.3', 'CentOS 7.2n', 'Ubuntu 14.04', 'Ubuntu 16.04']'")
+
+        image = ImageReference(None, 'OpenLogic', 'CentOS', '7.2')
+        result, msg = _check_encrypt_is_supported(image, 'data')
+        self.assertTrue(result)
 
     def test_merge_secrets(self):
         secret1 = [{

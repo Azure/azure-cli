@@ -9,7 +9,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup
 
-VERSION = "2.0.0+dev"
+VERSION = "2.0.1+dev"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -55,6 +55,7 @@ DEPENDENCIES = [
     'msrestazure>=0.4.7',
     'pip',
     'pygments',
+    'pyopenssl>=16.2',  # https://github.com/pyca/pyopenssl/issues/568
     'pyyaml',
     'requests',
     'six',

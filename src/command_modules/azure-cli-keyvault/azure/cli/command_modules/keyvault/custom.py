@@ -22,8 +22,7 @@ from azure.keyvault.generated.models import (CertificateAttributes,
                                              Trigger,
                                              Action)
 from azure.keyvault.generated.models.key_vault_client_enums import ActionType, KeyUsageType
-from azure.mgmt.keyvault.models import (VaultCreateOrUpdateParameters,
-                                        VaultProperties,
+from azure.mgmt.keyvault.models import (VaultProperties,
                                         AccessPolicyEntry,
                                         Permissions,
                                         CertificatePermissions,
@@ -216,13 +215,14 @@ def get_default_policy(client, scaffold=False): #pylint: disable=unused-argument
         return _default_certificate_profile()
 
 
-def create_keyvault(client, resource_group_name, vault_name, location, #pylint:disable=too-many-arguments
+def create_keyvault(client, resource_group_name, vault_name, location=None, #pylint:disable=too-many-arguments
                     sku=SkuName.standard.value,
                     enabled_for_deployment=None,
                     enabled_for_disk_encryption=None,
                     enabled_for_template_deployment=None,
-                    no_self_perms=False,
+                    no_self_perms=None,
                     tags=None):
+    from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
     from azure.cli.core._profile import Profile, CLOUD
     profile = Profile()
     cred, _, tenant_id = profile.get_login_credentials(
@@ -244,9 +244,7 @@ def create_keyvault(client, resource_group_name, vault_name, location, #pylint:d
                                         KeyPermissions.restore],
                                   secrets=[SecretPermissions.all],
                                   certificates=[CertificatePermissions.all])
-        object_id = _get_current_user_object_id(graph_client)
-        if not object_id:
-            object_id = _get_object_id(graph_client, subscription=subscription)
+        object_id = _get_object_id(graph_client, subscription=subscription)
         if not object_id:
             raise CLIError('Cannot create vault.\n'
                            'Unable to query active directory for information '\
@@ -272,6 +270,30 @@ def create_keyvault(client, resource_group_name, vault_name, location, #pylint:d
 create_keyvault.__doc__ = VaultProperties.__doc__
 
 
+def update_keyvault_setter(client, parameters, resource_group_name, vault_name):
+    from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   vault_name=vault_name,
+                                   parameters=VaultCreateOrUpdateParameters(
+                                       location=parameters.location,
+                                       properties=parameters.properties))
+
+
+def update_keyvault(instance, enabled_for_deployment=None, enabled_for_disk_encryption=None,
+                    enabled_for_template_deployment=None):
+
+    if enabled_for_deployment is not None:
+        instance.properties.enabled_for_deployment = enabled_for_deployment
+
+    if enabled_for_disk_encryption is not None:
+        instance.properties.enabled_for_disk_encryption = enabled_for_disk_encryption
+
+    if enabled_for_template_deployment is not None:
+        instance.properties.enabled_for_template_deployment = enabled_for_template_deployment
+
+    return instance
+
+
 def _object_id_args_helper(object_id, spn, upn):
     if not object_id:
         from azure.cli.core._profile import Profile, CLOUD
@@ -291,6 +313,7 @@ def set_policy(client, resource_group_name, vault_name, #pylint:disable=too-many
                object_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
                certificate_permissions=None):
     """ Update security policy settings for a Key Vault. """
+    from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
     object_id = _object_id_args_helper(object_id, spn, upn)
     vault = client.get(resource_group_name=resource_group_name,
                        vault_name=vault_name)
@@ -324,6 +347,7 @@ def set_policy(client, resource_group_name, vault_name, #pylint:disable=too-many
 
 def delete_policy(client, resource_group_name, vault_name, object_id=None, spn=None, upn=None): #pylint:disable=too-many-arguments
     """ Delete security policy settings for a Key Vault. """
+    from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
     object_id = _object_id_args_helper(object_id, spn, upn)
     vault = client.get(resource_group_name=resource_group_name,
                        vault_name=vault_name)
@@ -570,7 +594,7 @@ def delete_certificate_contact(client, vault_base_url, contact_email):
 
 
 def create_certificate_issuer(client, vault_base_url, issuer_name, provider_name, account_id=None,
-                              password=None, disabled=False, organization_id=None):
+                              password=None, disabled=None, organization_id=None):
     """ Create a certificate issuer record.
     :param issuer_name: Unique identifier for the issuer settings.
     :param provider_name: The certificate provider name. Must be registered with your
@@ -582,12 +606,6 @@ def create_certificate_issuer(client, vault_base_url, issuer_name, provider_name
     from azure.keyvault.generated.models import \
         (CertificateIssuerSetParameters, IssuerCredentials, OrganizationDetails, IssuerAttributes,
          AdministratorDetails, KeyVaultErrorException)
-    try:
-        client.get_certificate_issuer(vault_base_url, issuer_name)
-        raise CLIError("issuer '{}' already exists".format(issuer_name))
-    except KeyVaultErrorException:
-        # ensure issuer does not already exist
-        pass
     credentials = IssuerCredentials(account_id, password)
     issuer_attrs = IssuerAttributes(not disabled)
     org_details = OrganizationDetails(organization_id, admin_details=[])
@@ -611,7 +629,7 @@ def update_certificate_issuer(client, vault_base_url, issuer_name, provider_name
 
     def update(obj, prop, value, nullable=False):
         set_value = value if value is not None else getattr(obj, prop, None)
-        if not set_value and not nullable:
+        if set_value is None and not nullable:
             raise CLIError("property '{}' cannot be cleared".format(prop))
         elif not set_value and nullable:
             set_value = None

@@ -89,14 +89,9 @@ helps['appservice web config ssl'] = """
     short-summary: Configure SSL certificates.
 """
 
-helps['appservice web config ssl upload'] = """
-    type: command
-    short-summary: Upload an SSL certificate to a web app.
-"""
-
 helps['appservice web config ssl list'] = """
     type: command
-    short-summary: List SSL certificates.
+    short-summary: List SSL certificates within a resource group
 """
 
 helps['appservice web config ssl bind'] = """
@@ -112,6 +107,11 @@ helps['appservice web config ssl unbind'] = """
 helps['appservice web config ssl delete'] = """
     type: command
     short-summary: Delete an SSL certificate from a web app.
+"""
+
+helps['appservice web config ssl upload'] = """
+    type: command
+    short-summary: Upload an SSL certificate to a web app.
 """
 
 helps['appservice web deployment'] = """
@@ -144,9 +144,9 @@ helps['appservice web deployment'] = """
     short-summary: Manage web application deployments.
 """
 
-helps['appservice web deployment list-site-credentials'] = """
+helps['appservice web deployment list-publishing-profiles'] = """
     type: command
-    short-summary: Show site-level deployment credentials.
+    short-summary: get publishing endpoints, credentials, database connection strings, etc
 """
 
 helps['appservice web deployment slot auto-swap'] = """

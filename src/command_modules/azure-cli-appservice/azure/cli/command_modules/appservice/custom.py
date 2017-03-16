@@ -114,10 +114,14 @@ def get_app_settings(resource_group_name, name, slot=None):
                'slotSetting': str(p in (slot_cfg_names.app_setting_names or []))} for p in result.properties]  # pylint: disable=line-too-long
     return result
 
+def _add_linux_fx_version(resource_group_name, name, custom_image_name):
+    fx_version = '{}|{}'.format('DOCKER', custom_image_name)
+    update_site_configs(resource_group_name, name, linux_fx_version=fx_version)
+
 #for any modifications to the non-optional parameters, adjust the reflection logic accordingly
 #in the method
 def update_site_configs(resource_group_name, name, slot=None,
-                        php_version=None, python_version=None,#pylint: disable=unused-argument
+                        linux_fx_version=None, php_version=None, python_version=None,#pylint: disable=unused-argument
                         node_version=None, net_framework_version=None, #pylint: disable=unused-argument
                         java_version=None, java_container=None, java_container_version=None,#pylint: disable=unused-argument
                         remote_debugging_enabled=None, web_sockets_enabled=None,#pylint: disable=unused-argument
@@ -199,6 +203,7 @@ def update_container_settings(resource_group_name, name, docker_registry_server_
         settings.append('DOCKER_REGISTRY_SERVER_PASSWORD=' + docker_registry_server_password)
     if docker_custom_image_name is not None:
         settings.append('DOCKER_CUSTOM_IMAGE_NAME=' + docker_custom_image_name)
+        _add_linux_fx_version(resource_group_name, name, docker_custom_image_name)
     update_app_settings(resource_group_name, name, settings, slot)
     settings = get_app_settings(resource_group_name, name, slot)
     return _filter_for_container_settings(settings)
@@ -293,7 +298,6 @@ def config_source_control(resource_group_name, name, repo_url, repository_type=N
                                      'create_or_update_source_control',
                                      slot, source_control)
     return AppServiceLongRunningOperation()(poller)
-
 
 def update_git_token(git_token=None):
     '''
@@ -580,6 +584,27 @@ def set_deployment_user(user_name, password=None):
     user.publishing_password = password
     result = client.update_publishing_user(user)
     return result
+
+def list_publish_profiles(resource_group_name, name, slot=None):
+    from azure.mgmt.web.models import PublishingProfileFormat
+    import xmltodict
+
+    content = _generic_site_operation(resource_group_name, name,
+                                      'list_publishing_profile_xml_with_secrets', slot)
+    full_xml = ''
+    for f in content:
+        full_xml += f.decode()
+
+    profiles = xmltodict.parse(full_xml, xml_attribs=True)['publishData']['publishProfile']
+    converted = []
+    for profile in profiles:
+        new = {}
+        for key in profile:
+            # strip the leading '@' xmltodict put in for attributes
+            new[key.lstrip('@')] = profile[key]
+        converted.append(new)
+
+    return converted
 
 def view_in_browser(resource_group_name, name, slot=None, logs=False):
     site = _generic_site_operation(resource_group_name, name, 'get', slot)

@@ -3,6 +3,15 @@
 Release History
 ===============
 
+2.0.1 (2017-03-13)
+^^^^^^^^^^^^^^^^^^
+
+* Support setting default values for common arguments like default resource group, default web, default vm
+* Fix resource_id parsing to accept 'resourcegroups'
+* Mitigate AI SDK's problem with numeric in properties
+* Fix KeyError: 'environmentName' on 'az account list'
+* Support login to specific tenant
+
 2.0.0 (2017-02-27)
 ^^^^^^^^^^^^^^^^^^
 

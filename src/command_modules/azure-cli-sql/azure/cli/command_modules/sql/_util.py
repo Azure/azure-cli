@@ -72,17 +72,19 @@ class CommandGroup(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
-    def command(self, name, method_name):
+    def command(self, name, method_name, confirmation=None):
         cli_command(self._scope,
                     '{} {}'.format(self._group_name, name),
                     self._service_adapter(method_name),
-                    client_factory=self._client_factory)
+                    client_factory=self._client_factory,
+                    confirmation=confirmation)
 
-    def custom_command(self, name, custom_func_name):
+    def custom_command(self, name, custom_func_name, confirmation=None):
         cli_command(self._scope,
                     '{} {}'.format(self._group_name, name),
                     self._custom_path.format(custom_func_name),
-                    client_factory=self._client_factory)
+                    client_factory=self._client_factory,
+                    confirmation=confirmation)
 
     def generic_update_command(self, name, getter_op, setter_op, custom_func_name=None):
         if custom_func_name:
