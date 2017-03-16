@@ -324,9 +324,19 @@ with ParametersContext(command='sql db replica delete-link') as c:
 
 with ParametersContext(command='sql db audit-policy update') as c:
     c.argument('storage_account_access_key',
-               options_list=('--storage-account-access-key',),
+               options_list=('--storage-key',),
                help='Access key for the storage account.')
 
+
+#####
+#           sql db threat-detection-policy
+#####
+
+
+with ParametersContext(command='sql db threat-detection-policy update') as c:
+    c.argument('storage_account_access_key',
+               options_list=('--storage-key',),
+               help='Access key for the storage account.')
 
 ###############################################
 #                sql dw                       #

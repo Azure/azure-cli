@@ -433,7 +433,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
         audit_group = 'DATABASE_LOGOUT_GROUP'
 
         self.cmd('sql db audit-policy update -g {} -s {} -n {}'
-                 ' --set state={} --storage-account-access-key {} --set storageEndpoint={}'
+                 ' --set state={} --storage-key {} --set storageEndpoint={}'
                  ' --set retentionDays={} --add auditActionsAndGroups {}'
                  .format(resource_group, server, database_name, state, access_key,
                          storage_endpoint, retention_days, audit_group),
@@ -455,7 +455,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
         email_addresses = 'test1@example.com; test2@example.com'
 
         self.cmd('sql db threat-detection-policy update -g {} -s {} -n {}'
-                 ' --set state={} --storage-account-access-key {} --set storageEndpoint={}'
+                 ' --set state={} --storage-key {} --set storageEndpoint={}'
                  ' --set retentionDays={} --set emailAddresses=\'{}\' --set disabledAlerts=\'{}\''
                  .format(resource_group, server, database_name, state, access_key,
                          storage_endpoint, retention_days, email_addresses, disabled_alerts),
