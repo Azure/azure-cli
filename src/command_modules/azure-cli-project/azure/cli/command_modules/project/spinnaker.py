@@ -8,6 +8,8 @@ import paramiko
 
 import azure.cli.command_modules.project.utils as utils
 from azure.cli.command_modules.project.deployments import DeployableResource
+import azure.cli.core.azlogging as azlogging  # pylint: disable=invalid-name
+logger = azlogging.get_az_logger(__name__) # pylint: disable=invalid-name
 
 # pylint: disable=line-too-long, too-many-arguments
 class Spinnaker(DeployableResource):
@@ -65,9 +67,9 @@ class Spinnaker(DeployableResource):
             add_pipeline_script_url, registry_account_name, registry_url, registry_repository)
         _, stdout, stderr = ssh.exec_command(command)
         for line in stdout.readlines():
-            utils.writeline(line)
+            logger.debug(line)
         for line in stderr.readlines():
-            utils.writeline('ERR: ' + line)
+            logger.debug('ERR: ' + line)
         ssh.close()
 
     def _configure_registry(self, spinnaker_hostname, registry_url, client_id, client_secret):
@@ -93,9 +95,9 @@ class Spinnaker(DeployableResource):
             configure_k8s_script_url, args)
         _, stdout, stderr = ssh.exec_command(command)
         for line in stdout.readlines():
-            utils.writeline(line)
+            logger.debug(line)
         for line in stderr.readlines():
-            utils.writeline('ERR: ' + line)
+            logger.debug('ERR: ' + line)
         ssh.close()
 
     @staticmethod
