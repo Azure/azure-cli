@@ -11,7 +11,7 @@ import json
 import os
 import platform
 import sys
-from subprocess import PIPE, CalledProcessError, Popen, check_output
+from subprocess import PIPE, CalledProcessError, Popen, check_output, check_call
 import requests
 
 import azure.cli.command_modules.project.settings as settings
@@ -22,6 +22,7 @@ from azure.cli.command_modules.project.spinnaker import Spinnaker
 from azure.cli.core._util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.compute import ComputeManagementClient
+from azure.cli.command_modules.storage._factory import storage_client_factory
 
 logger = azlogging.get_az_logger(__name__) # pylint: disable=invalid-name
 project_settings = settings.Project() # pylint: disable=invalid-name
@@ -165,9 +166,12 @@ def _configure_cluster(dns_prefix, location, user_name): # pylint: disable=too-m
     a workspace on the local machine to connection.
     Asks for user input: ACR server name.
     """
+    kubernetes_path = None
     try:
-        innerloop_client_path = _get_innerloop_home_path()
-        kubernetes_path = os.path.join(innerloop_client_path, 'setup', 'Kubernetes')
+        # Validate kubectl context
+        if not _validate_kubectl_context(dns_prefix):
+            utils.writeline("kubectl context not set to {0}, please run 'az acs kubernetes get-credentials' to set it.".format(dns_prefix))
+            sys.exit(1)
 
         if _cluster_configured(dns_prefix, user_name):
             utils.writeline('Cluster already configured.')
@@ -177,10 +181,8 @@ def _configure_cluster(dns_prefix, location, user_name): # pylint: disable=too-m
 
         utils.writeline('Configuring Kubernetes cluster')
 
-        # Validate kubectl context
-        if not _validate_kubectl_context(dns_prefix):
-            utils.writeline("kubectl context not set to {0}, please run 'az acs kubernetes get-credentials'".format(dns_prefix))
-            sys.exit(1)
+        innerloop_client_path = _get_innerloop_home_path()
+        kubernetes_path = os.path.join(innerloop_client_path, 'setup', 'Kubernetes')
 
         # Get resource group
         creds = _get_creds_from_master(dns_prefix, location, user_name)
@@ -203,7 +205,7 @@ def _configure_cluster(dns_prefix, location, user_name): # pylint: disable=too-m
         utils.writeline('This is going to take a while. Sit back and relax.')
         deployment_command = "az group deployment create --template-file {0}/k8.deploy.json --parameters \
         '@{0}/k8.deploy.parameters.tmp.json' -g {1} -n {2}".format(kubernetes_path, resource_group, dns_prefix)
-        _execute_command(deployment_command)
+        check_call(deployment_command, shell=True)
         utils.writeline('Done with the resources!')
 
         utils.writeline('Creating tenx namespace')
@@ -267,10 +269,11 @@ def _configure_cluster(dns_prefix, location, user_name): # pylint: disable=too-m
 
     finally:
         # Removing temporary data files
-        file_path = os.path.join(kubernetes_path, '*.tmp.*')
-        files = glob.glob(file_path)
-        for single_file in files:
-            os.remove(single_file)
+        if kubernetes_path != None:
+            file_path = os.path.join(kubernetes_path, '*.tmp.*')
+            files = glob.glob(file_path)
+            for single_file in files:
+                os.remove(single_file)
         
         # Removing temporary creds azure.json
         azure_json_file = _get_creds_file()
@@ -280,10 +283,7 @@ def _configure_cluster(dns_prefix, location, user_name): # pylint: disable=too-m
 def _validate_kubectl_context(dns_prefix):
     context_command = 'kubectl config current-context'
     current_context = _get_command_output(context_command)
-    if current_context.strip() == dns_prefix.strip():
-        return True
-    else:
-        return False
+    return current_context.strip() == dns_prefix.strip()
 
 def _cluster_configured(dns_prefix, user_name): # pylint: disable=too-many-return-statements
     """
@@ -388,7 +388,7 @@ def _install_k8_secret(acr, dns_prefix, user_name, password, location, cluster_u
     kubectl_create_secret_command = "kubectl create secret docker-registry tenxregkey --docker-server={0} --docker-username={1} \
     --docker-password={2} --docker-email={3} -n tenx".format(acr, user_name, password, _get_creds_from_master(dns_prefix, location, cluster_user_name))
     try:
-        _execute_command(kubectl_create_secret_command)
+        check_call(kubectl_create_secret_command, shell=True)
     except Exception:
         logger.debug("Command failed: %s\n", kubectl_create_secret_command)
 
@@ -425,21 +425,20 @@ def _install_k8_shares(resource_group, dns_prefix):
     # Populate connectlocal.tmp.sh with private storage account key
     config_storage = dns_prefix.replace('-', '') + "cfgsa"
     workspace_storage = dns_prefix.replace('-', '') + "wks"
+    scf = storage_client_factory()
 
     try:
         storage_command = "az storage account keys list -n {0} -g {1}".format(config_storage, resource_group)
-        keys_list = _get_command_output(storage_command)
-        keys_list_json = json.loads(keys_list)
-        config_storage_key = keys_list_json[0]['value']
+        keys_list_json = scf.storage_accounts.list_keys(resource_group, config_storage).keys  # pylint: disable=no-member
+        config_storage_key = list(keys_list_json)[0].value
     except Exception as error:
         logger.debug(error)
         raise CLIError("Can't get storage account key for {0}".format(config_storage))
 
     try:
         wks_storage_command = "az storage account keys list -n {0} -g {1}".format(workspace_storage, resource_group)
-        keys_list = _get_command_output(wks_storage_command)
-        keys_list_json = json.loads(keys_list)
-        workspace_storage_key = keys_list_json[0]['value']
+        keys_list_json = scf.storage_accounts.list_keys(resource_group, workspace_storage).keys  # pylint: disable=no-member
+        workspace_storage_key = list(keys_list_json)[0].value
     except Exception as error:
         logger.debug(error)
         raise CLIError("Can't get storage account key for {0}".format(workspace_storage))
@@ -459,10 +458,10 @@ def _install_k8_shares(resource_group, dns_prefix):
         connect_output_file.write(connect_template)
 
     # Ensure 'cfgs' share exists in configStorage
-    _execute_command("az storage share create -n 'cfgs' --account-name {0} --account-key {1}".format(config_storage, config_storage_key))
+    check_call("az storage share create -n 'cfgs' --account-name {0} --account-key {1}".format(config_storage, config_storage_key), shell=True)
 
     # Ensure 'mindaro' share exists in configStorage
-    _execute_command("az storage share create -n 'mindaro' --account-name {0} --account-key {1}".format(workspace_storage, workspace_storage_key))
+    check_call("az storage share create -n 'mindaro' --account-name {0} --account-key {1}".format(workspace_storage, workspace_storage_key), shell=True)
 
     return workspace_storage_key
 
@@ -476,8 +475,7 @@ def to_base64(string_value):
 def _execute_command(command, ignore_failure=False):
     """
     Executes a command.
-    """
-    print(command)
+    """ 
     with Popen(command, shell=True, stdout=PIPE, stderr=PIPE, bufsize=1, universal_newlines=True) as process:
         for line in process.stdout:
             logger.info(line)
@@ -485,6 +483,7 @@ def _execute_command(command, ignore_failure=False):
             for err in process.stderr:
                 logger.warning(err)
 
+    if not ignore_failure:
         if process.returncode != 0:
             raise CLIError(CalledProcessError(process.returncode, command))
 
@@ -492,19 +491,7 @@ def _get_command_output(command):
     """
     Executes a command and provides the output.
     """
-    encoding = "utf-8"
-    output = ''
-    newLine = False
-    with Popen(command, shell=True, stdout=PIPE, stderr=PIPE) as process:
-        for line in process.stdout:
-            if not newLine:
-                newLine = True
-                output = output + (line.rstrip().decode(encoding))
-            else:
-                output = output + '\n' + (line.rstrip().decode(encoding))
-    if process.returncode != 0:
-        raise CLIError(CalledProcessError(process.returncode, command))
-
+    output = check_output(command.split(' ')).strip().decode('utf-8')
     return output
 
 def _get_creds_from_master(dns_prefix, location, user_name):
@@ -648,7 +635,7 @@ def _service_run():
     Calls tenx run command on the current directory.
     Run implicitly builds the service in the cluster and starts the service.
     """
-    run_innerloop_command('run')
+    run_innerloop_command('run -t')
 
 def run_innerloop_command(*args):
     """
