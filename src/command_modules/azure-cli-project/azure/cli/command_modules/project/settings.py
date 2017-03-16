@@ -7,6 +7,7 @@ import json
 import os
 
 import azure.cli.core.azlogging as azlogging
+from azure.cli.core._environment import get_config_dir
 
 logger = azlogging.get_az_logger(__name__)  # pylint: disable=invalid-name
 
@@ -15,10 +16,9 @@ class Project(object):
     """
     Class that deals with project settings
     """
+    settings_file = os.path.join(get_config_dir(), 'projectResource.json')
 
     def __init__(self):
-        self.settings_file = os.path.join(
-            os.path.expanduser('~'), '.azure', 'projectResource.json')
         if os.path.exists(self.settings_file):
             with open(self.settings_file) as file_object:
                 try:
@@ -26,7 +26,8 @@ class Project(object):
                 except ValueError:
                     pass
         else:
-            self.settings = None
+            self.settings = {}
+            self._save_changes()
 
     def _get_property_value(self, property_name):
         """
@@ -40,8 +41,15 @@ class Project(object):
         """
         Sets the property value and saves it to the underlying storage
         """
-        # TODO: Actually save/store the values here
         self.settings[property_name] = property_value
+        self._save_changes()
+
+    def _save_changes(self):
+        """
+        Saves the changes to the underlying storage
+        """
+        with open(self.settings_file, 'w+') as file_object:
+            file_object.write(json.dumps(self.settings))
 
     @property
     def resource_group(self):
@@ -140,3 +148,31 @@ class Project(object):
         Sets the container registry URL
         """
         self._set_property_value('container_registry_url', value)
+
+    @property
+    def project_name(self):
+        """
+        Gets the project name
+        """
+        return self._get_property_value('project_name')
+
+    @project_name.setter
+    def project_name(self, value):
+        """
+        Sets the project name
+        """
+        self._set_property_value('project_name', value)
+
+    @property
+    def location(self):
+        """
+        Gets the location
+        """
+        return self._get_property_value('location')
+
+    @location.setter
+    def location(self, value):
+        """
+        Sets the location
+        """
+        self._set_property_value('location', value)

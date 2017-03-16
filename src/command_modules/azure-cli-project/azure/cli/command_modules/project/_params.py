@@ -4,6 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliArgumentType, register_cli_argument
+from azure.cli.core.commands.parameters import (
+    resource_group_name_type,
+    location_type)
 
 # pylint: disable=line-too-long,invalid-name
 
@@ -38,8 +41,17 @@ user_name = CliArgumentType(
     required=False
 )
 
+name_arg_type = CliArgumentType(
+    options_list=('--name', '-n'),
+    metavar='NAME')
+
 register_cli_argument('project', 'remote_access_token', remote_access_token)
 register_cli_argument('project', 'project_path', project_path)
 register_cli_argument('project', 'dns_prefix', dns_prefix)
 register_cli_argument('project', 'location', location)
 register_cli_argument('project', 'user_name', user_name)
+
+
+register_cli_argument('project', 'name', name_arg_type)
+register_cli_argument('project', 'resource_group', resource_group_name_type)
+register_cli_argument('project', 'location', location_type)

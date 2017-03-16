@@ -157,19 +157,9 @@ class Spinnaker(DeployableResource):
                 'value': self.admin_username
             },
             'sshPublicKey': {
-                'value': self._get_public_ssh_key_contents()
+                'value': utils.get_public_ssh_key_contents(self.public_ssh_key_filename)
             },
             'dnsLabelPrefix': {
                 'value': self.dns_prefix
             }
         }
-
-    def _get_public_ssh_key_contents(self):
-        """
-        Gets the public SSH key file contents
-        """
-        ssh_filename = self.public_ssh_key_filename
-        contents = None
-        with open(ssh_filename) as ssh_file:
-            contents = ssh_file.read()
-        return contents

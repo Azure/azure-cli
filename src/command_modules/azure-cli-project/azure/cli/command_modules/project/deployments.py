@@ -41,16 +41,7 @@ class DeployableResource(object):
         client = DeployableResource._get_resource_mgmt_client()
         deployment = client.deployments.create_or_update(
             self.resource_group, self.deployment_name, properties)
-        deployment.add_done_callback(self._deployment_completed)
         return deployment
-
-    def _deployment_completed(self, completed_deployment):
-        """
-        Called when deployment is completed
-        """
-        self.completed_deployment = completed_deployment
-        utils.writeline('Deployment "{}" to resource group "{}" completed.'.format(
-            self.deployment_name, self.resource_group))
 
     @staticmethod
     def _get_resource_mgmt_client():
