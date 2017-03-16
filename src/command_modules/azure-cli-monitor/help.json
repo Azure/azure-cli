@@ -1,0 +1,762 @@
+(env) vishrut@mac azure-cli (monitor) $ az monitor -h
+
+Group
+    az monitor: Commands to manage Azure Monitor service.
+
+Subgroups:
+    activity-logs              : Commands to manage activity logs.
+    alert-rule-incidents       : Commands to manage alert rule incidents.
+    alert-rules                : Commands to manage alerts assigned to Azure resources.
+    autoscale-settings         : Commands to manage autoscale settings.
+    event-categories           : Commands to manage event categories.
+    log-profiles               : Commands to manage the log profiles assigned to Azure subscription.
+    metric-definitions         : Commands to manage metric definitions.
+    metrics                    : Commands to manage metrics.
+    service-diagnostic-settings: Commands to manage service diagnostic settings.
+    tenant-activity-logs       : Commands to manage tenant activity logs.
+
+*********************
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor activity-logs -h
+
+Group
+    az monitor activity-logs: Commands to manage activity logs.
+
+Commands:
+    list: Provides the list of activity logs.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor activity-logs list -h
+
+Command
+    az monitor activity-logs list: Provides the list of activity logs.
+
+Arguments
+    --filters          : The OData filter for the list activity logs. If this argument is provided
+                         OData Filter Arguments will be ignored.
+    --max-events       : The maximum number of records to be returned by the command.  Default: 50.
+    --select           : The list of event names.
+
+OData Filter Arguments
+    --caller           : The caller to look for when querying.
+    --correlation-id   : The correlation id of the query.
+    --end-time         : The end time of the query. In ISO format with explicit indication of
+                         timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500. Defaults to
+                         current time.
+    --resource-group   : The resource group.
+    --resource-id      : The identifier of the resource.
+    --resource-provider: The resource provider.
+    --start-time       : The start time of the query. In ISO format with explicit indication of
+                         timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500. Defaults to 1
+                         Hour prior to the current time.
+    --status           : The status value to query (ex: Failed).
+
+Global Arguments
+    --debug            : Increase logging verbosity to show all debug logs.
+    --help -h          : Show this help message and exit.
+    --output -o        : Output format.  Allowed values: json, jsonc, table, tsv.  Default: json.
+    --query            : JMESPath query string. See http://jmespath.org/ for more information and
+                         examples.
+    --verbose          : Increase logging verbosity. Use --debug for full debug logs.
+
+*********************
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor alert-rule-incidents -h
+
+Group
+    az monitor alert-rule-incidents: Commands to manage alert rule incidents.
+
+Commands:
+    list: Gets a list of incidents associated to an alert rule.
+    show: Gets an incident associated to an alert rule.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor alert-rule-incidents list -h
+
+Command
+    az monitor alert-rule-incidents list: Gets a list of incidents associated to an alert rule.
+
+Arguments
+    --resource-group -g [Required]: Name of resource group. You can configure the default group
+                                    using 'az configure --defaults group=<name>'.
+    --rule-name         [Required]: The name of the rule.
+
+Global Arguments
+    --debug                       : Increase logging verbosity to show all debug logs.
+    --help -h                     : Show this help message and exit.
+    --output -o                   : Output format.  Allowed values: json, jsonc, table, tsv.
+                                    Default: json.
+    --query                       : JMESPath query string. See http://jmespath.org/ for more
+                                    information and examples.
+    --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor alert-rule-incidents show -h
+
+Command
+    az monitor alert-rule-incidents show: Gets an incident associated to an alert rule.
+
+Arguments
+    --name -n           [Required]: The name of the incident to retrieve.
+    --resource-group -g [Required]: Name of resource group. You can configure the default group
+                                    using 'az configure --defaults group=<name>'.
+    --rule-name         [Required]: The name of the rule.
+
+Global Arguments
+    --debug                       : Increase logging verbosity to show all debug logs.
+    --help -h                     : Show this help message and exit.
+    --output -o                   : Output format.  Allowed values: json, jsonc, table, tsv.
+                                    Default: json.
+    --query                       : JMESPath query string. See http://jmespath.org/ for more
+                                    information and examples.
+    --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
+
+*********************
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor alert-rules -h
+
+Group
+    az monitor alert-rules: Commands to manage alerts assigned to Azure resources.
+
+Commands:
+    create: Creates or updates an alert rule.
+    delete: Deletes an alert rule.
+    list  : List the alert rules within a resource group.
+    show  : Gets an alert rule.
+    update: Updates an alert rule.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor alert-rules create -h
+
+Command
+    az monitor alert-rules create: Creates or updates an alert rule.
+        Request method: PUT             Request URI:
+        https://management.azure.com/subscriptions/{subscription-id}/resourceGroups/{resource-group-
+        name}/providers/microsoft.insights/alertRules/{alert-rule-name}?api-version={api-version}.
+
+Arguments
+    --alert-rule-resource-name [Required]: The name of the alert rule.
+    --is-enabled               [Required]: The flag that indicates whether the alert rule is
+                                           enabled.
+    --location -l              [Required]: Location. You can configure the default location using
+                                           'az configure --defaults location=<location>'.
+    --name -n                  [Required]: The name of the rule.
+    --resource-group -g        [Required]: Name of resource group. You can configure the default
+                                           group using 'az configure --defaults group=<name>'.
+    --actions                            : The array of actions that are performed when the alert
+                                           rule becomes active, and when an alert condition is
+                                           resolved.
+    --azure-resource-name                : Azure resource name.
+    --condition                          : JSON encoded condition configuration. Use @{file} to load
+                                           from a file.
+    --description                        : The description of the alert rule that will be included
+                                           in the alert email.
+    --tags                               : Resource tags.
+
+Global Arguments
+    --debug                              : Increase logging verbosity to show all debug logs.
+    --help -h                            : Show this help message and exit.
+    --output -o                          : Output format.  Allowed values: json, jsonc, table, tsv.
+                                           Default: json.
+    --query                              : JMESPath query string. See http://jmespath.org/ for more
+                                           information and examples.
+    --verbose                            : Increase logging verbosity. Use --debug for full debug
+                                           logs.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor alert-rules delete -h
+
+Command
+    az monitor alert-rules delete: Deletes an alert rule.
+
+Arguments
+
+Resource Id Arguments
+    --ids              : One or more resource IDs (space delimited). If provided, no other 'Resource
+                         Id' arguments should be specified.
+    --name -n          : The name of the rule.
+    --resource-group -g: Name of resource group. You can configure the default group using 'az
+                         configure --defaults group=<name>'.
+
+Global Arguments
+    --debug            : Increase logging verbosity to show all debug logs.
+    --help -h          : Show this help message and exit.
+    --output -o        : Output format.  Allowed values: json, jsonc, table, tsv.  Default: json.
+    --query            : JMESPath query string. See http://jmespath.org/ for more information and
+                         examples.
+    --verbose          : Increase logging verbosity. Use --debug for full debug logs.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor alert-rules list -h
+
+Command
+    az monitor alert-rules list: List the alert rules within a resource group.
+
+Arguments
+    --resource-group -g [Required]: Name of resource group. You can configure the default group
+                                    using 'az configure --defaults group=<name>'.
+
+Global Arguments
+    --debug                       : Increase logging verbosity to show all debug logs.
+    --help -h                     : Show this help message and exit.
+    --output -o                   : Output format.  Allowed values: json, jsonc, table, tsv.
+                                    Default: json.
+    --query                       : JMESPath query string. See http://jmespath.org/ for more
+                                    information and examples.
+    --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor alert-rules show -h
+
+Command
+    az monitor alert-rules show: Gets an alert rule.
+
+Arguments
+
+Resource Id Arguments
+    --ids              : One or more resource IDs (space delimited). If provided, no other 'Resource
+                         Id' arguments should be specified.
+    --name -n          : The name of the rule.
+    --resource-group -g: Name of resource group. You can configure the default group using 'az
+                         configure --defaults group=<name>'.
+
+Global Arguments
+    --debug            : Increase logging verbosity to show all debug logs.
+    --help -h          : Show this help message and exit.
+    --output -o        : Output format.  Allowed values: json, jsonc, table, tsv.  Default: json.
+    --query            : JMESPath query string. See http://jmespath.org/ for more information and
+                         examples.
+    --verbose          : Increase logging verbosity. Use --debug for full debug logs.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor alert-rules update -h
+
+Command
+    az monitor alert-rules update: Updates an alert rule.
+
+Arguments
+    --name -n           [Required]: The name of the rule.
+    --resource-group -g [Required]: Name of resource group. You can configure the default group
+                                    using 'az configure --defaults group=<name>'.
+
+Generic Update Arguments
+    --add                         : Add an object to a list of objects by specifying a path and key
+                                    value pairs.  Example: --add property.listProperty <key=value,
+                                    string or JSON string>.
+    --remove                      : Remove a property or an element from a list.  Example: --remove
+                                    property.list <indexToRemove> OR --remove propertyToRemove.
+    --set                         : Update an object by specifying a property path and value to set.
+                                    Example: --set property1.property2=<value>.
+
+Global Arguments
+    --debug                       : Increase logging verbosity to show all debug logs.
+    --help -h                     : Show this help message and exit.
+    --output -o                   : Output format.  Allowed values: json, jsonc, table, tsv.
+                                    Default: json.
+    --query                       : JMESPath query string. See http://jmespath.org/ for more
+                                    information and examples.
+    --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
+
+*********************
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor autoscale-settings -h
+
+Group
+    az monitor autoscale-settings: Commands to manage autoscale settings.
+
+Commands:
+    create                 : Creates or updates an autoscale setting.
+    delete                 : Deletes and autoscale setting.
+    get-parameters-template: Scaffold fully formed autoscale-settings' parameters as json template.
+    list                   : Lists the autoscale settings for a resource group.
+    show                   : Gets an autoscale setting.
+    update                 : Updates an autoscale setting.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor autoscale-settings create -h
+
+Command
+    az monitor autoscale-settings create: Creates or updates an autoscale setting.
+
+Arguments
+    --name -n           [Required]: The autoscale setting name.
+    --parameters        [Required]: JSON encoded parameters configuration. Use @{file} to load from
+                                    a file.Use az autoscale-settings get-parameters-template to
+                                    export json template.
+    --resource-group -g [Required]: Name of resource group. You can configure the default group
+                                    using 'az configure --defaults group=<name>'.
+
+Global Arguments
+    --debug                       : Increase logging verbosity to show all debug logs.
+    --help -h                     : Show this help message and exit.
+    --output -o                   : Output format.  Allowed values: json, jsonc, table, tsv.
+                                    Default: json.
+    --query                       : JMESPath query string. See http://jmespath.org/ for more
+                                    information and examples.
+    --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor autoscale-settings delete -h
+
+Command
+    az monitor autoscale-settings delete: Deletes and autoscale setting.
+
+Arguments
+
+Resource Id Arguments
+    --ids              : One or more resource IDs (space delimited). If provided, no other 'Resource
+                         Id' arguments should be specified.
+    --name -n          : The autoscale setting name.
+    --resource-group -g: Name of resource group. You can configure the default group using 'az
+                         configure --defaults group=<name>'.
+
+Global Arguments
+    --debug            : Increase logging verbosity to show all debug logs.
+    --help -h          : Show this help message and exit.
+    --output -o        : Output format.  Allowed values: json, jsonc, table, tsv.  Default: json.
+    --query            : JMESPath query string. See http://jmespath.org/ for more information and
+                         examples.
+    --verbose          : Increase logging verbosity. Use --debug for full debug logs.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor autoscale-settings get-parameters-template -h
+
+Command
+    az monitor autoscale-settings get-parameters-template: Scaffold fully formed autoscale-settings'
+    parameters as json template.
+
+Arguments
+
+Global Arguments
+    --debug    : Increase logging verbosity to show all debug logs.
+    --help -h  : Show this help message and exit.
+    --output -o: Output format.  Allowed values: json, jsonc, table, tsv.  Default: json.
+    --query    : JMESPath query string. See http://jmespath.org/ for more information and examples.
+    --verbose  : Increase logging verbosity. Use --debug for full debug logs.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor autoscale-settings list -h
+
+Command
+    az monitor autoscale-settings list: Lists the autoscale settings for a resource group.
+
+Arguments
+    --resource-group -g [Required]: Name of resource group. You can configure the default group
+                                    using 'az configure --defaults group=<name>'.
+
+Global Arguments
+    --debug                       : Increase logging verbosity to show all debug logs.
+    --help -h                     : Show this help message and exit.
+    --output -o                   : Output format.  Allowed values: json, jsonc, table, tsv.
+                                    Default: json.
+    --query                       : JMESPath query string. See http://jmespath.org/ for more
+                                    information and examples.
+    --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor autoscale-settings show -h
+
+Command
+    az monitor autoscale-settings show: Gets an autoscale setting.
+
+Arguments
+
+Resource Id Arguments
+    --ids              : One or more resource IDs (space delimited). If provided, no other 'Resource
+                         Id' arguments should be specified.
+    --name -n          : The autoscale setting name.
+    --resource-group -g: Name of resource group. You can configure the default group using 'az
+                         configure --defaults group=<name>'.
+
+Global Arguments
+    --debug            : Increase logging verbosity to show all debug logs.
+    --help -h          : Show this help message and exit.
+    --output -o        : Output format.  Allowed values: json, jsonc, table, tsv.  Default: json.
+    --query            : JMESPath query string. See http://jmespath.org/ for more information and
+                         examples.
+    --verbose          : Increase logging verbosity. Use --debug for full debug logs.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor autoscale-settings update -h
+
+Command
+    az monitor autoscale-settings update: Updates an autoscale setting.
+
+Arguments
+    --name -n           [Required]: The autoscale setting name.
+    --resource-group -g [Required]: Name of resource group. You can configure the default group
+                                    using 'az configure --defaults group=<name>'.
+
+Generic Update Arguments
+    --add                         : Add an object to a list of objects by specifying a path and key
+                                    value pairs.  Example: --add property.listProperty <key=value,
+                                    string or JSON string>.
+    --remove                      : Remove a property or an element from a list.  Example: --remove
+                                    property.list <indexToRemove> OR --remove propertyToRemove.
+    --set                         : Update an object by specifying a property path and value to set.
+                                    Example: --set property1.property2=<value>.
+
+Global Arguments
+    --debug                       : Increase logging verbosity to show all debug logs.
+    --help -h                     : Show this help message and exit.
+    --output -o                   : Output format.  Allowed values: json, jsonc, table, tsv.
+                                    Default: json.
+    --query                       : JMESPath query string. See http://jmespath.org/ for more
+                                    information and examples.
+    --verbose                     : Increase logging verbosity. Use --debug for full debug logs.
+
+*********************
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor event-categories -h
+
+Group
+    az monitor event-categories: Commands to manage event categories.
+
+Commands:
+    list: Get the list of available event categories supported in the Activity Log Service.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor event-categories -h
+
+Group
+    az monitor event-categories: Commands to manage event categories.
+
+Commands:
+    list: Get the list of available event categories supported in the Activity Log Service.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor event-categories list -h
+
+Command
+    az monitor event-categories list: Get the list of available event categories supported in the
+    Activity Log Service.
+        The current list includes the following: Aministrative, Security, ServiceHealth, Alert,
+        Recommendation, Policy.
+
+Arguments
+
+Global Arguments
+    --debug    : Increase logging verbosity to show all debug logs.
+    --help -h  : Show this help message and exit.
+    --output -o: Output format.  Allowed values: json, jsonc, table, tsv.  Default: json.
+    --query    : JMESPath query string. See http://jmespath.org/ for more information and examples.
+    --verbose  : Increase logging verbosity. Use --debug for full debug logs.
+
+*********************
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor log-profiles -h
+
+Group
+    az monitor log-profiles: Commands to manage the log profiles assigned to Azure subscription.
+
+Commands:
+    create: Create or update a log profile in Azure Monitoring REST API.
+    delete: Deletes the log profile.
+    list  : List the log profiles.
+    show  : Gets the log profile.
+    update: Update a log profile assigned to Azure subscription.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor log-profiles create -h
+
+Command
+    az monitor log-profiles create: Create or update a log profile in Azure Monitoring REST API.
+
+Arguments
+    --days           [Required]: The number of days for the retention in days. A value of 0 will
+                                 retain the events indefinitely.
+    --enabled        [Required]: A value indicating whether the retention policy is enabled.
+    --location -l    [Required]: Location. You can configure the default location using 'az
+                                 configure --defaults location=<location>'.
+    --locations      [Required]: Space separated list of regions for which Activity Log events
+                                 should be stored.
+    --name -n        [Required]: The name of the log profile.
+    --categories               : Space separated categories of the logs.Some values are: 'Write',
+                                 'Delete', and/or 'Action.'.
+    --log-profile-resource-name: Azure resource name.
+    --service-bus-rule-id      : The service bus rule ID of the service bus namespace in which you
+                                 would like to have Event Hubs created for streaming the Activity
+                                 Log. The rule ID is of the format: '{service bus resource
+                                 ID}/authorizationrules/{key name}'.
+    --storage-account-id       : The resource id of the storage account to which you would like to
+                                 send the Activity Log.
+    --tags                     : Resource tags.
+
+Global Arguments
+    --debug                    : Increase logging verbosity to show all debug logs.
+    --help -h                  : Show this help message and exit.
+    --output -o                : Output format.  Allowed values: json, jsonc, table, tsv.  Default:
+                                 json.
+    --query                    : JMESPath query string. See http://jmespath.org/ for more
+                                 information and examples.
+    --verbose                  : Increase logging verbosity. Use --debug for full debug logs.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor log-profiles delete -h
+
+Command
+    az monitor log-profiles delete: Deletes the log profile.
+
+Arguments
+    --name -n [Required]: The name of the log profile.
+
+Global Arguments
+    --debug             : Increase logging verbosity to show all debug logs.
+    --help -h           : Show this help message and exit.
+    --output -o         : Output format.  Allowed values: json, jsonc, table, tsv.  Default: json.
+    --query             : JMESPath query string. See http://jmespath.org/ for more information and
+                          examples.
+    --verbose           : Increase logging verbosity. Use --debug for full debug logs.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor log-profiles delete -h
+
+Command
+    az monitor log-profiles delete: Deletes the log profile.
+
+Arguments
+    --name -n [Required]: The name of the log profile.
+
+Global Arguments
+    --debug             : Increase logging verbosity to show all debug logs.
+    --help -h           : Show this help message and exit.
+    --output -o         : Output format.  Allowed values: json, jsonc, table, tsv.  Default: json.
+    --query             : JMESPath query string. See http://jmespath.org/ for more information and
+                          examples.
+    --verbose           : Increase logging verbosity. Use --debug for full debug logs.
+(env) vishrut@mac azure-cli (monitor) $ az monitor log-profiles list -h
+
+Command
+    az monitor log-profiles list: List the log profiles.
+
+Arguments
+
+Global Arguments
+    --debug    : Increase logging verbosity to show all debug logs.
+    --help -h  : Show this help message and exit.
+    --output -o: Output format.  Allowed values: json, jsonc, table, tsv.  Default: json.
+    --query    : JMESPath query string. See http://jmespath.org/ for more information and examples.
+    --verbose  : Increase logging verbosity. Use --debug for full debug logs.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor log-profiles show -h
+
+Command
+    az monitor log-profiles show: Gets the log profile.
+
+Arguments
+    --name -n [Required]: The name of the log profile.
+
+Global Arguments
+    --debug             : Increase logging verbosity to show all debug logs.
+    --help -h           : Show this help message and exit.
+    --output -o         : Output format.  Allowed values: json, jsonc, table, tsv.  Default: json.
+    --query             : JMESPath query string. See http://jmespath.org/ for more information and
+                          examples.
+    --verbose           : Increase logging verbosity. Use --debug for full debug logs.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor log-profiles update -h
+
+Command
+    az monitor log-profiles update: Update a log profile assigned to Azure subscription.
+
+Arguments
+    --name -n        [Required]: The name of the log profile.
+    --parameters-abc [Required]: Parameters supplied to the operation.
+
+Generic Update Arguments
+    --add                      : Add an object to a list of objects by specifying a path and key
+                                 value pairs.  Example: --add property.listProperty <key=value,
+                                 string or JSON string>.
+    --remove                   : Remove a property or an element from a list.  Example: --remove
+                                 property.list <indexToRemove> OR --remove propertyToRemove.
+    --set                      : Update an object by specifying a property path and value to set.
+                                 Example: --set property1.property2=<value>.
+
+Global Arguments
+    --debug                    : Increase logging verbosity to show all debug logs.
+    --help -h                  : Show this help message and exit.
+    --output -o                : Output format.  Allowed values: json, jsonc, table, tsv.  Default:
+                                 json.
+    --query                    : JMESPath query string. See http://jmespath.org/ for more
+                                 information and examples.
+    --verbose                  : Increase logging verbosity. Use --debug for full debug logs.
+
+*********************
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor metric-definitions -h
+
+Group
+    az monitor metric-definitions: Commands to manage metric definitions.
+
+Commands:
+    list: Commands to manage metric definitions.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor metric-definitions list -h
+
+Command
+    az monitor metric-definitions list: Commands to manage metric definitions.
+
+Arguments
+    --resource-id [Required]: The identifier of the resource.
+    --metric-names          : The list of metric names.
+
+Global Arguments
+    --debug                 : Increase logging verbosity to show all debug logs.
+    --help -h               : Show this help message and exit.
+    --output -o             : Output format.  Allowed values: json, jsonc, table, tsv.  Default:
+                              json.
+    --query                 : JMESPath query string. See http://jmespath.org/ for more information
+                              and examples.
+    --verbose               : Increase logging verbosity. Use --debug for full debug logs.
+
+*********************
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor metrics -h
+
+Group
+    az monitor metrics: Commands to manage metrics.
+
+Commands:
+    list: Lists the metric values for a resource.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor metrics list -h
+
+Command
+    az monitor metrics list: Lists the metric values for a resource.
+
+Arguments
+    --resource-id [Required]: The identifier of the resource.
+    --time-grain  [Required]: The time grain. Granularity of the metric data returned in ISO 8601
+                              duration format, eg "PT1M".
+    --end-time              : The end time of the query. In ISO format with explicit indication of
+                              timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500. Defaults to
+                              current time.
+    --metric-names          : The space separated list of metric names.
+    --start-time            : The start time of the query. In ISO format with explicit indication of
+                              timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500. Defaults to
+                              1 Hour prior to the current time.
+
+Global Arguments
+    --debug                 : Increase logging verbosity to show all debug logs.
+    --help -h               : Show this help message and exit.
+    --output -o             : Output format.  Allowed values: json, jsonc, table, tsv.  Default:
+                              json.
+    --query                 : JMESPath query string. See http://jmespath.org/ for more information
+                              and examples.
+    --verbose               : Increase logging verbosity. Use --debug for full debug logs.
+
+*********************
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor service-diagnostic-settings -h
+
+Group
+    az monitor service-diagnostic-settings: Commands to manage service diagnostic settings.
+
+Commands:
+    create: Create or update new diagnostic settings for the specified resource.
+    show  : Gets the active diagnostic settings for the specified resource.
+    update: Update diagnostic settings for the specified resource.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor service-diagnostic-settings create -h
+
+Command
+    az monitor service-diagnostic-settings create: Create or update new diagnostic settings for the
+    specified resource.
+
+Arguments
+    --location -l [Required]: Location. You can configure the default location using 'az configure
+                              --defaults location=<location>'.
+    --resource-id [Required]: The identifier of the resource.
+    --logs                  : JSON encoded list of logs settings. Use @{file} to load from a file.
+    --metrics               : JSON encoded list of metric settings. Use @{file} to load from a file.
+    --name                  : Azure resource name.
+    --service-bus-rule-id   : The service bus rule ID of the service bus namespace in which you
+                              would like to have Event Hubs created for streaming Diagnostic Logs.
+                              The rule ID is of the format: '{service bus resource
+                              ID}/authorizationrules/{key name}'.
+    --storage-account-id    : The resource ID of the storage account to which you would like to send
+                              Diagnostic Logs.
+    --tags                  : Resource tags.
+    --workspace-id          : The workspace ID (resource ID of a Log Analytics workspace) for a Log
+                              Analytics workspace to which you would like to send Diagnostic Logs.
+                              Example: /subscriptions/4b9e8510-67ab-4e9a-95a9-e2f1e570ea9c/resourceG
+                              roups/insights-integration/providers/Microsoft.OperationalInsights/wor
+                              kspaces/viruela2.
+
+Global Arguments
+    --debug                 : Increase logging verbosity to show all debug logs.
+    --help -h               : Show this help message and exit.
+    --output -o             : Output format.  Allowed values: json, jsonc, table, tsv.  Default:
+                              json.
+    --query                 : JMESPath query string. See http://jmespath.org/ for more information
+                              and examples.
+    --verbose               : Increase logging verbosity. Use --debug for full debug logs.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor service-diagnostic-settings show -h
+
+Command
+    az monitor service-diagnostic-settings show: Gets the active diagnostic settings for the
+    specified resource.
+
+Arguments
+    --resource-id [Required]: The identifier of the resource.
+
+Global Arguments
+    --debug                 : Increase logging verbosity to show all debug logs.
+    --help -h               : Show this help message and exit.
+    --output -o             : Output format.  Allowed values: json, jsonc, table, tsv.  Default:
+                              json.
+    --query                 : JMESPath query string. See http://jmespath.org/ for more information
+                              and examples.
+    --verbose               : Increase logging verbosity. Use --debug for full debug logs.
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor service-diagnostic-settings update -h
+
+Command
+    az monitor service-diagnostic-settings update: Update diagnostic settings for the specified
+    resource.
+
+Arguments
+    --resource-id [Required]: The identifier of the resource.
+
+Generic Update Arguments
+    --add                   : Add an object to a list of objects by specifying a path and key value
+                              pairs.  Example: --add property.listProperty <key=value, string or
+                              JSON string>.
+    --remove                : Remove a property or an element from a list.  Example: --remove
+                              property.list <indexToRemove> OR --remove propertyToRemove.
+    --set                   : Update an object by specifying a property path and value to set.
+                              Example: --set property1.property2=<value>.
+
+Global Arguments
+    --debug                 : Increase logging verbosity to show all debug logs.
+    --help -h               : Show this help message and exit.
+    --output -o             : Output format.  Allowed values: json, jsonc, table, tsv.  Default:
+                              json.
+    --query                 : JMESPath query string. See http://jmespath.org/ for more information
+                              and examples.
+    --verbose               : Increase logging verbosity. Use --debug for full debug logs.
+
+*********************
+
+(env) vishrut@mac azure-cli (monitor) $ az monitor tenant-activity-logs -h
+
+Group
+    az monitor tenant-activity-logs: Commands to manage tenant activity logs.
+
+Commands:
+    list: Provides the list of activity logs.
+    
+(env) vishrut@mac azure-cli (monitor) $ az monitor tenant-activity-logs list -h
+
+Command
+    az monitor tenant-activity-logs list: Provides the list of activity logs.
+
+Arguments
+    --filters          : The OData filter for the list activity logs. If this argument is provided
+                         OData Filter Arguments will be ignored.
+    --max-events       : The maximum number of records to be returned by the command.  Default: 50.
+    --select           : The list of event names.
+
+OData Filter Arguments
+    --caller           : The caller to look for when querying.
+    --correlation-id   : The correlation id of the query.
+    --end-time         : The end time of the query. In ISO format with explicit indication of
+                         timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500. Defaults to
+                         current time.
+    --resource-group   : The resource group.
+    --resource-id      : The identifier of the resource.
+    --resource-provider: The resource provider.
+    --start-time       : The start time of the query. In ISO format with explicit indication of
+                         timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500. Defaults to 1
+                         Hour prior to the current time.
+    --status           : The status value to query (ex: Failed).
+
+Global Arguments
+    --debug            : Increase logging verbosity to show all debug logs.
+    --help -h          : Show this help message and exit.
+    --output -o        : Output format.  Allowed values: json, jsonc, table, tsv.  Default: json.
+    --query            : JMESPath query string. See http://jmespath.org/ for more information and
+                         examples.
+    --verbose          : Increase logging verbosity. Use --debug for full debug logs.
