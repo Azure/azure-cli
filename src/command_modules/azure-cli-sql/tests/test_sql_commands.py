@@ -9,7 +9,8 @@ from azure.cli.testsdk import (
     JMESPathCheck,
     NoneCheck,
     ResourceGroupPreparer,
-    ScenarioTest)
+    ScenarioTest,
+    StorageAccountPreparer)
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
@@ -393,6 +394,83 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
                           JMESPathCheck('name', restore_pool_database_name),
                           JMESPathCheck('elasticPoolName', elastic_pool),
                           JMESPathCheck('status', 'Online')])
+
+
+class SqlServerDbSecurityScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    @SqlServerPreparer()
+    @StorageAccountPreparer()
+    def test_sql_db_security_mgmt(self, resource_group, resource_group_location, server,
+                                  storage_account):
+        database_name = "cliautomationdb01"
+
+        # get storage account endpoint
+        storage_endpoint = self.cmd('storage account show -g {} -n {}'
+                                    ' --query primaryEndpoints.blob'
+                                    .format(resource_group, storage_account)).get_output_in_json()
+
+        print(storage_endpoint)
+
+        # get storage account key
+        key = self.cmd('storage account keys list -g {} -n {} --query [0].value'
+                        .format(resource_group, storage_account)).get_output_in_json()
+
+        print(key)
+
+        # create db
+        self.cmd('sql db create -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('status', 'Online')])
+
+        # get audit policy
+        self.cmd('sql db audit-policy show -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[JMESPathCheck('resourceGroup', resource_group)])
+
+        # update audit policy
+        state = 'Enabled'
+        access_key = key
+        retention_days = 30
+        audit_group = 'DATABASE_LOGOUT_GROUP'
+
+        self.cmd('sql db audit-policy update -g {} -s {} -n {}'
+                 ' --set state={} --storage-account-access-key {} --set storageEndpoint={}'
+                 ' --set retentionDays={} --add auditActionsAndGroups {}'
+                 .format(resource_group, server, database_name, state, access_key,
+                         storage_endpoint, retention_days, audit_group),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state),
+                     JMESPathCheck('storageAccountAccessKey', ''),  # service doesn't return it
+                     JMESPathCheck('storageEndpoint', storage_endpoint),
+                     JMESPathCheck('retentionDays', retention_days),
+                     JMESPathCheck('auditActionsAndGroups[0]', audit_group)])
+
+        # get threat detection policy
+        self.cmd('sql db threat-detection-policy show -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[JMESPathCheck('resourceGroup', resource_group)])
+
+        # update threat detection policy
+        disabled_alerts = 'Sql_Injection_Vulnerability; Access_Anomaly'
+        email_addresses = 'test1@example.com; test2@example.com'
+
+        self.cmd('sql db threat-detection-policy update -g {} -s {} -n {}'
+                 ' --set state={} --storage-account-access-key {} --set storageEndpoint={}'
+                 ' --set retentionDays={} --set emailAddresses=\'{}\' --set disabledAlerts=\'{}\''
+                 .format(resource_group, server, database_name, state, access_key,
+                         storage_endpoint, retention_days, email_addresses, disabled_alerts),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state),
+                     JMESPathCheck('storageAccountAccessKey', access_key),
+                     JMESPathCheck('storageEndpoint', storage_endpoint),
+                     JMESPathCheck('retentionDays', retention_days),
+                     JMESPathCheck('emailAddresses', email_addresses),
+                     JMESPathCheck('disabledAlerts', disabled_alerts)])
 
 
 class SqlServerDwMgmtScenarioTest(ScenarioTest):

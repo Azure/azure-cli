@@ -72,7 +72,10 @@ with ServiceGroup(__name__,
                   database_blob_auditing_policy_operations) as s:
     with s.group('sql db audit-policy') as c:
         c.command('show', 'get')
-        c.generic_update_command('update', 'get', 'create_or_update')
+        c.generic_update_command(
+            'update', 'get', 'create_or_update',
+            custom_func_name='db_audit_policy_update',
+            setter_arg_name='database_blob_auditing_policy')
 
 database_threat_detection_policy_operations = create_service_adapter(
     'azure.mgmt.sql.operations.database_threat_detection_policies_operations',
@@ -83,7 +86,9 @@ with ServiceGroup(__name__,
                   database_threat_detection_policy_operations) as s:
     with s.group('sql db threat-detection-policy') as c:
         c.command('show', 'get')
-        c.generic_update_command('update', 'get', 'create_or_update')
+        c.generic_update_command('update', 'get', 'create_or_update',
+                                 custom_func_name='db_threat_detection_policy_update',
+                                 setter_arg_name='database_security_alert_policy')
 
 ###############################################
 #                sql elastic-pool             #

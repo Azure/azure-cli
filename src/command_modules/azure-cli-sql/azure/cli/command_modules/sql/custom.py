@@ -331,6 +331,24 @@ def db_update(
     return instance
 
 
+def db_audit_policy_update(
+    instance,
+    storage_account_access_key=None):
+
+    instance.storage_account_access_key = storage_account_access_key or instance.storage_account_access_key
+
+    return instance
+
+
+def db_threat_detection_policy_update(
+    instance,
+    storage_account_access_key=None):
+
+    instance.storage_account_access_key = storage_account_access_key or instance.storage_account_access_key
+
+    return instance
+
+
 ###############################################
 #                sql dw                       #
 ###############################################

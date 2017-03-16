@@ -8,6 +8,7 @@ from enum import Enum
 from ._util import ParametersContext, patch_arg_make_required
 from azure.cli.core.commands import CliArgumentType
 from azure.mgmt.sql.models.database import Database
+from azure.mgmt.sql.models.database_blob_auditing_policy import DatabaseBlobAuditingPolicy
 from azure.mgmt.sql.models.elastic_pool import ElasticPool
 from azure.mgmt.sql.models.server import Server
 from azure.mgmt.sql.models.sql_management_client_enums import CreateMode
@@ -317,17 +318,14 @@ with ParametersContext(command='sql db replica delete-link') as c:
 
 
 #####
-#           sql db <<other subgroups>>
+#           sql db audit-policy
 #####
 
 
-# Service tier advisor will not be included in the first batch of GA commands
-# with ParametersContext(command='sql db service-tier-advisor') as c:
-#     c.register_alias('database_name', ('--database', '-d'))
-
-# TDE will not be included in the first batch of GA commands
-# with ParametersContext(command='sql db transparent-data-encryption') as c:
-#     c.register_alias('database_name', ('--database', '-d'))
+with ParametersContext(command='sql db audit-policy update') as c:
+    c.argument('storage_account_access_key',
+               options_list=('--storage-account-access-key',),
+               help='Access key for the storage account.')
 
 
 ###############################################

@@ -39,6 +39,14 @@ helps['sql db update'] = """
             type: command
             short-summary: Updates a database.
             """
+helps['sql db audit-policy'] = """
+            type: group
+            short-summary: Manage a database's auditing policy.
+            """
+helps['sql db audit-policy update'] = """
+            type: command
+            short-summary: Updates a database's auditing policy.
+            """
 helps['sql db replica'] = """
             type: group
             short-summary: Manage replication between databases.
@@ -62,6 +70,14 @@ helps['sql db replica delete-link'] = """
 helps['sql db restore'] = """
             type: command
             short-summary: Creates a new database by restoring from a database backup.
+            """
+helps['sql db threat-detection-policy'] = """
+            type: group
+            short-summary: Manage a database's threat detection policy.
+            """
+helps['sql db threat-detection-policy update'] = """
+            type: command
+            short-summary: Updates a database's threat detection policy.
             """
 # helps['sql db restore-point'] = """
 #             type: group
