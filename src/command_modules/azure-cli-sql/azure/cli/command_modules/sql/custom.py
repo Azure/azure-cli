@@ -331,61 +331,73 @@ def db_update(
     return instance
 
 
-def db_audit_policy_update(
-    instance,
-    storage_account_access_key=None,
-    audit_actions_and_groups=None,
-    state=None,
-    retention_days=None,
-    storage_endpoint=None):
+#####
+#           sql server audit-policy
+#####
 
-    if storage_account_access_key != None:
+
+# Update audit policy. Custom update function to apply parameters to instance.
+def db_audit_policy_update(  # pylint: disable=too-many-arguments
+        instance,
+        storage_account_access_key=None,
+        audit_actions_and_groups=None,
+        state=None,
+        retention_days=None,
+        storage_endpoint=None):
+
+    if storage_account_access_key is not None:
         instance.storage_account_access_key = storage_account_access_key
 
-    if audit_actions_and_groups != None:
+    if audit_actions_and_groups is not None:
         instance.audit_actions_and_groups = audit_actions_and_groups
 
-    if state != None:
+    if state is not None:
         instance.state = state
 
-    if retention_days != None:
+    if retention_days is not None:
         instance.retention_days = retention_days
 
-    if storage_endpoint != None:
+    if storage_endpoint is not None:
         instance.storage_endpoint = storage_endpoint
 
     return instance
 
 
-def db_threat_detection_policy_update(
-    instance,
-    storage_account_access_key=None,
-    state=None,
-    retention_days=None,
-    storage_endpoint=None,
-    email_addresses=None,
-    disabled_alerts=None,
-    email_account_admins=None):
+#####
+#           sql server threat-detection-policy
+#####
 
-    if storage_account_access_key != None:
+
+# Update threat detection policy. Custom update function to apply parameters to instance.
+def db_threat_detection_policy_update(  # pylint: disable=too-many-arguments
+        instance,
+        storage_account_access_key=None,
+        state=None,
+        retention_days=None,
+        storage_endpoint=None,
+        email_addresses=None,
+        disabled_alerts=None,
+        email_account_admins=None):
+
+    if storage_account_access_key is not None:
         instance.storage_account_access_key = storage_account_access_key
 
-    if state != None:
+    if state is not None:
         instance.state = state
 
-    if retention_days != None:
+    if retention_days is not None:
         instance.retention_days = retention_days
 
-    if storage_endpoint != None:
+    if storage_endpoint is not None:
         instance.storage_endpoint = storage_endpoint
 
-    if email_addresses != None:
+    if email_addresses is not None:
         instance.email_addresses = ";".join(email_addresses)
 
-    if disabled_alerts != None:
+    if disabled_alerts is not None:
         instance.disabled_alerts = ";".join(disabled_alerts)
 
-    if email_account_admins != None:
+    if email_account_admins is not None:
         instance.email_account_admins = email_account_admins
 
     return instance

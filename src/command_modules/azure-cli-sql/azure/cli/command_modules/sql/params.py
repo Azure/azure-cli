@@ -9,7 +9,6 @@ from ._util import ParametersContext, patch_arg_make_required
 from azure.cli.core.commands import CliArgumentType
 from azure.cli.core.commands.parameters import enum_choice_list
 from azure.mgmt.sql.models.database import Database
-from azure.mgmt.sql.models.database_blob_auditing_policy import DatabaseBlobAuditingPolicy
 from azure.mgmt.sql.models.elastic_pool import ElasticPool
 from azure.mgmt.sql.models.server import Server
 from azure.mgmt.sql.models.sql_management_client_enums import (
@@ -340,7 +339,8 @@ with ParametersContext(command='sql db audit-policy update') as c:
                nargs='+')
 
     c.argument('state',
-               help='Auditing policy state')
+               help='Auditing policy state',
+               **enum_choice_list(BlobAuditingPolicyState))
 
     c.argument('retention_days',
                help='The number of days to retain audit logs.')
@@ -360,8 +360,8 @@ with ParametersContext(command='sql db threat-detection-policy update') as c:
                help='The storage account endpoint.')
 
     c.argument('state',
-               help='Auditing policy state',
-               **enum_choice_list(BlobAuditingPolicyState))
+               help='Threat detection policy state',
+               **enum_choice_list(SecurityAlertPolicyState))
 
     c.argument('retention_days',
                help='The number of days to retain threat detection logs.')

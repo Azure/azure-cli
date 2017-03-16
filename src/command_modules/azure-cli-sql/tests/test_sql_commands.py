@@ -411,7 +411,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
 
         # get storage account key
         key = self.cmd('storage account keys list -g {} -n {} --query [0].value'
-                        .format(resource_group, storage_account)).get_output_in_json()
+                       .format(resource_group, storage_account)).get_output_in_json()
 
         # create db
         self.cmd('sql db create -g {} -s {} -n {}'
