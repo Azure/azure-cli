@@ -1443,7 +1443,7 @@ class VMSSCreateOptions(ResourceGroupVCRTestBase):
 
         self.cmd('vmss create --image Debian --admin-password Test1234@! -l westus'
                  ' -g {} -n {} --disable-overprovision --instance-count {}'
-                 ' --os-caching {} --upgrade-policy-mode {}'
+                 ' --os-disk-caching {} --upgrade-policy-mode {}'
                  ' --authentication-type password --admin-username myadmin --public-ip-address {}'
                  ' --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2'
                  .format(self.resource_group, vmss_name, instance_count, caching,

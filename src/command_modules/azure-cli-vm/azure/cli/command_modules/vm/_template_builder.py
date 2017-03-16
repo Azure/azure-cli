@@ -396,6 +396,7 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
             profile['dataDisks'].append({
                 'lun': image_data_disk.lun,
                 'createOption': "fromImage",
+                'caching': data_caching
             })
         lun = max([d.lun for d in image_data_disks]) + 1 if image_data_disks else 0
         for size in data_disk_sizes_gb:
@@ -540,7 +541,7 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
             })
         else:
             storage_properties['osDisk']['vhdContainers'] = "[variables('vhdContainers')]"
-    elif storage_profile in [StorageProfile.ManagedPirImage, StorageProfile.ManagedPirImage]:
+    elif storage_profile in [StorageProfile.ManagedPirImage, StorageProfile.ManagedCustomImage]:
         storage_properties['osDisk'] = {
             'createOption': 'FromImage',
             'caching': os_caching,

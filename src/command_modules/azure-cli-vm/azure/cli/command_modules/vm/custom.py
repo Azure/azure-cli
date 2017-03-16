@@ -1682,6 +1682,7 @@ def create_vmss(vmss_name, resource_group_name, image,
     from azure.cli.core._profile import CLOUD
     from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
+    from azure.mgmt.compute.models import CachingTypes
 
     network_id_template = resource_id(
         subscription=get_subscription_id(), resource_group=resource_group_name,
@@ -1691,6 +1692,7 @@ def create_vmss(vmss_name, resource_group_name, image,
     tags = tags or {}
     os_disk_name = os_disk_name or 'osdisk_{}'.format(random_string(10))
     storage_container_name = storage_container_name or 'vhds'
+    os_caching = os_caching or CachingTypes.read_write.value
 
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
