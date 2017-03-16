@@ -79,6 +79,8 @@ class CliCommandArgument(object):
             return {key: value for key, value in self.type.settings.items()
                     if key != 'options' and key not in self._NAMED_ARGUMENTS and
                     not value == CliArgumentType.REMOVE}
+        elif name == 'choices':
+            return self.type.settings.get(name, None)
         else:
             raise AttributeError(message=name)
 
