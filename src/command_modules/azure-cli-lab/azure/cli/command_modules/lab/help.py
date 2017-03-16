@@ -101,3 +101,7 @@ helps['lab vnet'] = """
             type: group
             short-summary: Commands to manage Azure DevTest Lab's Virtual Network.
             """
+helps['lab formula'] = """
+            type: group
+            short-summary: Commands to manage formulas in the Azure DevTest Lab.
+            """

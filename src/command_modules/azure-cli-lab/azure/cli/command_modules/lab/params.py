@@ -56,3 +56,9 @@ with ParametersContext(command='lab vm list') as c:
     c.argument('my_vms', action='store_true', arg_group=filter_arg_group_name)
     c.argument('claimable', action='store_true', arg_group=filter_arg_group_name)
     c.register_alias('resource_group', ('--resource-group', '-g'), validator=validate_lab_vm_list)
+
+
+with ParametersContext(command='lab vm apply-artifacts') as c:
+    c.register('artifacts', ('--artifacts',),
+               type=json.loads,
+               help='JSON encoded array of artifacts to be applied. Use @{file} to load from a file')

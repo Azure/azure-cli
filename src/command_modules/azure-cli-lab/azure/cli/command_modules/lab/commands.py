@@ -8,7 +8,8 @@ from ._client_factory import (get_devtestlabs_virtual_machine_operation,
                               get_devtestlabs_gallery_image_operation,
                               get_devtestlabs_artifact_operation,
                               get_devtestlabs_lab_operation,
-                              get_devtestlabs_virtual_network_operation)
+                              get_devtestlabs_virtual_network_operation,
+                              get_devtestlabs_formula_operation)
 from ._util import (ServiceGroup, create_service_adapter)
 
 
@@ -32,6 +33,7 @@ with ServiceGroup(__name__, get_devtestlabs_virtual_machine_operation,
         c.command('delete', 'delete_resource')
         c.command('start', 'start')
         c.command('stop', 'stop')
+        c.command('apply-artifacts', 'apply_artifacts')
 
 # Virtual Machine Operations Custom Commands
 with ServiceGroup(__name__, get_devtestlabs_virtual_machine_operation,
@@ -95,3 +97,15 @@ with ServiceGroup(__name__, get_devtestlabs_virtual_network_operation,
         with s.group('lab vnet') as c:
             c.command('list', 'list')
             c.command('get', 'get_resource')
+
+# Formula Operations Commands
+formula_operations = create_service_adapter(
+    'azure.mgmt.devtestlabs.operations.formula_operations',
+    'FormulaOperations')
+
+with ServiceGroup(__name__, get_devtestlabs_formula_operation,
+                  formula_operations) as s:
+    with s.group('lab formula') as c:
+        c.command('get', 'get_resource')
+        c.command('list', 'list')
+        c.command('delete', 'delete_resource')

@@ -33,3 +33,7 @@ def get_devtestlabs_artifact_operation(kwargs):
 
 def get_devtestlabs_virtual_network_operation(kwargs):
     return get_devtestlabs_management_client(kwargs).virtual_network
+
+
+def get_devtestlabs_formula_operation(kwargs):
+    return get_devtestlabs_management_client(kwargs).formula
