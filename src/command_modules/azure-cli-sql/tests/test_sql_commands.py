@@ -253,10 +253,9 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                  .format(rg, server),
                  checks=[
                      JMESPathCheck('length(@)', 2),
-                     JMESPathCheck('[1].name', 'master'),
-                     JMESPathCheck('[1].resourceGroup', rg),
-                     JMESPathCheck('[0].name', database_name),
-                     JMESPathCheck('[0].resourceGroup', rg)])
+                     JMESPathCheck('sort([].name)', sorted([database_name, 'master'])),
+                     JMESPathCheck('[0].resourceGroup', rg),
+                     JMESPathCheck('[1].resourceGroup', rg)])
 
         self.cmd('sql db show -g {} --server {} --name {}'
                  .format(rg, server, database_name),
