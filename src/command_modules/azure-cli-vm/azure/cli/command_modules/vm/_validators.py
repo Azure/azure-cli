@@ -452,6 +452,10 @@ def _validate_vmss_create_subnet(namespace):
                 raise CLIError(err.format(namespace.instance_count))
             namespace.subnet_address_prefix = '{}/{}'.format(cidr, i)
 
+        if namespace.app_gateway_type and namespace.gateway_subnet_address_prefix is None:
+            raise CLIError('Must specify --gateway-subnet-address-prefix to create an '
+                           'application gateway.')
+
 
 def _validate_vm_create_nsg(namespace):
 
@@ -481,7 +485,7 @@ def _validate_vm_create_public_ip(namespace):
 
 
 def _validate_vmss_create_public_ip(namespace):
-    if namespace.load_balancer_type is None:
+    if namespace.load_balancer_type is None and namespace.app_gateway_type is None:
         if namespace.public_ip_address:
             raise CLIError('--public-ip-address is not applicable when there is no load-balancer '
                            'attached, or implictly disabled due to 100+ instance count')
@@ -697,35 +701,52 @@ def process_vm_create_namespace(namespace):
 # region VMSS Create Validators
 
 
-def _validate_vmss_create_load_balancer(namespace):
+def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
+
+    INSTANCE_THRESHOLD = 100
+
     # convert the single_placement_group to boolean for simpler logic beyond
     if namespace.single_placement_group is None:
-        namespace.single_placement_group = namespace.instance_count <= 100
+        namespace.single_placement_group = namespace.instance_count <= INSTANCE_THRESHOLD
     else:
         namespace.single_placement_group = (namespace.single_placement_group == 'true')
 
-    if not namespace.single_placement_group:
-        if namespace.load_balancer:
-            raise CLIError('--load-balancer is not applicable when --single-placement-group is '
-                           'explictly turned off or implictly turned off for 100+ instance count')
-        namespace.load_balancer = ''
+    if not namespace.single_placement_group and namespace.load_balancer:
+        raise CLIError(
+            '--load-balancer is not applicable when --single-placement-group is turned off.')
 
-    if namespace.load_balancer:
-        if check_existence(namespace.load_balancer, namespace.resource_group_name,
-                           'Microsoft.Network', 'loadBalancers'):
-            namespace.load_balancer_type = 'existing'
-        else:
+    if namespace.instance_count > INSTANCE_THRESHOLD:
+        # AppGateway frontend
+        # TODO: Verify load balancer parameters are NOT supplied
+        if namespace.application_gateway:
+            if check_existence(namespace.application_gateway, namespace.resource_group_name,
+                               'Microsoft.Network', 'applicationGateways'):
+                namespace.app_gateway_type = 'existing'
+            else:
+                namespace.app_gateway_type = 'new'
+        elif namespace.application_gateway == '':
+            namespace.app_gateway_type = None
+        elif namespace.application_gateway is None:
+            namespace.app_gateway_type = 'new'
+    else:
+        # LoadBalancer frontend
+        # TODO: Verify app gateway parameters are NOT supplied
+        if namespace.load_balancer:
+            if check_existence(namespace.load_balancer, namespace.resource_group_name,
+                               'Microsoft.Network', 'loadBalancers'):
+                namespace.load_balancer_type = 'existing'
+            else:
+                namespace.load_balancer_type = 'new'
+        elif namespace.load_balancer == '':
+            namespace.load_balancer_type = None
+        elif namespace.load_balancer is None:
             namespace.load_balancer_type = 'new'
-    elif namespace.load_balancer == '':
-        namespace.load_balancer_type = None
-    elif namespace.load_balancer is None:
-        namespace.load_balancer_type = 'new'
 
 
 def process_vmss_create_namespace(namespace):
     get_default_location_from_resource_group(namespace)
     _validate_vm_create_storage_profile(namespace, for_scale_set=True)
-    _validate_vmss_create_load_balancer(namespace)
+    _validate_vmss_create_load_balancer_or_app_gateway(namespace)
     _validate_vm_create_vnet(namespace, for_scale_set=True)
     _validate_vmss_create_subnet(namespace)
     _validate_vmss_create_public_ip(namespace)

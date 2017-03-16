@@ -411,13 +411,10 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
     return profile
 
 
-def build_load_balancer_resource(name, location, tags, backend_pool_name, nat_pool_name,
-                                 backend_port, frontend_ip_name, public_ip_id, subnet_id,
-                                 private_ip_address='', private_ip_allocation='dynamic'):
-    lb_id = "resourceId('Microsoft.Network/loadBalancers', '{}')".format(name)
-
+def _build_frontend_ip_config(name, public_ip_id=None, private_ip_allocation=None,
+                              private_ip_address=None, subnet_id=None):
     frontend_ip_config = {
-        'name': frontend_ip_name
+        'name': name
     }
 
     if public_ip_id:
@@ -438,6 +435,109 @@ def build_load_balancer_resource(name, location, tags, backend_pool_name, nat_po
                 }
             }
         })
+    return frontend_ip_config
+
+
+def build_application_gateway_resource(name, location, tags, backend_pool_name, backend_port,
+                                       frontend_ip_name, public_ip_id,
+                                       subnet_id, gateway_subnet_id,
+                                       private_ip_address, private_ip_allocation):
+    frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id,
+                                                   private_ip_address, private_ip_allocation,
+                                                   subnet_id)
+
+    def _ag_subresource_id(_type, name):
+        return "[concat(variables('appGwID'), '/{}/{}')]".format(_type, name)
+
+    frontend_ip_config_id = _ag_subresource_id('frontendIPConfigurations', frontend_ip_name)
+    frontend_port_id = _ag_subresource_id('frontendPorts', 'appGwFrontendPort')
+    http_listener_id = _ag_subresource_id('httpListeners', 'appGwHttpListener')
+    backend_address_pool_id = _ag_subresource_id('backendAddressPools', backend_pool_name)
+    backend_http_settings_id = _ag_subresource_id(
+        'backendHttpSettingsCollection', 'appGwBackendHttpSettings')
+
+    ag_properties = {
+        'backendAddressPools': [
+            {
+                'name': backend_pool_name
+            }
+        ],
+        'backendHttpSettingsCollection': [
+            {
+                'name': 'appGwBackendHttpSettings',
+                'properties': {
+                    'Port': backend_port,
+                    'Protocol': 'Http',
+                    'CookieBasedAffinity': 'Disabled'
+                }
+            }
+        ],
+        'frontendIPConfigurations': [frontend_ip_config],
+        'frontendPorts': [
+            {
+                'name': 'appGwFrontendPort',
+                'properties': {
+                    'Port': 80
+                }
+            }
+        ],
+        'gatewayIPConfigurations': [
+            {
+                'name': 'appGwIpConfig',
+                'properties': {
+                    'subnet': {'id': gateway_subnet_id}
+                }
+            }
+        ],
+        'httpListeners': [
+            {
+                'name': 'appGwHttpListener',
+                'properties': {
+                    'FrontendIPConfiguration': {'Id': frontend_ip_config_id},
+                    'FrontendPort': {'Id': frontend_port_id},
+                    'Protocol': 'Http',
+                    'SslCertificate': None
+                }
+            }
+        ],
+        'sku': {
+            'name': 'Standard_Large',
+            'tier': 'Standard',
+            'capacity': '10'
+        },
+        'requestRoutingRules': [
+            {
+                'Name': 'rule1',
+                'properties': {
+                    'RuleType': 'Basic',
+                    'httpListener': {'id': http_listener_id},
+                    'backendAddressPool': {'id': backend_address_pool_id},
+                    'backendHttpSettings': {'id': backend_http_settings_id}
+                }
+            }
+        ]
+    }
+
+    ag = {
+        'type': 'Microsoft.Network/applicationGateways',
+        'name': name,
+        'location': location,
+        'tags': tags,
+        'apiVersion': '2015-06-15',
+        'dependsOn': [],
+        'properties': ag_properties
+    }
+    return ag
+
+
+def build_load_balancer_resource(name, location, tags, backend_pool_name, nat_pool_name,
+                                 backend_port, frontend_ip_name, public_ip_id, subnet_id,
+                                 private_ip_address, private_ip_allocation):
+    lb_id = "resourceId('Microsoft.Network/loadBalancers', '{}')".format(name)
+
+    frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id,
+                                                   private_ip_address, private_ip_allocation,
+                                                   subnet_id)
 
     lb_properties = {
         'backendAddressPools': [
@@ -464,13 +564,13 @@ def build_load_balancer_resource(name, location, tags, backend_pool_name, nat_po
     }
 
     lb = {
-        "type": "Microsoft.Network/loadBalancers",
-        "name": name,
-        "location": location,
-        "tags": tags,
-        "apiVersion": "2015-06-15",
-        "dependsOn": [],
-        "properties": lb_properties
+        'type': 'Microsoft.Network/loadBalancers',
+        'name': name,
+        'location': location,
+        'tags': tags,
+        'apiVersion': '2015-06-15',
+        'dependsOn': [],
+        'properties': lb_properties
     }
     return lb
 
@@ -513,8 +613,11 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
             'subnet': {'id': subnet_id}
         }
     }
+
     if backend_address_pool_id:
-        ip_configuration['properties']['loadBalancerBackendAddressPools'] = [
+        key = 'loadBalancerBackendAddressPools' if 'loadBalancers' in backend_address_pool_id \
+            else 'ApplicationGatewayBackendAddressPools'
+        ip_configuration['properties'][key] = [
             {'id': backend_address_pool_id}
         ]
 
