@@ -333,18 +333,60 @@ def db_update(
 
 def db_audit_policy_update(
     instance,
-    storage_account_access_key=None):
+    storage_account_access_key=None,
+    audit_actions_and_groups=None,
+    state=None,
+    retention_days=None,
+    storage_endpoint=None):
 
-    instance.storage_account_access_key = storage_account_access_key or instance.storage_account_access_key
+    if storage_account_access_key != None:
+        instance.storage_account_access_key = storage_account_access_key
+
+    if audit_actions_and_groups != None:
+        instance.audit_actions_and_groups = audit_actions_and_groups
+
+    if state != None:
+        instance.state = state
+
+    if retention_days != None:
+        instance.retention_days = retention_days
+
+    if storage_endpoint != None:
+        instance.storage_endpoint = storage_endpoint
 
     return instance
 
 
 def db_threat_detection_policy_update(
     instance,
-    storage_account_access_key=None):
+    storage_account_access_key=None,
+    state=None,
+    retention_days=None,
+    storage_endpoint=None,
+    email_addresses=None,
+    disabled_alerts=None,
+    email_account_admins=None):
 
-    instance.storage_account_access_key = storage_account_access_key or instance.storage_account_access_key
+    if storage_account_access_key != None:
+        instance.storage_account_access_key = storage_account_access_key
+
+    if state != None:
+        instance.state = state
+
+    if retention_days != None:
+        instance.retention_days = retention_days
+
+    if storage_endpoint != None:
+        instance.storage_endpoint = storage_endpoint
+
+    if email_addresses != None:
+        instance.email_addresses = ";".join(email_addresses)
+
+    if disabled_alerts != None:
+        instance.disabled_alerts = ";".join(disabled_alerts)
+
+    if email_account_admins != None:
+        instance.email_account_admins = email_account_admins
 
     return instance
 

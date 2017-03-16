@@ -7,11 +7,15 @@ import itertools
 from enum import Enum
 from ._util import ParametersContext, patch_arg_make_required
 from azure.cli.core.commands import CliArgumentType
+from azure.cli.core.commands.parameters import enum_choice_list
 from azure.mgmt.sql.models.database import Database
 from azure.mgmt.sql.models.database_blob_auditing_policy import DatabaseBlobAuditingPolicy
 from azure.mgmt.sql.models.elastic_pool import ElasticPool
 from azure.mgmt.sql.models.server import Server
-from azure.mgmt.sql.models.sql_management_client_enums import CreateMode
+from azure.mgmt.sql.models.sql_management_client_enums import (
+    BlobAuditingPolicyState,
+    CreateMode,
+    SecurityAlertPolicyState)
 
 #####
 #           Reusable param type definitions
@@ -327,6 +331,20 @@ with ParametersContext(command='sql db audit-policy update') as c:
                options_list=('--storage-key',),
                help='Access key for the storage account.')
 
+    c.argument('storage_endpoint',
+               help='The storage account endpoint.')
+
+    c.argument('audit_actions_and_groups',
+               options_list=('--actions',),
+               help='List of actions and action groups to audit.',
+               nargs='+')
+
+    c.argument('state',
+               help='Auditing policy state')
+
+    c.argument('retention_days',
+               help='The number of days to retain audit logs.')
+
 
 #####
 #           sql db threat-detection-policy
@@ -337,6 +355,30 @@ with ParametersContext(command='sql db threat-detection-policy update') as c:
     c.argument('storage_account_access_key',
                options_list=('--storage-key',),
                help='Access key for the storage account.')
+
+    c.argument('storage_endpoint',
+               help='The storage account endpoint.')
+
+    c.argument('state',
+               help='Auditing policy state',
+               **enum_choice_list(BlobAuditingPolicyState))
+
+    c.argument('retention_days',
+               help='The number of days to retain threat detection logs.')
+
+    c.argument('email_addresses',
+               options_list=('--email-addresses',),
+               help='List of email addresses that alerts are sent to.',
+               nargs='+')
+
+    c.argument('disabled_alerts',
+               options_list=('--disabled-alerts',),
+               help='List of disabled alerts.',
+               nargs='+')
+
+    c.argument('email_account_admins',
+               options_list=('--email-account-admins',),
+               help='Whether the alert is sent to the account administrators.')
 
 ###############################################
 #                sql dw                       #

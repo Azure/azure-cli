@@ -430,20 +430,22 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
         state = 'Enabled'
         access_key = key
         retention_days = 30
-        audit_group = 'DATABASE_LOGOUT_GROUP'
+        audit_actions_input = 'DATABASE_LOGOUT_GROUP DATABASE_ROLE_MEMBER_CHANGE_GROUP'
+        audit_actions_expected = ['DATABASE_LOGOUT_GROUP',
+                                  'DATABASE_ROLE_MEMBER_CHANGE_GROUP']
 
         self.cmd('sql db audit-policy update -g {} -s {} -n {}'
-                 ' --set state={} --storage-key {} --set storageEndpoint={}'
-                 ' --set retentionDays={} --add auditActionsAndGroups {}'
+                 ' --state {} --storage-key {} --storage-endpoint={}'
+                 ' --retention-days={} --actions {}'
                  .format(resource_group, server, database_name, state, access_key,
-                         storage_endpoint, retention_days, audit_group),
+                         storage_endpoint, retention_days, audit_actions_input),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', state),
                      JMESPathCheck('storageAccountAccessKey', ''),  # service doesn't return it
                      JMESPathCheck('storageEndpoint', storage_endpoint),
                      JMESPathCheck('retentionDays', retention_days),
-                     JMESPathCheck('auditActionsAndGroups[0]', audit_group)])
+                     JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
         # get threat detection policy
         self.cmd('sql db threat-detection-policy show -g {} -s {} -n {}'
@@ -451,22 +453,28 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                  checks=[JMESPathCheck('resourceGroup', resource_group)])
 
         # update threat detection policy
-        disabled_alerts = 'Sql_Injection_Vulnerability; Access_Anomaly'
-        email_addresses = 'test1@example.com; test2@example.com'
+        disabled_alerts_input = 'Sql_Injection_Vulnerability Access_Anomaly'
+        disabled_alerts_expected = 'Sql_Injection_Vulnerability;Access_Anomaly'
+        email_addresses_input = 'test1@example.com test2@example.com'
+        email_addresses_expected = 'test1@example.com;test2@example.com'
+        email_account_admins = 'Enabled'
 
         self.cmd('sql db threat-detection-policy update -g {} -s {} -n {}'
-                 ' --set state={} --storage-key {} --set storageEndpoint={}'
-                 ' --set retentionDays={} --set emailAddresses=\'{}\' --set disabledAlerts=\'{}\''
+                 ' --state {} --storage-key {} --storage-endpoint {}'
+                 ' --retention-days {} --email-addresses {} --disabled-alerts {}'
+                 ' --email-account-admins {}'
                  .format(resource_group, server, database_name, state, access_key,
-                         storage_endpoint, retention_days, email_addresses, disabled_alerts),
+                         storage_endpoint, retention_days, email_addresses_input,
+                         disabled_alerts_input, email_account_admins),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', state),
                      JMESPathCheck('storageAccountAccessKey', access_key),
                      JMESPathCheck('storageEndpoint', storage_endpoint),
                      JMESPathCheck('retentionDays', retention_days),
-                     JMESPathCheck('emailAddresses', email_addresses),
-                     JMESPathCheck('disabledAlerts', disabled_alerts)])
+                     JMESPathCheck('emailAddresses', email_addresses_expected),
+                     JMESPathCheck('disabledAlerts', disabled_alerts_expected),
+                     JMESPathCheck('emailAccountAdmins', email_account_admins)])
 
 
 class SqlServerDwMgmtScenarioTest(ScenarioTest):
