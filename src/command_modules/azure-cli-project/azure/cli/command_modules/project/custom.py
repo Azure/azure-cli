@@ -177,6 +177,11 @@ def _configure_cluster(dns_prefix, location, user_name): # pylint: disable=too-m
 
         utils.writeline('Configuring Kubernetes cluster')
 
+        # Validate kubectl context
+        if not _validate_kubectl_context(dns_prefix):
+            utils.writeline("kubectl context not set to {0}, please run 'az acs kubernetes get-credentials'".format(dns_prefix))
+            sys.exit(1)
+
         # Get resource group
         creds = _get_creds_from_master(dns_prefix, location, user_name)
         resource_group = creds['resourceGroup']
@@ -259,12 +264,26 @@ def _configure_cluster(dns_prefix, location, user_name): # pylint: disable=too-m
         utils.writeline('This might take some waiting.')
         workspace_storage = dns_prefix.replace('-', '') + 'wks'
         _initialize_workspace(dns_prefix, workspace_storage, workspace_storage_key)
+
     finally:
         # Removing temporary data files
         file_path = os.path.join(kubernetes_path, '*.tmp.*')
         files = glob.glob(file_path)
         for single_file in files:
             os.remove(single_file)
+        
+        # Removing temporary creds azure.json
+        azure_json_file = _get_creds_file()
+        if os.path.exists(azure_json_file):
+            os.remove(azure_json_file)
+
+def _validate_kubectl_context(dns_prefix):
+    context_command = 'kubectl config current-context'
+    current_context = _get_command_output(context_command)
+    if current_context == dns_prefix:
+        return True
+    else:
+        return False
 
 def _cluster_configured(dns_prefix, user_name): # pylint: disable=too-many-return-statements
     """
