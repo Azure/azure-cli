@@ -8,6 +8,7 @@
 #pylint: disable=bad-continuation
 #pylint: disable=too-many-lines
 import os
+import unittest
 
 from azure.cli.core._util import CLIError
 from azure.cli.core.commands.arm import resource_id
@@ -1295,3 +1296,6 @@ class NetworkZoneImportExportTest(ResourceGroupVCRTestBase):
         self.cmd('network dns zone import -n {} -g {} --file-name "{}"'
                  .format(zone_name, self.resource_group, zone_file_path))
         self.cmd('network dns zone export -n {} -g {}'.format(zone_name, self.resource_group))
+
+if __name__ == '__main__':
+    unittest.main()

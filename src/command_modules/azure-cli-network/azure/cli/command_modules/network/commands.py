@@ -100,18 +100,20 @@ cli_generic_update_command(__name__, 'network express-route peering update',
 cli_command(__name__, 'network express-route peering create', custom_path.format('create_express_route_peering'), cf_express_route_circuit_peerings)
 
 # ExpressRouteCircuitsOperations
-cli_command(__name__, 'network express-route delete', 'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.delete', cf_express_route_circuits)
+cli_command(__name__, 'network express-route delete', 'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.delete', cf_express_route_circuits, no_wait_param='raw')
 cli_command(__name__, 'network express-route show', 'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.get', cf_express_route_circuits, exception_handler=empty_on_404)
 cli_command(__name__, 'network express-route get-stats', 'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.get_stats', cf_express_route_circuits)
 cli_command(__name__, 'network express-route list-arp-tables', 'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.list_arp_table', cf_express_route_circuits)
 cli_command(__name__, 'network express-route list-route-tables', 'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.list_routes_table', cf_express_route_circuits)
-cli_command(__name__, 'network express-route create', custom_path.format('create_express_route'))
+cli_command(__name__, 'network express-route create', custom_path.format('create_express_route'), no_wait_param='no_wait')
 cli_command(__name__, 'network express-route list', custom_path.format('list_express_route_circuits'))
 cli_generic_update_command(__name__, 'network express-route update',
                            'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.get',
                            'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.create_or_update',
                            cf_express_route_circuits,
-                           custom_function_op=custom_path.format('update_express_route'))
+                           custom_function_op=custom_path.format('update_express_route'),
+                           no_wait_param='raw')
+cli_generic_wait_command(__name__, 'network express-route wait', 'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.get', cf_express_route_circuits)
 
 # ExpressRouteServiceProvidersOperations
 cli_command(__name__, 'network express-route list-service-providers', 'azure.mgmt.network.operations.express_route_service_providers_operations#ExpressRouteServiceProvidersOperations.list', cf_express_route_service_providers)
@@ -181,15 +183,16 @@ cli_generic_update_command(__name__, 'network lb probe update',
                            custom_function_op=custom_path.format('set_lb_probe'))
 
 # LocalNetworkGatewaysOperations
-cli_command(__name__, 'network local-gateway delete', 'azure.mgmt.network.operations.local_network_gateways_operations#LocalNetworkGatewaysOperations.delete', cf_local_network_gateways)
+cli_command(__name__, 'network local-gateway delete', 'azure.mgmt.network.operations.local_network_gateways_operations#LocalNetworkGatewaysOperations.delete', cf_local_network_gateways, no_wait_param='raw')
 cli_command(__name__, 'network local-gateway show', 'azure.mgmt.network.operations.local_network_gateways_operations#LocalNetworkGatewaysOperations.get', cf_local_network_gateways, exception_handler=empty_on_404)
 cli_command(__name__, 'network local-gateway list', 'azure.mgmt.network.operations.local_network_gateways_operations#LocalNetworkGatewaysOperations.list', cf_local_network_gateways, table_transformer=transform_local_gateway_table_output)
-cli_command(__name__, 'network local-gateway create', custom_path.format('create_local_gateway'))
+cli_command(__name__, 'network local-gateway create', custom_path.format('create_local_gateway'), no_wait_param='no_wait')
 cli_generic_update_command(__name__, 'network local-gateway update',
                            'azure.mgmt.network.operations.local_network_gateways_operations#LocalNetworkGatewaysOperations.get',
                            'azure.mgmt.network.operations.local_network_gateways_operations#LocalNetworkGatewaysOperations.create_or_update',
                            cf_local_network_gateways,
-                           custom_function_op=custom_path.format('update_local_gateway'))
+                           custom_function_op=custom_path.format('update_local_gateway'), no_wait_param='raw')
+cli_generic_wait_command(__name__, 'network local-gateway wait', 'azure.mgmt.network.operations.local_network_gateways_operations#LocalNetworkGatewaysOperations.get', cf_local_network_gateways)
 
 # NetworkInterfacesOperations
 cli_command(__name__, 'network nic create', custom_path.format('create_nic'), transform=transform_nic_create_output)
@@ -312,7 +315,7 @@ cli_generic_update_command(__name__, 'network vpn-connection shared-key update',
                            cf_virtual_network_gateway_connections)
 
 # VirtualNetworkGatewaysOperations
-cli_command(__name__, 'network vnet-gateway delete', 'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.delete', cf_virtual_network_gateways)
+cli_command(__name__, 'network vnet-gateway delete', 'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.delete', cf_virtual_network_gateways, no_wait_param='raw')
 cli_command(__name__, 'network vnet-gateway show', 'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.get', cf_virtual_network_gateways, exception_handler=empty_on_404)
 cli_command(__name__, 'network vnet-gateway list', 'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.list', cf_virtual_network_gateways)
 cli_command(__name__, 'network vnet-gateway reset', 'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.reset', cf_virtual_network_gateways)
@@ -323,13 +326,12 @@ cli_generic_update_command(__name__, 'network vnet-gateway update',
                            cf_virtual_network_gateways,
                            custom_function_op=custom_path.format('update_vnet_gateway'),
                            no_wait_param='raw')
+cli_generic_wait_command(__name__, 'network vnet-gateway wait', 'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.get', cf_virtual_network_gateways)
+
 cli_command(__name__, 'network vnet-gateway root-cert create', custom_path.format('create_vnet_gateway_root_cert'))
 cli_command(__name__, 'network vnet-gateway root-cert delete', custom_path.format('delete_vnet_gateway_root_cert'))
 cli_command(__name__, 'network vnet-gateway revoked-cert create', custom_path.format('create_vnet_gateway_revoked_cert'))
 cli_command(__name__, 'network vnet-gateway revoked-cert delete', custom_path.format('delete_vnet_gateway_revoked_cert'))
-
-
-cli_generic_wait_command(__name__, 'network vnet-gateway wait', 'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.get', cf_virtual_network_gateways)
 
 # VirtualNetworksOperations
 cli_command(__name__, 'network vnet delete', 'azure.mgmt.network.operations.virtual_networks_operations#VirtualNetworksOperations.delete', cf_virtual_networks)

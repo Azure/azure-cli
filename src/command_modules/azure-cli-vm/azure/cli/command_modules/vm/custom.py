@@ -54,7 +54,7 @@ def get_vm(resource_group_name, vm_name, expand=None):
                                        expand=expand)
 
 
-def set_vm(instance, lro_operation=None):
+def set_vm(instance, lro_operation=None, no_wait=False):
     '''Update the given Virtual Machine instance'''
     instance.resources = None  # Issue: https://github.com/Azure/autorest/issues/934
     client = _compute_client_factory()
@@ -62,7 +62,7 @@ def set_vm(instance, lro_operation=None):
     poller = client.virtual_machines.create_or_update(
         resource_group_name=parsed_id[0],
         vm_name=parsed_id[1],
-        parameters=instance)
+        parameters=instance, raw=no_wait)
     if lro_operation:
         return lro_operation(poller)
     else:
@@ -553,13 +553,13 @@ def _get_disk_lun(data_disks):
         return 0
 
 
-def resize_vm(resource_group_name, vm_name, size):
+def resize_vm(resource_group_name, vm_name, size, no_wait=False):
     '''Update vm size
     :param str size: sizes such as Standard_A4, Standard_F4s, etc
     '''
     vm = get_vm(resource_group_name, vm_name)
     vm.hardware_profile.vm_size = size  # pylint: disable=no-member
-    return set_vm(vm)
+    return set_vm(vm, no_wait)
 
 
 def get_instance_view(resource_group_name, vm_name):
@@ -587,7 +587,8 @@ def capture_vm(resource_group_name, vm_name, vhd_name_prefix,
     print(json.dumps(result.output, indent=2))  # pylint: disable=no-member
 
 
-def set_user(resource_group_name, vm_name, username, password=None, ssh_key_value=None):
+def set_user(resource_group_name, vm_name, username, password=None, ssh_key_value=None,
+             no_wait=False):
     '''Update or Add(only on Linux VM) users
     :param username: user name
     :param password: user password.
@@ -595,31 +596,37 @@ def set_user(resource_group_name, vm_name, username, password=None, ssh_key_valu
     '''
     vm = get_vm(resource_group_name, vm_name, 'instanceView')
     if _is_linux_vm(vm):
-        return _set_linux_user(vm, resource_group_name, username, password, ssh_key_value)
+        return _set_linux_user(vm, resource_group_name, username, password, ssh_key_value, no_wait)
     else:
         if ssh_key_value:
             raise CLIError('SSH key is not appliable on a Windows VM')
-        return _reset_windows_admin(vm, resource_group_name, username, password)
+        return _reset_windows_admin(vm, resource_group_name, username, password, no_wait)
 
 
 def delete_user(
-        resource_group_name, vm_name, username):
+        resource_group_name, vm_name, username, no_wait=False):
     '''Remove a user(not supported on Windows VM)
     :param username: user name
     '''
     vm = get_vm(resource_group_name, vm_name, 'instanceView')
     if not _is_linux_vm(vm):
         raise CLIError('Deleting a user is not supported on Windows VM')
+    if no_wait:
+        return _update_linux_access_extension(vm, resource_group_name,
+                                              {'remove_user': username}, no_wait)
     poller = _update_linux_access_extension(vm, resource_group_name,
                                             {'remove_user': username})
     return ExtensionUpdateLongRunningOperation('deleting user', 'done')(poller)
 
 
-def reset_linux_ssh(resource_group_name, vm_name):
+def reset_linux_ssh(resource_group_name, vm_name, no_wait=False):
     '''Reset the SSH configuration In Linux VM'''
     vm = get_vm(resource_group_name, vm_name, 'instanceView')
     if not _is_linux_vm(vm):
         raise CLIError('Resetting SSH is not supported in Windows VM')
+    if no_wait:
+        return _update_linux_access_extension(vm, resource_group_name,
+                                              {'reset_ssh': True}, no_wait)
     poller = _update_linux_access_extension(vm, resource_group_name,
                                             {'reset_ssh': True})
     return ExtensionUpdateLongRunningOperation('resetting SSH', 'done')(poller)
@@ -631,7 +638,7 @@ def _is_linux_vm(vm):
 
 
 def _set_linux_user(vm_instance, resource_group_name, username,
-                    password=None, ssh_key_value=None):
+                    password=None, ssh_key_value=None, no_wait=False):
     protected_settings = {}
     protected_settings['username'] = username
     if password:
@@ -642,12 +649,15 @@ def _set_linux_user(vm_instance, resource_group_name, username,
     if ssh_key_value:
         protected_settings['ssh_key'] = read_content_if_is_file(ssh_key_value)
 
+    if no_wait:
+        return _update_linux_access_extension(vm_instance, resource_group_name,
+                                              protected_settings, no_wait)
     poller = _update_linux_access_extension(vm_instance, resource_group_name,
                                             protected_settings)
     return ExtensionUpdateLongRunningOperation('setting user', 'done')(poller)
 
 
-def _reset_windows_admin(vm_instance, resource_group_name, username, password):
+def _reset_windows_admin(vm_instance, resource_group_name, username, password, no_wait=False):
     '''Update the password.
     You can only change the password. Adding a new user is not supported.
     '''
@@ -671,13 +681,18 @@ def _reset_windows_admin(vm_instance, resource_group_name, username, password):
                                   settings={'UserName': username},
                                   auto_upgrade_minor_version=auto_upgrade)
 
+    if no_wait:
+        return client.virtual_machine_extensions.create_or_update(resource_group_name,
+                                                                  vm_instance.name,
+                                                                  instance_name, ext, raw=no_wait)
     poller = client.virtual_machine_extensions.create_or_update(resource_group_name,
                                                                 vm_instance.name,
                                                                 instance_name, ext)
     return ExtensionUpdateLongRunningOperation('resetting admin', 'done')(poller)
 
 
-def _update_linux_access_extension(vm_instance, resource_group_name, protected_settings):
+def _update_linux_access_extension(vm_instance, resource_group_name, protected_settings,
+                                   no_wait=False):
     client = _compute_client_factory()
 
     from azure.mgmt.compute.models import VirtualMachineExtension
@@ -697,11 +712,10 @@ def _update_linux_access_extension(vm_instance, resource_group_name, protected_s
                                   type_handler_version=version,
                                   settings={},
                                   auto_upgrade_minor_version=auto_upgrade)
-
-    poller = client.virtual_machine_extensions.create_or_update(resource_group_name,
-                                                                vm_instance.name,
-                                                                instance_name, ext)
-    return poller
+    return client.virtual_machine_extensions.create_or_update(resource_group_name,
+                                                              vm_instance.name,
+                                                              instance_name, ext,
+                                                              raw=no_wait)
 
 
 def _get_extension_instance_name(instance_view, publisher, extension_type_name,
@@ -1255,7 +1269,7 @@ def _update_vm_nics(vm, nics, primary_nic):
     return set_vm(vm).network_profile.network_interfaces
 
 
-def scale_vmss(resource_group_name, vm_scale_set_name, new_capacity):
+def scale_vmss(resource_group_name, vm_scale_set_name, new_capacity, no_wait=False):
     '''change the number of VMs in an virtual machine scale set
 
     :param int new_capacity: number of virtual machines in a scale set
@@ -1270,15 +1284,17 @@ def scale_vmss(resource_group_name, vm_scale_set_name, new_capacity):
     vmss_new = VirtualMachineScaleSet(vmss.location, sku=vmss.sku)
     return client.virtual_machine_scale_sets.create_or_update(resource_group_name,
                                                               vm_scale_set_name,
-                                                              vmss_new)
+                                                              vmss_new,
+                                                              raw=no_wait)
 
 
-def update_vmss_instances(resource_group_name, vm_scale_set_name, instance_ids):
+def update_vmss_instances(resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
     '''upgrade virtual machines in a virtual machine scale set'''
     client = _compute_client_factory()
     return client.virtual_machine_scale_sets.update_instances(resource_group_name,
                                                               vm_scale_set_name,
-                                                              instance_ids)
+                                                              instance_ids,
+                                                              raw=no_wait)
 
 
 def get_vmss_instance_view(resource_group_name, vm_scale_set_name, instance_id=None):
@@ -1327,46 +1343,52 @@ def list_vmss(resource_group_name=None):
         return client.virtual_machine_scale_sets.list_all()
 
 
-def deallocate_vmss(resource_group_name, vm_scale_set_name, instance_ids=None):
+def deallocate_vmss(resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     '''deallocate virtual machines in a scale set. '''
     client = _compute_client_factory()
     if instance_ids and len(instance_ids) == 1:
         return client.virtual_machine_scale_set_vms.deallocate(resource_group_name,
                                                                vm_scale_set_name,
-                                                               instance_ids[0])
+                                                               instance_ids[0],
+                                                               raw=no_wait)
     else:
         return client.virtual_machine_scale_sets.deallocate(resource_group_name,
                                                             vm_scale_set_name,
-                                                            instance_ids=instance_ids)
+                                                            instance_ids=instance_ids,
+                                                            raw=no_wait)
 
 
-def delete_vmss_instances(resource_group_name, vm_scale_set_name, instance_ids):
+def delete_vmss_instances(resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
     '''delete virtual machines in a scale set.'''
     client = _compute_client_factory()
     if len(instance_ids) == 1:
         return client.virtual_machine_scale_set_vms.delete(resource_group_name,
                                                            vm_scale_set_name,
-                                                           instance_ids[0])
+                                                           instance_ids[0],
+                                                           raw=no_wait)
     else:
         return client.virtual_machine_scale_sets.delete_instances(resource_group_name,
                                                                   vm_scale_set_name,
-                                                                  instance_ids)
+                                                                  instance_ids,
+                                                                  raw=no_wait)
 
 
-def stop_vmss(resource_group_name, vm_scale_set_name, instance_ids=None):
+def stop_vmss(resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     '''power off (stop) virtual machines in a virtual machine scale set.'''
     client = _compute_client_factory()
     if instance_ids and len(instance_ids) == 1:
         return client.virtual_machine_scale_set_vms.power_off(resource_group_name,
                                                               vm_scale_set_name,
-                                                              instance_ids[0])
+                                                              instance_ids[0],
+                                                              raw=no_wait)
     else:
         return client.virtual_machine_scale_sets.power_off(resource_group_name,
                                                            vm_scale_set_name,
-                                                           instance_ids=instance_ids)
+                                                           instance_ids=instance_ids,
+                                                           raw=no_wait)
 
 
-def reimage_vmss(resource_group_name, vm_scale_set_name, instance_id=None):
+def reimage_vmss(resource_group_name, vm_scale_set_name, instance_id=None, no_wait=False):
     '''reimage virtual machines in a virtual machine scale set.
 
     :param str instance_id: VM instance id. If missing, reimage all instances
@@ -1375,36 +1397,42 @@ def reimage_vmss(resource_group_name, vm_scale_set_name, instance_id=None):
     if instance_id:
         return client.virtual_machine_scale_set_vms.reimage(resource_group_name,
                                                             vm_scale_set_name,
-                                                            instance_id)
+                                                            instance_id,
+                                                            raw=no_wait)
     else:
         return client.virtual_machine_scale_sets.reimage(resource_group_name,
-                                                         vm_scale_set_name)
+                                                         vm_scale_set_name,
+                                                         raw=no_wait)
 
 
-def restart_vmss(resource_group_name, vm_scale_set_name, instance_ids=None):
+def restart_vmss(resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     '''restart virtual machines in a scale set.'''
     client = _compute_client_factory()
     if instance_ids and len(instance_ids) == 1:
         return client.virtual_machine_scale_set_vms.restart(resource_group_name,
                                                             vm_scale_set_name,
-                                                            instance_ids[0])
+                                                            instance_ids[0],
+                                                            raw=no_wait)
     else:
         return client.virtual_machine_scale_sets.restart(resource_group_name,
                                                          vm_scale_set_name,
-                                                         instance_ids=instance_ids)
+                                                         instance_ids=instance_ids,
+                                                         raw=no_wait)
 
 
-def start_vmss(resource_group_name, vm_scale_set_name, instance_ids=None):
+def start_vmss(resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     '''start virtual machines in a virtual machine scale set.'''
     client = _compute_client_factory()
     if instance_ids and len(instance_ids) == 1:
         return client.virtual_machine_scale_set_vms.start(resource_group_name,
                                                           vm_scale_set_name,
-                                                          instance_ids[0])
+                                                          instance_ids[0],
+                                                          raw=no_wait)
     else:
         return client.virtual_machine_scale_sets.start(resource_group_name,
                                                        vm_scale_set_name,
-                                                       instance_ids=instance_ids)
+                                                       instance_ids=instance_ids,
+                                                       raw=no_wait)
 
 
 def list_vmss_instance_connection_info(resource_group_name, vm_scale_set_name):
@@ -1456,8 +1484,9 @@ def vmss_get(resource_group_name, name):
     return _compute_client_factory().virtual_machine_scale_sets.get(resource_group_name, name)
 
 
-def vmss_set(**kwargs):
-    return _compute_client_factory().virtual_machine_scale_sets.create_or_update(**kwargs)
+def vmss_set(no_wait=False, **kwargs):
+    return _compute_client_factory().virtual_machine_scale_sets.create_or_update(
+        raw=no_wait, **kwargs)
 
 
 def convert_av_set_to_managed_disk(resource_group_name, availability_set_name):

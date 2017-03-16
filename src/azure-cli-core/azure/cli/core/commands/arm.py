@@ -246,15 +246,18 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
     def handler(args):  # pylint: disable=too-many-branches,too-many-statements
         from msrestazure.azure_operation import AzureOperationPoller
 
-        ordered_arguments = args.pop('ordered_arguments') if 'ordered_arguments' in args else []
+        ordered_arguments = args.pop('ordered_arguments', [])
+        for item in ['properties_to_add', 'properties_to_set', 'properties_to_remove']:
+            if args[item]:
+                raise CLIError("Unexpected '{}' was not empty.".format(item))
+            del args[item]
 
         try:
             client = factory() if factory else None
         except TypeError:
             client = factory(None) if factory else None
 
-        getterargs = {key: val for key, val in args.items()
-                      if key in get_arguments_loader()}
+        getterargs = {key: val for key, val in args.items() if key in get_arguments_loader()}
         getter = get_op_handler(getter_op)
         if child_collection_prop_name:
             parent = getter(client, **getterargs) if client else getter(**getterargs)
@@ -278,13 +281,7 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
                 instance = custom_function(instance, **custom_func_args)
 
         # apply generic updates after custom updates
-        setterargs = set_arguments_loader()
-        for k in args.copy().keys():
-            if k in get_arguments_loader() or k in setterargs \
-                    or k in ('properties_to_add', 'properties_to_remove', 'properties_to_set'):
-                args.pop(k)
-        for key, val in args.items():
-            ordered_arguments.append((key, val))
+        setterargs = {key: val for key, val in args.items() if key in set_arguments_loader()}
 
         for arg in ordered_arguments:
             arg_type, arg_values = arg
@@ -306,15 +303,12 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
                     raise CLIError('invalid syntax: {}'.format(remove_usage))
 
         # Done... update the instance!
-        getterargs[setter_arg_name] = parent if child_collection_prop_name else instance
+        setterargs[setter_arg_name] = parent if child_collection_prop_name else instance
         setter = get_op_handler(setter_op)
-        no_wait = no_wait_param and setterargs.get(no_wait_param, None)
-        if no_wait:
-            getterargs[no_wait_param] = True
 
-        opres = setter(client, **getterargs) if client else setter(**getterargs)
+        opres = setter(client, **setterargs) if client else setter(**setterargs)
 
-        if no_wait:
+        if setterargs.get(no_wait_param, None):
             return None
 
         result = opres.result() if isinstance(opres, AzureOperationPoller) else opres

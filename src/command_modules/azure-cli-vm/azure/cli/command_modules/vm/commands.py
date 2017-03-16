@@ -84,20 +84,20 @@ def transform_av_set_collection_output(av_sets):
 
 op_var = 'virtual_machines_operations'
 op_class = 'VirtualMachinesOperations'
-cli_command(__name__, 'vm create', custom_path.format('create_vm'), transform=transform_vm_create_output)
-cli_command(__name__, 'vm delete', mgmt_path.format(op_var, op_class, 'delete'), cf_vm, confirmation=True)
-cli_command(__name__, 'vm deallocate', mgmt_path.format(op_var, op_class, 'deallocate'), cf_vm)
-cli_command(__name__, 'vm generalize', mgmt_path.format(op_var, op_class, 'generalize'), cf_vm)
+cli_command(__name__, 'vm create', custom_path.format('create_vm'), transform=transform_vm_create_output, no_wait_param='no_wait')
+cli_command(__name__, 'vm delete', mgmt_path.format(op_var, op_class, 'delete'), cf_vm, confirmation=True, no_wait_param='raw')
+cli_command(__name__, 'vm deallocate', mgmt_path.format(op_var, op_class, 'deallocate'), cf_vm, no_wait_param='raw')
+cli_command(__name__, 'vm generalize', mgmt_path.format(op_var, op_class, 'generalize'), cf_vm, no_wait_param='raw')
 cli_command(__name__, 'vm show', custom_path.format('show_vm'), table_transformer=transform_vm, exception_handler=empty_on_404)
 cli_command(__name__, 'vm list-vm-resize-options', mgmt_path.format(op_var, op_class, 'list_available_sizes'), cf_vm)
-cli_command(__name__, 'vm stop', mgmt_path.format(op_var, op_class, 'power_off'), cf_vm)
-cli_command(__name__, 'vm restart', mgmt_path.format(op_var, op_class, 'restart'), cf_vm)
-cli_command(__name__, 'vm start', mgmt_path.format(op_var, op_class, 'start'), cf_vm)
-cli_command(__name__, 'vm redeploy', mgmt_path.format(op_var, op_class, 'redeploy'), cf_vm)
+cli_command(__name__, 'vm stop', mgmt_path.format(op_var, op_class, 'power_off'), cf_vm, no_wait_param='raw')
+cli_command(__name__, 'vm restart', mgmt_path.format(op_var, op_class, 'restart'), cf_vm, no_wait_param='raw')
+cli_command(__name__, 'vm start', mgmt_path.format(op_var, op_class, 'start'), cf_vm, no_wait_param='raw')
+cli_command(__name__, 'vm redeploy', mgmt_path.format(op_var, op_class, 'redeploy'), cf_vm, no_wait_param='raw')
 cli_command(__name__, 'vm list-ip-addresses', custom_path.format('list_ip_addresses'), table_transformer=transform_ip_addresses)
 cli_command(__name__, 'vm get-instance-view', custom_path.format('get_instance_view'))
 cli_command(__name__, 'vm list', custom_path.format('list_vm'), table_transformer=transform_vm_list)
-cli_command(__name__, 'vm resize', custom_path.format('resize_vm'))
+cli_command(__name__, 'vm resize', custom_path.format('resize_vm'), no_wait_param='no_wait')
 cli_command(__name__, 'vm capture', custom_path.format('capture_vm'))
 cli_command(__name__, 'vm open-port', custom_path.format('vm_open_port'))
 cli_command(__name__, 'vm format-secret', custom_path.format('get_vm_format_secret'))
@@ -108,6 +108,7 @@ cli_generic_update_command(__name__, 'vm update',
                            no_wait_param='raw')
 cli_generic_wait_command(__name__, 'vm wait', 'azure.cli.command_modules.vm.custom#get_instance_view')
 cli_command(__name__, 'vm convert', mgmt_path.format(op_var, op_class, 'convert_to_managed_disks'), cf_vm)
+
 cli_command(__name__, 'vm encryption enable', 'azure.cli.command_modules.vm.disk_encryption#enable')
 cli_command(__name__, 'vm encryption disable', 'azure.cli.command_modules.vm.disk_encryption#disable')
 cli_command(__name__, 'vm encryption show', 'azure.cli.command_modules.vm.disk_encryption#show', exception_handler=empty_on_404)
@@ -125,9 +126,9 @@ cli_command(__name__, 'vmss nic list-vm-nics', 'azure.mgmt.network.operations.ne
 cli_command(__name__, 'vmss nic show', 'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.get_virtual_machine_scale_set_network_interface', cf_ni, exception_handler=empty_on_404)
 
 # VM Access
-cli_command(__name__, 'vm user update', custom_path.format('set_user'))
-cli_command(__name__, 'vm user delete', custom_path.format('delete_user'))
-cli_command(__name__, 'vm user reset-ssh', custom_path.format('reset_linux_ssh'))
+cli_command(__name__, 'vm user update', custom_path.format('set_user'), no_wait_param='no_wait')
+cli_command(__name__, 'vm user delete', custom_path.format('delete_user'), no_wait_param='no_wait')
+cli_command(__name__, 'vm user reset-ssh', custom_path.format('reset_linux_ssh'), no_wait_param='no_wait')
 
 # # VM Availability Set
 cli_command(__name__, 'vm availability-set create', custom_path.format('create_av_set'), transform=transform_av_set_output)
@@ -143,9 +144,12 @@ cli_command(__name__, 'vm availability-set convert', custom_path.format('convert
 cli_generic_update_command(__name__, 'vm availability-set update',
                            custom_path.format('availset_get'),
                            custom_path.format('availset_set'))
+
 cli_generic_update_command(__name__, 'vmss update',
                            custom_path.format('vmss_get'),
-                           custom_path.format('vmss_set'))
+                           custom_path.format('vmss_set'),
+                           no_wait_param='no_wait')
+cli_generic_wait_command(__name__, 'vmss wait', custom_path.format('vmss_get'))
 
 # VM Boot Diagnostics
 cli_command(__name__, 'vm boot-diagnostics disable', custom_path.format('disable_boot_diagnostics'))
@@ -211,23 +215,23 @@ cli_command(__name__, 'vm image list', custom_path.format('list_vm_images'))
 cli_command(__name__, 'vm list-usage', mgmt_path.format('usage_operations', 'UsageOperations', 'list'), cf_usage)
 
 # VMSS
-cli_command(__name__, 'vmss delete', mgmt_path.format('virtual_machine_scale_sets_operations', 'VirtualMachineScaleSetsOperations', 'delete'), cf_vmss)
+cli_command(__name__, 'vmss delete', mgmt_path.format('virtual_machine_scale_sets_operations', 'VirtualMachineScaleSetsOperations', 'delete'), cf_vmss, no_wait_param='raw')
 cli_command(__name__, 'vmss list-skus', mgmt_path.format('virtual_machine_scale_sets_operations', 'VirtualMachineScaleSetsOperations', 'list_skus'), cf_vmss)
 
 cli_command(__name__, 'vmss list-instances', mgmt_path.format('virtual_machine_scale_set_vms_operations', 'VirtualMachineScaleSetVMsOperations', 'list'), cf_vmss_vm)
 
-cli_command(__name__, 'vmss create', custom_path.format('create_vmss'), transform=DeploymentOutputLongRunningOperation('Starting vmss create'))
-cli_command(__name__, 'vmss deallocate', custom_path.format('deallocate_vmss'))
-cli_command(__name__, 'vmss delete-instances', custom_path.format('delete_vmss_instances'))
+cli_command(__name__, 'vmss create', custom_path.format('create_vmss'), transform=DeploymentOutputLongRunningOperation('Starting vmss create'), no_wait_param='no_wait')
+cli_command(__name__, 'vmss deallocate', custom_path.format('deallocate_vmss'), no_wait_param='no_wait')
+cli_command(__name__, 'vmss delete-instances', custom_path.format('delete_vmss_instances'), no_wait_param='no_wait')
 cli_command(__name__, 'vmss get-instance-view', custom_path.format('get_vmss_instance_view'))
 cli_command(__name__, 'vmss show', custom_path.format('show_vmss'), exception_handler=empty_on_404)
 cli_command(__name__, 'vmss list', custom_path.format('list_vmss'))
-cli_command(__name__, 'vmss stop', custom_path.format('stop_vmss'))
-cli_command(__name__, 'vmss restart', custom_path.format('restart_vmss'))
-cli_command(__name__, 'vmss start', custom_path.format('start_vmss'))
-cli_command(__name__, 'vmss update-instances', custom_path.format('update_vmss_instances'))
-cli_command(__name__, 'vmss reimage', custom_path.format('reimage_vmss'))
-cli_command(__name__, 'vmss scale', custom_path.format('scale_vmss'))
+cli_command(__name__, 'vmss stop', custom_path.format('stop_vmss'), no_wait_param='no_wait')
+cli_command(__name__, 'vmss restart', custom_path.format('restart_vmss'), no_wait_param='no_wait')
+cli_command(__name__, 'vmss start', custom_path.format('start_vmss'), no_wait_param='no_wait')
+cli_command(__name__, 'vmss update-instances', custom_path.format('update_vmss_instances'), no_wait_param='no_wait')
+cli_command(__name__, 'vmss reimage', custom_path.format('reimage_vmss'), no_wait_param='no_wait')
+cli_command(__name__, 'vmss scale', custom_path.format('scale_vmss'), no_wait_param='no_wait')
 cli_command(__name__, 'vmss list-instance-connection-info', custom_path.format('list_vmss_instance_connection_info'))
 
 # VM Size
