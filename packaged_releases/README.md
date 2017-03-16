@@ -25,6 +25,19 @@ $ python -m automation.release.packaged --version {VERSION} --components azure-c
 
 A full example:  
 ```
+$ cat ~/cli-components.json
+{
+    "azure-cli": "2.0.1",
+    "azure-cli-core": "2.0.1",
+    "azure-cli-component": "2.0.0",
+    "azure-cli-acs": "2.0.0"
+}
+$ python -m automation.release.packaged --version 0.2.3 -f ~/cli-components.json
+```
+
+OR
+
+```
 $ python -m automation.release.packaged --version 0.2.3 --components azure-cli=2.0.1 acs=2.0.1 appservice=0.1.1b6 batch=0.1.1b5 cloud=2.0.0 component=2.0.0 configure=2.0.1 container=0.1.1b4 core=2.0.1 documentdb=0.1.1b2 feedback=2.0.0 find=0.0.1b1 iot=0.1.1b3 keyvault=0.1.1b6 network=2.0.1 nspkg=2.0.0 profile=2.0.1 redis=0.1.1b3 resource=2.0.1 role=2.0.0 sql=0.1.1b6 storage=2.0.1 vm=2.0.1
 ```
 
