@@ -11,6 +11,7 @@ from azure.cli.core.commands import CliArgumentType, register_cli_argument
 from azure.cli.core.commands.validators import validate_tag, validate_tags
 from azure.cli.core._util import CLIError
 from azure.cli.core.commands.validators import generate_deployment_name
+from azure.cli.core.profiles import get_versioned_models
 
 
 def get_subscription_locations():
@@ -94,6 +95,11 @@ class CaseInsensitiveList(list):  # pylint: disable=too-few-public-methods
 
     def __contains__(self, other):
         return next((True for x in self if other.lower() == x.lower()), False)
+
+
+def model_choice_list(resource_type, model_name):
+    model = get_versioned_models(resource_type, model_name)
+    return enum_choice_list(model) if model else {}
 
 
 def enum_choice_list(data):

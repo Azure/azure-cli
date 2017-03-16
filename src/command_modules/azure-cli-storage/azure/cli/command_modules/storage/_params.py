@@ -10,7 +10,7 @@ from six import u as unicode_string
 
 from azure.cli.core._config import az_config
 from azure.cli.core.commands.parameters import \
-    (ignore_type, tags_type, file_type, get_resource_name_completion_list, enum_choice_list)
+    (ignore_type, tags_type, file_type, get_resource_name_completion_list, enum_choice_list, model_choice_list)
 import azure.cli.core.commands.arm  # pylint: disable=unused-import
 from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
 
@@ -26,7 +26,7 @@ from azure.storage.queue import QueueService
 from azure.storage.queue.models import QueuePermissions
 
 from azure.cli.core.profiles import get_versioned_models
-from azure.cli.core.profiles._shared import ResourceType
+from azure.cli.core.profiles.shared import ResourceType
 
 from ._factory import get_storage_data_service_client
 from ._validators import \
@@ -241,21 +241,21 @@ register_cli_argument('storage account show-connection-string', 'key_name', opti
 for item in ['blob', 'file', 'queue', 'table']:
     register_cli_argument('storage account show-connection-string', '{}_endpoint'.format(item), help='Custom endpoint for {}s.'.format(item))
 
-register_cli_argument('storage account create', 'account_type', help='The storage account type', **enum_choice_list(get_versioned_models(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS, model='AccountType')))
+register_cli_argument('storage account create', 'account_type', help='The storage account type', **model_choice_list(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS, 'AccountType'))
 
 register_cli_argument('storage account create', 'account_name', account_name_type, options_list=('--name', '-n'), completer=None)
 
-register_cli_argument('storage account create', 'kind', help='Indicates the type of storage account.', **enum_choice_list(get_versioned_models(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS, model='Kind')))
+register_cli_argument('storage account create', 'kind', help='Indicates the type of storage account.', **model_choice_list(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS, 'Kind'))
 register_cli_argument('storage account create', 'tags', tags_type)
 
 for item in ['create', 'update']:
-    register_cli_argument('storage account {}'.format(item), 'sku', help='The storage account SKU.', **enum_choice_list(get_versioned_models(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS, model='SkuName')))
-    es_model = get_versioned_models(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS, model='EncryptionServices')
+    register_cli_argument('storage account {}'.format(item), 'sku', help='The storage account SKU.', **model_choice_list(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS, 'SkuName'))
+    es_model = get_versioned_models(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS, 'EncryptionServices')
     if es_model:
         register_cli_argument('storage account {}'.format(item), 'encryption', nargs='+', help='Specifies which service(s) to encrypt.', validator=validate_encryption, **enum_choice_list(list(es_model._attribute_map.keys())))  # pylint: disable=protected-access
 
-register_cli_argument('storage account create', 'access_tier', help='Required for StandardBlob accounts. The access tier used for billing. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types.', **enum_choice_list(get_versioned_models(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS, model='AccessTier')))
-register_cli_argument('storage account update', 'access_tier', help='The access tier used for billing StandardBlob accounts. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types.', **enum_choice_list(get_versioned_models(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS, model='AccessTier')))
+register_cli_argument('storage account create', 'access_tier', help='Required for StandardBlob accounts. The access tier used for billing. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types.', **model_choice_list(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS, 'AccessTier'))
+register_cli_argument('storage account update', 'access_tier', help='The access tier used for billing StandardBlob accounts. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types.', **model_choice_list(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS, 'AccessTier'))
 register_cli_argument('storage account create', 'custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.')
 register_cli_argument('storage account update', 'custom_domain', help='User domain assigned to the storage account. Name is the CNAME source. Use "" to clear existing value.', validator=validate_custom_domain)
 register_cli_argument('storage account update', 'use_subdomain', help='Specify whether to use indirect CNAME validation.', **enum_choice_list(['true', 'false']))

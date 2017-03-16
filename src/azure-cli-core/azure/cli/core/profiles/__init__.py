@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.profiles._shared import (AZURE_API_PROFILES,
-                                             get_api_version as _sdk_get_api_version,
-                                             get_versioned_models as _sdk_get_versioned_models)
+from azure.cli.core.profiles.shared import (AZURE_API_PROFILES,
+                                            get_api_version as _sdk_get_api_version,
+                                            get_versioned_models as _sdk_get_versioned_models)
 
 # API Profiles currently supported in the CLI.
 API_PROFILES = {
@@ -20,6 +20,6 @@ def get_api_version(resource_type):
     return _sdk_get_api_version(CLOUD.profile, resource_type)
 
 
-def get_versioned_models(resource_type, model=None, checked=True):
+def get_versioned_models(resource_type, *model_args, **kwargs):
     from azure.cli.core._profile import CLOUD
-    return _sdk_get_versioned_models(CLOUD.profile, resource_type, model=model, checked=checked)
+    return _sdk_get_versioned_models(CLOUD.profile, resource_type, *model_args, **kwargs)

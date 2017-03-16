@@ -22,7 +22,7 @@ from azure.cli.core.application import APPLICATION
 from azure.cli.core.prompting import prompt_y_n, NoTTYException
 from azure.cli.core._config import az_config, DEFAULTS_SECTION
 from azure.cli.core.profiles import get_api_version
-from azure.cli.core.profiles._shared import ResourceType
+from azure.cli.core.profiles.shared import ResourceType
 
 from ._introspection import (extract_args_from_signature,
                              extract_full_summary_from_signature)
@@ -324,6 +324,11 @@ def cli_command(module_name, name, operation,
 
 
 def _patch_mgmt_operation(operation):
+    """ Patch the unversioned mgmt operations to include the appropriate API version for the
+        resource type in question.
+        e.g. Converts azure.mgmt.storage.operations.storage_accounts_operations to
+                      azure.mgmt.storage.v_2016_12_01.operations.storage_accounts_operations
+    """
     for rt in ResourceType:
         if operation.startswith(rt.sdk_module):
             return operation.replace(rt.sdk_module,

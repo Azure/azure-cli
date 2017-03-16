@@ -13,7 +13,7 @@ from azure.cli.core._config import az_config
 from azure.cli.core._profile import CLOUD
 from azure.cli.core._util import CLIError
 from azure.cli.core.profiles import get_versioned_models
-from azure.cli.core.profiles._shared import ResourceType
+from azure.cli.core.profiles.shared import ResourceType
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.storage.sharedaccesssignature import SharedAccessSignature
@@ -284,9 +284,7 @@ def validate_encryption(namespace):
     list of services passed in. '''
     if namespace.encryption:
         rt = ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS
-        Encryption = get_versioned_models(rt, model='Encryption')
-        EncryptionServices = get_versioned_models(rt, model='EncryptionServices')
-        EncryptionService = get_versioned_models(rt, model='EncryptionService')
+        Encryption, EncryptionServices, EncryptionService = get_versioned_models(rt, 'Encryption', 'EncryptionServices', 'EncryptionService')  # pylint: disable=line-too-long
         services = {service: EncryptionService(True) for service in namespace.encryption}
         namespace.encryption = Encryption(EncryptionServices(**services))
 

@@ -13,7 +13,7 @@ from azure.storage._error import _ERROR_STORAGE_MISSING_INFO
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core.commands import CLIError
 from azure.cli.core._profile import CLOUD
-from azure.cli.core.profiles._shared import ResourceType
+from azure.cli.core.profiles.shared import ResourceType
 
 NO_CREDENTIALS_ERROR_MESSAGE = """
 No credentials specifed to access storage service. Please provide any of the following:
