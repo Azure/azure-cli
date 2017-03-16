@@ -280,7 +280,7 @@ def _configure_cluster(dns_prefix, location, user_name): # pylint: disable=too-m
 def _validate_kubectl_context(dns_prefix):
     context_command = 'kubectl config current-context'
     current_context = _get_command_output(context_command)
-    if current_context == dns_prefix:
+    if current_context.strip() == dns_prefix.strip():
         return True
     else:
         return False
@@ -477,6 +477,7 @@ def _execute_command(command, ignore_failure=False):
     """
     Executes a command.
     """
+    print(command)
     with Popen(command, shell=True, stdout=PIPE, stderr=PIPE, bufsize=1, universal_newlines=True) as process:
         for line in process.stdout:
             logger.info(line)
@@ -493,9 +494,14 @@ def _get_command_output(command):
     """
     encoding = "utf-8"
     output = ''
+    newLine = False
     with Popen(command, shell=True, stdout=PIPE, stderr=PIPE) as process:
         for line in process.stdout:
-            output = output +(line.rstrip().decode(encoding)) + '\n'
+            if not newLine:
+                newLine = True
+                output = output + (line.rstrip().decode(encoding))
+            else:
+                output = output + '\n' + (line.rstrip().decode(encoding))
     if process.returncode != 0:
         raise CLIError(CalledProcessError(process.returncode, command))
 
