@@ -15,8 +15,7 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
     BlobAuditingPolicyState,
     CreateMode,
     SecurityAlertPolicyState,
-    SecurityAlertPolicyEmailAccountAdmins,
-    SecurityAlertPolicyUseServerDefault)
+    SecurityAlertPolicyEmailAccountAdmins)
 
 #####
 #           Reusable param type definitions
@@ -323,62 +322,83 @@ with ParametersContext(command='sql db replica delete-link') as c:
 
 
 #####
-#           sql db audit-policy
+#           sql db audit-policy & threat-detection-policy
 #####
+
+def _configure_security_policy_storage_params(cmd):
+    storage_arg_group = 'Storage'
+
+    cmd.argument('storage_account',
+                 options_list=('--storage-account',),
+                 arg_group=storage_arg_group,
+                 help='Name of the storage account.')
+
+    cmd.argument('storage_resource_group',
+                 options_list=('--storage-resource-group',),
+                 arg_group=storage_arg_group,
+                 help='Resource group containing the storage account. If unspecified, defaults to'
+                 ' the database\'s resource group.')
+
+    cmd.argument('storage_account_access_key',
+                 options_list=('--storage-key',),
+                 arg_group=storage_arg_group,
+                 help='Access key for the storage account.')
+
+    cmd.argument('storage_endpoint',
+                 arg_group=storage_arg_group,
+                 help='The storage account endpoint.')
 
 
 with ParametersContext(command='sql db audit-policy update') as c:
-    c.argument('storage_account_access_key',
-               options_list=('--storage-key',),
-               help='Access key for the storage account.')
+    _configure_security_policy_storage_params(c)
 
-    c.argument('storage_endpoint',
-               help='The storage account endpoint.')
-
-    c.argument('audit_actions_and_groups',
-               options_list=('--actions',),
-               help='List of actions and action groups to audit.',
-               nargs='+')
+    policy_arg_group = 'Policy'
 
     c.argument('state',
+               arg_group=policy_arg_group,
                help='Auditing policy state',
                **enum_choice_list(BlobAuditingPolicyState))
 
+    c.argument('audit_actions_and_groups',
+               options_list=('--actions',),
+               arg_group=policy_arg_group,
+               help='List of actions and action groups to audit.',
+               nargs='+')
+
     c.argument('retention_days',
+               arg_group=policy_arg_group,
                help='The number of days to retain audit logs.')
 
 
-#####
-#           sql db threat-detection-policy
-#####
-
-
 with ParametersContext(command='sql db threat-detection-policy update') as c:
-    c.argument('storage_account_access_key',
-               options_list=('--storage-key',),
-               help='Access key for the storage account.')
+    _configure_security_policy_storage_params(c)
 
-    c.argument('storage_endpoint',
-               help='The storage account endpoint.')
+    policy_arg_group = 'Policy'
+    notification_arg_group = 'Notification'
 
     c.argument('state',
+               arg_group=policy_arg_group,
                help='Threat detection policy state',
                **enum_choice_list(SecurityAlertPolicyState))
 
     c.argument('retention_days',
+               arg_group=policy_arg_group,
                help='The number of days to retain threat detection logs.')
 
-    c.argument('email_addresses',
-               options_list=('--email-addresses',),
-               help='List of email addresses that alerts are sent to.',
-               nargs='+')
-
     c.argument('disabled_alerts',
+               arg_group=policy_arg_group,
                options_list=('--disabled-alerts',),
                help='List of disabled alerts.',
                nargs='+')
 
+    c.argument('email_addresses',
+               arg_group=notification_arg_group,
+               options_list=('--email-addresses',),
+               help='List of email addresses that alerts are sent to.',
+               nargs='+')
+
     c.argument('email_account_admins',
+               arg_group=notification_arg_group,
                options_list=('--email-account-admins',),
                help='Whether the alert is sent to the account administrators.',
                **enum_choice_list(SecurityAlertPolicyEmailAccountAdmins))

@@ -397,21 +397,29 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
 
 
 class SqlServerDbSecurityScenarioTest(ScenarioTest):
+    def _get_storage_endpoint(self, storage_account, resource_group):
+        return self.cmd('storage account show -g {} -n {}'
+                        ' --query primaryEndpoints.blob'
+                        .format(resource_group, storage_account)).get_output_in_json()
+
+    def _get_storage_key(self, storage_account, resource_group):
+        return self.cmd('storage account keys list -g {} -n {} --query [0].value'
+                        .format(resource_group, storage_account)).get_output_in_json()
+
     @ResourceGroupPreparer()
+    @ResourceGroupPreparer(parameter_name='resource_group_2')
     @SqlServerPreparer()
     @StorageAccountPreparer()
-    def test_sql_db_security_mgmt(self, resource_group, resource_group_location, server,
-                                  storage_account):
+    @StorageAccountPreparer(parameter_name='storage_account_2',
+                            resource_group_parameter_name='resource_group_2')
+    def test_sql_db_security_mgmt(self, resource_group, resource_group_2,
+                                  resource_group_location, server,
+                                  storage_account, storage_account_2):
         database_name = "cliautomationdb01"
 
-        # get storage account endpoint
-        storage_endpoint = self.cmd('storage account show -g {} -n {}'
-                                    ' --query primaryEndpoints.blob'
-                                    .format(resource_group, storage_account)).get_output_in_json()
-
-        # get storage account key
-        key = self.cmd('storage account keys list -g {} -n {} --query [0].value'
-                       .format(resource_group, storage_account)).get_output_in_json()
+        # get storage account endpoint and key
+        storage_endpoint = self._get_storage_endpoint(storage_account, resource_group)
+        key = self._get_storage_key(storage_account, resource_group)
 
         # create db
         self.cmd('sql db create -g {} -s {} -n {}'
@@ -426,9 +434,9 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                  .format(resource_group, server, database_name),
                  checks=[JMESPathCheck('resourceGroup', resource_group)])
 
-        # update audit policy
-        state = 'Enabled'
-        access_key = key
+        # update audit policy - enable
+        state_enabled = 'Enabled'
+        key
         retention_days = 30
         audit_actions_input = 'DATABASE_LOGOUT_GROUP DATABASE_ROLE_MEMBER_CHANGE_GROUP'
         audit_actions_expected = ['DATABASE_LOGOUT_GROUP',
@@ -437,13 +445,39 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
         self.cmd('sql db audit-policy update -g {} -s {} -n {}'
                  ' --state {} --storage-key {} --storage-endpoint={}'
                  ' --retention-days={} --actions {}'
-                 .format(resource_group, server, database_name, state, access_key,
+                 .format(resource_group, server, database_name, state_enabled, key,
                          storage_endpoint, retention_days, audit_actions_input),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('state', state),
+                     JMESPathCheck('state', state_enabled),
                      JMESPathCheck('storageAccountAccessKey', ''),  # service doesn't return it
                      JMESPathCheck('storageEndpoint', storage_endpoint),
+                     JMESPathCheck('retentionDays', retention_days),
+                     JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
+
+        # update audit policy - specify storage account and resource group. use secondary key
+        storage_endpoint_2 = self._get_storage_endpoint(storage_account_2, resource_group_2)
+        self.cmd('sql db audit-policy update -g {} -s {} -n {} --storage-account {}'
+                 ' --storage-resource-group {}'
+                 .format(resource_group, server, database_name, storage_account_2,
+                         resource_group_2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('storageAccountAccessKey', ''),  # service doesn't return it
+                     JMESPathCheck('storageEndpoint', storage_endpoint_2),
+                     JMESPathCheck('retentionDays', retention_days),
+                     JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
+
+        # update audit policy - disable
+        state_disabled = 'Disabled'
+        self.cmd('sql db audit-policy update -g {} -s {} -n {} --state {}'
+                 .format(resource_group, server, database_name, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled),
+                     JMESPathCheck('storageAccountAccessKey', ''),  # service doesn't return it
+                     JMESPathCheck('storageEndpoint', storage_endpoint_2),
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
@@ -452,7 +486,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                  .format(resource_group, server, database_name),
                  checks=[JMESPathCheck('resourceGroup', resource_group)])
 
-        # update threat detection policy
+        # update threat detection policy - enable
         disabled_alerts_input = 'Sql_Injection_Vulnerability Access_Anomaly'
         disabled_alerts_expected = 'Sql_Injection_Vulnerability;Access_Anomaly'
         email_addresses_input = 'test1@example.com test2@example.com'
@@ -463,18 +497,45 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                  ' --state {} --storage-key {} --storage-endpoint {}'
                  ' --retention-days {} --email-addresses {} --disabled-alerts {}'
                  ' --email-account-admins {}'
-                 .format(resource_group, server, database_name, state, access_key,
+                 .format(resource_group, server, database_name, state_enabled, key,
                          storage_endpoint, retention_days, email_addresses_input,
                          disabled_alerts_input, email_account_admins),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('state', state),
-                     JMESPathCheck('storageAccountAccessKey', access_key),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('storageAccountAccessKey', key),
                      JMESPathCheck('storageEndpoint', storage_endpoint),
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('emailAddresses', email_addresses_expected),
                      JMESPathCheck('disabledAlerts', disabled_alerts_expected),
                      JMESPathCheck('emailAccountAdmins', email_account_admins)])
+
+        # update threat policy - specify storage account and resource group. use secondary key
+        key_2 = self._get_storage_key(storage_account_2, resource_group_2)
+        self.cmd('sql db threat-detection-policy update -g {} -s {} -n {}'
+                 ' --storage-account {} --storage-resource-group {}'
+                 .format(resource_group, server, database_name, storage_account_2,
+                         resource_group_2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('storageAccountAccessKey', key_2),
+                     JMESPathCheck('storageEndpoint', storage_endpoint_2),
+                     JMESPathCheck('retentionDays', retention_days),
+                     JMESPathCheck('emailAddresses', email_addresses_expected),
+                     JMESPathCheck('disabledAlerts', disabled_alerts_expected),
+                     JMESPathCheck('emailAccountAdmins', email_account_admins)])
+
+        # update threat policy - disable
+        self.cmd('sql db audit-policy update -g {} -s {} -n {} --state {}'
+                 .format(resource_group, server, database_name, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled),
+                     JMESPathCheck('storageAccountAccessKey', ''),  # service doesn't return it
+                     JMESPathCheck('storageEndpoint', storage_endpoint_2),
+                     JMESPathCheck('retentionDays', retention_days),
+                     JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
 
 class SqlServerDwMgmtScenarioTest(ScenarioTest):
