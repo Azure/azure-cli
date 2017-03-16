@@ -259,8 +259,8 @@ class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
                      self.resource_group, self.location, self.vm_name))
         self.cmd('vm stop -g {} -n {}'.format(self.resource_group, self.vm_name))
         # Should be able to generalize the VM after it has been stopped
-        self.cmd('vm generalize -g {} --n {}'.format(self.resource_group, self.vm_name), checks=NoneCheck())
-        vm = self.cmd('vm show -g {} --n {}'.format(self.resource_group, self.vm_name))
+        self.cmd('vm generalize -g {} -n {}'.format(self.resource_group, self.vm_name), checks=NoneCheck())
+        vm = self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name))
         self.cmd('vm capture -g {} -n {} --vhd-name-prefix vmtest'.format(self.resource_group, self.vm_name),
                  checks=NoneCheck())
 
