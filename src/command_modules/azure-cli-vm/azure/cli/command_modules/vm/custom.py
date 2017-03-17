@@ -325,7 +325,7 @@ def update_managed_disk(instance, size_gb=None, sku=None):
 
 
 def attach_managed_data_disk(resource_group_name, vm_name, disk,
-                             new=False, sku=None, size_gb=None, lun=None):
+                             new=False, sku=None, size_gb=None, lun=None, caching=None):
     '''attach a managed disk'''
     vm = get_vm(resource_group_name, vm_name)
     from azure.mgmt.compute.models import (CreationData, DiskCreateOptionTypes,
@@ -340,7 +340,7 @@ def attach_managed_data_disk(resource_group_name, vm_name, disk,
             raise CLIError('usage error: --size-gb required to create an empty disk for attach')
         data_disk = DataDisk(lun, DiskCreateOptionTypes.empty,
                              name=parse_resource_id(disk)['name'],
-                             disk_size_gb=size_gb)
+                             disk_size_gb=size_gb, caching=caching)
     else:
         params = ManagedDiskParameters(id=disk,
                                        storage_account_type=sku)
@@ -361,7 +361,8 @@ def detach_data_disk(resource_group_name, vm_name, disk_name):
     set_vm(vm)
 
 
-def attach_managed_data_disk_to_vmss(resource_group_name, vmss_name, size_gb, lun=None):
+def attach_managed_data_disk_to_vmss(resource_group_name, vmss_name, size_gb, lun=None,
+                                     caching=None):
     from azure.mgmt.compute.models import (DiskCreateOptionTypes,
                                            VirtualMachineScaleSetDataDisk)
     client = _compute_client_factory()
@@ -373,7 +374,7 @@ def attach_managed_data_disk_to_vmss(resource_group_name, vmss_name, size_gb, lu
         luns = [d.lun for d in data_disks]
         lun = max(luns) + 1 if luns else 0
     data_disk = VirtualMachineScaleSetDataDisk(lun, DiskCreateOptionTypes.empty,
-                                               disk_size_gb=size_gb)
+                                               disk_size_gb=size_gb, caching=caching)
     data_disks.append(data_disk)
     vmss.virtual_machine_profile.storage_profile.data_disks = data_disks
     return client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
@@ -1508,7 +1509,7 @@ def create_vm(vm_name, resource_group_name, image=None,
               public_ip_address=None, public_ip_address_allocation='dynamic',
               public_ip_address_dns_name=None,
               os_disk_name=None, os_type=None, storage_account=None,
-              storage_caching=None, storage_container_name=None,
+              os_caching=None, data_caching=None, storage_container_name=None,
               storage_sku=None, use_unmanaged_disk=False,
               attach_os_disk=None, data_disk_sizes_gb=None, image_data_disks=None,
               vnet_name=None, vnet_address_prefix='10.0.0.0/16',
@@ -1535,7 +1536,6 @@ def create_vm(vm_name, resource_group_name, image=None,
     tags = tags or {}
     os_disk_name = os_disk_name or 'osdisk_{}'.format(random_string(10))
     storage_container_name = storage_container_name or 'vhds'
-    storage_caching = storage_caching or 'ReadWrite'
 
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
@@ -1625,7 +1625,7 @@ def create_vm(vm_name, resource_group_name, image=None,
     vm_resource = build_vm_resource(
         vm_name, location, tags, size, storage_profile, nics, admin_username, availability_set,
         admin_password, ssh_key_value, ssh_dest_key_path, image, os_disk_name,
-        os_type, storage_caching, storage_sku, os_publisher, os_offer, os_sku, os_version,
+        os_type, os_caching, data_caching, storage_sku, os_publisher, os_offer, os_sku, os_version,
         os_vhd_uri, attach_os_disk, data_disk_sizes_gb, image_data_disks, custom_data, secrets)
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1662,7 +1662,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                 load_balancer=None, backend_pool_name=None, nat_pool_name=None, backend_port=None,
                 public_ip_address=None, public_ip_address_allocation='dynamic',
                 public_ip_address_dns_name=None,
-                storage_caching=None,
+                os_caching=None, data_caching=None,
                 storage_container_name=None, storage_sku=None,
                 os_type=None, os_disk_name=None,
                 use_unmanaged_disk=False, data_disk_sizes_gb=None, image_data_disks=None,
@@ -1682,6 +1682,7 @@ def create_vmss(vmss_name, resource_group_name, image,
     from azure.cli.core._profile import CLOUD
     from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
+    from azure.mgmt.compute.models import CachingTypes
 
     network_id_template = resource_id(
         subscription=get_subscription_id(), resource_group=resource_group_name,
@@ -1691,7 +1692,7 @@ def create_vmss(vmss_name, resource_group_name, image,
     tags = tags or {}
     os_disk_name = os_disk_name or 'osdisk_{}'.format(random_string(10))
     storage_container_name = storage_container_name or 'vhds'
-    storage_caching = storage_caching or 'ReadOnly'
+    os_caching = os_caching or CachingTypes.read_write.value
 
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
@@ -1736,14 +1737,22 @@ def create_vmss(vmss_name, resource_group_name, image,
         lb_resource['dependsOn'] = lb_dependencies
         master_template.add_resource(lb_resource)
 
-    if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
-        master_template.add_resource(build_vmss_storage_account_pool_resource(
-            'storageLoop', location, tags, storage_sku))
-        vmss_dependencies.append('storageLoop')
-
     scrubbed_name = vmss_name.replace('-', '').lower()[:5]
     naming_prefix = '{}{}'.format(scrubbed_name,
                                   random_string(9 - len(scrubbed_name), force_lower=True))
+
+    if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
+        master_template.add_resource(build_vmss_storage_account_pool_resource(
+            'storageLoop', location, tags, storage_sku))
+        master_template.add_variable('storageAccountNames', [
+            '{}{}'.format(naming_prefix, x) for x in range(5)
+        ])
+        master_template.add_variable('vhdContainers', [
+            "[concat('https://', variables('storageAccountNames')[{}], '.blob.{}/{}')]".format(
+                x, CLOUD.suffixes.storage_endpoint, storage_container_name) for x in range(5)
+        ])
+        vmss_dependencies.append('storageLoop')
+
     backend_address_pool_id = None
     inbound_nat_pool_id = None
     if is_valid_resource_id(load_balancer):
@@ -1773,7 +1782,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                                         vm_sku, instance_count,
                                         ip_config_name, nic_name, subnet_id, admin_username,
                                         authentication_type, storage_profile,
-                                        os_disk_name, storage_caching,
+                                        os_disk_name, os_caching, data_caching,
                                         storage_sku, data_disk_sizes_gb, image_data_disks,
                                         os_type, image, admin_password,
                                         ssh_key_value, ssh_dest_key_path,
@@ -1784,13 +1793,6 @@ def create_vmss(vmss_name, resource_group_name, image,
     vmss_resource['dependsOn'] = vmss_dependencies
 
     master_template.add_resource(vmss_resource)
-    master_template.add_variable('storageAccountNames', [
-        '{}{}'.format(naming_prefix, x) for x in range(5)
-    ])
-    master_template.add_variable('vhdContainers', [
-        "[concat('https://', variables('storageAccountNames')[{}], '.blob.{}/{}')]".format(
-            x, CLOUD.suffixes.storage_endpoint, storage_container_name) for x in range(5)
-    ])
     master_template.add_output('VMSS', vmss_name, 'Microsoft.Compute', 'virtualMachineScaleSets',
                                output_type='object')
     template = master_template.build()
