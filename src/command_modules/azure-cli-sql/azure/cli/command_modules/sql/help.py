@@ -49,14 +49,10 @@ helps['sql db audit-policy update'] = """
     long-summary: If the policy is being enabled, storage_account or both storage_endpoint and
                   storage_account_access_key must be specified.
     examples:
-        - name: Enable an auditing policy by specifying storage account name
+        - name: Enable by specifying storage account name
           text: az db audit-policy update -g mygroup -s myserver -n mydb
                 --state Enabled --storage-account mystorage
-        - name: Enable an auditing policy by specifying storage account name and resource
-                group
-          text: az db audit-policy update -g mygroup -s myserver -n mydb
-                --state Enabled --storage-account mystorage
-        - name: Enable an auditing policy by specifying storage endpoint and key
+        - name: Enable by specifying storage endpoint and key
           text: az db audit-policy update -g mygroup -s myserver -n mydb
                 --state Enabled --storage-endpoint https://mystorage.blob.core.windows.net
                 --storage-key MYKEY==
@@ -108,10 +104,6 @@ helps['sql db threat-detection-policy update'] = """
                   storage_account_access_key must be specified.
     examples:
         - name: Enable by specifying storage account name
-          text: az db threat-detection-policy update -g mygroup -s myserver -n mydb
-                --state Enabled --storage-account mystorage
-        - name: Enable by specifying storage account name and resource
-                group
           text: az db threat-detection-policy update -g mygroup -s myserver -n mydb
                 --state Enabled --storage-account mystorage
         - name: Enable by specifying storage endpoint and key
