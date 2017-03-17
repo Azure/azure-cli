@@ -29,7 +29,8 @@ DEPENDENCIES = [
     'requests',
     'paramiko',
     'scp',
-    'sshtunnel'
+    'sshtunnel',
+    'six'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
