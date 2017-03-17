@@ -92,7 +92,9 @@ class CommandGroup(object):
                     self._custom_path.format(custom_func_name),
                     client_factory=self._client_factory)
 
-    def generic_update_command(self, name, getter_op, setter_op, custom_func_name=None, **kwargs):
+    # pylint: disable=too-many-arguments
+    def generic_update_command(self, name, getter_op, setter_op, custom_func_name=None,
+                               setter_arg_name='parameters'):
         if custom_func_name:
             custom_function_op = self._custom_path.format(custom_func_name)
         else:
@@ -105,7 +107,7 @@ class CommandGroup(object):
             self._service_adapter(setter_op),
             factory=self._client_factory,
             custom_function_op=custom_function_op,
-            **kwargs)
+            setter_arg_name=setter_arg_name)
 
 
 # PARAMETERS UTILITIES
