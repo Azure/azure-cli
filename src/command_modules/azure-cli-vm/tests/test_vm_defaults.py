@@ -263,7 +263,7 @@ class TestVMDefaultAuthType(unittest.TestCase):
         ns.os_type = "LINux"
         ns.authentication_type = 'password'
         ns.admin_username = 'user12345'
-        ns.admin_password = 'verySecret!'
+        ns.admin_password = 'verySecret!!!'
         _validate_vm_create_auth(ns)
         # still has 'password'
         self.assertEqual(ns.authentication_type, 'password')
