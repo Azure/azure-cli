@@ -9,6 +9,7 @@ from azure.cli.testsdk import (
     JMESPathCheck,
     NoneCheck,
     ResourceGroupPreparer,
+    StorageAccountPreparer,
     ScenarioTest)
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
@@ -866,3 +867,82 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
         self.cmd('sql elastic-pool delete -g {} --server {} --name {}'
                  .format(rg, server, self.pool_name),
                  checks=[NoneCheck()])
+
+
+class SqlServerImportExportMgmtScenarioTest(ScenarioTest):    
+    @ResourceGroupPreparer()
+    @SqlServerPreparer()
+    @StorageAccountPreparer()
+
+    def test_sql_db_import_export_mgmt(self, resource_group, resource_group_location, server,
+                                  storage_account): 
+        location_short_name = 'westus'
+        location_long_name = 'West US'
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        db_name = 'cliautomationdb01'
+        db_name2 = 'cliautomationdb02'
+        container = 'bacpacs'
+        
+        firewall_rule_1 = 'allowAllIps'
+        start_ip_address_1 = '0.0.0.0'
+        end_ip_address_1 = '255.255.255.255'
+
+        loc_short = location_short_name
+        loc_long = location_long_name
+        rg = resource_group
+        sa = storage_account
+
+        # create server firewall rule
+        self.cmd('sql server firewall-rule create --name {} -g {} --server {} '
+                 '--start-ip-address {} --end-ip-address {}'
+                 .format(firewall_rule_1, rg, server,
+                         start_ip_address_1, end_ip_address_1),
+                 checks=[
+                     JMESPathCheck('name', firewall_rule_1),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('startIpAddress', start_ip_address_1),
+                     JMESPathCheck('endIpAddress', end_ip_address_1)])
+
+        # create db
+        self.cmd('sql db create -g {} --server {} --name {}'
+                 .format(rg, server, db_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', db_name),
+                     JMESPathCheck('location', loc_long),
+                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('status', 'Online')])
+
+        self.cmd('sql db create -g {} --server {} --name {}'
+                 .format(rg, server, db_name2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', db_name2),
+                     JMESPathCheck('location', loc_long),
+                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('status', 'Online')])
+
+        # Backup to new dacpac
+        # get storage account endpoint
+        storage_endpoint = self.cmd('storage account show -g {} -n {}'
+                                    ' --query primaryEndpoints.blob'
+                                    .format(rg, storage_account)).get_output_in_json()
+
+        # get storage account key
+        key = self.cmd('storage account keys list -g {} -n {} --query [0].value'
+                        .format(rg, storage_account)).get_output_in_json()
+
+        # create storage account blob container
+        self.cmd('storage container create -n {} --account-name {} --account-key {} '
+                        .format(container, sa, key),
+                 checks=[
+                     JMESPathCheck('created', True)])
+
+        # export database to blob container
+        testoutput = self.cmd('sql db export -s {} -n {} -g {} -p {} -u {} --storage-key {} --storage-key-type StorageAccessKey --storage-uri {}{}/testbacpac.bacpac'
+                        .format(server, db_name, rg, admin_password, admin_login, key, storage_endpoint, container)).get_output_in_json()
+
+        # import bacpac to second database
+        testoutput2 = self.cmd('sql db import -s {} -n {} -g {} -p {} -u {} --storage-key {} --storage-key-type StorageAccessKey --storage-uri {}{}/testbacpac.bacpac'
+                        .format(server, db_name2, rg, admin_password, admin_login, key, storage_endpoint, container)).get_output_in_json()

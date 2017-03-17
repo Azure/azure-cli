@@ -24,7 +24,8 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
         # c.command('show-usage', 'list_usages')
         c.command('delete', 'delete', confirmation=True)
         c.generic_update_command('update', 'get', 'create_or_update', custom_func_name='db_update')
-        #c.command('import-existing', 'import_method')
+        c.command('import', 'import_method')
+        c.command('export', 'export')
 
     with s.group('sql db replica') as c:
         c.custom_command('create', 'db_create_replica')
@@ -100,8 +101,6 @@ server_operations = create_service_adapter('azure.mgmt.sql.operations.servers_op
                                            'ServersOperations')
 
 with ServiceGroup(__name__, get_sql_servers_operation, server_operations) as s:
-    with s.group('sql db') as c:
-        c.command('import-new', 'import_database')
 
     with s.group('sql server') as c:
         c.command('create', 'create_or_update')
@@ -110,7 +109,6 @@ with ServiceGroup(__name__, get_sql_servers_operation, server_operations) as s:
         # Usages will not be included in the first batch of GA commands
         # c.command('show-usage', 'list_usages')
         c.command('list', 'list_by_resource_group')
-        # c.command('import-database','import_database')
         c.generic_update_command('update', 'get_by_resource_group', 'create_or_update',
                                  custom_func_name='server_update')
 
