@@ -458,7 +458,6 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
         # update audit policy - specify storage account and resource group. use secondary key
         storage_endpoint_2 = self._get_storage_endpoint(storage_account_2, resource_group_2)
         self.cmd('sql db audit-policy update -g {} -s {} -n {} --storage-account {}'
-                 ' --storage-resource-group {}'
                  .format(resource_group, server, database_name, storage_account_2,
                          resource_group_2),
                  checks=[
@@ -512,8 +511,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
 
         # update threat policy - specify storage account and resource group. use secondary key
         key_2 = self._get_storage_key(storage_account_2, resource_group_2)
-        self.cmd('sql db threat-detection-policy update -g {} -s {} -n {}'
-                 ' --storage-account {} --storage-resource-group {}'
+        self.cmd('sql db threat-detection-policy update -g {} -s {} -n {} --storage-account {}'
                  .format(resource_group, server, database_name, storage_account_2,
                          resource_group_2),
                  checks=[

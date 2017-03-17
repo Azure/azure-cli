@@ -55,7 +55,7 @@ helps['sql db audit-policy update'] = """
         - name: Enable an auditing policy by specifying storage account name and resource
                 group
           text: az db audit-policy update -g mygroup -s myserver -n mydb
-                --state Enabled --storage-account mystorage --storage-resource-group mygroup2
+                --state Enabled --storage-account mystorage
         - name: Enable an auditing policy by specifying storage endpoint and key
           text: az db audit-policy update -g mygroup -s myserver -n mydb
                 --state Enabled --storage-endpoint https://mystorage.blob.core.windows.net
@@ -113,7 +113,7 @@ helps['sql db threat-detection-policy update'] = """
         - name: Enable by specifying storage account name and resource
                 group
           text: az db threat-detection-policy update -g mygroup -s myserver -n mydb
-                --state Enabled --storage-account mystorage --storage-resource-group mygroup2
+                --state Enabled --storage-account mystorage
         - name: Enable by specifying storage endpoint and key
           text: az db threat-detection-policy update -g mygroup -s myserver -n mydb
                 --state Enabled --storage-endpoint https://mystorage.blob.core.windows.net

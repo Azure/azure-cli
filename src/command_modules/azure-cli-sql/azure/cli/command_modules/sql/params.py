@@ -333,12 +333,6 @@ def _configure_security_policy_storage_params(cmd):
                  arg_group=storage_arg_group,
                  help='Name of the storage account.')
 
-    cmd.argument('storage_resource_group',
-                 options_list=('--storage-resource-group',),
-                 arg_group=storage_arg_group,
-                 help='Resource group containing the storage account. If unspecified, defaults to'
-                 ' the database\'s resource group.')
-
     cmd.argument('storage_account_access_key',
                  options_list=('--storage-key',),
                  arg_group=storage_arg_group,

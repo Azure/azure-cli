@@ -20,6 +20,7 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
     SecurityAlertPolicyState,
     ServiceObjectiveName
 )
+from azure.mgmt.resource.resources import ResourceManagementClient
 from azure.mgmt.storage import StorageManagementClient
 
 # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
@@ -342,6 +343,32 @@ def db_update(
 #####
 
 
+# Finds a storage account's resource group by querying ARM resource cache.
+# Why do we have to do this: so we know the resource group in order to later query the storage API
+# to determine the account's keys and endpoint. Why isn't this just a command line parameter:
+# because if it was a command line parameter then the customer would need to specify storage
+# resource group just to update some unrelated property, which is annoying and makes no sense to
+# the customer.
+def _find_storage_account(name):
+    resource_type = 'Microsoft.Storage/storageAccounts'
+
+    client = get_mgmt_service_client(ResourceManagementClient)
+    resources = list(client.resources.list(
+        filter="name eq '{}' and resourceType eq '{}'"
+        .format(name, resource_type)))
+
+    if len(resources) == 0:
+        raise CLIError('No resource with name {} and type {} was found.'
+                       .format(name, resource_type))
+
+    if len(resources) > 1:
+        raise CLIError('Multiple resources with name {} and type {} were found.'
+                       .format(name, resource_type))
+
+    # Split the uri and return just the resource group
+    return resources[0].id.split('/')[4]
+
+
 # Determines storage account name from endpoint url string.
 # e.g. 'https://mystorage.blob.core.windows.net' -> 'mystorage'
 def _get_storage_account_name(storage_endpoint):
@@ -383,10 +410,8 @@ def _get_storage_key(
 # Common code for updating audit and threat detection policy
 def _db_security_policy_update(  # pylint: disable=too-many-arguments
         instance,
-        resource_group_name,
         enabled,
         storage_account,
-        storage_resource_group,
         storage_endpoint,
         storage_account_access_key,
         use_secondary_key):
@@ -394,15 +419,12 @@ def _db_security_policy_update(  # pylint: disable=too-many-arguments
     # Validate storage endpoint arguments
     if storage_endpoint is not None and storage_account is not None:
         raise CLIError('--storage-endpoint and --storage-account cannot both be specified.')
-    if storage_resource_group is not None and storage_account is None:
-        raise CLIError('If --storage-resource-group is specified, --storage-account must be'
-                       ' specified.')
 
     # Set storage endpoint
-    storage_resource_group = storage_resource_group or resource_group_name
     if storage_endpoint is not None:
         instance.storage_endpoint = storage_endpoint
     if storage_account is not None:
+        storage_resource_group = _find_storage_account(storage_account)
         instance.storage_endpoint = _get_storage_endpoint(storage_account, storage_resource_group)
 
     # Set storage access key
@@ -420,6 +442,7 @@ def _db_security_policy_update(  # pylint: disable=too-many-arguments
         # function, but at least we tried.
         if storage_account is None:
             storage_account = _get_storage_account_name(instance.storage_endpoint)
+            storage_resource_group = _find_storage_account(storage_account)
 
         instance.storage_account_access_key = _get_storage_key(
             storage_account,
@@ -430,10 +453,8 @@ def _db_security_policy_update(  # pylint: disable=too-many-arguments
 # Update audit policy. Custom update function to apply parameters to instance.
 def db_audit_policy_update(  # pylint: disable=too-many-arguments
         instance,
-        resource_group_name,
         state=None,
         storage_account=None,
-        storage_resource_group=None,
         storage_endpoint=None,
         storage_account_access_key=None,
         audit_actions_and_groups=None,
@@ -448,10 +469,8 @@ def db_audit_policy_update(  # pylint: disable=too-many-arguments
     # Set storage-related properties
     _db_security_policy_update(
         instance,
-        resource_group_name,
         enabled,
         storage_account,
-        storage_resource_group,
         storage_endpoint,
         storage_account_access_key,
         instance.is_storage_secondary_key_in_use)
@@ -469,10 +488,8 @@ def db_audit_policy_update(  # pylint: disable=too-many-arguments
 # Update threat detection policy. Custom update function to apply parameters to instance.
 def db_threat_detection_policy_update(  # pylint: disable=too-many-arguments
         instance,
-        resource_group_name,
         state=None,
         storage_account=None,
-        storage_resource_group=None,
         storage_endpoint=None,
         storage_account_access_key=None,
         retention_days=None,
@@ -489,10 +506,8 @@ def db_threat_detection_policy_update(  # pylint: disable=too-many-arguments
     # Set storage-related properties
     _db_security_policy_update(
         instance,
-        resource_group_name,
         enabled,
         storage_account,
-        storage_resource_group,
         storage_endpoint,
         storage_account_access_key,
         False)
