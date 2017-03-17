@@ -22,26 +22,12 @@ project_path = CliArgumentType(
     required=False
 )
 
-dns_prefix = CliArgumentType(
-    options_list=('--dns-prefix', '-d'),
-    help='Prefix used to create a unique fully qualified domain name (FQDN) for the master.'
-)
-
-user_name = CliArgumentType(
-    options_list=('--admin-username', '-u'),
-    help='User name for an account on each of the Linux virtual machines in the cluster.',
-    default='azureuser',
-    required=False
-)
-
 name_arg_type = CliArgumentType(
     options_list=('--name', '-n'),
     metavar='NAME')
 
 register_cli_argument('project', 'remote_access_token', remote_access_token)
 register_cli_argument('project', 'project_path', project_path)
-register_cli_argument('project', 'dns_prefix', dns_prefix)
-register_cli_argument('project', 'user_name', user_name)
 
 # TODO: Ideally, this should be project-name
 register_cli_argument('project', 'name', name_arg_type)

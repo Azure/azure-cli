@@ -25,15 +25,20 @@ from azure.mgmt.compute import ComputeManagementClient
 from azure.mgmt.resource.resources import ResourceManagementClient
 from azure.mgmt.resource.resources.models.resource_group import ResourceGroup
 from azure.mgmt.containerregistry.models import (
-    Registry, StorageAccountProperties)
+    Registry,
+    StorageAccountProperties)
 from azure.mgmt.containerregistry import ContainerRegistryManagementClient
 from azure.mgmt.storage import StorageManagementClient
-from azure.mgmt.storage.models import (StorageAccountCreateParameters, Sku)
+from azure.mgmt.storage.models import (
+    StorageAccountCreateParameters,
+    Sku)
 from azure.mgmt.storage.models import Kind
 from azure.cli.core._profile import Profile
 from azure.cli.core._environment import get_config_dir
-
-from azure.cli.command_modules.acs.custom import acs_create
+from azure.cli.command_modules.storage._factory import storage_client_factory
+from azure.cli.command_modules.acs.custom import (
+    acs_create,
+    k8s_get_credentials)
 
 logger = azlogging.get_az_logger(__name__)  # pylint: disable=invalid-name
 project_settings = settings.Project()  # pylint: disable=invalid-name
@@ -51,7 +56,7 @@ def create_project(resource_group, name, location):
     default_user_name = 'azureuser'
 
     # 1. Create a resource group: resource_group, location
-    utils.writeline('Creating resource group...')
+    utils.writeline('Creating resource group ...')
     res_client = _get_resource_client_factory()
     resource_group_parameters = ResourceGroup(
         location=location)
@@ -60,7 +65,7 @@ def create_project(resource_group, name, location):
     utils.writeline('Resource group "{}" created.'.format(resource_group))
 
     # 2. Create a storage account (for ACR)
-    utils.writeline('Creating storage account...')
+    utils.writeline('Creating storage account ...')
     storage_account_sku = Sku('Standard_LRS')
     storage_client = _get_storage_service_client()
     storage_account_parameters = StorageAccountCreateParameters(
@@ -76,7 +81,7 @@ def create_project(resource_group, name, location):
     utils.writeline('Storage account "{}" created.'.format(storage_account_name))
 
     # 3. Create ACR (resource_group, location)
-    utils.writeline('Creating Azure container registry...')
+    utils.writeline('Creating Azure container registry ...')
     acr_client = _get_acr_service_client()
     acr_name = 'acr' + utils.get_random_registry_name()
     registry = acr_client.registries.create_or_update(resource_group,
@@ -90,7 +95,7 @@ def create_project(resource_group, name, location):
     utils.writeline('Azure container registry "{}" created.'.format(acr_name))
 
     # 4. Create Kubernetes cluster
-    utils.writeline('Creating Kubernetes cluster...')
+    utils.writeline('Creating Kubernetes cluster ...')
     kube_deployment_name = 'kube-' + utils.get_random_string()
     kube_cluster_name = 'acs-kube-' + utils.get_random_string()
     acs_deployment = acs_create(resource_group_name=resource_group,
@@ -104,7 +109,13 @@ def create_project(resource_group, name, location):
     acs_deployment.wait()
     utils.writeline('Kubernetes cluster "{}" created.'.format(kube_cluster_name))
 
-    # 5. Store the settings in projectSettings.json
+    # 5. Set Kubernetes config 
+    utils.writeline('Setting Kubernetes config ...')
+    k8s_get_credentials(name=kube_cluster_name,
+                                resource_group_name=resource_group)
+    utils.writeline('Kubernetes config "{}" created.'.format(kube_cluster_name))
+
+    # 6. Store the settings in projectSettings.json
     # TODO: We should create service principal and pass it to the
     # acs_create when creating the Kubernetes cluster
     client_id, client_secret = _get_service_principal()
@@ -118,6 +129,7 @@ def create_project(resource_group, name, location):
     project_settings.location = location
     project_settings.project_name = name
     utils.writeline('Project "{}" created.'.format(name))
+
 
 def create_continuous_deployment(remote_access_token):  # pylint: disable=unused-argument
     """
@@ -144,6 +156,7 @@ def create_continuous_deployment(remote_access_token):  # pylint: disable=unused
     utils.writeline('Spinnaker hostname: {}'.format(spinnaker_hostname))
     utils.writeline('Done.')
 
+
 def _get_service_principal():
     """
     Gets the service principal and secret tuple
@@ -168,7 +181,7 @@ def _configure_spinnaker(spinnaker_resource, spinnaker_hostname):
     """
     Configures the Spinnaker resource
     """
-    utils.writeline('Configuring Spinnaker...')
+    utils.writeline('Configuring Spinnaker ...')
     client_id = project_settings.client_id
     client_secret = project_settings.client_secret
     cluster_name = project_settings.cluster_name
@@ -207,7 +220,7 @@ def _deploy_spinnaker():
     """
     Starts the Spinnaker deployment and returns the resource and AzurePollerOperation
     """
-    utils.writeline('Deploying Spinnaker...')
+    utils.writeline('Deploying Spinnaker ...')
     resource_group = project_settings.resource_group
     admin_username = project_settings.admin_username
     public_ssh_key_filename = os.path.join(
@@ -280,22 +293,15 @@ def _get_git_remote_url():
     return remote_url.decode()
 
 
-def setup(dns_prefix, location, user_name):
+def setup():
     """
     Initializes a workspace definition that automates connection to a Kubernetes cluster in an Azure container
     service for deploying services.
-
-    :param dns_prefix: Prefix used to create a unique fully qualified domain name (FQDN) for the master.
-    :type dns_prefix: String
-    :param location: Azure region for the Azure Container Service deployment.
-    :type location: String
-    :param user_name: User name for an account on each of the Linux virtual machines in the cluster.
-    :type user_name: String
     """
-    _configure_cluster(dns_prefix, location, user_name)
+    _configure_cluster()
 
 
-def _configure_cluster(dns_prefix, location, user_name):  # pylint: disable=too-many-statements
+def _configure_cluster():  # pylint: disable=too-many-statements
     """
     Configures the cluster to deploy tenx services which can be used by the user deployed services and initializes
     a workspace on the local machine to connection.
@@ -303,6 +309,17 @@ def _configure_cluster(dns_prefix, location, user_name):  # pylint: disable=too-
     """
     kubernetes_path = None
     try:
+        # Validate if az project exists
+        if not os.path.exists(project_settings.settings_file):
+            utils.writeline("projectResource.json not found, please run 'az project create' to create resources.")
+            sys.exit(1)
+
+        #Setting the values
+        dns_prefix = project_settings.cluster_name
+        location = project_settings.location
+        user_name = project_settings.admin_username
+        acr_server = project_settings.container_registry_url.replace("https://", "")
+
         # Validate kubectl context
         if not _validate_kubectl_context(dns_prefix):
             utils.writeline("kubectl context not set to {0}, please run 'az acs kubernetes get-credentials' to set it.".format(dns_prefix))
@@ -314,7 +331,7 @@ def _configure_cluster(dns_prefix, location, user_name):  # pylint: disable=too-
         else:
             utils.writeline('Cluster not configured.')
 
-        utils.writeline('Configuring Kubernetes cluster')
+        utils.writeline('Configuring Kubernetes cluster ...')
 
         innerloop_client_path = _get_innerloop_home_path()
         kubernetes_path = os.path.join(innerloop_client_path, 'setup', 'Kubernetes')
@@ -326,40 +343,28 @@ def _configure_cluster(dns_prefix, location, user_name):  # pylint: disable=too-
         client_secret = creds['aadClientSecret']
 
         # Cluster Setup(deploying required artifacts in the kubectl nodes)
-        utils.writeline('Please ensure these requirements are met:')
-        utils.writeline(
-            '1. You have created a Kubernetes cluster in ACS, installed kubectl on this computer and are able to connect to your Kubernetes cluster.')
-        utils.writeline(
-            '2. You have created an Azure Container Registry in the same Azure Subscription.')
-
-        # TODO: Remove the below input when azp create will be implemented and
-        # we can take the acr_server_name from the resource file generated by
-        # azp create
-        acr_server = input(
-            "Please enter the Azure Container Registry server name, such as test-microsoft.azurecr.io, to continue.\nOtherwise, please press Ctrl-C: ")
-
-        utils.writeline('Preparing ARM configuration')
+        utils.writeline('Preparing ARM configuration ...')
         _prepare_arm_k8(dns_prefix)
 
-        utils.writeline('Creating Resources')
+        utils.writeline('Creating Resources ...')
         utils.writeline('This is going to take a while. Sit back and relax.')
         deployment_command = "az group deployment create --template-file {0}/k8.deploy.json --parameters \
         '@{0}/k8.deploy.parameters.tmp.json' -g {1} -n {2}".format(kubernetes_path, resource_group, dns_prefix)
         check_call(deployment_command, shell=True)
         utils.writeline('Done with the resources!')
 
-        utils.writeline('Creating tenx namespace')
+        utils.writeline('Creating tenx namespace ...')
         namespace_command = "kubectl create namespace tenx"
         _execute_command(namespace_command, True)
 
-        utils.writeline('Deploying ACR credentials in Kubernetes')
+        utils.writeline('Deploying ACR credentials in Kubernetes ...')
         workspace_storage_key = _deploy_secrets_share_k8(
             acr_server, resource_group, dns_prefix, client_id, client_secret, location, user_name)
 
-        utils.writeline('Enumerating Kubernetes agents')
+        utils.writeline('Enumerating Kubernetes agents ...')
         _enumerate_k8_agents(innerloop_client_path)
 
-        utils.writeline('Preparing the cluster')
+        utils.writeline('Preparing the cluster ...')
         remote_host = _get_remote_host(user_name, dns_prefix, location)
         ssh_private_key = _get_ssh_private_key()
         _execute_command("ssh -i {0} -o StrictHostKeyChecking=no -p 22 {1} 'mkdir ~/.azure'".format(
@@ -369,7 +374,7 @@ def _configure_cluster(dns_prefix, location, user_name):  # pylint: disable=too-
         _execute_command("scp -i {0} -P 22 {1}/hosts.tmp {2}:~/hosts".format(
             ssh_private_key, kubernetes_path, remote_host))
 
-        utils.writeline('Copying configuration files into the cluster')
+        utils.writeline('Copying configuration files into the cluster ...')
 
         _execute_command(
             "scp -i {1} -P 22 {1} {0}:~/.ssh/id_rsa".format(remote_host, ssh_private_key))
@@ -378,17 +383,18 @@ def _configure_cluster(dns_prefix, location, user_name):  # pylint: disable=too-
         _execute_command("scp -i {2} -P 22 {1}/configagents.sh {0}:~/configagents.sh".format(
             remote_host, kubernetes_path, ssh_private_key))
 
+        # _execute_command("eval $(ssh-agent) && ssh-add ~/.ssh/id_rsa")
         _execute_command(
             "ssh -i {0} -o StrictHostKeyChecking=no -p 22 {1} 'chmod 600 ~/.ssh/id_rsa'".format(ssh_private_key, remote_host))
         _execute_command(
             "ssh -i {0} -o StrictHostKeyChecking=no -p 22 {1} 'chmod +x ./configagents.sh'".format(ssh_private_key, remote_host))
 
-        utils.writeline('Configuring agents in the cluster')
+        utils.writeline('Configuring agents in the cluster ...')
 
         _execute_command(
             "ssh -i {0} -p 22 {1} 'source ./configagents.sh'".format(ssh_private_key, remote_host))
 
-        utils.writeline('Deploying TenX services to K8 cluster')
+        utils.writeline('Deploying TenX services to K8 cluster ...')
 
         _execute_command(
             "kubectl create -f {0}/tenx.tmp.yaml".format(kubernetes_path), True)
@@ -428,7 +434,7 @@ def _configure_cluster(dns_prefix, location, user_name):  # pylint: disable=too-
             "kubectl create -f {0}/tenxPublicEndpoint.yaml -n tenx".format(kubernetes_path))
 
         # Initialize Workspace
-        utils.writeline('Initializing Workspace: {0}'.format(dns_prefix))
+        utils.writeline('Initializing Workspace: {0} ...'.format(dns_prefix))
         utils.writeline('This might take some waiting.')
         workspace_storage = dns_prefix.replace('-', '') + 'wks'
         _initialize_workspace(
@@ -446,6 +452,7 @@ def _configure_cluster(dns_prefix, location, user_name):  # pylint: disable=too-
         if os.path.exists(azure_json_file):
             os.remove(azure_json_file)
 
+
 def _validate_kubectl_context(dns_prefix):
     context_command = 'kubectl config current-context'
     current_context = _get_command_output(context_command)
@@ -460,7 +467,7 @@ def _cluster_configured(dns_prefix, user_name):  # pylint: disable=too-many-retu
     2. Checks if all the services are running by pinging each URL.
     """
 
-    utils.writeline('Detecting if the cluster exists')
+    utils.writeline('Detecting if the cluster exists ...')
     settings_json_file_path = _get_workspace_settings_file()
     workspace_err_message = '  Workspace not defined.'
     if not os.path.exists(settings_json_file_path):
@@ -547,7 +554,7 @@ def _enumerate_k8_agents(innerloop_client_path):
 
 def _deploy_secrets_share_k8(acr_server, resource_group, dns_prefix, client_id, client_secret, location, user_name):
     """
-    Install cluster/registry secrets and creates sahre on the file storage.
+    Install cluster/registry secrets and creates share on the file storage.
     """
     _install_k8_secret(acr_server, dns_prefix, client_id,
                        client_secret, location, user_name)
@@ -786,7 +793,7 @@ def _initialize_workspace(
                           storage_account_name, storage_account_key, workspace_share_name, '--k8')
 
 
-def service_run(dns_prefix, location, project_path, user_name):
+def service_run(project_path):
     """
     Automates building the project/service in a Docker image and pushing to an Azure container registry,
     and creates a release definition that automates deploying container images from a container registry
@@ -794,14 +801,8 @@ def service_run(dns_prefix, location, project_path, user_name):
 
     Run configures the cluster, if not already, then builds the service in the cluster and starts the service.
 
-    :param dns_prefix: Prefix used to create a unique fully qualified domain name (FQDN) for the master.
-    :type dns_prefix: String
-    :param location: Azure region for the Azure Container Service deployment.
-    :type location: String
     :param project_path: Project/Service path to deploy on the Kubernetes cluster or current directory.
     :type project_path: String
-    :param user_name: User name for an account on each of the Linux virtual machines in the cluster.
-    :type user_name: String
     """
 
     curr_dir = None
@@ -814,7 +815,7 @@ def service_run(dns_prefix, location, project_path, user_name):
             raise CLIError("Invalid path: {0}".format(project_path))
 
         # Configuring Cluster
-        _configure_cluster(dns_prefix, location, user_name)
+        _configure_cluster()
 
         # Building Service ...
         _service_build()
