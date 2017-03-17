@@ -6,12 +6,11 @@
 # pylint: disable=no-self-use,too-many-arguments,too-many-lines
 from __future__ import print_function
 from sys import stderr
+import adal
 import json
+import re
 import threading
 import time
-import re
-import adal
-
 try:
     from urllib.parse import quote, urlparse
 except ImportError:
@@ -23,7 +22,6 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan,
                                    SkuDescription, SslState, HostNameBinding,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState)
-
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import parse_resource_id
 from azure.cli.core.commands import LongRunningOperation
@@ -32,7 +30,10 @@ import azure.cli.core.azlogging as azlogging
 from azure.cli.core._util import CLIError
 from ._params import web_client_factory, _generic_site_operation
 from azure.cli.core.cloud import get_active_cloud
-from azuretfs.models import ContinuousDeploymentOperation
+from azuretfs import AzureTfs
+from azuretfs.models import (ContinuousDeploymentConfiguration, ContinuousDeploymentOperation, ResourceConfiguration,
+                             SourceConfiguration, SourceRepository, PipelineConfiguration, Property)
+from azure.cli.core._profile import Profile, CredsCache, _CLIENT_ID, _ACCESS_TOKEN
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -294,6 +295,10 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
     result.name = result.name.split('/')[-1]
     return result
 
+def _verify_vsts_parameters(cd_account, sourceRepository):
+    ## if provider is vsts and repo is not vsts then we need the account name
+    if not sourceRepository.repository_type == 3 and not cd_account:
+        raise RuntimeError('You must provide a value for cd-account since your repo-url is not a VSTS repository.')
 
 def _update_progress(current, total, status):
     if total:
@@ -309,8 +314,6 @@ def _update_progress(current, total, status):
             print('', file=stderr)
 
 def _get_source_repository(uri, token):
-    from azuretfs.models import SourceRepository, Property
-
     ## Determine the type of repository (vstsgit == 1, github == 2, tfvc == 3, externalGit == 4)
     ## Find the identifier and set the properties; default to externalGit
     type = 4
@@ -334,8 +337,7 @@ def _get_source_repository(uri, token):
     sourceRepository = SourceRepository(identifier, properties, type)
     return sourceRepository
 
-def get_vsts_azure_auth_info(tenant, resource):
-    from azure.cli.core._profile import CredsCache, _CLIENT_ID, _ACCESS_TOKEN
+def _get_vsts_azure_auth_info(tenant, resource):
     ## create auth context
     tenant = tenant or 'common'
     authority = get_active_cloud().endpoints.active_directory + '/' + tenant
@@ -399,10 +401,6 @@ def config_source_control(resource_group_name, name, repo_url, repository_type=N
     location = _get_location_from_webapp(client, resource_group_name, name)
 
     if cd_provider == 'vsts':
-        from azuretfs import AzureTfs
-        from azuretfs.models import ContinuousDeploymentConfiguration, ResourceConfiguration, SourceConfiguration, SourceRepository, PipelineConfiguration, Property
-        from azure.cli.core._profile import Profile
-
         app_type = _get_app_project_type(cd_app_type)
         vsts_app_id = '499b84ac-1321-427f-aa17-267ca6975798'
 
@@ -412,19 +410,21 @@ def config_source_control(resource_group_name, name, repo_url, repository_type=N
         user = profile.get_current_account_user()
         cred, subscription_id, _ = profile.get_login_credentials(subscription_id=None)
 
+        ## Verify inputs before we start asking for creds
+        sourceRepository = _get_source_repository(repo_url, git_token)
+        _verify_vsts_parameters(cd_account, sourceRepository)
+
         ## Generate an Azure token with the VSTS resource app id
         print('Acquiring token to communicate from VSTS to Azure...')
-        auth_info = get_vsts_azure_auth_info(None, vsts_app_id)
+        auth_info = _get_vsts_azure_auth_info(None, vsts_app_id)
 
         ## Create AzureTfs client
-        ##TODO SET USER AGENT STRING
         az_tfs = AzureTfs('3.2-preview', None, cred)
 
         ## Construct the config body of the continuous delivery call
         accountConfiguration = ResourceConfiguration(cd_create_account, [Property('region','CUS'), Property('PortalExtensionUsesNewAcquisitionFlows', 'false')], cd_account)
         pipelineConfiguration = PipelineConfiguration('ibiza')
         projectConfiguration = ResourceConfiguration(True, [Property('','')], name)
-        sourceRepository = _get_source_repository(repo_url, git_token)
         sourceConfiguration = SourceConfiguration(sourceRepository, branch)
         targetConfiguration = [Property('resourceProperties', app_type),
             Property('resourceGroup', resource_group_name),
