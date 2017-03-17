@@ -523,7 +523,7 @@ def _validate_vm_create_auth(namespace):
                                      StorageProfile.SASpecializedOSDisk]:
         return
 
-    _validate_admin_username(namespace.admin_username, namespace.os_type.lower() == 'linux')
+    _validate_admin_username(namespace.admin_username, namespace.os_type)
 
     if not namespace.os_type:
         raise CLIError("Unable to resolve OS type. Specify '--os-type' argument.")
@@ -552,7 +552,7 @@ def _validate_vm_create_auth(namespace):
 
         # validate password
         _validate_admin_password(namespace.admin_password,
-                                 namespace.os_type.lower() == 'linux')
+                                 namespace.os_type)
 
     elif namespace.authentication_type == 'ssh':
 
@@ -566,9 +566,10 @@ def _validate_vm_create_auth(namespace):
                 '/home/{}/.ssh/authorized_keys'.format(namespace.admin_username)
 
 
-def _validate_admin_username(username, is_linux):
+def _validate_admin_username(username, os_type):
     if not username:
-        return "admin user name can not be empty"
+        raise CLIError("admin user name can not be empty")
+    is_linux = (os_type.lower() == 'linux')
     # pylint: disable=line-too-long
     pattern = (r'[\\\/"\[\]:|<>+=;,?*@#()!A-Z]+' if is_linux else r'[\\\/"\[\]:|<>+=;,?*@]+')
     linux_err = r'admin user name cannot contain upper case character A-Z, special characters \/"[]:|<>+=;,?*@#()! or start with $ or -'
@@ -586,10 +587,11 @@ def _validate_admin_username(username, is_linux):
         "owner", "root", "server", "sql", "support", "support_388945a0",
         "sys", "test2", "test3", "user4", "user5"]
     if username.lower() in disallowed_user_names:
-        raise CLIError('The specified admin user name is not allowed, as it uses reserved words. Try again with a different value')
+        raise CLIError("This user name '{}' meets the general requirements, but is specifically disallowed for this image. Please try a different value.".format(username))
 
 
-def _validate_admin_password(password, is_linux):
+def _validate_admin_password(password, os_type):
+    is_linux = (os_type.lower() == 'linux')
     max_length = 72 if is_linux else 123
     min_length = 12
     if len(password) not in range(min_length, max_length + 1):
@@ -604,12 +606,6 @@ def _validate_admin_password(password, is_linux):
     # pylint: disable=line-too-long
     if count < 3:
         raise CLIError('Password must have the 3 of the following: 1 lower case character, 1 upper case character, 1 number and 1 special character')
-    disallowed_passwords = [
-        "abc@123", "P@$$w0rd", "P@ssw0rd", "P@ssword123", "Pa$$word",
-        "pass@word1", "Password!", "Password1", "Password22", "iloveyou!"
-    ]
-    if password.lower() in disallowed_passwords:
-        raise CLIError('The specified password is not allowed')
 
 
 def validate_ssh_key(namespace):

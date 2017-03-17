@@ -72,52 +72,55 @@ class TestActions(unittest.TestCase):
         # pylint: disable=line-too-long
         err_invalid_char = r'admin user name cannot contain upper case character A-Z, special characters \/"[]:|<>+=;,?*@#()! or start with $ or -'
 
-        self._verify_username_with_ex('david', True, 'The specified admin user name is not allowed, as it uses reserved words. Try again with a different value')
-        self._verify_username_with_ex('!@#', True, err_invalid_char)
-        self._verify_username_with_ex('dav[', True, err_invalid_char)
-        self._verify_username_with_ex('Adavid', True, err_invalid_char)
-        self._verify_username_with_ex('-ddavid', True, err_invalid_char)
+        self._verify_username_with_ex('!@#', 'linux', err_invalid_char)
+        self._verify_username_with_ex('dav[', 'linux', err_invalid_char)
+        self._verify_username_with_ex('Adavid', 'linux', err_invalid_char)
+        self._verify_username_with_ex('-ddavid', 'linux', err_invalid_char)
+        self._verify_username_with_ex('', 'linux', 'admin user name can not be empty')
+        self._verify_username_with_ex('david', 'linux',
+                                      "This user name 'david' meets the general requirements, but is specifically disallowed for this image. Please try a different value.")
 
-        _validate_admin_username('d-avid1', True)
-        _validate_admin_username('david1', True)
-        _validate_admin_username('david1.', True)
+        _validate_admin_username('d-avid1', 'linux')
+        _validate_admin_username('david1', 'linux')
+        _validate_admin_username('david1.', 'linux')
 
     def test_validate_admin_username_windows(self):
         # pylint: disable=line-too-long
         err_invalid_char = r'admin user name cannot contain special characters \/"[]:|<>+=;,?*@# or ends with .'
 
-        self._verify_username_with_ex('david', False, 'The specified admin user name is not allowed, as it uses reserved words. Try again with a different value')
-        self._verify_username_with_ex('!@#', False, err_invalid_char)
-        self._verify_username_with_ex('dav[', False, err_invalid_char)
-        self._verify_username_with_ex('dddivid.', False, err_invalid_char)
+        self._verify_username_with_ex('!@#', 'windows', err_invalid_char)
+        self._verify_username_with_ex('dav[', 'windows', err_invalid_char)
+        self._verify_username_with_ex('dddivid.', 'windows', err_invalid_char)
+        self._verify_username_with_ex('john', 'windows',
+                                      "This user name 'john' meets the general requirements, but is specifically disallowed for this image. Please try a different value.")
 
-        _validate_admin_username('ADAVID', False)
-        _validate_admin_username('d-avid1', False)
-        _validate_admin_username('david1', False)
+        _validate_admin_username('ADAVID', 'windows')
+        _validate_admin_username('d-avid1', 'windows')
+        _validate_admin_username('david1', 'windows')
 
     def test_validate_admin_password_linux(self):
         # pylint: disable=line-too-long
         err_length = 'The pssword length must be between 12 and 72'
         err_variety = 'Password must have the 3 of the following: 1 lower case character, 1 upper case character, 1 number and 1 special character'
 
-        self._verify_password_with_ex('te', True, err_length)
-        self._verify_password_with_ex('P12' + '3' * 70, True, err_length)
-        self._verify_password_with_ex('te12312312321', True, err_variety)
+        self._verify_password_with_ex('te', 'linux', err_length)
+        self._verify_password_with_ex('P12' + '3' * 70, 'linux', err_length)
+        self._verify_password_with_ex('te12312312321', 'linux', err_variety)
 
-        _validate_admin_password('Password22345', True)
-        _validate_admin_password('Password12!@#', True)
+        _validate_admin_password('Password22345', 'linux')
+        _validate_admin_password('Password12!@#', 'linux')
 
     def test_validate_admin_password_windows(self):
         # pylint: disable=line-too-long
         err_length = 'The pssword length must be between 12 and 123'
         err_variety = 'Password must have the 3 of the following: 1 lower case character, 1 upper case character, 1 number and 1 special character'
 
-        self._verify_password_with_ex('P1', False, err_length)
-        self._verify_password_with_ex('te14' + '3' * 120, False, err_length)
-        self._verify_password_with_ex('te12345678997', False, err_variety)
+        self._verify_password_with_ex('P1', 'windows', err_length)
+        self._verify_password_with_ex('te14' + '3' * 120, 'windows', err_length)
+        self._verify_password_with_ex('te12345678997', 'windows', err_variety)
 
-        _validate_admin_password('Password22!!!', False)
-        _validate_admin_password('Pas' + '1' * 70, False)
+        _validate_admin_password('Password22!!!', 'windows')
+        _validate_admin_password('Pas' + '1' * 70, 'windows')
 
     def _verify_username_with_ex(self, admin_username, is_linux, expected_err):
         with self.assertRaises(CLIError) as context:
