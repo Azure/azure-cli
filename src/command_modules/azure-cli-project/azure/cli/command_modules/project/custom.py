@@ -467,7 +467,7 @@ def _cluster_configured(dns_prefix, user_name):  # pylint: disable=too-many-retu
     2. Checks if all the services are running by pinging each URL.
     """
 
-    utils.writeline('Detecting if the cluster exists')
+    utils.writeline('Detecting if the cluster exists ...')
     settings_json_file_path = _get_workspace_settings_file()
     workspace_err_message = '  Workspace not defined.'
     if not os.path.exists(settings_json_file_path):
@@ -495,22 +495,22 @@ def _cluster_configured(dns_prefix, user_name):  # pylint: disable=too-many-retu
     try:
         url_sub_path = "api/ping"
         build_service_url = default_workspace["BuildServiceUrl"]
-        logger.info('  Checking build service ...')
+        logger.info('  Checking build service')
         if not _ping_url("{0}/{1}".format(build_service_url, url_sub_path)):
             return False
 
         exec_service_url = default_workspace["ExecServiceUrl"]
-        logger.info('  Checking exec service ...')
+        logger.info('  Checking exec service')
         if not _ping_url("{0}/{1}".format(exec_service_url, url_sub_path)):
             return False
 
         rsrc_service_url = default_workspace["RsrcServiceUrl"]
-        logger.info('  Checking rsrc service ...')
+        logger.info('  Checking rsrc service')
         if not _ping_url("{0}/{1}".format(rsrc_service_url, url_sub_path)):
             return False
 
         config_service_url = default_workspace["ConfigServiceUrl"]
-        logger.info('  Checking config service ...')
+        logger.info('  Checking config service')
         if not _ping_url("{0}/{1}".format(config_service_url, url_sub_path)):
             return False
 
