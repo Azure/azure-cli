@@ -93,32 +93,32 @@ helps['sql db restore'] = """
     type: command
     short-summary: Creates a new database by restoring from a database backup.
     """
-helps['sql db threat-detection-policy'] = """
+helps['sql db threat-policy'] = """
     type: group
     short-summary: Manage a database's threat detection policy.
     """
-helps['sql db threat-detection-policy update'] = """
+helps['sql db threat-policy update'] = """
     type: command
     short-summary: Updates a database's threat detection policy.
     long-summary: If the policy is being enabled, storage_account or both storage_endpoint and
                   storage_account_access_key must be specified.
     examples:
         - name: Enable by specifying storage account name
-          text: az db threat-detection-policy update -g mygroup -s myserver -n mydb
+          text: az db threat-policy update -g mygroup -s myserver -n mydb
                 --state Enabled --storage-account mystorage
         - name: Enable by specifying storage endpoint and key
-          text: az db threat-detection-policy update -g mygroup -s myserver -n mydb
+          text: az db threat-policy update -g mygroup -s myserver -n mydb
                 --state Enabled --storage-endpoint https://mystorage.blob.core.windows.net
                 --storage-key MYKEY==
         - name: Disable a subset of alert types
-          text: az db threat-detection-policy update -g mygroup -s myserver -n mydb
+          text: az db threat-policy update -g mygroup -s myserver -n mydb
                 --disabled-alerts Sql_Injection_Vulnerability Access_Anomaly
         - name: Configure email recipients
-          text: az db threat-detection-policy update -g mygroup -s myserver -n mydb
+          text: az db threat-policy update -g mygroup -s myserver -n mydb
                 --email-addresses me@examlee.com you@example.com --email-account-admins
                 Enabled
         - name: Disable
-          text: az db threat-detection-policy update -g mygroup -s myserver -n mydb
+          text: az db threat-policy update -g mygroup -s myserver -n mydb
                 --state Disabled
     """
 # helps['sql db restore-point'] = """

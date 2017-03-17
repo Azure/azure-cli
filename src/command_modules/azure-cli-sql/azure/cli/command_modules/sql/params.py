@@ -322,7 +322,7 @@ with ParametersContext(command='sql db replica delete-link') as c:
 
 
 #####
-#           sql db audit-policy & threat-detection-policy
+#           sql db audit-policy & threat-policy
 #####
 
 def _configure_security_policy_storage_params(cmd):
@@ -364,7 +364,7 @@ with ParametersContext(command='sql db audit-policy update') as c:
                help='The number of days to retain audit logs.')
 
 
-with ParametersContext(command='sql db threat-detection-policy update') as c:
+with ParametersContext(command='sql db threat-policy update') as c:
     _configure_security_policy_storage_params(c)
 
     policy_arg_group = 'Policy'

@@ -84,7 +84,7 @@ database_threat_detection_policy_operations = create_service_adapter(
 with ServiceGroup(__name__,
                   get_sql_database_threat_detection_policies_operations,
                   database_threat_detection_policy_operations) as s:
-    with s.group('sql db threat-detection-policy') as c:
+    with s.group('sql db threat-policy') as c:
         c.command('show', 'get')
         c.generic_update_command('update', 'get', 'create_or_update',
                                  custom_func_name='db_threat_detection_policy_update',

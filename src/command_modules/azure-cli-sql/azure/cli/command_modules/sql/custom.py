@@ -339,7 +339,7 @@ def db_update(
 
 
 #####
-#           sql server audit-policy & threat-detection-policy
+#           sql server audit-policy & threat-policy
 #####
 
 

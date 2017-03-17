@@ -481,7 +481,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
         # get threat detection policy
-        self.cmd('sql db threat-detection-policy show -g {} -s {} -n {}'
+        self.cmd('sql db threat-policy show -g {} -s {} -n {}'
                  .format(resource_group, server, database_name),
                  checks=[JMESPathCheck('resourceGroup', resource_group)])
 
@@ -492,7 +492,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
         email_addresses_expected = 'test1@example.com;test2@example.com'
         email_account_admins = 'Enabled'
 
-        self.cmd('sql db threat-detection-policy update -g {} -s {} -n {}'
+        self.cmd('sql db threat-policy update -g {} -s {} -n {}'
                  ' --state {} --storage-key {} --storage-endpoint {}'
                  ' --retention-days {} --email-addresses {} --disabled-alerts {}'
                  ' --email-account-admins {}'
@@ -511,7 +511,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
 
         # update threat policy - specify storage account and resource group. use secondary key
         key_2 = self._get_storage_key(storage_account_2, resource_group_2)
-        self.cmd('sql db threat-detection-policy update -g {} -s {} -n {} --storage-account {}'
+        self.cmd('sql db threat-policy update -g {} -s {} -n {} --storage-account {}'
                  .format(resource_group, server, database_name, storage_account_2,
                          resource_group_2),
                  checks=[
