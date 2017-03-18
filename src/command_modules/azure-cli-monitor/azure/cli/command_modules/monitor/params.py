@@ -51,10 +51,10 @@ with ParametersContext(command='monitor autoscale-settings delete') as c:
 with ParametersContext(command='monitor autoscale-settings list') as c:
     c.ignore('filter')
 
-with ParametersContext(command='monitor service-diagnostic-settings') as c:
+with ParametersContext(command='monitor diagnostic-settings') as c:
     c.register_alias('resource_uri', ('--resource-id',))
 
-with ParametersContext(command='monitor service-diagnostic-settings create') as c:
+with ParametersContext(command='monitor diagnostic-settings create') as c:
     from azure.mgmt.monitor.models.service_diagnostic_settings_resource import \
         (ServiceDiagnosticSettingsResource)
 

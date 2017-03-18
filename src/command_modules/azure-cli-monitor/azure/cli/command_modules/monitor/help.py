@@ -31,11 +31,11 @@ helps['monitor log-profiles update'] = """
             type: command
             short-summary: Update a log profile assigned to Azure subscription.
             """
-helps['monitor service-diagnostic-settings'] = """
+helps['monitor diagnostic-settings'] = """
             type: group
             short-summary: Commands to manage service diagnostic settings.
             """
-helps['monitor service-diagnostic-settings update'] = """
+helps['monitor diagnostic-settings update'] = """
             type: command
             short-summary: Update diagnostic settings for the specified resource.
             """

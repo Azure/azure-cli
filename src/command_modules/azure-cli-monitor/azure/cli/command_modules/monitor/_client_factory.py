@@ -15,7 +15,7 @@ def get_monitor_autoscale_settings_operation(kwargs):
     return get_monitor_management_client(kwargs).autoscale_settings
 
 
-def get_monitor_service_diagnostic_settings_operation(kwargs):
+def get_monitor_diagnostic_settings_operation(kwargs):
     return get_monitor_management_client(kwargs).service_diagnostic_settings
 
 
