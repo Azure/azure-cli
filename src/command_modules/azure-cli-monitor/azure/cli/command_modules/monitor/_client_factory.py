@@ -42,7 +42,7 @@ def get_monitor_event_categories_operation(kwargs):
     return get_monitor_client(kwargs).event_categories
 
 
-def get_monitor_activity_logs_operation(kwargs):
+def get_monitor_activity_log_operation(kwargs):
     return get_monitor_client(kwargs).activity_logs
 
 

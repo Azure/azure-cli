@@ -52,9 +52,9 @@ helps['monitor event-categories'] = """
             type: group
             short-summary: Commands to manage event categories.
             """
-helps['monitor activity-logs'] = """
+helps['monitor activity-log'] = """
             type: group
-            short-summary: Commands to manage activity logs.
+            short-summary: Commands to manage activity log.
             """
 helps['monitor metrics'] = """
             type: group

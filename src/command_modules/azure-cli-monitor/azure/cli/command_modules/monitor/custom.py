@@ -105,10 +105,10 @@ def _validate_start_time(start_time, end_time):
 
 
 # pylint: disable=too-many-arguments
-def list_activity_logs(client, filters=None, correlation_id=None, resource_group=None,
-                       resource_id=None, resource_provider=None, start_time=None, end_time=None,
-                       caller=None, status=None, max_events=50, select=None):
-    '''Provides the list of activity logs.
+def list_activity_log(client, filters=None, correlation_id=None, resource_group=None,
+                      resource_id=None, resource_provider=None, start_time=None, end_time=None,
+                      caller=None, status=None, max_events=50, select=None):
+    '''Provides the list of activity log.
     :param str filters: The OData filter for the list activity logs. If this argument is provided
                         OData Filter Arguments will be ignored
     :param str correlation_id: The correlation id of the query
@@ -134,17 +134,17 @@ def list_activity_logs(client, filters=None, correlation_id=None, resource_group
             raise CLIError("usage error: [--correlation-id ID | --resource-group NAME | "
                            "--resource-id ID | --resource-provider PROVIDER]")
 
-        odata_filters = _build_activity_logs_odata_filter(correlation_id, resource_group,
-                                                          resource_id, resource_provider,
-                                                          start_time, end_time,
-                                                          caller, status)
+        odata_filters = _build_activity_log_odata_filter(correlation_id, resource_group,
+                                                         resource_id, resource_provider,
+                                                         start_time, end_time,
+                                                         caller, status)
 
     if max_events:
         max_events = int(max_events)
 
-    select_filters = _activity_logs_select_filter_builder(select)
-    activity_logs = client.list(filter=odata_filters, select=select_filters)
-    return _limit_results(activity_logs, max_events)
+    select_filters = _activity_log_select_filter_builder(select)
+    activity_log = client.list(filter=odata_filters, select=select_filters)
+    return _limit_results(activity_log, max_events)
 
 
 def _single(collection):
@@ -152,9 +152,9 @@ def _single(collection):
 
 
 # pylint: disable=too-many-arguments
-def _build_activity_logs_odata_filter(correlation_id=None, resource_group=None, resource_id=None,
-                                      resource_provider=None, start_time=None, end_time=None,
-                                      caller=None, status=None):
+def _build_activity_log_odata_filter(correlation_id=None, resource_group=None, resource_id=None,
+                                     resource_provider=None, start_time=None, end_time=None,
+                                     caller=None, status=None):
     '''Builds odata filter string.
     :param str correlation_id: The correlation id of the query
     :param str resource_group: The resource group
@@ -193,7 +193,7 @@ def _build_activity_logs_odata_filter(correlation_id=None, resource_group=None, 
     return odata_filters
 
 
-def _activity_logs_select_filter_builder(events=None):
+def _activity_log_select_filter_builder(events=None):
     '''Build up select filter string from events
     '''
     if events:
