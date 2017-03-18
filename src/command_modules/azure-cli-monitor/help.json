@@ -4,31 +4,29 @@ Group
     az monitor: Commands to manage Azure Monitor service.
 
 Subgroups:
-    activity-logs              : Commands to manage activity logs.
-    alert-rule-incidents       : Commands to manage alert rule incidents.
-    alert-rules                : Commands to manage alerts assigned to Azure resources.
-    autoscale-settings         : Commands to manage autoscale settings.
-    event-categories           : Commands to manage event categories.
-    log-profiles               : Commands to manage the log profiles assigned to Azure subscription.
-    metric-definitions         : Commands to manage metric definitions.
-    metrics                    : Commands to manage metrics.
-    service-diagnostic-settings: Commands to manage service diagnostic settings.
-    tenant-activity-logs       : Commands to manage tenant activity logs.
+    activity-log        : Commands to manage activity log.
+    alert-rule-incidents: Commands to manage alert rule incidents.
+    alert-rules         : Commands to manage alerts assigned to Azure resources.
+    autoscale-settings  : Commands to manage autoscale settings.
+    diagnostic-settings : Commands to manage service diagnostic settings.
+    log-profiles        : Commands to manage the log profiles assigned to Azure subscription.
+    metric-definitions  : Commands to manage metric definitions.
+    metrics             : Commands to manage metrics.
 
 *********************
 
-(env) vishrut@mac azure-cli (monitor) $ az monitor activity-logs -h
+(env) vishrut@mac azure-cli (monitor) $ az monitor activity-log -h
 
 Group
-    az monitor activity-logs: Commands to manage activity logs.
+    az monitor activity-log: Commands to manage activity log.
 
 Commands:
-    list: Provides the list of activity logs.
+    list: Provides the list of activity log.
 
-(env) vishrut@mac azure-cli (monitor) $ az monitor activity-logs list -h
+(env) vishrut@mac azure-cli (monitor) $ az monitor activity-log list -h
 
 Command
-    az monitor activity-logs list: Provides the list of activity logs.
+    az monitor activity-logs list: Provides the list of activity log.
 
 Arguments
     --filters          : The OData filter for the list activity logs. If this argument is provided
@@ -393,41 +391,6 @@ Global Arguments
 
 *********************
 
-(env) vishrut@mac azure-cli (monitor) $ az monitor event-categories -h
-
-Group
-    az monitor event-categories: Commands to manage event categories.
-
-Commands:
-    list: Get the list of available event categories supported in the Activity Log Service.
-
-(env) vishrut@mac azure-cli (monitor) $ az monitor event-categories -h
-
-Group
-    az monitor event-categories: Commands to manage event categories.
-
-Commands:
-    list: Get the list of available event categories supported in the Activity Log Service.
-
-(env) vishrut@mac azure-cli (monitor) $ az monitor event-categories list -h
-
-Command
-    az monitor event-categories list: Get the list of available event categories supported in the
-    Activity Log Service.
-        The current list includes the following: Aministrative, Security, ServiceHealth, Alert,
-        Recommendation, Policy.
-
-Arguments
-
-Global Arguments
-    --debug    : Increase logging verbosity to show all debug logs.
-    --help -h  : Show this help message and exit.
-    --output -o: Output format.  Allowed values: json, jsonc, table, tsv.  Default: json.
-    --query    : JMESPath query string. See http://jmespath.org/ for more information and examples.
-    --verbose  : Increase logging verbosity. Use --debug for full debug logs.
-
-*********************
-
 (env) vishrut@mac azure-cli (monitor) $ az monitor log-profiles -h
 
 Group
@@ -628,20 +591,20 @@ Global Arguments
 
 *********************
 
-(env) vishrut@mac azure-cli (monitor) $ az monitor service-diagnostic-settings -h
+(env) vishrut@mac azure-cli (monitor) $ az monitor diagnostic-settings -h
 
 Group
-    az monitor service-diagnostic-settings: Commands to manage service diagnostic settings.
+    az monitor diagnostic-settings: Commands to manage service diagnostic settings.
 
 Commands:
     create: Create or update new diagnostic settings for the specified resource.
     show  : Gets the active diagnostic settings for the specified resource.
     update: Update diagnostic settings for the specified resource.
 
-(env) vishrut@mac azure-cli (monitor) $ az monitor service-diagnostic-settings create -h
+(env) vishrut@mac azure-cli (monitor) $ az monitor diagnostic-settings create -h
 
 Command
-    az monitor service-diagnostic-settings create: Create or update new diagnostic settings for the
+    az monitor diagnostic-settings create: Create or update new diagnostic settings for the
     specified resource.
 
 Arguments
@@ -673,10 +636,10 @@ Global Arguments
                               and examples.
     --verbose               : Increase logging verbosity. Use --debug for full debug logs.
 
-(env) vishrut@mac azure-cli (monitor) $ az monitor service-diagnostic-settings show -h
+(env) vishrut@mac azure-cli (monitor) $ az monitor diagnostic-settings show -h
 
 Command
-    az monitor service-diagnostic-settings show: Gets the active diagnostic settings for the
+    az monitor diagnostic-settings show: Gets the active diagnostic settings for the
     specified resource.
 
 Arguments
@@ -691,10 +654,10 @@ Global Arguments
                               and examples.
     --verbose               : Increase logging verbosity. Use --debug for full debug logs.
 
-(env) vishrut@mac azure-cli (monitor) $ az monitor service-diagnostic-settings update -h
+(env) vishrut@mac azure-cli (monitor) $ az monitor diagnostic-settings update -h
 
 Command
-    az monitor service-diagnostic-settings update: Update diagnostic settings for the specified
+    az monitor diagnostic-settings update: Update diagnostic settings for the specified
     resource.
 
 Arguments
@@ -717,46 +680,3 @@ Global Arguments
     --query                 : JMESPath query string. See http://jmespath.org/ for more information
                               and examples.
     --verbose               : Increase logging verbosity. Use --debug for full debug logs.
-
-*********************
-
-(env) vishrut@mac azure-cli (monitor) $ az monitor tenant-activity-logs -h
-
-Group
-    az monitor tenant-activity-logs: Commands to manage tenant activity logs.
-
-Commands:
-    list: Provides the list of activity logs.
-    
-(env) vishrut@mac azure-cli (monitor) $ az monitor tenant-activity-logs list -h
-
-Command
-    az monitor tenant-activity-logs list: Provides the list of activity logs.
-
-Arguments
-    --filters          : The OData filter for the list activity logs. If this argument is provided
-                         OData Filter Arguments will be ignored.
-    --max-events       : The maximum number of records to be returned by the command.  Default: 50.
-    --select           : The list of event names.
-
-OData Filter Arguments
-    --caller           : The caller to look for when querying.
-    --correlation-id   : The correlation id of the query.
-    --end-time         : The end time of the query. In ISO format with explicit indication of
-                         timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500. Defaults to
-                         current time.
-    --resource-group   : The resource group.
-    --resource-id      : The identifier of the resource.
-    --resource-provider: The resource provider.
-    --start-time       : The start time of the query. In ISO format with explicit indication of
-                         timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500. Defaults to 1
-                         Hour prior to the current time.
-    --status           : The status value to query (ex: Failed).
-
-Global Arguments
-    --debug            : Increase logging verbosity to show all debug logs.
-    --help -h          : Show this help message and exit.
-    --output -o        : Output format.  Allowed values: json, jsonc, table, tsv.  Default: json.
-    --query            : JMESPath query string. See http://jmespath.org/ for more information and
-                         examples.
-    --verbose          : Increase logging verbosity. Use --debug for full debug logs.
