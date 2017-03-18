@@ -48,10 +48,6 @@ helps['monitor autoscale-settings update'] = """
             short-summary: Updates an autoscale setting.
             """
 # DATA COMMANDS HELPS
-helps['monitor event-categories'] = """
-            type: group
-            short-summary: Commands to manage event categories.
-            """
 helps['monitor activity-log'] = """
             type: group
             short-summary: Commands to manage activity log.

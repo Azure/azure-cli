@@ -8,7 +8,6 @@ from ._client_factory import (get_monitor_alert_rules_operation,
                               get_monitor_log_profiles_operation,
                               get_monitor_autoscale_settings_operation,
                               get_monitor_service_diagnostic_settings_operation,
-                              get_monitor_event_categories_operation,
                               get_monitor_activity_log_operation,
                               get_monitor_metric_definitions_operation,
                               get_monitor_metrics_operation)
@@ -85,14 +84,6 @@ with ServiceGroup(__name__, get_monitor_autoscale_settings_operation,
 
 
 # DATA COMMANDS
-event_categories_operations = create_service_adapter(
-    'azure.monitor.operations.event_categories_operations', 'EventCategoriesOperations')
-
-with ServiceGroup(__name__, get_monitor_event_categories_operation,
-                  event_categories_operations) as s:
-    with s.group('monitor event-categories') as c:
-        c.command('list', 'list')
-
 activity_logs_operations = create_service_adapter(
     'azure.cli.command_modules.monitor.custom')
 

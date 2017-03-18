@@ -38,10 +38,6 @@ def get_monitor_client(_):
     return get_mgmt_service_client(MonitorClient)
 
 
-def get_monitor_event_categories_operation(kwargs):
-    return get_monitor_client(kwargs).event_categories
-
-
 def get_monitor_activity_log_operation(kwargs):
     return get_monitor_client(kwargs).activity_logs
 
