@@ -8,8 +8,8 @@ import re
 from azure.cli.core._util import CLIError
 from azure.cli.command_modules.monitor.custom import (_metric_names_filter_builder,
                                                       _metrics_odata_filter_builder,
-                                                      _build_activity_logs_odata_filter,
-                                                      _activity_logs_select_filter_builder,
+                                                      _build_activity_log_odata_filter,
+                                                      _activity_log_select_filter_builder,
                                                       _build_odata_filter,
                                                       scaffold_autoscale_settings_parameters)
 
@@ -54,40 +54,40 @@ class CustomCommandTest(unittest.TestCase):
         caller = 'contoso@contoso.com'
         status = 'RunsSucceeded'
 
-        filter_output = _build_activity_logs_odata_filter(correlation_id)
+        filter_output = _build_activity_log_odata_filter(correlation_id)
         regex = r'^(eventTimestamp ge).*(eventTimestamp le).*(correlationId eq).*$'
         assert bool(re.search(regex, filter_output))
 
-        filter_output = _build_activity_logs_odata_filter(resource_group=resource_group)
+        filter_output = _build_activity_log_odata_filter(resource_group=resource_group)
         regex = r'^(eventTimestamp ge).*(eventTimestamp le).*(resourceGroupName eq).*$'
         assert bool(re.search(regex, filter_output))
 
-        filter_output = _build_activity_logs_odata_filter(resource_id=resource_id)
+        filter_output = _build_activity_log_odata_filter(resource_id=resource_id)
         regex = r'^(eventTimestamp ge).*(eventTimestamp le).*(resourceId eq).*$'
         assert bool(re.search(regex, filter_output))
 
-        filter_output = _build_activity_logs_odata_filter(resource_provider=resource_provider)
+        filter_output = _build_activity_log_odata_filter(resource_provider=resource_provider)
         regex = r'^(eventTimestamp ge).*(eventTimestamp le).*(resourceProvider eq).*$'
         assert bool(re.search(regex, filter_output))
 
-        filter_output = _build_activity_logs_odata_filter(caller=caller)
+        filter_output = _build_activity_log_odata_filter(caller=caller)
         regex = r'^(eventTimestamp ge).*(eventTimestamp le).*(caller eq).*$'
         assert bool(re.search(regex, filter_output))
 
-        filter_output = _build_activity_logs_odata_filter(status=status)
+        filter_output = _build_activity_log_odata_filter(status=status)
         regex = r'^(eventTimestamp ge).*(eventTimestamp le).*(status eq).*$'
         assert bool(re.search(regex, filter_output))
 
     def test_activity_logs_select_filter_builder(self):
-        select_output = _activity_logs_select_filter_builder()
+        select_output = _activity_log_select_filter_builder()
         assert select_output is None
 
         events = ['channels']
-        select_output = _activity_logs_select_filter_builder(events)
+        select_output = _activity_log_select_filter_builder(events)
         assert select_output == '{}'.format(events[0])
 
         events = ['eventDataId', 'eventSource']
-        select_output = _activity_logs_select_filter_builder(events)
+        select_output = _activity_log_select_filter_builder(events)
         assert select_output == '{} , {}'.format(events[0], events[1])
 
     def test_build_odata_filter(self):

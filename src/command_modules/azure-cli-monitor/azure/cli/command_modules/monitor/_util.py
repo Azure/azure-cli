@@ -139,4 +139,3 @@ class ParametersContext(object):
                       validator=get_complex_argument_processor(expanded_arguments,
                                                                argument_name,
                                                                model_type))
-
