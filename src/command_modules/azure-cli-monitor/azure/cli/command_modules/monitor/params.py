@@ -109,16 +109,3 @@ with ParametersContext(command='monitor activity-log list') as c:
     c.argument('end_time', arg_group=filter_arg_group_name)
     c.argument('caller', arg_group=filter_arg_group_name)
     c.argument('status', arg_group=filter_arg_group_name)
-
-with ParametersContext(command='monitor tenant-activity-logs list') as c:
-    c.register_alias('resource_group', ('--resource-group', '-g'))
-    c.argument('select', None, nargs='+')
-    filter_arg_group_name = 'OData Filter'
-    c.argument('correlation_id', arg_group=filter_arg_group_name)
-    c.argument('resource_group', arg_group=filter_arg_group_name)
-    c.argument('resource_id', arg_group=filter_arg_group_name)
-    c.argument('resource_provider', arg_group=filter_arg_group_name)
-    c.argument('start_time', arg_group=filter_arg_group_name)
-    c.argument('end_time', arg_group=filter_arg_group_name)
-    c.argument('caller', arg_group=filter_arg_group_name)
-    c.argument('status', arg_group=filter_arg_group_name)

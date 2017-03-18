@@ -10,7 +10,6 @@ from ._client_factory import (get_monitor_alert_rules_operation,
                               get_monitor_service_diagnostic_settings_operation,
                               get_monitor_event_categories_operation,
                               get_monitor_activity_log_operation,
-                              get_monitor_tenant_activity_logs_operation,
                               get_monitor_metric_definitions_operation,
                               get_monitor_metrics_operation)
 from ._util import (ServiceGroup, create_service_adapter)
@@ -100,14 +99,6 @@ activity_logs_operations = create_service_adapter(
 with ServiceGroup(__name__, get_monitor_activity_log_operation,
                   activity_logs_operations) as s:
     with s.group('monitor activity-log') as c:
-        c.command('list', 'list_activity_log')
-
-tenant_activity_logs_operations = create_service_adapter(
-    'azure.cli.command_modules.monitor.custom')
-
-with ServiceGroup(__name__, get_monitor_tenant_activity_logs_operation,
-                  tenant_activity_logs_operations) as s:
-    with s.group('monitor tenant-activity-logs') as c:
         c.command('list', 'list_activity_log')
 
 metric_definitions_operations = create_service_adapter(

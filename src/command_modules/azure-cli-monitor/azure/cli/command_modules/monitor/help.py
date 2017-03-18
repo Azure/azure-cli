@@ -64,7 +64,3 @@ helps['monitor metric-definitions'] = """
             type: group
             short-summary: Commands to manage metric definitions.
             """
-helps['monitor tenant-activity-logs'] = """
-            type: group
-            short-summary: Commands to manage tenant activity logs.
-            """

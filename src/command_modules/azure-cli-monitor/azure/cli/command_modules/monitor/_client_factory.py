@@ -46,10 +46,6 @@ def get_monitor_activity_log_operation(kwargs):
     return get_monitor_client(kwargs).activity_logs
 
 
-def get_monitor_tenant_activity_logs_operation(kwargs):
-    return get_monitor_client(kwargs).tenant_activity_logs
-
-
 def get_monitor_metric_definitions_operation(kwargs):
     return get_monitor_client(kwargs).metric_definitions
 
