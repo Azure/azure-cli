@@ -61,7 +61,7 @@ class StorageAccountTests(ScenarioTest):
     def test_logging_operations(self, resource_group, storage_account):
         connection_string = self.cmd(
             'storage account show-connection-string -g {} -n {} -otsv'
-                .format(resource_group, storage_account)).output
+            .format(resource_group, storage_account)).output
 
         self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
             JMESPathCheck('blob.read', False),
@@ -82,7 +82,7 @@ class StorageAccountTests(ScenarioTest):
     def test_metrics_operations(self, resource_group, storage_account):
         connection_string = self.cmd(
             'storage account show-connection-string -g {} -n {} -otsv'
-                .format(resource_group, storage_account)).output
+            .format(resource_group, storage_account)).output
 
         self.cmd('storage metrics show --connection-string {}'.format(connection_string), checks=[
             JMESPathCheck('file.hour.enabled', True),
