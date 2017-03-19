@@ -97,6 +97,16 @@ def get_test_results_dir(with_timestamp=None, prefix=None):
     return result
 
 
+def filter_blacklisted_modules(black_list_modules):
+    """Returns the paths to the modules except those in the black list."""
+    import itertools
+
+    existing_modules = list(itertools.chain(get_core_modules_paths(),
+                                            get_command_modules_paths()))
+    black_list_modules = set(black_list_modules)
+    return list((name, path) for name, path in existing_modules if name not in black_list_modules)
+
+
 def filter_user_selected_modules(user_input_modules):
     import itertools
 
