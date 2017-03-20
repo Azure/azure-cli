@@ -295,7 +295,11 @@ with ParametersContext(command='sql db import') as c:
     c.argument('authentication_type', options_list=('--auth_type',),
                **enum_choice_list(AuthenticationType))
     c.argument('storage_key_type', **enum_choice_list(StorageKeyType))
-    c.argument('name', options_list=('--slkdjflksdjf',), arg_type=ignore_type)
+
+    # The parameter name '--name' is used for 'database_name', so we need to give a different name
+    # for the import extension 'name' parameter to avoid conflicts. This parameter is actually not
+    # needed, but we still need to avoid this conflict.
+    c.argument('name', options_list=('--unused-extension-name',), arg_type=ignore_type)
 
 
 #####
