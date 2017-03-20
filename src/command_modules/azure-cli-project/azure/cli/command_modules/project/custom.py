@@ -5,14 +5,19 @@
 
 import base64
 import codecs
-import errno
 import glob
 import json
 import os
+import socket
 import platform
 import sys
 from subprocess import PIPE, CalledProcessError, Popen, check_output, check_call
+from time import sleep
+import threading
+import webbrowser
 import requests
+from six.moves.urllib.request import urlopen  # pylint: disable=import-error
+from six.moves.urllib.error import URLError  # pylint: disable=import-error
 
 import azure.cli.command_modules.project.settings as settings
 import azure.cli.command_modules.project.utils as utils
@@ -39,13 +44,44 @@ from azure.cli.command_modules.storage._factory import storage_client_factory
 from azure.cli.command_modules.acs.custom import (
     acs_create,
     k8s_get_credentials)
+from sshtunnel import SSHTunnelForwarder
 
 logger = azlogging.get_az_logger(__name__)  # pylint: disable=invalid-name
 project_settings = settings.Project()  # pylint: disable=invalid-name
 
 # TODO: Remove and switch to SSH once templates are updated
 admin_password = 'Mindaro@Pass1!'  # pylint: disable=invalid-name
-# pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long,broad-except
+# pylint:
+# disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long,broad-except
+
+
+def browse_jenkins():
+    """
+    Creates an SSH tunnel to Jenkins host and opens
+    the dashboard in the browser
+    """
+    jenkins_hostname = project_settings.jenkins_hostname
+    admin_username = project_settings.admin_username
+
+    if not jenkins_hostname:
+        raise CLIError(
+            'Jenkins host name does not exist in projectSettings.json')
+
+    local_port = _get_available_local_port()
+    local_address = 'http://127.0.0.1:{}'.format(local_port)
+    utils.writeline('Jenkins Dashboard available at: {}'.format(local_address))
+    utils.writeline('Press CTRL+C to close the tunnel')
+    _wait_then_open_async(local_address)
+    with SSHTunnelForwarder((jenkins_hostname, 22),
+                            ssh_username=admin_username,
+                            ssh_password=admin_password,
+                            remote_bind_address=('127.0.0.1', 8080),
+                            local_bind_address=('0.0.0.0', local_port)):
+        try:
+            while True:
+                sleep(1)
+        except KeyboardInterrupt:
+            pass
 
 
 def create_project(resource_group, name, location):
@@ -78,7 +114,8 @@ def create_project(resource_group, name, location):
     storage_account_keys = storage_client.storage_accounts.list_keys(
         resource_group, storage_account_name).keys
     storage_account_key = storage_account_keys[0]
-    utils.writeline('Storage account "{}" created.'.format(storage_account_name))
+    utils.writeline(
+        'Storage account "{}" created.'.format(storage_account_name))
 
     # 3. Create ACR (resource_group, location)
     utils.writeline('Creating Azure container registry ...')
@@ -107,13 +144,15 @@ def create_project(resource_group, name, location):
                                 location=location,
                                 orchestrator_type='kubernetes')
     acs_deployment.wait()
-    utils.writeline('Kubernetes cluster "{}" created.'.format(kube_cluster_name))
+    utils.writeline(
+        'Kubernetes cluster "{}" created.'.format(kube_cluster_name))
 
-    # 5. Set Kubernetes config 
+    # 5. Set Kubernetes config
     utils.writeline('Setting Kubernetes config ...')
     k8s_get_credentials(name=kube_cluster_name,
-                                resource_group_name=resource_group)
-    utils.writeline('Kubernetes config "{}" created.'.format(kube_cluster_name))
+                        resource_group_name=resource_group)
+    utils.writeline(
+        'Kubernetes config "{}" created.'.format(kube_cluster_name))
 
     # 6. Store the settings in projectSettings.json
     # TODO: We should create service principal and pass it to the
@@ -152,13 +191,46 @@ def create_continuous_deployment(remote_access_token):  # pylint: disable=unused
     # TODO: Spinnker won't trigger pipeline if ACR is entire empty
     # TODO: how do we provide a correct service port when configuring Spinnaker
     jenkins_hostname = '{}.{}.cloudapp.azure.com'.format(
-         jenkins_resource.dns_prefix, jenkins_resource.location)
+        jenkins_resource.dns_prefix, jenkins_resource.location)
     project_settings.jenkins_hostname = jenkins_hostname
     utils.writeline('Jenkins hostname: {}'.format(jenkins_hostname))
 
     utils.writeline('Spinnaker hostname: {}'.format(spinnaker_hostname))
     project_settings.spinnaker_hostname = spinnaker_hostname
     utils.writeline('Done.')
+
+def _wait_then_open(url):
+    """
+    Waits for a bit then opens a URL. Useful for
+    waiting for a proxy to come up, and then open the URL.
+    """
+    for _ in range(1, 10):
+        try:
+            urlopen(url)
+        except URLError:
+            sleep(1)
+        break
+    webbrowser.open_new_tab(url)
+
+
+def _wait_then_open_async(url):
+    """
+    Tries to open the URL in the background thread.
+    """
+    thread = threading.Thread(target=_wait_then_open, args=({url}))
+    thread.daemon = True
+    thread.start()
+
+def _get_available_local_port():
+    """
+    Gets a random, available local port
+    """
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(('', 0))
+    s.listen(1)
+    port = s.getsockname()[1]
+    s.close()
+    return port
 
 
 def _get_service_principal():
@@ -315,18 +387,21 @@ def _configure_cluster():  # pylint: disable=too-many-statements
     try:
         # Validate if az project exists
         if not os.path.exists(project_settings.settings_file):
-            utils.writeline("projectResource.json not found, please run 'az project create' to create resources.")
+            utils.writeline(
+                "projectResource.json not found, please run 'az project create' to create resources.")
             sys.exit(1)
 
-        #Setting the values
+        # Setting the values
         dns_prefix = project_settings.cluster_name
         location = project_settings.location
         user_name = project_settings.admin_username
-        acr_server = project_settings.container_registry_url.replace("https://", "")
+        acr_server = project_settings.container_registry_url.replace(
+            "https://", "")
 
         # Validate kubectl context
         if not _validate_kubectl_context(dns_prefix):
-            utils.writeline("kubectl context not set to {0}, please run 'az acs kubernetes get-credentials' to set it.".format(dns_prefix))
+            utils.writeline(
+                "kubectl context not set to {0}, please run 'az acs kubernetes get-credentials' to set it.".format(dns_prefix))
             sys.exit(1)
 
         if _cluster_configured(dns_prefix, user_name):
@@ -338,7 +413,8 @@ def _configure_cluster():  # pylint: disable=too-many-statements
         utils.writeline('Configuring Kubernetes cluster ...')
 
         innerloop_client_path = _get_innerloop_home_path()
-        kubernetes_path = os.path.join(innerloop_client_path, 'setup', 'Kubernetes')
+        kubernetes_path = os.path.join(
+            innerloop_client_path, 'setup', 'Kubernetes')
 
         # Get resource group
         creds = _get_creds_from_master(dns_prefix, location, user_name)
@@ -555,7 +631,6 @@ def _enumerate_k8_agents(innerloop_client_path):
         raise CLIError(error)
 
 
-
 def _deploy_secrets_share_k8(acr_server, resource_group, dns_prefix, client_id, client_secret, location, user_name):
     """
     Install cluster/registry secrets and creates share on the file storage.
@@ -610,7 +685,6 @@ def _install_k8_secret(acr, dns_prefix, user_name, password, location, cluster_u
         raise CLIError(error)
 
 
-
 def _install_k8_shares(resource_group, dns_prefix):
     """
     Creates/ensures the shares in the file storage.
@@ -622,7 +696,8 @@ def _install_k8_shares(resource_group, dns_prefix):
     scf = storage_client_factory()
 
     try:
-        keys_list_json = scf.storage_accounts.list_keys(resource_group, config_storage).keys  # pylint: disable=no-member
+        keys_list_json = scf.storage_accounts.list_keys(
+            resource_group, config_storage).keys  # pylint: disable=no-member
         config_storage_key = list(keys_list_json)[0].value
     except Exception as error:
         logger.debug(error)
@@ -630,7 +705,8 @@ def _install_k8_shares(resource_group, dns_prefix):
             "Can't get storage account key for {0}".format(config_storage))
 
     try:
-        keys_list_json = scf.storage_accounts.list_keys(resource_group, workspace_storage).keys  # pylint: disable=no-member
+        keys_list_json = scf.storage_accounts.list_keys(
+            resource_group, workspace_storage).keys  # pylint: disable=no-member
         workspace_storage_key = list(keys_list_json)[0].value
     except Exception as error:
         logger.debug(error)
@@ -654,10 +730,12 @@ def _install_k8_shares(resource_group, dns_prefix):
         connect_output_file.write(connect_template)
 
     # Ensure 'cfgs' share exists in configStorage
-    check_call("az storage share create -n 'cfgs' --account-name {0} --account-key {1}".format(config_storage, config_storage_key), shell=True)
+    check_call("az storage share create -n 'cfgs' --account-name {0} --account-key {1}".format(
+        config_storage, config_storage_key), shell=True)
 
     # Ensure 'mindaro' share exists in configStorage
-    check_call("az storage share create -n 'mindaro' --account-name {0} --account-key {1}".format(workspace_storage, workspace_storage_key), shell=True)
+    check_call("az storage share create -n 'mindaro' --account-name {0} --account-key {1}".format(
+        workspace_storage, workspace_storage_key), shell=True)
 
     return workspace_storage_key
 
@@ -673,7 +751,7 @@ def to_base64(string_value):
 def _execute_command(command, ignore_failure=False):
     """
     Executes a command.
-    """ 
+    """
     with Popen(command, shell=True, stdout=PIPE, stderr=PIPE, bufsize=1, universal_newlines=True) as process:
         for line in process.stdout:
             logger.info(line)
@@ -776,7 +854,6 @@ def _prepare_arm_k8(dns_prefix):
         raise CLIError(error)
 
 
-
 def _initialize_workspace(
         dns_prefix,
         storage_account_name,
@@ -848,7 +925,6 @@ def _service_run():
     Run implicitly builds the service in the cluster and starts the service.
     """
     run_innerloop_command('run -t')
-
 
 
 def run_innerloop_command(*args):
