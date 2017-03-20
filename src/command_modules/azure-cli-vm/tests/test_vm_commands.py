@@ -1656,10 +1656,10 @@ class VMSSVMsScenarioTest(ResourceGroupVCRTestBase):
     def test_vmss_vms(self):
         self.execute()
 
-    def _check_vms_power_state(self, expected_power_state):
+    def _check_vms_power_state(self, expected_power_states):
         for iid in self.instance_ids:
-            self.cmd('vmss get-instance-view --resource-group {} --name {} --instance-id {}'.format(self.resource_group, self.ss_name, iid),
-                     checks=JMESPathCheck('statuses[1].code', expected_power_state))
+            result = self.cmd('vmss get-instance-view --resource-group {} --name {} --instance-id {}'.format(self.resource_group, self.ss_name, iid))
+            self.assertTrue(result['statuses'][1]['code'] in expected_power_states)
 
     def body(self):
         instance_list = self.cmd('vmss list-instances --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
@@ -1675,14 +1675,13 @@ class VMSSVMsScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('instanceId', str(self.instance_ids[0]))
         ])
         self.cmd('vmss restart --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name))
-        self._check_vms_power_state('PowerState/running')
-        self._check_vms_power_state('PowerState/running')
+        self._check_vms_power_state(['PowerState/running', 'PowerState/starting'])
         self.cmd('vmss stop --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name))
-        self._check_vms_power_state('PowerState/stopped')
+        self._check_vms_power_state(['PowerState/stopped'])
         self.cmd('vmss start --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name))
-        self._check_vms_power_state('PowerState/running')
+        self._check_vms_power_state(['PowerState/running', 'PowerState/starting'])
         self.cmd('vmss deallocate --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name))
-        self._check_vms_power_state('PowerState/deallocated')
+        self._check_vms_power_state(['PowerState/deallocated'])
         self.cmd('vmss delete-instances --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name))
         self.cmd('vmss list-instances --resource-group {} --name {}'.format(self.resource_group, self.ss_name))
 
