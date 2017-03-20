@@ -43,7 +43,8 @@ from azure.cli.core._environment import get_config_dir
 from azure.cli.command_modules.storage._factory import storage_client_factory
 from azure.cli.command_modules.acs.custom import (
     acs_create,
-    k8s_get_credentials)
+    k8s_get_credentials,
+    k8s_install_cli)
 from sshtunnel import SSHTunnelForwarder
 
 logger = azlogging.get_az_logger(__name__)  # pylint: disable=invalid-name
@@ -129,7 +130,8 @@ def create_project(resource_group, name, location):
                                                               storage_account_name,
                                                               storage_account_key)
                                                       ))
-    utils.writeline('Azure container registry "{}" created.'.format(acr_name))
+    utils.writeline(
+        'Azure container registry "{}" created.'.format(acr_name))
 
     # 4. Create Kubernetes cluster
     utils.writeline('Creating Kubernetes cluster ...')
@@ -147,14 +149,18 @@ def create_project(resource_group, name, location):
     utils.writeline(
         'Kubernetes cluster "{}" created.'.format(kube_cluster_name))
 
-    # 5. Set Kubernetes config
+    # 5. Install kubectl
+    utils.writeline('Installing kubectl ...')
+    k8s_install_cli()
+
+    # 6. Set Kubernetes config 
     utils.writeline('Setting Kubernetes config ...')
     k8s_get_credentials(name=kube_cluster_name,
                         resource_group_name=resource_group)
     utils.writeline(
         'Kubernetes config "{}" created.'.format(kube_cluster_name))
 
-    # 6. Store the settings in projectSettings.json
+    # 7. Store the settings in projectSettings.json
     # TODO: We should create service principal and pass it to the
     # acs_create when creating the Kubernetes cluster
     client_id, client_secret = _get_service_principal()
