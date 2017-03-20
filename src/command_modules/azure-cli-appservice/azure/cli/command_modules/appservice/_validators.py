@@ -6,7 +6,7 @@
 from azure.cli.core._util import CLIError
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
-def _validate_plan_arg(namespace):
+def validate_plan_arg(namespace):
     from ._client_factory import web_client_factory
     namespace.create_plan = False
     if namespace.plan:
@@ -21,7 +21,7 @@ def _validate_plan_arg(namespace):
     else:
         client = web_client_factory()
         result = client.app_service_plans.list_by_resource_group(namespace.resource_group_name)
-        existing_plan = next((x for x in result if _match_plan_location(x, namespace.location) and
+        existing_plan = next((x for x in result if match_plan_location(x, namespace.location) and
                               namespace.is_linux == (x.kind == 'linux')), None)
         if existing_plan:
             namespace.plan = existing_plan.id
@@ -36,7 +36,7 @@ def _validate_plan_arg(namespace):
 
 
 
-def _match_plan_location(plan, location):
+def match_plan_location(plan, location):
     # the problem with appservice is it uses display name, rather canonical name
     # so we have to hack it
     return plan.location.replace(' ', '').lower() == location.lower()
@@ -44,4 +44,4 @@ def _match_plan_location(plan, location):
 
 def process_webapp_create_namespace(namespace):
     get_default_location_from_resource_group(namespace)
-    _validate_plan_arg(namespace)
+    validate_plan_arg(namespace)

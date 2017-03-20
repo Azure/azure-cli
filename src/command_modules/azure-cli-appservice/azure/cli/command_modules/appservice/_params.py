@@ -64,7 +64,7 @@ register_cli_argument('appservice web create', 'name', options_list=('--name', '
 register_cli_argument('appservice web create', 'create_plan', ignore_type)
 register_cli_argument('appservice web create', 'plan', arg_group='AppService Plan',
                       options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
-                      help='Appservice plan name. Can also reference an existing subnet by ID. If omitted, an appropriate plan in the same resource group will be selected automatically, or a new one will be created.')
+                      help='Appservice plan name. Can also reference an existing plan by ID. If omitted, an appropriate plan in the same resource group will be selected automatically, or a new one will be created.')
 register_cli_argument('appservice web create', 'sku', arg_group='AppService Plan',
                       help='{}. Default: S1'.format(_SKU_HELP), **enum_choice_list(_SKU_LIST))
 register_cli_argument('appservice web create', 'number_of_workers', help='Number of workers to be allocated. Default: 1', type=int, arg_group='AppService Plan')
