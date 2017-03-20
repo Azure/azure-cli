@@ -723,10 +723,13 @@ def process_vm_create_namespace(namespace):
 
 # region VMSS Create Validators
 
+def _get_vmss_create_instance_threshold():
+    return 100
+
 
 def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
 
-    INSTANCE_THRESHOLD = 100
+    INSTANCE_THRESHOLD = _get_vmss_create_instance_threshold()
 
     # convert the single_placement_group to boolean for simpler logic beyond
     if namespace.single_placement_group is None:
@@ -738,7 +741,21 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
         raise CLIError(
             '--load-balancer is not applicable when --single-placement-group is turned off.')
 
-    if namespace.instance_count > INSTANCE_THRESHOLD:
+    if namespace.load_balancer and namespace.application_gateway:
+        raise CLIError('incorrect usage: --load-balancer NAME_OR_ID | '
+                       '--application-gateway NAME_OR_ID')
+
+    if namespace.instance_count > INSTANCE_THRESHOLD and namespace.load_balancer:
+        raise CLIError(
+            '--load-balancer cannot be used with --instance_count is > {}'.format(
+                INSTANCE_THRESHOLD))
+
+    balancer_type = namespace.load_balancer or namespace.application_gateway
+    if not balancer_type:
+        balancer_type = 'loadBalancer' if namespace.instance_count <= INSTANCE_THRESHOLD \
+            else 'applicationGateway'
+
+    if balancer_type == 'applicationGateway':
         # AppGateway frontend
         required = ['gateway_subnet_address_prefix']
         forbidden = ['nat_pool_name', 'load_balancer']
@@ -755,7 +772,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
             namespace.app_gateway_type = None
         elif namespace.application_gateway is None:
             namespace.app_gateway_type = 'new'
-    else:
+    elif balancer_type == 'loadBalancer':
         # LoadBalancer frontend
         required = []
         forbidden = ['gateway_subnet_address_prefix', 'application_gateway']
