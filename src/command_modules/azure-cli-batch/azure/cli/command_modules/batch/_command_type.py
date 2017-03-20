@@ -582,7 +582,7 @@ class AzureBatchDataPlaneCommand(object):
                 raise CLIError(ex)
         table_transformer = None
         try:
-            transform_func = '_'.join(name.split()[1:])
+            transform_func = '_'.join(name.split()[1:]).replace('-', '_')
             table_transformer = getattr(transformers, transform_func + "_table_format")
         except AttributeError:
             pass
