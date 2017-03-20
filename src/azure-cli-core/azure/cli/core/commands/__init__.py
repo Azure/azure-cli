@@ -327,7 +327,7 @@ def _patch_mgmt_operation(operation):
     """ Patch the unversioned mgmt operations to include the appropriate API version for the
         resource type in question.
         e.g. Converts azure.mgmt.storage.operations.storage_accounts_operations to
-                      azure.mgmt.storage.v_2016_12_01.operations.storage_accounts_operations
+                      azure.mgmt.storage.v2016_12_01.operations.storage_accounts_operations
     """
     for rt in ResourceType:
         if operation.startswith(rt.sdk_module):
