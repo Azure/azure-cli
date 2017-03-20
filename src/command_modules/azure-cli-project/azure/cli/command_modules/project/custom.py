@@ -151,9 +151,13 @@ def create_continuous_deployment(remote_access_token):  # pylint: disable=unused
 
     # TODO: Spinnker won't trigger pipeline if ACR is entire empty
     # TODO: how do we provide a correct service port when configuring Spinnaker
-    utils.writeline('Jenkins hostname: {}.{}.cloudapp.azure.com'.format(
-        jenkins_resource.dns_prefix, jenkins_resource.location))
+    jenkins_hostname = '{}.{}.cloudapp.azure.com'.format(
+         jenkins_resource.dns_prefix, jenkins_resource.location)
+    project_settings.jenkins_hostname = jenkins_hostname
+    utils.writeline('Jenkins hostname: {}'.format(jenkins_hostname))
+
     utils.writeline('Spinnaker hostname: {}'.format(spinnaker_hostname))
+    project_settings.spinnaker_hostname = spinnaker_hostname
     utils.writeline('Done.')
 
 

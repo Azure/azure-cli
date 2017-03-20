@@ -176,3 +176,31 @@ class Project(object):
         Sets the location
         """
         self._set_property_value('location', value)
+
+    @property
+    def jenkins_hostname(self):
+        """
+        Gets the Jenkins host name
+        """
+        return self._get_property_value('jenkins_hostname')
+
+    @jenkins_hostname.setter
+    def jenkins_hostname(self, value):
+        """
+        Sets the Jenkins host name
+        """
+        self._set_property_value('jenkins_hostname', value)
+
+    @property
+    def spinnaker_hostname(self):
+        """
+        Gets the Spinnaker host name
+        """
+        return self._get_property_value('spinnaker_hostname')
+
+    @spinnaker_hostname.setter
+    def spinnaker_hostname(self, value):
+        """
+        Sets the Spinnaker host name
+        """
+        self._set_property_value('spinnaker_hostname', value)
