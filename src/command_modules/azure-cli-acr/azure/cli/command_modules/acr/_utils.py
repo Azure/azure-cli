@@ -211,3 +211,7 @@ def random_storage_account_name(registry_name):
         storage_account_name = ''.join([prefix, time_stamp_suffix])[:24]
         if client.check_name_availability(storage_account_name).name_available: #pylint: disable=no-member
             return storage_account_name
+
+def get_location_from_resource_group(resource_group_name):
+    group = get_arm_service_client().resource_groups.get(resource_group_name)
+    return group.location #pylint: disable=no-member

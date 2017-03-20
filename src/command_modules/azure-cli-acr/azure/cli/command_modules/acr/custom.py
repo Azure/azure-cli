@@ -16,7 +16,8 @@ from ._utils import (
     get_access_key_by_storage_account_name,
     arm_deploy_template_new_storage,
     arm_deploy_template_existing_storage,
-    random_storage_account_name
+    random_storage_account_name,
+    get_location_from_resource_group
 )
 
 import azure.cli.core.azlogging as azlogging
@@ -43,20 +44,22 @@ def acr_list(resource_group_name=None):
 
 def acr_create(registry_name, #pylint: disable=too-many-arguments
                resource_group_name,
-               location,
                sku,
+               location=None,
                storage_account_name=None,
                admin_enabled='false',
                deployment_name=None):
     '''Creates a container registry.
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group
-    :param str location: The name of location
     :param str sku: The SKU of the container registry
+    :param str location: The name of location
     :param str storage_account_name: The name of storage account
     :param str admin_enabled: Indicates whether the admin user is enabled
     :param str deployment_name: The name of the deployment
     '''
+    if location is None:
+        location = get_location_from_resource_group(resource_group_name)
     client = get_acr_service_client().registries
     admin_user_enabled = admin_enabled == 'true'
 

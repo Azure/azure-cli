@@ -28,21 +28,21 @@ Create a container registry
         az acr create: Creates a container registry.
 
     Arguments
-        --location -l       [Required]: Location. You can configure the default location using 'az
-                                        configure --defaults location=<location>'.
         --name -n           [Required]: The name of the container registry.
         --resource-group -g [Required]: Name of resource group. You can configure the default group
                                         using 'az configure --defaults group=<name>'.
         --sku               [Required]: The SKU of the container registry.  Allowed values: Basic.
         --admin-enabled               : Indicates whether the admin user is enabled.  Allowed values:
                                         false, true.
+        --location -l                 : Location. You can configure the default location using 'az
+                                        configure --defaults location=<location>'.
         --storage-account-name        : Default: A new storage account will be created. Provide the name
                                         of an existing storage account if you're recreating a container
                                         registry over a previous registry created storage account.
 
     Examples
         Create a container registry with a new storage account.
-            az acr create -n MyRegistry -g MyResourceGroup -l southcentralus --sku Basic
+            az acr create -n MyRegistry -g MyResourceGroup --sku Basic
 
 Delete a container registry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
