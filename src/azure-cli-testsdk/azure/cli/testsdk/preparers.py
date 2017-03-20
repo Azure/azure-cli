@@ -5,6 +5,7 @@
 
 import inspect
 import functools
+import os
 
 from .base import ScenarioTest, execute
 from .exceptions import CliTestError
@@ -104,20 +105,31 @@ class SingleValueReplacer(RecordingProcessor):
 # Resource Group Preparer and its shorthand decorator
 
 class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest.rg', parameter_name='resource_group',
-                 parameter_name_for_location='resource_group_location', location='westus'):
+    def __init__(self, name_prefix='clitest.rg',  # pylint: disable=too-many-arguments
+                 parameter_name='resource_group',
+                 parameter_name_for_location='resource_group_location', location='westus',
+                 dev_setting_name='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME',
+                 dev_setting_location='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_LOCATION'):
         super(ResourceGroupPreparer, self).__init__(name_prefix, 90)
         self.location = location
         self.parameter_name = parameter_name
         self.parameter_name_for_location = parameter_name_for_location
 
+        self.dev_setting_name = os.environ.get(dev_setting_name, None)
+        self.dev_setting_location = os.environ.get(dev_setting_location, location)
+
     def create_resource(self, name, **kwargs):
-        template = 'az group create --location {} --name {} --tag use=az-test'
-        execute(template.format(self.location, name))
-        return {self.parameter_name: name, self.parameter_name_for_location: self.location}
+        if self.dev_setting_name:
+            return {self.parameter_name: self.dev_setting_name,
+                    self.parameter_name_for_location: self.dev_setting_location}
+        else:
+            template = 'az group create --location {} --name {} --tag use=az-test'
+            execute(template.format(self.location, name))
+            return {self.parameter_name: name, self.parameter_name_for_location: self.location}
 
     def remove_resource(self, name, **kwargs):
-        execute('az group delete --name {} --yes --no-wait'.format(name))
+        if not self.dev_setting_name:
+            execute('az group delete --name {} --yes --no-wait'.format(name))
 
 
 # Storage Account Preparer and its shorthand decorator
@@ -126,7 +138,7 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self,  # pylint: disable=too-many-arguments
                  name_prefix='clitest', sku='Standard_LRS', location='westus',
                  parameter_name='storage_account', resource_group_parameter_name='resource_group',
-                 skip_delete=True):
+                 skip_delete=True, dev_setting_name='AZURE_CLI_TEST_DEV_STORAGE_ACCOUNT_NAME'):
         super(StorageAccountPreparer, self).__init__(name_prefix, 24)
         self.location = location
         self.sku = sku
@@ -134,14 +146,19 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
         self.skip_delete = skip_delete
         self.parameter_name = parameter_name
 
+        self.dev_setting_name = os.environ.get(dev_setting_name, None)
+
     def create_resource(self, name, **kwargs):
-        group = self._get_resource_group(**kwargs)
-        template = 'az storage account create -n {} -g {} -l {} --sku {}'
-        execute(template.format(name, group, self.location, self.sku))
-        return {self.parameter_name: name}
+        if not self.dev_setting_name:
+            group = self._get_resource_group(**kwargs)
+            template = 'az storage account create -n {} -g {} -l {} --sku {}'
+            execute(template.format(name, group, self.location, self.sku))
+            return {self.parameter_name: name}
+        else:
+            return {self.parameter_name: self.dev_setting_name}
 
     def remove_resource(self, name, **kwargs):
-        if not self.skip_delete:
+        if not self.skip_delete and not self.dev_setting_name:
             group = self._get_resource_group(**kwargs)
             execute('az storage account delete -n {} -g {} --yes'.format(name, group))
 

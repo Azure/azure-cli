@@ -18,8 +18,12 @@ class JMESPathCheck(object):  # pylint: disable=too-few-public-methods
         actual_result = jmespath.search(self._query, json_value,
                                         jmespath.Options(collections.OrderedDict))
         if not actual_result == self._expected_result:
-            raise JMESPathCheckAssertionError(self._query, self._expected_result, actual_result,
-                                              execution_result.output)
+            if actual_result:
+                raise JMESPathCheckAssertionError(self._query, self._expected_result, actual_result,
+                                                  execution_result.output)
+            else:
+                raise JMESPathCheckAssertionError(self._query, self._expected_result, 'None',
+                                                  execution_result.output)
 
 
 class JMESPathCheckExists(object):  # pylint: disable=too-few-public-methods

@@ -48,6 +48,19 @@ class SubscriptionRecordingProcessor(RecordingProcessor):
                       val)
 
 
+class LargeRequestBodyProcessor(RecordingProcessor):
+    def __init__(self, max_request_body=128):
+        self._max_request_body = max_request_body
+
+    def process_request(self, request):
+        if request.body and len(request.body) > self._max_request_body * 1024:
+            request.body = '!!! The request body has been omitted from the recording because its ' \
+                           'size {} is larger than {}KB. !!!'.format(len(request.body),
+                                                                     self._max_request_body)
+
+        return request
+
+
 class OAuthRequestResponsesFilter(RecordingProcessor):
     """Remove oauth authentication requests and responses from recording."""
 

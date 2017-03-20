@@ -19,7 +19,7 @@ from .patches import (patch_load_cached_subscriptions, patch_main_exception_hand
 from .exceptions import CliExecutionError
 from .const import (ENV_LIVE_TEST, ENV_SKIP_ASSERT, ENV_TEST_DIAGNOSE, MOCKED_SUBSCRIPTION_ID)
 from .recording_processors import (SubscriptionRecordingProcessor, OAuthRequestResponsesFilter,
-                                   GeneralNameReplacer)
+                                   GeneralNameReplacer, LargeRequestBodyProcessor)
 from .utilities import create_random_name
 
 
@@ -42,6 +42,7 @@ class ScenarioTest(unittest.TestCase):  # pylint: disable=too-many-instance-attr
         self.name_replacer = GeneralNameReplacer()
         self.recording_processors = [SubscriptionRecordingProcessor(MOCKED_SUBSCRIPTION_ID),
                                      OAuthRequestResponsesFilter(),
+                                     LargeRequestBodyProcessor(),
                                      self.name_replacer]
 
         test_file_path = inspect.getfile(self.__class__)
@@ -65,6 +66,7 @@ class ScenarioTest(unittest.TestCase):  # pylint: disable=too-many-instance-attr
         self.skip_assert = os.environ.get(ENV_SKIP_ASSERT, None) == 'True'
         self.in_recording = live_test or not os.path.exists(self.recording_file)
         self.test_resources_count = 0
+        self.original_env = os.environ.copy()
 
     def setUp(self):
         super(ScenarioTest, self).setUp()
@@ -81,6 +83,9 @@ class ScenarioTest(unittest.TestCase):  # pylint: disable=too-many-instance-attr
             patch_long_run_operation_delay(self)
             patch_load_cached_subscriptions(self)
             patch_retrieve_token_for_user(self)
+
+    def tearDown(self):
+        os.environ = self.original_env
 
     def create_random_name(self, prefix, length):
         self.test_resources_count += 1
@@ -115,6 +120,14 @@ class ScenarioTest(unittest.TestCase):  # pylint: disable=too-many-instance-attr
                 c(result)
 
         return result
+
+    @classmethod
+    def set_env(cls, key, val):
+        os.environ[key] = val
+
+    @classmethod
+    def pop_env(cls, key):
+        return os.environ.pop(key, None)
 
     def _process_request_recording(self, request):
         if not self.in_recording:
