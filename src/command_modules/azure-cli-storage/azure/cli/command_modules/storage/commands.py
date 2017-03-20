@@ -47,8 +47,6 @@ def _dont_fail_not_exist(ex):
         raise ex
 
 
-transform_keys_result = lambda x: x.keys if hasattr(x, 'keys') else x  # noqa: E731 lambda vs def
-
 # storage account commands
 factory = lambda kwargs: storage_client_factory().storage_accounts  # noqa: E731 lambda vs def
 cli_command(__name__, 'storage account check-name', mgmt_path + 'check_name_availability', factory)
@@ -57,8 +55,8 @@ cli_command(__name__, 'storage account show', mgmt_path + 'get_properties', fact
 cli_command(__name__, 'storage account list', custom_path + 'list_storage_accounts')
 cli_command(__name__, 'storage account show-usage', custom_path + 'show_storage_account_usage')
 cli_command(__name__, 'storage account show-connection-string', custom_path + 'show_storage_account_connection_string')
-cli_command(__name__, 'storage account keys renew', mgmt_path + 'regenerate_key', factory, transform=transform_keys_result)
-cli_command(__name__, 'storage account keys list', mgmt_path + 'list_keys', factory, transform=transform_keys_result)
+cli_command(__name__, 'storage account keys renew', mgmt_path + 'regenerate_key', factory, transform=lambda x: getattr(x, 'keys', x))
+cli_command(__name__, 'storage account keys list', mgmt_path + 'list_keys', factory, transform=lambda x: getattr(x, 'keys', x))
 
 cli_command(__name__, 'storage account create', custom_nonce_path + 'create_storage_account')
 if get_api_version(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS) in ['2016-12-01']:
