@@ -9,7 +9,8 @@ import socket
 import os
 
 from azure.cli.core.commands.arm import is_valid_resource_id, resource_id
-from azure.cli.core.commands.validators import validate_tags
+from azure.cli.core.commands.validators import \
+    (validate_tags, get_default_location_from_resource_group)
 from azure.cli.core._util import CLIError
 from azure.cli.core.commands.template_create import get_folded_parameter_validator
 from azure.cli.core.commands.validators import SPECIFIED_SENTINEL
@@ -153,14 +154,6 @@ def validate_inbound_nat_rule_name_or_id(namespace):
             raise CLIError('Please specify --lb-name when specifying an inbound NAT rule name.')
         namespace.inbound_nat_rule = _generate_lb_subproperty_id(
             namespace, 'inboundNatRules', rule_name)
-
-def validate_location(namespace):
-    if not namespace.location:
-        from azure.mgmt.resource.resources import ResourceManagementClient
-        from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        resource_client = get_mgmt_service_client(ResourceManagementClient)
-        rg = resource_client.resource_groups.get(namespace.resource_group_name)
-        namespace.location = rg.location  # pylint: disable=no-member
 
 def validate_metadata(namespace):
     if namespace.metadata:
@@ -438,7 +431,7 @@ def process_lb_frontend_ip_namespace(namespace):
 
 def process_local_gateway_create_namespace(namespace):
     ns = namespace
-    validate_location(ns)
+    get_default_location_from_resource_group(ns)
     use_bgp_settings = any([ns.asn or ns.bgp_peering_address or ns.peer_weight])
     if use_bgp_settings and (not ns.asn or not ns.bgp_peering_address):
         raise ValueError(
@@ -446,7 +439,7 @@ def process_local_gateway_create_namespace(namespace):
 
 def process_nic_create_namespace(namespace):
 
-    validate_location(namespace)
+    get_default_location_from_resource_group(namespace)
 
     # process folded parameters
     get_subnet_validator(has_type_field=False)(namespace)
@@ -455,12 +448,12 @@ def process_nic_create_namespace(namespace):
 
 
 def process_public_ip_create_namespace(namespace):
-    validate_location(namespace)
+    get_default_location_from_resource_group(namespace)
 
 
 def process_route_table_create_namespace(namespace):
     from azure.mgmt.network.models import RouteTable
-    validate_location(namespace)
+    get_default_location_from_resource_group(namespace)
     validate_tags(namespace)
     namespace.parameters = RouteTable(location=namespace.location, tags=namespace.tags)
 
@@ -520,7 +513,7 @@ def process_tm_endpoint_create_namespace(namespace):
 
 def process_vnet_create_namespace(namespace):
 
-    validate_location(namespace)
+    get_default_location_from_resource_group(namespace)
 
     if namespace.subnet_prefix and not namespace.subnet_name:
         raise ValueError('incorrect usage: --subnet-name NAME [--subnet-prefix PREFIX]')
@@ -536,7 +529,7 @@ def process_vnet_create_namespace(namespace):
 
 def process_vnet_gateway_create_namespace(namespace):
     ns = namespace
-    validate_location(ns)
+    get_default_location_from_resource_group(ns)
     enable_bgp = any([ns.asn, ns.bgp_peering_address, ns.peer_weight])
     if enable_bgp and not ns.asn:
         raise ValueError(
@@ -544,7 +537,7 @@ def process_vnet_gateway_create_namespace(namespace):
 
 def process_vpn_connection_create_namespace(namespace):
 
-    validate_location(namespace)
+    get_default_location_from_resource_group(namespace)
 
     args = [a for a in [namespace.express_route_circuit2,
                         namespace.local_gateway2,

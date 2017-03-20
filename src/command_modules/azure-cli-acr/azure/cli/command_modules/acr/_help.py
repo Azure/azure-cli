@@ -10,16 +10,19 @@ from azure.cli.core.help_files import helps
 helps['acr'] = """
             type: group
             short-summary: Manage Azure container registries.
+            long-summary: These commands are in preview.
             """
 
 helps['acr credential'] = """
             type: group
             short-summary: Manage administrator login credentials for Azure container registries.
+            long-summary: These commands are in preview.
             """
 
 helps['acr repository'] = """
             type: group
             short-summary: Manage repositories for Azure container registries.
+            long-summary: These commands are in preview.
             """
 
 helps['acr list'] = """

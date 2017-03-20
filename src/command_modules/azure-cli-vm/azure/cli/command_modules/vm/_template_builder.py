@@ -253,7 +253,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         name, location, tags, size, storage_profile, nics, admin_username,
         availability_set_id=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
         image_reference=None, os_disk_name=None, custom_image_os_type=None,
-        storage_caching=None, storage_sku=None,
+        os_caching=None, data_caching=None, storage_sku=None,
         os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
         attach_os_disk=None, data_disk_sizes_gb=None, image_data_disks=None,
         custom_data=None, secrets=None):
@@ -296,7 +296,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                 'osDisk': {
                     'createOption': 'fromImage',
                     'name': os_disk_name,
-                    'caching': storage_caching,
+                    'caching': os_caching,
                     'osType': custom_image_os_type,
                     'image': {'uri': image_reference},
                     'vhd': {'uri': os_vhd_uri}
@@ -306,7 +306,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                 'osDisk': {
                     'createOption': 'fromImage',
                     'name': os_disk_name,
-                    'caching': storage_caching,
+                    'caching': os_caching,
                     'vhd': {'uri': os_vhd_uri}
                 },
                 'imageReference': {
@@ -328,7 +328,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                 'osDisk': {
                     'createOption': 'fromImage',
                     'name': os_disk_name,
-                    'caching': storage_caching,
+                    'caching': os_caching,
                     'managedDisk': {'storageAccountType': storage_sku}
                 },
                 'imageReference': {
@@ -342,7 +342,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                 'osDisk': {
                     'createOption': 'fromImage',
                     'name': os_disk_name,
-                    'caching': storage_caching,
+                    'caching': os_caching,
                     'managedDisk': {'storageAccountType': storage_sku}
                 },
                 "imageReference": {
@@ -361,7 +361,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         }
         profile = storage_profiles[storage_profile.name]
         return _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
-                                 storage_caching, storage_sku)
+                                 data_caching, storage_sku)
 
     vm_properties = {
         'hardwareProfile': {'vmSize': size},
@@ -389,13 +389,14 @@ def build_vm_resource(  # pylint: disable=too-many-locals
 
 
 def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
-                      storage_caching, storage_sku):
+                      data_caching, storage_sku):
     if data_disk_sizes_gb is not None:
         profile['dataDisks'] = []
         for image_data_disk in image_data_disks or []:
             profile['dataDisks'].append({
                 'lun': image_data_disk.lun,
                 'createOption': "fromImage",
+                'caching': data_caching
             })
         lun = max([d.lun for d in image_data_disks]) + 1 if image_data_disks else 0
         for size in data_disk_sizes_gb:
@@ -403,7 +404,7 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
                 'lun': lun,
                 'createOption': "empty",
                 'diskSizeGB': int(size),
-                'caching': storage_caching,
+                'caching': data_caching,
                 'managedDisk': {'storageAccountType': storage_sku}
             })
             lun = lun + 1
@@ -498,7 +499,8 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
                         vm_sku, instance_count, ip_config_name, nic_name, subnet_id,
                         admin_username, authentication_type,
                         storage_profile, os_disk_name,
-                        storage_caching, storage_sku, data_disk_sizes_gb, image_data_disks, os_type,
+                        os_caching, data_caching, storage_sku, data_disk_sizes_gb,
+                        image_data_disks, os_type,
                         image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
                         backend_address_pool_id=None, inbound_nat_pool_id=None,
@@ -526,7 +528,7 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
     if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
         storage_properties['osDisk'] = {
             'name': os_disk_name,
-            'caching': storage_caching,
+            'caching': os_caching,
             'createOption': 'FromImage',
         }
 
@@ -539,10 +541,10 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
             })
         else:
             storage_properties['osDisk']['vhdContainers'] = "[variables('vhdContainers')]"
-    elif storage_profile in [StorageProfile.ManagedPirImage, StorageProfile.ManagedPirImage]:
+    elif storage_profile in [StorageProfile.ManagedPirImage, StorageProfile.ManagedCustomImage]:
         storage_properties['osDisk'] = {
             'createOption': 'FromImage',
-            'caching': storage_caching,
+            'caching': os_caching,
             'managedDisk': {'storageAccountType': storage_sku}
         }
 
@@ -559,7 +561,7 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
         }
 
     storage_profile = _build_data_disks(storage_properties, data_disk_sizes_gb,
-                                        image_data_disks, storage_caching,
+                                        image_data_disks, data_caching,
                                         storage_sku)
 
     # Build OS Profile

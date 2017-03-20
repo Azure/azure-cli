@@ -259,8 +259,8 @@ class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
                      self.resource_group, self.location, self.vm_name))
         self.cmd('vm stop -g {} -n {}'.format(self.resource_group, self.vm_name))
         # Should be able to generalize the VM after it has been stopped
-        self.cmd('vm generalize -g {} --n {}'.format(self.resource_group, self.vm_name), checks=NoneCheck())
-        vm = self.cmd('vm show -g {} --n {}'.format(self.resource_group, self.vm_name))
+        self.cmd('vm generalize -g {} -n {}'.format(self.resource_group, self.vm_name), checks=NoneCheck())
+        vm = self.cmd('vm show -g {} -n {}'.format(self.resource_group, self.vm_name))
         self.cmd('vm capture -g {} -n {} --vhd-name-prefix vmtest'.format(self.resource_group, self.vm_name),
                  checks=NoneCheck())
 
@@ -497,7 +497,7 @@ class VMNoWaitScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
     def body(self):
-        self.cmd('vm create -g {} -n {} --admin-username user12 --admin-password VerySecret! --authentication-type password --image UbuntuLTS --no-wait'.format(self.resource_group, self.name), checks=NoneCheck())
+        self.cmd('vm create -g {} -n {} --admin-username user12 --admin-password testPassword0 --authentication-type password --image UbuntuLTS --no-wait'.format(self.resource_group, self.name), checks=NoneCheck())
         self.cmd('vm wait -g {} -n {} --custom "{}"'.format(self.resource_group, self.name, "instanceView.statuses[?code=='PowerState/running']"), checks=NoneCheck())
         self.cmd('vm get-instance-view -g {} -n {}'.format(self.resource_group, self.name), checks=[
             JMESPathCheck("length(instanceView.statuses[?code=='PowerState/running'])", 1)
@@ -547,7 +547,7 @@ class VMExtensionScenarioTest(ResourceGroupVCRTestBase):
 
     def set_up(self):
         super(VMExtensionScenarioTest, self).set_up()
-        self.cmd('vm create -n {} -g {} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password TestPass1@'.format(self.vm_name, self.resource_group))
+        self.cmd('vm create -n {} -g {} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password testPassword0'.format(self.vm_name, self.resource_group))
 
     def test_vm_extension(self):
         self.execute()
@@ -764,7 +764,7 @@ class VMBootDiagnostics(ResourceGroupVCRTestBase):
     def set_up(self):
         super(VMBootDiagnostics, self).set_up()
         self.cmd('storage account create -g {} -n {} --sku Standard_LRS -l westus'.format(self.resource_group, self.storage_name))
-        self.cmd('vm create -n {} -g {} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password TestPass1@ --use-unmanaged-disk'.format(self.vm_name, self.resource_group))
+        self.cmd('vm create -n {} -g {} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password testPassword0 --use-unmanaged-disk'.format(self.vm_name, self.resource_group))
 
     def body(self):
         storage_uri = 'https://{}.blob.core.windows.net/'.format(self.storage_name)
@@ -789,7 +789,7 @@ class VMSSExtensionInstallTest(ResourceGroupVCRTestBase):
 
     def set_up(self):
         super(VMSSExtensionInstallTest, self).set_up()
-        self.cmd('vmss create -n {} -g {} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password TestPass1@'.format(self.vmss_name, self.resource_group))
+        self.cmd('vmss create -n {} -g {} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password testPassword0'.format(self.vmss_name, self.resource_group))
 
     def test_vmss_extension(self):
         self.execute()
@@ -1369,7 +1369,7 @@ class VMSSCreateAndModify(ResourceGroupVCRTestBase):
         instance_count = 5
         new_instance_count = 4
 
-        self.cmd('vmss create --admin-password Test1234@! --name {} -g {} --admin-username myadmin --image Win2012R2Datacenter --instance-count {}'
+        self.cmd('vmss create --admin-password testPassword0 --name {} -g {} --admin-username myadmin --image Win2012R2Datacenter --instance-count {}'
                  .format(vmss_name, self.resource_group, instance_count))
 
         self.cmd('vmss show --name {} -g {}'.format(vmss_name, self.resource_group),
@@ -1441,9 +1441,9 @@ class VMSSCreateOptions(ResourceGroupVCRTestBase):
         caching = 'ReadWrite'
         upgrade_policy = 'automatic'
 
-        self.cmd('vmss create --image Debian --admin-password Test1234@! -l westus'
+        self.cmd('vmss create --image Debian --admin-password testPassword0 -l westus'
                  ' -g {} -n {} --disable-overprovision --instance-count {}'
-                 ' --storage-caching {} --upgrade-policy-mode {}'
+                 ' --os-disk-caching {} --upgrade-policy-mode {}'
                  ' --authentication-type password --admin-username myadmin --public-ip-address {}'
                  ' --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2'
                  .format(self.resource_group, vmss_name, instance_count, caching,

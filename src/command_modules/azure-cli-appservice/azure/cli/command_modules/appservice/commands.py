@@ -68,8 +68,9 @@ cli_command(__name__, 'appservice web deployment slot swap', 'azure.cli.command_
 cli_command(__name__, 'appservice web deployment slot create', 'azure.cli.command_modules.appservice.custom#create_webapp_slot')
 
 cli_command(__name__, 'appservice web deployment user set', 'azure.cli.command_modules.appservice.custom#set_deployment_user')
-cli_command(__name__, 'appservice web deployment list-site-credentials',
-            'azure.mgmt.web.operations.web_apps_operations#WebAppsOperations.list_publishing_credentials', factory)
+cli_command(__name__, 'appservice web deployment list-publishing-profiles',
+            'azure.cli.command_modules.appservice.custom#list_publish_profiles')
+
 
 factory = lambda _: web_client_factory()
 cli_command(__name__, 'appservice web deployment user show', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.get_publishing_user', factory, exception_handler=empty_on_404)

@@ -22,20 +22,22 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
         c.custom_command('list', 'db_list')
         # # Usages will not be included in the first batch of GA commands
         # c.command('show-usage', 'list_usages')
-        c.command('delete', 'delete')
+        c.command('delete', 'delete', confirmation=True)
         c.generic_update_command('update', 'get', 'create_or_update', custom_func_name='db_update')
+        c.command('import', 'import_method')
+        c.command('export', 'export')
 
     with s.group('sql db replica') as c:
         c.custom_command('create', 'db_create_replica')
         c.command('list-links', 'list_replication_links')
-        c.custom_command('delete-link', 'db_delete_replica_link')
+        c.custom_command('delete-link', 'db_delete_replica_link', confirmation=True)
         c.custom_command('set-primary', 'db_failover')
 
     with s.group('sql dw') as c:
         c.custom_command('create', 'dw_create')
         c.command('show', 'get')
         c.custom_command('list', 'dw_list')
-        c.command('delete', 'delete')
+        c.command('delete', 'delete', confirmation=True)
         c.command('pause', 'pause_data_warehouse')
         c.command('resume', 'resume_data_warehouse')
         c.generic_update_command('update', 'get', 'create_or_update', custom_func_name='dw_update')
@@ -99,9 +101,10 @@ server_operations = create_service_adapter('azure.mgmt.sql.operations.servers_op
                                            'ServersOperations')
 
 with ServiceGroup(__name__, get_sql_servers_operation, server_operations) as s:
+
     with s.group('sql server') as c:
         c.command('create', 'create_or_update')
-        c.command('delete', 'delete')
+        c.command('delete', 'delete', confirmation=True)
         c.command('show', 'get_by_resource_group')
         # Usages will not be included in the first batch of GA commands
         # c.command('show-usage', 'list_usages')

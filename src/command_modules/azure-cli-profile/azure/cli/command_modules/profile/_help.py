@@ -14,9 +14,12 @@ helps['login'] = """
                 - name: Log in with user name and password. This doesn't work with Microsoft accounts or accounts that have two-factor authentication enabled.
                   text: >
                     az login -u johndoe@contoso.com -p VerySecret
-                - name: Log in with a service principal.
+                - name: Log in with a service principal using client secret.
                   text: >
                     az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p VerySecret --tenant contoso.onmicrosoft.com
+                - name: Log in with a service principal using client certificate.
+                  text: >
+                    az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p ~/mycertfile.pem --tenant contoso.onmicrosoft.com
             """
 
 helps['account'] = """

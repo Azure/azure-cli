@@ -15,9 +15,6 @@ class JMESPathCheck(object):  # pylint: disable=too-few-public-methods
 
     def __call__(self, execution_result):
         json_value = execution_result.get_output_in_json()
-        if not json_value:
-            raise AssertionError('The command output cannot be parsed in json.')
-
         actual_result = jmespath.search(self._query, json_value,
                                         jmespath.Options(collections.OrderedDict))
         if not actual_result == self._expected_result:
@@ -31,9 +28,6 @@ class JMESPathCheckExists(object):  # pylint: disable=too-few-public-methods
 
     def __call__(self, execution_result):
         json_value = execution_result.get_output_in_json()
-        if not json_value:
-            raise AssertionError('The command output cannot be parsed in json.')
-
         actual_result = jmespath.search(self._query, json_value,
                                         jmespath.Options(collections.OrderedDict))
         if not actual_result:

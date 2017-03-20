@@ -11,6 +11,7 @@ from azure.mgmt.compute.models import (CachingTypes,
 from azure.mgmt.storage.models import SkuName
 
 from azure.cli.core.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
+from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import \
     (location_type, get_one_of_subscription_locations,
      get_resource_name_completion_list, tags_type, file_type, enum_choice_list, ignore_type)
@@ -19,7 +20,7 @@ from azure.cli.command_modules.vm._actions import \
 from azure.cli.command_modules.vm._validators import \
     (validate_nsg_name, validate_vm_nics, validate_vm_nic, process_vm_create_namespace,
      process_vmss_create_namespace, process_image_create_namespace,
-     process_disk_or_snapshot_create_namespace, validate_vm_disk, validate_location,
+     process_disk_or_snapshot_create_namespace, validate_vm_disk,
      process_disk_encryption_namespace)
 
 
@@ -67,9 +68,9 @@ register_cli_argument('vm unmanaged-disk attach', 'disk_name', options_list=('--
 register_cli_argument('vm unmanaged-disk detach', 'disk_name', options_list=('--name', '-n'), help='The data disk name.')
 register_cli_argument('vm unmanaged-disk', 'disk_size', help='Size of disk (GiB)', default=1023, type=int)
 register_cli_argument('vm unmanaged-disk', 'new', action="store_true", help='create a new disk')
-register_cli_argument('vm unmanaged-disk', 'lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virutal Machine size.')
+register_cli_argument('vm unmanaged-disk', 'lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine size.')
 register_cli_argument('vm unmanaged-disk', 'vhd_uri', help="virtual hard disk's uri. For example:https://mystorage.blob.core.windows.net/vhds/d1.vhd")
-register_cli_argument('vm unmanaged-disk', 'caching', help='Host caching policy', default=CachingTypes.none.value, **enum_choice_list(CachingTypes))
+register_cli_argument('vm', 'caching', help='Disk caching policy', **enum_choice_list(CachingTypes))
 
 for item in ['attach', 'detach']:
     register_cli_argument('vm unmanaged-disk {}'.format(item), 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',), id_part=None)
@@ -82,11 +83,11 @@ register_cli_argument('vm disk detach', 'disk_name', options_list=('--name', '-n
 register_cli_argument('vm disk', 'new', action="store_true", help='create a new disk')
 register_cli_argument('vm disk', 'sku', arg_type=disk_sku)
 register_cli_argument('vm disk', 'size_gb', options_list=('--size-gb', '-z'), help='size in GB.')
-register_cli_argument('vm disk', 'lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virutal Machine size.')
+register_cli_argument('vm disk', 'lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine size.')
 
 register_cli_argument('vm availability-set', 'availability_set_name', name_arg_type, id_part='name',
                       completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'), help='Name of the availability set')
-register_cli_argument('vm availability-set create', 'availability_set_name', name_arg_type, validator=validate_location, help='Name of the availability set')
+register_cli_argument('vm availability-set create', 'availability_set_name', name_arg_type, validator=get_default_location_from_resource_group, help='Name of the availability set')
 register_cli_argument('vm availability-set create', 'unmanaged', action='store_true', help='contained VMs should use unmanaged disks')
 register_cli_argument('vm availability-set create', 'platform_update_domain_count', type=int, help='Update Domain count. Example: 2')
 register_cli_argument('vm availability-set create', 'platform_fault_domain_count', type=int, help='Fault Domain count. Example: 2')
@@ -121,8 +122,9 @@ for dest in ['vm_scale_set_name', 'virtual_machine_scale_set_name', 'name']:
 register_cli_argument('vmss', 'instance_id', id_part='child_name')
 register_cli_argument('vmss', 'instance_ids', multi_ids_type, help='Space separated list of IDs (ex: 1 2 3 ...) or * for all instances. If not provided, the action will be applied on the scaleset itself')
 register_cli_argument('vmss', 'tags', tags_type)
+register_cli_argument('vmss', 'caching', help='Disk caching policy', **enum_choice_list(CachingTypes))
 
-register_cli_argument('vmss disk', 'lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virutal Machine instance size.')
+register_cli_argument('vmss disk', 'lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine instance size.')
 register_cli_argument('vmss disk', 'size_gb', options_list=('--size-gb', '-z'), help='size in GB.')
 register_cli_argument('vmss disk', 'vmss_name', vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
 
@@ -221,11 +223,12 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'public_ip_address_allocation', help=None, arg_group='Network', **enum_choice_list(['dynamic', 'static']))
     register_cli_argument(scope, 'public_ip_address_dns_name', help='Globally unique DNS name for a newly created Public IP.', arg_group='Network')
     register_cli_argument(scope, 'secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via \'@<file path>\' containing \'[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]\'', type=file_type, completer=FilesCompleter())
+    register_cli_argument(scope, 'os_caching', options_list=['--storage-caching', '--os-disk-caching'], arg_group='Storage', help='Storage caching type for the VM OS disk.', **enum_choice_list([CachingTypes.read_only.value, CachingTypes.read_write.value]))
+    register_cli_argument(scope, 'data_caching', options_list=['--data-disk-caching'], arg_group='Storage', help='Storage caching type for the VM data disk(s).', **enum_choice_list(CachingTypes))
 
 register_cli_argument('vm create', 'vm_name', name_arg_type, id_part=None, help='Name of the virtual machine.', validator=process_vm_create_namespace, completer=None)
 register_cli_argument('vm create', 'attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
 register_cli_argument('vm create', 'availability_set', help='Name or ID of an existing availability set to add the VM to. None by default.')
-register_cli_argument('vm create', 'storage_caching', help='Storage caching type for the VM OS disk. Default: ReadWrite.', arg_group='Storage', **enum_choice_list(['ReadWrite', 'ReadOnly']))
 
 register_cli_argument('vmss create', 'vmss_name', name_arg_type, id_part=None, help='Name of the virtual machine scale set.', validator=process_vmss_create_namespace)
 register_cli_argument('vmss create', 'load_balancer', help='Name to use when creating a new load balancer (default) or referencing an existing one. Can also reference an existing load balancer by ID or specify "" for none.', arg_group='Load Balancer')
@@ -236,7 +239,6 @@ register_cli_argument('vmss create', 'instance_count', help='Number of VMs in th
 register_cli_argument('vmss create', 'disable_overprovision', help='Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details).', action='store_true')
 register_cli_argument('vmss create', 'upgrade_policy_mode', help=None, **enum_choice_list(UpgradeMode))
 register_cli_argument('vmss create', 'vm_sku', help='Size of VMs in the scale set.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
-register_cli_argument('vmss create', 'storage_caching', help='Storage caching type for the VM OS disk. Default: ReadOnly.', arg_group='Storage', **enum_choice_list(['ReadWrite', 'ReadOnly']))
 
 register_cli_argument('vm encryption', 'volume_type', help='Type of volume that the encryption operation is performed on', **enum_choice_list(['DATA', 'OS', 'ALL']))
 register_cli_argument('vm encryption', 'force', action='store_true', help='continue with encryption operations regardless of the warnings')
