@@ -199,7 +199,14 @@ storage_profile_param_options = {
 }
 
 
-def _validate_required_forbidden_parameters(namespace, required, forbidden):
+network_balancer_param_options = {
+    'application_gateway': '--application-gateway',
+    'load_balancer': '--load-balancer',
+    'gateway_subnet_address_prefix': '--gateway-subnet-address-prefix'
+}
+
+
+def _validate_storage_required_forbidden_parameters(namespace, required, forbidden):
     missing_required = [x for x in required if not getattr(namespace, x)]
     included_forbidden = [x for x in forbidden if getattr(namespace, x)]
     if missing_required or included_forbidden:
@@ -212,6 +219,22 @@ def _validate_required_forbidden_parameters(namespace, required, forbidden):
         if included_forbidden:
             forbidden_string = ', '.join(
                 storage_profile_param_options[x] for x in included_forbidden)
+            error = '{}\n\tnot applicable: {}'.format(error, forbidden_string)
+        raise CLIError(error)
+
+
+def _validate_network_balancer_required_forbidden_parameters(namespace, required, forbidden, desc):
+    missing_required = [x for x in required if not getattr(namespace, x)]
+    included_forbidden = [x for x in forbidden if getattr(namespace, x)]
+    if missing_required or included_forbidden:
+        error = 'invalid usage for network balancer: {}'.format(desc)
+        if missing_required:
+            missing_string = ', '.join(
+                network_balancer_param_options[x] for x in missing_required)
+            error = '{}\n\tmissing: {}'.format(error, missing_string)
+        if included_forbidden:
+            forbidden_string = ', '.join(
+                network_balancer_param_options[x] for x in included_forbidden)
             error = '{}\n\tnot applicable: {}'.format(error, forbidden_string)
         raise CLIError(error)
 
@@ -309,7 +332,7 @@ def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
         namespace.storage_sku = 'Standard_LRS' if for_scale_set else 'Premium_LRS'
 
     # Now verify that the status of required and forbidden parameters
-    _validate_required_forbidden_parameters(namespace, required, forbidden)
+    _validate_storage_required_forbidden_parameters(namespace, required, forbidden)
 
     if namespace.storage_profile == StorageProfile.ManagedCustomImage:
         # extract additional information from a managed custom image
@@ -717,7 +740,11 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
 
     if namespace.instance_count > INSTANCE_THRESHOLD:
         # AppGateway frontend
-        # TODO: Verify load balancer parameters are NOT supplied
+        required = ['gateway_subnet_address_prefix']
+        forbidden = ['nat_pool_name', 'load_balancer']
+        _validate_network_balancer_required_forbidden_parameters(
+            namespace, required, forbidden, 'application gateway')
+
         if namespace.application_gateway:
             if check_existence(namespace.application_gateway, namespace.resource_group_name,
                                'Microsoft.Network', 'applicationGateways'):
@@ -730,7 +757,11 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
             namespace.app_gateway_type = 'new'
     else:
         # LoadBalancer frontend
-        # TODO: Verify app gateway parameters are NOT supplied
+        required = []
+        forbidden = ['gateway_subnet_address_prefix', 'application_gateway']
+        _validate_network_balancer_required_forbidden_parameters(
+            namespace, required, forbidden, 'load balancer')
+
         if namespace.load_balancer:
             if check_existence(namespace.load_balancer, namespace.resource_group_name,
                                'Microsoft.Network', 'loadBalancers'):
