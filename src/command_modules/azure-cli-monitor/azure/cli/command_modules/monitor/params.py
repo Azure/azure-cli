@@ -77,7 +77,7 @@ with ParametersContext(command='monitor log-profiles create') as c:
 
     c.register_alias('name', ('--log-profile-name',))
     c.expand('retention_policy', RetentionPolicy)
-    c.expand('parameters_abc', LogProfileResource)
+    c.expand('parameters', LogProfileResource)
     c.register_alias('name', ('--log-profile-resource-name',))
     c.register_alias('log_profile_name', ('--name', '-n'))
     c.argument('categories', nargs='+',
