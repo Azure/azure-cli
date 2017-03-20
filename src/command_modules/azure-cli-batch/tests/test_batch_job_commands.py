@@ -5,7 +5,7 @@
 
 import datetime
 import os
-from msrest.exceptions import (SerializationError)
+
 from azure.cli.core._util import CLIError
 from .test_batch_data_plane_command_base import (BatchDataPlaneTestBase)
 
@@ -66,7 +66,7 @@ class BatchJobTest(BatchDataPlaneTestBase):
         self.assertEqual(job1['onAllTasksComplete'], 'noAction')
 
         # test bad enum value
-        with self.assertRaises(SerializationError):
+        with self.assertRaises(SystemExit):
             self.cmd('batch job set --job-id {} '
                      '--on-all-tasks-complete badValue '.format(self.job1))
 

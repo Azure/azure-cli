@@ -9,17 +9,23 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 helps['ad sp create-for-rbac'] = """
             examples:
-                - name: Create role assignments with defaults.
+                - name: Create with a default role assignment.
                   text: az ad sp create-for-rbac
-                - name: Create role assignments with a custom name.
+                - name: Create using a custom name, and with a default assiggment.
                   text: az ad sp create-for-rbac -n "http://MyApp"
-                - name: Create role assignments at the same time.
+                - name: Create without a default assignment.
+                  text: az ad sp create-for-rbac --skip-assignment
+                - name: Create with customized assignments
                   text: az ad sp create-for-rbac -n "http://MyApp" --role contributor --scopes /subscriptions/11111111-2222-3333-4444-555555555555/resourceGroups/MyResourceGroup /subscriptions/11111111-2222-3333-4444-666666666666/resourceGroups/MyAnotherResourceGroup
+                - name: Create using self-signed certificte
+                  text: az ad sp create-for-rbac --create-cert
                 - name: Login with a service principal.
                   text: az login --service-principal -u <name> -p <password> --tenant <tenant>
+                - name: Login with self-signed certificate
+                  text: az login --service-principal -u <name> -p <certificate file path> --tenant <tenant>
                 - name: Reset credentials on expiration.
                   text: az ad sp reset-credentials --name <name>
-                - name: Create role assignments.
+                - name: Create extra role assignments in future.
                   text: az role assignment create --assignee <name> --role Contributor
                 - name: Revoke the service principal when done with it.
                   text: az ad app delete --id <name>

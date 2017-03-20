@@ -1248,7 +1248,7 @@ def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None
 # region Express Route commands
 
 def create_express_route(circuit_name, resource_group_name, bandwidth_in_mbps, peering_location,
-                         service_provider_name, location=None, tags=None,
+                         service_provider_name, location=None, tags=None, no_wait=False,
                          sku_family=ExpressRouteCircuitSkuFamily.metered_data.value,
                          sku_tier=ExpressRouteCircuitSkuTier.standard.value):
     from azure.mgmt.network.models import \
@@ -1261,7 +1261,7 @@ def create_express_route(circuit_name, resource_group_name, bandwidth_in_mbps, p
             service_provider_name, peering_location, bandwidth_in_mbps),
         sku=ExpressRouteCircuitSku(sku_name, sku_tier, sku_family)
     )
-    return client.create_or_update(resource_group_name, circuit_name, circuit)
+    return client.create_or_update(resource_group_name, circuit_name, circuit, raw=no_wait)
 
 def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None,
                          service_provider_name=None, sku_family=None, sku_tier=None, tags=None):
@@ -1409,7 +1409,7 @@ update_route.__doc__ = Route.__doc__
 
 def create_local_gateway(resource_group_name, local_network_gateway_name, gateway_ip_address,
                          location=None, tags=None, local_address_prefix=None, asn=None,
-                         bgp_peering_address=None, peer_weight=None):
+                         bgp_peering_address=None, peer_weight=None, no_wait=False):
     from azure.mgmt.network.models import LocalNetworkGateway, BgpSettings
     client = _network_client_factory().local_network_gateways
     local_gateway = LocalNetworkGateway(
@@ -1417,7 +1417,8 @@ def create_local_gateway(resource_group_name, local_network_gateway_name, gatewa
         gateway_ip_address=gateway_ip_address)
     if bgp_peering_address or asn or peer_weight:
         local_gateway.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
-    return client.create_or_update(resource_group_name, local_network_gateway_name, local_gateway)
+    return client.create_or_update(
+        resource_group_name, local_network_gateway_name, local_gateway, raw=no_wait)
 
 def update_local_gateway(instance, gateway_ip_address=None, local_address_prefix=None, asn=None,
                          bgp_peering_address=None, peer_weight=None, tags=None):

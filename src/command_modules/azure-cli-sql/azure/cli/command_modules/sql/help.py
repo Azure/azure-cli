@@ -93,6 +93,10 @@ helps['sql db restore'] = """
     type: command
     short-summary: Creates a new database by restoring from a database backup.
     """
+helps['sql db import'] = """
+    type: command
+    short-summary: Imports a bacpac into an existing database.
+    """
 helps['sql db threat-policy'] = """
     type: group
     short-summary: Manage a database's threat detection policy.

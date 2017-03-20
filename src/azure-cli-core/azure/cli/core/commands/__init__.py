@@ -54,7 +54,7 @@ class CliArgumentType(object):
 
 
 class CliCommandArgument(object):
-    _NAMED_ARGUMENTS = ('options_list', 'validator', 'completer', 'id_part', 'arg_group', 'choices')
+    _NAMED_ARGUMENTS = ('options_list', 'validator', 'completer', 'id_part', 'arg_group')
 
     def __init__(self, dest=None, argtype=None, **kwargs):
         self.type = CliArgumentType(overrides=argtype, **kwargs)
@@ -79,6 +79,8 @@ class CliCommandArgument(object):
             return {key: value for key, value in self.type.settings.items()
                     if key != 'options' and key not in self._NAMED_ARGUMENTS and
                     not value == CliArgumentType.REMOVE}
+        elif name == 'choices':
+            return self.type.settings.get(name, None)
         else:
             raise AttributeError(message=name)
 
