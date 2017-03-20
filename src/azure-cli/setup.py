@@ -9,7 +9,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup
 
-VERSION = "0.1.2rc1+dev"
+VERSION = "2.0.1+dev"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -30,7 +30,7 @@ else:
         sys.exit(1)
 
 CLASSIFIERS = [
-    'Development Status :: 4 - Beta',
+    'Development Status :: 5 - Production/Stable',
     'Intended Audience :: Developers',
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
@@ -54,6 +54,7 @@ DEPENDENCIES = [
     'azure-cli-core',
     'azure-cli-documentdb',
     'azure-cli-feedback',
+    'azure-cli-find',
     'azure-cli-iot',
     'azure-cli-keyvault',
     'azure-cli-network',

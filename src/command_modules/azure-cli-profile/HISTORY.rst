@@ -3,6 +3,25 @@
 Release History
 ===============
 
+2.0.1 (2017-03-13)
+++++++++++++++++++
+
+* Fix KeyError: 'environmentName' on 'az account list' (#2358)
+* Core: Support login to specific tenant (#2327)
+
+
+2.0.0 (2017-02-27)
+++++++++++++++++++
+
+* GA release.
+
+
+0.1.2rc2 (2017-02-22)
++++++++++++++++++++++
+
+* Documentation updates.
+
+
 0.1.2rc1 (2017-02-17)
 +++++++++++++++++++++
 

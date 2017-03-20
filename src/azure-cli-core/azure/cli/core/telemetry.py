@@ -53,7 +53,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         details = {
             'Reserved.DataModel.EntityType': 'Fault',
             'Reserved.DataModel.Fault.Description': description or fault_type,
-            'Reserved.DataModel.Correlation.1': self.correlation_id,
+            'Reserved.DataModel.Correlation.1': '{},UserTask,'.format(self.correlation_id),
             'Reserved.DataModel.Fault.TypeString': exception.__class__.__name__,
             'Reserved.DataModel.Fault.Exception.Message': _remove_cmd_chars(
                 message or str(exception)),
@@ -79,7 +79,8 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         for name, props in self.exceptions:
             props.update(base)
             props.update(cli)
-            props.update({'Reserved.DataModel.CorrelationId': str(uuid.uuid4())})
+            props.update({'Reserved.DataModel.CorrelationId': str(uuid.uuid4()),
+                          'Reserved.EventId': str(uuid.uuid4())})
             events.append({'name': name, 'properties': props})
 
         payload = json.dumps(events)

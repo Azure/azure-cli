@@ -33,13 +33,14 @@ Create a container registry
         --resource-group -g [Required]: Name of resource group.
         --admin-enabled               : Indicates whether the admin user is enabled.
                                         Allowed values: false, true.  Default: false.
-        --storage-account-name        : The name of an existing storage account.
+        --storage-account-name        : Default: A new storage account will be created. 
+                                        Provide the name of an existing storage account if
+                                        you're recreating a container registry over a previous 
+                                        registry created storage account.
 
     Examples
         Create a container registry with a new storage account
             az acr create -n myRegistry -g myResourceGroup -l southcentralus
-        Create a container registry with an existing storage account
-            az acr create -n myRegistry -g myResourceGroup -l southcentralus --storage-account-name myStorageAccount
 
 Delete a container registry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -91,7 +92,9 @@ Update a container registry
         --admin-enabled       : Indicates whether the admin user is enabled.
 		                        Allowed values: false, true.
         --resource-group -g   : Name of resource group.
-        --storage-account-name: The name of an existing storage account.
+        --storage-account-name: Provide the name of an existing storage account if
+                                you're recreating a container registry over a previous 
+                                registry created storage account.
         --tags                : Space separated tags in 'key[=value]' format. Use "" to clear existing
                                 tags.
 

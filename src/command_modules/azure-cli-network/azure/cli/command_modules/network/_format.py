@@ -23,6 +23,7 @@ def transform_dns_record_set_output(result):
 
     return result
 
+
 def transform_dns_record_set_table_output(result):
     table_output = []
 
@@ -58,6 +59,7 @@ def transform_dns_zone_table_output(result):
 
     return final_result if is_list else final_result[0]
 
+
 def transform_local_gateway_table_output(result):
     final_result = []
     for item in result:
@@ -75,3 +77,27 @@ def transform_local_gateway_table_output(result):
         new_item['AddressPrefixes'] = prefix_val
         final_result.append(new_item)
     return final_result
+
+
+def transform_vnet_create_output(result):
+    return {'newVNet': result.result()}
+
+
+def transform_public_ip_create_output(result):
+    return {'publicIp': result.result()}
+
+
+def transform_traffic_manager_create_output(result):
+    return {'TrafficManagerProfile': result}
+
+
+def transform_nic_create_output(result):
+    return {'NewNIC': result.result()}
+
+
+def transform_nsg_create_output(result):
+    return {'NewNSG': result.result()}
+
+
+def transform_vnet_gateway_create_output(result):
+    return {'vnetGateway': result.result()}

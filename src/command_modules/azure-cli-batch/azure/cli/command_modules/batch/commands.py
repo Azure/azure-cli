@@ -66,17 +66,19 @@ cli_command(__name__, 'batch certificate delete', custom_path.format('delete_cer
 cli_batch_data_plane_command('batch certificate show', data_path.format('certificate', 'CertificateOperations.get'), certificate_client_factory, validator=validate_cert_settings)
 cli_batch_data_plane_command('batch certificate list', data_path.format('certificate', 'CertificateOperations.list'), certificate_client_factory)
 
-cli_batch_data_plane_command('batch pool usage-metrics list', data_path.format('pool', 'PoolOperations.list_pool_usage_metrics'), pool_client_factory)
-cli_batch_data_plane_command('batch pool all-statistics show', data_path.format('pool', 'PoolOperations.get_all_pools_lifetime_statistics'), pool_client_factory)
+cli_batch_data_plane_command('batch pool usage-metrics list', data_path.format('pool', 'PoolOperations.list_usage_metrics'), pool_client_factory)
+cli_batch_data_plane_command('batch pool all-statistics show', data_path.format('pool', 'PoolOperations.get_all_lifetime_statistics'), pool_client_factory)
 cli_batch_data_plane_command('batch pool create', data_path.format('pool', 'PoolOperations.add'), pool_client_factory, validator=validate_pool_settings,
                              ignore=['pool.cloud_service_configuration.current_os_version', 'pool.virtual_machine_configuration.windows_configuration',
                                      'pool.auto_scale_evaluation_interval', 'pool.enable_auto_scale', 'pool.max_tasks_per_node', 'pool.network_configuration',
-                                     'pool.cloud_service_configuration.target_os_version', 'pool.task_scheduling_policy',
-                                     'pool.start_task.max_task_retry_count', 'pool.start_task.environment_settings'], silent=['pool.virtual_machine_configuration.image_reference'])
+                                     'pool.cloud_service_configuration.target_os_version', 'pool.task_scheduling_policy', 'pool.virtual_machine_configuration.os_disk',
+                                     'pool.start_task.max_task_retry_count', 'pool.start_task.environment_settings', 'pool.start_task.user_identity'],
+                             silent=['pool.virtual_machine_configuration.image_reference'])
 cli_batch_data_plane_command('batch pool list', data_path.format('pool', 'PoolOperations.list'), pool_client_factory)
 cli_batch_data_plane_command('batch pool delete', data_path.format('pool', 'PoolOperations.delete'), pool_client_factory)
 cli_batch_data_plane_command('batch pool show', data_path.format('pool', 'PoolOperations.get'), pool_client_factory)
-cli_batch_data_plane_command('batch pool set', data_path.format('pool', 'PoolOperations.patch'), pool_client_factory)
+cli_batch_data_plane_command('batch pool set', data_path.format('pool', 'PoolOperations.patch'), pool_client_factory,
+                             ignore=['pool_patch_parameter.start_task.user_identity'])
 cli_command(__name__, 'batch pool reset', custom_path.format('update_pool'), pool_client_factory)
 cli_batch_data_plane_command('batch pool autoscale disable', data_path.format('pool', 'PoolOperations.disable_auto_scale'), pool_client_factory)
 cli_batch_data_plane_command('batch pool autoscale enable', data_path.format('pool', 'PoolOperations.enable_auto_scale'), pool_client_factory)
@@ -85,11 +87,12 @@ cli_command(__name__, 'batch pool resize', custom_path.format('resize_pool'), po
 cli_batch_data_plane_command('batch pool os upgrade', data_path.format('pool', 'PoolOperations.upgrade_os'), pool_client_factory)
 cli_batch_data_plane_command('batch node delete', data_path.format('pool', 'PoolOperations.remove_nodes'), pool_client_factory)
 
-cli_batch_data_plane_command('batch job all-statistics show', data_path.format('job', 'JobOperations.get_all_jobs_lifetime_statistics'), job_client_factory)
+cli_batch_data_plane_command('batch job all-statistics show', data_path.format('job', 'JobOperations.get_all_lifetime_statistics'), job_client_factory)
 cli_batch_data_plane_command('batch job create', data_path.format('job', 'JobOperations.add'), job_client_factory,
                              ignore=['job.job_preparation_task', 'job.job_release_task', 'job.pool_info.auto_pool_specification', 'job.on_task_failure',
                                      'job.job_manager_task.kill_job_on_completion', 'job.common_environment_settings', 'job.on_all_tasks_complete',
-                                     'job.job_manager_task.run_exclusive', 'job.job_manager_task.constraints', 'job.job_manager_task.application_package_references'])
+                                     'job.job_manager_task.run_exclusive', 'job.job_manager_task.constraints', 'job.job_manager_task.application_package_references',
+                                     'job.job_manager_task.user_identity'])
 cli_batch_data_plane_command('batch job delete', data_path.format('job', 'JobOperations.delete'), job_client_factory)
 cli_batch_data_plane_command('batch job show', data_path.format('job', 'JobOperations.get'), job_client_factory)
 cli_batch_data_plane_command('batch job set', data_path.format('job', 'JobOperations.patch'), job_client_factory, flatten=2)
@@ -101,7 +104,7 @@ cli_batch_data_plane_command('batch job stop', data_path.format('job', 'JobOpera
 cli_batch_data_plane_command('batch job prep-release-status list', data_path.format('job', 'JobOperations.list_preparation_and_release_task_status'), job_client_factory)
 
 cli_batch_data_plane_command('batch job-schedule create', data_path.format('job_schedule', 'JobScheduleOperations.add'), job_schedule_client_factory,
-                             ignore=['cloud_job_schedule.job_specification.job_preparation_task',
+                             ignore=['cloud_job_schedule.job_specification.job_preparation_task', 'cloud_job_schedule.job_specification.on_task_failure',
                                      'cloud_job_schedule.job_specification.job_release_task', 'cloud_job_schedule.job_specification.metadata',
                                      'cloud_job_schedule.job_specification.job_manager_task.kill_job_on_completion',
                                      'cloud_job_schedule.job_specification.job_manager_task.run_exclusive',
@@ -113,6 +116,7 @@ cli_batch_data_plane_command('batch job-schedule set', data_path.format('job_sch
                              ignore=['job_schedule_patch_parameter.job_specification.job_preparation_task',
                                      'job_schedule_patch_parameter.job_specification.job_release_task',
                                      'job_schedule_patch_parameter.job_specification.constraints',
+                                     'job_schedule_patch_parameter.job_specification.on_task_failure',
                                      'job_schedule_patch_parameter.job_specification.job_manager_task.kill_job_on_completion',
                                      'job_schedule_patch_parameter.job_specification.job_manager_task.run_exclusive',
                                      'job_schedule_patch_parameter.job_specification.job_manager_task.constraints'])
@@ -120,6 +124,7 @@ cli_batch_data_plane_command('batch job-schedule reset', data_path.format('job_s
                              ignore=['job_schedule_update_parameter.job_specification.job_preparation_task',
                                      'job_schedule_update_parameter.job_specification.job_release_task',
                                      'job_schedule_update_parameter.job_specification.constraints',
+                                     'job_schedule_update_parameter.job_specification.on_task_failure',
                                      'job_schedule_update_parameter.job_specification.job_manager_task.kill_job_on_completion',
                                      'job_schedule_update_parameter.job_specification.job_manager_task.run_exclusive',
                                      'job_schedule_update_parameter.job_specification.job_manager_task.constraints'])
@@ -139,7 +144,7 @@ cli_batch_data_plane_command('batch task subtask list', data_path.format('task',
 
 cli_batch_data_plane_command('batch task file delete', data_path.format('file', 'FileOperations.delete_from_task'), file_client_factory)
 cli_batch_data_plane_command('batch task file download', data_path.format('file', 'FileOperations.get_from_task'), file_client_factory)
-cli_batch_data_plane_command('batch task file show', data_path.format('file', 'FileOperations.get_node_file_properties_from_task'), file_client_factory)
+cli_batch_data_plane_command('batch task file show', data_path.format('file', 'FileOperations.get_properties_from_task'), file_client_factory)
 cli_batch_data_plane_command('batch task file list', data_path.format('file', 'FileOperations.list_from_task'), file_client_factory)
 
 cli_batch_data_plane_command('batch node user create', data_path.format('compute_node', 'ComputeNodeOperations.add_user'), compute_node_client_factory)
@@ -156,5 +161,5 @@ cli_batch_data_plane_command('batch node remote-desktop download', data_path.for
 
 cli_batch_data_plane_command('batch node file delete', data_path.format('file', 'FileOperations.delete_from_compute_node'), file_client_factory)
 cli_batch_data_plane_command('batch node file download', data_path.format('file', 'FileOperations.get_from_compute_node'), file_client_factory)
-cli_batch_data_plane_command('batch node file show', data_path.format('file', 'FileOperations.get_node_file_properties_from_compute_node'), file_client_factory)
+cli_batch_data_plane_command('batch node file show', data_path.format('file', 'FileOperations.get_properties_from_compute_node'), file_client_factory)
 cli_batch_data_plane_command('batch node file list', data_path.format('file', 'FileOperations.list_from_compute_node'), file_client_factory)

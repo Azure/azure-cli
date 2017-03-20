@@ -3,6 +3,19 @@
 Release History
 ===============
 
+0.1.1b5 (2017-03-13)
+++++++++++++++++++++
+
+* Latest Batch Commands (#2413)
+* Load optional command extensions (#2284)
+
+
+0.1.1b4 (2017-02-22)
+++++++++++++++++++++
+
+* Documentation updates.
+
+
 0.1.1b3 (2017-02-17)
 +++++++++++++++++++++
 

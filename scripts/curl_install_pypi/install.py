@@ -199,6 +199,8 @@ def _get_default_rc_file():
     bash_profile_exists = os.path.isfile(USER_BASH_PROFILE)
     if not bashrc_exists and bash_profile_exists:
         return USER_BASH_PROFILE
+    if bashrc_exists and bash_profile_exists and platform.system().lower() == 'darwin':
+        return USER_BASH_PROFILE
     return USER_BASH_RC if bashrc_exists else None
 
 def _find_line_in_file(file_path, search_pattern):

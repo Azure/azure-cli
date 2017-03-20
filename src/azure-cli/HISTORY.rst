@@ -3,11 +3,29 @@
 Release History
 ===============
 
+
+2.0.1 (2017-03-13)
+^^^^^^^^^^^^^^^^^^
+
+* Add 'az find' module
+
+2.0.0 (2017-02-27)
+^^^^^^^^^^^^^^^^^^
+
+* GA release.
+
+0.1.2rc2 (2017-02-22)
+^^^^^^^^^^^^^^^^^^^^^
+
+* Fix format of package readme on PyPI.
+
+
 0.1.2rc1 (2017-02-17)
-^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
 
 * Handle cloud switching in more user friendly way + remove context
 * Include the following command modules by default:
+
 azure-cli-acs
 azure-cli-appservice
 azure-cli-batch

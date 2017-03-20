@@ -3,6 +3,30 @@
 Release History
 ===============
 
+2.0.1 (2017-03-13)
+++++++++++++++++++
+
+* Fix: 'None' already exists. Replacing values. (#2390)
+* Convert network creates to use SDK (#2371)
+* Convert PublicIP Create to use SDK (#2294)
+* Convert VNet Create to use SDK (#2269)
+
+
+2.0.0 (2017-02-27)
+++++++++++++++++++
+
+* GA release.
+
+
+0.1.2rc2 (2017-02-22)
++++++++++++++++++++++
+
+* Fix VPN connection create shared-key validator.
+* Add delete confirmation for DNS record-set delete.
+* Fix bug with local address prefixes.
+* Documentation updates.
+
+
 0.1.2rc1 (2017-02-17)
 +++++++++++++++++++++
 

@@ -3,6 +3,31 @@
 Release History
 ===============
 
+2.0.1 (2017-03-13)
+++++++++++++++++++
+
+* Add support for ssh key password prompting. (#2044)
+* Reduce the default number of masters. (#2430)
+* Add support for windows clusters. (#2211)
+* Switch from Owner to Contributor role. (#2321)
+* Remove acs - vm dependency (#2288)
+* On scale, clear the service principal profile so that it will update
+
+
+2.0.0 (2017-02-27)
+++++++++++++++++++
+
+* GA release
+* Add customizable master_count for Kubernetes cluster create
+
+
+0.1.2rc2 (2017-02-22)
++++++++++++++++++++++
+
+* Rev compute package to 0.33.rc1 for new API version.
+* Documentation fixes.
+
+
 0.1.2rc1 (2017-02-17)
 +++++++++++++++++++++
 

@@ -3,6 +3,28 @@
 Release History
 ===============
 
+0.1.1b6 (2017-03-13)
+++++++++++++++++++++
+
+* AppService - Trigger source control sync after config (#2326)
+* Misc bug fixes(locations, trace when browse, polish error) (#2407)
+* Remove tab completion from 'appservice plan create --name'. (#2404)
+* Fix a bug on detecting argument value for site configs (#2392)
+* Fix slot related bugs
+
+
+0.1.1b5 (2017-02-27)
+++++++++++++++++++++
+
+* Expose git token reset command and add more test coverage
+
+
+0.1.1b4 (2017-02-22)
+++++++++++++++++++++
+
+* Documentation fixes.
+
+
 0.1.1b3 (2017-02-17)
 ++++++++++++++++++++
 

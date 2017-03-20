@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.1.1b3+dev'
+VERSION = '0.1.1b6+dev'
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -29,6 +29,7 @@ DEPENDENCIES = [
     'azure-mgmt-web==0.31.0',
     # v1.17 breaks on wildcard cert https://github.com/shazow/urllib3/issues/981
     'urllib3[secure]==1.16',
+    'xmltodict',
     'pyOpenSSL',
 ]
 

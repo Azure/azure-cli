@@ -10,12 +10,13 @@ import hmac
 import tempfile
 import shutil
 import requests
+import threading
 from hashlib import sha1
 from flask import Flask, jsonify, request, Response
 from subprocess import check_call, CalledProcessError
 from uritemplate import URITemplate, expand
 
-VERSION = '0.1.0'
+VERSION = '0.1.1'
 
 # GitHub API constants
 GITHUB_UA_PREFIX = 'GitHub-Hookshot/'
@@ -93,9 +94,10 @@ def _parse_pr_title(title):
     assert component_name.lower().startswith('azure-cli')
     return component_name, version
 
-def create_release(component_name, release_assets_dir):
+def create_release(component_name, release_assets_dir, merge_commit_sha):
     working_dir = tempfile.mkdtemp()
     check_call(['git', 'clone', 'https://github.com/{}'.format(ENV_REPO_NAME), working_dir])
+    check_call(['git', 'checkout', merge_commit_sha], cwd=working_dir)
     check_call(['pip', 'install', '-e', 'scripts'], cwd=working_dir)
     check_call(['python', '-m', 'scripts.automation.release.run', '-c', component_name,
                 '-r', ENV_PYPI_REPO, '--dest', release_assets_dir], cwd=working_dir)
@@ -129,16 +131,34 @@ def upload_assets_for_github_release(upload_uri_tmpl, component_name, component_
         elif filename.endswith('.whl'):
             upload_asset(upload_uri_tmpl, fullpath, '{} {} Python Wheel (.whl)'.format(component_name, component_version))
 
-def create_github_release(component_name, component_version, released_pypi_url, release_assets_dir):
+def create_github_release(component_name, component_version, released_pypi_url, release_assets_dir, merge_commit_sha):
     tag_name = '{}-{}'.format(component_name, component_version)
     release_name = "{} {}".format(component_name, component_version)
-    payload = {'tag_name': tag_name, "target_commitish": "master", "name": release_name, "body": GITHUB_RELEASE_BODY_TMPL.format(released_pypi_url), "prerelease": True}
+    payload = {'tag_name': tag_name, "target_commitish": merge_commit_sha, "name": release_name, "body": GITHUB_RELEASE_BODY_TMPL.format(released_pypi_url), "prerelease": False}
     r = requests.post('https://api.github.com/repos/{}/releases'.format(ENV_REPO_NAME), json=payload, auth=GITHUB_API_AUTH, headers=GITHUB_API_HEADERS)
     if r.status_code == 201:
         upload_url = r.json()['upload_url']
         upload_assets_for_github_release(upload_url, component_name, component_version, release_assets_dir)
         return True
     return False
+
+def _task_async_release(component_name=None, component_version=None, comment_url=None, merge_commit_sha=None):
+    try:
+        comment_on_pr(comment_url, "Started releasing {} {}...".format(component_name, component_version))
+        release_assets_dir = tempfile.mkdtemp()
+        create_release(component_name, release_assets_dir, merge_commit_sha)
+        released_pypi_url = '{}/{}/{}'.format(ENV_PYPI_REPO, component_name, component_version)
+        msg = "Release of '{}' with version '{}' successful. View at {}.".format(component_name, component_version, released_pypi_url)
+        comment_on_pr(comment_url, msg)
+        success = create_github_release(component_name, component_version, released_pypi_url, release_assets_dir, merge_commit_sha)
+        if success:
+            comment_on_pr(comment_url, 'GitHub release created. https://github.com/{}/releases.'.format(ENV_REPO_NAME))
+        else:
+            comment_on_pr(comment_url, 'GitHub release creation unsuccessful. Please create a release at https://github.com/{}/releases.'.format(ENV_REPO_NAME))
+    except CalledProcessError:
+        err_msg = "Release of '{}' with version '{}' unsuccessful. Admins, please release manually.".format(component_name, component_version)
+        comment_on_pr(comment_url, err_msg)
+
 
 def _handle_pr_event(payload):
     pr_action = payload['action']
@@ -159,24 +179,15 @@ def _handle_pr_event(payload):
             return jsonify(msg="Ignoring event. PR not merged.")
         else:
             # Merged PR
-            try:
-                release_assets_dir = tempfile.mkdtemp()
-                create_release(component_name, release_assets_dir)
-                released_pypi_url = '{}/{}/{}'.format(ENV_PYPI_REPO, component_name, component_version)
-                msg = "Release of '{}' with version '{}' successful. View at {}.".format(component_name, component_version, released_pypi_url)
-                comment_on_pr(comment_url, msg)
-                success = create_github_release(component_name, component_version, released_pypi_url, release_assets_dir)
-                if success:
-                    comment_on_pr(comment_url, 'GitHub release created. https://github.com/{}/releases.'.format(ENV_REPO_NAME))
-                else:
-                    comment_on_pr(comment_url, 'GitHub release creation unsuccessful. Please create a release at https://github.com/{}/releases.'.format(ENV_REPO_NAME))
-                return jsonify(msg=msg)
-            except CalledProcessError as e:
-                err_msg = "Release of '{}' with version '{}' unsuccessful. Admins, please release manually.".format(component_name, component_version)
-                comment_on_pr(comment_url, err_msg)
-                print(err_msg)
-                print(e)
-                return jsonify(msg="Release of '{}' with version '{}' failed. View server logs for more info.".format(component_name, component_version)), 500
+            merge_commit_sha = pr['merge_commit_sha']
+            msg = "Received merge PR. Asynchronously creating release."
+            task_args = {'component_name': component_name,
+                         'component_version': component_version,
+                         'merge_commit_sha': merge_commit_sha,
+                         'comment_url': comment_url}
+            async_task = threading.Thread(target=_task_async_release, kwargs=task_args)
+            async_task.start()
+            return jsonify(msg=msg)
     except (AssertionError, ValueError):
         return jsonify(msg="Ignoring merged PR as not a Release PR. Expecting title to have format 'Release <component-name> <version>'")
     return jsonify(error='Unable to handle PR event.'), 500
@@ -198,9 +209,9 @@ def handle_github_webhook():
         elif event == GITHUB_EVENT_NAME_PR:
             return _handle_pr_event(payload)
         else:
-            return jsonify(error="Event '{}' not supported.".format(event)), 400
+            return jsonify(error="Event '{}' not supported.".format(event))
     except AssertionError as e:
-        return jsonify(error=str(e)), 400
+        return jsonify(error=str(e))
     return jsonify(error='Unable to handle request.'), 500
 
 if __name__ == "__main__":

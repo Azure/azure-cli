@@ -9,7 +9,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.1.1b3+dev'
+VERSION = '0.1.1b5+dev'
 
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -28,8 +28,9 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-batch==1.1.0',
-    'azure-mgmt-batch==2.0.0',
+    'azure-batch==2.0.0',
+    'azure-mgmt-batch==3.0.0',
+    'azure-mgmt-keyvault==0.30.0',
     'azure-cli-core'
 ]
 

@@ -5,8 +5,8 @@
 
 FROM python:3.5.2-alpine
 
-ENV CLI_VERSION 0.2.0
-ENV CLI_DOWNLOAD_SHA256 e625a57f61b29f4058a0e30ee35ea527f4e4e0138d74f6191df5794a4ff993ea
+ENV CLI_VERSION 0.2.3
+ENV CLI_DOWNLOAD_SHA256 e27ed69af1e7a3922fe25359a899954bca6d551437fd3edab3e54a8e141ec151
 
 # Metadata as defined at http://label-schema.org
 ARG BUILD_DATE
@@ -32,7 +32,7 @@ RUN pip install --upgrade pip wheel jmespath-terminal
 # ca-certificates 
 # wget - required for installing jp
 RUN apk update \
-        && apk add bash gcc openssl-dev libffi-dev musl-dev jq openssh ca-certificates wget openssl \
+        && apk add bash gcc openssl-dev libffi-dev musl-dev jq openssh ca-certificates wget openssl git \
         && update-ca-certificates
 # We also, install jp
 RUN wget https://github.com/jmespath/jp/releases/download/0.1.2/jp-linux-amd64 -qO /usr/local/bin/jp \

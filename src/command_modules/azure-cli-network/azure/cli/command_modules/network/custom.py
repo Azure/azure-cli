@@ -14,7 +14,9 @@ from azure.mgmt.network.models import \
      NetworkInterfaceIPConfiguration, Route, VpnClientRootCertificate, VpnClientConfiguration,
      AddressSpace, VpnClientRevokedCertificate, SubResource, VirtualNetworkPeering,
      ApplicationGatewayFirewallMode, SecurityRuleAccess, SecurityRuleDirection,
-     SecurityRuleProtocol)
+     SecurityRuleProtocol, IPAllocationMethod, IPVersion,
+     ExpressRouteCircuitSkuTier, ExpressRouteCircuitSkuFamily,
+     VirtualNetworkGatewayType, VirtualNetworkGatewaySkuName, VpnType)
 
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands import LongRunningOperation
@@ -26,9 +28,6 @@ from azure.cli.command_modules.network.mgmt_app_gateway.lib.operations.app_gatew
     import AppGatewayOperations
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.command_modules.network.mgmt_nic.lib.operations.nic_operations import NicOperations
-from azure.mgmt.trafficmanager import TrafficManagerManagementClient
-from azure.mgmt.trafficmanager.models import Endpoint
 from azure.mgmt.dns import DnsManagementClient
 from azure.mgmt.dns.operations import RecordSetsOperations
 from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CnameRecord, MxRecord,
@@ -39,12 +38,22 @@ from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone
 
 logger = azlogging.get_az_logger(__name__)
 
-def _upsert(collection, obj, key_name, key_value):
-    match = next((x for x in collection if getattr(x, key_name, None) == key_value), None)
+def _upsert(parent, collection_name, obj_to_add, key_name):
+
+    if not getattr(parent, collection_name, None):
+        setattr(parent, collection_name, [])
+    collection = getattr(parent, collection_name, None)
+
+    value = getattr(obj_to_add, key_name)
+    if value is None:
+        raise CLIError(
+            "Unable to resolve a value for key '{}' with which to match.".format(key_name))
+    match = next((x for x in collection if getattr(x, key_name, None) == value), None)
     if match:
-        logger.warning("Item '%s' already exists. Replacing with new values.", key_value)
+        logger.warning("Item '%s' already exists. Replacing with new values.", value)
         collection.remove(match)
-    collection.append(obj)
+
+    collection.append(obj_to_add)
 
 #region Generic list commands
 def _generic_list(operation_name, resource_group_name):
@@ -101,7 +110,7 @@ def create_ag_authentication_certificate(resource_group_name, application_gatewa
     ncf = _network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     new_cert = AuthCert(data=cert_data, name=item_name)
-    _upsert(ag.authentication_certificates, new_cert, 'name', item_name)
+    _upsert(ag, 'authentication_certificates', new_cert, 'name')
     return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 def update_ag_authentication_certificate(instance, parent, item_name, cert_data): # pylint: disable=unused-argument
@@ -114,7 +123,7 @@ def create_ag_backend_address_pool(resource_group_name, application_gateway_name
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_pool = ApplicationGatewayBackendAddressPool(name=item_name, backend_addresses=servers)
-    _upsert(ag.backend_address_pools, new_pool, 'name', item_name)
+    _upsert(ag, 'backend_address_pools', new_pool, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 create_ag_backend_address_pool.__doc__ = AppGatewayOperations.create_or_update.__doc__
@@ -141,7 +150,7 @@ def create_ag_frontend_ip_configuration(resource_group_name, application_gateway
             private_ip_address=private_ip_address if private_ip_address else None,
             private_ip_allocation_method='Static' if private_ip_address else 'Dynamic',
             subnet=SubResource(subnet))
-    _upsert(ag.frontend_ip_configurations, new_config, 'name', item_name)
+    _upsert(ag, 'frontend_ip_configurations', new_config, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 create_ag_frontend_ip_configuration.__doc__ = AppGatewayOperations.create_or_update.__doc__
@@ -165,7 +174,7 @@ def create_ag_frontend_port(resource_group_name, application_gateway_name, item_
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_port = ApplicationGatewayFrontendPort(name=item_name, port=port)
-    _upsert(ag.frontend_ports, new_port, 'name', item_name)
+    _upsert(ag, 'frontend_ports', new_port, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
@@ -188,7 +197,7 @@ def create_ag_http_listener(resource_group_name, application_gateway_name, item_
         require_server_name_indication=True if ssl_cert and host_name else None,
         protocol='https' if ssl_cert else 'http',
         ssl_certificate=SubResource(ssl_cert) if ssl_cert else None)
-    _upsert(ag.http_listeners, new_listener, 'name', item_name)
+    _upsert(ag, 'http_listeners', new_listener, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
@@ -225,7 +234,7 @@ def create_ag_backend_http_settings_collection(resource_group_name, application_
         request_timeout=timeout,
         probe=SubResource(probe) if probe else None,
         name=item_name)
-    _upsert(ag.backend_http_settings_collection, new_settings, 'name', item_name)
+    _upsert(ag, 'backend_http_settings_collection', new_settings, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
@@ -257,7 +266,7 @@ def create_ag_probe(resource_group_name, application_gateway_name, item_name, pr
         interval=interval,
         timeout=timeout,
         unhealthy_threshold=threshold)
-    _upsert(ag.probes, new_probe, 'name', item_name)
+    _upsert(ag, 'probes', new_probe, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
@@ -290,7 +299,7 @@ def create_ag_request_routing_rule(resource_group_name, application_gateway_name
         backend_http_settings=SubResource(http_settings),
         http_listener=SubResource(http_listener),
         url_path_map=SubResource(url_path_map) if url_path_map else None)
-    _upsert(ag.request_routing_rules, new_rule, 'name', item_name)
+    _upsert(ag, 'request_routing_rules', new_rule, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
@@ -316,7 +325,7 @@ def create_ag_ssl_certificate(resource_group_name, application_gateway_name, ite
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_cert = ApplicationGatewaySslCertificate(
         name=item_name, data=cert_data, password=cert_password)
-    _upsert(ag.ssl_certificates, new_cert, 'name', item_name)
+    _upsert(ag, 'ssl_certificates', new_cert, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 create_ag_ssl_certificate.__doc__ = AppGatewayOperations.create_or_update.__doc__
@@ -359,7 +368,7 @@ def create_ag_url_path_map(resource_group_name, application_gateway_name, item_n
             backend_http_settings=SubResource(http_settings),
             paths=paths
         )])
-    _upsert(ag.url_path_maps, new_map, 'name', item_name)
+    _upsert(ag, 'url_path_maps', new_map, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
@@ -387,7 +396,7 @@ def create_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
             if address_pool else SubResource(url_map.default_backend_address_pool.id),
         backend_http_settings=SubResource(http_settings) \
             if http_settings else SubResource(url_map.default_backend_http_settings.id))
-    _upsert(url_map.path_rules, new_rule, 'name', item_name)
+    _upsert(url_map, 'path_rules', new_rule, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
@@ -432,7 +441,7 @@ def create_lb_inbound_nat_rule(
         frontend_ip_configuration=frontend_ip,
         enable_floating_ip=floating_ip == 'true',
         idle_timeout_in_minutes=idle_timeout)
-    _upsert(lb.inbound_nat_rules, new_rule, 'name', item_name)
+    _upsert(lb, 'inbound_nat_rules', new_rule, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().inbound_nat_rules, item_name)
 
@@ -467,7 +476,7 @@ def create_lb_inbound_nat_pool(
         frontend_port_range_start=frontend_port_range_start,
         frontend_port_range_end=frontend_port_range_end,
         backend_port=backend_port)
-    _upsert(lb.inbound_nat_pools, new_pool, 'name', item_name)
+    _upsert(lb, 'inbound_nat_pools', new_pool, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().inbound_nat_pools, item_name)
 
@@ -500,7 +509,7 @@ def create_lb_frontend_ip_configuration(
         private_ip_allocation_method=private_ip_address_allocation,
         public_ip_address=PublicIPAddress(public_ip_address) if public_ip_address else None,
         subnet=Subnet(subnet) if subnet else None)
-    _upsert(lb.frontend_ip_configurations, new_config, 'name', item_name)
+    _upsert(lb, 'frontend_ip_configurations', new_config, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().frontend_ip_configurations, item_name)
 
@@ -532,7 +541,7 @@ def create_lb_backend_address_pool(resource_group_name, load_balancer_name, item
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     new_pool = BackendAddressPool(name=item_name)
-    _upsert(lb.backend_address_pools, new_pool, 'name', item_name)
+    _upsert(lb, 'backend_address_pools', new_pool, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().backend_address_pools, item_name)
 
@@ -543,7 +552,7 @@ def create_lb_probe(resource_group_name, load_balancer_name, item_name, protocol
     new_probe = Probe(
         protocol, port, interval_in_seconds=interval, number_of_probes=threshold,
         request_path=path, name=item_name)
-    _upsert(lb.probes, new_probe, 'name', item_name)
+    _upsert(lb, 'probes', new_probe, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().probes, item_name)
 
@@ -577,7 +586,7 @@ def create_lb_rule(
         load_distribution=load_distribution,
         enable_floating_ip=floating_ip == 'true',
         idle_timeout_in_minutes=idle_timeout)
-    _upsert(lb.load_balancing_rules, new_rule, 'name', item_name)
+    _upsert(lb, 'load_balancing_rules', new_rule, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().load_balancing_rules, item_name)
 
@@ -612,8 +621,40 @@ def set_lb_rule(
 
 #region NIC commands
 
-def set_nic(instance, network_security_group=None, enable_ip_forwarding=None,
-            internal_dns_name_label=None):
+# pylint: disable=unused-argument
+def create_nic(resource_group_name, network_interface_name, subnet, location=None, tags=None,
+               internal_dns_name_label=None, enable_ip_forwarding=False,
+               load_balancer_backend_address_pool_ids=None,
+               load_balancer_inbound_nat_rule_ids=None,
+               load_balancer_name=None, network_security_group=None,
+               private_ip_address=None, private_ip_address_version=IPVersion.ipv4.value,
+               public_ip_address=None, virtual_network_name=None):
+    from azure.mgmt.network.models import NetworkInterface
+    client = _network_client_factory().network_interfaces
+    nic = NetworkInterface(location=location, tags=tags, enable_ip_forwarding=enable_ip_forwarding)
+    if internal_dns_name_label:
+        from azure.mgmt.network.models import NetworkInterfaceDnsSettings
+        nic.dns_settings = NetworkInterfaceDnsSettings(
+            internal_dns_name_label=internal_dns_name_label)
+    if network_security_group:
+        nic.network_security_group = NetworkSecurityGroup(id=network_security_group)
+    ip_config = NetworkInterfaceIPConfiguration(
+        name='ipconfig1',
+        load_balancer_backend_address_pools=load_balancer_backend_address_pool_ids,
+        load_balancer_inbound_nat_rules=load_balancer_inbound_nat_rule_ids,
+        private_ip_allocation_method='Static' if private_ip_address else 'Dynamic',
+        private_ip_address=private_ip_address,
+        private_ip_address_version=private_ip_address_version,
+        subnet=Subnet(id=subnet)
+    )
+    if public_ip_address:
+        ip_config.public_ip_address = PublicIPAddress(id=public_ip_address)
+    nic.ip_configurations = [ip_config]
+    return client.create_or_update(resource_group_name, network_interface_name, nic)
+
+
+def update_nic(instance, network_security_group=None, enable_ip_forwarding=None,
+               internal_dns_name_label=None):
 
     if enable_ip_forwarding is not None:
         instance.enable_ip_forwarding = enable_ip_forwarding == 'true'
@@ -629,18 +670,19 @@ def set_nic(instance, network_security_group=None, enable_ip_forwarding=None,
         instance.dns_settings.internal_dns_name_label = internal_dns_name_label
 
     return instance
-set_nic.__doc__ = NicOperations.create_or_update.__doc__
+
 
 def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_name, subnet=None,
                          virtual_network_name=None, public_ip_address=None, load_balancer_name=None, # pylint: disable=unused-argument
                          load_balancer_backend_address_pool_ids=None,
                          load_balancer_inbound_nat_rule_ids=None,
-                         private_ip_address=None, private_ip_address_allocation='dynamic',
-                         private_ip_address_version='ipv4', make_primary=False):
+                         private_ip_address=None,
+                         private_ip_address_allocation=IPAllocationMethod.dynamic.value,
+                         private_ip_address_version=IPVersion.ipv4.value, make_primary=False):
     ncf = _network_client_factory()
     nic = ncf.network_interfaces.get(resource_group_name, network_interface_name)
 
-    if private_ip_address_version == 'ipv4' and not subnet:
+    if private_ip_address_version == IPVersion.ipv4.value and not subnet:
         primary_config = next(x for x in nic.ip_configurations if x.primary)
         subnet = primary_config.subnet.id
 
@@ -658,11 +700,10 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
         private_ip_allocation_method=private_ip_address_allocation,
         private_ip_address_version=private_ip_address_version,
         primary=make_primary)
-    _upsert(nic.ip_configurations, new_config, 'name', ip_config_name)
+    _upsert(nic, 'ip_configurations', new_config, 'name')
     poller = ncf.network_interfaces.create_or_update(
         resource_group_name, network_interface_name, nic)
     return _get_property(poller.result().ip_configurations, ip_config_name)
-create_nic_ip_config.__doc__ = NicOperations.create_or_update.__doc__
 
 def set_nic_ip_config(instance, parent, ip_config_name, subnet=None, # pylint: disable=unused-argument
                       virtual_network_name=None, public_ip_address=None, load_balancer_name=None, # pylint: disable=unused-argument
@@ -706,21 +747,26 @@ def set_nic_ip_config(instance, parent, ip_config_name, subnet=None, # pylint: d
         instance.load_balancer_inbound_nat_rules = load_balancer_inbound_nat_rule_ids
 
     return parent
-set_nic_ip_config.__doc__ = NicOperations.create_or_update.__doc__
+
+def _get_nic_ip_config(nic, name):
+    if nic.ip_configurations:
+        ip_config = next(
+            (x for x in nic.ip_configurations if x.name.lower() == name.lower()), None)
+    else:
+        ip_config = None
+    if not ip_config:
+        raise CLIError('IP configuration {} not found.'.format(name))
+    return ip_config
 
 def add_nic_ip_config_address_pool(
         resource_group_name, network_interface_name, ip_config_name, backend_address_pool,
         load_balancer_name=None): # pylint: disable=unused-argument
     client = _network_client_factory().network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
-    ip_config = next(
-        (x for x in nic.ip_configurations if x.name.lower() == ip_config_name.lower()), None)
-    try:
-        _upsert(ip_config.load_balancer_backend_address_pools,
-                BackendAddressPool(backend_address_pool),
-                'name', backend_address_pool)
-    except AttributeError:
-        ip_config.load_balancer_backend_address_pools = [BackendAddressPool(backend_address_pool)]
+    ip_config = _get_nic_ip_config(nic, ip_config_name)
+    _upsert(ip_config, 'load_balancer_backend_address_pools',
+            BackendAddressPool(backend_address_pool),
+            'id')
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
     return _get_property(poller.result().ip_configurations, ip_config_name)
 
@@ -729,10 +775,7 @@ def remove_nic_ip_config_address_pool(
         load_balancer_name=None): # pylint: disable=unused-argument
     client = _network_client_factory().network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
-    ip_config = next(
-        (x for x in nic.ip_configurations if x.name.lower() == ip_config_name.lower()), None)
-    if not ip_config:
-        raise CLIError('IP configuration {} not found.'.format(ip_config_name))
+    ip_config = _get_nic_ip_config(nic, ip_config_name)
     keep_items = \
         [x for x in ip_config.load_balancer_backend_address_pools or [] \
             if x.id != backend_address_pool]
@@ -745,14 +788,10 @@ def add_nic_ip_config_inbound_nat_rule(
         load_balancer_name=None): # pylint: disable=unused-argument
     client = _network_client_factory().network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
-    ip_config = next(
-        (x for x in nic.ip_configurations if x.name.lower() == ip_config_name.lower()), None)
-    try:
-        _upsert(ip_config.load_balancer_inbound_nat_rules,
-                InboundNatRule(inbound_nat_rule),
-                'name', inbound_nat_rule)
-    except AttributeError:
-        ip_config.load_balancer_inbound_nat_rules = [InboundNatRule(inbound_nat_rule)]
+    ip_config = _get_nic_ip_config(nic, ip_config_name)
+    _upsert(ip_config, 'load_balancer_inbound_nat_rules',
+            InboundNatRule(inbound_nat_rule),
+            'id')
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
     return  _get_property(poller.result().ip_configurations, ip_config_name)
 
@@ -761,10 +800,7 @@ def remove_nic_ip_config_inbound_nat_rule(
         load_balancer_name=None): # pylint: disable=unused-argument
     client = _network_client_factory().network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
-    ip_config = next(
-        (x for x in nic.ip_configurations or [] if x.name.lower() == ip_config_name.lower()), None)
-    if not ip_config:
-        raise CLIError('IP configuration {} not found.'.format(ip_config_name))
+    ip_config = _get_nic_ip_config(nic, ip_config_name)
     keep_items = \
         [x for x in ip_config.load_balancer_inbound_nat_rules if x.id != inbound_nat_rule]
     ip_config.load_balancer_inbound_nat_rules = keep_items
@@ -773,6 +809,12 @@ def remove_nic_ip_config_inbound_nat_rule(
 #endregion
 
 #region Network Security Group commands
+
+def create_nsg(resource_group_name, network_security_group_name, location=None, tags=None):
+    client = _network_client_factory().network_security_groups
+    nsg = NetworkSecurityGroup(location=location, tags=tags)
+    return client.create_or_update(resource_group_name, network_security_group_name, nsg)
+
 
 def create_nsg_rule(resource_group_name, network_security_group_name, security_rule_name,
                     priority, description=None, protocol=SecurityRuleProtocol.asterisk.value,
@@ -815,6 +857,21 @@ update_nsg_rule.__doc__ = SecurityRule.__doc__
 #endregion
 
 #region Public IP commands
+
+def create_public_ip(resource_group_name, public_ip_address_name, location=None, tags=None,
+                     allocation_method=IPAllocationMethod.dynamic.value, dns_name=None,
+                     idle_timeout=4, reverse_fqdn=None, version=IPVersion.ipv4.value):
+    client = _network_client_factory().public_ip_addresses
+    public_ip = PublicIPAddress(
+        location=location, tags=tags, public_ip_allocation_method=allocation_method,
+        idle_timeout_in_minutes=idle_timeout, public_ip_address_version=version,
+        dns_settings=None)
+    if dns_name or reverse_fqdn:
+        from azure.mgmt.network.models import PublicIPAddressDnsSettings
+        public_ip.dns_settings = PublicIPAddressDnsSettings(
+            domain_name_label=dns_name,
+            reverse_fqdn=reverse_fqdn)
+    return client.create_or_update(resource_group_name, public_ip_address_name, public_ip)
 
 def update_public_ip(instance, dns_name=None, allocation_method=None, version=None,
                      idle_timeout=None, reverse_fqdn=None, tags=None):
@@ -867,15 +924,28 @@ create_vnet_peering.__doc__ = VirtualNetworkPeering.__doc__
 
 #region Vnet/Subnet commands
 
-def update_vnet(instance, address_prefixes=None):
-    '''update existing virtual network
-    :param address_prefixes: update address spaces. Use space separated address prefixes,
-        for example, "10.0.0.0/24 10.0.1.0/24"
-    '''
+# pylint: disable=too-many-locals
+def create_vnet(resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
+                subnet_name=None, subnet_prefix=None, dns_servers=None,
+                location=None, tags=None):
+    from azure.mgmt.network.models import VirtualNetwork, DhcpOptions
+    client = _network_client_factory().virtual_networks
+    tags = tags or {}
+    vnet = VirtualNetwork(
+        location=location, tags=tags,
+        dhcp_options=DhcpOptions(dns_servers),
+        address_space=AddressSpace(
+            vnet_prefixes if isinstance(vnet_prefixes, list) else [vnet_prefixes]))
+    if subnet_name:
+        vnet.subnets = [Subnet(name=subnet_name, address_prefix=subnet_prefix)]
+    return client.create_or_update(resource_group_name, vnet_name, vnet)
+
+
+def update_vnet(instance, vnet_prefixes=None):
     #server side validation reports pretty good error message on invalid CIDR,
     #so we don't validate at client side
-    if address_prefixes:
-        instance.address_space.address_prefixes = address_prefixes
+    if vnet_prefixes:
+        instance.address_space.address_prefixes = vnet_prefixes
     return instance
 
 def _set_route_table(ncf, resource_group_name, route_table, subnet):
@@ -1046,7 +1116,7 @@ def create_vnet_gateway_root_cert(resource_group_name, gateway_name, public_cert
         config.vpn_client_root_certificates = []
 
     cert = VpnClientRootCertificate(name=cert_name, public_cert_data=public_cert_data)
-    _upsert(config.vpn_client_root_certificates, cert, 'name', cert_name)
+    _upsert(config, 'vpn_client_root_certificates', cert, 'name')
     return ncf.create_or_update(resource_group_name, gateway_name, gateway)
 
 def delete_vnet_gateway_root_cert(resource_group_name, gateway_name, cert_name):
@@ -1066,7 +1136,7 @@ def create_vnet_gateway_revoked_cert(resource_group_name, gateway_name, thumbpri
     config, gateway, ncf = _prep_cert_create(gateway_name, resource_group_name)
 
     cert = VpnClientRevokedCertificate(name=cert_name, thumbprint=thumbprint)
-    _upsert(config.vpn_client_revoked_certificates, cert, 'name', cert_name)
+    _upsert(config, 'vpn_client_revoked_certificates', cert, 'name')
     return ncf.create_or_update(resource_group_name, gateway_name, gateway)
 
 def delete_vnet_gateway_revoked_cert(resource_group_name, gateway_name, cert_name):
@@ -1099,6 +1169,36 @@ def _prep_cert_create(gateway_name, resource_group_name):
         config.vpn_client_root_certificates = []
 
     return config, gateway, ncf
+
+
+def create_vnet_gateway(resource_group_name, virtual_network_gateway_name, public_ip_address,
+                        virtual_network, location=None, tags=None, address_prefixes=None,
+                        no_wait=False, gateway_type=VirtualNetworkGatewayType.vpn.value,
+                        sku=VirtualNetworkGatewaySkuName.basic.value,
+                        vpn_type=VpnType.route_based.value,
+                        asn=None, bgp_peering_address=None, peer_weight=None):
+    from azure.mgmt.network.models import \
+        (VirtualNetworkGateway, BgpSettings, VirtualNetworkGatewayIPConfiguration,
+         VirtualNetworkGatewaySku)
+
+    client = _network_client_factory().virtual_network_gateways
+    subnet = virtual_network + '/subnets/GatewaySubnet'
+    ip_configuration = VirtualNetworkGatewayIPConfiguration(
+        SubResource(subnet),
+        SubResource(public_ip_address),
+        private_ip_allocation_method='Dynamic', name='vnetGatewayConfig')
+    vnet_gateway = VirtualNetworkGateway(
+        [ip_configuration], gateway_type, vpn_type, location=location, tags=tags,
+        sku=VirtualNetworkGatewaySku(sku, sku))
+    if asn or bgp_peering_address or peer_weight:
+        vnet_gateway.enable_bgp = True
+        vnet_gateway.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
+    if address_prefixes:
+        vnet_gateway.vpn_client_configuration = VpnClientConfiguration()
+        vnet_gateway.vpn_client_configuration.address_prefixes = address_prefixes
+    return client.create_or_update(
+        resource_group_name, virtual_network_gateway_name, vnet_gateway, raw=no_wait)
+
 
 def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None,
                         public_ip_address=None, gateway_type=None, enable_bgp=None,
@@ -1147,6 +1247,22 @@ def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None
 
 # region Express Route commands
 
+def create_express_route(circuit_name, resource_group_name, bandwidth_in_mbps, peering_location,
+                         service_provider_name, location=None, tags=None, no_wait=False,
+                         sku_family=ExpressRouteCircuitSkuFamily.metered_data.value,
+                         sku_tier=ExpressRouteCircuitSkuTier.standard.value):
+    from azure.mgmt.network.models import \
+        (ExpressRouteCircuit, ExpressRouteCircuitSku, ExpressRouteCircuitServiceProviderProperties)
+    client = _network_client_factory().express_route_circuits
+    sku_name = '{}_{}'.format(sku_tier, sku_family)
+    circuit = ExpressRouteCircuit(
+        location=location, tags=tags,
+        service_provider_properties=ExpressRouteCircuitServiceProviderProperties(
+            service_provider_name, peering_location, bandwidth_in_mbps),
+        sku=ExpressRouteCircuitSku(sku_name, sku_tier, sku_family)
+    )
+    return client.create_or_update(resource_group_name, circuit_name, circuit, raw=no_wait)
+
 def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None,
                          service_provider_name=None, sku_family=None, sku_tier=None, tags=None):
     if bandwidth_in_mbps is not None:
@@ -1189,15 +1305,14 @@ def create_express_route_peering(
     """
     from azure.mgmt.network.models import \
         (ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig)
-    from azure.mgmt.network.models import ExpressRouteCircuitPeeringType as PeeringType
-    from azure.mgmt.network.models import ExpressRouteCircuitSkuTier as SkuTier
+    from azure.mgmt.network.models import ExpressRouteCircuitPeeringType
 
     # TODO: Remove workaround when issue #1574 is fixed in the service
     # region Issue #1574 workaround
     circuit = _network_client_factory().express_route_circuits.get(
         resource_group_name, circuit_name)
-    if peering_type == PeeringType.microsoft_peering.value and \
-        circuit.sku.tier == SkuTier.standard.value:
+    if peering_type == ExpressRouteCircuitPeeringType.microsoft_peering.value and \
+        circuit.sku.tier == ExpressRouteCircuitSkuTier.standard.value:
         raise CLIError("MicrosoftPeering cannot be created on a 'Standard' SKU circuit")
     for peering in circuit.peerings:
         if peering.vlan_id == vlan_id:
@@ -1209,7 +1324,7 @@ def create_express_route_peering(
         advertised_public_prefixes=advertised_public_prefixes,
         customer_asn=customer_asn,
         routing_registry_name=routing_registry_name) \
-            if peering_type == PeeringType.microsoft_peering.value else None
+            if peering_type == ExpressRouteCircuitPeeringType.microsoft_peering.value else None
     peering = ExpressRouteCircuitPeering(
         peering_type=peering_type, peer_asn=peer_asn, vlan_id=vlan_id,
         primary_peer_address_prefix=primary_peer_address_prefix,
@@ -1292,6 +1407,19 @@ update_route.__doc__ = Route.__doc__
 
 #region Local Gateway commands
 
+def create_local_gateway(resource_group_name, local_network_gateway_name, gateway_ip_address,
+                         location=None, tags=None, local_address_prefix=None, asn=None,
+                         bgp_peering_address=None, peer_weight=None, no_wait=False):
+    from azure.mgmt.network.models import LocalNetworkGateway, BgpSettings
+    client = _network_client_factory().local_network_gateways
+    local_gateway = LocalNetworkGateway(
+        local_address_prefix or [], location=location, tags=tags,
+        gateway_ip_address=gateway_ip_address)
+    if bgp_peering_address or asn or peer_weight:
+        local_gateway.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
+    return client.create_or_update(
+        resource_group_name, local_network_gateway_name, local_gateway, raw=no_wait)
+
 def update_local_gateway(instance, gateway_ip_address=None, local_address_prefix=None, asn=None,
                          bgp_peering_address=None, peer_weight=None, tags=None):
 
@@ -1310,11 +1438,28 @@ def update_local_gateway(instance, gateway_ip_address=None, local_address_prefix
 #region Traffic Manager Commands
 
 def list_traffic_manager_profiles(resource_group_name=None):
-    ncf = get_mgmt_service_client(TrafficManagerManagementClient).profiles
+    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
+    client = get_mgmt_service_client(TrafficManagerManagementClient).profiles
     if resource_group_name:
-        return ncf.list_all_in_resource_group(resource_group_name)
+        return client.list_all_in_resource_group(resource_group_name)
     else:
-        return ncf.list_all()
+        return client.list_all()
+
+
+def create_traffic_manager_profile(traffic_manager_profile_name, resource_group_name,
+                                   routing_method, unique_dns_name, monitor_path='/',
+                                   monitor_port=80, monitor_protocol='http', status='enabled',
+                                   ttl=30, tags=None):
+    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
+    from azure.mgmt.trafficmanager.models import Profile, DnsConfig, MonitorConfig
+    client = get_mgmt_service_client(TrafficManagerManagementClient).profiles
+    profile = Profile(location='global', tags=tags, profile_status=status,
+                      traffic_routing_method=routing_method,
+                      dns_config=DnsConfig(unique_dns_name, None, ttl),
+                      monitor_config=MonitorConfig(None, monitor_protocol,
+                                                   monitor_port, monitor_path))
+    return client.create_or_update(resource_group_name, traffic_manager_profile_name, profile)
+
 
 def update_traffic_manager_profile(instance, profile_status=None, routing_method=None, tags=None,
                                    monitor_protocol=None, monitor_port=None, monitor_path=None,
@@ -1342,6 +1487,8 @@ def create_traffic_manager_endpoint(resource_group_name, profile_name, endpoint_
                                     endpoint_status=None, weight=None, priority=None,
                                     endpoint_location=None, endpoint_monitor_status=None,
                                     min_child_endpoints=None):
+    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
+    from azure.mgmt.trafficmanager.models import Endpoint
     ncf = get_mgmt_service_client(TrafficManagerManagementClient).endpoints
 
     endpoint = Endpoint(target_resource_id=target_resource_id, target=target,
@@ -1379,8 +1526,9 @@ def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_locat
     return instance
 
 def list_traffic_manager_endpoints(resource_group_name, profile_name, endpoint_type=None):
-    ncf = get_mgmt_service_client(TrafficManagerManagementClient).profiles
-    profile = ncf.get(resource_group_name, profile_name)
+    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
+    client = get_mgmt_service_client(TrafficManagerManagementClient).profiles
+    profile = client.get(resource_group_name, profile_name)
     return [e for e in profile.endpoints if not endpoint_type or e.type.endswith(endpoint_type)]
 #endregion
 

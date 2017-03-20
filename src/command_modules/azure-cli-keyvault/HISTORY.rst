@@ -3,6 +3,18 @@
 Release History
 ===============
 
+0.1.1b6 (2017-03-13)
+++++++++++++++++++++
+
+* Enable creation of KeyVault using service principal. (#2447)
+* Add --secrets for VM and VMSS (#2212)
+
+0.1.1b5 (2017-02-22)
++++++++++++++++++++++
+
+* Documentation updates.
+
+
 0.1.1b4 (2017-02-17)
 +++++++++++++++++++++
 

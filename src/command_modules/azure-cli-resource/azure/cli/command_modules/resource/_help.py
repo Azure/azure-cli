@@ -6,6 +6,10 @@
 from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
 #pylint: disable=line-too-long
+helps['lock'] = """
+    type: group
+    short-summary: Manage Azure locks.
+"""
 helps['policy'] = """
     type: group
     short-summary: Manage resource policies.
@@ -156,7 +160,7 @@ helps['feature'] = """
 
 helps['group'] = """
     type: group
-    short-summary: Manage resource groups.
+    short-summary: Manage resource groups and template deployments.
 """
 
 helps['group exists'] = """
@@ -196,7 +200,7 @@ helps['group list'] = """
 """
 
 helps['group update'] = """
-    type: group
+    type: command
     short-summary: Update a resource group.
 """
 helps['group wait'] = """

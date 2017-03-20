@@ -17,10 +17,10 @@ def get_subscription_id_list(prefix, **kwargs):  # pylint: disable=unused-argume
     return result
 
 
-register_cli_argument('login', 'password', options_list=('--password', '-p'), help='User password or client secret. Will prompt if not given.')
+register_cli_argument('login', 'password', options_list=('--password', '-p'), help="Credentials like user password, or for a service principal, provide client secret or a pem file with key and public certificate. Will prompt if not given.")
 register_cli_argument('login', 'service_principal', action='store_true', help='The credential representing a service principal.')
 register_cli_argument('login', 'username', options_list=('--username', '-u'), help='Organization id or service principal')
-register_cli_argument('login', 'tenant', options_list=('--tenant', '-t'), help='The tenant associated with the service principal.')
+register_cli_argument('login', 'tenant', options_list=('--tenant', '-t'), help='The AAD tenant, must provide when using service principals.')
 
 register_cli_argument('logout', 'username', help='account user, if missing, logout the current active account')
 

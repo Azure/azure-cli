@@ -3,8 +3,30 @@
 Release History
 ===============
 
+2.0.1 (2017-03-13)
+^^^^^^^^^^^^^^^^^^
+
+* Support setting default values for common arguments like default resource group, default web, default vm
+* Fix resource_id parsing to accept 'resourcegroups'
+* Mitigate AI SDK's problem with numeric in properties
+* Fix KeyError: 'environmentName' on 'az account list'
+* Support login to specific tenant
+
+2.0.0 (2017-02-27)
+^^^^^^^^^^^^^^^^^^
+
+* GA release
+
+
+0.1.2rc2 (2017-02-22)
+^^^^^^^^^^^^^^^^^^^^^
+
+* Telemetry: Generate unique event ID for each exception.
+* Show privacy statement on first invocation of ‘az’ command.
+
+
 0.1.2rc1 (2017-02-17)
-^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
 
 * Show commands return empty string with exit code 0 for 404 responses
 * Fix: Ensure known clouds are always in cloud config
