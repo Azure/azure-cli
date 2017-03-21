@@ -5,10 +5,10 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .azure_tfs import AzureTfs
+from .azure_tfs import AzureTfs, VstsInfoProvider
 from .version import VERSION
 
-__all__ = ['AzureTfs']
+__all__ = ['AzureTfs', 'VstsInfoProvider']
 
 __version__ = VERSION
 

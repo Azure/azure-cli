@@ -15,6 +15,10 @@ from .continuous_deployment_operation import ContinuousDeploymentOperation
 from .reference_links import ReferenceLinks
 from .operation import Operation
 from .operation_reference import OperationReference
+from .collection_info import CollectionInfo
+from .repository_info import RepositoryInfo
+from .team_project_info import TeamProjectInfo
+from .vsts_info import VstsInfo
 
 __all__ = [
     'Property',
@@ -27,4 +31,8 @@ __all__ = [
     'ReferenceLinks',
     'Operation',
     'OperationReference',
+    'CollectionInfo',
+    'RepositoryInfo',
+    'TeamProjectInfo',
+    'VstsInfo',
 ]
