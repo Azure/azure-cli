@@ -10,6 +10,8 @@ import azure.cli.core._debug as _debug
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
 from azure.cli.core.application import APPLICATION
+from azure.cli.core.profiles.shared import ResourceType, get_client_class
+from azure.cli.core.profiles import get_api_version
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -17,7 +19,15 @@ UA_AGENT = "AZURECLI/{}".format(core_version)
 ENV_ADDITIONAL_USER_AGENT = 'AZURE_HTTP_USER_AGENT'
 
 
-def get_mgmt_service_client(client_type, subscription_id=None, api_version=None, **kwargs):
+def get_mgmt_service_client(client_or_resource_type, subscription_id=None, api_version=None,
+                            **kwargs):
+    if isinstance(client_or_resource_type, ResourceType):
+        # Get the versioned client
+        client_type = get_client_class(client_or_resource_type)
+        api_version = api_version or get_api_version(client_or_resource_type)
+    else:
+        # Get the default (non-versioned) client
+        client_type = client_or_resource_type
     client, _ = _get_mgmt_service_client(client_type, subscription_id=subscription_id,
                                          api_version=api_version, **kwargs)
     return client

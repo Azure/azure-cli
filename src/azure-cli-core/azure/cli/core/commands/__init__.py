@@ -21,6 +21,8 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.application import APPLICATION
 from azure.cli.core.prompting import prompt_y_n, NoTTYException
 from azure.cli.core._config import az_config, DEFAULTS_SECTION
+from azure.cli.core.profiles import get_api_version
+from azure.cli.core.profiles.shared import ResourceType
 
 from ._introspection import (extract_args_from_signature,
                              extract_full_summary_from_signature)
@@ -324,8 +326,22 @@ def cli_command(module_name, name, operation,
                                          formatter_class=formatter_class)
 
 
+def _patch_mgmt_operation(operation):
+    """ Patch the unversioned mgmt operations to include the appropriate API version for the
+        resource type in question.
+        e.g. Converts azure.mgmt.storage.operations.storage_accounts_operations to
+                      azure.mgmt.storage.v2016_12_01.operations.storage_accounts_operations
+    """
+    for rt in ResourceType:
+        if operation.startswith(rt.sdk_module):
+            return operation.replace(rt.sdk_module,
+                                     rt.sdk_module + '.v' + get_api_version(rt).replace('-', '_'))
+    return operation
+
+
 def get_op_handler(operation):
     """ Import and load the operation handler """
+    operation = _patch_mgmt_operation(operation)
     try:
         mod_to_import, attr_path = operation.split('#')
         op = import_module(mod_to_import)
