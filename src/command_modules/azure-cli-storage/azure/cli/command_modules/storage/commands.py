@@ -26,9 +26,12 @@ from azure.cli.command_modules.storage._validators import \
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.util import empty_on_404
+from azure.cli.core.profiles import get_api_version
+from azure.cli.core.profiles.shared import ResourceType
 
 mgmt_path = 'azure.mgmt.storage.operations.storage_accounts_operations#StorageAccountsOperations.'
 custom_path = 'azure.cli.command_modules.storage.custom#'
+custom_nonce_path = 'azure.cli.command_modules.storage.custom_nonce#'
 file_service_path = 'azure.storage.file.fileservice#FileService.'
 block_blob_path = 'azure.storage.blob.blockblobservice#BlockBlobService.'
 base_blob_path = 'azure.storage.blob.baseblobservice#BaseBlobService.'
@@ -49,16 +52,19 @@ factory = lambda kwargs: storage_client_factory().storage_accounts  # noqa: E731
 cli_command(__name__, 'storage account check-name', mgmt_path + 'check_name_availability', factory)
 cli_command(__name__, 'storage account delete', mgmt_path + 'delete', factory, confirmation=True)
 cli_command(__name__, 'storage account show', mgmt_path + 'get_properties', factory, exception_handler=empty_on_404)
-cli_command(__name__, 'storage account create', custom_path + 'create_storage_account')
 cli_command(__name__, 'storage account list', custom_path + 'list_storage_accounts')
 cli_command(__name__, 'storage account show-usage', custom_path + 'show_storage_account_usage')
 cli_command(__name__, 'storage account show-connection-string', custom_path + 'show_storage_account_connection_string')
-cli_command(__name__, 'storage account keys renew', mgmt_path + 'regenerate_key', factory, transform=lambda x: x.keys)
-cli_command(__name__, 'storage account keys list', mgmt_path + 'list_keys', factory, transform=lambda x: x.keys)
-cli_generic_update_command(__name__, 'storage account update',
-                           mgmt_path + 'get_properties',
-                           mgmt_path + 'update', factory,
-                           custom_function_op=custom_path + 'update_storage_account')
+cli_command(__name__, 'storage account keys renew', mgmt_path + 'regenerate_key', factory, transform=lambda x: getattr(x, 'keys', x))
+cli_command(__name__, 'storage account keys list', mgmt_path + 'list_keys', factory, transform=lambda x: getattr(x, 'keys', x))
+
+cli_command(__name__, 'storage account create', custom_nonce_path + 'create_storage_account')
+if get_api_version(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS) in ['2016-12-01']:
+    cli_generic_update_command(__name__, 'storage account update',
+                               mgmt_path + 'get_properties',
+                               mgmt_path + 'update', factory,
+                               custom_function_op=custom_nonce_path + 'update_storage_account')
+
 cli_storage_data_plane_command('storage account generate-sas', 'azure.storage.cloudstorageaccount#CloudStorageAccount.generate_shared_access_signature', cloud_storage_account_service_factory)
 
 # container commands

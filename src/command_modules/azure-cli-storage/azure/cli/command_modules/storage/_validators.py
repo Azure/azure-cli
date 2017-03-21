@@ -12,9 +12,10 @@ from datetime import datetime, timedelta
 from azure.cli.core._config import az_config
 from azure.cli.core._profile import CLOUD
 from azure.cli.core.util import CLIError
+from azure.cli.core.profiles import get_versioned_models
+from azure.cli.core.profiles.shared import ResourceType
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
-from azure.mgmt.storage import StorageManagementClient
 from azure.storage.sharedaccesssignature import SharedAccessSignature
 from azure.storage.blob import Include, PublicAccess
 from azure.storage.blob.baseblobservice import BaseBlobService
@@ -33,7 +34,7 @@ storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 # Utilities
 
 def _query_account_key(account_name):
-    scf = get_mgmt_service_client(StorageManagementClient)
+    scf = get_mgmt_service_client(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS)
     acc = next((x for x in scf.storage_accounts.list() if x.name == account_name), None)
     if acc:
         from azure.cli.core.commands.arm import parse_resource_id
@@ -282,7 +283,8 @@ def validate_encryption(namespace):
     ''' Builds up the encryption object for storage account operations based on the
     list of services passed in. '''
     if namespace.encryption:
-        from azure.mgmt.storage.models import Encryption, EncryptionServices, EncryptionService
+        rt = ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS
+        Encryption, EncryptionServices, EncryptionService = get_versioned_models(rt, 'Encryption', 'EncryptionServices', 'EncryptionService')  # pylint: disable=line-too-long
         services = {service: EncryptionService(True) for service in namespace.encryption}
         namespace.encryption = Encryption(EncryptionServices(**services))
 

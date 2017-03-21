@@ -81,6 +81,11 @@ helps['storage container create'] = """
           text: az storage container create -n MyStorageContainer --fail-on-exist
 """
 
+helps['storage account create'] = """
+    type: command
+    short-summary: Create a storage account.
+"""
+
 helps['storage account list'] = """
     type: command
     short-summary: Lists storage accounts
