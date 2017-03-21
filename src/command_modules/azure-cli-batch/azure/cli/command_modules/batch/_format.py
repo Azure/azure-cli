@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
+
 from collections import OrderedDict
 
 from six.moves.urllib.parse import unquote  # pylint: disable=import-error
@@ -35,16 +37,229 @@ def task_file_list_table_format(result):
         table_row = OrderedDict()
         table_row['Name'] = item['name']
         table_row['URL'] = item['url']
-        table_row['IsDirectory'] = item['isDirectory']
-        table_row['ContentLength'] = item['properties']['contentLength'] \
+        table_row['Is Directory'] = str(item['isDirectory'])
+        table_row['Content Length'] = str(item['properties']['contentLength']) \
             if item['properties'] else ""
-        table_row['ContentType'] = item['properties']['contentType'] \
+        table_row['Creation Time'] = item['properties']['creationTime'] \
             if item['properties'] else ""
-        table_row['CreationTime'] = item['properties']['creationTime'] \
+        table_output.append(table_row)
+    return table_output
+
+
+def node_file_list_table_format(result):
+    """Format file list as a table."""
+    table_output = []
+    for item in result:
+        table_row = OrderedDict()
+        table_row['Name'] = item['name']
+        table_row['URL'] = item['url']
+        table_row['Is Directory'] = str(item['isDirectory'])
+        table_row['Content Length'] = str(item['properties']['contentLength']) \
             if item['properties'] else ""
-        table_row['LastModified'] = item['properties']['lastModified'] \
+        table_row['Creation Time'] = item['properties']['creationTime'] \
             if item['properties'] else ""
-        table_row['FileMode'] = item['properties']['fileMode'] \
-            if item['properties'] and item['properties']['fileMode'] else ""
+        table_output.append(table_row)
+    return table_output
+
+
+def application_list_table_format(result):
+    """Format application list as a table."""
+    table_output = []
+    for item in result:
+        table_row = OrderedDict()
+        table_row['Id'] = item['id']
+        table_row['Default Version'] = item['defaultVersion']
+        table_row['Allow Updates'] = item['allowUpdates']
+        table_row['Version Count'] = str(len(item['packages'])) if 'packages' in item else '0'
+        table_output.append(table_row)
+    return table_output
+
+
+def application_summary_list_table_format(result):
+    """Format application summary list as a table."""
+    table_output = []
+    for item in result:
+        table_row = OrderedDict()
+        table_row['Application Id'] = item['id']
+        table_row['Display Name'] = item['displayName']
+        table_row['Versions'] = json.dumps(item['versions'])
+        table_output.append(table_row)
+    return table_output
+
+
+def account_list_table_format(result):
+    """Format account list as a table."""
+    table_output = []
+    for item in result:
+        table_row = OrderedDict()
+        table_row['Name'] = item['name']
+        table_row['Location'] = item['location']
+        table_row['Resource Group'] = item['resourceGroup']
+        table_output.append(table_row)
+    return table_output
+
+
+def account_keys_list_table_format(result):
+    """Format account keys list as a table."""
+    table_output = []
+    table_row = OrderedDict()
+    table_row['Number'] = 'Primary'
+    table_row['Key'] = result['primary']
+    table_output.append(table_row)
+    table_row = OrderedDict()
+    table_row['Number'] = 'Secondary'
+    table_row['Key'] = result['secondary']
+    table_output.append(table_row)
+    return table_output
+
+
+def account_keys_renew_table_format(result):
+    """Format account keys list as a table."""
+    table_output = []
+    table_row = OrderedDict()
+    table_row['Number'] = 'Primary'
+    table_row['Key'] = result['primary']
+    table_output.append(table_row)
+    table_row = OrderedDict()
+    table_row['Number'] = 'Secondary'
+    table_row['Key'] = result['secondary']
+    table_output.append(table_row)
+    return table_output
+
+
+def certificate_list_table_format(result):
+    """Format certificate list as a table."""
+    table_output = []
+    for item in result:
+        table_row = OrderedDict()
+        table_row['Thumbprint'] = item['thumbprint']
+        table_row['State'] = item['state']
+        table_row['Previous State'] = item['previousState']
+        table_row['Deletion Error'] = 'True' if item['deleteCertificateError'] else 'False'
+        table_output.append(table_row)
+    return table_output
+
+
+def job_list_table_format(result):
+    """Format job list as a table."""
+    table_output = []
+    for item in result:
+        table_row = OrderedDict()
+        table_row['Job Id'] = item['id']
+        table_row['State'] = item['state']
+        table_row['Previous State'] = item['previousState']
+        table_row['Execution Pool'] = item['executionInfo']['poolId'] \
+            if 'executionInfo' in item else ""
+        table_output.append(table_row)
+    return table_output
+
+
+def job_prep_release_status_list_table_format(result):
+    """Format job prep-release-status list as a table."""
+    table_output = []
+    for item in result:
+        table_row = OrderedDict()
+        table_row['Pool Id'] = item['poolId']
+        table_row['Node Id'] = item['nodeId']
+        table_row['Job Prep State'] = item['jobPreparationTaskExecutionInfo']['state'] \
+            if 'jobPreparationTaskExecutionInfo' in item else ""
+        table_row['Job Release State'] = item['jobReleaseTaskExecutionInfo']['state'] \
+            if 'jobReleaseTaskExecutionInfo' in item else ""
+        table_output.append(table_row)
+    return table_output
+
+
+def job_schedule_list_table_format(result):
+    """Format job-schedule list as a table."""
+    table_output = []
+    for item in result:
+        table_row = OrderedDict()
+        table_row['Job Schedule Id'] = item['id']
+        table_row['State'] = item['state']
+        table_row['Previous State'] = item['previousState']
+        table_output.append(table_row)
+    return table_output
+
+
+def node_list_table_format(result):
+    """Format node list as a table."""
+    table_output = []
+    for item in result:
+        table_row = OrderedDict()
+        table_row['Node Id'] = item['id']
+        table_row['State'] = item['state']
+        table_row['VM Size'] = item['vmSize']
+        table_row['IP Address'] = item['ipAddress']
+        table_output.append(table_row)
+    return table_output
+
+
+def pool_node_agent_skus_list_table_format(result):
+    """Format pool node-agent-skus list as a table."""
+    table_output = []
+    for item in result:
+        table_row = OrderedDict()
+        table_row['Agent Id'] = item['id']
+        table_row['Publisher'] = item['publisher']
+        table_row['Offer'] = item['offer']
+        table_row['Sku'] = item['sku']
+        table_output.append(table_row)
+    return table_output
+
+
+def pool_list_table_format(result):
+    """Format pool list as a table."""
+    table_output = []
+    for item in result:
+        table_row = OrderedDict()
+        table_row['Pool Id'] = item['id']
+        table_row['State'] = item['state']
+        table_row['Allocation State'] = item['allocationState']
+        table_row['VM Size'] = item['vmSize']
+        table_row['VM Count'] = item['currentDedicated']
+        table_row['Type'] = 'IaaS' if item['virtualMachineConfiguration'] else 'PaaS'
+        table_output.append(table_row)
+    return table_output
+
+
+def pool_usage_metrics_list_table_format(result):
+    """Format pool usage-metrics list as a table."""
+    table_output = []
+    for item in result:
+        table_row = OrderedDict()
+        table_row['Pool Id'] = item['poolId']
+        table_row['Start Time'] = item['startTime'] if item['startTime'] else ""
+        table_row['End Time'] = item['endTime'] if item['endTime'] else ""
+        table_row['VM Size'] = item['vmSize']
+        table_row['Total Core Hours'] = str(item['totalCoreHours'])
+        table_output.append(table_row)
+    return table_output
+
+
+def task_list_table_format(result):
+    """Format task list as a table."""
+    table_output = []
+    for item in result:
+        table_row = OrderedDict()
+        table_row['Task Id'] = item['id']
+        table_row['State'] = item['state']
+        table_row['Command Line'] = item['commandLine']
+        table_row['Exit Code'] = str(item['executionInfo']['exitCode']) \
+            if 'executionInfo' in item else ""
+        table_row['Node Id'] = item['nodeInfo']['nodeId'] if 'nodeInfo' in item else ""
+        table_output.append(table_row)
+    return table_output
+
+
+def task_create_table_format(result):
+    """Format task create as a table."""
+
+    #TODO: figure out how to different the multiple task add or single task add
+    table_output = []
+    for item in result:
+        table_row = OrderedDict()
+        table_row['Task Id'] = item['taskId']
+        table_row['Status'] = item['status']
+        table_row['Error'] = item['error']['code'] if 'error' in item else ""
         table_output.append(table_row)
     return table_output
