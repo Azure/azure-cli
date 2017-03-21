@@ -91,11 +91,7 @@ with ParametersContext(command='monitor metric-definitions list') as c:
     c.argument('metric_names', nargs='+')
 
 with ParametersContext(command='monitor metrics list') as c:
-    c.argument('metric_names', nargs='+')
-    c.argument('metric_names', None, nargs='+')
-
-with ParametersContext(command='monitor metrics list') as c:
-    c.argument('metric_names', None, nargs='+')
+    c.argument('metric_names', nargs='+', required=True)
 
 with ParametersContext(command='monitor activity-log list') as c:
     c.register_alias('resource_group', ('--resource-group', '-g'))
