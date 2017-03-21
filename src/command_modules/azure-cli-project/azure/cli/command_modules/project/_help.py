@@ -10,11 +10,6 @@ helps['project'] = """
     short-summary: "Do *magic* project stuff."
 """
 
-helps['project temp-command-setup'] = """
-    type: command
-    short-summary: "Set up a workspace to connect to a kubernetes cluster for deploying a service."
-"""
-
 helps['project run'] = """
     type: command
     short-summary: "Set up automated build and deployment for a service on a kubernetes cluster in the current workspace."

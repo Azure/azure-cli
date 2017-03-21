@@ -13,5 +13,4 @@ cli_command(__name__, 'project create', 'azure.cli.command_modules.project.custo
 cli_command(__name__, 'project browse jenkins', 'azure.cli.command_modules.project.custom#browse_jenkins')
 
 #InnerLoop Commands
-cli_command(__name__, 'project temp-command-setup', 'azure.cli.command_modules.project.custom#setup')
 cli_command(__name__, 'project run', 'azure.cli.command_modules.project.custom#service_run')

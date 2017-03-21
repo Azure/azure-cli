@@ -3,49 +3,47 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import base64
 import codecs
 import glob
 import json
 import os
-import socket
 import platform
+import socket
 import sys
-from subprocess import PIPE, CalledProcessError, Popen, check_output, check_call
-from time import sleep
 import threading
 import webbrowser
+from subprocess import (PIPE, CalledProcessError, Popen, check_call,
+                        check_output)
+from time import sleep
 import requests
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error
-from six.moves.urllib.error import URLError  # pylint: disable=import-error
+from sshtunnel import SSHTunnelForwarder
 
 import azure.cli.command_modules.project.settings as settings
 import azure.cli.command_modules.project.utils as utils
 import azure.cli.core.azlogging as azlogging  # pylint: disable=invalid-name
+from azure.cli.command_modules.acs.custom import (acs_create,
+                                                  k8s_get_credentials,
+                                                  k8s_install_cli)
+from azure.cli.command_modules.acs._params import _get_default_install_location
 from azure.cli.command_modules.project.jenkins import Jenkins
 from azure.cli.command_modules.project.spinnaker import Spinnaker
+from azure.cli.command_modules.resource.custom import _deploy_arm_template_core
+from azure.cli.command_modules.storage._factory import storage_client_factory
+from azure.cli.core._environment import get_config_dir
+from azure.cli.core._profile import Profile
 from azure.cli.core._util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.compute import ComputeManagementClient
+from azure.mgmt.containerregistry import ContainerRegistryManagementClient
+from azure.mgmt.containerregistry.models import (Registry,
+                                                 StorageAccountProperties)
 from azure.mgmt.resource.resources import ResourceManagementClient
 from azure.mgmt.resource.resources.models.resource_group import ResourceGroup
-from azure.mgmt.containerregistry.models import (
-    Registry,
-    StorageAccountProperties)
-from azure.mgmt.containerregistry import ContainerRegistryManagementClient
 from azure.mgmt.storage import StorageManagementClient
-from azure.mgmt.storage.models import (
-    StorageAccountCreateParameters,
-    Sku)
-from azure.mgmt.storage.models import Kind
-from azure.cli.core._profile import Profile
-from azure.cli.core._environment import get_config_dir
-from azure.cli.command_modules.storage._factory import storage_client_factory
-from azure.cli.command_modules.acs.custom import (
-    acs_create,
-    k8s_get_credentials,
-    k8s_install_cli)
-from sshtunnel import SSHTunnelForwarder
+from azure.mgmt.storage.models import Kind, Sku, StorageAccountCreateParameters
+from azure.storage.file import FileService
+from six.moves.urllib.error import URLError  # pylint: disable=import-error
+from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
 logger = azlogging.get_az_logger(__name__)  # pylint: disable=invalid-name
 project_settings = settings.Project()  # pylint: disable=invalid-name
@@ -151,9 +149,9 @@ def create_project(resource_group, name, location):
 
     # 5. Install kubectl
     utils.writeline('Installing kubectl ...')
-    k8s_install_cli()
+    k8s_install_cli(location=_get_default_install_location('kubectl'))
 
-    # 6. Set Kubernetes config 
+    # 6. Set Kubernetes config
     utils.writeline('Setting Kubernetes config ...')
     k8s_get_credentials(name=kube_cluster_name,
                         resource_group_name=resource_group)
@@ -174,6 +172,11 @@ def create_project(resource_group, name, location):
     project_settings.location = location
     project_settings.project_name = name
     utils.writeline('Project "{}" created.'.format(name))
+
+    # 8. Configure the Kubernetes cluster
+    # Initializes a workspace definition that automates connection to a Kubernetes cluster
+    # in an Azure container service for deploying services.
+    _configure_cluster()
 
 
 def create_continuous_deployment(remote_access_token):  # pylint: disable=unused-argument
@@ -375,28 +378,14 @@ def _get_git_remote_url():
     return remote_url.decode()
 
 
-def setup():
-    """
-    Initializes a workspace definition that automates connection to a Kubernetes cluster in an Azure container
-    service for deploying services.
-    """
-    _configure_cluster()
-
-
 def _configure_cluster():  # pylint: disable=too-many-statements
     """
-    Configures the cluster to deploy tenx services which can be used by the user deployed services and initializes
-    a workspace on the local machine to connection.
+    Configures the cluster to deploy tenx services which can be used by the user 
+    deployed services and initializes a workspace on the local machine to connection.
     Asks for user input: ACR server name.
     """
     kubernetes_path = None
     try:
-        # Validate if az project exists
-        if not os.path.exists(project_settings.settings_file):
-            utils.writeline(
-                "projectResource.json not found, please run 'az project create' to create resources.")
-            sys.exit(1)
-
         # Setting the values
         dns_prefix = project_settings.cluster_name
         location = project_settings.location
@@ -418,6 +407,11 @@ def _configure_cluster():  # pylint: disable=too-many-statements
 
         utils.writeline('Configuring Kubernetes cluster ...')
 
+        # Removing existing cluster from ~/.ssh/known_hosts
+        known_hostname = 'ssh-keygen -R {}.{}.cloudapp.azure.com'.format(
+            dns_prefix, location)
+        _execute_command(namespace_command, True)
+
         innerloop_client_path = _get_innerloop_home_path()
         kubernetes_path = os.path.join(
             innerloop_client_path, 'setup', 'Kubernetes')
@@ -430,13 +424,13 @@ def _configure_cluster():  # pylint: disable=too-many-statements
 
         # Cluster Setup(deploying required artifacts in the kubectl nodes)
         utils.writeline('Preparing ARM configuration ...')
-        _prepare_arm_k8(dns_prefix)
+        k8_parameters = _prepare_arm_k8(dns_prefix)
 
         utils.writeline('Creating Resources ...')
         utils.writeline('This is going to take a while. Sit back and relax.')
-        deployment_command = "az group deployment create --template-file {0}/k8.deploy.json --parameters \
-        '@{0}/k8.deploy.parameters.tmp.json' -g {1} -n {2}".format(kubernetes_path, resource_group, dns_prefix)
-        check_call(deployment_command, shell=True)
+        _deploy_arm_template_core(
+            resource_group, template_file='{}/k8.deploy.json'.format(kubernetes_path), deployment_name=dns_prefix,
+            parameters=k8_parameters)
         utils.writeline('Done with the resources!')
 
         utils.writeline('Creating tenx namespace ...')
@@ -524,7 +518,7 @@ def _configure_cluster():  # pylint: disable=too-many-statements
         utils.writeline('This might take some waiting.')
         workspace_storage = dns_prefix.replace('-', '') + 'wks'
         _initialize_workspace(
-            dns_prefix, workspace_storage, workspace_storage_key)
+            dns_prefix, user_name, workspace_storage, workspace_storage_key, location=location)
     finally:
         # Removing temporary data files
         if kubernetes_path != None:
@@ -553,7 +547,7 @@ def _cluster_configured(dns_prefix, user_name):  # pylint: disable=too-many-retu
     2. Checks if all the services are running by pinging each URL.
     """
 
-    utils.writeline('Detecting if the cluster exists ...')
+    utils.writeline('Detecting if the cluster is configured ...')
     settings_json_file_path = _get_workspace_settings_file()
     workspace_err_message = '  Workspace not defined.'
     if not os.path.exists(settings_json_file_path):
@@ -700,24 +694,8 @@ def _install_k8_shares(resource_group, dns_prefix):
     config_storage = dns_prefix.replace('-', '') + "cfgsa"
     workspace_storage = dns_prefix.replace('-', '') + "wks"
     scf = storage_client_factory()
-
-    try:
-        keys_list_json = scf.storage_accounts.list_keys(
-            resource_group, config_storage).keys  # pylint: disable=no-member
-        config_storage_key = list(keys_list_json)[0].value
-    except Exception as error:
-        logger.debug(error)
-        raise CLIError(
-            "Can't get storage account key for {0}".format(config_storage))
-
-    try:
-        keys_list_json = scf.storage_accounts.list_keys(
-            resource_group, workspace_storage).keys  # pylint: disable=no-member
-        workspace_storage_key = list(keys_list_json)[0].value
-    except Exception as error:
-        logger.debug(error)
-        raise CLIError(
-            "Can't get storage account key for {0}".format(workspace_storage))
+    config_storage_key = _get_storage_key(resource_group, scf, config_storage, 10)
+    workspace_storage_key = _get_storage_key(resource_group, scf, workspace_storage, 10)
 
     innerloop_client_path = _get_innerloop_home_path()
     connect_template_path = os.path.join(
@@ -736,22 +714,37 @@ def _install_k8_shares(resource_group, dns_prefix):
         connect_output_file.write(connect_template)
 
     # Ensure 'cfgs' share exists in configStorage
-    check_call("az storage share create -n 'cfgs' --account-name {0} --account-key {1}".format(
-        config_storage, config_storage_key), shell=True)
+    file_service = FileService(account_name=config_storage, account_key=config_storage_key)
+    file_service.create_share(share_name='cfgs')
 
     # Ensure 'mindaro' share exists in configStorage
-    check_call("az storage share create -n 'mindaro' --account-name {0} --account-key {1}".format(
-        workspace_storage, workspace_storage_key), shell=True)
+    file_service = FileService(account_name=workspace_storage, account_key=workspace_storage_key)
+    file_service.create_share(share_name='mindaro')
 
     return workspace_storage_key
 
 
-def to_base64(string_value):
-    """
-    Converts string to base64 string.
-    """
-    encoding = "utf-8"
-    return base64.b64encode(bytes(string_value, encoding)).decode(encoding)
+def _get_storage_key(resource_group, scf, storage, tries):
+    # Re-tries in case the config storage account is not ready yet
+    retry = 0
+    storage_key = None
+    while retry < tries:
+        try:
+            keys_list_json = scf.storage_accounts.list_keys(
+                resource_group, storage).keys  # pylint: disable=no-member
+            storage_key = list(keys_list_json)[0].value
+            if storage_key != None:
+                break
+        except Exception as error:
+            logger.debug(error)
+        finally:
+            logger.warning("Couldn't get storage account key for {0}, Retrying ...".format(storage))
+            sleep(2)
+            retry = retry + 1
+    if storage_key == None:
+        raise CLIError(
+            "Can't get storage account key for {0}".format(storage))
+    return storage_key
 
 
 def _execute_command(command, ignore_failure=False):
@@ -856,15 +849,19 @@ def _prepare_arm_k8(dns_prefix):
             innerloop_client_path, 'setup', 'Kubernetes', 'k8.deploy.parameters.tmp.json')
         with open(new_k8_parameters_file_path, "w") as new_k8_parameters_file:
             new_k8_parameters_file.write(new_k8_parameters)
+
+        return new_k8_parameters
     except FileNotFoundError as error:
         raise CLIError(error)
 
 
 def _initialize_workspace(
         dns_prefix,
+        user_name,
         storage_account_name,
         storage_account_key,
-        workspace_share_name='mindaro'):
+        workspace_share_name='mindaro',
+        location='westus'):
     """
     Calls tenx initialize command on the current directory.
     Initialize creates settings.json file which contains all the credentials and links to connect to the cluster.
@@ -877,7 +874,13 @@ def _initialize_workspace(
         os.remove(settings_json_file)
 
     run_innerloop_command('initialize', workspace_share_name, dns_prefix,
-                          storage_account_name, storage_account_key, workspace_share_name, '--k8')
+                          storage_account_name, storage_account_key, workspace_share_name, location, '--k8')
+
+    # Checking if the services are ready
+    while not _cluster_configured(dns_prefix, user_name):
+        utils.writeline('Services are not ready yet. Waiting ...')
+        sleep(5)
+    utils.writeline('Cluster configured successfully.')
 
 
 def service_run(project_path):
@@ -900,6 +903,12 @@ def service_run(project_path):
             project_path = curr_dir
         elif not os.path.exists(project_path):
             raise CLIError("Invalid path: {0}".format(project_path))
+
+        # Validate if az project exists
+        if not os.path.exists(project_settings.settings_file):
+            utils.writeline(
+                "projectResource.json not found, please run 'az project create' to create resources.")
+            sys.exit(1)
 
         # Configuring Cluster
         _configure_cluster()
