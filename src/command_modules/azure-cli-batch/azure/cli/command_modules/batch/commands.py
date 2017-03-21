@@ -22,7 +22,13 @@ from azure.cli.command_modules.batch._client_factory import (
     location_client_factory,
     pool_client_factory,
     task_client_factory)
-from azure.cli.command_modules.batch._format import job_list_table_format, task_create_table_format
+from azure.cli.command_modules.batch._format import (
+    job_list_table_format,
+    task_create_table_format,
+    account_keys_list_table_format,
+    account_list_table_format,
+    application_list_table_format,
+    account_keys_renew_table_format)
 
 
 data_path = 'azure.batch.operations.{}_operations#{}'
@@ -32,17 +38,17 @@ mgmt_path = 'azure.mgmt.batch.operations.{}_operations#{}'
 # pylint: disable=line-too-long
 # Mgmt Account Operations
 
-cli_command(__name__, 'batch account list', custom_path.format('list_accounts'), account_mgmt_client_factory)
+cli_command(__name__, 'batch account list', custom_path.format('list_accounts'), account_mgmt_client_factory, table_transformer=account_list_table_format)
 cli_command(__name__, 'batch account show', mgmt_path.format('batch_account', 'BatchAccountOperations.get'), account_mgmt_client_factory)
 cli_command(__name__, 'batch account create', custom_path.format('create_account'), account_mgmt_client_factory)
 cli_command(__name__, 'batch account set', custom_path.format('update_account'), account_mgmt_client_factory)
 cli_command(__name__, 'batch account delete', mgmt_path.format('batch_account', 'BatchAccountOperations.delete'), account_mgmt_client_factory, confirmation=True)
 cli_command(__name__, 'batch account autostorage-keys sync', mgmt_path.format('batch_account', 'BatchAccountOperations.synchronize_auto_storage_keys'), account_mgmt_client_factory)
-cli_command(__name__, 'batch account keys list', mgmt_path.format('batch_account', 'BatchAccountOperations.get_keys'), account_mgmt_client_factory)
-cli_command(__name__, 'batch account keys renew', mgmt_path.format('batch_account', 'BatchAccountOperations.regenerate_key'), account_mgmt_client_factory)
+cli_command(__name__, 'batch account keys list', mgmt_path.format('batch_account', 'BatchAccountOperations.get_keys'), account_mgmt_client_factory, table_transformer=account_keys_list_table_format)
+cli_command(__name__, 'batch account keys renew', mgmt_path.format('batch_account', 'BatchAccountOperations.regenerate_key'), account_mgmt_client_factory, table_transformer=account_keys_renew_table_format)
 cli_command(__name__, 'batch account login', custom_path.format('login_account'), account_mgmt_client_factory)
 
-cli_command(__name__, 'batch application list', mgmt_path.format('application', 'ApplicationOperations.list'), application_mgmt_client_factory)
+cli_command(__name__, 'batch application list', mgmt_path.format('application', 'ApplicationOperations.list'), application_mgmt_client_factory, table_transformer=application_list_table_format)
 cli_command(__name__, 'batch application show', mgmt_path.format('application', 'ApplicationOperations.get'), application_mgmt_client_factory)
 cli_command(__name__, 'batch application create', mgmt_path.format('application', 'ApplicationOperations.create'), application_mgmt_client_factory)
 cli_command(__name__, 'batch application set', custom_path.format('update_application'), application_mgmt_client_factory)
