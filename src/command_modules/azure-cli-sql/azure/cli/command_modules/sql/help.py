@@ -68,10 +68,10 @@ helps['sql db export'] = """
             short-summary: Exports a database to a bacpac
 
             examples:
-                name: Export bacpac using SAS key
+              - name: Export bacpac using SAS key
                 text: az sql db import -s myserver -n mydatabase -g mygroup -p password -u login --storage-key "mysaskey" --storage-key-type SharedAccessKey --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/mybacpac.bacpac
 
-                name: Export bacpac using storage account Key
+              - name: Export bacpac using storage account Key
                 text: az sql db import -s myserver -n mydatabase -g mygroup -p password -u login --storage-key "storageaccountkey" --storage-key-type StorageAccessKey --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/mybacpac.bacpac
             """
 helps['sql db import'] = """
@@ -79,10 +79,10 @@ helps['sql db import'] = """
             short-summary: Imports a bacpac into an existing database.
 
             examples:
-                name: Import bacpac into an existing database using SAS key
+              - name: Import bacpac into an existing database using SAS key
                 text: az sql db export -s myserver -n mydatabase -g mygroup -p password -u login --storage-key "mysaskey" --storage-key-type SharedAccessKey --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/mybacpac.bacpac
 
-                name: Import bacpac into an existing database using storage account key
+              - name: Import bacpac into an existing database using storage account key
                 text: az sql db export -s myserver -n mydatabase -g mygroup -p password -u login --storage-key "storageaccountkey" --storage-key-type StorageAccessKey --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/mybacpac.bacpac
             """
 # helps['sql db restore-point'] = """
