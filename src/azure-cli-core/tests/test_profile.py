@@ -165,6 +165,19 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         self.assertFalse(storage_mock['subscriptions'][1]['isDefault'])
         self.assertTrue(storage_mock['subscriptions'][0]['isDefault'])
 
+    def test_default_active_subscription_to_non_disabled_one(self):
+        storage_mock = {'subscriptions': None}
+        profile = Profile(storage_mock)
+
+        subscriptions = profile._normalize_properties(
+            self.user2, [self.subscription2, self.subscription1], False)
+
+        profile._set_subscriptions(subscriptions)
+
+        # verify we skip the overdued subscription and default to the 2nd one in the list
+        self.assertEqual(storage_mock['subscriptions'][1]['name'], self.subscription1.display_name)
+        self.assertTrue(storage_mock['subscriptions'][1]['isDefault'])
+
     def test_get_subscription(self):
         storage_mock = {'subscriptions': None}
         profile = Profile(storage_mock)
