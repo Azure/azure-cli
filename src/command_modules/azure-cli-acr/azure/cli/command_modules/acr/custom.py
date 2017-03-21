@@ -6,17 +6,18 @@
 from azure.cli.core.commands import LongRunningOperation
 
 from azure.mgmt.containerregistry.models import (
-    Registry,
     RegistryUpdateParameters,
-    StorageAccountProperties
+    StorageAccountParameters
 )
 
 from ._factory import get_acr_service_client
 from ._utils import (
-    get_access_key_by_storage_account_name,
     get_resource_group_name_by_registry_name,
-    arm_deploy_template,
-    random_storage_account_name
+    get_access_key_by_storage_account_name,
+    arm_deploy_template_new_storage,
+    arm_deploy_template_existing_storage,
+    random_storage_account_name,
+    get_location_from_resource_group
 )
 
 import azure.cli.core.azlogging as azlogging
@@ -31,7 +32,7 @@ def acr_check_name(registry_name):
     return client.check_name_availability(registry_name)
 
 def acr_list(resource_group_name=None):
-    '''Lists all the available container registries under the current subscription.
+    '''Lists all the container registries under the current subscription.
     :param str resource_group_name: The name of resource group
     '''
     client = get_acr_service_client().registries
@@ -43,43 +44,50 @@ def acr_list(resource_group_name=None):
 
 def acr_create(registry_name, #pylint: disable=too-many-arguments
                resource_group_name,
-               location,
+               sku,
+               location=None,
                storage_account_name=None,
-               admin_enabled='false'):
+               admin_enabled='false',
+               deployment_name=None):
     '''Creates a container registry.
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group
+    :param str sku: The SKU of the container registry
     :param str location: The name of location
     :param str storage_account_name: The name of storage account
     :param str admin_enabled: Indicates whether the admin user is enabled
+    :param str deployment_name: The name of the deployment
     '''
+    if location is None:
+        location = get_location_from_resource_group(resource_group_name)
     client = get_acr_service_client().registries
     admin_user_enabled = admin_enabled == 'true'
 
     if storage_account_name is None:
         storage_account_name = random_storage_account_name(registry_name)
         LongRunningOperation()(
-            arm_deploy_template(resource_group_name,
-                                registry_name,
-                                location,
-                                storage_account_name,
-                                admin_user_enabled)
+            arm_deploy_template_new_storage(
+                resource_group_name,
+                registry_name,
+                location,
+                sku,
+                storage_account_name,
+                admin_user_enabled,
+                deployment_name)
         )
-        registry = client.get_properties(resource_group_name, registry_name)
     else:
-        storage_account_key = get_access_key_by_storage_account_name(storage_account_name)
-        registry = client.create_or_update(
-            resource_group_name, registry_name,
-            Registry(
-                location=location,
-                storage_account=StorageAccountProperties(
-                    storage_account_name,
-                    storage_account_key
-                ),
-                admin_user_enabled=admin_user_enabled
-            )
+        LongRunningOperation()(
+            arm_deploy_template_existing_storage(
+                resource_group_name,
+                registry_name,
+                location,
+                sku,
+                storage_account_name,
+                admin_user_enabled,
+                deployment_name)
         )
 
+    registry = client.get(resource_group_name, registry_name)
     logger.warning('\nCreate a new service principal and assign access:')
     logger.warning(
         '  az ad sp create-for-rbac --scopes %s --role Owner --password <password>',
@@ -113,7 +121,7 @@ def acr_show(registry_name, resource_group_name=None):
 
     client = get_acr_service_client().registries
 
-    return client.get_properties(resource_group_name, registry_name)
+    return client.get(resource_group_name, registry_name)
 
 def acr_update_get(client,
                    registry_name,
@@ -121,7 +129,7 @@ def acr_update_get(client,
     if resource_group_name is None:
         resource_group_name = get_resource_group_name_by_registry_name(registry_name)
 
-    props = client.get_properties(resource_group_name, registry_name)
+    props = client.get(resource_group_name, registry_name)
 
     return RegistryUpdateParameters(
         tags=props.tags,
@@ -142,7 +150,7 @@ def acr_update_custom(instance,
     if storage_account_name is not None:
         storage_account_key = \
             get_access_key_by_storage_account_name(storage_account_name)
-        storage_account = StorageAccountProperties(
+        storage_account = StorageAccountParameters(
             storage_account_name,
             storage_account_key
         )

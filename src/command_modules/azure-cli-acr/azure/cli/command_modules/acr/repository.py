@@ -61,7 +61,7 @@ def _validate_user_credentials(registry_name, path, resultIndex, username=None, 
     try:
         cred = acr_credential_show(registry_name)
         username = cred.username
-        password = cred.password
+        password = cred.passwords[0].value
         return _obtain_data_from_registry(login_server, path, resultIndex, username, password)
     except: #pylint: disable=bare-except
         pass
