@@ -7,6 +7,8 @@
 from codecs import open
 from setuptools import setup
 
+VERSION = "0.0.1b1+dev"
+
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = [
@@ -19,6 +21,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
 ]
 
 DEPENDENCIES = [
@@ -26,16 +29,18 @@ DEPENDENCIES = [
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
+with open('HISTORY.rst', 'r', encoding='utf-8') as f:
+    HISTORY = f.read()
 
 setup(
     name='azure-cli-example',
-    version='0.0.1',
+    version=VERSION,
     description='Microsoft Azure Command-Line Tools Example Command Module',
-    long_description=README,
+    long_description=README + '\n\n' + HISTORY,
     license='MIT',
-    author='Example Author',
-    author_email='author@example.com',
-    url='https://github.com/example/repo',
+    author='Microsoft Corporation',
+    author_email='azpycli@microsoft.com',
+    url='https://github.com/Azure/azure-cli',
     classifiers=CLASSIFIERS,
     namespace_packages = [
         'azure',

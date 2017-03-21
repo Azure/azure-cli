@@ -4,32 +4,60 @@
 # --------------------------------------------------------------------------------------------
 
 import argparse
-from collections import OrderedDict
-from datetime import datetime
 import os
 import re
+from collections import OrderedDict
+from datetime import datetime, timedelta
 
 from azure.cli.core._config import az_config
+from azure.cli.core._profile import CLOUD
 from azure.cli.core._util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
-
-from azure.cli.core._profile import CLOUD
-
 from azure.mgmt.storage import StorageManagementClient
-from azure.mgmt.storage.models import CustomDomain
-from azure.storage.models import ResourceTypes, Services
-from azure.storage.table import TablePermissions, TablePayloadFormat
+from azure.storage.sharedaccesssignature import SharedAccessSignature
 from azure.storage.blob import Include, PublicAccess
 from azure.storage.blob.baseblobservice import BaseBlobService
-from azure.storage.blob.models import ContentSettings as BlobContentSettings
+from azure.storage.blob.models import ContentSettings as BlobContentSettings, BlobPermissions
 from azure.storage.file import FileService
 from azure.storage.file.models import ContentSettings as FileContentSettings
+from azure.storage.models import ResourceTypes, Services
+from azure.storage.table import TablePermissions, TablePayloadFormat
 
 from ._factory import get_storage_data_service_client
 from .util import glob_files_locally
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
+
+
+# Utilities
+
+def _query_account_key(account_name):
+    scf = get_mgmt_service_client(StorageManagementClient)
+    acc = next((x for x in scf.storage_accounts.list() if x.name == account_name), None)
+    if acc:
+        from azure.cli.core.commands.arm import parse_resource_id
+        rg = parse_resource_id(acc.id)['resource_group']
+        return scf.storage_accounts.list_keys(rg, account_name).keys[0].value  # pylint: disable=no-member
+    else:
+        raise ValueError("Storage account '{}' not found.".format(account_name))
+
+
+def _create_short_lived_blob_sas(account_name, account_key, container, blob):
+    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    sas = SharedAccessSignature(account_name, account_key)
+    return sas.generate_blob(container, blob, permission=BlobPermissions(read=True), expiry=expiry,
+                             protocol='https')
+
+
+def _create_short_lived_file_sas(account_name, account_key, share, directory_name, file_name):
+    # if dir is empty string change it to None
+    directory_name = directory_name if directory_name else None
+    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    sas = SharedAccessSignature(account_name, account_key)
+    return sas.generate_file(share, directory_name=directory_name, file_name=file_name,
+                             permission=BlobPermissions(read=True), expiry=expiry, protocol='https')
+
 
 # region PARAMETER VALIDATORS
 
@@ -41,6 +69,7 @@ def validate_accept(namespace):
             'full': TablePayloadFormat.JSON_FULL_METADATA
         }
         namespace.accept = formats[namespace.accept.lower()]
+
 
 def validate_client_parameters(namespace):
     """ Retrieves storage connection parameters from environment variables and parses out
@@ -64,45 +93,102 @@ def validate_client_parameters(namespace):
     if not n.sas_token:
         n.sas_token = az_config.get('storage', 'sas_token', None)
 
-    # if account name is specified but no key, attempt to query
-    if n.account_name and not n.account_key:
-        scf = get_mgmt_service_client(StorageManagementClient)
-        acc = next((x for x in scf.storage_accounts.list() if x.name == n.account_name), None)
-        if acc:
-            from azure.cli.core.commands.arm import parse_resource_id
-            rg = parse_resource_id(acc.id)['resource_group']
-            n.account_key = \
-                scf.storage_accounts.list_keys(rg, n.account_name).keys[0].value #pylint: disable=no-member
-        else:
-            raise ValueError("Storage account '{}' not found.".format(n.account_name))
+    # strip the '?' from sas token. the portal and command line are returns sas token in different
+    # forms
+    if n.sas_token:
+        n.sas_token = n.sas_token.lstrip('?')
 
-def validate_source_uri(namespace):
-    usage_string = 'invalid usage: supply only one of the following argument sets:' + \
-                   '\n\t   --source-uri' + \
-                   '\n\tOR --source-container --source-blob [--source-snapshot] [--source-sas]' + \
-                   '\n\tOR --source-share --source-path [--source-sas]'
+    # if account name is specified but no key, attempt to query
+    if n.account_name and not n.account_key and not n.sas_token:
+        n.account_key = _query_account_key(n.account_name)
+
+
+def validate_source_uri(namespace):  # pylint: disable=too-many-statements
+    usage_string = \
+        'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
+        '\n\t   --source-uri' \
+        '\n\tOR --source-container --source-blob [--source-account-name & sas] [--source-snapshot]'\
+        '\n\tOR --source-container --source-blob [--source-account-name & key] [--source-snapshot]'\
+        '\n\tOR --source-share --source-path' \
+        '\n\tOR --source-share --source-path [--source-account-name & sas]' \
+        '\n\tOR --source-share --source-path [--source-account-name & key]'
+
     ns = vars(namespace)
-    validate_client_parameters(namespace) # must run first to resolve storage account
-    storage_acc = ns.get('account_name', None) or az_config.get('storage', 'account', None)
-    uri = ns.get('copy_source', None)
+
+    # source as blob
     container = ns.pop('source_container', None)
     blob = ns.pop('source_blob', None)
-    sas = ns.pop('source_sas', None)
     snapshot = ns.pop('source_snapshot', None)
+
+    # source as file
     share = ns.pop('source_share', None)
     path = ns.pop('source_path', None)
+
+    # source credential clues
+    source_account_name = ns.pop('source_account_name', None)
+    source_account_key = ns.pop('source_account_key', None)
+    sas = ns.pop('source_sas', None)
+
+    # source in the form of an uri
+    uri = ns.get('copy_source', None)
     if uri:
-        if any([container, blob, sas, snapshot, share, path]):
-            raise ValueError(usage_string)
+        if any([container, blob, sas, snapshot, share, path, source_account_name,
+                source_account_key]):
+            raise ValueError(usage_string.format('Unused parameters are given in addition to the '
+                                                 'source URI'))
         else:
             # simplest scenario--no further processing necessary
             return
 
+    # ensure either a file or blob source is specified
     valid_blob_source = container and blob and not share and not path
     valid_file_source = share and path and not container and not blob and not snapshot
 
-    if (not valid_blob_source and not valid_file_source) or (valid_blob_source and valid_file_source): # pylint: disable=line-too-long
-        raise ValueError(usage_string)
+    if not valid_blob_source and not valid_file_source:
+        raise ValueError(usage_string.format('Neither a valid blob or file source is specified'))
+    elif valid_blob_source and valid_file_source:
+        raise ValueError(usage_string.format('Ambiguous parameters, both blob and file sources are '
+                                             'specified'))
+
+    validate_client_parameters(namespace)  # must run first to resolve storage account
+
+    # determine if the copy will happen in the same storage account
+    same_account = False
+    if not source_account_name and source_account_key:
+        raise ValueError(usage_string.format('Source account key is given but account name is not'))
+    elif not source_account_name and not source_account_key:
+        # neither source account name or key is given, assume that user intends to copy blob in
+        # the same account
+        same_account = True
+        source_account_name = ns.get('account_name', None)
+        source_account_key = ns.get('account_key', None)
+    elif source_account_name and not source_account_key:
+        if source_account_name == ns.get('account_name', None):
+            # the source account name is same as the destination account name
+            same_account = True
+            source_account_key = ns.get('account_key', None)
+        else:
+            # the source account is different from destination account but the key is missing
+            # try to query one.
+            try:
+                source_account_key = _query_account_key(source_account_name)
+            except ValueError:
+                raise ValueError('Source storage account {} not found.'.format(source_account_name))
+    # else: both source account name and key are given by user
+
+    if not source_account_name:
+        raise ValueError(usage_string.format('Storage account name not found'))
+
+    if not sas:
+        # generate a sas token even in the same account when the source and destination are not the
+        # same kind.
+        if valid_file_source and (ns.get('container_name', None) or not same_account):
+            dir_name, file_name = os.path.split(path) if path else (None, '')
+            sas = _create_short_lived_file_sas(source_account_name, source_account_key, share,
+                                               dir_name, file_name)
+        elif valid_blob_source and (ns.get('share_name', None) or not same_account):
+            sas = _create_short_lived_blob_sas(source_account_name, source_account_key, container,
+                                               blob)
 
     query_params = []
     if sas:
@@ -111,7 +197,7 @@ def validate_source_uri(namespace):
         query_params.append(snapshot)
 
     uri = 'https://{0}.{1}.{6}/{2}/{3}{4}{5}'.format(
-        storage_acc,
+        source_account_name,
         'blob' if valid_blob_source else 'file',
         container if valid_blob_source else share,
         blob if valid_blob_source else path,
@@ -121,9 +207,11 @@ def validate_source_uri(namespace):
 
     namespace.copy_source = uri
 
+
 def validate_blob_type(namespace):
     if not namespace.blob_type:
         namespace.blob_type = 'page' if namespace.file_path.endswith('.vhd') else 'block'
+
 
 def get_content_setting_validator(settings_class, update):
     def _class_name(class_type):
@@ -152,13 +240,13 @@ def get_content_setting_validator(settings_class, update):
                 container = ns.get('container_name')
                 blob = ns.get('blob_name')
                 lease_id = ns.get('lease_id')
-                props = client.get_blob_properties(container, blob, lease_id=lease_id).properties.content_settings # pylint: disable=line-too-long
+                props = client.get_blob_properties(container, blob, lease_id=lease_id).properties.content_settings  # pylint: disable=line-too-long
             elif _class_name(settings_class) == _class_name(FileContentSettings):
-                client = get_storage_data_service_client(FileService, account, key, cs, sas) # pylint: disable=redefined-variable-type
+                client = get_storage_data_service_client(FileService, account, key, cs, sas)  # pylint: disable=redefined-variable-type
                 share = ns.get('share_name')
                 directory = ns.get('directory_name')
                 filename = ns.get('file_name')
-                props = client.get_file_properties(share, directory, filename).properties.content_settings # pylint: disable=line-too-long
+                props = client.get_file_properties(share, directory, filename).properties.content_settings  # pylint: disable=line-too-long
 
         # create new properties
         new_props = settings_class(
@@ -184,12 +272,11 @@ def get_content_setting_validator(settings_class, update):
         namespace = argparse.Namespace(**ns)
     return validator
 
+
 def validate_custom_domain(namespace):
-    if namespace.custom_domain:
-        namespace.custom_domain = CustomDomain(namespace.custom_domain, namespace.subdomain)
-    if namespace.subdomain and not namespace.custom_domain:
-        raise ValueError("must specify '--custom-domain' to use the '--use-subdomain' flag")
-    del namespace.subdomain
+    if namespace.use_subdomain and not namespace.custom_domain:
+        raise ValueError('usage error: --custom-domain DOMAIN [--use-subdomain]')
+
 
 def validate_encryption(namespace):
     ''' Builds up the encryption object for storage account operations based on the
@@ -198,6 +285,7 @@ def validate_encryption(namespace):
         from azure.mgmt.storage.models import Encryption, EncryptionServices, EncryptionService
         services = {service: EncryptionService(True) for service in namespace.encryption}
         namespace.encryption = Encryption(EncryptionServices(**services))
+
 
 def validate_entity(namespace):
     ''' Converts a list of key value pairs into a dictionary. Ensures that required
@@ -238,6 +326,7 @@ def validate_entity(namespace):
     values = {key: cast_val(key, val) for key, val in values.items()}
     namespace.entity = values
 
+
 def get_file_path_validator(default_file_param=None):
     """ Creates a namespace validator that splits out 'path' into 'directory_name' and 'file_name'.
     Allows another path-type parameter to be named which can supply a default filename. """
@@ -256,6 +345,7 @@ def get_file_path_validator(default_file_param=None):
         del namespace.path
     return validator
 
+
 def validate_included_datasets(namespace):
     if namespace.include:
         include = namespace.include
@@ -264,16 +354,20 @@ def validate_included_datasets(namespace):
             raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
         namespace.include = Include('s' in include, 'm' in include, False, 'c' in include)
 
+
 def validate_key(namespace):
     namespace.key_name = storage_account_key_options[namespace.key_name]
+
 
 def validate_metadata(namespace):
     if namespace.metadata:
         namespace.metadata = dict(x.split('=', 1) for x in namespace.metadata)
 
+
 def get_permission_help_string(permission_class):
     allowed_values = [x.lower() for x in dir(permission_class) if not x.startswith('__')]
     return ' '.join(['({}){}'.format(x[0], x[1:]) for x in allowed_values])
+
 
 def get_permission_validator(permission_class):
 
@@ -289,6 +383,7 @@ def get_permission_validator(permission_class):
             namespace.permission = permission_class(_str=namespace.permission)
     return validator
 
+
 def table_permission_validator(namespace):
     """ A special case for table because the SDK associates the QUERY permission with 'r' """
     if namespace.permission:
@@ -297,7 +392,10 @@ def table_permission_validator(namespace):
             raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
         namespace.permission = TablePermissions(_str=namespace.permission)
 
+
 public_access_types = {'off': None, 'blob': PublicAccess.Blob, 'container': PublicAccess.Container}
+
+
 def validate_public_access(namespace):
     if namespace.public_access:
         namespace.public_access = public_access_types[namespace.public_access.lower()]
@@ -316,6 +414,7 @@ def validate_public_access(namespace):
             lease_id = ns.get('lease_id')
             ns['signed_identifiers'] = client.get_container_acl(container, lease_id=lease_id)
 
+
 def validate_select(namespace):
     if namespace.select:
         namespace.select = ','.join(namespace.select)
@@ -330,17 +429,21 @@ def get_source_file_or_blob_service_client(namespace):
     """
     usage_string = 'invalid usage: supply only one of the following argument sets:' + \
                    '\n\t   --source-uri' + \
-                   '\n\tOR --source-container [--source-account] [--source-key] [--source-sas]' + \
-                   '\n\tOR --source-share [--source-account] [--source-key] [--source-sas]'
+                   '\n\tOR --source-container' + \
+                   '\n\tOR --source-container --source-account-name --source-account-key' + \
+                   '\n\tOR --source-container --source-account-name --source-sas' + \
+                   '\n\tOR --source-share --source-account-name --source-account-key' + \
+                   '\n\tOR --source-share --source-account-name --source-account-sas'
+
     ns = vars(namespace)
-    source_account = ns.pop('source_account', None)
+    source_account = ns.pop('source_account_name', None)
+    source_key = ns.pop('source_account_key', None)
     source_uri = ns.pop('source_uri', None)
-    source_key = ns.pop('source_key', None)
     source_sas = ns.get('source_sas', None)
     source_container = ns.get('source_container', None)
     source_share = ns.get('source_share', None)
 
-    if source_account and source_uri:
+    if source_uri and source_account:
         raise ValueError(usage_string)
 
     elif (not source_account) and (not source_uri):
@@ -354,7 +457,8 @@ def get_source_file_or_blob_service_client(namespace):
         # A few arguments check will be made as well so as not to cause ambiguity.
 
         if source_key:
-            raise ValueError('invalid usage: --source-key is set but --source-account is missing.')
+            raise ValueError('invalid usage: --source-account-key is set but --source-account-name'
+                             ' is missing.')
 
         if source_container and source_share:
             raise ValueError(usage_string)
@@ -365,15 +469,20 @@ def get_source_file_or_blob_service_client(namespace):
         ns['source_client'] = None
 
     elif source_account:
-        if ('source_container' in ns) and ('source_share' in ns):
+        if source_container and source_share:
             raise ValueError(usage_string)
 
-        if 'source_container' in ns:
+        if not (source_key or source_sas):
+            # when either storage account key or SAS is given, try to fetch the key in the current
+            # subscription
+            source_key = _query_account_key(source_account)
+
+        if source_container:
             from azure.storage.blob.blockblobservice import BlockBlobService
             ns['source_client'] = BlockBlobService(account_name=source_account,
                                                    account_key=source_key,
                                                    sas_token=source_sas)
-        elif 'source_share' in ns:
+        elif source_share:
             ns['source_client'] = FileService(account_name=source_account,
                                               account_key=source_key,
                                               sas_token=source_sas)
@@ -386,10 +495,12 @@ def get_source_file_or_blob_service_client(namespace):
 
         from .storage_url_helpers import StorageResourceIdentifier
         identifier = StorageResourceIdentifier(source_uri)
+
+        nor_container_or_share = not identifier.container and not identifier.share
         if not identifier.is_url():
             raise ValueError('incorrect usage: --source-uri expects a URI')
-        elif identifier.blob or identifier.directory or identifier.filename or \
-             (not identifier.container and not identifier.share):
+        elif identifier.blob or identifier.directory or \
+                identifier.filename or nor_container_or_share:
             raise ValueError('incorrect usage: --source-uri has to be blob container or file share')
         elif identifier.container:
             from azure.storage.blob.blockblobservice import BlockBlobService
@@ -527,6 +638,7 @@ def process_file_download_namespace(namespace):
         namespace.file_path = os.path.join(dest, namespace.file_name) \
             if dest else namespace.file_name
 
+
 def process_logging_update_namespace(namespace):
     services = namespace.services
     if set(services) - set('bqt'):
@@ -536,6 +648,7 @@ def process_logging_update_namespace(namespace):
     if set(log) - set('rwd'):
         raise ValueError('--log: valid values are (r)ead (w)rite (d)elete '
                          'or a combination thereof (ex: rw).')
+
 
 def process_metric_update_namespace(namespace):
     namespace.hour = namespace.hour == 'enable'
@@ -552,15 +665,26 @@ def process_metric_update_namespace(namespace):
 
 # region TYPES
 
-def datetime_string_type(string):
-    ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
-    date_format = '%Y-%m-%dT%H:%MZ'
-    return datetime.strptime(string, date_format).strftime(date_format)
 
-def datetime_type(string):
-    ''' Validates UTC datettime in format '%Y-%m-%d\'T\'%H:%M\'Z\''. '''
-    date_format = '%Y-%m-%dT%H:%MZ'
-    return datetime.strptime(string, date_format)
+def get_datetime_type(to_string):
+    """ Validates UTC datetime. Examples of accepted forms:
+    2017-12-31T01:11:59Z,2017-12-31T01:11Z or 2017-12-31T01Z or 2017-12-31 """
+    def datetime_type(string):
+        """ Validates UTC datetime. Examples of accepted forms:
+        2017-12-31T01:11:59Z,2017-12-31T01:11Z or 2017-12-31T01Z or 2017-12-31 """
+        accepted_date_formats = ['%Y-%m-%dT%H:%M:%SZ', '%Y-%m-%dT%H:%MZ',
+                                 '%Y-%m-%dT%HZ', '%Y-%m-%d']
+        for form in accepted_date_formats:
+            try:
+                if to_string:
+                    return datetime.strptime(string, form).strftime(form)
+                else:
+                    return datetime.strptime(string, form)
+            except ValueError:
+                continue
+        raise ValueError("Input '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(string))
+    return datetime_type
+
 
 def ipv4_range_type(string):
     ''' Validates an IPv4 address or address range. '''
@@ -570,12 +694,14 @@ def ipv4_range_type(string):
             raise ValueError
     return string
 
+
 def resource_type_type(string):
     ''' Validates that resource types string contains only a combination
     of (s)ervice, (c)ontainer, (o)bject '''
     if set(string) - set("sco"):
         raise ValueError
     return ResourceTypes(_str=''.join(set(string)))
+
 
 def services_type(string):
     ''' Validates that services string contains only a combination
@@ -587,6 +713,7 @@ def services_type(string):
 # endregion
 
 # region TRANSFORMS
+
 
 def transform_acl_list_output(result):
     """ Transform to convert SDK output into a form that is more readily
@@ -601,8 +728,10 @@ def transform_acl_list_output(result):
         new_result.append(new_entry)
     return new_result
 
+
 def transform_container_permission_output(result):
     return {'publicAccess': result.public_access or 'off'}
+
 
 def transform_cors_list_output(result):
     new_result = []
@@ -613,13 +742,15 @@ def transform_cors_list_output(result):
             new_entry['Service'] = service_name
             service_name = ''
             new_entry['Rule'] = i + 1
-            new_entry['AllowedMethods'] = ', '.join((x for x in rule['allowedMethods']))
-            new_entry['AllowedOrigins'] = ', '.join((x for x in rule['allowedOrigins']))
-            new_entry['ExposedHeaders'] = ', '.join((x for x in rule['exposedHeaders']))
-            new_entry['AllowedHeaders'] = ', '.join((x for x in rule['allowedHeaders']))
-            new_entry['MaxAgeInSeconds'] = rule['maxAgeInSeconds']
+
+            new_entry['AllowedMethods'] = ', '.join((x for x in rule.allowed_methods))
+            new_entry['AllowedOrigins'] = ', '.join((x for x in rule.allowed_origins))
+            new_entry['ExposedHeaders'] = ', '.join((x for x in rule.exposed_headers))
+            new_entry['AllowedHeaders'] = ', '.join((x for x in rule.allowed_headers))
+            new_entry['MaxAgeInSeconds'] = rule.max_age_in_seconds
             new_result.append(new_entry)
     return new_result
+
 
 def transform_entity_query_output(result):
     new_results = []
@@ -634,6 +765,7 @@ def transform_entity_query_output(result):
         new_results.append(new_entry)
     return new_results
 
+
 def transform_logging_list_output(result):
     new_result = []
     for key in sorted(result.keys()):
@@ -645,6 +777,7 @@ def transform_logging_list_output(result):
         new_entry['RetentionPolicy'] = str(result[key]['retentionPolicy']['days'])
         new_result.append(new_entry)
     return new_result
+
 
 def transform_metrics_list_output(result):
     new_result = []
@@ -662,14 +795,17 @@ def transform_metrics_list_output(result):
             new_result.append(new_entry)
     return new_result
 
-def transform_storage_boolean_output(result):
-    return {'success': result}
 
-def transform_storage_exists_output(result):
-    return {'exists': result}
+def create_boolean_result_output_transformer(property_name):
+    def _transformer(result):
+        return {property_name: result}
+
+    return _transformer
+
 
 def transform_storage_list_output(result):
     return list(result)
+
 
 def transform_url(result):
     """ Ensures the resulting URL string does not contain extra / characters """
@@ -677,4 +813,4 @@ def transform_url(result):
     result = re.sub('/', '//', result, count=1)
     return result
 
-#endregion
+# endregion

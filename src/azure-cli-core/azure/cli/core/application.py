@@ -12,30 +12,40 @@ from azure.cli.core.parser import AzCliCommandParser, enable_autocomplete
 from azure.cli.core._output import CommandResultItem
 import azure.cli.core.extensions
 import azure.cli.core._help as _help
-import azure.cli.core._logging as _logging
-from azure.cli.core._util import todict, CLIError
+import azure.cli.core.azlogging as azlogging
+from azure.cli.core._util import todict, truncate_text, CLIError, read_file_content
 from azure.cli.core._config import az_config
-from azure.cli.core.telemetry import log_telemetry, set_application
 
-logger = _logging.get_az_logger(__name__)
+import azure.cli.core.telemetry as telemetry
+
+logger = azlogging.get_az_logger(__name__)
 
 ARGCOMPLETE_ENV_NAME = '_ARGCOMPLETE'
 
-class Configuration(object): # pylint: disable=too-few-public-methods
+
+class Configuration(object):  # pylint: disable=too-few-public-methods
     """The configuration object tracks session specific data such
     as output formats, available commands etc.
     """
+
     def __init__(self, argv):
         self.argv = argv or sys.argv[1:]
         self.output_format = None
 
-    def get_command_table(self): # pylint: disable=no-self-use
+    def get_command_table(self):  # pylint: disable=no-self-use
         import azure.cli.core.commands as commands
+        # Find the first noun on the command line and only load commands from that
+        # module to improve startup time.
+        for a in self.argv:
+            if not a.startswith('-'):
+                return commands.get_command_table(a)
+        # No noun found, so load all commands.
         return commands.get_command_table()
 
-    def load_params(self, command): # pylint: disable=no-self-use
+    def load_params(self, command):  # pylint: disable=no-self-use
         import azure.cli.core.commands as commands
         commands.load_params(command)
+
 
 class Application(object):
 
@@ -52,11 +62,11 @@ class Application(object):
         self.session = {
             'headers': {
                 'x-ms-client-request-id': str(uuid.uuid1())
-                },
+            },
             'command': 'unknown',
             'completer_active': ARGCOMPLETE_ENV_NAME in os.environ,
             'query_active': False
-            }
+        }
 
         # Register presence of and handlers for global parameters
         self.register(self.GLOBAL_PARSER_CREATED, Application._register_builtin_arguments)
@@ -76,7 +86,7 @@ class Application(object):
     def initialize(self, configuration):
         self.configuration = configuration
 
-    def execute(self, unexpanded_argv): # pylint: disable=too-many-statements
+    def execute(self, unexpanded_argv):  # pylint: disable=too-many-statements
         argv = Application._expand_file_prefixed_files(unexpanded_argv)
         command_table = self.configuration.get_command_table()
         self.raise_event(self.COMMAND_TABLE_LOADED, command_table=command_table)
@@ -87,7 +97,11 @@ class Application(object):
             enable_autocomplete(self.parser)
             az_subparser = self.parser.subparsers[tuple()]
             _help.show_welcome(az_subparser)
-            log_telemetry('welcome')
+
+            # TODO: Question, is this needed?
+            telemetry.set_command_details('az')
+            telemetry.set_success(summary='welcome')
+
             return None
 
         if argv[0].lower() == 'help':
@@ -122,7 +136,7 @@ class Application(object):
                 _validate_arguments(expanded_arg)
             except CLIError:
                 raise
-            except: # pylint: disable=bare-except
+            except:  # pylint: disable=bare-except
                 err = sys.exc_info()[1]
                 getattr(expanded_arg, '_parser', self.parser).validation_error(str(err))
 
@@ -135,9 +149,10 @@ class Application(object):
             params.pop('subcommand', None)
             params.pop('func', None)
             params.pop('command', None)
-            log_telemetry(expanded_arg.command, log_type='pageview',
-                          output_type=self.configuration.output_format,
-                          parameters=[p for p in unexpanded_argv if p.startswith('-')])
+
+            telemetry.set_command_details(expanded_arg.command,
+                                          self.configuration.output_format,
+                                          [p for p in unexpanded_argv if p.startswith('-')])
 
             result = expanded_arg.func(params)
             result = todict(result)
@@ -149,16 +164,17 @@ class Application(object):
         event_data = {'result': results}
         self.raise_event(self.TRANSFORM_RESULT, event_data=event_data)
         self.raise_event(self.FILTER_RESULT, event_data=event_data)
+
         return CommandResultItem(event_data['result'],
-                                 table_transformer=
-                                 command_table[args.command].table_transformer,
+                                 table_transformer=command_table[args.command].table_transformer,
                                  is_query_active=self.session['query_active'])
 
     def raise_event(self, name, **kwargs):
         '''Raise the event `name`.
         '''
-        logger.info("Application event '%s' with event data %s", name, kwargs)
-        for func in list(self._event_handlers[name]): # Make copy in case handler modifies the list
+        data = truncate_text(str(kwargs), width=500)
+        logger.debug("Application event '%s' with event data %s", name, data)
+        for func in list(self._event_handlers[name]):  # Make copy in case handler modifies the list
             func(**kwargs)
 
     def register(self, name, handler):
@@ -171,7 +187,7 @@ class Application(object):
           event_data: `dict` with event specific data.
         '''
         self._event_handlers[name].append(handler)
-        logger.info("Registered application event handler '%s' at %s", name, handler)
+        logger.debug("Registered application event handler '%s' at %s", name, handler)
 
     def remove(self, name, handler):
         '''Remove a callable that is registered to be called when the
@@ -183,34 +199,34 @@ class Application(object):
           event_data: `dict` with event specific data.
         '''
         self._event_handlers[name].remove(handler)
-        logger.info("Removed application event handler '%s' at %s", name, handler)
+        logger.debug("Removed application event handler '%s' at %s", name, handler)
 
     @staticmethod
     def _register_builtin_arguments(**kwargs):
         global_group = kwargs['global_group']
         global_group.add_argument('--output', '-o', dest='_output_format',
-                                  choices=['json', 'tsv', 'list', 'table', 'jsonc'],
+                                  choices=['json', 'tsv', 'table', 'jsonc'],
                                   default=az_config.get('core', 'output', fallback='json'),
                                   help='Output format',
                                   type=str.lower)
         # The arguments for verbosity don't get parsed by argparse but we add it here for help.
         global_group.add_argument('--verbose', dest='_log_verbosity_verbose', action='store_true',
-                                  help='Increase logging verbosity. Use --debug for full debug logs.') #pylint: disable=line-too-long
+                                  help='Increase logging verbosity. Use --debug for full debug logs.')  # pylint: disable=line-too-long
         global_group.add_argument('--debug', dest='_log_verbosity_debug', action='store_true',
                                   help='Increase logging verbosity to show all debug logs.')
 
     @staticmethod
     def _maybe_load_file(arg):
         ix = arg.find('@')
-        if ix == -1: # no @ found
+        if ix == -1:  # no @ found
             return arg
 
         poss_file = arg[ix + 1:]
-        if not poss_file: # if nothing after @ then it can't be a file
+        if not poss_file:  # if nothing after @ then it can't be a file
             return arg
         elif ix == 0:
             return Application._load_file(poss_file)
-        else: # if @ not at the start it can't be a file
+        else:  # if @ not at the start it can't be a file
             return arg
 
     @staticmethod
@@ -227,24 +243,19 @@ class Application(object):
 
     @staticmethod
     def _load_file(path):
-        try:
-            if path == '-':
-                content = sys.stdin.read()
-            else:
-                try:
-                    with open(os.path.expanduser(path), 'r') as input_file:
-                        content = input_file.read()
-                except UnicodeDecodeError:
-                    with open(os.path.expanduser(path), 'rb') as input_file:
-                        content = input_file.read()
-            return content[0:-1] if content[-1] == '\n' else content
-        except:
-            raise CLIError('Failed to open file {}'.format(path))
+        if path == '-':
+            content = sys.stdin.read()
+        else:
+            content = read_file_content(os.path.expanduser(path),
+                                        allow_binary=True)
+
+        return content[0:-1] if content and content[-1] == '\n' else content
 
     def _handle_builtin_arguments(self, **kwargs):
         args = kwargs['args']
-        self.configuration.output_format = args._output_format #pylint: disable=protected-access
+        self.configuration.output_format = args._output_format  # pylint: disable=protected-access
         del args._output_format
+
 
 def _validate_arguments(args, **_):
     for validator in getattr(args, '_validators', []):
@@ -254,6 +265,7 @@ def _validate_arguments(args, **_):
     except AttributeError:
         pass
 
+
 def _explode_list_args(args):
     '''Iterate through each attribute member of args and create a copy with
     the IterateValues 'flattened' to only contain a single value
@@ -261,7 +273,7 @@ def _explode_list_args(args):
     Ex.
         { a1:'x', a2:IterateValue(['y', 'z']) } => [{ a1:'x', a2:'y'),{ a1:'x', a2:'z'}]
     '''
-    list_args = {argname:argvalue for argname, argvalue in vars(args).items()
+    list_args = {argname: argvalue for argname, argvalue in vars(args).items()
                  if isinstance(argvalue, IterateValue)}
     if not list_args:
         yield args
@@ -277,7 +289,7 @@ def _explode_list_args(args):
             yield new_ns
 
 
-class IterateAction(argparse.Action): # pylint: disable=too-few-public-methods
+class IterateAction(argparse.Action):  # pylint: disable=too-few-public-methods
     '''Action used to collect argument values in an IterateValue list
     The application will loop through each value in the IterateValue
     and execeute the associated handler for each
@@ -296,6 +308,7 @@ class IterateValue(list):
     '''
     pass
 
+
 APPLICATION = Application()
 
-set_application(APPLICATION, ARGCOMPLETE_ENV_NAME)
+telemetry.set_application(APPLICATION, ARGCOMPLETE_ENV_NAME)

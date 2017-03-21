@@ -34,10 +34,13 @@ register_cli_argument('ad sp create', 'identifier', options_list=('--id',), help
 register_cli_argument('ad sp create-for-rbac', 'name', name_arg_type)
 register_cli_argument('ad sp create-for-rbac', 'years', type=int)
 register_cli_argument('ad sp create-for-rbac', 'scopes', nargs='+')
+register_cli_argument('ad sp create-for-rbac', 'create_cert', action='store_true', help='create and upload self-signed certificate which you can use to login')
 register_cli_argument('ad sp create-for-rbac', 'role', completer=get_role_definition_name_completion_list)
+register_cli_argument('ad sp create-for-rbac', 'skip_assignment', action='store_true', help='do not create default assignment')
 register_cli_argument('ad sp create-for-rbac', 'expanded_view', action='store_true', help='Once created, display more information like subscription and cloud environments')
 register_cli_argument('ad sp reset-credentials', 'name', name_arg_type)
 register_cli_argument('ad sp reset-credentials', 'years', type=int)
+register_cli_argument('ad sp reset-credentials', 'create_cert', action='store_true', help='re-create and upload self-signed certificate')
 
 register_cli_argument('ad', 'display_name', help='object\'s display name or its prefix')
 register_cli_argument('ad', 'identifier_uri',

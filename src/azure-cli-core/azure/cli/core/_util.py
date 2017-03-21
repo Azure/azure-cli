@@ -7,15 +7,19 @@ from __future__ import print_function
 import re
 import sys
 import json
+import base64
+import binascii
 from datetime import datetime, timedelta
 from enum import Enum
 
-import azure.cli.core._logging as _logging
+import six
+import azure.cli.core.azlogging as azlogging
 
 CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
+
 
 class CLIError(Exception):
     """Base class for exceptions that occur during
@@ -24,8 +28,9 @@ class CLIError(Exception):
     """
     pass
 
+
 def handle_exception(ex):
-    #For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
+    # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from msrestazure.azure_exceptions import CloudError
     if isinstance(ex, CLIError) or isinstance(ex, CloudError):
         logger.error(ex.args[0])
@@ -36,8 +41,24 @@ def handle_exception(ex):
         logger.exception(ex)
         return 1
 
+
+def empty_on_404(ex):
+    from msrestazure.azure_exceptions import CloudError
+    if isinstance(ex, CloudError) and ex.status_code == 404:
+        return None
+    raise ex
+
+
 def normalize_newlines(str_to_normalize):
     return str_to_normalize.replace('\r\n', '\n')
+
+
+def truncate_text(str_to_shorten, width=70, placeholder=' [...]'):
+    if width <= 0:
+        raise ValueError('width must be greater than 0.')
+    s_len = width - len(placeholder)
+    return str_to_shorten[:s_len] + (str_to_shorten[s_len:] and placeholder)
+
 
 def show_version_info_exit(out_file):
     import platform
@@ -66,6 +87,7 @@ def show_version_info_exit(out_file):
     print('Python ({}) {}'.format(platform.system(), sys.version), file=out_file)
     sys.exit(0)
 
+
 def get_json_object(json_string):
     """ Loads a JSON string as an object and converts all keys to snake case """
     def _convert_to_snake_case(item):
@@ -80,26 +102,34 @@ def get_json_object(json_string):
             return item
     return _convert_to_snake_case(json.loads(json_string))
 
+
 def get_file_json(file_path, throw_on_empty=True):
+    content = read_file_content(file_path)
+    if not content and not throw_on_empty:
+        return None
+    return json.loads(content)
+
+
+def read_file_content(file_path, allow_binary=False):
     from codecs import open as codecs_open
-    #always try 'utf-8-sig' first, so that BOM in WinOS won't cause trouble.
-    for encoding in ('utf-8-sig', 'utf-8', 'utf-16', 'utf-16le', 'utf-16be'):
+    # Note, always put 'utf-8-sig' first, so that BOM in WinOS won't cause trouble.
+    for encoding in ['utf-8-sig', 'utf-8', 'utf-16', 'utf-16le', 'utf-16be']:
         try:
             with codecs_open(file_path, encoding=encoding) as f:
-                text = f.read()
-
-            if not text and not throw_on_empty:
-                return None
-
-            return json.loads(text)
+                return f.read()
+        except UnicodeDecodeError:
+            if allow_binary:
+                with open(file_path, 'rb') as input_file:
+                    return input_file.read()
+            else:
+                raise
         except UnicodeError:
             pass
-        except Exception as ex:
-            raise CLIError("File '{}' contains error: {}".format(file_path, str(ex)))
 
     raise CLIError('Failed to decode file {} - unknown decoding'.format(file_path))
 
-def todict(obj): #pylint: disable=too-many-return-statements
+
+def todict(obj):  # pylint: disable=too-many-return-statements
 
     if isinstance(obj, dict):
         return {k: todict(v) for (k, v) in obj.items()}
@@ -120,10 +150,48 @@ def todict(obj): #pylint: disable=too-many-return-statements
     else:
         return obj
 
+
 KEYS_CAMELCASE_PATTERN = re.compile('(?!^)_([a-zA-Z])')
+
+
 def to_camel_case(s):
     return re.sub(KEYS_CAMELCASE_PATTERN, lambda x: x.group(1).upper(), s)
+
 
 def to_snake_case(s):
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', s)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+
+def b64encode(s):
+    """
+    Encodes a string to base64 on 2.x and 3.x
+    :param str s: latin_1 encoded string
+    :return: base64 encoded string
+    :rtype: str
+    """
+    encoded = base64.b64encode(six.b(s))
+    if encoded is str:
+        return encoded
+    else:
+        return encoded.decode('latin-1')
+
+
+def b64_to_hex(s):
+    """
+    Decodes a string to base64 on 2.x and 3.x
+    :param str s: base64 encoded string
+    :return: uppercase hex string
+    :rtype: str
+    """
+    decoded = base64.b64decode(s)
+    return binascii.hexlify(decoded).upper()
+
+
+def random_string(length=16, force_lower=False, digits_only=False):
+    from string import ascii_letters, digits, ascii_lowercase
+    from random import choice
+    choice_set = digits
+    if not digits_only:
+        choice_set += ascii_lowercase if force_lower else ascii_letters
+    return ''.join([choice(choice_set) for _ in range(length)])

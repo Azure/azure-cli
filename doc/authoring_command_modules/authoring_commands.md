@@ -35,7 +35,7 @@ from azure.cli.commands import cli_command
 
 The signature of this method is 
 ```Python
-def cli_command(module_name, name, operation, client_factory=None, transform=None, table_transformer=None):
+def cli_command(module_name, name, operation, client_factory=None, transform=None, table_transformer=None, confirmation=None):
 ```
 You will generally only specify `name`, `operation` and possibly `table_transformer`.
   - `module_name` - The name of the module that is registering the command (e.g. `azure.cli.command_modules.vm.commands`). Typically this will be `__name__`.
@@ -43,6 +43,7 @@ You will generally only specify `name`, `operation` and possibly `table_transfor
   - `operation` - The handler that will be executed. Format is `<module_to_import>#<attribute_list>`
       - For example if `operation='azure.mgmt.compute.operations.virtual_machines_operations#VirtualMachinesOperations.get'`, the CLI will import `azure.mgmt.compute.operations.virtual_machines_operations`, get the `VirtualMachinesOperations` attribute and then the `get` attribute of `VirtualMachinesOperations`.
   - `table_transformer` (optional) - Supply a callable that takes, transforms and returns a result for table output.
+  - `confirmation` (optional) - Supply True to enable default confirmation. Alternatively, supply a callable that takes the command arguments as a dict and returning a boolean. Alternatively, supply a string for the prompt.
 
 At this point, you should be able to access your command using `az [name]` and access the built-in help with `az [name] -h/--help`. Your command will automatically be 'wired up' with the global parameters.
 

@@ -19,8 +19,8 @@ from ._utils import (
     random_storage_account_name
 )
 
-import azure.cli.core._logging as _logging
-logger = _logging.get_az_logger(__name__)
+import azure.cli.core.azlogging as azlogging
+logger = azlogging.get_az_logger(__name__)
 
 def acr_check_name(registry_name):
     '''Checks whether the container registry name is available for use.
@@ -134,7 +134,7 @@ def acr_update_custom(instance,
                       storage_account_name=None,
                       tags=None):
     if admin_enabled is not None:
-        instance.admin_user_enabled = admin_enabled == 'true'
+        instance.admin_user_enabled = admin_enabled == ['true']
 
     if tags is not None:
         instance.tags = tags

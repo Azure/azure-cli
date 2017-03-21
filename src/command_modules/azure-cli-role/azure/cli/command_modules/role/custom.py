@@ -11,7 +11,7 @@ from dateutil.relativedelta import relativedelta
 import dateutil.parser
 
 from azure.cli.core._util import CLIError, todict, get_file_json
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 
 from azure.mgmt.authorization.models import (RoleAssignmentProperties, Permission, RoleDefinition,
                                              RoleDefinitionProperties)
@@ -26,7 +26,7 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
 
 from ._client_factory import _auth_client_factory, _graph_client_factory
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 _CUSTOM_RULE = 'CustomRole'
 
@@ -434,11 +434,14 @@ def _resolve_service_principal(client, identifier):
     except ValueError:
         raise CLIError("service principal '{}' doesn't exist".format(identifier))
 
-def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint:disable=too-many-arguments,too-many-statements,too-many-locals
-                                      scopes=None, role='Contributor', expanded_view=None):
+def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint:disable=too-many-arguments,too-many-statements,too-many-locals, too-many-branches
+                                      create_cert=False, cert=None,
+                                      scopes=None, role='Contributor',
+                                      expanded_view=None, skip_assignment=False):
     '''create a service principal and configure its access to Azure resources
-    :param str name: an unique uri. If missing, the command will generate one.
+    :param str name: a display name or an app id uri. Command will generate one if missing.
     :param str password: the password used to login. If missing, command will generate one.
+    :param str cert: PEM formatted public certificate. Do not include private key info.
     :param str years: Years the password will be valid.
     :param str scopes: space separated scopes the service principal's role assignment applies to.
            Defaults to the root of the current subscription.
@@ -449,69 +452,87 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
     role_client = _auth_client_factory().role_assignments
     scopes = scopes or ['/subscriptions/' + role_client.config.subscription_id]
     sp_oid = None
-    sp_created = False
-    _RETRY_TIMES = 24
+    _RETRY_TIMES = 36
+
+    app_display_name = None
+    if name and not '://' in name:
+        app_display_name = name
+        name = "http://" + name #normalize be a valid graph service principal name
+
     if name:
         query_exp = 'servicePrincipalNames/any(x:x eq \'{}\')'.format(name)
         aad_sps = list(graph_client.service_principals.list(filter=query_exp))
         if aad_sps:
-            sp_oid = aad_sps[0].object_id
-            app_id = aad_sps[0].app_id
+            raise CLIError("'{}' already exists.".format(name))
 
     #pylint: disable=protected-access
-    if not sp_oid:
-        start_date = datetime.datetime.utcnow()
-        app_display_name = 'azure-cli-' + start_date.strftime('%Y-%m-%d-%H-%M-%S')
-        if name is None:
-            name = 'http://' + app_display_name # just a valid uri, no need to exist
+    public_cert_string = None
+    cert_file = None
+    password = None
 
-        end_date = start_date + relativedelta(years=years)
+    if len([x for x in [cert, create_cert, password] if x]) > 1:
+        raise CLIError('Usage error: --cert | --create-cert | --password')
+    if create_cert:
+        public_cert_string, cert_file = _create_self_signed_cert(years)
+    elif cert:
+        public_cert_string = cert
+    else:
         password = password or str(uuid.uuid4())
-        aad_application = create_application(graph_client.applications,
-                                             display_name=app_display_name, #pylint: disable=too-many-function-args
-                                             homepage='http://'+app_display_name,
-                                             identifier_uris=[name],
-                                             available_to_other_tenants=False,
-                                             password=password,
-                                             start_date=start_date,
-                                             end_date=end_date)
-        #pylint: disable=no-member
-        app_id = aad_application.app_id
-        #retry till server replication is done
-        for l in range(0, _RETRY_TIMES):
-            try:
-                aad_sp = _create_service_principal(app_id, resolve_app=False)
-                break
-            except Exception as ex: #pylint: disable=broad-except
-                #pylint: disable=line-too-long
-                if l < _RETRY_TIMES and 'The appId of the service principal does not reference a valid application object' in str(ex):
-                    time.sleep(5)
-                    logger.warning('Retrying service principal creation: %s/%s', l+1, _RETRY_TIMES)
-                else:
-                    logger.warning("Creating service principal failed for appid '%s'. Trace followed:\n%s",
-                                   name, ex.response.headers) #pylint: disable=no-member
-                    raise
-        sp_oid = aad_sp.object_id
-        sp_created = True
+
+    start_date = datetime.datetime.utcnow()
+    app_display_name = app_display_name or ('azure-cli-' +
+                                            start_date.strftime('%Y-%m-%d-%H-%M-%S'))
+    if name is None:
+        name = 'http://' + app_display_name # just a valid uri, no need to exist
+
+    end_date = start_date + relativedelta(years=years)
+
+    aad_application = create_application(graph_client.applications,
+                                         display_name=app_display_name, #pylint: disable=too-many-function-args
+                                         homepage='http://'+app_display_name,
+                                         identifier_uris=[name],
+                                         available_to_other_tenants=False,
+                                         password=password,
+                                         key_value=public_cert_string,
+                                         start_date=start_date,
+                                         end_date=end_date)
+    #pylint: disable=no-member
+    app_id = aad_application.app_id
+    #retry till server replication is done
+    for l in range(0, _RETRY_TIMES):
+        try:
+            aad_sp = _create_service_principal(app_id, resolve_app=False)
+            break
+        except Exception as ex: #pylint: disable=broad-except
+            #pylint: disable=line-too-long
+            if l < _RETRY_TIMES and (' does not reference ' in str(ex) or ' does not exist ' in str(ex)):
+                time.sleep(5)
+                logger.warning('Retrying service principal creation: %s/%s', l+1, _RETRY_TIMES)
+            else:
+                logger.warning("Creating service principal failed for appid '%s'. Trace followed:\n%s",
+                               name, ex.response.headers if hasattr(ex, 'response') else ex) #pylint: disable=no-member
+                raise
+    sp_oid = aad_sp.object_id
 
     #retry while server replication is done
-    for scope in scopes:
-        for l in range(0, _RETRY_TIMES):
-            try:
-                _create_role_assignment(role, sp_oid, None, scope, resolve_assignee=False)
-                break
-            except Exception as ex:
-                if l < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
-                    time.sleep(5)
-                    logger.warning('Retrying role assignment creation: %s/%s', l+1, _RETRY_TIMES)
-                    continue
-                elif sp_created:
-                    #dump out history for diagnoses
-                    logger.warning('Role assignment creation failed. Traces followed:\n')
-                    logger.warning('Service principal response: %s\n', aad_sp.response.headers)
-                    if getattr(ex, 'response', None) is not None:
-                        logger.warning('role assignment response: %s\n', ex.response.headers) #pylint: disable=no-member
-                raise
+    if not skip_assignment:
+        # pylint: disable=line-too-long
+        for scope in scopes:
+            for l in range(0, _RETRY_TIMES):
+                try:
+                    _create_role_assignment(role, sp_oid, None, scope, resolve_assignee=False)
+                    break
+                except Exception as ex:
+                    if l < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
+                        time.sleep(5)
+                        logger.warning('Retrying role assignment creation: %s/%s', l+1, _RETRY_TIMES)
+                        continue
+                    else:
+                        #dump out history for diagnoses
+                        logger.warning('Role assignment creation failed.\n')
+                        if getattr(ex, 'response', None) is not None:
+                            logger.warning('role assignment response headers: %s\n', ex.response.headers) #pylint: disable=no-member
+                    raise
 
     if expanded_view:
         from azure.cli.core._profile import Profile
@@ -523,15 +544,69 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
             'appId': app_id,
             'password': password,
             'name': name,
+            'displayName': app_display_name,
             'tenant': graph_client.config.tenant_id
             }
+        if cert_file:
+            # pylint: disable=line-too-long
+            logger.warning("Please copy %s to a safe place. When run 'az login' provide the file path to the --password argument", cert_file)
+            result['fileWithCertAndPrivateKey'] = cert_file
     return result
 
-def reset_service_principal_credential(name, password=None, years=1):
+def _create_self_signed_cert(years):
+    from os import path
+    import tempfile
+    from OpenSSL import crypto, SSL
+    from datetime import timedelta
+
+    _, cert_file = tempfile.mkstemp()
+    _, key_file = tempfile.mkstemp()
+
+    # create a file with both cert & key so users can use to login
+    # leverage tempfile ot produce a random file name
+    _, temp_file = tempfile.mkstemp()
+    creds_file = path.join(path.expanduser("~"), path.basename(temp_file) + '.pem')
+
+    # create a key pair
+    k = crypto.PKey()
+    k.generate_key(crypto.TYPE_RSA, 2048)
+
+    # create a self-signed cert
+    cert = crypto.X509()
+    subject = cert.get_subject()
+    # as long it works, we skip fileds C, ST, L, O, OU, which we have no reasonable defaults for
+    subject.CN = 'CLI-Login'
+    cert.set_serial_number(1000)
+    cert.gmtime_adj_notBefore(0)
+    cert.gmtime_adj_notAfter(int(timedelta(days=366*years, hours=1).total_seconds()))
+    cert.set_issuer(cert.get_subject())
+    cert.set_pubkey(k)
+    cert.sign(k, 'sha1')
+
+    with open(cert_file, "wt") as f:
+        f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode())
+    with open(key_file, "wt") as f:
+        f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k).decode())
+
+    cert_string = None
+    with open(creds_file, 'wt') as cf:
+        with open(key_file, 'rt') as f:
+            cf.write(f.read())
+        with open(cert_file, "rt") as f:
+            cert_string = f.read()
+            cf.write(cert_string)
+
+    # get rid of the header and tails for upload to AAD: ----BEGIN CERT....----
+    cert_string = re.sub(r'\-+[A-z\s]+\-+', '', cert_string).strip()
+    return (cert_string, creds_file)
+
+
+def reset_service_principal_credential(name, password=None, create_cert=False, cert=None, years=1):
     '''reset credential, on expiration or you forget it.
 
-    :param str name: the uri representing the name of the service principal
+    :param str name: the name, can be the app id uri, app id guid, or display name
     :param str password: the password used to login. If missing, command will generate one.
+    :param str cert: PEM formatted public certificate. Do not include private key info.
     :param str years: Years the password will be valid.
     '''
     client = _graph_client_factory()
@@ -539,35 +614,45 @@ def reset_service_principal_credential(name, password=None, years=1):
     #pylint: disable=no-member
 
     #look for the existing application
-    query_exp = 'identifierUris/any(x:x eq \'{}\')'.format(name)
-    aad_apps = list(client.applications.list(filter=query_exp))
-    if not aad_apps:
-        raise CLIError('can\'t find an application matching \'{}\''.format(name))
-    #no need to check 2+ matches, as app id uri is unique
-    app = aad_apps[0]
-
-    #look for the existing service principal
-    query_exp = 'servicePrincipalNames/any(x:x eq \'{}\')'.format(name)
+    query_exp = "servicePrincipalNames/any(x:x eq \'{0}\') or displayName eq '{0}'".format(name)
     aad_sps = list(client.service_principals.list(filter=query_exp))
     if not aad_sps:
-        raise CLIError('can\'t find a service principal matching \'{}\''.format(name))
+        raise CLIError("can't find a service principal matching '{}'".format(name))
+    if len(aad_sps) > 1:
+        raise CLIError('more than one entry matches the name, please provide unique names like app id guid, or app id uri')#pylint: disable=line-too-long
+    app = show_application(client.applications, aad_sps[0].app_id)
 
-    #build a new password credential and patch it
-    password = password or str(uuid.uuid4())
+    #build a new password/cert credential and patch it
+    public_cert_string = None
+    cert_file = None
+    if len([x for x in [cert, create_cert, password] if x]) > 1:
+        raise CLIError('Usage error: --cert | --create-cert | --password')
+    if create_cert:
+        public_cert_string, cert_file = _create_self_signed_cert(years)
+    elif cert:
+        public_cert_string = cert
+    else:
+        password = password or str(uuid.uuid4())
     start_date = datetime.datetime.utcnow()
     end_date = start_date + relativedelta(years=years)
     key_id = str(uuid.uuid4())
-    app_cred = PasswordCredential(start_date, end_date, key_id, password)
-    app_create_param = ApplicationUpdateParameters(password_credentials=[app_cred])
+    app_creds = [PasswordCredential(start_date, end_date, key_id, password)] if password else None
+    cert_creds = [KeyCredential(start_date, end_date, public_cert_string, str(uuid.uuid4()),
+                                usage='Verify', type='AsymmetricX509Cert')] if public_cert_string else None  # pylint: disable=line-too-long
+    app_create_param = ApplicationUpdateParameters(password_credentials=app_creds,
+                                                   key_credentials=cert_creds)
 
     client.applications.patch(app.object_id, app_create_param)
 
-    return {
+    result = {
         'appId': app.app_id,
         'password': password,
         'name': name,
         'tenant': client.config.tenant_id
         }
+    if cert_file:
+        result['fileWithCertAndPrivateKey'] = cert_file
+    return result
 
 def _resolve_object_id(assignee):
     client = _graph_client_factory()

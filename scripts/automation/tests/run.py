@@ -3,42 +3,64 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import itertools
+import argparse
+import os
 import sys
 
-from .nose_helper import get_nose_runner
-from ..utilities.display import print_records
-from ..utilities.path import get_command_modules_paths_with_tests, \
-                             get_core_modules_paths_with_tests,\
-                             get_test_results_dir
+from automation.utilities.path import filter_user_selected_modules_with_tests
+from automation.tests.nose_helper import get_nose_runner
+from automation.utilities.display import print_records
+from automation.utilities.path import get_test_results_dir
 
 
-def run_all():
+def run_tests(modules, parallel, run_live):
+    print('\n\nRun automation')
+    print('Modules: {}'.format(', '.join(name for name, _, _ in modules)))
+
     # create test results folder
     test_results_folder = get_test_results_dir(with_timestamp=True, prefix='tests')
 
-    # get test runner
-    run_nose = get_nose_runner(test_results_folder, xunit_report=True, exclude_integration=True)
+    # set environment variable
+    if run_live:
+        os.environ['AZURE_CLI_TEST_RUN_LIVE'] = 'True'
 
-    # get test list
-    modules_to_test = itertools.chain(
-        get_core_modules_paths_with_tests(),
-        get_command_modules_paths_with_tests())
+    # get test runner
+    run_nose = get_nose_runner(test_results_folder, xunit_report=True, exclude_integration=True,
+                               parallel=parallel, process_timeout=3600 if run_live else 600)
 
     # run tests
-    passed = True
-    module_results = []
-    for name, _, test_path in modules_to_test:
-        result, start, end, log_file = run_nose(name, test_path)
-        passed &= result
-        record = (name, start.strftime('%H:%M:%D'), str((end - start).total_seconds()),
-                  'Pass' if result else 'Fail')
+    overall_result = True
+    for name, _, test_path in modules:
+        print('\n\n==== Test module {} ===='.format(name))
+        result, test_result = run_nose([test_path])
+        overall_result &= result
+        print('==== Test module {} result ====\n{}\n==========\n'.format(name, test_result))
 
-        module_results.append(record)
+    return overall_result
 
-    print_records(module_results, title='test results')
-
-    return passed
 
 if __name__ == '__main__':
-    sys.exit(0 if run_all() else 1)
+    parse = argparse.ArgumentParser('Test tools')
+    parse.add_argument('--module', dest='modules', action='append',
+                       help='The modules of which the test to be run. Accept short names, except '
+                            'azure-cli, azure-cli-core and azure-cli-nspkg. The modules list can '
+                            'also be set through environment variable AZURE_CLI_TEST_MODULES. The '
+                            'value should be a string of comma separated module names. The '
+                            'environment variable will be overwritten by command line parameters.')
+    parse.add_argument('--non-parallel', action='store_true',
+                       help='Not to run the tests in parallel.')
+    parse.add_argument('--live', action='store_true', help='Run all the tests live.')
+    args = parse.parse_args()
+
+    if not args.modules and os.environ.get('AZURE_CLI_TEST_MODULES', None):
+        print('Test modules list is parsed from environment variable AZURE_CLI_TEST_MODULES.')
+        args.modules = [m.strip() for m in os.environ.get('AZURE_CLI_TEST_MODULES').split(',')]
+
+    selected_modules = filter_user_selected_modules_with_tests(args.modules)
+    if not selected_modules:
+        parse.print_help()
+        sys.exit(1)
+
+    retval = run_tests(selected_modules, not args.non_parallel, args.live)
+
+    sys.exit(0 if retval else 1)

@@ -1,7 +1,16 @@
 Authoring Command Modules
 =========================
 
-The document provides instructions and guidelines on how to author command modules.
+The document provides instructions and guidelines on how to author command modules. For other help, please see the following:
+
+**Module Authoring**:<br>You are here!
+
+**Command Authoring**:<br>https://github.com/Azure/azure-cli/blob/master/doc/authoring_command_modules/authoring_commands.md
+
+**Help Authoring**:<br>https://github.com/Azure/azure-cli/blob/master/doc/authoring_help.md
+
+**Test Authoring**:<br>https://github.com/Azure/azure-cli/blob/master/doc/recording_vcr_tests.md
+
 
 <a name="heading_set_up"></a>Set Up
 ------
@@ -61,7 +70,6 @@ Command modules should have the following structure:
 |           |-- __init__.py
 |           `-- <MODULE_NAME>
 |               `-- __init__.py
-|-- requirements.txt
 `-- setup.py
 ```
 

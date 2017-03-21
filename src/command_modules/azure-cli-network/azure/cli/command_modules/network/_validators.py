@@ -9,6 +9,8 @@ import socket
 import os
 
 from azure.cli.core.commands.arm import is_valid_resource_id, resource_id
+from azure.cli.core.commands.validators import \
+    (validate_tags, get_default_location_from_resource_group)
 from azure.cli.core._util import CLIError
 from azure.cli.core.commands.template_create import get_folded_parameter_validator
 from azure.cli.core.commands.validators import SPECIFIED_SENTINEL
@@ -125,6 +127,17 @@ def validate_cert(namespace):
             # app-gateway ssl-cert create does not have these fields and that is okay
             pass
 
+def validate_dns_record_type(namespace):
+    tokens = namespace.command.split(' ')
+    types = ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'soa', 'srv', 'txt']
+    for token in tokens:
+        if token in types:
+            if hasattr(namespace, 'record_type'):
+                namespace.record_type = token
+            else:
+                namespace.record_set_type = token
+            return
+
 def validate_inbound_nat_rule_id_list(namespace):
     _generate_lb_id_list_from_names_or_ids(
         namespace, 'load_balancer_inbound_nat_rule_ids', 'inboundNatRules')
@@ -154,7 +167,7 @@ def validate_peering_type(namespace):
                 'missing required MicrosoftPeering parameter --advertised-public-prefixes')
 
 def validate_private_ip_address(namespace):
-    if namespace.private_ip_address:
+    if namespace.private_ip_address and hasattr(namespace, 'private_ip_address_allocation'):
         namespace.private_ip_address_allocation = 'static'
 
 def get_public_ip_validator(has_type_field=False, allow_none=False, allow_new=False,
@@ -277,37 +290,37 @@ def get_virtual_network_validator(has_type_field=False, allow_none=False, allow_
 # COMMAND NAMESPACE VALIDATORS
 
 def process_ag_listener_create_namespace(namespace): # pylint: disable=unused-argument
-    if not is_valid_resource_id(namespace.frontend_ip):
+    if namespace.frontend_ip and not is_valid_resource_id(namespace.frontend_ip):
         namespace.frontend_ip = _generate_ag_subproperty_id(
             namespace, 'frontendIpConfigurations', namespace.frontend_ip)
 
-    if not is_valid_resource_id(namespace.frontend_port):
+    if namespace.frontend_port and not is_valid_resource_id(namespace.frontend_port):
         namespace.frontend_port = _generate_ag_subproperty_id(
             namespace, 'frontendPorts', namespace.frontend_port)
 
-    if not is_valid_resource_id(namespace.ssl_cert):
+    if namespace.ssl_cert and not is_valid_resource_id(namespace.ssl_cert):
         namespace.ssl_cert = _generate_ag_subproperty_id(
             namespace, 'sslCertificates', namespace.ssl_cert)
 
 def process_ag_http_settings_create_namespace(namespace): # pylint: disable=unused-argument
-    if not is_valid_resource_id(namespace.probe):
+    if namespace.probe and not is_valid_resource_id(namespace.probe):
         namespace.probe = _generate_ag_subproperty_id(
             namespace, 'probes', namespace.probe)
 
 def process_ag_rule_create_namespace(namespace): # pylint: disable=unused-argument
-    if not is_valid_resource_id(namespace.address_pool):
+    if namespace.address_pool and not is_valid_resource_id(namespace.address_pool):
         namespace.address_pool = _generate_ag_subproperty_id(
             namespace, 'backendAddressPools', namespace.address_pool)
 
-    if not is_valid_resource_id(namespace.http_listener):
+    if namespace.http_listener and not is_valid_resource_id(namespace.http_listener):
         namespace.http_listener = _generate_ag_subproperty_id(
             namespace, 'httpListeners', namespace.http_listener)
 
-    if not is_valid_resource_id(namespace.http_settings):
+    if namespace.http_settings and not is_valid_resource_id(namespace.http_settings):
         namespace.http_settings = _generate_ag_subproperty_id(
             namespace, 'backendHttpSettingsCollection', namespace.http_settings)
 
-    if not is_valid_resource_id(namespace.url_path_map):
+    if namespace.url_path_map and not is_valid_resource_id(namespace.url_path_map):
         namespace.url_path_map = _generate_ag_subproperty_id(
             namespace, 'urlPathMaps', namespace.url_path_map)
 
@@ -341,14 +354,28 @@ def process_ag_create_namespace(namespace):
     if namespace.subnet or namespace.virtual_network_name:
         get_subnet_validator(has_type_field=True, allow_new=True)(namespace)
 
+    prefix_usage_error = CLIError('Do not specify --subnet-address-prefix or --vnet-address-prefix'
+                                  ' when using an existing subnet.')
+    if namespace.subnet_address_prefix:
+        if '__SET__' in namespace.subnet_address_prefix:
+            if namespace.subnet_type != 'new':
+                raise prefix_usage_error
+            namespace.subnet_address_prefix = namespace.subnet_address_prefix.replace('__SET__', '')
+
+    if namespace.vnet_address_prefix:
+        if '__SET__' in namespace.vnet_address_prefix:
+            if namespace.subnet_type != 'new':
+                raise prefix_usage_error
+            namespace.vnet_address_prefix = namespace.vnet_address_prefix.replace('__SET__', '')
+
     if namespace.public_ip_address:
         get_public_ip_validator(
             has_type_field=True, allow_none=True, allow_new=True, default_none=True)(namespace)
         namespace.frontend_type = 'publicIp'
     else:
         namespace.frontend_type = 'privateIp'
-        namespace.private_ip_address_allocation = 'static' if namespace.private_ip_address \
-            else 'dynamic'
+        namespace.private_ip_address_allocation = 'Static' if namespace.private_ip_address \
+            else 'Dynamic'
 
     namespace.sku_tier = namespace.sku_name.split('_', 1)[0]
 
@@ -404,24 +431,31 @@ def process_lb_frontend_ip_namespace(namespace):
 
 def process_local_gateway_create_namespace(namespace):
     ns = namespace
-    ns.use_bgp_settings = any([ns.asn or ns.bgp_peering_address or ns.peer_weight])
-    if ns.use_bgp_settings and (not ns.asn or not ns.bgp_peering_address):
+    get_default_location_from_resource_group(ns)
+    use_bgp_settings = any([ns.asn or ns.bgp_peering_address or ns.peer_weight])
+    if use_bgp_settings and (not ns.asn or not ns.bgp_peering_address):
         raise ValueError(
             'incorrect usage: --bgp-peering-address IP --asn ASN [--peer-weight WEIGHT]')
 
 def process_nic_create_namespace(namespace):
 
-    # process folded parameters
-    get_subnet_validator(has_type_field=True)(namespace)
-    get_public_ip_validator(has_type_field=True, allow_none=True, default_none=True)(namespace)
-    get_nsg_validator(has_type_field=True, allow_none=True, default_none=True)(namespace)
+    get_default_location_from_resource_group(namespace)
 
-    if namespace.internal_dns_name_label:
-        namespace.use_dns_settings = 'true'
+    # process folded parameters
+    get_subnet_validator(has_type_field=False)(namespace)
+    get_public_ip_validator(has_type_field=False, allow_none=True, default_none=True)(namespace)
+    get_nsg_validator(has_type_field=False, allow_none=True, default_none=True)(namespace)
+
 
 def process_public_ip_create_namespace(namespace):
-    if namespace.dns_name:
-        namespace.dns_name_type = 'new'
+    get_default_location_from_resource_group(namespace)
+
+
+def process_route_table_create_namespace(namespace):
+    from azure.mgmt.network.models import RouteTable
+    get_default_location_from_resource_group(namespace)
+    validate_tags(namespace)
+    namespace.parameters = RouteTable(location=namespace.location, tags=namespace.tags)
 
 def process_tm_endpoint_create_namespace(namespace):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -479,13 +513,15 @@ def process_tm_endpoint_create_namespace(namespace):
 
 def process_vnet_create_namespace(namespace):
 
+    get_default_location_from_resource_group(namespace)
+
     if namespace.subnet_prefix and not namespace.subnet_name:
         raise ValueError('incorrect usage: --subnet-name NAME [--subnet-prefix PREFIX]')
 
-    namespace.create_subnet = bool(namespace.subnet_name)
-
-    if namespace.create_subnet and not namespace.subnet_prefix:
-        prefix_components = namespace.virtual_network_prefix.split('/', 1)
+    if namespace.subnet_name and not namespace.subnet_prefix:
+        if isinstance(namespace.vnet_prefixes, str):
+            namespace.vnet_prefixes = [namespace.vnet_prefixes]
+        prefix_components = namespace.vnet_prefixes[0].split('/', 1)
         address = prefix_components[0]
         bit_mask = int(prefix_components[1])
         subnet_mask = 24 if bit_mask < 24 else bit_mask
@@ -493,17 +529,19 @@ def process_vnet_create_namespace(namespace):
 
 def process_vnet_gateway_create_namespace(namespace):
     ns = namespace
-    ns.enable_bgp = any([ns.asn or ns.bgp_peering_address or ns.peer_weight])
-    ns.create_client_configuration = any(ns.address_prefixes or [])
-    if ns.enable_bgp and (not ns.asn or not ns.bgp_peering_address):
+    get_default_location_from_resource_group(ns)
+    enable_bgp = any([ns.asn, ns.bgp_peering_address, ns.peer_weight])
+    if enable_bgp and not ns.asn:
         raise ValueError(
-            'incorrect usage: --bgp-peering-address IP --asn ASN [--peer-weight WEIGHT]')
+            'incorrect usage: --asn ASN [--peer-weight WEIGHT --bgp-peering-address IP ]')
 
 def process_vpn_connection_create_namespace(namespace):
 
-    args = [a for a in [namespace.express_route_circuit2_id,
-                        namespace.local_gateway2_id,
-                        namespace.vnet_gateway2_id]
+    get_default_location_from_resource_group(namespace)
+
+    args = [a for a in [namespace.express_route_circuit2,
+                        namespace.local_gateway2,
+                        namespace.vnet_gateway2]
             if a]
     if len(args) != 1:
         raise ValueError('usage error: --vnet-gateway2 NAME_OR_ID | --local-gateway2 NAME_OR_ID '
@@ -520,21 +558,27 @@ def process_vpn_connection_create_namespace(namespace):
                 name=value)
         return value
 
-    namespace.vnet_gateway1_id = \
-        _validate_name_or_id(namespace, namespace.vnet_gateway1_id, 'virtualNetworkGateways')
+    if (namespace.local_gateway2 or namespace.vnet_gateway2) and not namespace.shared_key:
+        raise CLIError('--shared-key is required for VNET-to-VNET or Site-to-Site connections.')
 
-    if namespace.express_route_circuit2_id:
-        namespace.express_route_circuit2_id = \
+    if namespace.express_route_circuit2 and namespace.shared_key:
+        raise CLIError('--shared-key cannot be used with an ExpressRoute connection.')
+
+    namespace.vnet_gateway1 = \
+        _validate_name_or_id(namespace, namespace.vnet_gateway1, 'virtualNetworkGateways')
+
+    if namespace.express_route_circuit2:
+        namespace.express_route_circuit2 = \
             _validate_name_or_id(
-                namespace, namespace.express_route_circuit2_id, 'expressRouteCircuits')
+                namespace, namespace.express_route_circuit2, 'expressRouteCircuits')
         namespace.connection_type = 'ExpressRoute'
-    elif namespace.local_gateway2_id:
-        namespace.local_gateway2_id = \
-            _validate_name_or_id(namespace, namespace.local_gateway2_id, 'localNetworkGateways')
+    elif namespace.local_gateway2:
+        namespace.local_gateway2 = \
+            _validate_name_or_id(namespace, namespace.local_gateway2, 'localNetworkGateways')
         namespace.connection_type = 'IPSec'
-    elif namespace.vnet_gateway2_id:
-        namespace.vnet_gateway2_id = \
-            _validate_name_or_id(namespace, namespace.vnet_gateway2_id, 'virtualNetworkGateways')
+    elif namespace.vnet_gateway2:
+        namespace.vnet_gateway2 = \
+            _validate_name_or_id(namespace, namespace.vnet_gateway2, 'virtualNetworkGateways')
         namespace.connection_type = 'Vnet2Vnet'
 
 def load_cert_file(param_name):

@@ -7,10 +7,11 @@
 from argcomplete.completers import FilesCompleter
 
 from azure.mgmt.resource.resources.models import DeploymentMode
+from azure.mgmt.resource.locks.models import LockLevel
 from azure.cli.core.commands import register_cli_argument, CliArgumentType
 from azure.cli.core.commands.parameters import (ignore_type, resource_group_name_type, tag_type,
                                                 tags_type, get_resource_group_completion_list,
-                                                enum_choice_list, no_wait_type)
+                                                enum_choice_list, no_wait_type, file_type)
 from .custom import (get_policy_completion_list, get_policy_assignment_completion_list,
                      get_resource_types_completion_list, get_providers_completion_list)
 from ._validators import validate_deployment_name
@@ -47,7 +48,7 @@ existing_policy_definition_name_type = CliArgumentType(options_list=('--name', '
 register_cli_argument('policy', 'resource_group_name', arg_type=resource_group_name_type, help='the resource group where the policy will be applied')
 register_cli_argument('policy definition', 'policy_definition_name', arg_type=existing_policy_definition_name_type)
 register_cli_argument('policy definition create', 'name', options_list=('--name', '-n'), help='name of the new policy definition')
-register_cli_argument('policy definition', 'rules', help='JSON formatted string or a path to a file with such content')
+register_cli_argument('policy definition', 'rules', help='JSON formatted string or a path to a file with such content', type=file_type, completer=FilesCompleter())
 register_cli_argument('policy definition', 'display_name', help='display name of policy definition')
 register_cli_argument('policy definition', 'description', help='description of policy definition')
 register_cli_argument('policy assignment', 'name', options_list=('--name', '-n'), completer=get_policy_assignment_completion_list, help='name of the assignment')
@@ -63,15 +64,18 @@ register_cli_argument('group', 'resource_group_name', resource_group_name_type, 
 register_cli_argument('group deployment', 'resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list)
 register_cli_argument('group deployment', 'deployment_name', options_list=('--name', '-n'), required=True, help='The deployment name.')
 register_cli_argument('group deployment', 'parameters', completer=FilesCompleter(), help="provide deployment parameter values, either json string, or use '@<file path>' to load from a file")
-register_cli_argument('group deployment', 'template_file', completer=FilesCompleter(), help="a template file path in the file system")
-register_cli_argument('group deployment', 'template_uri', completer=FilesCompleter(), help='a uri to a remote template file')
+register_cli_argument('group deployment', 'template_file', completer=FilesCompleter(), type=file_type, help="a template file path in the file system")
+register_cli_argument('group deployment', 'template_uri', help='a uri to a remote template file')
 register_cli_argument('group deployment', 'mode', help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)', **enum_choice_list(DeploymentMode))
 register_cli_argument('group deployment create', 'deployment_name', options_list=('--name', '-n'), required=False,
                       validator=validate_deployment_name, help='The deployment name. Default to template file base name')
 register_cli_argument('group deployment operation show', 'operation_ids', nargs='+', help='A list of operation ids to show')
 register_cli_argument('group export', 'include_comments', action='store_true')
 register_cli_argument('group export', 'include_parameter_default_value', action='store_true')
-register_cli_argument('group create', 'resource_group_name', completer=None)
+register_cli_argument('group create', 'rg_name', options_list=('--name', '-n'), help='name of the new resource group', completer=None)
 
 register_cli_argument('tag', 'tag_name', options_list=('--name', '-n'))
 register_cli_argument('tag', 'tag_value', options_list=('--value',))
+
+register_cli_argument('lock', 'name', options_list=('--name', '-n'))
+register_cli_argument('lock create', 'level', options_list=('--lock-type', '-t'), required=True, **enum_choice_list(LockLevel))

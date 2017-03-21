@@ -3,9 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import sys
+import json
 import requests
 
+from azure.cli.core.prompting import prompt, prompt_pass, NoTTYException
 from azure.cli.core._util import CLIError
 
 from ._utils import (
@@ -38,8 +39,10 @@ def _obtain_data_from_registry(login_server, path, resultIndex, username, passwo
                 # we should follow the next path indicated in the link header
                 path = linkHeader[(linkHeader.index('<')+1):linkHeader.index('>')]
                 executeNextHttpCall = True
+        elif response.status_code == 401:
+            raise CLIError('Invalid username or password specified.')
         else:
-            response.raise_for_status()
+            raise CLIError(json.loads(response.text)['errors'][0]['message'])
 
     return resultList
 
@@ -49,10 +52,10 @@ def _validate_user_credentials(registry_name, path, resultIndex, username=None, 
 
     if username:
         if not password:
-            if not sys.stdin.isatty():
+            try:
+                password = prompt_pass(msg='Password: ')
+            except NoTTYException:
                 raise CLIError('Please specify both username and password in non-interactive mode.')
-            import getpass
-            password = getpass.getpass('Password: ')
         return _obtain_data_from_registry(login_server, path, resultIndex, username, password)
 
     try:
@@ -63,19 +66,13 @@ def _validate_user_credentials(registry_name, path, resultIndex, username=None, 
     except: #pylint: disable=bare-except
         pass
 
-    if not sys.stdin.isatty():
+    try:
+        username = prompt('Username: ')
+        password = prompt_pass(msg='Password: ')
+    except NoTTYException:
         raise CLIError(
             'Unable to authenticate using admin login credentials or admin is not enabled. ' +
             'Please specify both username and password in non-interactive mode.')
-
-    try:
-        user_input = raw_input
-    except NameError:
-        user_input = input
-
-    import getpass
-    username = user_input("Username: ")
-    password = getpass.getpass('Password: ')
     return _obtain_data_from_registry(login_server, path, resultIndex, username, password)
 
 def acr_repository_list(registry_name, username=None, password=None):

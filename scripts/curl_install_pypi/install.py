@@ -23,6 +23,7 @@ import tarfile
 import tempfile
 import shutil
 import subprocess
+import hashlib
 try:
     # Attempt to load python 3 module
     from urllib.request import urlretrieve
@@ -41,9 +42,13 @@ AZ_DISPATCH_TEMPLATE = """#!/usr/bin/env bash
 {install_dir}/bin/python -m azure.cli "$@"
 """
 
+VIRTUALENV_VERSION = '15.0.0'
+VIRTUALENV_ARCHIVE = 'virtualenv-'+VIRTUALENV_VERSION+'.tar.gz'
+VIRTUALENV_DOWNLOAD_URL = 'https://pypi.python.org/packages/source/v/virtualenv/'+VIRTUALENV_ARCHIVE
+VIRTUALENV_ARCHIVE_SHA256 = '70d63fb7e949d07aeb37f6ecc94e8b60671edb15b890aa86dba5dfaf2225dc19'
+
 DEFAULT_INSTALL_DIR = os.path.expanduser(os.path.join('~', 'lib', 'azure-cli'))
 DEFAULT_EXEC_DIR = os.path.expanduser(os.path.join('~', 'bin'))
-VIRTUALENV_VERSION = '15.0.0'
 EXECUTABLE_NAME = 'az'
 
 USER_BASH_RC = os.path.expanduser(os.path.join('~', '.bashrc'))
@@ -103,15 +108,28 @@ def create_dir(dir):
         print_status("Creating directory '{}'.".format(dir))
         os.makedirs(dir)
 
-def create_virtualenv(tmp_dir, version, install_dir):
-    file_name = 'virtualenv-'+version+'.tar.gz'
-    download_location = os.path.join(tmp_dir, file_name)
-    downloaded_file, _ = urlretrieve('https://pypi.python.org/packages/source/v/virtualenv/'+file_name,
+def is_valid_sha256sum(a_file, expected_sum):
+    sha256 = hashlib.sha256()
+    with open(a_file, 'rb') as f:
+        sha256.update(f.read())
+    computed_hash = sha256.hexdigest()
+    return expected_sum == computed_hash
+
+def create_virtualenv(tmp_dir, install_dir):
+    download_location = os.path.join(tmp_dir, VIRTUALENV_ARCHIVE)
+    print_status('Downloading virtualenv package from {}.'.format(VIRTUALENV_DOWNLOAD_URL))
+    downloaded_file, _ = urlretrieve(VIRTUALENV_DOWNLOAD_URL,
                                      download_location)
+    print_status("Downloaded virtualenv package to {}.".format(downloaded_file))
+    if is_valid_sha256sum(downloaded_file, VIRTUALENV_ARCHIVE_SHA256):
+        print_status("Checksum of {} OK.".format(downloaded_file))
+    else:
+        raise CLIInstallError("The checksum of the downloaded virtualenv package does not match.")
+    print_status("Extracting '{}' to '{}'.".format(downloaded_file, tmp_dir))
     package_tar = tarfile.open(downloaded_file)
     package_tar.extractall(path=tmp_dir)
     package_tar.close()
-    virtualenv_dir_name = 'virtualenv-'+version
+    virtualenv_dir_name = 'virtualenv-'+VIRTUALENV_VERSION
     working_dir = os.path.join(tmp_dir, virtualenv_dir_name)
     cmd = [sys.executable, 'virtualenv.py', '--python', sys.executable, install_dir]
     exec_command(cmd, cwd=working_dir)
@@ -144,6 +162,7 @@ def get_install_dir():
             create_dir(install_dir)
             if os.listdir(install_dir):
                 print_status("'{}' is not empty and may contain a previous installation.".format(install_dir))
+                print_status("If you'd like to update the CLI, exit this script and run 'az component update'.")
                 ans_yes = prompt_y_n('Remove this directory?', 'n')
                 if ans_yes:
                     shutil.rmtree(install_dir)
@@ -179,6 +198,8 @@ def _get_default_rc_file():
     bashrc_exists = os.path.isfile(USER_BASH_RC)
     bash_profile_exists = os.path.isfile(USER_BASH_PROFILE)
     if not bashrc_exists and bash_profile_exists:
+        return USER_BASH_PROFILE
+    if bashrc_exists and bash_profile_exists and platform.system().lower() == 'darwin':
         return USER_BASH_PROFILE
     return USER_BASH_RC if bashrc_exists else None
 
@@ -307,7 +328,7 @@ def main():
     exec_dir = get_exec_dir()
     exec_path = os.path.join(exec_dir, EXECUTABLE_NAME)
     verify_install_dir_exec_path_conflict(install_dir, exec_path)
-    create_virtualenv(tmp_dir, VIRTUALENV_VERSION, install_dir)
+    create_virtualenv(tmp_dir, install_dir)
     install_cli(install_dir, tmp_dir)
     exec_filepath = create_executable(exec_dir, install_dir)
     completion_file_path = os.path.join(install_dir, COMPLETION_FILENAME)

@@ -9,7 +9,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.1.0b11+dev'
+VERSION = '0.1.1b6+dev'
 
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -23,23 +23,27 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
     'License :: OSI Approved :: MIT License',
 ]
 
 DEPENDENCIES = [
     'azure-mgmt-keyvault==0.30.0',
+    'azure-keyvault==0.1.0',
     'azure-cli-core',
     'pyOpenSSL'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
+with open('HISTORY.rst', 'r', encoding='utf-8') as f:
+    HISTORY = f.read()
 
 setup(
     name='azure-cli-keyvault',
     version=VERSION,
     description='Microsoft Azure Command-Line Tools Keyvault Command Module',
-    long_description=README,
+    long_description=README + '\n\n' + HISTORY,
     license='MIT',
     author='Microsoft Corporation',
     author_email='azpycli@microsoft.com',
@@ -51,11 +55,7 @@ setup(
         'azure.cli.command_modules'
     ],
     packages=[
-        'azure.cli.command_modules.keyvault',
-        'azure.cli.command_modules.keyvault.keyvaultclient',
-        'azure.cli.command_modules.keyvault.keyvaultclient.http_bearer_challenge_cache',
-        'azure.cli.command_modules.keyvault.keyvaultclient.generated',
-        'azure.cli.command_modules.keyvault.keyvaultclient.generated.models'
+        'azure.cli.command_modules.keyvault'
     ],
     install_requires=DEPENDENCIES,
 )

@@ -81,6 +81,13 @@ def get_access_key_by_storage_account_name(storage_account_name, resource_group_
         resource_group_name = get_resource_group_name_by_storage_account_name(storage_account_name)
 
     client = get_storage_service_client().storage_accounts
+    storage_account = client.get_properties(resource_group_name, storage_account_name)
+
+    from azure.mgmt.storage.models import SkuTier
+
+    if storage_account.sku.tier == SkuTier.premium: #pylint: disable=no-member
+        raise CLIError('Premium storage account {} is currently not supported. ' \
+                       'Please use standard storage account.'.format(storage_account_name))
 
     return client.list_keys(resource_group_name, storage_account_name).keys[0].value #pylint: disable=no-member
 
@@ -161,9 +168,10 @@ def random_storage_account_name(registry_name):
     from datetime import datetime
 
     client = get_storage_service_client().storage_accounts
+    prefix = registry_name[:18].lower()
 
     while True:
         time_stamp_suffix = datetime.utcnow().strftime('%H%M%S')
-        storage_account_name = ''.join([registry_name[:18], time_stamp_suffix])[:24]
+        storage_account_name = ''.join([prefix, time_stamp_suffix])[:24]
         if client.check_name_availability(storage_account_name).name_available: #pylint: disable=no-member
             return storage_account_name

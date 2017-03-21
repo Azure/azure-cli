@@ -22,7 +22,7 @@ class StorageResourceIdentifier(object):
         self.snapshot = None
         self.sas_token = None
 
-        from six.moves.urllib.parse import urlparse # pylint: disable=import-error
+        from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
         url = urlparse(moniker)
 
         self._is_url = (url.scheme == 'http' or url.scheme == 'https')
@@ -34,7 +34,7 @@ class StorageResourceIdentifier(object):
 
         from azure.cli.core._profile import CLOUD
         self.account_name, type_name = url.netloc[:0 - len(CLOUD.suffixes.storage_endpoint) - 1]\
-            .split('.', maxsplit=2)
+            .split('.', 2)
 
         if type_name == 'blob':
             self.container, self.blob = self._separate_path_l(url.path)

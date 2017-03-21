@@ -3,13 +3,11 @@ language: python
 python:
   - "2.7"
   - "3.5"
-  - "3.5-dev" # 3.5 development branch
-matrix:
-  allow_failures:
-  - python: 3.5-dev
-  fast_finish: true
+  - "3.6"
+env:
+  - CODE_COVERAGE="True"
 install:
   - pip install -qqq virtualenv # used by package_verify script
   - python scripts/dev_setup.py
-script: 
-  - ./scripts/build_in_travis.sh
+script:
+  - ./scripts/build.sh

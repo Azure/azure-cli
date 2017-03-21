@@ -2,18 +2,22 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+
+from argcomplete.completers import FilesCompleter
+from azure.mgmt.web.models import DatabaseType
+
 from azure.cli.core.commands import register_cli_argument
 
 from azure.cli.core.commands.parameters import (resource_group_name_type, location_type,
-                                                get_resource_name_completion_list,
+                                                get_resource_name_completion_list, file_type,
                                                 CliArgumentType, ignore_type, enum_choice_list)
-
-from ._client_factory import web_client_factory
+from azure.cli.command_modules.appservice._validators import process_webapp_create_namespace
+from azure.cli.command_modules.appservice._client_factory import web_client_factory
 
 def _generic_site_operation(resource_group_name, name, operation_name, slot=None, #pylint: disable=too-many-arguments
                             extra_parameter=None, client=None):
     client = client or web_client_factory()
-    m = getattr(client.sites,
+    m = getattr(client.web_apps,
                 operation_name if slot is None else operation_name + '_slot')
     if slot is None:
         return (m(resource_group_name, name)
@@ -34,15 +38,17 @@ def get_hostname_completion_list(prefix, action, parsed_args, **kwargs): # pylin
 #pylint: disable=line-too-long
 # PARAMETER REGISTRATION
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
-sku_arg_type = CliArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1(Premium Small), etc',
-                               **enum_choice_list(['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3']))
+_SKU_HELP = 'The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1(Premium Small), etc'
+_SKU_LIST = ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3']
+sku_arg_type = CliArgumentType(help=_SKU_HELP, **enum_choice_list(_SKU_LIST))
 
 register_cli_argument('appservice', 'resource_group_name', arg_type=resource_group_name_type)
 register_cli_argument('appservice', 'location', arg_type=location_type)
 
 register_cli_argument('appservice list-locations', 'linux_workers_enabled', action='store_true', help='get regions which support hosting webapps on Linux workers')
+register_cli_argument('appservice list-locations', 'sku', arg_type=sku_arg_type)
 register_cli_argument('appservice plan', 'name', arg_type=name_arg_type, help='The name of the app service plan', completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'), id_part='name')
-register_cli_argument('appservice plan create', 'name', options_list=('--name', '-n'), help="Name of the new app service plan")
+register_cli_argument('appservice plan create', 'name', options_list=('--name', '-n'), help="Name of the new app service plan", completer=None)
 register_cli_argument('appservice plan create', 'sku', arg_type=sku_arg_type)
 register_cli_argument('appservice plan create', 'is_linux', action='store_true', required=False, help='host webapp on Linux worker')
 register_cli_argument('appservice plan update', 'sku', arg_type=sku_arg_type)
@@ -50,11 +56,22 @@ register_cli_argument('appservice plan update', 'allow_pending_state', ignore_ty
 register_cli_argument('appservice plan', 'number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
 register_cli_argument('appservice plan', 'admin_site_name', help='The name of the admin web app.')
 
-register_cli_argument('appservice web', 'slot', help="the name of the slot. Default to the productions slot if not specified")
-register_cli_argument('appservice web', 'name', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name', help='name of the web')
-register_cli_argument('appservice web create', 'name', options_list=('--name', '-n'), help='name of the new webapp')
-register_cli_argument('appservice web create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
-                      help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
+register_cli_argument('appservice web', 'slot', options_list=('--slot', '-s'), help="the name of the slot. Default to the productions slot if not specified")
+register_cli_argument('appservice web', 'name', configured_default='web',
+                      arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
+                      help="name of the web. You can configure the default using 'az configure --defaults web=<name>'")
+register_cli_argument('appservice web create', 'name', options_list=('--name', '-n'), help='name of the new webapp', validator=process_webapp_create_namespace)
+register_cli_argument('appservice web create', 'create_plan', ignore_type)
+register_cli_argument('appservice web create', 'plan', arg_group='AppService Plan',
+                      options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+                      help='Appservice plan name. Can also reference an existing plan by ID. If omitted, an appropriate plan in the same resource group will be selected automatically, or a new one will be created.')
+register_cli_argument('appservice web create', 'sku', arg_group='AppService Plan',
+                      help='{}. Default: S1'.format(_SKU_HELP), **enum_choice_list(_SKU_LIST))
+register_cli_argument('appservice web create', 'number_of_workers', help='Number of workers to be allocated. Default: 1', type=int, arg_group='AppService Plan')
+register_cli_argument('appservice web create', 'is_linux', action='store_true', help='create a new linux web')
+register_cli_argument('appservice web create', 'location', location_type, help='Location in which to create webapp and related resources. Defaults to the resource group\'s location.')
+
+register_cli_argument('appservice web browse', 'logs', options_list=('--logs', '-l'), action='store_true', help='Enable viewing the log stream immediately after launching the web app')
 
 register_cli_argument('appservice web deployment user', 'user_name', help='user name')
 register_cli_argument('appservice web deployment user', 'password', help='password, will prompt if not specified')
@@ -65,6 +82,7 @@ register_cli_argument('appservice web deployment slot', 'webapp', arg_type=name_
 register_cli_argument('appservice web deployment slot', 'auto_swap_slot', help='target slot to auto swap', default='production')
 register_cli_argument('appservice web deployment slot', 'disable', help='disable auto swap', action='store_true')
 register_cli_argument('appservice web deployment slot', 'target_slot', help="target slot to swap, default to 'production'")
+register_cli_argument('appservice web deployment slot create', 'configuration_source', help="source slot to clone configurations from. Use webapp's name to refer to the production slot")
 
 
 two_states_switch = ['true', 'false']
@@ -77,9 +95,10 @@ server_log_switch_options = ['off', 'storage', 'filesystem']
 register_cli_argument('appservice web log config', 'web_server_logging', help='configure Web server logging', **enum_choice_list(server_log_switch_options))
 
 register_cli_argument('appservice web log tail', 'provider', help="scope the live traces to certain providers/folders, for example:'application', 'http' for server log, 'kudu/trace', etc")
-register_cli_argument('appservice web log download', 'log_file', default='webapp_logs.zip', help='the downloaded zipped log file path')
+register_cli_argument('appservice web log download', 'log_file', default='webapp_logs.zip', type=file_type, completer=FilesCompleter(), help='the downloaded zipped log file path')
 
 register_cli_argument('appservice web config appsettings', 'settings', nargs='+', help="space separated app settings in a format of <name>=<value>")
+register_cli_argument('appservice web config appsettings', 'slot_settings', nargs='+', help="space separated slot app settings in a format of <name>=<value>")
 register_cli_argument('appservice web config appsettings', 'setting_names', nargs='+', help="space separated app setting names")
 
 register_cli_argument('appservice web config container', 'docker_registry_server_url', options_list=('--docker-registry-server-url', '-r'), help='the container registry server url')
@@ -96,16 +115,40 @@ register_cli_argument('appservice web config update', 'node_version', help='The 
 register_cli_argument('appservice web config update', 'php_version', help='The version used to run your web app if using PHP, e.g., 5.5, 5.6, 7.0')
 register_cli_argument('appservice web config update', 'python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
 register_cli_argument('appservice web config update', 'net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")
+register_cli_argument('appservice web config update', 'linux_fx_version', help="The runtime stack used for your linux-based webapp, e.g., \"RUBY|2.3\", \"NODE|6.6\", \"PHP|5.6\", \"DOTNETCORE|1.1.0\". See https://aka.ms/linux-stacks for more info.")
 register_cli_argument('appservice web config update', 'java_version', help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
 register_cli_argument('appservice web config update', 'java_container', help="The java container, e.g., Tomcat, Jetty")
 register_cli_argument('appservice web config update', 'java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
 register_cli_argument('appservice web config update', 'app_command_line', options_list=('--startup-file',), help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
 
-register_cli_argument('appservice web config hostname', 'webapp', help="webapp name", completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
+register_cli_argument('appservice web config ssl bind', 'ssl_type', help='The ssl cert type', **enum_choice_list(['SNI', 'IP']))
+register_cli_argument('appservice web config ssl upload', 'certificate_password', help='The ssl cert password')
+register_cli_argument('appservice web config ssl upload', 'certificate_file', type=file_type, help='The filepath for the .pfx file')
+register_cli_argument('appservice web config ssl', 'certificate_thumbprint', help='The ssl cert thumbprint')
+
+register_cli_argument('appservice web config hostname', 'webapp_name', help="webapp name", completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
 register_cli_argument('appservice web config hostname', 'name', arg_type=name_arg_type, completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name')
+
+register_cli_argument('appservice web config backup', 'storage_account_url', help='URL with SAS token to the blob storage container', options_list=['--container-url'])
+register_cli_argument('appservice web config backup', 'webapp_name', help='The name of the webapp')
+register_cli_argument('appservice web config backup', 'db_name', help='Name of the database in the backup', arg_group='Database')
+register_cli_argument('appservice web config backup', 'db_connection_string', help='Connection string for the database in the backup', arg_group='Database')
+register_cli_argument('appservice web config backup', 'db_type', help='Type of database in the backup', arg_group='Database', **enum_choice_list(DatabaseType))
+
+register_cli_argument('appservice web config backup create', 'backup_name', help='Name of the backup. If unspecified, the backup will be named with the webapp name and a timestamp')
+
+register_cli_argument('appservice web config backup update', 'frequency', help='How often to backup. Use a number followed by d or h, e.g. 5d = 5 days, 2h = 2 hours')
+register_cli_argument('appservice web config backup update', 'keep_at_least_one_backup', help='Always keep one backup, regardless of how old it is', options_list=['--retain-one'], **enum_choice_list(two_states_switch))
+register_cli_argument('appservice web config backup update', 'retention_period_in_days', help='How many days to keep a backup before automatically deleting it. Set to 0 for indefinite retention', options_list=['--retention'])
+
+register_cli_argument('appservice web config backup restore', 'backup_name', help='Name of the backup to restore')
+register_cli_argument('appservice web config backup restore', 'target_name', help='The name to use for the restored webapp. If unspecified, will default to the name that was used when the backup was created')
+register_cli_argument('appservice web config backup restore', 'overwrite', help='Overwrite the source webapp, if --target-name is not specified', action='store_true')
+register_cli_argument('appservice web config backup restore', 'ignore_hostname_conflict', help='Ignores custom hostnames stored in the backup', action='store_true')
 
 register_cli_argument('appservice web source-control', 'manual_integration', action='store_true', help='disable automatic sync between source control and web')
 register_cli_argument('appservice web source-control', 'repo_url', help='repository url to pull the latest source from, e.g. https://github.com/foo/foo-web')
 register_cli_argument('appservice web source-control', 'branch', help='the branch name of the repository')
 register_cli_argument('appservice web source-control', 'repository_type', help='repository type', default='git', **enum_choice_list(['git', 'mercurial']))
+register_cli_argument('appservice web source-control', 'git_token', help='git access token required for auto sync')
 

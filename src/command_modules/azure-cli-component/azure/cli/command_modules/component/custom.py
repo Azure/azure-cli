@@ -8,18 +8,20 @@ from six import StringIO
 
 from azure.cli.core._util import CLIError
 from azure.cli.core._config import az_config
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
+
 
 def _verify_not_dev():
     from azure.cli.core import __version__ as core_version
     dev_version = core_version.endswith('+dev')
     if dev_version:
         raise CLIError('This operation is not available in the developer version of the CLI.')
+
 
 def list_components():
     """ List the installed components """
@@ -29,34 +31,46 @@ def list_components():
                    for dist in pip.get_installed_distributions(local_only=True)
                    if dist.key.startswith(COMPONENT_PREFIX)], key=lambda x: x['name'])
 
+
+def _get_first_party_pypi_command_modules():
+    try:
+        import xmlrpclib
+    except ImportError:
+        import xmlrpc.client as xmlrpclib  # pylint: disable=import-error
+    results = []
+    client = xmlrpclib.ServerProxy('https://pypi.python.org/pypi')
+    pypi_hits = client.search({'author': 'Microsoft Corporation', 'author_email': 'azpycli'})
+    for hit in pypi_hits:
+        if hit['name'].startswith(COMPONENT_PREFIX):
+            comp_name = hit['name'].replace(COMPONENT_PREFIX, '')
+            results.append({
+                'name': comp_name,
+                'summary': hit['summary'],
+                'version': hit['version']
+            })
+    return results
+
+
 def list_available_components():
     """ List publicly available components that can be installed """
     _verify_not_dev()
     import pip
     available_components = []
-    installed_component_names = [dist.key.replace(COMPONENT_PREFIX, '') \
-                                for dist in pip.get_installed_distributions(local_only=True)
-                                 if dist.key.startswith(COMPONENT_PREFIX)]
-    try:
-        import xmlrpclib
-    except ImportError:
-        import xmlrpc.client as xmlrpclib #pylint: disable=import-error
-    client = xmlrpclib.ServerProxy('https://pypi.python.org/pypi')
-    pypi_hits = client.search({'author': 'Microsoft Corporation', 'author_email': 'azpycli'})
+    installed_component_names = [dist.key.replace(COMPONENT_PREFIX, '') for dist in
+                                 pip.get_installed_distributions(local_only=True) if
+                                 dist.key.startswith(COMPONENT_PREFIX)]
+
+    pypi_results = _get_first_party_pypi_command_modules()
     logger.debug('The following components are already installed %s', installed_component_names)
-    logger.debug("Found %d result(s)", len(pypi_hits))
-    for hit in pypi_hits:
-        if hit['name'].startswith(COMPONENT_PREFIX):
-            comp_name = hit['name'].replace(COMPONENT_PREFIX, '')
-            if comp_name not in installed_component_names:
-                available_components.append({
-                    'name': comp_name,
-                    'summary': hit['summary'],
-                    'version': hit['version']
-                })
+    logger.debug("Found %d result(s)", len(pypi_results))
+
+    for pypi_res in pypi_results:
+        if pypi_res['name'] not in installed_component_names:
+            available_components.append(pypi_res)
     if not available_components:
         logger.warning('All available components are already installed.')
     return available_components
+
 
 def remove(component_name):
     """ Remove a component """
@@ -73,6 +87,7 @@ def remove(component_name):
         _run_pip(pip, pip_args)
     else:
         raise CLIError("Component not installed.")
+
 
 def _run_pip(pip, pip_exec_args):
     log_stream = StringIO()
@@ -93,11 +108,13 @@ def _run_pip(pip, pip_exec_args):
         raise CLIError('An error occurred. Run command with --debug for more information.\n'
                        'If executing az with sudo, you may want sudo\'s -E and -H flags.')
 
+
 def _installed_in_user():
     try:
         return __file__.startswith(site.getusersitepackages())
     except (TypeError, AttributeError):
         return False
+
 
 def _install_or_update(package_list, link, private, pre):
     import pip
@@ -109,18 +126,41 @@ def _install_or_update(package_list, link, private, pre):
     pkg_index_options = ['--find-links', link] if link else []
     if private:
         package_index_url = az_config.get('component', 'package_index_url', fallback=None)
-        package_index_trusted_host = az_config.get('component', 'package_index_trusted_host', fallback=None) #pylint: disable=line-too-long
+        package_index_trusted_host = az_config.get('component', 'package_index_trusted_host',
+                                                   fallback=None)
         if package_index_url:
             pkg_index_options += ['--extra-index-url', package_index_url]
         else:
-            raise CLIError('AZURE_COMPONENT_PACKAGE_INDEX_URL environment variable not set and not specified in config. ' #pylint: disable=line-too-long
-                           'AZURE_COMPONENT_PACKAGE_INDEX_TRUSTED_HOST may also need to be set.\n'
-                           'If executing az with sudo, you may want sudo\'s -E and -H flags.') #pylint: disable=line-too-long
-        pkg_index_options += ['--trusted-host', package_index_trusted_host] if package_index_trusted_host else [] #pylint: disable=line-too-long
+            raise CLIError('AZURE_COMPONENT_PACKAGE_INDEX_URL environment variable not set and not '
+                           'specified in config. AZURE_COMPONENT_PACKAGE_INDEX_TRUSTED_HOST may '
+                           'also need to be set.\nIf executing az with sudo, you may want sudo\'s '
+                           '-E and -H flags.')
+        pkg_index_options += ['--trusted-host',
+                              package_index_trusted_host] if package_index_trusted_host else []
     pip_args = ['install'] + options + package_list + pkg_index_options
     _run_pip(pip, pip_args)
 
-def update(private=False, pre=False, link=None, additional_components=None):
+
+def _verify_additional_components(components, private, allow_third_party):
+    # Don't verify as third party packages allowed or private server which we can't query
+    if allow_third_party or private:
+        return
+    third_party = []
+    first_party_component_names = [r['name']for r in _get_first_party_pypi_command_modules()]
+    for c in components:
+        if c not in first_party_component_names:
+            third_party.append(c)
+    if third_party:
+        raise CLIError("The following component(s) '{}' are third party or not available. "
+                       "Use --allow-third-party to install "
+                       "third party packages.".format(', '.join(third_party)))
+
+
+def update(private=False,
+           pre=False,
+           link=None,
+           additional_components=None,
+           allow_third_party=False):
     """ Update the CLI and all installed components """
     _verify_not_dev()
     import pip
@@ -131,6 +171,7 @@ def update(private=False, pre=False, link=None, additional_components=None):
                      if dist.key.startswith(COMPONENT_PREFIX)]
     # Install/Update any new components the user requested
     if additional_components:
+        _verify_additional_components(additional_components, private, allow_third_party)
         for c in additional_components:
             package_list += [COMPONENT_PREFIX + c]
     _install_or_update(package_list, link, private, pre)

@@ -8,37 +8,32 @@
 
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
+from azure.cli.core._util import empty_on_404
 
 from ._client_factory import keyvault_client_factory
 from ._command_type import cli_keyvault_data_plane_command
 
-convenience_path = 'azure.cli.command_modules.keyvault.keyvaultclient.key_vault_client#{}'
-base_client_path = 'azure.cli.command_modules.keyvault.keyvaultclient.generated.key_vault_client#{}'
+convenience_path = 'azure.keyvault.key_vault_client#{}'
+base_client_path = 'azure.keyvault.generated.key_vault_client#{}'
 custom_path = 'azure.cli.command_modules.keyvault.custom#{}'
 mgmt_path = 'azure.mgmt.keyvault.operations.vaults_operations#{}'
 
 factory = lambda args: keyvault_client_factory(**args).vaults
 cli_command(__name__, 'keyvault create', custom_path.format('create_keyvault'), factory)
 cli_command(__name__, 'keyvault list', custom_path.format('list_keyvault'), factory)
-cli_command(__name__, 'keyvault show', mgmt_path.format('VaultsOperations.get'), factory)
+cli_command(__name__, 'keyvault show', mgmt_path.format('VaultsOperations.get'), factory, exception_handler=empty_on_404)
 cli_command(__name__, 'keyvault delete', mgmt_path.format('VaultsOperations.delete'), factory)
 
 cli_command(__name__, 'keyvault set-policy', custom_path.format('set_policy'), factory)
 cli_command(__name__, 'keyvault delete-policy', custom_path.format('delete_policy'), factory)
 
-def keyvault_update_setter(client, resource_group_name, vault_name, parameters):
-    from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   vault_name=vault_name,
-                                   parameters=VaultCreateOrUpdateParameters(
-                                       location=parameters.location,
-                                       properties=parameters.properties))
 
 cli_generic_update_command(__name__,
                            'keyvault update',
                            mgmt_path.format('VaultsOperations.get'),
-                           'azure.cli.command_modules.keyvault.commands#keyvault_update_setter',
-                           lambda: keyvault_client_factory().vaults)
+                           custom_path.format('update_keyvault_setter'),
+                           lambda: keyvault_client_factory().vaults,
+                           custom_function_op=custom_path.format('update_keyvault'))
 
 # Data Plane Commands
 
@@ -107,3 +102,6 @@ cli_keyvault_data_plane_command('keyvault certificate issuer delete', convenienc
 cli_keyvault_data_plane_command('keyvault certificate issuer admin list', custom_path.format('list_certificate_issuer_admins'))
 cli_keyvault_data_plane_command('keyvault certificate issuer admin add', custom_path.format('add_certificate_issuer_admin'))
 cli_keyvault_data_plane_command('keyvault certificate issuer admin delete', custom_path.format('delete_certificate_issuer_admin'))
+
+# default policy document
+cli_keyvault_data_plane_command('keyvault certificate get-default-policy', custom_path.format('get_default_policy'))

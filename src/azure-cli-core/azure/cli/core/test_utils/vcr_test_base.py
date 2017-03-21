@@ -3,18 +3,22 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=wrong-import-order
+
 from __future__ import print_function
 
+import collections
 import json
 import os
-import collections
-import shlex
-from random import choice
 import re
-from string import digits, ascii_lowercase
+import shlex
 import sys
-from six.moves.urllib.parse import urlparse, parse_qs # pylint: disable=import-error
 import tempfile
+import traceback
+from random import choice
+from string import digits, ascii_lowercase
+
+from six.moves.urllib.parse import urlparse, parse_qs  # pylint: disable=import-error
 
 import unittest
 try:
@@ -32,65 +36,91 @@ from azure.cli.main import main as cli_main
 
 from azure.cli.core import __version__ as core_version
 import azure.cli.core._debug as _debug
-from azure.cli.core._profile import Profile
-from azure.cli.core._util import CLIError
+from azure.cli.core._profile import Profile, CLOUD
+from azure.cli.core._util import CLIError, random_string
 
-TRACK_COMMANDS = os.environ.get('AZURE_CLI_TEST_TRACK_COMMANDS')
-COMMAND_COVERAGE_FILENAME = 'command_coverage.txt'
+LIVE_TEST_CONTROL_ENV = 'AZURE_CLI_TEST_RUN_LIVE'
+COMMAND_COVERAGE_CONTROL_ENV = 'AZURE_CLI_TEST_COMMAND_COVERAGE'
 MOCKED_SUBSCRIPTION_ID = '00000000-0000-0000-0000-000000000000'
 MOCKED_TENANT_ID = '00000000-0000-0000-0000-000000000000'
 MOCKED_STORAGE_ACCOUNT = 'dummystorage'
 
+
 # MOCK METHODS
 
+# Workaround until https://github.com/kevin1024/vcrpy/issues/293 is fixed.
+vcr_connection_request = vcr.stubs.VCRConnection.request
+
+
+def patch_vcr_connection_request(*args, **kwargs):
+    kwargs.pop('encode_chunked', None)
+    vcr_connection_request(*args, **kwargs)
+
+
+vcr.stubs.VCRConnection.request = patch_vcr_connection_request
+
+
 def _mock_get_mgmt_service_client(client_type, subscription_bound=True, subscription_id=None,
-                                  api_version=None):
+                                  api_version=None, base_url_bound=None, **kwargs):
     # version of _get_mgmt_service_client to use when recording or playing tests
     profile = Profile()
     cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id)
-    if subscription_bound:
-        client = client_type(cred, subscription_id, api_version=api_version) \
-            if api_version else client_type(cred, subscription_id)
-    else:
-        client = client_type(cred, api_version=api_version) \
-            if api_version else client_type(cred)
+    client_kwargs = {}
 
-    _debug.allow_debug_connection(client)
+    if base_url_bound:
+        client_kwargs = {'base_url': CLOUD.endpoints.resource_manager}
+    if api_version:
+        client_kwargs['api_version'] = api_version
+    if kwargs:
+        client_kwargs.update(kwargs)
+
+    if subscription_bound:
+        client = client_type(cred, subscription_id, **client_kwargs)
+    else:
+        client = client_type(cred, **client_kwargs)
+
+    client = _debug.allow_debug_connection(client)
 
     client.config.add_user_agent("AZURECLI/TEST/{}".format(core_version))
 
     return (client, subscription_id)
 
+
 def _mock_generate_deployment_name(namespace):
     if not namespace.deployment_name:
         namespace.deployment_name = 'mock-deployment'
 
+
 def _mock_handle_exceptions(ex):
     raise ex
 
-def _mock_subscriptions(self): #pylint: disable=unused-argument
+
+def _mock_subscriptions(self):  # pylint: disable=unused-argument
     return [{
         "id": MOCKED_SUBSCRIPTION_ID,
         "user": {
             "name": "example@example.com",
             "type": "user"
-            },
+        },
         "state": "Enabled",
         "name": "Example",
         "tenantId": MOCKED_TENANT_ID,
         "isDefault": True}]
 
-def _mock_user_access_token(_, _1, _2, _3): #pylint: disable=unused-argument
+
+def _mock_user_access_token(_, _1, _2, _3):  # pylint: disable=unused-argument
     return ('Bearer', 'top-secret-token-for-you')
+
 
 def _mock_operation_delay(_):
     # don't run time.sleep()
     return
 
+
 # TEST CHECKS
 
-class JMESPathCheckAssertionError(AssertionError):
 
+class JMESPathCheckAssertionError(AssertionError):
     def __init__(self, comparator, actual_result, json_data):
         message = "Actual value '{}' != Expected value '{}'. ".format(
             actual_result,
@@ -98,7 +128,8 @@ class JMESPathCheckAssertionError(AssertionError):
         message += "Query '{}' used on json data '{}'".format(comparator.query, json_data)
         super(JMESPathCheckAssertionError, self).__init__(message)
 
-class JMESPathCheck(object): # pylint: disable=too-few-public-methods
+
+class JMESPathCheck(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, query, expected_result):
         self.query = query
@@ -109,7 +140,8 @@ class JMESPathCheck(object): # pylint: disable=too-few-public-methods
         if not actual_result == self.expected_result:
             raise JMESPathCheckAssertionError(self, actual_result, json_data)
 
-class JMESPathPatternCheck(object): # pylint: disable=too-few-public-methods
+
+class JMESPathPatternCheck(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, query, expected_result):
         self.query = query
@@ -120,7 +152,8 @@ class JMESPathPatternCheck(object): # pylint: disable=too-few-public-methods
         if not re.match(self.expected_result, str(actual_result), re.IGNORECASE):
             raise JMESPathCheckAssertionError(self, actual_result, json_data)
 
-class BooleanCheck(object): # pylint: disable=too-few-public-methods
+
+class BooleanCheck(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, expected_result):
         self.expected_result = expected_result
@@ -133,19 +166,22 @@ class BooleanCheck(object): # pylint: disable=too-few-public-methods
             raise AssertionError("Actual value '{}' != Expected value {}".format(
                 result, self.expected_result))
 
-class NoneCheck(object): # pylint: disable=too-few-public-methods
+
+class NoneCheck(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self):
         pass
 
-    def compare(self, data): # pylint: disable=no-self-use
+    def compare(self, data):  # pylint: disable=no-self-use
+        none_strings = ['[]', '{}', 'false']
         try:
-            assert not data
+            assert not data or data in none_strings
         except AssertionError:
-            raise AssertionError("Actual value '{}' != Expected value falsy (None, '', [])".format(
-                data))
+            raise AssertionError("Actual value '{}' != Expected value falsy (None, '', []) or "
+                                 "string in {}".format(data, none_strings))
 
-class StringCheck(object): # pylint: disable=too-few-public-methods
+
+class StringCheck(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, expected_result):
         self.expected_result = expected_result
@@ -158,10 +194,18 @@ class StringCheck(object): # pylint: disable=too-few-public-methods
             raise AssertionError("Actual value '{}' != Expected value {}".format(
                 data, self.expected_result))
 
+
 # HELPER METHODS
+
 
 def _scrub_deployment_name(uri):
     return re.sub('/deployments/([^/?]+)', '/deployments/mock-deployment', uri)
+
+
+def _scrub_service_principal_name(uri):
+    return re.sub('userPrincipalName%20eq%20%27(.+)%27',
+                  'userPrincipalName%20eq%20%27example%40example.com%27', uri)
+
 
 def _search_result_by_jmespath(json_data, query):
     if not json_data:
@@ -171,6 +215,7 @@ def _search_result_by_jmespath(json_data, query):
         query,
         json_val,
         jmespath.Options(collections.OrderedDict))
+
 
 def _custom_request_matcher(r1, r2):
     """ Ensure method, path, and query parameters match. """
@@ -196,9 +241,11 @@ def _custom_request_matcher(r1, r2):
 
     return True
 
+
 # MAIN CLASS
 
-class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attributes
+
+class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attributes
 
     FILTER_HEADERS = [
         'authorization',
@@ -221,12 +268,17 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
         self.recording_dir = os.path.join(os.path.dirname(test_file), 'recordings')
         self.cassette_path = os.path.join(self.recording_dir, '{}.yaml'.format(test_name))
         self.playback = os.path.isfile(self.cassette_path)
-        self.run_live = run_live
+
+        if os.environ.get(LIVE_TEST_CONTROL_ENV, None) == 'True':
+            self.run_live = True
+        else:
+            self.run_live = run_live
+
         self.skip_setup = skip_setup
         self.skip_teardown = skip_teardown
         self.success = False
         self.exception = None
-        self.track_commands = False
+        self.track_commands = os.environ.get(COMMAND_COVERAGE_CONTROL_ENV, None)
         self._debug = debug
 
         if not self.playback and ('--buffer' in sys.argv) and not run_live:
@@ -247,35 +299,36 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
         self.my_vcr.match_on = ['custom']
 
     def _track_executed_commands(self, command):
-        if not self.track_commands:
-            return
-        filename = COMMAND_COVERAGE_FILENAME
-        with open(filename, 'a+') as f:
-            f.write(' '.join(command))
-            f.write('\n')
+        if self.track_commands:
+            with open(self.track_commands, 'a+') as f:
+                f.write(' '.join(command))
+                f.write('\n')
 
-    def _before_record_request(self, request): # pylint: disable=no-self-use
+    def _before_record_request(self, request):  # pylint: disable=no-self-use
         # scrub subscription from the uri
         request.uri = re.sub('/subscriptions/([^/]+)/',
                              '/subscriptions/{}/'.format(MOCKED_SUBSCRIPTION_ID), request.uri)
+        # scrub jobId from uri, required for ADLA
+        request.uri = re.sub('/Jobs/([^/]+)',
+                             '/Jobs/{}'.format(MOCKED_SUBSCRIPTION_ID), request.uri)
         request.uri = re.sub('/graph.windows.net/([^/]+)/',
                              '/graph.windows.net/{}/'.format(MOCKED_TENANT_ID), request.uri)
         request.uri = re.sub('/sig=([^/]+)&', '/sig=0000&', request.uri)
         request.uri = _scrub_deployment_name(request.uri)
+        request.uri = _scrub_service_principal_name(request.uri)
 
         # replace random storage account name with dummy name
-        request.uri = re.sub('/vcrstorage([\\d]+).',
-                             '/{}.'.format(MOCKED_STORAGE_ACCOUNT), request.uri)
+        request.uri = re.sub(r'(vcrstorage[\d]+)', MOCKED_STORAGE_ACCOUNT, request.uri)
         # prevents URI mismatch between Python 2 and 3 if request URI has extra / chars
         request.uri = re.sub('//', '/', request.uri)
         request.uri = re.sub('/', '//', request.uri, count=1)
         # do not record requests sent for token refresh'
         if (request.body and 'grant-type=refresh_token' in str(request.body)) or \
-            '/oauth2/token' in request.uri:
+                ('/oauth2/token' in request.uri):
             request = None
         return request
 
-    def _before_record_response(self, response): # pylint: disable=no-self-use
+    def _before_record_response(self, response):  # pylint: disable=no-self-use
         for key in VCRTestBase.FILTER_HEADERS:
             if key in response['headers']:
                 del response['headers'][key]
@@ -283,6 +336,8 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
         def _scrub_body_parameters(value):
             value = re.sub('/subscriptions/([^/]+)/',
                            '/subscriptions/{}/'.format(MOCKED_SUBSCRIPTION_ID), value)
+            value = re.sub('\"jobId\": \"([^/]+)\"',
+                           '\"jobId\": \"{}\"'.format(MOCKED_SUBSCRIPTION_ID), value)
             return value
 
         for key in response['body']:
@@ -296,9 +351,10 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
         return response
 
     @mock.patch('azure.cli.main.handle_exception', _mock_handle_exceptions)
-    @mock.patch('azure.cli.core.commands.client_factory._get_mgmt_service_client', _mock_get_mgmt_service_client) # pylint: disable=line-too-long
+    @mock.patch('azure.cli.core.commands.client_factory._get_mgmt_service_client',
+                _mock_get_mgmt_service_client)  # pylint: disable=line-too-long
     def _execute_live_or_recording(self):
-        #pylint: disable=no-member
+        # pylint: disable=no-member
         try:
             set_up = getattr(self, "set_up", None)
             if callable(set_up) and not self.skip_setup:
@@ -318,9 +374,11 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
                 self.tear_down()
 
     @mock.patch('azure.cli.core._profile.Profile.load_cached_subscriptions', _mock_subscriptions)
-    @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', _mock_user_access_token) # pylint: disable=line-too-long
+    @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user',
+                _mock_user_access_token)  # pylint: disable=line-too-long
     @mock.patch('azure.cli.main.handle_exception', _mock_handle_exceptions)
-    @mock.patch('azure.cli.core.commands.client_factory._get_mgmt_service_client', _mock_get_mgmt_service_client) # pylint: disable=line-too-long
+    @mock.patch('azure.cli.core.commands.client_factory._get_mgmt_service_client',
+                _mock_get_mgmt_service_client)  # pylint: disable=line-too-long
     @mock.patch('msrestazure.azure_operation.AzureOperationPoller._delay', _mock_operation_delay)
     @mock.patch('time.sleep', _mock_operation_delay)
     @mock.patch('azure.cli.core.commands.LongRunningOperation._delay', _mock_operation_delay)
@@ -356,7 +414,8 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
 
     # COMMAND METHODS
 
-    def cmd(self, command, checks=None, allowed_exceptions=None, debug=False): #pylint: disable=no-self-use
+    def cmd(self, command, checks=None, allowed_exceptions=None,
+            debug=False):  # pylint: disable=no-self-use
         allowed_exceptions = allowed_exceptions or []
         if not isinstance(allowed_exceptions, list):
             allowed_exceptions = [allowed_exceptions]
@@ -367,7 +426,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
         output = StringIO()
         try:
             cli_main(command_list, file=output)
-        except Exception as ex: # pylint: disable=broad-except
+        except Exception as ex:  # pylint: disable=broad-except
             ex_msg = str(ex)
             if not next((x for x in allowed_exceptions if x in ex_msg), None):
                 raise ex
@@ -383,16 +442,19 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             for check in checks:
                 check.compare(result)
 
-        result = result or '{}'
-        try:
-            return json.loads(result)
-        except Exception: # pylint: disable=broad-except
+        if '-o' in command_list and 'tsv' in command_list:
             return result
+        else:
+            try:
+                result = result or '{}'
+                return json.loads(result)
+            except Exception:  # pylint: disable=broad-except
+                return result
 
-    def set_env(self, key, val): #pylint: disable=no-self-use
+    def set_env(self, key, val):  # pylint: disable=no-self-use
         os.environ[key] = val
 
-    def pop_env(self, key): #pylint: disable=no-self-use
+    def pop_env(self, key):  # pylint: disable=no-self-use
         return os.environ.pop(key, None)
 
     def execute(self):
@@ -409,6 +471,7 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
                 print('RECORDING: {}'.format(self.test_name))
                 self._execute_live_or_recording()
         except Exception as ex:
+            traceback.print_exc()
             raise ex
         finally:
             if not self.success and not self.playback and os.path.isfile(self.cassette_path):
@@ -417,11 +480,13 @@ class VCRTestBase(unittest.TestCase):#pylint: disable=too-many-instance-attribut
             elif self.success and not self.playback and os.path.isfile(self.cassette_path):
                 try:
                     self._post_recording_scrub()
-                except Exception: # pylint: disable=broad-except
+                except Exception:  # pylint: disable=broad-except
                     os.remove(self.cassette_path)
+
 
 class ResourceGroupVCRTestBase(VCRTestBase):
     # pylint: disable=too-many-arguments
+
     def __init__(self, test_file, test_name, resource_group='vcr_resource_group', run_live=False,
                  debug=False, debug_vcr=False, skip_setup=False, skip_teardown=False):
         super(ResourceGroupVCRTestBase, self).__init__(test_file, test_name, run_live=run_live,
@@ -438,9 +503,13 @@ class ResourceGroupVCRTestBase(VCRTestBase):
             self.location, self.resource_group))
 
     def tear_down(self):
-        self.cmd('group delete --name {} --no-wait'.format(self.resource_group))
+        self.cmd('group delete --name {} --no-wait --yes'.format(self.resource_group))
+
 
 class StorageAccountVCRTestBase(VCRTestBase):
+    account_location = 'westus'
+    account_sku = 'Standard_LRS'
+
     # pylint: disable=too-many-arguments
     def __init__(self, test_file, test_name, resource_group='vcr_resource_group', run_live=False,
                  debug=False, debug_vcr=False, skip_setup=False, skip_teardown=False):
@@ -449,19 +518,25 @@ class StorageAccountVCRTestBase(VCRTestBase):
                                                         skip_setup=skip_setup,
                                                         skip_teardown=skip_teardown)
         self.resource_group_original = resource_group
-        random_tag = '_{}_'.format(''.join((choice(ascii_lowercase + digits) for _ in range(4))))
-        self.resource_group = '{}{}'.format(resource_group, '' if self.playback else random_tag)
-
-        self.account = MOCKED_STORAGE_ACCOUNT if self.playback else \
-            'vcrstorage{}'.format(''.join(choice(digits) for i in range(12)))
-        self.location = 'westus'
+        self.resource_group = '{}{}'.format(resource_group,
+                                            '' if self.playback else self.generate_random_tag())
+        self.account = MOCKED_STORAGE_ACCOUNT if self.playback else self.generate_account_name()
 
     def set_up(self):
         self.cmd('group create --location {} --name {} --tags use=az-test'.format(
-            self.location, self.resource_group))
-        self.cmd('storage account create --sku Standard_LRS -l westus -n {} -g {}'.format(
-            self.account, self.resource_group))
+            self.account_location, self.resource_group))
+        self.cmd('storage account create --sku {} -l {} -n {} -g {}'.format(
+            self.account_sku, self.account_location, self.account, self.resource_group))
 
     def tear_down(self):
-        self.cmd('storage account delete -g {} -n {}'.format(self.resource_group, self.account))
-        self.cmd('group delete --name {} --no-wait'.format(self.resource_group))
+        self.cmd('storage account delete -g {} -n {} --yes'.format(
+            self.resource_group, self.account))
+        self.cmd('group delete --name {} --no-wait --yes'.format(self.resource_group))
+
+    @classmethod
+    def generate_account_name(cls):
+        return 'vcrstorage{}'.format(random_string(12, digits_only=True))
+
+    @classmethod
+    def generate_random_tag(cls):
+        return '_{}_'.format(random_string(4, force_lower=True))

@@ -18,6 +18,16 @@ def _resource_policy_client_factory(**_):
     from azure.mgmt.resource.policy import PolicyClient
     return get_mgmt_service_client(PolicyClient)
 
+def _resource_lock_client_factory(**_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.resource.locks import ManagementLockClient
+    return get_mgmt_service_client(ManagementLockClient)
+
+def _resource_links_client_factory(**_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.resource.links import ManagementLinkClient
+    return get_mgmt_service_client(ManagementLinkClient)
+
 def cf_resource_groups(_):
     return _resource_client_factory().resource_groups
 
@@ -36,11 +46,14 @@ def cf_deployments(_):
 def cf_deployment_operations(_):
     return _resource_client_factory().deployment_operations
 
-
 def cf_features(_):
     return _resource_feature_client_factory().features
-
 
 def cf_policy_definitions(_):
     return _resource_policy_client_factory().policy_definitions
 
+def cf_management_locks(_):
+    return _resource_lock_client_factory().management_locks
+
+def cf_resource_links():
+    return _resource_links_client_factory().resource_links

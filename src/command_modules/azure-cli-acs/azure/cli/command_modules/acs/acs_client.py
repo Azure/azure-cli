@@ -6,24 +6,43 @@
 import os.path
 import socket
 import threading
-import webbrowser
 from time import sleep
 
 import paramiko
 from sshtunnel import SSHTunnelForwarder
 from scp import SCPClient
 
-def SecureCopy(user, host, src, dest):
-    home = os.path.expanduser("~")
+from azure.cli.core._util import CLIError
+from azure.cli.core.prompting import prompt_pass
+
+
+def _load_key(key_filename):
+    pkey = None
+    try:
+        pkey = paramiko.RSAKey.from_private_key_file(key_filename, None)
+    except paramiko.PasswordRequiredException:
+        key_pass = prompt_pass('Password:')
+        pkey = paramiko.RSAKey.from_private_key_file(key_filename, key_pass)
+    if pkey is None:
+        raise CLIError('failed to load key: {}'.format(key_filename))
+    return pkey
+
+
+def SecureCopy(user, host, src, dest,  # pylint: disable=too-many-arguments
+               key_filename=os.path.join(os.path.expanduser("~"), '.ssh', 'id_rsa')):
     ssh = paramiko.SSHClient()
     ssh.load_system_host_keys()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(host, username=user, key_filename=os.path.join(home, '.ssh', 'id_rsa'))
+
+    pkey = _load_key(key_filename)
+
+    ssh.connect(host, username=user, pkey=pkey)
 
     scp = SCPClient(ssh.get_transport())
 
     scp.get(src, dest)
     scp.close()
+
 
 class ACSClient(object):
     def __init__(self, client=None):
@@ -42,7 +61,8 @@ class ACSClient(object):
         if self.tunnel_server is not None:
             self.tunnel_server.close_tunnel()
 
-    def connect(self, host, username, port=2200):
+    def connect(self, host, username, port=2200,  # pylint: disable=too-many-arguments
+                key_filename=os.path.join(os.path.expanduser("~"), '.ssh', 'id_rsa')):
         """
         Creates a connection to the remote server.
 
@@ -70,10 +90,13 @@ class ACSClient(object):
         if self.client is None:
             self.client = paramiko.SSHClient()
             self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+            pkey = _load_key(key_filename)
             self.client.connect(
                 hostname=host,
                 port=port,
-                username=username)
+                username=username,
+                pkey=pkey)
 
         self.transport = self.client.get_transport()
         return self.transport is not None
@@ -134,7 +157,7 @@ class ACSClient(object):
             sftp.close()
         return result
 
-    def create_tunnel(self, remote_host, remote_port, local_port=0, open_url=None):
+    def create_tunnel(self, remote_host, remote_port, local_port=0):
         """
         Creates a tunnel to the remote host
 
@@ -144,20 +167,15 @@ class ACSClient(object):
         :type remote_port: Number
         :param local_port: Local port. If set to 0, random local port is selected
         :type local_port: Number
-        :param open_url: URL to open after tunnel is created
-        :type open_url: String
         """
         if local_port is 0:
             local_port = self.get_available_local_port()
 
-        with SSHTunnelForwarder(
-            (self.host, self.port),
-            ssh_username=self.username,
-            remote_bind_address=(remote_host, remote_port),
-            local_bind_address=('0.0.0.0', local_port)):
+        with SSHTunnelForwarder((self.host, self.port),
+                                ssh_username=self.username,
+                                remote_bind_address=(remote_host, remote_port),
+                                local_bind_address=('0.0.0.0', local_port)):
             try:
-                if open_url:
-                    webbrowser.open(open_url)
                 while True:
                     sleep(1)
             except KeyboardInterrupt:

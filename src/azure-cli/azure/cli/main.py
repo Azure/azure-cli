@@ -7,16 +7,18 @@ import os
 import sys
 
 from azure.cli.core.application import APPLICATION, Configuration
-import azure.cli.core._logging as _logging
+import azure.cli.core.azlogging as azlogging
 from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
 from azure.cli.core._util import (show_version_info_exit, handle_exception)
 from azure.cli.core._environment import get_config_dir
+import azure.cli.core.telemetry as telemetry
 
-logger = _logging.get_az_logger(__name__)
+logger = azlogging.get_az_logger(__name__)
 
 
 def main(args, file=sys.stdout):  # pylint: disable=redefined-builtin
-    _logging.configure_logging(args)
+    azlogging.configure_logging(args)
+    logger.debug('Command arguments %s', args)
 
     if len(args) > 0 and args[0] == '--version':
         show_version_info_exit(file)
@@ -33,14 +35,20 @@ def main(args, file=sys.stdout):  # pylint: disable=redefined-builtin
 
     try:
         cmd_result = APPLICATION.execute(args)
+
         # Commands can return a dictionary/list of results
         # If they do, we print the results.
-        if cmd_result and cmd_result.result:
+        if cmd_result and cmd_result.result is not None:
             from azure.cli.core._output import OutputProducer
             formatter = OutputProducer.get_formatter(APPLICATION.configuration.output_format)
             OutputProducer(formatter=formatter, file=file).out(cmd_result)
+
     except Exception as ex:  # pylint: disable=broad-except
-        from azure.cli.core.telemetry import log_telemetry
-        log_telemetry('Error', log_type='trace')
+
+        # TODO: include additional details of the exception in telemetry
+        telemetry.set_exception(ex, 'outer-exception',
+                                'Unexpected exception caught during application execution.')
+        telemetry.set_failure()
+
         error_code = handle_exception(ex)
         return error_code

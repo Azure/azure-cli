@@ -4,7 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import os.path
-from .const import COMMAND_MODULE_PREFIX
+import glob
+
+from automation.utilities.const import COMMAND_MODULE_PREFIX
 
 
 def get_repo_root():
@@ -16,44 +18,52 @@ def get_repo_root():
     return current_dir
 
 
-def get_command_modules_paths():
-    """List all the command modules and returns those have tests folder"""
-    root = os.path.join(get_repo_root(), 'src', 'command_modules')
+def get_all_module_paths():
+    """List all core and command modules"""
+    return list(get_core_modules_paths()) + list(get_command_modules_paths(include_prefix=True))
 
-    modules_paths = ((name[len(COMMAND_MODULE_PREFIX):], os.path.join(root, name))
-                     for name in os.listdir(root) if name.startswith(COMMAND_MODULE_PREFIX))
 
-    return list(modules_paths)
+def get_command_modules_paths(include_prefix=False):
+    for path in glob.glob(get_repo_root() + '/src/command_modules/{}*/setup.py'.format(
+            COMMAND_MODULE_PREFIX)):
+        folder = os.path.dirname(path)
+        name = os.path.basename(folder)
+        if not include_prefix:
+            name = name[len(COMMAND_MODULE_PREFIX):]
+        yield name, folder
 
 
 def get_command_modules_paths_with_tests():
-    """List all the command modules and returns those have tests folder"""
-    for name, module_path in get_command_modules_paths():
-        test_path = os.path.join(module_path, 'azure', 'cli', 'command_modules', name, 'tests')
-        if os.path.exists(test_path):
-            yield name, module_path, test_path
-
-
-def get_core_modules_paths():
-    def _get_path(name):
-        return os.path.join(get_repo_root(), 'src', name)
-
-    yield 'azure-cli', _get_path('azure-cli')
-    yield 'azure-cli-core', _get_path('azure-cli-core')
+    return get_module_paths_with_tests(get_command_modules_paths())
 
 
 def get_core_modules_paths_with_tests():
-    # the pattern for the test folder here is not consistent with command modules'
-    yield 'azure-cli', os.path.join(get_repo_root(), 'src', 'azure-cli'), \
-          os.path.join(get_repo_root(), 'src', 'azure-cli', 'azure', 'cli', 'tests')
-    yield 'azure-cli-core', os.path.join(get_repo_root(), 'src', 'azure-cli-core'), \
-          os.path.join(get_repo_root(), 'src', 'azure-cli-core', 'azure', 'cli', 'core', 'tests')
+    return get_module_paths_with_tests(get_core_modules_paths())
+
+
+def get_core_modules_paths():
+    for path in glob.glob(get_repo_root() + '/src/*/setup.py'):
+        yield os.path.basename(os.path.dirname(path)), os.path.dirname(path)
+
+
+def get_module_paths_with_tests(modules):
+    for name, path in modules:
+        test_folder = os.path.join(path, 'tests')
+        if not os.path.exists(test_folder):
+            # fallback, will be obsolete eventually when all tests folder are moved to the root of
+            # it's module source folder.
+            name = name.replace(COMMAND_MODULE_PREFIX, '')
+            test_folder = os.path.join(path, 'azure', 'cli', 'command_modules', name, 'tests')
+            if not os.path.exists(test_folder):
+                test_folder = None
+
+        if test_folder:
+            yield name, path, test_folder
 
 
 def make_dirs(path):
     """Create a directories recursively"""
     import errno
-    import os
     try:
         os.makedirs(path)
     except OSError as exc:  # Python <= 2.5
@@ -64,7 +74,8 @@ def make_dirs(path):
 
 
 def get_test_results_dir(with_timestamp=None, prefix=None):
-    """Returns the folder where test results should be saved to. If the folder doesn't exist, it will be created."""
+    """Returns the folder where test results should be saved to. If the folder doesn't exist,
+    it will be created."""
     result = os.path.join(get_repo_root(), 'test_results')
 
     if isinstance(with_timestamp, bool):
@@ -84,3 +95,106 @@ def get_test_results_dir(with_timestamp=None, prefix=None):
         raise Exception('Failed to create test result dir {}'.format(result))
 
     return result
+
+
+def filter_blacklisted_modules(black_list_modules):
+    """Returns the paths to the modules except those in the black list."""
+    import itertools
+
+    existing_modules = list(itertools.chain(get_core_modules_paths(),
+                                            get_command_modules_paths()))
+    black_list_modules = set(black_list_modules)
+    return list((name, path) for name, path in existing_modules if name not in black_list_modules)
+
+
+def filter_user_selected_modules(user_input_modules):
+    import itertools
+
+    existing_modules = list(itertools.chain(get_core_modules_paths(),
+                                            get_command_modules_paths()))
+
+    if user_input_modules:
+        selected_modules = set(user_input_modules)
+        extra = selected_modules - set([name for name, _ in existing_modules])
+        if any(extra):
+            print('ERROR: These modules do not exist: {}.'.format(', '.join(extra)))
+            return None
+
+        return list((name, module) for name, module in existing_modules
+                    if name in selected_modules)
+    else:
+        return list((name, module) for name, module in existing_modules)
+
+
+def filter_user_selected_modules_with_tests(user_input_modules):
+    import itertools
+
+    existing_modules = list(itertools.chain(get_core_modules_paths_with_tests(),
+                                            get_command_modules_paths_with_tests()))
+
+    if user_input_modules:
+        selected_modules = set(user_input_modules)
+        extra = selected_modules - set([name for name, _, _ in existing_modules])
+        if any(extra):
+            print('ERROR: These modules do not exist: {}.'.format(', '.join(extra)))
+            return None
+
+        return list((name, module, test) for name, module, test in existing_modules
+                    if name in selected_modules)
+    else:
+        return list((name, module, test) for name, module, test in existing_modules)
+
+
+if __name__ == '__main__':
+    print('Automation utility')
+    print('All modules and their paths')
+
+    module_paths = get_all_module_paths()
+    template = '  {:' + str(max([len(m) for m, _ in module_paths]) + 2) + '}{}'
+
+    for m, p in module_paths:
+        print(template.format(m, p))
+
+    print('Total: {}\n\n'.format(len(module_paths)))
+
+    print('Core modules and their paths')
+
+    module_paths = list(get_core_modules_paths())
+    template = '  {:' + str(max([len(m) for m, _ in module_paths]) + 2) + '}{}'
+
+    for m, p in module_paths:
+        print(template.format(m, p))
+
+    print('Total: {}\n\n'.format(len(module_paths)))
+
+    print('Command modules and their paths')
+
+    module_paths = list(get_command_modules_paths())
+    template = '  {:' + str(max([len(m) for m, _ in module_paths]) + 2) + '}{}'
+
+    for m, p in module_paths:
+        print(template.format(m, p))
+
+    print('Total: {}\n\n'.format(len(module_paths)))
+
+    print('Core modules and their paths as well as tests')
+
+    module_paths = list(get_core_modules_paths_with_tests())
+    name_len = str(max([len(m) for m, _, _ in module_paths]) + 2)
+    template = '  {:' + name_len + '}{}\n  {:' + name_len + '}{}'
+
+    for m, p, t in module_paths:
+        print(template.format(m, p, '', t))
+
+    print('Total: {}\n\n'.format(len(module_paths)))
+
+    print('Command modules and their paths as well as tests')
+
+    module_paths = list(get_command_modules_paths_with_tests())
+    name_len = str(max([len(m) for m, _, _ in module_paths]) + 2)
+    template = '  {:' + name_len + '}{}\n  {:' + name_len + '}{}'
+
+    for m, p, t in module_paths:
+        print(template.format(m, p, '', t))
+
+    print('Total: {}\n\n'.format(len(module_paths)))

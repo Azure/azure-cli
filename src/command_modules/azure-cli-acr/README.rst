@@ -1,8 +1,8 @@
 Microsoft Azure CLI 'acr' Command Module
-==================================
+========================================
 
 Commands to manage Azure container registries
--------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
     Group
@@ -21,7 +21,7 @@ Commands to manage Azure container registries
         update    : Updates a container registry.
 
 Create a container registry
--------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
     Command
@@ -33,16 +33,17 @@ Create a container registry
         --resource-group -g [Required]: Name of resource group.
         --admin-enabled               : Indicates whether the admin user is enabled.
                                         Allowed values: false, true.  Default: false.
-        --storage-account-name        : The name of an existing storage account.
+        --storage-account-name        : Default: A new storage account will be created. 
+                                        Provide the name of an existing storage account if
+                                        you're recreating a container registry over a previous 
+                                        registry created storage account.
 
     Examples
         Create a container registry with a new storage account
             az acr create -n myRegistry -g myResourceGroup -l southcentralus
-        Create a container registry with an existing storage account
-            az acr create -n myRegistry -g myResourceGroup -l southcentralus --storage-account-name myStorageAccount
 
 Delete a container registry
--------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
     Command
@@ -53,7 +54,7 @@ Delete a container registry
         --resource-group -g : Name of resource group.
 
 List container registries
--------------
+^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
     Command
@@ -69,7 +70,7 @@ List container registries
             az acr list -g myResourceGroup -o table
 
 Get a container registry
--------------
+^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
     Command
@@ -80,7 +81,7 @@ Get a container registry
         --resource-group -g : Name of resource group.
 
 Update a container registry
--------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
     Command
@@ -91,7 +92,9 @@ Update a container registry
         --admin-enabled       : Indicates whether the admin user is enabled.
 		                        Allowed values: false, true.
         --resource-group -g   : Name of resource group.
-        --storage-account-name: The name of an existing storage account.
+        --storage-account-name: Provide the name of an existing storage account if
+                                you're recreating a container registry over a previous 
+                                registry created storage account.
         --tags                : Space separated tags in 'key[=value]' format. Use "" to clear existing
                                 tags.
 
@@ -113,7 +116,7 @@ Update a container registry
             az acr update -n myRegistry --admin-enabled true
 
 Get login credentials for a container registry
--------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
     Command
@@ -124,7 +127,7 @@ Get login credentials for a container registry
         --resource-group -g : Name of resource group.
 
 Regenerate login credentials for a container registry
--------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
     Command
@@ -135,7 +138,7 @@ Regenerate login credentials for a container registry
         --resource-group -g : Name of resource group.
 
 List repositories in a given container registry
--------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
     Command
@@ -153,7 +156,7 @@ List repositories in a given container registry
             az acr repository list -n myRegistry -u myUsername -p myPassword
 
 Show tags of a given repository in a given container registry
--------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
     Command

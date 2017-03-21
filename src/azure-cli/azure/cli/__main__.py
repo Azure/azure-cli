@@ -7,17 +7,10 @@ import sys
 import os
 
 import azure.cli.main
-
-from azure.cli.core.telemetry import (init_telemetry, user_agrees_to_telemetry,
-                                      telemetry_flush, log_telemetry)
+import azure.cli.core.telemetry as telemetry
 
 try:
-    try:
-        if user_agrees_to_telemetry():
-            init_telemetry()
-    except Exception:  # pylint: disable=broad-except
-        pass
-
+    telemetry.start()
     args = sys.argv[1:]
 
     # Check if we are in argcomplete mode - if so, we
@@ -27,13 +20,15 @@ try:
         if comp_line:
             args = comp_line.split()[1:]
 
-    sys.exit(azure.cli.main.main(args))
+    exit_code = azure.cli.main.main(args)
+    if exit_code and exit_code != 0:
+        telemetry.set_failure()
+    else:
+        telemetry.set_success()
+
+    sys.exit(exit_code)
 except KeyboardInterrupt:
-    log_telemetry('keyboard interrupt')
+    telemetry.set_user_fault('keyboard interrupt')
     sys.exit(1)
 finally:
-    try:
-        if user_agrees_to_telemetry():
-            telemetry_flush()
-    except Exception:  # pylint: disable=broad-except
-        pass
+    telemetry.conclude()
