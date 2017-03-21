@@ -14,7 +14,7 @@ from azure.cli.testsdk import (
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
-from datetime import timedelta, datetime, timezone
+from datetime import datetime
 
 
 # Constants
@@ -939,11 +939,8 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
         storageKey = self.cmd('storage account keys list -g {} -n {} --query [0].value'
                               .format(resource_group, storage_account)).get_output_in_json()
 
-        # set expire time as utcnow + 2 hours
-        expiry = datetime.utcnow() + timedelta(hours=2)
-
-        # datetime.utcnow doesn't assume timezone info, append required Z for datetime string
-        expiryString = expiry.strftime('%Y-%m-%dT%H:%M:%SZ')
+        # Set Expiry
+        expiryString = '9999-12-25T00:00:00Z'
 
         # Get sas key
         sasKey = self.cmd('storage blob generate-sas --account-name {} -c {} -n {} --permissions rw --expiry {}'.format(
