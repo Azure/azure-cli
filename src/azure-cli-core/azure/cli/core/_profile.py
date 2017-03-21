@@ -182,15 +182,21 @@ class Profile(object):
                 s[_IS_DEFAULT_SUBSCRIPTION] = False
 
             if not new_active_one:
-                new_active_one = new_subscriptions[0]
-            new_active_one[_IS_DEFAULT_SUBSCRIPTION] = True
-            default_sub_id = new_active_one[_SUBSCRIPTION_ID]
+                new_active_one = Profile._pick_working_subscription(new_subscriptions)
         else:
-            new_subscriptions[0][_IS_DEFAULT_SUBSCRIPTION] = True
-            default_sub_id = new_subscriptions[0][_SUBSCRIPTION_ID]
+            new_active_one = Profile._pick_working_subscription(new_subscriptions)
+
+        new_active_one[_IS_DEFAULT_SUBSCRIPTION] = True
+        default_sub_id = new_active_one[_SUBSCRIPTION_ID]
 
         set_cloud_subscription(active_cloud.name, default_sub_id)
         self._storage[_SUBSCRIPTIONS] = subscriptions
+
+    @staticmethod
+    def _pick_working_subscription(subscriptions):
+        from azure.mgmt.resource.subscriptions.models import SubscriptionState
+        s = next((x for x in subscriptions if x['state'] == SubscriptionState.enabled.value), None)
+        return s or subscriptions[0]
 
     def set_active_subscription(self, subscription):  # take id or name
         subscriptions = self.load_cached_subscriptions(all_clouds=True)
