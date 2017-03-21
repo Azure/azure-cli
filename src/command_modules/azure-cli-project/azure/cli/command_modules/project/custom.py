@@ -149,7 +149,7 @@ def create_project(resource_group, name, location):
 
     # 5. Install kubectl
     utils.writeline('Installing kubectl ...')
-    k8s_install_cli(location=_get_default_install_location('kubectl'))
+    k8s_install_cli(install_location=_get_default_install_location('kubectl'))
 
     # 6. Set Kubernetes config
     utils.writeline('Setting Kubernetes config ...')
@@ -380,7 +380,7 @@ def _get_git_remote_url():
 
 def _configure_cluster():  # pylint: disable=too-many-statements
     """
-    Configures the cluster to deploy tenx services which can be used by the user 
+    Configures the cluster to deploy tenx services which can be used by the user
     deployed services and initializes a workspace on the local machine to connection.
     Asks for user input: ACR server name.
     """
@@ -408,9 +408,9 @@ def _configure_cluster():  # pylint: disable=too-many-statements
         utils.writeline('Configuring Kubernetes cluster ...')
 
         # Removing existing cluster from ~/.ssh/known_hosts
-        known_hostname = 'ssh-keygen -R {}.{}.cloudapp.azure.com'.format(
+        known_hostname_command = 'ssh-keygen -R {}.{}.cloudapp.azure.com'.format(
             dns_prefix, location)
-        _execute_command(namespace_command, True)
+        _execute_command(known_hostname_command, True)
 
         innerloop_client_path = _get_innerloop_home_path()
         kubernetes_path = os.path.join(
