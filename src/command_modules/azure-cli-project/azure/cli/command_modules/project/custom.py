@@ -118,6 +118,7 @@ def create_project(resource_group, name, location):
 
     # 3. Create ACR (resource_group, location)
     utils.writeline('Creating Azure container registry ...')
+    res_client.providers.register(resource_provider_namespace='Microsoft.ContainerRegistry')
     acr_client = _get_acr_service_client()
     acr_name = 'acr' + utils.get_random_registry_name()
     registry = acr_client.registries.create_or_update(resource_group,
