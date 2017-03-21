@@ -76,7 +76,22 @@ def create_webapp(resource_group_name, name,
 
     webapp_def = Site(server_farm_id=plan_id, location=location)
     poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
-    return AppServiceLongRunningOperation()(poller)
+    site = AppServiceLongRunningOperation()(poller)
+
+    profiles = list_publish_profiles(resource_group_name, name, None)
+    publishURL="";
+    for profile in profiles:
+        publishMethod=""
+        for key in profile:
+            if profile[key] == "FTP":
+                for k in profile:
+                    print (k)
+                    if k == "publishUrl":
+                        publishURL = profile[k]
+                                            
+    site.ftp_publishing_url = publishURL
+
+    return site
 
 def show_webapp(resource_group_name, name, slot=None):
     webapp = _generic_site_operation(resource_group_name, name, 'get', slot)
