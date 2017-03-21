@@ -16,11 +16,6 @@ _registry_map = {
     'adminUserEnabled': 'ADMIN ENABLED'
 }
 
-_admin_user_map = {
-    'username': 'USERNAME',
-    'password': 'PASSWORD'
-}
-
 _order_map = {
     'NAME': 1,
     'RESOURCE GROUP': 2,
@@ -29,7 +24,8 @@ _order_map = {
     'CREATION DATE': 12,
     'ADMIN ENABLED': 13,
     'USERNAME': 31,
-    'PASSWORD': 32
+    'PASSWORD': 32,
+    'PASSWORD2': 33
 }
 
 def output_format(result):
@@ -49,10 +45,14 @@ def _format_group(item):
         resource_group_name = get_resource_group_name_by_resource_id(item['id'])
         registry_info['RESOURCE GROUP'] = resource_group_name
 
-    admin_user_info = {_admin_user_map[key]: str(item[key])
-                       for key in item if key in _admin_user_map}
+    return OrderedDict(sorted(registry_info.items(), key=lambda t: _order_map[t[0]]))
 
-    all_info = registry_info.copy()
-    all_info.update(admin_user_info)
+def credential_format(item):
+    credential_info = {
+        'USERNAME': item['username'],
+        'PASSWORD': item['passwords'][0]['value']
+    }
+    if len(item['passwords']) > 1:
+        credential_info['PASSWORD2'] = item['passwords'][1]['value']
 
-    return OrderedDict(sorted(all_info.items(), key=lambda t: _order_map[t[0]]))
+    return OrderedDict(sorted(credential_info.items(), key=lambda t: _order_map[t[0]]))
