@@ -5,29 +5,35 @@
 
 # pylint: disable=no-self-use,too-many-arguments,too-many-lines
 from __future__ import print_function
+from sys import stderr
+import adal
 import json
+import re
 import threading
+import time
 try:
-    from urllib.parse import urlparse
+    from urllib.parse import quote, urlparse
 except ImportError:
+    from urllib import quote #pylint: disable=no-name-in-module
     from urlparse import urlparse # pylint: disable=import-error
 import OpenSSL.crypto
-
 from msrestazure.azure_exceptions import CloudError
-
 from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan,
                                    SkuDescription, SslState, HostNameBinding,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState)
-
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import parse_resource_id
 from azure.cli.core.commands import LongRunningOperation
-
 from azure.cli.core.prompting import prompt_pass, NoTTYException
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._util import CLIError
 from ._params import web_client_factory, _generic_site_operation
+from azure.cli.core.cloud import get_active_cloud
+from azuretfs import AzureTfs, VstsInfoProvider
+from azuretfs.models import (ContinuousDeploymentConfiguration, ContinuousDeploymentOperation, ResourceConfiguration,
+                             SourceConfiguration, SourceRepository, PipelineConfiguration, Property, VstsInfo)
+from azure.cli.core._profile import Profile, CredsCache, _CLIENT_ID, _ACCESS_TOKEN
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -35,6 +41,7 @@ logger = azlogging.get_az_logger(__name__)
 
 #workaround that app service's error doesn't comform to LRO spec
 class AppServiceLongRunningOperation(LongRunningOperation): #pylint: disable=too-few-public-methods
+    _progress_last_message = ''
 
     def __init__(self, creating_plan=False):
         super(AppServiceLongRunningOperation, self).__init__(self)
@@ -288,23 +295,186 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
     result.name = result.name.split('/')[-1]
     return result
 
+def _verify_vsts_parameters(cd_account, sourceRepository):
+    ## if provider is vsts and repo is not vsts then we need the account name
+    if sourceRepository.repository_type in [2, 4] and not cd_account:
+        raise RuntimeError('You must provide a value for cd-account since your repo-url is not a VSTS repository.')
+
+def _update_progress(current, total, status):
+    if total:
+        percent_done = current * 100 / total
+        message = '{: >3.0f}% complete: {}'.format(percent_done, status)
+        ## Erase the previous message (backspace to beginning, space over the text and backspace again)
+        l = len(AppServiceLongRunningOperation._progress_last_message)
+        print('\b' * l + ' ' * l + '\b' * l, end='', file=stderr)
+        print(message, end='', file=stderr)
+        AppServiceLongRunningOperation._progress_last_message = message
+        stderr.flush()
+        if current == total:
+            print('', file=stderr)
+
+def _get_source_repository(uri, token, cred):
+    ## Determine the type of repository (vstsgit == 1, github == 2, tfvc == 3, externalGit == 4)
+    ## Find the identifier and set the properties; default to externalGit
+    type = 4
+    identifier = uri
+    properties = []
+    account_name = None
+    team_project_name = None
+    match = re.match(r'[htps]+\:\/\/(.+)\.visualstudio\.com.*\/_git\/(.+)', uri, re.IGNORECASE)
+    if match:
+        type = 1
+        account_name = match.group(1)
+        ## we have to get the repo id as the identifier
+        info = _get_vsts_info(uri, cred)
+        identifier = info.repository_info.id
+        team_project_name = info.repository_info.project_info.name
+    else:
+        match = re.match(r'[htps]+\:\/\/github\.com\/(.+)', uri, re.IGNORECASE)
+        if match:
+            type = 2
+            identifier = match.group(1)
+            properties = [Property('accessToken', token)]
+        else:
+            match = re.match(r'[htps]+\:\/\/(.+)\.visualstudio\.com\/(.+)', uri, re.IGNORECASE)
+            if match:
+                type = 3
+                identifier = match.group(2)
+                account_name = match.group(1)
+    sourceRepository = SourceRepository(identifier, properties, type)
+    return sourceRepository, account_name, team_project_name
+
+def _get_vsts_info(vsts_repo_url, cred):
+    vsts_info_client = VstsInfoProvider('3.2-preview', vsts_repo_url, cred)
+    return vsts_info_client.get_vsts_info()
+
+def _get_vsts_azure_auth_info(tenant, resource):
+    ## create auth context
+    tenant = tenant or 'common'
+    authority = get_active_cloud().endpoints.active_directory + '/' + tenant
+    context = _authentication_context_factory(authority, CredsCache(_authentication_context_factory).adal_token_cache)
+    code = context.acquire_user_code(resource, _CLIENT_ID)
+    ## Instruct the user how to use the code
+    logger.warning(code['message'])
+    ## Wait for the user to finish device login
+    token_entry = context.acquire_token_with_device_code(resource, code, _CLIENT_ID)
+    return 'Bearer ' + token_entry[_ACCESS_TOKEN]
+
+def _authentication_context_factory(authority, cache):
+    return adal.AuthenticationContext(authority, cache=cache, api_version=None)
+
+def _get_app_project_type(cd_app_type=None):
+    ##TODO should cd_app_type just be a string instead of an enum type?
+    ##     if so we would need to validate that string here and produce appropriate warnings/errors
+    app_type =  '{{\"webAppProjectType\":\"{}\"}}'.format(cd_app_type)
+    return app_type
+
+def _wait_for_cd_completion(az_tfs, response):
+    ## Wait for the configuration to finish and report on the status
+    step = 5
+    max = 100
+    _update_progress(step, max, 'Setting up VSTS continuous deployment')
+    status = az_tfs.get_continuous_deployment_operation(response.id)
+    while status.status == 'queued' or status.status == 'inProgress':
+        step += 5 if step + 5 < max else 0
+        _update_progress(step, max, 'Setting up VSTS continuous deployment (' + status.status + ')')
+        time.sleep(2)
+        status = az_tfs.get_continuous_deployment_operation(response.id)
+    if status.status == 'failed':
+        _update_progress(max, max, 'Setting up VSTS continuous deployment (FAILED)')
+        raise RuntimeError(status.result_message)
+    _update_progress(max, max, 'Setting up VSTS continuous deployment (SUCCEEDED)')
+    return status
+
+def _print_cd_summary(final_status, account_name, subscription_id, resource_group_name, website_name):
+    step_ids = final_status.deployment_step_ids
+    if not step_ids or len(step_ids) == 0: return
+    steps = {}
+    for property in step_ids:
+        steps[property.name] = property.value
+    ## Pring the vsts account info
+    account_url = 'https://{}.visualstudio.com'.format(quote(account_name))
+    if steps['AccountCreated'] == '0':
+        print("The VSTS account '{}' was updated to handle the continuous delivery.".format(account_url))
+    elif steps['AccountCreated'] == '1':
+        print("The VSTS account '{}' was created to handle the continuous delivery.".format(account_url))
+    ## Print the subscription info
+    website_url = 'https://portal.azure.com/#resource/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/vstscd'.format(
+        quote(subscription_id), quote(resource_group_name), quote(website_name))
+    print('You can check on the status of the Azure web site deployment here:')
+    print(website_url)
 
 def config_source_control(resource_group_name, name, repo_url, repository_type=None, branch=None,
-                          git_token=None, manual_integration=None, slot=None):
-    from azure.mgmt.web.models import SiteSourceControl, SourceControl
+                          git_token=None, manual_integration=None, slot=None, cd_provider=None,
+                          cd_app_type=None, cd_account=None, cd_create_account=None):
+
     client = web_client_factory()
     location = _get_location_from_webapp(client, resource_group_name, name)
-    if git_token:
-        sc = SourceControl(location, name='GitHub', token=git_token)
-        client.update_source_control('GitHub', sc)
 
-    source_control = SiteSourceControl(location, repo_url=repo_url, branch=branch,
-                                       is_manual_integration=manual_integration,
-                                       is_mercurial=(repository_type != 'git'))
-    poller = _generic_site_operation(resource_group_name, name,
-                                     'create_or_update_source_control',
-                                     slot, source_control)
-    return AppServiceLongRunningOperation()(poller)
+    if cd_provider == 'vsts':
+        app_type = _get_app_project_type(cd_app_type)
+        vsts_app_id = '499b84ac-1321-427f-aa17-267ca6975798'
+        branch = branch or 'refs/heads/master'
+
+        ## Gather information about the Azure connection
+        profile = Profile()
+        subscription = profile.get_subscription()
+        user = profile.get_current_account_user()
+        cred, subscription_id, _ = profile.get_login_credentials(subscription_id=None)
+
+        ## Verify inputs before we start asking for creds
+        sourceRepository, account_name, team_project_name = _get_source_repository(repo_url, git_token, cred)
+        _verify_vsts_parameters(cd_account, sourceRepository)
+        cd_account = cd_account or account_name
+        cd_project_name = team_project_name or name
+
+        ## Generate an Azure token with the VSTS resource app id
+        print('Acquiring token to communicate from VSTS to Azure...')
+        auth_info = _get_vsts_azure_auth_info(None, vsts_app_id)
+
+        ## Create AzureTfs client
+        az_tfs = AzureTfs('3.2-preview', None, cred)
+
+        ## Construct the config body of the continuous delivery call
+        accountConfiguration = ResourceConfiguration(cd_create_account, [Property('region','CUS'), Property('PortalExtensionUsesNewAcquisitionFlows', 'false')], cd_account)
+        pipelineConfiguration = None ##PipelineConfiguration('ibiza')
+        projectConfiguration = ResourceConfiguration(True, [Property('','')], cd_project_name)
+        sourceConfiguration = SourceConfiguration(sourceRepository, branch)
+        targetConfiguration = [Property('resourceProperties', app_type),
+            Property('resourceGroup', resource_group_name),
+            Property('subscriptionId', subscription['id']),
+            Property('subscriptionName', subscription['name']),
+            Property('tenantId', subscription['tenantId']),
+            Property('resourceName', name),
+            Property('deploymentSlot', slot),
+            Property('location', location),
+            Property('AuthInfo', auth_info)]
+        testConfiguration = [Property('appServicePlan',''),
+            Property('appServicePlanName',''),
+            Property('appServicePricingTier','Premium'),
+            Property('testWebAppLocation', location),
+            Property('testWebAppName',name)]
+        config = ContinuousDeploymentConfiguration(accountConfiguration, pipelineConfiguration, projectConfiguration,
+                                                   sourceConfiguration, targetConfiguration, testConfiguration)
+        ## Configure the continuous deliver using VSTS as a backend
+        response = az_tfs.configure_continuous_deployment(config)
+        if response.status == 'inProgress':
+            final_status = _wait_for_cd_completion(az_tfs, response)
+            _print_cd_summary(final_status, cd_account, subscription['id'], resource_group_name, name)
+        return None
+    else:
+        from azure.mgmt.web.models import SiteSourceControl, SourceControl
+        if git_token:
+            sc = SourceControl(location, name='GitHub', token=git_token)
+            client.update_source_control('GitHub', sc)
+
+        source_control = SiteSourceControl(location, repo_url=repo_url, branch=branch,
+                                           is_manual_integration=manual_integration,
+                                           is_mercurial=(repository_type != 'git'))
+        poller = _generic_site_operation(resource_group_name, name,
+                                         'create_or_update_source_control',
+                                         slot, source_control)
+        return AppServiceLongRunningOperation()(poller)
 
 def update_git_token(git_token=None):
     '''

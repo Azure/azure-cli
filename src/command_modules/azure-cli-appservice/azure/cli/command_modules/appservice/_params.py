@@ -149,6 +149,10 @@ register_cli_argument('appservice web config backup restore', 'ignore_hostname_c
 register_cli_argument('appservice web source-control', 'manual_integration', action='store_true', help='disable automatic sync between source control and web')
 register_cli_argument('appservice web source-control', 'repo_url', help='repository url to pull the latest source from, e.g. https://github.com/foo/foo-web')
 register_cli_argument('appservice web source-control', 'branch', help='the branch name of the repository')
+register_cli_argument('appservice web source-control', 'cd_provider', help='type of CI/CD provider', default='kudu', **enum_choice_list(['kudu', 'vsts']))
+register_cli_argument('appservice web source-control', 'cd_app_type', help='VSTS Only: web application framework you used to develop your app', default='AspNetWap', **enum_choice_list(['AspNetWap', 'AspNetCore', 'NodeJSWithGulp', 'NodeJSWithGrunt']))
+register_cli_argument('appservice web source-control', 'cd_account', help='VSTS Only: name of the VSTS account to create/use for continuous delivery', default='')
+register_cli_argument('appservice web source-control', 'cd_create_account', help='VSTS Only: specifies that the account should be created if it does not already exist (existing accounts are updated)', default=True)
 register_cli_argument('appservice web source-control', 'repository_type', help='repository type', default='git', **enum_choice_list(['git', 'mercurial']))
 register_cli_argument('appservice web source-control', 'git_token', help='git access token required for auto sync')
 
