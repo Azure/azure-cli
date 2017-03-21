@@ -63,9 +63,27 @@ helps['sql db restore'] = """
             type: command
             short-summary: Creates a new database by restoring from a database backup.
             """
+helps['sql db export'] = """
+            type: command
+            short-summary: Exports a database to a bacpac
+
+            examples:
+                name: Export bacpac using SAS key
+                text: az sql db import -s myserver -n mydatabase -g mygroup -p password -u login --storage-key "mysaskey" --storage-key-type SharedAccessKey --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/mybacpac.bacpac
+
+                name: Export bacpac using storage account Key
+                text: az sql db import -s myserver -n mydatabase -g mygroup -p password -u login --storage-key "storageaccountkey" --storage-key-type StorageAccessKey --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/mybacpac.bacpac
+            """
 helps['sql db import'] = """
             type: command
             short-summary: Imports a bacpac into an existing database.
+
+            examples:
+                name: Import bacpac into an existing database using SAS key
+                text: az sql db export -s myserver -n mydatabase -g mygroup -p password -u login --storage-key "mysaskey" --storage-key-type SharedAccessKey --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/mybacpac.bacpac
+
+                name: Import bacpac into an existing database using storage account key
+                text: az sql db export -s myserver -n mydatabase -g mygroup -p password -u login --storage-key "storageaccountkey" --storage-key-type StorageAccessKey --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/mybacpac.bacpac
             """
 # helps['sql db restore-point'] = """
 #             type: group

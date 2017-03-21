@@ -265,6 +265,50 @@ def db_delete_replica_link(  # pylint: disable=too-many-arguments
         link_id=link.name)
 
 
+def db_export(
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        **kwargs):
+    keyType = kwargs['storage_key_type']
+
+    # Import/Export API requires that "?" precede SAS key as an argument.
+    # Add ? prefix if it wasn't included.
+    if keyType == 'SharedAccessKey':
+        key = kwargs['storage_key']
+        if key[0] != '?':
+            kwargs['storage_key'] = '?' + key
+
+    return client.export(
+        database_name=database_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        parameters=kwargs)
+
+
+def db_import(
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        **kwargs):
+    keyType = kwargs['storage_key_type']
+
+    # Import/Export API requires that "?" precede SAS key as an argument.
+    # Add ? prefix if it wasn't included.
+    if keyType == 'SharedAccessKey':
+        key = kwargs['storage_key']
+        if key[0] != '?':
+            kwargs['storage_key'] = '?' + key
+
+    return client.import_method(
+        database_name=database_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        parameters=kwargs)
+
+
 # Lists databases in a server or elastic pool.
 def db_list(
         client,

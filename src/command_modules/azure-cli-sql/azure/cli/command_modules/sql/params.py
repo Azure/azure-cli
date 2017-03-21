@@ -279,10 +279,11 @@ with ParametersContext(command='sql db import') as c:
     c.expand('parameters', ImportExtensionRequestParameters)
     c.register_alias('administrator_login', ('--admin-user', '-u'))
     c.register_alias('administrator_login_password', ('--admin-password', '-p'))
-    c.argument('authentication_type', options_list=('--auth_type',),
+    c.argument('authentication_type', options_list=('--auth-type',),
                **enum_choice_list(AuthenticationType))
     c.argument('storage_key_type', **enum_choice_list(StorageKeyType))
-    c.argument('name', options_list=('--slkdjflksdjf',), arg_type=ignore_type)
+    c.argument('name', options_list=('--not-name',), arg_type=ignore_type)
+    c.argument('type', options_list=('--not-type',), arg_type=ignore_type)
 
 
 #####
