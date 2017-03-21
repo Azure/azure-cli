@@ -64,7 +64,7 @@ helps['sql db audit-policy update'] = """
                 --add auditActionsAndGroups FAILED_DATABASE_AUTHENTICATION_GROUP
         - name: Remove an audit action by list index
           text: az sql db audit-policy update -g mygroup -s myserver -n mydb
-                --add auditActionsAndGroups 0
+                --remove auditActionsAndGroups 0
         - name: Disable an auditing policy
           text: az sql db audit-policy update -g mygroup -s myserver -n mydb
                 --state Disabled
