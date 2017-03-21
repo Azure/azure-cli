@@ -14,7 +14,6 @@ from azure.cli.testsdk import (
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
-from datetime import datetime
 
 
 # Constants

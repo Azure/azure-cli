@@ -15,6 +15,7 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
     DatabaseEditions,
     ReplicationRole,
     ServiceObjectiveName,
+    StorageKeyType,
 )
 
 ###############################################
@@ -265,48 +266,59 @@ def db_delete_replica_link(  # pylint: disable=too-many-arguments
         link_id=link.name)
 
 
-def db_export(
+def db_export(  # pylint: disable=too-many-arguments
         client,
         database_name,
         server_name,
         resource_group_name,
+        storage_key_type,
+        storage_key,
         **kwargs):
-    keyType = kwargs['storage_key_type']
+    storage_key = pad_sas_key(storage_key_type, storage_key)
 
-    # Import/Export API requires that "?" precede SAS key as an argument.
-    # Add ? prefix if it wasn't included.
-    if keyType == 'SharedAccessKey':
-        key = kwargs['storage_key']
-        if key[0] != '?':
-            kwargs['storage_key'] = '?' + key
+    kwargs['storage_key_type'] = storage_key_type
+    kwargs['storage_key'] = storage_key
 
     return client.export(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
+        storage_key_type=storage_key_type,
+        storage_key=storage_key,
         parameters=kwargs)
 
 
-def db_import(
+def db_import(  # pylint: disable=too-many-arguments
         client,
         database_name,
         server_name,
         resource_group_name,
+        storage_key_type,
+        storage_key,
         **kwargs):
-    keyType = kwargs['storage_key_type']
+    storage_key = pad_sas_key(storage_key_type, storage_key)
 
-    # Import/Export API requires that "?" precede SAS key as an argument.
-    # Add ? prefix if it wasn't included.
-    if keyType == 'SharedAccessKey':
-        key = kwargs['storage_key']
-        if key[0] != '?':
-            kwargs['storage_key'] = '?' + key
+    kwargs['storage_key_type'] = storage_key_type
+    kwargs['storage_key'] = storage_key
 
     return client.import_method(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
+        storage_key_type=storage_key_type,
+        storage_key=storage_key,
         parameters=kwargs)
+
+
+def pad_sas_key(
+        storage_key_type,
+        storage_key):
+    # Import/Export API requires that "?" precede SAS key as an argument.
+    # Add ? prefix if it wasn't included.
+    if storage_key_type.lower() == StorageKeyType.shared_access_key.value.lower():
+        if storage_key[0] != '?':
+            storage_key = '?' + storage_key
+    return storage_key
 
 
 # Lists databases in a server or elastic pool.
