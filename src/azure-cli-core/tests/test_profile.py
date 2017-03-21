@@ -169,10 +169,9 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         storage_mock = {'subscriptions': None}
         profile = Profile(storage_mock)
 
-        subscriptions = profile._normalize_properties(self.user2,
-                                                 [self.subscription2, self.subscription1],
-                                                 False)
-        
+        subscriptions = profile._normalize_properties(
+            self.user2, [self.subscription2, self.subscription1], False)
+
         profile._set_subscriptions(subscriptions)
 
         # make sure we set current the subscription to a good one
