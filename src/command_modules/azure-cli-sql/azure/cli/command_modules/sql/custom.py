@@ -354,21 +354,26 @@ def db_update(
 # because if it was a command line parameter then the customer would need to specify storage
 # resource group just to update some unrelated property, which is annoying and makes no sense to
 # the customer.
-def _find_storage_account(name):
-    resource_type = 'Microsoft.Storage/storageAccounts'
+def _find_storage_account_resource_group(name):
+    storage_type = 'Microsoft.Storage/storageAccounts'
+    classic_storage_type = 'Microsoft.ClassicStorage/storageAccounts'
+
+    query = "name eq '{}' and (resourceType eq '{}' or resourceType eq '{}')".format(
+        name, storage_type, classic_storage_type)
 
     client = get_mgmt_service_client(ResourceManagementClient)
-    resources = list(client.resources.list(
-        filter="name eq '{}' and resourceType eq '{}'"
-        .format(name, resource_type)))
+    resources = list(client.resources.list(filter=query))
 
     if len(resources) == 0:
-        raise CLIError('No resource with name {} and type {} was found.'
-                       .format(name, resource_type))
+        raise CLIError("No storage account with name '{}' was found.".format(name))
 
     if len(resources) > 1:
-        raise CLIError('Multiple resources with name {} and type {} were found.'
-                       .format(name, resource_type))
+        raise CLIError("Multiple storage accounts with name '{}' were found.".format(name))
+
+    if resources[0].type == classic_storage_type:
+        raise CLIError("The storage account with name '{}' is a classic storage account which is"
+                       " not supported by this command. Use a non-classic storage account or"
+                       " specify storage endpoint and key instead.".format(name))
 
     # Split the uri and return just the resource group
     return resources[0].id.split('/')[4]
@@ -392,7 +397,13 @@ def _get_storage_endpoint(
         account_name=storage_account)
 
     # Get endpoint
-    return account.primary_endpoints.blob  # pylint: disable=no-member
+    # pylint: disable=no-member
+    endpoints = account.primary_endpoints
+    try:
+        return endpoints.blob
+    except AttributeError:
+        raise CLIError("The storage account with name '{}' (id '{}') has no blob endpoint. Use a"
+                       " different storage account.".format(account.name, account.id))
 
 
 # Gets storage account key by querying storage ARM API.
@@ -429,7 +440,7 @@ def _db_security_policy_update(  # pylint: disable=too-many-arguments
     if storage_endpoint is not None:
         instance.storage_endpoint = storage_endpoint
     if storage_account is not None:
-        storage_resource_group = _find_storage_account(storage_account)
+        storage_resource_group = _find_storage_account_resource_group(storage_account)
         instance.storage_endpoint = _get_storage_endpoint(storage_account, storage_resource_group)
 
     # Set storage access key
@@ -447,7 +458,7 @@ def _db_security_policy_update(  # pylint: disable=too-many-arguments
         # function, but at least we tried.
         if storage_account is None:
             storage_account = _get_storage_account_name(instance.storage_endpoint)
-            storage_resource_group = _find_storage_account(storage_account)
+            storage_resource_group = _find_storage_account_resource_group(storage_account)
 
         instance.storage_account_access_key = _get_storage_key(
             storage_account,
