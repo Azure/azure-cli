@@ -50,23 +50,23 @@ helps['sql db audit-policy update'] = """
                   storage_account_access_key must be specified.
     examples:
         - name: Enable by specifying storage account name
-          text: az db audit-policy update -g mygroup -s myserver -n mydb
+          text: az sql db audit-policy update -g mygroup -s myserver -n mydb
                 --state Enabled --storage-account mystorage
         - name: Enable by specifying storage endpoint and key
-          text: az db audit-policy update -g mygroup -s myserver -n mydb
+          text: az sql db audit-policy update -g mygroup -s myserver -n mydb
                 --state Enabled --storage-endpoint https://mystorage.blob.core.windows.net
                 --storage-key MYKEY==
         - name: Set the list of audit actions
-          text: az db audit-policy update -g mygroup -s myserver -n mydb
+          text: az sql db audit-policy update -g mygroup -s myserver -n mydb
                 --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public'
         - name: Add an audit action
-          text: az db audit-policy update -g mygroup -s myserver -n mydb
+          text: az sql db audit-policy update -g mygroup -s myserver -n mydb
                 --add auditActionsAndGroups FAILED_DATABASE_AUTHENTICATION_GROUP
         - name: Remove an audit action by list index
-          text: az db audit-policy update -g mygroup -s myserver -n mydb
+          text: az sql db audit-policy update -g mygroup -s myserver -n mydb
                 --add auditActionsAndGroups 0
         - name: Disable an auditing policy
-          text: az db audit-policy update -g mygroup -s myserver -n mydb
+          text: az sql db audit-policy update -g mygroup -s myserver -n mydb
                 --state Disabled
     """
 helps['sql db replica'] = """
@@ -108,21 +108,21 @@ helps['sql db threat-policy update'] = """
                   storage_account_access_key must be specified.
     examples:
         - name: Enable by specifying storage account name
-          text: az db threat-policy update -g mygroup -s myserver -n mydb
+          text: az sql db threat-policy update -g mygroup -s myserver -n mydb
                 --state Enabled --storage-account mystorage
         - name: Enable by specifying storage endpoint and key
-          text: az db threat-policy update -g mygroup -s myserver -n mydb
+          text: az sql db threat-policy update -g mygroup -s myserver -n mydb
                 --state Enabled --storage-endpoint https://mystorage.blob.core.windows.net
                 --storage-key MYKEY==
         - name: Disable a subset of alert types
-          text: az db threat-policy update -g mygroup -s myserver -n mydb
+          text: az sql db threat-policy update -g mygroup -s myserver -n mydb
                 --disabled-alerts Sql_Injection_Vulnerability Access_Anomaly
         - name: Configure email recipients
-          text: az db threat-policy update -g mygroup -s myserver -n mydb
+          text: az sql db threat-policy update -g mygroup -s myserver -n mydb
                 --email-addresses me@examlee.com you@example.com --email-account-admins
                 Enabled
         - name: Disable
-          text: az db threat-policy update -g mygroup -s myserver -n mydb
+          text: az sql db threat-policy update -g mygroup -s myserver -n mydb
                 --state Disabled
     """
 # helps['sql db restore-point'] = """
