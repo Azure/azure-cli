@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.mgmt.storage import StorageManagementClient
-
 from azure.storage import CloudStorageAccount
 from azure.storage.blob import BlockBlobService
 from azure.storage.file import FileService
@@ -15,6 +13,7 @@ from azure.storage._error import _ERROR_STORAGE_MISSING_INFO
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core.commands import CLIError
 from azure.cli.core._profile import CLOUD
+from azure.cli.core.profiles.shared import ResourceType
 
 NO_CREDENTIALS_ERROR_MESSAGE = """
 No credentials specifed to access storage service. Please provide any of the following:
@@ -49,7 +48,7 @@ def generic_data_service_factory(service, name=None, key=None, connection_string
 
 
 def storage_client_factory(**_):
-    return get_mgmt_service_client(StorageManagementClient)
+    return get_mgmt_service_client(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS)
 
 
 def file_data_service_factory(kwargs):
