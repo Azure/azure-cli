@@ -95,7 +95,22 @@ def create_webapp(resource_group_name, name,
 
 def show_webapp(resource_group_name, name, slot=None):
     webapp = _generic_site_operation(resource_group_name, name, 'get', slot)
-    return _rename_server_farm_props(webapp)
+    webapp = _rename_server_farm_props(webapp)
+    
+    profiles = list_publish_profiles(resource_group_name, name, None)
+    publishURL="";
+    for profile in profiles:
+        publishMethod=""
+        for key in profile:
+            if profile[key] == "FTP":
+                for k in profile:
+                    print (k)
+                    if k == "publishUrl":
+                        publishURL = profile[k]
+                                            
+    webapp.ftp_publishing_url = publishURL
+    
+    return webapp
 
 def list_webapp(resource_group_name=None):
     client = web_client_factory()
