@@ -505,7 +505,7 @@ def create_service_principal_for_rbac(name=None, password=None, years=1, #pylint
             break
         except Exception as ex: #pylint: disable=broad-except
             #pylint: disable=line-too-long
-            if l < _RETRY_TIMES and 'The appId of the service principal does not reference a valid application object' in str(ex):
+            if l < _RETRY_TIMES and (' does not reference ' in str(ex) or ' does not exist ' in str(ex)):
                 time.sleep(5)
                 logger.warning('Retrying service principal creation: %s/%s', l+1, _RETRY_TIMES)
             else:

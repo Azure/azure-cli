@@ -224,6 +224,8 @@ def _is_inside_git_directory():
         is_inside_git_dir = check_output(['git', 'rev-parse', '--is-inside-git-dir'])
     except OSError:
         raise CLIError('Git is not currently installed.')
+    except CalledProcessError:
+        raise CLIError('Current working directory is not a git repository')
 
     git_result = is_inside_git_dir.decode('utf-8').strip()
 
@@ -312,7 +314,7 @@ def _get_remote_url():
             Please run this command in a git repository folder with \
             an 'origin' remote or specify a remote using '--remote-url'")
     except CalledProcessError as e:
-        raise CLIError('Please ensure git version 2.7.0 or greater is installed.\n' + e)
+        raise CLIError('Please ensure git version 2.7.0 or greater is installed.\n' + str(e))
     return remote_url.decode()
 
 def _check_registry_information(registry_name, registry_resource_id):
@@ -372,7 +374,9 @@ def add_ci(
     :param registry_name: Azure container registry name. A new Azure container registry is created if omitted or does not exist.
     :type registry_name: String
     """
-    _ensure_dockerfile()
+    # Ensure docker-compose file is correct if no remote url provided.
+    if not remote_url:
+        _ensure_dockerfile()
 
     _check_registry_information(registry_name, registry_resource_id)
 
