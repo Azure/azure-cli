@@ -174,7 +174,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
 
         profile._set_subscriptions(subscriptions)
 
-        # make sure we set current the subscription to a good one
+        # verify we skip the overdued subscription and default to the 2nd one in the list
         self.assertEqual(storage_mock['subscriptions'][1]['name'], self.subscription1.display_name)
         self.assertTrue(storage_mock['subscriptions'][1]['isDefault'])
 
