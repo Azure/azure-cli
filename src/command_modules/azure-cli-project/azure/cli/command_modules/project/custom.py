@@ -149,8 +149,11 @@ def create_project(resource_group, name, location):
         'Kubernetes cluster "{}" created.'.format(kube_cluster_name))
 
     # 5. Install kubectl
+    # TODO: uncomment this step when the acs ssl certificate issue is resolved
+    """
     utils.writeline('Installing kubectl ...')
     k8s_install_cli(install_location=_get_default_install_location('kubectl'))
+    """
 
     # 6. Set Kubernetes config
     utils.writeline('Setting Kubernetes config ...')
