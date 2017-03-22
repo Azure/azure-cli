@@ -454,39 +454,39 @@ class TestBatchLoader(unittest.TestCase):
             'batch_unit_tests',
             'batch_tests_pool',
             'azure.batch.operations.pool_operations#PoolOperations.add',
-            get_client, None, None, 3, None, None, None)
+            get_client, None, 3, None, None, None)
         self.command_job = _command_type.AzureBatchDataPlaneCommand(
             'batch_unit_tests',
             'batch_tests_job',
             'azure.batch.operations.job_operations#JobOperations.add',
-            get_client, None, None, 3,
+            get_client, None, 3,
             ['job.job_manager_task', 'job.job_preparation_task', \
              'job.job_release_task'], None, None)
         self.command_task = _command_type.AzureBatchDataPlaneCommand(
             'batch_unit_tests',
             'batch_tests_task',
             'azure.batch.operations.task_operations#TaskOperations.add',
-            get_client, None, None, 1, None, None, None)
+            get_client, None, 1, None, None, None)
         self.command_file = _command_type.AzureBatchDataPlaneCommand(
             'batch_unit_tests',
             'batch_tests_file',
             'azure.batch.operations.file_operations#FileOperations.get_from_task',
-            get_client, None, None, 3, None, None, None)
+            get_client, None, 3, None, None, None)
         self.command_list = _command_type.AzureBatchDataPlaneCommand(
             'batch_unit_tests',
             'batch_tests_list',
             'azure.batch.operations.job_operations#JobOperations.list',
-            get_client, None, None, 3, None, None, None)
+            get_client, None, 3, None, None, None)
         self.command_delete = _command_type.AzureBatchDataPlaneCommand(
             'batch_unit_tests',
             'batch_tests_delete',
             'azure.batch.operations.pool_operations#PoolOperations.delete',
-            get_client, None, None, 3, None, None, None)
+            get_client, None, 3, None, None, None)
         self.command_conflicts = _command_type.AzureBatchDataPlaneCommand(
             'batch_unit_tests',
             'batch_tests_conflicts',
             'azure.batch.operations.job_schedule_operations#JobScheduleOperations.add',
-            get_client, None, None, 4, None, None, None)
+            get_client, None, 4, None, None, None)
         return super(TestBatchLoader, self).setUp()
 
     def test_batch_build_parameters(self):
