@@ -70,7 +70,7 @@ def application_list_table_format(result):
         table_row['Id'] = item['id']
         table_row['Default Version'] = item['defaultVersion']
         table_row['Allow Updates'] = item['allowUpdates']
-        table_row['Version Count'] = str(len(item['packages'])) if 'packages' in item else '0'
+        table_row['Version Count'] = str(len(item['packages'])) if item['packages'] else '0'
         table_output.append(table_row)
     return table_output
 
@@ -149,7 +149,7 @@ def job_list_table_format(result):
         table_row['State'] = item['state']
         table_row['Previous State'] = item['previousState']
         table_row['Execution Pool'] = item['executionInfo']['poolId'] \
-            if 'executionInfo' in item else ""
+            if item['executionInfo'] else ""
         table_output.append(table_row)
     return table_output
 
@@ -162,9 +162,9 @@ def job_prep_release_status_list_table_format(result):
         table_row['Pool Id'] = item['poolId']
         table_row['Node Id'] = item['nodeId']
         table_row['Job Prep State'] = item['jobPreparationTaskExecutionInfo']['state'] \
-            if 'jobPreparationTaskExecutionInfo' in item else ""
+            if item['jobPreparationTaskExecutionInfo'] else ""
         table_row['Job Release State'] = item['jobReleaseTaskExecutionInfo']['state'] \
-            if 'jobReleaseTaskExecutionInfo' in item else ""
+            if item['jobReleaseTaskExecutionInfo'] else ""
         table_output.append(table_row)
     return table_output
 
@@ -243,23 +243,27 @@ def task_list_table_format(result):
         table_row = OrderedDict()
         table_row['Task Id'] = item['id']
         table_row['State'] = item['state']
-        table_row['Command Line'] = item['commandLine']
         table_row['Exit Code'] = str(item['executionInfo']['exitCode']) \
-            if 'executionInfo' in item else ""
-        table_row['Node Id'] = item['nodeInfo']['nodeId'] if 'nodeInfo' in item else ""
+            if item['executionInfo'] else ""
+        table_row['Node Id'] = item['nodeInfo']['nodeId'] if item['nodeInfo'] else ""
+        table_row['Command Line'] = item['commandLine']
         table_output.append(table_row)
     return table_output
 
 
 def task_create_table_format(result):
     """Format task create as a table."""
-
-    #TODO: figure out how to different the multiple task add or single task add
     table_output = []
-    for item in result:
+    if not isinstance(result, list):
         table_row = OrderedDict()
-        table_row['Task Id'] = item['taskId']
-        table_row['Status'] = item['status']
-        table_row['Error'] = item['error']['code'] if 'error' in item else ""
+        table_row['Task Id'] = result['id']
+        table_row['Submission Status'] = "success"
         table_output.append(table_row)
+    else:
+        for item in result:
+            table_row = OrderedDict()
+            table_row['Task Id'] = item['taskId']
+            table_row['Submission Status'] = item['status']
+            table_row['Error'] = item['error']['code'] if item['error'] else ""
+            table_output.append(table_row)
     return table_output

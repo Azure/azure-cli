@@ -315,6 +315,9 @@ def create_task(client, job_id, json_file=None, task_id=None, command_line=None,
                 except DeserializationError:
                     raise ValueError("JSON file '{}' is not in reqired format.".format(json_file))
     else:
+        if command_line is None or task_id is None:
+            raise ValueError("Missing required arguments.\nEither --json-file, "
+                             "or both --task-id and --command-line must be specified.")
         task = TaskAddParameter(task_id, command_line,
                                 resource_files=resource_files,
                                 environment_settings=environment_settings,
