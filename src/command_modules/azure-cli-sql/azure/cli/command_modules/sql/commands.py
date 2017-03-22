@@ -3,8 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from ._util import (get_sql_servers_operation, get_sql_database_operations,
-                    get_sql_elasticpools_operations, create_service_adapter, ServiceGroup)
+from ._util import (
+    get_sql_servers_operation,
+    get_sql_database_operations,
+    get_sql_database_blob_auditing_policies_operations,
+    get_sql_database_threat_detection_policies_operations,
+    get_sql_elasticpools_operations,
+    create_service_adapter,
+    ServiceGroup)
 
 ###############################################
 #                sql db                       #
@@ -58,6 +64,33 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
     # with s.group('sql db service-tier-advisor') as c:
     #     c.command('list', 'list_service_tier_advisors')
     #     c.command('show', 'get_service_tier_advisor')
+
+database_blob_auditing_policy_operations = create_service_adapter(
+    'azure.mgmt.sql.operations.database_blob_auditing_policies_operations',
+    'DatabaseBlobAuditingPoliciesOperations')
+
+with ServiceGroup(__name__,
+                  get_sql_database_blob_auditing_policies_operations,
+                  database_blob_auditing_policy_operations) as s:
+    with s.group('sql db audit-policy') as c:
+        c.command('show', 'get')
+        c.generic_update_command(
+            'update', 'get', 'create_or_update',
+            custom_func_name='db_audit_policy_update',
+            setter_arg_name='database_blob_auditing_policy')
+
+database_threat_detection_policy_operations = create_service_adapter(
+    'azure.mgmt.sql.operations.database_threat_detection_policies_operations',
+    'DatabaseThreatDetectionPoliciesOperations')
+
+with ServiceGroup(__name__,
+                  get_sql_database_threat_detection_policies_operations,
+                  database_threat_detection_policy_operations) as s:
+    with s.group('sql db threat-policy') as c:
+        c.command('show', 'get')
+        c.generic_update_command('update', 'get', 'create_or_update',
+                                 custom_func_name='db_threat_detection_policy_update',
+                                 setter_arg_name='database_security_alert_policy')
 
 ###############################################
 #                sql elastic-pool             #
