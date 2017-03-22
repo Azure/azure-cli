@@ -14,7 +14,8 @@ from azure.cli.core.commands.parameters import (resource_group_name_type, locati
 from azure.cli.command_modules.appservice._validators import process_webapp_create_namespace
 from azure.cli.command_modules.appservice._client_factory import web_client_factory
 
-def _generic_site_operation(resource_group_name, name, operation_name, slot=None, #pylint: disable=too-many-arguments
+
+def _generic_site_operation(resource_group_name, name, operation_name, slot=None,  # pylint: disable=too-many-arguments
                             extra_parameter=None, client=None):
     client = client or web_client_factory()
     m = getattr(client.web_apps,
@@ -26,16 +27,18 @@ def _generic_site_operation(resource_group_name, name, operation_name, slot=None
         return (m(resource_group_name, name, slot)
                 if extra_parameter is None else m(resource_group_name, name, extra_parameter, slot))
 
-def get_hostname_completion_list(prefix, action, parsed_args, **kwargs): # pylint: disable=unused-argument
+
+def get_hostname_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
     if parsed_args.resource_group_name and parsed_args.webapp:
         rg = parsed_args.resource_group_name
         webapp = parsed_args.webapp
         slot = getattr(parsed_args, 'slot', None)
         result = _generic_site_operation(rg, webapp, 'get_site_host_name_bindings', slot)
-        #workaround an api defect, that 'name' is '<webapp>/<hostname>'
+        # workaround an api defect, that 'name' is '<webapp>/<hostname>'
         return [r.name.split('/', 1)[1] for r in result]
 
-#pylint: disable=line-too-long
+
+# pylint: disable=line-too-long
 # PARAMETER REGISTRATION
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 _SKU_HELP = 'The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1(Premium Small), etc'
@@ -151,4 +154,3 @@ register_cli_argument('appservice web source-control', 'repo_url', help='reposit
 register_cli_argument('appservice web source-control', 'branch', help='the branch name of the repository')
 register_cli_argument('appservice web source-control', 'repository_type', help='repository type', default='git', **enum_choice_list(['git', 'mercurial']))
 register_cli_argument('appservice web source-control', 'git_token', help='git access token required for auto sync')
-
