@@ -6,6 +6,7 @@
 from azure.cli.core._util import CLIError
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
+
 def validate_plan_arg(namespace):
     from ._client_factory import web_client_factory
     namespace.create_plan = False
@@ -33,7 +34,6 @@ def validate_plan_arg(namespace):
         raise CLIError('Usage error: argument values for --sku or --number-of-workers will '
                        'be ignored, as the new web will be created using an existing '
                        'plan {}. Please use --plan to specify a new plan'.format(namespace.plan))
-
 
 
 def match_plan_location(plan, location):
