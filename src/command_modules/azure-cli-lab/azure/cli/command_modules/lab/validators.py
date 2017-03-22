@@ -4,12 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import datetime
+import dateutil.parser
 
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core._util import CLIError
-from azure.cli.core.commands.arm import is_valid_resource_id
+from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
 from ._client_factory import (get_devtestlabs_management_client)
-from azure.mgmt.devtestlabs.models.gallery_image_reference import GalleryImageReference
+from .sdk.devtestlabs.models.gallery_image_reference import GalleryImageReference
+from azure.graphrbac import GraphRbacManagementClient
 import azure.cli.core.azlogging as azlogging
 
 logger = azlogging.get_az_logger(__name__)
@@ -35,20 +38,59 @@ def get_complex_argument_processor(expanded_arguments, assigned_arg, model_type)
     return _expension_valiator_impl
 
 
-def validate_location(namespace):
+def validate_lab_vm_create(namespace):
+    """ Validates parameters for lab vm create and updates namespace. """
+    _validate_location(namespace)
+    _validate_expiration_date(namespace)
+    _validate_image_argument(namespace)
+    validate_authentication_type(namespace)
+    _validate_network_parameters(namespace)
+
+
+def validate_lab_vm_list(namespace):
+    """ Validates parameters for lab vm list and updates namespace. """
+    collection = [namespace.filters, namespace.my_vms, namespace.claimable]
+    if not _single(collection):
+        raise CLIError("usage error: [--filters FILTER | --my-vms | --claimable]")
+
+    if namespace.my_vms:
+        # Find out owner object id
+        from azure.cli.core._profile import Profile, CLOUD
+        profile = Profile()
+        cred, _, tenant_id = profile.get_login_credentials(
+            resource=CLOUD.endpoints.active_directory_graph_resource_id)
+        graph_client = GraphRbacManagementClient(cred,
+                                                 tenant_id,
+                                                 base_url=CLOUD.endpoints.active_directory_graph_resource_id)
+        subscription = profile.get_subscription()
+        object_id = namespace.object_id or _get_object_id(graph_client, subscription=subscription)
+        namespace.filters = "Properties/ownerObjectId eq '{}'".format(object_id)
+    elif namespace.claimable:
+        namespace.filters = 'properties/allowClaim'
+    else:
+        namespace.filters = namespace.filters
+
+
+def _validate_location(namespace):
     """
     Selects the default location of the lab when location is not provided while creating vm.
     """
     if namespace.location is None:
-        try:
-            lab_operation = devtestlabs_management_client.lab
-            lab = lab_operation.get_resource(namespace.resource_group, namespace.lab_name)
-            namespace.location = lab.location
-        except CloudError as err:
-            raise CLIError(err)
+        lab_operation = devtestlabs_management_client.lab
+        lab = lab_operation.get_resource(namespace.resource_group, namespace.lab_name)
+        namespace.location = lab.location
 
 
-def validate_network_parameters(namespace):
+def _validate_expiration_date(namespace):
+    """
+    Validates expiration date if provided.
+    """
+    if namespace.expiration_date:
+        if datetime.datetime.utcnow().date() >= dateutil.parser.parse(namespace.expiration_date).date():
+            raise CLIError("Expiration date '{}' must be in future.".format(namespace.expiration_date))
+
+
+def _validate_network_parameters(namespace):
     """
     Selects the DevTest Lab's virtual network and subnet if not provided and updates namespace
     """
@@ -56,23 +98,22 @@ def validate_network_parameters(namespace):
     vnet_operation = devtestlabs_management_client.virtual_network
 
     if not namespace.vnet_name:
-        try:
-            lab_vnets = list(vnet_operation.list(namespace.resource_group, namespace.lab_name, top=1))
-            if not lab_vnets:
-                err = "Unable to find any virtual network in the '{}' lab.".format(namespace.lab_name)
-                raise CLIError(err)
-            else:
-                lab_vnet = lab_vnets[0]
-                namespace.vnet_name = lab_vnet.name
-                namespace.lab_virtual_network_id = lab_vnet.id
-        except CloudError as err:
+        lab_vnets = list(vnet_operation.list(namespace.resource_group, namespace.lab_name, top=1))
+        if not lab_vnets:
+            err = "Unable to find any virtual network in the '{}' lab.".format(namespace.lab_name)
             raise CLIError(err)
+        else:
+            lab_vnet = lab_vnets[0]
+            namespace.vnet_name = lab_vnet.name
+            namespace.lab_virtual_network_id = lab_vnet.id
     else:
-        namespace.lab_virtual_network_id = '/subscriptions/{}/resourcegroups/{}/providers/microsoft.devtestlab' \
-                                           '/labs/{}/virtualnetworks/{}'.format(get_subscription_id(),
-                                                                                namespace.resource_group,
-                                                                                namespace.lab_name,
-                                                                                namespace.vnet_name)
+        namespace.lab_virtual_network_id = resource_id(subscription=get_subscription_id(),
+                                                       resource_group=namespace.resource_group,
+                                                       namespace='microsoft.devtestlab',
+                                                       type='labs',
+                                                       name=namespace.lab_name,
+                                                       child_type='virtualnetworks',
+                                                       child_name=namespace.vnet_name)
 
     # Select default subnet for selected vnet when subnet is not provided
     if not namespace.subnet:
@@ -87,7 +128,7 @@ def validate_network_parameters(namespace):
             namespace.disallow_public_ip_address = 'true'
 
 
-def validate_image_argument(namespace):
+def _validate_image_argument(namespace):
     image_type = _parse_image_argument(namespace)
     if image_type == 'gallery_image':
         namespace.gallery_image_reference = GalleryImageReference(offer=namespace.os_offer,
@@ -109,13 +150,13 @@ def _parse_image_argument(namespace):
     try:
         gallery_image_operation = devtestlabs_management_client.gallery_image
         odata_filter = "name eq '{}'".format(namespace.image)
-        lab_images = list(gallery_image_operation.list(namespace.resource_group, namespace.lab_name, odata_filter))
+        lab_images = list(gallery_image_operation.list(namespace.resource_group, namespace.lab_name, filter=odata_filter))
 
         if not lab_images:
             err = "Unable to find image name '{}' in the '{}' lab Gallery.".format(namespace.image, namespace.lab_name)
             raise CLIError(err)
         elif len(lab_images) > 1:
-            err = "Found more than 1 images with name "'{}'". Please pick one from {}"
+            err = "Found more than 1 image with name "'{}'". Please pick one from {}"
             raise CLIError(err.format(namespace.image, [x['name'] for x in lab_images]))
         else:
             image = lab_images[0]
@@ -126,17 +167,15 @@ def _parse_image_argument(namespace):
             namespace.os_version = image.image_reference.version
         return 'gallery_image'
     except CloudError:
-        err = 'Invalid image "{}". Use a custom image id or pick one from lab Gallery'
+        err = "Invalid image "'{}'". Use a custom image id or pick one from lab Gallery"
         raise CLIError(err.format(namespace.image))
 
 
-# TODO: Following methods can be extracted into common utils shared by other command modules
-
-
+# TODO: Following methods are carried over from other command modules
 def validate_authentication_type(namespace):
     # validate proper arguments supplied based on the authentication type
     if namespace.authentication_type == 'password':
-        if namespace.ssh_key:
+        if namespace.ssh_key or namespace.generate_ssh_keys:
             raise ValueError(
                 "incorrect usage for authentication-type 'password': "
                 "[--admin-username USERNAME] --admin-password PASSWORD")
@@ -223,3 +262,53 @@ def _is_valid_ssh_rsa_public_key(openssh_pubkey):
     int_len = 4
     str_len = struct.unpack('>I', data[:int_len])[0]  # this should return 7
     return data[int_len:int_len + str_len] == key_type.encode()
+
+
+def _single(collection):
+    return len([x for x in collection if x]) == 1
+
+
+def _get_object_id(graph_client, subscription=None, spn=None, upn=None):
+    if spn:
+        return _get_object_id_by_spn(graph_client, spn)
+    if upn:
+        return _get_object_id_by_upn(graph_client, upn)
+    return _get_object_id_from_subscription(graph_client, subscription)
+
+
+def _get_object_id_from_subscription(graph_client, subscription):
+    if subscription['user']:
+        if subscription['user']['type'] == 'user':
+            return _get_object_id_by_upn(graph_client, subscription['user']['name'])
+        elif subscription['user']['type'] == 'servicePrincipal':
+            return _get_object_id_by_spn(graph_client, subscription['user']['name'])
+        else:
+            logger.warning("Unknown user type '%s'", subscription['user']['type'])
+    else:
+        logger.warning('Current credentials are not from a user or service principal. '
+                       'Azure DevTest Lab does not work with certificate credentials.')
+
+
+def _get_object_id_by_spn(graph_client, spn):
+    accounts = list(graph_client.service_principals.list(
+        filter="servicePrincipalNames/any(c:c eq '{}')".format(spn)))
+    if not accounts:
+        logger.warning("Unable to find user with spn '%s'", spn)
+        return
+    if len(accounts) > 1:
+        logger.warning("Multiple service principals found with spn '%s'. "
+                       "You can avoid this by specifying object id.", spn)
+        return
+    return accounts[0].object_id
+
+
+def _get_object_id_by_upn(graph_client, upn):
+    accounts = list(graph_client.users.list(filter="userPrincipalName eq '{}'".format(upn)))
+    if not accounts:
+        logger.warning("Unable to find user with upn '%s'", upn)
+        return
+    if len(accounts) > 1:
+        logger.warning("Multiple users principals found with upn '%s'. "
+                       "You can avoid this by specifying object id.", upn)
+        return
+    return accounts[0].object_id

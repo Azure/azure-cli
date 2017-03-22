@@ -12,12 +12,16 @@ from ._client_factory import (get_devtestlabs_virtual_machine_operation,
 from ._util import (ServiceGroup, create_service_adapter)
 
 
+custom_path = 'azure.cli.command_modules.lab.custom'
+mgmt_operations_path = 'azure.cli.command_modules.lab.sdk.devtestlabs.operations.{}'
+
+
 # Custom Command's service adapter
-custom_operations = create_service_adapter('azure.cli.command_modules.lab.custom')
+custom_operations = create_service_adapter(custom_path)
 
 # Virtual Machine Operations Commands
 virtual_machine_operations = create_service_adapter(
-    'azure.mgmt.devtestlabs.operations.virtual_machine_operations',
+    mgmt_operations_path.format('virtual_machine_operations'),
     'VirtualMachineOperations')
 
 with ServiceGroup(__name__, get_devtestlabs_virtual_machine_operation,
@@ -41,7 +45,7 @@ with ServiceGroup(__name__, get_devtestlabs_lab_operation,
     with s.group('lab vm') as c:
         c.command('create', 'create_lab_vm')
 
-lab_operations = create_service_adapter('azure.mgmt.devtestlabs.operations.lab_operations',
+lab_operations = create_service_adapter(mgmt_operations_path.format('lab_operations'),
                                         'LabOperations')
 
 # Lab Operations Commands
@@ -52,7 +56,7 @@ with ServiceGroup(__name__, get_devtestlabs_lab_operation,
 
 # Custom Image Operations Commands
 custom_image_operations = create_service_adapter(
-    'azure.mgmt.devtestlabs.operations.custom_image_operations',
+    mgmt_operations_path.format('custom_image_operations'),
     'CustomImageOperations')
 
 with ServiceGroup(__name__, get_devtestlabs_custom_image_operation,
@@ -64,7 +68,7 @@ with ServiceGroup(__name__, get_devtestlabs_custom_image_operation,
 
 # Gallery Image Operations Commands
 gallery_image_operations = create_service_adapter(
-    'azure.mgmt.devtestlabs.operations.gallery_image_operations',
+    mgmt_operations_path.format('gallery_image_operations'),
     'GalleryImageOperations')
 
 with ServiceGroup(__name__, get_devtestlabs_gallery_image_operation,
@@ -74,7 +78,7 @@ with ServiceGroup(__name__, get_devtestlabs_gallery_image_operation,
 
 # Artifact Operations Commands
 artifact_operations = create_service_adapter(
-    'azure.mgmt.devtestlabs.operations.artifact_operations',
+    mgmt_operations_path.format('artifact_operations'),
     'ArtifactOperations')
 
 with ServiceGroup(__name__, get_devtestlabs_artifact_operation,
@@ -83,7 +87,7 @@ with ServiceGroup(__name__, get_devtestlabs_artifact_operation,
         c.command('list', 'list')
 
 # Virtual Network Operations Commands
-virtual_network_operations = create_service_adapter('azure.mgmt.devtestlabs.operations.virtual_network_operations',
+virtual_network_operations = create_service_adapter(mgmt_operations_path.format('virtual_network_operations'),
                                                     'VirtualNetworkOperations')
 
 with ServiceGroup(__name__, get_devtestlabs_virtual_network_operation,

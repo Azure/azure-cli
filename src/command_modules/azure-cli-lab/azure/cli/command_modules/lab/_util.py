@@ -94,8 +94,8 @@ class ParametersContext(object):
     def argument(self, argument_name, arg_type=None, **kwargs):
         register_cli_argument(self._commmand, argument_name, arg_type=arg_type, **kwargs)
 
-    def register_alias(self, argument_name, options_list):
-        register_cli_argument(self._commmand, argument_name, options_list=options_list)
+    def register_alias(self, argument_name, options_list, **kwargs):
+        register_cli_argument(self._commmand, argument_name, options_list=options_list, **kwargs)
 
     def register(self, argument_name, options_list, **kwargs):
         register_cli_argument(self._commmand, argument_name, options_list=options_list, **kwargs)

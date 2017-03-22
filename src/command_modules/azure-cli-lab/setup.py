@@ -6,7 +6,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.1.1b4+dev'
+VERSION = '0.0.1b1+dev'
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -25,7 +25,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-cli-core',
     'azure-graphrbac==0.30.0rc6',
-    'azure-mgmt-devtestlabs==1.0.0'
+    # 'azure-mgmt-devtestlabs==1.0.0'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
