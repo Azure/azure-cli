@@ -53,9 +53,9 @@ def cli_documentdb_create(client,
         consistency_policy=consistency_policy,
         ip_range_filter=ip_range_filter)
 
-    async_docdb_create = client.database_accounts.create_or_update(resource_group_name, account_name, params)
+    async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
-    docdb_account = client.database_accounts.get(resource_group_name, account_name) # Workaround
+    docdb_account = client.get(resource_group_name, account_name) # Workaround
     return docdb_account
 
 def cli_documentdb_update(client,
@@ -69,7 +69,7 @@ def cli_documentdb_update(client,
     # pylint:disable=line-too-long
     """Update an existing Azure DocumentDB database account.
     """
-    existing = client.database_accounts.get(resource_group_name, account_name)
+    existing = client.get(resource_group_name, account_name)
 
     update_consistency_policy = False
     if max_interval is not None or max_staleness_prefix is not None or default_consistency_level is not None:
@@ -104,9 +104,9 @@ def cli_documentdb_update(client,
         consistency_policy=consistency_policy,
         ip_range_filter=ip_range_filter)
 
-    async_docdb_create = client.database_accounts.create_or_update(resource_group_name, account_name, params)
+    async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
-    docdb_account = client.database_accounts.get(resource_group_name, account_name) # Workaround
+    docdb_account = client.get(resource_group_name, account_name) # Workaround
     return docdb_account
 
 
@@ -116,6 +116,6 @@ def cli_documentdb_list(client,
     """
 
     if resource_group_name:
-        return client.database_accounts.list_by_resource_group(resource_group_name)
+        return client.list_by_resource_group(resource_group_name)
     else:
-        return client.database_accounts.list()
+        return client.list()
