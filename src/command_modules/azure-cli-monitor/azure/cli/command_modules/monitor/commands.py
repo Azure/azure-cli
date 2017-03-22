@@ -11,7 +11,7 @@ from ._client_factory import (get_monitor_alert_rules_operation,
                               get_monitor_activity_log_operation,
                               get_monitor_metric_definitions_operation,
                               get_monitor_metrics_operation)
-from ._util import (ServiceGroup, create_service_adapter)
+from azure.cli.core.sdk.util import (ServiceGroup, create_service_adapter)
 
 
 # MANAGEMENT COMMANDS
