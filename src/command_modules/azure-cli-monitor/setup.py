@@ -6,7 +6,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.1.1b6+dev'
+VERSION = '0.0.1b1+dev'
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -24,9 +24,8 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'azure-mgmt-sql==0.3.3',
-    'azure-mgmt-storage==0.31.0',
-    'six'
+    'azure-monitor==0.2.0',
+    'azure-mgmt-monitor==0.1.0'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -35,9 +34,9 @@ with open('HISTORY.rst', 'r', encoding='utf-8') as f:
     HISTORY = f.read()
 
 setup(
-    name='azure-cli-sql',
+    name='azure-cli-monitor',
     version=VERSION,
-    description='Microsoft Azure Command-Line Tools SQL Command Module',
+    description='Microsoft Azure Command-Line Tools Monitor Command Module',
     long_description=README + '\n\n' + HISTORY,
     license='MIT',
     author='Microsoft Corporation',
@@ -50,7 +49,7 @@ setup(
         'azure.cli.command_modules'
     ],
     packages=[
-        'azure.cli.command_modules.sql'
+        'azure.cli.command_modules.monitor'
     ],
     install_requires=DEPENDENCIES
 )

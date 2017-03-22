@@ -3,7 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-def cf_documentdb(**_):
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.documentdb import DocumentDB
-    return get_mgmt_service_client(DocumentDB)
+import azure.cli.command_modules.monitor.help  # pylint: disable=unused-import
+
+
+def load_params(_):
+    import azure.cli.command_modules.monitor.params  # pylint: disable=redefined-outer-name
+
+
+def load_commands():
+    import azure.cli.command_modules.monitor.commands  # pylint: disable=redefined-outer-name

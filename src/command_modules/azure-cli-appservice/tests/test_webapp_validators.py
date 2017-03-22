@@ -9,6 +9,7 @@ import mock
 from azure.cli.core._util import CLIError
 from azure.cli.command_modules.appservice._validators import process_webapp_create_namespace
 
+
 class TestValidators(unittest.TestCase):
     def test_create_web_with_plan_id(self):
         np = mock.MagicMock()
@@ -28,4 +29,3 @@ class TestValidators(unittest.TestCase):
         with self.assertRaises(CLIError) as context:
             process_webapp_create_namespace(np)
         self.assertTrue('Usage error:' in str(context.exception))
-

@@ -20,6 +20,7 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
 
 # pylint: disable=line-too-long
 
+
 class Test_Webapp_Mocked(unittest.TestCase):
 
     def setUp(self):
@@ -128,6 +129,7 @@ class Test_Webapp_Mocked(unittest.TestCase):
             sync_site_repo('myRG', 'myweb')
         # assert
         self.assertEqual("nice error", str(ex.exception))
+
 
 class FakedResponse(object):  # pylint: disable=too-few-public-methods
     def __init__(self, status_code):

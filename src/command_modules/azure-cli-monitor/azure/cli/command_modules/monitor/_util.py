@@ -8,43 +8,14 @@ from azure.cli.core.commands.parameters import ignore_type
 from azure.cli.core.commands.arm import cli_generic_update_command
 
 
-# CLIENT FACTORIES
-
-def get_sql_management_client(_):
-    from azure.mgmt.sql import SqlManagementClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(SqlManagementClient)
-
-
-def get_sql_servers_operation(kwargs):
-    return get_sql_management_client(kwargs).servers
-
-
-def get_sql_database_operations(kwargs):
-    return get_sql_management_client(kwargs).databases
-
-
-def get_sql_elasticpools_operations(kwargs):
-    return get_sql_management_client(kwargs).elastic_pools
-
-
-def get_sql_recommended_elastic_pools_operations(kwargs):
-    return get_sql_management_client(kwargs).recommended_elastic_pools
-
-
-def get_sql_database_blob_auditing_policies_operations(kwargs):
-    return get_sql_management_client(kwargs).database_blob_auditing_policies
-
-
-def get_sql_database_threat_detection_policies_operations(kwargs):
-    return get_sql_management_client(kwargs).database_threat_detection_policies
-
-
 # COMMANDS UTILITIES
 
-def create_service_adapter(service_model, service_class):
+def create_service_adapter(service_model, service_class=None):
     def _service_adapter(method_name):
-        return '{}#{}.{}'.format(service_model, service_class, method_name)
+        if service_class is not None:
+            return '{}#{}.{}'.format(service_model, service_class, method_name)
+        else:
+            return '{}#{}'.format(service_model, method_name)
 
     return _service_adapter
 
@@ -72,7 +43,6 @@ class CommandGroup(object):
         self._group_name = group_name
         self._client_factory = client_factory
         self._service_adapter = service_adapter or (lambda name: name)
-        self._custom_path = 'azure.cli.command_modules.sql.custom#{}'
 
     def __enter__(self):
         return self
@@ -80,36 +50,19 @@ class CommandGroup(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
-    def command(self, name, method_name, confirmation=None):
+    def command(self, name, method_name):
         cli_command(self._scope,
                     '{} {}'.format(self._group_name, name),
                     self._service_adapter(method_name),
-                    client_factory=self._client_factory,
-                    confirmation=confirmation)
+                    client_factory=self._client_factory)
 
-    def custom_command(self, name, custom_func_name, confirmation=None):
-        cli_command(self._scope,
-                    '{} {}'.format(self._group_name, name),
-                    self._custom_path.format(custom_func_name),
-                    client_factory=self._client_factory,
-                    confirmation=confirmation)
-
-    # pylint: disable=too-many-arguments
-    def generic_update_command(self, name, getter_op, setter_op, custom_func_name=None,
-                               setter_arg_name='parameters'):
-        if custom_func_name:
-            custom_function_op = self._custom_path.format(custom_func_name)
-        else:
-            custom_function_op = None
-
+    def generic_update_command(self, name, getter_op, setter_op):
         cli_generic_update_command(
             self._scope,
             '{} {}'.format(self._group_name, name),
             self._service_adapter(getter_op),
             self._service_adapter(setter_op),
-            factory=self._client_factory,
-            custom_function_op=custom_function_op,
-            setter_arg_name=setter_arg_name)
+            factory=self._client_factory)
 
 
 # PARAMETERS UTILITIES
@@ -144,6 +97,9 @@ class ParametersContext(object):
     def register_alias(self, argument_name, options_list):
         register_cli_argument(self._commmand, argument_name, options_list=options_list)
 
+    def register(self, argument_name, options_list, **kwargs):
+        register_cli_argument(self._commmand, argument_name, options_list=options_list, **kwargs)
+
     def expand(self, argument_name, model_type, group_name=None, patches=None):
         # TODO:
         # two privates symbols are imported here. they should be made public or this utility class
@@ -152,7 +108,7 @@ class ParametersContext(object):
         from azure.cli.core.commands._introspection import \
             (extract_args_from_signature, _option_descriptions)
 
-        from .validators import get_complex_argument_processor
+        from azure.cli.command_modules.monitor.validators import get_complex_argument_processor
 
         if not patches:
             patches = dict()
@@ -180,4 +136,6 @@ class ParametersContext(object):
 
         self.argument(argument_name,
                       arg_type=ignore_type,
-                      validator=get_complex_argument_processor(expanded_arguments, model_type))
+                      validator=get_complex_argument_processor(expanded_arguments,
+                                                               argument_name,
+                                                               model_type))
