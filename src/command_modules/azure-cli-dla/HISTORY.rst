@@ -2,10 +2,13 @@
 
 Release History
 ===============
-0.0.1b3 (2017-03-13)
+0.0.1b3 (2017-03-22)
 +++++++++++++++++++++
 
 * Rename and separate command modules for Data Lake Analytics and Data Lake Store
+* Remove datalake package
+* rename parameters for some catalog management sub groups
+* Fix support for the job list command to allow better filtering and ordering
 
 0.0.1b2 (2017-03-13)
 +++++++++++++++++++++
