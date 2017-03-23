@@ -243,6 +243,8 @@ def _print_examples(help_file):
         indent = 2
         _print_indent('{0}'.format(e.text), indent)
 
+        print('')
+
 
 class HelpObject(object):  # pylint: disable=too-few-public-methods
 
