@@ -204,3 +204,17 @@ class Project(object):
         Sets the Spinnaker host name
         """
         self._set_property_value('spinnaker_hostname', value)
+
+    @property
+    def ssh_private_key(self):
+        """
+        Gets the SSH private key path
+        """
+        return self._get_property_value('ssh_private_key')
+
+    @ssh_private_key.setter
+    def ssh_private_key(self, value):
+        """
+        Sets the SSH private key path
+        """
+        self._set_property_value('ssh_private_key', value)

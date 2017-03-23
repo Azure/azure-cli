@@ -7,6 +7,7 @@ import string
 import random
 import sys
 import os
+from random_words import RandomWords
 
 
 def get_random_registry_name():
@@ -30,6 +31,14 @@ def get_random_string(length=6, only_letters=False):
         random_string = ''.join(random.choice(string.ascii_lowercase + string.digits)
                                 for _ in range(length))
     return random_string
+
+
+def get_random_word():
+    """
+    Gets a random word
+    """
+    rw = RandomWords()
+    return rw.random_word()
 
 
 def writeline(message):

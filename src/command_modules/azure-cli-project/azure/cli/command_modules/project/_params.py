@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 from azure.cli.core.commands import (CliArgumentType, register_cli_argument)
 from azure.cli.core.commands.parameters import (
     resource_group_name_type,
@@ -22,14 +23,21 @@ project_path = CliArgumentType(
     required=False
 )
 
+ssh_private_key = CliArgumentType(
+    options_list=('--ssh-private-key', '-k'),
+    help='Path to SSH private key.',
+    default=os.path.join(
+        os.path.expanduser("~"), '.ssh', 'id_rsa'),
+    required=False
+)
+
 name_arg_type = CliArgumentType(
     options_list=('--name', '-n'),
     metavar='NAME')
 
 register_cli_argument('project', 'remote_access_token', remote_access_token)
 register_cli_argument('project', 'project_path', project_path)
-
-# TODO: Ideally, this should be project-name
-register_cli_argument('project', 'name', name_arg_type)
+register_cli_argument('project', 'ssh_private_key', ssh_private_key)
+register_cli_argument('project', 'name', name_arg_type) # TODO: Ideally, this should be project-name
 register_cli_argument('project', 'resource_group', resource_group_name_type)
 register_cli_argument('project', 'location', location_type)

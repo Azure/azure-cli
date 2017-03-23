@@ -47,11 +47,12 @@ from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
 logger = azlogging.get_az_logger(__name__)  # pylint: disable=invalid-name
 project_settings = settings.Project()  # pylint: disable=invalid-name
+random_word = utils.get_random_word()
 
 # TODO: Remove and switch to SSH once templates are updated
 admin_password = 'Mindaro@Pass1!'  # pylint: disable=invalid-name
-# pylint:
-# disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long,broad-except
+# pylint: disable=too-few-public-methods,too-many-arguments
+# pylint: disable=no-self-use,too-many-locals,line-too-long,broad-except
 
 
 def browse_jenkins():
@@ -83,12 +84,17 @@ def browse_jenkins():
             pass
 
 
-def create_project(resource_group, name, location):
+def create_project(ssh_private_key, resource_group='mindaro-rg-' + random_word, name='mindaro-project-' + random_word, location='southcentralus'):
     """
     Creates a new project which consists of a new resource group,
     ACS Kubernetes cluster and Azure Container Registry
     """
     default_user_name = 'azureuser'
+
+    # 0. Validate ssh private key path
+    if not os.path.exists(ssh_private_key):
+        raise CLIError(
+            "ssh key does not exist: {}, please run 'ssh-keygen -b 1024' to generate it or pass the correct ssh key.".format(ssh_private_key))
 
     # 1. Create a resource group: resource_group, location
     utils.writeline('Creating resource group ...')
@@ -135,11 +141,11 @@ def create_project(resource_group, name, location):
     # 4. Create Kubernetes cluster
     utils.writeline('Creating Kubernetes cluster ...')
     kube_deployment_name = 'kube-' + utils.get_random_string()
-    kube_cluster_name = 'acs-kube-' + utils.get_random_string()
+    kube_cluster_name = 'kube-acs-' + utils.get_random_string()
     acs_deployment = acs_create(resource_group_name=resource_group,
                                 deployment_name=kube_deployment_name,
                                 name=kube_cluster_name,
-                                ssh_key_value=utils.get_public_ssh_key_contents(),
+                                ssh_key_value=utils.get_public_ssh_key_contents(ssh_private_key + '.pub'),
                                 dns_name_prefix=kube_cluster_name,
                                 admin_username=default_user_name,
                                 location=location,
@@ -155,7 +161,8 @@ def create_project(resource_group, name, location):
     # 6. Set Kubernetes config
     utils.writeline('Setting Kubernetes config ...')
     k8s_get_credentials(name=kube_cluster_name,
-                        resource_group_name=resource_group)
+                        resource_group_name=resource_group,
+                        ssh_key_file=ssh_private_key)
     utils.writeline(
         'Kubernetes config "{}" created.'.format(kube_cluster_name))
 
@@ -172,6 +179,7 @@ def create_project(resource_group, name, location):
     project_settings.container_registry_url = 'https://' + registry.login_server
     project_settings.location = location
     project_settings.project_name = name
+    project_settings.ssh_private_key = ssh_private_key
     utils.writeline('Project "{}" created.'.format(name))
 
     # 8. Configure the Kubernetes cluster
@@ -393,11 +401,12 @@ def _configure_cluster():  # pylint: disable=too-many-statements
         user_name = project_settings.admin_username
         acr_server = project_settings.container_registry_url.replace(
             "https://", "")
+        ssh_private_key = project_settings.ssh_private_key
 
         # Validate kubectl context
         if not _validate_kubectl_context(dns_prefix):
             utils.writeline(
-                "kubectl context not set to {0}, please run 'az acs kubernetes get-credentials' to set it.".format(dns_prefix))
+                "kubectl context not set to {}, please run 'az acs kubernetes get-credentials' to set it.".format(dns_prefix))
             sys.exit(1)
 
         if _cluster_configured(dns_prefix, user_name):
@@ -418,7 +427,7 @@ def _configure_cluster():  # pylint: disable=too-many-statements
             innerloop_client_path, 'setup', 'Kubernetes')
 
         # Get resource group
-        creds = _get_creds_from_master(dns_prefix, location, user_name)
+        creds = _get_creds_from_master(dns_prefix, location, user_name, ssh_private_key)
         resource_group = creds['resourceGroup']
         client_id = creds['aadClientId']
         client_secret = creds['aadClientSecret']
@@ -447,7 +456,6 @@ def _configure_cluster():  # pylint: disable=too-many-statements
 
         utils.writeline('Preparing the cluster ...')
         remote_host = _get_remote_host(user_name, dns_prefix, location)
-        ssh_private_key = _get_ssh_private_key()
         _execute_command("ssh -i {0} -o StrictHostKeyChecking=no -p 22 {1} 'mkdir ~/.azure'".format(
             ssh_private_key, remote_host), True)
         _execute_command(
@@ -458,13 +466,13 @@ def _configure_cluster():  # pylint: disable=too-many-statements
         utils.writeline('Copying configuration files into the cluster ...')
 
         _execute_command(
-            "scp -i {1} -P 22 {1} {0}:~/.ssh/id_rsa".format(remote_host, ssh_private_key))
-        _execute_command("scp -i {2} -P 22 {1}/connectlocal.tmp.sh {0}:~/connectlocal.tmp.sh".format(
-            remote_host, kubernetes_path, ssh_private_key))
-        _execute_command("scp -i {2} -P 22 {1}/configagents.sh {0}:~/configagents.sh".format(
-            remote_host, kubernetes_path, ssh_private_key))
+            "scp -i {0} -P 22 {0} {1}:~/.ssh/id_rsa".format(ssh_private_key, remote_host))
+        _execute_command("scp -i {0} -P 22 {1}/connectlocal.tmp.sh {2}:~/connectlocal.tmp.sh".format(
+            ssh_private_key, kubernetes_path, remote_host))
+        _execute_command("scp -i {0} -P 22 {1}/configagents.sh {2}:~/configagents.sh".format(
+            ssh_private_key, kubernetes_path, remote_host))
 
-        # _execute_command("eval $(ssh-agent) && ssh-add ~/.ssh/id_rsa")
+        _execute_command("eval $(ssh-agent) && ssh-add {}".format(ssh_private_key))
         _execute_command(
             "ssh -i {0} -o StrictHostKeyChecking=no -p 22 {1} 'chmod 600 ~/.ssh/id_rsa'".format(ssh_private_key, remote_host))
         _execute_command(
@@ -473,53 +481,53 @@ def _configure_cluster():  # pylint: disable=too-many-statements
         utils.writeline('Configuring agents in the cluster ...')
 
         _execute_command(
-            "ssh -i {0} -p 22 {1} 'source ./configagents.sh'".format(ssh_private_key, remote_host))
+            "ssh -A -i {0} -p 22 {1} 'source ./configagents.sh'".format(ssh_private_key, remote_host))
 
         utils.writeline('Deploying TenX services to K8 cluster ...')
 
         _execute_command(
-            "kubectl create -f {0}/tenx.tmp.yaml".format(kubernetes_path), True)
+            "kubectl create -f {}/tenx.tmp.yaml".format(kubernetes_path), True)
         _execute_command(
-            "kubectl create -f {0}/tenxPrivate.tmp.yaml".format(kubernetes_path), True)
+            "kubectl create -f {}/tenxPrivate.tmp.yaml".format(kubernetes_path), True)
 
         utils.writeline('Cleaning existing TenX services in cluster, if any')
         _execute_command(
-            "kubectl delete -f {0}/tenxServices.yaml -n tenx".format(kubernetes_path), True)
+            "kubectl delete -f {}/tenxServices.yaml -n tenx".format(kubernetes_path), True)
         _execute_command(
-            "kubectl delete -f {0}/tenxPrivateService.yaml -n tenx".format(kubernetes_path), True)
+            "kubectl delete -f {}/tenxPrivateService.yaml -n tenx".format(kubernetes_path), True)
         _execute_command(
-            "kubectl delete -f {0}/tenxConfigService.yaml -n tenx".format(kubernetes_path), True)
+            "kubectl delete -f {}/tenxConfigService.yaml -n tenx".format(kubernetes_path), True)
         _execute_command(
-            "kubectl delete -f {0}/tenxBuildService.yaml -n tenx".format(kubernetes_path), True)
+            "kubectl delete -f {}/tenxBuildService.yaml -n tenx".format(kubernetes_path), True)
         _execute_command(
-            "kubectl delete -f {0}/tenxExecService.yaml -n tenx".format(kubernetes_path), True)
+            "kubectl delete -f {}/tenxExecService.yaml -n tenx".format(kubernetes_path), True)
         _execute_command(
-            "kubectl delete -f {0}/tenxRsrcService.yaml -n tenx".format(kubernetes_path), True)
+            "kubectl delete -f {}/tenxRsrcService.yaml -n tenx".format(kubernetes_path), True)
         _execute_command(
-            "kubectl delete -f {0}/tenxPublicEndpoint.yaml -n tenx".format(kubernetes_path), True)
+            "kubectl delete -f {}/tenxPublicEndpoint.yaml -n tenx".format(kubernetes_path), True)
 
         utils.writeline('Exposing TenX services from cluster')
         _execute_command(
-            "kubectl create -f {0}/tenxServices.yaml -n tenx".format(kubernetes_path))
+            "kubectl create -f {}/tenxServices.yaml -n tenx".format(kubernetes_path))
         _execute_command(
-            "kubectl create -f {0}/tenxPrivateService.yaml -n tenx".format(kubernetes_path))
+            "kubectl create -f {}/tenxPrivateService.yaml -n tenx".format(kubernetes_path))
         _execute_command(
-            "kubectl create -f {0}/tenxConfigService.yaml -n tenx".format(kubernetes_path))
+            "kubectl create -f {}/tenxConfigService.yaml -n tenx".format(kubernetes_path))
         _execute_command(
-            "kubectl create -f {0}/tenxBuildService.yaml -n tenx".format(kubernetes_path))
+            "kubectl create -f {}/tenxBuildService.yaml -n tenx".format(kubernetes_path))
         _execute_command(
-            "kubectl create -f {0}/tenxExecService.yaml -n tenx".format(kubernetes_path))
+            "kubectl create -f {}/tenxExecService.yaml -n tenx".format(kubernetes_path))
         _execute_command(
-            "kubectl create -f {0}/tenxRsrcService.yaml -n tenx".format(kubernetes_path))
+            "kubectl create -f {}/tenxRsrcService.yaml -n tenx".format(kubernetes_path))
         _execute_command(
-            "kubectl create -f {0}/tenxPublicEndpoint.yaml -n tenx".format(kubernetes_path))
+            "kubectl create -f {}/tenxPublicEndpoint.yaml -n tenx".format(kubernetes_path))
 
         # Initialize Workspace
-        utils.writeline('Initializing Workspace: {0} ...'.format(dns_prefix))
+        utils.writeline('Initializing Workspace: {} ...'.format(dns_prefix))
         utils.writeline('This might take some waiting.')
         workspace_storage = dns_prefix.replace('-', '') + 'wks'
         _initialize_workspace(
-            dns_prefix, user_name, workspace_storage, workspace_storage_key, location=location)
+            dns_prefix, user_name, workspace_storage, ssh_private_key, workspace_storage_key, location=location)
     finally:
         # Removing temporary data files
         if kubernetes_path != None:
@@ -577,22 +585,22 @@ def _cluster_configured(dns_prefix, user_name):  # pylint: disable=too-many-retu
         url_sub_path = "api/ping"
         build_service_url = default_workspace["BuildServiceUrl"]
         logger.info('  Checking build service')
-        if not _ping_url("{0}/{1}".format(build_service_url, url_sub_path)):
+        if not _ping_url("{}/{}".format(build_service_url, url_sub_path)):
             return False
 
         exec_service_url = default_workspace["ExecServiceUrl"]
         logger.info('  Checking exec service')
-        if not _ping_url("{0}/{1}".format(exec_service_url, url_sub_path)):
+        if not _ping_url("{}/{}".format(exec_service_url, url_sub_path)):
             return False
 
         rsrc_service_url = default_workspace["RsrcServiceUrl"]
         logger.info('  Checking rsrc service')
-        if not _ping_url("{0}/{1}".format(rsrc_service_url, url_sub_path)):
+        if not _ping_url("{}/{}".format(rsrc_service_url, url_sub_path)):
             return False
 
         config_service_url = default_workspace["ConfigServiceUrl"]
         logger.info('  Checking config service')
-        if not _ping_url("{0}/{1}".format(config_service_url, url_sub_path)):
+        if not _ping_url("{}/{}".format(config_service_url, url_sub_path)):
             return False
 
         # All services running
@@ -642,13 +650,13 @@ def _deploy_secrets_share_k8(acr_server, resource_group, dns_prefix, client_id, 
     return workspace_storage_key
 
 
-def _install_k8_secret(acr, dns_prefix, user_name, password, location, cluster_user_name):
+def _install_k8_secret(acr, dns_prefix, client_id, client_secret, location, cluster_user_name):
     """
     Creates a registry secret in the cluster, used by the tenx services.
     Prepares the file to create resource in the Kubernetes cluster.
     """
-    kubectl_create_secret_command = "kubectl create secret docker-registry tenxregkey --docker-server={0} --docker-username={1} \
-    --docker-password={2} --docker-email={3} -n tenx".format(acr, user_name, password, _get_creds_from_master(dns_prefix, location, cluster_user_name))
+    kubectl_create_secret_command = "kubectl create secret docker-registry tenxregkey --docker-server={} --docker-username={} \
+    --docker-password={} --docker-email={} -n tenx".format(acr, client_id, client_secret, _get_remote_host(cluster_user_name, dns_prefix, location))
     try:
         check_call(kubectl_create_secret_command, shell=True)
     except Exception:
@@ -739,12 +747,12 @@ def _get_storage_key(resource_group, scf, storage, tries):
         except Exception as error:
             logger.debug(error)
         finally:
-            logger.warning("Couldn't get storage account key for {0}, Retrying ...".format(storage))
+            logger.warning("Couldn't get storage account key for {}, Retrying ...".format(storage))
             sleep(2)
             retry = retry + 1
-    if storage_key == None:
+    if storage_key is None:
         raise CLIError(
-            "Can't get storage account key for {0}".format(storage))
+            "Can't get storage account key for {}".format(storage))
     return storage_key
 
 
@@ -772,7 +780,7 @@ def _get_command_output(command):
     return output
 
 
-def _get_creds_from_master(dns_prefix, location, user_name):
+def _get_creds_from_master(dns_prefix, location, user_name, ssh_private_key):
     """
     Copies azure.json file from the master host on the Kubernetes cluster to local system.
     Provides the json data from the file.
@@ -786,7 +794,7 @@ def _get_creds_from_master(dns_prefix, location, user_name):
         os.remove(azure_json_file)
 
     _execute_command("scp -i {0} -P 22 {1}:/etc/kubernetes/azure.json {2}".format(
-        _get_ssh_private_key(), _get_remote_host(user_name, dns_prefix, location), azure_json_file))
+        ssh_private_key, _get_remote_host(user_name, dns_prefix, location), azure_json_file))
 
     with open(azure_json_file, "r") as credentials_file:
         creds = json.load(credentials_file)
@@ -817,20 +825,11 @@ def _get_workspace_settings_file():
     return workspace_settings_file
 
 
-def _get_ssh_private_key():
-    """
-    Provides ssh private key file path.
-    """
-    ssh_private_key_file = os.path.join(
-        os.path.expanduser('~'), '.ssh', 'id_rsa')
-    return ssh_private_key_file
-
-
 def _get_remote_host(user_name, dns_prefix, location):
     """
     Provides a remote host according to the passed user_name, dns_prefix and location.
     """
-    return "{0}@{1}.{2}.cloudapp.azure.com".format(user_name, dns_prefix, location)
+    return "{}@{}.{}.cloudapp.azure.com".format(user_name, dns_prefix, location)
 
 
 def _prepare_arm_k8(dns_prefix):
@@ -861,6 +860,7 @@ def _initialize_workspace(
         user_name,
         storage_account_name,
         storage_account_key,
+        ssh_private_key,
         workspace_share_name='mindaro',
         location='westus'):
     """
@@ -875,7 +875,7 @@ def _initialize_workspace(
         os.remove(settings_json_file)
 
     run_innerloop_command('initialize', workspace_share_name, dns_prefix,
-                          storage_account_name, storage_account_key, workspace_share_name, location, '--k8')
+                          storage_account_name, storage_account_key, workspace_share_name, location, ssh_private_key, '--quiet', '--k8')
 
     # Checking if the services are ready
     while not _cluster_configured(dns_prefix, user_name):
@@ -903,7 +903,7 @@ def service_run(project_path):
             os.chdir(project_path)
             project_path = curr_dir
         elif not os.path.exists(project_path):
-            raise CLIError("Invalid path: {0}".format(project_path))
+            raise CLIError("Invalid path: {}".format(project_path))
 
         # Validate if az project exists
         if not os.path.exists(project_settings.settings_file):
@@ -976,6 +976,6 @@ def _get_innerloop_home_path():
         return file_path
     except KeyError as error:
         raise CLIError(
-            'Temporary: Please set the environment variable: {0} to your inner loop source code directory.'.format(error))
+            'Temporary: Please set the environment variable: {} to your inner loop source code directory.'.format(error))
     except Exception as error:
         raise CLIError(error)
