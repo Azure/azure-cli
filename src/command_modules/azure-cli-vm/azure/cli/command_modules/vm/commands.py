@@ -125,6 +125,9 @@ cli_command(__name__, 'vmss nic list', 'azure.mgmt.network.operations.network_in
 cli_command(__name__, 'vmss nic list-vm-nics', 'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.list_virtual_machine_scale_set_vm_network_interfaces', cf_ni)
 cli_command(__name__, 'vmss nic show', 'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.get_virtual_machine_scale_set_network_interface', cf_ni, exception_handler=empty_on_404)
 
+# VMSS Autoscale
+cli_command(__name__, 'vmss autoscale create', custom_path.format('create_vmss_autoscale'))
+
 # VM Access
 cli_command(__name__, 'vm user update', custom_path.format('set_user'), no_wait_param='no_wait')
 cli_command(__name__, 'vm user delete', custom_path.format('delete_user'), no_wait_param='no_wait')

@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import argparse
 import json
 import re
 
@@ -162,3 +163,11 @@ def _create_image_instance(publisher, offer, sku, version):
         'sku': sku,
         'version': version
     }
+
+
+# pylint: disable=too-few-public-methods
+class VmssAutoScaleEnableAction(argparse.Action):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, 'enable_autoscale', True)
+        setattr(namespace, self.dest, values)
