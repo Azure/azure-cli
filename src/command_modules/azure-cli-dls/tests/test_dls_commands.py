@@ -57,6 +57,31 @@ class DataLakeStoreFileAccessScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('type', 'DIRECTORY'),
             JMESPathCheck('length', 0),
         ])
+
+        # set the owner and owning group for the file and confirm them
+        group_id = '80a3ed5f-959e-4696-ba3c-d3c8b2db6766'
+        user_id = '6361e05d-c381-4275-a932-5535806bb323'
+        self.cmd('dls fs access set-owner -n {} --path "{}" --group {} --owner {}'.format(adls, folder_name, group_id, user_id))
+
+        # get the file and confirm those values
+        result = self.cmd('dls fs show -n {} --path "{}"'.format(adls, folder_name), checks=[
+            JMESPathCheck('name', folder_name),
+            JMESPathCheck('type', 'DIRECTORY'),
+            JMESPathCheck('length', 0),
+            JMESPathCheck('owner', user_id),
+            JMESPathCheck('group', group_id),
+        ])
+
+        # set the permissions on the file
+        self.cmd('dls fs access set-permission -n {} --path "{}" --permission {}'.format(adls, folder_name, 777))
+        # get the file and confirm those values
+        result = self.cmd('dls fs show -n {} --path "{}"'.format(adls, folder_name), checks=[
+            JMESPathCheck('name', folder_name),
+            JMESPathCheck('type', 'DIRECTORY'),
+            JMESPathCheck('length', 0),
+            JMESPathCheck('permission', '777'),
+        ])
+
         # get the initial ACE
         result = self.cmd('dls fs access show -n {} --path "{}"'.format(adls, folder_name))
         inital_acl_length = len(result['entries'])
@@ -211,30 +236,6 @@ class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('[0].pathSuffix', file_name),
             JMESPathCheck('[0].type', 'FILE'),
             JMESPathCheck('[0].length', len(file_content)),
-        ])
-
-        # set the owner and owning group for the file and confirm them
-        group_id = '80a3ed5f-959e-4696-ba3c-d3c8b2db6766'
-        user_id = '6361e05d-c381-4275-a932-5535806bb323'
-        self.cmd('dls fs access set-owner -n {} --path "{}/{}" --group {} --owner {}'.format(adls, move_folder_name, file_name, group_id, user_id))
-
-        # get the file and confirm those values
-        result = self.cmd('dls fs show -n {} --path "{}/{}"'.format(adls, move_folder_name, file_name), checks=[
-            JMESPathCheck('pathSuffix', file_name),
-            JMESPathCheck('type', 'FILE'),
-            JMESPathCheck('length', len(file_content)),
-            JMESPathCheck('owner', user_id),
-            JMESPathCheck('group', group_id),
-        ])
-
-        # set the permissions on the file
-        self.cmd('dls fs access set-permission -n {} --path "{}/{}" --permission {}'.format(adls, move_folder_name, file_name, 777))
-        # get the file and confirm those values
-        result = self.cmd('dls fs show -n {} --path "{}/{}"'.format(adls, move_folder_name, file_name), checks=[
-            JMESPathCheck('pathSuffix', file_name),
-            JMESPathCheck('type', 'FILE'),
-            JMESPathCheck('length', len(file_content)),
-            JMESPathCheck('permission', '777'),
         ])
 
         # append content to a file
