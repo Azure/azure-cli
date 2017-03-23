@@ -9,11 +9,11 @@ from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core._util import empty_on_404
 
-from ._format import output_format
+from ._format import output_format, credential_format
 from ._factory import get_acr_service_client
 
-cli_command(__name__, 'acr credential show', 'azure.cli.command_modules.acr.credential#acr_credential_show', table_transformer=output_format, exception_handler=empty_on_404)
-cli_command(__name__, 'acr credential renew', 'azure.cli.command_modules.acr.credential#acr_credential_renew', table_transformer=output_format)
+cli_command(__name__, 'acr credential show', 'azure.cli.command_modules.acr.credential#acr_credential_show', table_transformer=credential_format, exception_handler=empty_on_404)
+cli_command(__name__, 'acr credential renew', 'azure.cli.command_modules.acr.credential#acr_credential_renew', table_transformer=credential_format)
 
 cli_command(__name__, 'acr check-name', 'azure.cli.command_modules.acr.custom#acr_check_name')
 cli_command(__name__, 'acr list', 'azure.cli.command_modules.acr.custom#acr_list', table_transformer=output_format)

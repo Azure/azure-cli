@@ -1,0 +1,69 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "registryName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the container registry"
+            }
+        },
+        "registryLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "Location of the container registry"
+            }
+        },
+        "registrySku": {
+            "type": "string",
+            "defaultValue": "Basic",
+            "metadata": {
+                "description": "Sku of the container registry"
+            }
+        },
+        "registryApiVersion": {
+            "type": "string",
+            "defaultValue": "2017-03-01",
+            "metadata": {
+                "description": "Api version of the container registry"
+            }
+        },
+        "storageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the storage account"
+            }
+        },
+        "storageAccountResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Resource group of the storage account"
+            }
+        },
+        "adminUserEnabled": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "Enable admin user"
+            }
+        }
+    },
+    "resources": [
+        {
+            "name": "[parameters('registryName')]",
+            "type": "Microsoft.ContainerRegistry/registries",
+            "location": "[parameters('registryLocation')]",
+            "apiVersion": "[parameters('registryApiVersion')]",
+            "sku": {
+                "name": "[parameters('registrySku')]"
+            },
+            "properties": {
+                "adminUserEnabled": "[parameters('adminUserEnabled')]",
+                "storageAccount": {
+                    "name": "[parameters('storageAccountName')]",
+                    "accessKey": "[listKeys(resourceId(parameters('storageAccountResourceGroup'), 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2016-12-01').keys[0].value]"
+                }
+            }
+        }
+    ]
+}

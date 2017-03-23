@@ -9,11 +9,13 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 helps['dla'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics accounts, jobs and catalogs. 
+    long-summary: If you don't have the Data Lake Analytics component installed, add it with `az component update --add dla`. These commands are in preview.
 """
 
 helps['dla job'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics jobs. 
+    long-summary: These commands are in preview.
 """
 
 helps['dla job submit'] = """
@@ -66,66 +68,79 @@ helps['dla job list'] = """
 helps['dla catalog'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalogs. 
+    long-summary: These commands are in preview.
 """
 
 helps['dla catalog database'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog databases. 
+    long-summary: These commands are in preview.
 """
 
 helps['dla catalog assembly'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog assemblies. 
+    long-summary: These commands are in preview.
 """
 
 helps['dla catalog external-data-source'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog external data sources. 
+    long-summary: These commands are in preview.
 """
 
 helps['dla catalog procedure'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog stored procedures. 
+    long-summary: These commands are in preview.
 """
 
 helps['dla catalog schema'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog schemas. 
+    long-summary: These commands are in preview.
 """
 
 helps['dla catalog table'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog tables. 
+    long-summary: These commands are in preview.
 """
 
 helps['dla catalog table-partition'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog table partitions. 
+    long-summary: These commands are in preview.
 """
 
 helps['dla catalog table-stats'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog table statistics. 
+    long-summary: These commands are in preview.
 """
 
 helps['dla catalog table-type'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog table types. 
+    long-summary: These commands are in preview.
 """
 
 helps['dla catalog tvf'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog table valued functions, or TVFs. 
+    long-summary: These commands are in preview.
 """
 
 helps['dla catalog view'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog views. 
+    long-summary: These commands are in preview.
 """
 
 helps['dla catalog credential'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog credentials. 
+    long-summary: These commands are in preview.
 """
 
 helps['dla catalog credential create'] = """
@@ -176,6 +191,7 @@ helps['dla catalog credential delete'] = """
 helps['dla account'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics accounts. 
+    long-summary: These commands are in preview.
 """
 
 helps['dla account create'] = """
@@ -235,16 +251,19 @@ helps['dla account delete'] = """
 helps['dla account blob-storage'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics account linked Azure Storage. 
+    long-summary: These commands are in preview.
 """
 
 helps['dla account data-lake-store'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics account linked Data Lake Store accounts. 
+    long-summary: These commands are in preview.
 """
 
 helps['dla account firewall'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics account firewall rules. 
+    long-summary: These commands are in preview.
 """
 
 helps['dla account firewall create'] = """

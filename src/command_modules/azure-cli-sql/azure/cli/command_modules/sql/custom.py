@@ -8,14 +8,23 @@ from ._util import (
     get_sql_elasticpools_operations
 )
 
-from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.commands.client_factory import (
+    get_mgmt_service_client,
+    get_subscription_id)
 from azure.cli.core._util import CLIError
 from azure.mgmt.sql.models.sql_management_client_enums import (
+    BlobAuditingPolicyState,
     CreateMode,
     DatabaseEditions,
     ReplicationRole,
-    ServiceObjectiveName,
+    SecurityAlertPolicyState,
+    ServiceObjectiveName
 )
+from azure.mgmt.resource.resources import ResourceManagementClient
+from azure.mgmt.storage import StorageManagementClient
+
+# url parse package has different names in Python 2 and 3. 'six' package works cross-version.
+from six.moves.urllib.parse import (quote, urlparse)  # pylint: disable=import-error
 
 ###############################################
 #                Common funcs                 #
@@ -98,8 +107,6 @@ def _db_create_special(
         resource_group_name=dest_db.resource_group_name)
 
     # Set create mode properties
-    # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
-    from six.moves.urllib.parse import quote  # pylint: disable=import-error
     subscription_id = get_subscription_id()
     kwargs['source_database_id'] = (
         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}'
@@ -235,7 +242,12 @@ def db_delete_replica_link(  # pylint: disable=too-many-arguments
         resource_group_name,
         # Partner dbs must have the same name as one another
         partner_server_name,
-        partner_resource_group_name=None):
+        partner_resource_group_name=None,
+        # Base command code handles confirmation, but it passes '--yes' parameter to us if
+        # provided. We don't care about this parameter and it gets handled weirdly if we
+        # expliclty specify it with default value here (e.g. `yes=None` or `yes=True`), receiving
+        # it in kwargs seems to work.
+        **kwargs):  # pylint: disable=unused-argument
 
     # Determine optional values
     partner_resource_group_name = partner_resource_group_name or resource_group_name
@@ -327,6 +339,207 @@ def db_update(
 
     # Set other properties
     instance.max_size_bytes = max_size_bytes or instance.max_size_bytes
+
+    return instance
+
+
+#####
+#           sql server audit-policy & threat-policy
+#####
+
+
+# Finds a storage account's resource group by querying ARM resource cache.
+# Why do we have to do this: so we know the resource group in order to later query the storage API
+# to determine the account's keys and endpoint. Why isn't this just a command line parameter:
+# because if it was a command line parameter then the customer would need to specify storage
+# resource group just to update some unrelated property, which is annoying and makes no sense to
+# the customer.
+def _find_storage_account_resource_group(name):
+    storage_type = 'Microsoft.Storage/storageAccounts'
+    classic_storage_type = 'Microsoft.ClassicStorage/storageAccounts'
+
+    query = "name eq '{}' and (resourceType eq '{}' or resourceType eq '{}')".format(
+        name, storage_type, classic_storage_type)
+
+    client = get_mgmt_service_client(ResourceManagementClient)
+    resources = list(client.resources.list(filter=query))
+
+    if len(resources) == 0:
+        raise CLIError("No storage account with name '{}' was found.".format(name))
+
+    if len(resources) > 1:
+        raise CLIError("Multiple storage accounts with name '{}' were found.".format(name))
+
+    if resources[0].type == classic_storage_type:
+        raise CLIError("The storage account with name '{}' is a classic storage account which is"
+                       " not supported by this command. Use a non-classic storage account or"
+                       " specify storage endpoint and key instead.".format(name))
+
+    # Split the uri and return just the resource group
+    return resources[0].id.split('/')[4]
+
+
+# Determines storage account name from endpoint url string.
+# e.g. 'https://mystorage.blob.core.windows.net' -> 'mystorage'
+def _get_storage_account_name(storage_endpoint):
+    return urlparse(storage_endpoint).netloc.split('.')[0]
+
+
+# Gets storage account key by querying storage ARM API.
+def _get_storage_endpoint(
+        storage_account,
+        resource_group_name):
+
+    # Get storage account
+    client = get_mgmt_service_client(StorageManagementClient)
+    account = client.storage_accounts.get_properties(
+        resource_group_name=resource_group_name,
+        account_name=storage_account)
+
+    # Get endpoint
+    # pylint: disable=no-member
+    endpoints = account.primary_endpoints
+    try:
+        return endpoints.blob
+    except AttributeError:
+        raise CLIError("The storage account with name '{}' (id '{}') has no blob endpoint. Use a"
+                       " different storage account.".format(account.name, account.id))
+
+
+# Gets storage account key by querying storage ARM API.
+def _get_storage_key(
+        storage_account,
+        resource_group_name,
+        use_secondary_key):
+
+    # Get storage keys
+    client = get_mgmt_service_client(StorageManagementClient)
+    keys = client.storage_accounts.list_keys(
+        resource_group_name=resource_group_name,
+        account_name=storage_account)
+
+    # Choose storage key
+    index = 1 if use_secondary_key else 0
+    return keys.keys[index].value  # pylint: disable=no-member
+
+
+# Common code for updating audit and threat detection policy
+def _db_security_policy_update(  # pylint: disable=too-many-arguments
+        instance,
+        enabled,
+        storage_account,
+        storage_endpoint,
+        storage_account_access_key,
+        use_secondary_key):
+
+    # Validate storage endpoint arguments
+    if storage_endpoint is not None and storage_account is not None:
+        raise CLIError('--storage-endpoint and --storage-account cannot both be specified.')
+
+    # Set storage endpoint
+    if storage_endpoint is not None:
+        instance.storage_endpoint = storage_endpoint
+    if storage_account is not None:
+        storage_resource_group = _find_storage_account_resource_group(storage_account)
+        instance.storage_endpoint = _get_storage_endpoint(storage_account, storage_resource_group)
+
+    # Set storage access key
+    if storage_account_access_key is not None:
+        # Access key is specified
+        instance.storage_account_access_key = storage_account_access_key
+    elif enabled:
+        # Access key is not specified, but state is Enabled.
+        # If state is Enabled, then access key property is required in PUT. However access key is
+        # readonly (GET returns empty string for access key), so we need to determine the value
+        # and then PUT it back. (We don't want the user to be force to specify this, because that
+        # would be very annoying when updating non-storage-related properties).
+        # This doesn't work if the user used generic update args, i.e. `--set state=Enabled`
+        # instead of `--state Enabled`, since the generic update args are applied after this custom
+        # function, but at least we tried.
+        if storage_account is None:
+            storage_account = _get_storage_account_name(instance.storage_endpoint)
+            storage_resource_group = _find_storage_account_resource_group(storage_account)
+
+        instance.storage_account_access_key = _get_storage_key(
+            storage_account,
+            storage_resource_group,
+            use_secondary_key)
+
+
+# Update audit policy. Custom update function to apply parameters to instance.
+def db_audit_policy_update(  # pylint: disable=too-many-arguments
+        instance,
+        state=None,
+        storage_account=None,
+        storage_endpoint=None,
+        storage_account_access_key=None,
+        audit_actions_and_groups=None,
+        retention_days=None):
+
+    # Apply state
+    if state is not None:
+        # pylint: disable=unsubscriptable-object
+        instance.state = BlobAuditingPolicyState[state.lower()]
+    enabled = instance.state.value.lower() == BlobAuditingPolicyState.enabled.value.lower()
+
+    # Set storage-related properties
+    _db_security_policy_update(
+        instance,
+        enabled,
+        storage_account,
+        storage_endpoint,
+        storage_account_access_key,
+        instance.is_storage_secondary_key_in_use)
+
+    # Set other properties
+    if audit_actions_and_groups is not None:
+        instance.audit_actions_and_groups = audit_actions_and_groups
+
+    if retention_days is not None:
+        instance.retention_days = retention_days
+
+    return instance
+
+
+# Update threat detection policy. Custom update function to apply parameters to instance.
+def db_threat_detection_policy_update(  # pylint: disable=too-many-arguments
+        instance,
+        state=None,
+        storage_account=None,
+        storage_endpoint=None,
+        storage_account_access_key=None,
+        retention_days=None,
+        email_addresses=None,
+        disabled_alerts=None,
+        email_account_admins=None):
+
+    # Apply state
+    if state is not None:
+        # pylint: disable=unsubscriptable-object
+        instance.state = SecurityAlertPolicyState[state.lower()]
+    enabled = instance.state.value.lower() == SecurityAlertPolicyState.enabled.value.lower()
+
+    # Set storage-related properties
+    _db_security_policy_update(
+        instance,
+        enabled,
+        storage_account,
+        storage_endpoint,
+        storage_account_access_key,
+        False)
+
+    # Set other properties
+    if retention_days is not None:
+        instance.retention_days = retention_days
+
+    if email_addresses is not None:
+        instance.email_addresses = ";".join(email_addresses)
+
+    if disabled_alerts is not None:
+        instance.disabled_alerts = ";".join(disabled_alerts)
+
+    if email_account_admins is not None:
+        instance.email_account_admins = email_account_admins
 
     return instance
 

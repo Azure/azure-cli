@@ -5,20 +5,21 @@
 
 # AZURE CLI RBAC TEST DEFINITIONS
 import json
+import os
 import tempfile
 import time
 
 from azure.cli.core.test_utils.vcr_test_base import VCRTestBase, JMESPathCheck, ResourceGroupVCRTestBase, NoneCheck, MOCKED_SUBSCRIPTION_ID
 
 
-class RbacScenarioTest(ResourceGroupVCRTestBase):
+class RbacSPSecretScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(RbacScenarioTest, self).__init__(__file__, test_method)
+        super(RbacSPSecretScenarioTest, self).__init__(__file__, test_method)
         self.resource_group = 'cli_create_rbac_sp'
         self.sp_name = 'http://' + self.resource_group
 
-    def test_create_for_rbac(self):
+    def test_create_for_rbac_with_secret(self):
         if self.playback:
             return #live-only test, will enable playback once resolve #635
         self.execute()
@@ -35,6 +36,33 @@ class RbacScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('role assignment delete --assignee {} -g {}'.format(self.sp_name, self.resource_group), checks=NoneCheck())
         self.cmd('role assignment delete --assignee {}'.format(self.sp_name), checks=NoneCheck())
         self.cmd('ad app delete --id {}'.format(self.sp_name))
+
+class RBACSPCertScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(RBACSPCertScenarioTest, self).__init__(__file__, test_method)
+        self.resource_group = 'cli_create_rbac_sp_cert'
+        self.sp_name = 'http://' + self.resource_group
+
+    def test_create_for_rbac_with_cert(self):
+        if self.playback:
+            return #live-only test, will enable playback once resolve #635
+        self.execute()
+
+    def body(self):
+        subscription_id = self.cmd('account list --query "[?isDefault].id" -o tsv')
+        scope = '/subscriptions/{}'.format(subscription_id)
+        
+        result = self.cmd('ad sp create-for-rbac -n {0} --scopes {1} {1}/resourceGroups/{2} --create-cert'.format(self.sp_name, scope, self.resource_group))
+        self.assertEqual(self.sp_name, result['name'])
+        self.assertTrue(result['fileWithCertAndPrivateKey'].endswith('.pem'))
+        os.remove(result['fileWithCertAndPrivateKey'])
+        result = self.cmd('ad sp reset-credentials -n {0} --create-cert'.format(self.sp_name))
+        self.assertEqual(self.sp_name, result['name'])
+        self.assertTrue(result['fileWithCertAndPrivateKey'].endswith('.pem'))
+        os.remove(result['fileWithCertAndPrivateKey'])
+
+        self.cmd('ad app delete --id {}'.format(self.sp_name), checks=NoneCheck())
 
 class RoleCreateScenarioTest(VCRTestBase):
 

@@ -168,7 +168,7 @@ class ExecutionResult(object):  # pylint: disable=too-few-public-methods
         if not self.json_value:
             self.json_value = json.loads(self.output)
 
-        if not self.json_value:
+        if self.json_value is None:
             raise AssertionError('The command output cannot be parsed in json.')
 
         return self.json_value

@@ -42,6 +42,8 @@ _USER = 'user'
 _SERVICE_PRINCIPAL = 'servicePrincipal'
 _SERVICE_PRINCIPAL_ID = 'servicePrincipalId'
 _SERVICE_PRINCIPAL_TENANT = 'servicePrincipalTenant'
+_SERVICE_PRINCIPAL_CERT_FILE = 'certificateFile'
+_SERVICE_PRINCIPAL_CERT_THUMBPRINT = 'thumbprint'
 _TOKEN_ENTRY_USER_ID = 'userId'
 _TOKEN_ENTRY_TOKEN_TYPE = 'tokenType'
 # This could mean either real access token, or client secret of a service principal
@@ -118,9 +120,9 @@ class Profile(object):
             if is_service_principal:
                 if not tenant:
                     raise CLIError('Please supply tenant using "--tenant"')
-
+                sp_auth = ServicePrincipalAuth(password)
                 subscriptions = self._subscription_finder.find_from_service_principal_id(
-                    username, password, tenant, self._management_resource_uri)
+                    username, sp_auth, tenant, self._management_resource_uri)
             else:
                 subscriptions = self._subscription_finder.find_from_user_account(
                     username, password, tenant, self._management_resource_uri)
@@ -129,9 +131,9 @@ class Profile(object):
             raise CLIError('No subscriptions found for this account.')
 
         if is_service_principal:
-            self._creds_cache.save_service_principal_cred(username,
-                                                          password,
-                                                          tenant)
+            self._creds_cache.save_service_principal_cred(sp_auth.get_entry_to_persist(username,
+                                                                                       tenant))
+
         if self._creds_cache.adal_token_cache.has_state_changed:
             self._creds_cache.persist_cached_creds()
         consolidated = Profile._normalize_properties(self._subscription_finder.user_id,
@@ -180,15 +182,21 @@ class Profile(object):
                 s[_IS_DEFAULT_SUBSCRIPTION] = False
 
             if not new_active_one:
-                new_active_one = new_subscriptions[0]
-            new_active_one[_IS_DEFAULT_SUBSCRIPTION] = True
-            default_sub_id = new_active_one[_SUBSCRIPTION_ID]
+                new_active_one = Profile._pick_working_subscription(new_subscriptions)
         else:
-            new_subscriptions[0][_IS_DEFAULT_SUBSCRIPTION] = True
-            default_sub_id = new_subscriptions[0][_SUBSCRIPTION_ID]
+            new_active_one = Profile._pick_working_subscription(new_subscriptions)
+
+        new_active_one[_IS_DEFAULT_SUBSCRIPTION] = True
+        default_sub_id = new_active_one[_SUBSCRIPTION_ID]
 
         set_cloud_subscription(active_cloud.name, default_sub_id)
         self._storage[_SUBSCRIPTIONS] = subscriptions
+
+    @staticmethod
+    def _pick_working_subscription(subscriptions):
+        from azure.mgmt.resource.subscriptions.models import SubscriptionState
+        s = next((x for x in subscriptions if x['state'] == SubscriptionState.enabled.value), None)
+        return s or subscriptions[0]
 
     def set_active_subscription(self, subscription):  # take id or name
         subscriptions = self.load_cached_subscriptions(all_clouds=True)
@@ -361,12 +369,9 @@ class SubscriptionFinder(object):
             result = self._find_using_specific_tenant(tenant, token_entry[_ACCESS_TOKEN])
         return result
 
-    def find_from_service_principal_id(self, client_id, secret, tenant, resource):
+    def find_from_service_principal_id(self, client_id, sp_auth, tenant, resource):
         context = self._create_auth_context(tenant, False)
-        token_entry = context.acquire_token_with_client_credentials(
-            resource,
-            client_id,
-            secret)
+        token_entry = sp_auth.acquire_token(context, resource, client_id)
         self.user_id = client_id
         result = self._find_using_specific_tenant(tenant, token_entry[_ACCESS_TOKEN])
         return result
@@ -453,9 +458,9 @@ class CredsCache(object):
         cred = matched[0]
         authority_url = get_authority_url(cred[_SERVICE_PRINCIPAL_TENANT])
         context = self._auth_ctx_factory(authority_url, None)
-        token_entry = context.acquire_token_with_client_credentials(resource,
-                                                                    sp_id,
-                                                                    cred[_ACCESS_TOKEN])
+        sp_auth = ServicePrincipalAuth(cred.get(_ACCESS_TOKEN, None) or
+                                       cred.get(_SERVICE_PRINCIPAL_CERT_FILE, None))
+        token_entry = sp_auth.acquire_token(context, resource, sp_id)
         return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN])
 
     def retrieve_secret_of_service_principal(self, sp_id):
@@ -474,23 +479,20 @@ class CredsCache(object):
         self.adal_token_cache = adal.TokenCache(json.dumps(real_token))
         return self.adal_token_cache
 
-    def save_service_principal_cred(self, service_principal_id, secret, tenant):
-        entry = {
-            _SERVICE_PRINCIPAL_ID: service_principal_id,
-            _SERVICE_PRINCIPAL_TENANT: tenant,
-            _ACCESS_TOKEN: secret
-        }
-
+    def save_service_principal_cred(self, sp_entry):
         matched = [x for x in self._service_principal_creds
-                   if service_principal_id == x[_SERVICE_PRINCIPAL_ID] and
-                   tenant == x[_SERVICE_PRINCIPAL_TENANT]]
+                   if sp_entry[_SERVICE_PRINCIPAL_ID] == x[_SERVICE_PRINCIPAL_ID] and
+                   sp_entry[_SERVICE_PRINCIPAL_TENANT] == x[_SERVICE_PRINCIPAL_TENANT]]
         state_changed = False
         if matched:
-            if matched[0][_ACCESS_TOKEN] != secret:
-                matched[0] = entry
+            # pylint: disable=line-too-long
+            if (sp_entry.get(_ACCESS_TOKEN, None) != getattr(matched[0], _ACCESS_TOKEN, None) or
+                    sp_entry.get(_SERVICE_PRINCIPAL_CERT_FILE, None) != getattr(matched[0], _SERVICE_PRINCIPAL_CERT_FILE, None)):
+                self._service_principal_creds.pop(matched[0])
+                self._service_principal_creds.append(matched[0])
                 state_changed = True
         else:
-            self._service_principal_creds.append(entry)
+            self._service_principal_creds.append(sp_entry)
             state_changed = True
 
         if state_changed:
@@ -524,3 +526,43 @@ class CredsCache(object):
     def remove_all_cached_creds(self):
         # we can clear file contents, but deleting it is simpler
         _delete_file(self._token_file)
+
+
+class ServicePrincipalAuth(object):
+
+    def __init__(self, password_arg_value):
+        if not password_arg_value:
+            raise CLIError('missing secret or certificate in order to '
+                           'authnenticate through a service principal')
+        if os.path.isfile(password_arg_value):
+            certificate_file = password_arg_value
+            from OpenSSL.crypto import load_certificate, FILETYPE_PEM
+            self.certificate_file = certificate_file
+            with open(certificate_file, 'r') as file_reader:
+                self.cert_file_string = file_reader.read()
+                cert = load_certificate(FILETYPE_PEM, self.cert_file_string)
+                self.thumbprint = cert.digest("sha1").decode()
+        else:
+            self.secret = password_arg_value
+
+    def acquire_token(self, authentication_context, resource, client_id):
+        if hasattr(self, 'secret'):
+            return authentication_context.acquire_token_with_client_credentials(resource,
+                                                                                client_id,
+                                                                                self.secret)
+        else:
+            return authentication_context.acquire_token_with_client_certificate(
+                resource, client_id, self.cert_file_string, self.thumbprint)
+
+    def get_entry_to_persist(self, sp_id, tenant):
+        entry = {
+            _SERVICE_PRINCIPAL_ID: sp_id,
+            _SERVICE_PRINCIPAL_TENANT: tenant,
+        }
+        if hasattr(self, 'secret'):
+            entry[_ACCESS_TOKEN] = self.secret
+        else:
+            entry[_SERVICE_PRINCIPAL_CERT_FILE] = self.certificate_file
+            entry[_SERVICE_PRINCIPAL_CERT_THUMBPRINT] = self.thumbprint
+
+        return entry

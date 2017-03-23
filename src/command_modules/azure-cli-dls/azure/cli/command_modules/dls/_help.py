@@ -9,11 +9,13 @@ from azure.cli.core.help_files import helps #pylint: disable=unused-import
 helps['dls'] = """
     type: group
     short-summary: Commands to manage Data Lake Store accounts, and filesystems. 
+    long-summary: If you don't have the Data Lake Store component installed, add it with `az component update --add dls`. These commands are in preview.
 """
 
 helps['dls account'] = """
     type: group
     short-summary: Commands to manage Data Lake Store accounts. 
+    long-summary: These commands are in preview.
 """
 
 helps['dls account create'] = """
@@ -57,11 +59,13 @@ helps['dls account delete'] = """
 helps['dls account trusted-provider'] = """
     type: group
     short-summary: Commands to manage Data Lake Store account trusted identity providers. 
+    long-summary: These commands are in preview.
 """
 
 helps['dls account firewall'] = """
     type: group
     short-summary: Commands to manage Data Lake Store account firewall rules. 
+    long-summary: These commands are in preview.
 """
 
 helps['dls account firewall create'] = """
@@ -102,6 +106,7 @@ helps['dls account firewall delete'] = """
 helps['dls fs'] = """
     type: group
     short-summary: Commands to manage a Data Lake Store filesystem. 
+    long-summary: These commands are in preview.
 """
 
 helps['dls fs create'] = """

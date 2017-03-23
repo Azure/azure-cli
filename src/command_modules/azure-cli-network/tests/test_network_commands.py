@@ -8,6 +8,7 @@
 #pylint: disable=bad-continuation
 #pylint: disable=too-many-lines
 import os
+import unittest
 
 from azure.cli.core._util import CLIError
 from azure.cli.core.commands.arm import resource_id
@@ -277,10 +278,9 @@ class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
         _create_peering('AzurePrivatePeering', 10001, 101, '102.0.0.0/30', '103.0.0.0/30')
 
         self.cmd('network express-route peering create -g {} --circuit-name {} --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30 --advertised-public-prefixes 104.0.0.0/30 --customer-asn 10000 --routing-registry-name level3'.format(rg, circuit),
-            allowed_exceptions='An error occured.')
+            allowed_exceptions='not authorized for creating Microsoft Peering')
         self.cmd('network express-route peering show -g {} --circuit-name {} -n MicrosoftPeering'.format(rg, circuit), checks=[
             JMESPathCheck('microsoftPeeringConfig.advertisedPublicPrefixes[0]', '104.0.0.0/30'),
-            JMESPathCheck('microsoftPeeringConfig.advertisedPublicPrefixesState', 'ValidationNeeded'),
             JMESPathCheck('microsoftPeeringConfig.customerAsn', 10000),
             JMESPathCheck('microsoftPeeringConfig.routingRegistryName', 'LEVEL3')
         ])
@@ -1295,3 +1295,6 @@ class NetworkZoneImportExportTest(ResourceGroupVCRTestBase):
         self.cmd('network dns zone import -n {} -g {} --file-name "{}"'
                  .format(zone_name, self.resource_group, zone_file_path))
         self.cmd('network dns zone export -n {} -g {}'.format(zone_name, self.resource_group))
+
+if __name__ == '__main__':
+    unittest.main()

@@ -80,17 +80,11 @@ def transform_local_gateway_table_output(result):
 
 
 def transform_vnet_create_output(result):
-    try:
-        return {'newVNet': result.result()}
-    except Exception:  # pylint: disable=broad-except
-        return result
+    return {'newVNet': result.result()}
 
 
 def transform_public_ip_create_output(result):
-    try:
-        return {'publicIp': result.result()}
-    except Exception:  # pylint: disable=broad-except
-        return result
+    return {'publicIp': result.result()}
 
 
 def transform_traffic_manager_create_output(result):
@@ -98,20 +92,12 @@ def transform_traffic_manager_create_output(result):
 
 
 def transform_nic_create_output(result):
-    try:
-        return {'NewNIC': result.result()}
-    except Exception:  # pylint: disable=broad-except
-        return result
+    return {'NewNIC': result.result()}
 
 
 def transform_nsg_create_output(result):
-    try:
-        return {'NewNSG': result.result()}
-    except Exception:  # pylint: disable=broad-except
-        return result
+    return {'NewNSG': result.result()}
+
 
 def transform_vnet_gateway_create_output(result):
-    try:
-        return {'vnetGateway': result.result()}
-    except Exception:  # pylint: disable=broad-except
-        return result
+    return {'vnetGateway': result.result()}

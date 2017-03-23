@@ -32,6 +32,14 @@ def get_sql_recommended_elastic_pools_operations(kwargs):
     return get_sql_management_client(kwargs).recommended_elastic_pools
 
 
+def get_sql_database_blob_auditing_policies_operations(kwargs):
+    return get_sql_management_client(kwargs).database_blob_auditing_policies
+
+
+def get_sql_database_threat_detection_policies_operations(kwargs):
+    return get_sql_management_client(kwargs).database_threat_detection_policies
+
+
 # COMMANDS UTILITIES
 
 def create_service_adapter(service_model, service_class):
@@ -72,19 +80,23 @@ class CommandGroup(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
-    def command(self, name, method_name):
+    def command(self, name, method_name, confirmation=None):
         cli_command(self._scope,
                     '{} {}'.format(self._group_name, name),
                     self._service_adapter(method_name),
-                    client_factory=self._client_factory)
+                    client_factory=self._client_factory,
+                    confirmation=confirmation)
 
-    def custom_command(self, name, custom_func_name):
+    def custom_command(self, name, custom_func_name, confirmation=None):
         cli_command(self._scope,
                     '{} {}'.format(self._group_name, name),
                     self._custom_path.format(custom_func_name),
-                    client_factory=self._client_factory)
+                    client_factory=self._client_factory,
+                    confirmation=confirmation)
 
-    def generic_update_command(self, name, getter_op, setter_op, custom_func_name=None):
+    # pylint: disable=too-many-arguments
+    def generic_update_command(self, name, getter_op, setter_op, custom_func_name=None,
+                               setter_arg_name='parameters'):
         if custom_func_name:
             custom_function_op = self._custom_path.format(custom_func_name)
         else:
@@ -96,7 +108,8 @@ class CommandGroup(object):
             self._service_adapter(getter_op),
             self._service_adapter(setter_op),
             factory=self._client_factory,
-            custom_function_op=custom_function_op)
+            custom_function_op=custom_function_op,
+            setter_arg_name=setter_arg_name)
 
 
 # PARAMETERS UTILITIES
