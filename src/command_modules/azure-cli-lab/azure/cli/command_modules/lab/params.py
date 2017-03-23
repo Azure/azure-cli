@@ -59,6 +59,13 @@ with ParametersContext(command='lab vm list') as c:
 
 
 with ParametersContext(command='lab vm apply-artifacts') as c:
-    c.register('artifacts', ('--artifacts',),
-               type=json.loads,
-               help='JSON encoded array of artifacts to be applied. Use @{file} to load from a file')
+    from azure.cli.command_modules.lab.sdk.devtestlabs.models.apply_artifacts_request import \
+        ApplyArtifactsRequest
+
+    c.expand('apply_artifacts_request', ApplyArtifactsRequest)
+    c.register('artifacts', ('--artifacts',), type=json.loads)
+    c.register_alias('name', ('--name', '-n'))
+
+
+with ParametersContext(command='lab formula') as c:
+    c.register_alias('name', ('--name', '-n'))

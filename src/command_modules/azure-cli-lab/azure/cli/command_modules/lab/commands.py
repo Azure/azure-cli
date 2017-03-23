@@ -100,7 +100,7 @@ with ServiceGroup(__name__, get_devtestlabs_virtual_network_operation,
 
 # Formula Operations Commands
 formula_operations = create_service_adapter(
-    'azure.mgmt.devtestlabs.operations.formula_operations',
+    mgmt_operations_path.format('formula_operations'),
     'FormulaOperations')
 
 with ServiceGroup(__name__, get_devtestlabs_formula_operation,
