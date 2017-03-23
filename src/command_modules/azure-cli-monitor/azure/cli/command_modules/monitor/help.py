@@ -5,6 +5,7 @@
 
 from azure.cli.core.help_files import helps
 
+# pylint: disable=line-too-long, too-many-lines
 
 helps['monitor'] = """
             type: group
@@ -34,6 +35,37 @@ helps['monitor log-profiles update'] = """
 helps['monitor diagnostic-settings'] = """
             type: group
             short-summary: Commands to manage service diagnostic settings.
+            """
+helps['monitor diagnostic-settings create'] = """
+            type: command
+            short-summary: Creates diagnostic settings for the specified resource.
+            parameters:
+                - name: --resource-id
+                  type: string
+                  short-summary: The identifier of the resource
+                - name: --resource-group -g
+                  type: string
+                  short-summary: Name of the resource group
+                - name: --logs
+                  type: string
+                  short-summary: JSON encoded list of logs settings. Use @{file} to load from a file.
+                - name: --metrics
+                  type: string
+                  short-summary: JSON encoded list of metric settings. Use @{file} to load from a file.
+                - name: --storage-account
+                  type: string
+                  short-summary: Name or ID of the storage account to which you would like to send Diagnostic Logs
+                - name: --namespace
+                  type: string
+                  short-summary: Name or ID of the Service Bus namespace
+                - name: --rule-name
+                  type: string
+                  short-summary: Name of the Service Bus authorization rule
+                - name: --workspace
+                  type: string
+                  short-summary: Name or ID of the Log Analytics workspace to which you would like to send Diagnostic Logs
+                - name: --tags
+                  short-summary: Space separated tags in 'key[=value]' format. Use '' to clear existing tags
             """
 helps['monitor diagnostic-settings update'] = """
             type: command
