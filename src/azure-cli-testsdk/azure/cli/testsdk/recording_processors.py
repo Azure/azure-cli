@@ -61,6 +61,34 @@ class LargeRequestBodyProcessor(RecordingProcessor):
         return request
 
 
+class LargeResponseBodyProcessor(RecordingProcessor):
+    control_flag = '<CTRL-REPLACE>'
+
+    def __init__(self, max_response_body=128):
+        self._max_response_body = max_response_body
+
+    def process_response(self, response):
+        length = len(response['body']['string'] or '')
+        if length > self._max_response_body * 1024:
+            response['body']['string'] = \
+                "!!! The response body has been omitted from the recording because it is larger " \
+                "than {} KB. It will be replaced with blank content of {} bytes while replay. " \
+                "{}{}".format(self._max_response_body, length, self.control_flag, length)
+
+        return response
+
+
+class LargeResponseBodyReplacer(RecordingProcessor):
+    def process_response(self, response):
+        content = (response['body']['string'] or b'').decode('utf-8')
+        index = content.find(LargeResponseBodyProcessor.control_flag)
+        if index > -1:
+            length = int(content[index + len(LargeResponseBodyProcessor.control_flag):])
+            response['body']['string'] = bytes([0] * length)
+
+        return response
+
+
 class OAuthRequestResponsesFilter(RecordingProcessor):
     """Remove oauth authentication requests and responses from recording."""
 

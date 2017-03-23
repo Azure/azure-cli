@@ -22,7 +22,7 @@ class StorageBlobTests(ScenarioTest):
     def test_storage_blob_upload_midsize_file(self, resource_group, storage_account):
         # generate a 4MB file. the download test is skip for now to avoid huge recording file. the test harness will
         # be updated later to support recording file download.
-        self.verify_blob_upload_and_download(resource_group, storage_account, 4096, 'block', skip_download=True)
+        self.verify_blob_upload_and_download(resource_group, storage_account, 4096, 'block')
 
     def verify_blob_upload_and_download(self, group, account, file_size_kb, blob_type, skip_download=False):
         container = self.create_random_name(prefix='cont', length=24)
@@ -63,6 +63,7 @@ class StorageBlobTests(ScenarioTest):
             downloaded = os.path.join(local_dir, 'test.file')
             self.cmd('storage blob download -n {} -c {} --file {}'.format(blob_name, container, downloaded))
             assert os.path.isfile(downloaded)
+            assert os.stat(downloaded).st_size == file_size_kb * 1024
 
     def get_account_key(self, group, name):
         return self.cmd('storage account keys list -n {} -g {} --query "[0].value" -otsv'
