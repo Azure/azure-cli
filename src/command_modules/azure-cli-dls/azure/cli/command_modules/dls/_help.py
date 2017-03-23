@@ -208,6 +208,16 @@ helps['dls fs move'] = """
           short-summary: 'The destination path in the Data Lake Store account where the file or folder should be moved to.'
 """
 
+helps['dls fs set-expiry'] = """
+    type: command
+    short-summary: Sets the absolute expiration time of the file.
+"""
+
+helps['dls fs remove-expiry'] = """
+    type: command
+    short-summary: Removes the expiration time on a file, if any.
+"""
+
 helps['dls fs access'] = """
     type: group
     short-summary: Commands to manage a Data Lake Store filesystem access and permissions. 
@@ -232,4 +242,24 @@ helps['dls fs access set-permission'] = """
         - name: --permission
           type: int
           short-summary: 'The octal representation of the permissions for user, group and mask (for example: 777 is full rwx for all entities)'
+"""
+
+helps['dls fs access set-entry'] = """
+    type: command
+    short-summary: updates the existing ACL on the file or folder to include or update the entries specified
+"""
+
+helps['dls fs access set'] = """
+    type: command
+    short-summary: replaces the existing ACL on the file or folder with the specified ACL, which must contain all unnamed entries
+"""
+
+helps['dls fs access remove-entry'] = """
+    type: command
+    short-summary: updates the existing ACL on the file or folder to remove the entries specified if they exist
+"""
+
+helps['dls fs access remove-all'] = """
+    type: command
+    short-summary: completely removes the existing ACL or default ACL on the file or folder
 """

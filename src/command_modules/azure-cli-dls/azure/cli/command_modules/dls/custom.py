@@ -11,6 +11,7 @@ from azure.mgmt.datalake.store.models import (DataLakeStoreAccountUpdateParamete
                                               EncryptionState,
                                               KeyVaultMetaInfo)
 
+from azure.datalake.store.enums import ExpiryOptionType
 from azure.datalake.store.multithread import (ADLUploader, ADLDownloader)
 from azure.cli.command_modules.dls._client_factory import (cf_dls_filesystem)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -234,23 +235,56 @@ def set_adls_item_expiry(account_name,
     if client.info(path)['type'] != 'FILE':
         # pylint: disable=line-too-long
         raise CLIError('The specified path does not exist or is not a file. Please ensure the path points to a file and it exists. Path supplied: {}'.format(path))
-    raise CLIError('Not implemented: {}'.format(expiration_time))
+
+    expiration_time = float(expiration_time)
+    try:
+        expiration_time = long(expiration_time)
+    except NameError:
+        expiration_time = int(expiration_time)
+    client.set_expiry(path, ExpiryOptionType.absolute.value, expiration_time)
+
+# pylint: disable=superfluous-parens
+def remove_adls_item_expiry(account_name,
+                            path):
+    client = cf_dls_filesystem(account_name)
+    if client.info(path)['type'] != 'FILE':
+        # pylint: disable=line-too-long
+        raise CLIError('The specified path does not exist or is not a file. Please ensure the path points to a file and it exists. Path supplied: {}'.format(path))
+
+    client.set_expiry(path, ExpiryOptionType.never_expire.value)
 
 # filesystem permissions customizations
-def get_adls_item_acl():
-    raise CLIError('Not implemented')
+def get_adls_item_acl(account_name,
+                      path):
+    client = cf_dls_filesystem(account_name)
+    return client.get_acl_status(path)
 
-def remove_adls_item_acl():
-    raise CLIError('Not implemented')
+def remove_adls_item_acl(account_name,
+                         path,
+                         default_acl=False):
+    client = cf_dls_filesystem(account_name)
+    if default_acl:
+        client.remove_default_acl(path)
+    else:
+        client.remove_acl(path)
 
-def remove_adls_item_acl_entry():
-    raise CLIError('Not implemented')
+def remove_adls_item_acl_entry(account_name,
+                               path,
+                               acl_spec):
+    client = cf_dls_filesystem(account_name)
+    client.remove_acl_entries(path, acl_spec)
 
-def set_adls_item_acl():
-    raise CLIError('Not implemented')
+def set_adls_item_acl(account_name,
+                      path,
+                      acl_spec):
+    client = cf_dls_filesystem(account_name)
+    client.set_acl(path, acl_spec)
 
-def set_adls_item_acl_entry():
-    raise CLIError('Not implemented')
+def set_adls_item_acl_entry(account_name,
+                            path,
+                            acl_spec):
+    client = cf_dls_filesystem(account_name)
+    client.modify_acl_entries(path, acl_spec)
 
 def set_adls_item_owner(account_name,
                         path,

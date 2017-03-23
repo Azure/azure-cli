@@ -4,6 +4,11 @@
 # --------------------------------------------------------------------------------------------
 import time
 import uuid
+# to ensure we have consistent access to the quote() method
+try:
+    from urllib import parse as safe_url_lib
+except ImportError:
+    import urllib as safe_url_lib
 
 from azure.cli.core.prompting import prompt_pass, NoTTYException
 from azure.mgmt.datalake.analytics.account.models import (DataLakeAnalyticsAccountUpdateParameters,
@@ -28,6 +33,51 @@ def list_adla_account(client, resource_group_name=None):
     account_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
         if resource_group_name else client.list()
     return list(account_list)
+
+# pylint: disable=too-many-arguments
+def list_adla_jobs(client,
+                   account_name,
+                   top=500,
+                   name=None,
+                   submitter=None,
+                   submitted_after=None,
+                   submitted_before=None,
+                   state=None,
+                   result=None):
+    odata_filter_list = []
+    if submitter:
+        odata_filter_list.append("submitter eq '{}'".format(submitter))
+    if name:
+        odata_filter_list.append("name eq '{}'".format(name))
+    if name:
+        odata_filter_list.append("name eq '{}'".format(name))
+    if state:
+        odata_filter_list.append("({})".format(" or ".join(["state eq '{}'".format(f.value) for f in state])))
+    if result:
+        odata_filter_list.append("({})".format(" or ".join(["result eq '{}'".format(f.value) for f in result])))
+    if submitted_after:
+        odata_filter_list.append("submitTime ge datetimeoffset'{}'".format(safe_url_lib.quote(submitted_after)))
+    if submitted_before:
+        odata_filter_list.append("submitTime lt datetimeoffset'{}'".format(safe_url_lib.quote(submitted_before)))
+
+    filter_string = " and ".join(odata_filter_list)
+    to_return = []
+
+    job_list = client.list(account_name,
+                           orderby="submitTime desc",
+                           top=top if top <= 300 else None,
+                           filter=filter_string if filter_string and len(filter_string) > 0 else None)
+    if top <= 300:
+        return job_list
+
+    job_list = iter(job_list)
+    for _ in range(top):
+        elem = next(job_list, None)
+        if elem:
+            to_return.append(elem)
+        else:
+            break
+    return to_return
 
 # pylint: disable=too-many-arguments
 def create_adla_account(client,
@@ -152,9 +202,9 @@ def submit_adla_job(client,
                     compile_only=False,
                     degree_of_parallelism=1,
                     priority=1000):
-    if not script:
+    if not script or len(script) < 1:
         # pylint: disable=line-too-long
-        raise CLIError('Could not read script content from the supplied --script param. It is either empty or an invalid file. value: {}'.format(script))
+        raise CLIError('Could not read script content from the supplied --script param. It is either empty or an invalid file')
 
     job_properties = USqlJobProperties(script)
     if runtime_version:

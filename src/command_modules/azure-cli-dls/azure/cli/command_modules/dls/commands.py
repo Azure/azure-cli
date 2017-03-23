@@ -7,8 +7,8 @@
 
 from azure.cli.core.commands import cli_command
 from azure.cli.command_modules.dls._client_factory import (cf_dls_account,
-                                                                      cf_dls_account_firewall,
-                                                                      cf_dls_account_trusted_provider)
+                                                           cf_dls_account_firewall,
+                                                           cf_dls_account_trusted_provider)
 adls_format_path = 'azure.mgmt.datalake.store.operations.{}#{}.{}'
 adls_custom_format_path = 'azure.cli.command_modules.dls.custom#{}'
 
@@ -46,9 +46,14 @@ cli_command(__name__, 'dls fs test', adls_custom_format_path.format('test_adls_i
 cli_command(__name__, 'dls fs preview', adls_custom_format_path.format('preview_adls_item'))
 cli_command(__name__, 'dls fs join', adls_custom_format_path.format('join_adls_items'))
 cli_command(__name__, 'dls fs move', adls_custom_format_path.format('move_adls_item'))
-# todo implement set expiry when it is available
+cli_command(__name__, 'dls fs set-expiry', adls_custom_format_path.format('set_adls_item_expiry'))
+cli_command(__name__, 'dls fs remove-expiry', adls_custom_format_path.format('remove_adls_item_expiry'))
 
 # filesystem permission operations
-# todo: implement acl CRUD when available
 cli_command(__name__, 'dls fs access set-permission', adls_custom_format_path.format('set_adls_item_permissions'))
 cli_command(__name__, 'dls fs access set-owner', adls_custom_format_path.format('set_adls_item_owner'))
+cli_command(__name__, 'dls fs access show', adls_custom_format_path.format('get_adls_item_acl'))
+cli_command(__name__, 'dls fs access set-entry', adls_custom_format_path.format('set_adls_item_acl_entry'))
+cli_command(__name__, 'dls fs access set', adls_custom_format_path.format('set_adls_item_acl'))
+cli_command(__name__, 'dls fs access remove-entry', adls_custom_format_path.format('remove_adls_item_acl_entry'))
+cli_command(__name__, 'dls fs access remove-all', adls_custom_format_path.format('remove_adls_item_acl'))

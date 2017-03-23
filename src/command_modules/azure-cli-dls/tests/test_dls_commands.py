@@ -10,10 +10,87 @@ from __future__ import print_function
 
 import os
 import time
+import datetime
 
 from shutil import rmtree
 from azure.cli.core._util import CLIError
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck)
+
+class DataLakeStoreFileAccessScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(DataLakeStoreFileAccessScenarioTest, self).__init__(__file__, test_method, resource_group='test-adls-access')
+        self.adls_name = 'cliadls123426'
+        self.location = 'eastus2'
+    
+    def test_dls_file_access_mgmt(self):
+        self.execute()
+
+    def set_up(self):
+        super(DataLakeStoreFileAccessScenarioTest, self).set_up()
+
+        # create ADLS account
+        self.cmd('dls account create -g {} -n {} -l {} --disable-encryption'.format(self.resource_group, self.adls_name, self.location))
+        result = self.cmd('dls account show -g {} -n {}'.format(self.resource_group, self.adls_name))
+        while result['provisioningState'] != 'Succeeded' and result['provisioningState'] != 'Failed':
+            time.sleep(5)
+            result = self.cmd('dls account show -g {} -n {}'.format(self.resource_group, self.adls_name))
+
+        if result['provisioningState'] == 'Failed':
+            raise CLIError('Failed to create the adls account, tests cannot proceed!')
+
+    def body(self):
+        # define variables
+        adls = self.adls_name
+        folder_name = 'adltestfolder01'
+        user_id = '470c0ccf-c91a-4597-98cd-48507d2f1486'
+        acl_to_add = 'user:{}:rwx'.format(user_id)
+        acl_to_modify = 'user:{}:-w-'.format(user_id)
+        acl_to_remove = 'user:{}'.format(user_id)
+
+        # create a folder
+        self.cmd('dls fs create -n {} --path "{}" --folder --force'.format(adls, folder_name))
+        # get the folder
+        self.cmd('dls fs show -n {} --path "{}"'.format(adls, folder_name), checks=[
+            JMESPathCheck('name', folder_name),
+            JMESPathCheck('type', 'DIRECTORY'),
+            JMESPathCheck('length', 0),
+        ])
+        # get the initial ACE
+        result = self.cmd('dls fs access show -n {} --path "{}"'.format(adls, folder_name))
+        inital_acl_length = len(result['entries'])
+        new_acl = ','.join(result['entries'])
+        new_acl += ',{}'.format(acl_to_add)
+        # set the full ACL
+        self.cmd('dls fs access set -n {} --path "{}" --acl-spec {}'.format(adls, folder_name, new_acl))
+        # get the ACL and confirm that it has grown
+        set_result = self.cmd('dls fs access show -n {} --path "{}"'.format(adls, folder_name))
+        assert len(set_result['entries']) > inital_acl_length
+        assert acl_to_add in set_result['entries']
+        
+        # modify that ACE with set-entry
+        self.cmd('dls fs access set-entry -n {} --path "{}" --acl-spec {}'.format(adls, folder_name, acl_to_modify))
+        # get the ACL and confirm it has been modified
+        modify_result = self.cmd('dls fs access show -n {} --path "{}"'.format(adls, folder_name))
+        assert len(set_result['entries']) > inital_acl_length
+        assert acl_to_modify in modify_result['entries']
+        # remove an ACE
+        self.cmd('dls fs access remove-entry -n {} --path "{}" --acl-spec {}'.format(adls, folder_name, acl_to_remove))
+        # get ACL and ensure that it is smaller than before
+        remove_result = self.cmd('dls fs access show -n {} --path "{}"'.format(adls, folder_name))
+        assert len(remove_result['entries']) < len(modify_result['entries'])
+        assert acl_to_modify not in remove_result['entries']
+        # remove default ACL
+        self.cmd('dls fs access remove-all -n {} --path "{}" --default-acl'.format(adls, folder_name))
+        remove_result = self.cmd('dls fs access show -n {} --path "{}"'.format(adls, folder_name))
+        # there should be four entries left
+        assert 4 == len(remove_result['entries'])
+
+        # remove ACL
+        self.cmd('dls fs access remove-all -n {} --path "{}"'.format(adls, folder_name))
+        remove_result = self.cmd('dls fs access show -n {} --path "{}"'.format(adls, folder_name))
+        # there should be three entries left
+        assert 3 == len(remove_result['entries'])
 
 class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
 
@@ -76,10 +153,32 @@ class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
         # create a file
         self.cmd('dls fs create -n {} --path "{}/{}" --content {}'.format(adls, folder_name, file_name, file_content))
         # get the file
+        result = self.cmd('dls fs show -n {} --path "{}/{}"'.format(adls, folder_name, file_name), checks=[
+            JMESPathCheck('pathSuffix', file_name),
+            JMESPathCheck('type', 'FILE'),
+            JMESPathCheck('length', len(file_content)),
+        ])
+
+        # set expiration time on the file
+        # this future time gives the milliseconds since the epoch that have occured as of 01/31/2030 at noon
+        epoch_time = datetime.datetime.utcfromtimestamp(0)
+        final_time = datetime.datetime(2030, 1, 31, 12)
+        time_in_milliseconds = (final_time - epoch_time).total_seconds() * 1000
+        self.cmd('dls fs set-expiry -n {} --path "{}/{}" --expiration-time {}'.format(adls, folder_name, file_name, time_in_milliseconds))
         self.cmd('dls fs show -n {} --path "{}/{}"'.format(adls, folder_name, file_name), checks=[
             JMESPathCheck('pathSuffix', file_name),
             JMESPathCheck('type', 'FILE'),
             JMESPathCheck('length', len(file_content)),
+            JMESPathCheck('msExpirationTime', time_in_milliseconds),
+        ])
+
+        # remove the expiration time
+        self.cmd('dls fs remove-expiry -n {} --path "{}/{}"'.format(adls, folder_name, file_name))
+        self.cmd('dls fs show -n {} --path "{}/{}"'.format(adls, folder_name, file_name), checks=[
+            JMESPathCheck('pathSuffix', file_name),
+            JMESPathCheck('type', 'FILE'),
+            JMESPathCheck('length', len(file_content)),
+            JMESPathCheck('msExpirationTime', result['msExpirationTime']),
         ])
 
         # move the file

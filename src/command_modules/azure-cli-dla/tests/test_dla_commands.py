@@ -156,8 +156,8 @@ class DataLakeAnalyticsCatalogScenarioTest(ResourceGroupVCRTestBase):
 class DataLakeAnalyticsJobScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(DataLakeAnalyticsJobScenarioTest, self).__init__(__file__, test_method, resource_group='test-adla-job-mgmt')
-        self.adls_name = 'cliadls1234531'
-        self.adla_name = 'cliadla1234530'
+        self.adls_name = 'cliadls1234533'
+        self.adla_name = 'cliadla1234533'
         self.location = 'eastus2'
 
     def test_dla_job_mgmt(self):

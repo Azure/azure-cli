@@ -2,6 +2,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+from msrest.serialization import Deserializer
+from msrest.exceptions import DeserializationError
+
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.datalake.analytics.account import DataLakeAnalyticsAccountManagementClient
 from azure.cli.core.commands.arm import parse_resource_id
@@ -30,3 +33,12 @@ def validate_resource_group_name(ns):
         client = get_mgmt_service_client(DataLakeAnalyticsAccountManagementClient).account
         group_name = _get_resource_group_from_account_name(client, account_name)
         ns.resource_group_name = group_name
+
+def datetime_format(value):
+    """Validate the correct format of a datetime string and deserialize."""
+    try:
+        datetime_obj = Deserializer.deserialize_iso(value)
+    except DeserializationError:
+        message = "Argument {} is not a valid ISO-8601 datetime format"
+        raise ValueError(message.format(value))
+    return datetime_obj

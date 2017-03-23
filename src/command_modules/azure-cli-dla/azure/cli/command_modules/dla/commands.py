@@ -7,11 +7,11 @@
 
 from azure.cli.core.commands import cli_command
 from azure.cli.command_modules.dla._client_factory import (cf_dla_account,
-                                                                          cf_dla_account_firewall,
-                                                                          cf_dla_account_adls,
-                                                                          cf_dla_account_storage,
-                                                                          cf_dla_job,
-                                                                          cf_dla_catalog)
+                                                           cf_dla_account_firewall,
+                                                           cf_dla_account_adls,
+                                                           cf_dla_account_storage,
+                                                           cf_dla_job,
+                                                           cf_dla_catalog)
 adla_format_path = 'azure.mgmt.datalake.analytics.{}.operations.{}#{}.{}'
 adla_custom_format_path = 'azure.cli.command_modules.dla.custom#{}'
 
@@ -37,7 +37,7 @@ cli_command(__name__, 'dla job submit', adla_custom_format_path.format('submit_a
 cli_command(__name__, 'dla job wait', adla_custom_format_path.format('wait_adla_job'), cf_dla_job)
 cli_command(__name__, 'dla job show', adla_format_path.format('job', 'job_operations', 'JobOperations', 'get'), cf_dla_job)
 cli_command(__name__, 'dla job cancel', adla_format_path.format('job', 'job_operations', 'JobOperations', 'cancel'), cf_dla_job)
-cli_command(__name__, 'dla job list', adla_format_path.format('job', 'job_operations', 'JobOperations', 'list'), cf_dla_job)
+cli_command(__name__, 'dla job list', adla_custom_format_path.format('list_adla_jobs'), cf_dla_job)
 
 # account data source operations
 cli_command(__name__, 'dla account blob-storage show', adla_format_path.format('account', 'storage_accounts_operations', 'StorageAccountsOperations', 'get'), cf_dla_account_storage)
