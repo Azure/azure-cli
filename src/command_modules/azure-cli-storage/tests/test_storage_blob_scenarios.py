@@ -51,7 +51,7 @@ class StorageBlobTests(ScenarioTest):
         expiry = (datetime.datetime.utcnow() + datetime.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         sas = self.cmd('storage blob generate-sas -n {} -c {} --expiry {} '
                        '--permissions r --https-only'.format(blob_name, container, expiry)).output
-        assert dict(pair.split('=') for pair in sas.split('&'))   # TODO: more checks
+        assert dict(pair.split('=') for pair in sas.split('&'))  # TODO: more checks
 
         self.cmd('storage blob update -n {} -c {} --content-type application/test-content'.format(blob_name, container))
         self.cmd('storage blob show -n {} -c {}'.format(blob_name, container),
@@ -62,8 +62,8 @@ class StorageBlobTests(ScenarioTest):
         if not skip_download:
             downloaded = os.path.join(local_dir, 'test.file')
             self.cmd('storage blob download -n {} -c {} --file {}'.format(blob_name, container, downloaded))
-            assert os.path.isfile(downloaded)
-            assert os.stat(downloaded).st_size == file_size_kb * 1024
+            self.assertTrue(os.path.isfile(downloaded), 'The file is not downloaded.')
+            self.assertEqual(file_size_kb * 1024, os.stat(downloaded).st_size, 'The download file size is not right.')
 
     def get_account_key(self, group, name):
         return self.cmd('storage account keys list -n {} -g {} --query "[0].value" -otsv'

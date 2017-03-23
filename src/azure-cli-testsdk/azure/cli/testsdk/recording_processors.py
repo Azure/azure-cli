@@ -80,11 +80,22 @@ class LargeResponseBodyProcessor(RecordingProcessor):
 
 class LargeResponseBodyReplacer(RecordingProcessor):
     def process_response(self, response):
-        content = (response['body']['string'] or b'').decode('utf-8')
-        index = content.find(LargeResponseBodyProcessor.control_flag)
+        import six
+        body = response['body']['string']
+
+        # backward compatibility. under 2.7 response body is unicode, under 3.5 response body is
+        # bytes. when set the value back, the same type must be used.
+        body_is_string = isinstance(body, six.string_types)
+
+        content_in_string = (response['body']['string'] or b'').decode('utf-8')
+        index = content_in_string.find(LargeResponseBodyProcessor.control_flag)
+
         if index > -1:
-            length = int(content[index + len(LargeResponseBodyProcessor.control_flag):])
-            response['body']['string'] = bytes([0] * length)
+            length = int(content_in_string[index + len(LargeResponseBodyProcessor.control_flag):])
+            if body_is_string:
+                response['body']['string'] = '0' * length
+            else:
+                response['body']['string'] = bytes([0] * length)
 
         return response
 
