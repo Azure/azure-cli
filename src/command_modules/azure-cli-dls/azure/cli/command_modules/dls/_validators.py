@@ -7,6 +7,7 @@ from azure.mgmt.datalake.store import DataLakeStoreAccountManagementClient
 from azure.cli.core.commands.arm import parse_resource_id
 from azure.cli.core._util import CLIError
 
+
 # Helpers
 def _get_resource_group_from_account_name(client, account_name):
     """
@@ -20,8 +21,9 @@ def _get_resource_group_from_account_name(client, account_name):
         if id_comps['name'] == account_name:
             return id_comps['resource_group']
     raise CLIError(
-        "The Resource 'Microsoft.DataLakeStore/accounts/{}'".format(account_name) + \
+        "The Resource 'Microsoft.DataLakeStore/accounts/{}'".format(account_name) +
         " not found within subscription: {}".format(client.config.subscription_id))
+
 
 # COMMAND NAMESPACE VALIDATORS
 def validate_resource_group_name(ns):

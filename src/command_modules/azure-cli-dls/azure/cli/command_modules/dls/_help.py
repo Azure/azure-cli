@@ -3,18 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps #pylint: disable=unused-import
+# pylint: disable=unused-import
+from azure.cli.core.help_files import helps
 
-#pylint: disable=line-too-long
+# pylint: disable=line-too-long
 helps['dls'] = """
     type: group
-    short-summary: Commands to manage Data Lake Store accounts, and filesystems. 
+    short-summary: Commands to manage Data Lake Store accounts, and filesystems.
     long-summary: If you don't have the Data Lake Store component installed, add it with `az component update --add dls`. These commands are in preview.
 """
 
 helps['dls account'] = """
     type: group
-    short-summary: Commands to manage Data Lake Store accounts. 
+    short-summary: Commands to manage Data Lake Store accounts.
     long-summary: These commands are in preview.
 """
 
@@ -38,33 +39,33 @@ helps['dls account create'] = """
 
 helps['dls account update'] = """
     type: command
-    short-summary: Updates a Data Lake Store account. 
+    short-summary: Updates a Data Lake Store account.
 """
 
 helps['dls account show'] = """
     type: command
-    short-summary: Retrieves the Data Lake Store account. 
+    short-summary: Retrieves the Data Lake Store account.
 """
 
 helps['dls account list'] = """
     type: command
-    short-summary: Lists Data Lake Store accounts in a subscription or a specific resource group. 
+    short-summary: Lists Data Lake Store accounts in a subscription or a specific resource group.
 """
 
 helps['dls account delete'] = """
     type: command
-    short-summary: Deletes the Data Lake Store account. 
+    short-summary: Deletes the Data Lake Store account.
 """
 
 helps['dls account trusted-provider'] = """
     type: group
-    short-summary: Commands to manage Data Lake Store account trusted identity providers. 
+    short-summary: Commands to manage Data Lake Store account trusted identity providers.
     long-summary: These commands are in preview.
 """
 
 helps['dls account firewall'] = """
     type: group
-    short-summary: Commands to manage Data Lake Store account firewall rules. 
+    short-summary: Commands to manage Data Lake Store account firewall rules.
     long-summary: These commands are in preview.
 """
 
@@ -85,27 +86,27 @@ helps['dls account firewall create'] = """
 
 helps['dls account firewall update'] = """
     type: command
-    short-summary: Updates a firewall rule in the Data Lake Store account. 
+    short-summary: Updates a firewall rule in the Data Lake Store account.
 """
 
 helps['dls account firewall show'] = """
     type: command
-    short-summary: Retrieves a firewall rule in the Data Lake Store account. 
+    short-summary: Retrieves a firewall rule in the Data Lake Store account.
 """
 
 helps['dls account firewall list'] = """
     type: command
-    short-summary: Lists firewall rules in the Data Lake Store account. 
+    short-summary: Lists firewall rules in the Data Lake Store account.
 """
 
 helps['dls account firewall delete'] = """
     type: command
-    short-summary: Deletes a firewall rule in the Data Lake Store account. 
+    short-summary: Deletes a firewall rule in the Data Lake Store account.
 """
 
 helps['dls fs'] = """
     type: group
-    short-summary: Commands to manage a Data Lake Store filesystem. 
+    short-summary: Commands to manage a Data Lake Store filesystem.
     long-summary: These commands are in preview.
 """
 
@@ -225,7 +226,7 @@ helps['dls fs remove-expiry'] = """
 
 helps['dls fs access'] = """
     type: group
-    short-summary: Commands to manage a Data Lake Store filesystem access and permissions. 
+    short-summary: Commands to manage a Data Lake Store filesystem access and permissions.
 """
 
 helps['dls fs access set-owner'] = """

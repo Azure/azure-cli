@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-#pylint: disable=method-hidden
-#pylint: disable=line-too-long
-#pylint: disable=bad-continuation
+# pylint: disable=method-hidden
+# pylint: disable=line-too-long
+# pylint: disable=bad-continuation
 from __future__ import print_function
 
 try:
@@ -15,10 +15,12 @@ except ImportError:
 
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck)
 
+
 def _mock_get_uuid_str():
     return '00000000-0000-0000-0000-000000000000'
 
-#pylint: disable=too-many-instance-attributes
+
+# pylint: disable=too-many-instance-attributes
 class DataLakeAnalyticsCatalogScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
@@ -58,7 +60,7 @@ class DataLakeAnalyticsCatalogScenarioTest(ResourceGroupVCRTestBase):
         # list all DBs
         self.cmd('dla catalog database list -n {}'.format(adla), checks=[
             JMESPathCheck('type(@)', 'array'),
-            JMESPathCheck('length(@)', 2), # because there is always the master DB
+            JMESPathCheck('length(@)', 2),  # because there is always the master DB
         ])
         # get a specific DB
         self.cmd('dla catalog database show -n {} --database-name {}'.format(adla, self.db_name), checks=[
@@ -153,6 +155,7 @@ class DataLakeAnalyticsCatalogScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('length(@)', 0),
         ])
 
+
 class DataLakeAnalyticsJobScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(DataLakeAnalyticsJobScenarioTest, self).__init__(__file__, test_method, resource_group='test-adla-job-mgmt')
@@ -220,6 +223,7 @@ class DataLakeAnalyticsJobScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('type(@)', 'array'),
             JMESPathCheck('length(@)', 2)
         ])
+
 
 class DataLakeAnalyticsAccountScenarioTest(ResourceGroupVCRTestBase):
 

@@ -10,10 +10,10 @@ from azure.cli.core.commands.parameters import \
 
 from azure.cli.command_modules.dls._validators import validate_resource_group_name
 from azure.mgmt.datalake.store.models.data_lake_store_account_management_client_enums \
-    import(FirewallState,
-           TrustedIdProviderState,
-           TierType,
-           FirewallAllowAzureIpsState)
+    import (FirewallState,
+            TrustedIdProviderState,
+            TierType,
+            FirewallAllowAzureIpsState)
 
 from azure.mgmt.datalake.store.models import (EncryptionConfigType)
 
@@ -62,5 +62,3 @@ register_cli_argument('dls fs set-expiry', 'expiration_time', help='The absolute
 register_cli_argument('dls fs access', 'acl_spec', help=" The ACL specification to set on the path in the format '[default:]user|group|other:[entity id or UPN]:r|-w|-x|-,[default:]user|group|other:[entity id or UPN]:r|-w|-x|-,...'.")
 register_cli_argument('dls fs access set-permission', 'permission', help='The octal representation of the permissions for user, group and mask (for example: 777 is full rwx for all entities)', type=int)
 register_cli_argument('dls fs access remove-all', 'default_acl', help='A switch that, if specified, indicates that the remove ACL operation should remove the default ACL of the folder. Otherwise the regular ACL is removed.', action='store_true')
-
-

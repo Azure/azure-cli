@@ -28,11 +28,14 @@ from azure.cli.core._util import CLIError
 import azure.cli.core.azlogging as azlogging
 
 logger = azlogging.get_az_logger(__name__)
+
+
 # account customiaztions
 def list_adla_account(client, resource_group_name=None):
     account_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
         if resource_group_name else client.list()
     return list(account_list)
+
 
 # pylint: disable=too-many-arguments
 def list_adla_jobs(client,
@@ -79,6 +82,7 @@ def list_adla_jobs(client,
             break
     return to_return
 
+
 # pylint: disable=too-many-arguments
 def create_adla_account(client,
                         resource_group_name,
@@ -104,6 +108,7 @@ def create_adla_account(client,
 
     return client.create(resource_group_name, account_name, create_params)
 
+
 # pylint: disable=too-many-arguments
 def update_adla_account(client,
                         account_name,
@@ -126,6 +131,7 @@ def update_adla_account(client,
 
     return client.update(resource_group_name, account_name, update_params)
 
+
 # firewall customizations
 # pylint: disable=too-many-arguments
 def add_adla_firewall_rule(client,
@@ -139,6 +145,7 @@ def add_adla_firewall_rule(client,
                                    account_name,
                                    firewall_rule_name,
                                    create_params)
+
 
 # catalog customizations
 # pylint: disable=too-many-arguments
@@ -161,6 +168,7 @@ def create_adla_catalog_credential(client,
                                                                        uri,
                                                                        credential_user_name)
     client.create_credential(account_name, database_name, credential_name, create_params)
+
 
 # pylint: disable=too-many-arguments
 def update_adla_catalog_credential(client,
@@ -190,6 +198,7 @@ def update_adla_catalog_credential(client,
                                                                        uri,
                                                                        credential_user_name)
     client.update_credential(account_name, database_name, credential_name, update_params)
+
 
 # job customizations
 # pylint: disable=too-many-arguments
@@ -225,6 +234,7 @@ def submit_adla_job(client,
 
     return client.create(account_name, job_id, submit_params)
 
+
 # pylint: disable=superfluous-parens
 def wait_adla_job(client,
                   account_name,
@@ -247,9 +257,11 @@ def wait_adla_job(client,
 
     return job
 
+
 # helpers
 def _get_uuid_str():
     return str(uuid.uuid1())
+
 
 def _get_resource_group_location(resource_group_name):
     from azure.mgmt.resource.resources import ResourceManagementClient

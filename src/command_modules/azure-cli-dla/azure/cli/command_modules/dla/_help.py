@@ -3,24 +3,25 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps #pylint: disable=unused-import
+# pylint: disable=unused-import
+from azure.cli.core.help_files import helps
 
-#pylint: disable=line-too-long
+# pylint: disable=line-too-long
 helps['dla'] = """
     type: group
-    short-summary: Commands to manage Data Lake Analytics accounts, jobs and catalogs. 
+    short-summary: Commands to manage Data Lake Analytics accounts, jobs and catalogs.
     long-summary: If you don't have the Data Lake Analytics component installed, add it with `az component update --add dla`. These commands are in preview.
 """
 
 helps['dla job'] = """
     type: group
-    short-summary: Commands to manage Data Lake Analytics jobs. 
+    short-summary: Commands to manage Data Lake Analytics jobs.
     long-summary: These commands are in preview.
 """
 
 helps['dla job submit'] = """
     type: command
-    short-summary: submits the job to the Data Lake Analytics account. 
+    short-summary: submits the job to the Data Lake Analytics account.
     parameters:
         - name: --job-name
           type: string
@@ -43,12 +44,12 @@ helps['dla job submit'] = """
 
 helps['dla job cancel'] = """
     type: command
-    short-summary: cancels the job in the Data Lake Analytics account. 
+    short-summary: cancels the job in the Data Lake Analytics account.
 """
 
 helps['dla job show'] = """
     type: command
-    short-summary: Retrieves the job in the Data Lake Analytics account. 
+    short-summary: Retrieves the job in the Data Lake Analytics account.
 """
 
 helps['dla job wait'] = """
@@ -62,90 +63,90 @@ helps['dla job wait'] = """
 
 helps['dla job list'] = """
     type: command
-    short-summary: lists jobs in the Data Lake Analytics account. 
+    short-summary: lists jobs in the Data Lake Analytics account.
 """
 
 helps['dla catalog'] = """
     type: group
-    short-summary: Commands to manage Data Lake Analytics catalogs. 
+    short-summary: Commands to manage Data Lake Analytics catalogs.
     long-summary: These commands are in preview.
 """
 
 helps['dla catalog database'] = """
     type: group
-    short-summary: Commands to manage Data Lake Analytics catalog databases. 
+    short-summary: Commands to manage Data Lake Analytics catalog databases.
     long-summary: These commands are in preview.
 """
 
 helps['dla catalog assembly'] = """
     type: group
-    short-summary: Commands to manage Data Lake Analytics catalog assemblies. 
+    short-summary: Commands to manage Data Lake Analytics catalog assemblies.
     long-summary: These commands are in preview.
 """
 
 helps['dla catalog external-data-source'] = """
     type: group
-    short-summary: Commands to manage Data Lake Analytics catalog external data sources. 
+    short-summary: Commands to manage Data Lake Analytics catalog external data sources.
     long-summary: These commands are in preview.
 """
 
 helps['dla catalog procedure'] = """
     type: group
-    short-summary: Commands to manage Data Lake Analytics catalog stored procedures. 
+    short-summary: Commands to manage Data Lake Analytics catalog stored procedures.
     long-summary: These commands are in preview.
 """
 
 helps['dla catalog schema'] = """
     type: group
-    short-summary: Commands to manage Data Lake Analytics catalog schemas. 
+    short-summary: Commands to manage Data Lake Analytics catalog schemas.
     long-summary: These commands are in preview.
 """
 
 helps['dla catalog table'] = """
     type: group
-    short-summary: Commands to manage Data Lake Analytics catalog tables. 
+    short-summary: Commands to manage Data Lake Analytics catalog tables.
     long-summary: These commands are in preview.
 """
 
 helps['dla catalog table-partition'] = """
     type: group
-    short-summary: Commands to manage Data Lake Analytics catalog table partitions. 
+    short-summary: Commands to manage Data Lake Analytics catalog table partitions.
     long-summary: These commands are in preview.
 """
 
 helps['dla catalog table-stats'] = """
     type: group
-    short-summary: Commands to manage Data Lake Analytics catalog table statistics. 
+    short-summary: Commands to manage Data Lake Analytics catalog table statistics.
     long-summary: These commands are in preview.
 """
 
 helps['dla catalog table-type'] = """
     type: group
-    short-summary: Commands to manage Data Lake Analytics catalog table types. 
+    short-summary: Commands to manage Data Lake Analytics catalog table types.
     long-summary: These commands are in preview.
 """
 
 helps['dla catalog tvf'] = """
     type: group
-    short-summary: Commands to manage Data Lake Analytics catalog table valued functions, or TVFs. 
+    short-summary: Commands to manage Data Lake Analytics catalog table valued functions, or TVFs.
     long-summary: These commands are in preview.
 """
 
 helps['dla catalog view'] = """
     type: group
-    short-summary: Commands to manage Data Lake Analytics catalog views. 
+    short-summary: Commands to manage Data Lake Analytics catalog views.
     long-summary: These commands are in preview.
 """
 
 helps['dla catalog credential'] = """
     type: group
-    short-summary: Commands to manage Data Lake Analytics catalog credentials. 
+    short-summary: Commands to manage Data Lake Analytics catalog credentials.
     long-summary: These commands are in preview.
 """
 
 helps['dla catalog credential create'] = """
     type: command
-    short-summary: Creates a new catalog credential for use with an external data source. 
+    short-summary: Creates a new catalog credential for use with an external data source.
     parameters:
         - name: --credential-name
           type: string
@@ -175,28 +176,28 @@ helps['dla catalog credential update'] = """
 
 helps['dla catalog credential show'] = """
     type: command
-    short-summary: Retrieves the catalog credential. 
+    short-summary: Retrieves the catalog credential.
 """
 
 helps['dla catalog credential list'] = """
     type: command
-    short-summary: Lists the catalog credentials. 
+    short-summary: Lists the catalog credentials.
 """
 
 helps['dla catalog credential delete'] = """
     type: command
-    short-summary: deletes the catalog credential. 
+    short-summary: deletes the catalog credential.
 """
 
 helps['dla account'] = """
     type: group
-    short-summary: Commands to manage Data Lake Analytics accounts. 
+    short-summary: Commands to manage Data Lake Analytics accounts.
     long-summary: These commands are in preview.
 """
 
 helps['dla account create'] = """
     type: command
-    short-summary: Creates a Data Lake Analytics account. 
+    short-summary: Creates a Data Lake Analytics account.
     parameters:
         - name: --default-data-lake-store
           type: string
@@ -235,7 +236,7 @@ helps['dla account update'] = """
 
 helps['dla account show'] = """
     type: command
-    short-summary: Retrieves the Data Lake Analytics account. 
+    short-summary: Retrieves the Data Lake Analytics account.
 """
 
 helps['dla account list'] = """
@@ -245,24 +246,24 @@ helps['dla account list'] = """
 
 helps['dla account delete'] = """
     type: command
-    short-summary: Deletes the Data Lake Analytics account. 
+    short-summary: Deletes the Data Lake Analytics account.
 """
 
 helps['dla account blob-storage'] = """
     type: group
-    short-summary: Commands to manage Data Lake Analytics account linked Azure Storage. 
+    short-summary: Commands to manage Data Lake Analytics account linked Azure Storage.
     long-summary: These commands are in preview.
 """
 
 helps['dla account data-lake-store'] = """
     type: group
-    short-summary: Commands to manage Data Lake Analytics account linked Data Lake Store accounts. 
+    short-summary: Commands to manage Data Lake Analytics account linked Data Lake Store accounts.
     long-summary: These commands are in preview.
 """
 
 helps['dla account firewall'] = """
     type: group
-    short-summary: Commands to manage Data Lake Analytics account firewall rules. 
+    short-summary: Commands to manage Data Lake Analytics account firewall rules.
     long-summary: These commands are in preview.
 """
 
@@ -283,20 +284,20 @@ helps['dla account firewall create'] = """
 
 helps['dla account firewall update'] = """
     type: command
-    short-summary: Updates a firewall rule in the Data Lake Analytics account. 
+    short-summary: Updates a firewall rule in the Data Lake Analytics account.
 """
 
 helps['dla account firewall show'] = """
     type: command
-    short-summary: Retrieves a firewall rule in the Data Lake Analytics account. 
+    short-summary: Retrieves a firewall rule in the Data Lake Analytics account.
 """
 
 helps['dla account firewall list'] = """
     type: command
-    short-summary: Lists firewall rules in the Data Lake Analytics account. 
+    short-summary: Lists firewall rules in the Data Lake Analytics account.
 """
 
 helps['dla account firewall delete'] = """
     type: command
-    short-summary: Deletes a firewall rule in the Data Lake Analytics account. 
+    short-summary: Deletes a firewall rule in the Data Lake Analytics account.
 """

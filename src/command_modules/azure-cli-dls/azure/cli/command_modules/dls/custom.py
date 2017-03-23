@@ -19,11 +19,14 @@ from azure.cli.core._util import CLIError
 import azure.cli.core.azlogging as azlogging
 
 logger = azlogging.get_az_logger(__name__)
+
+
 # account customiaztions
 def list_adls_account(client, resource_group_name=None):
     account_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
         if resource_group_name else client.list()
     return list(account_list)
+
 
 # pylint: disable=too-many-arguments
 def create_adls_account(client,
@@ -67,6 +70,7 @@ def create_adls_account(client,
 
     return client.create(resource_group_name, account_name, create_params)
 
+
 # pylint: disable=too-many-arguments
 def update_adls_account(client,
                         account_name,
@@ -87,6 +91,7 @@ def update_adls_account(client,
 
     return client.update(resource_group_name, account_name, update_params)
 
+
 # firewall customizations
 # pylint: disable=too-many-arguments
 def add_adls_firewall_rule(client,
@@ -101,14 +106,17 @@ def add_adls_firewall_rule(client,
                                    firewall_rule_name,
                                    create_params)
 
+
 # filesystem customizations
 def get_adls_item(account_name,
                   path):
     return cf_dls_filesystem(account_name).info(path)
 
+
 def list_adls_items(account_name,
                     path):
     return cf_dls_filesystem(account_name).ls(path, detail=True)
+
 
 def create_adls_item(account_name,
                      path,
@@ -138,6 +146,7 @@ def create_adls_item(account_name,
     else:
         return client.touch(path)
 
+
 def append_adls_item(account_name,
                      path,
                      content):
@@ -151,10 +160,12 @@ def append_adls_item(account_name,
             content = str.encode(content)
         f.write(content)
 
+
 def remove_adls_item(account_name,
                      path,
                      recurse=False):
     cf_dls_filesystem(account_name).rm(path, recurse)
+
 
 def upload_to_adls(account_name,
                    source_path,
@@ -163,6 +174,7 @@ def upload_to_adls(account_name,
                    overwrite=False):
     client = cf_dls_filesystem(account_name)
     ADLUploader(client, destination_path, source_path, thread_count, overwrite=overwrite)
+
 
 def download_from_adls(account_name,
                        source_path,
@@ -177,9 +189,11 @@ def download_from_adls(account_name,
         thread_count,
         overwrite=overwrite)
 
+
 def test_adls_item(account_name,
                    path):
     return cf_dls_filesystem(account_name).exists(path)
+
 
 # pylint: disable=redefined-variable-type
 def preview_adls_item(account_name,
@@ -202,11 +216,12 @@ def preview_adls_item(account_name,
 
     if not length or length <= 0:
         length = client.info(path)['length'] - offset
-        if length > 1*1024*1024 and not force:
+        if length > 1 * 1024 * 1024 and not force:
             # pylint: disable=line-too-long
-            raise CLIError('The remaining data to preview is greater than {} bytes. Please specify a length or use the --force parameter to preview the entire file. The length of the file that would have been previewed: {}'.format(str(1*1024*1024), str(length)))
+            raise CLIError('The remaining data to preview is greater than {} bytes. Please specify a length or use the --force parameter to preview the entire file. The length of the file that would have been previewed: {}'.format(str(1 * 1024 * 1024), str(length)))
 
     return client.read_block(path, offset, length)
+
 
 def join_adls_items(account_name,
                     source_paths,
@@ -218,6 +233,7 @@ def join_adls_items(account_name,
 
     client.concat(destination_path, source_paths)
 
+
 def move_adls_item(account_name,
                    source_path,
                    destination_path,
@@ -226,6 +242,7 @@ def move_adls_item(account_name,
     if force and client.exists(destination_path):
         client.rm(destination_path)
     client.mv(source_path, destination_path)
+
 
 # pylint: disable=superfluous-parens
 def set_adls_item_expiry(account_name,
@@ -243,6 +260,7 @@ def set_adls_item_expiry(account_name,
         expiration_time = int(expiration_time)
     client.set_expiry(path, ExpiryOptionType.absolute.value, expiration_time)
 
+
 # pylint: disable=superfluous-parens
 def remove_adls_item_expiry(account_name,
                             path):
@@ -253,11 +271,13 @@ def remove_adls_item_expiry(account_name,
 
     client.set_expiry(path, ExpiryOptionType.never_expire.value)
 
+
 # filesystem permissions customizations
 def get_adls_item_acl(account_name,
                       path):
     client = cf_dls_filesystem(account_name)
     return client.get_acl_status(path)
+
 
 def remove_adls_item_acl(account_name,
                          path,
@@ -268,11 +288,13 @@ def remove_adls_item_acl(account_name,
     else:
         client.remove_acl(path)
 
+
 def remove_adls_item_acl_entry(account_name,
                                path,
                                acl_spec):
     client = cf_dls_filesystem(account_name)
     client.remove_acl_entries(path, acl_spec)
+
 
 def set_adls_item_acl(account_name,
                       path,
@@ -280,11 +302,13 @@ def set_adls_item_acl(account_name,
     client = cf_dls_filesystem(account_name)
     client.set_acl(path, acl_spec)
 
+
 def set_adls_item_acl_entry(account_name,
                             path,
                             acl_spec):
     client = cf_dls_filesystem(account_name)
     client.modify_acl_entries(path, acl_spec)
+
 
 def set_adls_item_owner(account_name,
                         path,
@@ -292,10 +316,12 @@ def set_adls_item_owner(account_name,
                         group=None):
     cf_dls_filesystem(account_name).chown(path, owner, group)
 
+
 def set_adls_item_permissions(account_name,
                               path,
                               permission):
     cf_dls_filesystem(account_name).chmod(path, permission)
+
 
 # helpers
 def _get_resource_group_location(resource_group_name):

@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-#pylint: disable=method-hidden
-#pylint: disable=line-too-long
-#pylint: disable=bad-continuation
+# pylint: disable=method-hidden
+# pylint: disable=line-too-long
+# pylint: disable=bad-continuation
 from __future__ import print_function
 
 import os
@@ -16,13 +16,14 @@ from shutil import rmtree
 from azure.cli.core._util import CLIError
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck)
 
+
 class DataLakeStoreFileAccessScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
         super(DataLakeStoreFileAccessScenarioTest, self).__init__(__file__, test_method, resource_group='test-adls-access')
         self.adls_name = 'cliadls123426'
         self.location = 'eastus2'
-    
+
     def test_dls_file_access_mgmt(self):
         self.execute()
 
@@ -67,7 +68,7 @@ class DataLakeStoreFileAccessScenarioTest(ResourceGroupVCRTestBase):
         set_result = self.cmd('dls fs access show -n {} --path "{}"'.format(adls, folder_name))
         assert len(set_result['entries']) > inital_acl_length
         assert acl_to_add in set_result['entries']
-        
+
         # modify that ACE with set-entry
         self.cmd('dls fs access set-entry -n {} --path "{}" --acl-spec {}'.format(adls, folder_name, acl_to_modify))
         # get the ACL and confirm it has been modified
@@ -91,6 +92,7 @@ class DataLakeStoreFileAccessScenarioTest(ResourceGroupVCRTestBase):
         remove_result = self.cmd('dls fs access show -n {} --path "{}"'.format(adls, folder_name))
         # there should be three entries left
         assert 3 == len(remove_result['entries'])
+
 
 class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
 
@@ -117,6 +119,7 @@ class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
 
         if result['provisioningState'] == 'Failed':
             raise CLIError('Failed to create the adls account, tests cannot proceed!')
+
     def tear_down(self):
         super(DataLakeStoreFileScenarioTest, self).tear_down()
         if os.path.exists(self.local_folder):
@@ -256,12 +259,12 @@ class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('dls fs show -n {} --path "{}/{}"'.format(adls, folder_name, join_file_name), checks=[
             JMESPathCheck('pathSuffix', join_file_name),
             JMESPathCheck('type', 'FILE'),
-            JMESPathCheck('length', len(self.local_file_content) + (len(file_content)*2)),
+            JMESPathCheck('length', len(self.local_file_content) + (len(file_content) * 2)),
         ])
 
         # download the joined file
         self.cmd('dls fs download -n {} --destination-path "{}" --source-path "{}/{}"'.format(adls, os.path.join(self.local_folder, download_file_name), folder_name, join_file_name))
-        assert os.path.getsize(os.path.join(self.local_folder, download_file_name)) == len(self.local_file_content) + (len(file_content)*2)
+        assert os.path.getsize(os.path.join(self.local_folder, download_file_name)) == len(self.local_file_content) + (len(file_content) * 2)
 
         # delete the file and confirm it is gone.
         self.cmd('dls fs delete -n {} --path "{}/{}"'.format(adls, folder_name, join_file_name))
@@ -283,9 +286,6 @@ class DataLakeStoreFileScenarioTest(ResourceGroupVCRTestBase):
         if os.path.exists(self.local_folder):
             rmtree(self.local_folder)
 
-        # TODO once there are commands for them:
-        # file expiration
-        # acl management
 
 class DataLakeStoreAccountScenarioTest(ResourceGroupVCRTestBase):
 

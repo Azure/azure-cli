@@ -3,8 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-#pylint: disable=line-too-long
-
+# pylint: disable=line-too-long
 from azure.cli.core.commands import cli_command
 from azure.cli.command_modules.dls._client_factory import (cf_dls_account,
                                                            cf_dls_account_firewall,

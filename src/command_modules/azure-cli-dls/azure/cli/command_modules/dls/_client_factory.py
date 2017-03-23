@@ -4,20 +4,25 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.core._profile import CLOUD, Profile
 from azure.datalake.store import core
+
+
 def cf_dls_account(_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.datalake.store import DataLakeStoreAccountManagementClient
     return get_mgmt_service_client(DataLakeStoreAccountManagementClient).account
+
 
 def cf_dls_account_firewall(_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.datalake.store import DataLakeStoreAccountManagementClient
     return get_mgmt_service_client(DataLakeStoreAccountManagementClient).firewall_rules
 
+
 def cf_dls_account_trusted_provider(_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.datalake.store import DataLakeStoreAccountManagementClient
     return get_mgmt_service_client(DataLakeStoreAccountManagementClient).trusted_id_providers
+
 
 def cf_dls_filesystem(account_name):
     profile = Profile()

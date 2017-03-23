@@ -3,8 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-#pylint: disable=line-too-long
-
+# pylint: disable=line-too-long
 from azure.cli.core.commands import cli_command
 from azure.cli.command_modules.dla._client_factory import (cf_dla_account,
                                                            cf_dla_account_firewall,
@@ -52,7 +51,7 @@ cli_command(__name__, 'dla account data-lake-store add', adla_format_path.format
 cli_command(__name__, 'dla account data-lake-store delete', adla_format_path.format('account', 'data_lake_store_accounts_operations', 'DataLakeStoreAccountsOperations', 'delete'), cf_dla_account_adls)
 
 # catalog operations
-#credential
+# credential
 cli_command(__name__, 'dla catalog credential create', adla_custom_format_path.format('create_adla_catalog_credential'), cf_dla_catalog)
 cli_command(__name__, 'dla catalog credential show', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'get_credential'), cf_dla_catalog)
 cli_command(__name__, 'dla catalog credential update', adla_custom_format_path.format('update_adla_catalog_credential'), cf_dla_catalog)
