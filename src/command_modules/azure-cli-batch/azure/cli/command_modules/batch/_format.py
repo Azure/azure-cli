@@ -21,6 +21,36 @@ HEAD_PROPERTIES = {  # Convert response headers to properties.
 }
 
 
+def _file_list_table_format(result):
+    """Format file list as a table."""
+    table_output = []
+    for item in result:
+        table_row = OrderedDict()
+        table_row['Name'] = item['name']
+        table_row['URL'] = item['url']
+        table_row['Is Directory'] = str(item['isDirectory'])
+        table_row['Content Length'] = str(item['properties']['contentLength']) \
+            if item['properties'] else ""
+        table_row['Creation Time'] = item['properties']['creationTime'] \
+            if item['properties'] else ""
+        table_output.append(table_row)
+    return table_output
+
+
+def _account_key_table_format(result):
+    """Format account keys as a table."""
+    table_output = []
+    table_row = OrderedDict()
+    table_row['Number'] = 'Primary'
+    table_row['Key'] = result['primary']
+    table_output.append(table_row)
+    table_row = OrderedDict()
+    table_row['Number'] = 'Secondary'
+    table_row['Key'] = result['secondary']
+    table_output.append(table_row)
+    return table_output
+
+
 def transform_response_headers(result):
     """Extract and format file property headers from ClientRawResponse object"""
     properties = {HEAD_PROPERTIES[k]: v for k, v in result.headers.items() \
@@ -31,35 +61,13 @@ def transform_response_headers(result):
 
 
 def task_file_list_table_format(result):
-    """Format file list as a table."""
-    table_output = []
-    for item in result:
-        table_row = OrderedDict()
-        table_row['Name'] = item['name']
-        table_row['URL'] = item['url']
-        table_row['Is Directory'] = str(item['isDirectory'])
-        table_row['Content Length'] = str(item['properties']['contentLength']) \
-            if item['properties'] else ""
-        table_row['Creation Time'] = item['properties']['creationTime'] \
-            if item['properties'] else ""
-        table_output.append(table_row)
-    return table_output
+    """Format task file list as a table."""
+    return _file_list_table_format(result)
 
 
 def node_file_list_table_format(result):
-    """Format file list as a table."""
-    table_output = []
-    for item in result:
-        table_row = OrderedDict()
-        table_row['Name'] = item['name']
-        table_row['URL'] = item['url']
-        table_row['Is Directory'] = str(item['isDirectory'])
-        table_row['Content Length'] = str(item['properties']['contentLength']) \
-            if item['properties'] else ""
-        table_row['Creation Time'] = item['properties']['creationTime'] \
-            if item['properties'] else ""
-        table_output.append(table_row)
-    return table_output
+    """Format node file list as a table."""
+    return _file_list_table_format(result)
 
 
 def application_list_table_format(result):
@@ -101,30 +109,12 @@ def account_list_table_format(result):
 
 def account_keys_list_table_format(result):
     """Format account keys list as a table."""
-    table_output = []
-    table_row = OrderedDict()
-    table_row['Number'] = 'Primary'
-    table_row['Key'] = result['primary']
-    table_output.append(table_row)
-    table_row = OrderedDict()
-    table_row['Number'] = 'Secondary'
-    table_row['Key'] = result['secondary']
-    table_output.append(table_row)
-    return table_output
+    return _account_key_table_format(result)
 
 
 def account_keys_renew_table_format(result):
-    """Format account keys list as a table."""
-    table_output = []
-    table_row = OrderedDict()
-    table_row['Number'] = 'Primary'
-    table_row['Key'] = result['primary']
-    table_output.append(table_row)
-    table_row = OrderedDict()
-    table_row['Number'] = 'Secondary'
-    table_row['Key'] = result['secondary']
-    table_output.append(table_row)
-    return table_output
+    """Format account keys renew as a table."""
+    return _account_key_table_format(result)
 
 
 def certificate_list_table_format(result):
