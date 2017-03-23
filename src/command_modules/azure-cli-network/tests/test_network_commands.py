@@ -278,10 +278,9 @@ class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
         _create_peering('AzurePrivatePeering', 10001, 101, '102.0.0.0/30', '103.0.0.0/30')
 
         self.cmd('network express-route peering create -g {} --circuit-name {} --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30 --advertised-public-prefixes 104.0.0.0/30 --customer-asn 10000 --routing-registry-name level3'.format(rg, circuit),
-            allowed_exceptions='An error occured.')
+            allowed_exceptions='not authorized for creating Microsoft Peering')
         self.cmd('network express-route peering show -g {} --circuit-name {} -n MicrosoftPeering'.format(rg, circuit), checks=[
             JMESPathCheck('microsoftPeeringConfig.advertisedPublicPrefixes[0]', '104.0.0.0/30'),
-            JMESPathCheck('microsoftPeeringConfig.advertisedPublicPrefixesState', 'ValidationNeeded'),
             JMESPathCheck('microsoftPeeringConfig.customerAsn', 10000),
             JMESPathCheck('microsoftPeeringConfig.routingRegistryName', 'LEVEL3')
         ])

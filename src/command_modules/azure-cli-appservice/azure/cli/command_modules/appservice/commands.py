@@ -3,22 +3,37 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-#pylint: disable=unused-import,line-too-long
+# pylint: disable=unused-import,line-too-long
 from azure.cli.core.commands import LongRunningOperation, cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core._util import empty_on_404
 
-from ._client_factory import web_client_factory
+from ._client_factory import web_client_factory, cf_plans
+
 
 def output_slots_in_table(slots):
     return [{'name': s['name'], 'status': s['state'], 'plan': s['appServicePlan']} for s in slots]
 
+
 def transform_list_location_output(result):
     return [{'name': x.name} for x in result]
 
+
+def transform_web_output(web):
+    props = ['name', 'state', 'location', 'resourceGroup', 'defaultHostName', 'appServicePlanId']
+    result = {k: web[k] for k in web if k in props}
+    # to get width under control, also the plan usually is in the same RG
+    result['appServicePlan'] = result.pop('appServicePlanId').split('/')[-1]
+    return result
+
+
+def transform_web_list_output(webs):
+    return [transform_web_output(w) for w in webs]
+
+
 cli_command(__name__, 'appservice web create', 'azure.cli.command_modules.appservice.custom#create_webapp')
-cli_command(__name__, 'appservice web list', 'azure.cli.command_modules.appservice.custom#list_webapp')
-cli_command(__name__, 'appservice web show', 'azure.cli.command_modules.appservice.custom#show_webapp', exception_handler=empty_on_404)
+cli_command(__name__, 'appservice web list', 'azure.cli.command_modules.appservice.custom#list_webapp', table_transformer=transform_web_list_output)
+cli_command(__name__, 'appservice web show', 'azure.cli.command_modules.appservice.custom#show_webapp', exception_handler=empty_on_404, table_transformer=transform_web_output)
 cli_command(__name__, 'appservice web delete', 'azure.cli.command_modules.appservice.custom#delete_webapp')
 cli_command(__name__, 'appservice web stop', 'azure.cli.command_modules.appservice.custom#stop_webapp')
 cli_command(__name__, 'appservice web start', 'azure.cli.command_modules.appservice.custom#start_webapp')
@@ -48,7 +63,6 @@ cli_command(__name__, 'appservice web config backup create', 'azure.cli.command_
 cli_command(__name__, 'appservice web config backup update', 'azure.cli.command_modules.appservice.custom#update_backup_schedule')
 cli_command(__name__, 'appservice web config backup restore', 'azure.cli.command_modules.appservice.custom#restore_backup')
 
-factory = lambda _: web_client_factory().web_apps
 cli_command(__name__, 'appservice web source-control config-local-git', 'azure.cli.command_modules.appservice.custom#enable_local_git')
 cli_command(__name__, 'appservice web source-control config', 'azure.cli.command_modules.appservice.custom#config_source_control')
 cli_command(__name__, 'appservice web source-control sync', 'azure.cli.command_modules.appservice.custom#sync_site_repo')
@@ -71,27 +85,14 @@ cli_command(__name__, 'appservice web deployment user set', 'azure.cli.command_m
 cli_command(__name__, 'appservice web deployment list-publishing-profiles',
             'azure.cli.command_modules.appservice.custom#list_publish_profiles')
 
-
-factory = lambda _: web_client_factory()
-cli_command(__name__, 'appservice web deployment user show', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.get_publishing_user', factory, exception_handler=empty_on_404)
-
-factory = lambda _: web_client_factory().app_service_plans
 cli_command(__name__, 'appservice plan create', 'azure.cli.command_modules.appservice.custom#create_app_service_plan')
-cli_command(__name__, 'appservice plan delete', 'azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.delete', factory, confirmation=True)
+cli_command(__name__, 'appservice plan delete', 'azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.delete', cf_plans, confirmation=True)
+cli_command(__name__, 'appservice plan list', 'azure.cli.command_modules.appservice.custom#list_app_service_plans')
+cli_command(__name__, 'appservice plan show', 'azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.get', cf_plans, exception_handler=empty_on_404)
 cli_generic_update_command(__name__, 'appservice plan update', 'azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.get',
                            'azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.create_or_update',
                            custom_function_op='azure.cli.command_modules.appservice.custom#update_app_service_plan',
-                           setter_arg_name='app_service_plan', factory=factory)
+                           setter_arg_name='app_service_plan', factory=cf_plans)
 
-cli_command(__name__, 'appservice plan list', 'azure.cli.command_modules.appservice.custom#list_app_service_plans')
-cli_command(__name__, 'appservice plan show', 'azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.get', factory, exception_handler=empty_on_404)
-factory = lambda _: web_client_factory()
-cli_command(__name__, 'appservice list-locations', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.list_geo_regions', factory, transform=transform_list_location_output)
-
-#Not for ignite release
-#cli_command(__name__, 'webapp plan update-vnet-route',
-            #   ServerFarmsOperations.update_vnet_route, factory)
-#cli_command(__name__, 'webapp plan update-vnet-gateway',
-#             ServerFarmsOperations.update_server_farm_vnet_gateway,factory)
-#cli_command(__name__, 'webapp plan update-vnet-route',
-                # ServerFarmsOperations.update_vnet_route, factory)
+cli_command(__name__, 'appservice web deployment user show', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.get_publishing_user', web_client_factory, exception_handler=empty_on_404)
+cli_command(__name__, 'appservice list-locations', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.list_geo_regions', web_client_factory, transform=transform_list_location_output)

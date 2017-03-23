@@ -1,24 +1,31 @@
 {
-    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "registryName": {
             "type": "string",
             "metadata": {
-                "description": "Name of the registry service"
+                "description": "Name of the container registry"
             }
         },
         "registryLocation": {
             "type": "string",
             "metadata": {
-                "description": "Location of the registry service"
+                "description": "Location of the container registry"
+            }
+        },
+        "registrySku": {
+            "type": "string",
+            "defaultValue": "Basic",
+            "metadata": {
+                "description": "Sku of the container registry"
             }
         },
         "registryApiVersion": {
             "type": "string",
-            "defaultValue": "2016-06-27-preview",
+            "defaultValue": "2017-03-01",
             "metadata": {
-                "description": "Api version of the registry service"
+                "description": "Api version of the container registry"
             }
         },
         "storageAccountName": {
@@ -27,11 +34,11 @@
                 "description": "Name of the storage account"
             }
         },
-        "storageAccountType": {
+        "storageAccountSku": {
             "type": "string",
             "defaultValue": "Standard_LRS",
             "metadata": {
-                "description": "Type of the storage account"
+                "description": "Sku of the storage account"
             }
         },
         "adminUserEnabled": {
@@ -52,7 +59,7 @@
                 "containerregistry": "[parameters('registryName')]"
             },
             "sku": {
-                "name": "[parameters('storageAccountType')]"
+                "name": "[parameters('storageAccountSku')]"
             },
             "kind": "Storage",
             "properties": {
@@ -71,6 +78,9 @@
             "type": "Microsoft.ContainerRegistry/registries",
             "location": "[parameters('registryLocation')]",
             "apiVersion": "[parameters('registryApiVersion')]",
+            "sku": {
+                "name": "[parameters('registrySku')]"
+            },
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
             ],

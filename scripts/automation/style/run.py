@@ -70,9 +70,8 @@ if __name__ == '__main__':
 
         # Run flake8 on modules
         pep8_ready_modules = automation_path.filter_blacklisted_modules(
-            ['azure-cli-testsdk', 'acr', 'appservice', 'batch', 'configure', 'container',
-             'datalake', 'documentdb', 'find', 'iot', 'keyvault', 'network', 'redis', 'resource',
-             'role', 'taskhelp'])
+            ['azure-cli-testsdk', 'acr', 'batch', 'configure', 'container', 'datalake', 'documentdb', 'find', 'iot',
+             'keyvault', 'network', 'redis', 'resource', 'taskhelp'])
 
         return_code_sum += run_pep8(pep8_ready_modules)
 
