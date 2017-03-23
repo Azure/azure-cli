@@ -7,7 +7,6 @@ import datetime
 import os
 from azure.cli.core._util import get_file_json, CLIError
 
-
 # 1 hour in milliseconds
 DEFAULT_QUERY_TIME_RANGE = 3600000
 
@@ -241,3 +240,24 @@ def _load_autoscale_settings_parameters(file_path):
         raise CLIError('File {} not found.'.format(file_path))
 
     return get_file_json(file_path)
+
+
+# pylint: disable=unused-argument
+def create_diagnostics_settings(client, target_resource_id, resource_group=None, logs=None,
+                                metrics=None, namespace=None, rule_name=None, tags=None,
+                                service_bus_rule_id=None, storage_account=None, workspace=None):
+    from azure.mgmt.monitor.models.service_diagnostic_settings_resource import \
+        ServiceDiagnosticSettingsResource
+
+    # https://github.com/Azure/azure-rest-api-specs/issues/1058
+    # https://github.com/Azure/azure-rest-api-specs/issues/1059
+    parameters = ServiceDiagnosticSettingsResource(location='',
+                                                   name='',
+                                                   storage_account_id=storage_account,
+                                                   service_bus_rule_id=service_bus_rule_id,
+                                                   metrics=metrics,
+                                                   logs=logs,
+                                                   workspace_id=workspace,
+                                                   tags=tags)
+
+    return client.create_or_update(target_resource_id, parameters)
