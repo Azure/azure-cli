@@ -89,16 +89,19 @@ class AzCliCommandParser(argparse.ArgumentParser):
                         group_name = '{} Arguments'.format(arg.arg_group)
                         group = command_parser.add_argument_group(arg.arg_group, group_name)
                         argument_groups[arg.arg_group] = group
-                    param = group.add_argument(
-                        *arg.options_list, **arg.options)
+                    try:
+                        param = group.add_argument(
+                            *arg.options_list, **arg.options)
+                    except argparse.ArgumentError:
+                        continue
                 else:
                     try:
                         param = command_parser.add_argument(
                             *arg.options_list, **arg.options)
                     except argparse.ArgumentError:
                         dest = arg.options['dest']
-                        if dest in ['no_wait', 'raw']:
-                            pass
+                        if dest in ['no_wait', 'raw', 'yes']:
+                            continue
                         else:
                             raise
                 param.completer = arg.completer
