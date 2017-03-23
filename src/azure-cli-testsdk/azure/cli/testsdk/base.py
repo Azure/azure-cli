@@ -11,8 +11,10 @@ import inspect
 import subprocess
 import json
 import shlex
-import vcr
+import tempfile
+import shutil
 import six
+import vcr
 
 from .patches import (patch_load_cached_subscriptions, patch_main_exception_handler,
                       patch_retrieve_token_for_user, patch_long_run_operation_delay)
@@ -123,6 +125,31 @@ class ScenarioTest(unittest.TestCase):  # pylint: disable=too-many-instance-attr
                 c(result)
 
         return result
+
+    def create_temp_file(self, size_kb):
+        """
+        Create a temporary file for testing. The test harness will delete the file during tearing
+        down.
+        """
+        _, path = tempfile.mkstemp()
+        self.addCleanup(lambda: os.remove(path))
+
+        with open(path, mode='r+b') as f:
+            chunk = bytearray([0] * 1024)
+            for _ in range(size_kb):
+                f.write(chunk)
+
+        return path
+
+    def create_temp_dir(self):
+        """
+        Create a temporary directory for testing. The test harness will delete the directory during
+        tearing down.
+        """
+        temp_dir = tempfile.mkdtemp()
+        self.addCleanup(lambda: shutil.rmtree(temp_dir, ignore_errors=True))
+
+        return temp_dir
 
     @classmethod
     def set_env(cls, key, val):
