@@ -199,7 +199,15 @@ storage_profile_param_options = {
 }
 
 
-def _validate_required_forbidden_parameters(namespace, required, forbidden):
+network_balancer_param_options = {
+    'application_gateway': '--application-gateway',
+    'load_balancer': '--load-balancer',
+    'app_gateway_subnet_address_prefix': '--app-gateway-subnet-address-prefix',
+    'backend_pool_name': '--backend-pool-name'
+}
+
+
+def _validate_storage_required_forbidden_parameters(namespace, required, forbidden):
     missing_required = [x for x in required if not getattr(namespace, x)]
     included_forbidden = [x for x in forbidden if getattr(namespace, x)]
     if missing_required or included_forbidden:
@@ -212,6 +220,22 @@ def _validate_required_forbidden_parameters(namespace, required, forbidden):
         if included_forbidden:
             forbidden_string = ', '.join(
                 storage_profile_param_options[x] for x in included_forbidden)
+            error = '{}\n\tnot applicable: {}'.format(error, forbidden_string)
+        raise CLIError(error)
+
+
+def _validate_network_balancer_required_forbidden_parameters(namespace, required, forbidden, desc):
+    missing_required = [x for x in required if not getattr(namespace, x)]
+    included_forbidden = [x for x in forbidden if getattr(namespace, x)]
+    if missing_required or included_forbidden:
+        error = 'invalid usage for network balancer: {}'.format(desc)
+        if missing_required:
+            missing_string = ', '.join(
+                network_balancer_param_options[x] for x in missing_required)
+            error = '{}\n\tmissing: {}'.format(error, missing_string)
+        if included_forbidden:
+            forbidden_string = ', '.join(
+                network_balancer_param_options[x] for x in included_forbidden)
             error = '{}\n\tnot applicable: {}'.format(error, forbidden_string)
         raise CLIError(error)
 
@@ -309,7 +333,7 @@ def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
         namespace.storage_sku = 'Standard_LRS' if for_scale_set else 'Premium_LRS'
 
     # Now verify that the status of required and forbidden parameters
-    _validate_required_forbidden_parameters(namespace, required, forbidden)
+    _validate_storage_required_forbidden_parameters(namespace, required, forbidden)
 
     if namespace.storage_profile == StorageProfile.ManagedCustomImage:
         # extract additional information from a managed custom image
@@ -452,6 +476,10 @@ def _validate_vmss_create_subnet(namespace):
                 raise CLIError(err.format(namespace.instance_count))
             namespace.subnet_address_prefix = '{}/{}'.format(cidr, i)
 
+        if namespace.app_gateway_type and namespace.app_gateway_subnet_address_prefix is None:
+            raise CLIError('Must specify --gateway-subnet-address-prefix to create an '
+                           'application gateway.')
+
 
 def _validate_vm_create_nsg(namespace):
 
@@ -481,10 +509,10 @@ def _validate_vm_create_public_ip(namespace):
 
 
 def _validate_vmss_create_public_ip(namespace):
-    if namespace.load_balancer_type is None:
+    if namespace.load_balancer_type is None and namespace.app_gateway_type is None:
         if namespace.public_ip_address:
-            raise CLIError('--public-ip-address is not applicable when there is no load-balancer '
-                           'attached, or implictly disabled due to 100+ instance count')
+            raise CLIError('--public-ip-address can only be used  when creating a new load '
+                           'balancer or application gateway frontend.')
         namespace.public_ip_address = ''
     _validate_vm_create_public_ip(namespace)
 
@@ -696,36 +724,90 @@ def process_vm_create_namespace(namespace):
 
 # region VMSS Create Validators
 
+def _get_vmss_create_instance_threshold():
+    return 100
 
-def _validate_vmss_create_load_balancer(namespace):
+
+def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
+
+    INSTANCE_THRESHOLD = _get_vmss_create_instance_threshold()
+
     # convert the single_placement_group to boolean for simpler logic beyond
     if namespace.single_placement_group is None:
-        namespace.single_placement_group = namespace.instance_count <= 100
+        namespace.single_placement_group = namespace.instance_count <= INSTANCE_THRESHOLD
     else:
         namespace.single_placement_group = (namespace.single_placement_group == 'true')
 
-    if not namespace.single_placement_group:
-        if namespace.load_balancer:
-            raise CLIError('--load-balancer is not applicable when --single-placement-group is '
-                           'explictly turned off or implictly turned off for 100+ instance count')
-        namespace.load_balancer = ''
+    if not namespace.single_placement_group and namespace.load_balancer:
+        raise CLIError(
+            '--load-balancer is not applicable when --single-placement-group is turned off.')
 
-    if namespace.load_balancer:
-        if check_existence(namespace.load_balancer, namespace.resource_group_name,
-                           'Microsoft.Network', 'loadBalancers'):
-            namespace.load_balancer_type = 'existing'
-        else:
+    if namespace.load_balancer and namespace.application_gateway:
+        raise CLIError('incorrect usage: --load-balancer NAME_OR_ID | '
+                       '--application-gateway NAME_OR_ID')
+
+    if namespace.instance_count > INSTANCE_THRESHOLD and namespace.load_balancer:
+        raise CLIError(
+            '--load-balancer cannot be used with --instance_count is > {}'.format(
+                INSTANCE_THRESHOLD))
+
+    # Resolve the type of balancer (if any) being used
+    balancer_type = 'None'
+    if namespace.load_balancer is None and namespace.application_gateway is None:
+        # use defaulting rules to determine
+        balancer_type = 'loadBalancer' if namespace.instance_count <= INSTANCE_THRESHOLD \
+            else 'applicationGateway'
+    elif namespace.load_balancer:
+        balancer_type = 'loadBalancer'
+    elif namespace.application_gateway:
+        balancer_type = 'applicationGateway'
+
+    if balancer_type == 'applicationGateway':
+
+        if namespace.application_gateway:
+            if check_existence(namespace.application_gateway, namespace.resource_group_name,
+                               'Microsoft.Network', 'applicationGateways'):
+                namespace.app_gateway_type = 'existing'
+            else:
+                namespace.app_gateway_type = 'new'
+        elif namespace.application_gateway == '':
+            namespace.app_gateway_type = None
+        elif namespace.application_gateway is None:
+            namespace.app_gateway_type = 'new'
+
+        # AppGateway frontend
+        required = []
+        if namespace.app_gateway_type == 'new':
+            required.append('app_gateway_subnet_address_prefix')
+        elif namespace.app_gateway_type == 'existing':
+            required.append('backend_pool_name')
+        forbidden = ['nat_pool_name', 'load_balancer']
+        _validate_network_balancer_required_forbidden_parameters(
+            namespace, required, forbidden, 'application gateway')
+
+    elif balancer_type == 'loadBalancer':
+        # LoadBalancer frontend
+        required = []
+        forbidden = ['app_gateway_subnet_address_prefix', 'application_gateway']
+        _validate_network_balancer_required_forbidden_parameters(
+            namespace, required, forbidden, 'load balancer')
+
+        if namespace.load_balancer:
+            if check_existence(namespace.load_balancer, namespace.resource_group_name,
+                               'Microsoft.Network', 'loadBalancers'):
+                namespace.load_balancer_type = 'existing'
+            else:
+                namespace.load_balancer_type = 'new'
+        elif namespace.load_balancer == '':
+            namespace.load_balancer_type = None
+        elif namespace.load_balancer is None:
             namespace.load_balancer_type = 'new'
-    elif namespace.load_balancer == '':
-        namespace.load_balancer_type = None
-    elif namespace.load_balancer is None:
-        namespace.load_balancer_type = 'new'
 
 
 def process_vmss_create_namespace(namespace):
     get_default_location_from_resource_group(namespace)
     _validate_vm_create_storage_profile(namespace, for_scale_set=True)
-    _validate_vmss_create_load_balancer(namespace)
+    _validate_vmss_create_load_balancer_or_app_gateway(namespace)
     _validate_vm_create_vnet(namespace, for_scale_set=True)
     _validate_vmss_create_subnet(namespace)
     _validate_vmss_create_public_ip(namespace)
