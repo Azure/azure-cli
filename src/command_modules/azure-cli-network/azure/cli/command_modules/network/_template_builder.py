@@ -62,6 +62,170 @@ class ArmTemplateBuilder(object):
         return json.loads(json.dumps(self.template))
 
 
+def _build_frontend_ip_config(name, public_ip_id=None, private_ip_allocation=None,
+                              private_ip_address=None, subnet_id=None):
+    frontend_ip_config = {
+        'name': name
+    }
+
+    if public_ip_id:
+        frontend_ip_config.update({
+            'properties': {
+                'publicIPAddress': {
+                    'id': public_ip_id
+                }
+            }
+        })
+    else:
+        frontend_ip_config.update({
+            'properties': {
+                'privateIPAllocationMethod': private_ip_allocation,
+                'privateIPAddress': private_ip_address,
+                'subnet': {
+                    'id': subnet_id
+                }
+            }
+        })
+    return frontend_ip_config
+
+
+def build_application_gateway_resource(name, location, tags, backend_pool_name, backend_port,
+                                       frontend_ip_name, public_ip_id,
+                                       subnet_id, gateway_subnet_id,
+                                       private_ip_address, private_ip_allocation):
+    frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id,
+                                                   private_ip_address, private_ip_allocation,
+                                                   subnet_id)
+
+    def _ag_subresource_id(_type, name):
+        return "[concat(variables('appGwID'), '/{}/{}')]".format(_type, name)
+
+    frontend_ip_config_id = _ag_subresource_id('frontendIPConfigurations', frontend_ip_name)
+    frontend_port_id = _ag_subresource_id('frontendPorts', 'appGwFrontendPort')
+    http_listener_id = _ag_subresource_id('httpListeners', 'appGwHttpListener')
+    backend_address_pool_id = _ag_subresource_id('backendAddressPools', backend_pool_name)
+    backend_http_settings_id = _ag_subresource_id(
+        'backendHttpSettingsCollection', 'appGwBackendHttpSettings')
+
+    ag_properties = {
+        'backendAddressPools': [
+            {
+                'name': backend_pool_name
+            }
+        ],
+        'backendHttpSettingsCollection': [
+            {
+                'name': 'appGwBackendHttpSettings',
+                'properties': {
+                    'Port': backend_port,
+                    'Protocol': 'Http',
+                    'CookieBasedAffinity': 'Disabled'
+                }
+            }
+        ],
+        'frontendIPConfigurations': [frontend_ip_config],
+        'frontendPorts': [
+            {
+                'name': 'appGwFrontendPort',
+                'properties': {
+                    'Port': 80
+                }
+            }
+        ],
+        'gatewayIPConfigurations': [
+            {
+                'name': 'appGwIpConfig',
+                'properties': {
+                    'subnet': {'id': gateway_subnet_id}
+                }
+            }
+        ],
+        'httpListeners': [
+            {
+                'name': 'appGwHttpListener',
+                'properties': {
+                    'FrontendIPConfiguration': {'Id': frontend_ip_config_id},
+                    'FrontendPort': {'Id': frontend_port_id},
+                    'Protocol': 'Http',
+                    'SslCertificate': None
+                }
+            }
+        ],
+        'sku': {
+            'name': 'Standard_Large',
+            'tier': 'Standard',
+            'capacity': '10'
+        },
+        'requestRoutingRules': [
+            {
+                'Name': 'rule1',
+                'properties': {
+                    'RuleType': 'Basic',
+                    'httpListener': {'id': http_listener_id},
+                    'backendAddressPool': {'id': backend_address_pool_id},
+                    'backendHttpSettings': {'id': backend_http_settings_id}
+                }
+            }
+        ]
+    }
+
+    ag = {
+        'type': 'Microsoft.Network/applicationGateways',
+        'name': name,
+        'location': location,
+        'tags': tags,
+        'apiVersion': '2015-06-15',
+        'dependsOn': [],
+        'properties': ag_properties
+    }
+    return ag
+
+
+def build_load_balancer_resource(name, location, tags, backend_pool_name, nat_pool_name,
+                                 backend_port, frontend_ip_name, public_ip_id, subnet_id,
+                                 private_ip_address, private_ip_allocation):
+    lb_id = "resourceId('Microsoft.Network/loadBalancers', '{}')".format(name)
+
+    frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id,
+                                                   private_ip_address, private_ip_allocation,
+                                                   subnet_id)
+
+    lb_properties = {
+        'backendAddressPools': [
+            {
+                'name': backend_pool_name
+            }
+        ],
+        'inboundNatPools': [
+            {
+                'name': nat_pool_name,
+                'properties': {
+                    'frontendIPConfiguration': {
+                        'id': "[concat({}, '/frontendIPConfigurations/', '{}')]".format(
+                            lb_id, frontend_ip_name)
+                    },
+                    'protocol': 'tcp',
+                    'frontendPortRangeStart': '50000',
+                    'frontendPortRangeEnd': '50119',
+                    'backendPort': backend_port
+                }
+            }
+        ],
+        'frontendIPConfigurations': [frontend_ip_config]
+    }
+
+    lb = {
+        'type': 'Microsoft.Network/loadBalancers',
+        'name': name,
+        'location': location,
+        'tags': tags,
+        'apiVersion': '2015-06-15',
+        'dependsOn': [],
+        'properties': lb_properties
+    }
+    return lb
+
+
 def build_vpn_connection_resource(name, location, tags, gateway1, gateway2, vpn_type,
                                   authorization_key, enable_bgp, routing_weight, shared_key):
     vpn_properties = {
@@ -98,3 +262,4 @@ def build_vpn_connection_resource(name, location, tags, gateway1, gateway2, vpn_
         'properties': vpn_properties if vpn_type != 'VpnClient' else {}
     }
     return vpn_connection
+
