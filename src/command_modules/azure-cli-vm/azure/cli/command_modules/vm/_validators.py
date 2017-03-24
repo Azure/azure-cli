@@ -202,7 +202,8 @@ storage_profile_param_options = {
 network_balancer_param_options = {
     'application_gateway': '--application-gateway',
     'load_balancer': '--load-balancer',
-    'gateway_subnet_address_prefix': '--gateway-subnet-address-prefix'
+    'gateway_subnet_address_prefix': '--gateway-subnet-address-prefix',
+    'backend_pool_name': '--backend-pool-name'
 }
 
 
@@ -510,8 +511,8 @@ def _validate_vm_create_public_ip(namespace):
 def _validate_vmss_create_public_ip(namespace):
     if namespace.load_balancer_type is None and namespace.app_gateway_type is None:
         if namespace.public_ip_address:
-            raise CLIError('--public-ip-address is not applicable when there is no load-balancer '
-                           'attached, or implictly disabled due to 100+ instance count')
+            raise CLIError('--public-ip-address can only be used  when creating a new load '
+                           'balancer or application gateway frontend.')
         namespace.public_ip_address = ''
     _validate_vm_create_public_ip(namespace)
 
@@ -750,17 +751,18 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
             '--load-balancer cannot be used with --instance_count is > {}'.format(
                 INSTANCE_THRESHOLD))
 
-    balancer_type = namespace.load_balancer or namespace.application_gateway
-    if not balancer_type:
+    # Resolve the type of balancer (if any) being used
+    balancer_type = 'None'
+    if namespace.load_balancer is None and namespace.application_gateway is None:
+        # use defaulting rules to determine
         balancer_type = 'loadBalancer' if namespace.instance_count <= INSTANCE_THRESHOLD \
             else 'applicationGateway'
+    elif namespace.load_balancer:
+        balancer_type = 'loadBalancer'
+    elif namespace.application_gateway:
+        balancer_type = 'applicationGateway'
 
     if balancer_type == 'applicationGateway':
-        # AppGateway frontend
-        required = ['gateway_subnet_address_prefix']
-        forbidden = ['nat_pool_name', 'load_balancer']
-        _validate_network_balancer_required_forbidden_parameters(
-            namespace, required, forbidden, 'application gateway')
 
         if namespace.application_gateway:
             if check_existence(namespace.application_gateway, namespace.resource_group_name,
@@ -772,6 +774,17 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
             namespace.app_gateway_type = None
         elif namespace.application_gateway is None:
             namespace.app_gateway_type = 'new'
+
+        # AppGateway frontend
+        required = []
+        if namespace.app_gateway_type == 'new':
+            required.append('gateway_subnet_address_prefix')
+        elif namespace.app_gateway_type == 'existing':
+            required.append('backend_pool_name')
+        forbidden = ['nat_pool_name', 'load_balancer']
+        _validate_network_balancer_required_forbidden_parameters(
+            namespace, required, forbidden, 'application gateway')
+
     elif balancer_type == 'loadBalancer':
         # LoadBalancer frontend
         required = []

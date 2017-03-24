@@ -1761,6 +1761,7 @@ def create_vmss(vmss_name, resource_group_name, image,
         master_template.add_resource(lb_resource)
 
     # Or handle application gateway creation
+    app_gateway = application_gateway
     if app_gateway_type == 'new':
         app_gateway = application_gateway or '{}AG'.format(vmss_name)
         vmss_dependencies.append('Microsoft.Network/applicationGateways/{}'.format(app_gateway))
