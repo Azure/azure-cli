@@ -143,9 +143,9 @@ def _validate_network_parameters(namespace, formula=None):
 
         # Determine value for disallow_public_ip_address based on subnet's use_public_ip_address_permission property
         if lab_vnet.subnet_overrides[0].use_public_ip_address_permission == 'Allow':
-            namespace.disallow_public_ip_address = 'false'
+            namespace.disallow_public_ip_address = False
         else:
-            namespace.disallow_public_ip_address = 'true'
+            namespace.disallow_public_ip_address = True
 
 
 def _validate_image_argument(namespace, formula=None):
