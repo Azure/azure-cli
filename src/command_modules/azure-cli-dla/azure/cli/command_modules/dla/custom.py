@@ -4,11 +4,6 @@
 # --------------------------------------------------------------------------------------------
 import time
 import uuid
-# to ensure we have consistent access to the quote() method
-try:
-    from urllib import parse as safe_url_lib
-except ImportError:
-    import urllib as safe_url_lib
 
 from azure.cli.core.prompting import prompt_pass, NoTTYException
 from azure.mgmt.datalake.analytics.account.models import (DataLakeAnalyticsAccountUpdateParameters,
@@ -59,9 +54,9 @@ def list_adla_jobs(client,
     if result:
         odata_filter_list.append("({})".format(" or ".join(["result eq '{}'".format(f.value) for f in result])))
     if submitted_after:
-        odata_filter_list.append("submitTime ge datetimeoffset'{}'".format(safe_url_lib.quote(submitted_after)))
+        odata_filter_list.append("submitTime ge datetimeoffset'{}'".format(submitted_after.isoformat()))
     if submitted_before:
-        odata_filter_list.append("submitTime lt datetimeoffset'{}'".format(safe_url_lib.quote(submitted_before)))
+        odata_filter_list.append("submitTime lt datetimeoffset'{}'".format(submitted_before.isoformat()))
 
     filter_string = " and ".join(odata_filter_list)
     to_return = []
