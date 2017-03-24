@@ -883,9 +883,9 @@ def _update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_t
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
             if len(webapp_cert.host_names) == 1 and not webapp_cert.host_names[0].startswith('*'):
-                _update_host_name_ssl_state(resource_group_name, name, webapp.location,
-                                            webapp_cert.host_names[0], ssl_type,
-                                            certificate_thumbprint, slot)
+                return _update_host_name_ssl_state(resource_group_name, name, webapp.location,
+                                                   webapp_cert.host_names[0], ssl_type,
+                                                   certificate_thumbprint, slot)
             else:
                 query_result = list_hostnames(resource_group_name, name, slot)
                 hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
@@ -894,7 +894,7 @@ def _update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_t
                     _update_host_name_ssl_state(resource_group_name, name, webapp.location,
                                                 h, ssl_type, certificate_thumbprint, slot)
 
-            return show_webapp(resource_group_name, name, slot)
+                return show_webapp(resource_group_name, name, slot)
 
     raise CLIError("Certificate for thumbprint '{}' not found.".format(certificate_thumbprint))
 
@@ -911,6 +911,7 @@ def unbind_ssl_cert(resource_group_name, name, certificate_thumbprint, slot=None
 
 
 def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
+    # the goal is to match '*.foo.com' with host name like 'admin.foo.com', 'logs.foo.com', etc
     matched = set()
     for hostname in hostnames_from_cert:
         if hostname.startswith('*'):
