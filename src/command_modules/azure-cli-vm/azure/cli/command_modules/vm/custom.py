@@ -1659,7 +1659,9 @@ def create_vmss(vmss_name, resource_group_name, image,
                 admin_username=getpass.getuser(), admin_password=None, authentication_type=None,
                 vm_sku="Standard_D1_v2", no_wait=False,
                 ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
-                load_balancer=None, backend_pool_name=None, nat_pool_name=None, backend_port=None,
+                load_balancer=None, application_gateway=None,
+                app_gateway_subnet_address_prefix=None,
+                backend_pool_name=None, nat_pool_name=None, backend_port=None,
                 public_ip_address=None, public_ip_address_allocation='dynamic',
                 public_ip_address_dns_name=None,
                 os_caching=None, data_caching=None,
@@ -1669,7 +1671,8 @@ def create_vmss(vmss_name, resource_group_name, image,
                 vnet_name=None, vnet_address_prefix='10.0.0.0/16',
                 subnet=None, subnet_address_prefix=None,
                 os_offer=None, os_publisher=None, os_sku=None, os_version=None,
-                load_balancer_type=None, vnet_type=None, public_ip_type=None, storage_profile=None,
+                load_balancer_type=None, app_gateway_type=None, vnet_type=None,
+                public_ip_type=None, storage_profile=None,
                 single_placement_group=None, custom_data=None, secrets=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core._util import random_string
@@ -1677,7 +1680,7 @@ def create_vmss(vmss_name, resource_group_name, image,
         ArmTemplateBuilder, StorageProfile, build_vmss_resource, build_storage_account_resource,
         build_vnet_resource, build_public_ip_resource, build_load_balancer_resource,
         build_output_deployment_resource, build_deployment_resource,
-        build_vmss_storage_account_pool_resource)
+        build_vmss_storage_account_pool_resource, build_application_gateway_resource)
 
     from azure.cli.core._profile import CLOUD
     from azure.mgmt.resource.resources import ResourceManagementClient
@@ -1687,6 +1690,10 @@ def create_vmss(vmss_name, resource_group_name, image,
     network_id_template = resource_id(
         subscription=get_subscription_id(), resource_group=resource_group_name,
         namespace='Microsoft.Network')
+
+    scrubbed_name = vmss_name.replace('-', '').lower()[:5]
+    naming_prefix = '{}{}'.format(scrubbed_name,
+                                  random_string(9 - len(scrubbed_name), force_lower=True))
 
     # determine final defaults and calculated values
     tags = tags or {}
@@ -1698,16 +1705,33 @@ def create_vmss(vmss_name, resource_group_name, image,
     master_template = ArmTemplateBuilder()
 
     vmss_dependencies = []
+
+    # VNET will always be a dependency
     if vnet_type == 'new':
         vnet_name = vnet_name or '{}VNET'.format(vmss_name)
         subnet = subnet or '{}Subnet'.format(vmss_name)
         vmss_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
-        master_template.add_resource(build_vnet_resource(
-            vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix))
+        vnet = build_vnet_resource(
+            vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix)
+        if app_gateway_type:
+            vnet['properties']['subnets'].append({
+                'name': 'appGwSubnet',
+                'properties': {
+                    'addressPrefix': app_gateway_subnet_address_prefix
+                }
+            })
+        master_template.add_resource(vnet)
 
     subnet_id = subnet if is_valid_resource_id(subnet) else \
         '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
+    gateway_subnet_id = \
+        '{}/virtualNetworks/{}/subnets/appGwSubnet'.format(network_id_template, vnet_name) \
+        if app_gateway_type == 'new' else None
 
+    # public IP is used by either load balancer/application gateway
+    public_ip_address_id = public_ip_address if is_valid_resource_id(public_ip_address) else None
+
+    # Handle load balancer creation
     if load_balancer_type == 'new':
         load_balancer = load_balancer or '{}LB'.format(vmss_name)
         vmss_dependencies.append('Microsoft.Network/loadBalancers/{}'.format(load_balancer))
@@ -1720,10 +1744,8 @@ def create_vmss(vmss_name, resource_group_name, image,
                                                                   tags,
                                                                   public_ip_address_allocation,
                                                                   public_ip_address_dns_name))
-        public_ip_address_id = None
-        if public_ip_address:
-            public_ip_address_id = public_ip_address if is_valid_resource_id(public_ip_address) \
-                else '{}/publicIPAddresses/{}'.format(network_id_template, public_ip_address)
+            public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
+                                                                    public_ip_address)
 
         # calculate default names if not provided
         backend_pool_name = backend_pool_name or '{}BEPool'.format(load_balancer)
@@ -1733,14 +1755,43 @@ def create_vmss(vmss_name, resource_group_name, image,
 
         lb_resource = build_load_balancer_resource(
             load_balancer, location, tags, backend_pool_name, nat_pool_name, backend_port,
-            'loadBalancerFrontEnd', public_ip_address_id, subnet_id)
+            'loadBalancerFrontEnd', public_ip_address_id, subnet_id,
+            private_ip_address='', private_ip_allocation='Dynamic')
         lb_resource['dependsOn'] = lb_dependencies
         master_template.add_resource(lb_resource)
 
-    scrubbed_name = vmss_name.replace('-', '').lower()[:5]
-    naming_prefix = '{}{}'.format(scrubbed_name,
-                                  random_string(9 - len(scrubbed_name), force_lower=True))
+    # Or handle application gateway creation
+    app_gateway = application_gateway
+    if app_gateway_type == 'new':
+        app_gateway = application_gateway or '{}AG'.format(vmss_name)
+        vmss_dependencies.append('Microsoft.Network/applicationGateways/{}'.format(app_gateway))
 
+        ag_dependencies = []
+        if public_ip_type == 'new':
+            public_ip_address = public_ip_address or '{}PublicIP'.format(app_gateway)
+            ag_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))  # pylint: disable=line-too-long
+            master_template.add_resource(build_public_ip_resource(public_ip_address, location,
+                                                                  tags,
+                                                                  public_ip_address_allocation,
+                                                                  public_ip_address_dns_name))
+            public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
+                                                                    public_ip_address)
+
+        # calculate default names if not provided
+        backend_pool_name = backend_pool_name or '{}BEPool'.format(app_gateway)
+        backend_port = backend_port or 80
+
+        ag_resource = build_application_gateway_resource(
+            app_gateway, location, tags, backend_pool_name, backend_port, 'appGwFrontendIP',
+            public_ip_address_id, subnet_id, gateway_subnet_id, private_ip_address='',
+            private_ip_allocation='Dynamic')
+        ag_resource['dependsOn'] = ag_dependencies
+        master_template.add_variable(
+            'appGwID',
+            "[resourceId('Microsoft.Network/applicationGateways', '{}')]".format(app_gateway))
+        master_template.add_resource(ag_resource)
+
+    # create storage accounts if needed for unmanaged disk storage
     if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
         master_template.add_resource(build_vmss_storage_account_pool_resource(
             'storageLoop', location, tags, storage_sku))
@@ -1755,18 +1806,27 @@ def create_vmss(vmss_name, resource_group_name, image,
 
     backend_address_pool_id = None
     inbound_nat_pool_id = None
-    if is_valid_resource_id(load_balancer):
-        backend_address_pool_id = \
-            '{}/backendAddressPools/{}'.format(load_balancer, backend_pool_name) \
-            if load_balancer_type else None
-        inbound_nat_pool_id = '{}/inboundNatPools/{}'.format(load_balancer, nat_pool_name) \
-            if load_balancer_type == 'new' else None
-    else:
-        backend_address_pool_id = '{}/loadBalancers/{}/backendAddressPools/{}'.format(
-            network_id_template, load_balancer, backend_pool_name) if load_balancer_type else None
-        inbound_nat_pool_id = '{}/loadBalancers/{}/inboundNatPools/{}'.format(
-            network_id_template, load_balancer, nat_pool_name) if load_balancer_type == 'new' \
-            else None
+    if load_balancer_type or app_gateway_type:
+        network_balancer = load_balancer or app_gateway
+        balancer_type = 'loadBalancers' if load_balancer_type else 'applicationGateways'
+
+        if is_valid_resource_id(network_balancer):
+            # backend address pool needed by load balancer or app gateway
+            backend_address_pool_id = \
+                '{}/backendAddressPools/{}'.format(network_balancer, backend_pool_name)
+
+            # nat pool only applies to new load balancers
+            inbound_nat_pool_id = '{}/inboundNatPools/{}'.format(load_balancer, nat_pool_name) \
+                if load_balancer_type == 'new' else None
+        else:
+            # backend address pool needed by load balancer or app gateway
+            backend_address_pool_id = '{}/{}/{}/backendAddressPools/{}'.format(
+                network_id_template, balancer_type, network_balancer, backend_pool_name)
+
+            # nat pool only applies to new load balancers
+            inbound_nat_pool_id = '{}/loadBalancers/{}/inboundNatPools/{}'.format(
+                network_id_template, load_balancer, nat_pool_name) if load_balancer_type == 'new' \
+                else None
 
     ip_config_name = '{}IPConfig'.format(naming_prefix)
     nic_name = '{}Nic'.format(naming_prefix)
