@@ -131,13 +131,14 @@ def create_project(ssh_private_key, resource_group='mindaro-rg-' + random_word, 
         resource_provider_namespace='Microsoft.ContainerRegistry')
     acr_client = _get_acr_service_client()
     acr_name = 'acr' + utils.get_random_registry_name()
-    registry = acr_client.registries.create(resource_group,
-                                            acr_name,
-                                            RegistryCreateParameters(
-                                                location=location,
-                                                sku=AcrSku('Basic'),
-                                                storage_account=StorageAccountParameters(
-                                                    storage_account_name, storage_account_key)))
+    acr_client.registries.create(resource_group,
+                                acr_name,
+                                RegistryCreateParameters(
+                                    location=location,
+                                    sku=AcrSku('Basic'),
+                                    storage_account=StorageAccountParameters(
+                                        storage_account_name, storage_account_key))).wait()
+    registry = acr_client.registries.get(resource_group, acr_name)
     utils.writeline(
         'Azure container registry "{}" created.'.format(acr_name))
 
