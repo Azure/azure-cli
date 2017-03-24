@@ -348,10 +348,10 @@ class Test_Vm_Custom(unittest.TestCase):
         extension = mock.MagicMock()
         extension.type = 'publisher2.extension2'
         instance_view.extensions = [extension]
-        
+
         # action
         result = _get_extension_instance_name(instance_view, 'publisher1', 'extension1')
-        
+
         # assert
         self.assertEqual(result, 'extension1')
 
