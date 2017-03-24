@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps #pylint: disable=unused-import
+from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
-#pylint: disable=line-too-long
+# pylint: disable=line-too-long
 
 helps['ad sp create-for-rbac'] = """
             examples:
@@ -62,7 +62,7 @@ helps['role definition'] = """
 helps['role definition create'] = """
     type: command
     short-summary: Create a custom role definition.
-    parameters: 
+    parameters:
         - name: --role-definition
           type: string
           short-summary: 'JSON formatted string or a path to a file with such content'
@@ -102,7 +102,7 @@ helps['role definition update'] = """
 """
 helps['role definition create'] = """
             type: command
-            parameters: 
+            parameters:
                 - name: --role-definition
                   type: string
                   short-summary: 'JSON formatted string or a path to a file with such content'

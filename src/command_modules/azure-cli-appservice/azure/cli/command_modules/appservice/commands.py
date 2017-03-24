@@ -19,9 +19,21 @@ def transform_list_location_output(result):
     return [{'name': x.name} for x in result]
 
 
+def transform_web_output(web):
+    props = ['name', 'state', 'location', 'resourceGroup', 'defaultHostName', 'appServicePlanId']
+    result = {k: web[k] for k in web if k in props}
+    # to get width under control, also the plan usually is in the same RG
+    result['appServicePlan'] = result.pop('appServicePlanId').split('/')[-1]
+    return result
+
+
+def transform_web_list_output(webs):
+    return [transform_web_output(w) for w in webs]
+
+
 cli_command(__name__, 'appservice web create', 'azure.cli.command_modules.appservice.custom#create_webapp')
-cli_command(__name__, 'appservice web list', 'azure.cli.command_modules.appservice.custom#list_webapp')
-cli_command(__name__, 'appservice web show', 'azure.cli.command_modules.appservice.custom#show_webapp', exception_handler=empty_on_404)
+cli_command(__name__, 'appservice web list', 'azure.cli.command_modules.appservice.custom#list_webapp', table_transformer=transform_web_list_output)
+cli_command(__name__, 'appservice web show', 'azure.cli.command_modules.appservice.custom#show_webapp', exception_handler=empty_on_404, table_transformer=transform_web_output)
 cli_command(__name__, 'appservice web delete', 'azure.cli.command_modules.appservice.custom#delete_webapp')
 cli_command(__name__, 'appservice web stop', 'azure.cli.command_modules.appservice.custom#stop_webapp')
 cli_command(__name__, 'appservice web start', 'azure.cli.command_modules.appservice.custom#start_webapp')
