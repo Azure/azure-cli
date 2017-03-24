@@ -208,7 +208,7 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'use_unmanaged_disk', action='store_true', help='Do not use managed disk to persist VM', arg_group='Storage')
     register_cli_argument(scope, 'data_disk_sizes_gb', nargs='+', type=int, help='space separated empty managed data disk sizes in GB to create', arg_group='Storage')
     register_cli_argument(scope, 'image_data_disks', ignore_type)
-    for item in ['storage_account', 'public_ip', 'nsg', 'nic', 'vnet', 'load_balancer']:
+    for item in ['storage_account', 'public_ip', 'nsg', 'nic', 'vnet', 'load_balancer', 'app_gateway']:
         register_cli_argument(scope, '{}_type'.format(item), ignore_type)
 
     register_cli_argument(scope, 'vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.', arg_group='Network')
@@ -231,12 +231,12 @@ register_cli_argument('vm create', 'attach_os_disk', help='Attach an existing OS
 register_cli_argument('vm create', 'availability_set', help='Name or ID of an existing availability set to add the VM to. None by default.')
 
 register_cli_argument('vmss create', 'vmss_name', name_arg_type, id_part=None, help='Name of the virtual machine scale set.', validator=process_vmss_create_namespace)
-register_cli_argument('vmss create', 'load_balancer', help='Name to use when creating a new load balancer (default) or referencing an existing one. Can also reference an existing load balancer by ID or specify "" for none.', arg_group='Network Balancer')
-register_cli_argument('vmss create', 'application_gateway', help='Name to use when creating a new application gateway (default) or referencing an existing one. Can also reference an existing application gateway by ID or specify "" for none.', arg_group='Network Balancer')
+register_cli_argument('vmss create', 'load_balancer', help='Name to use when creating a new load balancer (default) or referencing an existing one. Can also reference an existing load balancer by ID or specify "" for none.', options_list=['--load-balancer', '--lb'], arg_group='Network Balancer')
+register_cli_argument('vmss create', 'application_gateway', help='Name to use when creating a new application gateway (default) or referencing an existing one. Can also reference an existing application gateway by ID or specify "" for none.', options_list=['--app-gateway'], arg_group='Network Balancer')
 register_cli_argument('vmss create', 'backend_pool_name', help='Name to use for the backend pool when creating a new load balancer or application gateway.', arg_group='Network Balancer')
-register_cli_argument('vmss create', 'nat_pool_name', help='Name to use for the NAT pool when creating a new load balancer.', arg_group='Network Balancer')
+register_cli_argument('vmss create', 'nat_pool_name', help='Name to use for the NAT pool when creating a new load balancer.', options_list=['--lb-nat-pool-name', '--nat-pool-name'], arg_group='Network Balancer')
 register_cli_argument('vmss create', 'backend_port', help='When creating a new load balancer, backend port to open with NAT rules (Defaults to 22 on Linux and 3389 on Windows). When creating an application gateway, the backend port to use for the backend HTTP settings.', type=int, arg_group='Network Balancer')
-register_cli_argument('vmss create', 'gateway_subnet_address_prefix', help='The subnet IP address prefix to use when creating a new application gateway in CIDR format.', arg_group='Network Balancer')
+register_cli_argument('vmss create', 'app_gateway_subnet_address_prefix', help='The subnet IP address prefix to use when creating a new application gateway in CIDR format.', arg_group='Network Balancer')
 register_cli_argument('vmss create', 'instance_count', help='Number of VMs in the scale set.', type=int)
 register_cli_argument('vmss create', 'disable_overprovision', help='Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details).', action='store_true')
 register_cli_argument('vmss create', 'upgrade_policy_mode', help=None, **enum_choice_list(UpgradeMode))

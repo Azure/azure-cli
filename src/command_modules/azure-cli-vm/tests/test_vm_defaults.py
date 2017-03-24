@@ -176,7 +176,7 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
         ns.vnet_address_prefix = '10.0.0.0/16'
         ns.subnet_address_prefix = None
         ns.app_gateway_type = 'new'
-        ns.gateway_subnet_address_prefix = '10.0.1.0/22'
+        ns.app_gateway_subnet_address_prefix = '10.0.1.0/22'
         ns.instance_count = 1000
         _validate_vmss_create_subnet(ns)
         self.assertEqual('10.0.0.0/22', ns.subnet_address_prefix)
@@ -187,7 +187,7 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
         ns.vnet_address_prefix = '10.0.0.0/16'
         ns.subnet_address_prefix = None
         ns.app_gateway_type = None
-        ns.gateway_subnet_address_prefix = None
+        ns.app_gateway_subnet_address_prefix = None
         ns.instance_count = 2
         _validate_vmss_create_subnet(ns)
         self.assertEqual('10.0.0.0/24', ns.subnet_address_prefix)

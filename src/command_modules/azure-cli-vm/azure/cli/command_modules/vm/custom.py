@@ -1660,7 +1660,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                 vm_sku="Standard_D1_v2", no_wait=False,
                 ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
                 load_balancer=None, application_gateway=None,
-                gateway_subnet_address_prefix=None,
+                app_gateway_subnet_address_prefix=None,
                 backend_pool_name=None, nat_pool_name=None, backend_port=None,
                 public_ip_address=None, public_ip_address_allocation='dynamic',
                 public_ip_address_dns_name=None,
@@ -1717,7 +1717,7 @@ def create_vmss(vmss_name, resource_group_name, image,
             vnet['properties']['subnets'].append({
                 'name': 'appGwSubnet',
                 'properties': {
-                    'addressPrefix': gateway_subnet_address_prefix
+                    'addressPrefix': app_gateway_subnet_address_prefix
                 }
             })
         master_template.add_resource(vnet)

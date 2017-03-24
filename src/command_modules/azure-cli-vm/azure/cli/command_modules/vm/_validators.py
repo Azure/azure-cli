@@ -202,7 +202,7 @@ storage_profile_param_options = {
 network_balancer_param_options = {
     'application_gateway': '--application-gateway',
     'load_balancer': '--load-balancer',
-    'gateway_subnet_address_prefix': '--gateway-subnet-address-prefix',
+    'app_gateway_subnet_address_prefix': '--app-gateway-subnet-address-prefix',
     'backend_pool_name': '--backend-pool-name'
 }
 
@@ -476,7 +476,7 @@ def _validate_vmss_create_subnet(namespace):
                 raise CLIError(err.format(namespace.instance_count))
             namespace.subnet_address_prefix = '{}/{}'.format(cidr, i)
 
-        if namespace.app_gateway_type and namespace.gateway_subnet_address_prefix is None:
+        if namespace.app_gateway_type and namespace.app_gateway_subnet_address_prefix is None:
             raise CLIError('Must specify --gateway-subnet-address-prefix to create an '
                            'application gateway.')
 
@@ -778,7 +778,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
         # AppGateway frontend
         required = []
         if namespace.app_gateway_type == 'new':
-            required.append('gateway_subnet_address_prefix')
+            required.append('app_gateway_subnet_address_prefix')
         elif namespace.app_gateway_type == 'existing':
             required.append('backend_pool_name')
         forbidden = ['nat_pool_name', 'load_balancer']
@@ -788,7 +788,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
     elif balancer_type == 'loadBalancer':
         # LoadBalancer frontend
         required = []
-        forbidden = ['gateway_subnet_address_prefix', 'application_gateway']
+        forbidden = ['app_gateway_subnet_address_prefix', 'application_gateway']
         _validate_network_balancer_required_forbidden_parameters(
             namespace, required, forbidden, 'load balancer')
 
