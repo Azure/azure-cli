@@ -900,15 +900,15 @@ def _update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_t
 
 
 def bind_ssl_cert(resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
-    return _update_ssl_binding(resource_group_name, name,
-                               certificate_thumbprint,
-                               SslState.sni_enabled if ssl_type == 'SNI' else SslState.ip_based_enabled,
-                               slot)
+    return _update_ssl_binding(
+        resource_group_name, name, certificate_thumbprint,
+        SslState.sni_enabled if ssl_type == 'SNI' else SslState.ip_based_enabled, slot)
 
 
 def unbind_ssl_cert(resource_group_name, name, certificate_thumbprint, slot=None):
     return _update_ssl_binding(resource_group_name, name,
                                certificate_thumbprint, SslState.disabled, slot)
+
 
 def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
     matched = set()

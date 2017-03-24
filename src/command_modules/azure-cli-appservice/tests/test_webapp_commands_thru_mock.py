@@ -7,7 +7,7 @@ import mock
 
 from msrestazure.azure_exceptions import CloudError
 from azure.mgmt.web.models import (SourceControl, HostNameBinding, Site, SiteConfig,
-                                   HostNameSslState, SslState, Certificate, HostNameBinding)
+                                   HostNameSslState, SslState, Certificate)
 from azure.mgmt.web import WebSiteManagementClient
 from azure.cli.core.adal_authentication import AdalAuthentication
 from azure.cli.core._util import CLIError
@@ -155,14 +155,14 @@ class Test_Webapp_Mocked(unittest.TestCase):
         hostname_binding1 = HostNameBinding('antarctica', name='web1/admin.foo.com',)
         hostname_binding2 = HostNameBinding('antarctica', name='web1/logs.foo.com')
         site_op_mock.return_value = [hostname_binding1, hostname_binding2]
+
+        # action
         bind_ssl_cert('rg1', 'web1', 't1', SslState.sni_enabled)
 
-        expected = [('rg1', 'web1', 'antarctica', 'logs.foo.com', SslState.sni_enabled, 't1', None), ('rg1', 'web1', 'antarctica', 'admin.foo.com', SslState.sni_enabled, 't1', None)]
-        #host_ssl_update_mock.assert_called_with('rg1', 'web1', 'antarctica', 'admin.foo.com', SslState.sni_enabled, 't1', None)
+        # assert
         self.assertEqual(len(host_ssl_update_mock.call_args_list), 2)
-
-        #self.assertEqual(host_ssl_update_mock.call_args_list[0][3], 'logs.foo.com')
-        #self.assertEqual(host_ssl_update_mock.call_args_list[1][3], 'admin.foo.com')
+        self.assertEqual(host_ssl_update_mock.call_args_list[0][0][3], 'logs.foo.com')
+        self.assertEqual(host_ssl_update_mock.call_args_list[1][0][3], 'admin.foo.com')
 
 
 class FakedResponse(object):  # pylint: disable=too-few-public-methods
