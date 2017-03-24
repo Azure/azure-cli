@@ -11,6 +11,7 @@ from six import string_types
 from msrest.exceptions import DeserializationError
 
 from azure.cli.command_modules.batch import _validators as validators
+from azure.cli.command_modules.batch import _format as transformers
 from azure.cli.core.commands import (
     CONFIRM_PARAM_NAME,
     command_table,
@@ -481,8 +482,8 @@ class BatchArgumentTree(object):
 class AzureBatchDataPlaneCommand(object):
     # pylint:disable=too-many-instance-attributes, too-few-public-methods
 
-    def __init__(self, module_name, name, operation, factory, transform_result,  # pylint:disable=too-many-arguments
-                 table_transformer, flatten, ignore, validator, silent):
+    def __init__(self, module_name, name, operation, factory, transform_result,  # pylint:disable=too-many-arguments, too-many-statements
+                 flatten, ignore, validator, silent):
 
         if not isinstance(operation, string_types):
             raise ValueError("Operation must be a string. Got '{}'".format(operation))
@@ -495,6 +496,7 @@ class AzureBatchDataPlaneCommand(object):
         self.parser = None
         self.validator = validator
         self.confirmation = 'delete' in operation
+        self.head_cmd = False
 
         # The name of the request options parameter
         self._options_param = format_options_name(operation)
@@ -543,7 +545,13 @@ class AzureBatchDataPlaneCommand(object):
 
                 # Make request
                 op = get_op_handler(operation)
+                if self.head_cmd:
+                    kwargs['raw'] = True
                 result = op(client, **kwargs)
+
+                # Head output
+                if self.head_cmd:
+                    return transformers.transform_response_headers(result)
 
                 # File download
                 if stream_output:
@@ -572,7 +580,12 @@ class AzureBatchDataPlaneCommand(object):
                     raise CLIError(ex)
             except (ValidationError, ClientRequestError) as ex:
                 raise CLIError(ex)
-
+        table_transformer = None
+        try:
+            transform_func = '_'.join(name.split()[1:]).replace('-', '_')
+            table_transformer = getattr(transformers, transform_func + "_table_format")
+        except AttributeError:
+            pass
         command_module_map[name] = module_name
         self.cmd = CliCommand(
             ' '.join(name.split()),
@@ -815,7 +828,8 @@ class AzureBatchDataPlaneCommand(object):
                                                  help=docstring))
             elif arg[0] not in self.ignore:
                 yield arg
-        if find_return_type(handler) == 'Generator':
+        return_type = find_return_type(handler)
+        if return_type == 'Generator':
             param = 'destination'
             docstring = "The path to the destination file or directory."
             yield (param, CliCommandArgument(param,
@@ -826,6 +840,8 @@ class AzureBatchDataPlaneCommand(object):
                                              type=file_type,
                                              validator=validators.validate_file_destination,
                                              help=docstring))
+        if return_type == 'None' and handler.__name__.startswith('get'):
+            self.head_cmd = True
         if self.confirmation:
             param = CONFIRM_PARAM_NAME
             docstring = 'Do not prompt for confirmation.'
@@ -837,12 +853,11 @@ class AzureBatchDataPlaneCommand(object):
 
 
 def cli_batch_data_plane_command(name, operation, client_factory, transform=None,  # pylint:disable=too-many-arguments
-                                 table_transformer=None, flatten=FLATTEN,
-                                 ignore=None, validator=None, silent=None):
+                                 flatten=FLATTEN, ignore=None, validator=None, silent=None):
     """ Registers an Azure CLI Batch Data Plane command. These commands must respond to a
     challenge from the service when they make requests. """
     command = AzureBatchDataPlaneCommand(__name__, name, operation, client_factory, transform,
-                                         table_transformer, flatten, ignore, validator, silent)
+                                         flatten, ignore, validator, silent)
 
     # add parameters required to create a batch client
     group_name = 'Batch Account'
