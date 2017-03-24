@@ -28,6 +28,7 @@ from azure.cli.core.prompting import prompt_pass, NoTTYException
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
 from ._params import web_client_factory, _generic_site_operation
+from .vsts_cd_provider import VstsContinuousDeliveryProvider
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -304,20 +305,31 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
 
 
 def config_source_control(resource_group_name, name, repo_url, repository_type=None, branch=None,
-                          git_token=None, manual_integration=None, slot=None):
-    from azure.mgmt.web.models import SiteSourceControl, SourceControl
+                          git_token=None, manual_integration=None, slot=None, cd_provider=None,
+                          cd_app_type=None, cd_account=None, cd_account_must_exist=None):
     client = web_client_factory()
     location = _get_location_from_webapp(client, resource_group_name, name)
-    if git_token:
-        sc = SourceControl(location, name='GitHub', token=git_token)
-        client.update_source_control('GitHub', sc)
 
-    source_control = SiteSourceControl(location, repo_url=repo_url, branch=branch,
-                                       is_manual_integration=manual_integration,
-                                       is_mercurial=(repository_type != 'git'))
-    return _generic_site_operation(resource_group_name, name,
-                                   'create_or_update_source_control',
-                                   slot, source_control)
+    if cd_provider == 'vsts':
+        create_account = not cd_account_must_exist
+        vsts_provider = VstsContinuousDeliveryProvider()
+        status = vsts_provider.setup_continuous_delivery(resource_group_name, name, repo_url,
+                                                         branch, git_token, slot, cd_app_type,
+                                                         cd_account, create_account, location)
+        logger.warning(status.status_message)
+        return status
+    else:
+        from azure.mgmt.web.models import SiteSourceControl, SourceControl
+        if git_token:
+            sc = SourceControl(location, name='GitHub', token=git_token)
+            client.update_source_control('GitHub', sc)
+
+        source_control = SiteSourceControl(location, repo_url=repo_url, branch=branch,
+                                           is_manual_integration=manual_integration,
+                                           is_mercurial=(repository_type != 'git'))
+        return _generic_site_operation(resource_group_name, name,
+                                       'create_or_update_source_control',
+                                       slot, source_control)
 
 
 def update_git_token(git_token=None):
