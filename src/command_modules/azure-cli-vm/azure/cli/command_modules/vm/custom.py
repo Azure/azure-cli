@@ -725,7 +725,7 @@ def _get_extension_instance_name(instance_view, publisher, extension_type_name,
     full_type_name = '.'.join([publisher, extension_type_name])
     if instance_view.extensions:
         ext = next((x for x in instance_view.extensions
-                    if x.type.lower() == full_type_name.lower()))
+                    if x.type.lower() == full_type_name.lower()), None)
         if ext:
             extension_instance_name = ext.name
     return extension_instance_name
@@ -1442,7 +1442,7 @@ def list_vmss_instance_connection_info(resource_group_name, vm_scale_set_name):
                                                  vm_scale_set_name)
     # find the load balancer
     nic_configs = vmss.virtual_machine_profile.network_profile.network_interface_configurations
-    primary_nic_config = next(n for n in nic_configs if n.primary)
+    primary_nic_config = next((n for n in nic_configs if n.primary), None)
     if primary_nic_config is None:
         raise CLIError('could not find a primary nic which is needed to search to load balancer')
     ip_configs = primary_nic_config.ip_configurations
