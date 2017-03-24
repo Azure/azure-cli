@@ -26,7 +26,6 @@ from azure.cli.command_modules.acs.custom import (acs_create,
                                                   k8s_install_cli)
 from azure.cli.command_modules.acs._params import _get_default_install_location
 from azure.cli.command_modules.project.jenkins import Jenkins
-from azure.cli.command_modules.project.spinnaker import Spinnaker
 from azure.cli.command_modules.resource.custom import _deploy_arm_template_core
 from azure.cli.command_modules.storage._factory import storage_client_factory
 from azure.cli.core._environment import get_config_dir
@@ -41,6 +40,8 @@ from azure.mgmt.resource.resources import ResourceManagementClient
 from azure.mgmt.resource.resources.models.resource_group import ResourceGroup
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.storage.models import Kind, Sku, StorageAccountCreateParameters
+from azure.mgmt.containerregistry.models import RegistryCreateParameters, StorageAccountParameters
+from azure.mgmt.containerregistry.models import Sku as AcrSku
 from azure.storage.file import FileService
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
@@ -55,11 +56,13 @@ admin_password = 'Mindaro@Pass1!'  # pylint: disable=invalid-name
 # pylint: disable=no-self-use,too-many-locals,line-too-long,broad-except
 
 
-def browse_jenkins():
+def browse_pipeline():
     """
     Creates an SSH tunnel to Jenkins host and opens
-    the dashboard in the browser
+    the pipeline in the browser
     """
+    # TODO: Read the pipeline name from the project file and open
+    # the URL to localhost:PORT/job/[pipelinename]
     jenkins_hostname = project_settings.jenkins_hostname
     admin_username = project_settings.admin_username
 
@@ -124,17 +127,17 @@ def create_project(ssh_private_key, resource_group='mindaro-rg-' + random_word, 
 
     # 3. Create ACR (resource_group, location)
     utils.writeline('Creating Azure container registry ...')
-    res_client.providers.register(resource_provider_namespace='Microsoft.ContainerRegistry')
+    res_client.providers.register(
+        resource_provider_namespace='Microsoft.ContainerRegistry')
     acr_client = _get_acr_service_client()
     acr_name = 'acr' + utils.get_random_registry_name()
-    registry = acr_client.registries.create_or_update(resource_group,
-                                                      acr_name,
-                                                      Registry(
-                                                          location=location,
-                                                          storage_account=StorageAccountProperties(
-                                                              storage_account_name,
-                                                              storage_account_key)
-                                                      ))
+    registry = acr_client.registries.create(resource_group,
+                                            acr_name,
+                                            RegistryCreateParameters(
+                                                location=location,
+                                                sku=AcrSku('Basic'),
+                                                storage_account=StorageAccountParameters(
+                                                    storage_account_name, storage_account_key)))
     utils.writeline(
         'Azure container registry "{}" created.'.format(acr_name))
 
@@ -145,7 +148,8 @@ def create_project(ssh_private_key, resource_group='mindaro-rg-' + random_word, 
     acs_deployment = acs_create(resource_group_name=resource_group,
                                 deployment_name=kube_deployment_name,
                                 name=kube_cluster_name,
-                                ssh_key_value=utils.get_public_ssh_key_contents(ssh_private_key + '.pub'),
+                                ssh_key_value=utils.get_public_ssh_key_contents(
+                                    ssh_private_key + '.pub'),
                                 dns_name_prefix=kube_cluster_name,
                                 admin_username=default_user_name,
                                 location=location,
@@ -188,34 +192,22 @@ def create_project(ssh_private_key, resource_group='mindaro-rg-' + random_word, 
     _configure_cluster()
 
 
-def create_continuous_deployment(remote_access_token):  # pylint: disable=unused-argument
+def create_deployment_pipeline(remote_access_token):  # pylint: disable=unused-argument
     """
-    Provisions Jenkins and Spinnaker, configures CI and CD pipelines, kicks off initial build-deploy
+    Provisions Jenkins and configures CI and CD pipelines, kicks off initial build-deploy
     and saves the CI/CD information to a local project file.
     """
     jenkins_resource, jenkins_deployment = _deploy_jenkins()
-    spinnaker_resource, spinnaker_deployment = _deploy_spinnaker()
 
     # Wait for deployments to complete
-    spinnaker_deployment.wait()
     jenkins_deployment.wait()
 
-    spinnaker_deployment_result = spinnaker_deployment.result()
-    spinnaker_hostname = spinnaker_deployment_result.properties.outputs[
-        'hostname']['value']
-
-    _configure_spinnaker(spinnaker_resource, spinnaker_hostname)
-
-    # TODO: Spinnker won't trigger pipeline if ACR is entire empty
-    # TODO: how do we provide a correct service port when configuring Spinnaker
     jenkins_hostname = '{}.{}.cloudapp.azure.com'.format(
         jenkins_resource.dns_prefix, jenkins_resource.location)
     project_settings.jenkins_hostname = jenkins_hostname
     utils.writeline('Jenkins hostname: {}'.format(jenkins_hostname))
-
-    utils.writeline('Spinnaker hostname: {}'.format(spinnaker_hostname))
-    project_settings.spinnaker_hostname = spinnaker_hostname
     utils.writeline('Done.')
+
 
 def _wait_then_open(url):
     """
@@ -238,6 +230,7 @@ def _wait_then_open_async(url):
     thread = threading.Thread(target=_wait_then_open, args=({url}))
     thread.daemon = True
     thread.start()
+
 
 def _get_available_local_port():
     """
@@ -271,23 +264,6 @@ def _get_subscription_id():
     return sub_id
 
 
-def _configure_spinnaker(spinnaker_resource, spinnaker_hostname):
-    """
-    Configures the Spinnaker resource
-    """
-    utils.writeline('Configuring Spinnaker ...')
-    client_id = project_settings.client_id
-    client_secret = project_settings.client_secret
-    cluster_name = project_settings.cluster_name
-    cluster_resource_group = project_settings.cluster_resource_group
-    container_registry_url = project_settings.container_registry_url
-
-    repo_name = '{}/{}'.format(project_settings.admin_username, 'myfirstapp')
-    acs_info = _get_acs_info(cluster_name, cluster_resource_group)
-    spinnaker_resource.configure(
-        spinnaker_hostname, acs_info, container_registry_url, repo_name, client_id, client_secret)
-
-
 def _deploy_jenkins():
     """
     Starts the Jenkins deployment and returns the resource and AzurePollerOperation
@@ -308,22 +284,6 @@ def _deploy_jenkins():
         git_repo, jenkins_dns_prefix, location,
         container_registry_url)
     return (jenkins_resource, jenkins_resource.deploy())
-
-
-def _deploy_spinnaker():
-    """
-    Starts the Spinnaker deployment and returns the resource and AzurePollerOperation
-    """
-    utils.writeline('Deploying Spinnaker ...')
-    resource_group = project_settings.resource_group
-    admin_username = project_settings.admin_username
-    public_ssh_key_filename = os.path.join(
-        os.path.expanduser("~"), '.ssh', 'id_rsa.pub')
-
-    spinnaker_dns_prefix = 'spinnaker-' + utils.get_random_string()
-    spinnaker_resource = Spinnaker(
-        resource_group, admin_username, public_ssh_key_filename, spinnaker_dns_prefix)
-    return (spinnaker_resource, spinnaker_resource.deploy())
 
 
 def _get_acs_info(name, resource_group_name):
@@ -427,7 +387,8 @@ def _configure_cluster():  # pylint: disable=too-many-statements
             innerloop_client_path, 'setup', 'Kubernetes')
 
         # Get resource group
-        creds = _get_creds_from_master(dns_prefix, location, user_name, ssh_private_key)
+        creds = _get_creds_from_master(
+            dns_prefix, location, user_name, ssh_private_key)
         resource_group = creds['resourceGroup']
         client_id = creds['aadClientId']
         client_secret = creds['aadClientSecret']
@@ -472,7 +433,8 @@ def _configure_cluster():  # pylint: disable=too-many-statements
         _execute_command("scp -i {0} -P 22 {1}/configagents.sh {2}:~/configagents.sh".format(
             ssh_private_key, kubernetes_path, remote_host))
 
-        _execute_command("eval $(ssh-agent) && ssh-add {}".format(ssh_private_key))
+        _execute_command(
+            "eval $(ssh-agent) && ssh-add {}".format(ssh_private_key))
         _execute_command(
             "ssh -i {0} -o StrictHostKeyChecking=no -p 22 {1} 'chmod 600 ~/.ssh/id_rsa'".format(ssh_private_key, remote_host))
         _execute_command(
@@ -703,8 +665,10 @@ def _install_k8_shares(resource_group, dns_prefix):
     config_storage = dns_prefix.replace('-', '') + "cfgsa"
     workspace_storage = dns_prefix.replace('-', '') + "wks"
     scf = storage_client_factory()
-    config_storage_key = _get_storage_key(resource_group, scf, config_storage, 10)
-    workspace_storage_key = _get_storage_key(resource_group, scf, workspace_storage, 10)
+    config_storage_key = _get_storage_key(
+        resource_group, scf, config_storage, 10)
+    workspace_storage_key = _get_storage_key(
+        resource_group, scf, workspace_storage, 10)
 
     innerloop_client_path = _get_innerloop_home_path()
     connect_template_path = os.path.join(
@@ -723,11 +687,13 @@ def _install_k8_shares(resource_group, dns_prefix):
         connect_output_file.write(connect_template)
 
     # Ensure 'cfgs' share exists in configStorage
-    file_service = FileService(account_name=config_storage, account_key=config_storage_key)
+    file_service = FileService(
+        account_name=config_storage, account_key=config_storage_key)
     file_service.create_share(share_name='cfgs')
 
     # Ensure 'mindaro' share exists in configStorage
-    file_service = FileService(account_name=workspace_storage, account_key=workspace_storage_key)
+    file_service = FileService(
+        account_name=workspace_storage, account_key=workspace_storage_key)
     file_service.create_share(share_name='mindaro')
 
     return workspace_storage_key
@@ -747,7 +713,8 @@ def _get_storage_key(resource_group, scf, storage, tries):
         except Exception as error:
             logger.debug(error)
         finally:
-            logger.warning("Couldn't get storage account key for {}, Retrying ...".format(storage))
+            logger.warning(
+                "Couldn't get storage account key for {}, Retrying ...".format(storage))
             sleep(2)
             retry = retry + 1
     if storage_key is None:
