@@ -245,30 +245,55 @@ def _filter_for_container_settings(settings):
     return [x for x in settings if x['name'] in CONTAINER_APPSETTING_NAMES]
 
 
-def add_hostname(resource_group_name, webapp_name, name, slot=None):
+def add_hostname(resource_group_name, name, hostname, slot=None):
     client = web_client_factory()
-    webapp = client.web_apps.get(resource_group_name, webapp_name)
-    binding = HostNameBinding(webapp.location, host_name_binding_name=name, site_name=webapp.name)
+    webapp = client.web_apps.get(resource_group_name, name)
+    binding = HostNameBinding(webapp.location, host_name_binding_name=hostname,
+                              site_name=webapp.name)
     if slot is None:
         return client.web_apps.create_or_update_host_name_binding(
-            resource_group_name, webapp.name, name, binding)
+            resource_group_name, webapp.name, hostname, binding)
     else:
         return client.web_apps.create_or_update_host_name_binding_slot(
-            resource_group_name, webapp.name, name, binding, slot)
+            resource_group_name, webapp.name, hostname, binding, slot)
 
 
-def delete_hostname(resource_group_name, webapp_name, name, slot=None):
+def delete_hostname(resource_group_name, name, hostname, slot=None):
     client = web_client_factory()
     if slot is None:
-        return client.web_apps.delete_host_name_binding(resource_group_name, webapp_name, name)
+        return client.web_apps.delete_host_name_binding(resource_group_name, name, hostname)
     else:
         return client.web_apps.delete_host_name_binding_slot(resource_group_name,
-                                                             webapp_name, slot, name)
+                                                             name, slot, hostname)
 
 
 def list_hostnames(resource_group_name, webapp_name, slot=None):
     return _generic_site_operation(resource_group_name, webapp_name, 'list_host_name_bindings',
                                    slot)
+
+
+def get_external_ip(resource_group_name, name):
+    # logics here are ported from portal
+    client = web_client_factory()
+    webapp = client.web_apps.get(resource_group_name, name)
+    if webapp.hosting_environment_profile:
+        address = client.app_service_environments.list_vips(
+            resource_group_name, webapp.hosting_environment_profile.name)
+        if address.internal_ip_address:
+            ip_address = address.internal_ip_address
+        else:
+            vip = next((s for s in webapp.host_name_ssl_states
+                        if s.ssl_state == SslState.ip_based_enabled), None)
+            ip_address = (vip and vip.virtual_ip) or address.service_ip_address
+    else:
+        ip_address = _resolve_hostname_through_dns(webapp.default_host_name)
+
+    return {'ip': ip_address}
+
+
+def _resolve_hostname_through_dns(hostname):
+    import socket
+    return socket.gethostbyname(hostname)
 
 
 def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=None):

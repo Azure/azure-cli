@@ -7,18 +7,20 @@ import mock
 
 from msrestazure.azure_exceptions import CloudError
 from azure.mgmt.web.models import (SourceControl, HostNameBinding, Site, SiteConfig,
-                                   HostNameSslState, SslState, Certificate)
+                                   HostNameSslState, SslState, Certificate,
+                                   AddressResponse, HostingEnvironmentProfile)
 from azure.mgmt.web import WebSiteManagementClient
 from azure.cli.core.adal_authentication import AdalAuthentication
 from azure.cli.core._util import CLIError
 from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_git_token, add_hostname,
                                                          update_site_configs,
+                                                         get_external_ip,
                                                          view_in_browser,
                                                          sync_site_repo,
-                                                         list_publish_profiles,
                                                          _match_host_names_from_cert,
-                                                         bind_ssl_cert)
+                                                         bind_ssl_cert,
+                                                         list_publish_profiles)
 
 # pylint: disable=line-too-long
 
@@ -82,6 +84,67 @@ class Test_Webapp_Mocked(unittest.TestCase):
 
         # assert
         self.assertEqual(result.name, domain)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_get_external_ip_from_ase(self, client_factory_mock):
+        client = mock.Mock()
+        client_factory_mock.return_value = client
+        # set up the web inside a ASE, with an ip based ssl binding
+        host_env = HostingEnvironmentProfile('id11')
+        host_env.name = 'ase1'
+        host_env.resource_group = 'myRg'
+
+        host_ssl_state = HostNameSslState(ssl_state=SslState.ip_based_enabled, virtual_ip='1.2.3.4')
+        client.web_apps.get.return_value = Site('antarctica', hosting_environment_profile=host_env,
+                                                host_name_ssl_states=[host_ssl_state])
+        client.app_service_environments.list_vips.return_value = AddressResponse()
+
+        # action
+        result = get_external_ip('myRg', 'myWeb')
+
+        # assert, we return the virtual ip from the ip based ssl binding
+        self.assertEqual('1.2.3.4', result['ip'])
+
+        # tweak to have no ip based ssl binding, but it is in an internal load balancer
+        host_ssl_state2 = HostNameSslState(ssl_state=SslState.sni_enabled)
+        client.web_apps.get.return_value = Site('antarctica', hosting_environment_profile=host_env,
+                                                host_name_ssl_states=[host_ssl_state2])
+        client.app_service_environments.list_vips.return_value = AddressResponse(internal_ip_address='4.3.2.1')
+
+        # action
+        result = get_external_ip('myRg', 'myWeb')
+
+        # assert, we take the ILB address
+        self.assertEqual('4.3.2.1', result['ip'])
+
+        # tweak to have no ip based ssl binding, and not in internal load balancer
+        host_ssl_state2 = HostNameSslState(ssl_state=SslState.sni_enabled)
+        client.web_apps.get.return_value = Site('antarctica', hosting_environment_profile=host_env,
+                                                host_name_ssl_states=[host_ssl_state2])
+        client.app_service_environments.list_vips.return_value = AddressResponse(service_ip_address='1.1.1.1')
+
+        # action
+        result = get_external_ip('myRg', 'myWeb')
+
+        # assert, we take service ip
+        self.assertEqual('1.1.1.1', result['ip'])
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._resolve_hostname_through_dns', autospec=True)
+    def test_get_external_ip_from_dns(self, resolve_hostname_mock, client_factory_mock):
+        client = mock.Mock()
+        client_factory_mock.return_value = client
+
+        # set up the web inside a ASE, with an ip based ssl binding
+        site = Site('antarctica')
+        site.default_host_name = 'myweb.com'
+        client.web_apps.get.return_value = site
+
+        # action
+        get_external_ip('myRg', 'myWeb')
+
+        # assert, we return the virtual ip from the ip based ssl binding
+        resolve_hostname_mock.assert_called_with('myweb.com')
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     def test_update_site_config(self, site_op_mock):
