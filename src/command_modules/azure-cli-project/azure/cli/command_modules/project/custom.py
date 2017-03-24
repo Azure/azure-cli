@@ -490,7 +490,7 @@ def _configure_cluster():  # pylint: disable=too-many-statements
         utils.writeline('This might take some waiting.')
         workspace_storage = dns_prefix.replace('-', '') + 'wks'
         _initialize_workspace(
-            dns_prefix, user_name, workspace_storage, ssh_private_key, workspace_storage_key, location=location)
+            dns_prefix, user_name, workspace_storage, workspace_storage_key, ssh_private_key, location=location)
     finally:
         # Removing temporary data files
         if kubernetes_path != None:
@@ -829,8 +829,8 @@ def _initialize_workspace(
         storage_account_name,
         storage_account_key,
         ssh_private_key,
-        workspace_share_name='mindaro',
-        location='westus'):
+        location='westus',
+        workspace_share_name='mindaro'):
     """
     Calls tenx initialize command on the current directory.
     Initialize creates settings.json file which contains all the credentials and links to connect to the cluster.
