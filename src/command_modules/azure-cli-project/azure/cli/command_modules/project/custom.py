@@ -40,6 +40,8 @@ from azure.mgmt.resource.resources import ResourceManagementClient
 from azure.mgmt.resource.resources.models.resource_group import ResourceGroup
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.storage.models import Kind, Sku, StorageAccountCreateParameters
+from azure.mgmt.containerregistry.models import RegistryCreateParameters, StorageAccountParameters
+from azure.mgmt.containerregistry.models import Sku as AcrSku
 from azure.storage.file import FileService
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
@@ -125,17 +127,17 @@ def create_project(ssh_private_key, resource_group='mindaro-rg-' + random_word, 
 
     # 3. Create ACR (resource_group, location)
     utils.writeline('Creating Azure container registry ...')
-    res_client.providers.register(resource_provider_namespace='Microsoft.ContainerRegistry')
+    res_client.providers.register(
+        resource_provider_namespace='Microsoft.ContainerRegistry')
     acr_client = _get_acr_service_client()
     acr_name = 'acr' + utils.get_random_registry_name()
-    registry = acr_client.registries.create_or_update(resource_group,
-                                                      acr_name,
-                                                      Registry(
-                                                          location=location,
-                                                          storage_account=StorageAccountProperties(
-                                                              storage_account_name,
-                                                              storage_account_key)
-                                                      ))
+    registry = acr_client.registries.create(resource_group,
+                                            acr_name,
+                                            RegistryCreateParameters(
+                                                location=location,
+                                                sku=AcrSku('Basic'),
+                                                storage_account=StorageAccountParameters(
+                                                    storage_account_name, storage_account_key)))
     utils.writeline(
         'Azure container registry "{}" created.'.format(acr_name))
 
@@ -146,7 +148,8 @@ def create_project(ssh_private_key, resource_group='mindaro-rg-' + random_word, 
     acs_deployment = acs_create(resource_group_name=resource_group,
                                 deployment_name=kube_deployment_name,
                                 name=kube_cluster_name,
-                                ssh_key_value=utils.get_public_ssh_key_contents(ssh_private_key + '.pub'),
+                                ssh_key_value=utils.get_public_ssh_key_contents(
+                                    ssh_private_key + '.pub'),
                                 dns_name_prefix=kube_cluster_name,
                                 admin_username=default_user_name,
                                 location=location,
@@ -205,6 +208,7 @@ def create_deployment_pipeline(remote_access_token):  # pylint: disable=unused-a
     utils.writeline('Jenkins hostname: {}'.format(jenkins_hostname))
     utils.writeline('Done.')
 
+
 def _wait_then_open(url):
     """
     Waits for a bit then opens a URL. Useful for
@@ -226,6 +230,7 @@ def _wait_then_open_async(url):
     thread = threading.Thread(target=_wait_then_open, args=({url}))
     thread.daemon = True
     thread.start()
+
 
 def _get_available_local_port():
     """
@@ -257,6 +262,7 @@ def _get_service_principal():
 def _get_subscription_id():
     _, sub_id, _ = Profile().get_login_credentials(subscription_id=None)
     return sub_id
+
 
 def _deploy_jenkins():
     """
@@ -381,7 +387,8 @@ def _configure_cluster():  # pylint: disable=too-many-statements
             innerloop_client_path, 'setup', 'Kubernetes')
 
         # Get resource group
-        creds = _get_creds_from_master(dns_prefix, location, user_name, ssh_private_key)
+        creds = _get_creds_from_master(
+            dns_prefix, location, user_name, ssh_private_key)
         resource_group = creds['resourceGroup']
         client_id = creds['aadClientId']
         client_secret = creds['aadClientSecret']
@@ -426,7 +433,8 @@ def _configure_cluster():  # pylint: disable=too-many-statements
         _execute_command("scp -i {0} -P 22 {1}/configagents.sh {2}:~/configagents.sh".format(
             ssh_private_key, kubernetes_path, remote_host))
 
-        _execute_command("eval $(ssh-agent) && ssh-add {}".format(ssh_private_key))
+        _execute_command(
+            "eval $(ssh-agent) && ssh-add {}".format(ssh_private_key))
         _execute_command(
             "ssh -i {0} -o StrictHostKeyChecking=no -p 22 {1} 'chmod 600 ~/.ssh/id_rsa'".format(ssh_private_key, remote_host))
         _execute_command(
@@ -657,8 +665,10 @@ def _install_k8_shares(resource_group, dns_prefix):
     config_storage = dns_prefix.replace('-', '') + "cfgsa"
     workspace_storage = dns_prefix.replace('-', '') + "wks"
     scf = storage_client_factory()
-    config_storage_key = _get_storage_key(resource_group, scf, config_storage, 10)
-    workspace_storage_key = _get_storage_key(resource_group, scf, workspace_storage, 10)
+    config_storage_key = _get_storage_key(
+        resource_group, scf, config_storage, 10)
+    workspace_storage_key = _get_storage_key(
+        resource_group, scf, workspace_storage, 10)
 
     innerloop_client_path = _get_innerloop_home_path()
     connect_template_path = os.path.join(
@@ -677,11 +687,13 @@ def _install_k8_shares(resource_group, dns_prefix):
         connect_output_file.write(connect_template)
 
     # Ensure 'cfgs' share exists in configStorage
-    file_service = FileService(account_name=config_storage, account_key=config_storage_key)
+    file_service = FileService(
+        account_name=config_storage, account_key=config_storage_key)
     file_service.create_share(share_name='cfgs')
 
     # Ensure 'mindaro' share exists in configStorage
-    file_service = FileService(account_name=workspace_storage, account_key=workspace_storage_key)
+    file_service = FileService(
+        account_name=workspace_storage, account_key=workspace_storage_key)
     file_service.create_share(share_name='mindaro')
 
     return workspace_storage_key
@@ -701,7 +713,8 @@ def _get_storage_key(resource_group, scf, storage, tries):
         except Exception as error:
             logger.debug(error)
         finally:
-            logger.warning("Couldn't get storage account key for {}, Retrying ...".format(storage))
+            logger.warning(
+                "Couldn't get storage account key for {}, Retrying ...".format(storage))
             sleep(2)
             retry = retry + 1
     if storage_key is None:
