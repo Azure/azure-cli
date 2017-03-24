@@ -161,8 +161,8 @@ class Test_Webapp_Mocked(unittest.TestCase):
 
         # assert
         self.assertEqual(len(host_ssl_update_mock.call_args_list), 2)
-        self.assertEqual(host_ssl_update_mock.call_args_list[0][0][3], 'logs.foo.com')
-        self.assertEqual(host_ssl_update_mock.call_args_list[1][0][3], 'admin.foo.com')
+        host_names_updated = set([x[0][3] for x in host_ssl_update_mock.call_args_list])
+        self.assertEqual(host_names_updated, set(['logs.foo.com', 'admin.foo.com']))
 
 
 class FakedResponse(object):  # pylint: disable=too-few-public-methods
