@@ -22,6 +22,13 @@ from azure.cli.command_modules.batch._client_factory import (
     location_client_factory,
     pool_client_factory,
     task_client_factory)
+from azure.cli.command_modules.batch._format import (
+    job_list_table_format,
+    task_create_table_format,
+    account_keys_list_table_format,
+    account_list_table_format,
+    application_list_table_format,
+    account_keys_renew_table_format)
 
 
 data_path = 'azure.batch.operations.{}_operations#{}'
@@ -31,17 +38,17 @@ mgmt_path = 'azure.mgmt.batch.operations.{}_operations#{}'
 # pylint: disable=line-too-long
 # Mgmt Account Operations
 
-cli_command(__name__, 'batch account list', custom_path.format('list_accounts'), account_mgmt_client_factory)
+cli_command(__name__, 'batch account list', custom_path.format('list_accounts'), account_mgmt_client_factory, table_transformer=account_list_table_format)
 cli_command(__name__, 'batch account show', mgmt_path.format('batch_account', 'BatchAccountOperations.get'), account_mgmt_client_factory)
 cli_command(__name__, 'batch account create', custom_path.format('create_account'), account_mgmt_client_factory)
 cli_command(__name__, 'batch account set', custom_path.format('update_account'), account_mgmt_client_factory)
 cli_command(__name__, 'batch account delete', mgmt_path.format('batch_account', 'BatchAccountOperations.delete'), account_mgmt_client_factory, confirmation=True)
 cli_command(__name__, 'batch account autostorage-keys sync', mgmt_path.format('batch_account', 'BatchAccountOperations.synchronize_auto_storage_keys'), account_mgmt_client_factory)
-cli_command(__name__, 'batch account keys list', mgmt_path.format('batch_account', 'BatchAccountOperations.get_keys'), account_mgmt_client_factory)
-cli_command(__name__, 'batch account keys renew', mgmt_path.format('batch_account', 'BatchAccountOperations.regenerate_key'), account_mgmt_client_factory)
+cli_command(__name__, 'batch account keys list', mgmt_path.format('batch_account', 'BatchAccountOperations.get_keys'), account_mgmt_client_factory, table_transformer=account_keys_list_table_format)
+cli_command(__name__, 'batch account keys renew', mgmt_path.format('batch_account', 'BatchAccountOperations.regenerate_key'), account_mgmt_client_factory, table_transformer=account_keys_renew_table_format)
 cli_command(__name__, 'batch account login', custom_path.format('login_account'), account_mgmt_client_factory)
 
-cli_command(__name__, 'batch application list', mgmt_path.format('application', 'ApplicationOperations.list'), application_mgmt_client_factory)
+cli_command(__name__, 'batch application list', mgmt_path.format('application', 'ApplicationOperations.list'), application_mgmt_client_factory, table_transformer=application_list_table_format)
 cli_command(__name__, 'batch application show', mgmt_path.format('application', 'ApplicationOperations.get'), application_mgmt_client_factory)
 cli_command(__name__, 'batch application create', mgmt_path.format('application', 'ApplicationOperations.create'), application_mgmt_client_factory)
 cli_command(__name__, 'batch application set', custom_path.format('update_application'), application_mgmt_client_factory)
@@ -97,7 +104,7 @@ cli_batch_data_plane_command('batch job delete', data_path.format('job', 'JobOpe
 cli_batch_data_plane_command('batch job show', data_path.format('job', 'JobOperations.get'), job_client_factory)
 cli_batch_data_plane_command('batch job set', data_path.format('job', 'JobOperations.patch'), job_client_factory, flatten=2)
 cli_batch_data_plane_command('batch job reset', data_path.format('job', 'JobOperations.update'), job_client_factory, flatten=2)
-cli_command(__name__, 'batch job list', custom_path.format('list_job'), job_client_factory)
+cli_command(__name__, 'batch job list', custom_path.format('list_job'), job_client_factory, table_transformer=job_list_table_format)
 cli_batch_data_plane_command('batch job disable', data_path.format('job', 'JobOperations.disable'), job_client_factory)
 cli_batch_data_plane_command('batch job enable', data_path.format('job', 'JobOperations.enable'), job_client_factory)
 cli_batch_data_plane_command('batch job stop', data_path.format('job', 'JobOperations.terminate'), job_client_factory)
@@ -133,7 +140,7 @@ cli_batch_data_plane_command('batch job-schedule enable', data_path.format('job_
 cli_batch_data_plane_command('batch job-schedule stop', data_path.format('job_schedule', 'JobScheduleOperations.terminate'), job_schedule_client_factory)
 cli_batch_data_plane_command('batch job-schedule list', data_path.format('job_schedule', 'JobScheduleOperations.list'), job_schedule_client_factory)
 
-cli_command(__name__, 'batch task create', custom_path.format('create_task'), task_client_factory)
+cli_command(__name__, 'batch task create', custom_path.format('create_task'), task_client_factory, table_transformer=task_create_table_format)
 cli_batch_data_plane_command('batch task list', data_path.format('task', 'TaskOperations.list'), task_client_factory)
 cli_batch_data_plane_command('batch task delete', data_path.format('task', 'TaskOperations.delete'), task_client_factory)
 cli_batch_data_plane_command('batch task show', data_path.format('task', 'TaskOperations.get'), task_client_factory)

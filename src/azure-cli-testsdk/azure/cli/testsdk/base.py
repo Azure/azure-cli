@@ -19,7 +19,8 @@ from .patches import (patch_load_cached_subscriptions, patch_main_exception_hand
 from .exceptions import CliExecutionError
 from .const import (ENV_LIVE_TEST, ENV_SKIP_ASSERT, ENV_TEST_DIAGNOSE, MOCKED_SUBSCRIPTION_ID)
 from .recording_processors import (SubscriptionRecordingProcessor, OAuthRequestResponsesFilter,
-                                   GeneralNameReplacer)
+                                   GeneralNameReplacer, LargeRequestBodyProcessor,
+                                   LargeResponseBodyProcessor, LargeResponseBodyReplacer)
 from .utilities import create_random_name
 
 
@@ -42,7 +43,10 @@ class ScenarioTest(unittest.TestCase):  # pylint: disable=too-many-instance-attr
         self.name_replacer = GeneralNameReplacer()
         self.recording_processors = [SubscriptionRecordingProcessor(MOCKED_SUBSCRIPTION_ID),
                                      OAuthRequestResponsesFilter(),
+                                     LargeRequestBodyProcessor(),
+                                     LargeResponseBodyProcessor(),
                                      self.name_replacer]
+        self.replay_processors = [LargeResponseBodyReplacer()]
 
         test_file_path = inspect.getfile(self.__class__)
         recordings_dir = os.path.join(os.path.dirname(test_file_path), 'recordings')
@@ -65,6 +69,7 @@ class ScenarioTest(unittest.TestCase):  # pylint: disable=too-many-instance-attr
         self.skip_assert = os.environ.get(ENV_SKIP_ASSERT, None) == 'True'
         self.in_recording = live_test or not os.path.exists(self.recording_file)
         self.test_resources_count = 0
+        self.original_env = os.environ.copy()
 
     def setUp(self):
         super(ScenarioTest, self).setUp()
@@ -81,6 +86,9 @@ class ScenarioTest(unittest.TestCase):  # pylint: disable=too-many-instance-attr
             patch_long_run_operation_delay(self)
             patch_load_cached_subscriptions(self)
             patch_retrieve_token_for_user(self)
+
+    def tearDown(self):
+        os.environ = self.original_env
 
     def create_random_name(self, prefix, length):
         self.test_resources_count += 1
@@ -116,36 +124,50 @@ class ScenarioTest(unittest.TestCase):  # pylint: disable=too-many-instance-attr
 
         return result
 
-    def _process_request_recording(self, request):
-        if not self.in_recording:
-            return request
+    @classmethod
+    def set_env(cls, key, val):
+        os.environ[key] = val
 
-        for processor in self.recording_processors:
-            request = processor.process_request(request)
-            if not request:
-                break
+    @classmethod
+    def pop_env(cls, key):
+        return os.environ.pop(key, None)
+
+    def _process_request_recording(self, request):
+        if self.in_recording:
+            for processor in self.recording_processors:
+                request = processor.process_request(request)
+                if not request:
+                    break
+        else:
+            for processor in self.replay_processors:
+                request = processor.process_request(request)
+                if not request:
+                    break
 
         return request
 
     def _process_response_recording(self, response):
-        if not self.in_recording:
-            return response
+        if self.in_recording:
+            # make header name lower case and filter unwanted headers
+            headers = {}
+            for key in response['headers']:
+                if key.lower() not in self.FILTER_HEADERS:
+                    headers[key.lower()] = response['headers'][key]
+            response['headers'] = headers
 
-        # make header name lower case and filter unwanted headers
-        headers = {}
-        for key in response['headers']:
-            if key.lower() not in self.FILTER_HEADERS:
-                headers[key.lower()] = response['headers'][key]
-        response['headers'] = headers
+            body = response['body']['string']
+            if body and not isinstance(body, six.string_types):
+                response['body']['string'] = body.decode('utf-8')
 
-        body = response['body']['string']
-        if body and not isinstance(body, six.string_types):
-            response['body']['string'] = body.decode('utf-8')
-
-        for processor in self.recording_processors:
-            response = processor.process_response(response)
-            if not response:
-                break
+            for processor in self.recording_processors:
+                response = processor.process_response(response)
+                if not response:
+                    break
+        else:
+            for processor in self.replay_processors:
+                response = processor.process_response(response)
+                if not response:
+                    break
 
         return response
 
