@@ -192,20 +192,6 @@ class Project(object):
         self._set_property_value('jenkins_hostname', value)
 
     @property
-    def spinnaker_hostname(self):
-        """
-        Gets the Spinnaker host name
-        """
-        return self._get_property_value('spinnaker_hostname')
-
-    @spinnaker_hostname.setter
-    def spinnaker_hostname(self, value):
-        """
-        Sets the Spinnaker host name
-        """
-        self._set_property_value('spinnaker_hostname', value)
-
-    @property
     def ssh_private_key(self):
         """
         Gets the SSH private key path

@@ -26,7 +26,6 @@ from azure.cli.command_modules.acs.custom import (acs_create,
                                                   k8s_install_cli)
 from azure.cli.command_modules.acs._params import _get_default_install_location
 from azure.cli.command_modules.project.jenkins import Jenkins
-from azure.cli.command_modules.project.spinnaker import Spinnaker
 from azure.cli.command_modules.resource.custom import _deploy_arm_template_core
 from azure.cli.command_modules.storage._factory import storage_client_factory
 from azure.cli.core._environment import get_config_dir
@@ -55,11 +54,13 @@ admin_password = 'Mindaro@Pass1!'  # pylint: disable=invalid-name
 # pylint: disable=no-self-use,too-many-locals,line-too-long,broad-except
 
 
-def browse_jenkins():
+def browse_pipeline():
     """
     Creates an SSH tunnel to Jenkins host and opens
-    the dashboard in the browser
+    the pipeline in the browser
     """
+    # TODO: Read the pipeline name from the project file and open
+    # the URL to localhost:PORT/job/[pipelinename]
     jenkins_hostname = project_settings.jenkins_hostname
     admin_username = project_settings.admin_username
 
@@ -188,33 +189,20 @@ def create_project(ssh_private_key, resource_group='mindaro-rg-' + random_word, 
     _configure_cluster()
 
 
-def create_continuous_deployment(remote_access_token):  # pylint: disable=unused-argument
+def create_deployment_pipeline(remote_access_token):  # pylint: disable=unused-argument
     """
-    Provisions Jenkins and Spinnaker, configures CI and CD pipelines, kicks off initial build-deploy
+    Provisions Jenkins and configures CI and CD pipelines, kicks off initial build-deploy
     and saves the CI/CD information to a local project file.
     """
     jenkins_resource, jenkins_deployment = _deploy_jenkins()
-    spinnaker_resource, spinnaker_deployment = _deploy_spinnaker()
 
     # Wait for deployments to complete
-    spinnaker_deployment.wait()
     jenkins_deployment.wait()
 
-    spinnaker_deployment_result = spinnaker_deployment.result()
-    spinnaker_hostname = spinnaker_deployment_result.properties.outputs[
-        'hostname']['value']
-
-    _configure_spinnaker(spinnaker_resource, spinnaker_hostname)
-
-    # TODO: Spinnker won't trigger pipeline if ACR is entire empty
-    # TODO: how do we provide a correct service port when configuring Spinnaker
     jenkins_hostname = '{}.{}.cloudapp.azure.com'.format(
         jenkins_resource.dns_prefix, jenkins_resource.location)
     project_settings.jenkins_hostname = jenkins_hostname
     utils.writeline('Jenkins hostname: {}'.format(jenkins_hostname))
-
-    utils.writeline('Spinnaker hostname: {}'.format(spinnaker_hostname))
-    project_settings.spinnaker_hostname = spinnaker_hostname
     utils.writeline('Done.')
 
 def _wait_then_open(url):
@@ -270,24 +258,6 @@ def _get_subscription_id():
     _, sub_id, _ = Profile().get_login_credentials(subscription_id=None)
     return sub_id
 
-
-def _configure_spinnaker(spinnaker_resource, spinnaker_hostname):
-    """
-    Configures the Spinnaker resource
-    """
-    utils.writeline('Configuring Spinnaker ...')
-    client_id = project_settings.client_id
-    client_secret = project_settings.client_secret
-    cluster_name = project_settings.cluster_name
-    cluster_resource_group = project_settings.cluster_resource_group
-    container_registry_url = project_settings.container_registry_url
-
-    repo_name = '{}/{}'.format(project_settings.admin_username, 'myfirstapp')
-    acs_info = _get_acs_info(cluster_name, cluster_resource_group)
-    spinnaker_resource.configure(
-        spinnaker_hostname, acs_info, container_registry_url, repo_name, client_id, client_secret)
-
-
 def _deploy_jenkins():
     """
     Starts the Jenkins deployment and returns the resource and AzurePollerOperation
@@ -308,22 +278,6 @@ def _deploy_jenkins():
         git_repo, jenkins_dns_prefix, location,
         container_registry_url)
     return (jenkins_resource, jenkins_resource.deploy())
-
-
-def _deploy_spinnaker():
-    """
-    Starts the Spinnaker deployment and returns the resource and AzurePollerOperation
-    """
-    utils.writeline('Deploying Spinnaker ...')
-    resource_group = project_settings.resource_group
-    admin_username = project_settings.admin_username
-    public_ssh_key_filename = os.path.join(
-        os.path.expanduser("~"), '.ssh', 'id_rsa.pub')
-
-    spinnaker_dns_prefix = 'spinnaker-' + utils.get_random_string()
-    spinnaker_resource = Spinnaker(
-        resource_group, admin_username, public_ssh_key_filename, spinnaker_dns_prefix)
-    return (spinnaker_resource, spinnaker_resource.deploy())
 
 
 def _get_acs_info(name, resource_group_name):
