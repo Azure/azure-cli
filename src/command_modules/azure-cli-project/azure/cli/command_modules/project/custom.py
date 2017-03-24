@@ -1132,6 +1132,22 @@ def _service_run():
     """
     _run_innerloop_command('run -t -q')
 
+def service_list():
+    """
+    Lists all the running user services in the Kubernetes cluster.
+    """
+    try:
+        # Liting Services ...
+        _service_list()
+
+    except Exception as error:
+        raise CLIError(error)
+
+def _service_list():
+    """
+    Calls tenx service list command on the current directory.
+    """
+    _run_innerloop_command('service list')
 
 def _run_innerloop_command(*args):
     """

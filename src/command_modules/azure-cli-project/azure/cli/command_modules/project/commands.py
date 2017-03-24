@@ -17,7 +17,9 @@ cli_command(__name__, 'project reference add',
 # TODO: Add help for this command
 cli_command(__name__, 'project create',
             'azure.cli.command_modules.project.custom#create_project')
-
+            
 # InnerLoop Commands
 cli_command(__name__, 'project run',
             'azure.cli.command_modules.project.custom#service_run')
+cli_command(__name__, 'project service list', 
+            'azure.cli.command_modules.project.custom#service_list')
