@@ -18,6 +18,9 @@ import azure.cli.core.azlogging as azlogging
 logger = azlogging.get_az_logger(__name__)
 devtestlabs_management_client = get_devtestlabs_management_client(None)
 
+# Message for using defaults
+DEFAULT_MESSAGE_FORMAT = 'Using %s : %s'
+
 
 def get_complex_argument_processor(expanded_arguments, assigned_arg, model_type):
     """
@@ -40,11 +43,16 @@ def get_complex_argument_processor(expanded_arguments, assigned_arg, model_type)
 
 def validate_lab_vm_create(namespace):
     """ Validates parameters for lab vm create and updates namespace. """
+    formula = None
+    if namespace.formula is True:
+        formula = _get_formula(namespace)
+
     _validate_location(namespace)
     _validate_expiration_date(namespace)
-    _validate_image_argument(namespace)
-    validate_authentication_type(namespace)
-    _validate_network_parameters(namespace)
+    _validate_image_argument(namespace, formula)
+    validate_authentication_type(namespace, formula)
+    _validate_network_parameters(namespace, formula)
+    _validate_other_parameters(namespace, formula)
 
 
 def validate_lab_vm_list(namespace):
@@ -71,9 +79,15 @@ def validate_lab_vm_list(namespace):
         namespace.filters = namespace.filters
 
 
+def _get_formula(namespace):
+    """ Get formula from the lab """
+    formula_operation = devtestlabs_management_client.formula
+    return formula_operation.get_resource(namespace.resource_group, namespace.lab_name, namespace.image)
+
+
 def _validate_location(namespace):
     """
-    Selects the default location of the lab when location is not provided while creating vm.
+    Selects the default location of the lab when location is not provided.
     """
     if namespace.location is None:
         lab_operation = devtestlabs_management_client.lab
@@ -82,20 +96,26 @@ def _validate_location(namespace):
 
 
 def _validate_expiration_date(namespace):
-    """
-    Validates expiration date if provided.
-    """
+    """ Validates expiration date if provided. """
+
     if namespace.expiration_date:
         if datetime.datetime.utcnow().date() >= dateutil.parser.parse(namespace.expiration_date).date():
             raise CLIError("Expiration date '{}' must be in future.".format(namespace.expiration_date))
 
 
-def _validate_network_parameters(namespace):
-    """
-    Selects the DevTest Lab's virtual network and subnet if not provided and updates namespace
-    """
+def _validate_network_parameters(namespace, formula=None):
+    """ Selects lab's virtual network and subnet if not provided and updates namespace """
     from azure.cli.core.commands.client_factory import get_subscription_id
     vnet_operation = devtestlabs_management_client.virtual_network
+
+    if formula and formula.formula_content:
+        if formula.formula_content.lab_virtual_network_id:
+            namespace.vnet_name = namespace.vnet_name or formula.formula_content.lab_virtual_network_id.split('/')[-1]
+            logger.warning(DEFAULT_MESSAGE_FORMAT, 'vnet_name', namespace.vnet_name)
+        if formula.formula_content.lab_virtual_network_id:
+            namespace.subnet = namespace.subnet or formula.formula_content.lab_subnet_name
+            namespace.disallow_public_ip_address = namespace.disallow_public_ip_address or formula.formula_content.disallow_public_ip_address
+            logger.warning(DEFAULT_MESSAGE_FORMAT, 'lab_subnet_name', namespace.subnet)
 
     if not namespace.vnet_name:
         lab_vnets = list(vnet_operation.list(namespace.resource_group, namespace.lab_name, top=1))
@@ -128,8 +148,22 @@ def _validate_network_parameters(namespace):
             namespace.disallow_public_ip_address = 'true'
 
 
-def _validate_image_argument(namespace):
-    image_type = _parse_image_argument(namespace)
+def _validate_image_argument(namespace, formula=None):
+    image_type = None
+    if formula:
+        if formula.formula_content and formula.formula_content.gallery_image_reference:
+            namespace.os_offer = formula.formula_content.gallery_image_reference.offer
+            namespace.os_publisher = formula.formula_content.gallery_image_reference.publisher
+            namespace.os_type = formula.formula_content.gallery_image_reference.os_type
+            namespace.os_sku = formula.formula_content.gallery_image_reference.sku
+            namespace.os_version = formula.formula_content.gallery_image_reference.version
+            image_type = 'gallery_image'
+        elif formula.formula_content and formula.formula_content.custom_image_id:
+            namespace.custom_image_id = namespace.image
+            image_type = 'image_id'
+
+    image_type = image_type or _parse_image_argument(namespace)
+
     if image_type == 'gallery_image':
         namespace.gallery_image_reference = GalleryImageReference(offer=namespace.os_offer,
                                                                   publisher=namespace.os_publisher,
@@ -171,8 +205,28 @@ def _parse_image_argument(namespace):
         raise CLIError(err.format(namespace.image))
 
 
+def _validate_other_parameters(namespace, formula):
+    if formula:
+        namespace.tags = formula.tags
+        if formula.formula_content:
+            namespace.allow_claim = namespace.allow_claim or formula.formula_content.allow_claim
+            namespace.artifacts = namespace.artifacts or formula.formula_content.artifacts
+            namespace.notes = namespace.notes or formula.formula_content.notes
+            namespace.size = namespace.size or formula.formula_content.size
+            logger.warning(DEFAULT_MESSAGE_FORMAT, 'artifacts', namespace.artifacts)
+
+
 # TODO: Following methods are carried over from other command modules
-def validate_authentication_type(namespace):
+def validate_authentication_type(namespace, formula=None):
+    if formula and formula.formula_content:
+        if formula.formula_content.is_authentication_with_ssh_key is True:
+            namespace.authentication_type = 'ssh'
+            namespace.ssh_key = formula.formula_content.ssh_key
+        elif formula.formula_content.is_authentication_with_ssh_key is False:
+            namespace.admin_username = formula.formula_content.user_name
+            namespace.admin_password = formula.formula_content.password
+            namespace.authentication_type = 'password'
+
     # validate proper arguments supplied based on the authentication type
     if namespace.authentication_type == 'password':
         if namespace.ssh_key or namespace.generate_ssh_keys:

@@ -35,8 +35,6 @@ with ParametersContext(command='lab vm create') as c:
     c.ignore('custom_image_id')
     c.argument('image', required=True)
 
-    c.argument('size', required=True)
-
     # Network related arguments
     network_group_name = 'Network'
     c.argument('disallow_public_ip_address', arg_group=network_group_name)
@@ -48,6 +46,7 @@ with ParametersContext(command='lab vm create') as c:
     c.register('location', ('--location', '-l'),
                help='Location in which to create VM. Defaults to the location of the lab')
     c.argument('expiration_date')
+    c.argument('formula', action='store_true')
 
 
 with ParametersContext(command='lab vm list') as c:

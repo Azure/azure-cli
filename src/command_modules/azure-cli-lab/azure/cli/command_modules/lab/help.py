@@ -28,9 +28,11 @@ helps['lab vm create'] = """
                 - name: --notes
                   short-summary: Notes for the virtual machine
                 - name: --image
-                  short-summary: The name of the operating system image (Custom Image ID or Gallery Image Name of the lab).
+                  short-summary: The name of the operating system image (Custom Image ID or Gallery Image Name or Name of formula from the lab).
                                  Use az lab gallery-image list for available Gallery Images or
                                  Use az lab custom-image list for available Custom Images
+                - name: --formula
+                  short-summary: Use this when passing formula name in --image. Use az lab formula list for available formulas
                 - name: --size
                   short-summary: The VM size to be created. See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info
                 - name: --admin-username
