@@ -71,7 +71,8 @@ class AzCliCommandParser(argparse.ArgumentParser):
             command_parser = subparser.add_parser(command_verb,
                                                   description=metadata.description,
                                                   parents=self.parents, conflict_handler='error',
-                                                  help_file=metadata.help)
+                                                  help_file=metadata.help,
+                                                  formatter_class=metadata.formatter_class if metadata.formatter_class is not None else argparse.HelpFormatter)
 
             argument_validators = []
             argument_groups = {}
