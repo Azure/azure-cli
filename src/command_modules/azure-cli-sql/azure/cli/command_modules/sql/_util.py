@@ -16,28 +16,24 @@ def get_sql_management_client(_):
     return get_mgmt_service_client(SqlManagementClient)
 
 
-def get_sql_servers_operation(kwargs):
+def get_sql_servers_operations(kwargs):
     return get_sql_management_client(kwargs).servers
 
 
-def get_sql_database_operations(kwargs):
+def get_sql_firewall_rules_operations(kwargs):
+    return get_sql_management_client(kwargs).firewall_rules
+
+
+def get_sql_databases_operations(kwargs):
     return get_sql_management_client(kwargs).databases
 
 
-def get_sql_elasticpools_operations(kwargs):
+def get_sql_elastic_pools_operations(kwargs):
     return get_sql_management_client(kwargs).elastic_pools
 
 
 def get_sql_recommended_elastic_pools_operations(kwargs):
     return get_sql_management_client(kwargs).recommended_elastic_pools
-
-
-def get_sql_database_blob_auditing_policies_operations(kwargs):
-    return get_sql_management_client(kwargs).database_blob_auditing_policies
-
-
-def get_sql_database_threat_detection_policies_operations(kwargs):
-    return get_sql_management_client(kwargs).database_threat_detection_policies
 
 
 # COMMANDS UTILITIES

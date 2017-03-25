@@ -1018,72 +1018,132 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
         admin_password = 'SecretPassword123'
         db_name = 'cliautomationdb01'
         db_name2 = 'cliautomationdb02'
+        db_name3 = 'cliautomationdb03'
+        blob = 'testbacpac.bacpac'
+        blob2 = 'testbacpac2.bacpac'
+
         container = 'bacpacs'
 
         firewall_rule_1 = 'allowAllIps'
         start_ip_address_1 = '0.0.0.0'
-        end_ip_address_1 = '255.255.255.255'
-
-        loc_long = location_long_name
-        rg = resource_group
-        sa = storage_account
+        end_ip_address_1 = '0.0.0.0'
 
         # create server firewall rule
         self.cmd('sql server firewall-rule create --name {} -g {} --server {} '
                  '--start-ip-address {} --end-ip-address {}'
-                 .format(firewall_rule_1, rg, server,
+                 .format(firewall_rule_1, resource_group, server,
                          start_ip_address_1, end_ip_address_1),
                  checks=[
                      JMESPathCheck('name', firewall_rule_1),
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('startIpAddress', start_ip_address_1),
                      JMESPathCheck('endIpAddress', end_ip_address_1)])
 
-        # create db
+        # create dbs
         self.cmd('sql db create -g {} --server {} --name {}'
-                 .format(rg, server, db_name),
+                 .format(resource_group, server, db_name),
                  checks=[
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', db_name),
-                     JMESPathCheck('location', loc_long),
+                     JMESPathCheck('location', location_long_name),
                      JMESPathCheck('elasticPoolName', None),
                      JMESPathCheck('status', 'Online')])
 
         self.cmd('sql db create -g {} --server {} --name {}'
-                 .format(rg, server, db_name2),
+                 .format(resource_group, server, db_name2),
                  checks=[
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', db_name2),
-                     JMESPathCheck('location', loc_long),
+                     JMESPathCheck('location', location_long_name),
                      JMESPathCheck('elasticPoolName', None),
                      JMESPathCheck('status', 'Online')])
 
-        # Backup to new dacpac
+        self.cmd('sql db create -g {} --server {} --name {}'
+                 .format(resource_group, server, db_name3),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', db_name3),
+                     JMESPathCheck('location', location_long_name),
+                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('status', 'Online')])
+
         # get storage account endpoint
         storage_endpoint = self.cmd('storage account show -g {} -n {}'
                                     ' --query primaryEndpoints.blob'
-                                    .format(rg, storage_account)).get_output_in_json()
+                                    .format(resource_group, storage_account)).get_output_in_json()
+        bacpacUri = '{}{}/{}'.format(storage_endpoint, container, blob)
+        bacpacUri2 = '{}{}/{}'.format(storage_endpoint, container, blob2)
 
         # get storage account key
-        key = self.cmd('storage account keys list -g {} -n {} --query [0].value'
-                       .format(rg, storage_account)).get_output_in_json()
+        storageKey = self.cmd('storage account keys list -g {} -n {} --query [0].value'
+                              .format(resource_group, storage_account)).get_output_in_json()
+
+        # Set Expiry
+        expiryString = '9999-12-25T00:00:00Z'
+
+        # Get sas key
+        sasKey = self.cmd('storage blob generate-sas --account-name {} -c {} -n {} --permissions rw --expiry {}'.format(
+            storage_account, container, blob2, expiryString)).get_output_in_json()
 
         # create storage account blob container
         self.cmd('storage container create -n {} --account-name {} --account-key {} '
-                 .format(container, sa, key),
+                 .format(container, storage_account, storageKey),
                  checks=[
                      JMESPathCheck('created', True)])
 
-        # export database to blob container
+        # export database to blob container using both keys
         self.cmd('sql db export -s {} -n {} -g {} -p {} -u {}'
                  ' --storage-key {} --storage-key-type StorageAccessKey'
-                 ' --storage-uri {}{}/testbacpac.bacpac'
-                 .format(server, db_name, rg, admin_password, admin_login, key,
-                         storage_endpoint, container))
+                 ' --storage-uri {}'
+                 .format(server, db_name, resource_group, admin_password, admin_login, storageKey,
+                         bacpacUri),
+                 checks=[
+                     JMESPathCheck('blobUri', bacpacUri),
+                     JMESPathCheck('databaseName', db_name),
+                     JMESPathCheck('requestType', 'Export'),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('serverName', server),
+                     JMESPathCheck('status', 'Completed')])
 
-        # import bacpac to second database
+        self.cmd('sql db export -s {} -n {} -g {} -p {} -u {}'
+                 ' --storage-key {} --storage-key-type SharedAccessKey'
+                 ' --storage-uri {}'
+                 .format(server, db_name, resource_group, admin_password, admin_login, sasKey,
+                         bacpacUri2),
+                 checks=[
+                     JMESPathCheck('blobUri', bacpacUri2),
+                     JMESPathCheck('databaseName', db_name),
+                     JMESPathCheck('requestType', 'Export'),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('serverName', server),
+                     JMESPathCheck('status', 'Completed')])
+
+        # import bacpac to second database using Storage Key
         self.cmd('sql db import -s {} -n {} -g {} -p {} -u {}'
                  ' --storage-key {} --storage-key-type StorageAccessKey'
-                 ' --storage-uri {}{}/testbacpac.bacpac'
-                 .format(server, db_name2, rg, admin_password, admin_login, key,
-                         storage_endpoint, container))
+                 ' --storage-uri {}'
+                 .format(server, db_name2, resource_group, admin_password, admin_login, storageKey,
+                         bacpacUri),
+                 checks=[
+                     JMESPathCheck('blobUri', bacpacUri),
+                     JMESPathCheck('databaseName', db_name2),
+                     JMESPathCheck('name', 'import'),
+                     JMESPathCheck('requestType', 'Import'),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('serverName', server),
+                     JMESPathCheck('status', 'Completed')])
+
+        # import bacpac to third database using SAS key
+        self.cmd('sql db import -s {} -n {} -g {} -p {} -u {}'
+                 ' --storage-key {} --storage-key-type SharedAccessKey'
+                 ' --storage-uri {}'
+                 .format(server, db_name3, resource_group, admin_password, admin_login, sasKey,
+                         bacpacUri2),
+                 checks=[
+                     JMESPathCheck('blobUri', bacpacUri2),
+                     JMESPathCheck('databaseName', db_name3),
+                     JMESPathCheck('name', 'import'),
+                     JMESPathCheck('requestType', 'Import'),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('serverName', server),
+                     JMESPathCheck('status', 'Completed')])
