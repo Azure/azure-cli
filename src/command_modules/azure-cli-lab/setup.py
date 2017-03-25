@@ -24,8 +24,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'azure-graphrbac==0.30.0rc6',
-    # 'azure-mgmt-devtestlabs==1.0.0'
+    'azure-graphrbac==0.30.0rc6'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -49,7 +48,11 @@ setup(
         'azure.cli.command_modules'
     ],
     packages=[
-        'azure.cli.command_modules.lab'
+        'azure.cli.command_modules.lab',
+        'azure.cli.command_modules.lab.sdk',
+        'azure.cli.command_modules.lab.sdk.devtestlabs',
+        'azure.cli.command_modules.lab.sdk.devtestlabs.models',
+        'azure.cli.command_modules.lab.sdk.devtestlabs.operations'
     ],
     install_requires=DEPENDENCIES
 )

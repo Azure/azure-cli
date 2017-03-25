@@ -5,7 +5,7 @@
 
 from azure.cli.core.help_files import helps
 
-# pylint: disable=line-too-long, too-many-line
+# pylint: disable=line-too-long
 
 helps['lab'] = """
             type: group

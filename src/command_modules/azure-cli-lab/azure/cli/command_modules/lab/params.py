@@ -54,10 +54,6 @@ with ParametersContext(command='lab vm list') as c:
 
 
 with ParametersContext(command='lab vm apply-artifacts') as c:
-    from azure.cli.command_modules.lab.sdk.devtestlabs.models.apply_artifacts_request import \
-        ApplyArtifactsRequest
-
-    c.expand('apply_artifacts_request', ApplyArtifactsRequest)
     c.register('artifacts', ('--artifacts',), type=json.loads)
     c.register_alias('name', ('--name', '-n'))
 

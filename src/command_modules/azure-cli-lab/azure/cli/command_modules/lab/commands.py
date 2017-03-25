@@ -54,8 +54,8 @@ lab_operations = create_service_adapter(mgmt_operations_path.format('lab_operati
 # Lab Operations Commands
 with ServiceGroup(__name__, get_devtestlabs_lab_operation,
                   lab_operations) as s:
-        with s.group('lab') as c:
-            c.command('get', 'get_resource')
+    with s.group('lab') as c:
+        c.command('get', 'get_resource')
 
 # Custom Image Operations Commands
 custom_image_operations = create_service_adapter(
@@ -101,14 +101,15 @@ with ServiceGroup(__name__, get_devtestlabs_artifact_source_operation,
         c.command('get', 'get_resource')
 
 # Virtual Network Operations Commands
-virtual_network_operations = create_service_adapter(mgmt_operations_path.format('virtual_network_operations'),
-                                                    'VirtualNetworkOperations')
+virtual_network_operations = create_service_adapter(
+    mgmt_operations_path.format('virtual_network_operations'),
+    'VirtualNetworkOperations')
 
 with ServiceGroup(__name__, get_devtestlabs_virtual_network_operation,
                   virtual_network_operations) as s:
-        with s.group('lab vnet') as c:
-            c.command('list', 'list')
-            c.command('get', 'get_resource')
+    with s.group('lab vnet') as c:
+        c.command('list', 'list')
+        c.command('get', 'get_resource')
 
 # Formula Operations Commands
 formula_operations = create_service_adapter(

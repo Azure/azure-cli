@@ -14,7 +14,6 @@ from azure.graphrbac import GraphRbacManagementClient
 import azure.cli.core.azlogging as azlogging
 
 logger = azlogging.get_az_logger(__name__)
-devtestlabs_management_client = get_devtestlabs_management_client(None)
 
 # pylint: disable=line-too-long
 
@@ -70,12 +69,17 @@ def validate_lab_vm_list(namespace):
         namespace.filters = "Properties/ownerObjectId eq '{}'".format(object_id)
 
 
+def _devtestlabs_management_client():
+    return get_devtestlabs_management_client(None)
+
+
+# pylint: disable=no-member
 def _validate_location(namespace):
     """
     Selects the default location of the lab when location is not provided.
     """
     if namespace.location is None:
-        lab_operation = devtestlabs_management_client.lab
+        lab_operation = _devtestlabs_management_client.lab
         lab = lab_operation.get_resource(namespace.resource_group, namespace.lab_name)
         namespace.location = lab.location
 
@@ -88,20 +92,24 @@ def _validate_expiration_date(namespace):
             raise CLIError("Expiration date '{}' must be in future.".format(namespace.expiration_date))
 
 
+# pylint: disable=no-member
 def _validate_network_parameters(namespace, formula=None):
     """ Updates namespace for virtual network and subnet parameters """
     from azure.cli.core.commands.client_factory import get_subscription_id
-    vnet_operation = devtestlabs_management_client.virtual_network
+    vnet_operation = _devtestlabs_management_client.virtual_network
 
     if formula and formula.formula_content:
         if formula.formula_content.lab_virtual_network_id:
-            namespace.vnet_name = namespace.vnet_name or \
-                                  formula.formula_content.lab_virtual_network_id.split('/')[-1]
+            namespace.vnet_name = \
+                namespace.vnet_name or \
+                formula.formula_content.lab_virtual_network_id.split('/')[-1]
         if formula.formula_content.lab_virtual_network_id:
-            namespace.subnet = namespace.subnet or \
-                               formula.formula_content.lab_subnet_name
-            namespace.disallow_public_ip_address = namespace.disallow_public_ip_address or \
-                                                   formula.formula_content.disallow_public_ip_address
+            namespace.subnet = \
+                namespace.subnet or \
+                formula.formula_content.lab_subnet_name
+            namespace.disallow_public_ip_address = \
+                namespace.disallow_public_ip_address or \
+                formula.formula_content.disallow_public_ip_address
 
     if not namespace.vnet_name:
         lab_vnets = list(vnet_operation.list(namespace.resource_group, namespace.lab_name, top=1))
@@ -137,6 +145,7 @@ def _validate_network_parameters(namespace, formula=None):
             namespace.disallow_public_ip_address = True
 
 
+# pylint: disable=no-member
 def _validate_image_argument(namespace, formula=None):
     """ Update namespace for image based on image or formula """
     if formula and formula.formula_content:
@@ -162,9 +171,10 @@ def _validate_image_argument(namespace, formula=None):
                        .format(namespace.image_type))
 
 
+# pylint: disable=no-member
 def _use_gallery_image(namespace):
     """ Retrieve gallery image from lab and update namespace """
-    gallery_image_operation = devtestlabs_management_client.gallery_image
+    gallery_image_operation = _devtestlabs_management_client.gallery_image
     odata_filter = ODATA_STARTS_WITH_FILTER.format(namespace.image)
     gallery_images = list(gallery_image_operation.list(namespace.resource_group,
                                                        namespace.lab_name,
@@ -186,12 +196,13 @@ def _use_gallery_image(namespace):
                                   version=gallery_images[0].image_reference.version)
 
 
+# pylint: disable=no-member
 def _use_custom_image(namespace):
     """ Retrieve custom image from lab and update namespace """
     if is_valid_resource_id(namespace.image):
         namespace.custom_image_id = namespace.image
     else:
-        custom_image_operation = devtestlabs_management_client.custom_image
+        custom_image_operation = _devtestlabs_management_client.custom_image
         odata_filter = ODATA_STARTS_WITH_FILTER.format(namespace.image)
         custom_images = list(custom_image_operation.list(namespace.resource_group,
                                                          namespace.lab_name,
@@ -208,7 +219,7 @@ def _use_custom_image(namespace):
 
 def _get_formula(namespace):
     """ Retrieve formula image from lab """
-    formula_operation = devtestlabs_management_client.formula
+    formula_operation = _devtestlabs_management_client.formula
     odata_filter = ODATA_STARTS_WITH_FILTER.format(namespace.formula)
     formula_images = list(formula_operation.list(namespace.resource_group,
                                                  namespace.lab_name,
