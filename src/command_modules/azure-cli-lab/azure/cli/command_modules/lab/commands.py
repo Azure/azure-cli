@@ -11,7 +11,7 @@ from ._client_factory import (get_devtestlabs_virtual_machine_operation,
                               get_devtestlabs_lab_operation,
                               get_devtestlabs_virtual_network_operation,
                               get_devtestlabs_formula_operation)
-from ._util import (ServiceGroup, create_service_adapter)
+from azure.cli.core.sdk.util import (ServiceGroup, create_service_adapter)
 
 
 custom_path = 'azure.cli.command_modules.lab.custom'

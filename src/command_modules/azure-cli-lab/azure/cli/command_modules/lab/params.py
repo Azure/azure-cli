@@ -7,7 +7,7 @@ import json
 from azure.cli.command_modules.lab.validators import (validate_lab_vm_create,
                                                       validate_lab_vm_list)
 
-from ._util import ParametersContext
+from azure.cli.core.sdk.util import ParametersContext
 
 
 with ParametersContext(command='lab vm create') as c:
