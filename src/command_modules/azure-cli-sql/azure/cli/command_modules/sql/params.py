@@ -5,6 +5,7 @@
 
 import itertools
 from enum import Enum
+from .custom import CapabilityDetail
 from azure.cli.core.commands import CliArgumentType
 from azure.cli.core.commands.parameters import (
     enum_choice_list,
@@ -19,9 +20,12 @@ from azure.mgmt.sql.models.server import Server
 from azure.mgmt.sql.models.sql_management_client_enums import (
     AuthenticationType,
     BlobAuditingPolicyState,
+    CapabilityStatus,
     CreateMode,
+    DatabaseEdition,
     SecurityAlertPolicyState,
     SecurityAlertPolicyEmailAccountAdmins,
+    ServiceObjectiveName,
     StorageKeyType)
 
 
@@ -66,6 +70,40 @@ class SizeWithUnitConverter(object):  # pylint: disable=too-few-public-methods
         return 'Size (in {}) - valid units are {}.'.format(
             self.unit,
             ', '.join(sorted(self.unit_map, key=self.unit_map.__getitem__)))
+
+
+###############################################
+#                sql capabilities             #
+###############################################
+
+
+with ParametersContext(command='sql show-capabilities') as c:
+    c.argument('location_id',
+               options_list=('--location', '-l'),
+               help='The Azure region whose SQL capabilities will be shown.')
+
+    filter_group = 'Filter'
+
+    c.argument('status',
+               arg_group=filter_group,
+               help='Minimum status',
+               **enum_choice_list(CapabilityStatus))
+
+    c.argument('hide',
+               arg_group=filter_group,
+               help='Level of detail to hide. Use this to prune deeper layers from the'
+               ' capabilities tree.',
+               **enum_choice_list(CapabilityDetail))
+
+    c.argument('edition',
+               arg_group=filter_group,
+               help='Edition name to find in the capabilities tree.',
+               **enum_choice_list(DatabaseEdition))
+
+    c.argument('service_objective',
+               arg_group=filter_group,
+               help='Service objective to find in the capabilities tree.',
+               **enum_choice_list(ServiceObjectiveName))
 
 
 ###############################################

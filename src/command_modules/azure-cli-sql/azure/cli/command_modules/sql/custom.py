@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from enum import Enum
+
 from ._util import (
     get_sql_servers_operations,
     get_sql_elastic_pools_operations
@@ -14,6 +16,7 @@ from azure.cli.core.commands.client_factory import (
 from azure.cli.core.util import CLIError
 from azure.mgmt.sql.models.sql_management_client_enums import (
     BlobAuditingPolicyState,
+    CapabilityStatus,
     CreateMode,
     DatabaseEdition,
     ReplicationRole,
@@ -39,6 +42,135 @@ def get_server_location(server_name, resource_group_name):
     return server_client.get(
         server_name=server_name,
         resource_group_name=resource_group_name).location
+
+
+###############################################
+#                sql db                       #
+###############################################
+
+
+class CapabilityDetail(Enum):
+    edition = 'edition'
+    service_objective = 'service-objective'
+    max_size = 'max-size'
+
+
+def capabilities_get(  # pylint: disable=too-many-arguments
+        client,
+        location_id,
+        hide=None,
+        status=CapabilityStatus.available.value,
+        edition=None,
+        service_objective=None):
+
+    # Convert inputs to enum type
+    hide = CapabilityDetail(hide) if hide is not None else None
+    status = CapabilityStatus(status)
+
+    # Get capabilities tree from server
+    capabilities = client.list_by_location(location_id)
+
+    # ############# Phase 1: Find nodes that the user requested by name. #############
+
+    # If a user requested a node by name (e.g. service_objective=='P2') and also requested a status
+    # filter of status=='Default', then naive code would find P2 and then later filter it out
+    # because P2 has 'Available' status which is less prominent than 'Default'. We want to be
+    # smarter and only apply the 'Default' status filter to the found node's children. This means
+    # when applying status filter, we need to be more lenient to the found node and its parents.
+    # If they are 'Available' we want to keep them even if the status filter was 'Default'.
+
+    lenient_nodes = []
+    for sv in capabilities.supported_server_versions:
+
+        # If edition filter is requested then apply it.
+        if edition is not None:
+            sv.supported_editions = [e for e in sv.supported_editions if e.name == edition]
+
+        for e in sv.supported_editions:
+            # If edition filter was applied then this is the chosen edition. Remember to be more
+            # lenient to it and its parents when filtering by status.
+            if edition is not None:
+                lenient_nodes += [sv, e]
+
+            # If service objective filter is requested then apply it.
+            if service_objective is not None:
+                e.supported_service_level_objectives = [
+                    slo for slo in e.supported_service_level_objectives
+                    if slo.name == service_objective]
+
+            for slo in e.supported_service_level_objectives:
+                # If service objective filter was applied then this is the chosen service
+                # objective. Remember to be more lenient to it and its parents when
+                # filtering by status.
+                if service_objective is not None:
+                    lenient_nodes += [sv, e, slo]
+
+    # ############# Phase 2: Filter by status. #############
+
+    # Ordered list of statuses. Lowest status is first.
+    status_list = [CapabilityStatus.disabled, CapabilityStatus.visible,
+                   CapabilityStatus.available, CapabilityStatus.default]
+
+    def has_min_status(node, min_status):
+        # Returns true if the status is at least as high as the filter
+        return status_list.index(node.status) >= status_list.index(min_status)
+
+    def filter_by_status(nodes):
+        # Returns a new list with the status filter applied. If a node is in lenient_nodes, then
+        # keep it even if the status filter is 'Default' and the node's status is only 'Available'.
+        return [n for n in nodes if has_min_status(n, status) or (
+            has_min_status(n, CapabilityStatus.available) and n in lenient_nodes
+        )]
+
+    # Filter server versions.
+    capabilities.supported_server_versions = (
+        filter_by_status(capabilities.supported_server_versions))
+
+    for sv in capabilities.supported_server_versions:
+        # Filter editions.
+        sv.supported_editions = filter_by_status(sv.supported_editions)
+
+        for e in sv.supported_editions:
+            # Filter service objectives.
+            e.supported_service_level_objectives = (
+                filter_by_status(e.supported_service_level_objectives))
+
+            for slo in e.supported_service_level_objectives:
+                # Filter max sizes.
+                slo.supported_max_sizes = filter_by_status(slo.supported_max_sizes)
+
+    # ############# Phase 3: Prune items which have no children due to filters. #############
+    # This must be completed before pruning based on depth, because after depth-pruning the
+    # remaining leaf nodes will have no children; we don't want no-children-pruning to prune those
+    # leaves, otherwise we will end up pruning the entire tree.
+
+    for sv in capabilities.supported_server_versions:
+        # Remove editions with no service objectives (due to filters)
+        sv.supported_editions = [e for e in sv.supported_editions
+                                 if len(e.supported_service_level_objectives) > 0]
+
+    # Remove server versions with no editions (due to filters)
+    capabilities.supported_server_versions = [sv for sv in capabilities.supported_server_versions
+                                              if len(sv.supported_editions) > 0]
+
+    # ############# Phase 4: Prune tree based on requested depth. #############
+
+    for sv in capabilities.supported_server_versions:
+        # Prune edition and below if that is too much detail
+        if hide == CapabilityDetail.edition:
+            del sv.supported_editions
+        else:
+            for e in sv.supported_editions:
+                # Prune service objectives and below if that is too much detail
+                if hide == CapabilityDetail.service_objective:
+                    del e.supported_service_level_objectives
+                else:
+                    for slo in e.supported_service_level_objectives:
+                        # Prune max sizes if that is too much detail
+                        if hide == CapabilityDetail.max_size:
+                            del slo.supported_max_sizes
+
+    return capabilities
 
 
 ###############################################
