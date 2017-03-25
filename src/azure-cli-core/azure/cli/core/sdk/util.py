@@ -38,11 +38,13 @@ class ServiceGroup(object):
 
 
 class CommandGroup(object):
-    def __init__(self, scope, group_name, client_factory, service_adapter=None):
+    # pylint: disable=too-many-arguments
+    def __init__(self, scope, group_name, client_factory, service_adapter=None, custom_path=None):
         self._scope = scope
         self._group_name = group_name
         self._client_factory = client_factory
         self._service_adapter = service_adapter or (lambda name: name)
+        self._custom_path = custom_path
 
     def __enter__(self):
         return self
@@ -56,13 +58,29 @@ class CommandGroup(object):
                     self._service_adapter(method_name),
                     client_factory=self._client_factory)
 
-    def generic_update_command(self, name, getter_op, setter_op):
+    def custom_command(self, name, custom_func_name, confirmation=None):
+        cli_command(self._scope,
+                    '{} {}'.format(self._group_name, name),
+                    self._custom_path.format(custom_func_name),
+                    client_factory=self._client_factory,
+                    confirmation=confirmation)
+
+    # pylint: disable=too-many-arguments
+    def generic_update_command(self, name, getter_op, setter_op, custom_func_name=None,
+                               setter_arg_name='parameters'):
+        if custom_func_name:
+            custom_function_op = self._custom_path.format(custom_func_name)
+        else:
+            custom_function_op = None
+
         cli_generic_update_command(
             self._scope,
             '{} {}'.format(self._group_name, name),
             self._service_adapter(getter_op),
             self._service_adapter(setter_op),
-            factory=self._client_factory)
+            factory=self._client_factory,
+            custom_function_op=custom_function_op,
+            setter_arg_name=setter_arg_name)
 
 
 # PARAMETERS UTILITIES
@@ -94,8 +112,8 @@ class ParametersContext(object):
     def argument(self, argument_name, arg_type=None, **kwargs):
         register_cli_argument(self._commmand, argument_name, arg_type=arg_type, **kwargs)
 
-    def register_alias(self, argument_name, options_list):
-        register_cli_argument(self._commmand, argument_name, options_list=options_list)
+    def register_alias(self, argument_name, options_list, **kwargs):
+        register_cli_argument(self._commmand, argument_name, options_list=options_list, **kwargs)
 
     def register(self, argument_name, options_list, **kwargs):
         register_cli_argument(self._commmand, argument_name, options_list=options_list, **kwargs)
@@ -108,7 +126,7 @@ class ParametersContext(object):
         from azure.cli.core.commands._introspection import \
             (extract_args_from_signature, _option_descriptions)
 
-        from azure.cli.command_modules.monitor.validators import get_complex_argument_processor
+        from azure.cli.core.sdk.validators import get_complex_argument_processor
 
         if not patches:
             patches = dict()

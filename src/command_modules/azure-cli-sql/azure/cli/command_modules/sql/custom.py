@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from ._util import (
-    get_sql_servers_operation,
-    get_sql_elasticpools_operations
+    get_sql_servers_operations,
+    get_sql_elastic_pools_operations
 )
 
 from azure.cli.core.commands.client_factory import (
@@ -15,10 +15,11 @@ from azure.cli.core._util import CLIError
 from azure.mgmt.sql.models.sql_management_client_enums import (
     BlobAuditingPolicyState,
     CreateMode,
-    DatabaseEditions,
+    DatabaseEdition,
     ReplicationRole,
     SecurityAlertPolicyState,
-    ServiceObjectiveName
+    ServiceObjectiveName,
+    StorageKeyType
 )
 from azure.mgmt.resource.resources import ResourceManagementClient
 from azure.mgmt.storage import StorageManagementClient
@@ -33,9 +34,9 @@ from six.moves.urllib.parse import (quote, urlparse)  # pylint: disable=import-e
 
 # Determines server location
 def get_server_location(server_name, resource_group_name):
-    server_client = get_sql_servers_operation(None)
+    server_client = get_sql_servers_operations(None)
     # pylint: disable=no-member
-    return server_client.get_by_resource_group(
+    return server_client.get(
         server_name=server_name,
         resource_group_name=resource_group_name).location
 
@@ -84,7 +85,7 @@ def db_create(
 
     # Verify edition
     edition = kwargs.get('edition')  # kwags['edition'] throws KeyError if not in dictionary
-    if edition and edition.lower() == DatabaseEditions.data_warehouse.value.lower():
+    if edition and edition.lower() == DatabaseEdition.data_warehouse.value.lower():
         raise CLIError('Azure SQL Data Warehouse can be created with the command'
                        ' `az sql dw create`.')
 
@@ -272,6 +273,61 @@ def db_delete_replica_link(  # pylint: disable=too-many-arguments
         link_id=link.name)
 
 
+def db_export(  # pylint: disable=too-many-arguments
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        storage_key_type,
+        storage_key,
+        **kwargs):
+    storage_key = pad_sas_key(storage_key_type, storage_key)
+
+    kwargs['storage_key_type'] = storage_key_type
+    kwargs['storage_key'] = storage_key
+
+    return client.export(
+        database_name=database_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        storage_key_type=storage_key_type,
+        storage_key=storage_key,
+        parameters=kwargs)
+
+
+def db_import(  # pylint: disable=too-many-arguments
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        storage_key_type,
+        storage_key,
+        **kwargs):
+    storage_key = pad_sas_key(storage_key_type, storage_key)
+
+    kwargs['storage_key_type'] = storage_key_type
+    kwargs['storage_key'] = storage_key
+
+    return client.create_import_operation(
+        database_name=database_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        storage_key_type=storage_key_type,
+        storage_key=storage_key,
+        parameters=kwargs)
+
+
+def pad_sas_key(
+        storage_key_type,
+        storage_key):
+    # Import/Export API requires that "?" precede SAS key as an argument.
+    # Add ? prefix if it wasn't included.
+    if storage_key_type.lower() == StorageKeyType.shared_access_key.value.lower():
+        if storage_key[0] != '?':
+            storage_key = '?' + storage_key
+    return storage_key
+
+
 # Lists databases in a server or elastic pool.
 def db_list(
         client,
@@ -281,7 +337,7 @@ def db_list(
 
     if elastic_pool_name:
         # List all databases in the elastic pool
-        pool_client = get_sql_elasticpools_operations(None)
+        pool_client = get_sql_elastic_pools_operations(None)
         return pool_client.list_databases(
             server_name=server_name,
             resource_group_name=resource_group_name,
@@ -302,7 +358,7 @@ def db_update(
         requested_service_objective_name=None):
 
     # Verify edition
-    if instance.edition.lower() == DatabaseEditions.data_warehouse.value.lower():
+    if instance.edition.lower() == DatabaseEdition.data_warehouse.value.lower():
         raise CLIError('Azure SQL Data Warehouse can be updated with the command'
                        ' `az sql dw update`.')
 
@@ -559,7 +615,7 @@ def dw_create(
         **kwargs):
 
     # Set edition
-    kwargs['edition'] = DatabaseEditions.data_warehouse.value
+    kwargs['edition'] = DatabaseEdition.data_warehouse.value
 
     # Create
     return _db_dw_create(
@@ -578,7 +634,7 @@ def dw_list(
         resource_group_name=resource_group_name,
         server_name=server_name,
         # OData filter to include only DW's
-        filter="properties/edition eq '{}'".format(DatabaseEditions.data_warehouse.value))
+        filter="properties/edition eq '{}'".format(DatabaseEdition.data_warehouse.value))
 
 
 # Update data warehouse. Custom update function to apply parameters to instance.
@@ -678,7 +734,7 @@ def firewall_rule_allow_all_azure_ips(
     # Special start/end IP that represents allowing all azure ips
     azure_ip_addr = '0.0.0.0'
 
-    return client.create_or_update_firewall_rule(
+    return client.create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         firewall_rule_name=rule_name,
@@ -697,13 +753,13 @@ def firewall_rule_update(  # pylint: disable=too-many-arguments
         end_ip_address=None):
 
     # Get existing instance
-    instance = client.get_firewall_rule(
+    instance = client.get(
         firewall_rule_name=firewall_rule_name,
         server_name=server_name,
         resource_group_name=resource_group_name)
 
     # Send update
-    return client.create_or_update_firewall_rule(
+    return client.create_or_update(
         firewall_rule_name=firewall_rule_name,
         server_name=server_name,
         resource_group_name=resource_group_name,

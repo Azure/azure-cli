@@ -11,10 +11,12 @@ from ._client_factory import (get_monitor_alert_rules_operation,
                               get_monitor_activity_log_operation,
                               get_monitor_metric_definitions_operation,
                               get_monitor_metrics_operation)
-from ._util import (ServiceGroup, create_service_adapter)
+from azure.cli.core.sdk.util import (ServiceGroup, create_service_adapter)
 
 
 # MANAGEMENT COMMANDS
+custom_operations = create_service_adapter('azure.cli.command_modules.monitor.custom')
+
 alert_rules_operations = create_service_adapter(
     'azure.mgmt.monitor.operations.alert_rules_operations',
     'AlertRulesOperations')
@@ -57,9 +59,12 @@ diagnostic_settings_operations = create_service_adapter(
 with ServiceGroup(__name__, get_monitor_diagnostic_settings_operation,
                   diagnostic_settings_operations) as s:
     with s.group('monitor diagnostic-settings') as c:
-        c.command('create', 'create_or_update')
         c.command('show', 'get')
         c.generic_update_command('update', 'get', 'create_or_update')
+
+with ServiceGroup(__name__, get_monitor_diagnostic_settings_operation, custom_operations) as s:
+    with s.group('monitor diagnostic-settings') as c:
+        c.command('create', 'create_diagnostics_settings')
 
 autoscale_settings_operations = create_service_adapter(
     'azure.mgmt.monitor.operations.autoscale_settings_operations',
@@ -74,35 +79,23 @@ with ServiceGroup(__name__, get_monitor_autoscale_settings_operation,
         c.command('list', 'list_by_resource_group')
         c.generic_update_command('update', 'get', 'create_or_update')
 
-autoscale_settings_scaffold = create_service_adapter(
-    'azure.cli.command_modules.monitor.custom')
-
 with ServiceGroup(__name__, get_monitor_autoscale_settings_operation,
-                  autoscale_settings_scaffold) as s:
+                  custom_operations) as s:
     with s.group('monitor autoscale-settings') as c:
         c.command('get-parameters-template', 'scaffold_autoscale_settings_parameters')
 
 
 # DATA COMMANDS
-activity_logs_operations = create_service_adapter(
-    'azure.cli.command_modules.monitor.custom')
-
 with ServiceGroup(__name__, get_monitor_activity_log_operation,
-                  activity_logs_operations) as s:
+                  custom_operations) as s:
     with s.group('monitor activity-log') as c:
         c.command('list', 'list_activity_log')
 
-metric_definitions_operations = create_service_adapter(
-    'azure.cli.command_modules.monitor.custom')
-
 with ServiceGroup(__name__, get_monitor_metric_definitions_operation,
-                  metric_definitions_operations) as s:
+                  custom_operations) as s:
     with s.group('monitor metric-definitions') as c:
         c.command('list', 'list_metric_definitions')
 
-metrics_operations = create_service_adapter(
-    'azure.cli.command_modules.monitor.custom')
-
-with ServiceGroup(__name__, get_monitor_metrics_operation, metrics_operations) as s:
+with ServiceGroup(__name__, get_monitor_metrics_operation, custom_operations) as s:
     with s.group('monitor metrics') as c:
         c.command('list', 'list_metrics')

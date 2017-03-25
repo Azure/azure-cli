@@ -4,7 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import json
-from ._util import ParametersContext
+from azure.cli.core.sdk.util import ParametersContext
+from azure.cli.command_modules.monitor.validators import (validate_diagnostic_settings)
+
 
 with ParametersContext(command='monitor alert-rules') as c:
     c.register_alias('name', ('--azure-resource-name',))
@@ -55,18 +57,17 @@ with ParametersContext(command='monitor diagnostic-settings') as c:
     c.register_alias('resource_uri', ('--resource-id',))
 
 with ParametersContext(command='monitor diagnostic-settings create') as c:
-    from azure.mgmt.monitor.models.service_diagnostic_settings_resource import \
-        (ServiceDiagnosticSettingsResource)
+    c.register_alias('resource_group', ('--resource-group', '-g'))
+    c.register_alias('target_resource_id', ('--resource-id',),
+                     validator=validate_diagnostic_settings)
+    c.register('logs', ('--logs',), type=json.loads)
+    c.register('metrics', ('--metrics',), type=json.loads)
+    c.argument('tags', nargs='*')
 
-    c.expand('parameters', ServiceDiagnosticSettingsResource)
-    c.register_alias('resource_uri', ('--resource-id',))
-    c.register('logs', ('--logs',),
-               type=json.loads,
-               help='JSON encoded list of logs settings. Use @{file} to load from a file.')
-    c.register('metrics', ('--metrics',),
-               type=json.loads,
-               help='JSON encoded list of metric settings. Use @{file} to load from a file.')
-
+    # Service Bus argument group
+    c.ignore('service_bus_rule_id')
+    c.argument('namespace', arg_group='Service Bus')
+    c.argument('rule_name', arg_group='Service Bus')
 
 with ParametersContext(command='monitor log-profiles') as c:
     c.register_alias('log_profile_name', ('--name', '-n'))

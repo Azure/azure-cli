@@ -89,13 +89,31 @@ helps['sql db replica delete-link'] = """
     type: command
     short-summary: Permanently stops data replication between two database replicas.
     """
-helps['sql db restore'] = """
+helps['sql db export'] = """
     type: command
-    short-summary: Creates a new database by restoring from a database backup.
+    short-summary: Exports a database to a bacpac.
+    examples:
+        - name: Get SAS key for use in export operation
+          text: az storage blob generate-sas --account-name myAccountName -c myContainer -n myBacpac.bacpac --permissions w --expiry 2018-01-01T00:00:00Z
+        - name: Export bacpac using SAS key
+          text: az sql db export -s myserver -n mydatabase -g mygroup -p password -u login --storage-key "?sr=b&sp=rw&se=2018-01-01T00%3A00%3A00Z&sig=mysignature&sv=2015-07-08" --storage-key-type SharedAccessKey --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/mybacpac.bacpac
+        - name: Export bacpac using storage account Key
+          text: az sql db export -s myserver -n mydatabase -g mygroup -p password -u login --storage-key MYKEY== --storage-key-type StorageAccessKey --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/mybacpac.bacpac
     """
 helps['sql db import'] = """
     type: command
     short-summary: Imports a bacpac into an existing database.
+    examples:
+        - name: Get SAS key for use in import operation
+          text: az storage blob generate-sas --account-name myAccountName -c myContainer -n myBacpac.bacpac --permissions r --expiry 2018-01-01T00:00:00Z
+        - name: Import bacpac into an existing database using SAS key
+          text: az sql db import -s myserver -n mydatabase -g mygroup -p password -u login --storage-key "?sr=b&sp=rw&se=2018-01-01T00%3A00%3A00Z&sig=mysignature&sv=2015-07-08" --storage-key-type SharedAccessKey --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/mybacpac.bacpac
+        - name: Import bacpac into an existing database using storage account key
+          text: az sql db import -s myserver -n mydatabase -g mygroup -p password -u login --storage-key MYKEY== --storage-key-type StorageAccessKey --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/mybacpac.bacpac
+    """
+helps['sql db restore'] = """
+    type: command
+    short-summary: Creates a new database by restoring from a database backup.
     """
 helps['sql db threat-policy'] = """
     type: group
@@ -138,29 +156,29 @@ helps['sql db threat-policy update'] = """
 #             short-summary: Manage database service tier advisors.
 #             """
 helps['sql dw'] = """
-        type: group
-        short-summary: Manage data warehouses.
-        """
+    type: group
+    short-summary: Manage data warehouses.
+    """
 helps['sql dw create'] = """
-        type: command
-        short-summary: Creates a data warehouse.
-        """
+    type: command
+    short-summary: Creates a data warehouse.
+    """
 helps['sql dw delete'] = """
-        type: command
-        short-summary: Deletes a database or data warehouse.
-        """
+    type: command
+    short-summary: Deletes a database or data warehouse.
+    """
 helps['sql dw list'] = """
-        type: command
-        short-summary: Lists all data warehouses in a server.
-        """
+    type: command
+    short-summary: Lists all data warehouses in a server.
+    """
 helps['sql dw show'] = """
-        type: command
-        short-summary: Gets a database or data warehouse.
-        """
+    type: command
+    short-summary: Gets a database or data warehouse.
+    """
 helps['sql dw update'] = """
-        type: command
-        short-summary: Updates a data warehouse.
-        """
+    type: command
+    short-summary: Updates a data warehouse.
+    """
 helps['sql elastic-pool'] = """
     type: group
     short-summary: Manage elastic pools. An elastic pool is an allocation of CPU, IO, and memory resources. Databases inside the pool share these resources.
