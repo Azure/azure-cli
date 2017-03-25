@@ -12,6 +12,7 @@ from azure.cli.core.commands.validators import validate_tag, validate_tags
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands.validators import generate_deployment_name
 from azure.cli.core.profiles import get_versioned_models
+from azure.cli.core.profiles.shared import ResourceType
 
 
 def get_subscription_locations():
@@ -51,7 +52,7 @@ def get_resource_groups():
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     # TODO Find usages of ResourceManagementClient and version those also.
     from azure.mgmt.resource import ResourceManagementClient
-    rcf = get_mgmt_service_client(ResourceManagementClient)
+    rcf = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
     return list(rcf.resource_groups.list())
 
 
@@ -63,7 +64,7 @@ def get_resource_group_completion_list(prefix, **kwargs):  # pylint: disable=unu
 def get_resources_in_resource_group(resource_group_name, resource_type=None):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.resource import ResourceManagementClient
-    rcf = get_mgmt_service_client(ResourceManagementClient)
+    rcf = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
     filter_str = "resourceType eq '{}'".format(resource_type) if resource_type else None
     return list(rcf.resource_groups.list_resources(resource_group_name, filter=filter_str))
 
@@ -71,7 +72,7 @@ def get_resources_in_resource_group(resource_group_name, resource_type=None):
 def get_resources_in_subscription(resource_type=None):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.resource import ResourceManagementClient
-    rcf = get_mgmt_service_client(ResourceManagementClient)
+    rcf = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
     filter_str = "resourceType eq '{}'".format(resource_type) if resource_type else None
     return list(rcf.resources.list(filter=filter_str))
 

@@ -16,6 +16,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.application import APPLICATION, IterateValue
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError, todict, shell_safe_json_parse
+from azure.cli.core.profiles.shared import ResourceType
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -99,7 +100,7 @@ def resource_exists(resource_group, name, namespace, type, **_):  # pylint: disa
 
     odata_filter = "resourceGroup eq '{}' and name eq '{}'" \
         " and resourceType eq '{}/{}'".format(resource_group, name, namespace, type)
-    client = get_mgmt_service_client(ResourceManagementClient).resources
+    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).resources
     existing = len(list(client.list(filter=odata_filter))) == 1
     return existing
 

@@ -14,7 +14,8 @@ def _network_client_factory(**_):
 def resource_client_factory(**_):
     from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(ResourceManagementClient)
+    from azure.cli.core.profiles.shared import ResourceType
+    return get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
 
 
 def cf_application_gateways(_):
