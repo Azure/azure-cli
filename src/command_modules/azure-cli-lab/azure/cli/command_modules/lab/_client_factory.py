@@ -31,6 +31,10 @@ def get_devtestlabs_artifact_operation(kwargs):
     return get_devtestlabs_management_client(kwargs).artifact
 
 
+def get_devtestlabs_artifact_source_operation(kwargs):
+    return get_devtestlabs_management_client(kwargs).artifact_source
+
+
 def get_devtestlabs_virtual_network_operation(kwargs):
     return get_devtestlabs_management_client(kwargs).virtual_network
 

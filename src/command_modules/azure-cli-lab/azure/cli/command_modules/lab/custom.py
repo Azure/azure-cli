@@ -42,7 +42,7 @@ def create_lab_vm(client, resource_group, lab_name, name, notes=None, image=None
 
 
 def list_vm(client, resource_group, lab_name, order_by=None, top=None,
-            filters=None, my_vms=None, claimable=None, expand=None, object_id=None):
+            filters=None, all=None, claimable=None, expand=None, object_id=None):
     """ Command to list vms by resource group in the Azure DevTest Lab """
 
     return client.list(resource_group, lab_name, expand=expand, filter=filters, top=top, order_by=order_by)

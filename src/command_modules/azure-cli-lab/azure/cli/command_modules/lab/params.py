@@ -52,7 +52,7 @@ with ParametersContext(command='lab vm create') as c:
 with ParametersContext(command='lab vm list') as c:
     filter_arg_group_name = 'Filter'
     c.argument('filters', arg_group=filter_arg_group_name)
-    c.argument('my_vms', action='store_true', arg_group=filter_arg_group_name)
+    c.argument('all', action='store_true', arg_group=filter_arg_group_name)
     c.argument('claimable', action='store_true', arg_group=filter_arg_group_name)
     c.register_alias('resource_group', ('--resource-group', '-g'), validator=validate_lab_vm_list)
 

@@ -68,7 +68,7 @@ helps['lab vm create'] = """
             """
 helps['lab vm list'] = """
             type: command
-            short-summary: Command to create vm of in Azure DevTest Lab.
+            short-summary: Command to retrieve my vms from the Azure DevTest Lab.
             parameters:
                 - name: --resource-group -g
                   short-summary: Name of the lab resource group
@@ -80,10 +80,12 @@ helps['lab vm list'] = """
                   short-summary: The maximum number of resources to return from the operation
                 - name: --filters
                   short-summary: The filter to apply on the operation
+                - name: --expand
+                  short-summary: Specify the expand query.
                 - name: --claimable
                   short-summary: List of claimable virtual machines in the lab. Cannot be used with --filters
-                - name: --my-vms
-                  short-summary: List of viewable virtual machines in the lab. Cannot be used with --filters
+                - name: --all
+                  short-summary: List all virtual machines in the lab. Cannot be used with --filters
                 - name: --object-id
                   short-summary: Owner's object id. If omitted, we'll pick one if available
             """
@@ -111,6 +113,10 @@ helps['lab gallery-image'] = """
 helps['lab artifact'] = """
             type: group
             short-summary: Commands to manage artifact of Azure DevTest Lab.
+            """
+helps['lab artifact-source'] = """
+            type: group
+            short-summary: Commands to manage artifact source of Azure DevTest Lab.
             """
 helps['lab vnet'] = """
             type: group

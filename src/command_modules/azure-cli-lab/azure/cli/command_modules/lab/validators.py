@@ -57,11 +57,18 @@ def validate_lab_vm_create(namespace):
 
 def validate_lab_vm_list(namespace):
     """ Validates parameters for lab vm list and updates namespace. """
-    collection = [namespace.filters, namespace.my_vms, namespace.claimable]
-    if not _single(collection):
-        raise CLIError("usage error: [--filters FILTER | --my-vms | --claimable]")
+    collection = [namespace.filters, namespace.all, namespace.claimable]
+    if _any(collection) and not _single(collection):
+        raise CLIError("usage error: [--filters FILTER | --all | --claimable]")
 
-    if namespace.my_vms:
+    # Retrieve all the vms of the lab
+    if namespace.all:
+        namespace.filters = None
+    # Retrieve all the vms claimable by user
+    elif namespace.claimable:
+        namespace.filters = 'properties/allowClaim'
+    # Default to retrieving users vms only
+    else:
         # Find out owner object id
         from azure.cli.core._profile import Profile, CLOUD
         profile = Profile()
@@ -73,10 +80,6 @@ def validate_lab_vm_list(namespace):
         subscription = profile.get_subscription()
         object_id = namespace.object_id or _get_object_id(graph_client, subscription=subscription)
         namespace.filters = "Properties/ownerObjectId eq '{}'".format(object_id)
-    elif namespace.claimable:
-        namespace.filters = 'properties/allowClaim'
-    else:
-        namespace.filters = namespace.filters
 
 
 def _get_formula(namespace):
@@ -320,6 +323,10 @@ def _is_valid_ssh_rsa_public_key(openssh_pubkey):
 
 def _single(collection):
     return len([x for x in collection if x]) == 1
+
+
+def _any(collection):
+    return len([x for x in collection if x]) > 0
 
 
 def _get_object_id(graph_client, subscription=None, spn=None, upn=None):

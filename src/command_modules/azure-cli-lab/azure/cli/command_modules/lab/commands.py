@@ -7,6 +7,7 @@ from ._client_factory import (get_devtestlabs_virtual_machine_operation,
                               get_devtestlabs_custom_image_operation,
                               get_devtestlabs_gallery_image_operation,
                               get_devtestlabs_artifact_operation,
+                              get_devtestlabs_artifact_source_operation,
                               get_devtestlabs_lab_operation,
                               get_devtestlabs_virtual_network_operation,
                               get_devtestlabs_formula_operation)
@@ -87,6 +88,17 @@ with ServiceGroup(__name__, get_devtestlabs_artifact_operation,
                   artifact_operations) as s:
     with s.group('lab artifact') as c:
         c.command('list', 'list')
+
+# Artifact Source Operations Commands
+artifact_source_operations = create_service_adapter(
+    mgmt_operations_path.format('artifact_source_operations'),
+    'ArtifactSourceOperations')
+
+with ServiceGroup(__name__, get_devtestlabs_artifact_source_operation,
+                  artifact_source_operations) as s:
+    with s.group('lab artifact-source') as c:
+        c.command('list', 'list')
+        c.command('get', 'get_resource')
 
 # Virtual Network Operations Commands
 virtual_network_operations = create_service_adapter(mgmt_operations_path.format('virtual_network_operations'),
