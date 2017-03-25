@@ -27,13 +27,8 @@ with ParametersContext(command='lab vm create') as c:
 
     # Image related arguments
     c.ignore('gallery_image_reference')
-    c.ignore('os_offer')
-    c.ignore('os_publisher')
-    c.ignore('os_type')
-    c.ignore('os_sku')
-    c.ignore('os_version')
     c.ignore('custom_image_id')
-    c.argument('image', required=True)
+    c.argument('image')
 
     # Network related arguments
     network_group_name = 'Network'
@@ -46,7 +41,8 @@ with ParametersContext(command='lab vm create') as c:
     c.register('location', ('--location', '-l'),
                help='Location in which to create VM. Defaults to the location of the lab')
     c.argument('expiration_date')
-    c.argument('formula', action='store_true')
+    c.argument('formula')
+    c.argument('allow_claim', action='store_true')
 
 
 with ParametersContext(command='lab vm list') as c:

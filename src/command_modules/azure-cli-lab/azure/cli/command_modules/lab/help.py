@@ -28,11 +28,13 @@ helps['lab vm create'] = """
                 - name: --notes
                   short-summary: Notes for the virtual machine
                 - name: --image
-                  short-summary: The name of the operating system image (Custom Image ID or Gallery Image Name or Name of formula from the lab).
+                  short-summary: The name of the operating system image (Gallery Image Name and Custom Image Name/ID).
                                  Use az lab gallery-image list for available Gallery Images or
                                  Use az lab custom-image list for available Custom Images
+                - name: --image-type
+                  short-summary: Type of the image. Allowed values are gallery, custom
                 - name: --formula
-                  short-summary: Use this when passing formula name in --image. Use az lab formula list for available formulas
+                  short-summary: Name of the formula. Use az lab formula list for available formulas
                 - name: --size
                   short-summary: The VM size to be created. See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info
                 - name: --admin-username
@@ -59,7 +61,7 @@ helps['lab vm create'] = """
                   short-summary: Space separated tags in 'key[=value]' format. Use "" to clear existing tags
                 - name: --allow-claim
                   short-summary: Indicates whether another user can take ownership of the virtual machine
-                - name: --storage-type
+                - name: --disk-type
                   short-summary: Storage type to use for virtual machine (i.e. Standard, Premium)
                 - name: --expiration-date
                   short-summary: The expiration date in UTC(YYYY-mm-dd) for VM. Ex. 2017-03-25

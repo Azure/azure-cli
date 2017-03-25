@@ -6,8 +6,6 @@
 import os
 import datetime
 import dateutil.parser
-
-from msrestazure.azure_exceptions import CloudError
 from azure.cli.core._util import CLIError
 from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
 from ._client_factory import (get_devtestlabs_management_client)
@@ -18,22 +16,31 @@ import azure.cli.core.azlogging as azlogging
 logger = azlogging.get_az_logger(__name__)
 devtestlabs_management_client = get_devtestlabs_management_client(None)
 
-# Message for using defaults
-DEFAULT_MESSAGE_FORMAT = 'Using %s : %s'
+# pylint: disable=line-too-long
+
+# Odata filter for startswith
+ODATA_STARTS_WITH_FILTER = "startswith(name, '{}')"
 
 
 def validate_lab_vm_create(namespace):
     """ Validates parameters for lab vm create and updates namespace. """
     formula = None
-    if namespace.formula is True:
+
+    collection = [namespace.image, namespace.formula]
+    if not _single(collection):
+        raise CLIError("usage error: [--image name --image-type type | --formula name]")
+    if namespace.formula and (namespace.image or namespace.image_type):
+        raise CLIError("usage error: [--image name --image-type type | --formula name]")
+
+    if namespace.formula:
         formula = _get_formula(namespace)
 
     _validate_location(namespace)
     _validate_expiration_date(namespace)
     _validate_image_argument(namespace, formula)
-    validate_authentication_type(namespace, formula)
     _validate_network_parameters(namespace, formula)
     _validate_other_parameters(namespace, formula)
+    validate_authentication_type(namespace, formula)
 
 
 def validate_lab_vm_list(namespace):
@@ -63,12 +70,6 @@ def validate_lab_vm_list(namespace):
         namespace.filters = "Properties/ownerObjectId eq '{}'".format(object_id)
 
 
-def _get_formula(namespace):
-    """ Get formula from the lab """
-    formula_operation = devtestlabs_management_client.formula
-    return formula_operation.get_resource(namespace.resource_group, namespace.lab_name, namespace.image)
-
-
 def _validate_location(namespace):
     """
     Selects the default location of the lab when location is not provided.
@@ -88,18 +89,19 @@ def _validate_expiration_date(namespace):
 
 
 def _validate_network_parameters(namespace, formula=None):
-    """ Selects lab's virtual network and subnet if not provided and updates namespace """
+    """ Updates namespace for virtual network and subnet parameters """
     from azure.cli.core.commands.client_factory import get_subscription_id
     vnet_operation = devtestlabs_management_client.virtual_network
 
     if formula and formula.formula_content:
         if formula.formula_content.lab_virtual_network_id:
-            namespace.vnet_name = namespace.vnet_name or formula.formula_content.lab_virtual_network_id.split('/')[-1]
-            logger.warning(DEFAULT_MESSAGE_FORMAT, 'vnet_name', namespace.vnet_name)
+            namespace.vnet_name = namespace.vnet_name or \
+                                  formula.formula_content.lab_virtual_network_id.split('/')[-1]
         if formula.formula_content.lab_virtual_network_id:
-            namespace.subnet = namespace.subnet or formula.formula_content.lab_subnet_name
-            namespace.disallow_public_ip_address = namespace.disallow_public_ip_address or formula.formula_content.disallow_public_ip_address
-            logger.warning(DEFAULT_MESSAGE_FORMAT, 'lab_subnet_name', namespace.subnet)
+            namespace.subnet = namespace.subnet or \
+                               formula.formula_content.lab_subnet_name
+            namespace.disallow_public_ip_address = namespace.disallow_public_ip_address or \
+                                                   formula.formula_content.disallow_public_ip_address
 
     if not namespace.vnet_name:
         lab_vnets = list(vnet_operation.list(namespace.resource_group, namespace.lab_name, top=1))
@@ -119,13 +121,16 @@ def _validate_network_parameters(namespace, formula=None):
                                                        child_type='virtualnetworks',
                                                        child_name=namespace.vnet_name)
 
-    # Select default subnet for selected vnet when subnet is not provided
+    # Select default subnet for selected virtual network when subnet is not provided
     if not namespace.subnet:
         # Get the first subnet of the lab's virtual network
-        lab_vnet = vnet_operation.get_resource(namespace.resource_group, namespace.lab_name, namespace.vnet_name)
+        lab_vnet = vnet_operation.get_resource(namespace.resource_group,
+                                               namespace.lab_name,
+                                               namespace.vnet_name)
         namespace.subnet = lab_vnet.subnet_overrides[0].lab_subnet_name
 
-        # Determine value for disallow_public_ip_address based on subnet's use_public_ip_address_permission property
+        # Determine value for disallow_public_ip_address based on subnet's
+        # use_public_ip_address_permission property
         if lab_vnet.subnet_overrides[0].use_public_ip_address_permission == 'Allow':
             namespace.disallow_public_ip_address = False
         else:
@@ -133,71 +138,99 @@ def _validate_network_parameters(namespace, formula=None):
 
 
 def _validate_image_argument(namespace, formula=None):
-    image_type = None
-    if formula:
-        if formula.formula_content and formula.formula_content.gallery_image_reference:
-            namespace.os_offer = formula.formula_content.gallery_image_reference.offer
-            namespace.os_publisher = formula.formula_content.gallery_image_reference.publisher
-            namespace.os_type = formula.formula_content.gallery_image_reference.os_type
-            namespace.os_sku = formula.formula_content.gallery_image_reference.sku
-            namespace.os_version = formula.formula_content.gallery_image_reference.version
-            image_type = 'gallery_image'
-        elif formula.formula_content and formula.formula_content.custom_image_id:
-            namespace.custom_image_id = namespace.image
-            image_type = 'image_id'
+    """ Update namespace for image based on image or formula """
+    if formula and formula.formula_content:
+        if formula.formula_content.gallery_image_reference:
+            gallery_image_reference = formula.formula_content.gallery_image_reference
+            namespace.gallery_image_reference = \
+                GalleryImageReference(offer=gallery_image_reference.offer,
+                                      publisher=gallery_image_reference.publisher,
+                                      os_type=gallery_image_reference.os_type,
+                                      sku=gallery_image_reference.sku,
+                                      version=gallery_image_reference.version)
+            return
+        elif formula.formula_content.custom_image_id:
+            namespace.image = formula.formula_content.custom_image_id.split('/')[-1]
+            namespace.image_type = 'custom'
 
-    image_type = image_type or _parse_image_argument(namespace)
-
-    if image_type == 'gallery_image':
-        namespace.gallery_image_reference = GalleryImageReference(offer=namespace.os_offer,
-                                                                  publisher=namespace.os_publisher,
-                                                                  os_type=namespace.os_type,
-                                                                  sku=namespace.os_sku,
-                                                                  version=namespace.os_version)
-        namespace.notes = namespace.notes or namespace.image
+    if namespace.image_type == 'gallery':
+        _use_gallery_image(namespace)
+    elif namespace.image_type == 'custom':
+        _use_custom_image(namespace)
     else:
-        namespace.custom_image_id = namespace.image
+        raise CLIError("incorrect value for image-type: '{}'. Allowed values: gallery or custom"
+                       .format(namespace.image_type))
 
 
-def _parse_image_argument(namespace):
-    # 1 - check if a fully-qualified ID (assumes it is an image ID)
+def _use_gallery_image(namespace):
+    """ Retrieve gallery image from lab and update namespace """
+    gallery_image_operation = devtestlabs_management_client.gallery_image
+    odata_filter = ODATA_STARTS_WITH_FILTER.format(namespace.image)
+    gallery_images = list(gallery_image_operation.list(namespace.resource_group,
+                                                       namespace.lab_name,
+                                                       filter=odata_filter))
+
+    if not gallery_images:
+        err = "Unable to find image name '{}' in the '{}' lab Gallery.".format(namespace.image,
+                                                                               namespace.lab_name)
+        raise CLIError(err)
+    elif len(gallery_images) > 1:
+        err = "Found more than 1 image with name '{}'. Please pick one from {}"
+        raise CLIError(err.format(namespace.image, [x.name for x in gallery_images]))
+    else:
+        namespace.gallery_image_reference = \
+            GalleryImageReference(offer=gallery_images[0].image_reference.offer,
+                                  publisher=gallery_images[0].image_reference.publisher,
+                                  os_type=gallery_images[0].image_reference.os_type,
+                                  sku=gallery_images[0].image_reference.sku,
+                                  version=gallery_images[0].image_reference.version)
+
+
+def _use_custom_image(namespace):
+    """ Retrieve custom image from lab and update namespace """
     if is_valid_resource_id(namespace.image):
-        return 'image_id'
-
-    # 2 - check if an existing lab Gallery Image Reference
-    try:
-        gallery_image_operation = devtestlabs_management_client.gallery_image
-        odata_filter = "name eq '{}'".format(namespace.image)
-        lab_images = list(gallery_image_operation.list(namespace.resource_group, namespace.lab_name, filter=odata_filter))
-
-        if not lab_images:
-            err = "Unable to find image name '{}' in the '{}' lab Gallery.".format(namespace.image, namespace.lab_name)
+        namespace.custom_image_id = namespace.image
+    else:
+        custom_image_operation = devtestlabs_management_client.custom_image
+        odata_filter = ODATA_STARTS_WITH_FILTER.format(namespace.image)
+        custom_images = list(custom_image_operation.list(namespace.resource_group,
+                                                         namespace.lab_name,
+                                                         filter=odata_filter))
+        if not custom_images:
+            err = "Unable to find custom image name '{}' in the '{}' lab.".format(namespace.image, namespace.lab_name)
             raise CLIError(err)
-        elif len(lab_images) > 1:
-            err = "Found more than 1 image with name "'{}'". Please pick one from {}"
-            raise CLIError(err.format(namespace.image, [x['name'] for x in lab_images]))
+        elif len(custom_images) > 1:
+            err = "Found more than 1 image with name '{}'. Please pick one from {}"
+            raise CLIError(err.format(namespace.image, [x.name for x in custom_images]))
         else:
-            image = lab_images[0]
-            namespace.os_offer = image.image_reference.offer
-            namespace.os_publisher = image.image_reference.publisher
-            namespace.os_sku = image.image_reference.sku
-            namespace.os_type = image.image_reference.os_type
-            namespace.os_version = image.image_reference.version
-        return 'gallery_image'
-    except CloudError:
-        err = "Invalid image "'{}'". Use a custom image id or pick one from lab Gallery"
-        raise CLIError(err.format(namespace.image))
+            namespace.custom_image_id = custom_images[0].id
 
 
-def _validate_other_parameters(namespace, formula):
+def _get_formula(namespace):
+    """ Retrieve formula image from lab """
+    formula_operation = devtestlabs_management_client.formula
+    odata_filter = ODATA_STARTS_WITH_FILTER.format(namespace.formula)
+    formula_images = list(formula_operation.list(namespace.resource_group,
+                                                 namespace.lab_name,
+                                                 filter=odata_filter))
+    if not formula_images:
+        err = "Unable to find formula name '{}' in the '{}' lab.".format(namespace.formula, namespace.lab_name)
+        raise CLIError(err)
+    elif len(formula_images) > 1:
+        err = "Found more than 1 formula with name '{}'. Please pick one from {}"
+        raise CLIError(err.format(namespace.formula, [x.name for x in formula_images]))
+    return formula_images[0]
+
+
+def _validate_other_parameters(namespace, formula=None):
     if formula:
-        namespace.tags = formula.tags
+        namespace.tags = namespace.tags or formula.tags
         if formula.formula_content:
             namespace.allow_claim = namespace.allow_claim or formula.formula_content.allow_claim
             namespace.artifacts = namespace.artifacts or formula.formula_content.artifacts
             namespace.notes = namespace.notes or formula.formula_content.notes
             namespace.size = namespace.size or formula.formula_content.size
-            logger.warning(DEFAULT_MESSAGE_FORMAT, 'artifacts', namespace.artifacts)
+            namespace.disk_type = namespace.disk_type or formula.formula_content.storage_type
 
 
 # TODO: Following methods are carried over from other command modules

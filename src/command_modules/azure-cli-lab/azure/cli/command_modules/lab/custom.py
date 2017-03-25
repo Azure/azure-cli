@@ -6,14 +6,13 @@ import getpass
 
 
 # pylint: disable=too-many-locals, unused-argument, too-many-statements
-def create_lab_vm(client, resource_group, lab_name, name, notes=None, image=None, size=None,
-                  admin_username=getpass.getuser(), admin_password=None,
+def create_lab_vm(client, resource_group, lab_name, name, notes=None, image=None, image_type=None,
+                  size=None, admin_username=getpass.getuser(), admin_password=None,
                   ssh_key=None, authentication_type='password',
                   vnet_name=None, subnet=None, disallow_public_ip_address=None, artifacts=None,
                   location=None, tags=None, custom_image_id=None, lab_virtual_network_id=None,
-                  os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_type=None,
-                  gallery_image_reference=None, generate_ssh_keys=None, allow_claim=None,
-                  storage_type='Standard', expiration_date=None, formula=None):
+                  gallery_image_reference=None, generate_ssh_keys=None, allow_claim=False,
+                  disk_type=None, expiration_date=None, formula=None):
     """ Command to create vm of in the Azure DevTest Lab """
     from .sdk.devtestlabs.models.lab_virtual_machine_creation_parameter import LabVirtualMachineCreationParameter
 
@@ -35,7 +34,7 @@ def create_lab_vm(client, resource_group, lab_name, name, notes=None, image=None
                                                              location=location,
                                                              tags=tags,
                                                              allow_claim=allow_claim,
-                                                             storage_type=storage_type,
+                                                             storage_type=disk_type,
                                                              expiration_date=expiration_date)
 
     return client.create_environment(resource_group, lab_name, lab_virtual_machine)
