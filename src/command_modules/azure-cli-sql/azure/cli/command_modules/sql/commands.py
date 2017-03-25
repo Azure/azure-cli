@@ -7,9 +7,12 @@ from ._util import (
     get_sql_servers_operations,
     get_sql_firewall_rules_operations,
     get_sql_databases_operations,
-    get_sql_elastic_pools_operations,
+    get_sql_elastic_pools_operations)
+from azure.cli.core.sdk.util import (
     create_service_adapter,
     ServiceGroup)
+
+custom_path = 'azure.cli.command_modules.sql.custom#{}'
 
 ###############################################
 #                sql db                       #
@@ -18,7 +21,7 @@ from ._util import (
 database_operations = create_service_adapter('azure.mgmt.sql.operations.databases_operations',
                                              'DatabasesOperations')
 
-with ServiceGroup(__name__, get_sql_databases_operations, database_operations) as s:
+with ServiceGroup(__name__, get_sql_databases_operations, database_operations, custom_path) as s:
     with s.group('sql db') as c:
         c.custom_command('create', 'db_create')
         c.custom_command('copy', 'db_copy')
@@ -83,7 +86,7 @@ with ServiceGroup(__name__, get_sql_databases_operations, database_operations) a
 elastic_pools_ops = create_service_adapter('azure.mgmt.sql.operations.elastic_pools_operations',
                                            'ElasticPoolsOperations')
 
-with ServiceGroup(__name__, get_sql_elastic_pools_operations, elastic_pools_ops) as s:
+with ServiceGroup(__name__, get_sql_elastic_pools_operations, elastic_pools_ops, custom_path) as s:
     with s.group('sql elastic-pool') as c:
         c.custom_command('create', 'elastic_pool_create')
         c.command('delete', 'delete')
@@ -117,7 +120,7 @@ recommanded_elastic_pools_ops = \
 servers_operations = create_service_adapter('azure.mgmt.sql.operations.servers_operations',
                                             'ServersOperations')
 
-with ServiceGroup(__name__, get_sql_servers_operations, servers_operations) as s:
+with ServiceGroup(__name__, get_sql_servers_operations, servers_operations, custom_path) as s:
     with s.group('sql server') as c:
         c.command('create', 'create_or_update')
         c.command('delete', 'delete', confirmation=True)
@@ -132,7 +135,8 @@ firewall_rules_operations = create_service_adapter(
     'azure.mgmt.sql.operations.firewall_rules_operations',
     'FirewallRulesOperations')
 
-with ServiceGroup(__name__, get_sql_firewall_rules_operations, firewall_rules_operations) as s:
+with ServiceGroup(__name__, get_sql_firewall_rules_operations, firewall_rules_operations,
+                  custom_path) as s:
     with s.group('sql server firewall-rule') as c:
         c.command('create', 'create_or_update')
         c.custom_command('update', 'firewall_rule_update')

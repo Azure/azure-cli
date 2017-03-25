@@ -5,11 +5,11 @@
 
 import itertools
 from enum import Enum
-from ._util import ParametersContext, patch_arg_make_required
 from azure.cli.core.commands import CliArgumentType
 from azure.cli.core.commands.parameters import (
     enum_choice_list,
     ignore_type)
+from azure.cli.core.sdk.util import ParametersContext, patch_arg_make_required
 from azure.mgmt.sql.models.database import Database
 from azure.mgmt.sql.models.elastic_pool import ElasticPool
 from azure.mgmt.sql.models.import_extension_request \
