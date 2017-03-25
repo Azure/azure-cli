@@ -1137,7 +1137,7 @@ def service_list():
     Lists all the running user services in the Kubernetes cluster.
     """
     try:
-        # Liting Services ...
+        # Listing Services ...
         _service_list()
 
     except Exception as error:
