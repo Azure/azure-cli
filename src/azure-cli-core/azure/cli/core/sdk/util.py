@@ -76,21 +76,6 @@ class CommandGroup(object):
         else:
             custom_function_op = None
 
-    def custom_command(self, name, custom_func_name, confirmation=None):
-        cli_command(self._scope,
-                    '{} {}'.format(self._group_name, name),
-                    self._custom_path.format(custom_func_name),
-                    client_factory=self._client_factory,
-                    confirmation=confirmation)
-
-    # pylint: disable=too-many-arguments
-    def generic_update_command(self, name, getter_op, setter_op, custom_func_name=None,
-                               setter_arg_name='parameters'):
-        if custom_func_name:
-            custom_function_op = self._custom_path.format(custom_func_name)
-        else:
-            custom_function_op = None
-
         cli_generic_update_command(
             self._scope,
             '{} {}'.format(self._group_name, name),
