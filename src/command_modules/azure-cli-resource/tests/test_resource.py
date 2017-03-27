@@ -159,8 +159,13 @@ class ResourceIDScenarioTest(ResourceGroupVCRTestBase):
             subscription_id, self.resource_group, self.vnet_name, self.subnet_name)
         s.cmd('resource show --id {}'.format(subnet_resource_id), checks=[
             JMESPathCheck('name', self.subnet_name),
-            JMESPathCheck('resourceGroup', self.resource_group)
+            JMESPathCheck('resourceGroup', self.resource_group),
+            JMESPathCheck('properties.addressPrefix', '10.0.0.0/24')
         ])
+
+        s.cmd('resource update --id {} --set properties.addressPrefix=10.0.0.0/22'.format(subnet_resource_id), checks=[
+            JMESPathCheck('properties.addressPrefix', '10.0.0.0/22')
+            ])
 
         s.cmd('resource delete --id {}'.format(subnet_resource_id), checks=NoneCheck())
         s.cmd('resource delete --id {}'.format(vnet_resource_id), checks=NoneCheck())
