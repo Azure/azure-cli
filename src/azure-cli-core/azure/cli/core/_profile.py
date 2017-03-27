@@ -92,12 +92,16 @@ class CredentialType(Enum):  # pylint: disable=too-few-public-methods
     management = CLOUD.endpoints.management
     rbac = CLOUD.endpoints.active_directory_graph_resource_id
 
+_GLOBAL_CREDS_CACHE = None
 
 class Profile(object):
     def __init__(self, storage=None, auth_ctx_factory=None):
         self._storage = storage or ACCOUNT
         self.auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
-        self._creds_cache = CredsCache(self.auth_ctx_factory)
+        global _GLOBAL_CREDS_CACHE  # pylint: disable=global-statement
+        if _GLOBAL_CREDS_CACHE is None:
+            _GLOBAL_CREDS_CACHE = CredsCache(self.auth_ctx_factory)
+        self._creds_cache = _GLOBAL_CREDS_CACHE
         self._management_resource_uri = CLOUD.endpoints.management
         self._ad_resource_uri = CLOUD.endpoints.active_directory_resource_id
 
@@ -477,22 +481,28 @@ class CredsCache(object):
         self._service_principal_creds = []
         self._auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
         self._adal_token_cache_attr = None
+        self._should_flush_to_disk = False
+        import atexit
+        atexit.register(self.flush_to_disk)
 
     def persist_cached_creds(self):
-        with os.fdopen(os.open(self._token_file, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600),
-                       'w+') as cred_file:
-            items = self.adal_token_cache.read_items()
-            all_creds = [entry for _, entry in items]
-
-            # trim away useless fields (needed for cred sharing with xplat)
-            for i in all_creds:
-                for key in TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE:
-                    i.pop(key, None)
-
-            all_creds.extend(self._service_principal_creds)
-            cred_file.write(json.dumps(all_creds))
-
+        self._should_flush_to_disk = True
         self.adal_token_cache.has_state_changed = False
+
+    def flush_to_disk(self):
+        if self._should_flush_to_disk:
+            with os.fdopen(os.open(self._token_file, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600),
+                           'w+') as cred_file:
+                items = self.adal_token_cache.read_items()
+                all_creds = [entry for _, entry in items]
+
+                # trim away useless fields (needed for cred sharing with xplat)
+                for i in all_creds:
+                    for key in TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE:
+                        i.pop(key, None)
+
+                all_creds.extend(self._service_principal_creds)
+                cred_file.write(json.dumps(all_creds))
 
     def retrieve_token_for_user(self, username, tenant, resource):
         authority = get_authority_url(tenant)
