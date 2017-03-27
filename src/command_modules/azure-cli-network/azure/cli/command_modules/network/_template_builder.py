@@ -200,8 +200,8 @@ def build_application_gateway_resource(name, location, tags, sku_name, sku_tier,
     return ag
 
 
-def build_load_balancer_resource(name, location, tags, backend_pool_name, nat_pool_name,
-                                 backend_port, frontend_ip_name, public_ip_id, subnet_id,
+def build_load_balancer_resource(name, location, tags, backend_pool_name,
+                                 frontend_ip_name, public_ip_id, subnet_id,
                                  private_ip_address, private_ip_allocation):
     lb_id = "resourceId('Microsoft.Network/loadBalancers', '{}')".format(name)
 

@@ -100,8 +100,68 @@ def create_application_gateway(app_gateway_name, resource_group_name, location=N
                                private_ip_address=None, public_ip_address=None,
                                public_ip_address_allocation=IPAllocationMethod.dynamic.value,
                                subnet=None, subnet_address_prefix='10.0.0.0/24',
-                               vnet_name=None, vnet_address_prefix='10.0.0.0/16'):
-    pass
+                               vnet_name=None, vnet_address_prefix='10.0.0.0/16',
+                               public_ip_type=None, vnet_type=None, validate=False):
+    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
+    from azure.cli.core._util import random_string
+    from azure.cli.command_modules.network._template_builder import \
+        (ArmTemplateBuilder, build_application_gateway_resource, build_public_ip_resource,
+         build_vnet_resource)
+
+    tags = tags or {}
+
+    # Build up the ARM template
+    master_template = ArmTemplateBuilder()
+    ag_dependencies = []
+
+    public_ip_id = public_ip_address if is_valid_resource_id(public_ip_address) else None
+    subnet_id = subnet if is_valid_resource_id(subnet) else None
+    private_ip_allocation = IPAllocationMethod.static.value if private_ip_address \
+        else IPAllocationMethod.dynamic.value
+
+    network_id_template = resource_id(
+        subscription=get_subscription_id(), resource_group=resource_group_name,
+        namespace='Microsoft.Network')
+
+    if vnet_type == 'new':
+        ag_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
+        vnet = build_vnet_resource(
+            vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix)
+        master_template.add_resource(vnet)
+        subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name,
+                                                              subnet)
+
+    if public_ip_type == 'new':
+        ag_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))  # pylint: disable=line-too-long
+        master_template.add_resource(build_public_ip_resource(public_ip_address, location,
+                                                              tags,
+                                                              public_ip_address_allocation,
+                                                              None))
+        public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
+                                                                public_ip_address)
+
+    app_gateway_resource = build_application_gateway_resource(
+        app_gateway_name, location, tags, sku_name, sku_tier, capacity, backend_port, servers,
+        frontend_port, private_ip_address, private_ip_allocation)
+    app_gateway_resource['dependsOn'] = ag_dependencies
+    master_template.add_resource(app_gateway_resource)
+    master_template.add_output('resource', app_gateway_name, output_type='object')
+
+    template = master_template.build()
+
+    # deploy ARM template
+    deployment_name = 'ag_deploy_' + random_string(32)
+    client = get_mgmt_service_client(ResourceManagementClient).deployments
+    properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
+    if validate:
+        from pprint import pprint
+        pprint(template)
+        return client.validate(resource_group_name, deployment_name, properties)
+
+    return LongRunningOperation()(client.create_or_update(
+        resource_group_name, deployment_name, properties, raw=no_wait))
+
 
 def update_application_gateway(instance, sku_name=None, sku_tier=None, capacity=None, tags=None):
     if sku_name is not None:
@@ -445,8 +505,68 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
                          private_ip_address=None, public_ip_address=None,
                          public_ip_address_allocation=IPAllocationMethod.dynamic.value,
                          public_ip_dns_name=None, subnet=None, subnet_address_prefix='10.0.0.0/24',
-                         vnet_name=None, vnet_address_prefix='10.0.0.0/16'):
-    pass
+                         vnet_name=None, vnet_address_prefix='10.0.0.0/16',
+                         public_ip_type=None, vnet_type=None, validate=False):
+    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
+    from azure.cli.core._util import random_string
+    from azure.cli.command_modules.network._template_builder import \
+        (ArmTemplateBuilder, build_load_balancer_resource, build_public_ip_resource,
+         build_vnet_resource)
+
+    tags = tags or {}
+
+    # Build up the ARM template
+    master_template = ArmTemplateBuilder()
+    lb_dependencies = []
+
+    public_ip_id = public_ip_address if is_valid_resource_id(public_ip_address) else None
+    subnet_id = subnet if is_valid_resource_id(subnet) else None
+    private_ip_allocation = IPAllocationMethod.static.value if private_ip_address \
+        else IPAllocationMethod.dynamic.value
+
+    network_id_template = resource_id(
+        subscription=get_subscription_id(), resource_group=resource_group_name,
+        namespace='Microsoft.Network')
+
+    if vnet_type == 'new':
+        lb_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
+        vnet = build_vnet_resource(
+            vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix)
+        master_template.add_resource(vnet)
+        subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name,
+                                                              subnet)
+
+    if public_ip_type == 'new':
+        lb_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))  # pylint: disable=line-too-long
+        master_template.add_resource(build_public_ip_resource(public_ip_address, location,
+                                                              tags,
+                                                              public_ip_address_allocation,
+                                                              public_ip_dns_name))
+        public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
+                                                                public_ip_address)
+
+    load_balancer_resource = build_load_balancer_resource(
+        load_balancer_name, location, tags, backend_pool_name, frontend_ip_name,
+        public_ip_id, subnet_id, private_ip_address, private_ip_allocation)
+    load_balancer_resource['dependsOn'] = lb_dependencies
+    master_template.add_resource(load_balancer_resource)
+    master_template.add_output('resource', load_balancer_name, output_type='object')
+
+    template = master_template.build()
+
+    # deploy ARM template
+    deployment_name = 'lb_deploy_' + random_string(32)
+    client = get_mgmt_service_client(ResourceManagementClient).deployments
+    properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
+    if validate:
+        from pprint import pprint
+        pprint(template)
+        return client.validate(resource_group_name, deployment_name, properties)
+
+    return LongRunningOperation()(client.create_or_update(
+        resource_group_name, deployment_name, properties, raw=no_wait))
+
 
 def create_lb_inbound_nat_rule(
         resource_group_name, load_balancer_name, item_name, protocol, frontend_port,
