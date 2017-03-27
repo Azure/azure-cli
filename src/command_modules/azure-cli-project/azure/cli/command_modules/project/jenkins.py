@@ -20,7 +20,8 @@ class Jenkins(DeployableResource):
     def __init__(self, resource_group,
                  admin_username, admin_password,
                  client_id, client_secret,
-                 git_repo_url, dns_prefix, location, container_registry_url):
+                 git_repo_url, dns_prefix, location, container_registry_url,
+                 service_name, project_name):
         # TODO: admin_password should be replaced with the SSH key once quickstart
         # template is updated to use SSH instead of username/password
         super(Jenkins, self).__init__(resource_group)
@@ -33,6 +34,8 @@ class Jenkins(DeployableResource):
         self.dns_prefix = dns_prefix
         self.location = location
         self.container_registry_url = container_registry_url
+        self.service_name = service_name
+        self.project_name = project_name
 
     def deploy(self):
         """
@@ -69,6 +72,37 @@ class Jenkins(DeployableResource):
         self._unsecure_instance()
         utils.writeline('Jenkins configuration completed.')
 
+    def _instal_kubectl(self):
+        """
+        Installs kubectl on the Jenkins VM
+        """
+        command = 'curl -sSLO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl | sh && chmod +x ./kubectl && sudo mv ./kubectl /usr/local/bin/kubectl'
+        self._run_remote_command(command)
+
+    def _get_ci_job_name(self):
+        """
+        Gets the name for the CI job
+        """
+        return '{}-CI'.format(self.service_name)
+
+    def _get_cd_job_name(self):
+        """
+        Gets the name for the CD job
+        """
+        return '{}-CD'.format(self.service_name)
+
+    def _get_image_repo_name(self):
+        """
+        Gets the image repository name
+        """
+        return '{}/{}'.format(self.project_name, self.service_name)
+
+    def _add_cd_job(self):
+        """
+        Adds the CD job to Jenkins instance
+        """
+        pass
+
     def _install_docker(self):
         """
         Installs Docker on the Jenkins VM
@@ -77,13 +111,14 @@ class Jenkins(DeployableResource):
         command = 'sudo curl -sSL https://get.docker.com/ | sh && sudo gpasswd -a jenkins docker && skill -KILL -u jenkins && sudo service jenkins restart'
         self._run_remote_command(command)
 
-    def _add_docker_build_job(self):
+    def _add_ci_job(self):
         """
-        Adds a docker build job to Jenkins instance
+        Adds the CI job to Jenkins instance
         """
         initial_password = self._get_initial_password()
         add_build_job_script_url = \
-            'https://raw.githubusercontent.com/Azure/azure-devops-utils/{}/jenkins/add-docker-build-job.sh'.format(self.scripts_version)
+            'https://raw.githubusercontent.com/PeterJausovec/azure-devops-utils/master/jenkins/add-docker-build-job.sh'
+            # 'https://raw.githubusercontent.com/Azure/azure-devops-utils/{}/jenkins/add-docker-build-job.sh'.format(self.scripts_version)
         args = ' '.join([
             '-j {}'.format('http://127.0.0.1:8080'),
             '-ju {}'.format('admin'),
@@ -92,6 +127,9 @@ class Jenkins(DeployableResource):
             '-r {}'.format(self.container_registry_url),
             '-ru {}'.format(self.client_id),
             '-rp {}'.format(self.client_secret),
+            '-jsn {}'.format(self._get_ci_job_name()),
+            '-sn {}'.format(self.service_name),
+            '-rr {}'.format(self._get_image_repo_name()),
             '-sps {}'.format('"* * * * *"'),
             # TODO: Pull the registry repository name out of here
             '-rr {}/{}'.format(self.admin_username, 'myfirstapp')])

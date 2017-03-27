@@ -319,13 +319,17 @@ def _deploy_jenkins():
     admin_username = project_settings.admin_username
     container_registry_url = project_settings.container_registry_url
     location = project_settings.location
+    project_name = project_settings.project_name
+
+    # TODO: Where do we get the service name from?
+    service_name = os.path.basename(os.getcwd())
 
     jenkins_dns_prefix = 'jenkins-' + utils.get_random_string()
     jenkins_resource = Jenkins(
         resource_group, admin_username,
         admin_password, client_id, client_secret,
         git_repo, jenkins_dns_prefix, location,
-        container_registry_url)
+        container_registry_url, service_name, project_name)
     return (jenkins_resource, jenkins_resource.deploy())
 
 
