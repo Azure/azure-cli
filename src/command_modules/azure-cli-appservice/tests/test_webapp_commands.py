@@ -445,13 +445,13 @@ class WebappSSLCertTest(ResourceGroupVCRTestBase):
             JMESPathCheck('thumbprint', cert_thumbprint)
         ])
         self.cmd('appservice web config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {}'.format(self.resource_group, self.webapp_name, cert_thumbprint, 'SNI'), checks=[
-            JMESPathCheck('hostNameSslStates[0].sslState', 'SniEnabled'),
-            JMESPathCheck('hostNameSslStates[0].thumbprint', cert_thumbprint)
+            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(self.webapp_name), 'SniEnabled'),
+            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].thumbprint".format(self.webapp_name), cert_thumbprint)
         ])
         self.cmd('appservice web config ssl unbind -g {} -n {} --certificate-thumbprint {}'.format(self.resource_group, self.webapp_name, cert_thumbprint), checks=[
-            JMESPathCheck('hostNameSslStates[0].sslState', 'Disabled')
+            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(self.webapp_name), 'Disabled'),
         ])
-        self.cmd('appservice web config ssl delete -g {} -n {} --certificate-thumbprint {}'.format(self.resource_group, self.webapp_name, cert_thumbprint))
+        self.cmd('appservice web config ssl delete -g {} --certificate-thumbprint {}'.format(self.resource_group, cert_thumbprint))
         self.cmd('appservice web delete -g {} -n {}'.format(self.resource_group, self.webapp_name))
 
 
