@@ -391,7 +391,14 @@ class SubscriptionFinder(object):
         for t in tenants:
             tenant_id = t.tenant_id
             temp_context = self._create_auth_context(tenant_id)
-            temp_credentials = temp_context.acquire_token(resource, self.user_id, _CLIENT_ID)
+            try:
+                temp_credentials = temp_context.acquire_token(resource, self.user_id, _CLIENT_ID)
+            except adal.AdalError as ex:
+                # because user creds went through the 'common' tenant, the error here must be
+                # tenant specific, like the account was disabled. For such errors, we will continue
+                # with other tenants.
+                logger.warning("Failed to authenticate '%s' due to error '%s'", t, ex)
+                continue
             subscriptions = self._find_using_specific_tenant(
                 tenant_id,
                 temp_credentials[_ACCESS_TOKEN])
