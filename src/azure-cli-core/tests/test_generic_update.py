@@ -90,6 +90,9 @@ class GenericUpdateTest(unittest.TestCase):
         app.execute('update-obj --set myProp=val3'.split())
         self.assertEqual(my_obj.my_prop, 'val3', 'set simple property again')
 
+        app.execute('update-obj --set myProp="foo=bar"'.split())
+        self.assertEqual(my_obj.my_prop, 'foo=bar', 'use equal in value')
+
         app.execute('update-obj --set myList[0]=newValA'.split())
         self.assertEqual(my_obj.my_list[0], 'newValA', 'set simple list element')
 
@@ -105,7 +108,12 @@ class GenericUpdateTest(unittest.TestCase):
                          'set simple dict element with snake case key')
 
         # Test the different ways of indexing into a list of objects or dictionaries by filter
-        app.execute('update-obj --set myListOfCamelDicts[myKey=value_2].myKey=new_value'.split())
+        app.execute('update-obj --set myListOfCamelDicts[myKey=value_2].myKey="foo=bar"'.split())
+        self.assertEqual(my_obj.my_list_of_camel_dicts[1]['myKey'],
+                         'foo=bar',
+                         'index into list of dictionaries by camel-case key and set value with =')
+
+        app.execute('update-obj --set myListOfCamelDicts[myKey="foo=bar"].myKey=new_value'.split())
         self.assertEqual(my_obj.my_list_of_camel_dicts[1]['myKey'],
                          'new_value',
                          'index into list of dictionaries by camel-case key')
