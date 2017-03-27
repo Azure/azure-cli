@@ -22,10 +22,11 @@ def create_service_adapter(service_model, service_class=None):
 
 # pylint: disable=too-few-public-methods
 class ServiceGroup(object):
-    def __init__(self, scope, client_factory, service_adapter=None):
+    def __init__(self, scope, client_factory, service_adapter=None, custom_path=None):
         self._scope = scope
         self._factory = client_factory
         self._service_adapter = service_adapter or (lambda name: name)
+        self._custom_path = custom_path
 
     def __enter__(self):
         return self
@@ -34,7 +35,8 @@ class ServiceGroup(object):
         pass
 
     def group(self, group_name):
-        return CommandGroup(self._scope, group_name, self._factory, self._service_adapter)
+        return CommandGroup(self._scope, group_name, self._factory, self._service_adapter,
+                            self._custom_path)
 
 
 class CommandGroup(object):
@@ -52,11 +54,12 @@ class CommandGroup(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
-    def command(self, name, method_name):
+    def command(self, name, method_name, confirmation=None):
         cli_command(self._scope,
                     '{} {}'.format(self._group_name, name),
                     self._service_adapter(method_name),
-                    client_factory=self._client_factory)
+                    client_factory=self._client_factory,
+                    confirmation=confirmation)
 
     def custom_command(self, name, custom_func_name, confirmation=None):
         cli_command(self._scope,
