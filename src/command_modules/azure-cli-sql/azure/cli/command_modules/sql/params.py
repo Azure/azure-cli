@@ -95,13 +95,15 @@ with ParametersContext(command='sql show-capabilities') as c:
                ' capabilities tree.',
                **enum_choice_list(CapabilityDetail))
 
+    search_group = 'Search'
+
     c.argument('edition',
-               arg_group=filter_group,
+               arg_group=search_group,
                help='Edition name to find in the capabilities tree.',
                **enum_choice_list(DatabaseEdition))
 
     c.argument('service_objective',
-               arg_group=filter_group,
+               arg_group=search_group,
                help='Service objective to find in the capabilities tree.',
                **enum_choice_list(ServiceObjectiveName))
 
