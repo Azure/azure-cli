@@ -8,6 +8,8 @@ import json
 import os
 import unittest
 import mock
+
+from adal import AdalError
 from azure.mgmt.resource.subscriptions.models import (SubscriptionState, Subscription,
                                                       SubscriptionPolicies, spendingLimit)
 from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
@@ -396,6 +398,25 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
             mgmt_resource, self.user1, 'bar', mock.ANY)
         mock_auth_context.acquire_token.assert_called_once_with(
             mgmt_resource, self.user1, mock.ANY)
+
+    @mock.patch('adal.AuthenticationContext', autospec=True)
+    @mock.patch('azure.cli.core._profile.logger', autospec=True)
+    def test_find_subscriptions_thru_username_password_with_account_disabled(self, mock_logger,
+                                                                             mock_auth_context):
+        mock_auth_context.acquire_token_with_username_password.return_value = self.token_entry1
+        mock_auth_context.acquire_token.side_effect = AdalError('Account is disabled')
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
+        finder = SubscriptionFinder(lambda _, _2: mock_auth_context,
+                                    None,
+                                    lambda _: mock_arm_client)
+        mgmt_resource = 'https://management.core.windows.net/'
+        # action
+        subs = finder.find_from_user_account(self.user1, 'bar', None, mgmt_resource)
+
+        # assert
+        self.assertEqual([], subs)
+        mock_logger.warning.assert_called_once_with(mock.ANY, mock.ANY, mock.ANY)
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_find_subscriptions_from_particular_tenent(self, mock_auth_context):
