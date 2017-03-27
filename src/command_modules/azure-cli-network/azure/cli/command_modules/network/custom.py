@@ -92,6 +92,17 @@ def list_application_gateways(resource_group_name=None):
 
 #region Application Gateway commands
 
+def create_application_gateway(app_gateway_name, resource_group_name, location=None, tags=None,
+                               no_wait=False, capacity=2, cert_file=None, cert_password=None,
+                               frontend_port=None, http_settings_cookie_based_affinity='disabled',
+                               http_settings_port=80, http_settings_protocol='Http',
+                               routing_rule_type='Basic', servers=None, sku=None,
+                               private_ip_address=None, public_ip_address=None,
+                               public_ip_address_allocation=IPAllocationMethod.dynamic.value,
+                               subnet=None, subnet_address_prefix='10.0.0.0/24',
+                               vnet_name=None, vnet_address_prefix='10.0.0.0/16'):
+    pass
+
 def update_application_gateway(instance, sku_name=None, sku_tier=None, capacity=None, tags=None):
     if sku_name is not None:
         instance.sku.name = sku_name
@@ -428,6 +439,14 @@ def show_ag_waf_config(resource_group_name, application_gateway_name):
 #endregion
 
 #region Load Balancer subresource commands
+
+def create_load_balancer(load_balancer_name, resource_group_name, location=None, tags=None,
+                         backend_pool_name=None, frontend_ip_name='LoadBalancerFrontEnd',
+                         private_ip_address=None, public_ip_address=None,
+                         public_ip_address_allocation=IPAllocationMethod.dynamic.value,
+                         public_ip_dns_name=None, subnet=None, subnet_address_prefix='10.0.0.0/24',
+                         vnet_name=None, vnet_address_prefix='10.0.0.0/16'):
+    pass
 
 def create_lb_inbound_nat_rule(
         resource_group_name, load_balancer_name, item_name, protocol, frontend_port,

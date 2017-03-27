@@ -71,9 +71,7 @@ def _build_frontend_ip_config(name, public_ip_id=None, private_ip_allocation=Non
     if public_ip_id:
         frontend_ip_config.update({
             'properties': {
-                'publicIPAddress': {
-                    'id': public_ip_id
-                }
+                'publicIPAddress': {'id': public_ip_id}
             }
         })
     else:
@@ -81,21 +79,34 @@ def _build_frontend_ip_config(name, public_ip_id=None, private_ip_allocation=Non
             'properties': {
                 'privateIPAllocationMethod': private_ip_allocation,
                 'privateIPAddress': private_ip_address,
-                'subnet': {
-                    'id': subnet_id
-                }
+                'subnet': {'id': subnet_id}
             }
         })
     return frontend_ip_config
 
 
-def build_application_gateway_resource(name, location, tags, backend_pool_name, backend_port,
-                                       frontend_ip_name, public_ip_id,
-                                       subnet_id, gateway_subnet_id,
-                                       private_ip_address, private_ip_allocation):
+def build_application_gateway_resource(name, location, tags, sku_name, sku_tier, capacity,
+                                       backend_port, servers,
+                                       frontend_port,
+                                       private_ip_address, private_ip_allocation,
+                                       cert_data, cert_password,
+                                       cookie_based_affinity,
+                                       http_settings_protocol, http_settings_port,
+                                       routing_rule_type,
+                                       public_ip_id,
+                                       subnet_id, gateway_subnet_id):
+
+    frontend_ip_name = 'appGatewayFrontendIP'
+    backend_pool_name = 'appGatewayBackendPool'
+    ssl_cert_name = '{}SslCert'.format(name)
+    ssl_cert = None
+
     frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id,
                                                    private_ip_address, private_ip_allocation,
                                                    subnet_id)
+    backend_address_pool = {'name': backend_pool_name}
+    if servers:
+        backend_pool['properties'] = {'BackendAddresses': servers}
 
     def _ag_subresource_id(_type, name):
         return "[concat(variables('appGwID'), '/{}/{}')]".format(_type, name)
@@ -106,61 +117,67 @@ def build_application_gateway_resource(name, location, tags, backend_pool_name, 
     backend_address_pool_id = _ag_subresource_id('backendAddressPools', backend_pool_name)
     backend_http_settings_id = _ag_subresource_id(
         'backendHttpSettingsCollection', 'appGwBackendHttpSettings')
+    ssl_cert_id = _ag_subresource_id('sslCertificates', ssl_cert_name)
+
+    http_listener = {
+        'name': 'appGatewayHttpListener',
+        'properties': {
+            'FrontendIPConfiguration': {'Id': frontend_ip_config_id},
+            'FrontendPort': {'Id': frontend_port_id},
+            'Protocol': http_settings_protocol,
+            'SslCertificate': None
+        }
+    }
+    if cert_file:
+        http_listener.update({'properties': {'SslCertificate': {'id': ssl_cert_id}}})
+        ssl_cert = {
+            'name': ssl_cert_name,
+            'properties': {
+                'data': cert_data,
+                'password': cert_password
+            }
+        }
 
     ag_properties = {
-        'backendAddressPools': [
-            {
-                'name': backend_pool_name
-            }
-        ],
+        'backendAddressPools': [backend_address_pool],
         'backendHttpSettingsCollection': [
             {
-                'name': 'appGwBackendHttpSettings',
+                'name': 'appGatewayBackendHttpSettings',
                 'properties': {
-                    'Port': backend_port,
-                    'Protocol': 'Http',
-                    'CookieBasedAffinity': 'Disabled'
+                    'Port': http_settings_port,
+                    'Protocol': http_settings_protocol,
+                    'CookieBasedAffinity': cookie_based_affinity
                 }
             }
         ],
         'frontendIPConfigurations': [frontend_ip_config],
         'frontendPorts': [
             {
-                'name': 'appGwFrontendPort',
+                'name': 'appGatewayFrontendPort',
                 'properties': {
-                    'Port': 80
+                    'Port': frontend_port
                 }
             }
         ],
         'gatewayIPConfigurations': [
             {
-                'name': 'appGwIpConfig',
+                'name': 'appGatewayIpConfig',
                 'properties': {
                     'subnet': {'id': gateway_subnet_id}
                 }
             }
         ],
-        'httpListeners': [
-            {
-                'name': 'appGwHttpListener',
-                'properties': {
-                    'FrontendIPConfiguration': {'Id': frontend_ip_config_id},
-                    'FrontendPort': {'Id': frontend_port_id},
-                    'Protocol': 'Http',
-                    'SslCertificate': None
-                }
-            }
-        ],
+        'httpListeners': [http_listener],
         'sku': {
-            'name': 'Standard_Large',
-            'tier': 'Standard',
-            'capacity': '10'
+            'name': sku_name,
+            'tier': sku_tier,
+            'capacity': capacity
         },
         'requestRoutingRules': [
             {
                 'Name': 'rule1',
                 'properties': {
-                    'RuleType': 'Basic',
+                    'RuleType': routing_rule_type,
                     'httpListener': {'id': http_listener_id},
                     'backendAddressPool': {'id': backend_address_pool_id},
                     'backendHttpSettings': {'id': backend_http_settings_id}
@@ -168,6 +185,8 @@ def build_application_gateway_resource(name, location, tags, backend_pool_name, 
             }
         ]
     }
+    if ssl_cert:
+        ag_properties.update({'sslCertificates': [ssl_cert]})
 
     ag = {
         'type': 'Microsoft.Network/applicationGateways',
@@ -196,21 +215,6 @@ def build_load_balancer_resource(name, location, tags, backend_pool_name, nat_po
                 'name': backend_pool_name
             }
         ],
-        'inboundNatPools': [
-            {
-                'name': nat_pool_name,
-                'properties': {
-                    'frontendIPConfiguration': {
-                        'id': "[concat({}, '/frontendIPConfigurations/', '{}')]".format(
-                            lb_id, frontend_ip_name)
-                    },
-                    'protocol': 'tcp',
-                    'frontendPortRangeStart': '50000',
-                    'frontendPortRangeEnd': '50119',
-                    'backendPort': backend_port
-                }
-            }
-        ],
         'frontendIPConfigurations': [frontend_ip_config]
     }
 
@@ -224,6 +228,52 @@ def build_load_balancer_resource(name, location, tags, backend_pool_name, nat_po
         'properties': lb_properties
     }
     return lb
+
+
+def build_public_ip_resource(name, location, tags, address_allocation, dns_name=None):
+
+    public_ip_properties = {'publicIPAllocationMethod': address_allocation}
+
+    if dns_name:
+        public_ip_properties['dnsSettings'] = {'domainNameLabel': dns_name}
+
+    public_ip = {
+        'apiVersion': '2015-06-15',
+        'type': 'Microsoft.Network/publicIPAddresses',
+        'name': name,
+        'location': location,
+        'tags': tags,
+        'dependsOn': [],
+        'properties': public_ip_properties
+    }
+    return public_ip
+
+
+def build_vnet_resource(name, location, tags, vnet_prefix=None, subnet=None,
+                        subnet_prefix=None, dns_servers=None):
+    vnet = {
+        'name': name,
+        'type': 'Microsoft.Network/virtualNetworks',
+        'location': location,
+        'apiVersion': '2015-06-15',
+        'dependsOn': [],
+        'tags': tags,
+        'properties': {
+            'addressSpace': {'addressPrefixes': [vnet_prefix]},
+        }
+    }
+    if dns_servers:
+        vnet['properties']['dhcpOptions'] = {
+            'dnsServers': dns_servers
+        }
+    if subnet:
+        vnet['properties']['subnets'] = [{
+            'name': subnet,
+            'properties': {
+                'addressPrefix': subnet_prefix
+            }
+        }]
+    return vnet
 
 
 def build_vpn_connection_resource(name, location, tags, gateway1, gateway2, vpn_type,
