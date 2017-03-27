@@ -70,8 +70,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
             subparser.choices[command_verb] = command_verb
 
             # inject command_module designer's help formatter -- default is HelpFormatter
-            fc = metadata.formatter_class if metadata.formatter_class else \
-                argparse.HelpFormatter
+            fc = metadata.formatter_class or argparse.HelpFormatter
 
             command_parser = subparser.add_parser(command_verb,
                                                   description=metadata.description,
