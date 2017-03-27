@@ -304,6 +304,11 @@ helps['appservice web config hostname list'] = """
     short-summary: List all hostname bindings.
 """
 
+helps['appservice web config hostname get-external-ip'] = """
+    type: command
+    short-summary: get the ip address to configure your DNS settings for A records
+"""
+
 helps['appservice web config backup list'] = """
     type: command
     short-summary: List all backups of a web app.

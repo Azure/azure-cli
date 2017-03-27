@@ -47,6 +47,7 @@ cli_command(__name__, 'appservice web config appsettings delete', 'azure.cli.com
 cli_command(__name__, 'appservice web config hostname add', 'azure.cli.command_modules.appservice.custom#add_hostname')
 cli_command(__name__, 'appservice web config hostname list', 'azure.cli.command_modules.appservice.custom#list_hostnames')
 cli_command(__name__, 'appservice web config hostname delete', 'azure.cli.command_modules.appservice.custom#delete_hostname')
+cli_command(__name__, 'appservice web config hostname get-external-ip', 'azure.cli.command_modules.appservice.custom#get_external_ip')
 cli_command(__name__, 'appservice web config container update', 'azure.cli.command_modules.appservice.custom#update_container_settings')
 cli_command(__name__, 'appservice web config container delete', 'azure.cli.command_modules.appservice.custom#delete_container_settings')
 cli_command(__name__, 'appservice web config container show', 'azure.cli.command_modules.appservice.custom#show_container_settings', exception_handler=empty_on_404)
