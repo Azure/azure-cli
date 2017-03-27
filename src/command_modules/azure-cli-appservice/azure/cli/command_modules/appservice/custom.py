@@ -267,8 +267,8 @@ def delete_hostname(resource_group_name, name, hostname, slot=None):
                                                              name, slot, hostname)
 
 
-def list_hostnames(resource_group_name, webapp_name, slot=None):
-    return _generic_site_operation(resource_group_name, webapp_name, 'list_host_name_bindings',
+def list_hostnames(resource_group_name, name, slot=None):
+    return _generic_site_operation(resource_group_name, name, 'list_host_name_bindings',
                                    slot)
 
 
