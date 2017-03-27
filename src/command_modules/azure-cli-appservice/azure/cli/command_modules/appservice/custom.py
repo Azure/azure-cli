@@ -292,15 +292,17 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
 
 def config_source_control(resource_group_name, name, repo_url, repository_type=None, branch=None,
                           git_token=None, manual_integration=None, slot=None, cd_provider=None,
-                          cd_app_type=None, cd_account=None, cd_create_account=None):
+                          cd_app_type=None, cd_account=None, cd_account_must_exist=None):
     client = web_client_factory()
     location = _get_location_from_webapp(client, resource_group_name, name)
 
     if cd_provider == 'vsts':
+        create_account = False if cd_account_must_exist else True
         vsts_provider = VstsContinuousDeliveryProvider()
-        vsts_provider.setup_continuous_delivery(resource_group_name, name, repo_url, branch, git_token, slot,
-                                                cd_app_type, cd_account, cd_create_account, location)
-        return None
+        status = vsts_provider.setup_continuous_delivery(resource_group_name, name, repo_url, branch, git_token, slot,
+                                                         cd_app_type, cd_account, create_account, location)
+        print(status.status_message)
+        return status.status
     else:
         from azure.mgmt.web.models import SiteSourceControl, SourceControl
         if git_token:

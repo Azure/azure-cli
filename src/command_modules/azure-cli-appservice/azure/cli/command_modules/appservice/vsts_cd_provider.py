@@ -45,7 +45,7 @@ class VstsContinuousDeliveryProvider(object):
         cd_manager.set_azure_web_info(resource_group_name, name, cred, subscription['id'],
                                       subscription['name'], subscription['tenantId'], location)
         summary = cd_manager.setup_continuous_delivery(slot, cd_app_type, cd_account, cd_create_account, auth_token)
-        print(summary)
+        return vsts_cd_status("SUCCESS", summary)
 
     def remove_continuous_delivery(self):
         """
@@ -75,3 +75,8 @@ class VstsContinuousDeliveryProvider(object):
 
     def _authentication_context_factory(self, authority, cache):
         return adal.AuthenticationContext(authority, cache=cache, api_version=None)
+
+class vsts_cd_status(object):
+    def __init__(self, status, status_message):
+        self.status = status
+        self.status_message = status_message
