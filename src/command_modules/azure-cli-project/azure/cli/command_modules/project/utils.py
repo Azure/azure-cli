@@ -3,10 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import string
-import random
-import sys
 import os
+import random
+import string
+import sys
+import threading
+from time import sleep
+
 from random_words import RandomWords
 
 
@@ -43,10 +46,25 @@ def get_random_word():
 
 def writeline(message):
     """
-    Writes a message to stdout
+    Writes a message to stdout on a newline
     """
     sys.stdout.write(message + '\n')
 
+
+def write(message='.'):
+    """
+    Writes a message to stdout
+    """
+    sys.stdout.write(message)
+    sys.stdout.flush()
+
+
+def log(message, logger):
+    """
+    Writes a message to logger
+    """
+    logger.info('\n' + message)
+    
 
 def get_public_ssh_key_contents(
         file_name=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')):
@@ -57,3 +75,25 @@ def get_public_ssh_key_contents(
     with open(file_name) as ssh_file:
         contents = ssh_file.read()
     return contents
+
+
+class Process(object):
+
+    __process_stop = False # To stop the thread
+    wait_time_sec = 15
+
+    def __init__(self):
+        self.__long_process_start()
+
+    def __process_output(self, message='.'):
+        while not self.__process_stop:
+            write(message)
+            sleep(self.wait_time_sec)
+
+    def __long_process_start(self):
+        self.__process_stop = False
+        thread = threading.Thread(target=self.__process_output, args=(), kwargs={})
+        thread.start()
+    
+    def process_stop(self):
+        self.__process_stop = True
