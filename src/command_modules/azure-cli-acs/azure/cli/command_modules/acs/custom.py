@@ -31,8 +31,8 @@ from msrestazure.azure_exceptions import CloudError
 import azure.cli.core.azlogging as azlogging
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._actions import _is_valid_ssh_rsa_public_key
-from azure.cli.command_modules.acs.mgmt_acs.lib import \
-    AcsCreationClient as ACSClient
+from azure.cli.command_modules.acs.mgmt_acs.lib \
+    import AcsCreationClient as ACSClient
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,line-too-long
 from azure.cli.core._util import CLIError
 from azure.cli.core._profile import Profile
@@ -103,6 +103,9 @@ def wait_then_open(url):
 
 
 def wait_then_open_async(url):
+    """
+    Spawns a thread that waits for a bit then opens a URL.
+    """
     t = threading.Thread(target=wait_then_open, args=({url}))
     t.daemon = True
     t.start()
@@ -265,13 +268,18 @@ def dcos_install_cli(install_location=None, client_version='1.8'):
         raise CLIError('Connection error while attempting to download client ({})'.format(err))
 
 
-def k8s_install_cli(client_version="1.5.1", install_location=None):
+def k8s_install_cli(client_version='latest', install_location=None):
     """
     Downloads the kubectl command line from Kubernetes
     """
+
+    if client_version == 'latest':
+        version = urlopen('https://storage.googleapis.com/kubernetes-release/release/stable.txt').read()
+        client_version = version.decode('UTF-8').strip()
+
     file_url = ''
     system = platform.system()
-    base_url = 'https://storage.googleapis.com/kubernetes-release/release/v{}/bin/{}/amd64/{}'
+    base_url = 'https://storage.googleapis.com/kubernetes-release/release/{}/bin/{}/amd64/{}'
     if system == 'Windows':
         file_url = base_url.format(client_version, 'windows', 'kubectl.exe')
     elif system == 'Linux':
@@ -282,7 +290,7 @@ def k8s_install_cli(client_version="1.5.1", install_location=None):
     else:
         raise CLIError('Proxy server ({}) does not exist on the cluster.'.format(system))
 
-    logger.info('Downloading client to %s', install_location)
+    logger.info('Downloading client to %s from %s', install_location, file_url)
     try:
         urlretrieve(file_url, install_location)
         os.chmod(install_location,
