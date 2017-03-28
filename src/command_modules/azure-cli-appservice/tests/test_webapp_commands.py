@@ -101,42 +101,6 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
         ])
 
 
-class WebappSimpleCreateTest(ScenarioTest):
-
-    @ResourceGroupPreparer()
-    def test_webapp_simple_create(self, resource_group):
-        webapp_name = 'cli-webapp-simple'
-        webapp_name2 = 'cli-webapp-simple2'
-        webapp_name3 = 'cli-webapp-simple3'
-
-        # create web 1
-        result = self.cmd('appservice web create -g {} -n {} --is-linux'.format(resource_group, webapp_name)).get_output_in_json()
-        self.assertEqual(webapp_name, result['name'])
-        self.assertTrue(result['serverFarmId'].endswith('/' + webapp_name + '_plan'))
-
-        # create web 2
-        result = self.cmd('appservice web create -g {} -n {} --is-linux'.format(resource_group, webapp_name2)).get_output_in_json()
-        self.assertEqual(webapp_name2, result['name'])
-        self.assertTrue(result['serverFarmId'].endswith('/' + webapp_name + '_plan'))
-
-        # verify we reuse the plan for second web
-        self.cmd('resource list -g {}'.format(resource_group), checks=[
-            JMESPathCheckV2('length([])', 3),
-            JMESPathCheckV2("length([?name=='{}_plan'])".format(webapp_name), 1)
-        ])
-
-        # create web 3 which explictly calls out the plan name
-        result = self.cmd('appservice web create -g {} -n {} --plan winplan --is-linux --sku b1'.format(resource_group, webapp_name3)).get_output_in_json()
-        self.assertEqual(webapp_name3, result['name'])
-        self.assertTrue(result['serverFarmId'].endswith('/winplan'))
-
-        # verify we create a new plan
-        self.cmd('resource list -g {}'.format(resource_group), checks=[
-            JMESPathCheckV2('length([])', 5),
-            JMESPathCheckV2("length([?name=='winplan'])".format(webapp_name), 1)
-        ])
-
-
 class WebappConfigureTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
