@@ -5,7 +5,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-set -e
+set -ex
 
 scripts_root=$(cd $(dirname $0); pwd)
 

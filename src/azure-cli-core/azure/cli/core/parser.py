@@ -67,11 +67,14 @@ class AzCliCommandParser(argparse.ArgumentParser):
             command_verb = command_name.split()[-1]
             # To work around http://bugs.python.org/issue9253, we artificially add any new
             # parsers we add to the "choices" section of the subparser.
-            subparser.choices[command_verb] = command_verb
-            command_parser = subparser.add_parser(command_verb,
-                                                  description=metadata.description,
-                                                  parents=self.parents, conflict_handler='error',
-                                                  help_file=metadata.help)
+            if command_verb not in subparser.choices:
+                subparser.choices[command_verb] = command_verb
+                command_parser = subparser.add_parser(command_verb,
+                                                      description=metadata.description,
+                                                      parents=self.parents, conflict_handler='error',
+                                                      help_file=metadata.help)
+            else:
+                command_parser = subparser.choices[command_verb]
 
             argument_validators = []
             argument_groups = {}
@@ -86,18 +89,18 @@ class AzCliCommandParser(argparse.ArgumentParser):
                         group_name = '{} Arguments'.format(arg.arg_group)
                         group = command_parser.add_argument_group(arg.arg_group, group_name)
                         argument_groups[arg.arg_group] = group
-                    param = group.add_argument(
-                        *arg.options_list, **arg.options)
+                    try:
+                        param = group.add_argument(
+                            *arg.options_list, **arg.options)
+                    except argparse.ArgumentError:
+                        continue
                 else:
                     try:
                         param = command_parser.add_argument(
                             *arg.options_list, **arg.options)
                     except argparse.ArgumentError:
-                        dest = arg.options['dest']
-                        if dest in ['no_wait', 'raw']:
-                            pass
-                        else:
-                            raise
+                        continue
+
                 param.completer = arg.completer
 
             command_parser.set_defaults(func=metadata.handler,
