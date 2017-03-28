@@ -6,10 +6,15 @@
 import os
 import datetime
 import dateutil.parser
+from msrestazure.azure_exceptions import CloudError
 from azure.cli.core._util import CLIError
-from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
+from azure.cli.core.commands.arm import is_valid_resource_id
 from ._client_factory import (get_devtestlabs_management_client)
 from .sdk.devtestlabs.models.gallery_image_reference import GalleryImageReference
+from .sdk.devtestlabs.models.network_interface_properties import NetworkInterfaceProperties
+from .sdk.devtestlabs.models.shared_public_ip_address_configuration import \
+    SharedPublicIpAddressConfiguration
+from .sdk.devtestlabs.models.inbound_nat_rule import InboundNatRule
 from azure.graphrbac import GraphRbacManagementClient
 import azure.cli.core.azlogging as azlogging
 
@@ -17,8 +22,8 @@ logger = azlogging.get_az_logger(__name__)
 
 # pylint: disable=line-too-long
 
-# Odata filter for startswith
-ODATA_STARTS_WITH_FILTER = "startswith(name, '{}')"
+# Odata filter for name
+ODATA_NAME_FILTER = "name eq '{}'"
 
 
 def validate_lab_vm_create(namespace):
@@ -36,9 +41,9 @@ def validate_lab_vm_create(namespace):
 
     _validate_location(namespace)
     _validate_expiration_date(namespace)
+    _validate_other_parameters(namespace, formula)
     _validate_image_argument(namespace, formula)
     _validate_network_parameters(namespace, formula)
-    _validate_other_parameters(namespace, formula)
     validate_authentication_type(namespace, formula)
 
 
@@ -57,20 +62,22 @@ def validate_lab_vm_list(namespace):
     # Default to retrieving users vms only
     else:
         # Find out owner object id
-        from azure.cli.core._profile import Profile, CLOUD
-        profile = Profile()
-        cred, _, tenant_id = profile.get_login_credentials(
-            resource=CLOUD.endpoints.active_directory_graph_resource_id)
-        graph_client = GraphRbacManagementClient(cred,
-                                                 tenant_id,
-                                                 base_url=CLOUD.endpoints.active_directory_graph_resource_id)
-        subscription = profile.get_subscription()
-        object_id = namespace.object_id or _get_object_id(graph_client, subscription=subscription)
+        if not namespace.object_id:
+            from azure.cli.core._profile import Profile, CLOUD
+            from azure.graphrbac.models import GraphErrorException
+            profile = Profile()
+            cred, _, tenant_id = profile.get_login_credentials(
+                resource=CLOUD.endpoints.active_directory_graph_resource_id)
+            graph_client = GraphRbacManagementClient(cred,
+                                                     tenant_id,
+                                                     base_url=CLOUD.endpoints.active_directory_graph_resource_id)
+            subscription = profile.get_subscription()
+            try:
+                object_id = _get_current_user_object_id(graph_client)
+            except GraphErrorException:
+                object_id = _get_object_id(graph_client, subscription=subscription)
+
         namespace.filters = "Properties/ownerObjectId eq '{}'".format(object_id)
-
-
-def _devtestlabs_management_client():
-    return get_devtestlabs_management_client(None)
 
 
 # pylint: disable=no-member
@@ -79,7 +86,7 @@ def _validate_location(namespace):
     Selects the default location of the lab when location is not provided.
     """
     if namespace.location is None:
-        lab_operation = _devtestlabs_management_client.lab
+        lab_operation = get_devtestlabs_management_client(None).lab
         lab = lab_operation.get_resource(namespace.resource_group, namespace.lab_name)
         namespace.location = lab.location
 
@@ -95,22 +102,21 @@ def _validate_expiration_date(namespace):
 # pylint: disable=no-member
 def _validate_network_parameters(namespace, formula=None):
     """ Updates namespace for virtual network and subnet parameters """
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    vnet_operation = _devtestlabs_management_client.virtual_network
+    vnet_operation = get_devtestlabs_management_client(None).virtual_network
+    lab_vnet = None
 
     if formula and formula.formula_content:
         if formula.formula_content.lab_virtual_network_id:
             namespace.vnet_name = \
                 namespace.vnet_name or \
                 formula.formula_content.lab_virtual_network_id.split('/')[-1]
-        if formula.formula_content.lab_virtual_network_id:
+        if formula.formula_content.lab_subnet_name:
             namespace.subnet = \
                 namespace.subnet or \
                 formula.formula_content.lab_subnet_name
-            namespace.disallow_public_ip_address = \
-                namespace.disallow_public_ip_address or \
-                formula.formula_content.disallow_public_ip_address
+            namespace.disallow_public_ip_address = formula.formula_content.disallow_public_ip_address
 
+    # User did not provide vnet and not selected from formula
     if not namespace.vnet_name:
         lab_vnets = list(vnet_operation.list(namespace.resource_group, namespace.lab_name, top=1))
         if not lab_vnets:
@@ -120,29 +126,59 @@ def _validate_network_parameters(namespace, formula=None):
             lab_vnet = lab_vnets[0]
             namespace.vnet_name = lab_vnet.name
             namespace.lab_virtual_network_id = lab_vnet.id
+    # User did provide vnet or has been selected from formula
     else:
-        namespace.lab_virtual_network_id = resource_id(subscription=get_subscription_id(),
-                                                       resource_group=namespace.resource_group,
-                                                       namespace='microsoft.devtestlab',
-                                                       type='labs',
-                                                       name=namespace.lab_name,
-                                                       child_type='virtualnetworks',
-                                                       child_name=namespace.vnet_name)
+        lab_vnet = vnet_operation.get_resource(namespace.resource_group, namespace.lab_name, namespace.vnet_name)
+        namespace.lab_virtual_network_id = lab_vnet.id
 
-    # Select default subnet for selected virtual network when subnet is not provided
+    # User did not provide subnet and not selected from formula
     if not namespace.subnet:
-        # Get the first subnet of the lab's virtual network
-        lab_vnet = vnet_operation.get_resource(namespace.resource_group,
-                                               namespace.lab_name,
-                                               namespace.vnet_name)
         namespace.subnet = lab_vnet.subnet_overrides[0].lab_subnet_name
 
-        # Determine value for disallow_public_ip_address based on subnet's
-        # use_public_ip_address_permission property
-        if lab_vnet.subnet_overrides[0].use_public_ip_address_permission == 'Allow':
-            namespace.disallow_public_ip_address = False
-        else:
-            namespace.disallow_public_ip_address = True
+    _validate_ip_configuration(namespace, lab_vnet)
+
+
+# pylint: disable=no-member
+def _validate_ip_configuration(namespace, lab_vnet=None):
+    """ Updates namespace with network_interface & disallow_public_ip_address """
+
+    # case 1: User selecting "shared" ip configuration
+    if namespace.ip_configuration == 'shared':
+        rule = _inbound_rule_from_os(namespace)
+        public_ip_config = SharedPublicIpAddressConfiguration(inbound_nat_rules=[rule])
+        nic_properties = NetworkInterfaceProperties(shared_public_ip_address_configuration=public_ip_config)
+        namespace.network_interface = nic_properties
+        namespace.disallow_public_ip_address = True
+    # case 2: User selecting "public" ip configuration
+    elif namespace.ip_configuration == 'public':
+        namespace.disallow_public_ip_address = False
+    # case 3: User selecting "private" ip configuration
+    elif namespace.ip_configuration == 'private':
+        namespace.disallow_public_ip_address = True
+    # case 4: User did not select any ip configuration preference
+    elif namespace.ip_configuration is None:
+        # case 5: lab virtual network was selected from user's option / formula default then use it for look-up
+        if lab_vnet:
+            if lab_vnet.subnet_overrides and lab_vnet.subnet_overrides[0].shared_public_ip_address_configuration:
+                rule = _inbound_rule_from_os(namespace)
+                public_ip_config = SharedPublicIpAddressConfiguration(inbound_nat_rules=[rule])
+                nic_properties = NetworkInterfaceProperties(shared_public_ip_address_configuration=public_ip_config)
+                namespace.network_interface = nic_properties
+                namespace.disallow_public_ip_address = True
+            elif lab_vnet.subnet_overrides and lab_vnet.subnet_overrides[0].use_public_ip_address_permission == 'Allow':
+                namespace.disallow_public_ip_address = False
+            else:
+                namespace.disallow_public_ip_address = True
+    # case 6: User selecting invalid value for ip configuration
+    else:
+        raise CLIError("incorrect value for ip-configuration: {}".format(namespace.ip_configuration))
+
+
+def _inbound_rule_from_os(namespace):
+    if namespace.os_type == 'Linux':
+        return InboundNatRule(transport_protocol='Tcp', backend_port=22)
+
+    return InboundNatRule(transport_protocol='Tcp', backend_port=3389)
 
 
 # pylint: disable=no-member
@@ -157,8 +193,10 @@ def _validate_image_argument(namespace, formula=None):
                                       os_type=gallery_image_reference.os_type,
                                       sku=gallery_image_reference.sku,
                                       version=gallery_image_reference.version)
+            namespace.os_type = gallery_image_reference.os_type
             return
         elif formula.formula_content.custom_image_id:
+            # Custom image id from the formula is in the form of "customimages/{name}"
             namespace.image = formula.formula_content.custom_image_id.split('/')[-1]
             namespace.image_type = 'custom'
 
@@ -174,8 +212,8 @@ def _validate_image_argument(namespace, formula=None):
 # pylint: disable=no-member
 def _use_gallery_image(namespace):
     """ Retrieve gallery image from lab and update namespace """
-    gallery_image_operation = _devtestlabs_management_client.gallery_image
-    odata_filter = ODATA_STARTS_WITH_FILTER.format(namespace.image)
+    gallery_image_operation = get_devtestlabs_management_client(None).gallery_image
+    odata_filter = ODATA_NAME_FILTER.format(namespace.image)
     gallery_images = list(gallery_image_operation.list(namespace.resource_group,
                                                        namespace.lab_name,
                                                        filter=odata_filter))
@@ -194,6 +232,7 @@ def _use_gallery_image(namespace):
                                   os_type=gallery_images[0].image_reference.os_type,
                                   sku=gallery_images[0].image_reference.sku,
                                   version=gallery_images[0].image_reference.version)
+        namespace.os_type = gallery_images[0].image_reference.os_type
 
 
 # pylint: disable=no-member
@@ -202,8 +241,8 @@ def _use_custom_image(namespace):
     if is_valid_resource_id(namespace.image):
         namespace.custom_image_id = namespace.image
     else:
-        custom_image_operation = _devtestlabs_management_client.custom_image
-        odata_filter = ODATA_STARTS_WITH_FILTER.format(namespace.image)
+        custom_image_operation = get_devtestlabs_management_client(None).custom_image
+        odata_filter = ODATA_NAME_FILTER.format(namespace.image)
         custom_images = list(custom_image_operation.list(namespace.resource_group,
                                                          namespace.lab_name,
                                                          filter=odata_filter))
@@ -215,12 +254,13 @@ def _use_custom_image(namespace):
             raise CLIError(err.format(namespace.image, [x.name for x in custom_images]))
         else:
             namespace.custom_image_id = custom_images[0].id
+            namespace.os_type = custom_images[0].vhd.os_type
 
 
 def _get_formula(namespace):
     """ Retrieve formula image from lab """
-    formula_operation = _devtestlabs_management_client.formula
-    odata_filter = ODATA_STARTS_WITH_FILTER.format(namespace.formula)
+    formula_operation = get_devtestlabs_management_client(None).formula
+    odata_filter = ODATA_NAME_FILTER.format(namespace.formula)
     formula_images = list(formula_operation.list(namespace.resource_group,
                                                  namespace.lab_name,
                                                  filter=odata_filter))
@@ -233,6 +273,7 @@ def _get_formula(namespace):
     return formula_images[0]
 
 
+# pylint: disable=no-member
 def _validate_other_parameters(namespace, formula=None):
     if formula:
         namespace.tags = namespace.tags or formula.tags
@@ -242,6 +283,7 @@ def _validate_other_parameters(namespace, formula=None):
             namespace.notes = namespace.notes or formula.formula_content.notes
             namespace.size = namespace.size or formula.formula_content.size
             namespace.disk_type = namespace.disk_type or formula.formula_content.storage_type
+            namespace.os_type = formula.os_type
 
 
 # TODO: Following methods are carried over from other command modules
@@ -271,6 +313,9 @@ def validate_authentication_type(namespace, formula=None):
                 raise CLIError('Please specify both username and password in non-interactive mode.')
 
     elif namespace.authentication_type == 'ssh':
+        if namespace.os_type != 'Linux':
+            raise CLIError("incorrect authentication-type '{}' for os type '{}'".format(
+                namespace.authentication_type, namespace.os_type))
         if namespace.admin_password:
             raise ValueError('Admin password cannot be used with SSH authentication type')
 
@@ -352,6 +397,15 @@ def _single(collection):
 
 def _any(collection):
     return len([x for x in collection if x]) > 0
+
+
+def _get_current_user_object_id(graph_client):
+    try:
+        current_user = graph_client.objects.get_current_user()
+        if current_user and current_user.object_id:  # pylint:disable=no-member
+            return current_user.object_id  # pylint:disable=no-member
+    except CloudError:
+        pass
 
 
 def _get_object_id(graph_client, subscription=None, spn=None, upn=None):

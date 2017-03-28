@@ -26,20 +26,24 @@ with ParametersContext(command='lab vm create') as c:
     c.argument('artifacts', type=json.loads)
 
     # Image related arguments
+    c.ignore('os_type')
     c.ignore('gallery_image_reference')
     c.ignore('custom_image_id')
     c.argument('image')
 
     # Network related arguments
     network_group_name = 'Network'
-    c.argument('disallow_public_ip_address', arg_group=network_group_name)
+    c.argument('ip_configuration', arg_group=network_group_name)
     c.argument('subnet', arg_group=network_group_name)
     c.argument('vnet_name', arg_group=network_group_name)
     c.ignore('lab_subnet_name')
     c.ignore('lab_virtual_network_id')
+    c.ignore('disallow_public_ip_address')
+    c.ignore('network_interface')
 
-    c.register('location', ('--location', '-l'),
-               help='Location in which to create VM. Defaults to the location of the lab')
+    # Creating VM in the different location then lab is an officially unsupported scenario
+    c.ignore('location')
+
     c.argument('expiration_date')
     c.argument('formula')
     c.argument('allow_claim', action='store_true')
