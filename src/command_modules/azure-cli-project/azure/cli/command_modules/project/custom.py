@@ -328,7 +328,8 @@ def _deploy_jenkins():
         resource_group, admin_username,
         admin_password, client_id, client_secret,
         git_repo, jenkins_dns_prefix, location,
-        container_registry_url, service_name, project_name)
+        container_registry_url, service_name, project_name,
+        _get_pipeline_name())
     return (jenkins_resource, jenkins_resource.deploy())
 
 
@@ -364,6 +365,36 @@ def _get_storage_service_client():
     Gets  the client for managing storage accounts.
     """
     return get_mgmt_service_client(StorageManagementClient)
+
+def _get_git_root_folder_name():
+    """
+    Gets the git root folder name. E.g. if current folder is
+    /myfolder/subfolder/test and the git repo root is /myfolder
+    this method returns myfolder
+    """
+    full_path = check_output(['git', 'rev-parse', '--show-toplevel'])
+    return os.path.basename(full_path.decode().strip())
+
+def _get_pipeline_name():
+    """
+    Gets the name used for Jenkins pipelines by
+    getting the current folder, partitioning it at base_repo_name
+    taking the string on the right (subfolder) replacing '/' with '-'
+    and combine the both strings. For example:
+    if command is run in the root folder of BikeSharing of the
+    repository Contoso/BikeSharing, this method returns 'Contoso/BikeSharing'.
+    If command is run in a subfolder (e.g. BikeSharing/reservations/api), method
+    returns Contoso/BikeSharing-reservations-api
+    """
+    remote_url = _get_git_remote_url()
+    # Get owner|organization/repo e.g. BikeSharing/reservations
+    owner_repo = remote_url.partition('github.com/')[2]
+
+    base_repo_name = _get_git_root_folder_name()
+    current_directory = os.getcwd()
+    subfolders = current_directory.partition(
+        base_repo_name)[2].strip('/').replace('/', '-')
+    return '-'.join([owner_repo, subfolders]).strip('-')
 
 
 def _get_git_remote_url():

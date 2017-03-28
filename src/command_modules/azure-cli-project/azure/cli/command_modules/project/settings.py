@@ -204,3 +204,25 @@ class Project(object):
         Sets the SSH private key path
         """
         self._set_property_value('ssh_private_key', value)
+
+    def set_ci_pipeline_name(self, ci_pipeline_name, git_url):
+        """
+        Sets the CI pipeline name for a git_url
+        """
+        ci_pipelines = []
+        if 'ci_pipelines' in self.settings:
+            ci_pipelines = self.settings['ci_pipelines']
+
+        ci_pipelines.append({git_url: ci_pipeline_name})
+        self.settings['ci_pipelines'] = ci_pipelines
+        self._save_changes()
+
+    def get_ci_pipeline_name(self, git_url):
+        """
+        Gets the name of the CI pipeline for a git_url
+        """
+        ci_pipelines = self._get_property_value('ci_pipelines')
+        for entry in ci_pipelines:
+            if git_url in entry:
+                return entry[git_url]
+        return None

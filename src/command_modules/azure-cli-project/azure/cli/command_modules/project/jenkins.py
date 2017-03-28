@@ -10,6 +10,7 @@ import azure.cli.command_modules.project.utils as utils
 from azure.cli.command_modules.project.deployments import DeployableResource
 import azure.cli.core.azlogging as azlogging  # pylint: disable=invalid-name
 import tempfile
+import hashlib
 logger = azlogging.get_az_logger(__name__)  # pylint: disable=invalid-name
 
 # pylint: disable=line-too-long, too-many-arguments,
@@ -26,7 +27,7 @@ class Jenkins(DeployableResource):
                  admin_username, admin_password,
                  client_id, client_secret,
                  git_repo_url, dns_prefix, location, container_registry_url,
-                 service_name, project_name):
+                 service_name, project_name, pipeline_name):
         # TODO: admin_password should be replaced with the SSH key once quickstart
         # template is updated to use SSH instead of username/password
         super(Jenkins, self).__init__(resource_group)
@@ -41,6 +42,7 @@ class Jenkins(DeployableResource):
         self.container_registry_url = container_registry_url
         self.service_name = service_name
         self.project_name = project_name
+        self.pipeline_name = pipeline_name
 
     def deploy(self):
         """
@@ -133,23 +135,46 @@ class Jenkins(DeployableResource):
         command = 'curl -sSLO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl | sh && chmod +x ./kubectl && sudo mv ./kubectl /usr/local/bin/kubectl'
         self._run_remote_command(command)
 
+    def _get_hash(self):
+        """
+        Gets the hashed string
+        """
+        input_string = '{}-{}-{}'.format(self.project_name, self.service_name, self.git_repo_url)
+        hash_value = hashlib.sha1(input_string)
+        digest = hash_value.hexdigest()
+        return digest.encode('utf-8')[:8]
+
     def _get_ci_job_name(self):
         """
         Gets the name for the CI job
         """
-        return '{}-CI'.format(self.service_name)
+        return '{}-{}'.format(self.pipeline_name, self._get_hash())
+
+    def _get_ci_job_display_name(self):
+        """
+        Gets the display name for CI job
+        """
+        return '{} build'.format(self.pipeline_name)
 
     def _get_cd_job_name(self):
         """
         Gets the name for the CD job
         """
-        return '{}-CD'.format(self.service_name)
+        # TODO: Remove -x once we figure out proper naming
+        return '{}-{}-x'.format(self.pipeline_name, self._get_hash())
+
+    def _get_cd_job_display_name(self):
+        """
+        Gets the display name for CD job
+        """
+        return '{} deploy'.format(self.pipeline_name)
 
     def _get_image_repo_name(self):
         """
         Gets the image repository name
         """
-        return '{}/{}'.format(self.project_name, self.service_name)
+        # TODO: Make sure this is right
+        return self.pipeline_name
 
     def _get_jenkins_url(self):
         """
@@ -167,7 +192,8 @@ class Jenkins(DeployableResource):
             '-j {}'.format(self._get_jenkins_url()),
             '-g {}'.format(self.git_repo_url),
             '-cin {}'.format(self._get_ci_job_name()),
-            '-cdn {}'.format(self._get_cd_job_name())
+            '-cdn {}'.format(self._get_cd_job_name()),
+            '-cddn {}'.format(self._get_cd_job_display_name())
         ])
         command = 'curl {} | bash -s -- {}'.format(add_cd_job_script, args)
         utils.writeline(command)
@@ -197,7 +223,7 @@ class Jenkins(DeployableResource):
             '-ru {}'.format(self.client_id),
             '-rp {}'.format(self.client_secret),
             '-jsn {}'.format(self._get_ci_job_name()),
-            '-jdn {}'.format(self._get_ci_job_name()),
+            '-jdn {}'.format(self._get_ci_job_display_name()),
             '-cdn {}'.format(self._get_cd_job_name()),
             '-sn {}'.format(self.service_name),
             '-rr {}'.format(self._get_image_repo_name()),
