@@ -208,6 +208,10 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
             JMESPathCheck('[0].name', '{0}/{0}.azurewebsites.net'.format(self.webapp_name))
         ])
 
+        # see deployment user
+        result = self.cmd('appservice web deployment user show')
+        self.assertTrue(result['type'])  # just make sure the command does return something
+
 
 class WebappScaleTest(ResourceGroupVCRTestBase):
 
