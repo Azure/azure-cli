@@ -424,14 +424,14 @@ def _configure_cluster():  # pylint: disable=too-many-statements
         utils.log(
             'Configuring Kubernetes cluster ... ', logger)
 
+        innerloop_client_path = _get_innerloop_home_path()
+        kubernetes_path = os.path.join(
+            innerloop_client_path, 'setup', 'Kubernetes')
+
         # Removing existing cluster from ~/.ssh/known_hosts
         known_hostname_command = 'ssh-keygen -R {}'.format(
             _get_remote_host(dns_prefix, location))
         _execute_command(known_hostname_command, True)
-
-        innerloop_client_path = _get_innerloop_home_path()
-        kubernetes_path = os.path.join(
-            innerloop_client_path, 'setup', 'Kubernetes')
 
         # SSHClient connection
         port = 22
@@ -453,8 +453,6 @@ def _configure_cluster():  # pylint: disable=too-many-statements
         utils.log(
             'ARM configuration prepared.', logger)
 
-        utils.log(
-            'This is going to take a while. Sit back and relax.', logger)
         utils.log('Creating Resources ... ', logger)
         _deploy_arm_template_core(
             resource_group, template_file='{}/k8.deploy.json'.format(kubernetes_path), deployment_name=dns_prefix,
@@ -484,6 +482,8 @@ def _configure_cluster():  # pylint: disable=too-many-statements
             'mkdir ~/.azure', ssh_client)
         _run_remote_command(
             'mkdir ~/.ssh', ssh_client)
+        _run_remote_command(
+            'rm ~/hosts', ssh_client)
         scp_client.put(
             '{}/hosts.tmp'.format(kubernetes_path), '~/hosts')
         utils.log(
@@ -511,14 +511,11 @@ def _configure_cluster():  # pylint: disable=too-many-statements
             'source ./configagents.sh', ssh_client, True)
 
         utils.log(
-            'Deploying TenX services to K8 cluster ... ', logger)
-        _execute_command(
-            "kubectl create -f {}/tenx.tmp.yaml".format(kubernetes_path), True)
-        _execute_command(
-            "kubectl create -f {}/tenxPrivate.tmp.yaml".format(kubernetes_path), True)
-
-        utils.log(
             'Cleaning existing TenX services in cluster ... ', logger)
+        _execute_command(
+            "kubectl delete -f {}/tenx.tmp.yaml".format(kubernetes_path), True)
+        _execute_command(
+            "kubectl delete -f {}/tenxPrivate.tmp.yaml".format(kubernetes_path), True)
         _execute_command(
             "kubectl delete -f {}/tenxServices.yaml -n tenx".format(kubernetes_path), True)
         _execute_command(
@@ -533,6 +530,13 @@ def _configure_cluster():  # pylint: disable=too-many-statements
             "kubectl delete -f {}/tenxRsrcService.yaml -n tenx".format(kubernetes_path), True)
         _execute_command(
             "kubectl delete -f {}/tenxPublicEndpoint.yaml -n tenx".format(kubernetes_path), True)
+
+        utils.log(
+            'Deploying TenX services to K8 cluster ... ', logger)
+        _execute_command(
+            "kubectl create -f {}/tenx.tmp.yaml".format(kubernetes_path), True)
+        _execute_command(
+            "kubectl create -f {}/tenxPrivate.tmp.yaml".format(kubernetes_path), True)
 
         utils.log(
             'Exposing TenX services from cluster ... ', logger)
@@ -691,6 +695,12 @@ def _install_k8_secret(acr, dns_prefix, client_id, client_secret, location, clus
     Creates a registry secret in the cluster, used by the tenx services.
     Prepares the file to create resource in the Kubernetes cluster.
     """
+    kubectl_create_delete_command = "kubectl delete secret tenxregkey -n tenx"
+    try:
+        _execute_command(kubectl_create_delete_command, True)
+    except Exception:
+        logger.debug("Command failed: %s\n", kubectl_create_delete_command)
+
     kubectl_create_secret_command = "kubectl create secret docker-registry tenxregkey --docker-server={} --docker-username={} \
     --docker-password={} --docker-email={}@{} -n tenx".format(acr, client_id, client_secret, cluster_user_name, _get_remote_host(dns_prefix, location))
     try:
@@ -1047,10 +1057,12 @@ def _get_innerloop_home_path():
     Gets the Mindaro-InnerLoop set HOME path.
     """
     try:
-        return az_config.get(
-            'project', 'mindaro_home') # AZURE_PROJECT_MINDARO_HOME
-    except KeyError as error:
-        raise CLIError(
-            'Please set the environment variable: {} to your inner loop source code directory.'.format(error))
+        home_path = az_config.get(
+            'project', 'mindaro_home', None) # AZURE_PROJECT_MINDARO_HOME
+        if home_path is None:
+            raise CLIError(
+                'Please set the environment variable: AZURE_PROJECT_MINDARO_HOME to your inner loop source code directory.')
+        else:
+            return home_path
     except Exception as error:
         raise CLIError(error)
