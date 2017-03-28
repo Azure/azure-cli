@@ -423,7 +423,7 @@ def _linux_sku_check(sku):
     tier = _get_sku_name(sku)
     if tier in ['BASIC','STANDARD']:
         return
-    format_string = 'usage error: {0} is not a valid sku for linux plan, please use one of the following.... {1}' # pylint: disable=line-too-long
+    format_string = 'usage error: {0} is not a valid sku for linux plan, please use one of the following: {1}' # pylint: disable=line-too-long
     raise CLIError(format_string.format(sku, 'B1, B2, B3, S1, S2, S3'))
 
 
