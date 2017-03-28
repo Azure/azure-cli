@@ -1,0 +1,828 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 storagemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.1+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [1b32129e-1408-11e7-bc24-4c32759c53db]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_table_scenario_test/providers/Microsoft.Storage/storageAccounts/dummystorage/listKeys?api-version=2016-12-01
+  response:
+    body: {string: '{"keys":[{"keyName":"key1","permissions":"Full","value":"nv9+27XcdyjtO7Y3xJ0R5WlyouRpPf97vuQRvJRO1Ny1p/4QX+qGE6EnFy1xdH0Zns0P7ZBbGnVMEdELJ4rrkQ=="},{"keyName":"key2","permissions":"Full","value":"A+wZ6lFYZzJdxT40OtaMCl5xUIODcdrPdfskSq+EZUuMk9i2qqExBj5XhbahF5OoWd3w8iMOrG47/giA2UJTIA=="}]}
+
+'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json]
+      Date: ['Tue, 28 Mar 2017 22:44:30 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: [Accept-Encoding]
+      content-length: ['289']
+      x-ms-ratelimit-remaining-subscription-writes: ['1193']
+    status: {code: 200, message: OK}
+- request:
+    body: '{"TableName": "table1"}'
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Connection: [keep-alive]
+      Content-Length: ['23']
+      Content-Type: [application/json]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      Prefer: [return-no-content]
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:31 GMT']
+      x-ms-version: ['2016-05-31']
+    method: POST
+    uri: https://dummystorage.table.core.windows.net/Tables
+  response:
+    body: {string: ''}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['0']
+      DataServiceId: ['https://vcrstorage599362686349.table.core.windows.net/Tables(''table1'')']
+      Date: ['Tue, 28 Mar 2017 22:44:30 GMT']
+      Location: ['https://vcrstorage599362686349.table.core.windows.net/Tables(''table1'')']
+      Preference-Applied: [return-no-content]
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      X-Content-Type-Options: [nosniff]
+      x-ms-version: ['2016-05-31']
+    status: {code: 204, message: No Content}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;odata=nometadata]
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:32 GMT']
+      x-ms-version: ['2016-05-31']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/Tables('table1')
+  response:
+    body: {string: '{"TableName":"table1"}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json;odata=nometadata;streaming=true;charset=utf-8]
+      Date: ['Tue, 28 Mar 2017 22:44:32 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      x-ms-version: ['2016-05-31']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;odata=nometadata]
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:34 GMT']
+      x-ms-version: ['2016-05-31']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/Tables
+  response:
+    body: {string: '{"value":[{"TableName":"table1"}]}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json;odata=nometadata;streaming=true;charset=utf-8]
+      Date: ['Tue, 28 Mar 2017 22:44:33 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      x-ms-version: ['2016-05-31']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:36 GMT']
+      x-ms-version: ['2016-05-31']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/table1?comp=acl
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers
+        />"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Tue, 28 Mar 2017 22:44:37 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2016-05-31']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:38 GMT']
+      x-ms-version: ['2016-05-31']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/table1?comp=acl
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers
+        />"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Tue, 28 Mar 2017 22:44:37 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2016-05-31']
+    status: {code: 200, message: OK}
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>a</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['184']
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:38 GMT']
+      x-ms-version: ['2016-05-31']
+    method: PUT
+    uri: https://dummystorage.table.core.windows.net/table1?comp=acl
+  response:
+    body: {string: ''}
+    headers:
+      Content-Length: ['0']
+      Date: ['Tue, 28 Mar 2017 22:44:37 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-version: ['2016-05-31']
+    status: {code: 204, message: No Content}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:39 GMT']
+      x-ms-version: ['2016-05-31']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/table1?comp=acl
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>a</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Tue, 28 Mar 2017 22:44:39 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2016-05-31']
+    status: {code: 200, message: OK}
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>a</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['296']
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:39 GMT']
+      x-ms-version: ['2016-05-31']
+    method: PUT
+    uri: https://dummystorage.table.core.windows.net/table1?comp=acl
+  response:
+    body: {string: ''}
+    headers:
+      Content-Length: ['0']
+      Date: ['Tue, 28 Mar 2017 22:44:39 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-version: ['2016-05-31']
+    status: {code: 204, message: No Content}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:41 GMT']
+      x-ms-version: ['2016-05-31']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/table1?comp=acl
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>a</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Tue, 28 Mar 2017 22:44:41 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2016-05-31']
+    status: {code: 200, message: OK}
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>a</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['413']
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:41 GMT']
+      x-ms-version: ['2016-05-31']
+    method: PUT
+    uri: https://dummystorage.table.core.windows.net/table1?comp=acl
+  response:
+    body: {string: ''}
+    headers:
+      Content-Length: ['0']
+      Date: ['Tue, 28 Mar 2017 22:44:41 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-version: ['2016-05-31']
+    status: {code: 204, message: No Content}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:42 GMT']
+      x-ms-version: ['2016-05-31']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/table1?comp=acl
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>a</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Tue, 28 Mar 2017 22:44:42 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2016-05-31']
+    status: {code: 200, message: OK}
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>a</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00Z</Start><Expiry>2016-05-01T00:00Z</Expiry><Permission>raud</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['591']
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:42 GMT']
+      x-ms-version: ['2016-05-31']
+    method: PUT
+    uri: https://dummystorage.table.core.windows.net/table1?comp=acl
+  response:
+    body: {string: ''}
+    headers:
+      Content-Length: ['0']
+      Date: ['Tue, 28 Mar 2017 22:44:42 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-version: ['2016-05-31']
+    status: {code: 204, message: No Content}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:43 GMT']
+      x-ms-version: ['2016-05-31']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/table1?comp=acl
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>a</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>raud</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Tue, 28 Mar 2017 22:44:43 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2016-05-31']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:44 GMT']
+      x-ms-version: ['2016-05-31']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/table1?comp=acl
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>a</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>raud</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Tue, 28 Mar 2017 22:44:43 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2016-05-31']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:45 GMT']
+      x-ms-version: ['2016-05-31']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/table1?comp=acl
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>a</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>raud</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Tue, 28 Mar 2017 22:44:45 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2016-05-31']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:46 GMT']
+      x-ms-version: ['2016-05-31']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/table1?comp=acl
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>a</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>raud</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Tue, 28 Mar 2017 22:44:49 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2016-05-31']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:50 GMT']
+      x-ms-version: ['2016-05-31']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/table1?comp=acl
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>a</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>raud</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Tue, 28 Mar 2017 22:44:50 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2016-05-31']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:50 GMT']
+      x-ms-version: ['2016-05-31']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/table1?comp=acl
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>a</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>raud</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Tue, 28 Mar 2017 22:44:50 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2016-05-31']
+    status: {code: 200, message: OK}
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>au</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>2016-05-01T00:00:00Z</Expiry><Permission>raud</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['598']
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:51 GMT']
+      x-ms-version: ['2016-05-31']
+    method: PUT
+    uri: https://dummystorage.table.core.windows.net/table1?comp=acl
+  response:
+    body: {string: ''}
+    headers:
+      Content-Length: ['0']
+      Date: ['Tue, 28 Mar 2017 22:44:50 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-version: ['2016-05-31']
+    status: {code: 204, message: No Content}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:52 GMT']
+      x-ms-version: ['2016-05-31']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/table1?comp=acl
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>au</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>raud</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Tue, 28 Mar 2017 22:44:51 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2016-05-31']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:53 GMT']
+      x-ms-version: ['2016-05-31']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/table1?comp=acl
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>au</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>raud</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Tue, 28 Mar 2017 22:44:53 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2016-05-31']
+    status: {code: 200, message: OK}
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <SignedIdentifiers><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>2016-05-01T00:00:00Z</Expiry><Permission>raud</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['491']
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:53 GMT']
+      x-ms-version: ['2016-05-31']
+    method: PUT
+    uri: https://dummystorage.table.core.windows.net/table1?comp=acl
+  response:
+    body: {string: ''}
+    headers:
+      Content-Length: ['0']
+      Date: ['Tue, 28 Mar 2017 22:44:53 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-version: ['2016-05-31']
+    status: {code: 204, message: No Content}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:54 GMT']
+      x-ms-version: ['2016-05-31']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/table1?comp=acl
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00.0000000Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start><Expiry>2016-05-01T00:00:00.0000000Z</Expiry><Permission>raud</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00.0000000Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Tue, 28 Mar 2017 22:44:53 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-version: ['2016-05-31']
+    status: {code: 200, message: OK}
+- request:
+    body: '{"RowKey": "001", "name": "test", "value": "something", "PartitionKey":
+      "001"}'
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Connection: [keep-alive]
+      Content-Length: ['78']
+      Content-Type: [application/json]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      Prefer: [return-no-content]
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:55 GMT']
+      x-ms-version: ['2016-05-31']
+    method: POST
+    uri: https://dummystorage.table.core.windows.net/table1
+  response:
+    body: {string: ''}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['0']
+      DataServiceId: ['https://vcrstorage599362686349.table.core.windows.net/table1(PartitionKey=''001'',RowKey=''001'')']
+      Date: ['Tue, 28 Mar 2017 22:44:55 GMT']
+      ETag: [W/"datetime'2017-03-28T22%3A44%3A55.2473244Z'"]
+      Location: ['https://vcrstorage599362686349.table.core.windows.net/table1(PartitionKey=''001'',RowKey=''001'')']
+      Preference-Applied: [return-no-content]
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      X-Content-Type-Options: [nosniff]
+      x-ms-version: ['2016-05-31']
+    status: {code: 204, message: No Content}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:56 GMT']
+      x-ms-version: ['2016-05-31']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/table1(PartitionKey='001',RowKey='001')
+  response:
+    body: {string: '{"odata.metadata":"https://vcrstorage599362686349.table.core.windows.net/$metadata#table1/@Element","odata.etag":"W/\"datetime''2017-03-28T22%3A44%3A55.2473244Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2017-03-28T22:44:55.2473244Z","name":"test","value":"something"}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      Date: ['Tue, 28 Mar 2017 22:44:56 GMT']
+      ETag: [W/"datetime'2017-03-28T22%3A44%3A55.2473244Z'"]
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      x-ms-version: ['2016-05-31']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:57 GMT']
+      x-ms-version: ['2016-05-31']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/table1(PartitionKey='001',RowKey='001')?%24select=name
+  response:
+    body: {string: '{"odata.metadata":"https://vcrstorage599362686349.table.core.windows.net/$metadata#table1/@Element&$select=name","odata.etag":"W/\"datetime''2017-03-28T22%3A44%3A55.2473244Z''\"","name":"test"}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      Date: ['Tue, 28 Mar 2017 22:44:56 GMT']
+      ETag: [W/"datetime'2017-03-28T22%3A44%3A55.2473244Z'"]
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      x-ms-version: ['2016-05-31']
+    status: {code: 200, message: OK}
+- request:
+    body: '{"RowKey": "001", "name": "test", "value": "newval", "PartitionKey": "001"}'
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Connection: [keep-alive]
+      Content-Length: ['75']
+      Content-Type: [application/json]
+      DataServiceVersion: [3.0;NetFx]
+      If-Match: ['*']
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:58 GMT']
+      x-ms-version: ['2016-05-31']
+    method: MERGE
+    uri: https://dummystorage.table.core.windows.net/table1(PartitionKey='001',RowKey='001')
+  response:
+    body: {string: ''}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['0']
+      Date: ['Tue, 28 Mar 2017 22:44:57 GMT']
+      ETag: [W/"datetime'2017-03-28T22%3A44%3A58.5381166Z'"]
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      X-Content-Type-Options: [nosniff]
+      x-ms-version: ['2016-05-31']
+    status: {code: 204, message: No Content}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:44:59 GMT']
+      x-ms-version: ['2016-05-31']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/table1(PartitionKey='001',RowKey='001')
+  response:
+    body: {string: '{"odata.metadata":"https://vcrstorage599362686349.table.core.windows.net/$metadata#table1/@Element","odata.etag":"W/\"datetime''2017-03-28T22%3A44%3A58.5381166Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2017-03-28T22:44:58.5381166Z","name":"test","value":"newval"}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      Date: ['Tue, 28 Mar 2017 22:44:58 GMT']
+      ETag: [W/"datetime'2017-03-28T22%3A44%3A58.5381166Z'"]
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      x-ms-version: ['2016-05-31']
+    status: {code: 200, message: OK}
+- request:
+    body: '{"RowKey": "001", "PartitionKey": "001", "cat": "hat"}'
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Connection: [keep-alive]
+      Content-Length: ['54']
+      Content-Type: [application/json]
+      DataServiceVersion: [3.0;NetFx]
+      If-Match: ['*']
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:45:00 GMT']
+      x-ms-version: ['2016-05-31']
+    method: PUT
+    uri: https://dummystorage.table.core.windows.net/table1(PartitionKey='001',RowKey='001')
+  response:
+    body: {string: ''}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['0']
+      Date: ['Tue, 28 Mar 2017 22:44:59 GMT']
+      ETag: [W/"datetime'2017-03-28T22%3A45%3A00.4883551Z'"]
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      X-Content-Type-Options: [nosniff]
+      x-ms-version: ['2016-05-31']
+    status: {code: 204, message: No Content}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:45:01 GMT']
+      x-ms-version: ['2016-05-31']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/table1(PartitionKey='001',RowKey='001')
+  response:
+    body: {string: '{"odata.metadata":"https://vcrstorage599362686349.table.core.windows.net/$metadata#table1/@Element","odata.etag":"W/\"datetime''2017-03-28T22%3A45%3A00.4883551Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2017-03-28T22:45:00.4883551Z","cat":"hat"}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      Date: ['Tue, 28 Mar 2017 22:45:01 GMT']
+      ETag: [W/"datetime'2017-03-28T22%3A45%3A00.4883551Z'"]
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      x-ms-version: ['2016-05-31']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      DataServiceVersion: [3.0;NetFx]
+      If-Match: ['*']
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:45:02 GMT']
+      x-ms-version: ['2016-05-31']
+    method: DELETE
+    uri: https://dummystorage.table.core.windows.net/table1(PartitionKey='001',RowKey='001')
+  response:
+    body: {string: ''}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['0']
+      Date: ['Tue, 28 Mar 2017 22:45:02 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      X-Content-Type-Options: [nosniff]
+      x-ms-version: ['2016-05-31']
+    status: {code: 204, message: No Content}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:45:03 GMT']
+      x-ms-version: ['2016-05-31']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/table1(PartitionKey='001',RowKey='001')
+  response:
+    body: {string: '{"odata.error":{"code":"ResourceNotFound","message":{"lang":"en-US","value":"The
+        specified resource does not exist.\nRequestId:f3e6df43-0002-0086-3e14-a8fc19000000\nTime:2017-03-28T22:45:03.6401464Z"}}}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      Date: ['Tue, 28 Mar 2017 22:45:03 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      x-ms-version: ['2016-05-31']
+    status: {code: 404, message: Not Found}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:45:04 GMT']
+      x-ms-version: ['2016-05-31']
+    method: DELETE
+    uri: https://dummystorage.table.core.windows.net/Tables('table1')
+  response:
+    body: {string: ''}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['0']
+      Date: ['Tue, 28 Mar 2017 22:45:04 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      X-Content-Type-Options: [nosniff]
+      x-ms-version: ['2016-05-31']
+    status: {code: 204, message: No Content}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;odata=nometadata]
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.3; Darwin 16.5.0) AZURECLI/2.0.1+dev]
+      x-ms-client-request-id: [d2f2f8b0-1407-11e7-b4d3-4c32759c53db]
+      x-ms-date: ['Tue, 28 Mar 2017 22:45:06 GMT']
+      x-ms-version: ['2016-05-31']
+    method: GET
+    uri: https://dummystorage.table.core.windows.net/Tables('table1')
+  response:
+    body: {string: '{"odata.error":{"code":"ResourceNotFound","message":{"lang":"en-US","value":"The
+        specified resource does not exist.\nRequestId:7715cf12-0002-0100-7b14-a8ee9e000000\nTime:2017-03-28T22:45:05.9626709Z"}}}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json;odata=nometadata;streaming=true;charset=utf-8]
+      Date: ['Tue, 28 Mar 2017 22:45:05 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      x-ms-version: ['2016-05-31']
+    status: {code: 404, message: Not Found}
+version: 1
