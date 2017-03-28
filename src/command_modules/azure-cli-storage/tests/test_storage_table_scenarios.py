@@ -11,5 +11,5 @@ class StorageTableScenarioTests(ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(sku='Standard_RAGRS')
     def test_storage_table_stats(self, storage_account):
-        self.cmd('storage table stats --account-name {}'.format(storage_account), checks=
-                 JMESPathCheck('geoReplication.status', 'live'))
+        self.cmd('storage table stats --account-name {}'.format(storage_account),
+                 checks=JMESPathCheck('geoReplication.status', 'live'))
