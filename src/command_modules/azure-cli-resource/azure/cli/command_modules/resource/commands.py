@@ -90,9 +90,8 @@ cli_command(__name__, 'group deployment operation list', 'azure.mgmt.resource.re
 cli_command(__name__, 'group deployment operation show', 'azure.cli.command_modules.resource.custom#get_deployment_operations', cf_deployment_operations, exception_handler=empty_on_404)
 
 cli_generic_update_command(__name__, 'resource update',
-                           'azure.mgmt.resource.resources.operations.resources_operations#ResourcesOperations.get',
-                           'azure.mgmt.resource.resources.operations.resources_operations#ResourcesOperations.create_or_update',
-                           lambda: _resource_client_factory().resources)
+                           'azure.cli.command_modules.resource.custom#show_resource',
+                           'azure.cli.command_modules.resource.custom#update_resource')
 
 cli_generic_update_command(__name__, 'group update',
                            'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get',
