@@ -20,7 +20,7 @@ class StorageAccountTests(ScenarioTest):
             JMESPathCheck('reason', 'AlreadyExists')
         ])
 
-        self.cmd('storage account list -g {}'.format(resource_group, name), checks=[
+        self.cmd('storage account list -g {}'.format(resource_group), checks=[
             JMESPathCheck('[0].location', 'westus'),
             JMESPathCheck('[0].sku.name', 'Standard_LRS'),
             JMESPathCheck('[0].resourceGroup', resource_group)
