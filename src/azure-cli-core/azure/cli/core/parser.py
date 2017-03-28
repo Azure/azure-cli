@@ -68,10 +68,16 @@ class AzCliCommandParser(argparse.ArgumentParser):
             # To work around http://bugs.python.org/issue9253, we artificially add any new
             # parsers we add to the "choices" section of the subparser.
             subparser.choices[command_verb] = command_verb
+
+            # inject command_module designer's help formatter -- default is HelpFormatter
+            fc = metadata.formatter_class or argparse.HelpFormatter
+
             command_parser = subparser.add_parser(command_verb,
                                                   description=metadata.description,
-                                                  parents=self.parents, conflict_handler='error',
-                                                  help_file=metadata.help)
+                                                  parents=self.parents,
+                                                  conflict_handler='error',
+                                                  help_file=metadata.help,
+                                                  formatter_class=fc)
 
             argument_validators = []
             argument_groups = {}
