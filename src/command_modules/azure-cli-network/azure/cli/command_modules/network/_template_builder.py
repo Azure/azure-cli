@@ -86,15 +86,14 @@ def _build_frontend_ip_config(name, public_ip_id=None, subnet_id=None, private_i
 
 
 def build_application_gateway_resource(name, location, tags, sku_name, sku_tier, capacity,
-                                       backend_port, servers,
-                                       frontend_port,
+                                       servers, frontend_port,
                                        private_ip_address, private_ip_allocation,
                                        cert_data, cert_password,
                                        cookie_based_affinity,
                                        http_settings_protocol, http_settings_port,
                                        routing_rule_type,
                                        public_ip_id,
-                                       subnet_id, gateway_subnet_id):
+                                       subnet_id):
 
     frontend_ip_name = 'appGatewayFrontendIP'
     backend_pool_name = 'appGatewayBackendPool'
@@ -127,7 +126,7 @@ def build_application_gateway_resource(name, location, tags, sku_name, sku_tier,
             'SslCertificate': None
         }
     }
-    if cert_file:
+    if cert_data:
         http_listener.update({'properties': {'SslCertificate': {'id': ssl_cert_id}}})
         ssl_cert = {
             'name': ssl_cert_name,
@@ -162,7 +161,7 @@ def build_application_gateway_resource(name, location, tags, sku_name, sku_tier,
             {
                 'name': 'appGatewayIpConfig',
                 'properties': {
-                    'subnet': {'id': gateway_subnet_id}
+                    'subnet': {'id': subnet_id}
                 }
             }
         ],

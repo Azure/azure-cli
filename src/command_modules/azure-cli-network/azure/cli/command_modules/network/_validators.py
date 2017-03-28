@@ -106,7 +106,6 @@ def validate_cert(namespace):
     params = [namespace.cert_data, namespace.cert_password]
     if all([not x for x in params]):
         # no cert supplied -- use HTTP
-        namespace.http_listener_protocol = 'http'
         if not namespace.frontend_port:
             namespace.frontend_port = 80
     else:
@@ -122,7 +121,6 @@ def validate_cert(namespace):
             # change default to frontend port 443 for https
             if not namespace.frontend_port:
                 namespace.frontend_port = 443
-            namespace.http_listener_protocol = 'https'
         except AttributeError:
             # app-gateway ssl-cert create does not have these fields and that is okay
             pass
@@ -351,6 +349,8 @@ def process_ag_url_path_map_rule_create_namespace(namespace): # pylint: disable=
 
 def process_ag_create_namespace(namespace):
 
+    get_default_location_from_resource_group(namespace)
+
     # process folded parameters
     if namespace.subnet or namespace.virtual_network_name:
         get_subnet_validator(has_type_field=True, allow_new=True)(namespace)
@@ -372,13 +372,6 @@ def process_ag_create_namespace(namespace):
     if namespace.public_ip_address:
         get_public_ip_validator(
             has_type_field=True, allow_none=True, allow_new=True, default_none=True)(namespace)
-        namespace.frontend_type = 'publicIp'
-    else:
-        namespace.frontend_type = 'privateIp'
-        namespace.private_ip_address_allocation = 'Static' if namespace.private_ip_address \
-            else 'Dynamic'
-
-    namespace.sku_tier = namespace.sku_name.split('_', 1)[0]
 
     validate_cert(namespace)
 
