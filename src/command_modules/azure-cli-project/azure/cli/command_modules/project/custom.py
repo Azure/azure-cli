@@ -75,7 +75,7 @@ def browse_pipeline():
             'Jenkins host name does not exist in projectSettings.json')
 
     local_port = _get_available_local_port()
-    local_address = 'http://127.0.0.1:{}'.format(local_port)
+    local_address = 'http://127.0.0.1:{}/blue'.format(local_port)
     utils.writeline('Jenkins Dashboard available at: {}'.format(local_address))
     utils.writeline('Press CTRL+C to close the tunnel')
     _wait_then_open_async(local_address)
@@ -233,7 +233,6 @@ def create_project(ssh_private_key, resource_group=random_name, name=random_name
     finally:
         if current_process:
             current_process.process_stop()
-
 
 def create_deployment_pipeline(remote_access_token):  # pylint: disable=unused-argument
     """

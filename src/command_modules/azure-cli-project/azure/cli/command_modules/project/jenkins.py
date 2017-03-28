@@ -5,12 +5,17 @@
 
 import paramiko
 
+import azure.cli.command_modules.project.settings as settings
 import azure.cli.command_modules.project.utils as utils
 from azure.cli.command_modules.project.deployments import DeployableResource
 import azure.cli.core.azlogging as azlogging  # pylint: disable=invalid-name
-logger = azlogging.get_az_logger(__name__) # pylint: disable=invalid-name
+import tempfile
+logger = azlogging.get_az_logger(__name__)  # pylint: disable=invalid-name
 
-# pylint: disable=line-too-long, too-many-arguments, too-many-instance-attributes
+# pylint: disable=line-too-long, too-many-arguments,
+# too-many-instance-attributes
+
+
 class Jenkins(DeployableResource):
     """
     Deals with creating and configuring Jenkins
@@ -64,7 +69,10 @@ class Jenkins(DeployableResource):
         """
         utils.writeline('Configuring Jenkins...')
         self._install_docker()
-        self._add_docker_build_job()
+        self._install_kubectl()
+        self._create_kube_config()
+        self._add_ci_job()
+        self._add_cd_job()
         # TODO: We should unsecure the instance first
         # and then setup everything without using username/password
         # Current script requires a username and password, that's why we
@@ -72,7 +80,53 @@ class Jenkins(DeployableResource):
         self._unsecure_instance()
         utils.writeline('Jenkins configuration completed.')
 
-    def _instal_kubectl(self):
+    def _get_hostname(self):
+        """
+        Gets the Jenkins hostname
+        """
+        return '{}.{}.cloudapp.azure.com'.format(self.dns_prefix, self.location)
+
+    def _get_kube_config(self):
+        """
+        Gets the .kube/config file from Kubernetes master
+        """
+        project_settings = settings.Project()
+        dns_prefix = project_settings.cluster_name
+        location = project_settings.location
+        user = project_settings.admin_username
+
+        local_kube_config = tempfile.NamedTemporaryFile().name
+        ssh = paramiko.SSHClient()
+        ssh.load_system_host_keys()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect('{}.{}.cloudapp.azure.com'.format(
+            dns_prefix, location), username=user)
+        scp = paramiko.SFTPClient.from_transport(ssh.get_transport())
+        scp.get('.kube/config', local_kube_config)
+        scp.close()
+        ssh.close()
+
+        return local_kube_config
+
+    def _create_kube_config(self):
+        """
+        Creates the .kube/config file
+        """
+        local_kube_config = self._get_kube_config()
+        # Copy the local kube config to Jenkins VM
+        ssh = paramiko.SSHClient()
+        ssh.load_system_host_keys()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        hostname = self._get_hostname()
+        ssh.connect(hostname,
+                    username=self.admin_username,
+                    password=self.admin_password)
+        scp = paramiko.SFTPClient.from_transport(ssh.get_transport())
+        ssh.exec_command('sudo mkdir -p /var/lib/jenkins/.kube')
+        scp.put(local_kube_config, '/home/azureuser/config')
+        ssh.exec_command('sudo cp /home/azureuser/config /var/lib/jenkins/.kube && sudo chown --from root jenkins /var/lib/jenkins/.kube')
+
+    def _install_kubectl(self):
         """
         Installs kubectl on the Jenkins VM
         """
@@ -97,11 +151,27 @@ class Jenkins(DeployableResource):
         """
         return '{}/{}'.format(self.project_name, self.service_name)
 
+    def _get_jenkins_url(self):
+        """
+        Gets the Jenkins URL
+        """
+        return 'http://127.0.0.1:8080'
+
     def _add_cd_job(self):
         """
         Adds the CD job to Jenkins instance
         """
-        pass
+        add_cd_job_script = \
+            'https://raw.githubusercontent.com/PeterJausovec/azure-devops-utils/master/jenkins/add-cd-job.sh'
+        args = ' '.join([
+            '-j {}'.format(self._get_jenkins_url()),
+            '-g {}'.format(self.git_repo_url),
+            '-cin {}'.format(self._get_ci_job_name()),
+            '-cdn {}'.format(self._get_cd_job_name())
+        ])
+        command = 'curl {} | bash -s -- {}'.format(add_cd_job_script, args)
+        utils.writeline(command)
+        self._run_remote_command(command)
 
     def _install_docker(self):
         """
@@ -118,9 +188,8 @@ class Jenkins(DeployableResource):
         initial_password = self._get_initial_password()
         add_build_job_script_url = \
             'https://raw.githubusercontent.com/PeterJausovec/azure-devops-utils/master/jenkins/add-docker-build-job.sh'
-            # 'https://raw.githubusercontent.com/Azure/azure-devops-utils/{}/jenkins/add-docker-build-job.sh'.format(self.scripts_version)
         args = ' '.join([
-            '-j {}'.format('http://127.0.0.1:8080'),
+            '-j {}'.format(self._get_jenkins_url()),
             '-ju {}'.format('admin'),
             '-jp {}'.format(initial_password),
             '-g {}'.format(self.git_repo_url),
@@ -128,12 +197,16 @@ class Jenkins(DeployableResource):
             '-ru {}'.format(self.client_id),
             '-rp {}'.format(self.client_secret),
             '-jsn {}'.format(self._get_ci_job_name()),
+            '-jdn {}'.format(self._get_ci_job_name()),
+            '-cdn {}'.format(self._get_cd_job_name()),
             '-sn {}'.format(self.service_name),
             '-rr {}'.format(self._get_image_repo_name()),
             '-sps {}'.format('"* * * * *"'),
-            # TODO: Pull the registry repository name out of here
-            '-rr {}/{}'.format(self.admin_username, 'myfirstapp')])
-        command = 'curl --silent {} | sudo bash -s -- {}'.format(add_build_job_script_url, args)
+            '-al {}'.format(
+                'https://raw.githubusercontent.com/PeterJausovec/azure-devops-utils/master'),
+            '-rr {}/{}'.format(self.admin_username, self.service_name)])
+        command = 'curl --silent {} | sudo bash -s -- {}'.format(
+            add_build_job_script_url, args)
         self._run_remote_command(command)
 
     def _get_initial_password(self):
@@ -150,8 +223,10 @@ class Jenkins(DeployableResource):
         the useSecurity tag in config.xml to false
         """
         unsecure_script_url = \
-            'https://raw.githubusercontent.com/Azure/azure-devops-utils/{}/jenkins/unsecure-jenkins-instance.sh'.format(self.scripts_version)
-        command = 'curl --silent {} | sudo bash -s --'.format(unsecure_script_url)
+            'https://raw.githubusercontent.com/Azure/azure-devops-utils/{}/jenkins/unsecure-jenkins-instance.sh'.format(
+                self.scripts_version)
+        command = 'curl --silent {} | sudo bash -s --'.format(
+            unsecure_script_url)
         self._run_remote_command(command)
 
     def _run_remote_command(self, command):
