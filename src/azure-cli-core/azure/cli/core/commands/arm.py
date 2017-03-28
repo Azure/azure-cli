@@ -459,8 +459,43 @@ def verify_property(instance, condition):
 index_or_filter_regex = re.compile(r'\[(.*)\]')
 
 
+def _split_key_value_pair(expression):
+
+    def _find_split():
+        """ Find the first = sign to split on (that isn't in [brackets])"""
+        key = []
+        value = []
+        brackets = False
+        chars = list(expression)
+        while len(chars) > 0:
+            c = chars.pop(0)
+            if c == '=' and not brackets:
+                # keys done the rest is value
+                value = chars
+                break
+            elif c == '[':
+                brackets = True
+                key += c
+            elif c == ']' and brackets:
+                brackets = False
+                key += c
+            else:
+                # normal character
+                key += c
+
+        key = ''.join(key)  # pylint: disable=redefined-variable-type
+        value = ''.join(value)  # pylint: disable=redefined-variable-type
+        return key, value
+
+    equals_count = expression.count('=')
+    if equals_count == 1:
+        return expression.split('=', 1)
+    else:
+        return _find_split()
+
+
 def set_properties(instance, expression):
-    key, value = expression.rsplit('=', 1)
+    key, value = _split_key_value_pair(expression)
 
     try:
         value = json.loads(value)
@@ -631,7 +666,11 @@ def _update_instance(instance, part, path):
                 show_options(instance, part, path)
 
             if '=' in index.group(1):
-                key, value = index.group(1).split('=')
+                key, value = index.group(1).split('=', 1)
+                try:
+                    value = json.loads(value)
+                except:  # pylint: disable=bare-except
+                    pass
                 matches = []
                 for x in instance:
                     if isinstance(x, dict) and x.get(key, None) == value:
