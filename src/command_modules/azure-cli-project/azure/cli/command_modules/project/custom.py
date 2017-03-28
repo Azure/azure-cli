@@ -12,43 +12,47 @@ import socket
 import sys
 import threading
 import webbrowser
-from subprocess import (PIPE, CalledProcessError, Popen, check_call,
-                        check_output)
 from time import sleep
-import requests
+from subprocess import (PIPE,
+                        CalledProcessError,
+                        Popen,
+                        check_output)
+from scp import SCPClient
 from sshtunnel import SSHTunnelForwarder
-
+import requests
+import paramiko
 import azure.cli.command_modules.project.settings as settings
 import azure.cli.command_modules.project.utils as utils
 import azure.cli.core.azlogging as azlogging  # pylint: disable=invalid-name
+
+from azure.cli.command_modules.acs._params import _get_default_install_location
 from azure.cli.command_modules.acs.custom import (acs_create,
                                                   k8s_get_credentials,
                                                   k8s_install_cli)
-from azure.cli.command_modules.acs._params import _get_default_install_location
 from azure.cli.command_modules.project.jenkins import Jenkins
 from azure.cli.command_modules.resource.custom import _deploy_arm_template_core
 from azure.cli.command_modules.storage._factory import storage_client_factory
+from azure.cli.core._config import az_config
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._profile import Profile
 from azure.cli.core._util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.compute import ComputeManagementClient
 from azure.mgmt.containerregistry import ContainerRegistryManagementClient
-from azure.mgmt.containerregistry.models import (Registry,
-                                                 StorageAccountProperties)
+from azure.mgmt.containerregistry.models import Sku as AcrSku
+from azure.mgmt.containerregistry.models import (RegistryCreateParameters,
+                                                 StorageAccountParameters)
 from azure.mgmt.resource.resources import ResourceManagementClient
 from azure.mgmt.resource.resources.models.resource_group import ResourceGroup
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.storage.models import Kind, Sku, StorageAccountCreateParameters
-from azure.mgmt.containerregistry.models import RegistryCreateParameters, StorageAccountParameters
-from azure.mgmt.containerregistry.models import Sku as AcrSku
 from azure.storage.file import FileService
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
 logger = azlogging.get_az_logger(__name__)  # pylint: disable=invalid-name
 project_settings = settings.Project()  # pylint: disable=invalid-name
-random_word = utils.get_random_word()
+random_word = utils.get_random_word() # pylint: disable=invalid-name
 
 # TODO: Remove and switch to SSH once templates are updated
 admin_password = 'Mindaro@Pass1!'  # pylint: disable=invalid-name
@@ -93,19 +97,22 @@ def create_project(ssh_private_key, resource_group='mindaro-rg-' + random_word, 
     ACS Kubernetes cluster and Azure Container Registry
     """
     default_user_name = 'azureuser'
+    longprocess = None
     current_process = None
 
     try:
         utils.write('Creating Project ')
         # Validate if mindaro project already exists
-        if not (project_settings.project_name is None):
-            utils.write('... ')
+        if project_settings.project_name:
+            utils.write(
+                '{} ...'.format(project_settings.project_name))
             sleep(5)
             logger.info('\nProject already exists.')
             utils.write('Complete.\n')
             return
         else:
-            utils.write('{} ...'.format(name))
+            utils.write(
+                '{} ...'.format(name))
 
         # 0. Validate ssh private key path
         if not os.path.exists(ssh_private_key):
@@ -211,19 +218,20 @@ def create_project(ssh_private_key, resource_group='mindaro-rg-' + random_word, 
         project_settings.ssh_private_key = ssh_private_key
         utils.log(
             'Project "{}" created.'.format(name), logger)
-        
+
         # 8. Configure the Kubernetes cluster
         # Initializes a workspace definition that automates connection to a Kubernetes cluster
         # in an Azure container service for deploying services.
         _configure_cluster()
 
-        longprocess.process_stop()
+        if longprocess:
+            longprocess.process_stop()
         current_process = None
         utils.write(' Complete.\n')
     except KeyboardInterrupt:
         utils.writeline('Killing process ...')
     finally:
-        if not current_process is None:
+        if current_process:
             current_process.process_stop()
 
 
@@ -237,7 +245,7 @@ def create_deployment_pipeline(remote_access_token):  # pylint: disable=unused-a
     # Wait for deployments to complete
     jenkins_deployment.wait()
 
-    jenkins_hostname = '{}.{}.cloudapp.azure.com'.format(
+    jenkins_hostname = _get_remote_host(
         jenkins_resource.dns_prefix, jenkins_resource.location)
     project_settings.jenkins_hostname = jenkins_hostname
     utils.writeline('Jenkins hostname: {}'.format(jenkins_hostname))
@@ -271,11 +279,11 @@ def _get_available_local_port():
     """
     Gets a random, available local port
     """
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(('', 0))
-    s.listen(1)
-    port = s.getsockname()[1]
-    s.close()
+    socket_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    socket_client.bind(('', 0))
+    socket_client.listen(1)
+    port = socket_client.getsockname()[1]
+    socket_client.close()
     return port
 
 
@@ -389,6 +397,8 @@ def _configure_cluster():  # pylint: disable=too-many-statements
     Asks for user input: ACR server name.
     """
     kubernetes_path = None
+    ssh_client = None
+    scp_client = None
     try:
         # Setting the values
         dns_prefix = project_settings.cluster_name
@@ -415,17 +425,24 @@ def _configure_cluster():  # pylint: disable=too-many-statements
             'Configuring Kubernetes cluster ... ', logger)
 
         # Removing existing cluster from ~/.ssh/known_hosts
-        known_hostname_command = 'ssh-keygen -R {}.{}.cloudapp.azure.com'.format(
-            dns_prefix, location)
+        known_hostname_command = 'ssh-keygen -R {}'.format(
+            _get_remote_host(dns_prefix, location))
         _execute_command(known_hostname_command, True)
 
         innerloop_client_path = _get_innerloop_home_path()
         kubernetes_path = os.path.join(
             innerloop_client_path, 'setup', 'Kubernetes')
 
+        # SSHClient connection
+        port = 22
+        ssh_client = _get_ssh_client(
+            user_name, dns_prefix, location, port, ssh_private_key)
+        # SCPCLient takes a paramiko transport as its only argument
+        scp_client = SCPClient(
+            ssh_client.get_transport())
+
         # Get resource group
-        creds = _get_creds_from_master(
-            dns_prefix, location, user_name, ssh_private_key)
+        creds = _get_creds_from_master(scp_client)
         resource_group = creds['resourceGroup']
         client_id = creds['aadClientId']
         client_secret = creds['aadClientSecret']
@@ -463,38 +480,35 @@ def _configure_cluster():  # pylint: disable=too-many-statements
 
         utils.log(
             'Preparing the cluster ... ', logger)
-        remote_host = _get_remote_host(user_name, dns_prefix, location)
-        _execute_command("ssh -i {0} -o StrictHostKeyChecking=no -p 22 {1} 'mkdir ~/.azure'".format(
-            ssh_private_key, remote_host), True)
-        _execute_command(
-            "ssh -i {0} -p 22 {1} 'mkdir ~/.ssh'".format(ssh_private_key, remote_host), True)
-        _execute_command("scp -i {0} -P 22 {1}/hosts.tmp {2}:~/hosts".format(
-            ssh_private_key, kubernetes_path, remote_host))
+        _run_remote_command(
+            'mkdir ~/.azure', ssh_client)
+        _run_remote_command(
+            'mkdir ~/.ssh', ssh_client)
+        scp_client.put(
+            '{}/hosts.tmp'.format(kubernetes_path), '~/hosts')
         utils.log(
             'Cluster prepared.', logger)
 
         utils.log(
             'Copying configuration files into the cluster ... ', logger)
-        _execute_command(
-            "scp -i {0} -P 22 {0} {1}:~/.ssh/id_rsa".format(ssh_private_key, remote_host))
-        _execute_command("scp -i {0} -P 22 {1}/connectlocal.tmp.sh {2}:~/connectlocal.tmp.sh".format(
-            ssh_private_key, kubernetes_path, remote_host))
-        _execute_command("scp -i {0} -P 22 {1}/configagents.sh {2}:~/configagents.sh".format(
-            ssh_private_key, kubernetes_path, remote_host))
+        scp_client.put(
+            ssh_private_key, '~/.ssh/id_rsa')
+        scp_client.put(
+            '{}/connectlocal.tmp.sh'.format(kubernetes_path), '~/connectlocal.tmp.sh')
+        scp_client.put(
+            '{}/configagents.sh'.format(kubernetes_path), '~/configagents.sh')
 
-        _execute_command(
-            "eval $(ssh-agent) && ssh-add {}".format(ssh_private_key))
-        _execute_command(
-            "ssh -i {0} -o StrictHostKeyChecking=no -p 22 {1} 'chmod 600 ~/.ssh/id_rsa'".format(ssh_private_key, remote_host))
-        _execute_command(
-            "ssh -i {0} -o StrictHostKeyChecking=no -p 22 {1} 'chmod +x ./configagents.sh'".format(ssh_private_key, remote_host))
+        _run_remote_command(
+            'chmod 600 ~/.ssh/id_rsa', ssh_client)
+        _run_remote_command(
+            'chmod +x ./configagents.sh', ssh_client)
         utils.log(
             'Configuration files copied.', logger)
 
         utils.log(
             'Configuring agents in the cluster ... ', logger)
-        _execute_command(
-            "ssh -i {0} -p 22 {1} 'source ./configagents.sh'".format(ssh_private_key, remote_host))
+        _run_remote_command(
+            'source ./configagents.sh', ssh_client, True)
 
         utils.log(
             'Deploying TenX services to K8 cluster ... ', logger)
@@ -540,14 +554,12 @@ def _configure_cluster():  # pylint: disable=too-many-statements
         # Initialize Workspace
         utils.log(
             'Initializing Workspace: {} ... '.format(dns_prefix), logger)
-        utils.log(
-            'This might take some waiting.', logger)
         workspace_storage = dns_prefix.replace('-', '') + 'wks'
         _initialize_workspace(
             dns_prefix, user_name, workspace_storage, workspace_storage_key, ssh_private_key, location=location)
     finally:
         # Removing temporary data files
-        if kubernetes_path != None:
+        if kubernetes_path:
             file_path = os.path.join(kubernetes_path, '*.tmp.*')
             files = glob.glob(file_path)
             for single_file in files:
@@ -557,6 +569,12 @@ def _configure_cluster():  # pylint: disable=too-many-statements
         azure_json_file = _get_creds_file()
         if os.path.exists(azure_json_file):
             os.remove(azure_json_file)
+
+        # Close SSHClient
+        if scp_client:
+            scp_client.close()
+        if ssh_client:
+            ssh_client.close()
 
 
 def _validate_kubectl_context(dns_prefix):
@@ -674,7 +692,7 @@ def _install_k8_secret(acr, dns_prefix, client_id, client_secret, location, clus
     Prepares the file to create resource in the Kubernetes cluster.
     """
     kubectl_create_secret_command = "kubectl create secret docker-registry tenxregkey --docker-server={} --docker-username={} \
-    --docker-password={} --docker-email={} -n tenx".format(acr, client_id, client_secret, _get_remote_host(cluster_user_name, dns_prefix, location))
+    --docker-password={} --docker-email={}@{} -n tenx".format(acr, client_id, client_secret, cluster_user_name, _get_remote_host(dns_prefix, location))
     try:
         _execute_command(kubectl_create_secret_command, True)
     except Exception:
@@ -779,6 +797,39 @@ def _get_storage_key(resource_group, scf, storage, tries):
     return storage_key
 
 
+def _run_remote_command(command, ssh_client, async_call=False):
+    """
+    Runs a command on remote
+    """
+    if async_call:
+        transport = ssh_client.get_transport()
+        channel = transport.open_session()
+        channel.exec_command(
+            '{} > /dev/null 2>&1 &'.format(command))
+    else:
+        _, stdout, stderr = ssh_client.exec_command(command)
+        for line in stdout:
+            logger.info(line)
+        for line in stderr:
+            logger.debug(line)
+
+
+def _get_ssh_client(user_name, dns_prefix, location, port, ssh_private_key):
+    """
+    Gets SSHClient
+    """
+    ssh = paramiko.SSHClient()
+    ssh.load_system_host_keys()
+    # TODO: Remove the below command when we support protected SSH Keys
+    pkey = paramiko.RSAKey.from_private_key_file(ssh_private_key)
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(_get_remote_host(dns_prefix, location),
+                port,
+                username=user_name,
+                pkey=pkey)
+    return ssh
+
+
 def _execute_command(command, ignore_failure=False):
     """
     Executes a command.
@@ -804,7 +855,7 @@ def _get_command_output(command):
     return output
 
 
-def _get_creds_from_master(dns_prefix, location, user_name, ssh_private_key):
+def _get_creds_from_master(scp_client):
     """
     Copies azure.json file from the master host on the Kubernetes cluster to local system.
     Provides the json data from the file.
@@ -817,9 +868,8 @@ def _get_creds_from_master(dns_prefix, location, user_name, ssh_private_key):
     if os.path.exists(azure_json_file):
         os.remove(azure_json_file)
 
-    _execute_command("scp -i {0} -o StrictHostKeyChecking=no -P 22 {1}:/etc/kubernetes/azure.json {2}".format(
-        ssh_private_key, _get_remote_host(user_name, dns_prefix, location), azure_json_file))
-
+    scp_client.get(
+        '/etc/kubernetes/azure.json', azure_json_file)
     with open(azure_json_file, "r") as credentials_file:
         creds = json.load(credentials_file)
     return creds
@@ -849,11 +899,11 @@ def _get_workspace_settings_file():
     return workspace_settings_file
 
 
-def _get_remote_host(user_name, dns_prefix, location):
+def _get_remote_host(dns_prefix, location):
     """
-    Provides a remote host according to the passed user_name, dns_prefix and location.
+    Provides a remote host according to the passed dns_prefix and location.
     """
-    return "{}@{}.{}.cloudapp.azure.com".format(user_name, dns_prefix, location)
+    return '{}.{}.cloudapp.azure.com'.format(dns_prefix, location)
 
 
 def _prepare_arm_k8(dns_prefix):
@@ -903,7 +953,10 @@ def _initialize_workspace(
 
     # Checking if the services are ready
     while not _cluster_configured(dns_prefix, user_name):
-        logger.debug('Services are not ready yet. Waiting ... ')
+        logger.debug(
+            '\nServices are not ready yet. Waiting ... ')
+        logger.info(
+            '\nRetrying ... ')
         sleep(5)
     utils.log(
         'Cluster configured successfully.', logger)
@@ -929,7 +982,7 @@ def service_run(project_path):
             project_path = curr_dir
         elif not os.path.exists(project_path):
             raise CLIError(
-                "Invalid path: {}}".format(project_path))
+                'Invalid path: {}'.format(project_path))
 
         # Validate if mindaro project exists
         if not os.path.exists(project_settings.settings_file):
@@ -965,7 +1018,7 @@ def _service_run():
     Calls tenx run command on the current directory.
     Run implicitly builds the service in the cluster and starts the service.
     """
-    _run_innerloop_command('run -t')
+    _run_innerloop_command('run -t -q')
 
 
 def _run_innerloop_command(*args):
@@ -994,13 +1047,10 @@ def _get_innerloop_home_path():
     Gets the Mindaro-InnerLoop set HOME path.
     """
     try:
-        env_var = "TENX_HOME"
-        # TODO: to use az_config.get() when we update the env_var name to
-        # AZURE_CONTAINER_INNERLOOP_HOME or anything else
-        file_path = os.environ[env_var]
-        return file_path
+        return az_config.get(
+            'project', 'mindaro_home') # AZURE_PROJECT_MINDARO_HOME
     except KeyError as error:
         raise CLIError(
-            'Temporary: Please set the environment variable: {} to your inner loop source code directory.'.format(error))
+            'Please set the environment variable: {} to your inner loop source code directory.'.format(error))
     except Exception as error:
         raise CLIError(error)
