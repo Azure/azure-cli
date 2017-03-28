@@ -77,7 +77,7 @@ def parse_resource_id(rid):
 def is_valid_resource_id(rid, exception_type=None):
     is_valid = False
     try:
-        is_valid = rid and resource_id(**parse_resource_id(rid)) == rid
+        is_valid = rid and resource_id(**parse_resource_id(rid)).lower() == rid.lower()
     except KeyError:
         pass
     if not is_valid and exception_type:
