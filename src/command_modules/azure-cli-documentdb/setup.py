@@ -27,7 +27,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-documentdb==0.1.0',
+    'azure-mgmt-documentdb==0.1.1',
     'azure-cli-core'
 ]
 

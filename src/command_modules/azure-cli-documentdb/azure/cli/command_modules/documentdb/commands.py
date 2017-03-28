@@ -16,6 +16,7 @@ def db_accounts_factory(_):
 cli_command(__name__, 'documentdb show', mgmt_path.format('DatabaseAccountsOperations.get'), db_accounts_factory)
 cli_command(__name__, 'documentdb list-keys', mgmt_path.format('DatabaseAccountsOperations.list_keys'), db_accounts_factory)
 cli_command(__name__, 'documentdb list-read-only-keys', mgmt_path.format('DatabaseAccountsOperations.list_read_only_keys'), db_accounts_factory)
+cli_command(__name__, 'documentdb list-connection-strings', mgmt_path.format('DatabaseAccountsOperations.list_connection_strings'), db_accounts_factory)
 cli_command(__name__, 'documentdb regenerate-key', mgmt_path.format('DatabaseAccountsOperations.regenerate_key'), db_accounts_factory)
 cli_command(__name__, 'documentdb check-name-exists', mgmt_path.format('DatabaseAccountsOperations.check_name_exists'), db_accounts_factory)
 cli_command(__name__, 'documentdb delete', mgmt_path.format('DatabaseAccountsOperations.delete'), db_accounts_factory)
