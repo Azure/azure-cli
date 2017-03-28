@@ -419,13 +419,22 @@ def list_app_service_plans(resource_group_name=None):
     return plans
 
 
+def _linux_sku_check(sku):
+    tier = _get_sku_name(sku)
+    if tier == 'BASIC' or tier == 'STANDARD':
+        return
+    format_string = '{0} is not a valid sku for linux, please use one of the following: {1}'
+    raise CLIError(format_string.format(sku, 'B1, B2, B3, S1, S2, S3'))
+
+
 def create_app_service_plan(resource_group_name, name, is_linux, sku='B1', number_of_workers=None,
                             location=None):
     client = web_client_factory()
     sku = _normalize_sku(sku)
     if location is None:
         location = _get_location_from_resource_group(resource_group_name)
-
+    if is_linux is not None:
+        _linux_sku_check(sku)
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=_get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location, app_service_plan_name=name,
