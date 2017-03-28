@@ -212,6 +212,16 @@ def delete_resource(resource_group_name=None, resource_provider_namespace=None,
                          resource_id, api_version)
     return res.delete()
 
+
+def update_resource(parameters, resource_group_name=None, resource_provider_namespace=None,
+                    parent_resource_path=None, resource_type=None, resource_name=None,
+                    resource_id=None, api_version=None):
+    res = _ResourceUtils(resource_group_name, resource_provider_namespace,
+                         parent_resource_path, resource_type, resource_name,
+                         resource_id, api_version)
+    return res.update(parameters)
+
+
 def tag_resource(tags, resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None,
                  resource_id=None, api_version=None):
@@ -686,6 +696,20 @@ class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
                                              self.resource_type,
                                              self.resource_name,
                                              self.api_version)
+
+    def update(self, parameters):
+        if self.resource_id:
+            return self.rcf.resources.create_or_update_by_id(self.resource_id,
+                                                             self.api_version,
+                                                             parameters)
+        else:
+            return self.rcf.resources.create_or_update(self.resource_group_name,
+                                                       self.resource_provider_namespace,
+                                                       self.parent_resource_path or '',
+                                                       self.resource_type,
+                                                       self.resource_name,
+                                                       self.api_version,
+                                                       parameters)
 
     def tag(self, tags):
         resource = self.get_resource()
