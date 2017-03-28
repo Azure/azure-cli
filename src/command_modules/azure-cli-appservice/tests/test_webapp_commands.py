@@ -208,6 +208,10 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
             JMESPathCheck('[0].name', '{0}/{0}.azurewebsites.net'.format(self.webapp_name))
         ])
 
+        # see deployment user
+        result = self.cmd('appservice web deployment user show')
+        self.assertTrue(result['type'])  # just make sure the command does return something
+
 
 class WebappScaleTest(ResourceGroupVCRTestBase):
 
@@ -367,6 +371,7 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         slot = 'staging'
         slot2 = 'dev'
         test_git_repo = 'https://github.com/yugangw-msft/azure-site-test'
+        test_node_version = '6.6.0'
 
         # create a few app-settings to test they can be cloned
         self.cmd('appservice web config appsettings update -g {} -n {} --settings s1=v1 --slot-settings s2=v2'.format(self.resource_group, self.webapp))
@@ -382,26 +387,32 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
 
         import time
         import requests
-        '''
-        #verify the slot wires up the git repo/branch
-        time.sleep(30) # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
-        r = requests.get('http://{}-{}.azurewebsites.net'.format(self.webapp, slot))
-        self.assertTrue('Staging' in str(r.content))
-        '''
+
+        # comment out the git sync testing as it requires to pre-load a git token
+        # the rest test steps should be sufficient to verify the slot functionalities.
+
+        # verify the slot wires up the git repo/branch
+        # time.sleep(30) # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
+        # r = requests.get('http://{}-{}.azurewebsites.net'.format(self.webapp, slot))
+        # self.assertTrue('Staging' in str(r.content))
 
         # swap with prod and verify the git branch also switched
         self.cmd('appservice web deployment slot swap -g {} -n {} -s {}'.format(self.resource_group, self.webapp, slot))
-        time.sleep(30)  # 30 seconds should be enough for the slot swap finished(Skipped under playback mode)
-        r = requests.get('http://{}.azurewebsites.net'.format(self.webapp))
-        self.assertTrue('Staging' in str(r.content))
+        # time.sleep(30)  # 30 seconds should be enough for the slot swap finished(Skipped under playback mode)
+        # r = requests.get('http://{}.azurewebsites.net'.format(self.webapp))
+        # self.assertTrue('Staging' in str(r.content))
         result = self.cmd('appservice web config appsettings show -g {} -n {} -s {}'.format(self.resource_group, self.webapp, slot))
         self.assertEqual(set([x['name'] for x in result]), set(['WEBSITE_NODE_DEFAULT_VERSION', 's1']))
 
         # create a new slot by cloning from prod slot
+        self.cmd('appservice web config update -g {} -n {} --node-version {}'.format(self.resource_group, self.webapp, test_node_version))
         self.cmd('appservice web deployment slot create -g {} -n {} --slot {} --configuration-source {}'.format(self.resource_group, self.webapp, slot2, self.webapp))
         self.cmd('appservice web config appsettings show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2), checks=[
             JMESPathCheck("length([])", 1),
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION')
+        ])
+        self.cmd('appservice web config show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2), checks=[
+            JMESPathCheck("nodeVersion", test_node_version),
         ])
         self.cmd('appservice web config appsettings update -g {} -n {} --slot {} --settings s3=v3 --slot-settings s4=v4'.format(self.resource_group, self.webapp, slot2))
 
@@ -415,8 +426,8 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('appservice web deployment slot list -g {} -n {}'.format(self.resource_group, self.webapp), checks=[
             JMESPathCheck("length([])", 2),
-            JMESPathCheck('[0].name', slot2),
-            JMESPathCheck('[1].name', slot),
+            JMESPathCheck("length([?name=='{}'])".format(slot2), 1),
+            JMESPathCheck("length([?name=='{}'])".format(slot), 1),
         ])
         self.cmd('appservice web deployment slot delete -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=NoneCheck())
 

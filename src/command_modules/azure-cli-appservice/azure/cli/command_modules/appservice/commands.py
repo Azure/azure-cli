@@ -8,7 +8,7 @@ from azure.cli.core.commands import LongRunningOperation, cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core._util import empty_on_404
 
-from ._client_factory import web_client_factory, cf_plans
+from ._client_factory import cf_web_client, cf_plans
 
 
 def output_slots_in_table(slots):
@@ -95,5 +95,5 @@ cli_generic_update_command(__name__, 'appservice plan update', 'azure.mgmt.web.o
                            custom_function_op='azure.cli.command_modules.appservice.custom#update_app_service_plan',
                            setter_arg_name='app_service_plan', factory=cf_plans)
 
-cli_command(__name__, 'appservice web deployment user show', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.get_publishing_user', web_client_factory, exception_handler=empty_on_404)
-cli_command(__name__, 'appservice list-locations', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.list_geo_regions', web_client_factory, transform=transform_list_location_output)
+cli_command(__name__, 'appservice web deployment user show', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.get_publishing_user', cf_web_client, exception_handler=empty_on_404)
+cli_command(__name__, 'appservice list-locations', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.list_geo_regions', cf_web_client, transform=transform_list_location_output)
