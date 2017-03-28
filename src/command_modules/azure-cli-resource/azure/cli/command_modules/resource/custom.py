@@ -8,6 +8,7 @@
 from __future__ import print_function
 import json
 import os
+import re
 import uuid
 
 from azure.mgmt.resource.resources import ResourceManagementClient
@@ -270,9 +271,16 @@ def _list_resources_odata_filter_builder(resource_group_name=None,
         if resource_provider_namespace:
             f = "'{}/{}'".format(resource_provider_namespace, resource_type)
         else:
+            if not re.match('[^/]+/[^/]+', resource_type):
+                raise CLIError(
+                    'Malformed resource-type: '
+                    '--resource-type=<namespace>/<resource-type> expected.')
             #assume resource_type is <namespace>/<type>. The worst is to get a server error
             f = "'{}'".format(resource_type)
         filters.append("resourceType eq " + f)
+    else:
+        if resource_provider_namespace:
+            raise CLIError('--namespace also requires --resource-type')
 
     if tag:
         if name or location:
