@@ -80,15 +80,10 @@ register_cli_argument('acs dcos browse', 'name', name_arg_type)
 register_cli_argument('acs dcos install-cli', 'install_location',
                       options_list=('--install-location',),
                       default=_get_default_install_location('dcos'))
-register_cli_argument('acs dcos install-cli', 'client_version',
-                      options_list=('--client-version',),
-                      default='1.8')
 register_cli_argument('acs kubernetes install-cli', 'install_location',
                       options_list=('--install-location',),
                       default=_get_default_install_location('kubectl'))
-register_cli_argument('acs kubernetes install-cli', 'client_version',
-                      options_list=('--client-version',),
-                      default='1.4.5')
+
 # TODO: Make this derive from the cluster object, instead of just preset values
 register_cli_argument('acs kubernetes get-credentials', 'dns_prefix')
 register_cli_argument('acs kubernetes get-credentials', 'location')
