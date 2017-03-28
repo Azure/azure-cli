@@ -224,6 +224,7 @@ def create_keyvault(client, resource_group_name, vault_name, location=None, #pyl
                     tags=None):
     from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
     from azure.cli.core._profile import Profile, CLOUD
+    from azure.graphrbac.models import GraphErrorException
     profile = Profile()
     cred, _, tenant_id = profile.get_login_credentials(
         resource=CLOUD.endpoints.active_directory_graph_resource_id)
@@ -244,7 +245,10 @@ def create_keyvault(client, resource_group_name, vault_name, location=None, #pyl
                                         KeyPermissions.restore],
                                   secrets=[SecretPermissions.all],
                                   certificates=[CertificatePermissions.all])
-        object_id = _get_object_id(graph_client, subscription=subscription)
+        try:
+            object_id = _get_current_user_object_id(graph_client)
+        except GraphErrorException:
+            object_id = _get_object_id(graph_client, subscription=subscription)
         if not object_id:
             raise CLIError('Cannot create vault.\n'
                            'Unable to query active directory for information '\
