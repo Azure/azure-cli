@@ -430,15 +430,17 @@ register_cli_argument('network lb', 'frontend_port', help='Port number')
 register_cli_argument('network lb', 'frontend_port_range_start', help='Port number')
 register_cli_argument('network lb', 'frontend_port_range_end', help='Port number')
 register_cli_argument('network lb', 'backend_port', help='Port number')
-register_cli_argument('network lb', 'backend_pool_name', options_list=('--backend-pool-name',), help='The name of the backend address pool.', completer=get_lb_subresource_completion_list('backend_address_pools'))
 register_cli_argument('network lb', 'frontend_ip_name', help='The name of the frontend IP configuration.', completer=get_lb_subresource_completion_list('frontend_ip_configurations'))
 register_cli_argument('network lb', 'floating_ip', help='Enable floating IP.', **enum_choice_list(['true', 'false']))
 register_cli_argument('network lb', 'idle_timeout', help='Idle timeout in minutes.')
 register_cli_argument('network lb', 'protocol', help='', **enum_choice_list(TransportProtocol))
 
-register_cli_argument('network lb create', 'validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
+for item in ['backend_pool_name', 'backend_address_pool_name']:
+    register_cli_argument('network lb', item, options_list=('--backend-pool-name',), help='The name of the backend address pool.', completer=get_lb_subresource_completion_list('backend_address_pools'))
 
-register_cli_argument('network lb create', 'public_ip_dns_name', validator=process_lb_create_namespace)
+register_cli_argument('network lb create', 'validate', help='Generate and validate the ARM template without creating any resources.', action='store_true', validator=process_lb_create_namespace)
+
+register_cli_argument('network lb create', 'public_ip_dns_name')
 register_cli_argument('network lb create', 'public_ip_address_allocation', **enum_choice_list(IPAllocationMethod))
 register_cli_argument('network lb create', 'public_ip_dns_name', help='Globally unique DNS name for a new public IP.')
 

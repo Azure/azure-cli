@@ -115,7 +115,7 @@ cli_generic_wait_command(__name__, 'network express-route wait', 'azure.mgmt.net
 cli_command(__name__, 'network express-route list-service-providers', 'azure.mgmt.network.operations.express_route_service_providers_operations#ExpressRouteServiceProvidersOperations.list', cf_express_route_service_providers)
 
 # LoadBalancersOperations
-cli_command(__name__, 'network lb create', custom_path.format('create_load_balancer'), transform=DeploymentOutputLongRunningOperation('Starting network lb create'))
+cli_command(__name__, 'network lb create', custom_path.format('create_load_balancer'), transform=DeploymentOutputLongRunningOperation('Starting network lb create'), no_wait_param='no_wait')
 cli_command(__name__, 'network lb delete', 'azure.mgmt.network.operations.load_balancers_operations#LoadBalancersOperations.delete', cf_load_balancers)
 cli_command(__name__, 'network lb show', 'azure.mgmt.network.operations.load_balancers_operations#LoadBalancersOperations.get', cf_load_balancers, exception_handler=empty_on_404)
 cli_command(__name__, 'network lb list', custom_path.format('list_lbs'))

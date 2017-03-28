@@ -62,8 +62,8 @@ class ArmTemplateBuilder(object):
         return json.loads(json.dumps(self.template))
 
 
-def _build_frontend_ip_config(name, public_ip_id=None, private_ip_allocation=None,
-                              private_ip_address=None, subnet_id=None):
+def _build_frontend_ip_config(name, public_ip_id=None, subnet_id=None, private_ip_address=None,
+                              private_ip_allocation=None):
     frontend_ip_config = {
         'name': name
     }
@@ -101,9 +101,8 @@ def build_application_gateway_resource(name, location, tags, sku_name, sku_tier,
     ssl_cert_name = '{}SslCert'.format(name)
     ssl_cert = None
 
-    frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id,
-                                                   private_ip_address, private_ip_allocation,
-                                                   subnet_id)
+    frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id, subnet_id,
+                                                   private_ip_address, private_ip_allocation)
     backend_address_pool = {'name': backend_pool_name}
     if servers:
         backend_pool['properties'] = {'BackendAddresses': servers}
@@ -205,9 +204,8 @@ def build_load_balancer_resource(name, location, tags, backend_pool_name,
                                  private_ip_address, private_ip_allocation):
     lb_id = "resourceId('Microsoft.Network/loadBalancers', '{}')".format(name)
 
-    frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id,
-                                                   private_ip_address, private_ip_allocation,
-                                                   subnet_id)
+    frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id, subnet_id,
+                                                   private_ip_address, private_ip_allocation)
 
     lb_properties = {
         'backendAddressPools': [

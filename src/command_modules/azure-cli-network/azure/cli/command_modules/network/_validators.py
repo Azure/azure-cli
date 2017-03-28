@@ -226,6 +226,7 @@ def get_subnet_validator(has_type_field=False, allow_none=False, allow_new=False
                 child_name=namespace.subnet)
 
     def complex_validator_with_type(namespace):
+
         get_folded_parameter_validator(
             'subnet', 'subnets', '--subnet',
             'virtual_network_name', 'Microsoft.Network/virtualNetworks', '--vnet-name',
@@ -387,6 +388,8 @@ def process_auth_create_namespace(namespace):
 
 def process_lb_create_namespace(namespace):
 
+    get_default_location_from_resource_group(namespace)
+
     if namespace.subnet and namespace.public_ip_address:
         raise ValueError(
             'incorrect usage: --subnet NAME --vnet-name NAME | '
@@ -397,23 +400,18 @@ def process_lb_create_namespace(namespace):
         get_subnet_validator(
             has_type_field=True, allow_new=True, allow_none=True, default_none=True)(namespace)
 
-        validate_private_ip_address(namespace)
-
-        namespace.public_ip_address_type = 'none'
+        namespace.public_ip_address_type = None
         namespace.public_ip_address = None
 
     else:
         # validation for internet facing load balancer
         get_public_ip_validator(has_type_field=True, allow_none=True, allow_new=True)(namespace)
 
-        if namespace.public_ip_dns_name:
-            if namespace.public_ip_address_type != 'new':
+        if namespace.public_ip_dns_name and namespace.public_ip_address_type != 'new':
                 raise CLIError(
                     'specify --public-ip-dns-name only if creating a new public IP address.')
-            else:
-                namespace.dns_name_type = 'new'
 
-        namespace.subnet_type = 'none'
+        namespace.subnet_type = None
         namespace.subnet = None
         namespace.virtual_network_name = None
 

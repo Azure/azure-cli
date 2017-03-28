@@ -21,6 +21,7 @@ from azure.mgmt.network.models import \
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
+from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core._util import CLIError
 from azure.cli.command_modules.network._client_factory import _network_client_factory
 from azure.cli.command_modules.network._util import _get_property, _set_param
@@ -505,8 +506,8 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
                          private_ip_address=None, public_ip_address=None,
                          public_ip_address_allocation=IPAllocationMethod.dynamic.value,
                          public_ip_dns_name=None, subnet=None, subnet_address_prefix='10.0.0.0/24',
-                         vnet_name=None, vnet_address_prefix='10.0.0.0/16',
-                         public_ip_type=None, vnet_type=None, validate=False):
+                         virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
+                         public_ip_address_type=None, subnet_type=None, validate=False, no_wait=False):
     from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
     from azure.cli.core._util import random_string
@@ -515,6 +516,8 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
          build_vnet_resource)
 
     tags = tags or {}
+    public_ip_address = public_ip_address or 'PublicIP{}'.format(load_balancer_name)
+    backend_pool_name = backend_pool_name or '{}bepool'.format(load_balancer_name)
 
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
@@ -529,21 +532,21 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
         subscription=get_subscription_id(), resource_group=resource_group_name,
         namespace='Microsoft.Network')
 
-    if vnet_type == 'new':
-        lb_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
+    if subnet_type == 'new':
+        lb_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(virtual_network_name))
         vnet = build_vnet_resource(
-            vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix)
+            virtual_network_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix)
         master_template.add_resource(vnet)
-        subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name,
+        subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, virtual_network_name,
                                                               subnet)
 
-    if public_ip_type == 'new':
+    if public_ip_address_type == 'new':
         lb_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))  # pylint: disable=line-too-long
         master_template.add_resource(build_public_ip_resource(public_ip_address, location,
                                                               tags,
                                                               public_ip_address_allocation,
                                                               public_ip_dns_name))
-        public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
+        public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                                 public_ip_address)
 
     load_balancer_resource = build_load_balancer_resource(
@@ -551,7 +554,7 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
         public_ip_id, subnet_id, private_ip_address, private_ip_allocation)
     load_balancer_resource['dependsOn'] = lb_dependencies
     master_template.add_resource(load_balancer_resource)
-    master_template.add_output('resource', load_balancer_name, output_type='object')
+    master_template.add_output('loadBalancer', load_balancer_name, output_type='object')
 
     template = master_template.build()
 
@@ -564,8 +567,7 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
         pprint(template)
         return client.validate(resource_group_name, deployment_name, properties)
 
-    return LongRunningOperation()(client.create_or_update(
-        resource_group_name, deployment_name, properties, raw=no_wait))
+    return client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
 
 
 def create_lb_inbound_nat_rule(
