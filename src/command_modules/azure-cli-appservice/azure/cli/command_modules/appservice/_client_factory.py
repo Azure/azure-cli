@@ -12,3 +12,7 @@ def web_client_factory(**_):
 
 def cf_plans(_):
     return web_client_factory().app_service_plans
+
+
+def cf_web_client(_):
+    return web_client_factory()
