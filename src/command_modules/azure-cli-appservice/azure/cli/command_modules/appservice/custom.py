@@ -421,9 +421,9 @@ def list_app_service_plans(resource_group_name=None):
 
 def _linux_sku_check(sku):
     tier = _get_sku_name(sku)
-    if tier == 'BASIC' or tier == 'STANDARD':
+    if tier in ['BASIC','STANDARD']:
         return
-    format_string = '{0} is not a valid sku for linux, please use one of the following: {1}'
+    format_string = 'usage error: {0} is not a valid sku for linux plan, please use one of the following.... {1}' # pylint: disable=line-too-long
     raise CLIError(format_string.format(sku, 'B1, B2, B3, S1, S2, S3'))
 
 
@@ -433,7 +433,7 @@ def create_app_service_plan(resource_group_name, name, is_linux, sku='B1', numbe
     sku = _normalize_sku(sku)
     if location is None:
         location = _get_location_from_resource_group(resource_group_name)
-    if is_linux is not None:
+    if is_linux:
         _linux_sku_check(sku)
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=_get_sku_name(sku), name=sku, capacity=number_of_workers)
