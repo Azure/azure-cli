@@ -383,18 +383,20 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
 
         import time
         import requests
-        '''
-        #verify the slot wires up the git repo/branch
-        time.sleep(30) # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
-        r = requests.get('http://{}-{}.azurewebsites.net'.format(self.webapp, slot))
-        self.assertTrue('Staging' in str(r.content))
-        '''
+
+        # comment out the git sync testing as it requires to pre-load a git token
+        # the rest test steps should be sufficient to verify the slot functionalities.
+
+        # verify the slot wires up the git repo/branch
+        # time.sleep(30) # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
+        # r = requests.get('http://{}-{}.azurewebsites.net'.format(self.webapp, slot))
+        # self.assertTrue('Staging' in str(r.content))
 
         # swap with prod and verify the git branch also switched
         self.cmd('appservice web deployment slot swap -g {} -n {} -s {}'.format(self.resource_group, self.webapp, slot))
-        #time.sleep(30)  # 30 seconds should be enough for the slot swap finished(Skipped under playback mode)
-        #r = requests.get('http://{}.azurewebsites.net'.format(self.webapp))
-        #self.assertTrue('Staging' in str(r.content))
+        # time.sleep(30)  # 30 seconds should be enough for the slot swap finished(Skipped under playback mode)
+        # r = requests.get('http://{}.azurewebsites.net'.format(self.webapp))
+        # self.assertTrue('Staging' in str(r.content))
         result = self.cmd('appservice web config appsettings show -g {} -n {} -s {}'.format(self.resource_group, self.webapp, slot))
         self.assertEqual(set([x['name'] for x in result]), set(['WEBSITE_NODE_DEFAULT_VERSION', 's1']))
 

@@ -310,7 +310,8 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
         clone_from_prod = configuration_source.lower() == webapp.lower()
         site_config = get_site_configs(
             resource_group_name, webapp, None if clone_from_prod else configuration_source)
-        _generic_site_operation(resource_group_name, webapp, 'update_configuration', slot, site_config)
+        _generic_site_operation(resource_group_name, webapp,
+                                'update_configuration', slot, site_config)
 
     # slot create doesn't clone over the app-settings and connection-strings, so we do it here
     # also make sure slot settings don't get propagated.
