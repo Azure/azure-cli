@@ -301,15 +301,16 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
     clone_from_prod = None
-    if configuration_source:
-        clone_from_prod = configuration_source.lower() == webapp.lower()
-        slot_def.site_config = get_site_configs(
-            resource_group_name, webapp, None if clone_from_prod else configuration_source)
-    else:
-        slot_def.site_config = SiteConfig(location)
+    slot_def.site_config = SiteConfig(location)
 
     poller = client.web_apps.create_or_update_slot(resource_group_name, webapp, slot_def, slot)
     result = AppServiceLongRunningOperation()(poller)
+
+    if configuration_source:
+        clone_from_prod = configuration_source.lower() == webapp.lower()
+        site_config = get_site_configs(
+            resource_group_name, webapp, None if clone_from_prod else configuration_source)
+        _generic_site_operation(resource_group_name, webapp, 'update_configuration', slot, site_config)
 
     # slot create doesn't clone over the app-settings and connection-strings, so we do it here
     # also make sure slot settings don't get propagated.
@@ -325,7 +326,7 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
         connection_strings = _generic_site_operation(resource_group_name, webapp,
                                                      'list_connection_strings',
                                                      src_slot)
-        for a in slot_cfg_names.connection_string_names:
+        for a in (slot_cfg_names.connection_string_names or []):
             connection_strings.properties.pop(a, None)
 
         _generic_site_operation(resource_group_name, webapp, 'update_application_settings',
