@@ -25,8 +25,6 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core._util import CLIError
 from azure.cli.command_modules.network._client_factory import _network_client_factory
 from azure.cli.command_modules.network._util import _get_property, _set_param
-from azure.cli.command_modules.network.mgmt_app_gateway.lib.operations.app_gateway_operations \
-    import AppGatewayOperations
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.dns import DnsManagementClient
@@ -93,6 +91,7 @@ def list_application_gateways(resource_group_name=None):
 
 #region Application Gateway commands
 
+# pylint: disable=too-many-locals
 def create_application_gateway(application_gateway_name, resource_group_name, location=None,
                                tags=None, no_wait=False, capacity=2,
                                cert_data=None, cert_password=None,
@@ -100,7 +99,7 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
                                http_settings_port=80, http_settings_protocol='Http',
                                routing_rule_type='Basic', servers=None,
                                sku=ApplicationGatewaySkuName.standard_medium.value,
-                               private_ip_address=None, public_ip_address=None,
+                               private_ip_address='', public_ip_address=None,
                                public_ip_address_allocation=IPAllocationMethod.dynamic.value,
                                subnet='default', subnet_address_prefix='10.0.0.0/24',
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
@@ -147,20 +146,20 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
                                                               public_ip_address_allocation,
                                                               None))
         public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
-                                                                public_ip_address)
+                                                        public_ip_address)
 
     app_gateway_resource = build_application_gateway_resource(
         application_gateway_name, location, tags, sku, sku_tier, capacity, servers, frontend_port,
         private_ip_address, private_ip_allocation, cert_data, cert_password,
         http_settings_cookie_based_affinity, http_settings_protocol, http_settings_port,
-        routing_rule_type, public_ip_id, subnet_id)
+        http_listener_protocol, routing_rule_type, public_ip_id, subnet_id)
     app_gateway_resource['dependsOn'] = ag_dependencies
     master_template.add_variable(
         'appGwID',
         "[resourceId('Microsoft.Network/applicationGateways', '{}')]".format(
             application_gateway_name))
     master_template.add_resource(app_gateway_resource)
-    master_template.add_output('resource', application_gateway_name, output_type='object')
+    master_template.add_output('applicationGateway', application_gateway_name, output_type='object')
 
     template = master_template.build()
 
@@ -173,21 +172,18 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
         pprint(template)
         return client.validate(resource_group_name, deployment_name, properties)
 
-    return LongRunningOperation()(client.create_or_update(
-        resource_group_name, deployment_name, properties, raw=no_wait))
+    return client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
 
 
-def update_application_gateway(instance, sku_name=None, sku_tier=None, capacity=None, tags=None):
-    if sku_name is not None:
-        instance.sku.name = sku_name
-    if sku_tier is not None:
-        instance.sku.tier = sku_tier
+def update_application_gateway(instance, sku=None, capacity=None, tags=None):
+    if sku is not None:
+        instance.sku.name = sku
+        instance.sku.tier = sku.split('_', 1)[0]
     if capacity is not None:
         instance.sku.capacity = capacity
     if tags is not None:
         instance.tags = tags
     return instance
-update_application_gateway.__doc__ = AppGatewayOperations.create_or_update.__doc__
 
 def create_ag_authentication_certificate(resource_group_name, application_gateway_name, item_name,
                                          cert_data, no_wait=False):
@@ -211,7 +207,6 @@ def create_ag_backend_address_pool(resource_group_name, application_gateway_name
     _upsert(ag, 'backend_address_pools', new_pool, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
-create_ag_backend_address_pool.__doc__ = AppGatewayOperations.create_or_update.__doc__
 
 def update_ag_backend_address_pool(instance, parent, item_name, servers=None): # pylint: disable=unused-argument
     if servers is not None:
@@ -238,7 +233,6 @@ def create_ag_frontend_ip_configuration(resource_group_name, application_gateway
     _upsert(ag, 'frontend_ip_configurations', new_config, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
-create_ag_frontend_ip_configuration.__doc__ = AppGatewayOperations.create_or_update.__doc__
 
 def update_ag_frontend_ip_configuration(instance, parent, item_name, public_ip_address=None, # pylint: disable=unused-argument
                                         subnet=None, virtual_network_name=None, # pylint: disable=unused-argument
@@ -251,7 +245,6 @@ def update_ag_frontend_ip_configuration(instance, parent, item_name, public_ip_a
         instance.private_ip_address = private_ip_address
         instance.private_ip_allocation_method = 'Static'
     return parent
-update_ag_frontend_ip_configuration.__doc__ = AppGatewayOperations.create_or_update.__doc__
 
 def create_ag_frontend_port(resource_group_name, application_gateway_name, item_name, port,
                             no_wait=False):
@@ -413,7 +406,6 @@ def create_ag_ssl_certificate(resource_group_name, application_gateway_name, ite
     _upsert(ag, 'ssl_certificates', new_cert, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
-create_ag_ssl_certificate.__doc__ = AppGatewayOperations.create_or_update.__doc__
 
 def update_ag_ssl_certificate(instance, parent, item_name, cert_data=None, cert_password=None): # pylint: disable=unused-argument
     if cert_data is not None:
@@ -421,7 +413,6 @@ def update_ag_ssl_certificate(instance, parent, item_name, cert_data=None, cert_
     if cert_password is not None:
         instance.password = cert_password
     return parent
-update_ag_ssl_certificate.__doc__ = AppGatewayOperations.create_or_update.__doc__
 
 def set_ag_ssl_policy(resource_group_name, application_gateway_name, disabled_ssl_protocols=None,
                       clear=False, no_wait=False):
@@ -520,7 +511,8 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
                          public_ip_address_allocation=IPAllocationMethod.dynamic.value,
                          public_ip_dns_name=None, subnet=None, subnet_address_prefix='10.0.0.0/24',
                          virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
-                         public_ip_address_type=None, subnet_type=None, validate=False, no_wait=False):
+                         public_ip_address_type=None, subnet_type=None, validate=False,
+                         no_wait=False):
     from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
     from azure.cli.core._util import random_string
@@ -548,10 +540,11 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
     if subnet_type == 'new':
         lb_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(virtual_network_name))
         vnet = build_vnet_resource(
-            virtual_network_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix)
+            virtual_network_name, location, tags, vnet_address_prefix, subnet,
+            subnet_address_prefix)
         master_template.add_resource(vnet)
-        subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, virtual_network_name,
-                                                              subnet)
+        subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(
+            network_id_template, virtual_network_name, subnet)
 
     if public_ip_address_type == 'new':
         lb_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))  # pylint: disable=line-too-long
@@ -560,7 +553,7 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
                                                               public_ip_address_allocation,
                                                               public_ip_dns_name))
         public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
-                                                                public_ip_address)
+                                                        public_ip_address)
 
     load_balancer_resource = build_load_balancer_resource(
         load_balancer_name, location, tags, backend_pool_name, frontend_ip_name,
@@ -1056,7 +1049,6 @@ def create_vnet_peering(resource_group_name, virtual_network_name, virtual_netwo
                         remote_virtual_network, allow_virtual_network_access=False,
                         allow_forwarded_traffic=False, allow_gateway_transit=False,
                         use_remote_gateways=False):
-    from azure.cli.core.commands.client_factory import get_subscription_id
     peering = VirtualNetworkPeering(
         id=resource_id(
             subscription=get_subscription_id(),

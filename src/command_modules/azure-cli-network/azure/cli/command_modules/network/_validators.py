@@ -259,9 +259,9 @@ def validate_servers(namespace):
     for item in namespace.servers if namespace.servers else []:
         try:
             socket.inet_aton(item) #pylint:disable=no-member
-            servers.append(ApplicationGatewayBackendAddress(ip_address=item))
+            servers.append({'ipAddress':item})
         except socket.error: #pylint:disable=no-member
-            servers.append(ApplicationGatewayBackendAddress(fqdn=item))
+            servers.append({'fqdn':item})
     namespace.servers = servers
 
 def get_virtual_network_validator(has_type_field=False, allow_none=False, allow_new=False,
@@ -401,8 +401,8 @@ def process_lb_create_namespace(namespace):
         get_public_ip_validator(has_type_field=True, allow_none=True, allow_new=True)(namespace)
 
         if namespace.public_ip_dns_name and namespace.public_ip_address_type != 'new':
-                raise CLIError(
-                    'specify --public-ip-dns-name only if creating a new public IP address.')
+            raise CLIError(
+                'specify --public-ip-dns-name only if creating a new public IP address.')
 
         namespace.subnet_type = None
         namespace.subnet = None

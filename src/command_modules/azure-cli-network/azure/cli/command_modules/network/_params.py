@@ -153,6 +153,8 @@ register_cli_argument('network application-gateway create', 'capacity', help='Th
 register_cli_argument('network application-gateway create', 'cert_password', help='The certificate password', arg_group='Gateway')
 register_cli_argument('network application-gateway create', 'http_settings_port', help='The HTTP settings port.', arg_group='Gateway')
 
+register_cli_argument('network application-gateway update', 'sku', arg_group=None)
+
 public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, allow_new=True, default_none=True)
 register_cli_argument('network application-gateway create', 'public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), arg_group='Network')
 register_cli_argument('network application-gateway create', 'public_ip_address_type', ignore_type)
