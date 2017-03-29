@@ -171,7 +171,7 @@ def disable(resource_group_name, vm_name, volume_type=None, force=False):
                     status = show(resource_group_name, vm_name)
                     if status['osDisk'] == _STATUS_ENCRYPTED:
                         raise CLIError("VM's OS disk is encrypted. Disabling encryption on data "
-                                       "disk can still cause VM unbootable. Use '--force' "
+                                       "disk can render the VM unbootable. Use '--force' "
                                        "to continue")
                 else:
                     raise CLIError("Only data disk is supported to disable on Linux VM")
