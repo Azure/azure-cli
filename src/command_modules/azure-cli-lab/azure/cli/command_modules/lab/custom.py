@@ -12,7 +12,8 @@ def create_lab_vm(client, resource_group, lab_name, name, notes=None, image=None
                   vnet_name=None, subnet=None, disallow_public_ip_address=None, artifacts=None,
                   location=None, tags=None, custom_image_id=None, lab_virtual_network_id=None,
                   gallery_image_reference=None, generate_ssh_keys=None, allow_claim=False,
-                  disk_type=None, expiration_date=None, formula=None):
+                  disk_type=None, expiration_date=None, formula=None, ip_configuration=None,
+                  network_interface=None, os_type=None):
     """ Command to create vm of in the Azure DevTest Lab """
     from .sdk.devtestlabs.models.lab_virtual_machine_creation_parameter import \
         LabVirtualMachineCreationParameter
@@ -31,6 +32,7 @@ def create_lab_vm(client, resource_group, lab_name, name, notes=None, image=None
         lab_subnet_name=subnet,
         lab_virtual_network_id=lab_virtual_network_id,
         disallow_public_ip_address=disallow_public_ip_address,
+        network_interface=network_interface,
         artifacts=artifacts,
         gallery_image_reference=gallery_image_reference,
         location=location,
