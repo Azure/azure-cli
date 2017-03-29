@@ -396,7 +396,7 @@ def _configure_cluster():  # pylint: disable=too-many-statements
     deployed services and initializes a workspace on the local machine to connection.
     Asks for user input: ACR server name.
     """
-    kubernetes_path = None
+    artifacts_path = None
     ssh_client = None
     scp_client = None
     try:
@@ -425,8 +425,8 @@ def _configure_cluster():  # pylint: disable=too-many-statements
             'Configuring Kubernetes cluster ... ', logger)
 
         innerloop_client_path = _get_innerloop_home_path()
-        kubernetes_path = os.path.join(
-            innerloop_client_path, 'setup', 'Kubernetes')
+        artifacts_path = os.path.join(
+            innerloop_client_path, 'Artifacts')
 
         # Removing existing cluster from ~/.ssh/known_hosts
         known_hostname_command = 'ssh-keygen -R {}'.format(
@@ -449,13 +449,13 @@ def _configure_cluster():  # pylint: disable=too-many-statements
 
         # Cluster Setup(deploying required artifacts in the kubectl nodes)
         utils.log('Preparing ARM configuration ... ', logger)
-        k8_parameters = _prepare_arm_k8(dns_prefix)
+        k8_parameters = _prepare_arm_k8(dns_prefix, artifacts_path)
         utils.log(
             'ARM configuration prepared.', logger)
 
         utils.log('Creating Resources ... ', logger)
         _deploy_arm_template_core(
-            resource_group, template_file='{}/k8.deploy.json'.format(kubernetes_path), deployment_name=dns_prefix,
+            resource_group, template_file='{}/k8.deploy.json'.format(artifacts_path), deployment_name=dns_prefix,
             parameters=k8_parameters)
         utils.log(
             'ARM template deployed.', logger)
@@ -468,13 +468,13 @@ def _configure_cluster():  # pylint: disable=too-many-statements
         utils.log(
             'Deploying ACR credentials in Kubernetes ... ', logger)
         workspace_storage_key = _deploy_secrets_share_k8(
-            acr_server, resource_group, dns_prefix, client_id, client_secret, location, user_name)
+            acr_server, resource_group, dns_prefix, client_id, client_secret, location, user_name, artifacts_path)
         utils.log(
             'ACR credentials deployed.', logger)
 
         utils.log(
             'Enumerating Kubernetes agents ... ', logger)
-        _enumerate_k8_agents(innerloop_client_path)
+        _enumerate_k8_agents(artifacts_path)
 
         utils.log(
             'Preparing the cluster ... ', logger)
@@ -485,7 +485,7 @@ def _configure_cluster():  # pylint: disable=too-many-statements
         _run_remote_command(
             'rm ~/hosts', ssh_client)
         scp_client.put(
-            '{}/hosts.tmp'.format(kubernetes_path), '~/hosts')
+            '{}/hosts.tmp'.format(artifacts_path), '~/hosts')
         utils.log(
             'Cluster prepared.', logger)
 
@@ -494,9 +494,9 @@ def _configure_cluster():  # pylint: disable=too-many-statements
         scp_client.put(
             ssh_private_key, '~/.ssh/id_rsa')
         scp_client.put(
-            '{}/connectlocal.tmp.sh'.format(kubernetes_path), '~/connectlocal.tmp.sh')
+            '{}/connectlocal.tmp.sh'.format(artifacts_path), '~/connectlocal.tmp.sh')
         scp_client.put(
-            '{}/configagents.sh'.format(kubernetes_path), '~/configagents.sh')
+            '{}/configagents.sh'.format(artifacts_path), '~/configagents.sh')
 
         _run_remote_command(
             'chmod 600 ~/.ssh/id_rsa', ssh_client)
@@ -513,47 +513,47 @@ def _configure_cluster():  # pylint: disable=too-many-statements
         utils.log(
             'Cleaning existing TenX services in cluster ... ', logger)
         _execute_command(
-            "kubectl delete -f {}/tenx.tmp.yaml".format(kubernetes_path), True)
+            "kubectl delete -f {}/tenx.tmp.yaml".format(artifacts_path), True)
         _execute_command(
-            "kubectl delete -f {}/tenxPrivate.tmp.yaml".format(kubernetes_path), True)
+            "kubectl delete -f {}/tenxPrivate.tmp.yaml".format(artifacts_path), True)
         _execute_command(
-            "kubectl delete -f {}/tenxServices.yaml -n tenx".format(kubernetes_path), True)
+            "kubectl delete -f {}/tenxServices.yaml -n tenx".format(artifacts_path), True)
         _execute_command(
-            "kubectl delete -f {}/tenxPrivateService.yaml -n tenx".format(kubernetes_path), True)
+            "kubectl delete -f {}/tenxPrivateService.yaml -n tenx".format(artifacts_path), True)
         _execute_command(
-            "kubectl delete -f {}/tenxConfigService.yaml -n tenx".format(kubernetes_path), True)
+            "kubectl delete -f {}/tenxConfigService.yaml -n tenx".format(artifacts_path), True)
         _execute_command(
-            "kubectl delete -f {}/tenxBuildService.yaml -n tenx".format(kubernetes_path), True)
+            "kubectl delete -f {}/tenxBuildService.yaml -n tenx".format(artifacts_path), True)
         _execute_command(
-            "kubectl delete -f {}/tenxExecService.yaml -n tenx".format(kubernetes_path), True)
+            "kubectl delete -f {}/tenxExecService.yaml -n tenx".format(artifacts_path), True)
         _execute_command(
-            "kubectl delete -f {}/tenxRsrcService.yaml -n tenx".format(kubernetes_path), True)
+            "kubectl delete -f {}/tenxRsrcService.yaml -n tenx".format(artifacts_path), True)
         _execute_command(
-            "kubectl delete -f {}/tenxPublicEndpoint.yaml -n tenx".format(kubernetes_path), True)
+            "kubectl delete -f {}/tenxPublicEndpoint.yaml -n tenx".format(artifacts_path), True)
 
         utils.log(
             'Deploying TenX services to K8 cluster ... ', logger)
         _execute_command(
-            "kubectl create -f {}/tenx.tmp.yaml".format(kubernetes_path), True)
+            "kubectl create -f {}/tenx.tmp.yaml".format(artifacts_path), True)
         _execute_command(
-            "kubectl create -f {}/tenxPrivate.tmp.yaml".format(kubernetes_path), True)
+            "kubectl create -f {}/tenxPrivate.tmp.yaml".format(artifacts_path), True)
 
         utils.log(
             'Exposing TenX services from cluster ... ', logger)
         _execute_command(
-            "kubectl create -f {}/tenxServices.yaml -n tenx".format(kubernetes_path))
+            "kubectl create -f {}/tenxServices.yaml -n tenx".format(artifacts_path))
         _execute_command(
-            "kubectl create -f {}/tenxPrivateService.yaml -n tenx".format(kubernetes_path))
+            "kubectl create -f {}/tenxPrivateService.yaml -n tenx".format(artifacts_path))
         _execute_command(
-            "kubectl create -f {}/tenxConfigService.yaml -n tenx".format(kubernetes_path))
+            "kubectl create -f {}/tenxConfigService.yaml -n tenx".format(artifacts_path))
         _execute_command(
-            "kubectl create -f {}/tenxBuildService.yaml -n tenx".format(kubernetes_path))
+            "kubectl create -f {}/tenxBuildService.yaml -n tenx".format(artifacts_path))
         _execute_command(
-            "kubectl create -f {}/tenxExecService.yaml -n tenx".format(kubernetes_path))
+            "kubectl create -f {}/tenxExecService.yaml -n tenx".format(artifacts_path))
         _execute_command(
-            "kubectl create -f {}/tenxRsrcService.yaml -n tenx".format(kubernetes_path))
+            "kubectl create -f {}/tenxRsrcService.yaml -n tenx".format(artifacts_path))
         _execute_command(
-            "kubectl create -f {}/tenxPublicEndpoint.yaml -n tenx".format(kubernetes_path))
+            "kubectl create -f {}/tenxPublicEndpoint.yaml -n tenx".format(artifacts_path))
 
         # Initialize Workspace
         utils.log(
@@ -563,8 +563,8 @@ def _configure_cluster():  # pylint: disable=too-many-statements
             dns_prefix, user_name, workspace_storage, workspace_storage_key, ssh_private_key, location=location)
     finally:
         # Removing temporary data files
-        if kubernetes_path:
-            file_path = os.path.join(kubernetes_path, '*.tmp.*')
+        if artifacts_path:
+            file_path = os.path.join(artifacts_path, '*.tmp.*')
             files = glob.glob(file_path)
             for single_file in files:
                 os.remove(single_file)
@@ -657,13 +657,13 @@ def _ping_url(url):
     return req.status_code == 200
 
 
-def _enumerate_k8_agents(innerloop_client_path):
+def _enumerate_k8_agents(artifacts_path):
     """
     Enumerate the Kubernetes nodes (agents) and write them in a file to be copied to the master host.
     """
     output = _get_command_output("kubectl get nodes")
     hosts_file_path = os.path.join(
-        innerloop_client_path, 'setup', 'Kubernetes', 'hosts.tmp')
+        artifacts_path, 'hosts.tmp')
 
     try:
         with open(hosts_file_path, "w") as hosts_file:
@@ -680,17 +680,17 @@ def _enumerate_k8_agents(innerloop_client_path):
         raise CLIError(error)
 
 
-def _deploy_secrets_share_k8(acr_server, resource_group, dns_prefix, client_id, client_secret, location, user_name):
+def _deploy_secrets_share_k8(acr_server, resource_group, dns_prefix, client_id, client_secret, location, user_name, artifacts_path):
     """
     Install cluster/registry secrets and creates share on the file storage.
     """
     _install_k8_secret(acr_server, dns_prefix, client_id,
-                       client_secret, location, user_name)
-    workspace_storage_key = _install_k8_shares(resource_group, dns_prefix)
+                       client_secret, location, user_name, artifacts_path)
+    workspace_storage_key = _install_k8_shares(resource_group, dns_prefix, artifacts_path)
     return workspace_storage_key
 
 
-def _install_k8_secret(acr, dns_prefix, client_id, client_secret, location, cluster_user_name):
+def _install_k8_secret(acr, dns_prefix, client_id, client_secret, location, cluster_user_name, artifacts_path):
     """
     Creates a registry secret in the cluster, used by the tenx services.
     Prepares the file to create resource in the Kubernetes cluster.
@@ -714,33 +714,33 @@ def _install_k8_secret(acr, dns_prefix, client_id, client_secret, location, clus
     try:
         innerloop_client_path = _get_innerloop_home_path()
         tenx_yaml_path = os.path.join(
-            innerloop_client_path, 'setup', 'Kubernetes', 'tenx.yaml')
+            artifacts_path, 'tenx.yaml')
         with open(tenx_yaml_path, "r") as tenx_yaml_file:
             tenx_yaml = tenx_yaml_file.read()
         tmp_tenx_yaml = tenx_yaml.replace("$TENX_PRIVATE_REGISTRY$", acr).replace(
             "$TENX_STORAGE_ACCOUNT$", config_storage)
 
         tmp_tenx_yaml_path = os.path.join(
-            innerloop_client_path, 'setup', 'Kubernetes', 'tenx.tmp.yaml')
+            artifacts_path, 'tenx.tmp.yaml')
         with open(tmp_tenx_yaml_path, "w") as tmp_tenx_yaml_file:
             tmp_tenx_yaml_file.write(tmp_tenx_yaml)
 
         tenx_private_yaml_path = os.path.join(
-            innerloop_client_path, 'setup', 'Kubernetes', 'tenxPrivate.yaml')
+            artifacts_path, 'tenxPrivate.yaml')
         with open(tenx_private_yaml_path, "r") as tenx_private_yaml_file:
             tenx_private_yaml = tenx_private_yaml_file.read()
         tmp_tenx_private_yaml = tenx_private_yaml.replace(
             "$TENX_STORAGE_ACCOUNT_PRIVATE$", private_storage)
 
         tmp_tenx_private_yaml_path = os.path.join(
-            innerloop_client_path, 'setup', 'Kubernetes', 'tenxPrivate.tmp.yaml')
+            artifacts_path, 'tenxPrivate.tmp.yaml')
         with open(tmp_tenx_private_yaml_path, "w") as tmp_tenx_private_yaml_file:
             tmp_tenx_private_yaml_file.write(tmp_tenx_private_yaml)
     except FileNotFoundError as error:
         raise CLIError(error)
 
 
-def _install_k8_shares(resource_group, dns_prefix):
+def _install_k8_shares(resource_group, dns_prefix, artifacts_path):
     """
     Creates/ensures the shares in the file storage.
     Prepares the connection file that runs on each agent and mounts the directory to a share in the file storage.
@@ -756,7 +756,7 @@ def _install_k8_shares(resource_group, dns_prefix):
 
     innerloop_client_path = _get_innerloop_home_path()
     connect_template_path = os.path.join(
-        innerloop_client_path, 'setup', 'Kubernetes', 'connectlocal.template.sh')
+        artifacts_path, 'connectlocal.template.sh')
     with open(connect_template_path, "r") as connect_template_file:
         connect_template = connect_template_file.read()
     connect_template = connect_template.replace("$STORAGEACCOUNT_PRIVATE$", config_storage) \
@@ -766,7 +766,7 @@ def _install_k8_shares(resource_group, dns_prefix):
         .replace("$SHARE_NAME$", "mindaro")
 
     connect_output = os.path.join(
-        innerloop_client_path, 'setup', 'Kubernetes', 'connectlocal.tmp.sh')
+        artifacts_path, 'connectlocal.tmp.sh')
     with open(connect_output, "w") as connect_output_file:
         connect_output_file.write(connect_template)
 
@@ -916,21 +916,21 @@ def _get_remote_host(dns_prefix, location):
     return '{}.{}.cloudapp.azure.com'.format(dns_prefix, location)
 
 
-def _prepare_arm_k8(dns_prefix):
+def _prepare_arm_k8(dns_prefix, artifacts_path):
     """
     Prepares template file for configuring the Kubernetes cluster.
     """
     try:
         innerloop_client_path = _get_innerloop_home_path()
         k8_parameters_file_path = os.path.join(
-            innerloop_client_path, 'setup', 'Kubernetes', 'k8.deploy.parameters.json')
+            artifacts_path, 'k8.deploy.parameters.json')
         with open(k8_parameters_file_path, "r") as k8_parameters_file:
             k8_parameters = k8_parameters_file.read()
         new_k8_parameters = k8_parameters.replace(
             "CLUSTER_NAME", dns_prefix.replace('-', ''))
 
         new_k8_parameters_file_path = os.path.join(
-            innerloop_client_path, 'setup', 'Kubernetes', 'k8.deploy.parameters.tmp.json')
+            artifacts_path, 'k8.deploy.parameters.tmp.json')
         with open(new_k8_parameters_file_path, "w") as new_k8_parameters_file:
             new_k8_parameters_file.write(new_k8_parameters)
 
@@ -1037,12 +1037,11 @@ def _run_innerloop_command(*args):
     """
     try:
         file_path = _get_innerloop_home_path()
-        cmd = os.path.join(file_path, 'tenx.cmd') if(
-            platform.system() == 'Windows') else os.path.join(file_path, 'tenx.sh')
+        cmd = os.path.join(file_path, 'tenx.dll')
         cmd = cmd + ' ' + ' '.join(args)
 
         # Prints subprocess output while process is running
-        with Popen(cmd, shell=True, stdout=PIPE, bufsize=1, universal_newlines=True) as process:
+        with Popen('dotnet {}'.format(cmd), shell=True, stdout=PIPE, bufsize=1, universal_newlines=True) as process:
             for line in process.stdout:
                 sys.stdout.write(line)
 
