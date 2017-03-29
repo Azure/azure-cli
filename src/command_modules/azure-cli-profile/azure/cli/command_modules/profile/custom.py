@@ -29,7 +29,7 @@ def list_subscriptions(all_clouds=False, all=False):  # pylint: disable=redefine
     if not all:
         enabled_ones = [s for s in subscriptions if s['state'] == 'Enabled']
         if len(enabled_ones) != len(subscriptions):
-            logger.warning("A few accounts are skipped as their states are not 'Enabled'. Run '--all' to display them.")  # pylint: disable=line-too-long
+            logger.warning("A few accounts are skipped as they don't have 'Enabled' state. Run '--all' to display them.")  # pylint: disable=line-too-long
             subscriptions = enabled_ones
     return subscriptions
 
