@@ -226,3 +226,25 @@ class Project(object):
             if git_url in entry:
                 return entry[git_url]
         return None
+
+    def set_cd_pipeline_name(self, cd_pipeline_name, git_url):
+        """
+        Sets the CD pipeline name for a git_url
+        """
+        cd_pipelines = []
+        if 'cd_pipelines' in self.settings:
+            cd_pipelines = self.settings['cd_pipelines']
+
+        cd_pipelines.append({git_url: cd_pipeline_name})
+        self.settings['cd_pipelines'] = cd_pipelines
+        self._save_changes()
+
+    def get_cd_pipeline_name(self, git_url):
+        """
+        Gets the name of the CD pipeline for a git_url
+        """
+        cd_pipelines = self._get_property_value('cd_pipelines')
+        for entry in cd_pipelines:
+            if git_url in entry:
+                return entry[git_url]
+        return None

@@ -52,7 +52,7 @@ from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
 logger = azlogging.get_az_logger(__name__)  # pylint: disable=invalid-name
 project_settings = settings.Project()  # pylint: disable=invalid-name
-random_name = utils.get_random_name() # pylint: disable=invalid-name
+random_name = utils.get_random_name()  # pylint: disable=invalid-name
 
 # TODO: Remove and switch to SSH once templates are updated
 admin_password = 'Mindaro@Pass1!'  # pylint: disable=invalid-name
@@ -158,12 +158,12 @@ def create_project(ssh_private_key, resource_group=random_name, name=random_name
         acr_client = _get_acr_service_client()
         acr_name = 'acr' + utils.get_random_registry_name()
         acr_client.registries.create(resource_group,
-                                    acr_name,
-                                    RegistryCreateParameters(
-                                        location=location,
-                                        sku=AcrSku('Basic'),
-                                        storage_account=StorageAccountParameters(
-                                            storage_account_name, storage_account_key))).wait()
+                                     acr_name,
+                                     RegistryCreateParameters(
+                                         location=location,
+                                         sku=AcrSku('Basic'),
+                                         storage_account=StorageAccountParameters(
+                                             storage_account_name, storage_account_key))).wait()
         registry = acr_client.registries.get(resource_group, acr_name)
         utils.log(
             'Azure container registry "{}" created.'.format(acr_name), logger)
@@ -189,7 +189,8 @@ def create_project(ssh_private_key, resource_group=random_name, name=random_name
         # 5. Install kubectl
         utils.log(
             'Installing kubectl ... ', logger)
-        k8s_install_cli(install_location=_get_default_install_location('kubectl'))
+        k8s_install_cli(
+            install_location=_get_default_install_location('kubectl'))
         utils.log(
             'Kubernetes installed.', logger)
 
@@ -212,7 +213,8 @@ def create_project(ssh_private_key, resource_group=random_name, name=random_name
         project_settings.cluster_name = kube_cluster_name
         project_settings.cluster_resource_group = resource_group
         project_settings.admin_username = default_user_name
-        project_settings.container_registry_url = 'https://' + registry.login_server #pylint: disable=no-member
+        project_settings.container_registry_url = 'https://' + \
+            registry.login_server  # pylint: disable=no-member
         project_settings.location = location
         project_settings.project_name = name
         project_settings.ssh_private_key = ssh_private_key
@@ -234,6 +236,7 @@ def create_project(ssh_private_key, resource_group=random_name, name=random_name
         if current_process:
             current_process.process_stop()
 
+
 def create_deployment_pipeline(remote_access_token):  # pylint: disable=unused-argument
     """
     Provisions Jenkins and configures CI and CD pipelines, kicks off initial build-deploy
@@ -247,6 +250,11 @@ def create_deployment_pipeline(remote_access_token):  # pylint: disable=unused-a
     jenkins_hostname = _get_remote_host(
         jenkins_resource.dns_prefix, jenkins_resource.location)
     project_settings.jenkins_hostname = jenkins_hostname
+    project_settings.set_ci_pipeline_name(
+        jenkins_resource._get_ci_job_name(), _get_git_remote_url())
+    project_settings.set_cd_pipeline_name(
+        jenkins_resource._get_cd_job_name(), _get_git_remote_url())
+
     utils.writeline('Jenkins hostname: {}'.format(jenkins_hostname))
     utils.writeline('Complete.')
 
@@ -366,6 +374,7 @@ def _get_storage_service_client():
     """
     return get_mgmt_service_client(StorageManagementClient)
 
+
 def _get_git_root_folder_name():
     """
     Gets the git root folder name. E.g. if current folder is
@@ -374,6 +383,7 @@ def _get_git_root_folder_name():
     """
     full_path = check_output(['git', 'rev-parse', '--show-toplevel'])
     return os.path.basename(full_path.decode().strip())
+
 
 def _get_pipeline_name():
     """
@@ -388,7 +398,9 @@ def _get_pipeline_name():
     """
     remote_url = _get_git_remote_url()
     # Get owner|organization/repo e.g. BikeSharing/reservations
-    owner_repo = remote_url.partition('github.com/')[2]
+    # and replace '/' with '-' as '/' can't be used in the pipeline name
+    # which becomes a part of the URL
+    owner_repo = remote_url.partition('github.com/')[2].replace('/', '-')
 
     base_repo_name = _get_git_root_folder_name()
     current_directory = os.getcwd()
@@ -720,7 +732,8 @@ def _deploy_secrets_share_k8(acr_server, resource_group, dns_prefix, client_id, 
     """
     _install_k8_secret(acr_server, dns_prefix, client_id,
                        client_secret, location, user_name, artifacts_path)
-    workspace_storage_key = _install_k8_shares(resource_group, dns_prefix, artifacts_path)
+    workspace_storage_key = _install_k8_shares(
+        resource_group, dns_prefix, artifacts_path)
     return workspace_storage_key
 
 
@@ -999,7 +1012,7 @@ def _initialize_workspace(
         os.remove(settings_json_file)
 
     _run_innerloop_command('initialize', workspace_share_name, dns_prefix,
-                          storage_account_name, storage_account_key, workspace_share_name, location, ssh_private_key, '--quiet', '--k8')
+                           storage_account_name, storage_account_key, workspace_share_name, location, ssh_private_key, '--quiet', '--k8')
 
     # Checking if the services are ready
     while not _cluster_configured(dns_prefix, user_name):
@@ -1097,7 +1110,7 @@ def _get_innerloop_home_path():
     """
     try:
         home_path = az_config.get(
-            'project', 'mindaro_home', None) # AZURE_PROJECT_MINDARO_HOME
+            'project', 'mindaro_home', None)  # AZURE_PROJECT_MINDARO_HOME
         if home_path is None:
             raise CLIError(
                 'Please set the environment variable: AZURE_PROJECT_MINDARO_HOME to your inner loop source code directory.')

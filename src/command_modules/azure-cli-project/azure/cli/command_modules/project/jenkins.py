@@ -126,7 +126,8 @@ class Jenkins(DeployableResource):
         scp = paramiko.SFTPClient.from_transport(ssh.get_transport())
         ssh.exec_command('sudo mkdir -p /var/lib/jenkins/.kube')
         scp.put(local_kube_config, '/home/azureuser/config')
-        ssh.exec_command('sudo cp /home/azureuser/config /var/lib/jenkins/.kube && sudo chown --from root jenkins /var/lib/jenkins/.kube')
+        ssh.exec_command(
+            'sudo cp /home/azureuser/config /var/lib/jenkins/.kube && sudo chown --from root jenkins /var/lib/jenkins/.kube')
 
     def _install_kubectl(self):
         """
@@ -139,16 +140,17 @@ class Jenkins(DeployableResource):
         """
         Gets the hashed string
         """
-        input_string = '{}-{}-{}'.format(self.project_name, self.service_name, self.git_repo_url)
-        hash_value = hashlib.sha1(input_string)
+        input_string = '{}-{}-{}'.format(self.project_name,
+                                         self.service_name, self.git_repo_url)
+        hash_value = hashlib.sha1(input_string.encode('utf-8'))
         digest = hash_value.hexdigest()
-        return digest.encode('utf-8')[:8]
+        return digest[:8]
 
     def _get_ci_job_name(self):
         """
         Gets the name for the CI job
         """
-        return '{}-{}'.format(self.pipeline_name, self._get_hash())
+        return '{}-{}-build'.format(self.pipeline_name, self._get_hash())
 
     def _get_ci_job_display_name(self):
         """
@@ -161,7 +163,7 @@ class Jenkins(DeployableResource):
         Gets the name for the CD job
         """
         # TODO: Remove -x once we figure out proper naming
-        return '{}-{}-x'.format(self.pipeline_name, self._get_hash())
+        return '{}-{}-deploy'.format(self.pipeline_name, self._get_hash())
 
     def _get_cd_job_display_name(self):
         """
@@ -190,10 +192,11 @@ class Jenkins(DeployableResource):
             'https://raw.githubusercontent.com/PeterJausovec/azure-devops-utils/master/jenkins/add-cd-job.sh'
         args = ' '.join([
             '-j {}'.format(self._get_jenkins_url()),
+            '-ju {}'.format('admin'),
             '-g {}'.format(self.git_repo_url),
             '-cin {}'.format(self._get_ci_job_name()),
             '-cdn {}'.format(self._get_cd_job_name()),
-            '-cddn {}'.format(self._get_cd_job_display_name())
+            '-cddn "{}"'.format(self._get_cd_job_display_name())
         ])
         command = 'curl {} | bash -s -- {}'.format(add_cd_job_script, args)
         utils.writeline(command)
@@ -211,19 +214,17 @@ class Jenkins(DeployableResource):
         """
         Adds the CI job to Jenkins instance
         """
-        initial_password = self._get_initial_password()
         add_build_job_script_url = \
             'https://raw.githubusercontent.com/PeterJausovec/azure-devops-utils/master/jenkins/add-docker-build-job.sh'
         args = ' '.join([
             '-j {}'.format(self._get_jenkins_url()),
             '-ju {}'.format('admin'),
-            '-jp {}'.format(initial_password),
             '-g {}'.format(self.git_repo_url),
             '-r {}'.format(self.container_registry_url),
             '-ru {}'.format(self.client_id),
             '-rp {}'.format(self.client_secret),
             '-jsn {}'.format(self._get_ci_job_name()),
-            '-jdn {}'.format(self._get_ci_job_display_name()),
+            '-jdn "{}"'.format(self._get_ci_job_display_name()),
             '-cdn {}'.format(self._get_cd_job_name()),
             '-sn {}'.format(self.service_name),
             '-rr {}'.format(self._get_image_repo_name()),
@@ -270,9 +271,9 @@ class Jenkins(DeployableResource):
         stdout_lines = stdout.readlines()
         stderr_lines = stderr.readlines()
         for line in stdout_lines:
-            logger.debug(line)
+            utils.writeline(line)
         for line in stderr_lines:
-            logger.debug(line)
+            utils.writeline(line)
         return stdout_lines, stderr_lines
 
     def _create_params(self):

@@ -21,7 +21,6 @@ class DeployableResource(object):
 
     def __init__(self, resource_group, deployment_name=None):
         self.resource_group = resource_group
-
         if not deployment_name:
             self.deployment_name = resource_group + utils.get_random_string()
         else:
