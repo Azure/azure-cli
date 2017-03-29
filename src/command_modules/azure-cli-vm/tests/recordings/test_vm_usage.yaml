@@ -6,10 +6,11 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.0 (Windows-10.0.14393) requests/2.9.1 msrest/0.4.4 msrest_azure/0.4.7
-          computemanagementclient/0.33.0 Azure-SDK-For-Python AZURECLI/TEST/0.1.1b2+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 computemanagementclient/0.33.1rc1 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [453a56b0-e746-11e6-a969-64510658e3b3]
+      x-ms-client-request-id: [3356dd30-149f-11e7-9e87-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/usages?api-version=2016-04-30-preview
   response:
@@ -17,18 +18,21 @@ interactions:
         \      \"currentValue\": 0,\r\n      \"limit\": 2000,\r\n      \"name\": {\r\
         \n        \"value\": \"availabilitySets\",\r\n        \"localizedValue\":\
         \ \"Availability Sets\"\r\n      }\r\n    },\r\n    {\r\n      \"unit\": \"\
-        Count\",\r\n      \"currentValue\": 22,\r\n      \"limit\": 100,\r\n     \
-        \ \"name\": {\r\n        \"value\": \"cores\",\r\n        \"localizedValue\"\
-        : \"Total Regional Cores\"\r\n      }\r\n    },\r\n    {\r\n      \"unit\"\
-        : \"Count\",\r\n      \"currentValue\": 22,\r\n      \"limit\": 10000,\r\n\
+        Count\",\r\n      \"currentValue\": 3,\r\n      \"limit\": 100,\r\n      \"\
+        name\": {\r\n        \"value\": \"cores\",\r\n        \"localizedValue\":\
+        \ \"Total Regional Cores\"\r\n      }\r\n    },\r\n    {\r\n      \"unit\"\
+        : \"Count\",\r\n      \"currentValue\": 3,\r\n      \"limit\": 10000,\r\n\
         \      \"name\": {\r\n        \"value\": \"virtualMachines\",\r\n        \"\
         localizedValue\": \"Virtual Machines\"\r\n      }\r\n    },\r\n    {\r\n \
         \     \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"limit\"\
         : 2000,\r\n      \"name\": {\r\n        \"value\": \"virtualMachineScaleSets\"\
         ,\r\n        \"localizedValue\": \"Virtual Machine Scale Sets\"\r\n      }\r\
         \n    },\r\n    {\r\n      \"unit\": \"Count\",\r\n      \"currentValue\"\
-        : 22,\r\n      \"limit\": 100,\r\n      \"name\": {\r\n        \"value\":\
-        \ \"standardDSFamily\",\r\n        \"localizedValue\": \"Standard DS Family\
+        : 2,\r\n      \"limit\": 100,\r\n      \"name\": {\r\n        \"value\": \"\
+        standardDSFamily\",\r\n        \"localizedValue\": \"Standard DS Family Cores\"\
+        \r\n      }\r\n    },\r\n    {\r\n      \"unit\": \"Count\",\r\n      \"currentValue\"\
+        : 1,\r\n      \"limit\": 100,\r\n      \"name\": {\r\n        \"value\": \"\
+        standardDSv2Family\",\r\n        \"localizedValue\": \"Standard DSv2 Family\
         \ Cores\"\r\n      }\r\n    },\r\n    {\r\n      \"unit\": \"Count\",\r\n\
         \      \"currentValue\": 0,\r\n      \"limit\": 100,\r\n      \"name\": {\r\
         \n        \"value\": \"standardDv2Family\",\r\n        \"localizedValue\"\
@@ -50,12 +54,9 @@ interactions:
         \    \"name\": {\r\n        \"value\": \"standardGFamily\",\r\n        \"\
         localizedValue\": \"Standard G Family Cores\"\r\n      }\r\n    },\r\n   \
         \ {\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\n      \"\
-        limit\": 100,\r\n      \"name\": {\r\n        \"value\": \"standardDSv2Family\"\
-        ,\r\n        \"localizedValue\": \"Standard DSv2 Family Cores\"\r\n      }\r\
+        limit\": 100,\r\n      \"name\": {\r\n        \"value\": \"standardGSFamily\"\
+        ,\r\n        \"localizedValue\": \"Standard GS Family Cores\"\r\n      }\r\
         \n    },\r\n    {\r\n      \"unit\": \"Count\",\r\n      \"currentValue\"\
-        : 0,\r\n      \"limit\": 100,\r\n      \"name\": {\r\n        \"value\": \"\
-        standardGSFamily\",\r\n        \"localizedValue\": \"Standard GS Family Cores\"\
-        \r\n      }\r\n    },\r\n    {\r\n      \"unit\": \"Count\",\r\n      \"currentValue\"\
         : 0,\r\n      \"limit\": 100,\r\n      \"name\": {\r\n        \"value\": \"\
         standardFFamily\",\r\n        \"localizedValue\": \"Standard F Family Cores\"\
         \r\n      }\r\n    },\r\n    {\r\n      \"unit\": \"Count\",\r\n      \"currentValue\"\
@@ -77,23 +78,33 @@ interactions:
         \      \"currentValue\": 0,\r\n      \"limit\": 100,\r\n      \"name\": {\r\
         \n        \"value\": \"standardLSFamily\",\r\n        \"localizedValue\":\
         \ \"Standard LS Family Cores\"\r\n      }\r\n    },\r\n    {\r\n      \"unit\"\
-        : \"Count\",\r\n      \"currentValue\": 3,\r\n      \"limit\": 2000,\r\n \
+        : \"Count\",\r\n      \"currentValue\": 0,\r\n      \"limit\": 100,\r\n  \
+        \    \"name\": {\r\n        \"value\": \"standardDv2PromoFamily\",\r\n   \
+        \     \"localizedValue\": \"Standard Dv2 Promo Family Cores\"\r\n      }\r\
+        \n    },\r\n    {\r\n      \"unit\": \"Count\",\r\n      \"currentValue\"\
+        : 0,\r\n      \"limit\": 100,\r\n      \"name\": {\r\n        \"value\": \"\
+        standardDSv2PromoFamily\",\r\n        \"localizedValue\": \"Standard DSv2\
+        \ Promo Family Cores\"\r\n      }\r\n    },\r\n    {\r\n      \"unit\": \"\
+        Count\",\r\n      \"currentValue\": 0,\r\n      \"limit\": 0,\r\n      \"\
+        name\": {\r\n        \"value\": \"standardMSFamily\",\r\n        \"localizedValue\"\
+        : \"Standard MS Family Cores\"\r\n      }\r\n    },\r\n    {\r\n      \"unit\"\
+        : \"Count\",\r\n      \"currentValue\": 2,\r\n      \"limit\": 2000,\r\n \
         \     \"name\": {\r\n        \"value\": \"StandardDiskCount\",\r\n       \
         \ \"localizedValue\": \"Standard Storage Managed Disks\"\r\n      }\r\n  \
-        \  },\r\n    {\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 0,\r\
+        \  },\r\n    {\r\n      \"unit\": \"Count\",\r\n      \"currentValue\": 1,\r\
         \n      \"limit\": 2000,\r\n      \"name\": {\r\n        \"value\": \"PremiumDiskCount\"\
         ,\r\n        \"localizedValue\": \"Premium Storage Managed Disks\"\r\n   \
         \   }\r\n    }\r\n  ]\r\n}"}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 30 Jan 2017 23:46:08 GMT']
+      Date: ['Wed, 29 Mar 2017 16:46:05 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
-      content-length: ['4511']
+      content-length: ['5146']
     status: {code: 200, message: OK}
 version: 1
