@@ -768,19 +768,3 @@ class StorageBlobNoCredentialsScenarioTest(VCRTestBase):
         self.pop_env('AZURE_STORAGE_CONNECTION_STRING')
         with self.assertRaisesRegexp(CLIError, re.escape(NO_CREDENTIALS_ERROR_MESSAGE)):
             self.cmd('storage blob upload -c foo -n bar -f file_0')
-
-
-class StorageTableAndQueueStatsTest(StorageAccountVCRTestBase):
-    def __init__(self, test_method):
-        super(StorageTableAndQueueStatsTest, self).__init__(__file__, test_method)
-        self.account_sku = 'Standard_RAGRS'
-
-    def test_table_and_queue_stats(self):
-        # combine two tests to avoid repeatedly creating accounts.
-        self.execute()
-
-    def body(self):
-        self.cmd('storage table stats --account-name {}'.format(self.account),
-                 checks=JMESPathCheck('geoReplication.status', 'live'))
-        self.cmd('storage queue stats --account-name {}'.format(self.account),
-                 checks=JMESPathCheck('geoReplication.status', 'live'))
