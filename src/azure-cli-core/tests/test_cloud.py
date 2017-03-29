@@ -6,7 +6,6 @@
 import tempfile
 import unittest
 import mock
-from six.moves import configparser
 
 from azure.cli.core.cloud import (Cloud,
                                   CloudEndpoints,
@@ -17,6 +16,7 @@ from azure.cli.core.cloud import (Cloud,
                                   get_active_cloud_name,
                                   AZURE_PUBLIC_CLOUD,
                                   CloudEndpointNotSetException)
+from azure.cli.core._config import get_config_parser
 from azure.cli.core._profile import Profile
 
 
@@ -39,7 +39,7 @@ class TestCloud(unittest.TestCase):
                 config_file:
             with mock.patch('azure.cli.core.cloud.get_custom_clouds', lambda: []):
                 add_cloud(c)
-                config = configparser.SafeConfigParser()
+                config = get_config_parser()
                 config.read(config_file)
                 self.assertTrue(c.name in config.sections())
                 self.assertEqual(config.get(c.name, 'endpoint_resource_manager'), endpoint_rm)

@@ -6,12 +6,14 @@
 # flake8: noqa
 
 import os
+from six.moves import configparser
 import stat
 import unittest
 import tempfile
 import mock
-from six.moves import configparser
-from azure.cli.core._config import CONFIG_FILE_NAME, AzConfig, set_global_config_value
+
+from azure.cli.core._config import \
+    (CONFIG_FILE_NAME, AzConfig, set_global_config_value, get_config_parser)
 
 
 class TestAzConfig(unittest.TestCase):
@@ -133,7 +135,7 @@ class TestSetConfig(unittest.TestCase):
         with mock.patch('azure.cli.core._config.GLOBAL_CONFIG_DIR', self.config_dir), \
         mock.patch('azure.cli.core._config.GLOBAL_CONFIG_PATH', self.config_path):
             set_global_config_value('test_section', 'test_option', 'a_value')
-            config = configparser.SafeConfigParser()
+            config = get_config_parser()
             config.read(os.path.join(self.config_dir, CONFIG_FILE_NAME))
             self.assertEqual(config.get('test_section', 'test_option'), 'a_value')
 
@@ -142,7 +144,7 @@ class TestSetConfig(unittest.TestCase):
         mock.patch('azure.cli.core._config.GLOBAL_CONFIG_PATH', self.config_path):
             set_global_config_value('test_section', 'test_option', 'a_value')
             set_global_config_value('test_section', 'test_option_another', 'another_value')
-            config = configparser.SafeConfigParser()
+            config = get_config_parser()
             config.read(os.path.join(self.config_dir, CONFIG_FILE_NAME))
             self.assertEqual(config.get('test_section', 'test_option'), 'a_value')
             self.assertEqual(config.get('test_section', 'test_option_another'), 'another_value')
