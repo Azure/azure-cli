@@ -752,7 +752,7 @@ helps['vm delete'] = """
     examples:
         - name: Delete a VM without a prompt for confirmation.
           text: >
-            az vm delete -g MyResourceGroup -n MyVm --force
+            az vm delete -g MyResourceGroup -n MyVm --yes
 {0}
 """.format(vm_ids_example.format('Delete a virtual machine by Ids', 'vm delete'))
 
