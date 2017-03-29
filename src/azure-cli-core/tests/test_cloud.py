@@ -39,7 +39,7 @@ class TestCloud(unittest.TestCase):
                 config_file:
             with mock.patch('azure.cli.core.cloud.get_custom_clouds', lambda: []):
                 add_cloud(c)
-                config = configparser.SafeConfigParser()
+                config = configparser.ConfigParser()
                 config.read(config_file)
                 self.assertTrue(c.name in config.sections())
                 self.assertEqual(config.get(c.name, 'endpoint_resource_manager'), endpoint_rm)

@@ -22,7 +22,7 @@ class AzConfig(object):
                        '0': False, 'no': False, 'false': False, 'off': False}
 
     def __init__(self):
-        self.config_parser = configparser.SafeConfigParser()
+        self.config_parser = configparser.ConfigParser()
 
     @staticmethod
     def env_var_name(section, option):
@@ -72,7 +72,7 @@ def set_global_config(config):
 
 
 def set_global_config_value(section, option, value):
-    config = configparser.SafeConfigParser()
+    config = configparser.ConfigParser()
     config.read(GLOBAL_CONFIG_PATH)
     try:
         config.add_section(section)

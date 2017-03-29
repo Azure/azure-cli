@@ -96,9 +96,9 @@ def _handle_global_configuration():
     # print location of global configuration
     print(MSG_GLOBAL_SETTINGS_LOCATION.format(GLOBAL_CONFIG_PATH))
     # set up the config parsers
-    file_config = configparser.SafeConfigParser()
+    file_config = configparser.ConfigParser()
     config_exists = file_config.read([GLOBAL_CONFIG_PATH])
-    global_config = configparser.SafeConfigParser()
+    global_config = configparser.ConfigParser()
     global_config.read(GLOBAL_CONFIG_PATH)
     should_modify_global_config = False
     if config_exists:
