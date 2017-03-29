@@ -119,6 +119,9 @@ def list_route_tables(resource_group_name=None):
 def list_application_gateways(resource_group_name=None):
     return _generic_list('application_gateways', resource_group_name)
 
+def list_network_watchers(resource_group_name=None):
+    return _generic_list('network_watchers', resource_group_name)
+
 #endregion
 
 #region Application Gateway commands
@@ -2244,3 +2247,158 @@ def lists_match(l1, l2):
         return False
 
 #endregion
+
+def _create_network_watchers(client, resource_group_name, locations, tags):
+    if resource_group_name is None:
+        raise CLIError("usage error: '--resource-group' required when enabling new regions")
+
+    from azure.mgmt.network.models import NetworkWatcher
+    for location in locations:
+        client.create_or_update(
+            resource_group_name, '{}-watcher'.format(location),
+            NetworkWatcher(location=location, tags=tags))
+
+def _update_network_watchers(client, watchers, tags):
+    from azure.mgmt.network.models import NetworkWatcher
+    for watcher in watchers:
+        id_parts = parse_resource_id(watcher.id)
+        watcher_rg = id_parts['resource_group']
+        watcher_name = id_parts['name']
+        watcher_tags = watcher.tags if tags is None else tags
+        client.create_or_update(
+            watcher_rg, watcher_name,
+            NetworkWatcher(location=watcher.location, tags=watcher_tags))
+
+def _delete_network_watchers(client, watchers):
+    for watcher in watchers:
+        from azure.cli.core.commands import LongRunningOperation
+        id_parts = parse_resource_id(watcher.id)
+        watcher_rg = id_parts['resource_group']
+        watcher_name = id_parts['name']
+        logger.warning(
+            "Disabling Network Watcher for region '%s' by deleting resource '%s'",
+            watcher.location, watcher.id)
+        LongRunningOperation()(client.delete(watcher_rg, watcher_name))
+
+def configure_network_watcher(client, locations, resource_group_name=None, enabled=None, tags=None):
+    watcher_list = list(client.list_all())
+    existing_watchers = [w for w in watcher_list if w.location in locations]
+    nonenabled_regions = list(set(locations) - set(l.location for l in existing_watchers))
+
+    if enabled is None:
+        if resource_group_name is not None:
+            logger.warning(
+                "Resource group '%s' is only used when enabling new regions and will be ignored.",
+                resource_group_name)
+        for location in nonenabled_regions:
+            logger.warning(
+                "Region '%s' is not enabled for Network Watcher and will be ignored.", location)
+        _update_network_watchers(client, existing_watchers, tags)
+
+    elif enabled:
+        _create_network_watchers(client, resource_group_name, nonenabled_regions, tags)
+        _update_network_watchers(client, existing_watchers, tags)
+
+    else:
+        if tags is not None:
+            raise CLIError("usage error: '--tags' cannot be used when disabling regions")
+        _delete_network_watchers(client, existing_watchers)
+
+    return client.list_all()
+
+def check_nw_ip_flow(client, vm, watcher_rg, watcher_name, direction, protocol, local, remote,
+                     resource_group_name=None, nic=None, location=None):
+    from azure.mgmt.network.models import VerificationIPFlowParameters
+
+    local_ip_address, local_port = local.split(':')
+    remote_ip_address, remote_port = remote.split(':')
+    if not is_valid_resource_id(vm):
+        vm = resource_id(
+            subscription=get_subscription_id(), resource_group=resource_group_name,
+            namespace='Microsoft.Compute', type='virtualMachines', name=vm)
+
+    if nic and not is_valid_resource_id(nic):
+        nic = resource_id(
+            subscription=get_subscription_id(), resource_group=resource_group_name,
+            namespace='Microsoft.Network', type='networkInterfaces', name=nic)
+
+    return client.verify_ip_flow(
+        watcher_rg, watcher_name,
+        VerificationIPFlowParameters(
+            vm, direction, protocol, local_port, remote_port,
+            local_ip_address, remote_ip_address, nic))
+
+
+def show_nw_next_hop(client, resource_group_name, vm, watcher_rg, watcher_name,
+                     source_ip, dest_ip, nic=None, location=None):
+    from azure.mgmt.network.models import NextHopParameters
+
+    if not is_valid_resource_id(vm):
+        vm = resource_id(
+            subscription=get_subscription_id(), resource_group=resource_group_name,
+            namespace='Microsoft.Compute', type='virtualMachines', name=vm)
+
+    if nic and not is_valid_resource_id(nic):
+        nic = resource_id(
+            subscription=get_subscription_id(), resource_group=resource_group_name,
+            namespace='Microsoft.Network', type='networkInterfaces', name=nic)
+
+    return client.get_next_hop(
+        watcher_rg, watcher_name, NextHopParameters(vm, source_ip, dest_ip, nic))
+
+
+def show_nw_security_view(client, resource_group_name, vm, watcher_rg, watcher_name, location=None):
+
+    if not is_valid_resource_id(vm):
+        vm = resource_id(
+            subscription=get_subscription_id(), resource_group=resource_group_name,
+            namespace='Microsoft.Compute', type='virtualMachines', name=vm)
+
+    return client.get_vm_security_rules(watcher_rg, watcher_name, vm)
+
+
+def create_nw_packet_capture(client, resource_group_name, capture_name, vm,
+                             watcher_rg, watcher_name, location=None,
+                             storage_account=None, storage_path=None, file_path=None,
+                             capture_size=None, capture_limit=None, time_limit=None):
+    from azure.mgmt.network.models import PacketCapture, PacketCaptureStorageLocation
+    storage_settings = PacketCaptureStorageLocation(storage_account, storage_path, file_path)
+    capture_params = PacketCapture(vm, storage_settings, capture_size, capture_limit, time_limit)
+    return client.create(watcher_rg, watcher_name, capture_name, capture_params)
+
+
+def set_nsg_flow_logging(client, watcher_rg, watcher_name, nsg, storage_account=None,
+                         resource_group_name=None, enabled=None, retention=0):
+    try:
+        # update
+        from azure.cli.core.commands import LongRunningOperation
+        config = LongRunningOperation()(client.get_flow_log_status(watcher_rg, watcher_name, nsg))
+        if enabled is not None:
+            config.enabled = enabled
+        if storage_account is not None:
+            config.storage_id = storage_account
+        if retention is not None:
+            from azure.mgmt.network.models import RetentionPolicyParameters
+            config.retention_policy = RetentionPolicyParameters(retention, int(retention) > 0)
+    except CloudError:
+        # create
+        from azure.mgmt.network.models import FlowLogInformation, RetentionPolicyParameters
+        config = FlowLogInformation(nsg, storage_account, enabled,
+                                    RetentionPolicyParameters(retention, int(retention) > 0))
+    return client.set_flow_log_configuration(watcher_rg, watcher_name, config)
+
+
+def show_nsg_flow_logging(client, watcher_rg, watcher_name, nsg, resource_group_name=None):
+    return client.get_flow_log_status(watcher_rg, watcher_name, nsg)
+
+
+def start_nw_troubleshooting(client, watcher_name, watcher_rg, resource, storage_account,
+                             storage_path, resource_type=None, resource_group_name=None,
+                             no_wait=False):
+    from azure.mgmt.network.models import TroubleshootingParameters
+    params = TroubleshootingParameters(resource, storage_account, storage_path)
+    return client.get_troubleshooting(watcher_rg, watcher_name, params, raw=no_wait)
+
+def show_nw_troubleshooting_result(client, watcher_name, watcher_rg, resource, resource_type=None,
+                                   resource_group_name=None):
+    return client.get_troubleshooting_result(watcher_rg, watcher_name, resource)

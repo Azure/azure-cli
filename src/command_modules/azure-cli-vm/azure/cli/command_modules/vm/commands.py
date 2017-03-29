@@ -23,7 +23,6 @@ mgmt_path = 'azure.mgmt.compute.compute.operations.{}#{}.{}'
 
 # VM
 
-
 def transform_ip_addresses(result):
     transformed = []
     for r in result:
@@ -112,6 +111,8 @@ cli_generic_wait_command(__name__, 'vm wait', 'azure.cli.command_modules.vm.cust
 
 if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
     cli_command(__name__, 'vm convert', mgmt_path.format(op_var, op_class, 'convert_to_managed_disks'), cf_vm)
+
+    # VM encryption
     cli_command(__name__, 'vm encryption enable', 'azure.cli.command_modules.vm.disk_encryption#enable')
     cli_command(__name__, 'vm encryption disable', 'azure.cli.command_modules.vm.disk_encryption#disable')
     cli_command(__name__, 'vm encryption show', 'azure.cli.command_modules.vm.disk_encryption#show', exception_handler=empty_on_404)

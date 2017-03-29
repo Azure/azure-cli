@@ -15,7 +15,7 @@ from azure.cli.core.commands.arm import resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
                                            NoneCheck, MOCKED_SUBSCRIPTION_ID)
-
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 class NetworkMultiIdsShowScenarioTest(ResourceGroupVCRTestBase):
@@ -1434,6 +1434,54 @@ class NetworkZoneImportExportTest(ResourceGroupVCRTestBase):
         self.cmd('network dns zone import -n {} -g {} --file-name "{}"'
                  .format(zone_name, self.resource_group, zone_file_path))
         self.cmd('network dns zone export -n {} -g {}'.format(zone_name, self.resource_group))
+
+class NetworkWatcherScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(NetworkWatcherScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_network_watcher')
+
+    def test_network_watcher(self):
+        self.execute()
+
+    def body(self):
+
+        resource_group = self.resource_group
+        storage_account = 'clitestnwstorage1'
+
+        self.cmd('network watcher configure -g {} --locations westus westus2 --enabled'.format(resource_group))
+        self.cmd('network watcher configure --locations westus westus2 --tags foo=doo')
+        self.cmd('network watcher configure -l westus2 --enabled false')
+        self.cmd('network watcher list')
+
+        vm = 'vm1'
+        # create VM with NetworkWatcher extension
+        self.cmd('storage account create -g {} -l westus --sku Standard_LRS -n {}'.format(resource_group, storage_account))
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS'.format(resource_group, vm))
+        self.cmd('vm extension set -g {} --vm-name {} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher'.format(resource_group, vm))
+
+        self.cmd('network watcher show-topology -g {} -l westus'.format(resource_group))
+
+        self.cmd('network watcher test-ip-flow -g {} --vm {} --direction inbound --local 10.0.0.4:22 --protocol tcp --remote 100.1.2.3:*'.format(resource_group, vm))
+        self.cmd('network watcher test-ip-flow -g {} --vm {} --direction outbound --local 10.0.0.4:* --protocol tcp --remote 100.1.2.3:80'.format(resource_group, vm))
+
+        self.cmd('network watcher show-security-group-view -g {} --vm {}'.format(resource_group, vm))
+
+        self.cmd('network watcher show-next-hop -g {} --vm {} --source-ip 123.4.5.6 --dest-ip 10.0.0.6'.format(resource_group, vm))
+
+        capture = 'capture1'
+        location = 'westus'
+        self.cmd('network watcher packet-capture create -g {} --vm {} -n {} --file-path capture/capture.cap'.format(resource_group, vm, capture))
+        self.cmd('network watcher packet-capture show -l {} -n {}'.format(location, capture))
+        self.cmd('network watcher packet-capture stop -l {} -n {}'.format(location, capture))
+        self.cmd('network watcher packet-capture show-status -l {} -n {}'.format(location, capture))
+        self.cmd('network watcher packet-capture list -l {}'.format(location, capture))
+        self.cmd('network watcher packet-capture delete -l {} -n {}'.format(location, capture))
+        self.cmd('network watcher packet-capture list -l {}'.format(location, capture))
+
+        nsg = '{}NSG'.format(vm)
+        self.cmd('network watcher flow-log configure -g {} --nsg {} --enabled --retention 5 --storage-account {}'.format(resource_group, nsg, storage_account))
+        self.cmd('network watcher flow-log configure -g {} --nsg {} --retention 0'.format(resource_group, nsg))
+        self.cmd('network watcher flow-log show -g {} --nsg {}'.format(resource_group, nsg))
 
 if __name__ == '__main__':
     unittest.main()
