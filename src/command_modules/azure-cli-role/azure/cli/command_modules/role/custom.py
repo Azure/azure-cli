@@ -256,7 +256,8 @@ def _resolve_role_id(role, scope, definitions_client):
     role_id = None
     try:
         uuid.UUID(role)
-        role_id = role
+        role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(
+            definitions_client.config.subscription_id, role)
     except ValueError:
         pass
     if not role_id:  # retrieve role id
