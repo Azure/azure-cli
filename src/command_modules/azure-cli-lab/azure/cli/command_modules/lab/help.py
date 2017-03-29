@@ -19,8 +19,6 @@ helps['lab vm create'] = """
             type: command
             short-summary: Command to create VM in a DevTest Lab.
             parameters:
-                - name: --resource-group -g
-                  short-summary: Name of lab's resource group
                 - name: --name -n
                   short-summary: Name of the virtual machine
                 - name: --lab-name
@@ -95,8 +93,6 @@ helps['lab vm list'] = """
             type: command
             short-summary: Command to retrieve my vms from the Azure DevTest Lab.
             parameters:
-                - name: --resource-group -g
-                  short-summary: Name of lab's resource group
                 - name: --lab-name
                   short-summary: Name of the Lab
                 - name: --order-by

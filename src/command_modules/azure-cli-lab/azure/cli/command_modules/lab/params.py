@@ -6,9 +6,14 @@
 import json
 from azure.cli.command_modules.lab.validators import (validate_lab_vm_create,
                                                       validate_lab_vm_list)
-
+from azure.cli.core.commands.parameters import resource_group_name_type
 from azure.cli.core.sdk.util import ParametersContext
 
+
+with ParametersContext(command='lab') as c:
+    c.argument('resource_group', arg_type=resource_group_name_type,
+               help='Name of lab\'s resource group. You can configure the default group '
+                    'using \'az configure --defaults group=<name>\'')
 
 with ParametersContext(command='lab vm create') as c:
     c.register_alias('resource_group', ('--resource-group', '-g'), validator=validate_lab_vm_create)
