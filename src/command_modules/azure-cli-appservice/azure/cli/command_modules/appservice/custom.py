@@ -21,7 +21,7 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.commands.arm import parse_resource_id
+from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
 from azure.cli.core.commands import LongRunningOperation
 
 from azure.cli.core.prompting import prompt_pass, NoTTYException
@@ -64,19 +64,12 @@ class AppServiceLongRunningOperation(LongRunningOperation):  # pylint: disable=t
             return ex
 
 
-def create_webapp(resource_group_name, name,
-                  plan=None, create_plan=False,
-                  sku=None, is_linux=False, number_of_workers=None,
-                  location=None):
+def create_webapp(resource_group_name, name, plan):
     client = web_client_factory()
-    plan_id = plan
-    if create_plan:
-        logger.warning("Create appservice plan: '%s'", plan)
-        result = create_app_service_plan(resource_group_name, plan, is_linux,
-                                         sku or 'S1', number_of_workers or 1, location)
-        plan_id = result.id
-
-    webapp_def = Site(server_farm_id=plan_id, location=location)
+    if is_valid_resource_id(plan):
+        plan = parse_resource_id(plan)['name']
+    location = _get_location_from_app_service_plan(client, resource_group_name, plan)
+    webapp_def = Site(server_farm_id=plan, location=location)
     poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
     return AppServiceLongRunningOperation()(poller)
 
