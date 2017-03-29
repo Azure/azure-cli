@@ -7,7 +7,8 @@ import os
 from six.moves import configparser
 
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._config import GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH, set_global_config_value
+from azure.cli.core._config import \
+    (GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH, set_global_config_value, get_config_parser)
 from azure.cli.core._util import CLIError
 
 CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
@@ -187,7 +188,7 @@ def _set_active_cloud(cloud_name):
 
 
 def get_active_cloud_name():
-    global_config = configparser.ConfigParser()
+    global_config = get_config_parser()
     global_config.read(GLOBAL_CONFIG_PATH)
     try:
         return global_config.get('cloud', 'name')
@@ -206,7 +207,7 @@ def get_custom_clouds():
 
 
 def _init_known_clouds():
-    config = configparser.ConfigParser()
+    config = get_config_parser()
     config.read(CLOUD_CONFIG_FILE)
     stored_cloud_names = config.sections()
     for c in KNOWN_CLOUDS:
@@ -219,7 +220,7 @@ def get_clouds():
     _init_known_clouds()
     clouds = []
     # load the config again as it may have changed
-    config = configparser.ConfigParser()
+    config = get_config_parser()
     config.read(CLOUD_CONFIG_FILE)
     for section in config.sections():
         c = Cloud(section)
@@ -249,7 +250,7 @@ def get_active_cloud():
 
 
 def get_cloud_subscription(cloud_name):
-    config = configparser.ConfigParser()
+    config = get_config_parser()
     config.read(CLOUD_CONFIG_FILE)
     try:
         return config.get(cloud_name, 'subscription')
@@ -260,7 +261,7 @@ def get_cloud_subscription(cloud_name):
 def set_cloud_subscription(cloud_name, subscription):
     if not _get_cloud(cloud_name):
         raise CloudNotRegisteredException(cloud_name)
-    config = configparser.ConfigParser()
+    config = get_config_parser()
     config.read(CLOUD_CONFIG_FILE)
     if subscription:
         config.set(cloud_name, 'subscription', subscription)
@@ -306,7 +307,7 @@ def switch_active_cloud(cloud_name):
 
 
 def _save_cloud(cloud, overwrite=False):
-    config = configparser.ConfigParser()
+    config = get_config_parser()
     config.read(CLOUD_CONFIG_FILE)
     try:
         config.add_section(cloud.name)
@@ -347,7 +348,7 @@ def remove_cloud(cloud_name):
     if is_known_cloud:
         raise CannotUnregisterCloudException("The cloud '{}' cannot be unregistered "
                                              "as it's not a custom cloud.".format(cloud_name))
-    config = configparser.ConfigParser()
+    config = get_config_parser()
     config.read(CLOUD_CONFIG_FILE)
     config.remove_section(cloud_name)
     with open(CLOUD_CONFIG_FILE, 'w') as configfile:

@@ -5,12 +5,13 @@
 
 from __future__ import print_function
 import os
-from six.moves import configparser  # pylint: disable=redefined-builtin
+from six.moves import configparser
+
 from adal.adal_error import AdalError
 
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._config import (GLOBAL_CONFIG_PATH, ENV_VAR_PREFIX, set_global_config,
-                                    set_global_config_value, DEFAULTS_SECTION)
+                                    set_global_config_value, DEFAULTS_SECTION, get_config_parser)
 from azure.cli.core._util import CLIError
 from azure.cli.core.prompting import (prompt,
                                       prompt_y_n,
@@ -96,9 +97,9 @@ def _handle_global_configuration():
     # print location of global configuration
     print(MSG_GLOBAL_SETTINGS_LOCATION.format(GLOBAL_CONFIG_PATH))
     # set up the config parsers
-    file_config = configparser.ConfigParser()
+    file_config = get_config_parser()
     config_exists = file_config.read([GLOBAL_CONFIG_PATH])
-    global_config = configparser.ConfigParser()
+    global_config = get_config_parser()
     global_config.read(GLOBAL_CONFIG_PATH)
     should_modify_global_config = False
     if config_exists:
