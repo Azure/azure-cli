@@ -52,7 +52,7 @@ from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
 logger = azlogging.get_az_logger(__name__)  # pylint: disable=invalid-name
 project_settings = settings.Project()  # pylint: disable=invalid-name
-random_word = utils.get_random_word() # pylint: disable=invalid-name
+random_name = utils.get_random_name() # pylint: disable=invalid-name
 
 # TODO: Remove and switch to SSH once templates are updated
 admin_password = 'Mindaro@Pass1!'  # pylint: disable=invalid-name
@@ -91,7 +91,7 @@ def browse_pipeline():
             pass
 
 
-def create_project(ssh_private_key, resource_group='mindaro-rg-' + random_word, name='mindaro-project-' + random_word, location='southcentralus'):
+def create_project(ssh_private_key, resource_group=random_name, name=random_name, location='southcentralus', force_create=False):
     """
     Creates a new project which consists of a new resource group,
     ACS Kubernetes cluster and Azure Container Registry
@@ -103,7 +103,7 @@ def create_project(ssh_private_key, resource_group='mindaro-rg-' + random_word, 
     try:
         utils.write('Creating Project ')
         # Validate if mindaro project already exists
-        if project_settings.project_name:
+        if (not force_create) and project_settings.project_name:
             utils.write(
                 '{} ...'.format(project_settings.project_name))
             sleep(5)
@@ -463,7 +463,7 @@ def _configure_cluster():  # pylint: disable=too-many-statements
         utils.log(
             'Creating tenx namespace ... ', logger)
         namespace_command = "kubectl create namespace tenx"
-        _execute_command(namespace_command, True)
+        _execute_command(namespace_command, True, 10)
 
         utils.log(
             'Deploying ACR credentials in Kubernetes ... ', logger)
@@ -840,21 +840,27 @@ def _get_ssh_client(user_name, dns_prefix, location, port, ssh_private_key):
     return ssh
 
 
-def _execute_command(command, ignore_failure=False):
+def _execute_command(command, ignore_failure=False, tries=1):
     """
     Executes a command.
     """
-    utils.write()
-    with Popen(command, shell=True, stdout=PIPE, stderr=PIPE, bufsize=1, universal_newlines=True) as process:
-        for line in process.stdout:
-            utils.log(line, logger)
-        if ignore_failure:
-            for err in process.stderr:
-                logger.debug(err)
+    retry = 0
+    while retry < tries:
+        utils.write()
+        with Popen(command, shell=True, stdout=PIPE, stderr=PIPE, bufsize=1, universal_newlines=True) as process:
+            for line in process.stdout:
+                utils.log(line, logger)
+            if ignore_failure:
+                for err in process.stderr:
+                    logger.debug(err)
 
-    if not ignore_failure:
-        if process.returncode != 0:
-            raise CLIError(CalledProcessError(process.returncode, command))
+        if process.returncode == 0:
+            break
+        else:
+            if not ignore_failure:
+                raise CLIError(CalledProcessError(process.returncode, command))
+        sleep(2)
+        retry = retry + 1
 
 
 def _get_command_output(command):

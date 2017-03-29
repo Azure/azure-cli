@@ -10,7 +10,7 @@ import sys
 import threading
 from time import sleep
 
-from random_words import RandomWords
+import petname
 
 
 def get_random_registry_name():
@@ -36,12 +36,11 @@ def get_random_string(length=6, only_letters=False):
     return random_string
 
 
-def get_random_word():
+def get_random_name(words=2, separator="-"):
     """
-    Gets a random word
+    Gets a random name
     """
-    rw = RandomWords()
-    return rw.random_word()
+    return petname.Generate(words, separator)
 
 
 def writeline(message):
@@ -64,7 +63,7 @@ def log(message, logger):
     Writes a message to logger
     """
     logger.info('\n' + message)
-    
+
 
 def get_public_ssh_key_contents(
         file_name=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')):
@@ -94,6 +93,6 @@ class Process(object):
         self.__process_stop = False
         thread = threading.Thread(target=self.__process_output, args=(), kwargs={})
         thread.start()
-    
+
     def process_stop(self):
         self.__process_stop = True

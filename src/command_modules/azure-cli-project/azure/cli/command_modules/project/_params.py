@@ -31,6 +31,12 @@ ssh_private_key = CliArgumentType(
     required=False
 )
 
+force_create = CliArgumentType(
+    options_list=('-f',),
+    help='Force Project Create',
+    required=False
+)
+
 name_arg_type = CliArgumentType(
     options_list=('--name', '-n'),
     metavar='NAME')
@@ -41,3 +47,4 @@ register_cli_argument('project', 'ssh_private_key', ssh_private_key)
 register_cli_argument('project', 'name', name_arg_type) # TODO: Ideally, this should be project-name
 register_cli_argument('project', 'resource_group', resource_group_name_type)
 register_cli_argument('project', 'location', location_type)
+register_cli_argument('project', 'force_create', force_create, action='store_true')
