@@ -10,8 +10,10 @@ import sys
 import threading
 from time import sleep
 
+import azure.cli.core.azlogging as azlogging  # pylint: disable=invalid-name
 import petname
 
+logger = azlogging.get_az_logger(__name__) # pylint: disable=invalid-name
 
 def get_random_registry_name():
     """
@@ -36,7 +38,7 @@ def get_random_string(length=6, only_letters=False):
     return random_string
 
 
-def get_random_name(words=2, separator="-"):
+def get_random_project_name(words=2, separator="-"):
     """
     Gets a random name
     """
@@ -58,13 +60,6 @@ def write(message='.'):
     sys.stdout.flush()
 
 
-def log(message, logger):
-    """
-    Writes a message to logger
-    """
-    logger.info('\n' + message)
-
-
 def get_public_ssh_key_contents(
         file_name=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')):
     """
@@ -76,7 +71,19 @@ def get_public_ssh_key_contents(
     return contents
 
 
+def get_remote_host(dns_prefix, location):
+    """
+    Provides a remote host according to the passed dns_prefix and location.
+    """
+    return '{}.{}.cloudapp.azure.com'.format(dns_prefix, location)
+
+
 class Process(object):
+    """
+    Process object runs a thread in the backgroud to print the
+    status of an execution for which the output is not displayed to stdout.
+    It prints '.' to stdout till the process is runnin.
+    """
 
     __process_stop = False  # To stop the thread
     wait_time_sec = 15
