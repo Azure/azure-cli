@@ -52,7 +52,7 @@ from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
 logger = azlogging.get_az_logger(__name__)  # pylint: disable=invalid-name
 project_settings = settings.Project()  # pylint: disable=invalid-name
-random_name = utils.get_random_name() # pylint: disable=invalid-name
+random_name = utils.get_random_name()  # pylint: disable=invalid-name
 
 # TODO: Remove and switch to SSH once templates are updated
 admin_password = 'Mindaro@Pass1!'  # pylint: disable=invalid-name
@@ -75,7 +75,7 @@ def browse_pipeline():
             'Jenkins host name does not exist in projectSettings.json')
 
     local_port = _get_available_local_port()
-    local_address = 'http://127.0.0.1:{}'.format(local_port)
+    local_address = 'http://127.0.0.1:{}/blue'.format(local_port)
     utils.writeline('Jenkins Dashboard available at: {}'.format(local_address))
     utils.writeline('Press CTRL+C to close the tunnel')
     _wait_then_open_async(local_address)
@@ -158,12 +158,12 @@ def create_project(ssh_private_key, resource_group=random_name, name=random_name
         acr_client = _get_acr_service_client()
         acr_name = 'acr' + utils.get_random_registry_name()
         acr_client.registries.create(resource_group,
-                                    acr_name,
-                                    RegistryCreateParameters(
-                                        location=location,
-                                        sku=AcrSku('Basic'),
-                                        storage_account=StorageAccountParameters(
-                                            storage_account_name, storage_account_key))).wait()
+                                     acr_name,
+                                     RegistryCreateParameters(
+                                         location=location,
+                                         sku=AcrSku('Basic'),
+                                         storage_account=StorageAccountParameters(
+                                             storage_account_name, storage_account_key))).wait()
         registry = acr_client.registries.get(resource_group, acr_name)
         utils.log(
             'Azure container registry "{}" created.'.format(acr_name), logger)
@@ -189,7 +189,8 @@ def create_project(ssh_private_key, resource_group=random_name, name=random_name
         # 5. Install kubectl
         utils.log(
             'Installing kubectl ... ', logger)
-        k8s_install_cli(install_location=_get_default_install_location('kubectl'))
+        k8s_install_cli(
+            install_location=_get_default_install_location('kubectl'))
         utils.log(
             'Kubernetes installed.', logger)
 
@@ -212,7 +213,8 @@ def create_project(ssh_private_key, resource_group=random_name, name=random_name
         project_settings.cluster_name = kube_cluster_name
         project_settings.cluster_resource_group = resource_group
         project_settings.admin_username = default_user_name
-        project_settings.container_registry_url = 'https://' + registry.login_server #pylint: disable=no-member
+        project_settings.container_registry_url = 'https://' + \
+            registry.login_server  # pylint: disable=no-member
         project_settings.location = location
         project_settings.project_name = name
         project_settings.ssh_private_key = ssh_private_key
@@ -240,16 +242,108 @@ def create_deployment_pipeline(remote_access_token):  # pylint: disable=unused-a
     Provisions Jenkins and configures CI and CD pipelines, kicks off initial build-deploy
     and saves the CI/CD information to a local project file.
     """
-    jenkins_resource, jenkins_deployment = _deploy_jenkins()
+    longprocess = None
+    current_process = None
+    service_name = _get_service_name()
+    try:
+        utils.write('Creating build and deployment pipelines for {} ...'.format(
+            service_name))
 
-    # Wait for deployments to complete
-    jenkins_deployment.wait()
+        # Check if we already have a pipeline for this repo and service
+        if not project_settings.jenkins_hostname:
+            git_repo = _get_git_remote_url()
+            resource_group = project_settings.resource_group
+            client_id = project_settings.client_id
+            client_secret = project_settings.client_secret
+            admin_username = project_settings.admin_username
+            container_registry_url = project_settings.container_registry_url
+            location = project_settings.location
+            project_name = project_settings.project_name
 
-    jenkins_hostname = _get_remote_host(
-        jenkins_resource.dns_prefix, jenkins_resource.location)
-    project_settings.jenkins_hostname = jenkins_hostname
-    utils.writeline('Jenkins hostname: {}'.format(jenkins_hostname))
-    utils.writeline('Complete.')
+            jenkins_dns_prefix = 'jenkins-' + utils.get_random_string()
+            jenkins_resource = Jenkins(
+                resource_group, admin_username,
+                admin_password, client_id, client_secret,
+                git_repo, jenkins_dns_prefix, location,
+                container_registry_url, service_name, project_name,
+                _get_pipeline_name())
+
+            longprocess = utils.Process()
+            current_process = longprocess
+
+            jenkins_resource.deploy().wait()
+
+            jenkins_hostname = _get_remote_host(
+                jenkins_resource.dns_prefix, jenkins_resource.location)
+            project_settings.jenkins_hostname = jenkins_hostname
+            project_settings.set_ci_pipeline_name(
+                jenkins_resource._get_ci_job_name(), _get_git_remote_url(), _get_service_folder())
+            project_settings.set_cd_pipeline_name(
+                jenkins_resource._get_cd_job_name(), _get_git_remote_url(), _get_service_folder())
+
+            utils.write('Created')
+            if longprocess:
+                longprocess.process_stop()
+            current_process = None
+        else:
+            # Check if the pipelines are already created
+            if _deployment_pipelines_exist():
+                sleep(5)
+                utils.write('Created')
+            else:
+                git_repo = _get_git_remote_url()
+                resource_group = project_settings.resource_group
+                client_id = project_settings.client_id
+                client_secret = project_settings.client_secret
+                admin_username = project_settings.admin_username
+                container_registry_url = project_settings.container_registry_url
+                location = project_settings.location
+                project_name = project_settings.project_name
+
+                existing_jenkins_prefix = project_settings.jenkins_hostname.split('.')[
+                    0]
+                jenkins_resource = Jenkins(
+                    resource_group, admin_username,
+                    admin_password, client_id, client_secret,
+                    git_repo, existing_jenkins_prefix, location,
+                    container_registry_url, service_name, project_name,
+                    _get_pipeline_name())
+
+                longprocess = utils.Process()
+                current_process = longprocess
+
+                jenkins_resource.configure()
+                project_settings.set_ci_pipeline_name(
+                    jenkins_resource._get_ci_job_name(), _get_git_remote_url(), _get_service_folder())
+                project_settings.set_cd_pipeline_name(
+                    jenkins_resource._get_cd_job_name(), _get_git_remote_url(), _get_service_folder())
+                utils.write('Created')
+
+                if longprocess:
+                    longprocess.process_stop()
+                current_process = None
+
+        utils.writeline('Git push to {} to trigger the pipeline'.format(
+            _get_git_remote_url()))
+        utils.writeline(
+            "Run 'azp deployment-pipeline browse' to view pipeline status")
+    except KeyboardInterrupt:
+        utils.writeline('Killing process ...')
+    finally:
+        if current_process:
+            current_process.process_stop()
+
+
+def _deployment_pipelines_exist():
+    """
+    Checks if the deployment pipeline already
+    exists for this repo and service folder.
+    """
+    service_folder = _get_service_folder()
+    git_remote_url = _get_git_remote_url()
+
+    return project_settings.get_ci_pipeline_name(git_remote_url, service_folder) or \
+        project_settings.get_cd_pipeline_name(git_remote_url, service_folder)
 
 
 def _wait_then_open(url):
@@ -307,28 +401,6 @@ def _get_subscription_id():
     return sub_id
 
 
-def _deploy_jenkins():
-    """
-    Starts the Jenkins deployment and returns the resource and AzurePollerOperation
-    """
-    utils.log('Deploying Jenkins ... ', logger)
-    git_repo = _get_git_remote_url()
-    resource_group = project_settings.resource_group
-    client_id = project_settings.client_id
-    client_secret = project_settings.client_secret
-    admin_username = project_settings.admin_username
-    container_registry_url = project_settings.container_registry_url
-    location = project_settings.location
-
-    jenkins_dns_prefix = 'jenkins-' + utils.get_random_string()
-    jenkins_resource = Jenkins(
-        resource_group, admin_username,
-        admin_password, client_id, client_secret,
-        git_repo, jenkins_dns_prefix, location,
-        container_registry_url)
-    return (jenkins_resource, jenkins_resource.deploy())
-
-
 def _get_acs_info(name, resource_group_name):
     """
     Gets the ContainerService object from Azure REST API.
@@ -361,6 +433,61 @@ def _get_storage_service_client():
     Gets  the client for managing storage accounts.
     """
     return get_mgmt_service_client(StorageManagementClient)
+
+
+def _get_git_root_folder_name():
+    """
+    Gets the git root folder name. E.g. if current folder is
+    /myfolder/subfolder/test and the git repo root is /myfolder
+    this method returns myfolder
+    """
+    full_path = check_output(['git', 'rev-parse', '--show-toplevel'])
+    return os.path.basename(full_path.decode().strip())
+
+
+def _get_service_name():
+    """
+    Gets the name of the service using the Git
+    repo root folder and subfolders
+    """
+    return _get_service_folder().replace('/', '-')
+
+
+def _get_service_folder():
+    """
+    Gets the service folder up from the Git root.
+    E.g. with Git repo root in BikeRepository, the
+    method returns BikeRepository/servicea/api if
+    CLI is invoked in the /servicea/api subfolder of the repo.
+    """
+    git_root = _get_git_root_folder_name()
+    current_folder = os.getcwd()
+    return ''.join(current_folder.partition(git_root)[1:])
+
+
+def _get_pipeline_name():
+    """
+    Gets the name used for Jenkins pipelines by
+    getting the current folder, partitioning it at base_repo_name
+    taking the string on the right (subfolder) replacing '/' with '-'
+    and combine the both strings. For example:
+    if command is run in the root folder of BikeSharing of the
+    repository Contoso/BikeSharing, this method returns 'Contoso/BikeSharing'.
+    If command is run in a subfolder (e.g. BikeSharing/reservations/api), method
+    returns Contoso/BikeSharing-reservations-api
+    """
+    remote_url = _get_git_remote_url()
+    # Get owner|organization/repo e.g. BikeSharing/reservations
+    # and replace '/' with '-' as '/' can't be used in the pipeline name
+    # which becomes a part of the URL
+    owner_repo = remote_url.partition(
+        'github.com/')[2].replace('/', '-').replace('.git', '')
+
+    base_repo_name = _get_git_root_folder_name()
+    current_directory = os.getcwd()
+    subfolders = current_directory.partition(
+        base_repo_name)[2].strip('/').replace('/', '-')
+    return '-'.join([owner_repo, subfolders]).strip('-')
 
 
 def _get_git_remote_url():
@@ -686,7 +813,8 @@ def _deploy_secrets_share_k8(acr_server, resource_group, dns_prefix, client_id, 
     """
     _install_k8_secret(acr_server, dns_prefix, client_id,
                        client_secret, location, user_name, artifacts_path)
-    workspace_storage_key = _install_k8_shares(resource_group, dns_prefix, artifacts_path)
+    workspace_storage_key = _install_k8_shares(
+        resource_group, dns_prefix, artifacts_path)
     return workspace_storage_key
 
 
@@ -965,7 +1093,7 @@ def _initialize_workspace(
         os.remove(settings_json_file)
 
     _run_innerloop_command('initialize', workspace_share_name, dns_prefix,
-                          storage_account_name, storage_account_key, workspace_share_name, location, ssh_private_key, '--quiet', '--k8')
+                           storage_account_name, storage_account_key, workspace_share_name, location, ssh_private_key, '--quiet', '--k8')
 
     # Checking if the services are ready
     while not _cluster_configured(dns_prefix, user_name):
@@ -1063,7 +1191,7 @@ def _get_innerloop_home_path():
     """
     try:
         home_path = az_config.get(
-            'project', 'mindaro_home', None) # AZURE_PROJECT_MINDARO_HOME
+            'project', 'mindaro_home', None)  # AZURE_PROJECT_MINDARO_HOME
         if home_path is None:
             raise CLIError(
                 'Please set the environment variable: AZURE_PROJECT_MINDARO_HOME to your inner loop source code directory.')

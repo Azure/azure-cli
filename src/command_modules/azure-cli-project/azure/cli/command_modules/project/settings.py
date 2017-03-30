@@ -204,3 +204,51 @@ class Project(object):
         Sets the SSH private key path
         """
         self._set_property_value('ssh_private_key', value)
+
+    def set_ci_pipeline_name(self, ci_pipeline_name, git_url, service_folder):
+        """
+        Sets the CI pipeline name for a git_url
+        """
+        ci_pipelines = []
+        if 'ci_pipelines' in self.settings:
+            ci_pipelines = self.settings['ci_pipelines']
+
+        ci_pipelines.append(
+            {git_url: {'pipeline': ci_pipeline_name, 'folder': service_folder}})
+        self.settings['ci_pipelines'] = ci_pipelines
+        self._save_changes()
+
+    def get_ci_pipeline_name(self, git_url, service_folder):
+        """
+        Gets the name of the CI pipeline for a git_url
+        """
+        ci_pipelines = self._get_property_value('ci_pipelines')
+        for entry in ci_pipelines:
+            if git_url in entry:
+                if ci_pipelines[git_url]['folder'] == service_folder:
+                    return ci_pipelines[git_url]['pipeline']
+        return None
+
+    def set_cd_pipeline_name(self, cd_pipeline_name, git_url, service_folder):
+        """
+        Sets the CD pipeline name for a git_url
+        """
+        cd_pipelines = []
+        if 'cd_pipelines' in self.settings:
+            cd_pipelines = self.settings['cd_pipelines']
+
+        cd_pipelines.append(
+            {git_url: {'pipeline': cd_pipeline_name, 'folder': service_folder}})
+        self.settings['cd_pipelines'] = cd_pipelines
+        self._save_changes()
+
+    def get_cd_pipeline_name(self, git_url, service_folder):
+        """
+        Gets the name of the CD pipeline for a git_url
+        """
+        cd_pipelines = self._get_property_value('cd_pipelines')
+        for entry in cd_pipelines:
+            if git_url in entry:
+                if cd_pipelines[git_url]['folder'] == service_folder:
+                    return cd_pipelines[git_url]['pipeline']
+        return None

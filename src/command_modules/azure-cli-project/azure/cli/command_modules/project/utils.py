@@ -78,7 +78,7 @@ def get_public_ssh_key_contents(
 
 class Process(object):
 
-    __process_stop = False # To stop the thread
+    __process_stop = False  # To stop the thread
     wait_time_sec = 15
 
     def __init__(self):
@@ -91,7 +91,8 @@ class Process(object):
 
     def __long_process_start(self):
         self.__process_stop = False
-        thread = threading.Thread(target=self.__process_output, args=(), kwargs={})
+        thread = threading.Thread(
+            target=self.__process_output, args=(), kwargs={})
         thread.start()
 
     def process_stop(self):
