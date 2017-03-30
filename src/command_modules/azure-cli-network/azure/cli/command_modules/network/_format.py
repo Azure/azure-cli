@@ -79,6 +79,29 @@ def transform_local_gateway_table_output(result):
     return final_result
 
 
+def transform_vpn_connection_output(result):
+
+    if not result:
+        return result
+
+    from azure.mgmt.network.models import VirtualNetworkGatewayConnectionPaged
+    is_list = isinstance(result, VirtualNetworkGatewayConnectionPaged)
+    result = list(result) if is_list else [result]
+
+    properties_to_strip = \
+        ['virtual_network_gateway1', 'virtual_network_gateway2', 'local_network_gateway2', 'peer']
+    for item in result:
+        for prop in properties_to_strip:
+            prop_val = getattr(item, prop, None)
+            if not prop_val:
+                delattr(item, prop)
+            else:
+                null_props = [key for key in prop_val.__dict__ if not prop_val.__dict__[key]]
+                for prop in null_props:
+                    delattr(prop_val, prop)
+    return result if is_list else result[0]
+
+
 def transform_vnet_create_output(result):
     return {'newVNet': result.result()}
 
