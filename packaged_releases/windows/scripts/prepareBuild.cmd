@@ -11,14 +11,18 @@ set CLI_VERSION=0.2.3
 :: and not a Git bash shell... We also need the gnu toolchain (for curl & unzip)
 
 set PATH=%PATH%;"C:\Program Files (x86)\Git\bin;"
-
+set PYTHON_VERSION=3.6.1
 
 pushd %~dp0..\
 
 set CLI_ARCHIVE_DOWNLOAD_URL=https://azurecliprod.blob.core.windows.net/releases/azure-cli_packaged_%CLI_VERSION%.tar.gz
-:: Download URL for Wix 10 from https://wix.codeplex.com/downloads/get/1587180
 
-set WIX_DOWNLOAD_URL="http://download-codeplex.sec.s-msft.com/Download/Release?ProjectName=wix&DownloadId=1587180&FileTime=131118854877130000&Build=21050"
+:: Download URL for Wix 10 from https://wix.codeplex.com/downloads/get/1587180
+:: Direct download URL http://download-codeplex.sec.s-msft.com/Download/Release?ProjectName=wix&DownloadId=1587180&FileTime=131118854877130000&Build=21050
+:: We use a mirror of Wix storage on Azure blob storage as the above link can be slow...
+set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
+
+set PYTHON_DOWNLOAD_URL=https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%.exe
 
 :: Set up the output directory and temp. directories
 echo Cleaning previous build artifacts...
@@ -29,10 +33,11 @@ mkdir %OUTPUT_DIR%
 set TEMP_CLI_FOLDER=zcli
 set TEMP_SCRATCH_FOLDER=zcli_scratch
 set TEMP_WIX_FOLDER=zwix
+set TEMP_PYTHON_FOLDER=zPython
 set BUILDING_DIR=%HOMEDRIVE%%HOMEPATH%\%TEMP_CLI_FOLDER%
 set SCRATCH_DIR=%HOMEDRIVE%%HOMEPATH%\%TEMP_SCRATCH_FOLDER%
 set WIX_DIR=%HOMEDRIVE%%HOMEPATH%\%TEMP_WIX_FOLDER%
-set PYTHON_DIR=%HOMEDRIVE%%HOMEPATH%\zPython
+set PYTHON_DIR=%HOMEDRIVE%%HOMEPATH%\%TEMP_PYTHON_FOLDER%
 
 pushd %HOMEDRIVE%%HOMEPATH%
 if exist %TEMP_CLI_FOLDER% rmdir /s /q %TEMP_CLI_FOLDER%
@@ -50,27 +55,46 @@ if exist %TEMP_SCRATCH_FOLDER% (
 )
 mkdir %TEMP_SCRATCH_FOLDER%
 
-if exist %TEMP_WIX_FOLDER% rmdir /s /q %TEMP_WIX_FOLDER%
-if exist %TEMP_WIX_FOLDER% (
-    echo Failed to delete %TEMP_WIX_FOLDER%.
-    goto ERROR
+if exist %TEMP_PYTHON_FOLDER% (
+    echo Using existing Python at %PYTHON_DIR%
 )
-mkdir %TEMP_WIX_FOLDER%
-popd
+if not exist %TEMP_PYTHON_FOLDER% (
+    mkdir %TEMP_PYTHON_FOLDER%
+    pushd %PYTHON_DIR%
+    echo Downloading Python %PYTHON_VERSION%
+    curl -o python-installer.exe %PYTHON_DOWNLOAD_URL%
+    python-installer.exe /quiet InstallAllUsers=0 TargetDir=%PYTHON_DIR% PrependPath=0 AssociateFiles=0 CompileAll=1 Shortcuts=0 Include_test=0 Include_doc=0 Include_dev=0 Include_launcher=0 Include_tcltk=0 Include_tools=0
+    if %errorlevel% neq 0 goto ERROR
+    del python-installer.exe
+    echo Downloaded Python %PYTHON_VERSION% to %PYTHON_DIR% successfully.
+    popd
+)
 
-pushd %WIX_DIR%
-curl -o wix-archive.zip %WIX_DOWNLOAD_URL%
-unzip -q wix-archive.zip
-del wix-archive.zip
-if %errorlevel% neq 0 goto ERROR
+if exist %TEMP_WIX_FOLDER% (
+    echo Using existing Wix at %WIX_DIR%
+)
+if not exist %TEMP_WIX_FOLDER% (
+    mkdir %TEMP_WIX_FOLDER%
+    pushd %WIX_DIR%
+    echo Downloading Wix.
+    curl -o wix-archive.zip %WIX_DOWNLOAD_URL%
+    unzip -q wix-archive.zip
+    del wix-archive.zip
+    if %errorlevel% neq 0 goto ERROR
+    echo Wix downloaded and extracted successfully.
+    popd
+)
+
 popd
 
 :: Download & unzip CLI archive
 pushd %BUILDING_DIR%
+echo Downloading CLI archive version %CLI_VERSION%
 curl -o cli-archive.tar.gz %CLI_ARCHIVE_DOWNLOAD_URL%
 gzip -d < cli-archive.tar.gz | tar xvf - 
 del cli-archive.tar.gz
 if %errorlevel% neq 0 goto ERROR
+echo Downloaded and extracted CLI archive successfully.
 popd
 
 :: Use the Python version on the machine that creates the MSI
@@ -78,6 +102,7 @@ robocopy %PYTHON_DIR% %BUILDING_DIR% /s /NFL /NDL /NJH /NJS
 
 :: Build & install all the packages with bdist_wheel
 %BUILDING_DIR%\python.exe -m pip install wheel
+echo Building CLI packages...
 set CLI_SRC=%BUILDING_DIR%\azure-cli_packaged_%CLI_VERSION%\src
 for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-nspkg) do (
    pushd %%a
@@ -90,8 +115,9 @@ for /D %%a in (*) do (
    %BUILDING_DIR%\python.exe setup.py bdist_wheel -d %SCRATCH_DIR%
    popd
 )
+echo Built CLI packages successfully.
 popd
-%BUILDING_DIR%\python.exe -m pip install azure-cli -f %SCRATCH_DIR% --root %BUILDING_DIR%
+%BUILDING_DIR%\python.exe -m pip install azure-cli -f %SCRATCH_DIR%
 
 rmdir /s /q %BUILDING_DIR%\azure-cli_packaged_%CLI_VERSION%
 
