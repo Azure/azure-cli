@@ -281,7 +281,7 @@ def create_deployment_pipeline(remote_access_token):  # pylint: disable=unused-a
             project_settings.set_cd_pipeline_name(
                 jenkins_resource._get_cd_job_name(), _get_git_remote_url(), _get_service_folder())
 
-            utils.writeline('Created')
+            utils.write('Created')
             if longprocess:
                 longprocess.process_stop()
             current_process = None
@@ -289,7 +289,7 @@ def create_deployment_pipeline(remote_access_token):  # pylint: disable=unused-a
             # Check if the pipelines are already created
             if _deployment_pipelines_exist():
                 sleep(5)
-                utils.writeline('Created')
+                utils.write('Created')
             else:
                 git_repo = _get_git_remote_url()
                 resource_group = project_settings.resource_group
@@ -317,7 +317,7 @@ def create_deployment_pipeline(remote_access_token):  # pylint: disable=unused-a
                     jenkins_resource._get_ci_job_name(), _get_git_remote_url(), _get_service_folder())
                 project_settings.set_cd_pipeline_name(
                     jenkins_resource._get_cd_job_name(), _get_git_remote_url(), _get_service_folder())
-                utils.writeline('Created')
+                utils.write('Created')
 
                 if longprocess:
                     longprocess.process_stop()

@@ -12,8 +12,8 @@ import tempfile
 import hashlib
 logger = azlogging.get_az_logger(__name__)  # pylint: disable=invalid-name
 
-# pylint: disable=line-too-long, too-many-arguments,
-# too-many-instance-attributes
+# pylint: disable=line-too-long, too-many-arguments
+# pylint: disable=too-many-instance-attributes
 
 
 class Jenkins(DeployableResource):
