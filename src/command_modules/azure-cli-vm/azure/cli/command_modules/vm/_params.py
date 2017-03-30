@@ -140,6 +140,17 @@ register_cli_argument('vmss extension image', 'orderby', help='The sort to apply
 register_cli_argument('vmss extension image', 'top', help='Return top number of records')
 register_cli_argument('vmss extension image', 'version', help='Extension version')
 
+def _test(val):
+    import json
+    print(val)
+    try:
+        return json.loads(val)
+    except Exception as ex:
+        print(str(ex))
+        raise ex
+
+register_cli_argument('vmss extension set', 'settings', type=_test)
+
 for scope in ['vm diagnostics', 'vmss diagnostics']:
     register_cli_argument(scope, 'version', help='version of the diagnostics extension. Will use the latest if not specfied')
     register_cli_argument(scope, 'settings', help='json string or a file path, which defines data to be collected.', type=file_type, completer=FilesCompleter())
