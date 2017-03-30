@@ -153,18 +153,27 @@ def _prompt_for_parameters(missing_parameters):
                 break
     return {}
 
+def _merge_parameters(parameter_list):
+    parameters = None
+    for params in parameter_list or []:
+        params_object = json.loads(params)
+        if params_object:
+            params_object = params_object.get('parameters', params_object)
+        if parameters is None:
+            parameters = params_object
+        else:
+            parameters.update(params_object)
+    return parameters
+
 def _deploy_arm_template_core(resource_group_name, template_file=None, template_uri=None,
-                              deployment_name=None, parameters=None, mode='incremental',
+                              deployment_name=None, parameter_list=None, mode='incremental',
                               validate_only=False, no_wait=False):
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
 
     if bool(template_uri) == bool(template_file):
         raise CLIError('please provide either template file path or uri, but not both')
 
-    if parameters:
-        parameters = json.loads(parameters)
-        if parameters:
-            parameters = parameters.get('parameters', parameters)
+    parameters = _merge_parameters(parameter_list)
 
     template = None
     template_link = None
