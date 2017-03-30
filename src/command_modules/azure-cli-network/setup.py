@@ -54,14 +54,6 @@ setup(
     ],
     packages=[
         'azure.cli.command_modules.network',
-        'azure.cli.command_modules.network.mgmt_app_gateway',
-        'azure.cli.command_modules.network.mgmt_app_gateway.lib',
-        'azure.cli.command_modules.network.mgmt_app_gateway.lib.models',
-        'azure.cli.command_modules.network.mgmt_app_gateway.lib.operations',
-        'azure.cli.command_modules.network.mgmt_lb',
-        'azure.cli.command_modules.network.mgmt_lb.lib',
-        'azure.cli.command_modules.network.mgmt_lb.lib.models',
-        'azure.cli.command_modules.network.mgmt_lb.lib.operations',
         'azure.cli.command_modules.network.zone_file'
     ],
     install_requires=DEPENDENCIES,
