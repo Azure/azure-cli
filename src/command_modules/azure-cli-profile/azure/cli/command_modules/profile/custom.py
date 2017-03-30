@@ -19,9 +19,9 @@ def load_subscriptions(all_clouds=False):
     return subscriptions
 
 
-def list_subscriptions(all_clouds=False, all=False):  # pylint: disable=redefined-builtin
+def list_subscriptions(all=False):  # pylint: disable=redefined-builtin
     """List the imported subscriptions."""
-    subscriptions = load_subscriptions(all_clouds)
+    subscriptions = load_subscriptions(all_clouds=all)
     if not subscriptions:
         logger.warning('Please run "az login" to access your accounts.')
     for sub in subscriptions:
