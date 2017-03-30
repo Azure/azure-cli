@@ -141,15 +141,19 @@ register_cli_argument('vmss extension image', 'top', help='Return top number of 
 register_cli_argument('vmss extension image', 'version', help='Extension version')
 
 def _test(val):
+    import ast
     import json
-    print(val)
+    
     try:
-        return json.loads(val)
+        val = json.dumps(ast.literal_eval(val))
+        print(val)
+        return val
     except Exception as ex:
         print(str(ex))
         raise ex
 
-register_cli_argument('vmss extension set', 'settings', type=_test)
+import ast
+register_cli_argument('vmss extension set', 'settings', type=ast.literal_eval)
 
 for scope in ['vm diagnostics', 'vmss diagnostics']:
     register_cli_argument(scope, 'version', help='version of the diagnostics extension. Will use the latest if not specfied')
