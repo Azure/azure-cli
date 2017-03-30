@@ -21,12 +21,6 @@ def cf_application_gateways(_):
     return _network_client_factory().application_gateways
 
 
-def cf_application_gateway_create(_):
-    from azure.cli.command_modules.network.mgmt_app_gateway.lib import AppGatewayCreationClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(AppGatewayCreationClient).app_gateway
-
-
 def cf_express_route_circuit_authorizations(_):
     return _network_client_factory().express_route_circuit_authorizations
 
@@ -45,12 +39,6 @@ def cf_express_route_service_providers(_):
 
 def cf_load_balancers(_):
     return _network_client_factory().load_balancers
-
-
-def cf_load_balancer_create(_):
-    from azure.cli.command_modules.network.mgmt_lb.lib import LbCreationClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(LbCreationClient).lb
 
 
 def cf_local_network_gateways(_):

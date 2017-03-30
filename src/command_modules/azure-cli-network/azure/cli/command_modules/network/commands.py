@@ -23,6 +23,7 @@ from ._format import \
 custom_path = 'azure.cli.command_modules.network.custom#{}'
 
 # Application gateways
+cli_command(__name__, 'network application-gateway create', custom_path.format('create_application_gateway'), transform=DeploymentOutputLongRunningOperation('Starting network application-gateway create'), no_wait_param='no_wait')
 cli_command(__name__, 'network application-gateway delete', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.delete', cf_application_gateways, no_wait_param='raw')
 cli_command(__name__, 'network application-gateway show', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.get', cf_application_gateways, exception_handler=empty_on_404)
 cli_command(__name__, 'network application-gateway list', custom_path.format('list_application_gateways'))
@@ -37,11 +38,6 @@ cli_generic_update_command(__name__, 'network application-gateway update',
 cli_generic_wait_command(__name__, 'network application-gateway wait',
                          'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.get', cf_application_gateways)
 
-cli_command(__name__, 'network application-gateway create',
-            'azure.cli.command_modules.network.mgmt_app_gateway.lib.operations.app_gateway_operations#AppGatewayOperations.create_or_update',
-            cf_application_gateway_create,
-            transform=DeploymentOutputLongRunningOperation('Starting network application-gateway create'),
-            no_wait_param='raw')
 
 property_map = {
     'authentication_certificates': 'auth-cert',
@@ -119,6 +115,7 @@ cli_generic_wait_command(__name__, 'network express-route wait', 'azure.mgmt.net
 cli_command(__name__, 'network express-route list-service-providers', 'azure.mgmt.network.operations.express_route_service_providers_operations#ExpressRouteServiceProvidersOperations.list', cf_express_route_service_providers)
 
 # LoadBalancersOperations
+cli_command(__name__, 'network lb create', custom_path.format('create_load_balancer'), transform=DeploymentOutputLongRunningOperation('Starting network lb create'), no_wait_param='no_wait')
 cli_command(__name__, 'network lb delete', 'azure.mgmt.network.operations.load_balancers_operations#LoadBalancersOperations.delete', cf_load_balancers)
 cli_command(__name__, 'network lb show', 'azure.mgmt.network.operations.load_balancers_operations#LoadBalancersOperations.get', cf_load_balancers, exception_handler=empty_on_404)
 cli_command(__name__, 'network lb list', custom_path.format('list_lbs'))
@@ -126,10 +123,6 @@ cli_generic_update_command(__name__, 'network lb update',
                            'azure.mgmt.network.operations.load_balancers_operations#LoadBalancersOperations.get',
                            'azure.mgmt.network.operations.load_balancers_operations#LoadBalancersOperations.create_or_update', cf_load_balancers)
 
-cli_command(__name__, 'network lb create',
-            'azure.cli.command_modules.network.mgmt_lb.lib.operations.lb_operations#LbOperations.create_or_update',
-            cf_load_balancer_create,
-            transform=DeploymentOutputLongRunningOperation('Starting network lb create'))
 
 property_map = {
     'frontend_ip_configurations': 'frontend-ip',
