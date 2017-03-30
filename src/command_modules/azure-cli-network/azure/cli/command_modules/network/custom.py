@@ -37,6 +37,13 @@ from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone
 
 logger = azlogging.get_az_logger(__name__)
 
+def _log_pprint_template(template):
+    import json
+    logger.info('==== BEGIN TEMPLATE ====')
+    logger.info(json.dumps(template, indent=2))
+    logger.info('==== END TEMPLATE ====')
+
+
 def _upsert(parent, collection_name, obj_to_add, key_name):
 
     if not getattr(parent, collection_name, None):
@@ -168,8 +175,7 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
     client = get_mgmt_service_client(ResourceManagementClient).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     if validate:
-        from pprint import pprint
-        pprint(template)
+        _log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties)
 
     return client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
@@ -569,8 +575,7 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
     client = get_mgmt_service_client(ResourceManagementClient).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     if validate:
-        from pprint import pprint
-        pprint(template)
+        _log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties)
 
     return client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
@@ -1190,8 +1195,7 @@ def create_vpn_connection(client, resource_group_name, connection_name, vnet_gat
     client = get_mgmt_service_client(ResourceManagementClient).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     if validate:
-        from pprint import pprint
-        pprint(template)
+        _log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties)
 
     return LongRunningOperation()(client.create_or_update(

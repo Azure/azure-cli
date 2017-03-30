@@ -134,7 +134,7 @@ register_cli_argument('network application-gateway', 'application_gateway_name',
 register_cli_argument('network application-gateway', 'sku', arg_group='Gateway', help='The name of the SKU.', **enum_choice_list(ApplicationGatewaySkuName))
 register_cli_argument('network application-gateway', 'virtual_network_name', virtual_network_name_type, arg_group='Network')
 register_cli_argument('network application-gateway', 'private_ip_address', arg_group='Network')
-register_cli_argument('network application-gateway', 'private_ip_address_allocation', arg_group='Network')
+register_cli_argument('network application-gateway', 'private_ip_address_allocation', ignore_type, arg_group='Network')
 register_cli_argument('network application-gateway', 'public_ip_address_allocation', help='The kind of IP allocation to use when creating a new public IP.', arg_group='Network')
 register_cli_argument('network application-gateway', 'servers', nargs='+', help='Space separated list of IP addresses or DNS names corresponding to backend servers.', validator=validate_servers, arg_group='Gateway')
 register_cli_argument('network application-gateway', 'http_settings_cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable HTTP settings cookie-based affinity.', arg_group='Gateway')
@@ -142,7 +142,6 @@ register_cli_argument('network application-gateway', 'http_settings_protocol', h
 register_cli_argument('network application-gateway', 'subnet_address_prefix', help='The CIDR prefix to use when creating a new subnet.', action=MarkSpecifiedAction, arg_group='Network')
 register_cli_argument('network application-gateway', 'vnet_address_prefix', help='The CIDR prefix to use when creating a new VNet.', action=MarkSpecifiedAction, arg_group='Network')
 register_cli_argument('network application-gateway', 'virtual_network_type', ignore_type, arg_group='Network')
-register_cli_argument('network application-gateway', 'private_ip_address_allocation', ignore_type, arg_group='Network')
 
 register_cli_argument('network application-gateway create', 'validate', help='Generate and validate the ARM template without creating any resources.', action='store_true', validator=process_ag_create_namespace)
 register_cli_argument('network application-gateway create', 'routing_rule_type', arg_group='Gateway', help='The request routing rule type.', **enum_choice_list(ApplicationGatewayRequestRoutingRuleType))
@@ -440,8 +439,6 @@ for item in ['backend_pool_name', 'backend_address_pool_name']:
     register_cli_argument('network lb', item, options_list=('--backend-pool-name',), help='The name of the backend address pool.', completer=get_lb_subresource_completion_list('backend_address_pools'))
 
 register_cli_argument('network lb create', 'validate', help='Generate and validate the ARM template without creating any resources.', action='store_true', validator=process_lb_create_namespace)
-
-register_cli_argument('network lb create', 'public_ip_dns_name')
 register_cli_argument('network lb create', 'public_ip_address_allocation', **enum_choice_list(IPAllocationMethod))
 register_cli_argument('network lb create', 'public_ip_dns_name', help='Globally unique DNS name for a new public IP.')
 
