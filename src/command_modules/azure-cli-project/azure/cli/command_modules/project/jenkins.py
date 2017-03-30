@@ -6,7 +6,6 @@
 import paramiko
 
 import azure.cli.command_modules.project.settings as settings
-import azure.cli.command_modules.project.utils as utils
 from azure.cli.command_modules.project.deployments import DeployableResource
 import azure.cli.core.azlogging as azlogging  # pylint: disable=invalid-name
 import tempfile
@@ -48,6 +47,7 @@ class Jenkins(DeployableResource):
         """
         Creates a VM, installs Jenkins on it and configures it
         """
+        logger.info('Deplyong Jenkins...')
         parameters = self._create_params()
         template_url = \
             'https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/101-jenkins-master-on-ubuntu/azuredeploy.json'
@@ -61,7 +61,7 @@ class Jenkins(DeployableResource):
         """
         # TODO: We could check the completed_deployment to see
         # if it failed or succeeded
-        utils.writeline('Jenkins deployment completed.')
+        logger.info('Jenkins deployment completed.')
         self.configure()
 
     def configure(self):
@@ -69,18 +69,14 @@ class Jenkins(DeployableResource):
         Configures Jenkins instance to work with the
         Azure registry and polls the GitHub repo
         """
-        utils.writeline('Configuring Jenkins...')
+        logger.info('Configuring Jenkins...')
         self._install_docker()
         self._install_kubectl()
         self._create_kube_config()
         self._add_ci_job()
         self._add_cd_job()
-        # TODO: We should unsecure the instance first
-        # and then setup everything without using username/password
-        # Current script requires a username and password, that's why we
-        # are running unsecure script at the end.
         self._unsecure_instance()
-        utils.writeline('Jenkins configuration completed.')
+        logger.info('Jenkins configuration completed.')
 
     def _get_hostname(self):
         """
@@ -114,6 +110,7 @@ class Jenkins(DeployableResource):
         """
         Creates the .kube/config file
         """
+        logger.info('Creating .kube/config file...')
         local_kube_config = self._get_kube_config()
         # Copy the local kube config to Jenkins VM
         ssh = paramiko.SSHClient()
@@ -133,6 +130,7 @@ class Jenkins(DeployableResource):
         """
         Installs kubectl on the Jenkins VM
         """
+        logger.info('Installing kubectl...')
         command = 'curl -sSLO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl | sh && chmod +x ./kubectl && sudo mv ./kubectl /usr/local/bin/kubectl'
         self._run_remote_command(command)
 
@@ -175,8 +173,7 @@ class Jenkins(DeployableResource):
         """
         Gets the image repository name
         """
-        # TODO: Make sure this is right
-        return self.pipeline_name
+        return self.pipeline_name.lower()
 
     def _get_jenkins_url(self):
         """
@@ -188,18 +185,18 @@ class Jenkins(DeployableResource):
         """
         Adds the CD job to Jenkins instance
         """
+        logger.info('Adding CD job...')
         add_cd_job_script = \
             'https://raw.githubusercontent.com/PeterJausovec/azure-devops-utils/master/jenkins/add-cd-job.sh'
         args = ' '.join([
             '-j {}'.format(self._get_jenkins_url()),
             '-ju {}'.format('admin'),
-            '-g {}'.format(self.git_repo_url),
-            '-cin {}'.format(self._get_ci_job_name()),
             '-cdn {}'.format(self._get_cd_job_name()),
             '-cddn "{}"'.format(self._get_cd_job_display_name())
         ])
-        command = 'curl {} | bash -s -- {}'.format(add_cd_job_script, args)
-        utils.writeline(command)
+        command = 'curl {} | sudo bash -s -- {}'.format(
+            add_cd_job_script, args)
+        logger.info(command)
         self._run_remote_command(command)
 
     def _install_docker(self):
@@ -207,6 +204,7 @@ class Jenkins(DeployableResource):
         Installs Docker on the Jenkins VM
         and ensures Jenkins has access to it
         """
+        logger.info('Installing Docker...')
         command = 'sudo curl -sSL https://get.docker.com/ | sh && sudo gpasswd -a jenkins docker && skill -KILL -u jenkins && sudo service jenkins restart'
         self._run_remote_command(command)
 
@@ -214,6 +212,7 @@ class Jenkins(DeployableResource):
         """
         Adds the CI job to Jenkins instance
         """
+        logger.info('Adding CI job...')
         add_build_job_script_url = \
             'https://raw.githubusercontent.com/PeterJausovec/azure-devops-utils/master/jenkins/add-docker-build-job.sh'
         args = ' '.join([
@@ -223,32 +222,24 @@ class Jenkins(DeployableResource):
             '-r {}'.format(self.container_registry_url),
             '-ru {}'.format(self.client_id),
             '-rp {}'.format(self.client_secret),
+            '-rr {}'.format(self._get_image_repo_name()),
             '-jsn {}'.format(self._get_ci_job_name()),
             '-jdn "{}"'.format(self._get_ci_job_display_name()),
             '-cdn {}'.format(self._get_cd_job_name()),
             '-sn {}'.format(self.service_name),
-            '-rr {}'.format(self._get_image_repo_name()),
             '-sps {}'.format('"* * * * *"'),
             '-al {}'.format(
-                'https://raw.githubusercontent.com/PeterJausovec/azure-devops-utils/master'),
-            '-rr {}/{}'.format(self.admin_username, self.service_name)])
+                'https://raw.githubusercontent.com/PeterJausovec/azure-devops-utils/master')])
         command = 'curl --silent {} | sudo bash -s -- {}'.format(
             add_build_job_script_url, args)
         self._run_remote_command(command)
-
-    def _get_initial_password(self):
-        """
-        Gets the initial Jenkins password from
-        """
-        command = 'sudo cat /var/lib/jenkins/secrets/initialAdminPassword'
-        stdout, _ = self._run_remote_command(command)
-        return stdout[0].strip()
 
     def _unsecure_instance(self):
         """
         Unsecures the Jenkins instance by setting
         the useSecurity tag in config.xml to false
         """
+        logger.info('Unsecuring Jenkins instance...')
         unsecure_script_url = \
             'https://raw.githubusercontent.com/Azure/azure-devops-utils/{}/jenkins/unsecure-jenkins-instance.sh'.format(
                 self.scripts_version)
@@ -271,9 +262,9 @@ class Jenkins(DeployableResource):
         stdout_lines = stdout.readlines()
         stderr_lines = stderr.readlines()
         for line in stdout_lines:
-            utils.writeline(line)
+            logger.info(line)
         for line in stderr_lines:
-            utils.writeline(line)
+            logger.info(line)
         return stdout_lines, stderr_lines
 
     def _create_params(self):
