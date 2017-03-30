@@ -1325,7 +1325,7 @@ def create_vnet_gateway(resource_group_name, virtual_network_gateway_name, publi
                         virtual_network, location=None, tags=None, address_prefixes=None,
                         no_wait=False, gateway_type=VirtualNetworkGatewayType.vpn.value,
                         sku=VirtualNetworkGatewaySkuName.basic.value,
-                        vpn_type=VpnType.route_based.value,
+                        vpn_type=VpnType.route_based.value, active_active=False,
                         asn=None, bgp_peering_address=None, peer_weight=None):
     from azure.mgmt.network.models import \
         (VirtualNetworkGateway, BgpSettings, VirtualNetworkGatewayIPConfiguration,
@@ -1339,7 +1339,7 @@ def create_vnet_gateway(resource_group_name, virtual_network_gateway_name, publi
         private_ip_allocation_method='Dynamic', name='vnetGatewayConfig')
     vnet_gateway = VirtualNetworkGateway(
         [ip_configuration], gateway_type, vpn_type, location=location, tags=tags,
-        sku=VirtualNetworkGatewaySku(sku, sku))
+        sku=VirtualNetworkGatewaySku(sku, sku), active_active=active_active)
     if asn or bgp_peering_address or peer_weight:
         vnet_gateway.enable_bgp = True
         vnet_gateway.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
@@ -1353,7 +1353,7 @@ def create_vnet_gateway(resource_group_name, virtual_network_gateway_name, publi
 def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None,
                         public_ip_address=None, gateway_type=None, enable_bgp=None,
                         asn=None, bgp_peering_address=None, peer_weight=None, virtual_network=None,
-                        tags=None):
+                        tags=None, active_active=None):
 
     if address_prefixes is not None:
         if not instance.vpn_client_configuration:
@@ -1365,6 +1365,9 @@ def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None
         if not config.vpn_client_address_pool.address_prefixes:
             config.vpn_client_address_pool.address_prefixes = []
         config.vpn_client_address_pool.address_prefixes = address_prefixes
+
+    if active_active is not None:
+        instance.active_active = active_active
 
     if sku is not None:
         instance.sku.name = sku
