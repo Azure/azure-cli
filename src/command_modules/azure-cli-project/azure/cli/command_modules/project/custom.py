@@ -142,7 +142,8 @@ def create_project(ssh_private_key, resource_group=random_name, name=random_name
         storage_account_keys = storage_client.storage_accounts.list_keys(
             resource_group, storage_account_name).keys
         storage_account_key = storage_account_keys[0]
-        logger.info('\nStorage account "{}" created.'.format(storage_account_name))
+        logger.info('\nStorage account "{}" created.'.format(
+            storage_account_name))
 
         # 3. Create ACR (resource_group, location)
         logger.info('\nCreating Azure container registry ... ')
@@ -176,7 +177,8 @@ def create_project(ssh_private_key, resource_group=random_name, name=random_name
                                     master_count=default_acs_master_count,
                                     orchestrator_type='kubernetes')
         acs_deployment.wait()
-        logger.info('\nKubernetes cluster "{}" created.'.format(kube_cluster_name))
+        logger.info('\nKubernetes cluster "{}" created.'.format(
+            kube_cluster_name))
 
         # 5. Install kubectl
         logger.info('\nInstalling kubectl ... ')
@@ -189,7 +191,8 @@ def create_project(ssh_private_key, resource_group=random_name, name=random_name
         k8s_get_credentials(name=kube_cluster_name,
                             resource_group_name=resource_group,
                             ssh_key_file=ssh_private_key)
-        logger.info('\nKubernetes config "{}" created.'.format(kube_cluster_name))
+        logger.info('\nKubernetes config "{}" created.'.format(
+            kube_cluster_name))
 
         # 7. Store the settings in projectSettings.json
         # TODO: We should create service principal and pass it to the
@@ -433,7 +436,7 @@ def _get_git_root_folder_name():
     this method returns myfolder
     """
     full_path = check_output(['git', 'rev-parse', '--show-toplevel'])
-    return os.path.basename(full_path.decode().strip())
+    return os.path.basename(full_path.decode().strip()).lower()
 
 
 def _get_service_name():
@@ -441,7 +444,7 @@ def _get_service_name():
     Gets the name of the service using the Git
     repo root folder and subfolders
     """
-    return _get_service_folder().replace('/', '-')
+    return _get_service_folder().replace('/', '-').lower()
 
 
 def _get_service_folder():
@@ -452,8 +455,8 @@ def _get_service_folder():
     CLI is invoked in the /servicea/api subfolder of the repo.
     """
     git_root = _get_git_root_folder_name()
-    current_folder = os.getcwd()
-    return ''.join(current_folder.partition(git_root)[1:])
+    current_folder = os.getcwd().lower()
+    return ''.join(current_folder.partition(git_root)[1:]).lower()
 
 
 def _get_pipeline_name():
@@ -478,7 +481,7 @@ def _get_pipeline_name():
     current_directory = os.getcwd()
     subfolders = current_directory.partition(
         base_repo_name)[2].strip('/').replace('/', '-')
-    return '-'.join([owner_repo, subfolders]).strip('-')
+    return '-'.join([owner_repo, subfolders]).strip('-').lower()
 
 
 def _get_git_remote_url():
@@ -548,9 +551,8 @@ def _configure_cluster():  # pylint: disable=too-many-statements
         _execute_command(known_hostname_command, True)
 
         # SSHClient connection
-        port = 22
         ssh_client = SSHConnect(
-            user_name, dns_prefix, location, port, ssh_private_key)
+            dns_prefix, location, user_name, ssh_private_key=ssh_private_key)
 
         # Get resource group
         creds = _get_creds_from_master(ssh_client)
@@ -795,7 +797,7 @@ def _enumerate_k8_agents(artifacts_path):
 
 
 def _deploy_secrets_share_k8(acr_server, resource_group, dns_prefix, client_id,
-                            client_secret, location, user_name, artifacts_path):
+                             client_secret, location, user_name, artifacts_path):
     """
     Install cluster/registry secrets and creates share on the file storage.
     """
@@ -807,7 +809,7 @@ def _deploy_secrets_share_k8(acr_server, resource_group, dns_prefix, client_id,
 
 
 def _install_k8_secret(acr, dns_prefix, client_id, client_secret,
-                        location, cluster_user_name, artifacts_path):
+                       location, cluster_user_name, artifacts_path):
     """
     Creates a registry secret in the cluster, used by the tenx services.
     Prepares the file to create resource in the Kubernetes cluster.
@@ -820,8 +822,8 @@ def _install_k8_secret(acr, dns_prefix, client_id, client_secret,
 
     kubectl_create_secret_command = "kubectl create secret docker-registry tenxregkey \
     --docker-server={} --docker-username={} --docker-password={} --docker-email={}@{} \
-    -n tenx".format(acr, client_id, client_secret, cluster_user_name, 
-    utils.get_remote_host(dns_prefix, location))
+    -n tenx".format(acr, client_id, client_secret, cluster_user_name,
+                    utils.get_remote_host(dns_prefix, location))
     try:
         _execute_command(kubectl_create_secret_command, True)
     except Exception:

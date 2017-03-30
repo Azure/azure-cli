@@ -225,8 +225,8 @@ class Project(object):
         ci_pipelines = self._get_property_value('ci_pipelines')
         for entry in ci_pipelines:
             if git_url in entry:
-                if ci_pipelines[git_url]['folder'] == service_folder:
-                    return ci_pipelines[git_url]['pipeline']
+                if entry[git_url]['folder'] == service_folder:
+                    return entry[git_url]['pipeline']
         return None
 
     def set_cd_pipeline_name(self, cd_pipeline_name, git_url, service_folder):
@@ -249,6 +249,6 @@ class Project(object):
         cd_pipelines = self._get_property_value('cd_pipelines')
         for entry in cd_pipelines:
             if git_url in entry:
-                if cd_pipelines[git_url]['folder'] == service_folder:
-                    return cd_pipelines[git_url]['pipeline']
+                if entry[git_url]['folder'] == service_folder:
+                    return entry[git_url]['pipeline']
         return None
