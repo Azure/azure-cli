@@ -411,8 +411,8 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
     return profile
 
 
-def _build_frontend_ip_config(name, public_ip_id=None, private_ip_allocation=None,
-                              private_ip_address=None, subnet_id=None):
+def _build_frontend_ip_config(name, public_ip_id=None, private_ip_address=None,
+                              private_ip_allocation=None, subnet_id=None):
     frontend_ip_config = {
         'name': name
     }
