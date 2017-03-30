@@ -1729,7 +1729,9 @@ def create_vmss(vmss_name, resource_group_name, image,
         if app_gateway_type == 'new' else None
 
     # public IP is used by either load balancer/application gateway
-    public_ip_address_id = public_ip_address if is_valid_resource_id(public_ip_address) else None
+    if public_ip_address:
+        public_ip_address_id = (public_ip_address if is_valid_resource_id(public_ip_address)
+                                else '{}/publicIPAddresses/{}'.format(network_id_template, public_ip_address))  # pylint: disable=line-too-long
 
     # Handle load balancer creation
     if load_balancer_type == 'new':
