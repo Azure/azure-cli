@@ -307,6 +307,10 @@ def validate_authentication_type(namespace, formula=None):
                 "incorrect usage for authentication-type 'password': "
                 "[--admin-username USERNAME] --admin-password PASSWORD")
 
+        # Respect user's provided saved secret name for password authentication
+        if namespace.saved_secret:
+            namespace.admin_password = "[[{}]]".format(namespace.saved_secret)
+
         if not namespace.admin_password:
             # prompt for admin password if not supplied
             from azure.cli.core.prompting import prompt_pass, NoTTYException
@@ -322,7 +326,11 @@ def validate_authentication_type(namespace, formula=None):
         if namespace.admin_password:
             raise ValueError('Admin password cannot be used with SSH authentication type')
 
-        validate_ssh_key(namespace)
+        # Respect user's provided saved secret name for ssh authentication
+        if namespace.saved_secret:
+            namespace.ssh_key = "[[{}]]".format(namespace.saved_secret)
+        else:
+            validate_ssh_key(namespace)
     else:
         raise CLIError("incorrect value for authentication-type: {}".format(namespace.authentication_type))
 

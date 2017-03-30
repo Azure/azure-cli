@@ -45,6 +45,10 @@ helps['lab vm create'] = """
                   short-summary: The SSH public key or public key file path. Use --generate-ssh-keys to regen ssh keys
                 - name: --authentication-type
                   short-summary: Type of authentication to use with the VM. Allowed values are password, ssh
+                - name: --saved-secret
+                  short-summary: Name of the saved secret to be used for authentication. When provided,
+                                 we'll use it inplace of --admin-password for password based authentication or
+                                 inplace of --ssh-key for ssh based authentication
                 - name: --vnet-name
                   short-summary: Name of the virtual network to reference an existing one in lab. If omitted, lab's existing one
                                  VNet and subnet will be selected automatically

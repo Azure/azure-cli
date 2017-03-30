@@ -26,6 +26,7 @@ with ParametersContext(command='lab vm create') as c:
     c.argument('authentication_type', arg_group=authentication_group_name)
     c.argument('ssh_key', arg_group=authentication_group_name)
     c.argument('generate_ssh_keys', action='store_true', arg_group=authentication_group_name)
+    c.argument('saved_secret', arg_group=authentication_group_name)
 
     # Add Artifacts from json object
     c.argument('artifacts', type=json.loads)
