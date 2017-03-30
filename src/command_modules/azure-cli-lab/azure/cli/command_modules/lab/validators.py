@@ -159,7 +159,8 @@ def _validate_ip_configuration(namespace, lab_vnet=None):
     elif namespace.ip_configuration is None:
         # case 5: lab virtual network was selected from user's option / formula default then use it for look-up
         if lab_vnet:
-            if lab_vnet.subnet_overrides and lab_vnet.subnet_overrides[0].shared_public_ip_address_configuration:
+            if lab_vnet.subnet_overrides and lab_vnet.subnet_overrides[0].shared_public_ip_address_configuration and \
+                    lab_vnet.subnet_overrides[0].shared_public_ip_address_configuration.inbound_nat_rules:
                 rule = _inbound_rule_from_os(namespace)
                 public_ip_config = SharedPublicIpAddressConfiguration(inbound_nat_rules=[rule])
                 nic_properties = NetworkInterfaceProperties(shared_public_ip_address_configuration=public_ip_config)
