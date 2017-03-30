@@ -1742,8 +1742,6 @@ def create_vmss(vmss_name, resource_group_name, image,
         if public_ip_type == 'new':
             public_ip_address = public_ip_address or '{}PublicIP'.format(load_balancer)
             lb_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))  # pylint: disable=line-too-long
-            if vnet_type == 'new':
-                lb_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))  # pylint: disable=line-too-long
             master_template.add_resource(build_public_ip_resource(public_ip_address, location,
                                                                   tags,
                                                                   public_ip_address_allocation,
