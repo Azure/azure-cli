@@ -299,7 +299,7 @@ def create_deployment_pipeline(remote_access_token):  # pylint: disable=unused-a
                 longprocess = utils.Process()
                 current_process = longprocess
 
-                jenkins_resource.configure()
+                jenkins_resource.create_pipelines()
                 project_settings.set_ci_pipeline_name(
                     jenkins_resource._get_ci_job_name(),
                     _get_git_remote_url(),

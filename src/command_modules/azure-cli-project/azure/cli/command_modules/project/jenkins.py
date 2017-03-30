@@ -47,7 +47,7 @@ class Jenkins(DeployableResource):
         """
         Creates a VM, installs Jenkins on it and configures it
         """
-        logger.info('Deplyong Jenkins...')
+        logger.info('Deploying Jenkins...')
         parameters = self._create_params()
         template_url = \
             'https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/101-jenkins-master-on-ubuntu/azuredeploy.json'
@@ -62,9 +62,9 @@ class Jenkins(DeployableResource):
         # TODO: We could check the completed_deployment to see
         # if it failed or succeeded
         logger.info('Jenkins deployment completed.')
-        self.configure()
+        self._configure()
 
-    def configure(self):
+    def _configure(self):
         """
         Configures Jenkins instance to work with the
         Azure registry and polls the GitHub repo
@@ -73,10 +73,16 @@ class Jenkins(DeployableResource):
         self._install_docker()
         self._install_kubectl()
         self._create_kube_config()
-        self._add_ci_job()
-        self._add_cd_job()
+        self.create_pipelines()
         self._unsecure_instance()
         logger.info('Jenkins configuration completed.')
+
+    def create_pipelines(self):
+        """
+        Create CI and CD pipelines
+        """
+        self._add_ci_job()
+        self._add_cd_job()
 
     def _get_hostname(self):
         """
