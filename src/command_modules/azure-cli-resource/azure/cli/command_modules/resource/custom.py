@@ -647,15 +647,14 @@ def _update_lock_parameters(parameters, level, notes, lock_id, lock_type):
     if lock_type is not None:
         parameters.type = lock_type
 
-def update_lock(name, resource_group_name=None,
-                level=None, notes=None, lock_id=None, lock_type=None):
+def update_lock(name, resource_group_name=None, level=None, notes=None):
     lock_client = _resource_lock_client_factory()
     if resource_group_name is None:
         params = lock_client.management_locks.get(name)
-        _update_lock_parameters(params, level, notes, lock_id, lock_type)
+        _update_lock_parameters(params, level, notes, None, None)
         return lock_client.management_locks.create_or_update_at_subscription_level(name, params)
     params = lock_client.management_locks.get_at_resource_group_level(resource_group_name, name)
-    _update_lock_parameters(params, level, notes, lock_id, lock_type)
+    _update_lock_parameters(params, level, notes, None, None)
     return lock_client.management_locks.create_or_update_at_resource_group_level(
         resource_group_name, name, params)
 
