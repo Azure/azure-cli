@@ -1333,13 +1333,15 @@ def create_vnet_gateway(resource_group_name, virtual_network_gateway_name, publi
 
     client = _network_client_factory().virtual_network_gateways
     subnet = virtual_network + '/subnets/GatewaySubnet'
-    ip_configuration = VirtualNetworkGatewayIPConfiguration(
-        SubResource(subnet),
-        SubResource(public_ip_address),
-        private_ip_allocation_method='Dynamic', name='vnetGatewayConfig')
     vnet_gateway = VirtualNetworkGateway(
-        [ip_configuration], gateway_type, vpn_type, location=location, tags=tags,
+        [], gateway_type, vpn_type, location=location, tags=tags,
         sku=VirtualNetworkGatewaySku(sku, sku), active_active=active_active)
+    for i, public_ip in enumerate(public_ip_address):
+        ip_configuration = VirtualNetworkGatewayIPConfiguration(
+            SubResource(subnet),
+            SubResource(public_ip),
+            private_ip_allocation_method='Dynamic', name='vnetGatewayConfig{}'.format(i))
+        vnet_gateway.ip_configurations.append(ip_configuration)
     if asn or bgp_peering_address or peer_weight:
         vnet_gateway.enable_bgp = True
         vnet_gateway.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
@@ -1379,8 +1381,11 @@ def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None
     if tags is not None:
         instance.tags = tags
 
+    # TODO: update the public IP address...magically if need be... >_>
     if public_ip_address is not None:
         instance.ip_configurations[0].public_ip_address.id = public_ip_address
+        if len(public_ip_address) > 1:
+            raise CLIError('TODO: Update multi-public IPs...')
 
     if gateway_type is not None:
         instance.gateway_type = gateway_type
@@ -1563,10 +1568,10 @@ update_route.__doc__ = Route.__doc__
 def create_local_gateway(resource_group_name, local_network_gateway_name, gateway_ip_address,
                          location=None, tags=None, local_address_prefix=None, asn=None,
                          bgp_peering_address=None, peer_weight=None, no_wait=False):
-    from azure.mgmt.network.models import LocalNetworkGateway, BgpSettings
+    from azure.mgmt.network.models import LocalNetworkGateway, BgpSettings, AddressSpace
     client = _network_client_factory().local_network_gateways
     local_gateway = LocalNetworkGateway(
-        local_address_prefix or [], location=location, tags=tags,
+        AddressSpace(local_address_prefix or []), location=location, tags=tags,
         gateway_ip_address=gateway_ip_address)
     if bgp_peering_address or asn or peer_weight:
         local_gateway.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)

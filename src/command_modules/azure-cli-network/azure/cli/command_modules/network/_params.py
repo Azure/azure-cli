@@ -482,15 +482,12 @@ register_cli_argument('network vnet-gateway', 'vpn_type', help='VPN routing type
 register_cli_argument('network vnet-gateway', 'bgp_peering_address', arg_group='BGP Peering', help='IP address to use for BGP peering.')
 register_cli_argument('network vnet-gateway', 'address_prefixes', help='Space separated list of address prefixes to associate with the VNet gateway.', nargs='+')
 register_cli_argument('network vnet-gateway', 'active_active', help='Enable active-active connection.', **three_state_flag())
+register_cli_argument('network vnet-gateway', 'public_ip_address', options_list=['--public-ip-addresses'], nargs='+', help='Name or ID of a public IP address. For active-active gateways, space separated list of two public IP addresses (names or IDs).', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), validator=get_public_ip_validator())
 
 register_cli_argument('network vnet-gateway create', 'asn', validator=process_vnet_gateway_create_namespace)
 
 register_cli_argument('network vnet-gateway update', 'enable_bgp', help='Enable BGP (Border Gateway Protocol)', arg_group='BGP Peering', **enum_choice_list(['true', 'false']))
-register_cli_argument('network vnet-gateway update', 'public_ip_address', help='Name or ID of a public IP address.', validator=get_public_ip_validator())
 register_cli_argument('network vnet-gateway update', 'virtual_network', virtual_network_name_type, options_list=('--vnet',), help="Name or ID of a virtual network that contains a subnet named 'GatewaySubnet'.", validator=get_virtual_network_validator())
-
-public_ip_help = get_folded_parameter_help_string('public IP address')
-register_cli_argument('network vnet-gateway create', 'public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), validator=get_public_ip_validator())
 
 vnet_help = "Name or ID of an existing virtual network which has a subnet named 'GatewaySubnet'."
 register_cli_argument('network vnet-gateway create', 'virtual_network', options_list=('--vnet',), help=vnet_help, validator=get_virtual_network_validator())

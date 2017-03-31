@@ -174,15 +174,24 @@ def get_public_ip_validator(has_type_field=False, allow_none=False, allow_new=Fa
     for an existing name or ID with no ARM-required -type parameter. """
     def simple_validator(namespace):
         if namespace.public_ip_address:
-            # determine if public_ip_address is name or ID
-            is_id = is_valid_resource_id(namespace.public_ip_address)
-            if not is_id:
-                namespace.public_ip_address = resource_id(
+            is_list = isinstance(namespace.public_ip_address, list)
+
+            def _validate_name_or_id(public_ip):
+                # determine if public_ip_address is name or ID
+                is_id = is_valid_resource_id(public_ip)
+                return public_ip if is_id else resource_id(
                     subscription=get_subscription_id(),
                     resource_group=namespace.resource_group_name,
                     namespace='Microsoft.Network',
                     type='publicIPAddresses',
-                    name=namespace.public_ip_address)
+                    name=public_ip)
+
+            if is_list:
+                for i, public_ip in enumerate(namespace.public_ip_address):
+                    namespace.public_ip_address[i] = _validate_name_or_id(public_ip)
+            else:
+                namespace.public_ip_address = _validate_name_or_id(namespace.public_ip_address)
+                
 
     def complex_validator_with_type(namespace):
         get_folded_parameter_validator(

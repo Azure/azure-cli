@@ -1090,35 +1090,26 @@ class NetworkSubnetSetScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network vnet delete --resource-group {} --name {}'.format(self.resource_group, self.vnet_name))
         self.cmd('network nsg delete --resource-group {} --name {}'.format(self.resource_group, nsg_name))
 
-class NetworkActiveActiveVpnConnectionScenarioTest(ResourceGroupVCRTestBase): # pylint: disable=too-many-instance-attributes
+class NetworkActiveActiveCrossPremiseScenarioTest(ResourceGroupVCRTestBase): # pylint: disable=too-many-instance-attributes
 
     def __init__(self, test_method):
-        super(NetworkActiveActiveVpnConnectionScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_active_active_vpn_connection', debug=True)
+        super(NetworkActiveActiveCrossPremiseScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_active_active_cross_premise_connection')
         self.vnet1 = 'vnet1'
-        self.fe_subnet = 'FrontEnd'
-        self.be_subnet = 'BackEnd'
         self.gw_subnet = 'GatewaySubnet'
         self.vnet_prefix1 = '10.11.0.0/16'
         self.vnet_prefix2 = '10.12.0.0/16'
-        self.fe_subnet_prefix = '10.11.0.0/24'
-        self.be_subnet_prefix = '10.12.0.0/24'
         self.gw_subnet_prefix = '10.12.255.0/27'
         self.gw_ip1 = 'gwip1'
         self.gw_ip2 = 'gwip2'
-        self.gw_ipconf1 = 'gwipconf1'
-        self.gw_ipconf2 = 'gwipconf2'
 
-    def test_network_active_active_vpn_connection(self):
+    def test_network_active_active_cross_premise_connection(self):
         self.execute()
 
     def set_up(self):
-        super(NetworkActiveActiveVpnConnectionScenarioTest, self).set_up()
+        super(NetworkActiveActiveCrossPremiseScenarioTest, self).set_up()
         rg = self.resource_group
         # create VNET with two non-overlapping prefixes and three subnets (backend, frontend and gateway)
-        self.cmd('network vnet create -g {} -n {} --address-prefix {} --subnet-name {} --subnet-prefix {}'.format(rg, self.vnet1, self.vnet_prefix2, self.gw_subnet, self.gw_subnet_prefix))
-        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {}  --address-prefix'.format(rg, self.vnet1, self.be_subnet, self.be_subnet_prefix))
-        self.cmd('network vnet update -g {} -n {} --add addressSpace.addressPrefixes {}'.format(rg, self.vnet1, self.vnet_prefix1))
-        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {}  --address-prefix'.format(rg, self.vnet1, self.fe_subnet, self.fe_subnet_prefix))
+        self.cmd('network vnet create -g {} -n {} --address-prefix {} {} --subnet-name {} --subnet-prefix {}'.format(rg, self.vnet1, self.vnet_prefix1, self.vnet_prefix2, self.gw_subnet, self.gw_subnet_prefix))
 
         # create public IPs for the gateway
         self.cmd('network public-ip create -g {} -n {}'.format(rg, self.gw_ip1))
@@ -1128,16 +1119,33 @@ class NetworkActiveActiveVpnConnectionScenarioTest(ResourceGroupVCRTestBase): # 
         rg = self.resource_group
         vnet1 = self.vnet1
         vnet1_asn = 65010
-        dns1 = '8.8.8.8'
         gw1 = 'gw1'
-        conn_12 = 'Vnet1ToVnet2'
+
+        lgw2 = 'lgw2'
+        lgw_ip = '131.107.72.22'
+        lgw_prefix = '10.52.255.253/32'
+        bgp_peer1 = '10.52.255.253'
+        lgw_asn = 65050
+        lgw_loc = 'eastus'
         conn_151 = 'Vnet1toSite5_1'
         conn_152 = 'Vnet1toSite5_2'
+        shared_key = 'abc123'
 
         # create the vnet gateway with active-active feature
-        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --sku HighPerformance --asn {} --public-ip-address {} --active-active'.format(rg, gw1, vnet1, vnet1_asn, self.gw_ip1))
+        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --sku HighPerformance --asn {} --public-ip-addresses {} {} --active-active'.format(rg, gw1, vnet1, vnet1_asn, self.gw_ip1, self.gw_ip2))
 
-        raise Exception('TODO: Test in progress!')
+        # create and connect first local-gateway
+        self.cmd('network local-gateway create -g {} -n {} -l {} --gateway-ip-address {} --local-address-prefixes {} --asn {} --bgp-peering-address {}'.format(rg, lgw2, lgw_loc, lgw_ip, lgw_prefix, lgw_asn, bgp_peer1))
+        self.cmd('network vpn-connection create -g {} -n {} --vnet-gateway1 {} --local-gateway2 {} --shared-key {} --enable-bgp'.format(rg, conn_151, gw1, lgw2, shared_key))
+
+        lgw3 = 'lgw3'
+        lgw3_ip = '131.107.72.23'
+        lgw3_prefix = '10.52.255.254/32'
+        bgp_peer2 = '10.52.255.254'
+
+        # create and connect second local-gateway
+        self.cmd('network local-gateway create -g {} -n {} -l {} --gateway-ip-address {} --local-address-prefixes {} --asn {} --bgp-peering-address {}'.format(rg, lgw3, lgw_loc, lgw3_ip, lgw3_prefix, lgw_asn, bgp_peer2))
+        self.cmd('network vpn-connection create -g {} -n {} --vnet-gateway1 {} --local-gateway2 {} --shared-key {} --enable-bgp'.format(rg, conn_152, gw1, lgw3, shared_key))
 
 
 class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase): # pylint: disable=too-many-instance-attributes
