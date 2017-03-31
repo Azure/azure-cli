@@ -871,7 +871,7 @@ def set_extension(
     from azure.mgmt.compute.models import VirtualMachineExtension
 
     protected_settings = load_json(protected_settings) if protected_settings else {}
-    settings = load_json(settings) if settings else None
+    #settings = load_json(settings) if settings else None
     # pylint: disable=no-member
     instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name)
     # pylint: disable=no-member

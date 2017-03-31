@@ -11,7 +11,8 @@ from azure.mgmt.compute.models import (CachingTypes,
 from azure.mgmt.storage.models import SkuName
 
 from azure.cli.core.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
-from azure.cli.core.commands.validators import get_default_location_from_resource_group
+from azure.cli.core.commands.validators import \
+    (get_default_location_from_resource_group, validate_dict)
 from azure.cli.core.commands.parameters import \
     (location_type, get_one_of_subscription_locations,
      get_resource_name_completion_list, tags_type, file_type, enum_choice_list, ignore_type)
@@ -140,20 +141,7 @@ register_cli_argument('vmss extension image', 'orderby', help='The sort to apply
 register_cli_argument('vmss extension image', 'top', help='Return top number of records')
 register_cli_argument('vmss extension image', 'version', help='Extension version')
 
-def _test(val):
-    import ast
-    import json
-    
-    try:
-        val = json.dumps(ast.literal_eval(val))
-        print(val)
-        return val
-    except Exception as ex:
-        print(str(ex))
-        raise ex
-
-import ast
-register_cli_argument('vmss extension set', 'settings', type=ast.literal_eval)
+register_cli_argument('vmss extension set', 'settings', type=validate_dict)
 
 for scope in ['vm diagnostics', 'vmss diagnostics']:
     register_cli_argument(scope, 'version', help='version of the diagnostics extension. Will use the latest if not specfied')
