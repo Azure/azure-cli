@@ -100,14 +100,14 @@ def get_json_object(json_string):
             return [_convert_to_snake_case(x) for x in item]
         else:
             return item
-    return _convert_to_snake_case(json.loads(json_string))
+    return _convert_to_snake_case(shell_safe_json_parse(json_string))
 
 
 def get_file_json(file_path, throw_on_empty=True):
     content = read_file_content(file_path)
     if not content and not throw_on_empty:
         return None
-    return json.loads(content)
+    return shell_safe_json_parse(content)
 
 
 def read_file_content(file_path, allow_binary=False):
@@ -127,6 +127,22 @@ def read_file_content(file_path, allow_binary=False):
             pass
 
     raise CLIError('Failed to decode file {} - unknown decoding'.format(file_path))
+
+
+def shell_safe_json_parse(json_or_dict_string):
+    """ Allows the passing of JSON or Python dictionary strings. This is needed because certain
+    JSON strings in CMD shell are not received in main's argv. This allows the user to specify
+    the alternative notation, which does not have this problem (but is technically not JSON). """
+    try:
+        return json.loads(json_or_dict_string)
+    except ValueError:
+        try:
+            import ast
+            return ast.literal_eval(json_or_dict_string)
+        except SyntaxError as ex:
+            raise CLIError('{}: {}'.format(ex.msg, ex.text))
+    except Exception:
+        raise CLIError(ex)
 
 
 def todict(obj):  # pylint: disable=too-many-return-statements

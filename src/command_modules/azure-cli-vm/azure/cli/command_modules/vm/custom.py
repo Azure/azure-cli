@@ -17,6 +17,7 @@ except ImportError:
 
 from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
+from azure.cli.core.commands.validators import validate_file_or_dict
 from azure.keyvault.key_vault_id import parse_secret_id
 from azure.mgmt.compute.models import (VirtualHardDisk,
                                        VirtualMachineScaleSet,
@@ -28,7 +29,7 @@ from azure.cli.core.commands.arm import parse_resource_id, resource_id, is_valid
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core._util import CLIError
 import azure.cli.core.azlogging as azlogging
-from ._vm_utils import read_content_if_is_file, load_json
+from ._vm_utils import read_content_if_is_file
 from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc,
@@ -870,8 +871,6 @@ def set_extension(
 
     from azure.mgmt.compute.models import VirtualMachineExtension
 
-    protected_settings = load_json(protected_settings) if protected_settings else {}
-    #settings = load_json(settings) if settings else None
     # pylint: disable=no-member
     instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name)
     # pylint: disable=no-member
@@ -905,9 +904,6 @@ def set_vmss_extension(
     client = _compute_client_factory()
     vmss = client.virtual_machine_scale_sets.get(resource_group_name,
                                                  vmss_name)
-
-    protected_settings = load_json(protected_settings) if protected_settings else {}
-    settings = load_json(settings) if settings else None
 
     # pylint: disable=no-member
     version = _normalize_extension_version(publisher, extension_name, version, vmss.location)
@@ -1620,7 +1616,7 @@ def create_vm(vm_name, resource_group_name, image=None,
         custom_data = read_content_if_is_file(custom_data)
 
     if secrets:
-        secrets = _merge_secrets([load_json(secret) for secret in secrets])
+        secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
     vm_resource = build_vm_resource(
         vm_name, location, tags, size, storage_profile, nics, admin_username, availability_set,
@@ -1837,7 +1833,7 @@ def create_vmss(vmss_name, resource_group_name, image,
         custom_data = read_content_if_is_file(custom_data)
 
     if secrets:
-        secrets = _merge_secrets([load_json(secret) for secret in secrets])
+        secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
     vmss_resource = build_vmss_resource(vmss_name, naming_prefix, location, tags,
                                         not disable_overprovision, upgrade_policy_mode,

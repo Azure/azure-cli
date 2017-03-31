@@ -50,17 +50,14 @@ def get_default_location_from_resource_group(namespace):
         namespace.location = rg.location  # pylint: disable=no-member
 
 
-def validate_dict(string):
-    """ Allows the passing of JSON or Python dictionary syntax. This is needed because certain
-    JSON strings in CMD shell are not received in main's argv. This allows the user to specify
-    the alternative notation, which does not have this problem (but is technically not JSON). """
-    import ast
-    result = ast.literal_eval(string)
-    return result
-
-
 def validate_file_or_dict(string):
-    pass
+    import os
+    if os.path.exists(string):
+        from azure.cli.core._util import get_file_json
+        return get_file_json(string)
+    else:
+        from azure.cli.core._util import shell_safe_json_parse
+        return shell_safe_json_parse(string)
 
 
 SPECIFIED_SENTINEL = '__SET__'
