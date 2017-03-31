@@ -153,17 +153,18 @@ def _parse_image_argument(namespace):
         namespace.os_offer = urn_match.group(2)
         namespace.os_sku = urn_match.group(3)
         namespace.os_version = urn_match.group(4)
-        compute_client = _compute_client_factory()
-        image = compute_client.virtual_machine_images.get(namespace.location,
-                                                          namespace.os_publisher,
-                                                          namespace.os_offer,
-                                                          namespace.os_sku,
-                                                          namespace.os_version)
-        # pylint: disable=no-member
-        if image.plan:
-            namespace.plan_name = image.plan.name
-            namespace.plan_product = image.plan.product
-            namespace.plan_publisher = image.plan.publisher
+        if namespace.os_version.lower() != 'latest':
+            compute_client = _compute_client_factory()
+            image = compute_client.virtual_machine_images.get(namespace.location,
+                                                              namespace.os_publisher,
+                                                              namespace.os_offer,
+                                                              namespace.os_sku,
+                                                              namespace.os_version)
+            # pylint: disable=no-member
+            if image.plan:
+                namespace.plan_name = image.plan.name
+                namespace.plan_product = image.plan.product
+                namespace.plan_publisher = image.plan.publisher
         return 'urn'
 
     # 4 - check if a fully-qualified ID (assumes it is an image ID)
