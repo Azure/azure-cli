@@ -321,7 +321,8 @@ def _build_service_principal(client, name, url, client_secret, output=True):
             sys.stdout.write('.')
             sys.stdout.flush()
             time.sleep(2 + 2 * x)
-    print('done')
+    if output:
+        print('done')
     return service_principal
 
 
