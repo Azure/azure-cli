@@ -1066,10 +1066,10 @@ def service_run(project_path):
     container registry to a Kubernetes cluster in an Azure container
     service. Then deploying the project as a service and running it.
 
-    Run configures the cluster, if not already, then builds 
+    Run configures the cluster, if not already, then builds
     the service in the cluster and starts the service.
 
-    :param project_path: Project/Service path to deploy on the 
+    :param project_path: Project/Service path to deploy on the
     Kubernetes cluster or current directory.
     :type project_path: String
     """

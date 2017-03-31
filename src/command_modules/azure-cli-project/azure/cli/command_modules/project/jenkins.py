@@ -111,7 +111,7 @@ class Jenkins(DeployableResource):
             ssh_client.run_command('sudo mkdir -p /var/lib/jenkins/.kube')
             ssh_client.put(local_kube_config, '/home/azureuser/config')
             ssh_client.run_command(
-                'sudo cp /home/azureuser/config /var/lib/jenkins/.kube && sudo chown --from root jenkins /var/lib/jenkins/.kube')
+                'sudo cp /home/azureuser/config /var/lib/jenkins/.kube && sudo chown --from root jenkins /var/lib/jenkins/.kube && sudo chown --from root jenkins /var/lib/jenkins/.kube/config')
 
     def _install_kubectl(self):
         """
