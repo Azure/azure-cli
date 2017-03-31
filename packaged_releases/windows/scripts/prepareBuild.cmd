@@ -126,6 +126,7 @@ mkdir %BUILDING_DIR%\wbin
 copy .\scripts\az.cmd %BUILDING_DIR%\wbin\
 if %errorlevel% neq 0 goto ERROR
 copy .\resources\CLI_LICENSE.rtf %BUILDING_DIR%
+copy .\resources\ThirdPartyNotices.txt %BUILDING_DIR%
 if %errorlevel% neq 0 goto ERROR
 
 echo.

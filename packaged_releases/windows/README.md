@@ -23,4 +23,4 @@ Building
 
 2. Run `build.cmd`.
 
-3. The MSI will be in the `.\out` folder.
+3. The unsigned MSI will be in the `.\out` folder.
