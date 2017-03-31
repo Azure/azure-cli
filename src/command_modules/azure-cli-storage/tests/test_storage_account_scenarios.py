@@ -20,7 +20,7 @@ class StorageAccountTests(ScenarioTest):
             JMESPathCheck('reason', 'AlreadyExists')
         ])
 
-        self.cmd('storage account list -g {}'.format(resource_group, name), checks=[
+        self.cmd('storage account list -g {}'.format(resource_group), checks=[
             JMESPathCheck('[0].location', 'westus'),
             JMESPathCheck('[0].sku.name', 'Standard_LRS'),
             JMESPathCheck('[0].resourceGroup', resource_group)
@@ -132,8 +132,8 @@ class StorageAccountTests(ScenarioTest):
         sas = self.cmd('storage account generate-sas --resource-types o --services b '
                        '--expiry 2046-12-31T08:23Z --permissions r --https-only --account-name {}'
                        .format(storage_account)).output
-        sas_keys = dict(pair.split('=') for pair in sas.split('&'))
-        assert u'sig' in sas_keys
+        self.assertIn('sig=', sas, 'SAS token {} does not contain sig segment'.format(sas))
+        self.assertIn('se=', sas, 'SAS token {} does not contain se segment'.format(sas))
 
     def test_list_locations(self):
         self.cmd('az account list-locations',

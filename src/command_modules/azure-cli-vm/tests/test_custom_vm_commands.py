@@ -12,7 +12,8 @@ from azure.cli.command_modules.vm.custom import enable_boot_diagnostics, disable
     _merge_secrets
 from azure.cli.command_modules.vm.custom import (_get_access_extension_upgrade_info,
                                                  _LINUX_ACCESS_EXT,
-                                                 _WINDOWS_ACCESS_EXT)
+                                                 _WINDOWS_ACCESS_EXT,
+                                                 _get_extension_instance_name)
 from azure.cli.command_modules.vm.custom import \
     (attach_unmanaged_data_disk, detach_data_disk, get_vmss_instance_view)
 from azure.cli.command_modules.vm.disk_encryption import enable, disable, _check_encrypt_is_supported
@@ -261,7 +262,7 @@ class Test_Vm_Custom(unittest.TestCase):
         with self.assertRaises(CLIError) as context:
             disable('rg1', 'vm1', 'DATA')
 
-        self.assertTrue("Disabling encryption on data disk can still cause VM unbootable" in str(context.exception))
+        self.assertTrue("Disabling encryption on data disk can render the VM unbootable" in str(context.exception))
 
         # works fine to disable encryption on daat disk when OS disk is never encrypted
         vm_extension.instance_view.substatuses[0].message = '{}'
@@ -341,6 +342,18 @@ class Test_Vm_Custom(unittest.TestCase):
         ]
         vault123Expected.sort(key=lambda x: x['certificateUrl'])
         self.assertListEqual(vault123Expected, vault123)
+
+    def test_get_extension_instance_name(self):
+        instance_view = mock.MagicMock()
+        extension = mock.MagicMock()
+        extension.type = 'publisher2.extension2'
+        instance_view.extensions = [extension]
+
+        # action
+        result = _get_extension_instance_name(instance_view, 'publisher1', 'extension1')
+
+        # assert
+        self.assertEqual(result, 'extension1')
 
 
 class FakedVM:  # pylint: disable=too-few-public-methods,old-style-class

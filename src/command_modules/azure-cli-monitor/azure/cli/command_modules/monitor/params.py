@@ -4,8 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import json
-from ._util import ParametersContext
+from azure.cli.core.sdk.util import ParametersContext
 from azure.cli.command_modules.monitor.validators import (validate_diagnostic_settings)
+
 
 with ParametersContext(command='monitor alert-rules') as c:
     c.register_alias('name', ('--azure-resource-name',))

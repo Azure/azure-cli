@@ -10,6 +10,7 @@ from __future__ import print_function
 
 import os
 import time
+import unittest
 
 from azure.cli.core._util import CLIError
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck,
@@ -458,3 +459,7 @@ class KeyVaultCertificateScenarioTest(ResourceGroupVCRTestBase):
         pfx_plain_file = os.path.join(TEST_DIR, 'import_pfx.pfx')
         pfx_policy_path = os.path.join(TEST_DIR, 'policy_import_pfx.json')
         self.cmd('keyvault certificate import --vault-name {} -n pfx-cert --file "{}" -p @"{}"'.format(kv, pfx_plain_file, pfx_policy_path))
+
+
+if __name__ == '__main__':
+    unittest.main()

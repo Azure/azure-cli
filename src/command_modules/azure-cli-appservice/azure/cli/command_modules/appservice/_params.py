@@ -4,15 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 from argcomplete.completers import FilesCompleter
-from azure.mgmt.web.models import DatabaseType
 
 from azure.cli.core.commands import register_cli_argument
-
 from azure.cli.core.commands.parameters import (resource_group_name_type, location_type,
                                                 get_resource_name_completion_list, file_type,
                                                 CliArgumentType, ignore_type, enum_choice_list)
-from azure.cli.command_modules.appservice._validators import process_webapp_create_namespace
-from azure.cli.command_modules.appservice._client_factory import web_client_factory
+from azure.mgmt.web.models import DatabaseType
+from ._client_factory import web_client_factory
 
 
 def _generic_site_operation(resource_group_name, name, operation_name, slot=None,  # pylint: disable=too-many-arguments
@@ -41,9 +39,8 @@ def get_hostname_completion_list(prefix, action, parsed_args, **kwargs):  # pyli
 # pylint: disable=line-too-long
 # PARAMETER REGISTRATION
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
-_SKU_HELP = 'The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1(Premium Small), etc'
-_SKU_LIST = ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3']
-sku_arg_type = CliArgumentType(help=_SKU_HELP, **enum_choice_list(_SKU_LIST))
+sku_arg_type = CliArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1(Premium Small), etc',
+                               **enum_choice_list(['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3']))
 
 register_cli_argument('appservice', 'resource_group_name', arg_type=resource_group_name_type)
 register_cli_argument('appservice', 'location', arg_type=location_type)
@@ -63,16 +60,9 @@ register_cli_argument('appservice web', 'slot', options_list=('--slot', '-s'), h
 register_cli_argument('appservice web', 'name', configured_default='web',
                       arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
                       help="name of the web. You can configure the default using 'az configure --defaults web=<name>'")
-register_cli_argument('appservice web create', 'name', options_list=('--name', '-n'), help='name of the new webapp', validator=process_webapp_create_namespace)
-register_cli_argument('appservice web create', 'create_plan', ignore_type)
-register_cli_argument('appservice web create', 'plan', arg_group='AppService Plan',
-                      options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
-                      help='Appservice plan name. Can also reference an existing plan by ID. If omitted, an appropriate plan in the same resource group will be selected automatically, or a new one will be created.')
-register_cli_argument('appservice web create', 'sku', arg_group='AppService Plan',
-                      help='{}. Default: S1'.format(_SKU_HELP), **enum_choice_list(_SKU_LIST))
-register_cli_argument('appservice web create', 'number_of_workers', help='Number of workers to be allocated. Default: 1', type=int, arg_group='AppService Plan')
-register_cli_argument('appservice web create', 'is_linux', action='store_true', help='create a new linux web')
-register_cli_argument('appservice web create', 'location', location_type, help='Location in which to create webapp and related resources. Defaults to the resource group\'s location.')
+register_cli_argument('appservice web create', 'name', options_list=('--name', '-n'), help='name of the new webapp')
+register_cli_argument('appservice web create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+                      help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
 
 register_cli_argument('appservice web browse', 'logs', options_list=('--logs', '-l'), action='store_true', help='Enable viewing the log stream immediately after launching the web app')
 

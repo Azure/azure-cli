@@ -5,16 +5,16 @@
 
 import itertools
 from enum import Enum
-from ._util import ParametersContext, patch_arg_make_required
 from azure.cli.core.commands import CliArgumentType
 from azure.cli.core.commands.parameters import (
     enum_choice_list,
     ignore_type)
+from azure.cli.core.sdk.util import ParametersContext, patch_arg_make_required
 from azure.mgmt.sql.models.database import Database
 from azure.mgmt.sql.models.elastic_pool import ElasticPool
-from azure.mgmt.sql.models.import_extension_request_parameters \
-    import ImportExtensionRequestParameters
-from azure.mgmt.sql.models.export_request_parameters import ExportRequestParameters
+from azure.mgmt.sql.models.import_extension_request \
+    import ImportExtensionRequest
+from azure.mgmt.sql.models.export_request import ExportRequest
 from azure.mgmt.sql.models.server import Server
 from azure.mgmt.sql.models.sql_management_client_enums import (
     AuthenticationType,
@@ -281,25 +281,27 @@ with ParametersContext(command='sql db update') as c:
     c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
 
 with ParametersContext(command='sql db export') as c:
-    c.expand('parameters', ExportRequestParameters)
+    c.expand('parameters', ExportRequest)
     c.register_alias('administrator_login', ('--admin-user', '-u'))
     c.register_alias('administrator_login_password', ('--admin-password', '-p'))
-    c.argument('authentication_type', options_list=('--auth_type',),
+    c.argument('authentication_type', options_list=('--auth-type',),
                **enum_choice_list(AuthenticationType))
     c.argument('storage_key_type', **enum_choice_list(StorageKeyType))
 
 with ParametersContext(command='sql db import') as c:
-    c.expand('parameters', ImportExtensionRequestParameters)
+    c.expand('parameters', ImportExtensionRequest)
     c.register_alias('administrator_login', ('--admin-user', '-u'))
     c.register_alias('administrator_login_password', ('--admin-password', '-p'))
-    c.argument('authentication_type', options_list=('--auth_type',),
+    c.argument('authentication_type', options_list=('--auth-type',),
                **enum_choice_list(AuthenticationType))
     c.argument('storage_key_type', **enum_choice_list(StorageKeyType))
+
+    c.ignore('type')
 
     # The parameter name '--name' is used for 'database_name', so we need to give a different name
     # for the import extension 'name' parameter to avoid conflicts. This parameter is actually not
     # needed, but we still need to avoid this conflict.
-    c.argument('name', options_list=('--unused-extension-name',), arg_type=ignore_type)
+    c.argument('name', options_list=('--not-name',), arg_type=ignore_type)
 
 
 #####

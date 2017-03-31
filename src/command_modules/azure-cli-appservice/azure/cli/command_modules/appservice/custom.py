@@ -21,7 +21,7 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.commands.arm import parse_resource_id
+from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
 from azure.cli.core.commands import LongRunningOperation
 
 from azure.cli.core.prompting import prompt_pass, NoTTYException
@@ -64,19 +64,12 @@ class AppServiceLongRunningOperation(LongRunningOperation):  # pylint: disable=t
             return ex
 
 
-def create_webapp(resource_group_name, name,
-                  plan=None, create_plan=False,
-                  sku=None, is_linux=False, number_of_workers=None,
-                  location=None):
+def create_webapp(resource_group_name, name, plan):
     client = web_client_factory()
-    plan_id = plan
-    if create_plan:
-        logger.warning("Create appservice plan: '%s'", plan)
-        result = create_app_service_plan(resource_group_name, plan, is_linux,
-                                         sku or 'S1', number_of_workers or 1, location)
-        plan_id = result.id
-
-    webapp_def = Site(server_farm_id=plan_id, location=location)
+    if is_valid_resource_id(plan):
+        plan = parse_resource_id(plan)['name']
+    location = _get_location_from_app_service_plan(client, resource_group_name, plan)
+    webapp_def = Site(server_farm_id=plan, location=location)
     poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
     return AppServiceLongRunningOperation()(poller)
 
@@ -271,21 +264,47 @@ def list_hostnames(resource_group_name, webapp_name, slot=None):
                                    slot)
 
 
+def get_external_ip(resource_group_name, webapp_name):
+    # logics here are ported from portal
+    client = web_client_factory()
+    webapp = client.web_apps.get(resource_group_name, webapp_name)
+    if webapp.hosting_environment_profile:
+        address = client.app_service_environments.list_vips(
+            resource_group_name, webapp.hosting_environment_profile.name)
+        if address.internal_ip_address:
+            ip_address = address.internal_ip_address
+        else:
+            vip = next((s for s in webapp.host_name_ssl_states
+                        if s.ssl_state == SslState.ip_based_enabled), None)
+            ip_address = (vip and vip.virtual_ip) or address.service_ip_address
+    else:
+        ip_address = _resolve_hostname_through_dns(webapp.default_host_name)
+
+    return {'ip': ip_address}
+
+
+def _resolve_hostname_through_dns(hostname):
+    import socket
+    return socket.gethostbyname(hostname)
+
+
 def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=None):
     client = web_client_factory()
     site = client.web_apps.get(resource_group_name, webapp)
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
     clone_from_prod = None
-    if configuration_source:
-        clone_from_prod = configuration_source.lower() == webapp.lower()
-        slot_def.site_config = get_site_configs(
-            resource_group_name, webapp, None if clone_from_prod else configuration_source)
-    else:
-        slot_def.site_config = SiteConfig(location)
+    slot_def.site_config = SiteConfig(location)
 
     poller = client.web_apps.create_or_update_slot(resource_group_name, webapp, slot_def, slot)
     result = AppServiceLongRunningOperation()(poller)
+
+    if configuration_source:
+        clone_from_prod = configuration_source.lower() == webapp.lower()
+        site_config = get_site_configs(
+            resource_group_name, webapp, None if clone_from_prod else configuration_source)
+        _generic_site_operation(resource_group_name, webapp,
+                                'update_configuration', slot, site_config)
 
     # slot create doesn't clone over the app-settings and connection-strings, so we do it here
     # also make sure slot settings don't get propagated.
@@ -301,7 +320,7 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
         connection_strings = _generic_site_operation(resource_group_name, webapp,
                                                      'list_connection_strings',
                                                      src_slot)
-        for a in slot_cfg_names.connection_string_names:
+        for a in (slot_cfg_names.connection_string_names or []):
             connection_strings.properties.pop(a, None)
 
         _generic_site_operation(resource_group_name, webapp, 'update_application_settings',
@@ -393,13 +412,22 @@ def list_app_service_plans(resource_group_name=None):
     return plans
 
 
+def _linux_sku_check(sku):
+    tier = _get_sku_name(sku)
+    if tier in ['BASIC', 'STANDARD']:
+        return
+    format_string = 'usage error: {0} is not a valid sku for linux plan, please use one of the following: {1}'  # pylint: disable=line-too-long
+    raise CLIError(format_string.format(sku, 'B1, B2, B3, S1, S2, S3'))
+
+
 def create_app_service_plan(resource_group_name, name, is_linux, sku='B1', number_of_workers=None,
                             location=None):
     client = web_client_factory()
     sku = _normalize_sku(sku)
     if location is None:
         location = _get_location_from_resource_group(resource_group_name)
-
+    if is_linux:
+        _linux_sku_check(sku)
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=_get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location, app_service_plan_name=name,
@@ -855,19 +883,13 @@ def list_ssl_certs(resource_group_name):
     return client.certificates.list_by_resource_group(resource_group_name)
 
 
-def delete_ssl_cert(resource_group_name, name, certificate_thumbprint):
+def delete_ssl_cert(resource_group_name, certificate_thumbprint):
     client = web_client_factory()
-    error_str_1 = "Certificate for thumbprint '{}' found, but not for webapp '{}'"
-    error_str_2 = "Certificate for thumbprint '{}' not found"
     webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
-            for hostname in webapp_cert.host_names:
-                if name in hostname:
-                    return client.certificates.delete(resource_group_name,
-                                                      webapp_cert.name)
-                raise CLIError(error_str_1.format(certificate_thumbprint, name))
-            raise CLIError(error_str_2.format(certificate_thumbprint))
+            return client.certificates.delete(resource_group_name, webapp_cert.name)
+    raise CLIError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
 
 
 def _update_host_name_ssl_state(resource_group_name, webapp_name, location,
@@ -884,25 +906,46 @@ def _update_host_name_ssl_state(resource_group_name, webapp_name, location,
 
 def _update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
     client = web_client_factory()
-    webapp = _generic_site_operation(resource_group_name, name, 'get')
+    webapp = client.web_apps.get(resource_group_name, name)
     webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
-            return _update_host_name_ssl_state(resource_group_name, name, webapp.location,
-                                               webapp_cert.host_names[0], ssl_type,
-                                               certificate_thumbprint, slot)
+            if len(webapp_cert.host_names) == 1 and not webapp_cert.host_names[0].startswith('*'):
+                return _update_host_name_ssl_state(resource_group_name, name, webapp.location,
+                                                   webapp_cert.host_names[0], ssl_type,
+                                                   certificate_thumbprint, slot)
+            else:
+                query_result = list_hostnames(resource_group_name, name, slot)
+                hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
+                to_update = _match_host_names_from_cert(webapp_cert.host_names, hostnames_in_webapp)
+                for h in to_update:
+                    _update_host_name_ssl_state(resource_group_name, name, webapp.location,
+                                                h, ssl_type, certificate_thumbprint, slot)
+
+                return show_webapp(resource_group_name, name, slot)
+
     raise CLIError("Certificate for thumbprint '{}' not found.".format(certificate_thumbprint))
 
 
 def bind_ssl_cert(resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
-    if ssl_type == 'SNI':
-        return _update_ssl_binding(resource_group_name, name,
-                                   certificate_thumbprint, SslState.sni_enabled, slot)
-    else:
-        return _update_ssl_binding(resource_group_name, name,
-                                   certificate_thumbprint, SslState.ip_based_enabled, slot)
+    return _update_ssl_binding(
+        resource_group_name, name, certificate_thumbprint,
+        SslState.sni_enabled if ssl_type == 'SNI' else SslState.ip_based_enabled, slot)
 
 
 def unbind_ssl_cert(resource_group_name, name, certificate_thumbprint, slot=None):
     return _update_ssl_binding(resource_group_name, name,
                                certificate_thumbprint, SslState.disabled, slot)
+
+
+def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
+    # the goal is to match '*.foo.com' with host name like 'admin.foo.com', 'logs.foo.com', etc
+    matched = set()
+    for hostname in hostnames_from_cert:
+        if hostname.startswith('*'):
+            for h in hostnames_in_webapp:
+                if hostname[hostname.find('.'):] == h[h.find('.'):]:
+                    matched.add(h)
+        elif hostname in hostnames_in_webapp:
+            matched.add(hostname)
+    return matched

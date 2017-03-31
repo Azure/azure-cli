@@ -4,13 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 from ._util import (
-    get_sql_servers_operation,
-    get_sql_database_operations,
-    get_sql_database_blob_auditing_policies_operations,
-    get_sql_database_threat_detection_policies_operations,
-    get_sql_elasticpools_operations,
+    get_sql_servers_operations,
+    get_sql_firewall_rules_operations,
+    get_sql_databases_operations,
+    get_sql_elastic_pools_operations)
+from azure.cli.core.sdk.util import (
     create_service_adapter,
     ServiceGroup)
+
+custom_path = 'azure.cli.command_modules.sql.custom#{}'
 
 ###############################################
 #                sql db                       #
@@ -19,7 +21,7 @@ from ._util import (
 database_operations = create_service_adapter('azure.mgmt.sql.operations.databases_operations',
                                              'DatabasesOperations')
 
-with ServiceGroup(__name__, get_sql_database_operations, database_operations) as s:
+with ServiceGroup(__name__, get_sql_databases_operations, database_operations, custom_path) as s:
     with s.group('sql db') as c:
         c.custom_command('create', 'db_create')
         c.custom_command('copy', 'db_copy')
@@ -30,8 +32,8 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
         # c.command('show-usage', 'list_usages')
         c.command('delete', 'delete', confirmation=True)
         c.generic_update_command('update', 'get', 'create_or_update', custom_func_name='db_update')
-        c.command('import', 'import_method')
-        c.command('export', 'export')
+        c.custom_command('import', 'db_import')
+        c.custom_command('export', 'db_export')
 
     with s.group('sql db replica') as c:
         c.custom_command('create', 'db_create_replica')
@@ -44,8 +46,8 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
         c.command('show', 'get')
         c.custom_command('list', 'dw_list')
         c.command('delete', 'delete', confirmation=True)
-        c.command('pause', 'pause_data_warehouse')
-        c.command('resume', 'resume_data_warehouse')
+        c.command('pause', 'pause')
+        c.command('resume', 'resume')
         c.generic_update_command('update', 'get', 'create_or_update', custom_func_name='dw_update')
 
     # Data Warehouse restore will not be included in the first batch of GA commands
@@ -65,41 +67,26 @@ with ServiceGroup(__name__, get_sql_database_operations, database_operations) as
     #     c.command('list', 'list_service_tier_advisors')
     #     c.command('show', 'get_service_tier_advisor')
 
-database_blob_auditing_policy_operations = create_service_adapter(
-    'azure.mgmt.sql.operations.database_blob_auditing_policies_operations',
-    'DatabaseBlobAuditingPoliciesOperations')
-
-with ServiceGroup(__name__,
-                  get_sql_database_blob_auditing_policies_operations,
-                  database_blob_auditing_policy_operations) as s:
     with s.group('sql db audit-policy') as c:
-        c.command('show', 'get')
+        c.command('show', 'get_blob_auditing_policy')
         c.generic_update_command(
-            'update', 'get', 'create_or_update',
-            custom_func_name='db_audit_policy_update',
-            setter_arg_name='database_blob_auditing_policy')
+            'update', 'get_blob_auditing_policy', 'create_or_update_blob_auditing_policy',
+            custom_func_name='db_audit_policy_update')
 
-database_threat_detection_policy_operations = create_service_adapter(
-    'azure.mgmt.sql.operations.database_threat_detection_policies_operations',
-    'DatabaseThreatDetectionPoliciesOperations')
-
-with ServiceGroup(__name__,
-                  get_sql_database_threat_detection_policies_operations,
-                  database_threat_detection_policy_operations) as s:
     with s.group('sql db threat-policy') as c:
-        c.command('show', 'get')
-        c.generic_update_command('update', 'get', 'create_or_update',
-                                 custom_func_name='db_threat_detection_policy_update',
-                                 setter_arg_name='database_security_alert_policy')
+        c.command('show', 'get_threat_detection_policy')
+        c.generic_update_command('update', 'get_threat_detection_policy',
+                                 'create_or_update_threat_detection_policy',
+                                 custom_func_name='db_threat_detection_policy_update')
 
 ###############################################
 #                sql elastic-pool             #
 ###############################################
 
-elasticpools_ops = create_service_adapter('azure.mgmt.sql.operations.elastic_pools_operations',
-                                          'ElasticPoolsOperations')
+elastic_pools_ops = create_service_adapter('azure.mgmt.sql.operations.elastic_pools_operations',
+                                           'ElasticPoolsOperations')
 
-with ServiceGroup(__name__, get_sql_elasticpools_operations, elasticpools_ops) as s:
+with ServiceGroup(__name__, get_sql_elastic_pools_operations, elastic_pools_ops, custom_path) as s:
     with s.group('sql elastic-pool') as c:
         c.custom_command('create', 'elastic_pool_create')
         c.command('delete', 'delete')
@@ -130,27 +117,32 @@ recommanded_elastic_pools_ops = \
 #                sql server                   #
 ###############################################
 
-server_operations = create_service_adapter('azure.mgmt.sql.operations.servers_operations',
-                                           'ServersOperations')
+servers_operations = create_service_adapter('azure.mgmt.sql.operations.servers_operations',
+                                            'ServersOperations')
 
-with ServiceGroup(__name__, get_sql_servers_operation, server_operations) as s:
-
+with ServiceGroup(__name__, get_sql_servers_operations, servers_operations, custom_path) as s:
     with s.group('sql server') as c:
         c.command('create', 'create_or_update')
         c.command('delete', 'delete', confirmation=True)
-        c.command('show', 'get_by_resource_group')
+        c.command('show', 'get')
         # Usages will not be included in the first batch of GA commands
         # c.command('show-usage', 'list_usages')
         c.command('list', 'list_by_resource_group')
-        c.generic_update_command('update', 'get_by_resource_group', 'create_or_update',
+        c.generic_update_command('update', 'get', 'create_or_update',
                                  custom_func_name='server_update')
 
+firewall_rules_operations = create_service_adapter(
+    'azure.mgmt.sql.operations.firewall_rules_operations',
+    'FirewallRulesOperations')
+
+with ServiceGroup(__name__, get_sql_firewall_rules_operations, firewall_rules_operations,
+                  custom_path) as s:
     with s.group('sql server firewall-rule') as c:
-        c.command('create', 'create_or_update_firewall_rule')
+        c.command('create', 'create_or_update')
         c.custom_command('update', 'firewall_rule_update')
-        c.command('delete', 'delete_firewall_rule')
-        c.command('show', 'get_firewall_rule')
-        c.command('list', 'list_firewall_rules')
+        c.command('delete', 'delete')
+        c.command('show', 'get')
+        c.command('list', 'list_by_server')
         # Keeping this command hidden for now. `firewall-rule create` will explain the special
         # 0.0.0.0 rule.
         # c.custom_command('allow-all-azure-ips', 'firewall_rule_allow_all_azure_ips')

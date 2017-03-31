@@ -10,7 +10,6 @@ import azure.cli.core._debug as _debug
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._util import CLIError
 from azure.cli.core.application import APPLICATION
-from azure.storage._error import _ERROR_STORAGE_MISSING_INFO
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -85,6 +84,7 @@ def get_data_service_client(service_type, account_name, account_key, connection_
             client_kwargs['endpoint_suffix'] = endpoint_suffix
         client = service_type(**client_kwargs)
     except ValueError as exc:
+        from azure.storage._error import _ERROR_STORAGE_MISSING_INFO
         if _ERROR_STORAGE_MISSING_INFO in str(exc):
             raise ValueError(exc)
         else:

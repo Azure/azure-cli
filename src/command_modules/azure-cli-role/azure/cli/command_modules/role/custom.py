@@ -254,20 +254,26 @@ def _build_role_scope(resource_group_name, scope, subscription_id):
 
 def _resolve_role_id(role, scope, definitions_client):
     role_id = None
-    try:
-        uuid.UUID(role)
+    if re.match(r'/subscriptions/.+/providers/Microsoft.Authorization/roleDefinitions/',
+                role, re.I):
         role_id = role
-    except ValueError:
-        pass
-    if not role_id:  # retrieve role id
-        role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
-        if not role_defs:
-            raise CLIError("Role '{}' doesn't exist.".format(role))
-        elif len(role_defs) > 1:
-            ids = [r.id for r in role_defs]
-            err = "More than one role matches the given name '{}'. Please pick a value from '{}'"
-            raise CLIError(err.format(role, ids))
-        role_id = role_defs[0].id
+    else:
+        # pylint: disable=line-too-long
+        try:
+            uuid.UUID(role)
+            role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(
+                definitions_client.config.subscription_id, role)
+        except ValueError:
+            pass
+        if not role_id:  # retrieve role id
+            role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
+            if not role_defs:
+                raise CLIError("Role '{}' doesn't exist.".format(role))
+            elif len(role_defs) > 1:
+                ids = [r.id for r in role_defs]
+                err = "More than one role matches the given name '{}'. Please pick a value from '{}'"
+                raise CLIError(err.format(role, ids))
+            role_id = role_defs[0].id
     return role_id
 
 
