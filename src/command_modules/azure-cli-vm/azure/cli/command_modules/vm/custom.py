@@ -1863,6 +1863,13 @@ def create_vmss(vmss_name, resource_group_name, image,
                                         custom_data=custom_data, secrets=secrets)
     vmss_resource['dependsOn'] = vmss_dependencies
 
+    if plan_name:
+        vmss_resource['plan'] = {
+            'name': plan_name,
+            'publisher': plan_publisher,
+            'product': plan_product
+        }
+
     master_template.add_resource(vmss_resource)
     master_template.add_output('VMSS', vmss_name, 'Microsoft.Compute', 'virtualMachineScaleSets',
                                output_type='object')
