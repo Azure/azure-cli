@@ -31,7 +31,6 @@ DEPENDENCIES = [
     'scp',
     'sshtunnel',
     'six',
-    'petname'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
