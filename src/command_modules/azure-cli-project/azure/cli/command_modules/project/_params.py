@@ -41,10 +41,19 @@ name_arg_type = CliArgumentType(
     options_list=('--name', '-n'),
     metavar='NAME')
 
+reference_name = CliArgumentType(
+    options_list=('--reference-name', '-r'))
+
 register_cli_argument('project', 'remote_access_token', remote_access_token)
 register_cli_argument('project', 'project_path', project_path)
 register_cli_argument('project', 'ssh_private_key', ssh_private_key)
-register_cli_argument('project', 'name', name_arg_type) # TODO: Ideally, this should be project-name
+# TODO: Ideally, this should be project-name
+register_cli_argument('project', 'name', name_arg_type)
 register_cli_argument('project', 'resource_group', resource_group_name_type)
 register_cli_argument('project', 'location', location_type)
-register_cli_argument('project', 'force_create', force_create, action='store_true')
+register_cli_argument('project', 'force_create',
+                      force_create, action='store_true')
+
+register_cli_argument('project', 'target-group', resource_group_name_type)
+register_cli_argument('project', 'target-name', name_arg_type)
+register_cli_argument('project', 'reference-name', reference_name)

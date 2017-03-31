@@ -327,6 +327,30 @@ def create_deployment_pipeline(remote_access_token):  # pylint: disable=unused-a
         if current_process:
             current_process.process_stop()
 
+from azure.cli.command_modules.documentdb._client_factory import (
+    cf_documentdb)
+
+
+def add_reference(target_group, target_name, reference_name):
+    """
+    """
+    # 1. Get the reference type
+    client = cf_documentdb().database_accounts
+    instance = client.get(target_group, target_name)
+    reference_type = instance.type
+
+    if reference_type == 'Microsoft.DocumentDB/databaseAccounts':
+        print(instance.write_locations[0])
+        keys = client.list_keys(target_group, target_name)
+        print (keys)
+        # host = '{}.documents.azure.com'.format(target_name)
+        # port = 443
+        # keys = client.list_keys(target_group, target_name)
+        # primary_master_key = keys.primary_readonly_master_key
+        # kubectl create configmap service-a-mymongo
+        # --from-literal=host=mymongo.document.azure.com
+        # --from-literal=port=6380
+
 
 def _deployment_pipelines_exist():
     """
