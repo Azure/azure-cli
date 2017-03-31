@@ -570,7 +570,7 @@ def _configure_cluster():  # pylint: disable=too-many-statements
             resource_group,
             template_file='{}/k8.deploy.json'.format(artifacts_path),
             deployment_name=dns_prefix,
-            parameters=k8_parameters)
+            parameter_list=k8_parameters)
         logger.info('\nARM template deployed.')
 
         logger.info('\nCreating tenx namespace ... ')
