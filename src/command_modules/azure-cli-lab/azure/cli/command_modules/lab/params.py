@@ -79,3 +79,8 @@ with ParametersContext(command='lab secret') as c:
     c.register_alias('secret', ('--value', ), type=lambda x: Secret(value=x))
     c.ignore('user_name')
     c.argument('lab_name', validator=validate_user_name)
+
+
+with ParametersContext(command='lab formula export-artifacts') as c:
+    # Exporting artifacts does not need expand filter
+    c.ignore('expand')

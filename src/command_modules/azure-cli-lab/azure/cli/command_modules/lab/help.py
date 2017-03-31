@@ -32,8 +32,9 @@ helps['lab vm create'] = """
                 - name: --image-type
                   short-summary: Type of the image. Allowed values are gallery, custom
                 - name: --formula
-                  short-summary: Name of the formula. Use az lab formula list for available formulas. Use --artifacts to pass-in
-                                 parameters required by the artifacts of the formula
+                  short-summary: Name of the formula. Use az lab formula list for available formulas.
+                                 Use az lab formula with --export-artifacts flag to export & update artifacts then supply
+                                 it via --artifacts argument
                 - name: --size
                   short-summary: The VM size to be created. See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.
                                  Required when creating VM from gallery or custom image
@@ -87,7 +88,7 @@ helps['lab vm create'] = """
                     az lab vm create --lab-name MyLab -g MyRG --name MyVM --image "Ubuntu Server 16.04 LTS" --image-type gallery --size Standard_DS1_v2 --ip-configuration public
                 - name: Create a Virtual Machine from a formula.
                   text: >
-                    az lab vm create --lab-name MyLab -g MyRG --name MyVM --formula MyFormula
+                    az lab vm create --lab-name MyLab -g MyRG --name MyVM --formula MyFormula --artifacts @/artifacts.json
             """
 helps['lab vm list'] = """
             type: command
@@ -146,6 +147,24 @@ helps['lab vnet'] = """
 helps['lab formula'] = """
             type: group
             short-summary: Commands to manage formulas of a DevTest Lab.
+            """
+helps['lab formula show'] = """
+            type: command
+            short-summary: Commands to show formula from the Azure DevTest Lab.
+            parameters:
+                - name: --lab-name
+                  short-summary: Name of the Lab
+                - name: --name -n
+                  short-summary: Name of the formula
+            """
+helps['lab formula export-artifacts'] = """
+            type: command
+            short-summary: Export artifacts from a formula.
+            parameters:
+                - name: --lab-name
+                  short-summary: Name of the Lab
+                - name: --name -n
+                  short-summary: Name of the formula
             """
 helps['lab secret'] = """
             type: group
