@@ -1516,7 +1516,8 @@ def create_vm(vm_name, resource_group_name, image=None,
               subnet=None, subnet_address_prefix='10.0.0.0/24', storage_profile=None,
               os_publisher=None, os_offer=None, os_sku=None, os_version=None,
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_type=None,
-              nic_type=None, validate=False, custom_data=None, secrets=None):
+              nic_type=None, validate=False, custom_data=None, secrets=None,
+              plan_name=None, plan_product=None, plan_publisher=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core._util import random_string
     from azure.cli.command_modules.vm._template_builder import (
@@ -1629,6 +1630,13 @@ def create_vm(vm_name, resource_group_name, image=None,
         os_vhd_uri, attach_os_disk, data_disk_sizes_gb, image_data_disks, custom_data, secrets)
     vm_resource['dependsOn'] = vm_dependencies
 
+    if plan_name:
+        vm_resource['plan'] = {
+            'name': plan_name,
+            'publisher': plan_publisher,
+            'product': plan_product
+        }
+
     master_template.add_resource(vm_resource)
 
     template = master_template.build()
@@ -1673,7 +1681,8 @@ def create_vmss(vmss_name, resource_group_name, image,
                 os_offer=None, os_publisher=None, os_sku=None, os_version=None,
                 load_balancer_type=None, app_gateway_type=None, vnet_type=None,
                 public_ip_type=None, storage_profile=None,
-                single_placement_group=None, custom_data=None, secrets=None):
+                single_placement_group=None, custom_data=None, secrets=None,
+                plan_name=None, plan_product=None, plan_publisher=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core._util import random_string
     from azure.cli.command_modules.vm._template_builder import (
