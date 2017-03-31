@@ -5,7 +5,8 @@
 
 import json
 from azure.cli.command_modules.lab.validators import (validate_lab_vm_create,
-                                                      validate_lab_vm_list)
+                                                      validate_lab_vm_list,
+                                                      validate_user_name)
 from azure.cli.core.commands.parameters import resource_group_name_type
 from azure.cli.core.sdk.util import ParametersContext
 
@@ -69,3 +70,9 @@ with ParametersContext(command='lab vm apply-artifacts') as c:
 
 with ParametersContext(command='lab formula') as c:
     c.register_alias('name', ('--name', '-n'))
+
+
+with ParametersContext(command='lab secret') as c:
+    c.register_alias('name', ('--name', '-n'))
+    c.ignore('user_name')
+    c.argument('lab_name', validator=validate_user_name)

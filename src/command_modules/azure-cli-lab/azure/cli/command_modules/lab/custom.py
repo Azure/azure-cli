@@ -51,3 +51,13 @@ def list_vm(client, resource_group, lab_name, order_by=None, top=None,
 
     return client.list(resource_group, lab_name,
                        expand=expand, filter=filters, top=top, order_by=order_by)
+
+
+def create_or_update_secret(client, resource_group, lab_name, name, value, user_name=None):
+    from .sdk.devtestlabs.models.secret import Secret
+
+    return client.create_or_update_resource(resource_group_name=resource_group,
+                                            lab_name=lab_name,
+                                            user_name=user_name,
+                                            name=name,
+                                            secret=Secret(value=value))

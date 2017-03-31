@@ -147,3 +147,29 @@ helps['lab formula'] = """
             type: group
             short-summary: Commands to manage formulas of a DevTest Lab.
             """
+helps['lab secret'] = """
+            type: group
+            short-summary: Commands to manage secrets of a DevTest Lab.
+            """
+helps['lab secret create'] = """
+            type: command
+            short-summary: Create a secret in the DevTest Lab.
+            parameters:
+                - name: --lab-name
+                  short-summary: Name of the Lab
+                - name: --name -n
+                  short-summary: Name of the secret
+                - name: --value
+                  short-summary: Value of the secret
+            """
+helps['lab secret update'] = """
+            type: command
+            short-summary: Update a secret in the DevTest Lab.
+            parameters:
+                - name: --lab-name
+                  short-summary: Name of the Lab
+                - name: --name -n
+                  short-summary: Name of the secret
+                - name: --value
+                  short-summary: Value of the secret
+            """
