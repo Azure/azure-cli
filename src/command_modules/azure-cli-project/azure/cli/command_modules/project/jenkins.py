@@ -3,13 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import paramiko
+import hashlib
+import tempfile
 
 import azure.cli.command_modules.project.settings as settings
+import azure.cli.command_modules.project.sshconnect as ssh
+import azure.cli.command_modules.project.utils as utils
 from azure.cli.command_modules.project.deployments import DeployableResource
 import azure.cli.core.azlogging as azlogging  # pylint: disable=invalid-name
-import tempfile
-import hashlib
 logger = azlogging.get_az_logger(__name__)  # pylint: disable=invalid-name
 
 # pylint: disable=line-too-long, too-many-arguments
@@ -47,7 +48,7 @@ class Jenkins(DeployableResource):
         """
         Creates a VM, installs Jenkins on it and configures it
         """
-        logger.info('Deplyong Jenkins...')
+        logger.info('Deploying Jenkins...')
         parameters = self._create_params()
         template_url = \
             'https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/101-jenkins-master-on-ubuntu/azuredeploy.json'
@@ -62,9 +63,9 @@ class Jenkins(DeployableResource):
         # TODO: We could check the completed_deployment to see
         # if it failed or succeeded
         logger.info('Jenkins deployment completed.')
-        self.configure()
+        self._configure()
 
-    def configure(self):
+    def _configure(self):
         """
         Configures Jenkins instance to work with the
         Azure registry and polls the GitHub repo
@@ -73,16 +74,16 @@ class Jenkins(DeployableResource):
         self._install_docker()
         self._install_kubectl()
         self._create_kube_config()
-        self._add_ci_job()
-        self._add_cd_job()
+        self.create_pipelines()
         self._unsecure_instance()
         logger.info('Jenkins configuration completed.')
 
-    def _get_hostname(self):
+    def create_pipelines(self):
         """
-        Gets the Jenkins hostname
+        Create CI and CD pipelines
         """
-        return '{}.{}.cloudapp.azure.com'.format(self.dns_prefix, self.location)
+        self._add_ci_job()
+        self._add_cd_job()
 
     def _get_kube_config(self):
         """
@@ -94,16 +95,9 @@ class Jenkins(DeployableResource):
         user = project_settings.admin_username
 
         local_kube_config = tempfile.NamedTemporaryFile().name
-        ssh = paramiko.SSHClient()
-        ssh.load_system_host_keys()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect('{}.{}.cloudapp.azure.com'.format(
-            dns_prefix, location), username=user)
-        scp = paramiko.SFTPClient.from_transport(ssh.get_transport())
-        scp.get('.kube/config', local_kube_config)
-        scp.close()
-        ssh.close()
-
+        ssh_client = ssh.SSHConnect(
+            dns_prefix, location, user, ssh_private_key=project_settings.ssh_private_key)
+        ssh_client.get('.kube/config', local_kube_config)
         return local_kube_config
 
     def _create_kube_config(self):
@@ -113,18 +107,11 @@ class Jenkins(DeployableResource):
         logger.info('Creating .kube/config file...')
         local_kube_config = self._get_kube_config()
         # Copy the local kube config to Jenkins VM
-        ssh = paramiko.SSHClient()
-        ssh.load_system_host_keys()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        hostname = self._get_hostname()
-        ssh.connect(hostname,
-                    username=self.admin_username,
-                    password=self.admin_password)
-        scp = paramiko.SFTPClient.from_transport(ssh.get_transport())
-        ssh.exec_command('sudo mkdir -p /var/lib/jenkins/.kube')
-        scp.put(local_kube_config, '/home/azureuser/config')
-        ssh.exec_command(
-            'sudo cp /home/azureuser/config /var/lib/jenkins/.kube && sudo chown --from root jenkins /var/lib/jenkins/.kube')
+        with ssh.SSHConnect(self.dns_prefix, self.location, user_name=self.admin_username, password=self.admin_password) as ssh_client:
+            ssh_client.run_command('sudo mkdir -p /var/lib/jenkins/.kube')
+            ssh_client.put(local_kube_config, '/home/azureuser/config')
+            ssh_client.run_command(
+                'sudo cp /home/azureuser/config /var/lib/jenkins/.kube && sudo chown --from root jenkins /var/lib/jenkins/.kube && sudo chown --from root jenkins /var/lib/jenkins/.kube/config')
 
     def _install_kubectl(self):
         """
@@ -160,7 +147,6 @@ class Jenkins(DeployableResource):
         """
         Gets the name for the CD job
         """
-        # TODO: Remove -x once we figure out proper naming
         return '{}-{}-deploy'.format(self.pipeline_name, self._get_hash())
 
     def _get_cd_job_display_name(self):
@@ -196,7 +182,6 @@ class Jenkins(DeployableResource):
         ])
         command = 'curl {} | sudo bash -s -- {}'.format(
             add_cd_job_script, args)
-        logger.info(command)
         self._run_remote_command(command)
 
     def _install_docker(self):
@@ -249,23 +234,10 @@ class Jenkins(DeployableResource):
 
     def _run_remote_command(self, command):
         """
-        Runs a command on remote Jenkins instance
+        Runs a command on Jenkins instance
         """
-        ssh = paramiko.SSHClient()
-        ssh.load_system_host_keys()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect('{}.{}.cloudapp.azure.com'.format(self.dns_prefix, self.location),
-                    username=self.admin_username,
-                    password=self.admin_password)
-
-        _, stdout, stderr = ssh.exec_command(command)
-        stdout_lines = stdout.readlines()
-        stderr_lines = stderr.readlines()
-        for line in stdout_lines:
-            logger.info(line)
-        for line in stderr_lines:
-            logger.info(line)
-        return stdout_lines, stderr_lines
+        with ssh.SSHConnect(self.dns_prefix, self.location, user_name=self.admin_username, password=self.admin_password) as ssh_client:
+            ssh_client.run_command(command)
 
     def _create_params(self):
         """
