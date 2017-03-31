@@ -9,8 +9,8 @@ Prerequisites
 1. Install 'WIX Toolset build tools' if not already installed.
     http://wixtoolset.org/releases/
 
-2. Install 'curl' as it's used during the build.
-    You can get this through Git for Windows.
+2. Get Git for Windows (it has several tools used for the build).
+    https://github.com/git-for-windows/git/releases/download/v2.12.2.windows.1/Git-2.12.2-32-bit.exe
 
 3. Install 'Microsoft Build Tools 2015'.
     https://www.microsoft.com/en-us/download/details.aspx?id=48159

@@ -7,10 +7,6 @@
 ::
 set CLI_VERSION=0.2.3
 
-:: Add Git to the path as this should be run through a .NET command prompt
-:: and not a Git bash shell... We also need the gnu toolchain (for curl & unzip)
-
-set PATH=%PATH%;"C:\Program Files (x86)\Git\bin;"
 set PYTHON_VERSION=3.6.1
 
 pushd %~dp0..\

@@ -1,7 +1,10 @@
 @echo off
 echo Building the Windows Installer...
-echo NOTE: This needs to be run from a .NET developer command prompt with msbuild in the path.
 echo.
+:: Add Git to the path as this should be run through a .NET command prompt
+:: and not a Git bash shell... We also need the gnu toolchain (for curl & unzip)
+:: Also, add path for msbuild
+set PATH=%PATH%;"C:\Program Files (x86)\Git\bin;C:\Program Files (x86)\MSBuild\14.0\Bin""
 
 pushd %~dp0
 
