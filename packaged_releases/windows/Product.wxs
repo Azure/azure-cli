@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+  <?define ProductVersion="0.2.3" ?>
+
+  <?define ProductName = "Microsoft Azure CLI 2.0" ?>
+  <?define ProductDescription = "Command-line tools for Azure." ?>
+  <?define ProductAuthor = "Microsoft Corporation" ?>
+  <?define ProductResources = ".\resources\" ?>
+
+  <Product Id="*"
+           Name="$(var.ProductName)"
+           Language="1033"
+           Version="$(var.ProductVersion)"
+           Manufacturer="$(var.ProductAuthor)"
+           UpgradeCode="dff82af0-3f95-4ac9-8efd-948604fdb028">
+
+    <Package InstallerVersion="200"
+             Compressed="yes"
+             InstallScope="perMachine" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." Schedule="afterInstallInitialize" />
+
+    <Media Id="1" Cabinet="WindowsAzureCLI.cab" EmbedCab="yes" CompressionLevel="high" />
+
+    <Icon Id="AzureIcon" SourceFile="$(var.ProductResources)windowsazure.ico" />
+
+    <Property Id="ARPPRODUCTICON" Value="AzureIcon" />
+    <Property Id="ARPHELPLINK" Value="https://docs.microsoft.com/en-us/cli/azure" />
+    <Property Id="ARPURLINFOABOUT" Value="https://docs.microsoft.com/en-us/cli/azure/overview" />
+    <Property Id="ARPURLUPDATEINFO" Value="https://docs.microsoft.com/en-us/cli/azure/overview" />
+    <Property Id="ApplicationFolderName" Value="Microsoft SDKs\Azure" />
+    <Property Id="WixAppFolder" Value="WixPerMachineFolder" />
+
+    <Feature Id="ProductFeature"
+             Title="Microsoft Azure CLI 2.0"
+             Level="1"
+             AllowAdvertise="no">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+
+    <!--Custom action to propagate path env variable change-->
+    <Binary Id="PropagateEnvChangeExe" SourceFile=".\propagate_env_change\propagate_env_change.exe" />
+    <Property Id="WixQuietExecCmdLine" Value="propagate_env_change.exe"/>
+    <!--Ignoring the return value if case there is app-hang we can't control -->
+    <CustomAction Id="PropagateEnvChange"
+                  BinaryKey="PropagateEnvChangeExe"
+                  ExeCommand="propagate_env_change.exe"
+                  Execute="commit"
+                  Return="ignore"/>
+    <InstallExecuteSequence>
+      <Custom Action="PropagateEnvChange" Before="InstallFinalize" />
+    </InstallExecuteSequence>
+
+    <!-- User Interface -->
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.ProductResources)CLI_LICENSE.rtf"/>
+    <WixVariable Id="WixUIDialogBmp" Value="$(var.ProductResources)Dialog.bmp" />
+    <WixVariable Id="WixUIBannerBmp" Value="$(var.ProductResources)Banner.bmp" />
+
+    <UIRef Id="WixUI_Minimal"/>
+
+  </Product>
+
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="SDKFOLDER" Name="Microsoft SDKs">
+          <Directory Id="AZUREFOLDER" Name="Azure">
+            <Directory Id="AZURECLIFOLDER" Name="CLI2">
+              <Directory Id="DynamicCliDir"/>
+              <Directory Id="BIN" Name="Bin" />
+            </Directory>
+          </Directory>
+        </Directory>
+      </Directory>
+    </Directory>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="AzureCliSettingsGroup">
+      <Component Id="RemoveCLIFolder"
+                 Directory="DynamicCliDir"
+                 Guid="{24DA394D-B03D-4623-A0D9-852DB51EF9F4}">
+        <RemoveFolder Id="DynamicCliDir" On="uninstall" />
+      </Component>
+      <Component Id="RemoveAzureCLIFolder"
+                 Directory="AZURECLIFOLDER"
+                 Guid="{6AF97701-6A7A-4292-95D6-ED34CD4C97C0}">
+        <RemoveFolder Id="AZURECLIFOLDER" On="uninstall" />
+      </Component>
+      <Component Id="AzureCliSystemPath"
+                 Directory="DynamicCliDir"
+                 Guid="{3B60CA67-DB92-465A-BC96-3CA6CAEFF41B}">
+        <Environment Id="AzureCliAddedToPATH"
+                     Name="PATH"
+                     Value="[DynamicCliDir]wbin"
+                     Permanent="no"
+                     Part="last"
+                     Action="set"
+                     System="yes" />
+        <CreateFolder />
+      </Component>
+      <Component Id="AzureCliRegistry"
+                 Directory="DynamicCliDir"
+                 Guid="{BDEEE50E-70D3-4990-BFF9-FCF8114AA701}">
+        <RegistryValue Root="HKCU"
+                       Key="Software\Microsoft\$(var.ProductName)"
+                       Name="installed"
+                       Type="integer"
+                       Value="1"
+                       KeyPath="yes"/>
+      </Component>
+      <Component Id="AzureCliVersion"
+                 Directory="DynamicCliDir"
+                 Guid="{A5647E93-02B7-4CED-802A-DDD7416E0231}">
+        <RegistryValue Root="HKLM"
+                       Key="Software\Microsoft\$(var.ProductName)"
+                       Name="version"
+                       Type="string"
+                       Value="$(var.ProductVersion)"
+                       KeyPath="yes"/>
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="ProductComponents">
+      <ComponentGroupRef Id="AzureCliComponentGroup"/>
+      <ComponentGroupRef Id="AzureCliSettingsGroup"/>
+    </ComponentGroup>
+
+  </Fragment>
+</Wix>
