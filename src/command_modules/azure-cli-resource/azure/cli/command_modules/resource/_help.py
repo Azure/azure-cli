@@ -160,6 +160,11 @@ helps['resource tag'] = """
             az resource tag --tags vmlist=vm1 --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp
 """
 
+helps['resource create'] = """
+    type: command
+    short-summary: create a resource.
+"""
+
 helps['resource update'] = """
     type: command
     short-summary: Update a resource.

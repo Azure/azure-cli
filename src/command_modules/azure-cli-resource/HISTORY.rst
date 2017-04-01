@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.3 (unreleased)
+
+* Support generic resource create (#2606)
 
 2.0.2 (2017-04-03)
 ++++++++++++++++++
