@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.3 (unreleqased)
+^^^^^^^^^^^^^^^^^^
+*core: Allow file path of accessTokens.json configurable (#2605)
 
 
 2.0.2 (2017-04-03)
