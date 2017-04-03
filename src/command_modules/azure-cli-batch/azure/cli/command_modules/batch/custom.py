@@ -21,7 +21,7 @@ from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, 
 
 from azure.storage.blob import BlockBlobService
 
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 import azure.cli.core.azlogging as azlogging
 

@@ -7,7 +7,7 @@ import os
 import datetime
 import dateutil.parser
 from msrestazure.azure_exceptions import CloudError
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core.commands.arm import is_valid_resource_id
 from ._client_factory import (get_devtestlabs_management_client)
 from .sdk.devtestlabs.models.gallery_image_reference import GalleryImageReference

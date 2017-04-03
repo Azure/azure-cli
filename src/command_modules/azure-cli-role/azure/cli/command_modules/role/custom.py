@@ -9,7 +9,7 @@ import uuid
 from dateutil.relativedelta import relativedelta
 import dateutil.parser
 
-from azure.cli.core._util import CLIError, todict, get_file_json, shell_safe_json_parse
+from azure.cli.core.util import CLIError, todict, get_file_json, shell_safe_json_parse
 import azure.cli.core.azlogging as azlogging
 
 from azure.mgmt.authorization.models import (RoleAssignmentProperties, Permission, RoleDefinition,

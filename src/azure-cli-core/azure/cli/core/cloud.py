@@ -9,7 +9,7 @@ from six.moves import configparser
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._config import \
     (GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH, set_global_config_value, get_config_parser)
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
 

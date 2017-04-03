@@ -18,7 +18,7 @@ from azure.storage.table import TableService
 from azure.storage.queue import QueueService
 
 from azure.cli.core.decorators import transfer_doc
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 from azure.cli.command_modules.storage._factory import \
     (storage_client_factory, generic_data_service_factory)

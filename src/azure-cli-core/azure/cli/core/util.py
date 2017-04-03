@@ -141,8 +141,6 @@ def shell_safe_json_parse(json_or_dict_string):
             return ast.literal_eval(json_or_dict_string)
         except SyntaxError as ex:
             raise CLIError('{}: {}'.format(ex.msg, ex.text))
-    except Exception:
-        raise CLIError(ex)
 
 
 def todict(obj):  # pylint: disable=too-many-return-statements

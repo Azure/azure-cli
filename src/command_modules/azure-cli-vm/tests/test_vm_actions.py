@@ -8,7 +8,7 @@ import tempfile
 import unittest
 import mock
 
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 from azure.cli.command_modules.vm._validators import (validate_ssh_key,
                                                       _is_valid_ssh_rsa_public_key,

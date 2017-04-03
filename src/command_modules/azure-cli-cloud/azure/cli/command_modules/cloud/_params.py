@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import register_cli_argument
-from azure.cli.core._util import shell_safe_json_parse
+from azure.cli.core.util import shell_safe_json_parse
 from azure.cli.core.cloud import get_clouds, get_custom_clouds, get_active_cloud_name
 
 

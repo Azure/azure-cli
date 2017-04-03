@@ -5,7 +5,7 @@
 
 import os
 
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from .test_batch_data_plane_command_base import (BatchDataPlaneTestBase)
 
 

@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 from ._factory import get_acr_service_client
 

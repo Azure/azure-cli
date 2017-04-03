@@ -5,7 +5,7 @@
 
 import re
 
-from azure.cli.core._util import b64_to_hex
+from azure.cli.core.util import b64_to_hex
 
 
 def register(application):

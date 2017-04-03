@@ -9,7 +9,7 @@ try:
 except ImportError:
     from mock import MagicMock
 
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 # pylint: disable=line-too-long
 from azure.cli.command_modules.resource.custom  import _ResourceUtils, _validate_resource_inputs, parse_resource_id
 
