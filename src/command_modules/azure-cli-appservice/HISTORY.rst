@@ -6,6 +6,7 @@ Release History
 0.1.2 (2017-04-03)
 ++++++++++++++++++++
 
+* appservice: adding ftp publishing url to create webapp and show webapp
 * appservice: rollback the change of auto creating plans (#2671)
 * Check sku when creating linux ASP (#2651)
 * appservice: include site config on cloning slot (#2644)
