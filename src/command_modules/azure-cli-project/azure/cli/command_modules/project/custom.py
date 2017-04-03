@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import base64
 import codecs
 import glob
 import json
@@ -330,26 +331,99 @@ def create_deployment_pipeline(remote_access_token):  # pylint: disable=unused-a
 from azure.cli.command_modules.documentdb._client_factory import (
     cf_documentdb)
 
+from azure.mgmt.sql import SqlManagementClient
+
+
+def _get_reference_type(resource_group, resource_name):
+    """
+    Gets the reference type from the provided
+    resource group and name
+    """
+    instance = None
+    try:
+        docdb_client = cf_documentdb().database_accounts
+        instance = docdb_client.get(resource_group, resource_name)
+        return instance, docdb_client
+    except:
+        pass
+
+    try:
+        sql_client = get_mgmt_service_client(SqlManagementClient).servers
+        instance = sql_client.get(resource_group, resource_name)
+        return instance, sql_client
+    except:
+        pass
+
+    return None, None
+
+
+def _get_environment_var_name(service_name, reference_name):
+    """
+    Gets the environment variable name for a reference
+    """
+    return '{}_{}_url'.format(service_name, reference_name).upper()
+
+
+def _create_connection_string(service_name, reference_name, connection_string):
+    """
+    Creates a secret on Kubernetes that stores
+    the connection string and is labeled with run=service_name
+    """
+    secret_name = '{}-{}'.format(service_name, reference_name)
+    encoded_connection_string = base64.b64encode(bytes(connection_string))
+    environment_variable_name = _get_environment_var_name(
+        service_name, reference_name)
+
+    # Create the secret
+    command = 'kubectl create secret generic {} --from-literal={}={}'.format(
+        secret_name, environment_variable_name, encoded_connection_string)
+    _execute_command(command)
+
+    # Label it with run=service_name
+    label_command = 'kubectl label secret {} run={}'.format(
+        secret_name, service_name)
+    _execute_command(label_command)
+
 
 def add_reference(target_group, target_name, reference_name):
     """
+    Adds a reference to an Azure resource
     """
-    # 1. Get the reference type
-    client = cf_documentdb().database_accounts
-    instance = client.get(target_group, target_name)
-    reference_type = instance.type
+    instance, client = _get_reference_type(target_group, target_name)
+    if instance.type == 'Microsoft.DocumentDB/databaseAccounts':
+        results = client.list_connection_strings(
+            target_group, target_name)
+        if len(results.connection_strings) <= 0:
+            raise ValueError('No connection strings found')
 
-    if reference_type == 'Microsoft.DocumentDB/databaseAccounts':
-        print(instance.write_locations[0])
-        keys = client.list_keys(target_group, target_name)
-        print (keys)
-        # host = '{}.documents.azure.com'.format(target_name)
-        # port = 443
-        # keys = client.list_keys(target_group, target_name)
-        # primary_master_key = keys.primary_readonly_master_key
-        # kubectl create configmap service-a-mymongo
-        # --from-literal=host=mymongo.document.azure.com
-        # --from-literal=port=6380
+        connection_string = results.connection_strings[0].connection_string
+        service_name = _get_service_name()
+        _create_connection_string(
+            service_name, reference_name, connection_string)
+
+    elif instance.type == 'Microsoft.Sql/servers':
+        raise NotImplementedError()
+
+    utils.writeline("Added reference '{}'".format(reference_name))
+    utils.writeline('Environment variables: {}'.format(
+        _get_environment_var_name(service_name, reference_name)))
+    # TODO: Save the reference to the projectresources file.
+# "references": [{
+#     "service-name" : "Bikes",
+#     "reference-name": "mymongo",
+#     "type": "DocumentDB"
+# },
+
+    # print(instance.write_locations[0])
+    # keys = client.list_keys(target_group, target_name)
+    # print (keys)
+    # host = '{}.documents.azure.com'.format(target_name)
+    # port = 443
+    # keys = client.list_keys(target_group, target_name)
+    # primary_master_key = keys.primary_readonly_master_key
+    # kubectl create configmap service-a-mymongo
+    # --from-literal=host=mymongo.document.azure.com
+    # --from-literal=port=6380
 
 
 def _deployment_pipelines_exist():
