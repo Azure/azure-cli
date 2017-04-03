@@ -3,6 +3,14 @@
 Release History
 ===============
 
+2.0.0 (2017-04-03)
+++++++++++++++++++++
+
+* [KeyVault] KeyVault create fix (#2648)
+* Fix #2422. (#2514)
+* [KeyVault] Command fixes (#2474)
+* Fix issue with "single tuple" options_list (#2495)
+
 0.1.1b6 (2017-03-13)
 ++++++++++++++++++++
 
