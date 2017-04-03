@@ -111,6 +111,7 @@ class TestUtils(unittest.TestCase):
     def test_shell_safe_json_parse(self):
         dict_obj = {'a': 'b & c'}
         list_obj = [{'a': 'b & c'}]
+        failed_strings = []
 
         valid_dict_strings = [
             '{"a": "b & c"}',
@@ -122,7 +123,7 @@ class TestUtils(unittest.TestCase):
             try:
                 self.assertEqual(actual, dict_obj)
             except AssertionError:
-                print('{} {} != {} {}'.format(type(dict_obj), dict_obj, type(actual), actual))
+                failed_strings.append(string)
 
         valid_list_strings = [
             '[{"a": "b & c"}]',
@@ -131,7 +132,14 @@ class TestUtils(unittest.TestCase):
         ]
         for string in valid_list_strings:
             actual = shell_safe_json_parse(string)
-            self.assertEqual(actual, list_obj)
+            try:
+                self.assertEqual(actual, list_obj)
+            except AssertionError:
+                failed_strings.append(string)
+
+        self.assertEqual(
+            len(failed_strings), 0,
+            'The following patterns failed: {}'.format(failed_strings))
 
 
 if __name__ == '__main__':

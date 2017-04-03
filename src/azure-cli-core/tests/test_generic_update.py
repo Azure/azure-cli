@@ -264,7 +264,6 @@ class GenericUpdateTest(unittest.TestCase):
             "item with value 'foo' doesn\'t exist for key 'myKey' on myListOfCamelDicts",
             'no match found when indexing by key and value')
 
-
     def test_generic_update_empty_nodes(self):
         my_obj = {
             'prop': None,
