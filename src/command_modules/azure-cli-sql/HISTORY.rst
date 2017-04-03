@@ -3,6 +3,15 @@
 Release History
 ===============
 
+2.0.0 (2017-04-03)
+++++++++++++++++++
+
+* Removed duplicate sql utils code (#2629)
+* Import/Export CLI changes for SAS key (#2584)
+* SQL database audit and threat detection commands (#2536)
+* Sql Import/Export CLI commands and test (#2538)
+* Require confirmation for destructive SQL commands. (#2509)
+
 0.1.1b6 (2017-03-13)
 ++++++++++++++++++++
 
