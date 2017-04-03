@@ -88,7 +88,7 @@ def load_commands():
 ```
 
 ```python
-from azure.cli.commands import cli_command
+from azure.cli.core.commands import cli_command
 
 def example(my_required_arg, my_optional_arg='MyDefault'):
     '''Returns the params you passed in.
@@ -101,7 +101,7 @@ cli_command('example', example)
 ```
 
 The snippet above shows what it takes to author a basic command.
-1. Import `cli_command` from `azure.cli.commands`  
+1. Import `cli_command` from `azure.cli.core.commands`  
     This holds the core logic for creating commands.
 2. Use `cli_command` to create your command  
     The only required parameters to this method are:  
