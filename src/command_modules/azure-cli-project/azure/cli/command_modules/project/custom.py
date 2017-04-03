@@ -29,6 +29,7 @@ from azure.cli.command_modules.acs.custom import (acs_create,
                                                   k8s_get_credentials,
                                                   k8s_install_cli)
 from azure.cli.command_modules.project.jenkins import Jenkins
+import azure.cli.command_modules.project.references as references
 from azure.cli.command_modules.resource.custom import _deploy_arm_template_core
 from azure.cli.command_modules.storage._factory import storage_client_factory
 from azure.cli.core._config import az_config
@@ -328,68 +329,14 @@ def create_deployment_pipeline(remote_access_token):  # pylint: disable=unused-a
         if current_process:
             current_process.process_stop()
 
-from azure.cli.command_modules.documentdb._client_factory import (
-    cf_documentdb)
-
-from azure.mgmt.sql import SqlManagementClient
-
-
-def _get_reference_type(resource_group, resource_name):
-    """
-    Gets the reference type from the provided
-    resource group and name
-    """
-    instance = None
-    try:
-        docdb_client = cf_documentdb().database_accounts
-        instance = docdb_client.get(resource_group, resource_name)
-        return instance, docdb_client
-    except:
-        pass
-
-    try:
-        sql_client = get_mgmt_service_client(SqlManagementClient).servers
-        instance = sql_client.get(resource_group, resource_name)
-        return instance, sql_client
-    except:
-        pass
-
-    return None, None
-
-
-def _get_environment_var_name(service_name, reference_name):
-    """
-    Gets the environment variable name for a reference
-    """
-    return '{}_{}_url'.format(service_name, reference_name).upper()
-
-
-def _create_connection_string(service_name, reference_name, connection_string):
-    """
-    Creates a secret on Kubernetes that stores
-    the connection string and is labeled with run=service_name
-    """
-    secret_name = '{}-{}'.format(service_name, reference_name)
-    encoded_connection_string = base64.b64encode(bytes(connection_string))
-    environment_variable_name = _get_environment_var_name(
-        service_name, reference_name)
-
-    # Create the secret
-    command = 'kubectl create secret generic {} --from-literal={}={}'.format(
-        secret_name, environment_variable_name, encoded_connection_string)
-    _execute_command(command)
-
-    # Label it with run=service_name
-    label_command = 'kubectl label secret {} run={}'.format(
-        secret_name, service_name)
-    _execute_command(label_command)
-
 
 def add_reference(target_group, target_name, reference_name):
     """
     Adds a reference to an Azure resource
     """
-    instance, client = _get_reference_type(target_group, target_name)
+    service_name = _get_service_name()
+    instance, client = references.get_reference_type(target_group, target_name)
+
     if instance.type == 'Microsoft.DocumentDB/databaseAccounts':
         results = client.list_connection_strings(
             target_group, target_name)
@@ -397,33 +344,17 @@ def add_reference(target_group, target_name, reference_name):
             raise ValueError('No connection strings found')
 
         connection_string = results.connection_strings[0].connection_string
-        service_name = _get_service_name()
-        _create_connection_string(
+        references.create_connection_string(
             service_name, reference_name, connection_string)
-
-    elif instance.type == 'Microsoft.Sql/servers':
+        # Save the reference
+        project_settings.add_reference(
+            service_name, reference_name, instance.type)
+    else:
         raise NotImplementedError()
 
     utils.writeline("Added reference '{}'".format(reference_name))
     utils.writeline('Environment variables: {}'.format(
-        _get_environment_var_name(service_name, reference_name)))
-    # TODO: Save the reference to the projectresources file.
-# "references": [{
-#     "service-name" : "Bikes",
-#     "reference-name": "mymongo",
-#     "type": "DocumentDB"
-# },
-
-    # print(instance.write_locations[0])
-    # keys = client.list_keys(target_group, target_name)
-    # print (keys)
-    # host = '{}.documents.azure.com'.format(target_name)
-    # port = 443
-    # keys = client.list_keys(target_group, target_name)
-    # primary_master_key = keys.primary_readonly_master_key
-    # kubectl create configmap service-a-mymongo
-    # --from-literal=host=mymongo.document.azure.com
-    # --from-literal=port=6380
+        references.get_environment_var_name(service_name, reference_name)))
 
 
 def _deployment_pipelines_exist():
@@ -646,7 +577,7 @@ def _configure_cluster():  # pylint: disable=too-many-statements
         # Removing existing cluster from ~/.ssh/known_hosts
         known_hostname_command = 'ssh-keygen -R {}'.format(
             utils.get_remote_host(dns_prefix, location))
-        _execute_command(known_hostname_command, True)
+        utils.execute_command(known_hostname_command, True)
 
         # SSHClient connection
         ssh_client = SSHConnect(
@@ -673,7 +604,7 @@ def _configure_cluster():  # pylint: disable=too-many-statements
 
         logger.info('\nCreating tenx namespace ... ')
         namespace_command = "kubectl create namespace tenx"
-        _execute_command(namespace_command, True, 10)
+        utils.execute_command(namespace_command, True, 10)
 
         logger.info('\nDeploying ACR credentials in Kubernetes ... ')
         workspace_storage_key = _deploy_secrets_share_k8(
@@ -714,45 +645,45 @@ def _configure_cluster():  # pylint: disable=too-many-statements
             'source ./configagents.sh', True)
 
         logger.info('\nCleaning existing TenX services in cluster ... ')
-        _execute_command(
+        utils.execute_command(
             "kubectl delete -f {}/tenx.tmp.yaml".format(artifacts_path), True)
-        _execute_command(
+        utils.execute_command(
             "kubectl delete -f {}/tenxPrivate.tmp.yaml".format(artifacts_path), True)
-        _execute_command(
+        utils.execute_command(
             "kubectl delete -f {}/tenxServices.yaml -n tenx".format(artifacts_path), True)
-        _execute_command(
+        utils.execute_command(
             "kubectl delete -f {}/tenxPrivateService.yaml -n tenx".format(artifacts_path), True)
-        _execute_command(
+        utils.execute_command(
             "kubectl delete -f {}/tenxConfigService.yaml -n tenx".format(artifacts_path), True)
-        _execute_command(
+        utils.execute_command(
             "kubectl delete -f {}/tenxBuildService.yaml -n tenx".format(artifacts_path), True)
-        _execute_command(
+        utils.execute_command(
             "kubectl delete -f {}/tenxExecService.yaml -n tenx".format(artifacts_path), True)
-        _execute_command(
+        utils.execute_command(
             "kubectl delete -f {}/tenxRsrcService.yaml -n tenx".format(artifacts_path), True)
-        _execute_command(
+        utils.execute_command(
             "kubectl delete -f {}/tenxPublicEndpoint.yaml -n tenx".format(artifacts_path), True)
 
         logger.info('\nDeploying TenX services to K8 cluster ... ')
-        _execute_command(
+        utils.execute_command(
             "kubectl create -f {}/tenx.tmp.yaml".format(artifacts_path), True)
-        _execute_command(
+        utils.execute_command(
             "kubectl create -f {}/tenxPrivate.tmp.yaml".format(artifacts_path), True)
 
         logger.info('\nExposing TenX services from cluster ... ')
-        _execute_command(
+        utils.execute_command(
             "kubectl create -f {}/tenxServices.yaml -n tenx".format(artifacts_path))
-        _execute_command(
+        utils.execute_command(
             "kubectl create -f {}/tenxPrivateService.yaml -n tenx".format(artifacts_path))
-        _execute_command(
+        utils.execute_command(
             "kubectl create -f {}/tenxConfigService.yaml -n tenx".format(artifacts_path))
-        _execute_command(
+        utils.execute_command(
             "kubectl create -f {}/tenxBuildService.yaml -n tenx".format(artifacts_path))
-        _execute_command(
+        utils.execute_command(
             "kubectl create -f {}/tenxExecService.yaml -n tenx".format(artifacts_path))
-        _execute_command(
+        utils.execute_command(
             "kubectl create -f {}/tenxRsrcService.yaml -n tenx".format(artifacts_path))
-        _execute_command(
+        utils.execute_command(
             "kubectl create -f {}/tenxPublicEndpoint.yaml -n tenx".format(artifacts_path))
 
         # Initialize Workspace
@@ -914,7 +845,7 @@ def _install_k8_secret(acr, dns_prefix, client_id, client_secret,
     """
     kubectl_create_delete_command = "kubectl delete secret tenxregkey -n tenx"
     try:
-        _execute_command(kubectl_create_delete_command, True)
+        utils.execute_command(kubectl_create_delete_command, True)
     except Exception:
         logger.debug("Command failed: %s\n", kubectl_create_delete_command)
 
@@ -923,7 +854,7 @@ def _install_k8_secret(acr, dns_prefix, client_id, client_secret,
     -n tenx".format(acr, client_id, client_secret, cluster_user_name,
                     utils.get_remote_host(dns_prefix, location))
     try:
-        _execute_command(kubectl_create_secret_command, True)
+        utils.execute_command(kubectl_create_secret_command, True)
     except Exception:
         logger.debug("Command failed: %s\n", kubectl_create_secret_command)
 
@@ -1023,29 +954,6 @@ def _get_storage_key(resource_group, scf, storage, tries):
         raise CLIError(
             "Can't get storage account key for {}".format(storage))
     return storage_key
-
-
-def _execute_command(command, ignore_failure=False, tries=1):
-    """
-    Executes a command.
-    """
-    retry = 0
-    while retry < tries:
-        utils.write()
-        with Popen(command, shell=True, stdout=PIPE, stderr=PIPE, bufsize=1, universal_newlines=True) as process:
-            for line in process.stdout:
-                logger.info('\n' + line)
-            if ignore_failure:
-                for err in process.stderr:
-                    logger.debug(err)
-
-        if process.returncode == 0:
-            break
-        else:
-            if not ignore_failure:
-                raise CLIError(CalledProcessError(process.returncode, command))
-        sleep(2)
-        retry = retry + 1
 
 
 def _get_command_output(command):
