@@ -88,13 +88,13 @@ with ParametersContext(command='lab secret create') as c:
     c.ignore('unique_identifier')
     c.ignore('tags')
 
-with ParametersContext(command='lab secret update') as c:
-    from .sdk.devtestlabs.models.secret import Secret
-    c.expand('secret', Secret)
-
-    c.ignore('id')
-    c.ignore('location')
-    c.ignore('type')
-    c.ignore('provisioning_state')
-    c.ignore('unique_identifier')
-    c.ignore('tags')
+# with ParametersContext(command='lab secret update') as c:
+#     from .sdk.devtestlabs.models.secret import Secret
+#     c.expand('secret', Secret)
+#
+#     c.ignore('id')
+#     c.ignore('location')
+#     c.ignore('type')
+#     c.ignore('provisioning_state')
+#     c.ignore('unique_identifier')
+#     c.ignore('tags')

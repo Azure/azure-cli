@@ -162,14 +162,14 @@ helps['lab secret create'] = """
                 - name: --value
                   short-summary: Value of the secret
             """
-helps['lab secret update'] = """
-            type: command
-            short-summary: Update a secret in the DevTest Lab.
-            parameters:
-                - name: --lab-name
-                  short-summary: Name of the Lab
-                - name: --name -n
-                  short-summary: Name of the secret
-                - name: --value
-                  short-summary: Value of the secret
-            """
+# helps['lab secret update'] = """
+#             type: command
+#             short-summary: Update a secret in the DevTest Lab.
+#             parameters:
+#                 - name: --lab-name
+#                   short-summary: Name of the Lab
+#                 - name: --name -n
+#                   short-summary: Name of the secret
+#                 - name: --value
+#                   short-summary: Value of the secret
+#             """
