@@ -302,10 +302,11 @@ def validate_authentication_type(namespace, formula=None):
 
     # validate proper arguments supplied based on the authentication type
     if namespace.authentication_type == 'password':
-        if namespace.ssh_key or namespace.generate_ssh_keys:
-            raise ValueError(
-                "incorrect usage for authentication-type 'password': "
-                "[--admin-username USERNAME] --admin-password PASSWORD")
+        password_usage_error = "incorrect usage for authentication-type 'password': " \
+                               "[--admin-username USERNAME] --admin-password PASSWORD | " \
+                               "[--admin-username USERNAME] --saved-secret SECRETNAME"
+        if namespace.ssh_key or namespace.generate_ssh_keys or (namespace.saved_secret and namespace.admin_password):
+            raise ValueError(password_usage_error)
 
         # Respect user's provided saved secret name for password authentication
         if namespace.saved_secret:
@@ -323,8 +324,14 @@ def validate_authentication_type(namespace, formula=None):
         if namespace.os_type != 'Linux':
             raise CLIError("incorrect authentication-type '{}' for os type '{}'".format(
                 namespace.authentication_type, namespace.os_type))
-        if namespace.admin_password:
-            raise ValueError('Admin password cannot be used with SSH authentication type')
+
+        ssh_usage_error = "incorrect usage for authentication-type 'ssh': " \
+                          "[--admin-username USERNAME] | " \
+                          "[--admin-username USERNAME] --ssh-key KEY | " \
+                          "[--admin-username USERNAME] --generate-ssh-keys | " \
+                          "[--admin-username USERNAME] --saved-secret SECRETNAME"
+        if namespace.admin_password or (namespace.saved_secret and (namespace.ssh_key or namespace.generate_ssh_keys)):
+            raise ValueError(ssh_usage_error)
 
         # Respect user's provided saved secret name for ssh authentication
         if namespace.saved_secret:
