@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.0.2 (2017-04-03)
+++++++++++++++++++
+
+* Fix kubectl version, always use latest stable. (#2517)
+* [ACS] Adding support for configuring a default ACS cluster (#2554)
+* [ACS] Provide a short name alias for the orchestrator type flag (#2553)
+
 2.0.1 (2017-03-13)
 ++++++++++++++++++
 
