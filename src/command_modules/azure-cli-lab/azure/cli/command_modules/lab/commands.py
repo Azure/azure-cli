@@ -134,14 +134,8 @@ secret_operations = create_service_adapter(
 with ServiceGroup(__name__, get_devtestlabs_secret_operation,
                   secret_operations) as s:
     with s.group('lab secret') as c:
+        c.command('create', 'create_or_update_resource')
         c.command('show', 'get_resource')
         c.command('list', 'list')
         c.command('delete', 'delete_resource')
-
-
-# Secret Operations Custom Commands
-with ServiceGroup(__name__, get_devtestlabs_secret_operation,
-                  custom_operations) as s:
-    with s.group('lab secret') as c:
-        c.command('create', 'create_or_update_secret')
-        c.command('update', 'create_or_update_secret')
+        c.generic_update_command('update', 'get_resource', 'create_or_update_resource')
