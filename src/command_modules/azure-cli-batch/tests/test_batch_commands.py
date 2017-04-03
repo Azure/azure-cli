@@ -12,7 +12,7 @@ import mock
 from msrest.exceptions import ValidationError, ClientRequestError
 from azure.batch import models, operations, BatchServiceClient
 from azure.batch.batch_auth import SharedKeyCredentials
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 from azure.cli.command_modules.batch import _validators
 from azure.cli.command_modules.batch import _command_type

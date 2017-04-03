@@ -8,7 +8,7 @@
 from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_wait_command
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
 from ._client_factory import * # pylint: disable=wildcard-import, unused-wildcard-import
-from azure.cli.core._util import empty_on_404
+from azure.cli.core.util import empty_on_404
 
 from ._util import (list_network_resource_property,
                     get_network_resource_property_entry,

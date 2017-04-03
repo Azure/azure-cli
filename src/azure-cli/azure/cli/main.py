@@ -9,7 +9,7 @@ import sys
 from azure.cli.core.application import APPLICATION, Configuration
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
-from azure.cli.core._util import (show_version_info_exit, handle_exception)
+from azure.cli.core.util import (show_version_info_exit, handle_exception)
 from azure.cli.core._environment import get_config_dir
 import azure.cli.core.telemetry as telemetry
 

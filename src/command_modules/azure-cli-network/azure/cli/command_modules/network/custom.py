@@ -22,7 +22,7 @@ import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.command_modules.network._client_factory import _network_client_factory
 from azure.cli.command_modules.network._util import _get_property, _set_param
 
@@ -113,7 +113,7 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
                                public_ip_address_type=None, subnet_type=None, validate=False):
     from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
-    from azure.cli.core._util import random_string
+    from azure.cli.core.util import random_string
     from azure.cli.command_modules.network._template_builder import \
         (ArmTemplateBuilder, build_application_gateway_resource, build_public_ip_resource,
          build_vnet_resource)
@@ -521,7 +521,7 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
                          no_wait=False):
     from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
-    from azure.cli.core._util import random_string
+    from azure.cli.core.util import random_string
     from azure.cli.command_modules.network._template_builder import \
         (ArmTemplateBuilder, build_load_balancer_resource, build_public_ip_resource,
          build_vnet_resource)
@@ -1173,7 +1173,7 @@ def create_vpn_connection(client, resource_group_name, connection_name, vnet_gat
     """
     from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
-    from azure.cli.core._util import random_string
+    from azure.cli.core.util import random_string
     from azure.cli.command_modules.network._template_builder import \
         ArmTemplateBuilder, build_vpn_connection_resource
 
@@ -1840,7 +1840,7 @@ def _build_record(data):
 
 # pylint: disable=too-many-statements
 def import_zone(resource_group_name, zone_name, file_name):
-    from azure.cli.core._util import read_file_content
+    from azure.cli.core.util import read_file_content
     import sys
     file_text = read_file_content(file_name)
     zone_obj = parse_zone_file(file_text, zone_name)

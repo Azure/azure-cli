@@ -11,7 +11,8 @@ from azure.mgmt.compute.models import (CachingTypes,
 from azure.mgmt.storage.models import SkuName
 
 from azure.cli.core.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
-from azure.cli.core.commands.validators import get_default_location_from_resource_group
+from azure.cli.core.commands.validators import \
+    (get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.commands.parameters import \
     (location_type, get_one_of_subscription_locations,
      get_resource_name_completion_list, tags_type, file_type, enum_choice_list, ignore_type)
@@ -139,6 +140,9 @@ register_cli_argument('vmss extension image', 'image_name', help='Image name')
 register_cli_argument('vmss extension image', 'orderby', help='The sort to apply on the operation')
 register_cli_argument('vmss extension image', 'top', help='Return top number of records')
 register_cli_argument('vmss extension image', 'version', help='Extension version')
+
+register_cli_argument('vmss extension', 'settings', type=validate_file_or_dict)
+register_cli_argument('vmss extension', 'protected_settings', type=validate_file_or_dict)
 
 for scope in ['vm diagnostics', 'vmss diagnostics']:
     register_cli_argument(scope, 'version', help='version of the diagnostics extension. Will use the latest if not specfied')

@@ -14,7 +14,7 @@ from azure.mgmt.resource.subscriptions.models import (SubscriptionState, Subscri
                                                       SubscriptionPolicies, spendingLimit)
 from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
                                      ServicePrincipalAuth, CLOUD)
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 
 class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-methods

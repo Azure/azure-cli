@@ -12,7 +12,7 @@ import paramiko
 from sshtunnel import SSHTunnelForwarder
 from scp import SCPClient
 
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core.prompting import prompt_pass
 
 

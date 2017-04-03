@@ -5,7 +5,7 @@
 
 import json
 import os
-from azure.cli.core._util import get_file_json, CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core.commands.arm import parse_resource_id
 
 
@@ -15,13 +15,6 @@ def read_content_if_is_file(string_or_file):
         with open(string_or_file, 'r') as f:
             content = f.read()
     return content
-
-
-def load_json(string_or_file_path):
-    if os.path.exists(string_or_file_path):
-        return get_file_json(string_or_file_path)
-    else:
-        return json.loads(string_or_file_path)
 
 
 def _resolve_api_version(provider_namespace, resource_type, parent_path):

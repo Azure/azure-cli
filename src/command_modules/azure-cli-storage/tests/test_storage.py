@@ -14,7 +14,7 @@ from azure.cli.command_modules.storage._factory import NO_CREDENTIALS_ERROR_MESS
 from azure.cli.core.test_utils.vcr_test_base import \
     (VCRTestBase, ResourceGroupVCRTestBase, StorageAccountVCRTestBase,
      JMESPathCheck, NoneCheck, BooleanCheck, StringCheck)
-from azure.cli.core._util import CLIError, random_string
+from azure.cli.core.util import CLIError, random_string
 
 MOCK_ACCOUNT_KEY = '00000000'
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))

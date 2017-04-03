@@ -8,7 +8,7 @@ from azure.cli.core import __version__ as core_version
 from azure.cli.core._profile import Profile, CLOUD
 import azure.cli.core._debug as _debug
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core.application import APPLICATION
 
 logger = azlogging.get_az_logger(__name__)

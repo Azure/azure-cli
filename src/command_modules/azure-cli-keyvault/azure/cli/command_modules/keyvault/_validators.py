@@ -16,7 +16,7 @@ from azure.mgmt.keyvault.models.key_vault_management_client_enums import \
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import parse_resource_id
 from azure.cli.core.commands.validators import validate_tags
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 from azure.keyvault.generated.models.key_vault_client_enums \
     import JsonWebKeyOperation
