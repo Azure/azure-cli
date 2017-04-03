@@ -252,3 +252,23 @@ class Project(object):
                 if entry[git_url]['folder'] == service_folder:
                     return entry[git_url]['pipeline']
         return None
+
+    def add_reference(self, service_name, reference_name, reference_type):
+        """
+        Adds a reference to Azure resource to the settings file
+        """
+        references = []
+        if 'references' in self.settings:
+            references = self.settings['references']
+
+        references.append({'service-name': service_name,
+                           'reference-name': reference_name, 'type': reference_type})
+        self.settings['references'] = references
+        self._save_changes()
+
+    def get_references(self, service_name):
+        """
+        Gets all references for specified service
+        """
+        references = self._get_property_value('references')
+        return [ref for ref in references if ref['service-name'] == service_name]

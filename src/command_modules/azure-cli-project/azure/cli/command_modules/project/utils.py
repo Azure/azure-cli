@@ -8,9 +8,11 @@ import random
 import string
 import sys
 import threading
+from subprocess import PIPE, CalledProcessError, Popen
 from time import sleep
 
 import azure.cli.core.azlogging as azlogging  # pylint: disable=invalid-name
+from azure.cli.core._util import CLIError
 
 logger = azlogging.get_az_logger(__name__)  # pylint: disable=invalid-name
 left = [
@@ -277,6 +279,29 @@ def get_remote_host(dns_prefix, location):
     Provides a remote host according to the passed dns_prefix and location.
     """
     return '{}.{}.cloudapp.azure.com'.format(dns_prefix, location)
+
+
+def execute_command(command, ignore_failure=False, tries=1):
+    """
+    Executes a shell command on a local machine
+    """
+    retry = 0
+    while retry < tries:
+        write()
+        with Popen(command, shell=True, stdout=PIPE, stderr=PIPE, bufsize=1, universal_newlines=True) as process:
+            for line in process.stdout:
+                logger.info('\n' + line)
+            if ignore_failure:
+                for err in process.stderr:
+                    logger.debug(err)
+
+        if process.returncode == 0:
+            break
+        else:
+            if not ignore_failure:
+                raise CLIError(CalledProcessError(process.returncode, command))
+        sleep(2)
+        retry = retry + 1
 
 
 class Process(object):
