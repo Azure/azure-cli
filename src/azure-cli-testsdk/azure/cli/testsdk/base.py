@@ -24,11 +24,12 @@ from .recording_processors import (SubscriptionRecordingProcessor, OAuthRequestR
                                    GeneralNameReplacer, LargeRequestBodyProcessor,
                                    LargeResponseBodyProcessor, LargeResponseBodyReplacer)
 from .utilities import create_random_name
+from .decorators import live_only
 
 
-class LiveTest(unittest.TestCase):
+class IntegrationTestBase(unittest.TestCase):
     def __init__(self, method_name):
-        super(LiveTest, self).__init__(method_name)
+        super(IntegrationTestBase, self).__init__(method_name)
         self.diagnose = os.environ.get(ENV_TEST_DIAGNOSE, None) == 'True'
         self.skip_assert = os.environ.get(ENV_SKIP_ASSERT, None) == 'True'
 
@@ -95,7 +96,12 @@ class LiveTest(unittest.TestCase):
         return os.environ.pop(key, None)
 
 
-class ScenarioTest(LiveTest):  # pylint: disable=too-many-instance-attributes
+@live_only()
+class LiveTest(IntegrationTestBase):
+    pass
+
+
+class ScenarioTest(IntegrationTestBase):  # pylint: disable=too-many-instance-attributes
     FILTER_HEADERS = [
         'authorization',
         'client-request-id',

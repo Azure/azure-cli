@@ -24,14 +24,8 @@ class StorageBlobUploadTests(ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
-    def test_storage_blob_upload_101mb_file(self, resource_group, storage_account):
-        self.verify_blob_upload_and_download(resource_group, storage_account, 101 * 1024, 'block',
-                                             0, skip_download=True)
-
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
-    def test_storage_blob_upload_100mb_file(self, resource_group, storage_account):
-        self.verify_blob_upload_and_download(resource_group, storage_account, 100 * 1024, 'block',
+    def test_storage_blob_upload_128mb_file(self, resource_group, storage_account):
+        self.verify_blob_upload_and_download(resource_group, storage_account, 128 * 1024, 'block',
                                              0, skip_download=True)
 
     @ResourceGroupPreparer()
@@ -39,13 +33,6 @@ class StorageBlobUploadTests(ScenarioTest):
     def test_storage_blob_upload_64mb_file(self, resource_group, storage_account):
         self.verify_blob_upload_and_download(resource_group, storage_account, 64 * 1024, 'block',
                                              0, skip_download=True)
-
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
-    def test_storage_blob_upload_63mb_file(self, resource_group, storage_account):
-        # 64MB is the put request size limit
-        self.verify_blob_upload_and_download(resource_group, storage_account, 63 * 1024, 'block',
-                                             skip_download=True)
 
     def verify_blob_upload_and_download(self, group, account, file_size_kb, blob_type,
                                         block_count=0, skip_download=False):
@@ -127,26 +114,22 @@ class StorageBlobUploadTests(ScenarioTest):
 
 
 class StorageBlobUploadLiveTests(LiveTest):
-    @live_only()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_upload_256mb_file(self, resource_group, storage_account):
         self.verify_blob_upload_and_download(resource_group, storage_account, 256 * 1024, 'block')
 
-    @live_only()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_upload_1G_file(self, resource_group, storage_account):
         self.verify_blob_upload_and_download(resource_group, storage_account, 1024 * 1024, 'block')
 
-    @live_only()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_upload_2G_file(self, resource_group, storage_account):
         self.verify_blob_upload_and_download(resource_group, storage_account, 2 * 1024 * 1024,
                                              'block')
 
-    @live_only()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_upload_10G_file(self, resource_group, storage_account):
