@@ -3,6 +3,14 @@
 Release History
 ===============
 
+2.0.1 (2017-04-03)
+++++++++++++++++++
+
+* role: fix the error when supply role in guid format (#2667)
+* Fix code style of azure-cli-role (#2608)
+* rbac:catch more graph error (#2567)
+* core: support login using service principal with a cert (#2457)
+
 2.0.0 (2017-02-27)
 ++++++++++++++++++
 
