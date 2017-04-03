@@ -51,7 +51,7 @@ class Jenkins(DeployableResource):
         logger.info('Deploying Jenkins...')
         parameters = self._create_params()
         template_url = \
-            'https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/101-jenkins-master-on-ubuntu/azuredeploy.json'
+            'https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/101-jenkins/azuredeploy.json'
         deployment = self.deploy_template(template_url, parameters)
         deployment.add_done_callback(self._deployment_completed)
         return deployment
@@ -250,7 +250,7 @@ class Jenkins(DeployableResource):
             'adminPassword': {
                 'value': self.admin_password
             },
-            'jenkinsDnsLabelPrefix': {
+            'jenkinsDnsPrefix': {
                 'value': self.dns_prefix
             }
         }
