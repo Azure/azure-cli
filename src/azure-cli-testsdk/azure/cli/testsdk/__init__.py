@@ -3,14 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from .base import ScenarioTest
+from .base import ScenarioTest, LiveTest
 from .preparers import StorageAccountPreparer, ResourceGroupPreparer
 from .exceptions import CliTestError
 from .checkers import JMESPathCheck, JMESPathCheckExists, NoneCheck
 from .decorators import live_only
+from .utilities import get_sha1_hash
 
-__all__ = ['ScenarioTest',
+__all__ = ['ScenarioTest', 'LiveTest',
            'ResourceGroupPreparer', 'StorageAccountPreparer',
            'CliTestError',
-           'JMESPathCheck', 'JMESPathCheckExists', 'NoneCheck', 'live_only']
+           'JMESPathCheck', 'JMESPathCheckExists', 'NoneCheck', 'live_only',
+           'get_sha1_hash']
 __version__ = '0.1.0+dev'

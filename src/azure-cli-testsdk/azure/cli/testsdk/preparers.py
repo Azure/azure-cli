@@ -22,17 +22,16 @@ class AbstractPreparer(object):
         self.resource_moniker = None
         self.resource_random_name = None
         self.test_class_instance = None
+        self.live_test = False
 
     def __call__(self, fn):
         def _preparer_wrapper(test_class_instance, **kwargs):
-            if not isinstance(test_class_instance, ScenarioTest):
-                raise CliTestError('The preparer decorator can be only used on the methods of '
-                                   'class derived from {}'.format(ScenarioTest.__name__))
+            self.live_test = not isinstance(test_class_instance, ScenarioTest)
             self.test_class_instance = test_class_instance
 
-            if test_class_instance.in_recording:
+            if self.live_test or test_class_instance.in_recording:
                 resource_name = self.random_name
-                if isinstance(self, RecordingProcessor):
+                if not self.live_test and isinstance(self, RecordingProcessor):
                     test_class_instance.recording_processors.append(self)
             else:
                 resource_name = self.moniker
