@@ -10,10 +10,11 @@ from msrestazure.azure_exceptions import CloudError
 
 from azure.mgmt.keyvault import KeyVaultManagementClient
 from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid_resource_id
-from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from azure.cli.core._util import CLIError, random_string
+from azure.cli.core.commands.validators import \
+    (get_default_location_from_resource_group, validate_file_or_dict)
+from azure.cli.core.util import CLIError, random_string
 from ._client_factory import _compute_client_factory
-from azure.cli.command_modules.vm._vm_utils import check_existence, load_json
+from azure.cli.command_modules.vm._vm_utils import check_existence
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.azlogging as azlogging
 
@@ -95,7 +96,7 @@ def _validate_secrets(secrets, os_type):
     errors = []
 
     try:
-        loaded_secret = [load_json(secret) for secret in secrets]
+        loaded_secret = [validate_file_or_dict(secret) for secret in secrets]
     except Exception as err:
         raise CLIError('Error decoding secrets: {0}'.format(err))
 

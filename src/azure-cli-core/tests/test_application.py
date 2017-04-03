@@ -12,7 +12,7 @@ from six import StringIO
 
 from azure.cli.core.application import Application, Configuration, IterateAction
 from azure.cli.core.commands import CliCommand
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 
 class TestApplication(unittest.TestCase):

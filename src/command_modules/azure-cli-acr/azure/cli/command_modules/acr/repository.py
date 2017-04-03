@@ -7,7 +7,7 @@ import json
 import requests
 
 from azure.cli.core.prompting import prompt, prompt_pass, NoTTYException
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 from ._utils import (
     get_registry_by_name

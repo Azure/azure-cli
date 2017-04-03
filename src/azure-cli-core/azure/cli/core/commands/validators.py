@@ -50,6 +50,16 @@ def get_default_location_from_resource_group(namespace):
         namespace.location = rg.location  # pylint: disable=no-member
 
 
+def validate_file_or_dict(string):
+    import os
+    if os.path.exists(string):
+        from azure.cli.core.util import get_file_json
+        return get_file_json(string)
+    else:
+        from azure.cli.core.util import shell_safe_json_parse
+        return shell_safe_json_parse(string)
+
+
 SPECIFIED_SENTINEL = '__SET__'
 
 

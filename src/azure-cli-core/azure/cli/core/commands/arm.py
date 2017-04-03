@@ -5,7 +5,6 @@
 
 import argparse
 import re
-import json
 from six import string_types
 
 from azure.cli.core.commands import (CliCommand,
@@ -16,7 +15,7 @@ from azure.cli.core.commands._introspection import extract_args_from_signature
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.application import APPLICATION, IterateValue
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._util import CLIError, todict
+from azure.cli.core.util import CLIError, todict, shell_safe_json_parse
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -498,7 +497,7 @@ def set_properties(instance, expression):
     key, value = _split_key_value_pair(expression)
 
     try:
-        value = json.loads(value)
+        value = shell_safe_json_parse(value)
     except:  # pylint:disable=bare-except
         pass
 
@@ -530,7 +529,7 @@ def set_properties(instance, expression):
             setattr(instance, name, value)
     except IndexError:
         raise CLIError('index {} doesn\'t exist on {}'.format(index_value, name))
-    except (AttributeError, KeyError):
+    except (AttributeError, KeyError, TypeError):
         show_options(instance, name, key.split('.'))
 
 
@@ -563,7 +562,7 @@ def add_properties(instance, argument_values):
 
             # attempt to convert anything else to JSON and fallback to string if error
             try:
-                argument = json.loads(argument)
+                argument = shell_safe_json_parse(argument)
             except ValueError:
                 pass
             list_to_add_to.append(argument)
@@ -668,7 +667,7 @@ def _update_instance(instance, part, path):
             if '=' in index.group(1):
                 key, value = index.group(1).split('=', 1)
                 try:
-                    value = json.loads(value)
+                    value = shell_safe_json_parse(value)
                 except:  # pylint: disable=bare-except
                     pass
                 matches = []

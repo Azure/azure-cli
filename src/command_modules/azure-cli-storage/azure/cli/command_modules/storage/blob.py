@@ -8,7 +8,7 @@ import os.path
 from collections import namedtuple
 from azure.common import AzureException
 
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core.azlogging import get_az_logger
 from azure.cli.command_modules.storage.util import (create_blob_service_from_storage_client,
                                                     create_file_share_from_storage_client,

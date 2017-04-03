@@ -509,7 +509,7 @@ class AzureBatchDataPlaneCommand(object):
             from msrest.paging import Paged
             from msrest.exceptions import ValidationError, ClientRequestError
             from azure.batch.models import BatchErrorException
-            from azure.cli.core._util import CLIError
+            from azure.cli.core.util import CLIError
             from azure.cli.core._config import az_config
             from azure.cli.core.commands import _user_confirmed
 

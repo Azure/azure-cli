@@ -17,7 +17,7 @@ import adal
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
-from azure.cli.core._util import CLIError, get_file_json
+from azure.cli.core.util import CLIError, get_file_json
 from azure.cli.core.adal_authentication import AdalAuthentication
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 

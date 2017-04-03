@@ -21,7 +21,7 @@ from azure.mgmt.resource.links.models import ResourceLinkProperties
 
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int
-from azure.cli.core._util import CLIError, get_file_json
+from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
@@ -157,7 +157,7 @@ def _prompt_for_parameters(missing_parameters):
 def _merge_parameters(parameter_list):
     parameters = None
     for params in parameter_list or []:
-        params_object = json.loads(params)
+        params_object = shell_safe_json_parse(params)
         if params_object:
             params_object = params_object.get('parameters', params_object)
         if parameters is None:
@@ -454,7 +454,7 @@ def create_policy_definition(name, rules, display_name=None, description=None):
     if os.path.exists(rules):
         rules = get_file_json(rules)
     else:
-        rules = json.loads(rules)
+        rules = shell_safe_json_parse(rules)
 
     policy_client = _resource_policy_client_factory()
     parameters = PolicyDefinition(policy_rule=rules, description=description,
@@ -467,7 +467,7 @@ def update_policy_definition(policy_definition_name, rules=None,
         if os.path.exists(rules):
             rules = get_file_json(rules)
         else:
-            rules = json.loads(rules)
+            rules = shell_safe_json_parse(rules)
 
     policy_client = _resource_policy_client_factory()
     definition = policy_client.policy_definitions.get(policy_definition_name)

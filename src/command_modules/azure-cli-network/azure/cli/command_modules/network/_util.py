@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import sys
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from ._client_factory import _network_client_factory
 
 def _get_property(items, name):

@@ -12,7 +12,7 @@ import os
 import time
 import unittest
 
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck,
                                                      NoneCheck)
 

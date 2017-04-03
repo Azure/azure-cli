@@ -40,7 +40,7 @@ def execute(cmd):
 
 
 def exec_json(cmd):
-    json.loads(execute(cmd))
+    shell_safe_json_parse(execute(cmd))
 
 
 class SearchIndexTest(unittest.TestCase):

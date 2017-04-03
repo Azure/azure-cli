@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands.arm import is_valid_resource_id, resource_id, parse_resource_id
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 
 # pylint: disable=line-too-long

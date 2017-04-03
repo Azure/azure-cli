@@ -25,7 +25,7 @@ from azure.cli.command_modules.storage._validators import \
      create_boolean_result_output_transformer)
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
-from azure.cli.core._util import empty_on_404
+from azure.cli.core.util import empty_on_404
 
 mgmt_path = 'azure.mgmt.storage.operations.storage_accounts_operations#StorageAccountsOperations.'
 custom_path = 'azure.cli.command_modules.storage.custom#'

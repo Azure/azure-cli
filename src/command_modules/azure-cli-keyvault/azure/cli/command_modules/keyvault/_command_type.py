@@ -16,7 +16,7 @@ from azure.cli.core.commands import (command_table,
 from azure.cli.core.commands._introspection import \
     (extract_full_summary_from_signature, extract_args_from_signature)
 
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 def _encode_hex(item):
     """ Recursively crawls the object structure and converts bytes or bytearrays to base64
