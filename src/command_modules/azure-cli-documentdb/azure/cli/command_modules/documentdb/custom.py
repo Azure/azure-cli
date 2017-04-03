@@ -3,14 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# --locations
-# -ipRangeFilter
-# -defaultConsistencyLevel
-# - MaxIntervalInSeconds
-# - MaxStalenessPrefix
-# - resource-group-location
-# -Kind
-
 from azure.mgmt.documentdb.models import (
     ConsistencyPolicy,
     DatabaseAccountCreateUpdateParameters,

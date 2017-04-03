@@ -569,10 +569,9 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
                  .format(rg, server),
                  checks=[
                      JMESPathCheck('length(@)', 2),  # includes dw and master
-                     JMESPathCheck('[1].name', 'master'),
-                     JMESPathCheck('[1].resourceGroup', rg),
-                     JMESPathCheck('[0].name', database_name),
-                     JMESPathCheck('[0].resourceGroup', rg)])
+                     JMESPathCheck('sort([].name)', sorted([database_name, 'master'])),
+                     JMESPathCheck('[0].resourceGroup', rg),
+                     JMESPathCheck('[1].resourceGroup', rg)])
 
         self.cmd('sql dw list -g {} --server {}'
                  .format(rg, server),

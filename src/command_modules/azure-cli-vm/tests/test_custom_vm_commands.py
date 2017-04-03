@@ -262,7 +262,7 @@ class Test_Vm_Custom(unittest.TestCase):
         with self.assertRaises(CLIError) as context:
             disable('rg1', 'vm1', 'DATA')
 
-        self.assertTrue("Disabling encryption on data disk can still cause VM unbootable" in str(context.exception))
+        self.assertTrue("Disabling encryption on data disk can render the VM unbootable" in str(context.exception))
 
         # works fine to disable encryption on daat disk when OS disk is never encrypted
         vm_extension.instance_view.substatuses[0].message = '{}'

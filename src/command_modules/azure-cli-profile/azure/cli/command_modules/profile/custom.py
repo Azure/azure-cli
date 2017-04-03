@@ -19,13 +19,18 @@ def load_subscriptions(all_clouds=False):
     return subscriptions
 
 
-def list_subscriptions(all_clouds=False):  # pylint: disable=redefined-builtin
+def list_subscriptions(all=False):  # pylint: disable=redefined-builtin
     """List the imported subscriptions."""
-    subscriptions = load_subscriptions(all_clouds)
+    subscriptions = load_subscriptions(all_clouds=all)
     if not subscriptions:
         logger.warning('Please run "az login" to access your accounts.')
     for sub in subscriptions:
         sub['cloudName'] = sub.pop('environmentName', None)
+    if not all:
+        enabled_ones = [s for s in subscriptions if s['state'] == 'Enabled']
+        if len(enabled_ones) != len(subscriptions):
+            logger.warning("A few accounts are skipped as they don't have 'Enabled' state. Use '--all' to display them.")  # pylint: disable=line-too-long
+            subscriptions = enabled_ones
     return subscriptions
 
 

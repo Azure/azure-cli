@@ -106,7 +106,6 @@ def validate_cert(namespace):
     params = [namespace.cert_data, namespace.cert_password]
     if all([not x for x in params]):
         # no cert supplied -- use HTTP
-        namespace.http_listener_protocol = 'http'
         if not namespace.frontend_port:
             namespace.frontend_port = 80
     else:
@@ -122,7 +121,6 @@ def validate_cert(namespace):
             # change default to frontend port 443 for https
             if not namespace.frontend_port:
                 namespace.frontend_port = 443
-            namespace.http_listener_protocol = 'https'
         except AttributeError:
             # app-gateway ssl-cert create does not have these fields and that is okay
             pass
@@ -226,6 +224,7 @@ def get_subnet_validator(has_type_field=False, allow_none=False, allow_new=False
                 child_name=namespace.subnet)
 
     def complex_validator_with_type(namespace):
+
         get_folded_parameter_validator(
             'subnet', 'subnets', '--subnet',
             'virtual_network_name', 'Microsoft.Network/virtualNetworks', '--vnet-name',
@@ -260,9 +259,9 @@ def validate_servers(namespace):
     for item in namespace.servers if namespace.servers else []:
         try:
             socket.inet_aton(item) #pylint:disable=no-member
-            servers.append(ApplicationGatewayBackendAddress(ip_address=item))
+            servers.append({'ipAddress':item})
         except socket.error: #pylint:disable=no-member
-            servers.append(ApplicationGatewayBackendAddress(fqdn=item))
+            servers.append({'fqdn':item})
     namespace.servers = servers
 
 def get_virtual_network_validator(has_type_field=False, allow_none=False, allow_new=False,
@@ -350,6 +349,8 @@ def process_ag_url_path_map_rule_create_namespace(namespace): # pylint: disable=
 
 def process_ag_create_namespace(namespace):
 
+    get_default_location_from_resource_group(namespace)
+
     # process folded parameters
     if namespace.subnet or namespace.virtual_network_name:
         get_subnet_validator(has_type_field=True, allow_new=True)(namespace)
@@ -371,13 +372,6 @@ def process_ag_create_namespace(namespace):
     if namespace.public_ip_address:
         get_public_ip_validator(
             has_type_field=True, allow_none=True, allow_new=True, default_none=True)(namespace)
-        namespace.frontend_type = 'publicIp'
-    else:
-        namespace.frontend_type = 'privateIp'
-        namespace.private_ip_address_allocation = 'Static' if namespace.private_ip_address \
-            else 'Dynamic'
-
-    namespace.sku_tier = namespace.sku_name.split('_', 1)[0]
 
     validate_cert(namespace)
 
@@ -386,6 +380,8 @@ def process_auth_create_namespace(namespace):
     namespace.authorization_parameters = ExpressRouteCircuitAuthorization()
 
 def process_lb_create_namespace(namespace):
+
+    get_default_location_from_resource_group(namespace)
 
     if namespace.subnet and namespace.public_ip_address:
         raise ValueError(
@@ -397,23 +393,18 @@ def process_lb_create_namespace(namespace):
         get_subnet_validator(
             has_type_field=True, allow_new=True, allow_none=True, default_none=True)(namespace)
 
-        validate_private_ip_address(namespace)
-
-        namespace.public_ip_address_type = 'none'
+        namespace.public_ip_address_type = None
         namespace.public_ip_address = None
 
     else:
         # validation for internet facing load balancer
         get_public_ip_validator(has_type_field=True, allow_none=True, allow_new=True)(namespace)
 
-        if namespace.public_ip_dns_name:
-            if namespace.public_ip_address_type != 'new':
-                raise CLIError(
-                    'specify --public-ip-dns-name only if creating a new public IP address.')
-            else:
-                namespace.dns_name_type = 'new'
+        if namespace.public_ip_dns_name and namespace.public_ip_address_type != 'new':
+            raise CLIError(
+                'specify --public-ip-dns-name only if creating a new public IP address.')
 
-        namespace.subnet_type = 'none'
+        namespace.subnet_type = None
         namespace.subnet = None
         namespace.virtual_network_name = None
 

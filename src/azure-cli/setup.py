@@ -58,6 +58,8 @@ DEPENDENCIES = [
     'azure-cli-find',
     'azure-cli-iot',
     'azure-cli-keyvault',
+    'azure-cli-lab',
+    'azure-cli-monitor',
     'azure-cli-network',
     'azure-cli-nspkg',
     'azure-cli-profile',

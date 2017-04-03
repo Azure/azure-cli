@@ -25,5 +25,5 @@ register_cli_argument('login', 'tenant', options_list=('--tenant', '-t'), help='
 register_cli_argument('logout', 'username', help='account user, if missing, logout the current active account')
 
 register_cli_argument('account', 'subscription', help='Name or ID of subscription.', completer=get_subscription_id_list)
-register_cli_argument('account list', 'all_clouds', options_list=('--all',), help='List all subscriptions across all cloud environments', action='store_true')
+register_cli_argument('account list', 'all', help="List all subscriptions, rather just 'Enabled' ones", action='store_true')
 register_cli_argument('account show', 'expanded_view', action='store_true', help="display more information like service principal's password and cloud environments")

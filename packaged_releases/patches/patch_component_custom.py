@@ -7,7 +7,9 @@ from azure.cli.core._util import CLIError
 
 MSG_TMPL = """
 az component and subcommands are not available with the current Azure CLI installation.
-If installed with apt-get, please use apt-get to update this installation.
+If installed with apt-get, please use 'apt-get update' to update this installation.
+If installed with Docker, please use 'docker pull' to update this installation.
+If installed with Windows MSI, download the new MSI to update this installation.
 {}
 """
 

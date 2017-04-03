@@ -8,6 +8,7 @@
 from __future__ import print_function
 import json
 import os
+import re
 import uuid
 
 from azure.mgmt.resource.resources import ResourceManagementClient
@@ -153,18 +154,27 @@ def _prompt_for_parameters(missing_parameters):
                 break
     return {}
 
+def _merge_parameters(parameter_list):
+    parameters = None
+    for params in parameter_list or []:
+        params_object = json.loads(params)
+        if params_object:
+            params_object = params_object.get('parameters', params_object)
+        if parameters is None:
+            parameters = params_object
+        else:
+            parameters.update(params_object)
+    return parameters
+
 def _deploy_arm_template_core(resource_group_name, template_file=None, template_uri=None,
-                              deployment_name=None, parameters=None, mode='incremental',
+                              deployment_name=None, parameter_list=None, mode='incremental',
                               validate_only=False, no_wait=False):
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
 
     if bool(template_uri) == bool(template_file):
         raise CLIError('please provide either template file path or uri, but not both')
 
-    if parameters:
-        parameters = json.loads(parameters)
-        if parameters:
-            parameters = parameters.get('parameters', parameters)
+    parameters = _merge_parameters(parameter_list)
 
     template = None
     template_link = None
@@ -211,6 +221,16 @@ def delete_resource(resource_group_name=None, resource_provider_namespace=None,
                          parent_resource_path, resource_type, resource_name,
                          resource_id, api_version)
     return res.delete()
+
+
+def update_resource(parameters, resource_group_name=None, resource_provider_namespace=None,
+                    parent_resource_path=None, resource_type=None, resource_name=None,
+                    resource_id=None, api_version=None):
+    res = _ResourceUtils(resource_group_name, resource_provider_namespace,
+                         parent_resource_path, resource_type, resource_name,
+                         resource_id, api_version)
+    return res.update(parameters)
+
 
 def tag_resource(tags, resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None,
@@ -260,9 +280,16 @@ def _list_resources_odata_filter_builder(resource_group_name=None,
         if resource_provider_namespace:
             f = "'{}/{}'".format(resource_provider_namespace, resource_type)
         else:
+            if not re.match('[^/]+/[^/]+', resource_type):
+                raise CLIError(
+                    'Malformed resource-type: '
+                    '--resource-type=<namespace>/<resource-type> expected.')
             #assume resource_type is <namespace>/<type>. The worst is to get a server error
             f = "'{}'".format(resource_type)
         filters.append("resourceType eq " + f)
+    else:
+        if resource_provider_namespace:
+            raise CLIError('--namespace also requires --resource-type')
 
     if tag:
         if name or location:
@@ -686,6 +713,20 @@ class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
                                              self.resource_type,
                                              self.resource_name,
                                              self.api_version)
+
+    def update(self, parameters):
+        if self.resource_id:
+            return self.rcf.resources.create_or_update_by_id(self.resource_id,
+                                                             self.api_version,
+                                                             parameters)
+        else:
+            return self.rcf.resources.create_or_update(self.resource_group_name,
+                                                       self.resource_provider_namespace,
+                                                       self.parent_resource_path or '',
+                                                       self.resource_type,
+                                                       self.resource_name,
+                                                       self.api_version,
+                                                       parameters)
 
     def tag(self, tags):
         resource = self.get_resource()
