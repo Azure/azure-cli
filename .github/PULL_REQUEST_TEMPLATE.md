@@ -2,7 +2,7 @@ This checklist is used to make sure that common guidelines for a pull request ar
 
 ### General Guidelines
 
-- [ ] The PR has modified HISTORY.rst with an appropriate description of the change.
+- [ ] The PR has modified HISTORY.rst with an appropriate description of the change (see [Modifying change log](https://github.com/Azure/azure-cli/tree/master/doc/authoring_command_modules#modify-change-log)).
 
 ### Command Guidelines
 
