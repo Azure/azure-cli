@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.0.2 (2017-04-03)
+++++++++++++++++++
+
+* Update storage dependencies (#2654)
+
 2.0.1 (2017-03-02)
 ++++++++++++++++++
 * Fix issue with storage account custom domain setting and updating. (#2346)
