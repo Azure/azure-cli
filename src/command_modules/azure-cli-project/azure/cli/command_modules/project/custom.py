@@ -333,6 +333,12 @@ def create_deployment_pipeline(remote_access_token):  # pylint: disable=unused-a
 def add_reference(target_group, target_name, reference_name):
     """
     Adds a reference to an Azure resource
+    :param target_group: Azure resource group name that contains the Azure resource
+    :type target_group: String
+    :param target_name: Azure resource name
+    :type target_name: String
+    :param reference_name: Name of the reference
+    :type reference_name: String
     """
     service_name = _get_service_name()
     instance, client = references.get_reference_type(target_group, target_name)
