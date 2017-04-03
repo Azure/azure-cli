@@ -24,9 +24,84 @@ from .recording_processors import (SubscriptionRecordingProcessor, OAuthRequestR
                                    GeneralNameReplacer, LargeRequestBodyProcessor,
                                    LargeResponseBodyProcessor, LargeResponseBodyReplacer)
 from .utilities import create_random_name
+from .decorators import live_only
 
 
-class ScenarioTest(unittest.TestCase):  # pylint: disable=too-many-instance-attributes
+class IntegrationTestBase(unittest.TestCase):
+    def __init__(self, method_name):
+        super(IntegrationTestBase, self).__init__(method_name)
+        self.diagnose = os.environ.get(ENV_TEST_DIAGNOSE, None) == 'True'
+        self.skip_assert = os.environ.get(ENV_SKIP_ASSERT, None) == 'True'
+
+    def cmd(self, command, checks=None):
+        if self.diagnose:
+            begin = datetime.datetime.now()
+            print('\nExecuting command: {}'.format(command))
+
+        result = execute(command)
+
+        if self.diagnose:
+            duration = datetime.datetime.now() - begin
+            print('\nCommand accomplished in {} s. Exit code {}.\n{}'.format(
+                duration.total_seconds(), result.exit_code, result.output))
+
+        if not checks:
+            checks = []
+        elif not isinstance(checks, list):
+            checks = [checks]
+
+        if not self.skip_assert:
+            for c in checks:
+                c(result)
+
+        return result
+
+    def create_random_name(self, prefix, length):  # for override pylint: disable=no-self-use
+        return create_random_name(prefix, length)
+
+    def create_temp_file(self, size_kb, full_random=False):
+        """
+        Create a temporary file for testing. The test harness will delete the file during tearing
+        down.
+        """
+        _, path = tempfile.mkstemp()
+        self.addCleanup(lambda: os.remove(path))
+
+        with open(path, mode='r+b') as f:
+            if full_random:
+                chunk = os.urandom(1024)
+            else:
+                chunk = bytearray([0] * 1024)
+            for _ in range(size_kb):
+                f.write(chunk)
+
+        return path
+
+    def create_temp_dir(self):
+        """
+        Create a temporary directory for testing. The test harness will delete the directory during
+        tearing down.
+        """
+        temp_dir = tempfile.mkdtemp()
+        self.addCleanup(lambda: shutil.rmtree(temp_dir, ignore_errors=True))
+
+        return temp_dir
+
+    @classmethod
+    def set_env(cls, key, val):
+        os.environ[key] = val
+
+    @classmethod
+    def pop_env(cls, key):
+        return os.environ.pop(key, None)
+
+
+@live_only()
+class LiveTest(IntegrationTestBase):
+    pass
+
+
+class ScenarioTest(IntegrationTestBase):  # pylint: disable=too-many-instance-attributes
     FILTER_HEADERS = [
         'authorization',
         'client-request-id',
@@ -67,8 +142,6 @@ class ScenarioTest(unittest.TestCase):  # pylint: disable=too-many-instance-attr
         if live_test and os.path.exists(self.recording_file):
             os.remove(self.recording_file)
 
-        self.diagnose = os.environ.get(ENV_TEST_DIAGNOSE, None) == 'True'
-        self.skip_assert = os.environ.get(ENV_SKIP_ASSERT, None) == 'True'
         self.in_recording = live_test or not os.path.exists(self.recording_file)
         self.test_resources_count = 0
         self.original_env = os.environ.copy()
@@ -102,62 +175,6 @@ class ScenarioTest(unittest.TestCase):  # pylint: disable=too-many-instance-attr
             return name
         else:
             return moniker
-
-    def cmd(self, command, checks=None):
-        if self.diagnose:
-            begin = datetime.datetime.now()
-            print('\nExecuting command: {}'.format(command))
-
-        result = execute(command)
-
-        if self.diagnose:
-            duration = datetime.datetime.now() - begin
-            print('\nCommand accomplished in {} s. Exit code {}.\n{}'.format(
-                duration.total_seconds(), result.exit_code, result.output))
-
-        if not checks:
-            checks = []
-        elif not isinstance(checks, list):
-            checks = [checks]
-
-        if not self.skip_assert:
-            for c in checks:
-                c(result)
-
-        return result
-
-    def create_temp_file(self, size_kb):
-        """
-        Create a temporary file for testing. The test harness will delete the file during tearing
-        down.
-        """
-        _, path = tempfile.mkstemp()
-        self.addCleanup(lambda: os.remove(path))
-
-        with open(path, mode='r+b') as f:
-            chunk = bytearray([0] * 1024)
-            for _ in range(size_kb):
-                f.write(chunk)
-
-        return path
-
-    def create_temp_dir(self):
-        """
-        Create a temporary directory for testing. The test harness will delete the directory during
-        tearing down.
-        """
-        temp_dir = tempfile.mkdtemp()
-        self.addCleanup(lambda: shutil.rmtree(temp_dir, ignore_errors=True))
-
-        return temp_dir
-
-    @classmethod
-    def set_env(cls, key, val):
-        os.environ[key] = val
-
-    @classmethod
-    def pop_env(cls, key):
-        return os.environ.pop(key, None)
 
     def _process_request_recording(self, request):
         if self.in_recording:
