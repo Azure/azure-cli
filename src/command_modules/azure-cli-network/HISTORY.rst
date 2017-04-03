@@ -3,6 +3,14 @@
 Release History
 ===============
 
+2.0.2 (2017-04-03)
+++++++++++++++++++
+
+* [Network] Convert Load Balancer and App Gateway Create to Dynamic Templates (#2668)
+* Fix format bug. (#2549)
+* Add wait commands and --no-wait support (#2524)
+* [KeyVault] Command fixes (#2474)
+
 2.0.1 (2017-03-13)
 ++++++++++++++++++
 
