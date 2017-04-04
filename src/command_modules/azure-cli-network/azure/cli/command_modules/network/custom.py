@@ -1885,7 +1885,7 @@ def import_zone(resource_group_name, zone_name, file_name):
                 record_set = record_sets.get(record_set_key, None)
                 if not record_set:
                     record_set = RecordSet(
-                        name=record_set_name.rstrip('.'), type=record_set_type, ttl=record_set_ttl)
+                        name=record_set_name, type=record_set_type, ttl=record_set_ttl)
                     record_sets[record_set_key] = record_set
                 _add_record(record_set, record, record_set_type,
                             is_list=record_set_type.lower() not in ['soa', 'cname'])
