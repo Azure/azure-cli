@@ -551,7 +551,7 @@ def delete_lock(name, resource_group_name=None, resource_provider_namespace=None
     if resource_type is None:
         raise CLIError('--resource-type is required if --resource-name is present')
     return lock_client.management_locks.delete_at_resource_level(
-        resource_group_name, resource_provider_namespace, parent_resource_path, resource_type,
+        resource_group_name, resource_provider_namespace, parent_resource_path or '', resource_type,
         resource_name, name)
 
 def create_lock(name, resource_group_name=None, resource_provider_namespace=None,
@@ -586,7 +586,7 @@ def create_lock(name, resource_group_name=None, resource_provider_namespace=None
     if resource_type is None:
         raise CLIError('--resource-type is required if --resource-name is present')
     return lock_client.management_locks.create_or_update_at_resource_level(
-        resource_group_name, resource_provider_namespace, parent_resource_path, resource_type,
+        resource_group_name, resource_provider_namespace, parent_resource_path or '', resource_type,
         resource_name, name, parameters)
 
 def _update_lock_parameters(parameters, level, notes, lock_id, lock_type):
