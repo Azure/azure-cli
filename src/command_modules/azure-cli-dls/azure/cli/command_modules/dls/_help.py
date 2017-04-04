@@ -229,6 +229,11 @@ helps['dls fs access'] = """
     short-summary: Commands to manage a Data Lake Store filesystem access and permissions.
 """
 
+helps['dls fs access show'] = """
+    type: command
+    short-summary: Displays the ACL for a given file or folder
+"""
+
 helps['dls fs access set-owner'] = """
     type: command
     short-summary: Sets the owner and or owning group for the file or folder in the Data Lake Store account.
