@@ -134,9 +134,19 @@ $ az example --my-required-arg abc
 Testing
 -------
 
+Run all tests in a module:
+
 ```
-python -m unittest discover -s <path_to_your_command_module>/azure/cli/command_modules/<module_name>/tests
+python -m unittest discover -s <path_to_your_command_module>/tests
 ```
+
+Run an individual test:
+
+```
+python <path_to_your_command_module>/<file> <class name>
+```
+For example `python src/command_modules/azure-cli-appservice/tests/test_webapp_commands.py WebappBasicE2ETest`
+
 
 ```
 pylint -r n <path_to_your_command_module>/azure
