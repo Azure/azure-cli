@@ -259,7 +259,7 @@ def dcos_install_cli(install_location=None, client_version='1.8'):
     else:
         raise CLIError('Proxy server ({}) does not exist on the cluster.'.format(system))
 
-    logger.info('Downloading client to %s', install_location)
+    logger.warning('Downloading client to %s', install_location)
     try:
         urlretrieve(file_url, install_location)
         os.chmod(install_location,
@@ -290,7 +290,7 @@ def k8s_install_cli(client_version='latest', install_location=None):
     else:
         raise CLIError('Proxy server ({}) does not exist on the cluster.'.format(system))
 
-    logger.info('Downloading client to %s from %s', install_location, file_url)
+    logger.warning('Downloading client to %s from %s', install_location, file_url)
     try:
         urlretrieve(file_url, install_location)
         os.chmod(install_location,
