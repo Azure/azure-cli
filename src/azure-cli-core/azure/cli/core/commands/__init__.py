@@ -187,7 +187,7 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
         self.name = name
         self.handler = handler
         self.help = None
-        self.description = description_loader() \
+        self.description = description_loader \
             if description_loader and CliCommand._should_load_description() \
             else description
         self.arguments = {}
