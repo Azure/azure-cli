@@ -76,6 +76,6 @@ with ParametersContext(command='lab secret') as c:
     from .sdk.devtestlabs.models.secret import Secret
 
     c.register_alias('name', ('--name', '-n'))
+    c.register_alias('secret', ('--value', ), type=lambda x: Secret(value=x))
     c.ignore('user_name')
     c.argument('lab_name', validator=validate_user_name)
-    c.argument('secret', type=lambda x: Secret(value=x))

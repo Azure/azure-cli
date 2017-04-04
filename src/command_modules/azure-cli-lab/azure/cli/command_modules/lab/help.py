@@ -159,7 +159,7 @@ helps['lab secret create'] = """
                   short-summary: Name of the Lab
                 - name: --name -n
                   short-summary: Name of the secret
-                - name: --secret
+                - name: --value
                   short-summary: Value of the secret
             """
 helps['lab secret update'] = """
@@ -170,6 +170,6 @@ helps['lab secret update'] = """
                   short-summary: Name of the Lab
                 - name: --name -n
                   short-summary: Name of the secret
-                - name: --secret
+                - name: --value
                   short-summary: Value of the secret
             """
