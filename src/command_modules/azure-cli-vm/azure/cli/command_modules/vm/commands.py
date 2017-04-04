@@ -76,10 +76,10 @@ def transform_av_set_output(av_set):
 
 
 def transform_av_set_collection_output(av_sets):
-    # workaround till compute api version gets to 2017-04-30
+    av_sets = list(av_sets)
     for av_set in av_sets:
         transform_av_set_output(av_set)
-    return list(av_sets)  # convert SDK paged object to a plain list to display
+    return av_sets
 
 
 op_var = 'virtual_machines_operations'
