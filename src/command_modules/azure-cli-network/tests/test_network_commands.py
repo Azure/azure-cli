@@ -1130,7 +1130,7 @@ class NetworkActiveActiveCrossPremiseScenarioTest(ResourceGroupVCRTestBase): # p
         shared_key = 'abc123'
 
         # create the vnet gateway with active-active feature
-        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --sku HighPerformance --asn {} --public-ip-addresses {} {} --active-active'.format(rg, gw1, vnet1, vnet1_asn, self.gw_ip1, self.gw_ip2))
+        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --sku HighPerformance --asn {} --public-ip-addresses {} {}'.format(rg, gw1, vnet1, vnet1_asn, self.gw_ip1, self.gw_ip2))
 
         # create and connect first local-gateway
         self.cmd('network local-gateway create -g {} -n {} -l {} --gateway-ip-address {} --local-address-prefixes {} --asn {} --bgp-peering-address {}'.format(rg, lgw2, lgw_loc, lgw_ip, lgw_prefix, lgw_asn, bgp_peer1))
@@ -1188,12 +1188,12 @@ class NetworkActiveActiveVnetVnetScenarioTest(ResourceGroupVCRTestBase): # pylin
         vnet1 = self.vnet1
         vnet1_asn = 65010
         gw1 = 'vgw1'
-        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --sku HighPerformance --asn {} --public-ip-addresses {} {} --active-active --no-wait'.format(rg, gw1, vnet1, vnet1_asn, self.gw1_ip1, self.gw1_ip2))
+        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --sku HighPerformance --asn {} --public-ip-addresses {} {} --no-wait'.format(rg, gw1, vnet1, vnet1_asn, self.gw1_ip1, self.gw1_ip2))
 
         vnet2 = self.vnet2
         vnet2_asn = 65020
         gw2 = 'vgw2'
-        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --sku HighPerformance --asn {} --public-ip-addresses {} {} --active-active --no-wait'.format(rg, gw2, vnet2, vnet2_asn, self.gw2_ip1, self.gw2_ip2))
+        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --sku HighPerformance --asn {} --public-ip-addresses {} {} --no-wait'.format(rg, gw2, vnet2, vnet2_asn, self.gw2_ip1, self.gw2_ip2))
 
         # wait for gateway completion to finish
         self.cmd('network vnet-gateway wait -g {} -n {} --created'.format(rg, gw1))

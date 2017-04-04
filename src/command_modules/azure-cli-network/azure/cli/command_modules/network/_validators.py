@@ -530,10 +530,27 @@ def process_vnet_create_namespace(namespace):
 def process_vnet_gateway_create_namespace(namespace):
     ns = namespace
     get_default_location_from_resource_group(ns)
+    get_virtual_network_validator()(ns)
+
+    get_public_ip_validator()(ns)
+    public_ip_count = len(ns.public_ip_address or [])
+    if public_ip_count > 2:
+        raise CLIError('Specify a single public IP to create an active-standby gateway or two '
+                       'public IPs to create an active-active gateway.')
+
     enable_bgp = any([ns.asn, ns.bgp_peering_address, ns.peer_weight])
     if enable_bgp and not ns.asn:
         raise ValueError(
             'incorrect usage: --asn ASN [--peer-weight WEIGHT --bgp-peering-address IP ]')
+
+def process_vnet_gateway_update_namespace(namespace):
+    ns = namespace
+    get_virtual_network_validator()(ns)
+    get_public_ip_validator()(ns)
+    public_ip_count = len(ns.public_ip_address or [])
+    if public_ip_count > 2:
+        raise CLIError('Specify a single public IP to create an active-standby gateway or two '
+                       'public IPs to create an active-active gateway.')    
 
 def process_vpn_connection_create_namespace(namespace):
 

@@ -1325,7 +1325,7 @@ def create_vnet_gateway(resource_group_name, virtual_network_gateway_name, publi
                         virtual_network, location=None, tags=None, address_prefixes=None,
                         no_wait=False, gateway_type=VirtualNetworkGatewayType.vpn.value,
                         sku=VirtualNetworkGatewaySkuName.basic.value,
-                        vpn_type=VpnType.route_based.value, active_active=False,
+                        vpn_type=VpnType.route_based.value,
                         asn=None, bgp_peering_address=None, peer_weight=None):
     from azure.mgmt.network.models import \
         (VirtualNetworkGateway, BgpSettings, VirtualNetworkGatewayIPConfiguration,
@@ -1333,6 +1333,7 @@ def create_vnet_gateway(resource_group_name, virtual_network_gateway_name, publi
 
     client = _network_client_factory().virtual_network_gateways
     subnet = virtual_network + '/subnets/GatewaySubnet'
+    active_active = len(public_ip_address) == 2
     vnet_gateway = VirtualNetworkGateway(
         [], gateway_type, vpn_type, location=location, tags=tags,
         sku=VirtualNetworkGatewaySku(sku, sku), active_active=active_active)
@@ -1355,7 +1356,8 @@ def create_vnet_gateway(resource_group_name, virtual_network_gateway_name, publi
 def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None,
                         public_ip_address=None, gateway_type=None, enable_bgp=None,
                         asn=None, bgp_peering_address=None, peer_weight=None, virtual_network=None,
-                        tags=None, active_active=None):
+                        tags=None):
+    from azure.mgmt.network.models import VirtualNetworkGatewayIPConfiguration
 
     if address_prefixes is not None:
         if not instance.vpn_client_configuration:
@@ -1368,9 +1370,6 @@ def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None
             config.vpn_client_address_pool.address_prefixes = []
         config.vpn_client_address_pool.address_prefixes = address_prefixes
 
-    if active_active is not None:
-        instance.active_active = active_active
-
     if sku is not None:
         instance.sku.name = sku
         instance.sku.tier = sku
@@ -1381,11 +1380,28 @@ def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None
     if tags is not None:
         instance.tags = tags
 
-    # TODO: update the public IP address...magically if need be... >_>
+    subnet_id = '{}/subnets/GatewaySubnet'.format(virtual_network) if virtual_network else \
+        instance.ip_configurations[0].subnet.id
+    if virtual_network is not None:
+        for config in instance.ip_configurations:        
+            config.subnet.id = subnet_id
+
     if public_ip_address is not None:
-        instance.ip_configurations[0].public_ip_address.id = public_ip_address
-        if len(public_ip_address) > 1:
-            raise CLIError('TODO: Update multi-public IPs...')
+        instance.ip_configurations = []
+        for i, public_ip in enumerate(public_ip_address):
+            ip_configuration = VirtualNetworkGatewayIPConfiguration(
+                SubResource(subnet_id),
+                SubResource(public_ip),
+                private_ip_allocation_method='Dynamic', name='vnetGatewayConfig{}'.format(i))
+            instance.ip_configurations.append(ip_configuration)
+
+        # Update active-active/active-standby status
+        active_active = len(public_ip_address) == 2
+        if instance.active_active and not active_active:
+            logger.info('Placing gateway in active-standby mode.')
+        elif not instance.active_active and active_active:
+            logger.info('Placing gateway in active-active mode.')
+        instance.active_active = active_active
 
     if gateway_type is not None:
         instance.gateway_type = gateway_type
@@ -1394,10 +1410,6 @@ def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None
         instance.enable_bgp = enable_bgp.lower() == 'true'
 
     _validate_bgp_peering(instance, asn, bgp_peering_address, peer_weight)
-
-    if virtual_network is not None:
-        instance.ip_configurations[0].subnet.id = \
-            '{}/subnets/GatewaySubnet'.format(virtual_network)
 
     return instance
 
