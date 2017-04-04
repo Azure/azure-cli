@@ -21,8 +21,7 @@ from azure.cli.core.commands import \
     (CliArgumentType, register_cli_argument, register_extra_cli_argument)
 from azure.cli.core.commands.parameters import (location_type, get_resource_name_completion_list,
                                                 enum_choice_list, tags_type, ignore_type,
-                                                get_generic_completion_list, file_type,
-                                                three_state_flag)
+                                                get_generic_completion_list, file_type)
 from azure.cli.core.commands.validators import \
     (MarkSpecifiedAction, get_default_location_from_resource_group)
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
@@ -43,8 +42,7 @@ from azure.cli.command_modules.network._validators import \
      validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
      validate_address_pool_name_or_id, validate_servers, load_cert_file, validate_metadata,
      validate_peering_type, validate_dns_record_type,
-     get_public_ip_validator, get_nsg_validator, get_subnet_validator,
-     get_virtual_network_validator)
+     get_public_ip_validator, get_nsg_validator, get_subnet_validator)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
 

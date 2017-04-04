@@ -1383,7 +1383,7 @@ def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None
     subnet_id = '{}/subnets/GatewaySubnet'.format(virtual_network) if virtual_network else \
         instance.ip_configurations[0].subnet.id
     if virtual_network is not None:
-        for config in instance.ip_configurations:        
+        for config in instance.ip_configurations:
             config.subnet.id = subnet_id
 
     if public_ip_address is not None:
@@ -1580,7 +1580,7 @@ update_route.__doc__ = Route.__doc__
 def create_local_gateway(resource_group_name, local_network_gateway_name, gateway_ip_address,
                          location=None, tags=None, local_address_prefix=None, asn=None,
                          bgp_peering_address=None, peer_weight=None, no_wait=False):
-    from azure.mgmt.network.models import LocalNetworkGateway, BgpSettings, AddressSpace
+    from azure.mgmt.network.models import LocalNetworkGateway, BgpSettings
     client = _network_client_factory().local_network_gateways
     local_gateway = LocalNetworkGateway(
         AddressSpace(local_address_prefix or []), location=location, tags=tags,

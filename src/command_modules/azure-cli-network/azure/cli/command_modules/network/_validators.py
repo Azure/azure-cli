@@ -191,7 +191,7 @@ def get_public_ip_validator(has_type_field=False, allow_none=False, allow_new=Fa
                     namespace.public_ip_address[i] = _validate_name_or_id(public_ip)
             else:
                 namespace.public_ip_address = _validate_name_or_id(namespace.public_ip_address)
-                
+
 
     def complex_validator_with_type(namespace):
         get_folded_parameter_validator(
@@ -550,7 +550,7 @@ def process_vnet_gateway_update_namespace(namespace):
     public_ip_count = len(ns.public_ip_address or [])
     if public_ip_count > 2:
         raise CLIError('Specify a single public IP to create an active-standby gateway or two '
-                       'public IPs to create an active-active gateway.')    
+                       'public IPs to create an active-active gateway.')
 
 def process_vpn_connection_create_namespace(namespace):
 
