@@ -29,9 +29,11 @@ RUN /bin/bash -c 'TMP_PKG_DIR=$(mktemp -d); \
     for d in src/azure-cli src/azure-cli-core src/azure-cli-nspkg src/command_modules/azure-cli-*/; \
     do cd $d; python setup.py bdist_wheel -d $TMP_PKG_DIR; cd -; \
     done; \
+    MODULE_NAMES=""; \
     for f in $TMP_PKG_DIR/*; \
-    do pip install $f; \
-    done;'
+    do MODULE_NAMES="$MODULE_NAMES $f"; \
+    done; \
+    pip install $MODULE_NAMES;'
 
 # Tab completion
 RUN echo -e "\
