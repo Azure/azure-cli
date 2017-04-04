@@ -103,6 +103,83 @@ def validate_client_parameters(namespace):
         n.account_key = _query_account_key(n.account_name)
 
 
+def process_blob_source_uri(namespace):
+    """
+    Validate the parameters referenced to a blob source and create the source URI from them.
+    """
+    usage_string = \
+        'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
+        '\n\t   --source-uri' \
+        '\n\tOR --source-container --source-blob --source-snapshot [--source-account-name & sas] ' \
+        '\n\tOR --source-container --source-blob --source-snapshot [--source-account-name & key] '
+
+    ns = vars(namespace)
+
+    # source as blob
+    container = ns.pop('source_container', None)
+    blob = ns.pop('source_blob', None)
+    snapshot = ns.pop('source_snapshot', None)
+
+    # source credential clues
+    source_account_name = ns.pop('source_account_name', None)
+    source_account_key = ns.pop('source_account_key', None)
+    sas = ns.pop('source_sas', None)
+
+    # source in the form of an uri
+    uri = ns.get('copy_source', None)
+    if uri:
+        if any([container, blob, sas, snapshot, source_account_name, source_account_key]):
+            raise ValueError(usage_string.format('Unused parameters are given in addition to the '
+                                                 'source URI'))
+        else:
+            # simplest scenario--no further processing necessary
+            return
+
+    validate_client_parameters(namespace)  # must run first to resolve storage account
+
+    # determine if the copy will happen in the same storage account
+    if not source_account_name and source_account_key:
+        raise ValueError(usage_string.format('Source account key is given but account name is not'))
+    elif not source_account_name and not source_account_key:
+        # neither source account name or key is given, assume that user intends to copy blob in
+        # the same account
+        source_account_name = ns.get('account_name', None)
+        source_account_key = ns.get('account_key', None)
+    elif source_account_name and not source_account_key:
+        if source_account_name == ns.get('account_name', None):
+            # the source account name is same as the destination account name
+            source_account_key = ns.get('account_key', None)
+        else:
+            # the source account is different from destination account but the key is missing
+            # try to query one.
+            try:
+                source_account_key = _query_account_key(source_account_name)
+            except ValueError:
+                raise ValueError('Source storage account {} not found.'.format(source_account_name))
+    # else: both source account name and key are given by user
+
+    if not source_account_name:
+        raise ValueError(usage_string.format('Storage account name not found'))
+
+    if not sas:
+        sas = _create_short_lived_blob_sas(source_account_name, source_account_key, container, blob)
+
+    query_params = []
+    if sas:
+        query_params.append(sas)
+    if snapshot:
+        query_params.append('snapshot={}'.format(snapshot))
+
+    uri = 'https://{}.blob.{}/{}/{}{}{}'.format(source_account_name,
+                                                CLOUD.suffixes.storage_endpoint,
+                                                container,
+                                                blob,
+                                                '?' if query_params else '',
+                                                '&'.join(query_params))
+
+    namespace.copy_source = uri
+
+
 def validate_source_uri(namespace):  # pylint: disable=too-many-statements
     usage_string = \
         'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
@@ -194,7 +271,7 @@ def validate_source_uri(namespace):  # pylint: disable=too-many-statements
     if sas:
         query_params.append(sas)
     if snapshot:
-        query_params.append(snapshot)
+        query_params.append('snapshot={}'.format(snapshot))
 
     uri = 'https://{0}.{1}.{6}/{2}/{3}{4}{5}'.format(
         source_account_name,
