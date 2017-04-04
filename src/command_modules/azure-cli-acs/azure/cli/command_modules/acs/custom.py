@@ -763,6 +763,9 @@ def update_acs(client, resource_group_name, container_service_name, new_agent_co
     # null out the service principal because otherwise validation complains
     if instance.orchestrator_profile.orchestrator_type == ContainerServiceOchestratorTypes.kubernetes:
         instance.service_principal_profile = None
+    
+    # null out the windows profile so that validation doesn't complain about not having the admin password
+    instance.windows_profile = None
 
     return client.create_or_update(resource_group_name, container_service_name, instance)
 
