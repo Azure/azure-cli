@@ -20,7 +20,9 @@ def build_command_table():
     for cmd in cmd_table:
         com_descip = {}
         param_descrip = {}
-        com_descip['short-summary'] = cmd_table[cmd].description or ''
+        com_descip['short-summary'] = cmd_table[cmd].description() \
+            if callable(cmd_table[cmd].description) \
+            else cmd_table[cmd].description or ''
         com_descip['examples'] = ''
 
         for key in cmd_table[cmd].arguments:
