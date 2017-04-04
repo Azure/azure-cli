@@ -413,7 +413,7 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # py
         # Expecting no results
         self.cmd('vm list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
         self.cmd('vm create --resource-group {0} --location {1} --name {2} --admin-username ubuntu '
-                 '--image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password testPassword0 '
+                 '--image UbuntuLTS --admin-password testPassword0 '
                  '--authentication-type password '
                  '--tags firsttag=1 secondtag=2 thirdtag --nsg {3} --public-ip-address {4} '
                  '--vnet-name {5} --storage-account {6} --use-unmanaged-disk'.format(
