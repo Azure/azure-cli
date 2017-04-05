@@ -163,6 +163,27 @@ PyLint
 pylint -r n <path_to_your_command_module>/azure
 ```
 
+Submitting Pull Requests
+------------------------
+
+### Modify Change Log
+
+Modify the `HISTORY.rst` for all changed modules.
+
+Add your change log to the 'unreleased' heading in the file.
+
+If that heading doesn't exist yet, create it.
+
+This will be the release notes for the next release.
+
+e.g.:  
+```
+unreleased
+----------
+
+* This is my change.
+
+```
 
 Packaging/Publishing
 --------------------
