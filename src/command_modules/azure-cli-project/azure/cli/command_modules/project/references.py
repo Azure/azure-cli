@@ -17,14 +17,12 @@ def create_connection_string(service_name, reference_name, connection_string):
     the connection string and is labeled with run=service_name
     """
     secret_name = '{}-{}'.format(service_name, reference_name)
-    encoded_connection_string = base64.b64encode(
-        bytes(connection_string, 'utf-8'))
     environment_variable_name = get_environment_var_name(
         service_name, reference_name)
 
     # Create the secret
     command = 'kubectl create secret generic {} --from-literal={}={}'.format(
-        secret_name, environment_variable_name, encoded_connection_string)
+        secret_name, environment_variable_name, connection_string)
     utils.execute_command(command)
 
     # Label it with run=service_name
