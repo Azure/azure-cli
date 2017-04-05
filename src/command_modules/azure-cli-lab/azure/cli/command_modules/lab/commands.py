@@ -19,6 +19,21 @@ custom_path = 'azure.cli.command_modules.lab.custom'
 mgmt_operations_path = 'azure.cli.command_modules.lab.sdk.devtestlabs.operations.{}'
 
 
+def _export_artifacts(formula):
+    """ Exports artifacts from the given formula. This method removes some of the properties of the
+        artifact model as they do not play important part for users in create or read context.
+    """
+    artifacts = []
+    if formula and formula.formula_content and formula.formula_content.artifacts:
+        artifacts = formula.formula_content.artifacts
+        for artifact in formula.formula_content.artifacts:
+            del artifact.status
+            del artifact.deployment_status_message
+            del artifact.vm_extension_status_message
+            del artifact.install_time
+    return artifacts
+
+
 # Custom Command's service adapter
 custom_operations = create_service_adapter(custom_path)
 
@@ -121,10 +136,10 @@ formula_operations = create_service_adapter(
 with ServiceGroup(__name__, get_devtestlabs_formula_operation,
                   formula_operations) as s:
     with s.group('lab formula') as c:
-        c.command('get', 'get_resource')
+        c.command('show', 'get_resource')
         c.command('list', 'list')
         c.command('delete', 'delete_resource')
-
+        c.command('export-artifacts', 'get_resource', transform=_export_artifacts)
 
 # Secret Operations Commands
 secret_operations = create_service_adapter(
