@@ -80,6 +80,10 @@ def validate_lab_vm_list(namespace):
         namespace.filters = "Properties/ownerObjectId eq '{}'".format(object_id)
 
 
+def validate_user_name(namespace):
+    namespace.user_name = "@me"
+
+
 # pylint: disable=no-member
 def _validate_location(namespace):
     """
