@@ -254,6 +254,10 @@ def get_deployment_operations(client, resource_group_name, deployment_name, oper
 def list_resources(resource_group_name=None, resource_provider_namespace=None,
                    resource_type=None, name=None, tag=None, location=None):
     rcf = _resource_client_factory()
+
+    if resource_group_name is not None:
+        rcf.resource_groups.get(resource_group_name)
+
     odata_filter = _list_resources_odata_filter_builder(resource_group_name,
                                                         resource_provider_namespace,
                                                         resource_type, name, tag, location)
