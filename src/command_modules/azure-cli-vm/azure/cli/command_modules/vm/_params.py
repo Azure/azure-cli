@@ -185,7 +185,7 @@ register_cli_argument('vmss create', 'nat_backend_port', default=None, help='Bac
 register_cli_argument('vmss create', 'single_placement_group', default=None, help="Enable single placement group. This flag will default to True if instance count <=100, and default to False for instance count >100.", **enum_choice_list(['true', 'false']))
 
 for scope in ['vm create', 'vmss create']:
-    register_cli_argument(scope, 'location', location_type, help='Location in which to create VM and related resources. If default location is not configued, will default to the resource group\'s location')
+    register_cli_argument(scope, 'location', location_type, help='Location in which to create VM and related resources. If default location is not configured, will default to the resource group\'s location')
     register_cli_argument(scope, 'tags', tags_type)
     register_cli_argument(scope, 'no_wait', help='Do not wait for the long running operation to finish.')
     register_cli_argument(scope, 'validate', options_list=('--validate',), help='Generate and validate the ARM template without creating any resources.', action='store_true')
