@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.2 (2017-04-03)
+^^^^^^^^^^^^^^^^^^
+
+* Add acr, lab and monitor modules to default list.
 
 2.0.1 (2017-03-13)
 ^^^^^^^^^^^^^^^^^^

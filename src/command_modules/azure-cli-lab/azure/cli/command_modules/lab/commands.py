@@ -56,6 +56,7 @@ with ServiceGroup(__name__, get_devtestlabs_lab_operation,
                   lab_operations) as s:
     with s.group('lab') as c:
         c.command('get', 'get_resource')
+        c.command('delete', 'delete_resource')
 
 # Custom Image Operations Commands
 custom_image_operations = create_service_adapter(

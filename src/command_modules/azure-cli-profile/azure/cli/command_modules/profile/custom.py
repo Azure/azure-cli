@@ -8,7 +8,7 @@ from adal.adal_error import AdalError
 from azure.cli.core.prompting import prompt_pass, NoTTYException
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._profile import Profile
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 logger = azlogging.get_az_logger(__name__)
 

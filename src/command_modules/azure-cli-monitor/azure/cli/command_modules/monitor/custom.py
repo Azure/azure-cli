@@ -5,7 +5,7 @@
 from __future__ import print_function
 import datetime
 import os
-from azure.cli.core._util import get_file_json, CLIError
+from azure.cli.core.util import get_file_json, CLIError
 
 # 1 hour in milliseconds
 DEFAULT_QUERY_TIME_RANGE = 3600000

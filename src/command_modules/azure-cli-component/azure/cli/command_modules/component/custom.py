@@ -6,7 +6,7 @@ import site
 import logging
 from six import StringIO
 
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core._config import az_config
 import azure.cli.core.azlogging as azlogging
 

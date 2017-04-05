@@ -13,7 +13,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_images)
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_wait_command
-from azure.cli.core._util import empty_on_404
+from azure.cli.core.util import empty_on_404
 # pylint: disable=line-too-long
 
 custom_path = 'azure.cli.command_modules.vm.custom#{}'
@@ -76,10 +76,10 @@ def transform_av_set_output(av_set):
 
 
 def transform_av_set_collection_output(av_sets):
-    # workaround till compute api version gets to 2017-04-30
+    av_sets = list(av_sets)
     for av_set in av_sets:
         transform_av_set_output(av_set)
-    return list(av_sets)  # convert SDK paged object to a plain list to display
+    return av_sets
 
 
 op_var = 'virtual_machines_operations'

@@ -17,7 +17,7 @@ import adal
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
-from azure.cli.core._util import CLIError, get_file_json
+from azure.cli.core.util import CLIError, get_file_json
 from azure.cli.core.adal_authentication import AdalAuthentication
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
@@ -425,7 +425,9 @@ class CredsCache(object):
     '''
 
     def __init__(self, auth_ctx_factory=None):
-        self._token_file = os.path.join(get_config_dir(), 'accessTokens.json')
+        # AZURE_ACCESS_TOKEN_FILE is used by Cloud Console and not meant to be user configured
+        self._token_file = (os.environ.get('AZURE_ACCESS_TOKEN_FILE', None) or
+                            os.path.join(get_config_dir(), 'accessTokens.json'))
         self._service_principal_creds = []
         self._auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
         self.adal_token_cache = None

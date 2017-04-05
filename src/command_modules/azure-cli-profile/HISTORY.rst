@@ -3,6 +3,12 @@
 Release History
 ===============
 
+2.0.2 (2017-04-03)
+++++++++++++++++++
+
+* account: do not show not enabled subscription by default (#2664)
+* core: support login using service principal with a cert (#2457)
+
 2.0.1 (2017-03-13)
 ++++++++++++++++++
 

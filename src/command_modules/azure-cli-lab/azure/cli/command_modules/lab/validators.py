@@ -7,7 +7,7 @@ import os
 import datetime
 import dateutil.parser
 from msrestazure.azure_exceptions import CloudError
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core.commands.arm import is_valid_resource_id
 from ._client_factory import (get_devtestlabs_management_client)
 from .sdk.devtestlabs.models.gallery_image_reference import GalleryImageReference
@@ -162,7 +162,7 @@ def _validate_ip_configuration(namespace, lab_vnet=None):
             # Default to shared ip configuration based on os type only if inbound nat rules exist on the
             # shared configuration of the selected lab's virtual network
             if lab_vnet.subnet_overrides and lab_vnet.subnet_overrides[0].shared_public_ip_address_configuration and \
-                    lab_vnet.subnet_overrides[0].shared_public_ip_address_configuration.inbound_nat_rules:
+                    lab_vnet.subnet_overrides[0].shared_public_ip_address_configuration.allowed_ports:
                 rule = _inbound_rule_from_os(namespace)
                 public_ip_config = SharedPublicIpAddressConfiguration(inbound_nat_rules=[rule])
                 nic_properties = NetworkInterfaceProperties(shared_public_ip_address_configuration=public_ip_config)

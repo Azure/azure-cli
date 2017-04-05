@@ -3,14 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import datetime
-import json
 import re
 import os
 import uuid
 from dateutil.relativedelta import relativedelta
 import dateutil.parser
 
-from azure.cli.core._util import CLIError, todict, get_file_json
+from azure.cli.core.util import CLIError, todict, get_file_json, shell_safe_json_parse
 import azure.cli.core.azlogging as azlogging
 
 from azure.mgmt.authorization.models import (RoleAssignmentProperties, Permission, RoleDefinition,
@@ -49,7 +48,7 @@ def create_role_definition(role_definition):
     if os.path.exists(role_definition):
         role_definition = get_file_json(role_definition)
     else:
-        role_definition = json.loads(role_definition)
+        role_definition = shell_safe_json_parse(role_definition)
 
     # to workaround service defects, ensure property names are camel case
     names = [p for p in role_definition if p[:1].isupper()]

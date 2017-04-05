@@ -3,6 +3,17 @@
 Release History
 ===============
 
+0.1.2 (2017-04-03)
+++++++++++++++++++++
+
+* appservice: rollback the change of auto creating plans (#2671)
+* Check sku when creating linux ASP (#2651)
+* appservice: include site config on cloning slot (#2644)
+* appservice: support to get external ip address used for DNS A records (#2627)
+* appservice: support binding wildcard certificates (#2625)
+* appservice:improve table output format of web show/list (#2614)
+* appservice: support list publishing profiles (#2504)
+
 0.1.1b6 (2017-03-13)
 ++++++++++++++++++++
 

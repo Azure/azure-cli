@@ -8,7 +8,7 @@
 from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_wait_command
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
 from ._client_factory import * # pylint: disable=wildcard-import, unused-wildcard-import
-from azure.cli.core._util import empty_on_404
+from azure.cli.core.util import empty_on_404
 
 from ._util import (list_network_resource_property,
                     get_network_resource_property_entry,
@@ -18,7 +18,8 @@ from ._format import \
      transform_dns_record_set_table_output, transform_dns_zone_table_output,
      transform_vnet_create_output, transform_public_ip_create_output,
      transform_traffic_manager_create_output, transform_nic_create_output,
-     transform_nsg_create_output, transform_vnet_gateway_create_output)
+     transform_nsg_create_output, transform_vnet_gateway_create_output,
+     transform_vpn_connection, transform_vpn_connection_list)
 
 custom_path = 'azure.cli.command_modules.network.custom#{}'
 
@@ -293,8 +294,8 @@ cli_command(__name__, 'network list-usages', 'azure.mgmt.network.operations.usag
 # VirtualNetworkGatewayConnectionsOperations
 cli_command(__name__, 'network vpn-connection create', custom_path.format('create_vpn_connection'), cf_virtual_network_gateway_connections)
 cli_command(__name__, 'network vpn-connection delete', 'azure.mgmt.network.operations.virtual_network_gateway_connections_operations#VirtualNetworkGatewayConnectionsOperations.delete', cf_virtual_network_gateway_connections)
-cli_command(__name__, 'network vpn-connection show', 'azure.mgmt.network.operations.virtual_network_gateway_connections_operations#VirtualNetworkGatewayConnectionsOperations.get', cf_virtual_network_gateway_connections, exception_handler=empty_on_404)
-cli_command(__name__, 'network vpn-connection list', 'azure.mgmt.network.operations.virtual_network_gateway_connections_operations#VirtualNetworkGatewayConnectionsOperations.list', cf_virtual_network_gateway_connections)
+cli_command(__name__, 'network vpn-connection show', 'azure.mgmt.network.operations.virtual_network_gateway_connections_operations#VirtualNetworkGatewayConnectionsOperations.get', cf_virtual_network_gateway_connections, exception_handler=empty_on_404, transform=transform_vpn_connection)
+cli_command(__name__, 'network vpn-connection list', 'azure.mgmt.network.operations.virtual_network_gateway_connections_operations#VirtualNetworkGatewayConnectionsOperations.list', cf_virtual_network_gateway_connections, transform=transform_vpn_connection_list)
 cli_generic_update_command(__name__, 'network vpn-connection update',
                            'azure.mgmt.network.operations.virtual_network_gateway_connections_operations#VirtualNetworkGatewayConnectionsOperations.get',
                            'azure.mgmt.network.operations.virtual_network_gateway_connections_operations#VirtualNetworkGatewayConnectionsOperations.create_or_update',

@@ -3,6 +3,14 @@
 Release History
 ===============
 
+2.0.2 (2017-04-03)
+++++++++++++++++++
+
+* Add better error messages if --namespace is missing. (#2652)
+* Make --parameters repeatable, and merge arguments. (#2656)
+* resource: support resource id for generic resource update (#2640)
+* Add prompting for missing template parameters. (#2364)
+
 2.0.1 (2017-03-13)
 ++++++++++++++++++
 

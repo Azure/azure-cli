@@ -91,7 +91,7 @@ def create_packaged_archive(version, components, archive_dest=None, use_version_
         patch.apply(working_dir)
     # Build archive
     archive_filename = ARCHIVE_FILE_TMPL.format(version)
-    archive_dest = os.path.expanduser(archive_dest) or os.getcwd()
+    archive_dest = os.path.expanduser(archive_dest) if archive_dest else os.getcwd()
     archive_path = os.path.join(archive_dest, archive_filename+'.tar.gz')
     with tarfile.open(archive_path, 'w:gz') as tar:
         tar.add(working_dir, arcname=archive_filename)

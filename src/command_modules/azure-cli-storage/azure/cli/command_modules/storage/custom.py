@@ -18,7 +18,7 @@ from azure.storage.table import TableService
 from azure.storage.queue import QueueService
 
 from azure.cli.core.decorators import transfer_doc
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 from azure.cli.command_modules.storage._factory import \
     (storage_client_factory, generic_data_service_factory)
@@ -159,6 +159,9 @@ def upload_blob(  # pylint: disable=too-many-locals
             timeout=timeout)
 
     def upload_block_blob():
+        client.MAX_BLOCK_SIZE = 100 * 1024 * 1024
+        client.MAX_SINGLE_PUT_SIZE = 256 * 1024 * 1024
+
         return client.create_blob_from_path(
             container_name=container_name,
             blob_name=blob_name,
