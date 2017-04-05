@@ -5,7 +5,7 @@
 
 from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
-#pylint: disable=line-too-long
+#pylint: disable=line-too-long, too-many-lines
 helps['lock'] = """
     type: group
     short-summary: Manage Azure locks.
