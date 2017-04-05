@@ -10,7 +10,8 @@ from ._client_factory import (get_devtestlabs_virtual_machine_operation,
                               get_devtestlabs_artifact_source_operation,
                               get_devtestlabs_lab_operation,
                               get_devtestlabs_virtual_network_operation,
-                              get_devtestlabs_formula_operation)
+                              get_devtestlabs_formula_operation,
+                              get_devtestlabs_secret_operation)
 from azure.cli.core.sdk.util import (ServiceGroup, create_service_adapter)
 
 
@@ -121,5 +122,19 @@ with ServiceGroup(__name__, get_devtestlabs_formula_operation,
                   formula_operations) as s:
     with s.group('lab formula') as c:
         c.command('get', 'get_resource')
+        c.command('list', 'list')
+        c.command('delete', 'delete_resource')
+
+
+# Secret Operations Commands
+secret_operations = create_service_adapter(
+    mgmt_operations_path.format('secret_operations'),
+    'SecretOperations')
+
+with ServiceGroup(__name__, get_devtestlabs_secret_operation,
+                  secret_operations) as s:
+    with s.group('lab secret') as c:
+        c.command('set', 'create_or_update_resource')
+        c.command('show', 'get_resource')
         c.command('list', 'list')
         c.command('delete', 'delete_resource')
