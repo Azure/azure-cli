@@ -254,7 +254,7 @@ def delete_project(no_wait=False):
     logger.info('Deleting file {project_resource_file}'.format(
         project_resource_file=project_resource_file))
     os.remove(project_resource_file)
-    logger.info('File deleted.')
+    logger.info('Project deleted.')
 
 
 def create_deployment_pipeline(remote_access_token):  # pylint: disable=unused-argument
