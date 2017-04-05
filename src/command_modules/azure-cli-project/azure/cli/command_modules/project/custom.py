@@ -228,6 +228,35 @@ def create_project(ssh_private_key, resource_group=random_name, name=random_name
             current_process.process_stop()
 
 
+def delete_project(no_wait=False):
+    """
+    Deletes the Azure resource group containing project's artifacts and the projectResource.json file.
+    """
+    _verify_project_resource_exists()
+    project_resource_file = project_settings.settings_file
+    resource_group = project_settings.resource_group
+    if resource_group is None:
+        logger.info('Resource group information missing from file {project_resource_file}'.format(
+            project_resource_file=project_resource_file))
+    else:
+        res_client = _get_resource_client_factory()
+        logger.info('Deleting resource group {resource_group}.'.format(
+            resource_group=resource_group))
+        res = res_client.resource_groups.delete(
+            resource_group_name=resource_group, raw=no_wait)
+        if not no_wait:
+            logger.info('Waiting for delete resource group {resource_group} operation to complete.'.format(
+                resource_group=resource_group))
+            res.wait()
+            if res.done():
+                logger.info('Resource group {resource_group} deleted.'.format(
+                    resource_group=resource_group))
+    logger.info('Deleting file {project_resource_file}'.format(
+        project_resource_file=project_resource_file))
+    os.remove(project_resource_file)
+    logger.info('Project deleted.')
+
+
 def create_deployment_pipeline(remote_access_token):  # pylint: disable=unused-argument
     """
     Provisions Jenkins and configures CI and CD pipelines, kicks off initial build-deploy
@@ -1069,6 +1098,12 @@ def _initialize_workspace(
     logger.info('\nCluster configured successfully.')
 
 
+def _verify_project_resource_exists():
+    if not os.path.exists(project_settings.settings_file):
+        raise CLIError(
+            "projectResource.json not found, please run 'az project create' to create resources.")
+
+
 def service_run(project_path):
     """
     Automates building the project/service in a Docker image and
@@ -1096,9 +1131,7 @@ def service_run(project_path):
                 'Invalid path: {}'.format(project_path))
 
         # Validate if mindaro project exists
-        if not os.path.exists(project_settings.settings_file):
-            raise CLIError(
-                "projectResource.json not found, please run 'az project create' to create resources.")
+        _verify_project_resource_exists()
 
         # Configuring Cluster
         _configure_cluster()

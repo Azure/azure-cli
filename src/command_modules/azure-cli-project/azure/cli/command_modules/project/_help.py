@@ -14,3 +14,8 @@ helps['project run'] = """
     type: command
     short-summary: "Set up automated build and deployment for a service on a kubernetes cluster in the current workspace."
 """
+
+helps['project delete'] = """
+    type: command
+    short-summary: "Deletes the Azure resource group containing project's artifacts and the projectResource.json file."
+"""

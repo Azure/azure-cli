@@ -37,6 +37,12 @@ force_create = CliArgumentType(
     required=False
 )
 
+no_wait = CliArgumentType(
+    options_list=('--no-wait'),
+    help='Do not wait for the long running delete resource group operation to finish.',
+    required=False
+)
+
 name_arg_type = CliArgumentType(
     options_list=('--name', '-n'),
     metavar='NAME')
@@ -53,6 +59,8 @@ register_cli_argument('project', 'resource_group', resource_group_name_type)
 register_cli_argument('project', 'location', location_type)
 register_cli_argument('project', 'force_create',
                       force_create, action='store_true')
+register_cli_argument('project', 'no_wait', no_wait, action='store_true')
+
 
 register_cli_argument('project', 'target-group', resource_group_name_type)
 register_cli_argument('project', 'target-name', name_arg_type)
