@@ -5,6 +5,7 @@ Release History
 2.0.3 (unreleased)
 ++++++++++++++++++
 * vm/vmss: support create from a market place image which requires plan info(#1209)
+* Fix bug with `vmss update` and `vm availability-set update`
 
 2.0.2 (2017-04-03)
 ++++++++++++++++++
