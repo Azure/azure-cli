@@ -287,7 +287,6 @@ def execute_command(command, ignore_failure=False, tries=1):
     """
     retry = 0
     while retry < tries:
-        write()
         with Popen(command, shell=True, stdout=PIPE, stderr=PIPE, bufsize=1, universal_newlines=True) as process:
             for line in process.stdout:
                 logger.info('\n' + line)

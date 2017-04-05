@@ -9,6 +9,7 @@ import json
 import os
 import socket
 import sys
+import re
 import threading
 import webbrowser
 from time import sleep
@@ -52,8 +53,8 @@ from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 logger = azlogging.get_az_logger(__name__)  # pylint: disable=invalid-name
 project_settings = settings.Project()  # pylint: disable=invalid-name
 random_name = utils.get_random_project_name()  # pylint: disable=invalid-name
-default_acs_agent_count = "3"
-default_acs_master_count = "1"
+default_acs_agent_count = "3"  # pylint: disable=invalid-name
+default_acs_master_count = "1"  # pylint: disable=invalid-name
 
 # TODO: Remove and switch to SSH once templates are updated
 admin_password = 'Mindaro@Pass1!'  # pylint: disable=invalid-name
@@ -110,8 +111,9 @@ def create_project(ssh_private_key, resource_group=random_name, name=random_name
             logger.info('\nProject already exists.')
             utils.write('Complete.\n')
             return
-        else:
-            utils.write('{} ...'.format(name))
+        elif force_create:
+            project_settings.settings = {}
+        utils.write('{} ...'.format(name))
 
         # 0. Validate ssh private key path
         if not os.path.exists(ssh_private_key):
@@ -368,6 +370,9 @@ def add_reference(target_group, target_name, reference_name):
     :param reference_name: Name of the reference
     :type reference_name: String
     """
+    if not _validate_reference_name(reference_name):
+        raise CLIError("{} is not valid for a Reference Name. A valid reference name must consist of alphanumeric characters, or '_'".format(reference_name))
+
     service_name = _get_service_name()
     instance, client = references.get_reference_type(target_group, target_name)
 
@@ -389,6 +394,17 @@ def add_reference(target_group, target_name, reference_name):
     utils.writeline("Added reference '{}'".format(reference_name))
     utils.writeline('Environment variables: {}'.format(
         references.get_environment_var_name(service_name, reference_name)))
+
+    _service_add_reference(reference_name, instance.type)
+
+
+def _validate_reference_name(reference_name):
+    """
+    Validates the reference name:
+    A valid reference name must consist of alphanumeric characters, or '_'
+    """
+    result = re.match('[_a-zA-Z0-9]+', reference_name)
+    return result.group() == reference_name
 
 
 def _deployment_pipelines_exist():
@@ -1180,6 +1196,14 @@ def _service_list():
     Calls tenx service list command on the current directory.
     """
     _run_innerloop_command('service list')
+
+def _service_add_reference(reference_name, reference_type):
+    """
+    Calls tenx run command on the current directory.
+    Adds reference to the projectInfo
+    """
+    _run_innerloop_command('reference add -n {} -t {} -q'.format(reference_name, reference_type))
+
 
 def _run_innerloop_command(*args):
     """
