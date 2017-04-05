@@ -3,6 +3,11 @@
 Release History
 ===============
 
+Unreleased
+++++++++++++++++++
+
+* remove windows profile before PUT call for scale command (#2755)
+
 2.0.2 (2017-04-03)
 ++++++++++++++++++
 
