@@ -19,18 +19,21 @@ from ._validators import validate_deployment_name
 # BASIC PARAMETER CONFIGURATION
 
 resource_name_type = CliArgumentType(options_list=('--name', '-n'), help='The resource name. (Ex: myC)')
+resource_type_type = CliArgumentType(help="The resource type (Ex: 'resC'). Can also accept namespace/type"
+                                          " format (Ex: 'Microsoft.Provider/resC')")
+resource_namespace_type = CliArgumentType(options_list=('--namespace',), completer=get_providers_completion_list,
+                                          help="Provider namespace (Ex: 'Microsoft.Provider')")
+resource_parent_type = CliArgumentType(required=False, options_list=('--parent',),
+                                       help="The parent path (Ex: 'resA/myA/resB/myB')")
 _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 register_cli_argument('resource', 'no_wait', no_wait_type)
 register_cli_argument('resource', 'resource_name', resource_name_type)
 register_cli_argument('resource', 'api_version', help='The api version of the resource (omit for latest)', required=False)
 register_cli_argument('resource', 'resource_id', options_list=('--id',), help='Resource ID')
-register_cli_argument('resource', 'resource_provider_namespace', options_list=('--namespace',), completer=get_providers_completion_list,
-                      help="Provider namespace (Ex: 'Microsoft.Provider')")
-register_cli_argument('resource', 'resource_type',
-                      completer=get_resource_types_completion_list,
-                      help="The resource type (Ex: 'resC'). Can also accept namespace/type format (Ex: 'Microsoft.Provider/resC')")
-register_cli_argument('resource', 'parent_resource_path', required=False, options_list=('--parent',),
-                      help="The parent path (Ex: 'resA/myA/resB/myB')")
+register_cli_argument('resource', 'resource_provider_namespace', resource_namespace_type)
+register_cli_argument('resource', 'resource_type', arg_type=resource_type_type,
+                      completer=get_resource_types_completion_list)
+register_cli_argument('resource', 'parent_resource_path', resource_parent_type)
 register_cli_argument('resource', 'tag', tag_type)
 register_cli_argument('resource', 'tags', tags_type)
 register_cli_argument('resource list', 'name', resource_name_type)
@@ -79,3 +82,8 @@ register_cli_argument('tag', 'tag_value', options_list=('--value',))
 
 register_cli_argument('lock', 'name', options_list=('--name', '-n'))
 register_cli_argument('lock create', 'level', options_list=('--lock-type', '-t'), required=True, **enum_choice_list(LockLevel))
+register_cli_argument('lock', 'parent_resource_path', resource_parent_type)
+register_cli_argument('lock', 'resource_provider_namespace', resource_namespace_type)
+register_cli_argument('lock', 'resource_type', arg_type=resource_type_type,
+                      completer=get_resource_types_completion_list,)
+register_cli_argument('lock', 'resource_name', options_list=('--resource-name'), help='The name of the resource this lock applies to.')
