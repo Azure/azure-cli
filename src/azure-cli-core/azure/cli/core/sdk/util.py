@@ -54,11 +54,13 @@ class CommandGroup(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
-    def command(self, name, method_name, confirmation=None):
+    def command(self, name, method_name, transform=None, table_transformer=None, confirmation=None):
         cli_command(self._scope,
                     '{} {}'.format(self._group_name, name),
                     self._service_adapter(method_name),
                     client_factory=self._client_factory,
+                    transform=transform,
+                    table_transformer=table_transformer,
                     confirmation=confirmation)
 
     def custom_command(self, name, custom_func_name, confirmation=None):

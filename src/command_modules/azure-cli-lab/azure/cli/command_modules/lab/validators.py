@@ -8,7 +8,7 @@ import datetime
 import dateutil.parser
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.util import CLIError
-from azure.cli.core.commands.arm import is_valid_resource_id
+from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
 from ._client_factory import (get_devtestlabs_management_client)
 from .sdk.devtestlabs.models.gallery_image_reference import GalleryImageReference
 from .sdk.devtestlabs.models.network_interface_properties import NetworkInterfaceProperties
@@ -42,6 +42,7 @@ def validate_lab_vm_create(namespace):
     _validate_location(namespace)
     _validate_expiration_date(namespace)
     _validate_other_parameters(namespace, formula)
+    _validate_artifacts(namespace)
     _validate_image_argument(namespace, formula)
     _validate_network_parameters(namespace, formula)
     validate_authentication_type(namespace, formula)
@@ -291,6 +292,40 @@ def _validate_other_parameters(namespace, formula=None):
             namespace.size = namespace.size or formula.formula_content.size
             namespace.disk_type = namespace.disk_type or formula.formula_content.storage_type
             namespace.os_type = formula.os_type
+
+
+def _validate_artifacts(namespace):
+    if namespace.artifacts:
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        lab_resource_id = resource_id(subscription=get_subscription_id(),
+                                      resource_group=namespace.resource_group,
+                                      namespace='Microsoft.DevTestLab',
+                                      type='labs',
+                                      name=namespace.lab_name)
+        namespace.artifacts = _update_artifacts(namespace.artifacts, lab_resource_id)
+
+
+def _update_artifacts(artifacts, lab_resource_id):
+    if not isinstance(artifacts, list):
+        raise CLIError("Artifacts must be of type list. Given artifacts: '{}'".format(artifacts))
+
+    result_artifacts = []
+    for artifact in artifacts:
+        artifact_id = artifact.get('artifactId', None)
+        if artifact_id:
+            result_artifact = dict()
+            result_artifact['artifact_id'] = _update_artifact_id(artifact_id, lab_resource_id)
+            result_artifact['parameters'] = artifact.get('parameters', [])
+            result_artifacts.append(result_artifact)
+        else:
+            raise CLIError("Missing 'artifactId' for artifact: '{}'".format(artifact))
+    return result_artifacts
+
+
+def _update_artifact_id(artifact_id, lab_resource_id):
+    if not is_valid_resource_id(artifact_id):
+        return "{}{}".format(lab_resource_id, artifact_id)
+    return artifact_id
 
 
 # TODO: Following methods are carried over from other command modules
