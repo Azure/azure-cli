@@ -21,3 +21,5 @@ cli_command(__name__, 'project create',
 # InnerLoop Commands
 cli_command(__name__, 'project run',
             'azure.cli.command_modules.project.custom#service_run')
+cli_command(__name__, 'project service list', 
+            'azure.cli.command_modules.project.custom#service_list')
