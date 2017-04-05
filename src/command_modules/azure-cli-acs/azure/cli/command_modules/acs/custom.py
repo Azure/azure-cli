@@ -188,6 +188,9 @@ def dcos_browse(name, resource_group, disable_browser=False,
 
 
 def _dcos_browse_internal(acs_info, disable_browser, ssh_key_file):
+    if not os.path.isfile(ssh_key_file):
+        raise CLIError('Private key file {} does not exist'.format(ssh_key_file))
+
     acs = acs_client.ACSClient()
     if not acs.connect(_get_host_name(acs_info), _get_username(acs_info),
                        key_filename=ssh_key_file):
@@ -622,6 +625,9 @@ def k8s_get_credentials(name, resource_group_name,
 
 
 def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file):
+    if not os.path.isfile(ssh_key_file):
+        raise CLIError('Private key file {} does not exist'.format(ssh_key_file))
+
     dns_prefix = acs_info.master_profile.dns_prefix  # pylint: disable=no-member
     location = acs_info.location  # pylint: disable=no-member
     user = acs_info.linux_profile.admin_username  # pylint: disable=no-member
