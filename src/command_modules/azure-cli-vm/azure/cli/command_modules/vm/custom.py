@@ -1473,17 +1473,18 @@ def availset_get(resource_group_name, name):
     return _compute_client_factory().availability_sets.get(resource_group_name, name)
 
 
-def availset_set(**kwargs):
-    return _compute_client_factory().availability_sets.create_or_update(**kwargs)
+def availset_set(resource_group_name, name, **kwargs):
+    return _compute_client_factory().availability_sets.create_or_update(resource_group_name, name,
+                                                                        **kwargs)
 
 
 def vmss_get(resource_group_name, name):
     return _compute_client_factory().virtual_machine_scale_sets.get(resource_group_name, name)
 
 
-def vmss_set(no_wait=False, **kwargs):
+def vmss_set(resource_group_name, name, no_wait=False, **kwargs):
     return _compute_client_factory().virtual_machine_scale_sets.create_or_update(
-        raw=no_wait, **kwargs)
+        resource_group_name, name, raw=no_wait, **kwargs)
 
 
 def convert_av_set_to_managed_disk(resource_group_name, availability_set_name):
