@@ -221,12 +221,11 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
             if (self.name.split()[-1] == 'create' and
                     overrides.settings.get('metavar', None) == 'NAME'):
                 return
-            if arg.type.settings.get('required', False):
-                setattr(arg.type, 'configured_default_applied', True)
-                config_value = az_config.get(DEFAULTS_SECTION, def_config, None)
-                if config_value:
-                    overrides.settings['default'] = config_value
-                    overrides.settings['required'] = False
+            setattr(arg.type, 'configured_default_applied', True)
+            config_value = az_config.get(DEFAULTS_SECTION, def_config, None)
+            if config_value:
+                overrides.settings['default'] = config_value
+                overrides.settings['required'] = False
 
     def execute(self, **kwargs):
         return self.handler(**kwargs)
