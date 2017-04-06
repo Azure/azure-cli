@@ -28,29 +28,74 @@ class Configuration(object):  # pylint: disable=too-few-public-methods
     as output formats, available commands etc.
     """
 
-    def __init__(self, argv):
+    def __init__(self):
         self.output_format = None
-        self.argv = argv
 
-    def get_command_table(self):  # pylint: disable=no-self-use
+    def get_command_table(self, argv=[]):  # pylint: disable=no-self-use
         import azure.cli.core.commands as commands
         # Find the first noun on the command line and only load commands from that
         # module to improve startup time.
         result = None
-        for a in self.argv:
-            if not a.startswith('-'):
-                result = commands.get_command_table(a)
+        try:
+            result = commands.get_command_table(argv[0])
+        except IndexError:
+            pass
 
         if result is None:
             # No noun found, so load all commands.
             result = commands.get_command_table()
 
-        return result
+        command_tree = Configuration.build_command_tree(result)
+        matches = Configuration.find_matches(argv, command_tree)
+        # return result
+        return dict(matches)
 
     def load_params(self, command):  # pylint: disable=no-self-use
         import azure.cli.core.commands as commands
         commands.load_params(command)
 
+    @staticmethod
+    def build_command_tree(command_table):
+        '''From the list of commands names, find the exact match or
+           set of potential matches that we are looking for
+        '''
+        
+        result = {}
+
+        for command in command_table:
+            index = result
+            parts = command.split()
+            for part in parts[:-1]:
+                if not part in index:
+                    index[part] = {}
+                index = index[part]
+            index[parts[-1]] = command_table[command]
+
+        return result
+
+    @staticmethod
+    def find_matches(parts, commandtable):
+        from .commands import CliCommand
+
+        best_match = commandtable
+        command_so_far = ""
+        try:
+            for part in parts:
+                best_match = best_match[part]
+                ' '.join((command_so_far, part))
+        except:
+            pass
+
+        if isinstance(best_match, CliCommand):
+            yield (best_match.name, best_match)
+        else:
+            for part in best_match:
+                cmd = best_match[part]
+                if isinstance(cmd, CliCommand):
+                    yield (cmd.name, cmd)
+                else:
+                    dummy_command_name = ' '.join((command_so_far, part))
+                    yield (dummy_command_name, CliCommand(dummy_command_name, lambda **kwargs: print('Why was I called?')))
 
 class Application(object):
 
@@ -91,7 +136,7 @@ class Application(object):
 
     def execute(self, unexpanded_argv):  # pylint: disable=too-many-statements
         argv = Application._expand_file_prefixed_files(unexpanded_argv)
-        command_table = self.configuration.get_command_table()
+        command_table = self.configuration.get_command_table(argv)
         self.raise_event(self.COMMAND_TABLE_LOADED, command_table=command_table)
         self.parser.load_command_table(command_table, argv)
         self.raise_event(self.COMMAND_PARSER_LOADED, parser=self.parser)
