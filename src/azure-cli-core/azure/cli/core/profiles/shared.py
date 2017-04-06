@@ -24,8 +24,8 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
 
     # TODO Thinking of removing the RP/RT format due to swagger/sdk format
     MGMT_STORAGE = ('Microsoft.Storage/storageAccounts',
-                                     'azure.mgmt.storage',
-                                     'azure.mgmt.storage#StorageManagementClient')
+                    'azure.mgmt.storage',
+                    'azure.mgmt.storage#StorageManagementClient')
     MGMT_COMPUTE = ('Microsoft.Compute/all',
                     'azure.mgmt.compute.compute',
                     'azure.mgmt.compute#ComputeManagementClient')
