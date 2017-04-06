@@ -427,3 +427,59 @@ helps['webapp stop'] = """
     type: command
     short-summary: Stop a web app.
 """
+
+helps['functionapp'] = """
+    type: group
+    short-summary: Manage your function app.
+"""
+
+helps['functionapp create'] = """
+    type: command
+    short-summary: Create a function app.
+    examples:
+        - name: Create a basic function app.  Name must be unique to yield a unique FQDN;
+                for example, MyUniqueApp.azurewebsites.net.
+          text: >
+            az functionapp create
+            -g MyResourceGroup
+            -p MyPlan
+            -n MyUniqueApp
+            -s MyStorageAccount
+"""
+
+helps['functionapp delete'] = """
+    type: command
+    short-summary: Delete a function app.
+"""
+
+helps['functionapp list'] = """
+    type: command
+    short-summary: List function apps.
+    examples:
+        - name: List default host name and state for all function apps.
+          text: >
+            az functionapp list --query "[].{ hostName: defaultHostName, state: state }"
+        - name: List all running function apps.
+          text: >
+            az functionapp list --query "[?state=='Running']"
+"""
+
+helps['functionapp restart'] = """
+    type: command
+    short-summary: Restart a function app.
+"""
+
+helps['functionapp start'] = """
+    type: command
+    short-summary: Start a function app.
+"""
+
+helps['functionapp show'] = """
+    type: command
+    short-summary: Show a function app.
+"""
+
+helps['functionapp stop'] = """
+    type: command
+    short-summary: Stop a function app.
+"""

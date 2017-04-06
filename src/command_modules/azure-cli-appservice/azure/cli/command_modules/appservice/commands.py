@@ -185,3 +185,15 @@ cli_generic_update_command(__name__, 'appservice plan update', 'azure.mgmt.web.o
                            custom_function_op='azure.cli.command_modules.appservice.custom#update_app_service_plan',
                            setter_arg_name='app_service_plan', factory=cf_plans)
 cli_command(__name__, 'appservice list-locations', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.list_geo_regions', cf_web_client, transform=transform_list_location_output)
+
+cli_command(__name__, 'functionapp create', 'azure.cli.command_modules.appservice.custom#create_function')
+cli_command(__name__, 'functionapp list', 'azure.cli.command_modules.appservice.custom#list_function_app', table_transformer=transform_web_list_output)
+cli_command(__name__, 'functionapp show', 'azure.cli.command_modules.appservice.custom#show_webapp', exception_handler=empty_on_404, table_transformer=transform_web_output)
+cli_command(__name__, 'functionapp delete', 'azure.cli.command_modules.appservice.custom#delete_webapp')
+cli_command(__name__, 'functionapp stop', 'azure.cli.command_modules.appservice.custom#stop_webapp')
+cli_command(__name__, 'functionapp start', 'azure.cli.command_modules.appservice.custom#start_webapp')
+cli_command(__name__, 'functionapp restart', 'azure.cli.command_modules.appservice.custom#restart_webapp')
+cli_command(__name__, 'functionapp list-consumption-locations', 'azure.cli.command_modules.appservice.custom#list_consumption_locations')
+cli_command(__name__, 'functionapp config appsettings show', 'azure.cli.command_modules.appservice.custom#get_app_settings', exception_handler=empty_on_404)
+cli_command(__name__, 'functionapp config appsettings update', 'azure.cli.command_modules.appservice.custom#update_app_settings')
+cli_command(__name__, 'functionapp config appsettings delete', 'azure.cli.command_modules.appservice.custom#delete_app_settings')

@@ -11,6 +11,7 @@ from azure.cli.core.commands.parameters import (resource_group_name_type, locati
                                                 CliArgumentType, ignore_type, enum_choice_list)
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType
 from ._client_factory import web_client_factory
+from ._validators import validate_existing_function_app, validate_existing_web_app
 
 
 def _generic_site_operation(resource_group_name, name, operation_name, slot=None,  # pylint: disable=too-many-arguments
@@ -41,7 +42,16 @@ def get_hostname_completion_list(prefix, action, parsed_args, **kwargs):  # pyli
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 sku_arg_type = CliArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1(Premium Small), etc',
                                **enum_choice_list(['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3']))
+webapp_name_arg_type = CliArgumentType(configured_default='web', options_list=('--name', '-n'), metavar='NAME',
+                                       completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
+                                       help="name of the web. You can configure the default using 'az configure --defaults web=<name>'")
 
+# use this hidden arg to give a command the right instance, that functionapp commands
+# work on function app and webapp ones work on web app
+register_cli_argument('webapp', 'app_instance', ignore_type)
+register_cli_argument('functionapp', 'app_instance', ignore_type)
+# function app doesn't have slot support
+register_cli_argument('functionapp', 'slot', ignore_type)
 
 register_cli_argument('appservice', 'resource_group_name', arg_type=resource_group_name_type)
 register_cli_argument('appservice', 'location', arg_type=location_type)
@@ -273,3 +283,27 @@ register_cli_argument('appservice web source-control', 'cd_account_must_exist', 
 register_cli_argument('appservice web source-control', 'repository_type', help='repository type', default='git', **enum_choice_list(['git', 'mercurial']))
 register_cli_argument('appservice web source-control', 'git_token', help='git access token required for auto sync')
 # end of olds ones #
+
+register_cli_argument('functionapp', 'name', arg_type=name_arg_type, id_part='name', help='name of the function app')
+register_cli_argument('functionapp create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+                      help="name or resource id of the function app service plan. Use 'appservice plan create' to get one")
+register_cli_argument('functionapp create', 'new_app_name', options_list=('--name', '-n'), help='name of the new function app')
+register_cli_argument('functionapp create', 'storage_account', options_list=('--storage-account', '-s'),
+                      help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
+
+# For commands with shared impl between webapp and functionapp and has output, we apply type validation to avoid confusions
+register_cli_argument('appservice web show', 'name', arg_type=webapp_name_arg_type, validator=validate_existing_web_app)
+register_cli_argument('webapp show', 'name', arg_type=webapp_name_arg_type, validator=validate_existing_web_app)
+register_cli_argument('functionapp show', 'name', arg_type=name_arg_type, validator=validate_existing_function_app)
+
+register_cli_argument('functionapp', 'name', arg_type=name_arg_type, id_part='name', help="name of the function")
+register_cli_argument('functionapp create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+                      help="name or resource id of the function app service plan. Use 'appservice plan create' to get one")
+register_cli_argument('functionapp create', 'consumption_plan_location', options_list=('--consumption-plan-location', '-c'),
+                      help="Geographic location where Function App will be hosted. Use 'functionapp list-consumption-locations' to view available locations.")
+register_cli_argument('functionapp create', 'storage_account', options_list=('--storage-account', '-s'),
+                      help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
+
+register_cli_argument('functionapp config appsettings', 'settings', nargs='+', help="space separated app settings in a format of <name>=<value>")
+register_cli_argument('functionapp config appsettings', 'slot_settings', nargs='+', help="space separated slot app settings in a format of <name>=<value>")
+register_cli_argument('functionapp config appsettings', 'setting_names', nargs='+', help="space separated app setting names")
