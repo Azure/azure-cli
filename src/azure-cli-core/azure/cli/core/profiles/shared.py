@@ -130,18 +130,14 @@ def get_client_class(resource_type):
 
     :param resource_type: The resource type.
     :type resource_type: ResourceType.
-    :raises: ImportError, AttributeError
     :returns:  class -- the Client class.
     """
     cp = resource_type.client_path
-    try:
-        mod_to_import, attr_path = cp.split('#')
-        op = import_module(mod_to_import)
-        for part in attr_path.split('.'):
-            op = getattr(op, part)
-        return op
-    except (ValueError, AttributeError):
-        return None
+    mod_to_import, attr_path = cp.split('#')
+    op = import_module(mod_to_import)
+    for part in attr_path.split('.'):
+        op = getattr(op, part)
+    return op
 
 
 def get_versioned_models(api_profile, resource_type, *model_args, **kwargs):
