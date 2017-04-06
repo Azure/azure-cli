@@ -141,17 +141,17 @@ register_cli_argument('vmss extension image', 'orderby', help='The sort to apply
 register_cli_argument('vmss extension image', 'top', help='Return top number of records')
 register_cli_argument('vmss extension image', 'version', help='Extension version')
 
-register_cli_argument('vmss extension', 'settings', type=validate_file_or_dict)
-register_cli_argument('vmss extension', 'protected_settings', type=validate_file_or_dict)
 
 for scope in ['vm diagnostics', 'vmss diagnostics']:
     register_cli_argument(scope, 'version', help='version of the diagnostics extension. Will use the latest if not specfied')
-    register_cli_argument(scope, 'settings', help='json string or a file path, which defines data to be collected.', type=file_type, completer=FilesCompleter())
-    register_cli_argument(scope, 'protected_settings', help='json string or a file path containing private configurations such as storage account keys, etc.', type=file_type, completer=FilesCompleter())
+    register_cli_argument(scope, 'settings', help='json string or a file path, which defines data to be collected.', type=validate_file_or_dict, completer=FilesCompleter())
+    register_cli_argument(scope, 'protected_settings', help='json string or a file path containing private configurations such as storage account keys, etc.', type=validate_file_or_dict, completer=FilesCompleter())
 
 for scope in ['vm', 'vmss']:
     register_cli_argument(scope, 'no_auto_upgrade', action='store_true', help='by doing this, extension system will not pick the highest minor version for the specified version number, and will not auto update to the latest build/revision number on any scale set updates in future.')
     register_cli_argument('{} create'.format(scope), 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing', arg_group='Authentication')
+    register_cli_argument('{} extension'.format(scope), 'settings', type=validate_file_or_dict)
+    register_cli_argument('{} extension'.format(scope), 'protected_settings', type=validate_file_or_dict)
 
 
 register_cli_argument('vm image list', 'image_location', location_type)
