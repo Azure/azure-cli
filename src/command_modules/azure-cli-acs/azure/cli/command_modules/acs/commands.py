@@ -9,8 +9,9 @@ from azure.cli.core.commands import cli_command
 from ._client_factory import _acs_client_factory
 from azure.cli.core.util import empty_on_404
 
-cli_command(__name__, 'acs show', 'azure.mgmt.compute.operations.container_services_operations#ContainerServicesOperations.get', _acs_client_factory, exception_handler=empty_on_404)
-cli_command(__name__, 'acs delete', 'azure.mgmt.compute.operations.container_services_operations#ContainerServicesOperations.delete', _acs_client_factory)
+
+cli_command(__name__, 'acs show', 'azure.mgmt.compute.containerservice.operations.container_services_operations#ContainerServicesOperations.get', _acs_client_factory, exception_handler=empty_on_404)
+cli_command(__name__, 'acs delete', 'azure.mgmt.compute.containerservice.operations.container_services_operations#ContainerServicesOperations.delete', _acs_client_factory)
 
 # Per conversation with ACS team, hide the update till we have something meaningful to tweak
 # from azure.cli.command_modules.acs.custom import update_acs

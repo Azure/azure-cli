@@ -48,7 +48,7 @@ def generic_data_service_factory(service, name=None, key=None, connection_string
 
 
 def storage_client_factory(**_):
-    return get_mgmt_service_client(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS)
+    return get_mgmt_service_client(ResourceType.MGMT_STORAGE)
 
 
 def file_data_service_factory(kwargs):

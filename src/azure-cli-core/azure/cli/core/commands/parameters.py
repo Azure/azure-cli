@@ -16,7 +16,7 @@ from azure.cli.core.profiles import get_versioned_models
 
 def get_subscription_locations():
     from azure.cli.core.commands.client_factory import get_subscription_service_client
-    from azure.mgmt.resource.subscriptions import SubscriptionClient
+    from azure.mgmt.resource import SubscriptionClient
     subscription_client, subscription_id = get_subscription_service_client(SubscriptionClient)
     return list(subscription_client.subscriptions.list_locations(subscription_id))
 
@@ -49,7 +49,8 @@ def get_one_of_subscription_locations():
 
 def get_resource_groups():
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.resource.resources import ResourceManagementClient
+    # TODO Find usages of ResourceManagementClient and version those also.
+    from azure.mgmt.resource import ResourceManagementClient
     rcf = get_mgmt_service_client(ResourceManagementClient)
     return list(rcf.resource_groups.list())
 
@@ -61,7 +62,7 @@ def get_resource_group_completion_list(prefix, **kwargs):  # pylint: disable=unu
 
 def get_resources_in_resource_group(resource_group_name, resource_type=None):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource import ResourceManagementClient
     rcf = get_mgmt_service_client(ResourceManagementClient)
     filter_str = "resourceType eq '{}'".format(resource_type) if resource_type else None
     return list(rcf.resource_groups.list_resources(resource_group_name, filter=filter_str))
@@ -69,7 +70,7 @@ def get_resources_in_resource_group(resource_group_name, resource_type=None):
 
 def get_resources_in_subscription(resource_type=None):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource import ResourceManagementClient
     rcf = get_mgmt_service_client(ResourceManagementClient)
     filter_str = "resourceType eq '{}'".format(resource_type) if resource_type else None
     return list(rcf.resources.list(filter=filter_str))
