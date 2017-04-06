@@ -370,8 +370,7 @@ def add_reference(target_group, target_name, reference_name):
     :param reference_name: Name of the reference
     :type reference_name: String
     """
-    if not _validate_reference_name(reference_name):
-        raise CLIError("{} is not valid for a Reference Name. A valid reference name must consist of alphanumeric characters, or '_'".format(reference_name))
+    _validate_reference_name(reference_name)
 
     service_name = _get_service_name()
     instance, client = references.get_reference_type(target_group, target_name)
@@ -398,13 +397,28 @@ def add_reference(target_group, target_name, reference_name):
     _service_add_reference(reference_name, instance.type)
 
 
+def remove_reference(reference_name):
+    """
+    Removes reference name
+    :param reference_name: Name of the reference
+    :type reference_name: String
+    """
+    _validate_reference_name(reference_name)
+    service_name = _get_service_name()
+    references.remove_reference(service_name, reference_name)
+    utils.writeline("Removed reference '{}'".format(reference_name))
+
+
 def _validate_reference_name(reference_name):
     """
-    Validates the reference name:
-    A valid reference name must consist of alphanumeric characters, or '_'
+    Validates the reference name and throws an exception
+    if reference name is invalid. A valid reference name
+    must consist of alphanumeric characters, or '_'
     """
     result = re.match('[_a-zA-Z0-9]+', reference_name)
-    return result.group() == reference_name
+    if result.group() != reference_name:
+        raise CLIError(
+            "{} is not a valid reference Name. A reference name must consist of alphanumeric characters, or '_'".format(reference_name))
 
 
 def _deployment_pipelines_exist():
@@ -553,6 +567,7 @@ def _get_pipeline_name():
     # Get owner|organization/repo e.g. BikeSharing/reservations
     # and replace '/' with '-' as '/' can't be used in the pipeline name
     # which becomes a part of the URL
+    # TODO: Need to do this for VSTS repos as well.
     owner_repo = remote_url.partition(
         'github.com/')[2].replace('/', '-').replace('.git', '')
 
@@ -1180,6 +1195,7 @@ def _service_run():
     """
     _run_innerloop_command('run -t -q')
 
+
 def service_list():
     """
     Lists all the running user services in the Kubernetes cluster.
@@ -1191,18 +1207,21 @@ def service_list():
     except Exception as error:
         raise CLIError(error)
 
+
 def _service_list():
     """
     Calls tenx service list command on the current directory.
     """
     _run_innerloop_command('service list')
 
+
 def _service_add_reference(reference_name, reference_type):
     """
     Calls tenx run command on the current directory.
     Adds reference to the projectInfo
     """
-    _run_innerloop_command('reference add -n {} -t {} -q'.format(reference_name, reference_type))
+    _run_innerloop_command(
+        'reference add -n {} -t {} -q'.format(reference_name, reference_type))
 
 
 def _run_innerloop_command(*args):
