@@ -372,6 +372,7 @@ def add_reference(target_group, target_name, reference_name):
     """
     _validate_reference_name(reference_name)
 
+    env_variables = []
     service_name = _get_service_name()
     instance, client = references.get_reference_type(target_group, target_name)
 
@@ -382,18 +383,27 @@ def add_reference(target_group, target_name, reference_name):
             raise ValueError('No connection strings found')
 
         connection_string = results.connection_strings[0].connection_string
-        references.create_connection_string(
+        env_variables = references.create_documentdb_reference(
             service_name, reference_name, connection_string)
-        # Save the reference
-        project_settings.add_reference(
-            service_name, reference_name, instance.type)
+    elif instance.type == 'Microsoft.Sql/servers':
+        sql_admin_login = instance.administrator_login
+        # BUG: Admin password is always null
+        # https://github.com/Azure/azure-cli/issues/2789
+        sql_admin_password = instance.administrator_login_password
+        fqdn = instance.fully_qualified_domain_name
+
+        env_variables = references.create_sqlserver_reference(
+            service_name, reference_name, sql_admin_login, sql_admin_password, fqdn)
     else:
         raise NotImplementedError()
 
-    utils.writeline("Added reference '{}'".format(reference_name))
-    utils.writeline('Environment variables: {}'.format(
-        references.get_environment_var_name(service_name, reference_name)))
+    # Save the reference
+    project_settings.add_reference(
+        service_name, reference_name, instance.type)
 
+    utils.writeline("Added reference '{}'".format(reference_name))
+    utils.writeline('Environment variables:\n{}'.format(
+        '\n'.join(env_variables)))
     _service_add_reference(reference_name, instance.type)
 
 
@@ -429,7 +439,7 @@ def _deployment_pipelines_exist():
     service_folder = _get_service_folder()
     git_remote_url = _get_git_remote_url()
 
-    return project_settings.get_ci_pipeline_name(git_remote_url, service_folder) or \
+    return project_settings.get_ci_pipeline_name(git_remote_url, service_folder) or\
         project_settings.get_cd_pipeline_name(git_remote_url, service_folder)
 
 
