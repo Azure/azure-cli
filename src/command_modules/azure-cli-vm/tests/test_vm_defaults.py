@@ -62,7 +62,7 @@ def _mock_resource_client(client_type):
             ]
             return next((x for x in all_mocks if x.name == rg), _get_mock_rg(rg, 'unknown'))
         client.resource_groups.get = _mock_get
-    elif client_type is ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS:
+    elif client_type is ResourceType.MGMT_STORAGE:
         def _mock_list_by_resource_group(rg):
             def _get_mock_sa(name, rg, location, tier):
                 mock_sa = mock.MagicMock()

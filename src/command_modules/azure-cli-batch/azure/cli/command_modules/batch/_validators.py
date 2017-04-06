@@ -137,7 +137,7 @@ def storage_account_id(namespace):
     if (namespace.storage_account and not
             ('/providers/Microsoft.ClassicStorage/storageAccounts/' in namespace.storage_account or
              '/providers/Microsoft.Storage/storageAccounts/' in namespace.storage_account)):
-        storage_client = get_mgmt_service_client(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS)
+        storage_client = get_mgmt_service_client(ResourceType.MGMT_STORAGE)
         acc = storage_client.storage_accounts.get_properties(namespace.resource_group_name,
                                                              namespace.storage_account)
         if not acc:

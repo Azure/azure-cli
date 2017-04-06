@@ -125,7 +125,7 @@ def _get_access_extension_upgrade_info(extensions, name):
 
 def _get_storage_management_client():
     from azure.cli.core.profiles.shared import ResourceType
-    return get_mgmt_service_client(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS)
+    return get_mgmt_service_client(ResourceType.MGMT_STORAGE)
 
 
 def _trim_away_build_number(version):

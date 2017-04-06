@@ -34,7 +34,7 @@ storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 # Utilities
 
 def _query_account_key(account_name):
-    scf = get_mgmt_service_client(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS)
+    scf = get_mgmt_service_client(ResourceType.MGMT_STORAGE)
     acc = next((x for x in scf.storage_accounts.list() if x.name == account_name), None)
     if acc:
         from azure.cli.core.commands.arm import parse_resource_id
@@ -283,7 +283,7 @@ def validate_encryption(namespace):
     ''' Builds up the encryption object for storage account operations based on the
     list of services passed in. '''
     if namespace.encryption:
-        rt = ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS
+        rt = ResourceType.MGMT_STORAGE
         Encryption, EncryptionServices, EncryptionService = get_versioned_models(rt, 'Encryption', 'EncryptionServices', 'EncryptionService')  # pylint: disable=line-too-long
         services = {service: EncryptionService(True) for service in namespace.encryption}
         namespace.encryption = Encryption(EncryptionServices(**services))

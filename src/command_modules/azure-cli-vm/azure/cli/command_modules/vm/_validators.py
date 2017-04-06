@@ -394,7 +394,7 @@ def _validate_vm_create_storage_account(namespace):
     else:
         from azure.cli.core.profiles.shared import ResourceType
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        storage_client = get_mgmt_service_client(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS).storage_accounts  # pylint: disable=line-too-long
+        storage_client = get_mgmt_service_client(ResourceType.MGMT_STORAGE).storage_accounts  # pylint: disable=line-too-long
 
         # find storage account in target resource group that matches the VM's location
         sku_tier = 'Premium' if 'Premium' in namespace.storage_sku else 'Standard'

@@ -23,7 +23,7 @@ class APIVersionException(Exception):
 class ResourceType(Enum):  # pylint: disable=too-few-public-methods
 
     # TODO Thinking of removing the RP/RT format due to swagger/sdk format
-    MGMT_STORAGE_STORAGE_ACCOUNTS = ('Microsoft.Storage/storageAccounts',
+    MGMT_STORAGE = ('Microsoft.Storage/storageAccounts',
                                      'azure.mgmt.storage',
                                      'azure.mgmt.storage#StorageManagementClient')
     MGMT_COMPUTE = ('Microsoft.Compute/all',
@@ -71,7 +71,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
 
 AZURE_API_PROFILES = {
     'latest': {
-        ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS: '2016-12-01',
+        ResourceType.MGMT_STORAGE: '2016-12-01',
         ResourceType.MGMT_NETWORK: '2016-09-01',
         ResourceType.MGMT_CONTAINER_SERVICE: '2017-01-31',
         ResourceType.MGMT_COMPUTE: '2016-04-30-preview',
@@ -83,7 +83,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01'
     },
     '2016-example': {
-        ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS: '2016-12-01',
+        ResourceType.MGMT_STORAGE: '2016-12-01',
         ResourceType.MGMT_NETWORK: '2016-09-01',
         ResourceType.MGMT_CONTAINER_SERVICE: '2017-01-31',
         ResourceType.MGMT_COMPUTE: '2016-04-30-preview',
@@ -95,7 +95,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01'
     },
     '2015-example': {
-        ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS: '2015-06-15',
+        ResourceType.MGMT_STORAGE: '2015-06-15',
         ResourceType.MGMT_NETWORK: '2015-06-15',
         ResourceType.MGMT_CONTAINER_SERVICE: '2017-01-31',
         ResourceType.MGMT_COMPUTE: '2015-06-15',

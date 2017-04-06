@@ -59,7 +59,7 @@ cli_command(__name__, 'storage account keys renew', mgmt_path + 'regenerate_key'
 cli_command(__name__, 'storage account keys list', mgmt_path + 'list_keys', factory, transform=lambda x: getattr(x, 'keys', x))
 
 cli_command(__name__, 'storage account create', custom_nonce_path + 'create_storage_account')
-if get_api_version(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS) in ['2016-12-01']:
+if get_api_version(ResourceType.MGMT_STORAGE) in ['2016-12-01']:
     cli_generic_update_command(__name__, 'storage account update',
                                mgmt_path + 'get_properties',
                                mgmt_path + 'update', factory,
