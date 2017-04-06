@@ -22,34 +22,89 @@ class APIVersionException(Exception):
 
 class ResourceType(Enum):  # pylint: disable=too-few-public-methods
 
-    MGMT_STORAGE_STORAGE_ACCOUNTS = ('Microsoft.Storage/storageAccounts',
-                                     'azure.mgmt.storage',
-                                     'StorageManagementClient')
+    # TODO Thinking of removing the RP/RT format due to swagger/sdk format
+    MGMT_STORAGE = ('Microsoft.Storage/storageAccounts',
+                    'azure.mgmt.storage',
+                    'azure.mgmt.storage#StorageManagementClient')
+    MGMT_COMPUTE = ('Microsoft.Compute/all',
+                    'azure.mgmt.compute.compute',
+                    'azure.mgmt.compute#ComputeManagementClient')
+    MGMT_CONTAINER_SERVICE = ('Microsoft.ContainerService/all',
+                              'azure.mgmt.compute.containerservice',
+                              'azure.mgmt.compute#ContainerServiceClient')
+    MGMT_NETWORK = ('Microsoft.Network/all',
+                    'azure.mgmt.network',
+                    'azure.mgmt.network#NetworkManagementClient')
+    MGMT_RESOURCE_FEATURES = ('Microsoft.Features/features',
+                              'azure.mgmt.resource.features',
+                              'azure.mgmt.resource#FeatureClient')
+    MGMT_RESOURCE_LINKS = ('Microsoft.Resources/links',
+                           'azure.mgmt.resource.links',
+                           'azure.mgmt.resource#ManagementLinkClient')
+    MGMT_RESOURCE_LOCKS = ('Microsoft.Authorization/locks',
+                           'azure.mgmt.resource.locks',
+                           'azure.mgmt.resource#ManagementLockClient')
+    MGMT_RESOURCE_POLICY = ('Microsoft.Authorization/policyassignments',
+                            'azure.mgmt.resource.policy',
+                            'azure.mgmt.resource#PolicyClient')
+    MGMT_RESOURCE_RESOURCES = ('Microsoft.Resources/deployments',
+                               'azure.mgmt.resource.resources',
+                               'azure.mgmt.resource#ResourceManagementClient')
+    MGMT_RESOURCE_SUBSCRIPTIONS = ('Microsoft.Resources/subscriptions',
+                                   'azure.mgmt.resource.subscriptions',
+                                   'azure.mgmt.resource#SubscriptionClient')
 
-    def __init__(self, type_name, sdk_module, client_name):
+    def __init__(self, type_name, operations_path, client_path):
         """Constructor.
 
         :param type_name: The full resource type name (e.g. Provider/ResourceType).
         :type type_name: str.
-        :param sdk_module: Path to the sdk module.
-        :type sdk_module: str.
-        :param client_name: The name of the client for this resource type.
-        :type client_name: str.
+        :param operations_path: Path to the (unversioned) operations module.
+        :type operations_path: str.
+        :param client_path: The path to the client for this resource type.
+        :type client_path: str.
         """
         self.type_name = type_name
-        self.sdk_module = sdk_module
-        self.client_name = client_name
+        self.operations_path = operations_path
+        self.client_path = client_path
 
 
 AZURE_API_PROFILES = {
     'latest': {
-        ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS: '2016-12-01'
+        ResourceType.MGMT_STORAGE: '2016-12-01',
+        ResourceType.MGMT_NETWORK: '2016-09-01',
+        ResourceType.MGMT_CONTAINER_SERVICE: '2017-01-31',
+        ResourceType.MGMT_COMPUTE: '2016-04-30-preview',
+        ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
+        ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
+        ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
+        ResourceType.MGMT_RESOURCE_POLICY: '2016-04-01',
+        ResourceType.MGMT_RESOURCE_RESOURCES: '2016-09-01',
+        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01'
     },
     '2016-example': {
-        ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS: '2016-12-01'
+        ResourceType.MGMT_STORAGE: '2016-12-01',
+        ResourceType.MGMT_NETWORK: '2016-09-01',
+        ResourceType.MGMT_CONTAINER_SERVICE: '2017-01-31',
+        ResourceType.MGMT_COMPUTE: '2016-04-30-preview',
+        ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
+        ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
+        ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
+        ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
+        ResourceType.MGMT_RESOURCE_RESOURCES: '2016-09-01',
+        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01'
     },
     '2015-example': {
-        ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS: '2015-06-15'
+        ResourceType.MGMT_STORAGE: '2015-06-15',
+        ResourceType.MGMT_NETWORK: '2015-06-15',
+        ResourceType.MGMT_CONTAINER_SERVICE: '2017-01-31',
+        ResourceType.MGMT_COMPUTE: '2015-06-15',
+        ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
+        ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
+        ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
+        ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
+        ResourceType.MGMT_RESOURCE_RESOURCES: '2016-09-01',
+        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01'
     }
 }
 
@@ -75,10 +130,14 @@ def get_client_class(resource_type):
 
     :param resource_type: The resource type.
     :type resource_type: ResourceType.
-    :raises: ImportError, AttributeError
     :returns:  class -- the Client class.
     """
-    return getattr(import_module(resource_type.sdk_module), resource_type.client_name)
+    cp = resource_type.client_path
+    mod_to_import, attr_path = cp.split('#')
+    op = import_module(mod_to_import)
+    for part in attr_path.split('.'):
+        op = getattr(op, part)
+    return op
 
 
 def get_versioned_models(api_profile, resource_type, *model_args, **kwargs):

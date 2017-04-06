@@ -21,7 +21,7 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
     ServiceObjectiveName,
     StorageKeyType
 )
-from azure.mgmt.resource.resources import ResourceManagementClient
+from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.storage import StorageManagementClient
 
 # url parse package has different names in Python 2 and 3. 'six' package works cross-version.

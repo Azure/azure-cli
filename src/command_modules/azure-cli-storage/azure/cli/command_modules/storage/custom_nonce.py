@@ -11,12 +11,12 @@ from azure.cli.core.profiles.shared import ResourceType
 from azure.cli.command_modules.storage._factory import storage_client_factory
 
 
-if get_api_version(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS) in ['2016-12-01']:
+if get_api_version(ResourceType.MGMT_STORAGE) in ['2016-12-01']:
 
     def create_storage_account(resource_group_name, account_name, sku, location,
-                               kind=get_versioned_models(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS, 'Kind').storage.value, tags=None, custom_domain=None,
+                               kind=get_versioned_models(ResourceType.MGMT_STORAGE, 'Kind').storage.value, tags=None, custom_domain=None,
                                encryption=None, access_tier=None):
-        StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier = get_versioned_models(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS, 'StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier')
+        StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier = get_versioned_models(ResourceType.MGMT_STORAGE, 'StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier')
         scf = storage_client_factory()
         params = StorageAccountCreateParameters(
             sku=Sku(sku),
@@ -30,7 +30,7 @@ if get_api_version(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS) in ['2016-12-01']
 
     def update_storage_account(instance, sku=None, tags=None, custom_domain=None,
                                use_subdomain=None, encryption=None, access_tier=None):
-        StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier = get_versioned_models(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS, 'StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier')
+        StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier = get_versioned_models(ResourceType.MGMT_STORAGE, 'StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier')
         domain = instance.custom_domain
         if custom_domain is not None:
             domain = CustomDomain(custom_domain)
@@ -46,10 +46,10 @@ if get_api_version(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS) in ['2016-12-01']
         )
         return params
 
-elif get_api_version(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS) in ['2015-06-15']:
+elif get_api_version(ResourceType.MGMT_STORAGE) in ['2015-06-15']:
 
     def create_storage_account(resource_group_name, account_name, location, account_type, tags=None):
-        StorageAccountCreateParameters, AccountType = get_versioned_models(ResourceType.MGMT_STORAGE_STORAGE_ACCOUNTS, 'StorageAccountCreateParameters', 'AccountType')
+        StorageAccountCreateParameters, AccountType = get_versioned_models(ResourceType.MGMT_STORAGE, 'StorageAccountCreateParameters', 'AccountType')
         scf = storage_client_factory()
         params = StorageAccountCreateParameters(location, AccountType(account_type), tags)
         return scf.storage_accounts.create(resource_group_name, account_name, params)

@@ -95,7 +95,7 @@ class ResourceId(str):
 def resource_exists(resource_group, name, namespace, type, **_):  # pylint: disable=redefined-builtin
     '''Checks if the given resource exists.
     '''
-    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource import ResourceManagementClient
 
     odata_filter = "resourceGroup eq '{}' and name eq '{}'" \
         " and resourceType eq '{}/{}'".format(resource_group, name, namespace, type)
