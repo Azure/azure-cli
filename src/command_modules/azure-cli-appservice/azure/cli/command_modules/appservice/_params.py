@@ -145,9 +145,7 @@ register_cli_argument('appservice web source-control', 'branch', help='the branc
 register_cli_argument('appservice web source-control', 'repository_type', help='repository type', default='git', **enum_choice_list(['git', 'mercurial']))
 register_cli_argument('appservice web source-control', 'git_token', help='git access token required for auto sync')
 
-register_cli_argument('functionapp', 'name', configured_default='web',
-                      arg_type=name_arg_type, id_part='name',
-                      help="name of the function")
+register_cli_argument('functionapp', 'name', arg_type=name_arg_type, id_part='name', help="name of the function")
 register_cli_argument('functionapp create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                       help="name or resource id of the function app service plan. Use 'appservice plan create' to get one")
 register_cli_argument('functionapp create', 'storage_account', options_list=('--storage-account', '-s'),

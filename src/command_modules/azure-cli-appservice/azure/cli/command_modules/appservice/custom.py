@@ -968,6 +968,8 @@ def create_function(resource_group_name, name, storage_account, plan=None):
     keys = storage_client.storage_accounts.list_keys(sa_resource_group, storage_account).keys
     con_string = 'DefaultEndpointsProtocol=https;AccountName={};AccountKey={}'.format(storage_account, keys[0].value)  # pylint: disable=line-too-long
     # adding appsetting to site to make it a function
-    settings = ['AzureWebJobsStorage=' + con_string, 'AzureWebJobsDashboard=' + con_string, 'FUNCTIONS_EXTENSION_VERSION=~1']  # pylint: disable=line-too-long
+    settings = ['AzureWebJobsStorage=' + con_string, 'AzureWebJobsDashboard=' + con_string,
+                'FUNCTIONS_EXTENSION_VERSION=~1', 'WEBSITE_NODE_DEFAULT_VERSION=6.5.0']
+    update_site_configs(resource_group_name, name, slot=None, always_on='true')
     update_app_settings(resource_group_name, name, settings, None)
     return webapp
