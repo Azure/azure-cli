@@ -57,11 +57,7 @@ setup(
         'azure.cli.command_modules',
     ],
     packages=[
-        'azure.cli.command_modules.acs',
-        'azure.cli.command_modules.acs.mgmt_acs',
-        'azure.cli.command_modules.acs.mgmt_acs.lib',
-        'azure.cli.command_modules.acs.mgmt_acs.lib.models',
-        'azure.cli.command_modules.acs.mgmt_acs.lib.operations',
+        'azure.cli.command_modules.acs'
     ],
     install_requires=DEPENDENCIES,
 )

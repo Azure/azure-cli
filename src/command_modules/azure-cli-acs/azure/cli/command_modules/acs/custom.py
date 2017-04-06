@@ -31,8 +31,6 @@ from msrestazure.azure_exceptions import CloudError
 import azure.cli.core.azlogging as azlogging
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._actions import _is_valid_ssh_rsa_public_key
-from azure.cli.command_modules.acs.mgmt_acs.lib \
-    import AcsCreationClient as ACSClient
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,line-too-long
 from azure.cli.core.util import CLIError, shell_safe_json_parse
 from azure.cli.core._profile import Profile
@@ -432,7 +430,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     register_providers()
     groups = _resource_client_factory().resource_groups
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
-    groups.get(resource_group_name)
+    rg = groups.get(resource_group_name)
 
     if orchestrator_type == 'Kubernetes' or orchestrator_type == 'kubernetes':
         # TODO: This really needs to be broken out and unit tested.
@@ -463,6 +461,9 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
             if not client_secret:
                 raise CLIError('--client-secret is required if --service-principal is specified')
             _validate_service_principal(client, service_principal)
+        
+        if location is None:
+            location = rg.location
         return _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name,
                                   ssh_key_value, admin_username=admin_username,
                                   agent_count=agent_count, agent_vm_size=agent_vm_size,
@@ -472,14 +473,37 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     if windows:
         raise CLIError('--windows is only supported for Kubernetes clusters')
 
-    ops = get_mgmt_service_client(ACSClient).acs
-    return ops.create_or_update(resource_group_name, deployment_name, dns_name_prefix, name,
-                                ssh_key_value, content_version=content_version,
-                                admin_username=admin_username, agent_count=agent_count,
-                                agent_vm_size=agent_vm_size, location=location,
-                                master_count=master_count, orchestrator_type=orchestrator_type,
-                                tags=tags, custom_headers=custom_headers, raw=raw,
-                                operation_config=operation_config)
+    return _create_non_kubernetes_acs(resource_group_name, name, location, tags,
+                                          orchestrator_type, dns_name_prefix, master_count,
+                                          agent_count, agent_vm_size,
+                                          admin_username, ssh_key_value)
+
+
+def _create_non_kubernetes_acs(resource_group_name, name, location, tags, orchestrator_type, dns_name_prefix,
+                               master_count, agent_count, agent_vm_size,
+                               admin_username, ssh_key_value):
+    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource.resources.models import DeploymentProperties
+    from azure.cli.core.util import random_string
+
+    from ._template_builder import ArmTemplateBuilder, build_acs_resource
+    # Build up the ARM template
+    master_template = ArmTemplateBuilder()
+    master_template.add_resource(build_acs_resource(name, location, tags, orchestrator_type,
+                                                    master_count, dns_name_prefix + 'mgmt',
+                                                    agent_count, agent_vm_size, dns_name_prefix+'agents',
+                                                    admin_username, ssh_key_value))
+
+    master_template.add_output(name, admin_username)
+    template = master_template.build()
+
+    # deploy ARM template
+    deployment_name = 'acs_deploy_' + random_string(32)
+    client = get_mgmt_service_client(ResourceManagementClient).deployments
+    properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
+    # creates the ACS deployment
+    return client.create_or_update(resource_group_name, deployment_name, properties)
+
 
 
 def store_acs_service_principal(subscription_id, client_secret, service_principal,
