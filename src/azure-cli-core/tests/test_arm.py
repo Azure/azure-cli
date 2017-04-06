@@ -7,7 +7,10 @@ import unittest
 
 from azure.cli.core.commands.arm import parse_resource_id
 
+<<<<<<< 9735c8a016cdcc8a36b19fefe2a7ac7d60632714
 
+=======
+>>>>>>> Fix ARM resource id parsing.
 class TestARM(unittest.TestCase):
     def test_resource_parse(self):
         tests = [{
@@ -92,7 +95,6 @@ class TestARM(unittest.TestCase):
         for test in tests:
             resource = parse_resource_id(test['resource_id'])
             self.assertDictEqual(resource, test['expected'])
-
 
 if __name__ == "__main__":
     unittest.main()
