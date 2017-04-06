@@ -14,7 +14,8 @@ except ImportError:
 import OpenSSL.crypto
 
 from msrestazure.azure_exceptions import CloudError
-
+from azure.mgmt.storage import StorageManagementClient
+from azure.cli.core.extensions.transform import _parse_id
 from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan,
                                    SkuDescription, SslState, HostNameBinding,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
@@ -949,3 +950,58 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
         elif hostname in hostnames_in_webapp:
             matched.add(hostname)
     return matched
+
+
+def create_function(resource_group_name, name, storage_account, plan=None):
+    client = web_client_factory()
+    if is_valid_resource_id(plan):
+        plan = parse_resource_id(plan)['name']
+    location = _get_location_from_app_service_plan(client, resource_group_name, plan)
+    webapp_def = Site(server_farm_id=plan, location=location)
+    webapp_def.kind = 'functionapp'
+    # check for storage account
+    sa_resource_group = resource_group_name
+    if storage_account.startswith('/subscriptions/'):
+        sa_resource_group = _parse_id(storage_account)['resource-group']
+        storage_account = _parse_id(storage_account)['name']
+    storage_client = get_mgmt_service_client(StorageManagementClient)
+    account_list = storage_client.storage_accounts.list_by_resource_group(sa_resource_group)
+    account_f = next((account for account in account_list if account.name == storage_account), None)
+    if account_f is None or account_f.name != storage_account:
+        return CLIError("Storage Account does not exist in Resource Group")
+    poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
+    webapp = AppServiceLongRunningOperation()(poller)
+    keys = storage_client.storage_accounts.list_keys(sa_resource_group, storage_account).keys
+    con_string = 'DefaultEndpointsProtocol=https;AccountName={};AccountKey={}'
+    con_string = con_string.format(storage_account, keys[0].value)
+    # adding appsetting to site to make it a function
+    settings = []
+    settings.append('AzureWebJobsStorage=' + con_string)
+    settings.append('AzureWebJobsDashboard=' + con_string)
+    settings.append('FUNCTIONS_EXTENSION_VERSION=~1')
+    update_app_settings(resource_group_name, name, settings, None)
+    return webapp
+
+
+def show_functionapp(resource_group_name, name, slot=None):
+    return show_webapp(resource_group_name, name, slot)
+
+
+def list_functionapp(resource_group_name=None):
+    return list_webapp(resource_group_name)
+
+
+def delete_functionapp(resource_group_name, name, slot=None):
+    return delete_webapp(resource_group_name, name, slot)
+
+
+def stop_functionapp(resource_group_name, name, slot=None):
+    return stop_webapp(resource_group_name, name, slot)
+
+
+def start_functionapp(resource_group_name, name, slot=None):
+    return start_webapp(resource_group_name, name, slot)
+
+
+def restart_functionapp(resource_group_name, name, slot=None):
+    return restart_webapp(resource_group_name, name, slot)
