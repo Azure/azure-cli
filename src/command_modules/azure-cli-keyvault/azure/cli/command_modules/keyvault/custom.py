@@ -542,6 +542,75 @@ def create_certificate(client, vault_base_url, certificate_name, certificate_pol
 create_certificate.__doc__ = KeyVaultClient.create_certificate.__doc__
 
 
+def _asn1_to_iso8601(asn1_date):
+    import dateutil
+    return dateutil.parser.parse(asn1_date.decode('utf-8'))
+
+
+def import_certificate(client, vault_base_url, certificate_name, certificate_data,
+                       disabled=False, password=None, certificate_policy=None, tags=None):
+    import binascii
+
+    x509 = None
+    content_type = None
+    try:
+        x509 = crypto.load_certificate(crypto.FILETYPE_PEM, certificate_data)
+        # if we get here, we know it was a PEM file
+        content_type = 'application/x-pem-file'
+        try:
+            # for PEM files (including automatic endline conversion for Windows)
+            certificate_data = certificate_data.decode('utf-8').replace('\r\n', '\n')
+        except UnicodeDecodeError:
+            certificate_data = binascii.b2a_base64(certificate_data).decode('utf-8')
+    except (ValueError, crypto.Error):
+        pass
+
+    if not x509:
+        try:
+            if password:
+                x509 = crypto.load_pkcs12(certificate_data, password).get_certificate()
+            else:
+                x509 = crypto.load_pkcs12(certificate_data).get_certificate()
+            content_type = 'application/x-pkcs12'
+            certificate_data = binascii.b2a_base64(certificate_data).decode('utf-8')
+        except crypto.Error:
+            raise CLIError('We could not parse the provided certificate as .pem or .pfx. Please verify the certificate with OpenSSL.') # pylint: disable=line-too-long
+
+    not_before, not_after = None, None
+
+    if x509.get_notBefore():
+        not_before = _asn1_to_iso8601(x509.get_notBefore())
+
+    if x509.get_notAfter():
+        not_after = _asn1_to_iso8601(x509.get_notAfter())
+
+    cert_attrs = CertificateAttributes(
+        enabled=not disabled,
+        not_before=not_before,
+        expires=not_after)
+
+    if certificate_policy:
+        secret_props = certificate_policy.get('secret_properties')
+        if secret_props:
+            secret_props['content_type'] = content_type
+        elif certificate_policy and not secret_props:
+            certificate_policy['secret_properties'] = SecretProperties(content_type=content_type)
+    else:
+        certificate_policy = CertificatePolicy(
+            secret_properties=SecretProperties(content_type=content_type))
+
+    logger.info("Starting 'keyvault certificate import'")
+    result = client.import_certificate(vault_base_url=vault_base_url,
+                                       certificate_name=certificate_name,
+                                       base64_encoded_certificate=certificate_data,
+                                       certificate_attributes=cert_attrs,
+                                       certificate_policy=certificate_policy,
+                                       tags=tags,
+                                       password=password)
+    logger.info("Finished 'keyvault certificate import'")
+    return result
+
+
 def download_certificate(client, vault_base_url, certificate_name, file_path,
                          encoding='binary', certificate_version=''):
     """ Download a certificate from a KeyVault. """

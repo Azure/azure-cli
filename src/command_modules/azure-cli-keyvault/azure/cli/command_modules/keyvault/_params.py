@@ -24,7 +24,7 @@ from azure.keyvault.generated.models.key_vault_client_enums import \
 from azure.keyvault.generated.models import \
     (KeyAttributes, SecretAttributes, CertificateAttributes)
 from azure.cli.command_modules.keyvault._validators import \
-    (datetime_type, base64_encoded_certificate_type,
+    (datetime_type, certificate_type,
      get_attribute_validator,
      vault_base_url_type, validate_key_import_source,
      validate_key_type, validate_key_ops, validate_policy_permissions,
@@ -155,7 +155,6 @@ register_cli_argument('keyvault secret download', 'encoding', options_list=('--e
 
 register_cli_argument('keyvault certificate', 'certificate_version', options_list=('--version', '-v'), help='The certificate version. If omitted, uses the latest version.', default='', required=False, completer=get_keyvault_version_completion_list('certificate'))
 register_attributes_argument('keyvault certificate create', 'certificate', CertificateAttributes, True)
-register_attributes_argument('keyvault certificate import', 'certificate', CertificateAttributes, True)
 register_attributes_argument('keyvault certificate set-attributes', 'certificate', CertificateAttributes)
 register_cli_argument('keyvault certificate set-attributes', 'expires', ignore_type)
 register_cli_argument('keyvault certificate set-attributes', 'not_before', ignore_type)
@@ -163,7 +162,9 @@ register_cli_argument('keyvault certificate set-attributes', 'not_before', ignor
 for item in ['create', 'set-attributes', 'import']:
     register_cli_argument('keyvault certificate {}'.format(item), 'certificate_policy', options_list=('--policy', '-p'), help='JSON encoded policy defintion. Use @{file} to load from a file.', type=get_json_object)
 
-register_cli_argument('keyvault certificate import', 'base64_encoded_certificate', options_list=('--file', '-f'), completer=FilesCompleter(), help='PKCS12 file or PEM file containing the certificate and private key.', type=base64_encoded_certificate_type)
+register_cli_argument('keyvault certificate import', 'certificate_data', options_list=('--file', '-f'), completer=FilesCompleter(), help='PKCS12 file or PEM file containing the certificate and private key.', type=certificate_type)
+register_cli_argument('keyvault certificate import', 'password', help="If the private key in certificate is encrypted, the password used for encryption.")
+register_extra_cli_argument('keyvault certificate import', 'disabled', help='Import the certificate in disabled state.', **three_state_flag())
 
 register_cli_argument('keyvault certificate download', 'file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter(), help='File to receive the binary certificate contents.')
 register_cli_argument('keyvault certificate download', 'encoding', options_list=('--encoding', '-e'), help='How to store base64 certificate contents in file.', **enum_choice_list(certificate_file_encoding_values))

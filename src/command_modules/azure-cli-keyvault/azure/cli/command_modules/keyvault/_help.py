@@ -91,6 +91,32 @@ helps['keyvault certificate create'] = """
               --image debian --secrets "$vm_secrets"
 """
 
+helps['keyvault certificate import'] = """
+    type: command
+    long-summary: >
+        Import a certificate into Key Vault. Certificates can also be used as a secrets in provisioned virtual machines.
+    examples:
+        - name: Create a service principal with a certificate, add the certificate to Key Vault and provision a VM with that certificate.
+          text: >
+            az group create -g my-group -l westus \n
+
+            service_principal=$(az ad sp create-for-rbac --create-cert) \n
+
+            cert_file=$(echo $service_principal | jq .fileWithCertAndPrivateKey -r) \n
+
+            az keyvault create -g my-group -n vaultname \n
+
+            az keyvault certificate import --vault-name vaultname -n cert_file \n
+
+            secrets=$(az keyvault secret list-versions --vault-name vaultname \\
+              -n cert1 --query "[?attributes.enabled].id" -o tsv)
+
+            vm_secrets=$(az vm format-secret -s "$secrets") \n
+
+            az vm create -g group-name -n vm-name --admin-username deploy  \\
+              --image debian --secrets "$vm_secrets"
+"""
+
 helps['keyvault certificate pending'] = """
     type: group
     short-summary: Manage pending certificate creation operations.
