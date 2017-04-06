@@ -138,7 +138,7 @@ class Application(object):
         argv = Application._expand_file_prefixed_files(unexpanded_argv)
         command_table = self.configuration.get_command_table(argv)
         self.raise_event(self.COMMAND_TABLE_LOADED, command_table=command_table)
-        self.parser.load_command_table(command_table, argv)
+        self.parser.load_command_table(command_table)
         self.raise_event(self.COMMAND_PARSER_LOADED, parser=self.parser)
 
         if len(argv) == 0:
