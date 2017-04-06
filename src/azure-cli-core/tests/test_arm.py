@@ -7,6 +7,7 @@ import unittest
 
 from azure.cli.core.commands.arm import parse_resource_id
 
+
 class TestARM(unittest.TestCase):
     def test_resource_parse(self):
         tests = [{
@@ -91,6 +92,7 @@ class TestARM(unittest.TestCase):
         for test in tests:
             resource = parse_resource_id(test['resource_id'])
             self.assertDictEqual(resource, test['expected'])
+
 
 if __name__ == "__main__":
     unittest.main()
