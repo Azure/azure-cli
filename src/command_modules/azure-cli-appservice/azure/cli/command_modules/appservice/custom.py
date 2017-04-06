@@ -14,7 +14,7 @@ except ImportError:
 import OpenSSL.crypto
 
 from msrestazure.azure_exceptions import CloudError
-
+from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan,
                                    SkuDescription, SslState, HostNameBinding,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
@@ -949,3 +949,27 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
         elif hostname in hostnames_in_webapp:
             matched.add(hostname)
     return matched
+
+
+def create_function(resource_group_name, name, storage_account, plan=None):
+    client = web_client_factory()
+    if is_valid_resource_id(plan):
+        plan = parse_resource_id(plan)['name']
+    location = _get_location_from_app_service_plan(client, resource_group_name, plan)
+    webapp_def = Site(server_farm_id=plan, location=location)
+    webapp_def.kind = 'functionapp'
+    sa_resource_group = resource_group_name
+    if is_valid_resource_id(storage_account):
+        sa_resource_group = parse_resource_id(storage_account)['resource_group']
+        storage_account = parse_resource_id(storage_account)['name']
+    poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
+    webapp = AppServiceLongRunningOperation()(poller)
+    storage_client = get_mgmt_service_client(StorageManagementClient)
+    keys = storage_client.storage_accounts.list_keys(sa_resource_group, storage_account).keys
+    con_string = 'DefaultEndpointsProtocol=https;AccountName={};AccountKey={}'.format(storage_account, keys[0].value)  # pylint: disable=line-too-long
+    # adding appsetting to site to make it a function
+    settings = ['AzureWebJobsStorage=' + con_string, 'AzureWebJobsDashboard=' + con_string,
+                'FUNCTIONS_EXTENSION_VERSION=~1', 'WEBSITE_NODE_DEFAULT_VERSION=6.5.0']
+    update_site_configs(resource_group_name, name, slot=None, always_on='true')
+    update_app_settings(resource_group_name, name, settings, None)
+    return webapp
