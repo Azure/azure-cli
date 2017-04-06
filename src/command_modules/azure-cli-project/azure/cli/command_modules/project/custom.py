@@ -404,7 +404,7 @@ def add_reference(target_group, target_name, reference_name):
     utils.writeline("Added reference '{}'".format(reference_name))
     utils.writeline('Environment variables:\n{}'.format(
         '\n'.join(env_variables)))
-    _service_add_reference(reference_name, instance.type)
+    _service_add_reference(reference_name, instance.type, service_name)
 
 
 def remove_reference(reference_name):
@@ -417,7 +417,6 @@ def remove_reference(reference_name):
     service_name = _get_service_name()
     references.remove_reference(service_name, reference_name)
     utils.writeline("Removed reference '{}'".format(reference_name))
-
     _service_remove_reference(reference_name)
 
 
