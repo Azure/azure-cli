@@ -272,3 +272,13 @@ class Project(object):
         """
         references = self._get_property_value('references')
         return [ref for ref in references if ref['service-name'] == service_name]
+
+    def remove_reference(self, service_name, reference_name):
+        """
+        Removes the references from the settings file
+        """
+        references = self._get_property_value('references')
+        for ref in references:
+            if ref['service-name'] == service_name and ref['reference-name'] == reference_name:
+                references.remove(ref)
+        self._save_changes()
