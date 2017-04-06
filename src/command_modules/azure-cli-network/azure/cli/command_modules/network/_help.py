@@ -1764,6 +1764,11 @@ helps['network vnet-gateway update'] = """
     type: command
     short-summary: Update a virtual network gateway.
 """
+
+helps['network vnet-gateway wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the virtual network gateway is met.
+"""
 #endregion
 
 # region VNet Gateway Revoke Cert
@@ -1788,7 +1793,7 @@ helps['network vnet-gateway revoked-cert delete'] = """
 # region VNet Gateway Root Cert
 helps['network vnet-gateway root-cert'] = """
     type: group
-    short-summary: Manage root certificates for a virtuak network gateway.
+    short-summary: Manage root certificates for a virtual network gateway.
 """
 
 helps['network vnet-gateway root-cert create'] = """
