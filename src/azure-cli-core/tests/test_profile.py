@@ -11,7 +11,7 @@ import mock
 
 from adal import AdalError
 from azure.mgmt.resource.subscriptions.models import (SubscriptionState, Subscription,
-                                                      SubscriptionPolicies, spendingLimit)
+                                                      SubscriptionPolicies, SpendingLimit)
 from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
                                      ServicePrincipalAuth, CLOUD)
 from azure.cli.core.util import CLIError
@@ -687,7 +687,7 @@ class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
 
     def __init__(self, id, display_name, state, tenant_id):  # pylint: disable=redefined-builtin,
         policies = SubscriptionPolicies()
-        policies.spending_limit = spendingLimit.current_period_off
+        policies.spending_limit = SpendingLimit.current_period_off
         policies.quota_id = 'some quota'
         super(SubscriptionStub, self).__init__(policies, 'some_authorization_source')
         self.id = id

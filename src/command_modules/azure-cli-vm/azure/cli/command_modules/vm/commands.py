@@ -17,7 +17,7 @@ from azure.cli.core.util import empty_on_404
 # pylint: disable=line-too-long
 
 custom_path = 'azure.cli.command_modules.vm.custom#{}'
-mgmt_path = 'azure.mgmt.compute.operations.{}#{}.{}'
+mgmt_path = 'azure.mgmt.compute.compute.operations.{}#{}.{}'
 
 # VM
 
@@ -246,8 +246,8 @@ cli_command(__name__, 'disk show', mgmt_path.format(op_var, op_class, 'get'), cf
 cli_command(__name__, 'disk delete', mgmt_path.format(op_var, op_class, 'delete'), cf_disks)
 cli_command(__name__, 'disk grant-access', custom_path.format('grant_disk_access'))
 cli_command(__name__, 'disk revoke-access', mgmt_path.format(op_var, op_class, 'revoke_access'), cf_disks)
-cli_generic_update_command(__name__, 'disk update', 'azure.mgmt.compute.operations.{}#{}.get'.format(op_var, op_class),
-                           'azure.mgmt.compute.operations.{}#{}.create_or_update'.format(op_var, op_class),
+cli_generic_update_command(__name__, 'disk update', 'azure.mgmt.compute.compute.operations.{}#{}.get'.format(op_var, op_class),
+                           'azure.mgmt.compute.compute.operations.{}#{}.create_or_update'.format(op_var, op_class),
                            custom_function_op=custom_path.format('update_managed_disk'),
                            setter_arg_name='disk', factory=cf_disks)
 
@@ -259,8 +259,8 @@ cli_command(__name__, 'snapshot show', mgmt_path.format(op_var, op_class, 'get')
 cli_command(__name__, 'snapshot delete', mgmt_path.format(op_var, op_class, 'delete'), cf_snapshots)
 cli_command(__name__, 'snapshot grant-access', custom_path.format('grant_snapshot_access'))
 cli_command(__name__, 'snapshot revoke-access', mgmt_path.format(op_var, op_class, 'revoke_access'), cf_snapshots)
-cli_generic_update_command(__name__, 'snapshot update', 'azure.mgmt.compute.operations.{}#{}.get'.format(op_var, op_class),
-                           'azure.mgmt.compute.operations.{}#{}.create_or_update'.format(op_var, op_class),
+cli_generic_update_command(__name__, 'snapshot update', 'azure.mgmt.compute.compute.operations.{}#{}.get'.format(op_var, op_class),
+                           'azure.mgmt.compute.compute.operations.{}#{}.create_or_update'.format(op_var, op_class),
                            custom_function_op=custom_path.format('update_snapshot'),
                            setter_arg_name='snapshot', factory=cf_snapshots)
 

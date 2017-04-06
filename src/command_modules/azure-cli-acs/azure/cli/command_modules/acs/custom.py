@@ -38,8 +38,8 @@ from azure.cli.core.util import CLIError, shell_safe_json_parse
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core._environment import get_config_dir
-from azure.mgmt.compute import ComputeManagementClient
-from azure.mgmt.compute.models import ContainerServiceOchestratorTypes
+from azure.cli.core.profiles.shared import ResourceType
+from azure.mgmt.compute.containerservice.models import ContainerServiceOchestratorTypes
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     PasswordCredential,
                                     KeyCredential,
@@ -68,7 +68,7 @@ def which(binary):
 
 
 def _resource_client_factory():
-    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource import ResourceManagementClient
     return get_mgmt_service_client(ResourceManagementClient)
 
 
@@ -733,7 +733,7 @@ def _get_acs_info(name, resource_group_name):
     :param resource_group_name: Resource group name
     :type resource_group_name: String
     """
-    mgmt_client = get_mgmt_service_client(ComputeManagementClient)
+    mgmt_client = get_mgmt_service_client(ResourceType.MGMT_CONTAINER_SERVICE)
     return mgmt_client.container_services.get(resource_group_name, name)
 
 
