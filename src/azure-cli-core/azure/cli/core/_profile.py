@@ -13,12 +13,10 @@ from pprint import pformat
 from copy import deepcopy
 from enum import Enum
 
-import adal
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import CLIError, get_file_json
-from azure.cli.core.adal_authentication import AdalAuthentication
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
 logger = azlogging.get_az_logger(__name__)
@@ -60,6 +58,7 @@ _COMMON_TENANT = 'common'
 
 
 def _authentication_context_factory(authority, cache):
+    import adal
     return adal.AuthenticationContext(authority, cache=cache, api_version=None)
 
 
@@ -274,6 +273,7 @@ class Profile(object):
                 return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
                                                                               resource)
 
+        from azure.cli.core.adal_authentication import AdalAuthentication
         auth_object = AdalAuthentication(_retrieve_token)
 
         return (auth_object,
@@ -382,6 +382,7 @@ class SubscriptionFinder(object):
         return self._auth_context_factory(authority, token_cache)
 
     def _find_using_common_tenant(self, access_token, resource):
+        import adal
         from msrest.authentication import BasicTokenAuthentication
 
         all_subscriptions = []
@@ -480,6 +481,7 @@ class CredsCache(object):
         return cred[_ACCESS_TOKEN]
 
     def _load_creds(self):
+        import adal
         if self.adal_token_cache is not None:
             return self.adal_token_cache
         all_entries = _load_tokens_from_file(self._token_file)

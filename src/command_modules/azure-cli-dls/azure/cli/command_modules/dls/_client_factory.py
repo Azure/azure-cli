@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.core._profile import CLOUD, Profile
-from azure.datalake.store import core
 
 
 def cf_dls_account(_):
@@ -25,6 +24,7 @@ def cf_dls_account_trusted_provider(_):
 
 
 def cf_dls_filesystem(account_name):
+    from azure.datalake.store import core
     profile = Profile()
     subscription_id = None
     cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id)

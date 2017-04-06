@@ -10,7 +10,6 @@ import textwrap
 import shutil
 
 import six
-from whoosh.highlight import UppercaseFormatter, ContextFragmenter
 from whoosh.qparser import MultifieldParser
 from whoosh import index
 from whoosh.fields import TEXT, Schema
@@ -110,6 +109,7 @@ def find(criteria, reindex=False):
         q = qp.parse(" OR ".join(criteria))
 
     with ix.searcher() as searcher:
+        from whoosh.highlight import UppercaseFormatter, ContextFragmenter
         results = searcher.search(q)
         results.fragmenter = ContextFragmenter(maxchars=300, surround=200)
         results.formatter = UppercaseFormatter()
