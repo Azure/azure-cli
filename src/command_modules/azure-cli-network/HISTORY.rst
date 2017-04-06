@@ -3,6 +3,11 @@
 Release History
 ===============
 
+unreleased
+++++++++++++++++++
+* Add support for active-active VNet gateways
+* Remove nulls values from output of `network vpn-connection list/show` commands.
+
 2.0.2 (2017-04-03)
 ++++++++++++++++++
 

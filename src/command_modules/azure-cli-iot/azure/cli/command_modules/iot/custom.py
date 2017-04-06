@@ -7,7 +7,7 @@
 from __future__ import print_function
 from os.path import exists
 from enum import Enum
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku, AccessRights
 from azure.mgmt.iothub.models.iot_hub_description import IotHubDescription

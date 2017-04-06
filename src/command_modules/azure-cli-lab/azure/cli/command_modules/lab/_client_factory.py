@@ -41,3 +41,7 @@ def get_devtestlabs_virtual_network_operation(kwargs):
 
 def get_devtestlabs_formula_operation(kwargs):
     return get_devtestlabs_management_client(kwargs).formula
+
+
+def get_devtestlabs_secret_operation(kwargs):
+    return get_devtestlabs_management_client(kwargs).secret

@@ -13,7 +13,7 @@ def create_lab_vm(client, resource_group, lab_name, name, notes=None, image=None
                   location=None, tags=None, custom_image_id=None, lab_virtual_network_id=None,
                   gallery_image_reference=None, generate_ssh_keys=None, allow_claim=False,
                   disk_type=None, expiration_date=None, formula=None, ip_configuration=None,
-                  network_interface=None, os_type=None):
+                  network_interface=None, os_type=None, saved_secret=None):
     """ Command to create vm of in the Azure DevTest Lab """
     from .sdk.devtestlabs.models.lab_virtual_machine_creation_parameter import \
         LabVirtualMachineCreationParameter

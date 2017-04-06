@@ -32,7 +32,7 @@ from azure.mgmt.keyvault.models import (VaultProperties,
                                         SkuName)
 from azure.graphrbac import GraphRbacManagementClient
 import azure.cli.core.telemetry as telemetry
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 import azure.cli.core.azlogging as azlogging
 from azure.keyvault import KeyVaultClient
 from azure.cli.command_modules.keyvault._validators import secret_text_encoding_values

@@ -8,7 +8,7 @@ from collections import OrderedDict
 
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
-from azure.cli.core._util import empty_on_404
+from azure.cli.core.util import empty_on_404
 
 from .custom import (_auth_client_factory, _graph_client_factory)
 

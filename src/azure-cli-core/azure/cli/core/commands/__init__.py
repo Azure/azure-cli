@@ -17,7 +17,7 @@ from six import string_types
 
 import azure.cli.core.azlogging as azlogging
 import azure.cli.core.telemetry as telemetry
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core.application import APPLICATION
 from azure.cli.core.prompting import prompt_y_n, NoTTYException
 from azure.cli.core._config import az_config, DEFAULTS_SECTION
@@ -221,12 +221,11 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
             if (self.name.split()[-1] == 'create' and
                     overrides.settings.get('metavar', None) == 'NAME'):
                 return
-            if arg.type.settings.get('required', False):
-                setattr(arg.type, 'configured_default_applied', True)
-                config_value = az_config.get(DEFAULTS_SECTION, def_config, None)
-                if config_value:
-                    overrides.settings['default'] = config_value
-                    overrides.settings['required'] = False
+            setattr(arg.type, 'configured_default_applied', True)
+            config_value = az_config.get(DEFAULTS_SECTION, def_config, None)
+            if config_value:
+                overrides.settings['default'] = config_value
+                overrides.settings['required'] = False
 
     def execute(self, **kwargs):
         return self.handler(**kwargs)

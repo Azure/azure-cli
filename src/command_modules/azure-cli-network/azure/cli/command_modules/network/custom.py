@@ -22,7 +22,7 @@ import azure.cli.core.azlogging as azlogging
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.command_modules.network._client_factory import _network_client_factory
 from azure.cli.command_modules.network._util import _get_property, _set_param
 
@@ -113,7 +113,7 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
                                public_ip_address_type=None, subnet_type=None, validate=False):
     from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
-    from azure.cli.core._util import random_string
+    from azure.cli.core.util import random_string
     from azure.cli.command_modules.network._template_builder import \
         (ArmTemplateBuilder, build_application_gateway_resource, build_public_ip_resource,
          build_vnet_resource)
@@ -521,7 +521,7 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
                          no_wait=False):
     from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
-    from azure.cli.core._util import random_string
+    from azure.cli.core.util import random_string
     from azure.cli.command_modules.network._template_builder import \
         (ArmTemplateBuilder, build_load_balancer_resource, build_public_ip_resource,
          build_vnet_resource)
@@ -1173,7 +1173,7 @@ def create_vpn_connection(client, resource_group_name, connection_name, vnet_gat
     """
     from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
-    from azure.cli.core._util import random_string
+    from azure.cli.core.util import random_string
     from azure.cli.command_modules.network._template_builder import \
         ArmTemplateBuilder, build_vpn_connection_resource
 
@@ -1333,13 +1333,16 @@ def create_vnet_gateway(resource_group_name, virtual_network_gateway_name, publi
 
     client = _network_client_factory().virtual_network_gateways
     subnet = virtual_network + '/subnets/GatewaySubnet'
-    ip_configuration = VirtualNetworkGatewayIPConfiguration(
-        SubResource(subnet),
-        SubResource(public_ip_address),
-        private_ip_allocation_method='Dynamic', name='vnetGatewayConfig')
+    active_active = len(public_ip_address) == 2
     vnet_gateway = VirtualNetworkGateway(
-        [ip_configuration], gateway_type, vpn_type, location=location, tags=tags,
-        sku=VirtualNetworkGatewaySku(sku, sku))
+        [], gateway_type, vpn_type, location=location, tags=tags,
+        sku=VirtualNetworkGatewaySku(sku, sku), active_active=active_active)
+    for i, public_ip in enumerate(public_ip_address):
+        ip_configuration = VirtualNetworkGatewayIPConfiguration(
+            SubResource(subnet),
+            SubResource(public_ip),
+            private_ip_allocation_method='Dynamic', name='vnetGatewayConfig{}'.format(i))
+        vnet_gateway.ip_configurations.append(ip_configuration)
     if asn or bgp_peering_address or peer_weight:
         vnet_gateway.enable_bgp = True
         vnet_gateway.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
@@ -1354,6 +1357,7 @@ def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None
                         public_ip_address=None, gateway_type=None, enable_bgp=None,
                         asn=None, bgp_peering_address=None, peer_weight=None, virtual_network=None,
                         tags=None):
+    from azure.mgmt.network.models import VirtualNetworkGatewayIPConfiguration
 
     if address_prefixes is not None:
         if not instance.vpn_client_configuration:
@@ -1376,8 +1380,28 @@ def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None
     if tags is not None:
         instance.tags = tags
 
+    subnet_id = '{}/subnets/GatewaySubnet'.format(virtual_network) if virtual_network else \
+        instance.ip_configurations[0].subnet.id
+    if virtual_network is not None:
+        for config in instance.ip_configurations:
+            config.subnet.id = subnet_id
+
     if public_ip_address is not None:
-        instance.ip_configurations[0].public_ip_address.id = public_ip_address
+        instance.ip_configurations = []
+        for i, public_ip in enumerate(public_ip_address):
+            ip_configuration = VirtualNetworkGatewayIPConfiguration(
+                SubResource(subnet_id),
+                SubResource(public_ip),
+                private_ip_allocation_method='Dynamic', name='vnetGatewayConfig{}'.format(i))
+            instance.ip_configurations.append(ip_configuration)
+
+        # Update active-active/active-standby status
+        active_active = len(public_ip_address) == 2
+        if instance.active_active and not active_active:
+            logger.info('Placing gateway in active-standby mode.')
+        elif not instance.active_active and active_active:
+            logger.info('Placing gateway in active-active mode.')
+        instance.active_active = active_active
 
     if gateway_type is not None:
         instance.gateway_type = gateway_type
@@ -1386,10 +1410,6 @@ def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None
         instance.enable_bgp = enable_bgp.lower() == 'true'
 
     _validate_bgp_peering(instance, asn, bgp_peering_address, peer_weight)
-
-    if virtual_network is not None:
-        instance.ip_configurations[0].subnet.id = \
-            '{}/subnets/GatewaySubnet'.format(virtual_network)
 
     return instance
 
@@ -1563,7 +1583,7 @@ def create_local_gateway(resource_group_name, local_network_gateway_name, gatewa
     from azure.mgmt.network.models import LocalNetworkGateway, BgpSettings
     client = _network_client_factory().local_network_gateways
     local_gateway = LocalNetworkGateway(
-        local_address_prefix or [], location=location, tags=tags,
+        AddressSpace(local_address_prefix or []), location=location, tags=tags,
         gateway_ip_address=gateway_ip_address)
     if bgp_peering_address or asn or peer_weight:
         local_gateway.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
@@ -1840,7 +1860,7 @@ def _build_record(data):
 
 # pylint: disable=too-many-statements
 def import_zone(resource_group_name, zone_name, file_name):
-    from azure.cli.core._util import read_file_content
+    from azure.cli.core.util import read_file_content
     import sys
     file_text = read_file_content(file_name)
     zone_obj = parse_zone_file(file_text, zone_name)

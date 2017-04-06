@@ -2,10 +2,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import json
 
 from azure.cli.core.commands import register_cli_argument
-
+from azure.cli.core.util import shell_safe_json_parse
 from azure.cli.core.cloud import get_clouds, get_custom_clouds, get_active_cloud_name
 
 
@@ -37,7 +36,7 @@ register_cli_argument('cloud unregister', 'cloud_name',
 
 register_cli_argument('cloud', 'cloud_config', options_list=('--cloud-config',),
                       help='JSON encoded cloud configuration. Use @{file} to load from a file.',
-                      type=json.loads)
+                      type=shell_safe_json_parse)
 
 register_cli_argument('cloud', 'endpoint_management',
                       help='The management service endpoint')

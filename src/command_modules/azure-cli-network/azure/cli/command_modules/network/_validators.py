@@ -11,7 +11,7 @@ import os
 from azure.cli.core.commands.arm import is_valid_resource_id, resource_id
 from azure.cli.core.commands.validators import \
     (validate_tags, get_default_location_from_resource_group)
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core.commands.template_create import get_folded_parameter_validator
 from azure.cli.core.commands.validators import SPECIFIED_SENTINEL
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -174,15 +174,24 @@ def get_public_ip_validator(has_type_field=False, allow_none=False, allow_new=Fa
     for an existing name or ID with no ARM-required -type parameter. """
     def simple_validator(namespace):
         if namespace.public_ip_address:
-            # determine if public_ip_address is name or ID
-            is_id = is_valid_resource_id(namespace.public_ip_address)
-            if not is_id:
-                namespace.public_ip_address = resource_id(
+            is_list = isinstance(namespace.public_ip_address, list)
+
+            def _validate_name_or_id(public_ip):
+                # determine if public_ip_address is name or ID
+                is_id = is_valid_resource_id(public_ip)
+                return public_ip if is_id else resource_id(
                     subscription=get_subscription_id(),
                     resource_group=namespace.resource_group_name,
                     namespace='Microsoft.Network',
                     type='publicIPAddresses',
-                    name=namespace.public_ip_address)
+                    name=public_ip)
+
+            if is_list:
+                for i, public_ip in enumerate(namespace.public_ip_address):
+                    namespace.public_ip_address[i] = _validate_name_or_id(public_ip)
+            else:
+                namespace.public_ip_address = _validate_name_or_id(namespace.public_ip_address)
+
 
     def complex_validator_with_type(namespace):
         get_folded_parameter_validator(
@@ -521,10 +530,27 @@ def process_vnet_create_namespace(namespace):
 def process_vnet_gateway_create_namespace(namespace):
     ns = namespace
     get_default_location_from_resource_group(ns)
+    get_virtual_network_validator()(ns)
+
+    get_public_ip_validator()(ns)
+    public_ip_count = len(ns.public_ip_address or [])
+    if public_ip_count > 2:
+        raise CLIError('Specify a single public IP to create an active-standby gateway or two '
+                       'public IPs to create an active-active gateway.')
+
     enable_bgp = any([ns.asn, ns.bgp_peering_address, ns.peer_weight])
     if enable_bgp and not ns.asn:
         raise ValueError(
             'incorrect usage: --asn ASN [--peer-weight WEIGHT --bgp-peering-address IP ]')
+
+def process_vnet_gateway_update_namespace(namespace):
+    ns = namespace
+    get_virtual_network_validator()(ns)
+    get_public_ip_validator()(ns)
+    public_ip_count = len(ns.public_ip_address or [])
+    if public_ip_count > 2:
+        raise CLIError('Specify a single public IP to create an active-standby gateway or two '
+                       'public IPs to create an active-active gateway.')
 
 def process_vpn_connection_create_namespace(namespace):
 

@@ -16,7 +16,7 @@ import azure.cli.core.azlogging as azlogging
 from azure.cli.core._config import az_config
 from azure.cli.core._profile import _SERVICE_PRINCIPAL, CredsCache, Profile
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 logger = azlogging.get_az_logger(__name__)
 

@@ -5,7 +5,8 @@
 
 import json
 from azure.cli.command_modules.lab.validators import (validate_lab_vm_create,
-                                                      validate_lab_vm_list)
+                                                      validate_lab_vm_list,
+                                                      validate_user_name)
 from azure.cli.core.commands.parameters import resource_group_name_type
 from azure.cli.core.sdk.util import ParametersContext
 
@@ -26,6 +27,7 @@ with ParametersContext(command='lab vm create') as c:
     c.argument('authentication_type', arg_group=authentication_group_name)
     c.argument('ssh_key', arg_group=authentication_group_name)
     c.argument('generate_ssh_keys', action='store_true', arg_group=authentication_group_name)
+    c.argument('saved_secret', arg_group=authentication_group_name)
 
     # Add Artifacts from json object
     c.argument('artifacts', type=json.loads)
@@ -69,3 +71,17 @@ with ParametersContext(command='lab vm apply-artifacts') as c:
 
 with ParametersContext(command='lab formula') as c:
     c.register_alias('name', ('--name', '-n'))
+
+
+with ParametersContext(command='lab secret') as c:
+    from .sdk.devtestlabs.models.secret import Secret
+
+    c.register_alias('name', ('--name', '-n'))
+    c.register_alias('secret', ('--value', ), type=lambda x: Secret(value=x))
+    c.ignore('user_name')
+    c.argument('lab_name', validator=validate_user_name)
+
+
+with ParametersContext(command='lab formula export-artifacts') as c:
+    # Exporting artifacts does not need expand filter
+    c.ignore('expand')

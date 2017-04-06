@@ -12,7 +12,7 @@ from adal.adal_error import AdalError
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._config import (GLOBAL_CONFIG_PATH, ENV_VAR_PREFIX, set_global_config,
                                     set_global_config_value, DEFAULTS_SECTION, get_config_parser)
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core.prompting import (prompt,
                                       prompt_y_n,
                                       prompt_choice_list,

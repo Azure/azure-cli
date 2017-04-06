@@ -10,12 +10,28 @@ from ._client_factory import (get_devtestlabs_virtual_machine_operation,
                               get_devtestlabs_artifact_source_operation,
                               get_devtestlabs_lab_operation,
                               get_devtestlabs_virtual_network_operation,
-                              get_devtestlabs_formula_operation)
+                              get_devtestlabs_formula_operation,
+                              get_devtestlabs_secret_operation)
 from azure.cli.core.sdk.util import (ServiceGroup, create_service_adapter)
 
 
 custom_path = 'azure.cli.command_modules.lab.custom'
 mgmt_operations_path = 'azure.cli.command_modules.lab.sdk.devtestlabs.operations.{}'
+
+
+def _export_artifacts(formula):
+    """ Exports artifacts from the given formula. This method removes some of the properties of the
+        artifact model as they do not play important part for users in create or read context.
+    """
+    artifacts = []
+    if formula and formula.formula_content and formula.formula_content.artifacts:
+        artifacts = formula.formula_content.artifacts
+        for artifact in formula.formula_content.artifacts:
+            del artifact.status
+            del artifact.deployment_status_message
+            del artifact.vm_extension_status_message
+            del artifact.install_time
+    return artifacts
 
 
 # Custom Command's service adapter
@@ -56,6 +72,7 @@ with ServiceGroup(__name__, get_devtestlabs_lab_operation,
                   lab_operations) as s:
     with s.group('lab') as c:
         c.command('get', 'get_resource')
+        c.command('delete', 'delete_resource')
 
 # Custom Image Operations Commands
 custom_image_operations = create_service_adapter(
@@ -119,6 +136,20 @@ formula_operations = create_service_adapter(
 with ServiceGroup(__name__, get_devtestlabs_formula_operation,
                   formula_operations) as s:
     with s.group('lab formula') as c:
-        c.command('get', 'get_resource')
+        c.command('show', 'get_resource')
+        c.command('list', 'list')
+        c.command('delete', 'delete_resource')
+        c.command('export-artifacts', 'get_resource', transform=_export_artifacts)
+
+# Secret Operations Commands
+secret_operations = create_service_adapter(
+    mgmt_operations_path.format('secret_operations'),
+    'SecretOperations')
+
+with ServiceGroup(__name__, get_devtestlabs_secret_operation,
+                  secret_operations) as s:
+    with s.group('lab secret') as c:
+        c.command('set', 'create_or_update_resource')
+        c.command('show', 'get_resource')
         c.command('list', 'list')
         c.command('delete', 'delete_resource')

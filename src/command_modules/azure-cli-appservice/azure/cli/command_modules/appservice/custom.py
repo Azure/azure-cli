@@ -26,7 +26,7 @@ from azure.cli.core.commands import LongRunningOperation
 
 from azure.cli.core.prompting import prompt_pass, NoTTYException
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from ._params import web_client_factory, _generic_site_operation
 
 logger = azlogging.get_az_logger(__name__)
@@ -82,9 +82,9 @@ def show_webapp(resource_group_name, name, slot=None):
 def list_webapp(resource_group_name=None):
     client = web_client_factory()
     if resource_group_name:
-        result = client.web_apps.list_by_resource_group(resource_group_name)
+        result = list(client.web_apps.list_by_resource_group(resource_group_name))
     else:
-        result = client.web_apps.list()
+        result = list(client.web_apps.list())
     for webapp in result:
         _rename_server_farm_props(webapp)
     return result
@@ -401,9 +401,9 @@ def _extract_real_error(ex):
 def list_app_service_plans(resource_group_name=None):
     client = web_client_factory()
     if resource_group_name is None:
-        plans = client.app_service_plans.list()
+        plans = list(client.app_service_plans.list())
     else:
-        plans = client.app_service_plans.list_by_resource_group(resource_group_name)
+        plans = list(client.app_service_plans.list_by_resource_group(resource_group_name))
     for plan in plans:
         # prune a few useless fields
         del plan.app_service_plan_name
@@ -757,7 +757,7 @@ def config_slot_auto_swap(resource_group_name, webapp, slot, auto_swap_slot=None
 
 def list_slots(resource_group_name, webapp):
     client = web_client_factory()
-    slots = client.web_apps.list_slots(resource_group_name, webapp)
+    slots = list(client.web_apps.list_slots(resource_group_name, webapp))
     for slot in slots:
         slot.name = slot.name.split('/')[-1]
         setattr(slot, 'app_service_plan', parse_resource_id(slot.server_farm_id)['name'])

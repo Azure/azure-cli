@@ -16,7 +16,7 @@ from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list, resource_group_name_type,
     tags_type, ignore_type, enum_choice_list, file_type, three_state_flag)
 from azure.cli.core._profile import Profile
-from azure.cli.core._util import get_json_object
+from azure.cli.core.util import get_json_object
 from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
 
 from azure.keyvault.generated.models.key_vault_client_enums import \

@@ -11,7 +11,7 @@ from six import StringIO
 
 from azure.cli.core._output import (OutputProducer, format_json, format_table,
                                     format_tsv, CommandResultItem)
-import azure.cli.core._util as util
+import azure.cli.core.util as util
 
 
 class TestOutput(unittest.TestCase):

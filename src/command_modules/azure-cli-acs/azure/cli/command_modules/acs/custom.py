@@ -34,7 +34,7 @@ from azure.cli.command_modules.acs._actions import _is_valid_ssh_rsa_public_key
 from azure.cli.command_modules.acs.mgmt_acs.lib \
     import AcsCreationClient as ACSClient
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,line-too-long
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError, shell_safe_json_parse
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core._environment import get_config_dir
@@ -259,7 +259,7 @@ def dcos_install_cli(install_location=None, client_version='1.8'):
     else:
         raise CLIError('Proxy server ({}) does not exist on the cluster.'.format(system))
 
-    logger.info('Downloading client to %s', install_location)
+    logger.warning('Downloading client to %s', install_location)
     try:
         urlretrieve(file_url, install_location)
         os.chmod(install_location,
@@ -290,7 +290,7 @@ def k8s_install_cli(client_version='latest', install_location=None):
     else:
         raise CLIError('Proxy server ({}) does not exist on the cluster.'.format(system))
 
-    logger.info('Downloading client to %s from %s', install_location, file_url)
+    logger.warning('Downloading client to %s from %s', install_location, file_url)
     try:
         urlretrieve(file_url, install_location)
         os.chmod(install_location,
@@ -515,7 +515,7 @@ def load_acs_service_principals(config_path):
     fd = os.open(config_path, os.O_RDONLY)
     try:
         with os.fdopen(fd) as f:
-            return json.loads(f.read())
+            return shell_safe_json_parse(f.read())
     except:  # pylint: disable=bare-except
         return None
 
@@ -763,6 +763,9 @@ def update_acs(client, resource_group_name, container_service_name, new_agent_co
     # null out the service principal because otherwise validation complains
     if instance.orchestrator_profile.orchestrator_type == ContainerServiceOchestratorTypes.kubernetes:
         instance.service_principal_profile = None
+
+    # null out the windows profile so that validation doesn't complain about not having the admin password
+    instance.windows_profile = None
 
     return client.create_or_update(resource_group_name, container_service_name, instance)
 

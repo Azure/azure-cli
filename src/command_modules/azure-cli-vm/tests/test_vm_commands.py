@@ -12,7 +12,7 @@ import unittest
 
 import six
 
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase,
                                                      ResourceGroupVCRTestBase,
                                                      JMESPathCheck,
@@ -413,7 +413,7 @@ class VMCreateAndStateModificationsScenarioTest(ResourceGroupVCRTestBase):  # py
         # Expecting no results
         self.cmd('vm list --resource-group {}'.format(self.resource_group), checks=NoneCheck())
         self.cmd('vm create --resource-group {0} --location {1} --name {2} --admin-username ubuntu '
-                 '--image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password testPassword0 '
+                 '--image UbuntuLTS --admin-password testPassword0 '
                  '--authentication-type password '
                  '--tags firsttag=1 secondtag=2 thirdtag --nsg {3} --public-ip-address {4} '
                  '--vnet-name {5} --storage-account {6} --use-unmanaged-disk'.format(
@@ -512,7 +512,7 @@ class VMNoWaitScenarioTest(ResourceGroupVCRTestBase):
 class VMAvailSetScenarioTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
-        super(VMAvailSetScenarioTest, self).__init__(__file__, test_method, resource_group='cliTestRg_Availset')
+        super(VMAvailSetScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_avail_set')
         self.location = 'westus'
         self.name = 'availset-test'
 
@@ -527,6 +527,8 @@ class VMAvailSetScenarioTest(ResourceGroupVCRTestBase):
                 JMESPathCheck('platformUpdateDomainCount', 2),
                 JMESPathCheck('sku.managed', True)
         ])
+        self.cmd('vm availability-set update -g {} -n {} --set tags.test=success'.format(self.resource_group, self.name),
+                 checks=JMESPathCheck('tags.test', 'success'))
         self.cmd('vm availability-set list -g {}'.format(self.resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', self.name),
@@ -1488,12 +1490,13 @@ class VMSSCreateNoneOptionsTest(ResourceGroupVCRTestBase):  # pylint: disable=to
         self.cmd('vmss create -n {0} -g {1} --image Debian --load-balancer {3} --admin-username ubuntu'
                  ' --ssh-key-value \'{2}\' --public-ip-address {3} --tags {3}'
                  .format(vmss_name, self.resource_group, TEST_SSH_KEY_PUB, '""' if platform.system() == 'Windows' else "''"))
-
         self.cmd('vmss show -n {} -g {}'.format(vmss_name, self.resource_group), [
             JMESPathCheck('availabilitySet', None),
             JMESPathCheck('tags', {}),
             JMESPathCheck('virtualMachineProfile.networkProfile.networkInterfaceConfigurations.ipConfigurations.loadBalancerBackendAddressPools', None)
         ])
+        self.cmd('vmss update -g {} -n {} --set tags.test=success'.format(self.resource_group, vmss_name),
+                 checks=JMESPathCheck('tags.test', 'success'))
         self.cmd('network public-ip show -n {}PublicIP -g {}'.format(vmss_name, self.resource_group), checks=NoneCheck(), allowed_exceptions='was not found')
 
 

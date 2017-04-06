@@ -17,6 +17,7 @@ except ImportError:
 
 from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
+from azure.cli.core.commands.validators import validate_file_or_dict
 from azure.keyvault.key_vault_id import parse_secret_id
 from azure.mgmt.compute.models import (VirtualHardDisk,
                                        VirtualMachineScaleSet,
@@ -26,9 +27,9 @@ from azure.mgmt.compute.models import (VirtualHardDisk,
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.arm import parse_resource_id, resource_id, is_valid_resource_id
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 import azure.cli.core.azlogging as azlogging
-from ._vm_utils import read_content_if_is_file, load_json
+from ._vm_utils import read_content_if_is_file
 from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc,
@@ -870,8 +871,6 @@ def set_extension(
 
     from azure.mgmt.compute.models import VirtualMachineExtension
 
-    protected_settings = load_json(protected_settings) if protected_settings else {}
-    settings = load_json(settings) if settings else None
     # pylint: disable=no-member
     instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name)
     # pylint: disable=no-member
@@ -905,9 +904,6 @@ def set_vmss_extension(
     client = _compute_client_factory()
     vmss = client.virtual_machine_scale_sets.get(resource_group_name,
                                                  vmss_name)
-
-    protected_settings = load_json(protected_settings) if protected_settings else {}
-    settings = load_json(settings) if settings else None
 
     # pylint: disable=no-member
     version = _normalize_extension_version(publisher, extension_name, version, vmss.location)
@@ -1477,17 +1473,18 @@ def availset_get(resource_group_name, name):
     return _compute_client_factory().availability_sets.get(resource_group_name, name)
 
 
-def availset_set(**kwargs):
-    return _compute_client_factory().availability_sets.create_or_update(**kwargs)
+def availset_set(resource_group_name, name, **kwargs):
+    return _compute_client_factory().availability_sets.create_or_update(resource_group_name, name,
+                                                                        **kwargs)
 
 
 def vmss_get(resource_group_name, name):
     return _compute_client_factory().virtual_machine_scale_sets.get(resource_group_name, name)
 
 
-def vmss_set(no_wait=False, **kwargs):
+def vmss_set(resource_group_name, name, no_wait=False, **kwargs):
     return _compute_client_factory().virtual_machine_scale_sets.create_or_update(
-        raw=no_wait, **kwargs)
+        resource_group_name, name, raw=no_wait, **kwargs)
 
 
 def convert_av_set_to_managed_disk(resource_group_name, availability_set_name):
@@ -1516,9 +1513,10 @@ def create_vm(vm_name, resource_group_name, image=None,
               subnet=None, subnet_address_prefix='10.0.0.0/24', storage_profile=None,
               os_publisher=None, os_offer=None, os_sku=None, os_version=None,
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_type=None,
-              nic_type=None, validate=False, custom_data=None, secrets=None):
+              nic_type=None, validate=False, custom_data=None, secrets=None,
+              plan_name=None, plan_product=None, plan_publisher=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.cli.core._util import random_string
+    from azure.cli.core.util import random_string
     from azure.cli.command_modules.vm._template_builder import (
         ArmTemplateBuilder, build_vm_resource, build_storage_account_resource, build_nic_resource,
         build_vnet_resource, build_nsg_resource, build_public_ip_resource,
@@ -1620,7 +1618,7 @@ def create_vm(vm_name, resource_group_name, image=None,
         custom_data = read_content_if_is_file(custom_data)
 
     if secrets:
-        secrets = _merge_secrets([load_json(secret) for secret in secrets])
+        secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
     vm_resource = build_vm_resource(
         vm_name, location, tags, size, storage_profile, nics, admin_username, availability_set,
@@ -1628,6 +1626,13 @@ def create_vm(vm_name, resource_group_name, image=None,
         os_type, os_caching, data_caching, storage_sku, os_publisher, os_offer, os_sku, os_version,
         os_vhd_uri, attach_os_disk, data_disk_sizes_gb, image_data_disks, custom_data, secrets)
     vm_resource['dependsOn'] = vm_dependencies
+
+    if plan_name:
+        vm_resource['plan'] = {
+            'name': plan_name,
+            'publisher': plan_publisher,
+            'product': plan_product
+        }
 
     master_template.add_resource(vm_resource)
 
@@ -1673,9 +1678,10 @@ def create_vmss(vmss_name, resource_group_name, image,
                 os_offer=None, os_publisher=None, os_sku=None, os_version=None,
                 load_balancer_type=None, app_gateway_type=None, vnet_type=None,
                 public_ip_type=None, storage_profile=None,
-                single_placement_group=None, custom_data=None, secrets=None):
+                single_placement_group=None, custom_data=None, secrets=None,
+                plan_name=None, plan_product=None, plan_publisher=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.cli.core._util import random_string
+    from azure.cli.core.util import random_string
     from azure.cli.command_modules.vm._template_builder import (
         ArmTemplateBuilder, StorageProfile, build_vmss_resource, build_storage_account_resource,
         build_vnet_resource, build_public_ip_resource, build_load_balancer_resource,
@@ -1837,7 +1843,7 @@ def create_vmss(vmss_name, resource_group_name, image,
         custom_data = read_content_if_is_file(custom_data)
 
     if secrets:
-        secrets = _merge_secrets([load_json(secret) for secret in secrets])
+        secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
     vmss_resource = build_vmss_resource(vmss_name, naming_prefix, location, tags,
                                         not disable_overprovision, upgrade_policy_mode,
@@ -1853,6 +1859,13 @@ def create_vmss(vmss_name, resource_group_name, image,
                                         single_placement_group=single_placement_group,
                                         custom_data=custom_data, secrets=secrets)
     vmss_resource['dependsOn'] = vmss_dependencies
+
+    if plan_name:
+        vmss_resource['plan'] = {
+            'name': plan_name,
+            'publisher': plan_publisher,
+            'product': plan_product
+        }
 
     master_template.add_resource(vmss_resource)
     master_template.add_output('VMSS', vmss_name, 'Microsoft.Compute', 'virtualMachineScaleSets',
@@ -1878,7 +1891,7 @@ def create_av_set(availability_set_name, resource_group_name,
                   unmanaged=False, tags=None, validate=False):
     from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
-    from azure.cli.core._util import random_string
+    from azure.cli.core.util import random_string
     from azure.cli.command_modules.vm._template_builder import (ArmTemplateBuilder,
                                                                 build_av_set_resource)
 

@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core.commands.parameters import get_resources_in_subscription
 
 from ._constants import (
@@ -101,7 +101,7 @@ def arm_deploy_template_new_storage(resource_group_name, #pylint: disable=too-ma
     :param str deployment_name: The name of the deployment
     '''
     from azure.mgmt.resource.resources.models import DeploymentProperties
-    from azure.cli.core._util import get_file_json
+    from azure.cli.core.util import get_file_json
     import os
 
     parameters = _parameters(
@@ -135,7 +135,7 @@ def arm_deploy_template_existing_storage(resource_group_name, #pylint: disable=t
     :param str deployment_name: The name of the deployment
     '''
     from azure.mgmt.resource.resources.models import DeploymentProperties
-    from azure.cli.core._util import get_file_json
+    from azure.cli.core.util import get_file_json
     import os
 
     storage_account_resource_group = \

@@ -10,7 +10,7 @@ import json
 
 from enum import Enum
 
-from azure.cli.core._util import b64encode
+from azure.cli.core.util import b64encode
 
 
 class ArmTemplateBuilder(object):
@@ -77,7 +77,7 @@ class StorageProfile(Enum):
 
 
 def build_deployment_resource(name, template, dependencies=None):
-    from azure.cli.core._util import random_string
+    from azure.cli.core.util import random_string
     dependencies = dependencies or []
     deployment = {
         'name': name,
@@ -94,7 +94,7 @@ def build_deployment_resource(name, template, dependencies=None):
 
 def build_output_deployment_resource(key, property_name, property_provider, property_type,
                                      parent_name=None, output_type='object', path=None):
-    from azure.cli.core._util import random_string
+    from azure.cli.core.util import random_string
     output_tb = ArmTemplateBuilder()
     output_tb.add_output(key, property_name, property_provider, property_type,
                          output_type=output_type, path=path)

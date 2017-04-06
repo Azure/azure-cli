@@ -8,7 +8,7 @@ from collections import OrderedDict
 
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_wait_command
-from azure.cli.core._util import empty_on_404
+from azure.cli.core.util import empty_on_404
 
 from azure.cli.command_modules.resource._client_factory import (_resource_client_factory,
                                                                 cf_resource_groups,

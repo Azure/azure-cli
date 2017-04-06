@@ -37,7 +37,7 @@ from azure.cli.main import main as cli_main
 from azure.cli.core import __version__ as core_version
 import azure.cli.core._debug as _debug
 from azure.cli.core._profile import Profile, CLOUD
-from azure.cli.core._util import CLIError, random_string
+from azure.cli.core.util import CLIError, random_string
 
 LIVE_TEST_CONTROL_ENV = 'AZURE_CLI_TEST_RUN_LIVE'
 COMMAND_COVERAGE_CONTROL_ENV = 'AZURE_CLI_TEST_COMMAND_COVERAGE'

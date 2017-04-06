@@ -13,7 +13,7 @@ from azure.cli.core._output import CommandResultItem
 import azure.cli.core.extensions
 import azure.cli.core._help as _help
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._util import todict, truncate_text, CLIError, read_file_content
+from azure.cli.core.util import todict, truncate_text, CLIError, read_file_content
 from azure.cli.core._config import az_config
 
 import azure.cli.core.telemetry as telemetry
