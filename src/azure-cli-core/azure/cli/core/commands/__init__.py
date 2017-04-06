@@ -250,7 +250,7 @@ def load_params(command):
         return
     module_to_load = command_module[:command_module.rfind('.')]
     import_module(module_to_load).load_params(command)
-    _update_command_definitions(command_table)
+    _apply_parameter_info(command, command_table[command])
 
 
 def get_command_table(module_name=None):
@@ -485,9 +485,7 @@ class _ArgumentRegistry(object):
 _cli_argument_registry = _ArgumentRegistry()
 _cli_extra_argument_registry = defaultdict(lambda: {})
 
-
-def _update_command_definitions(command_table_to_update):
-    for command_name, command in command_table_to_update.items():
+def _apply_parameter_info(command_name, command):
         for argument_name in command.arguments:
             overrides = _get_cli_argument(command_name, argument_name)
             command.update_argument(argument_name, overrides)
@@ -496,3 +494,8 @@ def _update_command_definitions(command_table_to_update):
         for argument_name, argument_definition in _get_cli_extra_arguments(command_name):
             command.arguments[argument_name] = argument_definition
             command.update_argument(argument_name, _get_cli_argument(command_name, argument_name))
+
+
+def _update_command_definitions(command_table_to_update):
+    for command_name, command in command_table_to_update.items():
+        _apply_parameter_info(command_name, command)

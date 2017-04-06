@@ -29,18 +29,23 @@ class Configuration(object):  # pylint: disable=too-few-public-methods
     """
 
     def __init__(self, argv):
-        self.argv = argv or sys.argv[1:]
         self.output_format = None
+        self.argv = argv
 
     def get_command_table(self):  # pylint: disable=no-self-use
         import azure.cli.core.commands as commands
         # Find the first noun on the command line and only load commands from that
         # module to improve startup time.
+        result = None
         for a in self.argv:
             if not a.startswith('-'):
-                return commands.get_command_table(a)
-        # No noun found, so load all commands.
-        return commands.get_command_table()
+                result = commands.get_command_table(a)
+
+        if result is None:
+            # No noun found, so load all commands.
+            result = commands.get_command_table()
+
+        return result
 
     def load_params(self, command):  # pylint: disable=no-self-use
         import azure.cli.core.commands as commands
@@ -57,7 +62,7 @@ class Application(object):
     COMMAND_TABLE_LOADED = 'CommandTable.Loaded'
     COMMAND_TABLE_PARAMS_LOADED = 'CommandTableParams.Loaded'
 
-    def __init__(self, config=None):
+    def __init__(self):
         self._event_handlers = defaultdict(lambda: [])
         self.session = {
             'headers': {
@@ -81,8 +86,6 @@ class Application(object):
 
         self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
 
-        self.initialize(config or Configuration([]))
-
     def initialize(self, configuration):
         self.configuration = configuration
 
@@ -90,7 +93,7 @@ class Application(object):
         argv = Application._expand_file_prefixed_files(unexpanded_argv)
         command_table = self.configuration.get_command_table()
         self.raise_event(self.COMMAND_TABLE_LOADED, command_table=command_table)
-        self.parser.load_command_table(command_table)
+        self.parser.load_command_table(command_table, argv)
         self.raise_event(self.COMMAND_PARSER_LOADED, parser=self.parser)
 
         if len(argv) == 0:
@@ -121,7 +124,7 @@ class Application(object):
         if argv[-1] in ('--help', '-h') or command in command_table:
             self.configuration.load_params(command)
             self.raise_event(self.COMMAND_TABLE_PARAMS_LOADED, command_table=command_table)
-            self.parser.load_command_table(command_table)
+            self.parser.load_command_table(command_table, argv)
 
         if self.session['completer_active']:
             enable_autocomplete(self.parser)

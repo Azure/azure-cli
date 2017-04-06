@@ -7,9 +7,31 @@
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
 from ._factory import iot_hub_service_factory as factory
-from .custom import PolicyUpdateResultTransform, HubDeleteResultTransform
+from azure.cli.core.commands import LongRunningOperation
+
 
 custom_path = 'azure.cli.command_modules.iot.custom#{0}'
+
+
+class PolicyUpdateResultTransform(LongRunningOperation): # pylint: disable=too-few-public-methods
+    def __call__(self, poller):
+        result = super(PolicyUpdateResultTransform, self).__call__(poller)
+        return result.properties.authorization_policies
+
+# Deleting IoT Hub is a long running operation. Due to API implementation issue, 404 error will be thrown during
+# deletion of an IoT Hub.
+# This is a work around to suppress the 404 error. It should be removed after API is fixed.
+class HubDeleteResultTransform(LongRunningOperation): # pylint: disable=too-few-public-methods
+    def __call__(self, poller):
+        from azure.cli.core.util import CLIError
+        try:
+            super(HubDeleteResultTransform, self).__call__(poller)
+        except CLIError as e:
+            if 'not found' not in str(e):
+                raise e
+        return None
+
+
 
 # iot hub commands
 cli_command(__name__, 'iot hub create', custom_path.format('iot_hub_create'), factory)

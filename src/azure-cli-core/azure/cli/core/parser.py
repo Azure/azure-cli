@@ -56,7 +56,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
         self._description = kwargs.pop('description', None)
         super(AzCliCommandParser, self).__init__(**kwargs)
 
-    def load_command_table(self, command_table):
+    def load_command_table(self, command_table, argv):
         """Load a command table into our parser.
         """
         # If we haven't already added a subparser, we
@@ -65,6 +65,31 @@ class AzCliCommandParser(argparse.ArgumentParser):
             sp = self.add_subparsers(dest='_command_package')
             sp.required = True
             self.subparsers = {(): sp}
+
+        if False:
+            command_to_load = {}
+            for command in command_list:
+                index = command_table
+                parts = command.split()
+                for part in parts[:-1]:
+                    if not part in index:
+                        index[part] = {}
+                    index = index[part]
+                index[parts[-1]] = command
+
+                return result
+
+            def find_matches(parts, commandtable):
+                best_match = commandtable
+                try:
+                    for part in parts:
+                        best_match = best_match[part]
+                except:
+                    pass
+
+            if isinstance(best_match, str):
+                return {' '.join(parts): best_match}
+            return [c for c in best_match]
 
         for command_name, metadata in command_table.items():
             subparser = self._get_subparser(command_name.split())
