@@ -418,7 +418,7 @@ def _validate_reference_name(reference_name):
     result = re.match('[_a-zA-Z0-9]+', reference_name)
     if result.group() != reference_name:
         raise CLIError(
-            "{} is not valid for a Reference Name. A valid reference name must consist of alphanumeric characters, or '_'".format(reference_name))
+            "{} is not a valid reference Name. A reference name must consist of alphanumeric characters, or '_'".format(reference_name))
 
 
 def _deployment_pipelines_exist():
