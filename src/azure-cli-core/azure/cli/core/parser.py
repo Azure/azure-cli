@@ -56,7 +56,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
         self._description = kwargs.pop('description', None)
         super(AzCliCommandParser, self).__init__(**kwargs)
 
-    def load_command_table(self, command_table, argv):
+    def load_command_table(self, command_table):
         """Load a command table into our parser.
         """
         # If we haven't already added a subparser, we
