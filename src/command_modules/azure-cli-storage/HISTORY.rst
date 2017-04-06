@@ -3,6 +3,12 @@
 Release History
 ===============
 
+unreleased
+++++++++++++++++++
+
+* Add support for incremental blob copy
+* Add support for large block blob upload
+
 2.0.2 (2017-04-03)
 ++++++++++++++++++
 

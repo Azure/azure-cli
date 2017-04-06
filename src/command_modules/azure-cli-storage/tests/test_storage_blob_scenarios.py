@@ -9,9 +9,43 @@ import unittest
 from datetime import datetime, timedelta
 from azure.cli.testsdk import (ScenarioTest, LiveTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck, live_only, get_sha1_hash)
+from azure.cli.core.util import CLIError
+from azure.cli.command_modules.storage._factory import NO_CREDENTIALS_ERROR_MESSAGE
 
 
 class StorageBlobUploadTests(ScenarioTest):
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='source_account')
+    @StorageAccountPreparer(parameter_name='target_account')
+    def test_storage_blob_incremental_copy(self, resource_group, source_account, target_account):
+        source_file = self.create_temp_file(16, full_random=True)
+        source_container = self.create_random_name(prefix='cont', length=24)
+        source_key = self.get_account_key(resource_group, source_account)
+        self.cmd('storage container create -n {} --account-name {} --account-key {}'
+                 .format(source_container, source_account, source_key))
+        self.cmd('storage blob upload -c {} -n src -f {} -t page --account-name {} --account-key '
+                 '{}'.format(source_container, source_file, source_account, source_key))
+        snapshot = self.cmd('storage blob snapshot -c {} -n src --account-name {} --account-key '
+                            '{}'.format(source_container,
+                                        source_account,
+                                        source_key)).get_output_in_json()['snapshot']
+
+        target_container = self.create_random_name(prefix='cont', length=24)
+        target_key = self.get_account_key(resource_group, target_account)
+        self.cmd('storage container create -n {} --account-name {} --account-key {}'
+                 .format(target_container, target_account, target_key))
+        self.cmd('storage blob incremental-copy start --source-container {} --source-blob src '
+                 '--source-account-name {} --source-account-key {} --source-snapshot {} '
+                 '--account-name {} --account-key {} --destination-container {} '
+                 '--destination-blob backup'.format(source_container, source_account, source_key,
+                                                    snapshot, target_account, target_key,
+                                                    target_container))
+
+    def test_storage_blob_no_credentials_scenario(self):
+        source_file = self.create_temp_file(1)
+        with self.assertRaisesRegexp(CLIError, re.escape(NO_CREDENTIALS_ERROR_MESSAGE)):
+            self.cmd('storage blob upload -c foo -n bar -f ' + source_file)
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_upload_small_file(self, resource_group, storage_account):
