@@ -418,6 +418,8 @@ def remove_reference(reference_name):
     references.remove_reference(service_name, reference_name)
     utils.writeline("Removed reference '{}'".format(reference_name))
 
+    _service_remove_reference(reference_name)
+
 
 def _validate_reference_name(reference_name):
     """
@@ -1225,13 +1227,22 @@ def _service_list():
     _run_innerloop_command('service list')
 
 
-def _service_add_reference(reference_name, reference_type):
+def _service_add_reference(reference_name, reference_type, service_name):
     """
     Calls tenx run command on the current directory.
     Adds reference to the projectInfo
     """
     _run_innerloop_command(
-        'reference add -n {} -t {} -q'.format(reference_name, reference_type))
+        'reference add -n {} -t {} -s {} -q'.format(reference_name, reference_type, service_name))
+
+
+def _service_remove_reference(reference_name):
+    """
+    Calls tenx run command on the current directory.
+    Removes reference from the projectInfo
+    """
+    _run_innerloop_command(
+        'reference remove -n {} -q'.format(reference_name))
 
 
 def _run_innerloop_command(*args):
