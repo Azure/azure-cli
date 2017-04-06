@@ -66,31 +66,6 @@ class AzCliCommandParser(argparse.ArgumentParser):
             sp.required = True
             self.subparsers = {(): sp}
 
-        if False:
-            command_to_load = {}
-            for command in command_list:
-                index = command_table
-                parts = command.split()
-                for part in parts[:-1]:
-                    if not part in index:
-                        index[part] = {}
-                    index = index[part]
-                index[parts[-1]] = command
-
-                return result
-
-            def find_matches(parts, commandtable):
-                best_match = commandtable
-                try:
-                    for part in parts:
-                        best_match = best_match[part]
-                except:
-                    pass
-
-            if isinstance(best_match, str):
-                return {' '.join(parts): best_match}
-            return [c for c in best_match]
-
         for command_name, metadata in command_table.items():
             subparser = self._get_subparser(command_name.split())
             command_verb = command_name.split()[-1]
