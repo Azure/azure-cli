@@ -577,17 +577,17 @@ class FunctionAppWithPlanE2ETest(ResourceGroupVCRTestBase):
             JMESPathCheck('name', webapp_name),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
         ])
-        self.cmd('functionapp list -g {}'.format(self.resource_group), checks=[
+        self.cmd('appservice web list -g {}'.format(self.resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', webapp_name),
             JMESPathCheck('[0].hostNames[0]', webapp_name + '.azurewebsites.net')
         ])
-        self.cmd('functionapp show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
+        self.cmd('appservice web show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
             JMESPathCheck('name', webapp_name),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
         ])
 
-        self.cmd('functionapp delete -g {} -n {}'.format(self.resource_group, webapp_name))
+        self.cmd('appservice web delete -g {} -n {}'.format(self.resource_group, webapp_name))
         # test empty service plan should be automatically deleted.
         self.cmd('appservice plan list -g {}'.format(self.resource_group), checks=[
             JMESPathCheck('length(@)', 0)
