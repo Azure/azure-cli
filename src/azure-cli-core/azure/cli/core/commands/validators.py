@@ -52,6 +52,7 @@ def get_default_location_from_resource_group(namespace):
 
 def validate_file_or_dict(string):
     import os
+    string = os.path.expanduser(string)
     if os.path.exists(string):
         from azure.cli.core.util import get_file_json
         return get_file_json(string)
