@@ -169,7 +169,7 @@ class Application(object):
         if argv[-1] in ('--help', '-h') or command in command_table:
             self.configuration.load_params(command)
             self.raise_event(self.COMMAND_TABLE_PARAMS_LOADED, command_table=command_table)
-            self.parser.load_command_table(command_table, argv)
+            self.parser.load_command_table(command_table)
 
         if self.session['completer_active']:
             enable_autocomplete(self.parser)
