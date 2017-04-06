@@ -35,14 +35,14 @@ from azure.cli.command_modules.network._validators import \
      process_public_ip_create_namespace, validate_private_ip_address,
      process_lb_frontend_ip_namespace, process_local_gateway_create_namespace,
      process_tm_endpoint_create_namespace, process_vnet_create_namespace,
-     process_vnet_gateway_create_namespace, process_vpn_connection_create_namespace,
+     process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
+     process_vpn_connection_create_namespace,
      process_ag_ssl_policy_set_namespace, process_route_table_create_namespace,
      validate_auth_cert, validate_cert, validate_inbound_nat_rule_id_list,
      validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
      validate_address_pool_name_or_id, validate_servers, load_cert_file, validate_metadata,
      validate_peering_type, validate_dns_record_type,
-     get_public_ip_validator, get_nsg_validator, get_subnet_validator,
-     get_virtual_network_validator)
+     get_public_ip_validator, get_nsg_validator, get_subnet_validator)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
 
@@ -480,17 +480,15 @@ register_cli_argument('network vnet-gateway', 'sku', help='VNet gateway SKU.', *
 register_cli_argument('network vnet-gateway', 'vpn_type', help='VPN routing type.', **enum_choice_list(VpnType))
 register_cli_argument('network vnet-gateway', 'bgp_peering_address', arg_group='BGP Peering', help='IP address to use for BGP peering.')
 register_cli_argument('network vnet-gateway', 'address_prefixes', help='Space separated list of address prefixes to associate with the VNet gateway.', nargs='+')
+register_cli_argument('network vnet-gateway', 'public_ip_address', options_list=['--public-ip-addresses'], nargs='+', help='Specify a single public IP (name or ID) for an active-standby gateway. Specify two space-separated public IPs for an active-active gateway.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
+
 register_cli_argument('network vnet-gateway create', 'asn', validator=process_vnet_gateway_create_namespace)
 
 register_cli_argument('network vnet-gateway update', 'enable_bgp', help='Enable BGP (Border Gateway Protocol)', arg_group='BGP Peering', **enum_choice_list(['true', 'false']))
-register_cli_argument('network vnet-gateway update', 'public_ip_address', help='Name or ID of a public IP address.', validator=get_public_ip_validator())
-register_cli_argument('network vnet-gateway update', 'virtual_network', virtual_network_name_type, options_list=('--vnet',), help="Name or ID of a virtual network that contains a subnet named 'GatewaySubnet'.", validator=get_virtual_network_validator())
-
-public_ip_help = get_folded_parameter_help_string('public IP address')
-register_cli_argument('network vnet-gateway create', 'public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), validator=get_public_ip_validator())
+register_cli_argument('network vnet-gateway update', 'virtual_network', virtual_network_name_type, options_list=('--vnet',), help="Name or ID of a virtual network that contains a subnet named 'GatewaySubnet'.", validator=process_vnet_gateway_update_namespace)
 
 vnet_help = "Name or ID of an existing virtual network which has a subnet named 'GatewaySubnet'."
-register_cli_argument('network vnet-gateway create', 'virtual_network', options_list=('--vnet',), help=vnet_help, validator=get_virtual_network_validator())
+register_cli_argument('network vnet-gateway create', 'virtual_network', options_list=('--vnet',), help=vnet_help)
 
 register_cli_argument('network vnet-gateway root-cert create', 'public_cert_data', help='Base64 contents of the root certificate file or file path.', type=file_type, completer=FilesCompleter(), validator=load_cert_file('public_cert_data'))
 register_cli_argument('network vnet-gateway root-cert create', 'cert_name', help='Root certificate name', options_list=('--name', '-n'))

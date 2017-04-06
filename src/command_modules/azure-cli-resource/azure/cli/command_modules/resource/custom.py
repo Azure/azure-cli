@@ -254,6 +254,10 @@ def get_deployment_operations(client, resource_group_name, deployment_name, oper
 def list_resources(resource_group_name=None, resource_provider_namespace=None,
                    resource_type=None, name=None, tag=None, location=None):
     rcf = _resource_client_factory()
+
+    if resource_group_name is not None:
+        rcf.resource_groups.get(resource_group_name)
+
     odata_filter = _list_resources_odata_filter_builder(resource_group_name,
                                                         resource_provider_namespace,
                                                         resource_type, name, tag, location)
@@ -503,15 +507,18 @@ def list_locks(resource_group_name=None, resource_provider_namespace=None,
     :type filter_string: str
     '''
     lock_client = _resource_lock_client_factory()
+    lock_resource = _validate_lock_params(resource_group_name, resource_provider_namespace,
+                                          parent_resource_path, resource_type, resource_name)
+    resource_group_name = lock_resource[0]
+    resource_name = lock_resource[1]
+    resource_provider_namespace = lock_resource[2]
+    resource_type = lock_resource[3]
+
     if resource_group_name is None:
         return lock_client.management_locks.list_at_subscription_level(filter=filter_string)
     if resource_name is None:
         return lock_client.management_locks.list_at_resource_group_level(
             resource_group_name, filter=filter_string)
-    if resource_provider_namespace is None:
-        raise CLIError('--resource-provider-namespace is required if --resource-name is present')
-    if resource_type is None:
-        raise CLIError('--resource-type is required if --resource-name is present')
     return lock_client.management_locks.list_at_resource_level(
         resource_group_name, resource_provider_namespace, parent_resource_path, resource_type,
         resource_name, filter=filter_string)
@@ -541,18 +548,58 @@ def delete_lock(name, resource_group_name=None, resource_provider_namespace=None
     :type resource_name: str
     '''
     lock_client = _resource_lock_client_factory()
+    lock_resource = _validate_lock_params(resource_group_name, resource_provider_namespace,
+                                          parent_resource_path, resource_type, resource_name)
+    resource_group_name = lock_resource[0]
+    resource_name = lock_resource[1]
+    resource_provider_namespace = lock_resource[2]
+    resource_type = lock_resource[3]
+
     if resource_group_name is None:
         return lock_client.management_locks.delete_at_subscription_level(name)
     if resource_name is None:
         return lock_client.management_locks.delete_at_resource_group_level(
             resource_group_name, name)
-    if resource_provider_namespace is None:
-        raise CLIError('--resource-provider-namespace is required if --resource-name is present')
-    if resource_type is None:
-        raise CLIError('--resource-type is required if --resource-name is present')
     return lock_client.management_locks.delete_at_resource_level(
         resource_group_name, resource_provider_namespace, parent_resource_path or '', resource_type,
         resource_name, name)
+
+def _validate_lock_params(resource_group_name, resource_provider_namespace, parent_resource_path,
+                          resource_type, resource_name):
+    if resource_group_name is None:
+        if resource_name is not None:
+            raise CLIError('--resource-name is ignored if --resource-group is not given.')
+        if resource_type is not None:
+            raise CLIError('--resource-type is ignored if --resource-group is not given.')
+        if resource_provider_namespace is not None:
+            raise CLIError('--namespace is ignored if --resource-group is not given.')
+        if parent_resource_path is not None:
+            raise CLIError('--parent is ignored if --resource-group is not given.')
+        return (None, None, None, None)
+
+    if resource_name is None:
+        if resource_type is not None:
+            raise CLIError('--resource-type is ignored if --resource-name is not given.')
+        if resource_provider_namespace is not None:
+            raise CLIError('--namespace is ignored if --resource-name is not given.')
+        if parent_resource_path is not None:
+            raise CLIError('--parent is ignored if --resource-name is not given.')
+        return (resource_group_name, None, None, None)
+
+    if resource_type is None or len(resource_type) == 0:
+        raise CLIError('--resource-type is required if --resource-name is present')
+
+    parts = resource_type.split('/')
+    if resource_provider_namespace is None:
+        if len(parts) == 1:
+            raise CLIError('A resource namespace is required if --resource-name is present.'
+                           'Expected <namespace>/<type> or --namespace=<namespace>')
+        else:
+            resource_provider_namespace = parts[0]
+            resource_type = parts[1]
+    elif len(parts) != 1:
+        raise CLIError('Resource namespace specified in both --resource-type and --namespace')
+    return (resource_group_name, resource_name, resource_provider_namespace, resource_type)
 
 def create_lock(name, resource_group_name=None, resource_provider_namespace=None,
                 parent_resource_path=None, resource_type=None, resource_name=None,
@@ -576,15 +623,20 @@ def create_lock(name, resource_group_name=None, resource_provider_namespace=None
     parameters = ManagementLockObject(level=level, notes=notes, name=name)
 
     lock_client = _resource_lock_client_factory()
+    lock_resource = _validate_lock_params(resource_group_name, resource_provider_namespace,
+                                          parent_resource_path, resource_type, resource_name)
+    resource_group_name = lock_resource[0]
+    resource_name = lock_resource[1]
+    resource_provider_namespace = lock_resource[2]
+    resource_type = lock_resource[3]
+
     if resource_group_name is None:
         return lock_client.management_locks.create_or_update_at_subscription_level(name, parameters)
+
     if resource_name is None:
         return lock_client.management_locks.create_or_update_at_resource_group_level(
             resource_group_name, name, parameters)
-    if resource_provider_namespace is None:
-        raise CLIError('--resource-provider-namespace is required if --resource-name is present')
-    if resource_type is None:
-        raise CLIError('--resource-type is required if --resource-name is present')
+
     return lock_client.management_locks.create_or_update_at_resource_level(
         resource_group_name, resource_provider_namespace, parent_resource_path or '', resource_type,
         resource_name, name, parameters)
@@ -599,15 +651,14 @@ def _update_lock_parameters(parameters, level, notes, lock_id, lock_type):
     if lock_type is not None:
         parameters.type = lock_type
 
-def update_lock(name, resource_group_name=None,
-                level=None, notes=None, lock_id=None, lock_type=None):
+def update_lock(name, resource_group_name=None, level=None, notes=None):
     lock_client = _resource_lock_client_factory()
     if resource_group_name is None:
         params = lock_client.management_locks.get(name)
-        _update_lock_parameters(params, level, notes, lock_id, lock_type)
+        _update_lock_parameters(params, level, notes, None, None)
         return lock_client.management_locks.create_or_update_at_subscription_level(name, params)
     params = lock_client.management_locks.get_at_resource_group_level(resource_group_name, name)
-    _update_lock_parameters(params, level, notes, lock_id, lock_type)
+    _update_lock_parameters(params, level, notes, None, None)
     return lock_client.management_locks.create_or_update_at_resource_group_level(
         resource_group_name, name, params)
 

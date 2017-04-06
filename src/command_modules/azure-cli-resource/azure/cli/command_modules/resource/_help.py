@@ -5,11 +5,23 @@
 
 from azure.cli.core.help_files import helps #pylint: disable=unused-import
 
-#pylint: disable=line-too-long
+#pylint: disable=line-too-long, too-many-lines
 helps['lock'] = """
     type: group
     short-summary: Manage Azure locks.
 """
+helps['lock update'] = """
+    type: command
+    short-summary: Update the properties of a lock.
+    parameters:
+        - name: --notes
+          type: string
+          short-summary: 'Notes about this lock'
+    examples:
+        - name: Update a subscription level lock with new notes
+          text: >
+            az lock update --name lockName --resource-group group --notes newNotesHere
+    """
 helps['policy'] = """
     type: group
     short-summary: Manage resource policies.
