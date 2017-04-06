@@ -394,6 +394,8 @@ def add_reference(target_group, target_name, reference_name):
 
         env_variables = references.create_sqlserver_reference(
             service_name, reference_name, sql_admin_login, sql_admin_password, fqdn)
+    else:
+        raise NotImplementedError()
 
     # Save the reference
     project_settings.add_reference(

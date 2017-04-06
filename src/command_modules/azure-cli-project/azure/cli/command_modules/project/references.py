@@ -32,6 +32,13 @@ def _label_secret(secret_name, label):
     utils.execute_command(label_command)
 
 
+def _add_run_label(secret_name, service_name):
+    """
+    Labels the secret with run=service_name
+    """
+    _label_secret(secret_name, 'run={}'.format(service_name))
+
+
 def create_documentdb_reference(service_name, reference_name, connection_string):
     """
     Creates a secret on Kubernetes that stores
@@ -48,7 +55,7 @@ def create_documentdb_reference(service_name, reference_name, connection_string)
     utils.execute_command(command)
 
     # Label it with run=service_name
-    _label_secret(secret_name, 'run={}'.format(service_name))
+    _add_run_label(secret_name, 'run={}'.format(service_name))
     return environment_variable_name
 
 
@@ -76,7 +83,7 @@ def create_sqlserver_reference(service_name, reference_name, admin_login, admin_
     utils.execute_command(command)
 
     # Label it with run=service_name
-    _label_secret(secret_name, 'run={}'.format(service_name))
+    _add_run_label(secret_name, 'run={}'.format(service_name))
     return [admin_login_var,
             admin_password_var,
             fqdn_var]
