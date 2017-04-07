@@ -110,7 +110,7 @@ class Application(object):
     COMMAND_TABLE_LOADED = 'CommandTable.Loaded'
     COMMAND_TABLE_PARAMS_LOADED = 'CommandTableParams.Loaded'
 
-    def __init__(self):
+    def __init__(self, configuration=None):
         self._event_handlers = defaultdict(lambda: [])
         self.session = {
             'headers': {
@@ -133,7 +133,7 @@ class Application(object):
         self.raise_event(self.GLOBAL_PARSER_CREATED, global_group=global_group)
 
         self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
-        self.configuration = None
+        self.configuration = configuration
 
     def initialize(self, configuration):
         self.configuration = configuration
