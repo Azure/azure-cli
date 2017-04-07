@@ -22,7 +22,7 @@ from azure.storage.file.models import ContentSettings as FileContentSettings
 from azure.storage.models import ResourceTypes, Services
 from azure.storage.table import TablePermissions, TablePayloadFormat
 
-from ._factory import get_storage_data_service_client
+from ._factory import get_storage_data_service_client, storage_client_factory
 from .util import glob_files_locally
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
@@ -31,7 +31,7 @@ storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 # Utilities
 
 def _query_account_key(account_name):
-    scf = get_mgmt_service_client(StorageManagementClient)
+    scf = storage_client_factory()
     acc = next((x for x in scf.storage_accounts.list() if x.name == account_name), None)
     if acc:
         from azure.cli.core.commands.arm import parse_resource_id
