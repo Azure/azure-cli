@@ -10,6 +10,8 @@ from datetime import datetime, timedelta
 
 from azure.cli.core.util import CLIError
 from azure.cli.core._profile import CLOUD
+from azure.cli.core._config import az_config
+from azure.cli.core.commands.validators import validate_key_value_pairs
 
 
 from azure.storage.blob import PublicAccess
@@ -22,12 +24,22 @@ from azure.storage.table import TablePermissions, TablePayloadFormat
 
 from ._factory import get_storage_data_service_client
 from .util import glob_files_locally
-from ._command_type import validate_client_parameters, query_account_key
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
 
 # Utilities
+
+def _query_account_key(account_name):
+    scf = get_mgmt_service_client(StorageManagementClient)
+    acc = next((x for x in scf.storage_accounts.list() if x.name == account_name), None)
+    if acc:
+        from azure.cli.core.commands.arm import parse_resource_id
+        rg = parse_resource_id(acc.id)['resource_group']
+        return scf.storage_accounts.list_keys(rg, account_name).keys[0].value  # pylint: disable=no-member
+    else:
+        raise ValueError("Storage account '{}' not found.".format(account_name))
+
 
 def _create_short_lived_blob_sas(account_name, account_key, container, blob):
     from azure.storage.sharedaccesssignature import SharedAccessSignature
@@ -89,6 +101,82 @@ def validate_client_parameters(namespace):
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key and not n.sas_token:
         n.account_key = _query_account_key(n.account_name)
+
+def process_blob_source_uri(namespace):
+    """
+    Validate the parameters referenced to a blob source and create the source URI from them.
+    """
+    usage_string = \
+        'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
+        '\n\t   --source-uri' \
+        '\n\tOR --source-container --source-blob --source-snapshot [--source-account-name & sas] ' \
+        '\n\tOR --source-container --source-blob --source-snapshot [--source-account-name & key] '
+
+    ns = vars(namespace)
+
+    # source as blob
+    container = ns.pop('source_container', None)
+    blob = ns.pop('source_blob', None)
+    snapshot = ns.pop('source_snapshot', None)
+
+    # source credential clues
+    source_account_name = ns.pop('source_account_name', None)
+    source_account_key = ns.pop('source_account_key', None)
+    sas = ns.pop('source_sas', None)
+
+    # source in the form of an uri
+    uri = ns.get('copy_source', None)
+    if uri:
+        if any([container, blob, sas, snapshot, source_account_name, source_account_key]):
+            raise ValueError(usage_string.format('Unused parameters are given in addition to the '
+                                                 'source URI'))
+        else:
+            # simplest scenario--no further processing necessary
+            return
+
+    validate_client_parameters(namespace)  # must run first to resolve storage account
+
+    # determine if the copy will happen in the same storage account
+    if not source_account_name and source_account_key:
+        raise ValueError(usage_string.format('Source account key is given but account name is not'))
+    elif not source_account_name and not source_account_key:
+        # neither source account name or key is given, assume that user intends to copy blob in
+        # the same account
+        source_account_name = ns.get('account_name', None)
+        source_account_key = ns.get('account_key', None)
+    elif source_account_name and not source_account_key:
+        if source_account_name == ns.get('account_name', None):
+            # the source account name is same as the destination account name
+            source_account_key = ns.get('account_key', None)
+        else:
+            # the source account is different from destination account but the key is missing
+            # try to query one.
+            try:
+                source_account_key = _query_account_key(source_account_name)
+            except ValueError:
+                raise ValueError('Source storage account {} not found.'.format(source_account_name))
+    # else: both source account name and key are given by user
+
+    if not source_account_name:
+        raise ValueError(usage_string.format('Storage account name not found'))
+
+    if not sas:
+        sas = _create_short_lived_blob_sas(source_account_name, source_account_key, container, blob)
+
+    query_params = []
+    if sas:
+        query_params.append(sas)
+    if snapshot:
+        query_params.append('snapshot={}'.format(snapshot))
+
+    uri = 'https://{}.blob.{}/{}/{}{}{}'.format(source_account_name,
+                                                CLOUD.suffixes.storage_endpoint,
+                                                container,
+                                                blob,
+                                                '?' if query_params else '',
+                                                '&'.join(query_params))
+
+    namespace.copy_source = uri
 
 
 def validate_source_uri(namespace):  # pylint: disable=too-many-statements
@@ -159,7 +247,7 @@ def validate_source_uri(namespace):  # pylint: disable=too-many-statements
             # the source account is different from destination account but the key is missing
             # try to query one.
             try:
-                source_account_key = query_account_key(source_account_name)
+                source_account_key = _query_account_key(source_account_name)
             except ValueError:
                 raise ValueError('Source storage account {} not found.'.format(source_account_name))
     # else: both source account name and key are given by user
@@ -464,7 +552,7 @@ def get_source_file_or_blob_service_client(namespace):
         if not (source_key or source_sas):
             # when either storage account key or SAS is given, try to fetch the key in the current
             # subscription
-            source_key = query_account_key(source_account)
+            source_key = _query_account_key(source_account)
 
         if source_container:
             from azure.storage.blob.blockblobservice import BlockBlobService
