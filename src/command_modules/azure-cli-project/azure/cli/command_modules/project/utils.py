@@ -281,26 +281,31 @@ def get_remote_host(dns_prefix, location):
     return '{}.{}.cloudapp.azure.com'.format(dns_prefix, location)
 
 
-def execute_command(command, ignore_failure=False, tries=1):
+def execute_command(command, throw=False, tries=1):
     """
     Executes a shell command on a local machine
     """
+    return_code = 1
     retry = 0
     while retry < tries:
         with Popen(command, shell=True, stdout=PIPE, stderr=PIPE, bufsize=1, universal_newlines=True) as process:
             for line in process.stdout:
                 logger.info('\n' + line)
-            if ignore_failure:
+            if throw:
                 for err in process.stderr:
                     logger.debug(err)
-
-        if process.returncode == 0:
+            # Wait for the process to finish to get the return code
+            return_code = process.wait()
+            if throw:
+                raise CLIError(CalledProcessError(
+                    return_code, command))
+        if return_code == 0:
             break
-        else:
-            if not ignore_failure:
-                raise CLIError(CalledProcessError(process.returncode, command))
+
         sleep(2)
         retry = retry + 1
+
+    return return_code
 
 
 class Process(object):
