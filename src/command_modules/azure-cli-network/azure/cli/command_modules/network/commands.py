@@ -19,7 +19,8 @@ from ._format import \
      transform_vnet_create_output, transform_public_ip_create_output,
      transform_traffic_manager_create_output, transform_nic_create_output,
      transform_nsg_create_output, transform_vnet_gateway_create_output,
-     transform_vpn_connection, transform_vpn_connection_list)
+     transform_vpn_connection, transform_vpn_connection_list,
+     transform_vpn_connection_create_output)
 
 custom_path = 'azure.cli.command_modules.network.custom#{}'
 
@@ -292,7 +293,7 @@ cli_generic_update_command(__name__, 'network vnet subnet update',
 cli_command(__name__, 'network list-usages', 'azure.mgmt.network.operations.usages_operations#UsagesOperations.list', cf_usages)
 
 # VirtualNetworkGatewayConnectionsOperations
-cli_command(__name__, 'network vpn-connection create', custom_path.format('create_vpn_connection'), cf_virtual_network_gateway_connections)
+cli_command(__name__, 'network vpn-connection create', custom_path.format('create_vpn_connection'), cf_virtual_network_gateway_connections, transform=transform_vpn_connection_create_output)
 cli_command(__name__, 'network vpn-connection delete', 'azure.mgmt.network.operations.virtual_network_gateway_connections_operations#VirtualNetworkGatewayConnectionsOperations.delete', cf_virtual_network_gateway_connections)
 cli_command(__name__, 'network vpn-connection show', 'azure.mgmt.network.operations.virtual_network_gateway_connections_operations#VirtualNetworkGatewayConnectionsOperations.get', cf_virtual_network_gateway_connections, exception_handler=empty_on_404, transform=transform_vpn_connection)
 cli_command(__name__, 'network vpn-connection list', 'azure.mgmt.network.operations.virtual_network_gateway_connections_operations#VirtualNetworkGatewayConnectionsOperations.list', cf_virtual_network_gateway_connections, transform=transform_vpn_connection_list)
