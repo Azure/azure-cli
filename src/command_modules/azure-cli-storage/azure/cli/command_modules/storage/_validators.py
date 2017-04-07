@@ -59,6 +59,38 @@ def validate_accept(namespace):
         namespace.accept = formats[namespace.accept.lower()]
 
 
+def validate_client_parameters(namespace):
+    """ Retrieves storage connection parameters from environment variables and parses out
+    connection string into account name and key """
+    n = namespace
+
+    if not n.connection_string:
+        n.connection_string = az_config.get('storage', 'connection_string', None)
+
+    # if connection string supplied or in environment variables, extract account key and name
+    if n.connection_string:
+        conn_dict = validate_key_value_pairs(n.connection_string)
+        n.account_name = conn_dict['AccountName']
+        n.account_key = conn_dict['AccountKey']
+
+    # otherwise, simply try to retrieve the remaining variables from environment variables
+    if not n.account_name:
+        n.account_name = az_config.get('storage', 'account', None)
+    if not n.account_key:
+        n.account_key = az_config.get('storage', 'key', None)
+    if not n.sas_token:
+        n.sas_token = az_config.get('storage', 'sas_token', None)
+
+    # strip the '?' from sas token. the portal and command line are returns sas token in different
+    # forms
+    if n.sas_token:
+        n.sas_token = n.sas_token.lstrip('?')
+
+    # if account name is specified but no key, attempt to query
+    if n.account_name and not n.account_key and not n.sas_token:
+        n.account_key = _query_account_key(n.account_name)
+
+
 def validate_source_uri(namespace):  # pylint: disable=too-many-statements
     usage_string = \
         'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
@@ -150,7 +182,7 @@ def validate_source_uri(namespace):  # pylint: disable=too-many-statements
     if sas:
         query_params.append(sas)
     if snapshot:
-        query_params.append(snapshot)
+        query_params.append('snapshot={}'.format(snapshot))
 
     uri = 'https://{0}.{1}.{6}/{2}/{3}{4}{5}'.format(
         source_account_name,

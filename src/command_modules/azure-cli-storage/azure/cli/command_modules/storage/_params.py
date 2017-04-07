@@ -39,7 +39,7 @@ from ._validators import \
      validate_key, storage_account_key_options,
      process_file_download_namespace, process_logging_update_namespace,
      process_metric_update_namespace, process_blob_copy_batch_namespace,
-     get_source_file_or_blob_service_client)
+     get_source_file_or_blob_service_client, process_blob_source_uri)
 
 # UTILITY
 
@@ -196,6 +196,16 @@ def register_source_uri_arguments(scope):
     register_extra_cli_argument(scope, 'source_account_key', default=None, help='The storage account key of the source blob.', arg_group='Copy Source')
 
 
+def register_blob_source_uri_arguments(scope):
+    register_cli_argument(scope, 'copy_source', options_list=('--source-uri', '-u'), validator=process_blob_source_uri, required=False, arg_group='Copy Source')
+    register_extra_cli_argument(scope, 'source_sas', default=None, help='The shared access signature for the source storage account.', arg_group='Copy Source')
+    register_extra_cli_argument(scope, 'source_container', default=None, help='The container name for the source storage account.', arg_group='Copy Source')
+    register_extra_cli_argument(scope, 'source_blob', default=None, help='The blob name for the source storage account.', arg_group='Copy Source')
+    register_extra_cli_argument(scope, 'source_snapshot', default=None, help='The blob snapshot for the source storage account.', arg_group='Copy Source')
+    register_extra_cli_argument(scope, 'source_account_name', default=None, help='The storage account name of the source blob.', arg_group='Copy Source')
+    register_extra_cli_argument(scope, 'source_account_key', default=None, help='The storage account key of the source blob.', arg_group='Copy Source')
+
+
 # CUSTOM CHOICE LISTS
 
 blob_types = {'block': BlockBlobService, 'page': PageBlobService, 'append': AppendBlobService}
@@ -277,6 +287,15 @@ register_cli_argument('storage blob copy', 'container_name', container_name_type
 register_cli_argument('storage blob copy', 'blob_name', blob_name_type, options_list=('--destination-blob', '-b'), help='Name of the destination blob. If the exists, it will be overwritten.')
 register_cli_argument('storage blob copy', 'source_lease_id', arg_group='Copy Source')
 
+# BLOB INCREMENTAL COPY PARAMETERS
+register_blob_source_uri_arguments('storage blob incremental-copy start')
+register_cli_argument('storage blob incremental-copy start', 'destination_if_modified_since', arg_group='Pre-condition')
+register_cli_argument('storage blob incremental-copy start', 'destination_if_unmodified_since', arg_group='Pre-condition')
+register_cli_argument('storage blob incremental-copy start', 'destination_if_match', arg_group='Pre-condition')
+register_cli_argument('storage blob incremental-copy start', 'destination_if_none_match', arg_group='Pre-condition')
+register_cli_argument('storage blob incremental-copy start', 'container_name', container_name_type, options_list=('--destination-container', '-c'))
+register_cli_argument('storage blob incremental-copy start', 'blob_name', blob_name_type, options_list=('--destination-blob', '-b'), help='Name of the destination blob. If the exists, it will be overwritten.')
+register_cli_argument('storage blob incremental-copy start', 'source_lease_id', arg_group='Copy Source')
 
 register_cli_argument('storage blob delete', 'delete_snapshots', **enum_choice_list(list(delete_snapshot_types.keys())))
 

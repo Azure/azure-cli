@@ -55,6 +55,16 @@ def file_data_service_factory(kwargs):
         sas_token=kwargs.pop('sas_token', None))
 
 
+def page_blob_service_factory(kwargs):
+    from azure.storage.blob.pageblobservice import PageBlobService
+    return generic_data_service_factory(
+        PageBlobService,
+        kwargs.pop('account_name', None),
+        kwargs.pop('account_key', None),
+        connection_string=kwargs.pop('connection_string', None),
+        sas_token=kwargs.pop('sas_token', None))
+
+
 def blob_data_service_factory(kwargs):
     from azure.storage.blob import BlockBlobService
     from ._params import blob_types

@@ -8,7 +8,8 @@
 from azure.cli.command_modules.storage._command_type import cli_storage_data_plane_command
 from azure.cli.command_modules.storage._factory import \
     (storage_client_factory, blob_data_service_factory, file_data_service_factory,
-     table_data_service_factory, queue_data_service_factory, cloud_storage_account_service_factory)
+     table_data_service_factory, queue_data_service_factory, cloud_storage_account_service_factory,
+     page_blob_service_factory)
 from azure.cli.command_modules.storage._format import \
     (transform_container_list, transform_container_show,
      transform_blob_output,
@@ -31,6 +32,7 @@ mgmt_path = 'azure.mgmt.storage.operations.storage_accounts_operations#StorageAc
 custom_path = 'azure.cli.command_modules.storage.custom#'
 file_service_path = 'azure.storage.file.fileservice#FileService.'
 block_blob_path = 'azure.storage.blob.blockblobservice#BlockBlobService.'
+page_blob_path = 'azure.storage.blob.pageblobservice#PageBlobService.'
 base_blob_path = 'azure.storage.blob.baseblobservice#BaseBlobService.'
 table_path = 'azure.storage.table.tableservice#TableService.'
 queue_path = 'azure.storage.queue.queueservice#QueueService.'
@@ -108,6 +110,12 @@ cli_storage_data_plane_command('storage blob copy start-batch', 'azure.cli.comma
 cli_storage_data_plane_command('storage blob copy cancel', block_blob_path + 'abort_copy_blob', factory)
 cli_storage_data_plane_command('storage blob upload-batch', 'azure.cli.command_modules.storage.blob#storage_blob_upload_batch', factory)
 cli_storage_data_plane_command('storage blob download-batch', 'azure.cli.command_modules.storage.blob#storage_blob_download_batch', factory)
+
+# page blob commands
+cli_storage_data_plane_command('storage blob incremental-copy start',
+                               page_blob_path + 'incremental_copy_blob', page_blob_service_factory)
+cli_storage_data_plane_command('storage blob incremental-copy cancel',
+                               block_blob_path + 'abort_copy_blob', page_blob_service_factory)
 
 # share commands
 factory = file_data_service_factory
