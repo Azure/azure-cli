@@ -230,7 +230,7 @@ def create_project(ssh_private_key, resource_group=random_name, name=random_name
             current_process.process_stop()
 
 
-def delete_project(no_wait=False):
+def delete_project(wait=False):
     """
     Deletes the Azure resource group containing project's artifacts and the projectResource.json file.
     """
@@ -245,8 +245,8 @@ def delete_project(no_wait=False):
         logger.info('Deleting resource group {resource_group}.'.format(
             resource_group=resource_group))
         res = res_client.resource_groups.delete(
-            resource_group_name=resource_group, raw=no_wait)
-        if not no_wait:
+            resource_group_name=resource_group, raw=not wait)
+        if wait:
             logger.info('Waiting for delete resource group {resource_group} operation to complete.'.format(
                 resource_group=resource_group))
             res.wait()
