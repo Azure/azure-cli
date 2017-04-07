@@ -10,6 +10,7 @@ from azure.cli.core.test_utils.vcr_test_base import ResourceGroupVCRTestBase, JM
 
 # pylint: disable=line-too-long
 
+
 class AzureContainerServiceScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, test_method):
