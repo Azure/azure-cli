@@ -83,7 +83,9 @@ class Configuration(object):  # pylint: disable=too-few-public-methods
         try:
             for part in parts:
                 best_match = best_match[part]
-                ' '.join((command_so_far, part))
+                command_so_far = ' '.join((command_so_far, part))
+                if isinstance(best_match, CliCommand):
+                    break
         except KeyError:
             pass
 
