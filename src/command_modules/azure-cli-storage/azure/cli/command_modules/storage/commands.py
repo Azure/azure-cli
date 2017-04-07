@@ -196,7 +196,7 @@ cli_storage_data_plane_command('storage entity delete', table_path + 'delete_ent
 factory = queue_data_service_factory
 cli_storage_data_plane_command('storage queue generate-sas', queue_path + 'generate_queue_shared_access_signature', factory)
 
-if get_api_version(ResourceType.MGMT_STORAGE) in ['2016-12-01']:
+if get_api_version(ResourceType.DATA_STORAGE) in ['2016-05-31']:
     cli_storage_data_plane_command('storage queue stats', queue_path + 'get_queue_service_stats', factory)
 
 cli_storage_data_plane_command('storage queue list', queue_path + 'list_queues', factory, transform=transform_storage_list_output)

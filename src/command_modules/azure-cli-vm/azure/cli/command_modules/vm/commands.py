@@ -111,7 +111,6 @@ cli_generic_update_command(__name__, 'vm update',
                            no_wait_param='raw')
 cli_generic_wait_command(__name__, 'vm wait', 'azure.cli.command_modules.vm.custom#get_instance_view')
 
-# Todo: add the list of api-versions instead of just one
 if get_api_version(ResourceType.MGMT_COMPUTE) in ['2016-04-30-preview']:
     cli_command(__name__, 'vm convert', mgmt_path.format(op_var, op_class, 'convert_to_managed_disks'), cf_vm)
     cli_command(__name__, 'vm encryption enable', 'azure.cli.command_modules.vm.disk_encryption#enable')
