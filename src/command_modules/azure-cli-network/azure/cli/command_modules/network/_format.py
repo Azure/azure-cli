@@ -85,17 +85,23 @@ def transform_vpn_connection_list(result):
 
 def transform_vpn_connection(result):
 
-    properties_to_strip = \
-        ['virtual_network_gateway1', 'virtual_network_gateway2', 'local_network_gateway2', 'peer']
-    for prop in properties_to_strip:
-        prop_val = getattr(result, prop, None)
-        if not prop_val:
-            delattr(result, prop)
-        else:
-            null_props = [key for key in prop_val.__dict__ if not prop_val.__dict__[key]]
-            for prop in null_props:
-                delattr(prop_val, prop)
+    if result:
+        properties_to_strip = \
+            ['virtual_network_gateway1', 'virtual_network_gateway2', 'local_network_gateway2', 'peer']
+        for prop in properties_to_strip:
+            prop_val = getattr(result, prop, None)
+            if not prop_val:
+                delattr(result, prop)
+            else:
+                null_props = [key for key in prop_val.__dict__ if not prop_val.__dict__[key]]
+                for prop in null_props:
+                    delattr(prop_val, prop)
     return result
+
+def transform_vpn_connection_create_output(result):
+    from azure.cli.core.commands import DeploymentOutputLongRunningOperation
+    result = DeploymentOutputLongRunningOperation('Starting network vpn-connection create')(result)
+    return result['resource']
 
 
 def transform_vnet_create_output(result):
