@@ -296,7 +296,7 @@ def execute_command(command, throw=False, tries=1):
                     logger.debug(err)
             # Wait for the process to finish to get the return code
             return_code = process.wait()
-            if throw:
+            if throw and return_code != 0:
                 raise CLIError(CalledProcessError(
                     return_code, command))
         if return_code == 0:
