@@ -8,19 +8,27 @@
 from __future__ import print_function
 from sys import stderr
 
-from azure.storage.models import Logging, Metrics, CorsRule, RetentionPolicy
-from azure.storage.blob import BlockBlobService
-from azure.storage.blob.baseblobservice import BaseBlobService
-from azure.storage.file import FileService
-from azure.storage.file.models import FileProperties, DirectoryProperties
-from azure.storage.table import TableService
-from azure.storage.queue import QueueService
-
 from azure.cli.core.decorators import transfer_doc
 from azure.cli.core.util import CLIError
+from azure.cli.core.profiles import get_sdk_attr
+
 
 from azure.cli.command_modules.storage._factory import \
     (storage_client_factory, generic_data_service_factory)
+
+
+Logging = get_sdk_attr('azure.multiapi.storage.models#Logging')
+Metrics = get_sdk_attr('azure.multiapi.storage.models#Metrics')
+CorsRule = get_sdk_attr('azure.multiapi.storage.models#CorsRule')
+AccessPolicy = get_sdk_attr('azure.multiapi.storage.models#AccessPolicy')
+RetentionPolicy = get_sdk_attr('azure.multiapi.storage.models#RetentionPolicy')
+BlockBlobService = get_sdk_attr('azure.multiapi.storage.blob#BlockBlobService')
+BaseBlobService = get_sdk_attr('azure.multiapi.storage.blob.baseblobservice#BaseBlobService')
+FileService = get_sdk_attr('azure.multiapi.storage.file#FileService')
+FileProperties = get_sdk_attr('azure.multiapi.storage.file.models#FileProperties')
+DirectoryProperties = get_sdk_attr('azure.multiapi.storage.file.models#DirectoryProperties')
+TableService = get_sdk_attr('azure.multiapi.storage.table#TableService')
+QueueService = get_sdk_attr('azure.multiapi.storage.queue#QueueService')
 
 
 def _update_progress(current, total):
@@ -191,7 +199,6 @@ def _set_acl(client, container_name, acl, **kwargs):
 def create_acl_policy(client, container_name, policy_name, start=None, expiry=None,
                       permission=None, **kwargs):
     """Create a stored access policy on the containing object"""
-    from azure.storage.models import AccessPolicy
     acl = _get_acl(client, container_name, **kwargs)
     acl[policy_name] = AccessPolicy(permission, expiry, start)
     if hasattr(acl, 'public_access'):

@@ -30,7 +30,7 @@ DEPENDENCIES = [
     'azure-keyvault==0.1.0',
     'azure-mgmt-network==0.40.0',
     'azure-mgmt-resource==0.40.0',
-    'azure-storage==0.34.0',
+    'azure-multiapi-storage==0.1.0',
     'azure-cli-core',
     'paramiko'
 ]

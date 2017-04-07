@@ -15,17 +15,8 @@ import azure.cli.core.commands.arm  # pylint: disable=unused-import
 from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
 
 from azure.common import AzureMissingResourceHttpError
-from azure.storage.models import AccountPermissions
-from azure.storage.blob import DeleteSnapshot, BlockBlobService, PageBlobService, AppendBlobService
-from azure.storage.blob.baseblobservice import BaseBlobService
-from azure.storage.blob.models import ContentSettings as BlobContentSettings, ContainerPermissions, BlobPermissions
-from azure.storage.file import FileService
-from azure.storage.file.models import ContentSettings as FileContentSettings, SharePermissions, FilePermissions
-from azure.storage.table import TableService, TablePayloadFormat
-from azure.storage.queue import QueueService
-from azure.storage.queue.models import QueuePermissions
 
-from azure.cli.core.profiles import get_versioned_models
+from azure.cli.core.profiles import get_versioned_models, get_sdk_attr
 from azure.cli.core.profiles.shared import ResourceType
 
 from ._factory import get_storage_data_service_client
@@ -42,6 +33,24 @@ from ._validators import \
      process_file_download_namespace, process_logging_update_namespace,
      process_metric_update_namespace, process_blob_copy_batch_namespace,
      get_source_file_or_blob_service_client, process_blob_source_uri)
+
+AccountPermissions = get_sdk_attr('azure.multiapi.storage.models#AccountPermissions')
+DeleteSnapshot = get_sdk_attr('azure.multiapi.storage.blob#DeleteSnapshot')
+BlockBlobService = get_sdk_attr('azure.multiapi.storage.blob#BlockBlobService')
+PageBlobService = get_sdk_attr('azure.multiapi.storage.blob#PageBlobService')
+AppendBlobService = get_sdk_attr('azure.multiapi.storage.blob#AppendBlobService')
+BaseBlobService = get_sdk_attr('azure.multiapi.storage.blob.baseblobservice#BaseBlobService')
+BlobContentSettings = get_sdk_attr('azure.multiapi.storage.blob.models#ContentSettings')
+ContainerPermissions = get_sdk_attr('azure.multiapi.storage.blob.models#ContainerPermissions')
+BlobPermissions = get_sdk_attr('azure.multiapi.storage.blob.models#BlobPermissions')
+FileService = get_sdk_attr('azure.multiapi.storage.file#FileService')
+FileContentSettings = get_sdk_attr('azure.multiapi.storage.file.models#ContentSettings')
+SharePermissions = get_sdk_attr('azure.multiapi.storage.file.models#SharePermissions')
+FilePermissions = get_sdk_attr('azure.multiapi.storage.file.models#FilePermissions')
+TableService = get_sdk_attr('azure.multiapi.storage.table#TableService')
+TablePayloadFormat = get_sdk_attr('azure.multiapi.storage.table#TablePayloadFormat')
+QueueService = get_sdk_attr('azure.multiapi.storage.queue#QueueService')
+QueuePermissions = get_sdk_attr('azure.multiapi.storage.queue.models#QueuePermissions')
 
 # UTILITY
 
