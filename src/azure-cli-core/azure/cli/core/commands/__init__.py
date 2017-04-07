@@ -350,7 +350,11 @@ def _load_azure_exception_class():
 
 def _is_paged(obj):
     # Since loading msrest is expensive, we avoid it until we have to
-    if obj.__class__.__name__ == 'Paged':
+    import collections
+    if isinstance(obj, collections.Iterable) \
+        and not isinstance(obj, list) \
+        and not isinstance(obj, dict):
+        
         from msrest.paging import Paged
         return isinstance(obj, Paged)
     return False
