@@ -72,8 +72,8 @@ class TestApplication(unittest.TestCase):
         cmd_table = {'test command': command}
 
         argv = 'az test command --hello world sir --something else'.split()
-        config = Configuration(argv)
-        config.get_command_table = lambda: cmd_table
+        config = Configuration()
+        config.get_command_table = lambda argv: cmd_table
         application = Application(config)
         application.execute(argv[1:])
 

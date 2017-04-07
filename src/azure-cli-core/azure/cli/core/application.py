@@ -35,22 +35,13 @@ class Configuration(object):  # pylint: disable=too-few-public-methods
         import azure.cli.core.commands as commands
         # Find the first noun on the command line and only load commands from that
         # module to improve startup time.
-        result = None
+        result = commands.get_command_table(argv[0] if argv else None)
+
         if argv is None:
-            argv = []
-
-        try:
-            result = commands.get_command_table(argv[0])
-        except IndexError:
-            pass
-
-        if result is None:
-            # No noun found, so load all commands.
-            result = commands.get_command_table()
+            return result
 
         command_tree = Configuration.build_command_tree(result)
         matches = Configuration.find_matches(argv, command_tree)
-        # return result
         return dict(matches)
 
     def load_params(self, command):  # pylint: disable=no-self-use
