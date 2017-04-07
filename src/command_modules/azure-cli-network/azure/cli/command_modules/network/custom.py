@@ -19,7 +19,6 @@ from azure.mgmt.network.models import \
      VirtualNetworkGatewayType, VirtualNetworkGatewaySkuName, VpnType, ApplicationGatewaySkuName)
 
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.arm import parse_resource_id, is_valid_resource_id, resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError
@@ -1198,8 +1197,8 @@ def create_vpn_connection(client, resource_group_name, connection_name, vnet_gat
         _log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties)
 
-    return LongRunningOperation()(client.create_or_update(
-        resource_group_name, deployment_name, properties, raw=no_wait))
+    return client.create_or_update(
+        resource_group_name, deployment_name, properties, raw=no_wait)
 
 
 def update_vpn_connection(instance, routing_weight=None, shared_key=None, tags=None,
