@@ -336,6 +336,26 @@ def get_op_handler(operation):
         raise ValueError("The operation '{}' is invalid.".format(operation))
 
 
+def _load_client_exception_class():
+    from msrest.exceptions import ClientException
+    return ClientException
+
+def _load_azure_exception_class():
+    from azure.common import AzureException
+    return AzureException
+
+def _is_paged(obj):
+    if obj.__class__.__name__ == 'Paged':
+        from msrest.paging import Paged
+        return isinstance(obj, Paged)
+    return False
+
+def _is_poller(obj):
+    if obj.__class__.__name__ == 'AzureOperationPoller':
+        from msrestazure.azure_operation import AzureOperationPoller
+        return isinstance(obj, AzureOperationPoller)
+    return False
+
 def create_command(module_name, name, operation,
                    transform_result, table_transformer, client_factory,
                    no_wait_param=None, confirmation=None, exception_handler=None,
@@ -344,10 +364,6 @@ def create_command(module_name, name, operation,
         raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
     def _execute_command(kwargs):
-        from msrest.paging import Paged
-        from msrest.exceptions import ClientException
-        from msrestazure.azure_operation import AzureOperationPoller
-        from azure.common import AzureException
 
         if confirmation \
             and not kwargs.get(CONFIRM_PARAM_NAME) \
@@ -374,19 +390,18 @@ def create_command(module_name, name, operation,
                 return transform_result(result)
 
             # otherwise handle based on return type of results
-            if isinstance(result, AzureOperationPoller):
+            if _is_poller(result):
                 return LongRunningOperation('Starting {}'.format(name))(result)
-            elif isinstance(result, Paged):
+            elif _is_paged(result):
                 return list(result)
-            else:
-                return result
-        except ClientException as client_exception:
+            return result
+        except _load_client_exception_class() as client_exception:
             fault_type = name.replace(' ', '-') + '-client-error'
             telemetry.set_exception(client_exception, fault_type=fault_type,
                                     summary='Unexpected client exception during command creation')
             message = getattr(client_exception, 'message', client_exception)
             raise _polish_rp_not_registerd_error(CLIError(message))
-        except AzureException as azure_exception:
+        except _load_azure_exception_class() as azure_exception:
             fault_type = name.replace(' ', '-') + '-service-error'
             telemetry.set_exception(azure_exception, fault_type=fault_type,
                                     summary='Unexpected azure exception during command creation')
