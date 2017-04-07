@@ -75,8 +75,9 @@ class GenericUpdateTest(unittest.TestCase):
         def my_set(**kwargs):  # pylint:disable=unused-argument
             return my_obj
 
-        config = Configuration([])
-        app = Application(config)
+        config = Configuration()
+        app = Application()
+        app.initialize(config)
 
         setattr(sys.modules[__name__], my_get.__name__, my_get)
         setattr(sys.modules[__name__], my_set.__name__, my_set)

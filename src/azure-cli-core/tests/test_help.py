@@ -95,8 +95,8 @@ class HelpTest(unittest.TestCase):
         command.add_argument('b', '-b', required=False, choices=['a', 'b', 'c'])
         cmd_table = {'n1': command}
 
-        config = Configuration([])
-        config.get_command_table = lambda: cmd_table
+        config = Configuration()
+        config.get_command_table = lambda argv: cmd_table
         app = Application()
         app.initialize(config)
         with self.assertRaises(SystemExit):

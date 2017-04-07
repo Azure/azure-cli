@@ -40,8 +40,8 @@ class TestApplication(unittest.TestCase):
         def other_handler(**kwargs):  # pylint: disable=unused-variable
             self.assertEqual(kwargs['args'], 'secret sauce')
 
-        config = Configuration([])
-        app = Application(config)
+        app = Application()
+        app.initialize(Configuration())
 
         app.raise_event('was_handler_called', args=handler_called)
         self.assertFalse(handler_called[0],
