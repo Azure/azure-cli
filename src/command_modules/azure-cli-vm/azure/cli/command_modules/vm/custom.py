@@ -29,6 +29,7 @@ from azure.cli.core.commands.arm import parse_resource_id, resource_id, is_valid
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core.util import CLIError
 import azure.cli.core.azlogging as azlogging
+from azure.cli.core.profiles import get_sdk_attr
 from ._vm_utils import read_content_if_is_file
 from ._vm_diagnostics_templates import get_default_diag_config
 
@@ -786,7 +787,7 @@ def enable_boot_diagnostics(resource_group_name, vm_name, storage):
 def get_boot_log(resource_group_name, vm_name):
     import sys
     from azure.cli.core._profile import CLOUD
-    from azure.storage.blob import BlockBlobService
+    BlockBlobService = get_sdk_attr('azure.multiapi.storage.blob.blockblobservice#BlockBlobService')
 
     client = _compute_client_factory()
 
