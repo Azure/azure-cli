@@ -337,24 +337,32 @@ def get_op_handler(operation):
 
 
 def _load_client_exception_class():
+    # Since loading msrest is expensive, we avoid it until we have to
     from msrest.exceptions import ClientException
     return ClientException
 
+
 def _load_azure_exception_class():
+    # Since loading msrest is expensive, we avoid it until we have to
     from azure.common import AzureException
     return AzureException
 
+
 def _is_paged(obj):
+    # Since loading msrest is expensive, we avoid it until we have to
     if obj.__class__.__name__ == 'Paged':
         from msrest.paging import Paged
         return isinstance(obj, Paged)
     return False
 
+
 def _is_poller(obj):
+    # Since loading msrest is expensive, we avoid it until we have to
     if obj.__class__.__name__ == 'AzureOperationPoller':
         from msrestazure.azure_operation import AzureOperationPoller
         return isinstance(obj, AzureOperationPoller)
     return False
+
 
 def create_command(module_name, name, operation,
                    transform_result, table_transformer, client_factory,
