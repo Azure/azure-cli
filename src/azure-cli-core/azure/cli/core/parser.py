@@ -186,6 +186,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
         """
         if name == 'description':
             if self._description:
-                self.description = self._description() if callable(self._description) else self._description
+                self.description = self._description() \
+                    if callable(self._description) else self._description
                 self._description = None
         return object.__getattribute__(self, name)

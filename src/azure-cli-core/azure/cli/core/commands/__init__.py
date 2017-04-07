@@ -484,6 +484,7 @@ class _ArgumentRegistry(object):
 _cli_argument_registry = _ArgumentRegistry()
 _cli_extra_argument_registry = defaultdict(lambda: {})
 
+
 def _apply_parameter_info(command_name, command):
     for argument_name in command.arguments:
         overrides = _get_cli_argument(command_name, argument_name)

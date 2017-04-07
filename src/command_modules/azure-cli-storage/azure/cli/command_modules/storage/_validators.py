@@ -59,7 +59,6 @@ def validate_accept(namespace):
         namespace.accept = formats[namespace.accept.lower()]
 
 
-
 def validate_source_uri(namespace):  # pylint: disable=too-many-statements
     usage_string = \
         'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \

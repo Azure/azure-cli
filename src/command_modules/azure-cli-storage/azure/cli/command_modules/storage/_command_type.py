@@ -7,6 +7,7 @@ from azure.cli.core.commands import create_command, command_table
 from azure.cli.core._config import az_config
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
+
 def query_account_key(account_name):
     from azure.mgmt.storage import StorageManagementClient
     scf = get_mgmt_service_client(StorageManagementClient)

@@ -58,7 +58,7 @@ class Configuration(object):  # pylint: disable=too-few-public-methods
             index = result
             parts = command.split()
             for part in parts[:-1]:
-                if not part in index:
+                if part not in index:
                     index[part] = {}
                 index = index[part]
             index[parts[-1]] = command_table[command]
@@ -90,6 +90,7 @@ class Configuration(object):  # pylint: disable=too-few-public-methods
                 else:
                     dummy_cmdname = ' '.join((command_so_far, part))
                     yield (dummy_cmdname, CliCommand(dummy_cmdname, lambda **kwargs: None))
+
 
 class Application(object):
 
