@@ -485,14 +485,14 @@ _cli_argument_registry = _ArgumentRegistry()
 _cli_extra_argument_registry = defaultdict(lambda: {})
 
 def _apply_parameter_info(command_name, command):
-        for argument_name in command.arguments:
-            overrides = _get_cli_argument(command_name, argument_name)
-            command.update_argument(argument_name, overrides)
+    for argument_name in command.arguments:
+        overrides = _get_cli_argument(command_name, argument_name)
+        command.update_argument(argument_name, overrides)
 
-        # Add any arguments explicitly registered for this command
-        for argument_name, argument_definition in _get_cli_extra_arguments(command_name):
-            command.arguments[argument_name] = argument_definition
-            command.update_argument(argument_name, _get_cli_argument(command_name, argument_name))
+    # Add any arguments explicitly registered for this command
+    for argument_name, argument_definition in _get_cli_extra_arguments(command_name):
+        command.arguments[argument_name] = argument_definition
+        command.update_argument(argument_name, _get_cli_argument(command_name, argument_name))
 
 
 def _update_command_definitions(command_table_to_update):

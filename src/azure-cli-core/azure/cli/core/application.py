@@ -31,11 +31,14 @@ class Configuration(object):  # pylint: disable=too-few-public-methods
     def __init__(self):
         self.output_format = None
 
-    def get_command_table(self, argv=[]):  # pylint: disable=no-self-use
+    def get_command_table(self, argv=None):  # pylint: disable=no-self-use
         import azure.cli.core.commands as commands
         # Find the first noun on the command line and only load commands from that
         # module to improve startup time.
         result = None
+        if argv is None:
+            argv = []
+
         try:
             result = commands.get_command_table(argv[0])
         except IndexError:
@@ -59,9 +62,7 @@ class Configuration(object):  # pylint: disable=too-few-public-methods
         '''From the list of commands names, find the exact match or
            set of potential matches that we are looking for
         '''
-        
         result = {}
-
         for command in command_table:
             index = result
             parts = command.split()
@@ -83,7 +84,7 @@ class Configuration(object):  # pylint: disable=too-few-public-methods
             for part in parts:
                 best_match = best_match[part]
                 ' '.join((command_so_far, part))
-        except:
+        except KeyError:
             pass
 
         if isinstance(best_match, CliCommand):
@@ -94,8 +95,8 @@ class Configuration(object):  # pylint: disable=too-few-public-methods
                 if isinstance(cmd, CliCommand):
                     yield (cmd.name, cmd)
                 else:
-                    dummy_command_name = ' '.join((command_so_far, part))
-                    yield (dummy_command_name, CliCommand(dummy_command_name, lambda **kwargs: None))
+                    dummy_cmdname = ' '.join((command_so_far, part))
+                    yield (dummy_cmdname, CliCommand(dummy_cmdname, lambda **kwargs: None))
 
 class Application(object):
 
@@ -130,6 +131,7 @@ class Application(object):
         self.raise_event(self.GLOBAL_PARSER_CREATED, global_group=global_group)
 
         self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
+        self.configuration = None
 
     def initialize(self, configuration):
         self.configuration = configuration
