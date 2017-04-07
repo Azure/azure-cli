@@ -27,22 +27,23 @@ from azure.cli.command_modules.storage._validators import \
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.util import empty_on_404
-from azure.cli.core.profiles import get_api_version
+from azure.cli.core.profiles import get_api_version, get_sdk_attr
 from azure.cli.core.profiles.shared import ResourceType
 
 mgmt_path = 'azure.mgmt.storage.operations.storage_accounts_operations#StorageAccountsOperations.'
 custom_path = 'azure.cli.command_modules.storage.custom#'
 custom_nonce_path = 'azure.cli.command_modules.storage.custom_nonce#'
-file_service_path = 'azure.storage.file.fileservice#FileService.'
-block_blob_path = 'azure.storage.blob.blockblobservice#BlockBlobService.'
-page_blob_path = 'azure.storage.blob.pageblobservice#PageBlobService.'
-base_blob_path = 'azure.storage.blob.baseblobservice#BaseBlobService.'
-table_path = 'azure.storage.table.tableservice#TableService.'
-queue_path = 'azure.storage.queue.queueservice#QueueService.'
+file_service_path = 'azure.cli.storagesdk.file.fileservice#FileService.'
+block_blob_path = 'azure.cli.storagesdk.blob.blockblobservice#BlockBlobService.'
+page_blob_path = 'azure.cli.storagesdk.blob.pageblobservice#PageBlobService.'
+base_blob_path = 'azure.cli.storagesdk.blob.baseblobservice#BaseBlobService.'
+table_path = 'azure.cli.storagesdk.table.tableservice#TableService.'
+queue_path = 'azure.cli.storagesdk.queue.queueservice#QueueService.'
 
 
 def _dont_fail_not_exist(ex):
-    from azure.storage._error import AzureMissingResourceHttpError
+    AzureMissingResourceHttpError = \
+        get_sdk_attr('azure.cli.storagesdk._error#AzureMissingResourceHttpError')
     if isinstance(ex, AzureMissingResourceHttpError):
         return None
     else:
@@ -67,7 +68,7 @@ if get_api_version(ResourceType.MGMT_STORAGE) in ['2016-12-01']:
                                mgmt_path + 'update', factory,
                                custom_function_op=custom_nonce_path + 'update_storage_account')
 
-cli_storage_data_plane_command('storage account generate-sas', 'azure.storage.cloudstorageaccount#CloudStorageAccount.generate_shared_access_signature', cloud_storage_account_service_factory)
+cli_storage_data_plane_command('storage account generate-sas', 'azure.cli.storagesdk.cloudstorageaccount#CloudStorageAccount.generate_shared_access_signature', cloud_storage_account_service_factory)
 
 # container commands
 factory = blob_data_service_factory

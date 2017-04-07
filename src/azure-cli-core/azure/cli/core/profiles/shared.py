@@ -53,19 +53,20 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_RESOURCE_SUBSCRIPTIONS = ('Microsoft.Resources/subscriptions',
                                    'azure.mgmt.resource.subscriptions',
                                    'azure.mgmt.resource#SubscriptionClient')
+    DATA_STORAGE = (None, 'azure.cli.storagesdk', None)
 
-    def __init__(self, type_name, operations_path, client_path):
+    def __init__(self, type_name, import_prefix, client_path):
         """Constructor.
 
         :param type_name: The full resource type name (e.g. Provider/ResourceType).
         :type type_name: str.
-        :param operations_path: Path to the (unversioned) operations module.
-        :type operations_path: str.
+        :param import_prefix: Path to the (unversioned) module.
+        :type import_prefix: str.
         :param client_path: The path to the client for this resource type.
         :type client_path: str.
         """
         self.type_name = type_name
-        self.operations_path = operations_path
+        self.import_prefix = import_prefix
         self.client_path = client_path
 
 
@@ -80,7 +81,8 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2016-04-01',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01'
+        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
+        ResourceType.DATA_STORAGE: '2016-05-31'
     },
     '2016-example': {
         ResourceType.MGMT_STORAGE: '2016-12-01',
@@ -92,7 +94,8 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01'
+        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
+        ResourceType.DATA_STORAGE: '2016-05-31'
     },
     '2015-example': {
         ResourceType.MGMT_STORAGE: '2015-06-15',
@@ -104,7 +107,8 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01'
+        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
+        ResourceType.DATA_STORAGE: '2015-04-05'
     }
 }
 

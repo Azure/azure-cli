@@ -25,7 +25,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-storage==0.34.0',
+    'azure-storage-sdk-cli==0.0.1',
     'azure-mgmt-storage==0.40.0',
     'azure-cli-core',
 ]

@@ -12,21 +12,28 @@ from datetime import datetime, timedelta
 from azure.cli.core._config import az_config
 from azure.cli.core._profile import CLOUD
 from azure.cli.core.util import CLIError
-from azure.cli.core.profiles import get_versioned_models
+from azure.cli.core.profiles import get_versioned_models, get_sdk_attr
 from azure.cli.core.profiles.shared import ResourceType
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
-from azure.storage.sharedaccesssignature import SharedAccessSignature
-from azure.storage.blob import Include, PublicAccess
-from azure.storage.blob.baseblobservice import BaseBlobService
-from azure.storage.blob.models import ContentSettings as BlobContentSettings, BlobPermissions
-from azure.storage.file import FileService
-from azure.storage.file.models import ContentSettings as FileContentSettings
-from azure.storage.models import ResourceTypes, Services
-from azure.storage.table import TablePermissions, TablePayloadFormat
 
 from ._factory import get_storage_data_service_client
 from .util import glob_files_locally
+
+SharedAccessSignature = \
+    get_sdk_attr('azure.cli.storagesdk.sharedaccesssignature#SharedAccessSignature')
+Include = get_sdk_attr('azure.cli.storagesdk.blob#Include')
+PublicAccess = get_sdk_attr('azure.cli.storagesdk.blob#PublicAccess')
+BaseBlobService = get_sdk_attr('azure.cli.storagesdk.blob.baseblobservice#BaseBlobService')
+BlobContentSettings = get_sdk_attr('azure.cli.storagesdk.blob.models#ContentSettings')
+BlobPermissions = get_sdk_attr('azure.cli.storagesdk.blob.models#BlobPermissions')
+FileService = get_sdk_attr('azure.cli.storagesdk.file#FileService')
+FileContentSettings = get_sdk_attr('azure.cli.storagesdk.file.models#ContentSettings')
+ResourceTypes = get_sdk_attr('azure.cli.storagesdk.models#ResourceTypes')
+Services = get_sdk_attr('azure.cli.storagesdk.models#Services')
+TablePermissions = get_sdk_attr('azure.cli.storagesdk.table#TablePermissions')
+TablePayloadFormat = get_sdk_attr('azure.cli.storagesdk.table#TablePayloadFormat')
+
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
@@ -506,6 +513,7 @@ def get_source_file_or_blob_service_client(namespace):
     indicates that user want to copy files or blobs in the same storage account, therefore the
     destination client will be set None hence the command will use destination client.
     """
+    BlockBlobService = get_sdk_attr('azure.cli.storagesdk.blob.blockblobservice#BlockBlobService')
     usage_string = 'invalid usage: supply only one of the following argument sets:' + \
                    '\n\t   --source-uri' + \
                    '\n\tOR --source-container' + \
@@ -557,7 +565,6 @@ def get_source_file_or_blob_service_client(namespace):
             source_key = _query_account_key(source_account)
 
         if source_container:
-            from azure.storage.blob.blockblobservice import BlockBlobService
             ns['source_client'] = BlockBlobService(account_name=source_account,
                                                    account_key=source_key,
                                                    sas_token=source_sas)
@@ -582,7 +589,6 @@ def get_source_file_or_blob_service_client(namespace):
                 identifier.filename or nor_container_or_share:
             raise ValueError('incorrect usage: --source-uri has to be blob container or file share')
         elif identifier.container:
-            from azure.storage.blob.blockblobservice import BlockBlobService
             ns['source_client'] = BlockBlobService(account_name=identifier.account_name,
                                                    sas_token=identifier.sas_token)
         elif identifier.share:
