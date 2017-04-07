@@ -39,7 +39,18 @@ def _add_run_label(secret_name, service_name):
     _label_secret(secret_name, 'run={}'.format(service_name))
 
 
-def create_documentdb_reference(service_name, reference_name, connection_string):
+def reference_exists(service_name, reference_name):
+    """
+    Checks if secret for provided service
+    and reference exists or not.
+    """
+    secret_name = get_secret_name(service_name, reference_name)
+    command = "kubectl get secret {}".format(secret_name)
+    exit_code = utils.execute_command(command)
+    return exit_code == 0
+
+
+def create_connection_string_reference(service_name, reference_name, connection_string):
     """
     Creates a secret on Kubernetes that stores
     the connection string and is labeled with run=service_name
@@ -98,7 +109,7 @@ def remove_reference(service_name, reference_name):
     project_settings.remove_reference(service_name, reference_name)
     command = 'kubectl delete secret {}'.format(
         get_secret_name(service_name, reference_name))
-    utils.execute_command(command, ignore_failure=True)
+    utils.execute_command(command)
 
 
 def get_sql_management_client(_):
@@ -108,6 +119,15 @@ def get_sql_management_client(_):
     from azure.mgmt.sql import SqlManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(SqlManagementClient)
+
+
+def get_service_bus_management_client(_):
+    """
+    Gets the Service Bus management client
+    """
+    from azure.mgmt.servicebus import ServiceBusManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(ServiceBusManagementClient)
 
 
 def get_reference_type(resource_group, resource_name):
@@ -127,6 +147,15 @@ def get_reference_type(resource_group, resource_name):
         sql_servers = get_sql_management_client(None).servers
         instance = sql_servers.get(resource_group, resource_name)
         return instance, sql_servers
+    except Exception as exc:
+        pass
+
+    try:
+        from azure.mgmt.servicebus.operations import NamespacesOperations
+        namespaces = get_service_bus_management_client(None).namespaces
+        NamespacesOperations.type = property(
+            lambda self: 'Microsoft.ServiceBus')
+        return namespaces, namespaces
     except Exception as exc:
         raise CLIError(exc)
 

@@ -370,12 +370,15 @@ def add_reference(target_group, target_name, reference_name):
     :param reference_name: Name of the reference
     :type reference_name: String
     """
+    service_name = _get_service_name()
     _validate_reference_name(reference_name)
 
-    env_variables = []
-    service_name = _get_service_name()
-    instance, client = references.get_reference_type(target_group, target_name)
+    if references.reference_exists(service_name, reference_name):
+        raise CLIError("Reference '{}' for service '{}' already exists".format(
+            service_name, reference_name))
 
+    env_variables = []
+    instance, client = references.get_reference_type(target_group, target_name)
     if instance.type == 'Microsoft.DocumentDB/databaseAccounts':
         results = client.list_connection_strings(
             target_group, target_name)
@@ -383,7 +386,7 @@ def add_reference(target_group, target_name, reference_name):
             raise ValueError('No connection strings found')
 
         connection_string = results.connection_strings[0].connection_string
-        env_variables = references.create_documentdb_reference(
+        env_variables = references.create_connection_string_reference(
             service_name, reference_name, connection_string)
     elif instance.type == 'Microsoft.Sql/servers':
         sql_admin_login = instance.administrator_login
@@ -394,6 +397,12 @@ def add_reference(target_group, target_name, reference_name):
 
         env_variables = references.create_sqlserver_reference(
             service_name, reference_name, sql_admin_login, sql_admin_password, fqdn)
+    elif instance.type == 'Microsoft.ServiceBus':
+        connection_string = instance.list_keys(
+            target_group, target_name, 'RootManageSharedAccessKey').primary_connection_string
+
+        env_variables = references.create_connection_string_reference(
+            service_name, reference_name, connection_string)
     else:
         raise NotImplementedError()
 
@@ -653,7 +662,7 @@ def _configure_cluster():  # pylint: disable=too-many-statements
         # Removing existing cluster from ~/.ssh/known_hosts
         known_hostname_command = 'ssh-keygen -R {}'.format(
             utils.get_remote_host(dns_prefix, location))
-        utils.execute_command(known_hostname_command, True)
+        utils.execute_command(known_hostname_command)
 
         # SSHClient connection
         ssh_client = SSHConnect(
@@ -680,7 +689,7 @@ def _configure_cluster():  # pylint: disable=too-many-statements
 
         logger.info('\nCreating tenx namespace ... ')
         namespace_command = "kubectl create namespace tenx"
-        utils.execute_command(namespace_command, True, 10)
+        utils.execute_command(namespace_command, tries=10)
 
         logger.info('\nDeploying ACR credentials in Kubernetes ... ')
         workspace_storage_key = _deploy_secrets_share_k8(
@@ -722,45 +731,45 @@ def _configure_cluster():  # pylint: disable=too-many-statements
 
         logger.info('\nCleaning existing TenX services in cluster ... ')
         utils.execute_command(
-            "kubectl delete -f {}/tenx.tmp.yaml".format(artifacts_path), True)
+            "kubectl delete -f {}/tenx.tmp.yaml".format(artifacts_path))
         utils.execute_command(
-            "kubectl delete -f {}/tenxPrivate.tmp.yaml".format(artifacts_path), True)
+            "kubectl delete -f {}/tenxPrivate.tmp.yaml".format(artifacts_path))
         utils.execute_command(
-            "kubectl delete -f {}/tenxServices.yaml -n tenx".format(artifacts_path), True)
+            "kubectl delete -f {}/tenxServices.yaml -n tenx".format(artifacts_path))
         utils.execute_command(
-            "kubectl delete -f {}/tenxPrivateService.yaml -n tenx".format(artifacts_path), True)
+            "kubectl delete -f {}/tenxPrivateService.yaml -n tenx".format(artifacts_path))
         utils.execute_command(
-            "kubectl delete -f {}/tenxConfigService.yaml -n tenx".format(artifacts_path), True)
+            "kubectl delete -f {}/tenxConfigService.yaml -n tenx".format(artifacts_path))
         utils.execute_command(
-            "kubectl delete -f {}/tenxBuildService.yaml -n tenx".format(artifacts_path), True)
+            "kubectl delete -f {}/tenxBuildService.yaml -n tenx".format(artifacts_path))
         utils.execute_command(
-            "kubectl delete -f {}/tenxExecService.yaml -n tenx".format(artifacts_path), True)
+            "kubectl delete -f {}/tenxExecService.yaml -n tenx".format(artifacts_path))
         utils.execute_command(
-            "kubectl delete -f {}/tenxRsrcService.yaml -n tenx".format(artifacts_path), True)
+            "kubectl delete -f {}/tenxRsrcService.yaml -n tenx".format(artifacts_path))
         utils.execute_command(
-            "kubectl delete -f {}/tenxPublicEndpoint.yaml -n tenx".format(artifacts_path), True)
+            "kubectl delete -f {}/tenxPublicEndpoint.yaml -n tenx".format(artifacts_path))
 
         logger.info('\nDeploying TenX services to K8 cluster ... ')
         utils.execute_command(
-            "kubectl create -f {}/tenx.tmp.yaml".format(artifacts_path), True)
+            "kubectl create -f {}/tenx.tmp.yaml".format(artifacts_path))
         utils.execute_command(
-            "kubectl create -f {}/tenxPrivate.tmp.yaml".format(artifacts_path), True)
+            "kubectl create -f {}/tenxPrivate.tmp.yaml".format(artifacts_path))
 
         logger.info('\nExposing TenX services from cluster ... ')
         utils.execute_command(
-            "kubectl create -f {}/tenxServices.yaml -n tenx".format(artifacts_path))
+            "kubectl create -f {}/tenxServices.yaml -n tenx".format(artifacts_path), throw=True)
         utils.execute_command(
-            "kubectl create -f {}/tenxPrivateService.yaml -n tenx".format(artifacts_path))
+            "kubectl create -f {}/tenxPrivateService.yaml -n tenx".format(artifacts_path), throw=True)
         utils.execute_command(
-            "kubectl create -f {}/tenxConfigService.yaml -n tenx".format(artifacts_path))
+            "kubectl create -f {}/tenxConfigService.yaml -n tenx".format(artifacts_path), throw=True)
         utils.execute_command(
-            "kubectl create -f {}/tenxBuildService.yaml -n tenx".format(artifacts_path))
+            "kubectl create -f {}/tenxBuildService.yaml -n tenx".format(artifacts_path), throw=True)
         utils.execute_command(
-            "kubectl create -f {}/tenxExecService.yaml -n tenx".format(artifacts_path))
+            "kubectl create -f {}/tenxExecService.yaml -n tenx".format(artifacts_path), throw=True)
         utils.execute_command(
-            "kubectl create -f {}/tenxRsrcService.yaml -n tenx".format(artifacts_path))
+            "kubectl create -f {}/tenxRsrcService.yaml -n tenx".format(artifacts_path), throw=True)
         utils.execute_command(
-            "kubectl create -f {}/tenxPublicEndpoint.yaml -n tenx".format(artifacts_path))
+            "kubectl create -f {}/tenxPublicEndpoint.yaml -n tenx".format(artifacts_path), throw=True)
 
         # Initialize Workspace
         logger.info('\nInitializing Workspace: {} ... '.format(dns_prefix))
@@ -921,7 +930,7 @@ def _install_k8_secret(acr, dns_prefix, client_id, client_secret,
     """
     kubectl_create_delete_command = "kubectl delete secret tenxregkey -n tenx"
     try:
-        utils.execute_command(kubectl_create_delete_command, True)
+        utils.execute_command(kubectl_create_delete_command)
     except Exception:
         logger.debug("Command failed: %s\n", kubectl_create_delete_command)
 
@@ -930,7 +939,7 @@ def _install_k8_secret(acr, dns_prefix, client_id, client_secret,
     -n tenx".format(acr, client_id, client_secret, cluster_user_name,
                     utils.get_remote_host(dns_prefix, location))
     try:
-        utils.execute_command(kubectl_create_secret_command, True)
+        utils.execute_command(kubectl_create_secret_command)
     except Exception:
         logger.debug("Command failed: %s\n", kubectl_create_secret_command)
 
