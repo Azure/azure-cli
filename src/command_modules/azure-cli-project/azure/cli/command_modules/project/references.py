@@ -55,8 +55,8 @@ def create_documentdb_reference(service_name, reference_name, connection_string)
     utils.execute_command(command)
 
     # Label it with run=service_name
-    _add_run_label(secret_name, 'run={}'.format(service_name))
-    return environment_variable_name
+    _add_run_label(secret_name, service_name)
+    return [environment_variable_name]
 
 
 def create_sqlserver_reference(service_name, reference_name, admin_login, admin_password, fqdn):
