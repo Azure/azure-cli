@@ -829,15 +829,21 @@ class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
     @staticmethod
     def _resolve_api_version_by_id(rcf, resource_id):
         parts = parse_resource_id(resource_id)
+        namespace = parts.get('child_namespace', parts['namespace'])
         if parts.get('grandchild_type'):
             parent = (parts['type'] + '/' +  parts['name'] + '/' +
                       parts['child_type'] + '/' + parts['child_name'])
             resource_type = parts['grandchild_type']
         elif parts.get('child_type'):
-            parent = parts['type'] + '/' +  parts['name']
+            # if the child resource has a provider namespace it is independent of the
+            # parent, so set the parent to empty
+            if parts.get('child_namespace') is not None:
+                parent = ''
+            else:
+                parent = parts['type'] + '/' +  parts['name']
             resource_type = parts['child_type']
         else:
             parent = None
             resource_type = parts['type']
 
-        return _ResourceUtils._resolve_api_version(rcf, parts['namespace'], parent, resource_type)
+        return _ResourceUtils._resolve_api_version(rcf, namespace, parent, resource_type)
