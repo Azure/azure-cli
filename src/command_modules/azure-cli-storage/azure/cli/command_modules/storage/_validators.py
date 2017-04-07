@@ -102,6 +102,7 @@ def validate_client_parameters(namespace):
     if n.account_name and not n.account_key and not n.sas_token:
         n.account_key = _query_account_key(n.account_name)
 
+
 def process_blob_source_uri(namespace):
     """
     Validate the parameters referenced to a blob source and create the source URI from them.
