@@ -109,7 +109,7 @@ def update_application(client, resource_group_name, account_name, application_id
 
 def _upload_package_blob(package_file, url):
     """Upload the location file to storage url provided by autostorage"""
-    BlockBlobService = get_sdk_attr('azure.cli.storagesdk.blob#BlockBlobService')
+    BlockBlobService = get_sdk_attr('azure.multiapi.storage.blob#BlockBlobService')
 
     uri = urlsplit(url)
     # in uri path, it always start with '/', so container name is at second block

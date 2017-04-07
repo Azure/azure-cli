@@ -49,14 +49,14 @@ def collect_files(file_service, share, pattern=None):
 
 
 def create_blob_service_from_storage_client(client):
-    BlockBlobService = get_sdk_attr('azure.cli.storagesdk.blob.blockblobservice#BlockBlobService')
+    BlockBlobService = get_sdk_attr('azure.multiapi.storage.blob.blockblobservice#BlockBlobService')
     return BlockBlobService(account_name=client.account_name,
                             account_key=client.account_key,
                             sas_token=client.sas_token)
 
 
 def create_file_share_from_storage_client(client):
-    FileService = get_sdk_attr('azure.cli.storagesdk.file.fileservice#FileService')
+    FileService = get_sdk_attr('azure.multiapi.storage.file.fileservice#FileService')
     return FileService(account_name=client.account_name,
                        account_key=client.account_key,
                        sas_token=client.sas_token)
@@ -84,8 +84,8 @@ def glob_files_locally(folder_path, pattern):
 def glob_files_remotely(client, share_name, pattern):
     """glob the files in remote file share based on the given pattern"""
     from collections import deque
-    Directory = get_sdk_attr('azure.cli.storagesdk.file.models#Directory')
-    File = get_sdk_attr('azure.cli.storagesdk.file.models#File')
+    Directory = get_sdk_attr('azure.multiapi.storage.file.models#Directory')
+    File = get_sdk_attr('azure.multiapi.storage.file.models#File')
 
     queue = deque([""])
     while len(queue) > 0:
@@ -102,8 +102,8 @@ def glob_files_remotely(client, share_name, pattern):
 def create_short_lived_container_sas(account_name, account_key, container):
     from datetime import datetime, timedelta
     SharedAccessSignature = \
-        get_sdk_attr('azure.cli.storagesdk.sharedaccesssignature#SharedAccessSignature')
-    BlobPermissions = get_sdk_attr('azure.cli.storagesdk.blob.models#BlobPermissions')
+        get_sdk_attr('azure.multiapi.storage.sharedaccesssignature#SharedAccessSignature')
+    BlobPermissions = get_sdk_attr('azure.multiapi.storage.blob.models#BlobPermissions')
 
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     sas = SharedAccessSignature(account_name, account_key)
@@ -114,8 +114,8 @@ def create_short_lived_container_sas(account_name, account_key, container):
 def create_short_lived_share_sas(account_name, account_key, share):
     from datetime import datetime, timedelta
     SharedAccessSignature = \
-        get_sdk_attr('azure.cli.storagesdk.sharedaccesssignature#SharedAccessSignature')
-    BlobPermissions = get_sdk_attr('azure.cli.storagesdk.blob.models#BlobPermissions')
+        get_sdk_attr('azure.multiapi.storage.sharedaccesssignature#SharedAccessSignature')
+    BlobPermissions = get_sdk_attr('azure.multiapi.storage.blob.models#BlobPermissions')
 
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     sas = SharedAccessSignature(account_name, account_key)

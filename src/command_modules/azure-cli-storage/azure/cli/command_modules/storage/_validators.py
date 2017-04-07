@@ -21,18 +21,18 @@ from ._factory import get_storage_data_service_client
 from .util import glob_files_locally
 
 SharedAccessSignature = \
-    get_sdk_attr('azure.cli.storagesdk.sharedaccesssignature#SharedAccessSignature')
-Include = get_sdk_attr('azure.cli.storagesdk.blob#Include')
-PublicAccess = get_sdk_attr('azure.cli.storagesdk.blob#PublicAccess')
-BaseBlobService = get_sdk_attr('azure.cli.storagesdk.blob.baseblobservice#BaseBlobService')
-BlobContentSettings = get_sdk_attr('azure.cli.storagesdk.blob.models#ContentSettings')
-BlobPermissions = get_sdk_attr('azure.cli.storagesdk.blob.models#BlobPermissions')
-FileService = get_sdk_attr('azure.cli.storagesdk.file#FileService')
-FileContentSettings = get_sdk_attr('azure.cli.storagesdk.file.models#ContentSettings')
-ResourceTypes = get_sdk_attr('azure.cli.storagesdk.models#ResourceTypes')
-Services = get_sdk_attr('azure.cli.storagesdk.models#Services')
-TablePermissions = get_sdk_attr('azure.cli.storagesdk.table#TablePermissions')
-TablePayloadFormat = get_sdk_attr('azure.cli.storagesdk.table#TablePayloadFormat')
+    get_sdk_attr('azure.multiapi.storage.sharedaccesssignature#SharedAccessSignature')
+Include = get_sdk_attr('azure.multiapi.storage.blob#Include')
+PublicAccess = get_sdk_attr('azure.multiapi.storage.blob#PublicAccess')
+BaseBlobService = get_sdk_attr('azure.multiapi.storage.blob.baseblobservice#BaseBlobService')
+BlobContentSettings = get_sdk_attr('azure.multiapi.storage.blob.models#ContentSettings')
+BlobPermissions = get_sdk_attr('azure.multiapi.storage.blob.models#BlobPermissions')
+FileService = get_sdk_attr('azure.multiapi.storage.file#FileService')
+FileContentSettings = get_sdk_attr('azure.multiapi.storage.file.models#ContentSettings')
+ResourceTypes = get_sdk_attr('azure.multiapi.storage.models#ResourceTypes')
+Services = get_sdk_attr('azure.multiapi.storage.models#Services')
+TablePermissions = get_sdk_attr('azure.multiapi.storage.table#TablePermissions')
+TablePayloadFormat = get_sdk_attr('azure.multiapi.storage.table#TablePayloadFormat')
 
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
@@ -513,7 +513,7 @@ def get_source_file_or_blob_service_client(namespace):
     indicates that user want to copy files or blobs in the same storage account, therefore the
     destination client will be set None hence the command will use destination client.
     """
-    BlockBlobService = get_sdk_attr('azure.cli.storagesdk.blob.blockblobservice#BlockBlobService')
+    BlockBlobService = get_sdk_attr('azure.multiapi.storage.blob.blockblobservice#BlockBlobService')
     usage_string = 'invalid usage: supply only one of the following argument sets:' + \
                    '\n\t   --source-uri' + \
                    '\n\tOR --source-container' + \

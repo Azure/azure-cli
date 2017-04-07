@@ -130,8 +130,8 @@ def transform_file_directory_result(result):
     in order to align the object's properties so as to offer a better view to the file and dir
     list.
     """
-    File = get_sdk_attr('azure.cli.storagesdk.file.models#File')
-    Directory = get_sdk_attr('azure.cli.storagesdk.file.models#Directory')
+    File = get_sdk_attr('azure.multiapi.storage.file.models#File')
+    Directory = get_sdk_attr('azure.multiapi.storage.file.models#Directory')
     return_list = []
     for each in result:
         if isinstance(each, File):

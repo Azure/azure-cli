@@ -787,7 +787,7 @@ def enable_boot_diagnostics(resource_group_name, vm_name, storage):
 def get_boot_log(resource_group_name, vm_name):
     import sys
     from azure.cli.core._profile import CLOUD
-    BlockBlobService = get_sdk_attr('azure.cli.storagesdk.blob.blockblobservice#BlockBlobService')
+    BlockBlobService = get_sdk_attr('azure.multiapi.storage.blob.blockblobservice#BlockBlobService')
 
     client = _compute_client_factory()
 

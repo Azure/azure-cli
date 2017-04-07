@@ -17,18 +17,18 @@ from azure.cli.command_modules.storage._factory import \
     (storage_client_factory, generic_data_service_factory)
 
 
-Logging = get_sdk_attr('azure.cli.storagesdk.models#Logging')
-Metrics = get_sdk_attr('azure.cli.storagesdk.models#Metrics')
-CorsRule = get_sdk_attr('azure.cli.storagesdk.models#CorsRule')
-AccessPolicy = get_sdk_attr('azure.cli.storagesdk.models#AccessPolicy')
-RetentionPolicy = get_sdk_attr('azure.cli.storagesdk.models#RetentionPolicy')
-BlockBlobService = get_sdk_attr('azure.cli.storagesdk.blob#BlockBlobService')
-BaseBlobService = get_sdk_attr('azure.cli.storagesdk.blob.baseblobservice#BaseBlobService')
-FileService = get_sdk_attr('azure.cli.storagesdk.file#FileService')
-FileProperties = get_sdk_attr('azure.cli.storagesdk.file.models#FileProperties')
-DirectoryProperties = get_sdk_attr('azure.cli.storagesdk.file.models#DirectoryProperties')
-TableService = get_sdk_attr('azure.cli.storagesdk.table#TableService')
-QueueService = get_sdk_attr('azure.cli.storagesdk.queue#QueueService')
+Logging = get_sdk_attr('azure.multiapi.storage.models#Logging')
+Metrics = get_sdk_attr('azure.multiapi.storage.models#Metrics')
+CorsRule = get_sdk_attr('azure.multiapi.storage.models#CorsRule')
+AccessPolicy = get_sdk_attr('azure.multiapi.storage.models#AccessPolicy')
+RetentionPolicy = get_sdk_attr('azure.multiapi.storage.models#RetentionPolicy')
+BlockBlobService = get_sdk_attr('azure.multiapi.storage.blob#BlockBlobService')
+BaseBlobService = get_sdk_attr('azure.multiapi.storage.blob.baseblobservice#BaseBlobService')
+FileService = get_sdk_attr('azure.multiapi.storage.file#FileService')
+FileProperties = get_sdk_attr('azure.multiapi.storage.file.models#FileProperties')
+DirectoryProperties = get_sdk_attr('azure.multiapi.storage.file.models#DirectoryProperties')
+TableService = get_sdk_attr('azure.multiapi.storage.table#TableService')
+QueueService = get_sdk_attr('azure.multiapi.storage.queue#QueueService')
 
 
 def _update_progress(current, total):

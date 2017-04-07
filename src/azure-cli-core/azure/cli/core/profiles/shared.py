@@ -53,7 +53,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_RESOURCE_SUBSCRIPTIONS = ('Microsoft.Resources/subscriptions',
                                    'azure.mgmt.resource.subscriptions',
                                    'azure.mgmt.resource#SubscriptionClient')
-    DATA_STORAGE = (None, 'azure.cli.storagesdk', None)
+    DATA_STORAGE = (None, 'azure.multiapi.storage', None)
 
     def __init__(self, type_name, import_prefix, client_path):
         """Constructor.

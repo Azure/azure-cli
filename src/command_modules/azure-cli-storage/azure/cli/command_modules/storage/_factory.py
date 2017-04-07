@@ -10,14 +10,14 @@ from azure.cli.core._profile import CLOUD
 from azure.cli.core.profiles.shared import ResourceType
 from azure.cli.core.profiles import get_sdk_attr
 
-CloudStorageAccount = get_sdk_attr('azure.cli.storagesdk#CloudStorageAccount')
-BlockBlobService = get_sdk_attr('azure.cli.storagesdk.blob#BlockBlobService')
-FileService = get_sdk_attr('azure.cli.storagesdk.file#FileService')
-TableService = get_sdk_attr('azure.cli.storagesdk.table#TableService')
-QueueService = get_sdk_attr('azure.cli.storagesdk.queue#QueueService')
-PageBlobService = get_sdk_attr('azure.cli.storagesdk.blob.pageblobservice#PageBlobService')
+CloudStorageAccount = get_sdk_attr('azure.multiapi.storage#CloudStorageAccount')
+BlockBlobService = get_sdk_attr('azure.multiapi.storage.blob#BlockBlobService')
+FileService = get_sdk_attr('azure.multiapi.storage.file#FileService')
+TableService = get_sdk_attr('azure.multiapi.storage.table#TableService')
+QueueService = get_sdk_attr('azure.multiapi.storage.queue#QueueService')
+PageBlobService = get_sdk_attr('azure.multiapi.storage.blob.pageblobservice#PageBlobService')
 _ERROR_STORAGE_MISSING_INFO = \
-    get_sdk_attr('azure.cli.storagesdk._error#_ERROR_STORAGE_MISSING_INFO')
+    get_sdk_attr('azure.multiapi.storage._error#_ERROR_STORAGE_MISSING_INFO')
 
 NO_CREDENTIALS_ERROR_MESSAGE = """
 No credentials specifed to access storage service. Please provide any of the following:

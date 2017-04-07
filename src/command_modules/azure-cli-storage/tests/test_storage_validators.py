@@ -20,7 +20,7 @@ class TestStorageValidators(unittest.TestCase):
         self.io.close()
 
     def test_permission_validator(self):
-        ContainerPermissions = get_sdk_attr('azure.cli.storagesdk.blob.models#ContainerPermissions')
+        ContainerPermissions = get_sdk_attr('azure.multiapi.storage.blob.models#ContainerPermissions')
 
         ns1 = Namespace(permission='rwdl')
         ns2 = Namespace(permission='abc')

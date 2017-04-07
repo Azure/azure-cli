@@ -9,8 +9,8 @@ from .integration_test_base import StorageIntegrationTestBase
 from ..util import glob_files_remotely
 from azure.cli.core.profiles import get_sdk_attr
 
-BlobPermissions = get_sdk_attr('azure.cli.storagesdk.blob.models#BlobPermissions')
-FilePermissions = get_sdk_attr('azure.cli.storagesdk.file.models#FilePermissions')
+BlobPermissions = get_sdk_attr('azure.multiapi.storage.blob.models#BlobPermissions')
+FilePermissions = get_sdk_attr('azure.multiapi.storage.file.models#FilePermissions')
 
 
 def _cli_main(command, *args):
