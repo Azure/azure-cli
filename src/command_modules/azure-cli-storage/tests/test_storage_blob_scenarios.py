@@ -72,14 +72,16 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
         container = self.create_container(account_info)
 
-        self.storage_cmd('storage blob exists -n {} -c {}', account_info, blob_name, container)
+        self.storage_cmd('storage blob exists -n {} -c {}', account_info, blob_name, container) \
+            .assert_with_checks(JMESPathCheck('exists', False))
+
         self.storage_cmd('storage blob upload -c {} -f {} -n {} --type {}', account_info,
                          container, local_file, blob_name, blob_type)
         self.storage_cmd('storage blob exists -n {} -c {}', account_info, blob_name, container) \
             .assert_with_checks(JMESPathCheck('exists', True))
 
         self.storage_cmd('storage blob show -n {} -c {}', account_info, blob_name, container) \
-            .assert_with_checks(JMESPathCheck('name', blob_name))  # TODO: more checks
+            .assert_with_checks(JMESPathCheck('name', blob_name))
 
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         sas = self.storage_cmd('storage blob generate-sas -n {} -c {} --expiry {} --permissions '
