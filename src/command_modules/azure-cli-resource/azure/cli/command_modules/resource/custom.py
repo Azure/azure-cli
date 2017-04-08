@@ -171,6 +171,10 @@ def _deploy_arm_template_core(resource_group_name, template_file=None, template_
                               validate_only=False, no_wait=False):
     from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
 
+    DeploymentProperties, TemplateLink = get_versioned_models(ResourceType.MGMT_RESOURCE_RESOURCES,
+                                                              'DeploymentProperties',
+                                                              'TemplateLink')
+
     if bool(template_uri) == bool(template_file):
         raise CLIError('please provide either template file path or uri, but not both')
 
