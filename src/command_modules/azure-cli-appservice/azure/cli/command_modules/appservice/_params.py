@@ -148,5 +148,7 @@ register_cli_argument('appservice web source-control', 'git_token', help='git ac
 register_cli_argument('functionapp', 'name', arg_type=name_arg_type, id_part='name', help="name of the function")
 register_cli_argument('functionapp create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                       help="name or resource id of the function app service plan. Use 'appservice plan create' to get one")
+register_cli_argument('functionapp create', 'consumption_plan_location', options_list=('--consumption-plan-location', '-c'),
+                      help="name or resource id of the function app service plan. Use 'appservice plan create' to get one")
 register_cli_argument('functionapp create', 'storage_account', options_list=('--storage-account', '-s'),
                       help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')

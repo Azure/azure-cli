@@ -105,3 +105,4 @@ cli_command(__name__, 'functionapp delete', 'azure.cli.command_modules.appservic
 cli_command(__name__, 'functionapp stop', 'azure.cli.command_modules.appservice.custom#stop_webapp')
 cli_command(__name__, 'functionapp start', 'azure.cli.command_modules.appservice.custom#start_webapp')
 cli_command(__name__, 'functionapp restart', 'azure.cli.command_modules.appservice.custom#restart_webapp')
+cli_command(__name__, 'functionapp list-consumption-locations', 'azure.cli.command_modules.appservice.custom#list_consumption_locations')

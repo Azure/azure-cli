@@ -556,7 +556,7 @@ class FunctionAppWithPlanE2ETest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(FunctionAppWithPlanE2ETest, self).__init__(__file__, test_method, resource_group='azurecli-functionapp-e2e')
 
-    def test_functionapp_e2e(self):
+    def test_functionapp_asp_e2e(self):
         self.execute()
 
     def body(self):
@@ -592,6 +592,38 @@ class FunctionAppWithPlanE2ETest(ResourceGroupVCRTestBase):
         self.cmd('appservice plan list -g {}'.format(self.resource_group), checks=[
             JMESPathCheck('length(@)', 0)
         ])
+
+
+class FunctionAppWithConsumptionPlanE2ETest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(FunctionAppWithConsumptionPlanE2ETest, self).__init__(__file__, test_method, resource_group='azurecli-functionapp-c-e2e')
+
+    def test_functionapp_consumption_e2e(self):
+        self.execute()
+
+    def body(self):
+        webapp_name = 'functionapp-consumption-e2e'
+        location = 'westus'
+        storage = 'functionappcstorage'
+
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, self.resource_group, location))
+        self.cmd('functionapp create -g {} -n {} -c {} -s {}'.format(self.resource_group, webapp_name, location, storage), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', webapp_name),
+            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
+        self.cmd('functionapp list -g {}'.format(self.resource_group), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', webapp_name),
+            JMESPathCheck('[0].hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
+        self.cmd('functionapp show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
+            JMESPathCheck('name', webapp_name),
+            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
+
+        self.cmd('functionapp delete -g {} -n {}'.format(self.resource_group, webapp_name))
 
 
 if __name__ == '__main__':
