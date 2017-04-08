@@ -38,7 +38,7 @@ def get_subscription_service_client(client_type):
 
 
 def configure_common_settings(client):
-    client = _debug.allow_debug_connection(client)
+    client = _debug.change_ssl_cert_verification(client)
 
     client.config.add_user_agent(UA_AGENT)
     try:

@@ -79,7 +79,7 @@ def _mock_get_mgmt_service_client(client_type, subscription_bound=True, subscrip
     else:
         client = client_type(cred, **client_kwargs)
 
-    client = _debug.allow_debug_connection(client)
+    client = _debug.change_ssl_cert_verification(client)
 
     client.config.add_user_agent("AZURECLI/TEST/{}".format(core_version))
 
