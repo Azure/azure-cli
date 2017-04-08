@@ -52,10 +52,10 @@ class SearchIndexTest(unittest.TestCase):
         six.assertRegex(
             self,
             execute('find -q keyvault list'),
-            'az keyvault certificate list-versions')
+            'az keyvault list')
 
     def test_search_reindex(self):
         six.assertRegex(
             self,
             execute('find -q keyvault list --reindex'),
-            'az keyvault certificate list-versions')
+            'az keyvault list')
