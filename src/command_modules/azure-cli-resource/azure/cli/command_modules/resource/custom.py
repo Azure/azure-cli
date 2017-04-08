@@ -11,7 +11,6 @@ import os
 import re
 import uuid
 
-from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.resource.resources.models import GenericResource
 
 from azure.mgmt.resource.locks.models import ManagementLockObject
@@ -193,7 +192,7 @@ def _deploy_arm_template_core(resource_group_name, template_file=None, template_
     properties = DeploymentProperties(template=template, template_link=template_link,
                                       parameters=parameters, mode=mode)
 
-    smc = get_mgmt_service_client(ResourceManagementClient)
+    smc = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
     if validate_only:
         return smc.deployments.validate(resource_group_name, deployment_name,
                                         properties, raw=no_wait)
@@ -203,7 +202,7 @@ def _deploy_arm_template_core(resource_group_name, template_file=None, template_
 
 
 def export_deployment_as_template(resource_group_name, deployment_name):
-    smc = get_mgmt_service_client(ResourceManagementClient)
+    smc = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
     result = smc.deployments.export_template(resource_group_name, deployment_name)
     print(json.dumps(result.template, indent=2))#pylint: disable=no-member
 

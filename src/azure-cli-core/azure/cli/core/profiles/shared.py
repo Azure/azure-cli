@@ -104,9 +104,9 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_COMPUTE: '2015-06-15',
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
-        ResourceType.MGMT_RESOURCE_RESOURCES: '2016-09-01',
+        ResourceType.MGMT_RESOURCE_LOCKS: '2015-01-01',
+        ResourceType.MGMT_RESOURCE_POLICY: '2016-04-01',
+        ResourceType.MGMT_RESOURCE_RESOURCES: '2016-02-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.DATA_STORAGE: '2015-04-05'
     }

@@ -69,7 +69,7 @@ def which(binary):
 
 def _resource_client_factory():
     from azure.mgmt.resource import ResourceManagementClient
-    return get_mgmt_service_client(ResourceManagementClient)
+    return get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
 
 
 def cf_providers():
