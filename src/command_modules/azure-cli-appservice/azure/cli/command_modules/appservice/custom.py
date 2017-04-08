@@ -31,7 +31,7 @@ from ._params import web_client_factory, _generic_site_operation
 
 logger = azlogging.get_az_logger(__name__)
 
-# pylint:disable=no-member,superfluous-parens
+# pylint:disable=no-member,superfluous-parens,unused-argument
 
 
 class AppServiceLongRunningOperation(LongRunningOperation):  # pylint: disable=too-few-public-methods
@@ -64,13 +64,13 @@ class AppServiceLongRunningOperation(LongRunningOperation):  # pylint: disable=t
             return ex
 
 
-def create_webapp(resource_group_name, name, plan):
+def create_webapp(resource_group_name, new_app_name, plan):
     client = web_client_factory()
     if is_valid_resource_id(plan):
         plan = parse_resource_id(plan)['name']
     location = _get_location_from_app_service_plan(client, resource_group_name, plan)
     webapp_def = Site(server_farm_id=plan, location=location)
-    poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
+    poller = client.web_apps.create_or_update(resource_group_name, new_app_name, webapp_def)
     return AppServiceLongRunningOperation()(poller)
 
 
@@ -80,11 +80,20 @@ def show_webapp(resource_group_name, name, slot=None):
 
 
 def list_webapp(resource_group_name=None):
+    return _list_app('app', resource_group_name)
+
+
+def list_function_app(resource_group_name=None):
+    return _list_app('functionapp', resource_group_name)
+
+
+def _list_app(app_type, resource_group_name=None):
     client = web_client_factory()
     if resource_group_name:
         result = list(client.web_apps.list_by_resource_group(resource_group_name))
     else:
         result = list(client.web_apps.list())
+    result = [x for x in result if x.kind == app_type]
     for webapp in result:
         _rename_server_farm_props(webapp)
     return result
@@ -97,19 +106,19 @@ def _rename_server_farm_props(webapp):
     return webapp
 
 
-def delete_webapp(resource_group_name, name, slot=None):
+def delete_webapp(resource_group_name, name, slot=None, app_instance=None):
     return _generic_site_operation(resource_group_name, name, 'delete', slot)
 
 
-def stop_webapp(resource_group_name, name, slot=None):
+def stop_webapp(resource_group_name, name, slot=None, app_instance=None):
     return _generic_site_operation(resource_group_name, name, 'stop', slot)
 
 
-def start_webapp(resource_group_name, name, slot=None):
+def start_webapp(resource_group_name, name, slot=None, app_instance=None):
     return _generic_site_operation(resource_group_name, name, 'start', slot)
 
 
-def restart_webapp(resource_group_name, name, slot=None):
+def restart_webapp(resource_group_name, name, slot=None, app_instance=None):
     return _generic_site_operation(resource_group_name, name, 'restart', slot)
 
 
@@ -951,7 +960,7 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
     return matched
 
 
-def create_function(resource_group_name, name, storage_account, plan=None):
+def create_function(resource_group_name, new_app_name, storage_account, plan=None):
     client = web_client_factory()
     if is_valid_resource_id(plan):
         plan = parse_resource_id(plan)['name']
@@ -962,7 +971,7 @@ def create_function(resource_group_name, name, storage_account, plan=None):
     if is_valid_resource_id(storage_account):
         sa_resource_group = parse_resource_id(storage_account)['resource_group']
         storage_account = parse_resource_id(storage_account)['name']
-    poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
+    poller = client.web_apps.create_or_update(resource_group_name, new_app_name, webapp_def)
     webapp = AppServiceLongRunningOperation()(poller)
     storage_client = get_mgmt_service_client(StorageManagementClient)
     keys = storage_client.storage_accounts.list_keys(sa_resource_group, storage_account).keys
@@ -970,6 +979,6 @@ def create_function(resource_group_name, name, storage_account, plan=None):
     # adding appsetting to site to make it a function
     settings = ['AzureWebJobsStorage=' + con_string, 'AzureWebJobsDashboard=' + con_string,
                 'FUNCTIONS_EXTENSION_VERSION=~1', 'WEBSITE_NODE_DEFAULT_VERSION=6.5.0']
-    update_site_configs(resource_group_name, name, slot=None, always_on='true')
-    update_app_settings(resource_group_name, name, settings, None)
+    update_site_configs(resource_group_name, new_app_name, slot=None, always_on='true')
+    update_app_settings(resource_group_name, new_app_name, settings, None)
     return webapp

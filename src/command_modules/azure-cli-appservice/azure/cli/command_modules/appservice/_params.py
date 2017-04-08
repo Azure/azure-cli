@@ -11,6 +11,7 @@ from azure.cli.core.commands.parameters import (resource_group_name_type, locati
                                                 CliArgumentType, ignore_type, enum_choice_list)
 from azure.mgmt.web.models import DatabaseType
 from ._client_factory import web_client_factory
+from ._validators import validate_existing_function_app, validate_existing_web_app
 
 
 def _generic_site_operation(resource_group_name, name, operation_name, slot=None,  # pylint: disable=too-many-arguments
@@ -42,6 +43,12 @@ name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 sku_arg_type = CliArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1(Premium Small), etc',
                                **enum_choice_list(['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3']))
 
+# use this hidden arg to give a command the right instance, that functionapp comamnds
+# work on function app and webapp ones work on web app
+register_cli_argument('appservice web', 'app_instance', ignore_type)
+register_cli_argument('functionapp', 'app_instance', ignore_type)
+register_cli_argument('functionapp', 'slot', ignore_type)
+
 register_cli_argument('appservice', 'resource_group_name', arg_type=resource_group_name_type)
 register_cli_argument('appservice', 'location', arg_type=location_type)
 
@@ -59,8 +66,9 @@ register_cli_argument('appservice plan', 'admin_site_name', help='The name of th
 register_cli_argument('appservice web', 'slot', options_list=('--slot', '-s'), help="the name of the slot. Default to the productions slot if not specified")
 register_cli_argument('appservice web', 'name', configured_default='web',
                       arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
-                      help="name of the web. You can configure the default using 'az configure --defaults web=<name>'")
-register_cli_argument('appservice web create', 'name', options_list=('--name', '-n'), help='name of the new webapp')
+                      help="name of the web. You can configure the default using 'az configure --defaults web=<name>'",
+                      validator=validate_existing_web_app)
+register_cli_argument('appservice web create', 'new_app_name', options_list=('--name', '-n'), help='name of the new webapp')
 register_cli_argument('appservice web create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                       help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
 
@@ -145,8 +153,10 @@ register_cli_argument('appservice web source-control', 'branch', help='the branc
 register_cli_argument('appservice web source-control', 'repository_type', help='repository type', default='git', **enum_choice_list(['git', 'mercurial']))
 register_cli_argument('appservice web source-control', 'git_token', help='git access token required for auto sync')
 
-register_cli_argument('functionapp', 'name', arg_type=name_arg_type, id_part='name', help="name of the function")
+register_cli_argument('functionapp', 'name', arg_type=name_arg_type, id_part='name', help='name of the function app',
+                      validator=validate_existing_function_app)
 register_cli_argument('functionapp create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                       help="name or resource id of the function app service plan. Use 'appservice plan create' to get one")
+register_cli_argument('functionapp create', 'new_app_name', options=('--name', '-n'), help='name of the new function app')
 register_cli_argument('functionapp create', 'storage_account', options_list=('--storage-account', '-s'),
                       help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
