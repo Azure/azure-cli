@@ -74,8 +74,9 @@ def create_webapp(resource_group_name, new_app_name, plan):
     return AppServiceLongRunningOperation()(poller)
 
 
-def show_webapp(resource_group_name, name, slot=None):
-    webapp = _generic_site_operation(resource_group_name, name, 'get', slot)
+def show_webapp(resource_group_name, name, slot=None, app_instance=None):
+    webapp = (_generic_site_operation(resource_group_name, name, 'get', slot)
+              if slot else app_instance)
     return _rename_server_farm_props(webapp)
 
 

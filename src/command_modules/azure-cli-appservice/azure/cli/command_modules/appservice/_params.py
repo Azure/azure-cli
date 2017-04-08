@@ -42,6 +42,9 @@ def get_hostname_completion_list(prefix, action, parsed_args, **kwargs):  # pyli
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 sku_arg_type = CliArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1(Premium Small), etc',
                                **enum_choice_list(['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3']))
+webapp_name_arg_type = CliArgumentType(configured_default='web', options_list=('--name', '-n'), metavar='NAME',
+                                       completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
+                                       help="name of the web. You can configure the default using 'az configure --defaults web=<name>'")
 
 # use this hidden arg to give a command the right instance, that functionapp comamnds
 # work on function app and webapp ones work on web app
@@ -64,10 +67,11 @@ register_cli_argument('appservice plan', 'number_of_workers', help='Number of wo
 register_cli_argument('appservice plan', 'admin_site_name', help='The name of the admin web app.')
 
 register_cli_argument('appservice web', 'slot', options_list=('--slot', '-s'), help="the name of the slot. Default to the productions slot if not specified")
-register_cli_argument('appservice web', 'name', configured_default='web',
-                      arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
-                      help="name of the web. You can configure the default using 'az configure --defaults web=<name>'",
-                      validator=validate_existing_web_app)
+register_cli_argument('appservice web', 'name', arg_type=webapp_name_arg_type)
+
+for scope in ['start', 'show', 'restart', 'delete', 'stop']:
+    register_cli_argument('appservice web ' + scope, 'name', arg_type=webapp_name_arg_type, validator=validate_existing_web_app)
+
 register_cli_argument('appservice web create', 'new_app_name', options_list=('--name', '-n'), help='name of the new webapp')
 register_cli_argument('appservice web create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                       help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
@@ -157,6 +161,6 @@ register_cli_argument('functionapp', 'name', arg_type=name_arg_type, id_part='na
                       validator=validate_existing_function_app)
 register_cli_argument('functionapp create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                       help="name or resource id of the function app service plan. Use 'appservice plan create' to get one")
-register_cli_argument('functionapp create', 'new_app_name', options=('--name', '-n'), help='name of the new function app')
+register_cli_argument('functionapp create', 'new_app_name', options_list=('--name', '-n'), help='name of the new function app')
 register_cli_argument('functionapp create', 'storage_account', options_list=('--storage-account', '-s'),
                       help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
