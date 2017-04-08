@@ -323,7 +323,7 @@ class SubscriptionFinder(object):
 
     def __init__(self, auth_context_factory, adal_token_cache, arm_client_factory=None):
         from azure.mgmt.resource import SubscriptionClient
-        from azure.cli.core._debug import allow_debug_connection
+        from azure.cli.core._debug import change_ssl_cert_verification
 
         self._adal_token_cache = adal_token_cache
         self._auth_context_factory = auth_context_factory
@@ -333,7 +333,7 @@ class SubscriptionFinder(object):
             if arm_client_factory:
                 return arm_client_factory(config)
             else:
-                return allow_debug_connection(SubscriptionClient(
+                return change_ssl_cert_verification(SubscriptionClient(
                     config, base_url=CLOUD.endpoints.resource_manager))
 
         self._arm_client_factory = create_arm_client_factory
