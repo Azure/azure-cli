@@ -33,6 +33,7 @@ from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CnameRecord, 
 
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
+from azure.cli.core.profiles.shared import ResourceType
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -1191,7 +1192,7 @@ def create_vpn_connection(client, resource_group_name, connection_name, vnet_gat
 
     # deploy ARM template
     deployment_name = 'vpn_connection_deploy_' + random_string(32)
-    client = get_mgmt_service_client(ResourceManagementClient).deployments
+    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     if validate:
         _log_pprint_template(template)
