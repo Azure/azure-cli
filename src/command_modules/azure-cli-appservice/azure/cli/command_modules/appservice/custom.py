@@ -953,6 +953,10 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
 
 def create_function(resource_group_name, name, storage_account, plan=None,
                     consumption_plan_location=None):
+
+    if plan is not None and consumption_plan_location is not None:
+        raise CLIError("Use Plan or Consumption Plan Location")
+
     client = web_client_factory()
     if consumption_plan_location is not None:
         plan = _set_and_get_consumption_plan(client,
