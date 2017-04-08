@@ -71,12 +71,22 @@ def create_webapp(resource_group_name, name, plan):
     location = _get_location_from_app_service_plan(client, resource_group_name, plan)
     webapp_def = Site(server_farm_id=plan, location=location)
     poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
-    return AppServiceLongRunningOperation()(poller)
+    webapp = AppServiceLongRunningOperation()(poller)
+    webapp.ftpPublishingUrl = _get_ftp_publishing_url(resource_group_name, name)
+    return webapp
 
 
 def show_webapp(resource_group_name, name, slot=None):
     webapp = _generic_site_operation(resource_group_name, name, 'get', slot)
-    return _rename_server_farm_props(webapp)
+    webapp = _rename_server_farm_props(webapp)
+    webapp.ftpPublishingUrl = _get_ftp_publishing_url(resource_group_name, name)
+    return webapp
+
+
+def _get_ftp_publishing_url(resource_group_name, name):
+    profiles = list_publish_profiles(resource_group_name, name, None)
+    ftpProfile = next((p for p in profiles if p['publishMethod'] == "FTP"), None)
+    return ftpProfile["publishUrl"]
 
 
 def list_webapp(resource_group_name=None):
