@@ -35,7 +35,7 @@ class Test_argparse(unittest.TestCase):
 
         clientMock = MagicMock()
         clientMock.config.connection.verify = True
-        clientMock = _debug.allow_debug_connection(clientMock)
+        clientMock = _debug.change_ssl_cert_verification(clientMock)
         self.assertFalse(clientMock.config.connection.verify)
 
 
