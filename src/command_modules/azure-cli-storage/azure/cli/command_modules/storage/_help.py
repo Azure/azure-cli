@@ -175,6 +175,12 @@ helps['storage blob copy'] = """
     type: group
     short-summary: Manage blob copy operations.
 """
+
+helps['storage blob incremental-copy'] = """
+    type: group
+    short-summary: Manage blob incremental copy operations.
+"""
+
 helps['storage blob lease'] = """
     type: group
     short-summary: Manage storage blob leases.
