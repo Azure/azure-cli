@@ -560,7 +560,7 @@ class FunctionAppWithPlanE2ETest(ResourceGroupVCRTestBase):
         self.execute()
 
     def body(self):
-        webapp_name = 'webapp-e2e3'
+        functionapp_name = 'webapp-e2e3'
         plan = 'webapp-e2e-plan'
         storage = 'functionappe2estorage'
         self.cmd('appservice plan create -g {} -n {}'.format(self.resource_group, plan))
@@ -572,22 +572,22 @@ class FunctionAppWithPlanE2ETest(ResourceGroupVCRTestBase):
         ])
 
         self.cmd('storage account create --name {} -g {} -l westus --sku Standard_LRS'.format(storage, self.resource_group))
-        self.cmd('functionapp create -g {} -n {} -p {} -s {}'.format(self.resource_group, webapp_name, plan, storage), checks=[
+        self.cmd('functionapp create -g {} -n {} -p {} -s {}'.format(self.resource_group, functionapp_name, plan, storage), checks=[
             JMESPathCheck('state', 'Running'),
-            JMESPathCheck('name', webapp_name),
-            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+            JMESPathCheck('name', functionapp_name),
+            JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')
         ])
-        self.cmd('appservice web list -g {}'.format(self.resource_group), checks=[
+        self.cmd('functionapp list -g {}'.format(self.resource_group), checks=[
             JMESPathCheck('length(@)', 1),
-            JMESPathCheck('[0].name', webapp_name),
-            JMESPathCheck('[0].hostNames[0]', webapp_name + '.azurewebsites.net')
+            JMESPathCheck('[0].name', functionapp_name),
+            JMESPathCheck('[0].hostNames[0]', functionapp_name + '.azurewebsites.net')
         ])
-        self.cmd('appservice web show -g {} -n {}'.format(self.resource_group, webapp_name), checks=[
-            JMESPathCheck('name', webapp_name),
-            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+        self.cmd('functionapp show -g {} -n {}'.format(self.resource_group, functionapp_name), checks=[
+            JMESPathCheck('name', functionapp_name),
+            JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')
         ])
 
-        self.cmd('appservice web delete -g {} -n {}'.format(self.resource_group, webapp_name))
+        self.cmd('functionapp delete -g {} -n {}'.format(self.resource_group, functionapp_name))
         # test empty service plan should be automatically deleted.
         self.cmd('appservice plan list -g {}'.format(self.resource_group), checks=[
             JMESPathCheck('length(@)', 0)

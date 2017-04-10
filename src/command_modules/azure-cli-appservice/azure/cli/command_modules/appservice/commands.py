@@ -99,7 +99,7 @@ cli_command(__name__, 'appservice web deployment user show', 'azure.mgmt.web.web
 cli_command(__name__, 'appservice list-locations', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.list_geo_regions', cf_web_client, transform=transform_list_location_output)
 
 cli_command(__name__, 'functionapp create', 'azure.cli.command_modules.appservice.custom#create_function')
-cli_command(__name__, 'functionapp list', 'azure.cli.command_modules.appservice.custom#list_webapp', table_transformer=transform_web_list_output)
+cli_command(__name__, 'functionapp list', 'azure.cli.command_modules.appservice.custom#list_function_app', table_transformer=transform_web_list_output)
 cli_command(__name__, 'functionapp show', 'azure.cli.command_modules.appservice.custom#show_webapp', exception_handler=empty_on_404, table_transformer=transform_web_output)
 cli_command(__name__, 'functionapp delete', 'azure.cli.command_modules.appservice.custom#delete_webapp')
 cli_command(__name__, 'functionapp stop', 'azure.cli.command_modules.appservice.custom#stop_webapp')
