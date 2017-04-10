@@ -46,6 +46,7 @@ from ._validators import \
 
 public_access_types = {'off': None, 'blob': PublicAccess.Blob, 'container': PublicAccess.Container}
 
+
 class CommandContext(object):
     def __init__(self, scope):
         self._scope = scope

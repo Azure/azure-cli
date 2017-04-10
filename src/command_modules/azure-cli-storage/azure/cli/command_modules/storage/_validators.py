@@ -469,6 +469,7 @@ def table_permission_validator(namespace):
             raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
         namespace.permission = TablePermissions(_str=namespace.permission)
 
+
 def validate_public_access(namespace):
     from ._params import public_access_types
 
