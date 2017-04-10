@@ -28,6 +28,7 @@ cli_command(__name__, 'keyvault set-policy', custom_path.format('set_policy'), f
 cli_command(__name__, 'keyvault delete-policy', custom_path.format('delete_policy'), factory)
 
 
+
 cli_generic_update_command(__name__,
                            'keyvault update',
                            mgmt_path.format('VaultsOperations.get'),
@@ -61,7 +62,7 @@ cli_keyvault_data_plane_command('keyvault certificate list-versions', convenienc
 cli_keyvault_data_plane_command('keyvault certificate show', base_client_path.format('KeyVaultClient.get_certificate'))
 cli_keyvault_data_plane_command('keyvault certificate delete', convenience_path.format('KeyVaultClient.delete_certificate'))
 cli_keyvault_data_plane_command('keyvault certificate set-attributes', base_client_path.format('KeyVaultClient.update_certificate'))
-cli_keyvault_data_plane_command('keyvault certificate import', convenience_path.format('KeyVaultClient.import_certificate'))
+cli_keyvault_data_plane_command('keyvault certificate import', custom_path.format('import_certificate'))
 cli_keyvault_data_plane_command('keyvault certificate download', custom_path.format('download_certificate'))
 
 cli_keyvault_data_plane_command('keyvault key list', convenience_path.format('KeyVaultClient.get_keys'))

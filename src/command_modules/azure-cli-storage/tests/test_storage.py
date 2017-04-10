@@ -662,16 +662,3 @@ class StorageFileACLScenarioTest(StorageAccountVCRTestBase):
 
     def body(self):
         _acl_body(self)
-
-
-class StorageBlobNoCredentialsScenarioTest(VCRTestBase):
-    def __init__(self, test_method):
-        super(StorageBlobNoCredentialsScenarioTest, self).__init__(__file__, test_method)
-
-    def test_storage_blob_no_credentials_scenario(self):
-        self.execute()
-
-    def body(self):
-        self.pop_env('AZURE_STORAGE_CONNECTION_STRING')
-        with self.assertRaisesRegexp(CLIError, re.escape(NO_CREDENTIALS_ERROR_MESSAGE)):
-            self.cmd('storage blob upload -c foo -n bar -f file_0')

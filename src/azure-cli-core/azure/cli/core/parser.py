@@ -50,6 +50,10 @@ class AzCliCommandParser(argparse.ArgumentParser):
         self.subparsers = {}
         self.parents = kwargs.get('parents', [])
         self.help_file = kwargs.pop('help_file', None)
+        # We allow a callable for description to be passed in in order to delay-load any help
+        # or description for a command. We better stash it away before handing it off for
+        # "normal" argparse handling...
+        self._description = kwargs.pop('description', None)
         super(AzCliCommandParser, self).__init__(**kwargs)
 
     def load_command_table(self, command_table):
@@ -175,3 +179,13 @@ class AzCliCommandParser(argparse.ArgumentParser):
 
     def is_group(self):
         return getattr(self, '_subparsers', None) is not None
+
+    def __getattribute__(self, name):
+        """ Since getting the description can be expensive (require module loads), we defer
+            this until someone actually wants to use it (i.e. show help for the command)
+        """
+        if name == 'description':
+            if callable(self._description):
+                self.description = self._description()
+                self._description = None
+        return object.__getattribute__(self, name)

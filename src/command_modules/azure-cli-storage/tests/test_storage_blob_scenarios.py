@@ -7,11 +7,40 @@ import os
 import re
 import unittest
 from datetime import datetime, timedelta
-from azure.cli.testsdk import (ScenarioTest, LiveTest, ResourceGroupPreparer,
-                               StorageAccountPreparer, JMESPathCheck, live_only, get_sha1_hash)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
+                               JMESPathCheck)
+from azure.cli.core.util import CLIError
+from azure.cli.command_modules.storage._factory import NO_CREDENTIALS_ERROR_MESSAGE
+from .storage_test_util import StorageScenarioMixin
 
 
-class StorageBlobUploadTests(ScenarioTest):
+class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='source_account')
+    @StorageAccountPreparer(parameter_name='target_account')
+    def test_storage_blob_incremental_copy(self, resource_group, source_account, target_account):
+        source_file = self.create_temp_file(16, full_random=True)
+        source_account_info = self.get_account_info(resource_group, source_account)
+        source_container = self.create_container(source_account_info)
+        self.storage_cmd('storage blob upload -c {} -n src -f {} -t page', source_account_info,
+                         source_container, source_file)
+
+        snapshot = self.storage_cmd('storage blob snapshot -c {} -n src', source_account_info,
+                                    source_container).get_output_in_json()['snapshot']
+
+        target_account_info = self.get_account_info(resource_group, target_account)
+        target_container = self.create_container(target_account_info)
+        self.storage_cmd('storage blob incremental-copy start --source-container {} --source-blob '
+                         'src --source-account-name {} --source-account-key {} --source-snapshot '
+                         '{} --destination-container {} --destination-blob backup',
+                         target_account_info, source_container, source_account,
+                         source_account_info[1], snapshot, target_container)
+
+    def test_storage_blob_no_credentials_scenario(self):
+        source_file = self.create_temp_file(1)
+        with self.assertRaisesRegexp(CLIError, re.escape(NO_CREDENTIALS_ERROR_MESSAGE)):
+            self.cmd('storage blob upload -c foo -n bar -f ' + source_file)
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_upload_small_file(self, resource_group, storage_account):
@@ -36,48 +65,45 @@ class StorageBlobUploadTests(ScenarioTest):
 
     def verify_blob_upload_and_download(self, group, account, file_size_kb, blob_type,
                                         block_count=0, skip_download=False):
-        container = self.create_random_name(prefix='cont', length=24)
         local_dir = self.create_temp_dir()
         local_file = self.create_temp_file(file_size_kb)
         blob_name = self.create_random_name(prefix='blob', length=24)
-        account_key = self.get_account_key(group, account)
+        account_info = self.get_account_info(group, account)
 
-        self.set_env('AZURE_STORAGE_ACCOUNT', account)
-        self.set_env('AZURE_STORAGE_KEY', account_key)
+        container = self.create_container(account_info)
 
-        self.cmd('storage container create -n {}'.format(container))
+        self.storage_cmd('storage blob exists -n {} -c {}', account_info, blob_name, container) \
+            .assert_with_checks(JMESPathCheck('exists', False))
 
-        self.cmd('storage blob exists -n {} -c {}'.format(blob_name, container),
-                 checks=JMESPathCheck('exists', False))
+        self.storage_cmd('storage blob upload -c {} -f {} -n {} --type {}', account_info,
+                         container, local_file, blob_name, blob_type)
+        self.storage_cmd('storage blob exists -n {} -c {}', account_info, blob_name, container) \
+            .assert_with_checks(JMESPathCheck('exists', True))
 
-        self.cmd('storage blob upload -c {} -f {} -n {} --type {}'
-                 .format(container, local_file, blob_name, blob_type))
-
-        self.cmd('storage blob exists -n {} -c {}'.format(blob_name, container),
-                 checks=JMESPathCheck('exists', True))
-
-        self.cmd('storage blob show -n {} -c {}'.format(blob_name, container),
-                 checks=JMESPathCheck('name', blob_name))  # TODO: more checks
+        self.storage_cmd('storage blob show -n {} -c {}', account_info, blob_name, container) \
+            .assert_with_checks(JMESPathCheck('name', blob_name))
 
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
-        sas = self.cmd('storage blob generate-sas -n {} -c {} --expiry {} '
-                       '--permissions r --https-only'.format(blob_name, container, expiry)).output
-        assert dict(pair.split('=') for pair in sas.split('&'))  # TODO: more checks
+        sas = self.storage_cmd('storage blob generate-sas -n {} -c {} --expiry {} --permissions '
+                               'r --https-only', account_info, blob_name, container, expiry).output
+        self.assertTrue(sas)
+        self.assertIn('sig', sas)
 
-        self.cmd('storage blob update -n {} -c {} --content-type application/test-content'
-                 .format(blob_name, container))
+        self.storage_cmd('storage blob update -n {} -c {} --content-type application/test-content',
+                         account_info, blob_name, container)
 
-        self.cmd('storage blob show -n {} -c {}'.format(blob_name, container), checks=[
-            JMESPathCheck('properties.contentSettings.contentType', 'application/test-content'),
-            JMESPathCheck('properties.contentLength', file_size_kb * 1024)])
+        self.storage_cmd('storage blob show -n {} -c {}', account_info, blob_name, container) \
+            .assert_with_checks([JMESPathCheck('properties.contentSettings.contentType', 'application/test-content'),
+                                 JMESPathCheck('properties.contentLength', file_size_kb * 1024)])
 
-        self.cmd('storage blob service-properties show',
-                 checks=JMESPathCheck('hourMetrics.enabled', True))
+        self.storage_cmd('storage blob service-properties show', account_info) \
+            .assert_with_checks(JMESPathCheck('hourMetrics.enabled', True))
 
         if not skip_download:
             downloaded = os.path.join(local_dir, 'test.file')
-            self.cmd('storage blob download -n {} -c {} --file {}'
-                     .format(blob_name, container, downloaded))
+
+            self.storage_cmd('storage blob download -n {} -c {} --file {}',
+                             account_info, blob_name, container, downloaded)
             self.assertTrue(os.path.isfile(downloaded), 'The file is not downloaded.')
             self.assertEqual(file_size_kb * 1024, os.stat(downloaded).st_size,
                              'The download file size is not right.')
@@ -85,6 +111,7 @@ class StorageBlobUploadTests(ScenarioTest):
         # Verify the requests in cassette to ensure the count of the block requests is expected
         # This portion of validation doesn't verify anything during playback because the recording
         # is fixed.
+
         def is_block_put_req(request):
             if request.method != 'PUT':
                 return False
@@ -107,66 +134,6 @@ class StorageBlobUploadTests(ScenarioTest):
         self.assertEqual(block_count, len(put_blocks),
                          'The expected number of block put requests is {} but the actual '
                          'number is {}.'.format(block_count, len(put_blocks)))
-
-    def get_account_key(self, group, name):
-        return self.cmd('storage account keys list -n {} -g {} --query "[0].value" -otsv'
-                        .format(name, group)).output
-
-
-class StorageBlobUploadLiveTests(LiveTest):
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
-    def test_storage_blob_upload_256mb_file(self, resource_group, storage_account):
-        self.verify_blob_upload_and_download(resource_group, storage_account, 256 * 1024, 'block')
-
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
-    def test_storage_blob_upload_1G_file(self, resource_group, storage_account):
-        self.verify_blob_upload_and_download(resource_group, storage_account, 1024 * 1024, 'block')
-
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
-    def test_storage_blob_upload_2G_file(self, resource_group, storage_account):
-        self.verify_blob_upload_and_download(resource_group, storage_account, 2 * 1024 * 1024,
-                                             'block')
-
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
-    def test_storage_blob_upload_10G_file(self, resource_group, storage_account):
-        self.verify_blob_upload_and_download(resource_group, storage_account, 10 * 1024 * 1024,
-                                             'block')
-
-    def verify_blob_upload_and_download(self, group, account, file_size_kb, blob_type):
-        container = self.create_random_name(prefix='cont', length=24)
-        local_dir = self.create_temp_dir()
-        local_file = self.create_temp_file(file_size_kb, full_random=True)
-        blob_name = self.create_random_name(prefix='blob', length=24)
-        account_key = self.cmd('storage account keys list -n {} -g {} --query "[0].value" -otsv'
-                               .format(account, group)).output
-
-        self.set_env('AZURE_STORAGE_ACCOUNT', account)
-        self.set_env('AZURE_STORAGE_KEY', account_key)
-
-        self.cmd('storage container create -n {}'.format(container))
-
-        self.cmd('storage blob exists -n {} -c {}'.format(blob_name, container),
-                 checks=JMESPathCheck('exists', False))
-
-        self.cmd('storage blob upload -c {} -f {} -n {} --type {}'
-                 .format(container, local_file, blob_name, blob_type))
-
-        self.cmd('storage blob exists -n {} -c {}'.format(blob_name, container),
-                 checks=JMESPathCheck('exists', True))
-
-        self.cmd('storage blob show -n {} -c {}'.format(blob_name, container),
-                 checks=JMESPathCheck('properties.contentLength', file_size_kb * 1024))
-
-        downloaded = os.path.join(local_dir, 'test.file')
-        self.cmd('storage blob download -n {} -c {} --file {}'
-                 .format(blob_name, container, downloaded))
-        self.assertTrue(os.path.isfile(downloaded), 'The file is not downloaded.')
-        self.assertEqual(file_size_kb * 1024, os.stat(downloaded).st_size,
-                         'The download file size is not right.')
 
 
 if __name__ == '__main__':

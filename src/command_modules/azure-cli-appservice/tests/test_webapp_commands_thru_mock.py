@@ -209,7 +209,7 @@ class Test_Webapp_Mocked(unittest.TestCase):
     def test_update_host_certs(self, client_mock, show_webapp_mock, host_ssl_update_mock, site_op_mock):
         faked_web_client = mock.MagicMock()
         client_mock.return_value = faked_web_client
-        faked_site = Site('antarctica', server_farm_id='big_plan')
+        faked_site = Site('antarctica', server_farm_id='/subscriptions/foo/resourceGroups/foo/providers/Microsoft.Web/serverfarms/big_plan')
         faked_web_client.web_apps.get.side_effect = [faked_site, faked_site]
         test_hostname = '*.foo.com'
         cert1 = Certificate('antarctica', host_names=[test_hostname])

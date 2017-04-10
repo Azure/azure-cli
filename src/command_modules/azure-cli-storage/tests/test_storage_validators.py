@@ -3,26 +3,15 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: skip-file
 import unittest
-
 from six import StringIO
-
+from argparse import Namespace
 from azure.cli.command_modules.storage._validators import (get_permission_validator,
                                                            get_datetime_type, datetime, ipv4_range_type, resource_type_type,
-                                                           services_type)
+                                                           services_type, process_blob_source_uri)
 
 
-class Test_storage_validators(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        pass
-
-    @classmethod
-    def tearDownClass(cls):
-        pass
-
+class TestStorageValidators(unittest.TestCase):
     def setUp(self):
         self.io = StringIO()
 
@@ -31,7 +20,6 @@ class Test_storage_validators(unittest.TestCase):
 
     def test_permission_validator(self):
         from azure.storage.blob.models import ContainerPermissions
-        from argparse import Namespace
 
         ns1 = Namespace(permission='rwdl')
         ns2 = Namespace(permission='abc')
@@ -98,6 +86,14 @@ class Test_storage_validators(unittest.TestCase):
         input = "everything"
         with self.assertRaises(ValueError):
             actual = services_type(input)
+
+    def test_storage_process_blob_source_uri_redundent_parameter(self):
+        with self.assertRaises(ValueError):
+            process_blob_source_uri(Namespace(copy_source='https://example.com',
+                                              source_sas='some_sas'))
+        with self.assertRaises(ValueError):
+            process_blob_source_uri(Namespace(copy_source='https://example.com',
+                                              source_account_name='account_name'))
 
 
 if __name__ == '__main__':

@@ -20,9 +20,9 @@ from azure.cli.core.util import CLIError, todict, shell_safe_json_parse
 logger = azlogging.get_az_logger(__name__)
 
 regex = re.compile(
-    '/subscriptions/(?P<subscription>[^/]*)/resource[gG]roups/(?P<resource_group>[^/]*)'
+    '/subscriptions/(?P<subscription>[^/]*)(/resource[gG]roups/(?P<resource_group>[^/]*))?'
     '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)'
-    '(/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?'
+    '((/providers/(?P<child_namespace>[^/]*))?/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?'
     '(/(?P<grandchild_type>[^/]*)/(?P<grandchild_name>[^/]*))?')
 
 

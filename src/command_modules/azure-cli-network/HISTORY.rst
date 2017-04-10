@@ -7,6 +7,8 @@ unreleased
 ++++++++++++++++++
 * Add support for active-active VNet gateways
 * Remove nulls values from output of `network vpn-connection list/show` commands.
+* BC: Fix bug in the output of `vpn-connection create` 
+* Fix bug where '--key-length' argument of 'vpn-connection create' was not parsed correctly.
 
 2.0.2 (2017-04-03)
 ++++++++++++++++++

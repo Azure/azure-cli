@@ -1128,6 +1128,7 @@ class NetworkActiveActiveCrossPremiseScenarioTest(ResourceGroupVCRTestBase): # p
         conn_151 = 'Vnet1toSite5_1'
         conn_152 = 'Vnet1toSite5_2'
         shared_key = 'abc123'
+        shared_key2 = 'a1b2c3'
 
         # create the vnet gateway with active-active feature
         self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --sku HighPerformance --asn {} --public-ip-addresses {} {}'.format(rg, gw1, vnet1, vnet1_asn, self.gw_ip1, self.gw_ip2))
@@ -1135,6 +1136,12 @@ class NetworkActiveActiveCrossPremiseScenarioTest(ResourceGroupVCRTestBase): # p
         # create and connect first local-gateway
         self.cmd('network local-gateway create -g {} -n {} -l {} --gateway-ip-address {} --local-address-prefixes {} --asn {} --bgp-peering-address {}'.format(rg, lgw2, lgw_loc, lgw_ip, lgw_prefix, lgw_asn, bgp_peer1))
         self.cmd('network vpn-connection create -g {} -n {} --vnet-gateway1 {} --local-gateway2 {} --shared-key {} --enable-bgp'.format(rg, conn_151, gw1, lgw2, shared_key))
+        self.cmd('network vpn-connection shared-key reset -g {} --connection-name {} --key-length 128'.format(rg, conn_151))
+        sk1 = self.cmd('network vpn-connection shared-key show -g {} --connection-name {}'.format(rg, conn_151))
+        self.cmd('network vpn-connection shared-key update -g {} --connection-name {} --value {}'.format(rg, conn_151, shared_key2))
+        sk2 = self.cmd('network vpn-connection shared-key show -g {} --connection-name {}'.format(rg, conn_151),
+            checks=JMESPathCheck('value', shared_key2))
+        self.assertNotEqual(sk1, sk2)
 
         lgw3 = 'lgw3'
         lgw3_ip = '131.107.72.23'
