@@ -31,30 +31,20 @@ class IntegrationTestBase(unittest.TestCase):
     def __init__(self, method_name):
         super(IntegrationTestBase, self).__init__(method_name)
         self.diagnose = os.environ.get(ENV_TEST_DIAGNOSE, None) == 'True'
-        self.skip_assert = os.environ.get(ENV_SKIP_ASSERT, None) == 'True'
 
-    def cmd(self, command, checks=None):
+    def cmd(self, command, checks=None, expect_failure=False):
         if self.diagnose:
             begin = datetime.datetime.now()
             print('\nExecuting command: {}'.format(command))
 
-        result = execute(command)
+        result = execute(command, expect_failure=expect_failure)
 
         if self.diagnose:
             duration = datetime.datetime.now() - begin
             print('\nCommand accomplished in {} s. Exit code {}.\n{}'.format(
                 duration.total_seconds(), result.exit_code, result.output))
 
-        if not checks:
-            checks = []
-        elif not isinstance(checks, list):
-            checks = [checks]
-
-        if not self.skip_assert:
-            for c in checks:
-                c(result)
-
-        return result
+        return result.assert_with_checks(checks)
 
     def create_random_name(self, prefix, length):  # for override pylint: disable=no-self-use
         return create_random_name(prefix, length)
@@ -229,6 +219,19 @@ class ExecutionResult(object):  # pylint: disable=too-few-public-methods
             raise AssertionError('The command failed. Exit code: {}'.format(self.exit_code))
 
         self.json_value = None
+        self.skip_assert = os.environ.get(ENV_SKIP_ASSERT, None) == 'True'
+
+    def assert_with_checks(self, checks):
+        if not checks:
+            checks = []
+        elif not isinstance(checks, list):
+            checks = [checks]
+
+        if not self.skip_assert:
+            for c in checks:
+                c(self)
+
+        return self
 
     def get_output_in_json(self):
         if not self.json_value:
