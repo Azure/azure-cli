@@ -7,29 +7,25 @@ import codecs
 import glob
 import json
 import os
+import re
 import socket
 import sys
-import re
 import threading
 import webbrowser
+from subprocess import PIPE, CalledProcessError, Popen, check_output
 from time import sleep
-from subprocess import (PIPE,
-                        CalledProcessError,
-                        Popen,
-                        check_output)
-from sshtunnel import SSHTunnelForwarder
-import requests
+
+import azure.cli.command_modules.project.references as references
 import azure.cli.command_modules.project.settings as settings
 import azure.cli.command_modules.project.utils as utils
-from azure.cli.command_modules.project.sshconnect import SSHConnect
 import azure.cli.core.azlogging as azlogging  # pylint: disable=invalid-name
-
+import requests
 from azure.cli.command_modules.acs._params import _get_default_install_location
 from azure.cli.command_modules.acs.custom import (acs_create,
                                                   k8s_get_credentials,
                                                   k8s_install_cli)
 from azure.cli.command_modules.project.jenkins import Jenkins
-import azure.cli.command_modules.project.references as references
+from azure.cli.command_modules.project.sshconnect import SSHConnect
 from azure.cli.command_modules.resource.custom import _deploy_arm_template_core
 from azure.cli.command_modules.storage._factory import storage_client_factory
 from azure.cli.core._config import az_config
@@ -47,6 +43,8 @@ from azure.mgmt.resource.resources.models.resource_group import ResourceGroup
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.storage.models import Kind, Sku, StorageAccountCreateParameters
 from azure.storage.file import FileService
+from sshtunnel import SSHTunnelForwarder
+
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
@@ -360,7 +358,7 @@ def create_deployment_pipeline(remote_access_token):  # pylint: disable=unused-a
             current_process.process_stop()
 
 
-def add_reference(target_group, target_name, reference_name):
+def add_reference(target_group, target_name, reference_name, env_variables):
     """
     Adds a reference to an Azure resource
     :param target_group: Azure resource group name that contains the Azure resource
@@ -377,43 +375,13 @@ def add_reference(target_group, target_name, reference_name):
         raise CLIError("Reference '{}' for service '{}' already exists".format(
             service_name, reference_name))
 
-    env_variables = []
-    instance, client = references.get_reference_type(target_group, target_name)
-    if instance.type == 'Microsoft.DocumentDB/databaseAccounts':
-        results = client.list_connection_strings(
-            target_group, target_name)
-        if len(results.connection_strings) <= 0:
-            raise ValueError('No connection strings found')
-
-        connection_string = results.connection_strings[0].connection_string
-        env_variables = references.create_connection_string_reference(
-            service_name, reference_name, connection_string)
-    elif instance.type == 'Microsoft.Sql/servers':
-        sql_admin_login = instance.administrator_login
-        # BUG: Admin password is always null
-        # https://github.com/Azure/azure-cli/issues/2789
-        sql_admin_password = instance.administrator_login_password
-        fqdn = instance.fully_qualified_domain_name
-
-        env_variables = references.create_sqlserver_reference(
-            service_name, reference_name, sql_admin_login, sql_admin_password, fqdn)
-    elif instance.type == 'Microsoft.ServiceBus':
-        connection_string = instance.list_keys(
-            target_group, target_name, 'RootManageSharedAccessKey').primary_connection_string
-
-        env_variables = references.create_connection_string_reference(
-            service_name, reference_name, connection_string)
-    else:
-        raise NotImplementedError()
-
-    # Save the reference
-    project_settings.add_reference(
-        service_name, reference_name, instance.type)
+    env_variables, instance_type = references.add_reference(
+        service_name, target_group, target_name, reference_name, env_variables)
 
     utils.writeline("Added reference '{}'".format(reference_name))
     utils.writeline('Environment variables:\n{}'.format(
         '\n'.join(env_variables)))
-    _service_add_reference(reference_name, instance.type, service_name)
+    _service_add_reference(reference_name, instance_type, service_name)
 
 
 def remove_reference(reference_name):

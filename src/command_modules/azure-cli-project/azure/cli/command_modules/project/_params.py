@@ -50,6 +50,22 @@ name_arg_type = CliArgumentType(
 reference_name = CliArgumentType(
     options_list=('--reference-name', '-r'))
 
+environment_variables = CliArgumentType(
+    options_list=('--env-variables', '-e'),
+    help="Space separated 'name=value' pairs",
+    required=False)
+
+optional_target_group = CliArgumentType(
+    options_list=('--target-group', '-g'),
+    help="Target resoure group name",
+    required=False
+)
+
+optional_target_name = CliArgumentType(
+    options_list=('--target-name', '-n'),
+    required=False
+)
+
 register_cli_argument('project', 'remote_access_token', remote_access_token)
 register_cli_argument('project', 'project_path', project_path)
 register_cli_argument('project', 'ssh_private_key', ssh_private_key)
@@ -60,8 +76,10 @@ register_cli_argument('project', 'location', location_type)
 register_cli_argument('project', 'force_create',
                       force_create, action='store_true')
 register_cli_argument('project', 'wait', wait, action='store_true')
+register_cli_argument('project', 'env_variables',
+                      environment_variables, nargs='+')
 
-
-register_cli_argument('project', 'target-group', resource_group_name_type)
-register_cli_argument('project', 'target-name', name_arg_type)
+register_cli_argument('project', 'target_group',
+                      optional_target_group)
+register_cli_argument('project', 'target_name', optional_target_name)
 register_cli_argument('project', 'reference-name', reference_name)
