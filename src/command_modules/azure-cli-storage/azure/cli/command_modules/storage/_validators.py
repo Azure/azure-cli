@@ -14,13 +14,6 @@ from azure.cli.core._config import az_config
 from azure.cli.core.commands.validators import validate_key_value_pairs
 
 
-from azure.storage.blob.baseblobservice import BaseBlobService
-from azure.storage.blob.models import ContentSettings as BlobContentSettings, BlobPermissions
-from azure.storage.file import FileService
-from azure.storage.file.models import ContentSettings as FileContentSettings
-from azure.storage.models import ResourceTypes, Services
-from azure.storage.table import TablePermissions, TablePayloadFormat
-
 from ._factory import get_storage_data_service_client, storage_client_factory
 from .util import glob_files_locally
 
@@ -42,6 +35,7 @@ def _query_account_key(account_name):
 
 def _create_short_lived_blob_sas(account_name, account_key, container, blob):
     from azure.storage.sharedaccesssignature import SharedAccessSignature
+    from azure.storage.blob.models import BlobPermissions
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     sas = SharedAccessSignature(account_name, account_key)
     return sas.generate_blob(container, blob, permission=BlobPermissions(read=True), expiry=expiry,
@@ -50,6 +44,7 @@ def _create_short_lived_blob_sas(account_name, account_key, container, blob):
 
 def _create_short_lived_file_sas(account_name, account_key, share, directory_name, file_name):
     from azure.storage.sharedaccesssignature import SharedAccessSignature
+    from azure.storage.blob.models import BlobPermissions
     # if dir is empty string change it to None
     directory_name = directory_name if directory_name else None
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -61,6 +56,7 @@ def _create_short_lived_file_sas(account_name, account_key, share, directory_nam
 # region PARAMETER VALIDATORS
 
 def validate_accept(namespace):
+    from azure.storage.table import TablePayloadFormat
     if namespace.accept:
         formats = {
             'none': TablePayloadFormat.JSON_NO_METADATA,
@@ -294,6 +290,10 @@ def get_content_setting_validator(settings_class, update):
         return class_type.__module__ + "." + class_type.__class__.__name__
 
     def validator(namespace):
+        from azure.storage.blob.baseblobservice import BaseBlobService
+        from azure.storage.file.models import ContentSettings as FileContentSettings
+        from azure.storage.blob.models import ContentSettings as BlobContentSettings
+        from azure.storage.file import FileService
         # must run certain validators first for an update
         if update:
             validate_client_parameters(namespace)
@@ -463,6 +463,7 @@ def get_permission_validator(permission_class):
 
 def table_permission_validator(namespace):
     """ A special case for table because the SDK associates the QUERY permission with 'r' """
+    from azure.storage.table import TablePermissions
     if namespace.permission:
         if set(namespace.permission) - set('raud'):
             help_string = '(r)ead/query (a)dd (u)pdate (d)elete'
@@ -471,6 +472,7 @@ def table_permission_validator(namespace):
 
 
 def validate_public_access(namespace):
+    from azure.storage.blob.baseblobservice import BaseBlobService
     from ._params import public_access_types
 
     if namespace.public_access:
@@ -503,6 +505,7 @@ def get_source_file_or_blob_service_client(namespace):
     indicates that user want to copy files or blobs in the same storage account, therefore the
     destination client will be set None hence the command will use destination client.
     """
+    from azure.storage.file import FileService
     usage_string = 'invalid usage: supply only one of the following argument sets:' + \
                    '\n\t   --source-uri' + \
                    '\n\tOR --source-container' + \
@@ -774,6 +777,7 @@ def ipv4_range_type(string):
 def resource_type_type(string):
     ''' Validates that resource types string contains only a combination
     of (s)ervice, (c)ontainer, (o)bject '''
+    from azure.storage.models import ResourceTypes
     if set(string) - set("sco"):
         raise ValueError
     return ResourceTypes(_str=''.join(set(string)))
@@ -782,6 +786,7 @@ def resource_type_type(string):
 def services_type(string):
     ''' Validates that services string contains only a combination
     of (b)lob, (q)ueue, (t)able, (f)ile '''
+    from azure.storage.models import Services
     if set(string) - set("bqtf"):
         raise ValueError
     return Services(_str=''.join(set(string)))
