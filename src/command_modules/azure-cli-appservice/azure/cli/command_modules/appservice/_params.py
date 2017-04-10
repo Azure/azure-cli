@@ -46,7 +46,7 @@ webapp_name_arg_type = CliArgumentType(configured_default='web', options_list=('
                                        completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
                                        help="name of the web. You can configure the default using 'az configure --defaults web=<name>'")
 
-# use this hidden arg to give a command the right instance, that functionapp comamnds
+# use this hidden arg to give a command the right instance, that functionapp commands
 # work on function app and webapp ones work on web app
 register_cli_argument('appservice web', 'app_instance', ignore_type)
 register_cli_argument('functionapp', 'app_instance', ignore_type)
