@@ -13,8 +13,8 @@ from azure.cli.core.profiles.shared import (AZURE_API_PROFILES,
 # API Profiles currently supported in the CLI.
 API_PROFILES = {
     'latest': AZURE_API_PROFILES['latest'],
-    '2016-example': AZURE_API_PROFILES['2016-example'],
-    '2015-example': AZURE_API_PROFILES['2015-example']
+    '2016-sample': AZURE_API_PROFILES['2016-sample'],
+    '2015-sample': AZURE_API_PROFILES['2015-sample']
 }
 
 
