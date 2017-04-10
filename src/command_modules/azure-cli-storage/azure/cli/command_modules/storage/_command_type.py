@@ -4,55 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import create_command, command_table
-from azure.cli.core._config import az_config
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
-
-
-def query_account_key(account_name):
-    from azure.mgmt.storage import StorageManagementClient
-    scf = get_mgmt_service_client(StorageManagementClient)
-    acc = next((x for x in scf.storage_accounts.list() if x.name == account_name), None)
-    if acc:
-        from azure.cli.core.commands.arm import parse_resource_id
-        rg = parse_resource_id(acc.id)['resource_group']
-        return scf.storage_accounts.list_keys(rg, account_name).keys[0].value  # pylint: disable=no-member
-    else:
-        raise ValueError("Storage account '{}' not found.".format(account_name))
-
-
-def validate_client_parameters(namespace):
-    """ Retrieves storage connection parameters from environment variables and parses out
-    connection string into account name and key """
-    from azure.cli.core.commands.validators import validate_key_value_pairs
-
-    n = namespace
-
-    if not n.connection_string:
-        n.connection_string = az_config.get('storage', 'connection_string', None)
-
-    # if connection string supplied or in environment variables, extract account key and name
-    if n.connection_string:
-        conn_dict = validate_key_value_pairs(n.connection_string)
-        n.account_name = conn_dict['AccountName']
-        n.account_key = conn_dict['AccountKey']
-
-    # otherwise, simply try to retrieve the remaining variables from environment variables
-    if not n.account_name:
-        n.account_name = az_config.get('storage', 'account', None)
-    if not n.account_key:
-        n.account_key = az_config.get('storage', 'key', None)
-    if not n.sas_token:
-        n.sas_token = az_config.get('storage', 'sas_token', None)
-
-    # strip the '?' from sas token. the portal and command line are returns sas token in different
-    # forms
-    if n.sas_token:
-        n.sas_token = n.sas_token.lstrip('?')
-
-    # if account name is specified but no key, attempt to query
-    if n.account_name and not n.account_key and not n.sas_token:
-        n.account_key = query_account_key(n.account_name)
-
+from ._validators import validate_client_parameters
 
 def cli_storage_data_plane_command(name, operation, client_factory,  # pylint: disable=too-many-arguments
                                    transform=None, table_transformer=None, exception_handler=None):

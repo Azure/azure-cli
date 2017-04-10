@@ -14,7 +14,6 @@ from azure.cli.core._config import az_config
 from azure.cli.core.commands.validators import validate_key_value_pairs
 
 
-from azure.storage.blob import PublicAccess
 from azure.storage.blob.baseblobservice import BaseBlobService
 from azure.storage.blob.models import ContentSettings as BlobContentSettings, BlobPermissions
 from azure.storage.file import FileService
@@ -470,11 +469,9 @@ def table_permission_validator(namespace):
             raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
         namespace.permission = TablePermissions(_str=namespace.permission)
 
-
-public_access_types = {'off': None, 'blob': PublicAccess.Blob, 'container': PublicAccess.Container}
-
-
 def validate_public_access(namespace):
+    from ._params import public_access_types
+
     if namespace.public_access:
         namespace.public_access = public_access_types[namespace.public_access.lower()]
 
