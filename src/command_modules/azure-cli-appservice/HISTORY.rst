@@ -3,6 +3,12 @@
 Release History
 ===============
 
+unreleased
+++++++++
+
+* functionapp: adding CRUD operations for Azure Functions with plan provided
+
+
 0.1.2 (2017-04-03)
 ++++++++++++++++++++
 
