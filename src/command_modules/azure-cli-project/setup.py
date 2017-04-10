@@ -31,6 +31,7 @@ DEPENDENCIES = [
     'scp',
     'sshtunnel',
     'six',
+    'azure-mgmt-servicebus'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
