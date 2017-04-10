@@ -31,7 +31,7 @@ from ._params import web_client_factory, _generic_site_operation
 
 logger = azlogging.get_az_logger(__name__)
 
-# pylint:disable=no-member,superfluous-parens,unused-argument
+# pylint:disable=no-member,superfluous-parens
 
 
 class AppServiceLongRunningOperation(LongRunningOperation):  # pylint: disable=too-few-public-methods
@@ -107,19 +107,19 @@ def _rename_server_farm_props(webapp):
     return webapp
 
 
-def delete_webapp(resource_group_name, name, slot=None, app_instance=None):
+def delete_webapp(resource_group_name, name, slot=None):
     return _generic_site_operation(resource_group_name, name, 'delete', slot)
 
 
-def stop_webapp(resource_group_name, name, slot=None, app_instance=None):
+def stop_webapp(resource_group_name, name, slot=None):
     return _generic_site_operation(resource_group_name, name, 'stop', slot)
 
 
-def start_webapp(resource_group_name, name, slot=None, app_instance=None):
+def start_webapp(resource_group_name, name, slot=None):
     return _generic_site_operation(resource_group_name, name, 'start', slot)
 
 
-def restart_webapp(resource_group_name, name, slot=None, app_instance=None):
+def restart_webapp(resource_group_name, name, slot=None):
     return _generic_site_operation(resource_group_name, name, 'restart', slot)
 
 

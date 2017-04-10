@@ -50,6 +50,8 @@ webapp_name_arg_type = CliArgumentType(configured_default='web', options_list=('
 # work on function app and webapp ones work on web app
 register_cli_argument('appservice web', 'app_instance', ignore_type)
 register_cli_argument('functionapp', 'app_instance', ignore_type)
+
+# function app doesn't have slot support
 register_cli_argument('functionapp', 'slot', ignore_type)
 
 register_cli_argument('appservice', 'resource_group_name', arg_type=resource_group_name_type)
@@ -68,9 +70,6 @@ register_cli_argument('appservice plan', 'admin_site_name', help='The name of th
 
 register_cli_argument('appservice web', 'slot', options_list=('--slot', '-s'), help="the name of the slot. Default to the productions slot if not specified")
 register_cli_argument('appservice web', 'name', arg_type=webapp_name_arg_type)
-
-for scope in ['start', 'show', 'restart', 'delete', 'stop']:
-    register_cli_argument('appservice web ' + scope, 'name', arg_type=webapp_name_arg_type, validator=validate_existing_web_app)
 
 register_cli_argument('appservice web create', 'new_app_name', options_list=('--name', '-n'), help='name of the new webapp')
 register_cli_argument('appservice web create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
@@ -157,10 +156,13 @@ register_cli_argument('appservice web source-control', 'branch', help='the branc
 register_cli_argument('appservice web source-control', 'repository_type', help='repository type', default='git', **enum_choice_list(['git', 'mercurial']))
 register_cli_argument('appservice web source-control', 'git_token', help='git access token required for auto sync')
 
-register_cli_argument('functionapp', 'name', arg_type=name_arg_type, id_part='name', help='name of the function app',
-                      validator=validate_existing_function_app)
+register_cli_argument('functionapp', 'name', arg_type=name_arg_type, id_part='name', help='name of the function app')
 register_cli_argument('functionapp create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                       help="name or resource id of the function app service plan. Use 'appservice plan create' to get one")
 register_cli_argument('functionapp create', 'new_app_name', options_list=('--name', '-n'), help='name of the new function app')
 register_cli_argument('functionapp create', 'storage_account', options_list=('--storage-account', '-s'),
                       help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
+
+# For commands with shared impl between webapp and functionapp and has output, we apply type validation to avoid confusions
+register_cli_argument('appservice web show', 'name', arg_type=webapp_name_arg_type, validator=validate_existing_web_app)
+register_cli_argument('functionapp show', 'name', arg_type=name_arg_type, validator=validate_existing_function_app)
