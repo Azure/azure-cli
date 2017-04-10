@@ -76,10 +76,10 @@ def verify_packages():
         build_package(path, built_packages_dir)
 
     # TODO Remove this when package released and merging to master
-    exec_command('python -m pip install git+https://github.com/Azure/azure-sdk-for-python.git@azurestack#egg=azure-mgmt-storage&subdirectory=azure-mgmt-storage')
-    exec_command('python -m pip install git+https://github.com/Azure/azure-sdk-for-python.git@azurestack#egg=azure-mgmt-compute&subdirectory=azure-mgmt-compute')
-    exec_command('python -m pip install git+https://github.com/Azure/azure-sdk-for-python.git@azurestack#egg=azure-mgmt-resource&subdirectory=azure-mgmt-resource')
-    exec_command('python -m pip install git+https://github.com/Azure/azure-sdk-for-python.git@azurestack#egg=azure-mgmt-network&subdirectory=azure-mgmt-network')
+    exec_command('python -m pip install git+https://github.com/Azure/azure-sdk-for-python.git@master#egg=azure-mgmt-storage&subdirectory=azure-mgmt-storage')
+    exec_command('python -m pip install git+https://github.com/Azure/azure-sdk-for-python.git@master#egg=azure-mgmt-compute&subdirectory=azure-mgmt-compute')
+    exec_command('python -m pip install git+https://github.com/Azure/azure-sdk-for-python.git@master#egg=azure-mgmt-resource&subdirectory=azure-mgmt-resource')
+    exec_command('python -m pip install git+https://github.com/Azure/azure-sdk-for-python.git@master#egg=azure-mgmt-network&subdirectory=azure-mgmt-network')
 
     # STEP 2:: Install the CLI and dependencies
     azure_cli_modules_path = next(path for name, path in all_modules if name == 'azure-cli')
