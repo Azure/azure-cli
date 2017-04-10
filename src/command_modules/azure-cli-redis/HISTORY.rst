@@ -3,6 +3,8 @@
 Release History
 ===============
 
+* Adding ability to scale for redis cache
+
 0.1.1b3 (2017-02-22)
 ++++++++++++++++++++
 
