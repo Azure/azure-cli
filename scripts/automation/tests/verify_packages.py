@@ -76,6 +76,7 @@ def verify_packages():
         build_package(path, built_packages_dir)
 
     # TODO Remove this when package released and merging to master
+    exec_command('python -m pip install git+https://github.com/Azure/azure-sdk-for-python.git@master#egg=azure-common&subdirectory=azure-common')
     exec_command('python -m pip install git+https://github.com/Azure/azure-sdk-for-python.git@master#egg=azure-mgmt-storage&subdirectory=azure-mgmt-storage')
     exec_command('python -m pip install git+https://github.com/Azure/azure-sdk-for-python.git@master#egg=azure-mgmt-compute&subdirectory=azure-mgmt-compute')
     exec_command('python -m pip install git+https://github.com/Azure/azure-sdk-for-python.git@master#egg=azure-mgmt-resource&subdirectory=azure-mgmt-resource')
