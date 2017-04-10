@@ -851,6 +851,7 @@ def _stream_trace(streaming_url, user_name, password):
 def upload_ssl_cert(resource_group_name, name, certificate_password, certificate_file):
     client = web_client_factory()
     webapp = _generic_site_operation(resource_group_name, name, 'get')
+    cert_resource_group_name = parse_resource_id(webapp.server_farm_id)['resource_group']
     cert_file = open(certificate_file, 'rb')
     cert_contents = cert_file.read()
     hosting_environment_profile_param = webapp.hosting_environment_profile
@@ -859,10 +860,10 @@ def upload_ssl_cert(resource_group_name, name, certificate_password, certificate
 
     thumb_print = _get_cert(certificate_password, certificate_file)
     cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
-                                    webapp.location, resource_group_name)
+                                    webapp.location, cert_resource_group_name)
     cert = Certificate(password=certificate_password, pfx_blob=cert_contents,
                        location=webapp.location)
-    return client.certificates.create_or_update(resource_group_name, cert_name, cert)
+    return client.certificates.create_or_update(cert_resource_group_name, cert_name, cert)
 
 
 def _generate_cert_name(thumb_print, hosting_environment, location, resource_group_name):
@@ -907,7 +908,8 @@ def _update_host_name_ssl_state(resource_group_name, webapp_name, location,
 def _update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
     client = web_client_factory()
     webapp = client.web_apps.get(resource_group_name, name)
-    webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
+    cert_resource_group_name = parse_resource_id(webapp.server_farm_id)['resource_group']
+    webapp_certs = client.certificates.list_by_resource_group(cert_resource_group_name)
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
             if len(webapp_cert.host_names) == 1 and not webapp_cert.host_names[0].startswith('*'):
