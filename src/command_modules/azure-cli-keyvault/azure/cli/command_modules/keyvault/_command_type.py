@@ -6,8 +6,6 @@
 import base64
 from six import string_types
 
-import adal
-
 from azure.cli.core.commands import (command_table,
                                      command_module_map,
                                      CliCommand,
@@ -56,6 +54,7 @@ def _create_key_vault_command(module_name, name, operation, transform_result, ta
         try:
 
             def get_token(server, resource, scope): # pylint: disable=unused-argument
+                import adal
                 try:
                     return Profile().get_login_credentials(resource)[0]._token_retriever() # pylint: disable=protected-access
                 except adal.AdalError as err:

@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import requests
-from adal.adal_error import AdalError
 from azure.cli.core.prompting import prompt_pass, NoTTYException
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._profile import Profile
@@ -58,6 +56,8 @@ def account_clear():
 
 def login(username=None, password=None, service_principal=None, tenant=None):
     """Log in to access Azure subscriptions"""
+    from adal.adal_error import AdalError
+    import requests
     interactive = False
 
     if username:

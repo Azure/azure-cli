@@ -95,8 +95,8 @@ class HelpTest(unittest.TestCase):
         command.add_argument('b', '-b', required=False, choices=['a', 'b', 'c'])
         cmd_table = {'n1': command}
 
-        config = Configuration([])
-        config.get_command_table = lambda: cmd_table
+        config = Configuration()
+        config.get_command_table = lambda argv: cmd_table
         app = Application()
         app.initialize(config)
         with self.assertRaises(SystemExit):
@@ -112,8 +112,8 @@ class HelpTest(unittest.TestCase):
         command.add_argument('b', '-b', required=False)
         cmd_table = {'n1': command}
 
-        config = Configuration([])
-        config.get_command_table = lambda: cmd_table
+        config = Configuration()
+        config.get_command_table = lambda argv: cmd_table
         app = Application()
         app.initialize(config)
         with self.assertRaises(SystemExit):
@@ -132,8 +132,8 @@ class HelpTest(unittest.TestCase):
         command.add_argument('b', '-b', required=False)
         cmd_table = {'n1': command}
 
-        config = Configuration([])
-        config.get_command_table = lambda: cmd_table
+        config = Configuration()
+        config.get_command_table = lambda argv: cmd_table
         app = Application(config)
 
         with self.assertRaises(SystemExit):
@@ -151,8 +151,8 @@ class HelpTest(unittest.TestCase):
         command.help = 'long description'
         cmd_table = {'n1': command}
 
-        config = Configuration([])
-        config.get_command_table = lambda: cmd_table
+        config = Configuration()
+        config.get_command_table = lambda argv: cmd_table
         app = Application(config)
 
         with self.assertRaises(SystemExit):
@@ -175,7 +175,7 @@ class HelpTest(unittest.TestCase):
         cli_command(None, 'test', '{}#{}'.format(__name__, test_handler.__name__))
         _update_command_definitions(command_table)
 
-        config = Configuration([])
+        config = Configuration()
         app = Application(config)
 
         with self.assertRaises(SystemExit):
@@ -194,8 +194,8 @@ class HelpTest(unittest.TestCase):
         command.help = 'long description'
         cmd_table = {'n1': command}
 
-        config = Configuration([])
-        config.get_command_table = lambda: cmd_table
+        config = Configuration()
+        config.get_command_table = lambda argv: cmd_table
         app = Application(config)
 
         with self.assertRaises(SystemExit):
@@ -214,8 +214,8 @@ class HelpTest(unittest.TestCase):
         command.help = 'short-summary: docstring summary'
         cmd_table = {'n1': command}
 
-        config = Configuration([])
-        config.get_command_table = lambda: cmd_table
+        config = Configuration()
+        config.get_command_table = lambda args: cmd_table
         app = Application(config)
 
         with self.assertRaises(SystemExit):
@@ -237,8 +237,8 @@ class HelpTest(unittest.TestCase):
             """
         cmd_table = {'n1': command}
 
-        config = Configuration([])
-        config.get_command_table = lambda: cmd_table
+        config = Configuration()
+        config.get_command_table = lambda argv: cmd_table
         app = Application(config)
 
         with self.assertRaises(SystemExit):
@@ -250,7 +250,7 @@ class HelpTest(unittest.TestCase):
     @redirect_io
     @mock.patch('azure.cli.core.application.Application.register', return_value=None)
     def test_help_params_documentations(self, _):
-        app = Application(Configuration([]))
+        app = Application(Configuration())
 
         def test_handler():
             pass
@@ -277,8 +277,8 @@ class HelpTest(unittest.TestCase):
             """
         cmd_table = {'n1': command}
 
-        config = Configuration([])
-        config.get_command_table = lambda: cmd_table
+        config = Configuration()
+        config.get_command_table = lambda argv: cmd_table
         app = Application(config)
 
         with self.assertRaises(SystemExit):
@@ -302,7 +302,7 @@ Global Arguments
     @redirect_io
     @mock.patch('azure.cli.core.application.Application.register', return_value=None)
     def test_help_full_documentations(self, _):
-        app = Application(Configuration([]))
+        app = Application(Configuration())
 
         def test_handler():
             pass
@@ -335,8 +335,8 @@ Global Arguments
             """
         cmd_table = {'n1': command}
 
-        config = Configuration([])
-        config.get_command_table = lambda: cmd_table
+        config = Configuration()
+        config.get_command_table = lambda args: cmd_table
         app = Application(config)
 
         with self.assertRaises(SystemExit):
@@ -365,7 +365,7 @@ Examples
     @redirect_io
     @mock.patch('azure.cli.core.application.Application.register', return_value=None)
     def test_help_with_param_specified(self, _):
-        app = Application(Configuration([]))
+        app = Application(Configuration())
 
         def test_handler():
             pass
@@ -375,8 +375,8 @@ Examples
         command.add_argument('b', '-b', required=False)
         cmd_table = {'n1': command}
 
-        config = Configuration([])
-        config.get_command_table = lambda: cmd_table
+        config = Configuration()
+        config.get_command_table = lambda argv: cmd_table
         app = Application(config)
 
         with self.assertRaises(SystemExit):
@@ -398,7 +398,7 @@ Global Arguments
 
     @redirect_io
     def test_help_group_children(self):
-        app = Application(Configuration([]))
+        app = Application(Configuration())
 
         def test_handler():
             pass
@@ -416,8 +416,8 @@ Global Arguments
 
         cmd_table = {'group1 group3 n1': command, 'group1 group2 n1': command2}
 
-        config = Configuration([])
-        config.get_command_table = lambda: cmd_table
+        config = Configuration()
+        config.get_command_table = lambda argv: cmd_table
         app = Application(config)
 
         with self.assertRaises(SystemExit):
@@ -427,7 +427,7 @@ Global Arguments
 
     @redirect_io
     def test_help_extra_missing_params(self):
-        app = Application(Configuration([]))
+        app = Application(Configuration())
 
         def test_handler(foobar2, foobar=None):  # pylint: disable=unused-argument
             pass
@@ -437,8 +437,8 @@ Global Arguments
         command.add_argument('foobar2', '--foobar2', '-fb2', required=True)
         cmd_table = {'n1': command}
 
-        config = Configuration([])
-        config.get_command_table = lambda: cmd_table
+        config = Configuration()
+        config.get_command_table = lambda args: cmd_table
         app = Application(config)
 
         # work around an argparse behavior where output is not printed and SystemExit
@@ -466,7 +466,7 @@ Global Arguments
 
     @redirect_io
     def test_help_group_help(self):
-        app = Application(Configuration([]))
+        app = Application(Configuration())
 
         def test_handler():
             pass
@@ -510,8 +510,8 @@ Global Arguments
         """
         cmd_table = {'test_group1 test_group2 n1': command}
 
-        config = Configuration([])
-        config.get_command_table = lambda: cmd_table
+        config = Configuration()
+        config.get_command_table = lambda argv: cmd_table
         app = Application(config)
 
         with self.assertRaises(SystemExit):
@@ -564,8 +564,8 @@ Examples
         """
         cmd_table = {'n1': command}
 
-        config = Configuration([])
-        config.get_command_table = lambda: cmd_table
+        config = Configuration()
+        config.get_command_table = lambda args: cmd_table
         app = Application(config)
 
         with self.assertRaises(SystemExit):
@@ -590,6 +590,7 @@ Global Arguments
 
     def test_help_loads(self):
         app = Application()
+        app.initialize(Configuration())
         with mock.patch('azure.cli.core.commands.arm.APPLICATION', app):
             from azure.cli.core.commands.arm import add_id_parameters
             parser_dict = {}

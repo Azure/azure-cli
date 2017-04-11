@@ -6,25 +6,15 @@
 import argparse
 import os
 import re
-from collections import OrderedDict
 from datetime import datetime, timedelta
 
-from azure.cli.core._config import az_config
-from azure.cli.core._profile import CLOUD
 from azure.cli.core.util import CLIError
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core._profile import CLOUD
+from azure.cli.core._config import az_config
 from azure.cli.core.commands.validators import validate_key_value_pairs
-from azure.mgmt.storage import StorageManagementClient
-from azure.storage.sharedaccesssignature import SharedAccessSignature
-from azure.storage.blob import Include, PublicAccess
-from azure.storage.blob.baseblobservice import BaseBlobService
-from azure.storage.blob.models import ContentSettings as BlobContentSettings, BlobPermissions
-from azure.storage.file import FileService
-from azure.storage.file.models import ContentSettings as FileContentSettings
-from azure.storage.models import ResourceTypes, Services
-from azure.storage.table import TablePermissions, TablePayloadFormat
 
-from ._factory import get_storage_data_service_client
+
+from ._factory import get_storage_data_service_client, storage_client_factory
 from .util import glob_files_locally
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
@@ -33,7 +23,7 @@ storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 # Utilities
 
 def _query_account_key(account_name):
-    scf = get_mgmt_service_client(StorageManagementClient)
+    scf = storage_client_factory()
     acc = next((x for x in scf.storage_accounts.list() if x.name == account_name), None)
     if acc:
         from azure.cli.core.commands.arm import parse_resource_id
@@ -44,6 +34,8 @@ def _query_account_key(account_name):
 
 
 def _create_short_lived_blob_sas(account_name, account_key, container, blob):
+    from azure.storage.sharedaccesssignature import SharedAccessSignature
+    from azure.storage.blob.models import BlobPermissions
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     sas = SharedAccessSignature(account_name, account_key)
     return sas.generate_blob(container, blob, permission=BlobPermissions(read=True), expiry=expiry,
@@ -51,6 +43,8 @@ def _create_short_lived_blob_sas(account_name, account_key, container, blob):
 
 
 def _create_short_lived_file_sas(account_name, account_key, share, directory_name, file_name):
+    from azure.storage.sharedaccesssignature import SharedAccessSignature
+    from azure.storage.blob.models import BlobPermissions
     # if dir is empty string change it to None
     directory_name = directory_name if directory_name else None
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -62,6 +56,7 @@ def _create_short_lived_file_sas(account_name, account_key, share, directory_nam
 # region PARAMETER VALIDATORS
 
 def validate_accept(namespace):
+    from azure.storage.table import TablePayloadFormat
     if namespace.accept:
         formats = {
             'none': TablePayloadFormat.JSON_NO_METADATA,
@@ -295,6 +290,10 @@ def get_content_setting_validator(settings_class, update):
         return class_type.__module__ + "." + class_type.__class__.__name__
 
     def validator(namespace):
+        from azure.storage.blob.baseblobservice import BaseBlobService
+        from azure.storage.file.models import ContentSettings as FileContentSettings
+        from azure.storage.blob.models import ContentSettings as BlobContentSettings
+        from azure.storage.file import FileService
         # must run certain validators first for an update
         if update:
             validate_client_parameters(namespace)
@@ -429,6 +428,7 @@ def validate_included_datasets(namespace):
         if set(include) - set('cms'):
             help_string = '(c)opy-info (m)etadata (s)napshots'
             raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
+        from azure.storage.blob import Include
         namespace.include = Include('s' in include, 'm' in include, False, 'c' in include)
 
 
@@ -463,6 +463,7 @@ def get_permission_validator(permission_class):
 
 def table_permission_validator(namespace):
     """ A special case for table because the SDK associates the QUERY permission with 'r' """
+    from azure.storage.table import TablePermissions
     if namespace.permission:
         if set(namespace.permission) - set('raud'):
             help_string = '(r)ead/query (a)dd (u)pdate (d)elete'
@@ -470,10 +471,10 @@ def table_permission_validator(namespace):
         namespace.permission = TablePermissions(_str=namespace.permission)
 
 
-public_access_types = {'off': None, 'blob': PublicAccess.Blob, 'container': PublicAccess.Container}
-
-
 def validate_public_access(namespace):
+    from azure.storage.blob.baseblobservice import BaseBlobService
+    from ._params import public_access_types
+
     if namespace.public_access:
         namespace.public_access = public_access_types[namespace.public_access.lower()]
 
@@ -504,6 +505,7 @@ def get_source_file_or_blob_service_client(namespace):
     indicates that user want to copy files or blobs in the same storage account, therefore the
     destination client will be set None hence the command will use destination client.
     """
+    from azure.storage.file import FileService
     usage_string = 'invalid usage: supply only one of the following argument sets:' + \
                    '\n\t   --source-uri' + \
                    '\n\tOR --source-container' + \
@@ -775,6 +777,7 @@ def ipv4_range_type(string):
 def resource_type_type(string):
     ''' Validates that resource types string contains only a combination
     of (s)ervice, (c)ontainer, (o)bject '''
+    from azure.storage.models import ResourceTypes
     if set(string) - set("sco"):
         raise ValueError
     return ResourceTypes(_str=''.join(set(string)))
@@ -783,111 +786,9 @@ def resource_type_type(string):
 def services_type(string):
     ''' Validates that services string contains only a combination
     of (b)lob, (q)ueue, (t)able, (f)ile '''
+    from azure.storage.models import Services
     if set(string) - set("bqtf"):
         raise ValueError
     return Services(_str=''.join(set(string)))
-
-# endregion
-
-# region TRANSFORMS
-
-
-def transform_acl_list_output(result):
-    """ Transform to convert SDK output into a form that is more readily
-    usable by the CLI and tools such as jpterm. """
-    new_result = []
-    for key in sorted(result.keys()):
-        new_entry = OrderedDict()
-        new_entry['Name'] = key
-        new_entry['Start'] = result[key]['start']
-        new_entry['Expiry'] = result[key]['expiry']
-        new_entry['Permissions'] = result[key]['permission']
-        new_result.append(new_entry)
-    return new_result
-
-
-def transform_container_permission_output(result):
-    return {'publicAccess': result.public_access or 'off'}
-
-
-def transform_cors_list_output(result):
-    new_result = []
-    for service in sorted(result.keys()):
-        service_name = service
-        for i, rule in enumerate(result[service]):
-            new_entry = OrderedDict()
-            new_entry['Service'] = service_name
-            service_name = ''
-            new_entry['Rule'] = i + 1
-
-            new_entry['AllowedMethods'] = ', '.join((x for x in rule.allowed_methods))
-            new_entry['AllowedOrigins'] = ', '.join((x for x in rule.allowed_origins))
-            new_entry['ExposedHeaders'] = ', '.join((x for x in rule.exposed_headers))
-            new_entry['AllowedHeaders'] = ', '.join((x for x in rule.allowed_headers))
-            new_entry['MaxAgeInSeconds'] = rule.max_age_in_seconds
-            new_result.append(new_entry)
-    return new_result
-
-
-def transform_entity_query_output(result):
-    new_results = []
-    ignored_keys = ['etag', 'Timestamp', 'RowKey', 'PartitionKey']
-    for row in result['items']:
-        new_entry = OrderedDict()
-        new_entry['PartitionKey'] = row['PartitionKey']
-        new_entry['RowKey'] = row['RowKey']
-        other_keys = sorted([x for x in row.keys() if x not in ignored_keys])
-        for key in other_keys:
-            new_entry[key] = row[key]
-        new_results.append(new_entry)
-    return new_results
-
-
-def transform_logging_list_output(result):
-    new_result = []
-    for key in sorted(result.keys()):
-        new_entry = OrderedDict()
-        new_entry['Service'] = key
-        new_entry['Read'] = str(result[key]['read'])
-        new_entry['Write'] = str(result[key]['write'])
-        new_entry['Delete'] = str(result[key]['delete'])
-        new_entry['RetentionPolicy'] = str(result[key]['retentionPolicy']['days'])
-        new_result.append(new_entry)
-    return new_result
-
-
-def transform_metrics_list_output(result):
-    new_result = []
-    for service in sorted(result.keys()):
-        service_name = service
-        for interval in sorted(result[service].keys()):
-            item = result[service][interval]
-            new_entry = OrderedDict()
-            new_entry['Service'] = service_name
-            service_name = ''
-            new_entry['Interval'] = str(interval)
-            new_entry['Enabled'] = str(item['enabled'])
-            new_entry['IncludeApis'] = str(item['includeApis'])
-            new_entry['RetentionPolicy'] = str(item['retentionPolicy']['days'])
-            new_result.append(new_entry)
-    return new_result
-
-
-def create_boolean_result_output_transformer(property_name):
-    def _transformer(result):
-        return {property_name: result}
-
-    return _transformer
-
-
-def transform_storage_list_output(result):
-    return list(result)
-
-
-def transform_url(result):
-    """ Ensures the resulting URL string does not contain extra / characters """
-    result = re.sub('//', '/', result)
-    result = re.sub('/', '//', result, count=1)
-    return result
 
 # endregion

@@ -1,0 +1,110 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
+from collections import OrderedDict
+import re
+
+storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
+
+
+def transform_acl_list_output(result):
+    """ Transform to convert SDK output into a form that is more readily
+    usable by the CLI and tools such as jpterm. """
+    new_result = []
+    for key in sorted(result.keys()):
+        new_entry = OrderedDict()
+        new_entry['Name'] = key
+        new_entry['Start'] = result[key]['start']
+        new_entry['Expiry'] = result[key]['expiry']
+        new_entry['Permissions'] = result[key]['permission']
+        new_result.append(new_entry)
+    return new_result
+
+
+def transform_container_permission_output(result):
+    return {'publicAccess': result.public_access or 'off'}
+
+
+def transform_cors_list_output(result):
+    new_result = []
+    for service in sorted(result.keys()):
+        service_name = service
+        for i, rule in enumerate(result[service]):
+            new_entry = OrderedDict()
+            new_entry['Service'] = service_name
+            service_name = ''
+            new_entry['Rule'] = i + 1
+
+            new_entry['AllowedMethods'] = ', '.join((x for x in rule.allowed_methods))
+            new_entry['AllowedOrigins'] = ', '.join((x for x in rule.allowed_origins))
+            new_entry['ExposedHeaders'] = ', '.join((x for x in rule.exposed_headers))
+            new_entry['AllowedHeaders'] = ', '.join((x for x in rule.allowed_headers))
+            new_entry['MaxAgeInSeconds'] = rule.max_age_in_seconds
+            new_result.append(new_entry)
+    return new_result
+
+
+def transform_entity_query_output(result):
+    new_results = []
+    ignored_keys = ['etag', 'Timestamp', 'RowKey', 'PartitionKey']
+    for row in result['items']:
+        new_entry = OrderedDict()
+        new_entry['PartitionKey'] = row['PartitionKey']
+        new_entry['RowKey'] = row['RowKey']
+        other_keys = sorted([x for x in row.keys() if x not in ignored_keys])
+        for key in other_keys:
+            new_entry[key] = row[key]
+        new_results.append(new_entry)
+    return new_results
+
+
+def transform_logging_list_output(result):
+    new_result = []
+    for key in sorted(result.keys()):
+        new_entry = OrderedDict()
+        new_entry['Service'] = key
+        new_entry['Read'] = str(result[key]['read'])
+        new_entry['Write'] = str(result[key]['write'])
+        new_entry['Delete'] = str(result[key]['delete'])
+        new_entry['RetentionPolicy'] = str(result[key]['retentionPolicy']['days'])
+        new_result.append(new_entry)
+    return new_result
+
+
+def transform_metrics_list_output(result):
+    new_result = []
+    for service in sorted(result.keys()):
+        service_name = service
+        for interval in sorted(result[service].keys()):
+            item = result[service][interval]
+            new_entry = OrderedDict()
+            new_entry['Service'] = service_name
+            service_name = ''
+            new_entry['Interval'] = str(interval)
+            new_entry['Enabled'] = str(item['enabled'])
+            new_entry['IncludeApis'] = str(item['includeApis'])
+            new_entry['RetentionPolicy'] = str(item['retentionPolicy']['days'])
+            new_result.append(new_entry)
+    return new_result
+
+
+def create_boolean_result_output_transformer(property_name):
+    def _transformer(result):
+        return {property_name: result}
+
+    return _transformer
+
+
+def transform_storage_list_output(result):
+    return list(result)
+
+
+def transform_url(result):
+    """ Ensures the resulting URL string does not contain extra / characters """
+    result = re.sub('//', '/', result)
+    result = re.sub('/', '//', result, count=1)
+    return result
+
+# endregion

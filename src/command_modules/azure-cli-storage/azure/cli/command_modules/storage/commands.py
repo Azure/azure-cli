@@ -19,7 +19,7 @@ from azure.cli.command_modules.storage._format import \
      transform_message_show,
      transform_boolean_for_table,
      transform_file_directory_result)
-from azure.cli.command_modules.storage._validators import \
+from azure.cli.command_modules.storage._transformers import \
     (transform_acl_list_output, transform_cors_list_output, transform_entity_query_output,
      transform_logging_list_output, transform_metrics_list_output,
      transform_url, transform_storage_list_output, transform_container_permission_output,

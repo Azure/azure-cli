@@ -17,7 +17,7 @@ from azure.cli.core.commands import register_cli_argument, register_extra_cli_ar
 from azure.common import AzureMissingResourceHttpError
 from azure.mgmt.storage.models import SkuName, AccessTier, Kind, EncryptionServices
 from azure.storage.models import AccountPermissions
-from azure.storage.blob import DeleteSnapshot, BlockBlobService, PageBlobService, AppendBlobService
+from azure.storage.blob import DeleteSnapshot, BlockBlobService, PageBlobService, AppendBlobService, PublicAccess
 from azure.storage.blob.baseblobservice import BaseBlobService
 from azure.storage.blob.models import ContentSettings as BlobContentSettings, ContainerPermissions, BlobPermissions
 from azure.storage.file import FileService
@@ -26,13 +26,14 @@ from azure.storage.table import TableService, TablePayloadFormat
 from azure.storage.queue import QueueService
 from azure.storage.queue.models import QueuePermissions
 
+
 from ._factory import get_storage_data_service_client
 from ._validators import \
     (get_datetime_type, get_file_path_validator, validate_metadata,
      get_permission_validator, table_permission_validator, get_permission_help_string,
      resource_type_type, services_type, ipv4_range_type, validate_entity,
      validate_select, validate_source_uri, validate_blob_type, validate_included_datasets,
-     validate_custom_domain, validate_public_access, public_access_types,
+     validate_custom_domain, validate_public_access,
      process_blob_upload_batch_parameters, process_blob_download_batch_parameters,
      process_file_upload_batch_parameters, process_file_download_batch_parameters,
      get_content_setting_validator, validate_encryption, validate_accept,
@@ -42,6 +43,8 @@ from ._validators import \
      get_source_file_or_blob_service_client, process_blob_source_uri)
 
 # UTILITY
+
+public_access_types = {'off': None, 'blob': PublicAccess.Blob, 'container': PublicAccess.Container}
 
 
 class CommandContext(object):
