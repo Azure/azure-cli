@@ -4,11 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import tempfile
-import unittest
-
-from azure.cli.core.test_utils.vcr_test_base import ResourceGroupVCRTestBase, JMESPathCheck
 
 # pylint: disable=line-too-long
+from azure.cli.core.test_utils.vcr_test_base import ResourceGroupVCRTestBase, JMESPathCheck, NoneCheck
 
 
 class AzureContainerServiceScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
@@ -32,14 +30,9 @@ class AzureContainerServiceScenarioTest(ResourceGroupVCRTestBase):  # pylint: di
 
         # create
         pathname = pathname.replace('\\', '\\\\')
-        print('acs create -g {} -n {} --dns-prefix {} --ssh-key-value {}'.format(
-            self.resource_group, acs_name, dns_prefix, pathname))
-        self.cmd('acs create -g {} -n {} --dns-prefix {} --ssh-key-value {}'.format(
-            self.resource_group, acs_name, dns_prefix, pathname), checks=[
-            JMESPathCheck('properties.outputs.masterFQDN.value',
-                          '{}mgmt.{}.cloudapp.azure.com'.format(dns_prefix, self.location)),
-            JMESPathCheck('properties.outputs.agentFQDN.value',
-                          '{}agents.{}.cloudapp.azure.com'.format(dns_prefix, self.location))
+        self.cmd('acs create -g {} -n {} --dns-prefix {} --ssh-key-value {}'.format(self.resource_group, acs_name, dns_prefix, pathname), checks=[
+            JMESPathCheck('properties.outputs.masterFQDN.value', '{}mgmt.{}.cloudapp.azure.com'.format(dns_prefix, self.location)),
+            JMESPathCheck('properties.outputs.agentFQDN.value', '{}agents.{}.cloudapp.azure.com'.format(dns_prefix, self.location))
         ])
 
         # show
@@ -59,3 +52,30 @@ class AzureContainerServiceScenarioTest(ResourceGroupVCRTestBase):  # pylint: di
         self.cmd('acs show -g {} -n {}'.format(self.resource_group, acs_name), checks=[
             JMESPathCheck('agentPoolProfiles[0].count', 5),
         ])
+
+
+class KubernetesScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
+
+    def __init__(self, test_method):
+        # using 'random_tag_format' override to ensure the RG doesn't contain '_' which otherwise would derive
+        # an invalid dns lable name
+        super(KubernetesScenarioTest, self).__init__(__file__, test_method, resource_group='acstest',
+                                                     random_tag_format='{}')
+        self.sp_name = 'http://cliTestRgAcs2'
+        self.sp_secret = 'verySecret'
+
+    def set_up(self):
+        self.cmd('ad sp create-for-rbac -n {} --password {} --skip-assignment'.format(self.sp_name, self.sp_secret))
+        return super().set_up()
+
+    def tear_down(self):
+        self.cmd('ad app delete --id {}'.format(self.sp_name), checks=NoneCheck())
+        return super().tear_down()
+
+    def test_kubernetes_create(self):
+        self.execute()
+
+    def body(self):
+        acs_name = 'kuberacstest'
+        self.cmd('acs create -g {} -n {} --orchestrator-type Kubernetes --service-principal {} --client-secret {}'.format(
+            self.resource_group, acs_name, self.sp_name, self.sp_secret), checks=[JMESPathCheck('properties.provisioningState', 'Succeeded')])
