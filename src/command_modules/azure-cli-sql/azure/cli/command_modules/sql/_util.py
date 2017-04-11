@@ -3,11 +3,21 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-
 def get_sql_management_client(_):
-    from azure.mgmt.sql import SqlManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(SqlManagementClient)
+    from azure.cli.core._profile import Profile, CLOUD
+    from azure.mgmt.sql import SqlManagementClient
+    from msrest.authentication import Authentication
+    from os import getenv
+
+    sql_rm_override = getenv('_AZURE_CLI_SQL_RM_URI')
+    if sql_rm_override:
+        return SqlManagementClient(
+            subscription_id=getenv('_AZURE_CLI_SQL_SUB_ID'),
+            base_url=sql_rm_override,
+            credentials=Authentication())
+    else:
+        return get_mgmt_service_client(SqlManagementClient)
 
 
 def get_sql_servers_operations(kwargs):
