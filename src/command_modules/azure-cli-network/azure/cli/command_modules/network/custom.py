@@ -1884,8 +1884,20 @@ def import_zone(resource_group_name, zone_name, file_name):
                 record = _build_record(entry)
                 record_set = record_sets.get(record_set_key, None)
                 if not record_set:
+
+                    # Workaround for issue #2824
+                    relative_record_set_name = record_set_name.rstrip('.')
+                    if not relative_record_set_name.endswith(origin):
+                        logger.warning(
+                            'Cannot import %s. Only records relative to origin may be '
+                            'imported at this time. Skipping...', relative_record_set_name)
+                        continue
+
+                    if record_set_type != 'soa' and relative_record_set_name != origin:
+                        relative_record_set_name = record_set_name[:-(len(origin) + 2)]
+
                     record_set = RecordSet(
-                        name=record_set_name.rstrip('.'), type=record_set_type, ttl=record_set_ttl)
+                        name=relative_record_set_name, type=record_set_type, ttl=record_set_ttl)
                     record_sets[record_set_key] = record_set
                 _add_record(record_set, record, record_set_type,
                             is_list=record_set_type.lower() not in ['soa', 'cname'])
