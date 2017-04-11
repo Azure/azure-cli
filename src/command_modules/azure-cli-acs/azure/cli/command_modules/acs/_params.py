@@ -74,6 +74,8 @@ register_extra_cli_argument('acs create', 'generate_ssh_keys', action='store_tru
 register_cli_argument('acs create', 'agent_vm_size', completer=get_vm_size_completion_list)
 
 register_cli_argument('acs create', 'windows', action='store_true', help='If true, deploy a windows container cluster.')
+register_cli_argument('acs create', 'validate', action='store_true', help='Generate and validate the ARM template without creating any resources')
+
 
 register_cli_argument('acs', 'disable_browser', help='Do not open browser after opening a proxy to the cluster web user interface')
 register_cli_argument('acs dcos browse', 'name', name_arg_type)

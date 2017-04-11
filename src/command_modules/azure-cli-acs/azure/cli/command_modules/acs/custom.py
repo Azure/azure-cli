@@ -31,8 +31,6 @@ from msrestazure.azure_exceptions import CloudError
 import azure.cli.core.azlogging as azlogging
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._actions import _is_valid_ssh_rsa_public_key
-from azure.cli.command_modules.acs.mgmt_acs.lib \
-    import AcsCreationClient as ACSClient
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,line-too-long
 from azure.cli.core.util import CLIError, shell_safe_json_parse
 from azure.cli.core._profile import Profile
@@ -49,6 +47,8 @@ from azure.mgmt.authorization.models import RoleAssignmentProperties
 from ._client_factory import (_auth_client_factory, _graph_client_factory)
 
 logger = azlogging.get_az_logger(__name__)
+
+# pylint:disable=too-many-lines
 
 
 def which(binary):
@@ -357,12 +357,12 @@ def _get_subscription_id():
     return sub_id
 
 
-def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None,
-               content_version=None, admin_username="azureuser", agent_count="3",
+def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None,  # pylint: disable=too-many-locals
+               admin_username="azureuser", agent_count="3",
                agent_vm_size="Standard_D2_v2", location=None, master_count="1",
                orchestrator_type="dcos", service_principal=None, client_secret=None, tags=None,
-               custom_headers=None, windows=False, admin_password="", raw=False,
-               **operation_config):  # pylint: disable=too-many-locals
+               windows=False, admin_password="", generate_ssh_keys=False,  # pylint: disable=unused-argument
+               validate=False, no_wait=False):
     """Create a new Acs.
     :param resource_group_name: The name of the resource group. The name
      is case insensitive.
@@ -409,7 +409,6 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
      and stored in ${HOME}/.azure/ directory.
     :param tags: Tags object.
     :type tags: object
-    :param dict custom_headers: headers that will be added to the request
     :param windows: If true, the cluster will be built for running Windows container.
     :type windows: bool
     :param admin_password: The adminstration password for Windows nodes. Only available if --windows=true
@@ -435,7 +434,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     register_providers()
     groups = _resource_client_factory().resource_groups
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
-    groups.get(resource_group_name)
+    rg = groups.get(resource_group_name)
 
     if orchestrator_type == 'Kubernetes' or orchestrator_type == 'kubernetes':
         # TODO: This really needs to be broken out and unit tested.
@@ -466,23 +465,22 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
             if not client_secret:
                 raise CLIError('--client-secret is required if --service-principal is specified')
             _validate_service_principal(client, service_principal)
+
         return _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name,
                                   ssh_key_value, admin_username=admin_username,
                                   agent_count=agent_count, agent_vm_size=agent_vm_size,
                                   location=location, service_principal=service_principal,
                                   client_secret=client_secret, master_count=master_count,
-                                  windows=windows, admin_password=admin_password)
+                                  windows=windows, admin_password=admin_password,
+                                  validate=validate, no_wait=no_wait)
+
     if windows:
         raise CLIError('--windows is only supported for Kubernetes clusters')
-
-    ops = get_mgmt_service_client(ACSClient).acs
-    return ops.create_or_update(resource_group_name, deployment_name, dns_name_prefix, name,
-                                ssh_key_value, content_version=content_version,
-                                admin_username=admin_username, agent_count=agent_count,
-                                agent_vm_size=agent_vm_size, location=location,
-                                master_count=master_count, orchestrator_type=orchestrator_type,
-                                tags=tags, custom_headers=custom_headers, raw=raw,
-                                operation_config=operation_config)
+    if location is None:
+        location = rg.location  # pylint:disable=no-member
+    return _create_non_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name,
+                                  ssh_key_value, admin_username, agent_count, agent_vm_size, location,
+                                  orchestrator_type, master_count, tags, validate, no_wait)
 
 
 def store_acs_service_principal(subscription_id, client_secret, service_principal,
@@ -526,8 +524,7 @@ def load_acs_service_principals(config_path):
 def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value,
                        admin_username="azureuser", agent_count="3", agent_vm_size="Standard_D2_v2",
                        location=None, service_principal=None, client_secret=None, master_count="1",
-                       windows=False, admin_password=''):
-    from azure.mgmt.resource.resources.models import DeploymentProperties
+                       windows=False, admin_password='', validate=False, no_wait=False):
     if not location:
         location = '[resourceGroup().location]'
     windows_profile = None
@@ -601,10 +598,82 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
             "value": client_secret
         }
     }
-    properties = DeploymentProperties(template=template, template_link=None,
-                                      parameters=params, mode='incremental')
-    smc = _resource_client_factory()
-    return smc.deployments.create_or_update(resource_group_name, deployment_name, properties)
+
+    return _invoke_deployment(resource_group_name, deployment_name, template, params, validate, no_wait)
+
+
+def _create_non_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name,
+                           ssh_key_value, admin_username, agent_count, agent_vm_size, location,
+                           orchestrator_type, master_count, tags, validate, no_wait):
+    template = {
+        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+        "contentVersion": "1.0.0.0",
+        "resources": [
+            {
+                "apiVersion": "2016-03-30",
+                "type": "Microsoft.ContainerService/containerServices",
+                "location": location,
+                "tags": tags,
+                "name": name,
+                "properties": {
+                    "orchestratorProfile": {
+                        "orchestratorType": orchestrator_type
+                    },
+                    "masterProfile": {
+                        "count": master_count,
+                        "dnsPrefix": dns_name_prefix + 'mgmt'
+                    },
+                    "agentPoolProfiles": [
+                        {
+                            "name": "agentpools",
+                            "count": agent_count,
+                            "vmSize": agent_vm_size,
+                            "dnsPrefix": dns_name_prefix + 'agents'
+                        }
+                    ],
+                    "linuxProfile": {
+                        "adminUsername": admin_username,
+                        "ssh": {
+                            "publicKeys": [
+                                {
+                                    "keyData": ssh_key_value
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        ],
+        "outputs": {
+            "masterFQDN": {
+                "type": "string",
+                "value": "[reference(concat('Microsoft.ContainerService/containerServices/', '{}')).masterProfile.fqdn]".format(name)
+            },
+            "sshMaster0": {
+                "type": "string",
+                "value": "[concat('ssh ', '{0}', '@', reference(concat('Microsoft.ContainerService/containerServices/', '{1}')).masterProfile.fqdn, ' -A -p 2200')]".format(admin_username, name)
+            },
+            "agentFQDN": {
+                "type": "string",
+                "value": "[reference(concat('Microsoft.ContainerService/containerServices/', '{}')).agentPoolProfiles[0].fqdn]".format(name)
+            }
+        }
+    }
+    return _invoke_deployment(resource_group_name, deployment_name, template, {}, validate, no_wait)
+
+
+def _invoke_deployment(resource_group_name, deployment_name, template, parameters, validate, no_wait):
+    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource.resources.models import DeploymentProperties
+
+    properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
+    smc = get_mgmt_service_client(ResourceManagementClient).deployments
+    if validate:
+        logger.info('==== BEGIN TEMPLATE ====')
+        logger.info(json.dumps(template, indent=2))
+        logger.info('==== END TEMPLATE ====')
+        return smc.validate(resource_group_name, deployment_name, properties)
+    return smc.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
 
 
 def k8s_get_credentials(name, resource_group_name,

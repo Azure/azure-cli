@@ -1308,54 +1308,6 @@ class VMCreateWindowsSecretsScenarioTest(ResourceGroupVCRTestBase):  # pylint: d
         ])
 
 
-class AzureContainerServiceScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable=too-many-instance-attributes
-
-    def __init__(self, test_method):
-        super(AzureContainerServiceScenarioTest, self).__init__(__file__, test_method, resource_group='cliTestRg_Acs')
-        self.pub_ssh_filename = None
-
-    def test_acs_create_update(self):
-        self.execute()
-
-    def body(self):
-        _, pathname = tempfile.mkstemp()
-        with open(pathname, 'w') as key_file:
-            key_file.write(TEST_SSH_KEY_PUB)
-
-        acs_name = 'acstest123'
-        dns_prefix = 'myacs1234'
-
-        # create
-        pathname = pathname.replace('\\', '\\\\')
-        print('acs create -g {} -n {} --dns-prefix {} --ssh-key-value {}'.format(
-            self.resource_group, acs_name, dns_prefix, pathname))
-        self.cmd('acs create -g {} -n {} --dns-prefix {} --ssh-key-value {}'.format(
-            self.resource_group, acs_name, dns_prefix, pathname), checks=[
-            JMESPathCheck('properties.outputs.masterFQDN.value',
-                          '{}mgmt.{}.cloudapp.azure.com'.format(dns_prefix, self.location)),
-            JMESPathCheck('properties.outputs.agentFQDN.value',
-                          '{}agents.{}.cloudapp.azure.com'.format(dns_prefix, self.location))
-        ])
-
-        # show
-        self.cmd('acs show -g {} -n {}'.format(self.resource_group, acs_name), checks=[
-            JMESPathCheck('agentPoolProfiles[0].count', 3),
-            JMESPathCheck('agentPoolProfiles[0].vmSize', 'Standard_D2_v2'),
-            JMESPathCheck('masterProfile.dnsPrefix', dns_prefix + 'mgmt'),
-            JMESPathCheck('orchestratorProfile.orchestratorType', 'DCOS'),
-            JMESPathCheck('name', acs_name),
-        ])
-
-        # scale-up
-        self.cmd('acs scale -g {} -n {} --new-agent-count 5'.format(self.resource_group, acs_name), checks=[
-            JMESPathCheck('agentPoolProfiles[0].count', 5),
-        ])
-        # show again
-        self.cmd('acs show -g {} -n {}'.format(self.resource_group, acs_name), checks=[
-            JMESPathCheck('agentPoolProfiles[0].count', 5),
-        ])
-
-
 # region VMSS Tests
 
 class VMSSCreateAndModify(ResourceGroupVCRTestBase):
