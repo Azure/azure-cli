@@ -19,7 +19,7 @@ def cli_redis_import_method(client, resource_group_name, name, file_format, file
     parameters = ImportRDBParameters(files, file_format)
     return client.import_method(resource_group_name, name, files, parameters)
 
-def cli_redis_update_settings(client, resource_group_name, name, redis_configuration = None, sku_name = None, sku_family = None, sku_capacity = None):
+def cli_redis_update_settings(client, resource_group_name, name, redis_configuration=None, sku_name=None, sku_family=None, sku_capacity=None):
     if sku_name != None or sku_family != None or sku_capacity != None:
         if sku_name is None or sku_family is None or sku_capacity is None:
             raise ValueError("All arguments for Sku : --sku-name,--sku-family and --sku-capacity must be provided. Please add -h to the command to see supported values")
@@ -28,7 +28,7 @@ def cli_redis_update_settings(client, resource_group_name, name, redis_configura
     if redis_configuration != None:
         existing.redis_configuration.update(redis_configuration)
 
-    if sku_name != None and sku_family != None and sku_capacity != None :
+    if sku_name != None and sku_family != None and sku_capacity != None:
         existing.sku = Sku(sku_name, sku_family, sku_capacity)
 	
     # Due to swagger/mgmt SDK quirkiness, we have to manually copy over
