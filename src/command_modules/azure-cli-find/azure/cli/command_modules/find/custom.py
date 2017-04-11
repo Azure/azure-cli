@@ -9,6 +9,7 @@ import os
 import textwrap
 import shutil
 
+import re
 import six
 
 from azure.cli.command_modules.find._gather_commands import build_command_table
@@ -17,16 +18,20 @@ from azure.cli.core._environment import get_config_dir
 
 logger = azlogging.get_az_logger(__name__)
 
-INDEX_PATH = os.path.join(get_config_dir(), 'search_index')
+INDEX_DIR_PREFIX = 'search_index'
+INDEX_VERSION = 'v1'
+INDEX_PATH = os.path.join(get_config_dir(), '{}_{}'.format(INDEX_DIR_PREFIX, INDEX_VERSION))
 
 
 def _get_schema():
     from whoosh.fields import TEXT, Schema
+    from whoosh.analysis import StemmingAnalyzer
+    stem_ana = StemmingAnalyzer()
     return Schema(
-        cmd_name=TEXT(stored=True),
-        short_summary=TEXT(stored=True),
-        long_summary=TEXT(stored=True),
-        examples=TEXT(stored=True))
+        cmd_name=TEXT(stored=True, analyzer=stem_ana, field_boost=1.3),
+        short_summary=TEXT(stored=True, analyzer=stem_ana),
+        long_summary=TEXT(stored=True, analyzer=stem_ana),
+        examples=TEXT(stored=True, analyzer=stem_ana))
 
 def _cli_index_corpus():
     return build_command_table()
@@ -46,14 +51,15 @@ def _index_help():
     writer.commit()
 
 
-def _remove_index():
-    if os.path.exists(INDEX_PATH):
-        shutil.rmtree(INDEX_PATH)
+def _purge():
+    for f in os.listdir(get_config_dir()):
+        if re.search("^{}_*".format(INDEX_DIR_PREFIX), f):
+            shutil.rmtree(os.path.join(get_config_dir(), f))
 
 
 def _create_index():
     from whoosh import index
-    _remove_index()
+    _purge()
     os.mkdir(INDEX_PATH)
     index.create_in(INDEX_PATH, _get_schema())
     _index_help()
@@ -98,7 +104,14 @@ def find(criteria, reindex=False):
     if reindex:
         _create_index()
 
-    ix = _get_index()
+    try:
+        ix = _get_index()
+    except ValueError:
+        # got a pickle error because the index was written by a different python version
+        # recreate the index and proceed
+        _create_index()
+        ix = _get_index()
+
     qp = MultifieldParser(
         ['cmd_name', 'short_summary', 'long_summary', 'examples'],
         schema=_get_schema()
@@ -109,7 +122,8 @@ def find(criteria, reindex=False):
         q = qp.parse(" ".join(criteria))
     else:
         # let's help out with some OR's to provide a less restrictive search
-        q = qp.parse(" OR ".join(criteria))
+        expanded_query = " OR ".join(criteria) + " OR '{}'".format(criteria)
+        q = qp.parse(expanded_query)
 
     with ix.searcher() as searcher:
         from whoosh.highlight import UppercaseFormatter, ContextFragmenter
