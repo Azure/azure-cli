@@ -10,8 +10,8 @@ from azure.cli.core.application import APPLICATION, Configuration
 def mock_echo_args(command_name, parameters):
     try:
         argv = ' '.join((command_name, parameters)).split()
-        APPLICATION.initialize(Configuration(argv))
-        command_table = APPLICATION.configuration.get_command_table()
+        APPLICATION.initialize(Configuration())
+        command_table = APPLICATION.configuration.get_command_table(argv)
         prefunc = command_table[command_name].handler
         command_table[command_name].handler = lambda args: args
         parsed_namespace = APPLICATION.execute(argv)

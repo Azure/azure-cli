@@ -10,10 +10,6 @@ import textwrap
 import shutil
 
 import six
-from whoosh.highlight import UppercaseFormatter, ContextFragmenter
-from whoosh.qparser import MultifieldParser
-from whoosh import index
-from whoosh.fields import TEXT, Schema
 
 from azure.cli.command_modules.find._gather_commands import build_command_table
 import azure.cli.core.azlogging as azlogging
@@ -23,18 +19,21 @@ logger = azlogging.get_az_logger(__name__)
 
 INDEX_PATH = os.path.join(get_config_dir(), 'search_index')
 
-schema = Schema(
-    cmd_name=TEXT(stored=True),
-    short_summary=TEXT(stored=True),
-    long_summary=TEXT(stored=True),
-    examples=TEXT(stored=True))
 
+def _get_schema():
+    from whoosh.fields import TEXT, Schema
+    return Schema(
+        cmd_name=TEXT(stored=True),
+        short_summary=TEXT(stored=True),
+        long_summary=TEXT(stored=True),
+        examples=TEXT(stored=True))
 
 def _cli_index_corpus():
     return build_command_table()
 
 
 def _index_help():
+    from whoosh import index
     ix = index.open_dir(INDEX_PATH)
     writer = ix.writer()
     for cmd, document in list(_cli_index_corpus().items()):
@@ -53,9 +52,10 @@ def _remove_index():
 
 
 def _create_index():
+    from whoosh import index
     _remove_index()
     os.mkdir(INDEX_PATH)
-    index.create_in(INDEX_PATH, schema)
+    index.create_in(INDEX_PATH, _get_schema())
     _index_help()
 
 
@@ -65,6 +65,7 @@ def _ensure_index():
 
 
 def _get_index():
+    from whoosh import index
     _ensure_index()
     return index.open_dir(INDEX_PATH)
 
@@ -93,13 +94,14 @@ def find(criteria, reindex=False):
     :return:
     :rtype: None
     """
+    from whoosh.qparser import MultifieldParser
     if reindex:
         _create_index()
 
     ix = _get_index()
     qp = MultifieldParser(
         ['cmd_name', 'short_summary', 'long_summary', 'examples'],
-        schema=schema
+        schema=_get_schema()
     )
 
     if 'OR' in criteria or 'AND' in criteria:
@@ -110,6 +112,7 @@ def find(criteria, reindex=False):
         q = qp.parse(" OR ".join(criteria))
 
     with ix.searcher() as searcher:
+        from whoosh.highlight import UppercaseFormatter, ContextFragmenter
         results = searcher.search(q)
         results.fragmenter = ContextFragmenter(maxchars=300, surround=200)
         results.formatter = UppercaseFormatter()

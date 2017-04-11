@@ -6,6 +6,7 @@ Release History
 ^^^^^^^^^^^^^^^^^^
 *core: Allow file path of accessTokens.json to be configurable through an env var(#2605)
 *core: Allow configured defaults to apply on optional args(#2703)
+*core: Improved performance
 
 2.0.2 (2017-04-03)
 ^^^^^^^^^^^^^^^^^^
