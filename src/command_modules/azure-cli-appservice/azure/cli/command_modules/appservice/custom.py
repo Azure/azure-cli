@@ -961,25 +961,79 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
     return matched
 
 
-def create_function(resource_group_name, new_app_name, storage_account, plan=None):
+def create_function(resource_group_name, name, storage_account, plan=None,
+                    consumption_plan_location=None):
+
+    if plan is not None and consumption_plan_location is not None:
+        raise CLIError("Use Plan or Consumption Plan Location")
+
+    webapp_def = Site(location='')
     client = web_client_factory()
-    if is_valid_resource_id(plan):
-        plan = parse_resource_id(plan)['name']
-    location = _get_location_from_app_service_plan(client, resource_group_name, plan)
-    webapp_def = Site(server_farm_id=plan, location=location)
+    if consumption_plan_location is not None:
+        locations = list_consumption_locations()
+        location = next((l for l in locations if l['name'] == consumption_plan_location), None)
+        if location is None:
+            raise CLIError("Location is invalid. Use: az functionapp list-consumption-locations")
+        webapp_def.location = consumption_plan_location
+    else:
+        if is_valid_resource_id(plan):
+            plan = parse_resource_id(plan)['name']
+        location = _get_location_from_app_service_plan(client, resource_group_name, plan)
+        webapp_def.server_farm_id = plan
+        webapp_def.location = location
+
+    con_string = _validate_and_get_connection_string(resource_group_name, storage_account)
+
     webapp_def.kind = 'functionapp'
+    poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
+    webapp = AppServiceLongRunningOperation()(poller)
+
+    # adding appsetting to site to make it a function
+    settings = ['AzureWebJobsStorage=' + con_string, 'AzureWebJobsDashboard=' + con_string,
+                'WEBSITE_NODE_DEFAULT_VERSION=6.5.0', 'FUNCTIONS_EXTENSION_VERSION=~1']
+
+    if consumption_plan_location is None:
+        update_site_configs(resource_group_name, name, always_on='true')
+    if consumption_plan_location is not None:
+        settings.append('WEBSITE_CONTENTAZUREFILECONNECTIONSTRING=' + con_string)
+        settings.append('WEBSITE_CONTENTSHARE=' + name.lower())
+
+    update_app_settings(resource_group_name, name, settings, None)
+
+    return webapp
+
+
+def _validate_and_get_connection_string(resource_group_name, storage_account):
     sa_resource_group = resource_group_name
     if is_valid_resource_id(storage_account):
         sa_resource_group = parse_resource_id(storage_account)['resource_group']
         storage_account = parse_resource_id(storage_account)['name']
-    poller = client.web_apps.create_or_update(resource_group_name, new_app_name, webapp_def)
-    webapp = AppServiceLongRunningOperation()(poller)
     storage_client = get_mgmt_service_client(StorageManagementClient)
-    keys = storage_client.storage_accounts.list_keys(sa_resource_group, storage_account).keys
+    storage_properties = storage_client.storage_accounts.get_properties(sa_resource_group,
+                                                                        storage_account)
+    error_message = ''
+    endpoints = storage_properties.primary_endpoints
+    sku = storage_properties.sku.name.value
+    allowed_storage_types = ['Standard_GRS', 'Standard_LRS', 'Standard_ZRS', 'Premium_LRS']
+
+    if (hasattr(endpoints, 'table') and not endpoints.table):
+        error_message = 'Storage has no table endpoint. '
+    if (hasattr(endpoints, 'blob') and not endpoints.blob):
+        error_message += 'Storage has no blob endpoint. '
+    if (hasattr(endpoints, 'queue') and not endpoints.queue):
+        error_message += 'Storage has no queue endpoint. '
+    if sku not in allowed_storage_types:
+        error_message += 'Storage type {} is not allowed'.format(sku)
+
+    if error_message:
+        raise CLIError(error_message)
+
+    keys = storage_client.storage_accounts.list_keys(resource_group_name, storage_account).keys
     con_string = 'DefaultEndpointsProtocol=https;AccountName={};AccountKey={}'.format(storage_account, keys[0].value)  # pylint: disable=line-too-long
-    # adding appsetting to site to make it a function
-    settings = ['AzureWebJobsStorage=' + con_string, 'AzureWebJobsDashboard=' + con_string,
-                'FUNCTIONS_EXTENSION_VERSION=~1', 'WEBSITE_NODE_DEFAULT_VERSION=6.5.0']
-    update_site_configs(resource_group_name, new_app_name, slot=None, always_on='true')
-    update_app_settings(resource_group_name, new_app_name, settings, None)
-    return webapp
+    return con_string
+
+
+def list_consumption_locations():
+    client = web_client_factory()
+    regions = client.list_geo_regions(sku='Dynamic')
+    return [{'name': x.name.lower().replace(" ", "")} for x in regions]
