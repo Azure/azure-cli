@@ -964,29 +964,30 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
 def create_function(resource_group_name, name, storage_account, plan=None,
                     consumption_plan_location=None):
 
-    if plan is not None and consumption_plan_location is not None:
-        raise CLIError("Use Plan or Consumption Plan Location")
+    if ((plan and consumption_plan_location) or
+            (plan is None and consumption_plan_location is None)):
+        raise CLIError("Use either Plan or Consumption Plan Location")
 
-    webapp_def = Site(location='')
+    functionapp_def = Site(location='')
     client = web_client_factory()
-    if consumption_plan_location is not None:
+    if consumption_plan_location:
         locations = list_consumption_locations()
-        location = next((l for l in locations if l['name'] == consumption_plan_location), None)
+        location = next((l for l in locations if l['name'].lower() == consumption_plan_location.lower()), None)  # pylint: disable=line-too-long
         if location is None:
             raise CLIError("Location is invalid. Use: az functionapp list-consumption-locations")
-        webapp_def.location = consumption_plan_location
+        functionapp_def.location = consumption_plan_location
     else:
         if is_valid_resource_id(plan):
             plan = parse_resource_id(plan)['name']
         location = _get_location_from_app_service_plan(client, resource_group_name, plan)
-        webapp_def.server_farm_id = plan
-        webapp_def.location = location
+        functionapp_def.server_farm_id = plan
+        functionapp_def.location = location
 
     con_string = _validate_and_get_connection_string(resource_group_name, storage_account)
 
-    webapp_def.kind = 'functionapp'
-    poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
-    webapp = AppServiceLongRunningOperation()(poller)
+    functionapp_def.kind = 'functionapp'
+    poller = client.web_apps.create_or_update(resource_group_name, name, functionapp_def)
+    functionapp = AppServiceLongRunningOperation()(poller)
 
     # adding appsetting to site to make it a function
     settings = ['AzureWebJobsStorage=' + con_string, 'AzureWebJobsDashboard=' + con_string,
@@ -994,13 +995,13 @@ def create_function(resource_group_name, name, storage_account, plan=None,
 
     if consumption_plan_location is None:
         update_site_configs(resource_group_name, name, always_on='true')
-    if consumption_plan_location is not None:
+    else:
         settings.append('WEBSITE_CONTENTAZUREFILECONNECTIONSTRING=' + con_string)
         settings.append('WEBSITE_CONTENTSHARE=' + name.lower())
 
     update_app_settings(resource_group_name, name, settings, None)
 
-    return webapp
+    return functionapp
 
 
 def _validate_and_get_connection_string(resource_group_name, storage_account):
@@ -1029,8 +1030,8 @@ def _validate_and_get_connection_string(resource_group_name, storage_account):
         raise CLIError(error_message)
 
     keys = storage_client.storage_accounts.list_keys(resource_group_name, storage_account).keys
-    con_string = 'DefaultEndpointsProtocol=https;AccountName={};AccountKey={}'.format(storage_account, keys[0].value)  # pylint: disable=line-too-long
-    return con_string
+    conn_string = 'DefaultEndpointsProtocol=https;AccountName={};AccountKey={}'.format(storage_account, keys[0].value)  # pylint: disable=line-too-long
+    return conn_string
 
 
 def list_consumption_locations():
