@@ -686,16 +686,22 @@ def _configure_cluster():  # pylint: disable=too-many-statements
             '{}/connectlocal.tmp.sh'.format(artifacts_path), '~/connectlocal.tmp.sh')
         ssh_client.put(
             '{}/configagents.sh'.format(artifacts_path), '~/configagents.sh')
+        ssh_client.put(
+            '{}/master-svc.sh'.format(artifacts_path), '~/master-svc.sh')
 
         ssh_client.run_command(
             'chmod 600 ~/.ssh/id_rsa')
         ssh_client.run_command(
             'chmod +x ./configagents.sh')
+        ssh_client.run_command(
+            'chmod +x ./master-svc.sh')
         logger.info('\nConfiguration files copied.')
 
         logger.info('\nConfiguring agents in the cluster ... ')
         ssh_client.run_command(
             'source ./configagents.sh', True)
+        ssh_client.run_command(
+            'source ./master-svc.sh </dev/null >./master-svc.log 2>&1 &', True)
 
         logger.info('\nCleaning existing TenX services in cluster ... ')
         utils.execute_command(
@@ -1155,10 +1161,7 @@ def service_run(project_path):
         # Configuring Cluster
         _configure_cluster()
 
-        # Building Service ...
-        _service_build()
-
-        # Starting Service ...
+        # Building and starting Service ...
         _service_run()
 
     except Exception as error:
@@ -1167,21 +1170,12 @@ def service_run(project_path):
         if curr_dir and curr_dir.strip():
             os.chdir(curr_dir)
 
-
-def _service_build():
-    """
-    Calls tenx build command on the current directory.
-    Build implicitly syncs the files to the cluster and builds an image of the service.
-    """
-    _run_innerloop_command('build')
-
-
 def _service_run():
     """
     Calls tenx run command on the current directory.
     Run implicitly builds the service in the cluster and starts the service.
     """
-    _run_innerloop_command('run -t -q')
+    _run_innerloop_command('run -t -q --build')
 
 
 def service_list():
