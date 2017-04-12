@@ -81,7 +81,7 @@ def _create_update_role_definition(role_definition, for_update):
     else:
         role_id = uuid.uuid4()
 
-    if 'assignableScopes' not in role_definition:
+    if not for_update and 'assignableScopes' not in role_definition:
         raise CLIError("please provide 'assignableScopes'")
 
     permission = Permission(actions=role_definition.get('actions', None),
