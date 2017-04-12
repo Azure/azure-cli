@@ -7,8 +7,6 @@ set -x  # do not echo command to prevent accidentally expose secrets
 
 echo 'Build Azure CLI and its command modules '
 
-pip install -r requirements.txt
-
 if [ -d ./artifacts ]; then
     rm -rf ./artifacts
 fi

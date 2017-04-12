@@ -16,7 +16,7 @@ version=$(printf '%.8d' $BUILD_NUMBER)
 echo "Version number: $version"
 
 if [ -d /var/build_share ]; then
-    echo 'Directory /var/build_share is found. The artifacts will be archieved there.'
+    echo 'Directory /var/build_share is found. The artifacts will be archived there.'
     mkdir -p /var/build_share/$BRANCH_NAME/$version
     cp -R ./artifacts/ /var/build_share/$BRANCH_NAME/$version
 else

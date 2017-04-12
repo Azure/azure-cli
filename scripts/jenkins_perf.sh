@@ -22,6 +22,6 @@ build_folder=/var/build_share/$BRANCH_NAME/$version
 echo "Install build from $build_folder"
 
 python -m pip install azure-cli --find-links file://$build_folder/artifacts/build -v
-python -m pip list
+python -m pip freeze
 
 python ./scripts/performance/measure.py
