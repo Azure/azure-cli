@@ -89,7 +89,7 @@ class Configuration(object):  # pylint: disable=too-few-public-methods
                     yield (cmd.name, cmd)
                 else:
                     dummy_cmdname = ' '.join((command_so_far, part))
-                    yield (dummy_cmdname, CliCommand(dummy_cmdname, lambda **kwargs: None))
+                    yield (dummy_cmdname, CliCommand(dummy_cmdname, None))
 
 
 class Application(object):
