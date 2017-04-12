@@ -16,6 +16,7 @@ from azure.cli.command_modules.role.custom import (create_role_definition,
 
 # pylint: disable=line-too-long
 
+
 class TestRoleMocked(unittest.TestCase):
 
     def setUp(self):
@@ -23,7 +24,7 @@ class TestRoleMocked(unittest.TestCase):
         self.subscription_id = 'sub123'
         self.default_scope = '/subscriptions/' + self.subscription_id
         self.sample_role_def = {
-            'Name':  self.role_logical_name,
+            'Name': self.role_logical_name,
             'Description': 'Can monitor compute, network and storage, and restart virtual machines',
             'Actions': [
                 'Microsoft.Compute/virtualMachines/start/action',
@@ -34,13 +35,14 @@ class TestRoleMocked(unittest.TestCase):
             ],
             'AssignableScopes': [self.default_scope]
         }
+        self.create_def_invoked = False
+        self.update_def_invoked = False
 
     @mock.patch('azure.cli.command_modules.role.custom._auth_client_factory', autospec=True)
     def test_create_role_definition(self, client_mock):
-        create_def_invoked = False
+
         def _create_def(role_definition_id, scope, role_definition):
-            nonlocal create_def_invoked
-            create_def_invoked = True
+            self.create_def_invoked = True
             uuid.UUID(str(role_definition_id))  # as long as no exception, it means a generated uuid
             self.assertEqual(self.default_scope, scope)
             self.assertEqual(role_definition.properties.role_name, self.role_logical_name)
@@ -58,15 +60,14 @@ class TestRoleMocked(unittest.TestCase):
         create_role_definition(role_definition_file)
 
         # assert
-        self.assertTrue(create_def_invoked)
+        self.assertTrue(self.create_def_invoked)
 
     @mock.patch('azure.cli.command_modules.role.custom._auth_client_factory', autospec=True)
     def test_update_role_definition(self, client_mock):
-        update_def_invoked = False
         test_role_id = '2ac90824-b711-4809-bec9-4c85809d1111'
+
         def _update_def(role_definition_id, scope, role_definition):
-            nonlocal update_def_invoked
-            update_def_invoked = True
+            self.update_def_invoked = True
             self.assertEqual(role_definition_id, test_role_id)
             self.assertEqual(self.default_scope, scope)
             self.assertEqual(role_definition.properties.role_name, self.role_logical_name)
@@ -87,7 +88,7 @@ class TestRoleMocked(unittest.TestCase):
         update_role_definition(role_definition_file)
 
         # assert
-        self.assertTrue(update_def_invoked)
+        self.assertTrue(self.update_def_invoked)
 
     @mock.patch('azure.cli.command_modules.role.custom._auth_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
