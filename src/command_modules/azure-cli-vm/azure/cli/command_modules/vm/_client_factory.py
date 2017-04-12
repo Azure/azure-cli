@@ -5,7 +5,7 @@
 
 
 def _compute_client_factory(**_):
-    from azure.cli.core.profiles.shared import ResourceType
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(ResourceType.MGMT_COMPUTE)
 

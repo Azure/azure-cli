@@ -36,7 +36,7 @@ from azure.cli.core.util import CLIError, shell_safe_json_parse
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core._environment import get_config_dir
-from azure.cli.core.profiles.shared import ResourceType
+from azure.cli.core.profiles import ResourceType
 from azure.mgmt.compute.containerservice.models import ContainerServiceOchestratorTypes
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     PasswordCredential,

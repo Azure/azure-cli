@@ -25,7 +25,7 @@ from azure.cli.core.commands.arm import parse_resource_id, resource_id, is_valid
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core.util import CLIError
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core.profiles import get_sdk_attr
+from azure.cli.core.profiles import get_sdk, ResourceType
 from ._vm_utils import read_content_if_is_file
 from ._vm_diagnostics_templates import get_default_diag_config
 
@@ -33,20 +33,19 @@ from ._actions import (load_images_from_aliases_doc,
                        load_extension_images_thru_services,
                        load_images_thru_services)
 from ._client_factory import _compute_client_factory
-from azure.cli.core.profiles.shared import ResourceType
-from azure.cli.core.profiles import get_versioned_models
 
 logger = azlogging.get_az_logger(__name__)
 
 VirtualHardDisk, VirtualMachineScaleSet, \
     VirtualMachineCaptureParameters, VirtualMachineScaleSetExtension, \
-    VirtualMachineScaleSetExtensionProfile = get_versioned_models(
+    VirtualMachineScaleSetExtensionProfile = get_sdk(
         ResourceType.MGMT_COMPUTE,
         'VirtualHardDisk',
         'VirtualMachineScaleSet',
         'VirtualMachineCaptureParameters',
         'VirtualMachineScaleSetExtension',
-        'VirtualMachineScaleSetExtensionProfile')
+        'VirtualMachineScaleSetExtensionProfile',
+        mod='models')
 
 
 def get_resource_group_location(resource_group_name):
@@ -668,8 +667,9 @@ def _reset_windows_admin(vm_instance, resource_group_name, username, password, n
     You can only change the password. Adding a new user is not supported.
     '''
     client = _compute_client_factory()
-    VirtualMachineExtension = get_versioned_models(ResourceType.MGMT_COMPUTE,
-                                                   "VirtualMachineExtension")
+    VirtualMachineExtension = get_sdk(ResourceType.MGMT_COMPUTE,
+                                      "VirtualMachineExtension",
+                                      mod='models')
 
     publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
         vm_instance.resources, _WINDOWS_ACCESS_EXT)
@@ -701,8 +701,9 @@ def _update_linux_access_extension(vm_instance, resource_group_name, protected_s
                                    no_wait=False):
     client = _compute_client_factory()
 
-    VirtualMachineExtension = get_versioned_models(ResourceType.MGMT_COMPUTE,
-                                                   "VirtualMachineExtension")
+    VirtualMachineExtension = get_sdk(ResourceType.MGMT_COMPUTE,
+                                      "VirtualMachineExtension",
+                                      mod='models')
 
     # pylint: disable=no-member
     instance_name = _get_extension_instance_name(vm_instance.instance_view,
@@ -777,9 +778,10 @@ def enable_boot_diagnostics(resource_group_name, vm_name, storage):
             vm.diagnostics_profile.boot_diagnostics.storage_uri.lower() == storage_uri.lower()):
         return
 
-    DiagnosticsProfile, BootDiagnostics = get_versioned_models(ResourceType.MGMT_COMPUTE,
-                                                               "DiagnosticsProfile",
-                                                               "BootDiagnostics")
+    DiagnosticsProfile, BootDiagnostics = get_sdk(ResourceType.MGMT_COMPUTE,
+                                                  "DiagnosticsProfile",
+                                                  "BootDiagnostics",
+                                                  mod='models')
 
     boot_diag = BootDiagnostics(True, storage_uri)
     if vm.diagnostics_profile is None:
@@ -795,7 +797,7 @@ def enable_boot_diagnostics(resource_group_name, vm_name, storage):
 def get_boot_log(resource_group_name, vm_name):
     import sys
     from azure.cli.core._profile import CLOUD
-    BlockBlobService = get_sdk_attr('azure.multiapi.storage.blob.blockblobservice#BlockBlobService')
+    BlockBlobService = get_sdk(ResourceType.DATA_STORAGE, 'blob.blockblobservice#BlockBlobService')
 
     client = _compute_client_factory()
 
@@ -878,8 +880,9 @@ def set_extension(
     vm = get_vm(resource_group_name, vm_name, 'instanceView')
     client = _compute_client_factory()
 
-    VirtualMachineExtension = get_versioned_models(ResourceType.MGMT_COMPUTE,
-                                                   "VirtualMachineExtension")
+    VirtualMachineExtension = get_sdk(ResourceType.MGMT_COMPUTE,
+                                      "VirtualMachineExtension",
+                                      mod='models')
     # pylint: disable=no-member
     instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name)
     # pylint: disable=no-member
@@ -1644,8 +1647,9 @@ def create_vm(vm_name, resource_group_name, image=None,
     # deploy ARM template
     deployment_name = 'vm_deploy_' + random_string(32)
     client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).deployments
-    DeploymentProperties = get_versioned_models(ResourceType.MGMT_RESOURCE_RESOURCES,
-                                                'DeploymentProperties')
+    DeploymentProperties = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES,
+                                   'DeploymentProperties',
+                                   mod='models')
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     if validate:
         from azure.cli.command_modules.vm._vm_utils import log_pprint_template
@@ -1878,8 +1882,9 @@ def create_vmss(vmss_name, resource_group_name, image,
     # deploy ARM template
     deployment_name = 'vmss_deploy_' + random_string(32)
     client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).deployments
-    DeploymentProperties = get_versioned_models(ResourceType.MGMT_RESOURCE_RESOURCES,
-                                                'DeploymentProperties')
+    DeploymentProperties = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES,
+                                   'DeploymentProperties',
+                                   mod='models')
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     if validate:
         from azure.cli.command_modules.vm._vm_utils import log_pprint_template
@@ -1913,8 +1918,9 @@ def create_av_set(availability_set_name, resource_group_name,
     # deploy ARM template
     deployment_name = 'av_set_deploy_' + random_string(32)
     client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).deployments
-    DeploymentProperties = get_versioned_models(ResourceType.MGMT_RESOURCE_RESOURCES,
-                                                'DeploymentProperties')
+    DeploymentProperties = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES,
+                                   'DeploymentProperties',
+                                   mod='models')
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     if validate:
         return client.validate(resource_group_name, deployment_name, properties)

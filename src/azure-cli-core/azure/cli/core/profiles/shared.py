@@ -23,37 +23,37 @@ class APIVersionException(Exception):
 class ResourceType(Enum):  # pylint: disable=too-few-public-methods
 
     MGMT_STORAGE = ('azure.mgmt.storage',
-                    'azure.mgmt.storage#StorageManagementClient')
+                    'StorageManagementClient')
     MGMT_COMPUTE = ('azure.mgmt.compute.compute',
-                    'azure.mgmt.compute#ComputeManagementClient')
+                    'ComputeManagementClient')
     MGMT_CONTAINER_SERVICE = ('azure.mgmt.compute.containerservice',
-                              'azure.mgmt.compute#ContainerServiceClient')
+                              'ContainerServiceClient')
     MGMT_NETWORK = ('azure.mgmt.network',
-                    'azure.mgmt.network#NetworkManagementClient')
+                    'NetworkManagementClient')
     MGMT_RESOURCE_FEATURES = ('azure.mgmt.resource.features',
-                              'azure.mgmt.resource#FeatureClient')
+                              'FeatureClient')
     MGMT_RESOURCE_LINKS = ('azure.mgmt.resource.links',
-                           'azure.mgmt.resource#ManagementLinkClient')
+                           'ManagementLinkClient')
     MGMT_RESOURCE_LOCKS = ('azure.mgmt.resource.locks',
-                           'azure.mgmt.resource#ManagementLockClient')
+                           'ManagementLockClient')
     MGMT_RESOURCE_POLICY = ('azure.mgmt.resource.policy',
-                            'azure.mgmt.resource#PolicyClient')
+                            'PolicyClient')
     MGMT_RESOURCE_RESOURCES = ('azure.mgmt.resource.resources',
-                               'azure.mgmt.resource#ResourceManagementClient')
+                               'ResourceManagementClient')
     MGMT_RESOURCE_SUBSCRIPTIONS = ('azure.mgmt.resource.subscriptions',
-                                   'azure.mgmt.resource#SubscriptionClient')
+                                   'SubscriptionClient')
     DATA_STORAGE = ('azure.multiapi.storage', None)
 
-    def __init__(self, import_prefix, client_path):
+    def __init__(self, import_prefix, client_name):
         """Constructor.
 
         :param import_prefix: Path to the (unversioned) module.
         :type import_prefix: str.
-        :param client_path: The path to the client for this resource type.
-        :type client_path: str.
+        :param client_name: Name the client for this resource type.
+        :type client_name: str.
         """
         self.import_prefix = import_prefix
-        self.client_path = client_path
+        self.client_name = client_name
 
 
 AZURE_API_PROFILES = {
@@ -115,44 +115,50 @@ def get_api_version(api_profile, resource_type):
         raise APIVersionException(resource_type, api_profile)
 
 
-def get_client_class(resource_type):
-    """Get the uninstantiated Client class for this resource type.
-
-    :param resource_type: The resource type.
-    :type resource_type: ResourceType.
-    :returns:  class -- the Client class.
-    """
-    cp = resource_type.client_path
-    mod_to_import, attr_path = cp.split('#')
-    op = import_module(mod_to_import)
-    for part in attr_path.split('.'):
-        op = getattr(op, part)
-    return op
-
-
-def get_versioned_models(api_profile, resource_type, *model_args, **kwargs):
-    """Get the models for a given resource type and version.
-
-    :param api_profile: The name of the API profile.
-    :type api_profile: str.
-    :param resource_type: The resource type.
-    :type resource_type: ResourceType.
-    :param model_args: Arguments for the models to be returned
-    :type model_args: str.
-    :param checked: If True, import exceptions are caught and None is returned, otherwise exception.
-    :type checked: bool.
-    :returns:  List of models if multiple specified, otherwise the model
-    """
-    checked = kwargs.get('checked', True)
-    api_version = get_api_version(api_profile, resource_type)
+def _get_attr(sdk_path, mod_attr_path, checked=True):
     try:
-        models_mod = get_client_class(resource_type).models(api_version=api_version)
-        models = []
-        for m in model_args:
-            new_model = getattr(models_mod, m, None) if checked else getattr(models_mod, m)
-            models.append(new_model)
-        return models[0] if len(models) == 1 else models
+        attr_mod, attr_path = mod_attr_path.split('#') \
+            if '#' in mod_attr_path else (mod_attr_path, '')
+        full_mod_path = '{}.{}'.format(sdk_path, attr_mod) if attr_mod else sdk_path
+        op = import_module(full_mod_path)
+        if attr_path:
+            # Only load attributes if needed
+            for part in attr_path.split('.'):
+                op = getattr(op, part)
+        return op
     except (ImportError, AttributeError) as ex:
         if checked:
             return None
         raise ex
+
+
+def get_client_class(resource_type):
+    return _get_attr(resource_type.import_prefix, '#' + resource_type.client_name)
+
+
+def get_versioned_sdk_path(api_profile, resource_type):
+    """ Patch the unversioned sdk path to include the appropriate API version for the
+        resource type in question.
+        e.g. Converts azure.mgmt.storage.operations.storage_accounts_operations to
+                      azure.mgmt.storage.v2016_12_01.operations.storage_accounts_operations
+    """
+    return '{}.v{}'.format(
+        resource_type.import_prefix,
+        get_api_version(api_profile, resource_type).replace('-', '_')
+    )
+
+
+def get_versioned_sdk(api_profile, resource_type, *attr_args, **kwargs):
+    checked = kwargs.get('checked', True)
+    sub_mod_prefix = kwargs.get('mod', None)
+    sdk_path = get_versioned_sdk_path(api_profile, resource_type)
+    if not attr_args:
+        # No attributes to load. Return the versioned sdk
+        return import_module(sdk_path)
+    results = []
+    for mod_attr_path in attr_args:
+        if sub_mod_prefix and '#' not in mod_attr_path:
+            mod_attr_path = '{}#{}'.format(sub_mod_prefix, mod_attr_path)
+        loaded_obj = _get_attr(sdk_path, mod_attr_path, checked)
+        results.append(loaded_obj)
+    return results[0] if len(results) == 1 else results

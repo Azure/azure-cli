@@ -22,8 +22,7 @@ from ._format import \
      transform_vpn_connection, transform_vpn_connection_list,
      transform_vpn_connection_create_output)
 
-from azure.cli.core.profiles import get_api_version
-from azure.cli.core.profiles.shared import ResourceType
+from azure.cli.core.profiles import get_api_version, ResourceType
 
 custom_path = 'azure.cli.command_modules.network.custom#{}'
 

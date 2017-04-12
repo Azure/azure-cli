@@ -70,6 +70,9 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
 
     def has_endpoint_set(self, endpoint_name):
         try:
+            # Can't simply use hasattr here as we override __getattribute__ below.
+            # Python 3 hasattr() only returns False if an AttributeError is raised but we raise
+            # CloudEndpointNotSetException. This exception is not a subclass of AttributeError.
             getattr(self, endpoint_name)
             return True
         except Exception:  # pylint: disable=broad-except
@@ -123,12 +126,13 @@ class Cloud(object):  # pylint: disable=too-few-public-methods
         self.is_active = is_active
 
     def __str__(self):
-        o = {}
-        o['profile'] = self.profile
-        o['name'] = self.name
-        o['is_active'] = self.is_active
-        o['endpoints'] = vars(self.endpoints)
-        o['suffixes'] = vars(self.suffixes)
+        o = {
+            'profile': self.profile,
+            'name': self.name,
+            'is_active': self.is_active,
+            'endpoints': vars(self.endpoints),
+            'suffixes': vars(self.suffixes),
+        }
         return pformat(o)
 
 

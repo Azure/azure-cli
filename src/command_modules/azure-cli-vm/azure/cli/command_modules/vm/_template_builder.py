@@ -11,8 +11,7 @@ import json
 from enum import Enum
 
 from azure.cli.core.util import b64encode
-from azure.cli.core.profiles import get_api_version
-from azure.cli.core.profiles.shared import ResourceType
+from azure.cli.core.profiles import get_api_version, ResourceType
 
 
 class ArmTemplateBuilder(object):
@@ -720,6 +719,9 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
     }
 
     vmss_api_version = get_api_version(ResourceType.MGMT_COMPUTE)
+    if vmss_api_version in ['2016-04-30-preview']:
+        vmss_properties['singlePlacementGroup'] = single_placement_group
+
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',
         'name': name,

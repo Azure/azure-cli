@@ -392,7 +392,7 @@ def _validate_vm_create_storage_account(namespace):
             # 2 - params for new storage account specified
             namespace.storage_account_type = 'new'
     else:
-        from azure.cli.core.profiles.shared import ResourceType
+        from azure.cli.core.profiles import ResourceType
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
         storage_client = get_mgmt_service_client(ResourceType.MGMT_STORAGE).storage_accounts  # pylint: disable=line-too-long
 
@@ -439,7 +439,7 @@ def _validate_vm_create_vnet(namespace, for_scale_set=False):
 
     if not vnet and not subnet and not nics:  # pylint: disable=too-many-nested-blocks
         # if nothing specified, try to find an existing vnet and subnet in the target resource group
-        from azure.cli.core.profiles.shared import ResourceType
+        from azure.cli.core.profiles import ResourceType
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
         client = get_mgmt_service_client(ResourceType.MGMT_NETWORK).virtual_networks
 

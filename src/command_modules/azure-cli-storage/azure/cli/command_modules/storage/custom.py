@@ -10,25 +10,33 @@ from sys import stderr
 
 from azure.cli.core.decorators import transfer_doc
 from azure.cli.core.util import CLIError
-from azure.cli.core.profiles import get_sdk_attr, get_versioned_models
-from azure.cli.core.profiles.shared import ResourceType
+from azure.cli.core.profiles import get_sdk, ResourceType
 
 from azure.cli.command_modules.storage._factory import \
     (storage_client_factory, generic_data_service_factory)
 
 
-Logging = get_sdk_attr('azure.multiapi.storage.models#Logging')
-Metrics = get_sdk_attr('azure.multiapi.storage.models#Metrics')
-CorsRule = get_sdk_attr('azure.multiapi.storage.models#CorsRule')
-AccessPolicy = get_sdk_attr('azure.multiapi.storage.models#AccessPolicy')
-RetentionPolicy = get_sdk_attr('azure.multiapi.storage.models#RetentionPolicy')
-BlockBlobService = get_sdk_attr('azure.multiapi.storage.blob#BlockBlobService')
-BaseBlobService = get_sdk_attr('azure.multiapi.storage.blob.baseblobservice#BaseBlobService')
-FileService = get_sdk_attr('azure.multiapi.storage.file#FileService')
-FileProperties = get_sdk_attr('azure.multiapi.storage.file.models#FileProperties')
-DirectoryProperties = get_sdk_attr('azure.multiapi.storage.file.models#DirectoryProperties')
-TableService = get_sdk_attr('azure.multiapi.storage.table#TableService')
-QueueService = get_sdk_attr('azure.multiapi.storage.queue#QueueService')
+Logging, Metrics, CorsRule, \
+    AccessPolicy, RetentionPolicy = get_sdk(ResourceType.DATA_STORAGE,
+                                            'Logging',
+                                            'Metrics',
+                                            'CorsRule',
+                                            'AccessPolicy',
+                                            'RetentionPolicy',
+                                            mod='models')
+
+
+BlockBlobService, BaseBlobService, \
+    FileService, FileProperties, \
+    DirectoryProperties, TableService, \
+    QueueService = get_sdk(ResourceType.DATA_STORAGE,
+                           'blob#BlockBlobService',
+                           'blob.baseblobservice#BaseBlobService',
+                           'file#FileService',
+                           'file.models#FileProperties',
+                           'file.models#DirectoryProperties',
+                           'table#TableService',
+                           'queue#QueueService')
 
 
 def _update_progress(current, total):
@@ -47,13 +55,14 @@ def _update_progress(current, total):
 def create_storage_account(resource_group_name, account_name, sku, location,
                            kind=None, tags=None, custom_domain=None,
                            encryption=None, access_tier=None):
-    StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier = get_versioned_models(
+    StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier = get_sdk(
         ResourceType.MGMT_STORAGE,
         'StorageAccountCreateParameters',
         'Kind',
         'Sku',
         'CustomDomain',
-        'AccessTier')
+        'AccessTier',
+        mod='models')
     scf = storage_client_factory()
     params = StorageAccountCreateParameters(
         sku=Sku(sku),
@@ -67,10 +76,11 @@ def create_storage_account(resource_group_name, account_name, sku, location,
 
 
 def create_storage_account_with_account_type(resource_group_name, account_name, location, account_type, tags=None):
-    StorageAccountCreateParameters, AccountType = get_versioned_models(
+    StorageAccountCreateParameters, AccountType = get_sdk(
         ResourceType.MGMT_STORAGE,
         'StorageAccountCreateParameters',
-        'AccountType')
+        'AccountType',
+        mod='models')
     scf = storage_client_factory()
     params = StorageAccountCreateParameters(location, AccountType(account_type), tags)
     return scf.storage_accounts.create(resource_group_name, account_name, params)
@@ -78,12 +88,13 @@ def create_storage_account_with_account_type(resource_group_name, account_name, 
 
 def update_storage_account(instance, sku=None, tags=None, custom_domain=None,
                            use_subdomain=None, encryption=None, access_tier=None):
-    StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier = get_versioned_models(
+    StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier = get_sdk(
         ResourceType.MGMT_STORAGE,
         'StorageAccountUpdateParameters',
         'Sku',
         'CustomDomain',
-        'AccessTier')
+        'AccessTier',
+        mod='models')
     domain = instance.custom_domain
     if custom_domain is not None:
         domain = CustomDomain(custom_domain)

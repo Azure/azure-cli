@@ -27,8 +27,7 @@ from azure.cli.command_modules.storage._transformers import \
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.util import empty_on_404
-from azure.cli.core.profiles import get_api_version, get_sdk_attr
-from azure.cli.core.profiles.shared import ResourceType
+from azure.cli.core.profiles import get_api_version, get_sdk, ResourceType
 
 mgmt_path = 'azure.mgmt.storage.operations.storage_accounts_operations#StorageAccountsOperations.'
 custom_path = 'azure.cli.command_modules.storage.custom#'
@@ -42,7 +41,7 @@ queue_path = 'azure.multiapi.storage.queue.queueservice#QueueService.'
 
 def _dont_fail_not_exist(ex):
     AzureMissingResourceHttpError = \
-        get_sdk_attr('azure.multiapi.storage._error#AzureMissingResourceHttpError')
+        get_sdk(ResourceType.DATA_STORAGE, '_error#_ERROR_STORAGE_MISSING_INFO')
     if isinstance(ex, AzureMissingResourceHttpError):
         return None
     else:

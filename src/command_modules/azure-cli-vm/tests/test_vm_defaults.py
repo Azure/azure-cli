@@ -10,11 +10,7 @@ try:
 except ImportError:
     import mock
 
-from azure.mgmt.network import NetworkManagementClient
-from azure.mgmt.storage import StorageManagementClient
-from azure.mgmt.resource import ResourceManagementClient
-
-from azure.cli.core.profiles.shared import ResourceType
+from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.vm._validators import (_validate_vm_create_vnet,
                                                       _validate_vmss_create_subnet,

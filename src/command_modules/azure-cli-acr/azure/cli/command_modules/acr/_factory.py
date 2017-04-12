@@ -18,7 +18,7 @@ def get_arm_service_client():
 def get_storage_service_client():
     '''Returns the client for managing storage accounts.
     '''
-    from azure.cli.core.profiles.shared import ResourceType
+    from azure.cli.core.profiles import ResourceType
     return get_mgmt_service_client(ResourceType.MGMT_STORAGE)
 
 def get_acr_service_client():

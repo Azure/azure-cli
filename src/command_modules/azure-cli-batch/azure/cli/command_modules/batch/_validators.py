@@ -130,7 +130,7 @@ def validate_required_parameter(ns, parser):
 def storage_account_id(namespace):
     """Validate storage account name"""
     from azure.mgmt.storage import StorageManagementClient
-    from azure.cli.core.profiles.shared import ResourceType
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     if (namespace.storage_account and not

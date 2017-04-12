@@ -23,8 +23,7 @@ from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CnameRecord, 
 
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
-from azure.cli.core.profiles.shared import ResourceType
-from azure.cli.core.profiles import get_versioned_models, get_api_version
+from azure.cli.core.profiles import get_sdk, get_api_version, ResourceType
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -35,35 +34,39 @@ def _log_pprint_template(template):
     logger.info('==== END TEMPLATE ====')
 
 VirtualNetworkPeering, ApplicationGatewayFirewallMode, \
-    ApplicationGatewaySkuName, IPVersion = get_versioned_models(
+    ApplicationGatewaySkuName, IPVersion = get_sdk(
         ResourceType.MGMT_NETWORK,
         'VirtualNetworkPeering', 'ApplicationGatewayFirewallMode',
-        'ApplicationGatewaySkuName', 'IPVersion')
+        'ApplicationGatewaySkuName', 'IPVersion',
+        mod='models')
 
 PublicIPAddress, PublicIPAddressDnsSettings, VirtualNetwork, DhcpOptions, \
     AddressSpace, Subnet, NetworkSecurityGroup, NetworkInterfaceIPConfiguration, \
-    InboundNatPool, InboundNatRule, SubResource = get_versioned_models(
+    InboundNatPool, InboundNatRule, SubResource = get_sdk(
         ResourceType.MGMT_NETWORK,
         'PublicIPAddress', 'PublicIPAddressDnsSettings',
         'VirtualNetwork', 'DhcpOptions', 'AddressSpace',
         'Subnet', 'NetworkSecurityGroup', 'NetworkInterfaceIPConfiguration',
-        'InboundNatPool', 'InboundNatRule', 'SubResource')
+        'InboundNatPool', 'InboundNatRule', 'SubResource',
+        mod='models')
 
 BackendAddressPool, LoadBalancingRule, VirtualNetworkGatewayType, \
     VirtualNetworkGatewaySkuName, SecurityRule, FrontendIPConfiguration, \
-    Route, VpnClientRootCertificate, SecurityRuleAccess = get_versioned_models(
+    Route, VpnClientRootCertificate, SecurityRuleAccess = get_sdk(
         ResourceType.MGMT_NETWORK,
         'BackendAddressPool', 'LoadBalancingRule', 'VirtualNetworkGatewayType',
         'VirtualNetworkGatewaySkuName', 'SecurityRule', 'FrontendIPConfiguration',
-        'Route', 'VpnClientRootCertificate', 'SecurityRuleAccess')
+        'Route', 'VpnClientRootCertificate', 'SecurityRuleAccess',
+        mod='models')
 
 SecurityRuleDirection, Probe, VpnClientConfiguration, VpnClientRevokedCertificate, \
     SecurityRuleProtocol, IPAllocationMethod, ExpressRouteCircuitSkuTier, \
-    ExpressRouteCircuitSkuFamily, VpnType = get_versioned_models(
+    ExpressRouteCircuitSkuFamily, VpnType = get_sdk(
         ResourceType.MGMT_NETWORK,
         'SecurityRuleDirection', 'Probe', 'VpnClientConfiguration',
         'VpnClientRevokedCertificate', 'SecurityRuleProtocol', 'IPAllocationMethod',
-        'ExpressRouteCircuitSkuTier', 'ExpressRouteCircuitSkuFamily', 'VpnType')
+        'ExpressRouteCircuitSkuTier', 'ExpressRouteCircuitSkuFamily', 'VpnType',
+        mod='models')
 
 
 def _upsert(parent, collection_name, obj_to_add, key_name):
@@ -139,8 +142,9 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
         (ArmTemplateBuilder, build_application_gateway_resource, build_public_ip_resource,
          build_vnet_resource)
 
-    DeploymentProperties = get_versioned_models(ResourceType.MGMT_RESOURCE_RESOURCES,
-                                                'DeploymentProperties')
+    DeploymentProperties = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES,
+                                   'DeploymentProperties',
+                                   mod='models')
     tags = tags or {}
     sku_tier = sku.split('_', 1)[0]
     http_listener_protocol = 'https' if cert_data else 'http'
@@ -216,8 +220,9 @@ def update_application_gateway(instance, sku=None, capacity=None, tags=None):
 
 def create_ag_authentication_certificate(resource_group_name, application_gateway_name, item_name,
                                          cert_data, no_wait=False):
-    AuthCert = get_versioned_models(ResourceType.MGMT_NETWORK,
-                                    'ApplicationGatewayAuthenticationCertificate')
+    AuthCert = get_sdk(ResourceType.MGMT_NETWORK,
+                       'ApplicationGatewayAuthenticationCertificate',
+                       mod='models')
     ncf = _network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     new_cert = AuthCert(data=cert_data, name=item_name)
@@ -230,9 +235,10 @@ def update_ag_authentication_certificate(instance, parent, item_name, cert_data)
 
 def create_ag_backend_address_pool(resource_group_name, application_gateway_name, item_name,
                                    servers, no_wait=False):
-    ApplicationGatewayBackendAddressPool = get_versioned_models(
+    ApplicationGatewayBackendAddressPool = get_sdk(
         ResourceType.MGMT_NETWORK,
-        'ApplicationGatewayBackendAddressPool')
+        'ApplicationGatewayBackendAddressPool',
+        mod='models')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_pool = ApplicationGatewayBackendAddressPool(name=item_name, backend_addresses=servers)
@@ -249,9 +255,10 @@ def create_ag_frontend_ip_configuration(resource_group_name, application_gateway
                                         public_ip_address=None, subnet=None,
                                         virtual_network_name=None, private_ip_address=None, # pylint: disable=unused-argument
                                         private_ip_address_allocation=None, no_wait=False): # pylint: disable=unused-argument
-    ApplicationGatewayFrontendIPConfiguration = get_versioned_models(
+    ApplicationGatewayFrontendIPConfiguration = get_sdk(
         ResourceType.MGMT_NETWORK,
-        'ApplicationGatewayFrontendIPConfiguration')
+        'ApplicationGatewayFrontendIPConfiguration',
+        mod='models')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     if public_ip_address:
@@ -282,9 +289,10 @@ def update_ag_frontend_ip_configuration(instance, parent, item_name, public_ip_a
 
 def create_ag_frontend_port(resource_group_name, application_gateway_name, item_name, port,
                             no_wait=False):
-    ApplicationGatewayFrontendPort = get_versioned_models(
+    ApplicationGatewayFrontendPort = get_sdk(
         ResourceType.MGMT_NETWORK,
-        'ApplicationGatewayFrontendPort')
+        'ApplicationGatewayFrontendPort',
+        mod='models')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_port = ApplicationGatewayFrontendPort(name=item_name, port=port)
@@ -300,9 +308,10 @@ def update_ag_frontend_port(instance, parent, item_name, port=None): # pylint: d
 def create_ag_http_listener(resource_group_name, application_gateway_name, item_name,
                             frontend_ip, frontend_port, host_name=None, ssl_cert=None,
                             no_wait=False):
-    ApplicationGatewayHttpListener = get_versioned_models(
+    ApplicationGatewayHttpListener = get_sdk(
         ResourceType.MGMT_NETWORK,
-        'ApplicationGatewayHttpListener')
+        'ApplicationGatewayHttpListener',
+        mod='models')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_listener = ApplicationGatewayHttpListener(
@@ -340,9 +349,10 @@ def create_ag_backend_http_settings_collection(resource_group_name, application_
                                                item_name, port, probe=None, protocol='http',
                                                cookie_based_affinity=None, timeout=None,
                                                no_wait=False):
-    ApplicationGatewayBackendHttpSettings = get_versioned_models(
+    ApplicationGatewayBackendHttpSettings = get_sdk(
         ResourceType.MGMT_NETWORK,
-        'ApplicationGatewayBackendHttpSettings')
+        'ApplicationGatewayBackendHttpSettings',
+        mod='models')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_settings = ApplicationGatewayBackendHttpSettings(
@@ -373,9 +383,10 @@ def update_ag_backend_http_settings_collection(instance, parent, item_name, port
 
 def create_ag_probe(resource_group_name, application_gateway_name, item_name, protocol, host,
                     path, interval=30, timeout=120, threshold=8, no_wait=False):
-    ApplicationGatewayProbe = get_versioned_models(
+    ApplicationGatewayProbe = get_sdk(
         ResourceType.MGMT_NETWORK,
-        'ApplicationGatewayProbe')
+        'ApplicationGatewayProbe',
+        mod='models')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_probe = ApplicationGatewayProbe(
@@ -409,9 +420,10 @@ def update_ag_probe(instance, parent, item_name, protocol=None, host=None, path=
 def create_ag_request_routing_rule(resource_group_name, application_gateway_name, item_name,
                                    address_pool, http_settings, http_listener, url_path_map=None,
                                    rule_type='Basic', no_wait=False):
-    ApplicationGatewayRequestRoutingRule = get_versioned_models(
+    ApplicationGatewayRequestRoutingRule = get_sdk(
         ResourceType.MGMT_NETWORK,
-        'ApplicationGatewayRequestRoutingRule')
+        'ApplicationGatewayRequestRoutingRule',
+        mod='models')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_rule = ApplicationGatewayRequestRoutingRule(
@@ -442,9 +454,10 @@ def update_ag_request_routing_rule(instance, parent, item_name, address_pool=Non
 
 def create_ag_ssl_certificate(resource_group_name, application_gateway_name, item_name, cert_data,
                               cert_password, no_wait=False):
-    ApplicationGatewaySslCertificate = get_versioned_models(
+    ApplicationGatewaySslCertificate = get_sdk(
         ResourceType.MGMT_NETWORK,
-        'ApplicationGatewaySslCertificate')
+        'ApplicationGatewaySslCertificate',
+        mod='models')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_cert = ApplicationGatewaySslCertificate(
@@ -462,9 +475,10 @@ def update_ag_ssl_certificate(instance, parent, item_name, cert_data=None, cert_
 
 def set_ag_ssl_policy(resource_group_name, application_gateway_name, disabled_ssl_protocols=None,
                       clear=False, no_wait=False):
-    ApplicationGatewaySslPolicy = get_versioned_models(
+    ApplicationGatewaySslPolicy = get_sdk(
         ResourceType.MGMT_NETWORK,
-        'ApplicationGatewaySslPolicy')
+        'ApplicationGatewaySslPolicy',
+        mod='models')
     ncf = _network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     ag.ssl_policy = None if clear else ApplicationGatewaySslPolicy(disabled_ssl_protocols)
@@ -477,9 +491,9 @@ def show_ag_ssl_policy(resource_group_name, application_gateway_name):
 def create_ag_url_path_map(resource_group_name, application_gateway_name, item_name,
                            paths, address_pool, http_settings, rule_name='default',
                            default_address_pool=None, default_http_settings=None, no_wait=False): # pylint: disable=unused-argument
-    ApplicationGatewayUrlPathMap, ApplicationGatewayPathRule = get_versioned_models(
+    ApplicationGatewayUrlPathMap, ApplicationGatewayPathRule = get_sdk(
         ResourceType.MGMT_NETWORK,
-        'ApplicationGatewayUrlPathMap', 'ApplicationGatewayPathRule')
+        'ApplicationGatewayUrlPathMap', 'ApplicationGatewayPathRule', mod='models')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_map = ApplicationGatewayUrlPathMap(
@@ -509,9 +523,9 @@ def update_ag_url_path_map(instance, parent, item_name, default_address_pool=Non
 def create_ag_url_path_map_rule(resource_group_name, application_gateway_name, url_path_map_name,
                                 item_name, paths, address_pool=None, http_settings=None,
                                 no_wait=False):
-    ApplicationGatewayPathRule = get_versioned_models(
+    ApplicationGatewayPathRule = get_sdk(
         ResourceType.MGMT_NETWORK,
-        'ApplicationGatewayPathRule')
+        'ApplicationGatewayPathRule', mod='models')
     ncf = _network_client_factory()
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     url_map = next((x for x in ag.url_path_maps if x.name == url_path_map_name), None)
@@ -542,9 +556,9 @@ def delete_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
 
 def set_ag_waf_config(resource_group_name, application_gateway_name, enabled,
                       firewall_mode=ApplicationGatewayFirewallMode.detection.value, no_wait=False):
-    ApplicationGatewayWebApplicationFirewallConfiguration = get_versioned_models(
+    ApplicationGatewayWebApplicationFirewallConfiguration = get_sdk(
         ResourceType.MGMT_NETWORK,
-        'ApplicationGatewayWebApplicationFirewallConfiguration')
+        'ApplicationGatewayWebApplicationFirewallConfiguration', mod='models')
     ncf = _network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     ag.web_application_firewall_configuration = \
@@ -572,8 +586,8 @@ def create_load_balancer(load_balancer_name, resource_group_name, location=None,
         (ArmTemplateBuilder, build_load_balancer_resource, build_public_ip_resource,
          build_vnet_resource)
 
-    DeploymentProperties = get_versioned_models(ResourceType.MGMT_RESOURCE_RESOURCES,
-                                                'DeploymentProperties')
+    DeploymentProperties = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES,
+                                   'DeploymentProperties', mod='models')
     tags = tags or {}
     public_ip_address = public_ip_address or 'PublicIP{}'.format(load_balancer_name)
     backend_pool_name = backend_pool_name or '{}bepool'.format(load_balancer_name)
@@ -830,10 +844,10 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
                private_ip_address=None, private_ip_address_version=IPVersion.ipv4.value,
                public_ip_address=None, virtual_network_name=None):
     client = _network_client_factory().network_interfaces
-    NetworkInterface = get_versioned_models(ResourceType.MGMT_NETWORK, 'NetworkInterface')
-    NetworkInterfaceDnsSettings = get_versioned_models(
+    NetworkInterface = get_sdk(ResourceType.MGMT_NETWORK, 'NetworkInterface', mod='models')
+    NetworkInterfaceDnsSettings = get_sdk(
         ResourceType.MGMT_NETWORK,
-        'NetworkInterfaceDnsSettings')
+        'NetworkInterfaceDnsSettings', mod='models')
     nic = NetworkInterface(location=location, tags=tags, enable_ip_forwarding=enable_ip_forwarding)
     if internal_dns_name_label:
         nic.dns_settings = NetworkInterfaceDnsSettings(
@@ -1241,8 +1255,8 @@ def create_vpn_connection(client, resource_group_name, connection_name, vnet_gat
     from azure.cli.command_modules.network._template_builder import \
         ArmTemplateBuilder, build_vpn_connection_resource
 
-    DeploymentProperties = get_versioned_models(ResourceType.MGMT_RESOURCE_RESOURCES,
-                                                'DeploymentProperties')
+    DeploymentProperties = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES,
+                                   'DeploymentProperties', mod='models')
     tags = tags or {}
 
     # Build up the ARM template
@@ -1312,7 +1326,7 @@ def _validate_bgp_peering(instance, asn, bgp_peering_address, peer_weight):
             if bgp_peering_address is not None:
                 instance.bgp_settings.bgp_peering_address = bgp_peering_address
         elif asn:
-            BgpSettings = get_versioned_models(ResourceType.MGMT_NETWORK, 'BgpSettings')
+            BgpSettings = get_sdk(ResourceType.MGMT_NETWORK, 'BgpSettings', mod='models')
             instance.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
         else:
             raise CLIError(
@@ -1394,12 +1408,13 @@ def create_vnet_gateway(resource_group_name, virtual_network_gateway_name, publi
                         vpn_type=VpnType.route_based.value,
                         asn=None, bgp_peering_address=None, peer_weight=None):
     VirtualNetworkGateway, BgpSettings, VirtualNetworkGatewayIPConfiguration, \
-        VirtualNetworkGatewaySku = get_versioned_models(
+        VirtualNetworkGatewaySku = get_sdk(
             ResourceType.MGMT_NETWORK,
             'VirtualNetworkGateway',
             'BgpSettings',
             'VirtualNetworkGatewayIPConfiguration',
-            'VirtualNetworkGatewaySku')
+            'VirtualNetworkGatewaySku',
+            mod='models')
 
     client = _network_client_factory().virtual_network_gateways
     subnet = virtual_network + '/subnets/GatewaySubnet'
@@ -1427,9 +1442,9 @@ def update_vnet_gateway(instance, address_prefixes=None, sku=None, vpn_type=None
                         public_ip_address=None, gateway_type=None, enable_bgp=None,
                         asn=None, bgp_peering_address=None, peer_weight=None, virtual_network=None,
                         tags=None):
-    VirtualNetworkGatewayIPConfiguration = get_versioned_models(
+    VirtualNetworkGatewayIPConfiguration = get_sdk(
         ResourceType.MGMT_NETWORK,
-        'VirtualNetworkGatewayIPConfiguration')
+        'VirtualNetworkGatewayIPConfiguration', mod='models')
 
     if address_prefixes is not None:
         if not instance.vpn_client_configuration:
@@ -1494,11 +1509,12 @@ def create_express_route(circuit_name, resource_group_name, bandwidth_in_mbps, p
                          sku_family=ExpressRouteCircuitSkuFamily.metered_data.value,
                          sku_tier=ExpressRouteCircuitSkuTier.standard.value):
     ExpressRouteCircuit, ExpressRouteCircuitSku, \
-    ExpressRouteCircuitServiceProviderProperties = get_versioned_models(
+    ExpressRouteCircuitServiceProviderProperties = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ExpressRouteCircuit',
         'ExpressRouteCircuitSku',
-        'ExpressRouteCircuitServiceProviderProperties')
+        'ExpressRouteCircuitServiceProviderProperties',
+        mod='models')
     client = _network_client_factory().express_route_circuits
     sku_name = '{}_{}'.format(sku_tier, sku_family)
     circuit = ExpressRouteCircuit(
@@ -1550,11 +1566,12 @@ def create_express_route_peering(
     :param str routing_registry_name: Internet Routing Registry / Regional Internet Registry
     """
     ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig, \
-    ExpressRouteCircuitPeeringType = get_versioned_models(
+    ExpressRouteCircuitPeeringType = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ExpressRouteCircuitPeering',
         'ExpressRouteCircuitPeeringConfig',
-        'ExpressRouteCircuitPeeringType')
+        'ExpressRouteCircuitPeeringType',
+        mod='models')
 
     # TODO: Remove workaround when issue #1574 is fixed in the service
     # region Issue #1574 workaround
@@ -1659,8 +1676,10 @@ update_route.__doc__ = Route.__doc__
 def create_local_gateway(resource_group_name, local_network_gateway_name, gateway_ip_address,
                          location=None, tags=None, local_address_prefix=None, asn=None,
                          bgp_peering_address=None, peer_weight=None, no_wait=False):
-    LocalNetworkGateway = get_versioned_models(ResourceType.MGMT_NETWORK, "LocalNetworkGateway")
-    BgpSettings = get_versioned_models(ResourceType.MGMT_NETWORK, "BgpSettings")
+    LocalNetworkGateway, BgpSettings = get_sdk(ResourceType.MGMT_NETWORK,
+                                               'LocalNetworkGateway',
+                                               'BgpSettings',
+                                               mod='models')
 
     client = _network_client_factory().local_network_gateways
     local_gateway = LocalNetworkGateway(

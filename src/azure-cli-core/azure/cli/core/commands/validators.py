@@ -6,7 +6,7 @@
 import argparse
 import time
 import random
-from azure.cli.core.profiles.shared import ResourceType
+from azure.cli.core.profiles import ResourceType
 
 
 def validate_tags(ns):

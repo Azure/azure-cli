@@ -11,8 +11,10 @@ from azure.cli.core.commands import CliArgumentType, register_cli_argument
 from azure.cli.core.commands.validators import validate_tag, validate_tags
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands.validators import generate_deployment_name
-from azure.cli.core.profiles import get_versioned_models
-from azure.cli.core.profiles.shared import ResourceType
+from azure.cli.core.profiles import get_sdk, ResourceType
+import azure.cli.core.azlogging as azlogging
+
+logger = azlogging.get_az_logger(__name__)
 
 
 def get_subscription_locations():
@@ -96,7 +98,7 @@ class CaseInsensitiveList(list):  # pylint: disable=too-few-public-methods
 
 
 def model_choice_list(resource_type, model_name):
-    model = get_versioned_models(resource_type, model_name)
+    model = get_sdk(resource_type, model_name, mod='models')
     return enum_choice_list(model) if model else {}
 
 
@@ -120,10 +122,11 @@ def enum_choice_list(data):
 
 
 def enum_default(resource_type, enum_name, enum_val_name):
-    mod = get_versioned_models(resource_type, enum_name)
+    mod = get_sdk(resource_type, enum_name, mod='models')
     try:
         return getattr(mod, enum_val_name).value
     except AttributeError:
+        logger.debug('Skipping param default %s.%s for %s.', enum_name, enum_val_name, resource_type)
         return None
 
 

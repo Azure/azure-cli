@@ -6,7 +6,7 @@
 #pylint: disable=line-too-long
 
 def _network_client_factory(**_):
-    from azure.cli.core.profiles.shared import ResourceType
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(ResourceType.MGMT_NETWORK)
 
@@ -14,7 +14,7 @@ def _network_client_factory(**_):
 def resource_client_factory(**_):
     from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.core.profiles.shared import ResourceType
+    from azure.cli.core.profiles import ResourceType
     return get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
 
 

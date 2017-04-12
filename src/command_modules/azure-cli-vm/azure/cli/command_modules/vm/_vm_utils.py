@@ -19,7 +19,7 @@ def read_content_if_is_file(string_or_file):
 
 def _resolve_api_version(provider_namespace, resource_type, parent_path):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.core.profiles.shared import ResourceType
+    from azure.cli.core.profiles import ResourceType
     client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
     provider = client.providers.get(provider_namespace)
 
@@ -54,7 +54,7 @@ def check_existence(value, resource_group, provider_namespace, resource_type,
     # check for name or ID and set the type flags
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from msrestazure.azure_exceptions import CloudError
-    from azure.cli.core.profiles.shared import ResourceType
+    from azure.cli.core.profiles import ResourceType
     resource_client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).resources
 
     id_parts = parse_resource_id(value)

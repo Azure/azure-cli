@@ -17,8 +17,7 @@ from azure.cli.core.commands import register_cli_argument, register_extra_cli_ar
 
 from azure.common import AzureMissingResourceHttpError
 
-from azure.cli.core.profiles import get_versioned_models, get_sdk_attr
-from azure.cli.core.profiles.shared import ResourceType
+from azure.cli.core.profiles import get_sdk, ResourceType
 
 from ._factory import get_storage_data_service_client
 from ._validators import \
@@ -35,24 +34,44 @@ from ._validators import \
      process_metric_update_namespace, process_blob_copy_batch_namespace,
      get_source_file_or_blob_service_client, process_blob_source_uri)
 
-AccountPermissions = get_sdk_attr('azure.multiapi.storage.models#AccountPermissions')
-DeleteSnapshot = get_sdk_attr('azure.multiapi.storage.blob#DeleteSnapshot')
-BlockBlobService = get_sdk_attr('azure.multiapi.storage.blob#BlockBlobService')
-PageBlobService = get_sdk_attr('azure.multiapi.storage.blob#PageBlobService')
-AppendBlobService = get_sdk_attr('azure.multiapi.storage.blob#AppendBlobService')
-BaseBlobService = get_sdk_attr('azure.multiapi.storage.blob.baseblobservice#BaseBlobService')
-BlobContentSettings = get_sdk_attr('azure.multiapi.storage.blob.models#ContentSettings')
-ContainerPermissions = get_sdk_attr('azure.multiapi.storage.blob.models#ContainerPermissions')
-BlobPermissions = get_sdk_attr('azure.multiapi.storage.blob.models#BlobPermissions')
-FileService = get_sdk_attr('azure.multiapi.storage.file#FileService')
-FileContentSettings = get_sdk_attr('azure.multiapi.storage.file.models#ContentSettings')
-SharePermissions = get_sdk_attr('azure.multiapi.storage.file.models#SharePermissions')
-FilePermissions = get_sdk_attr('azure.multiapi.storage.file.models#FilePermissions')
-TableService = get_sdk_attr('azure.multiapi.storage.table#TableService')
-TablePayloadFormat = get_sdk_attr('azure.multiapi.storage.table#TablePayloadFormat')
-QueueService = get_sdk_attr('azure.multiapi.storage.queue#QueueService')
-QueuePermissions = get_sdk_attr('azure.multiapi.storage.queue.models#QueuePermissions')
-PublicAccess = get_sdk_attr('azure.multiapi.storage.blob.models#PublicAccess')
+
+DeleteSnapshot, BlockBlobService, \
+    PageBlobService, AppendBlobService = get_sdk(ResourceType.DATA_STORAGE,
+                                                 'DeleteSnapshot',
+                                                 'BlockBlobService',
+                                                 'PageBlobService',
+                                                 'AppendBlobService',
+                                                 mod='blob')
+
+
+BlobContentSettings, ContainerPermissions, \
+    BlobPermissions, PublicAccess = get_sdk(ResourceType.DATA_STORAGE,
+                                            'ContentSettings',
+                                            'ContainerPermissions',
+                                            'BlobPermissions',
+                                            'PublicAccess',
+                                            mod='blob.models')
+
+FileContentSettings, SharePermissions, \
+    FilePermissions = get_sdk(ResourceType.DATA_STORAGE,
+                              'ContentSettings',
+                              'SharePermissions',
+                              'FilePermissions',
+                              mod='file.models')
+
+TableService, TablePayloadFormat = get_sdk(ResourceType.DATA_STORAGE,
+                                           'TableService',
+                                           'TablePayloadFormat',
+                                           mod='table')
+
+AccountPermissions, BaseBlobService, \
+    FileService, QueueService, QueuePermissions = get_sdk(ResourceType.DATA_STORAGE,
+                                                          'models#AccountPermissions',
+                                                          'blob.baseblobservice#BaseBlobService',
+                                                          'file#FileService',
+                                                          'queue#QueueService',
+                                                          'queue.models#QueuePermissions')
+
 
 # UTILITY
 
@@ -273,7 +292,7 @@ register_cli_argument('storage account create', 'tags', tags_type)
 
 for item in ['create', 'update']:
     register_cli_argument('storage account {}'.format(item), 'sku', help='The storage account SKU.', **model_choice_list(ResourceType.MGMT_STORAGE, 'SkuName'))
-    es_model = get_versioned_models(ResourceType.MGMT_STORAGE, 'EncryptionServices')
+    es_model = get_sdk(ResourceType.MGMT_STORAGE, 'models#EncryptionServices')
     if es_model:
         register_cli_argument('storage account {}'.format(item), 'encryption', nargs='+', help='Specifies which service(s) to encrypt.', validator=validate_encryption, **enum_choice_list(list(es_model._attribute_map.keys())))  # pylint: disable=protected-access
 
