@@ -56,10 +56,8 @@ cli_command(__name__, 'role definition delete',
             'azure.cli.command_modules.role.custom#delete_role_definition')
 cli_command(__name__, 'role definition create',
             'azure.cli.command_modules.role.custom#create_role_definition')
-cli_generic_update_command(__name__, 'role definition update',
-                           get_role_definition_op('get'),
-                           get_role_definition_op('create_or_update'),
-                           get_role_definitions)
+cli_command(__name__, 'role definition update',
+            'azure.cli.command_modules.role.custom#update_role_definition')
 
 cli_command(__name__, 'role assignment delete',
             'azure.cli.command_modules.role.custom#delete_role_assignments')
