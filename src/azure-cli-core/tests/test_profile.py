@@ -584,7 +584,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('os.fdopen', autospec=True)
     @mock.patch('os.open', autospec=True)
-    def test_credscache_add_pre_existing_sp_creds(self, _, mock_open_for_write, mock_read_file):
+    def test_credscache_add_preexisting_sp_creds(self, _, mock_open_for_write, mock_read_file):
         test_sp = {
             "servicePrincipalId": "myapp",
             "servicePrincipalTenant": "mytenant",
