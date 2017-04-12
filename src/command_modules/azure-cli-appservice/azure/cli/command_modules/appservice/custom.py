@@ -964,9 +964,8 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
 def create_function(resource_group_name, name, storage_account, plan=None,
                     consumption_plan_location=None):
 
-    if ((plan and consumption_plan_location) or
-            (plan is None and consumption_plan_location is None)):
-        raise CLIError("Use either Plan or Consumption Plan Location")
+    if bool(plan) == bool(consumption_plan_location):
+        raise CLIError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
 
     functionapp_def = Site(location='')
     client = web_client_factory()
@@ -1017,12 +1016,9 @@ def _validate_and_get_connection_string(resource_group_name, storage_account):
     sku = storage_properties.sku.name.value
     allowed_storage_types = ['Standard_GRS', 'Standard_LRS', 'Standard_ZRS', 'Premium_LRS']
 
-    if (hasattr(endpoints, 'table') and not endpoints.table):
-        error_message = 'Storage has no table endpoint. '
-    if (hasattr(endpoints, 'blob') and not endpoints.blob):
-        error_message += 'Storage has no blob endpoint. '
-    if (hasattr(endpoints, 'queue') and not endpoints.queue):
-        error_message += 'Storage has no queue endpoint. '
+    for e in ['blob', 'queue', 'table']:
+        if not getattr(endpoints, e, None):
+                error_message = "Storage account has no '{}' endpoint. It must have table, queue, and blob endpoints all enabled".format(e)
     if sku not in allowed_storage_types:
         error_message += 'Storage type {} is not allowed'.format(sku)
 
