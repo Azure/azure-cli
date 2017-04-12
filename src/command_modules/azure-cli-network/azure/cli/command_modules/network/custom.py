@@ -1673,8 +1673,6 @@ def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_locat
                                     endpoint_status=None, endpoint_monitor_status=None,
                                     priority=None, target=None, target_resource_id=None,
                                     weight=None, min_child_endpoints=None):
-    if endpoint_type is not None:
-        instance.type = endpoint_type
     if endpoint_location is not None:
         instance.endpoint_location = endpoint_location
     if endpoint_status is not None:

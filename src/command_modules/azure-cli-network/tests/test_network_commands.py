@@ -1301,15 +1301,30 @@ class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
         unique_dns_name = 'mytrafficmanager001100a'
 
         self.cmd('network traffic-manager profile check-dns -n myfoobar1')
-        self.cmd('network traffic-manager profile create -n {} -g {} --routing-method weighted --unique-dns-name {}'.format(tm_name, self.resource_group, unique_dns_name),
-            checks=JMESPathCheck('TrafficManagerProfile.trafficRoutingMethod', 'Weighted'))
+        self.cmd('network traffic-manager profile create -n {} -g {} --routing-method priority --unique-dns-name {}'.format(tm_name, self.resource_group, unique_dns_name),
+            checks=JMESPathCheck('TrafficManagerProfile.trafficRoutingMethod', 'Priority'))
         self.cmd('network traffic-manager profile show -g {} -n {}'.format(self.resource_group, tm_name),
             checks=JMESPathCheck('dnsConfig.relativeName', unique_dns_name))
+        self.cmd('network traffic-manager profile update -n {} -g {} --routing-method weighted'.format(tm_name, self.resource_group),
+            checks=JMESPathCheck('trafficRoutingMethod', 'Weighted'))
+        self.cmd('network traffic-manager profile list -g {}'.format(self.resource_group))
 
+        # Endpoint tests
         self.cmd('network traffic-manager endpoint create -n {} --profile-name {} -g {} --type externalEndpoints --weight 50 --target www.microsoft.com'.format(endpoint_name, tm_name, self.resource_group),
             checks=JMESPathCheck('type', 'Microsoft.Network/trafficManagerProfiles/externalEndpoints'))
-        self.cmd('network traffic-manager endpoint show --profile-name {} --type  externalEndpoints -n {} -g {}'.format(tm_name, endpoint_name, self.resource_group),
-            checks=JMESPathCheck('target', 'www.microsoft.com'))
+        self.cmd('network traffic-manager endpoint update -n {} --profile-name {} -g {} --type externalEndpoints --weight 25 --target www.contoso.com'.format(endpoint_name, tm_name, self.resource_group), checks=[
+            JMESPathCheck('weight', 25),
+            JMESPathCheck('target', 'www.contoso.com')
+        ])
+        self.cmd('network traffic-manager endpoint show -g {} --profile-name {} -t externalEndpoints -n {}'.format(self.resource_group, tm_name, endpoint_name))
+        self.cmd('network traffic-manager endpoint list -g {} --profile-name {} -t externalEndpoints'.format(self.resource_group, tm_name),
+            checks=JMESPathCheck('length(@)', 1))
+        self.cmd('network traffic-manager endpoint delete -g {} --profile-name {} -t externalEndpoints -n {}'.format(self.resource_group, tm_name, endpoint_name))
+        self.cmd('network traffic-manager endpoint list -g {} --profile-name {} -t externalEndpoints'.format(self.resource_group, tm_name),
+            checks=JMESPathCheck('length(@)', 0))
+
+        self.cmd('network traffic-manager profile delete -g {} -n {}'.format(self.resource_group, tm_name))
+
 
 class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
 
