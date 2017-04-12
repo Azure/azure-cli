@@ -178,4 +178,3 @@ register_cli_argument('functionapp create', 'storage_account', options_list=('--
 register_cli_argument('functionapp config appsettings', 'settings', nargs='+', help="space separated app settings in a format of <name>=<value>")
 register_cli_argument('functionapp config appsettings', 'slot_settings', nargs='+', help="space separated slot app settings in a format of <name>=<value>")
 register_cli_argument('functionapp config appsettings', 'setting_names', nargs='+', help="space separated app setting names")
-

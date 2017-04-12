@@ -1018,7 +1018,7 @@ def _validate_and_get_connection_string(resource_group_name, storage_account):
 
     for e in ['blob', 'queue', 'table']:
         if not getattr(endpoints, e, None):
-                error_message = "Storage account has no '{}' endpoint. It must have table, queue, and blob endpoints all enabled".format(e)
+            error_message = "Storage account '{}' has no '{}' endpoint. It must have table, queue, and blob endpoints all enabled".format(e, storage_account)   # pylint: disable=line-too-long
     if sku not in allowed_storage_types:
         error_message += 'Storage type {} is not allowed'.format(sku)
 
