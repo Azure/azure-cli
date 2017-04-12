@@ -86,7 +86,7 @@ def _create_update_role_definition(role_definition, for_update):
 
     permission = Permission(actions=role_definition.get('actions', None),
                             not_actions=role_definition.get('notActions', None))
-    properties = RoleDefinitionProperties(role_name=role_definition['name'],
+    properties = RoleDefinitionProperties(role_name=role_name,
                                           description=role_definition.get('description', None),
                                           type=_CUSTOM_RULE,
                                           assignable_scopes=role_definition['assignableScopes'],
@@ -111,7 +111,8 @@ def delete_role_definition(name, resource_group_name=None, scope=None,
 
 def _search_role_definitions(definitions_client, name, scope, custom_role_only=False):
     roles = list(definitions_client.list(scope))
-    roles = [r for r in roles if r.name == name or r.properties.role_name == name]
+    if name:
+        roles = [r for r in roles if r.name == name or r.properties.role_name == name]
     if custom_role_only:
         roles = [r for r in roles if r.properties.type == _CUSTOM_RULE]
     return roles
