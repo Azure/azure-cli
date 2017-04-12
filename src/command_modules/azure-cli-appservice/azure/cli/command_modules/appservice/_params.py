@@ -174,3 +174,8 @@ register_cli_argument('functionapp create', 'consumption_plan_location', options
                       help="Geographic location where Function App will be hosted. Use 'functionapp list-consumption-locations' to view available locations.")
 register_cli_argument('functionapp create', 'storage_account', options_list=('--storage-account', '-s'),
                       help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
+
+register_cli_argument('functionapp config appsettings', 'settings', nargs='+', help="space separated app settings in a format of <name>=<value>")
+register_cli_argument('functionapp config appsettings', 'slot_settings', nargs='+', help="space separated slot app settings in a format of <name>=<value>")
+register_cli_argument('functionapp config appsettings', 'setting_names', nargs='+', help="space separated app setting names")
+
