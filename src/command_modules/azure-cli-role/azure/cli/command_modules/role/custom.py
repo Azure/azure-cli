@@ -44,7 +44,15 @@ def get_role_definition_name_completion_list(prefix, **kwargs):  # pylint: disab
 
 
 def create_role_definition(role_definition):
-    role_id = uuid.uuid4()
+    return _create_update_role_definition(role_definition, for_update=False)
+
+
+def update_role_definition(role_definition):
+    return _create_update_role_definition(role_definition, for_update=True)
+
+
+def _create_update_role_definition(role_definition, for_update):
+    definitions_client = _auth_client_factory().role_definitions
     if os.path.exists(role_definition):
         role_definition = get_file_json(role_definition)
     else:
@@ -56,14 +64,29 @@ def create_role_definition(role_definition):
         new_name = n[:1].lower() + n[1:]
         role_definition[new_name] = role_definition.pop(n)
 
-    if 'name' not in role_definition:
-        raise CLIError("please provide 'name'")
-    if 'assignableScopes' not in role_definition:
+    role_name = role_definition.get('name', None)
+    if not role_name:
+        raise CLIError("please provide role name")
+    if for_update:  # for update, we need to use guid style unique name
+        scopes_in_definition = role_definition.get('assignableScopes', None)
+        scope = (scopes_in_definition[0] if scopes_in_definition else
+                 '/subscriptions/' + definitions_client.config.subscription_id)
+        matched = _search_role_definitions(definitions_client, role_name, scope)
+        if len(matched) != 1:
+            raise CLIError('Please provide the unique logic name of an existing role')
+        role_definition['name'] = matched[0].name
+        # ensure correct logical name and guid name. For update we accept both
+        role_name = matched[0].properties.role_name
+        role_id = matched[0].name
+    else:
+        role_id = uuid.uuid4()
+
+    if not for_update and 'assignableScopes' not in role_definition:
         raise CLIError("please provide 'assignableScopes'")
 
     permission = Permission(actions=role_definition.get('actions', None),
                             not_actions=role_definition.get('notActions', None))
-    properties = RoleDefinitionProperties(role_name=role_definition['name'],
+    properties = RoleDefinitionProperties(role_name=role_name,
                                           description=role_definition.get('description', None),
                                           type=_CUSTOM_RULE,
                                           assignable_scopes=role_definition['assignableScopes'],
@@ -71,7 +94,6 @@ def create_role_definition(role_definition):
 
     definition = RoleDefinition(name=role_id, properties=properties)
 
-    definitions_client = _auth_client_factory().role_definitions
     return definitions_client.create_or_update(role_definition_id=role_id,
                                                scope=properties.assignable_scopes[0],
                                                role_definition=definition)
@@ -88,7 +110,9 @@ def delete_role_definition(name, resource_group_name=None, scope=None,
 
 
 def _search_role_definitions(definitions_client, name, scope, custom_role_only=False):
-    roles = definitions_client.list(scope, filter="roleName eq '{}'".format(name) if name else None)
+    roles = list(definitions_client.list(scope))
+    if name:
+        roles = [r for r in roles if r.name == name or r.properties.role_name == name]
     if custom_role_only:
         roles = [r for r in roles if r.properties.type == _CUSTOM_RULE]
     return roles
@@ -508,7 +532,6 @@ def create_service_principal_for_rbac(
     # pylint: disable=protected-access
     public_cert_string = None
     cert_file = None
-    password = None
 
     if len([x for x in [cert, create_cert, password] if x]) > 1:
         raise CLIError('Usage error: --cert | --create-cert | --password')
