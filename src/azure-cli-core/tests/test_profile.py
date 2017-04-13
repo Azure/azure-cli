@@ -584,6 +584,25 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('os.fdopen', autospec=True)
     @mock.patch('os.open', autospec=True)
+    def test_credscache_add_preexisting_sp_creds(self, _, mock_open_for_write, mock_read_file):
+        test_sp = {
+            "servicePrincipalId": "myapp",
+            "servicePrincipalTenant": "mytenant",
+            "accessToken": "Secret"
+        }
+        mock_open_for_write.return_value = FileHandleStub()
+        mock_read_file.return_value = [test_sp]
+        creds_cache = CredsCache()
+
+        # action
+        creds_cache.save_service_principal_cred(test_sp)
+
+        # assert
+        self.assertEqual(creds_cache._service_principal_creds, [test_sp])
+
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
+    @mock.patch('os.fdopen', autospec=True)
+    @mock.patch('os.open', autospec=True)
     def test_credscache_remove_creds(self, _, mock_open_for_write, mock_read_file):
         test_sp = {
             "servicePrincipalId": "myapp",

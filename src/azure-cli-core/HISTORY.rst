@@ -4,6 +4,7 @@ Release History
 ===============
 2.0.3 (unreleased)
 ^^^^^^^^^^^^^^^^^^
+*core: fix a failure when login using a service principal twice (#2800)
 *core: Allow file path of accessTokens.json to be configurable through an env var(#2605)
 *core: Allow configured defaults to apply on optional args(#2703)
 *core: Improved performance
