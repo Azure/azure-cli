@@ -499,7 +499,7 @@ class CredsCache(object):
             # pylint: disable=line-too-long
             if (sp_entry.get(_ACCESS_TOKEN, None) != getattr(matched[0], _ACCESS_TOKEN, None) or
                     sp_entry.get(_SERVICE_PRINCIPAL_CERT_FILE, None) != getattr(matched[0], _SERVICE_PRINCIPAL_CERT_FILE, None)):
-                self._service_principal_creds.pop(matched[0])
+                self._service_principal_creds.remove(matched[0])
                 self._service_principal_creds.append(matched[0])
                 state_changed = True
         else:
