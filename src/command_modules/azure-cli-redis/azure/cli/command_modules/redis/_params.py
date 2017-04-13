@@ -32,7 +32,7 @@ class JsonString(dict):
         dictval = shell_safe_json_parse(value)
         self.update(dictval)
 
-class VmSize(Enum):
+class VmSize(Enum): # pylint: disable=too-few-public-methods
     C0 = 'C0'
     C1 = 'C1'
     C2 = 'C2'
