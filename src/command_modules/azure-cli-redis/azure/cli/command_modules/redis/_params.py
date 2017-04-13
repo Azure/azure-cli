@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+from enum import Enum
 from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list,
     enum_choice_list,
@@ -14,7 +15,6 @@ import azure.cli.core.commands.arm # pylint: disable=unused-import
 from azure.mgmt.redis.models.redis_management_client_enums import (
     RebootType,
     RedisKeyType,
-    SkuFamily,
     SkuName)
 
 from azure.mgmt.redis.models import (
@@ -31,6 +31,19 @@ class JsonString(dict):
             value = value[1:-1]
         dictval = shell_safe_json_parse(value)
         self.update(dictval)
+
+class VmSize(Enum):
+    C0 = 'C0'
+    C1 = 'C1'
+    C2 = 'C2'
+    C3 = 'C3'
+    C4 = 'C4'
+    C5 = 'C5'
+    C6 = 'C6'
+    P1 = 'P1'
+    P2 = 'P2'
+    P3 = 'P3'
+    P4 = 'P4'
 
 class ScheduleEntryList(list):
     def __init__(self, value):
@@ -51,16 +64,15 @@ register_cli_argument('redis', 'redis_configuration', type=JsonString)
 register_cli_argument('redis', 'reboot_type', **enum_choice_list(RebootType))
 register_cli_argument('redis', 'key_type', **enum_choice_list(RedisKeyType))
 register_cli_argument('redis', 'shard_id', type=int)
-register_cli_argument('redis', 'sku_name', **enum_choice_list(SkuName))
-register_cli_argument('redis', 'sku_family', **enum_choice_list(SkuFamily))
-register_cli_argument('redis', 'sku_capacity', choices=[str(n) for n in range(0, 7)])
+register_cli_argument('redis', 'sku', **enum_choice_list(SkuName))
+register_cli_argument('redis', 'vm_size', **enum_choice_list(VmSize))
+register_cli_argument('redis', 'enable_non_ssl_port', action='store_true')
+register_cli_argument('redis', 'shard_count', type=int)
+register_cli_argument('redis', 'subnet_id') # TODO: Create generic id completer similar to name
 
 register_cli_argument('redis import-method', 'files', nargs='+')
 
 register_cli_argument('redis patch-schedule set', 'schedule_entries', type=ScheduleEntryList)
 
 register_cli_argument('redis create', 'name', arg_type=name_type, completer=None)
-register_cli_argument('redis create', 'enable_non_ssl_port', action='store_true')
 register_cli_argument('redis create', 'tenant_settings', type=JsonString)
-register_cli_argument('redis create', 'shard_count', type=int)
-register_cli_argument('redis create', 'subnet_id') # TODO: Create generic id completer similar to name

@@ -10,6 +10,9 @@ from azure.mgmt.redis.models import (
     Sku,
 )
 
+import azure.cli.core.azlogging as azlogging
+logger = azlogging.get_az_logger(__name__)
+
 def cli_redis_export(client, resource_group_name, name, prefix, container, file_format=None):
     # pylint:disable=too-many-arguments
     parameters = ExportRDBParameters(prefix, container, file_format)
@@ -19,19 +22,11 @@ def cli_redis_import_method(client, resource_group_name, name, file_format, file
     parameters = ImportRDBParameters(files, file_format)
     return client.import_method(resource_group_name, name, files, parameters)
 
-def cli_redis_update_settings(client, resource_group_name, name, redis_configuration=None, # pylint:disable=too-many-arguments
-                              sku_name=None, sku_family=None, sku_capacity=None):
-    if sku_name != None or sku_family != None or sku_capacity != None:
-        if sku_name is None or sku_family is None or sku_capacity is None:
-			# pylint:disable=line-too-long
-            raise ValueError("All arguments for Sku : --sku-name,--sku-family and --sku-capacity must be provided. Please add -h to the command to see supported values")
+def cli_redis_update_settings(client, resource_group_name, name, redis_configuration):
+    logger.warning('This command is getting deprecated. Please use "redis update" command')
 
     existing = client.get(resource_group_name, name)
-    if redis_configuration != None:
-        existing.redis_configuration.update(redis_configuration)
-
-    if sku_name != None and sku_family != None and sku_capacity != None:
-        existing.sku = Sku(sku_name, sku_family, sku_capacity)
+    existing.redis_configuration.update(redis_configuration)
 
     # Due to swagger/mgmt SDK quirkiness, we have to manually copy over
     # the resource retrieved to a create_or_update_parameters object
@@ -49,8 +44,31 @@ def cli_redis_update_settings(client, resource_group_name, name, redis_configura
         )
     return client.create_or_update(resource_group_name, name, parameters=update_params)
 
-def cli_redis_create(client, resource_group_name, name, location, sku_name, # pylint:disable=too-many-arguments
-                     sku_family, sku_capacity, tags=None, redis_configuration=None,
+def cli_redis_update(instance, sku=None, vm_size=None):
+    if sku != None:
+        instance.sku.name = sku
+
+    if vm_size != None:
+        instance.sku.family = vm_size[0]
+        instance.sku.capacity = vm_size[1]
+
+    update_params = RedisCreateOrUpdateParameters(
+        instance.location,
+        instance.sku,
+        instance.tags,
+        instance.redis_version,
+        instance.redis_configuration,
+        instance.enable_non_ssl_port,
+        instance.tenant_settings,
+        instance.shard_count,
+        instance.subnet_id,
+        instance.static_ip,
+        )
+
+    return update_params
+
+def cli_redis_create(client, resource_group_name, name, location, sku, # pylint:disable=too-many-arguments
+                     vm_size, tags=None, redis_configuration=None,
                      enable_non_ssl_port=None, tenant_settings=None, shard_count=None,
                      subnet_id=None, static_ip=None):
     # pylint:disable=line-too-long
@@ -58,9 +76,8 @@ def cli_redis_create(client, resource_group_name, name, location, sku_name, # py
     :param resource_group_name: Name of resource group
     :param name: Name of redis cache
     :param location: Location
-    :param sku_name: What type of redis cache to deploy. Valid values: (Basic, Standard, Premium).
-    :param sku_family: Which family to use. Valid values: (C, P).
-    :param sku_capacity: What size of redis cache to deploy. Valid values for C family (0, 1, 2, 3, 4, 5, 6), for P family (1, 2, 3, 4)
+    :param sku: What type of redis cache to deploy. Valid values: (Basic, Standard, Premium).
+    :param vm_size: What size of redis cache to deploy. Valid values for C family (C0, C1, C2, C3, C4, C5, C6), for P family (P1, P2, P3, P4)
     :param redis_configuration: All Redis Settings. Few possible keys rdb-backup-enabled, rdb-storage-connection-string, rdb-backup-frequency, maxmemory-delta, maxmemory-policy, notify-keyspace-events, maxmemory-samples, slowlog-log-slower-than, slowlog-max-len, list-max-ziplist-entries, list-max-ziplist-value, hash-max-ziplist-entries, hash-max-ziplist-value, set-max-intset-entries, zset-max-ziplist-entries, zset-max-ziplist-value etc.
     :param enable_non_ssl_port: If the value is true, then the non-ssl redis server port (6379) will be enabled.
     :param tenant_settings: Json dictionary with tenant settings
@@ -70,7 +87,7 @@ def cli_redis_create(client, resource_group_name, name, location, sku_name, # py
     """
     params = RedisCreateOrUpdateParameters(
         location,
-        Sku(sku_name, sku_family, sku_capacity),
+        Sku(sku, vm_size[0], vm_size[1]),
         tags,
         None, # Version is deprecated and ignored
         redis_configuration,
@@ -81,4 +98,3 @@ def cli_redis_create(client, resource_group_name, name, location, sku_name, # py
         static_ip)
 
     return client.create_or_update(resource_group_name, name, params)
-
