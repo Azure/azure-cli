@@ -51,18 +51,6 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
     def test_storage_blob_upload_midsize_file(self, resource_group, storage_account):
         self.verify_blob_upload_and_download(resource_group, storage_account, 4096, 'block', 0)
 
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
-    def test_storage_blob_upload_128mb_file(self, resource_group, storage_account):
-        self.verify_blob_upload_and_download(resource_group, storage_account, 128 * 1024, 'block',
-                                             0, skip_download=True)
-
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
-    def test_storage_blob_upload_64mb_file(self, resource_group, storage_account):
-        self.verify_blob_upload_and_download(resource_group, storage_account, 64 * 1024, 'block',
-                                             0, skip_download=True)
-
     def verify_blob_upload_and_download(self, group, account, file_size_kb, blob_type,
                                         block_count=0, skip_download=False):
         local_dir = self.create_temp_dir()
