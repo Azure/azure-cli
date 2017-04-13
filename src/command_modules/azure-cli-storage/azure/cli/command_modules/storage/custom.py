@@ -159,8 +159,12 @@ def upload_blob(  # pylint: disable=too-many-locals
             timeout=timeout)
 
     def upload_block_blob():
-        client.MAX_BLOCK_SIZE = 100 * 1024 * 1024
-        client.MAX_SINGLE_PUT_SIZE = 256 * 1024 * 1024
+        import os
+
+        # increase the block size to 100MB when the file is larger than 200GB
+        if os.path.isfile(file_path) and os.stat(file_path).st_size > 200 * 1024 * 1024 * 1024:
+            client.MAX_BLOCK_SIZE = 100 * 1024 * 1024
+            client.MAX_SINGLE_PUT_SIZE = 256 * 1024 * 1024
 
         return client.create_blob_from_path(
             container_name=container_name,

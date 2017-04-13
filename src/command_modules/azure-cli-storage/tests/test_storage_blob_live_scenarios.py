@@ -11,6 +11,16 @@ from azure.cli.testsdk import (LiveTest, ResourceGroupPreparer, StorageAccountPr
 class StorageBlobUploadLiveTests(LiveTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
+    def test_storage_blob_upload_128mb_file(self, resource_group, storage_account):
+        self.verify_blob_upload_and_download(resource_group, storage_account, 128 * 1024, 'block')
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_blob_upload_64mb_file(self, resource_group, storage_account):
+        self.verify_blob_upload_and_download(resource_group, storage_account, 64 * 1024, 'block')
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
     def test_storage_blob_upload_256mb_file(self, resource_group, storage_account):
         self.verify_blob_upload_and_download(resource_group, storage_account, 256 * 1024, 'block')
 
@@ -30,6 +40,12 @@ class StorageBlobUploadLiveTests(LiveTest):
     def test_storage_blob_upload_10G_file(self, resource_group, storage_account):
         self.verify_blob_upload_and_download(resource_group, storage_account, 10 * 1024 * 1024,
                                              'block')
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_page_blob_upload_10G_file(self, resource_group, storage_account):
+        self.verify_blob_upload_and_download(resource_group, storage_account, 10 * 1024 * 1024,
+                                             'page')
 
     def verify_blob_upload_and_download(self, group, account, file_size_kb, blob_type):
         container = self.create_random_name(prefix='cont', length=24)
