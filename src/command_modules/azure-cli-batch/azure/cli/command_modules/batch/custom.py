@@ -19,14 +19,12 @@ from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, 
                                 TaskAddParameter, TaskConstraints, PoolUpdatePropertiesParameter,
                                 StartTask, BatchErrorException)
 
-from azure.storage.blob import BlockBlobService
-
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.profiles import get_sdk, ResourceType
 import azure.cli.core.azlogging as azlogging
 
 logger = azlogging.get_az_logger(__name__)
-
 
 def transfer_doc(source_func, *additional_source_funcs):
     def _decorator(func):
@@ -111,6 +109,7 @@ def update_application(client, resource_group_name, account_name, application_id
 
 def _upload_package_blob(package_file, url):
     """Upload the location file to storage url provided by autostorage"""
+    BlockBlobService = get_sdk(ResourceType.DATA_STORAGE, 'blob#BlockBlobService')
 
     uri = urlsplit(url)
     # in uri path, it always start with '/', so container name is at second block

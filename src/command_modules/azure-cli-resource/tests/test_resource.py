@@ -5,6 +5,7 @@
 
 import os
 import time
+import unittest
 # AZURE CLI RESOURCE TEST DEFINITIONS
 from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase, JMESPathCheck, NoneCheck,
                                                      BooleanCheck,
@@ -194,7 +195,7 @@ class TagScenarioTest(VCRTestBase): # Not RG test base because it operates only 
         s.cmd('tag create -n {}'.format(tn), checks=[
             JMESPathCheck('tagName', tn),
             JMESPathCheck('values', []),
-            JMESPathCheck('count.value', '0')
+            JMESPathCheck('count.value', 0)
         ])
         s.cmd('tag add-value -n {} --value test'.format(tn))
         s.cmd('tag add-value -n {} --value test2'.format(tn))
@@ -448,3 +449,6 @@ class PolicyScenarioTest(ResourceGroupVCRTestBase):
         time.sleep(10) # ensure the policy is gone when run live.
         self.cmd('policy definition list', checks=[
             JMESPathCheck("length([?name=='{}'])".format(policy_name), 0)])
+
+if __name__ == '__main__':
+    unittest.main()
