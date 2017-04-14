@@ -65,7 +65,7 @@ _AUTH_CTX_FACTORY = _authentication_context_factory
 
 CLOUD = get_active_cloud()
 
-logger.debug(str(CLOUD))
+logger.debug('Current cloud config:\n%s', str(CLOUD))
 
 
 def get_authority_url(tenant=None):
