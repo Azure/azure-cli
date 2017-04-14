@@ -168,8 +168,6 @@ def _merge_parameters(parameter_list):
 def _deploy_arm_template_core(resource_group_name, template_file=None, template_uri=None,
                               deployment_name=None, parameter_list=None, mode='incremental',
                               validate_only=False, no_wait=False):
-    from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
-
     DeploymentProperties, TemplateLink = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES,
                                                  'DeploymentProperties',
                                                  'TemplateLink',
