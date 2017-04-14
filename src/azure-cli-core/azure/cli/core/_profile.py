@@ -67,8 +67,8 @@ _AUTH_CTX_FACTORY = _authentication_context_factory
 CLOUD = get_active_cloud()
 
 logger.debug("Current active cloud '%s'", CLOUD.name)
-logger.debug(pformat(vars(CLOUD.endpoints)))
-logger.debug(pformat(vars(CLOUD.suffixes)))
+logger.debug(vars(CLOUD.endpoints))
+logger.debug(vars(CLOUD.suffixes))
 
 
 def get_authority_url(tenant=None):
@@ -98,10 +98,10 @@ class CredentialType(Enum):  # pylint: disable=too-few-public-methods
 class Profile(object):
     def __init__(self, storage=None, auth_ctx_factory=None):
         self._storage = storage or ACCOUNT
-        factory = auth_ctx_factory or _AUTH_CTX_FACTORY
-        self._creds_cache = CredsCache(factory)
-        self._subscription_finder = SubscriptionFinder(factory, self._creds_cache.adal_token_cache)
+        self.auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
+        self._creds_cache = CredsCache(self.auth_ctx_factory)
         self._management_resource_uri = CLOUD.endpoints.management
+        self._subscription_finder_attr = None
 
     def find_subscriptions_on_login(self,  # pylint: disable=too-many-arguments
                                     interactive,
@@ -113,17 +113,17 @@ class Profile(object):
         allow_debug_adal_connection()
         subscriptions = []
         if interactive:
-            subscriptions = self._subscription_finder.find_through_interactive_flow(
+            subscriptions = self.subscription_finder.find_through_interactive_flow(
                 tenant, self._management_resource_uri)
         else:
             if is_service_principal:
                 if not tenant:
                     raise CLIError('Please supply tenant using "--tenant"')
                 sp_auth = ServicePrincipalAuth(password)
-                subscriptions = self._subscription_finder.find_from_service_principal_id(
+                subscriptions = self.subscription_finder.find_from_service_principal_id(
                     username, sp_auth, tenant, self._management_resource_uri)
             else:
-                subscriptions = self._subscription_finder.find_from_user_account(
+                subscriptions = self.subscription_finder.find_from_user_account(
                     username, password, tenant, self._management_resource_uri)
 
         if not subscriptions:
@@ -135,12 +135,19 @@ class Profile(object):
 
         if self._creds_cache.adal_token_cache.has_state_changed:
             self._creds_cache.persist_cached_creds()
-        consolidated = Profile._normalize_properties(self._subscription_finder.user_id,
+        consolidated = Profile._normalize_properties(self.subscription_finder.user_id,
                                                      subscriptions,
                                                      is_service_principal)
         self._set_subscriptions(consolidated)
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
+
+    @property
+    def subscription_finder(self):
+        if self._subscription_finder_attr is None:
+            self._subscription_finder_attr = SubscriptionFinder(self.auth_ctx_factory,
+                                                                self._creds_cache.adal_token_cache)
+        return self._subscription_finder_attr
 
     @staticmethod
     def _normalize_properties(user, subscriptions, is_service_principal):
@@ -258,6 +265,9 @@ class Profile(object):
         if len(result) != 1:
             raise CLIError("Please run 'az account set' to select active account.")
         return result[0]
+
+    def get_subscription_id(self):
+        return self.get_subscription()[_SUBSCRIPTION_ID]
 
     def get_login_credentials(self, resource=CLOUD.endpoints.management,
                               subscription_id=None):
@@ -431,8 +441,7 @@ class CredsCache(object):
                             os.path.join(get_config_dir(), 'accessTokens.json'))
         self._service_principal_creds = []
         self._auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
-        self.adal_token_cache = None
-        self._load_creds()
+        self._adal_token_cache_attr = None
 
     def persist_cached_creds(self):
         with os.fdopen(os.open(self._token_file, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600),
@@ -480,15 +489,15 @@ class CredsCache(object):
         cred = matched[0]
         return cred[_ACCESS_TOKEN]
 
-    def _load_creds(self):
-        import adal
-        if self.adal_token_cache is not None:
-            return self.adal_token_cache
-        all_entries = _load_tokens_from_file(self._token_file)
-        self._load_service_principal_creds(all_entries)
-        real_token = [x for x in all_entries if x not in self._service_principal_creds]
-        self.adal_token_cache = adal.TokenCache(json.dumps(real_token))
-        return self.adal_token_cache
+    @property
+    def adal_token_cache(self):
+        if self._adal_token_cache_attr is None:
+            import adal
+            all_entries = _load_tokens_from_file(self._token_file)
+            self._load_service_principal_creds(all_entries)
+            real_token = [x for x in all_entries if x not in self._service_principal_creds]
+            self._adal_token_cache_attr = adal.TokenCache(json.dumps(real_token))
+        return self._adal_token_cache_attr
 
     def save_service_principal_cred(self, sp_entry):
         matched = [x for x in self._service_principal_creds
