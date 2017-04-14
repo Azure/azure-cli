@@ -97,7 +97,7 @@ class CredentialType(Enum):  # pylint: disable=too-few-public-methods
 
 class ReadOnlyProfile(object):
 
-    def __init__(self, storage):
+    def __init__(self, storage=None):
         self._storage = storage or ACCOUNT
 
     def get_subscription(self, subscription=None):  # take id or name
