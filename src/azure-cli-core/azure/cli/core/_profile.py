@@ -127,7 +127,7 @@ class ReadOnlyProfile(object):
         except CLIError:
             raise CLIError('There are no active accounts.')
 
-        return active_account[_USER_ENTITY][_SUBSCRIPTION_ID]
+        return active_account[_SUBSCRIPTION_ID]
 
     def load_cached_subscriptions(self, all_clouds=False):
         subscriptions = self._storage.get(_SUBSCRIPTIONS) or []
