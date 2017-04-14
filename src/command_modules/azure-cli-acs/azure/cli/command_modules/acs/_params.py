@@ -16,14 +16,14 @@ from azure.cli.core.commands.parameters import (
     resource_group_name_type,
     get_one_of_subscription_locations,
     get_resource_name_completion_list)
-from azure.mgmt.compute.models import ContainerServiceOchestratorTypes
+from azure.mgmt.compute.containerservice.models import ContainerServiceOchestratorTypes
 from azure.cli.command_modules.vm._validators import validate_ssh_key
 
 
 def _compute_client_factory(**_):
-    from azure.mgmt.compute import ComputeManagementClient
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(ComputeManagementClient)
+    return get_mgmt_service_client(ResourceType.MGMT_COMPUTE)
 
 
 def get_vm_sizes(location):

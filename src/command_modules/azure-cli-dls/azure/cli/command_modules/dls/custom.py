@@ -17,6 +17,7 @@ from azure.cli.command_modules.dls._client_factory import (cf_dls_filesystem)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import CLIError
 import azure.cli.core.azlogging as azlogging
+from azure.cli.core.profiles import ResourceType
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -325,7 +326,6 @@ def set_adls_item_permissions(account_name,
 
 # helpers
 def _get_resource_group_location(resource_group_name):
-    from azure.mgmt.resource.resources import ResourceManagementClient
-    client = get_mgmt_service_client(ResourceManagementClient)
+    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
     # pylint: disable=no-member
     return client.resource_groups.get(resource_group_name).location
