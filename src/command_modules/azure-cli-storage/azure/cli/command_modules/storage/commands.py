@@ -41,7 +41,7 @@ queue_path = 'azure.multiapi.storage.queue.queueservice#QueueService.'
 
 def _dont_fail_not_exist(ex):
     AzureMissingResourceHttpError = \
-        get_sdk(ResourceType.DATA_STORAGE, '_error#_ERROR_STORAGE_MISSING_INFO')
+        get_sdk(ResourceType.DATA_STORAGE, '_error#AzureMissingResourceHttpError')
     if isinstance(ex, AzureMissingResourceHttpError):
         return None
     else:
