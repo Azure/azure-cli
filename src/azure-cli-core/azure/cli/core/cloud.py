@@ -256,7 +256,7 @@ def get_clouds():
                 setattr(c.suffixes, option.replace('suffix_', ''), config.get(section, option))
         if c.profile is None:
             # If profile isn't set, use latest
-            c.profile = 'latest'  # pylint: disable=redefined-variable-type
+            setattr(c, 'profile', 'latest')
         if not c.endpoints.has_endpoint_set('management') and \
                 c.endpoints.has_endpoint_set('resource_manager'):
             # If management endpoint not set, use resource manager endpoint
