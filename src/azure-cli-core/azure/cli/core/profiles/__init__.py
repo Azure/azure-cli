@@ -3,11 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.profiles.shared import (AZURE_API_PROFILES,
-                                            ResourceType,
-                                            get_api_version as _sdk_get_api_version,
-                                            get_versioned_sdk as _sdk_get_versioned_sdk,
-                                            get_versioned_sdk_path as _sdk_get_versioned_sdk_path)
+from azure.cli.core.profiles._shared import (AZURE_API_PROFILES,
+                                             ResourceType,
+                                             get_api_version as _sdk_get_api_version,
+                                             get_versioned_sdk as _sdk_get_versioned_sdk,
+                                             get_versioned_sdk_path as _sdk_get_versioned_sdk_path)
 
 # API Profiles currently supported in the CLI.
 API_PROFILES = {
