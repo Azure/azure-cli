@@ -9,7 +9,6 @@ import collections
 import errno
 import json
 import os.path
-from pprint import pformat
 from copy import deepcopy
 from enum import Enum
 
