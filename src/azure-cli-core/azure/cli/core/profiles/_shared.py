@@ -117,7 +117,7 @@ def get_api_version(api_profile, resource_type):
 
 @total_ordering  # pylint: disable=too-few-public-methods
 class _DateAPIFormat(object):
-    """ Class to support comparisions for API versions in
+    """ Class to support comparisons for API versions in
         YYYY-MM-DD or YYYY-MM-DD-preview format
     """
 
