@@ -36,5 +36,6 @@ def get_versioned_sdk_path(unversioned_path):
     from azure.cli.core._profile import CLOUD
     for rt in ResourceType:
         if unversioned_path.startswith(rt.import_prefix):
-            return _sdk_get_versioned_sdk_path(CLOUD.profile, rt)
+            return unversioned_path.replace(rt.import_prefix,
+                                            _sdk_get_versioned_sdk_path(CLOUD.profile, rt))
     return unversioned_path
