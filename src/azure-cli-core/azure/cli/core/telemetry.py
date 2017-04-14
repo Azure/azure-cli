@@ -285,8 +285,8 @@ def _get_installation_id():
 @decorators.call_once
 @decorators.suppress_all_exceptions(fallback_return=None)
 def _get_profile():
-    from azure.cli.core._profile import Profile
-    return Profile()
+    from azure.cli.core._profile import ReadOnlyProfile
+    return ReadOnlyProfile()
 
 
 @decorators.suppress_all_exceptions(fallback_return='')
@@ -322,7 +322,7 @@ def _get_env_string():
 
 @decorators.suppress_all_exceptions(fallback_return=None)
 def _get_azure_subscription_id():
-    return _get_profile().get_login_credentials()[1]
+    return _get_profile().get_current_subscription_id()
 
 
 def _get_shell_type():
