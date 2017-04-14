@@ -184,7 +184,7 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
         result = self.cmd('appservice web config appsettings show -g {} -n {}'.format(self.resource_group, self.webapp_name))
         s2 = next((x for x in result if x['name'] == 's2'))
         self.assertEqual(s2['name'], 's2')
-        self.assertEqual(s2['slotSetting'], 'False')
+        self.assertEqual(s2['slotSetting'], False)
         self.assertEqual(s2['value'], 'bar')
         self.assertEqual(set([x['name'] for x in result]), set(['s1', 's2', 's3', 'WEBSITE_NODE_DEFAULT_VERSION']))
 
@@ -197,6 +197,23 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
         self.cmd('appservice web config hostname list -g {} --webapp-name {}'.format(self.resource_group, self.webapp_name), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', '{0}.azurewebsites.net'.format(self.webapp_name))
+        ])
+
+        # site connection string tests
+        self.cmd('appservice web config connection-string update -t mysql -g {} -n {} --settings c1=conn1 c2=conn2 --slot-settings c3=conn3'.format(self.resource_group, self.webapp_name))
+        result = self.cmd('appservice web config connection-string show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
+            JMESPathCheck('length([])', 3),
+            JMESPathCheck("[?name=='c1']|[0].slotSetting", False),
+            JMESPathCheck("[?name=='c1']|[0].value.type", 'MySql'),
+            JMESPathCheck("[?name=='c1']|[0].value.value", 'conn1'),
+            JMESPathCheck("[?name=='c2']|[0].slotSetting", False),
+            JMESPathCheck("[?name=='c3']|[0].slotSetting", True),
+        ])
+        self.cmd('appservice web config connection-string delete -g {} -n {} --setting-names c1 c3'.format(self.resource_group, self.webapp_name))
+        result = self.cmd('appservice web config connection-string show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
+            JMESPathCheck('length([])', 1),
+            JMESPathCheck('[0].slotSetting', False),
+            JMESPathCheck('[0].name', 'c2')
         ])
 
         # see deployment user
@@ -300,7 +317,7 @@ class LinuxWebappSceanrioTest(ResourceGroupVCRTestBase):
         result = self.cmd('appservice web config container show -g {} -n {} '.format(self.resource_group, webapp))
         self.assertEqual(set(x['name'] for x in result), set(['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME', 'DOCKER_CUSTOM_IMAGE_NAME', 'DOCKER_REGISTRY_SERVER_PASSWORD']))
         sample = next((x for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_URL'))
-        self.assertEqual(sample, {'name': 'DOCKER_REGISTRY_SERVER_URL', 'slotSetting': 'False', 'value': 'foo-url'})
+        self.assertEqual(sample, {'name': 'DOCKER_REGISTRY_SERVER_URL', 'slotSetting': False, 'value': 'foo-url'})
         self.cmd('appservice web config container delete -g {} -n {}'.format(self.resource_group, webapp))
         result2 = self.cmd('appservice web config container show -g {} -n {} '.format(self.resource_group, webapp), checks=NoneCheck())
         self.assertEqual(result2, [])
@@ -410,14 +427,19 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck("nodeVersion", test_node_version),
         ])
         self.cmd('appservice web config appsettings update -g {} -n {} --slot {} --settings s3=v3 --slot-settings s4=v4'.format(self.resource_group, self.webapp, slot2))
+        self.cmd('appservice web config connection-string update -g {} -n {} -t mysql --slot {} --settings c1=connection1 --slot-settings c2=connection2'.format(self.resource_group, self.webapp, slot2))
 
         # verify we can swap with non production slot
         self.cmd('appservice web deployment slot swap -g {} -n {} --slot {} --target-slot {}'.format(self.resource_group, self.webapp, slot, slot2), checks=NoneCheck())
         result = self.cmd('appservice web config appsettings show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2))
         self.assertEqual(set([x['name'] for x in result]), set(['WEBSITE_NODE_DEFAULT_VERSION', 's1', 's4']))
+        result = self.cmd('appservice web config connection-string show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2))
+        self.assertEqual(set([x['name'] for x in result]), set(['c2']))
 
         result = self.cmd('appservice web config appsettings show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
         self.assertEqual(set([x['name'] for x in result]), set(['WEBSITE_NODE_DEFAULT_VERSION', 's3']))
+        result = self.cmd('appservice web config connection-string show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot))
+        self.assertEqual(set([x['name'] for x in result]), set(['c1']))
 
         self.cmd('appservice web deployment slot list -g {} -n {}'.format(self.resource_group, self.webapp), checks=[
             JMESPathCheck("length([])", 2),

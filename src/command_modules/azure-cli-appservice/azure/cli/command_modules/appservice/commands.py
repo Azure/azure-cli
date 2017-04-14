@@ -126,6 +126,11 @@ cli_command(__name__, 'appservice web config show', 'azure.cli.command_modules.a
 cli_command(__name__, 'appservice web config appsettings show', 'azure.cli.command_modules.appservice.custom#get_app_settings', exception_handler=empty_on_404)
 cli_command(__name__, 'appservice web config appsettings update', 'azure.cli.command_modules.appservice.custom#update_app_settings')
 cli_command(__name__, 'appservice web config appsettings delete', 'azure.cli.command_modules.appservice.custom#delete_app_settings')
+
+cli_command(__name__, 'appservice web config connection-string show', 'azure.cli.command_modules.appservice.custom#get_connection_strings', exception_handler=empty_on_404)
+cli_command(__name__, 'appservice web config connection-string update', 'azure.cli.command_modules.appservice.custom#update_connection_strings')
+cli_command(__name__, 'appservice web config connection-string delete', 'azure.cli.command_modules.appservice.custom#delete_connection_strings')
+
 cli_command(__name__, 'appservice web config hostname add', 'azure.cli.command_modules.appservice.custom#add_hostname', exception_handler=ex_handler_factory())
 cli_command(__name__, 'appservice web config hostname list', 'azure.cli.command_modules.appservice.custom#list_hostnames')
 cli_command(__name__, 'appservice web config hostname delete', 'azure.cli.command_modules.appservice.custom#delete_hostname')

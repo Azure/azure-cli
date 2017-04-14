@@ -9,7 +9,7 @@ from azure.cli.core.commands import register_cli_argument
 from azure.cli.core.commands.parameters import (resource_group_name_type, location_type,
                                                 get_resource_name_completion_list, file_type,
                                                 CliArgumentType, ignore_type, enum_choice_list)
-from azure.mgmt.web.models import DatabaseType
+from azure.mgmt.web.models import DatabaseType, ConnectionStringType
 from ._client_factory import web_client_factory
 
 
@@ -206,9 +206,12 @@ register_cli_argument('appservice web log config', 'web_server_logging', help='c
 register_cli_argument('appservice web log tail', 'provider', help="scope the live traces to certain providers/folders, for example:'application', 'http' for server log, 'kudu/trace', etc")
 register_cli_argument('appservice web log download', 'log_file', default='webapp_logs.zip', type=file_type, completer=FilesCompleter(), help='the downloaded zipped log file path')
 
-register_cli_argument('appservice web config appsettings', 'settings', nargs='+', help="space separated app settings in a format of `<name>=<value>`")
-register_cli_argument('appservice web config appsettings', 'slot_settings', nargs='+', help="space separated slot app settings in a format of `<name>=<value>`")
-register_cli_argument('appservice web config appsettings', 'setting_names', nargs='+', help="space separated app setting names")
+for scope in ['appsettings', 'connection-string']:
+    register_cli_argument('appservice web config ' + scope, 'settings', nargs='+', help="space separated {} in a format of <name>=<value>".format(scope))
+    register_cli_argument('appservice web config ' + scope, 'slot_settings', nargs='+', help="space separated slot {} in a format of <name>=<value>".format(scope))
+    register_cli_argument('appservice web config ' + scope, 'setting_names', nargs='+', help="space separated {} names".format(scope))
+register_cli_argument('appservice web config connection-string', 'connection_string_type',
+                      options_list=('--connection-string-type', '-t'), help='connection string type', **enum_choice_list(ConnectionStringType))
 
 register_cli_argument('appservice web config container', 'docker_registry_server_url', options_list=('--docker-registry-server-url', '-r'), help='the container registry server url')
 register_cli_argument('appservice web config container', 'docker_custom_image_name', options_list=('--docker-custom-image-name', '-c'), help='the container custom image name and optionally the tag name')
