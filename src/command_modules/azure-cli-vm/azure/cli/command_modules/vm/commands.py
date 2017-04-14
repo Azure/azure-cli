@@ -14,7 +14,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_wait_command
 from azure.cli.core.util import empty_on_404
-from azure.cli.core.profiles import get_api_version, ResourceType
+from azure.cli.core.profiles import supported_api_version, ResourceType
 
 # pylint: disable=line-too-long
 
@@ -110,7 +110,7 @@ cli_generic_update_command(__name__, 'vm update',
                            no_wait_param='raw')
 cli_generic_wait_command(__name__, 'vm wait', 'azure.cli.command_modules.vm.custom#get_instance_view')
 
-if get_api_version(ResourceType.MGMT_COMPUTE) in ['2016-04-30-preview']:
+if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
     cli_command(__name__, 'vm convert', mgmt_path.format(op_var, op_class, 'convert_to_managed_disks'), cf_vm)
     cli_command(__name__, 'vm encryption enable', 'azure.cli.command_modules.vm.disk_encryption#enable')
     cli_command(__name__, 'vm encryption disable', 'azure.cli.command_modules.vm.disk_encryption#disable')
@@ -242,7 +242,7 @@ cli_command(__name__, 'vmss list-instance-connection-info', custom_path.format('
 cli_command(__name__, 'vm list-sizes', mgmt_path.format('virtual_machine_sizes_operations', 'VirtualMachineSizesOperations', 'list'), cf_vm_sizes)
 
 
-if get_api_version(ResourceType.MGMT_COMPUTE) in ['2016-04-30-preview']:
+if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
     # VM Disk
     op_var = 'disks_operations'
     op_class = 'DisksOperations'

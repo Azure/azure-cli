@@ -27,7 +27,7 @@ from azure.cli.command_modules.storage._transformers import \
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.util import empty_on_404
-from azure.cli.core.profiles import get_api_version, get_sdk, ResourceType
+from azure.cli.core.profiles import supported_api_version, get_sdk, ResourceType
 
 mgmt_path = 'azure.mgmt.storage.operations.storage_accounts_operations#StorageAccountsOperations.'
 custom_path = 'azure.cli.command_modules.storage.custom#'
@@ -59,12 +59,12 @@ cli_command(__name__, 'storage account show-connection-string', custom_path + 's
 cli_command(__name__, 'storage account keys renew', mgmt_path + 'regenerate_key', factory, transform=lambda x: getattr(x, 'keys', x))
 cli_command(__name__, 'storage account keys list', mgmt_path + 'list_keys', factory, transform=lambda x: getattr(x, 'keys', x))
 
-if get_api_version(ResourceType.MGMT_STORAGE) in ['2015-06-15']:
+if supported_api_version(ResourceType.MGMT_STORAGE, min_api='2015-06-15'):
     cli_command(__name__, 'storage account create', custom_path + 'create_storage_account_with_account_type')
 else:
     cli_command(__name__, 'storage account create', custom_path + 'create_storage_account')
 
-if get_api_version(ResourceType.MGMT_STORAGE) in ['2016-12-01']:
+if supported_api_version(ResourceType.MGMT_STORAGE, min_api='2016-12-01'):
     cli_generic_update_command(__name__, 'storage account update',
                                mgmt_path + 'get_properties',
                                mgmt_path + 'update', factory,
@@ -198,7 +198,7 @@ cli_storage_data_plane_command('storage entity delete', table_path + 'delete_ent
 factory = queue_data_service_factory
 cli_storage_data_plane_command('storage queue generate-sas', queue_path + 'generate_queue_shared_access_signature', factory)
 
-if get_api_version(ResourceType.DATA_STORAGE) in ['2016-05-31']:
+if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
     cli_storage_data_plane_command('storage queue stats', queue_path + 'get_queue_service_stats', factory)
 
 cli_storage_data_plane_command('storage queue list', queue_path + 'list_queues', factory, transform=transform_storage_list_output)

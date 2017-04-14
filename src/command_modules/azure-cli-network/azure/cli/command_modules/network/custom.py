@@ -23,7 +23,7 @@ from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CnameRecord, 
 
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
-from azure.cli.core.profiles import get_sdk, get_api_version, ResourceType
+from azure.cli.core.profiles import get_sdk, supported_api_version, ResourceType
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -863,7 +863,7 @@ def create_nic(resource_group_name, network_interface_name, subnet, location=Non
         'private_ip_address': private_ip_address,
         'subnet': Subnet(id=subnet)
     }
-    if get_api_version(ResourceType.MGMT_NETWORK) in ['2016-09-01']:
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
         ip_config_args['private_ip_address_version'] = private_ip_address_version
     ip_config = NetworkInterfaceIPConfiguration(**ip_config_args)
 
@@ -903,7 +903,7 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
     ncf = _network_client_factory()
     nic = ncf.network_interfaces.get(resource_group_name, network_interface_name)
 
-    if get_api_version(ResourceType.MGMT_NETWORK) in ['2016-09-01']:
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
         if private_ip_address_version == IPVersion.ipv4.value and not subnet:
             primary_config = next(x for x in nic.ip_configurations if x.primary)
             subnet = primary_config.subnet.id
@@ -920,7 +920,7 @@ def create_nic_ip_config(resource_group_name, network_interface_name, ip_config_
         'private_ip_address': private_ip_address,
         'private_ip_allocation_method': private_ip_address_allocation,
     }
-    if get_api_version(ResourceType.MGMT_NETWORK) in ['2016-09-01']:
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
         new_config_args['private_ip_address_version'] = private_ip_address_version
         new_config_args['primary'] = make_primary
     new_config = NetworkInterfaceIPConfiguration(**new_config_args)
@@ -944,7 +944,7 @@ def set_nic_ip_config(instance, parent, ip_config_name, subnet=None, # pylint: d
     if private_ip_address == '':
         instance.private_ip_address = None
         instance.private_ip_allocation_method = 'dynamic'
-        if get_api_version(ResourceType.MGMT_NETWORK) in ['2016-09-01']:
+        if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
             instance.private_ip_address_version = 'ipv4'
     elif private_ip_address is not None:
         instance.private_ip_address = private_ip_address
@@ -1096,7 +1096,7 @@ def create_public_ip(resource_group_name, public_ip_address_name, location=None,
         'idle_timeout_in_minutes': idle_timeout,
         'dns_settings': None
     }
-    if get_api_version(ResourceType.MGMT_NETWORK) in ['2016-09-01']:
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
         public_ip_args['public_ip_address_version'] = version
     public_ip = PublicIPAddress(**public_ip_args)
 

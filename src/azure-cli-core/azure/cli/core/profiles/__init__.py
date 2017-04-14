@@ -7,6 +7,7 @@
 from azure.cli.core.profiles._shared import (AZURE_API_PROFILES,
                                              ResourceType,
                                              get_api_version as _sdk_get_api_version,
+                                             supported_api_version as _sdk_supported_api_version,
                                              get_versioned_sdk as _sdk_get_versioned_sdk)
 
 # API Profiles currently supported in the CLI.
@@ -20,6 +21,11 @@ API_PROFILES = {
 def get_api_version(resource_type):
     from azure.cli.core._profile import CLOUD
     return _sdk_get_api_version(CLOUD.profile, resource_type)
+
+
+def supported_api_version(resource_type, min_api=None, max_api=None):
+    from azure.cli.core._profile import CLOUD
+    return _sdk_supported_api_version(CLOUD.profile, resource_type, min_api, max_api)
 
 
 def get_sdk(resource_type, *attr_args, **kwargs):

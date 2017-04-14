@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # TODO Move this to a package shared by CLI and SDK
-
+from functools import total_ordering
 from importlib import import_module
 from enum import Enum
 
@@ -113,6 +113,62 @@ def get_api_version(api_profile, resource_type):
         return AZURE_API_PROFILES[api_profile][resource_type]
     except KeyError:
         raise APIVersionException(resource_type, api_profile)
+
+
+@total_ordering  # pylint: disable=too-few-public-methods
+class _DateAPIFormat(object):
+    """ Class to support comparisions for API versions in
+        YYYY-MM-DD or YYYY-MM-DD-preview format
+    """
+
+    def __init__(self, api_version_str):
+        try:
+            if 'preview' in api_version_str:
+                yyyy, mm, dd, _ = api_version_str.split('-')
+                self.preview = True
+            else:
+                yyyy, mm, dd = api_version_str.split('-')
+                self.preview = False
+            self.yyyy = int(yyyy)
+            self.mm = int(mm)
+            self.dd = int(dd)
+        except (ValueError, TypeError):
+            raise ValueError('The API version {} is not in '
+                             'YYYY-MM-DD or YYYY-MM-DD-preview format'.format(api_version_str))
+
+    def __eq__(self, other):
+        return self.yyyy == other.yyyy and self.mm == other.mm and \
+            self.dd == other.dd and self.preview == other.preview
+
+    def __lt__(self, other):
+        if self.yyyy < other.yyyy:
+            return True
+        if self.yyyy == other.yyyy:
+            if self.mm < other.mm:
+                return True
+            if self.mm == other.mm:
+                if self.dd < other.dd:
+                    return True
+                if self.dd == other.dd:
+                    if self.preview and not other.preview:
+                        return True
+        return False
+
+
+def supported_api_version(api_profile, resource_type, min_api=None, max_api=None):
+    """
+    Returns True if current API version for the resource type satisfies min/max range.
+    note: Currently supports YYYY-MM-DD or YYYY-MM-DD-preview formatted API versions.
+    """
+    if min_api is None and max_api is None:
+        # No range specified so supported.
+        return True
+    api_version = _DateAPIFormat(get_api_version(api_profile, resource_type))
+    if min_api and api_version < _DateAPIFormat(min_api):
+        return False
+    if max_api and api_version > _DateAPIFormat(max_api):
+        return False
+    return True
 
 
 def _get_attr(sdk_path, mod_attr_path, checked=True):
