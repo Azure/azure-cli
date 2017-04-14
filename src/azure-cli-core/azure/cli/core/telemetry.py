@@ -285,8 +285,8 @@ def _get_installation_id():
 @decorators.call_once
 @decorators.suppress_all_exceptions(fallback_return=None)
 def _get_profile():
-    from azure.cli.core._profile import Profile
-    return Profile()
+    from azure.cli.core._profile import ReadOnlyProfile
+    return ReadOnlyProfile()
 
 
 @decorators.suppress_all_exceptions(fallback_return='')

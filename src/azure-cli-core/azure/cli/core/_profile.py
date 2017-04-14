@@ -95,9 +95,61 @@ class CredentialType(Enum):  # pylint: disable=too-few-public-methods
     rbac = CLOUD.endpoints.active_directory_graph_resource_id
 
 
-class Profile(object):
-    def __init__(self, storage=None, auth_ctx_factory=None):
+class ReadOnlyProfile(object):
+
+    def __init__(self, storage):
         self._storage = storage or ACCOUNT
+
+    def get_subscription(self, subscription=None):  # take id or name
+        subscriptions = self.load_cached_subscriptions()
+        if not subscriptions:
+            raise CLIError("Please run 'az login' to setup account.")
+
+        result = [x for x in subscriptions if (
+            not subscription and x.get(_IS_DEFAULT_SUBSCRIPTION) or
+            subscription and subscription.lower() in [x[_SUBSCRIPTION_ID].lower(), x[
+                _SUBSCRIPTION_NAME].lower()])]  # pylint: disable=line-too-long
+        if len(result) != 1:
+            raise CLIError("Please run 'az account set' to select active account.")
+        return result[0]
+
+    def get_current_account_user(self):
+        try:
+            active_account = self.get_subscription()
+        except CLIError:
+            raise CLIError('There are no active accounts.')
+
+        return active_account[_USER_ENTITY][_USER_NAME]
+
+    def get_current_subscription_id(self):
+        try:
+            active_account = self.get_subscription()
+        except CLIError:
+            raise CLIError('There are no active accounts.')
+
+        return active_account[_USER_ENTITY][_SUBSCRIPTION_ID]
+
+    def load_cached_subscriptions(self, all_clouds=False):
+        subscriptions = self._storage.get(_SUBSCRIPTIONS) or []
+        active_cloud = get_active_cloud()
+        cached_subscriptions = [sub for sub in subscriptions
+                                if all_clouds or sub[_ENVIRONMENT_NAME] == active_cloud.name]
+        # use deepcopy as we don't want to persist these changes to file.
+        return deepcopy(cached_subscriptions)
+
+    def get_installation_id(self):
+        installation_id = self._storage.get(_INSTALLATION_ID)
+        if not installation_id:
+            import uuid
+            installation_id = str(uuid.uuid1())
+            self._storage[_INSTALLATION_ID] = installation_id
+        return installation_id
+
+
+class Profile(ReadOnlyProfile):
+    def __init__(self, storage=None, auth_ctx_factory=None):
+        super(Profile, self).__init__(storage)
+
         factory = auth_ctx_factory or _AUTH_CTX_FACTORY
         self._creds_cache = CredsCache(factory)
         self._subscription_finder = SubscriptionFinder(factory, self._creds_cache.adal_token_cache)
@@ -160,6 +212,12 @@ class Profile(object):
             })
         return consolidated
 
+    @staticmethod
+    def _pick_working_subscription(subscriptions):
+        from azure.mgmt.resource.subscriptions.models import SubscriptionState
+        s = next((x for x in subscriptions if x['state'] == SubscriptionState.enabled.value), None)
+        return s or subscriptions[0]
+
     def _set_subscriptions(self, new_subscriptions):
         existing_ones = self.load_cached_subscriptions(all_clouds=True)
         active_one = next((x for x in existing_ones if x.get(_IS_DEFAULT_SUBSCRIPTION)), None)
@@ -190,12 +248,6 @@ class Profile(object):
 
         set_cloud_subscription(active_cloud.name, default_sub_id)
         self._storage[_SUBSCRIPTIONS] = subscriptions
-
-    @staticmethod
-    def _pick_working_subscription(subscriptions):
-        from azure.mgmt.resource.subscriptions.models import SubscriptionState
-        s = next((x for x in subscriptions if x['state'] == SubscriptionState.enabled.value), None)
-        return s or subscriptions[0]
 
     def set_active_subscription(self, subscription):  # take id or name
         subscriptions = self.load_cached_subscriptions(all_clouds=True)
@@ -229,35 +281,6 @@ class Profile(object):
     def logout_all(self):
         self._storage[_SUBSCRIPTIONS] = []
         self._creds_cache.remove_all_cached_creds()
-
-    def load_cached_subscriptions(self, all_clouds=False):
-        subscriptions = self._storage.get(_SUBSCRIPTIONS) or []
-        active_cloud = get_active_cloud()
-        cached_subscriptions = [sub for sub in subscriptions
-                                if all_clouds or sub[_ENVIRONMENT_NAME] == active_cloud.name]
-        # use deepcopy as we don't want to persist these changes to file.
-        return deepcopy(cached_subscriptions)
-
-    def get_current_account_user(self):
-        try:
-            active_account = self.get_subscription()
-        except CLIError:
-            raise CLIError('There are no active accounts.')
-
-        return active_account[_USER_ENTITY][_USER_NAME]
-
-    def get_subscription(self, subscription=None):  # take id or name
-        subscriptions = self.load_cached_subscriptions()
-        if not subscriptions:
-            raise CLIError("Please run 'az login' to setup account.")
-
-        result = [x for x in subscriptions if (
-            not subscription and x.get(_IS_DEFAULT_SUBSCRIPTION) or
-            subscription and subscription.lower() in [x[_SUBSCRIPTION_ID].lower(), x[
-                _SUBSCRIPTION_NAME].lower()])]  # pylint: disable=line-too-long
-        if len(result) != 1:
-            raise CLIError("Please run 'az account set' to select active account.")
-        return result[0]
 
     def get_login_credentials(self, resource=CLOUD.endpoints.management,
                               subscription_id=None):
@@ -311,14 +334,6 @@ class Profile(object):
         result['subscriptionId'] = result.pop('id')
         result['endpoints'] = CLOUD.endpoints
         return result
-
-    def get_installation_id(self):
-        installation_id = self._storage.get(_INSTALLATION_ID)
-        if not installation_id:
-            import uuid
-            installation_id = str(uuid.uuid1())
-            self._storage[_INSTALLATION_ID] = installation_id
-        return installation_id
 
 
 class SubscriptionFinder(object):
