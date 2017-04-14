@@ -25,7 +25,7 @@ helps['redis import-method'] = """
 
 helps['redis update-settings'] = """
     type: command
-    short-summary: Update the settings of a redis cache.
+    short-summary: (DEPRECATED) Update the settings of a redis cache.
     long-summary: |
         WARNING: This command is being deprecated. Please use 'update' command
 """

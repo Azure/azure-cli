@@ -3,6 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from msrest.exceptions import ClientException
+from azure.cli.core.util import CLIError
+
 from azure.mgmt.redis.models import (
     ImportRDBParameters,
     ExportRDBParameters,
@@ -50,7 +53,7 @@ def cli_redis_update(instance, sku=None, vm_size=None):
 
     if vm_size != None:
         instance.sku.family = vm_size[0]
-        instance.sku.capacity = vm_size[1]
+        instance.sku.capacity = vm_size[1:]
 
     update_params = RedisCreateOrUpdateParameters(
         instance.location,
@@ -66,6 +69,12 @@ def cli_redis_update(instance, sku=None, vm_size=None):
         )
 
     return update_params
+
+def wrong_vmsize_argument_exception_handler(ex):
+	# pylint:disable=line-too-long
+    if ("The value of the parameter 'properties.sku.family/properties.sku.capacity' is invalid" in format(ex)) or ("The value of the parameter 'properties.sku.family' is invalid" in format(ex)):
+        raise CLIError('Invalid VM size. Example for Valid values: For C family (C0, C1, C2, C3, C4, C5, C6), for P family (P1, P2, P3, P4)')
+    raise ex
 
 def cli_redis_create(client, resource_group_name, name, location, sku, # pylint:disable=too-many-arguments
                      vm_size, tags=None, redis_configuration=None,
@@ -87,7 +96,7 @@ def cli_redis_create(client, resource_group_name, name, location, sku, # pylint:
     """
     params = RedisCreateOrUpdateParameters(
         location,
-        Sku(sku, vm_size[0], vm_size[1]),
+        Sku(sku, vm_size[0], vm_size[1:]),
         tags,
         None, # Version is deprecated and ignored
         redis_configuration,
@@ -97,4 +106,7 @@ def cli_redis_create(client, resource_group_name, name, location, sku, # pylint:
         subnet_id,
         static_ip)
 
-    return client.create_or_update(resource_group_name, name, params)
+    try:
+        return client.create_or_update(resource_group_name, name, params)
+    except ClientException as err:
+        wrong_vmsize_argument_exception_handler(err)
