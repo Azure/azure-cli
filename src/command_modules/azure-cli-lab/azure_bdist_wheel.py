@@ -28,7 +28,7 @@ This file is a copy of the official bdist_wheel file from wheel 0.30.0a0, enhanc
 of the bottom with some Microsoft extension for Azure SDK for Python
 
 """
-
+# noqa
 import csv
 import hashlib
 import os
