@@ -132,7 +132,7 @@ class Profile(object):
             self._creds_cache.save_service_principal_cred(sp_auth.get_entry_to_persist(username,
                                                                                        tenant))
 
-        if self._creds_cache.load_adal_token_cache().has_state_changed:
+        if self._creds_cache.adal_token_cache.has_state_changed:
             self._creds_cache.persist_cached_creds()
         consolidated = Profile._normalize_properties(self.subscription_finder.user_id,
                                                      subscriptions,
@@ -532,7 +532,7 @@ class CredsCache(object):
     def remove_cached_creds(self, user_or_sp):
         state_changed = False
         # clear AAD tokens
-        tokens = self.load_adal_token_cache().find({_TOKEN_ENTRY_USER_ID: user_or_sp})
+        tokens = self.adal_token_cache.find({_TOKEN_ENTRY_USER_ID: user_or_sp})
         if tokens:
             state_changed = True
             self.adal_token_cache.remove(tokens)
