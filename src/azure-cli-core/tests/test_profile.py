@@ -310,7 +310,6 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         token_type, token = cred._token_retriever()
         self.assertEqual(token, self.raw_token1)
         self.assertEqual(some_token_type, token_type)
-        self.assertEqual(mock_read_cred_file.call_count, 1)
         mock_get_token.assert_called_once_with(mock.ANY, self.user1, self.tenant_id,
                                                'https://management.core.windows.net/')
         self.assertEqual(mock_get_token.call_count, 1)
@@ -535,7 +534,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         creds_cache = CredsCache()
 
         # assert
-        token_entries = [entry for _, entry in creds_cache.adal_token_cache.read_items()]
+        token_entries = [entry for _, entry in creds_cache.load_adal_token_cache().read_items()]
         self.assertEqual(token_entries, [self.token_entry1])
         self.assertEqual(creds_cache._service_principal_creds, [test_sp])
 
@@ -550,6 +549,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
 
         # action
         creds_cache = CredsCache()
+        creds_cache.load_adal_token_cache()
 
         # assert
         self.assertEqual(creds_cache._service_principal_creds, [test_sp])

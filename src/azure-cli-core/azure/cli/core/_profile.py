@@ -132,7 +132,7 @@ class Profile(object):
             self._creds_cache.save_service_principal_cred(sp_auth.get_entry_to_persist(username,
                                                                                        tenant))
 
-        if self._creds_cache.adal_token_cache.has_state_changed:
+        if self._creds_cache.load_adal_token_cache().has_state_changed:
             self._creds_cache.persist_cached_creds()
         consolidated = Profile._normalize_properties(self.subscription_finder.user_id,
                                                      subscriptions,
@@ -470,6 +470,7 @@ class CredsCache(object):
         return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN])
 
     def retrieve_token_for_service_principal(self, sp_id, resource):
+        self.load_adal_token_cache()
         matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
         if not matched:
             raise CLIError("Please run 'az account set' to select active account.")
@@ -482,6 +483,7 @@ class CredsCache(object):
         return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN])
 
     def retrieve_secret_of_service_principal(self, sp_id):
+        self.load_adal_token_cache()
         matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
         if not matched:
             raise CLIError("No matched service principal found")
@@ -490,6 +492,9 @@ class CredsCache(object):
 
     @property
     def adal_token_cache(self):
+        return self.load_adal_token_cache()
+
+    def load_adal_token_cache(self):
         if self._adal_token_cache_attr is None:
             import adal
             all_entries = _load_tokens_from_file(self._token_file)
@@ -499,6 +504,7 @@ class CredsCache(object):
         return self._adal_token_cache_attr
 
     def save_service_principal_cred(self, sp_entry):
+        self.load_adal_token_cache()
         matched = [x for x in self._service_principal_creds
                    if sp_entry[_SERVICE_PRINCIPAL_ID] == x[_SERVICE_PRINCIPAL_ID] and
                    sp_entry[_SERVICE_PRINCIPAL_TENANT] == x[_SERVICE_PRINCIPAL_TENANT]]
@@ -526,7 +532,7 @@ class CredsCache(object):
     def remove_cached_creds(self, user_or_sp):
         state_changed = False
         # clear AAD tokens
-        tokens = self.adal_token_cache.find({_TOKEN_ENTRY_USER_ID: user_or_sp})
+        tokens = self.load_adal_token_cache().find({_TOKEN_ENTRY_USER_ID: user_or_sp})
         if tokens:
             state_changed = True
             self.adal_token_cache.remove(tokens)
