@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=unused-argument,too-many-arguments
 from azure.cli.core.util import CLIError, to_snake_case
 
 from azure.cli.core.cloud import (Cloud,
@@ -38,6 +39,7 @@ def _build_cloud(cloud_name, cloud_config=None, cloud_args=None):
             cloud_config[to_snake_case(key)] = cloud_config.pop(key)
         cloud_args = cloud_config
     c = Cloud(cloud_name)
+    c.profile = cloud_args.get('profile', None)
     for arg in cloud_args:
         if arg.startswith('endpoint_') and cloud_args[arg] is not None:
             setattr(c.endpoints, arg.replace('endpoint_', ''), cloud_args[arg])
@@ -45,11 +47,10 @@ def _build_cloud(cloud_name, cloud_config=None, cloud_args=None):
             setattr(c.suffixes, arg.replace('suffix_', ''), cloud_args[arg])
     return c
 
-    # pylint: disable=unused-argument,too-many-arguments
-
 
 def register_cloud(cloud_name,
                    cloud_config=None,
+                   profile=None,
                    endpoint_management=None,
                    endpoint_resource_manager=None,
                    endpoint_sql_management=None,
@@ -72,6 +73,7 @@ def register_cloud(cloud_name,
 
 def modify_cloud(cloud_name=None,
                  cloud_config=None,
+                 profile=None,
                  endpoint_management=None,
                  endpoint_resource_manager=None,
                  endpoint_sql_management=None,
@@ -108,3 +110,10 @@ def set_cloud(cloud_name):
         switch_active_cloud(cloud_name)
     except CloudNotRegisteredException as e:
         raise CLIError(e)
+
+
+def list_profiles(cloud_name=None, show_all=False):
+    from azure.cli.core.profiles import API_PROFILES
+    if not cloud_name:
+        cloud_name = get_active_cloud_name()
+    return list(API_PROFILES)

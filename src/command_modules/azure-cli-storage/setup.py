@@ -31,7 +31,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-storage==0.34.0',
+    'azure-multiapi-storage==0.1.0',
     'azure-mgmt-storage==1.0.0rc1',
     'azure-cli-core',
 ]

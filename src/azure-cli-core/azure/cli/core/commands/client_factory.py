@@ -10,6 +10,8 @@ import azure.cli.core._debug as _debug
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
 from azure.cli.core.application import APPLICATION
+from azure.cli.core.profiles._shared import get_client_class
+from azure.cli.core.profiles import get_api_version, get_sdk, ResourceType
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -17,7 +19,15 @@ UA_AGENT = "AZURECLI/{}".format(core_version)
 ENV_ADDITIONAL_USER_AGENT = 'AZURE_HTTP_USER_AGENT'
 
 
-def get_mgmt_service_client(client_type, subscription_id=None, api_version=None, **kwargs):
+def get_mgmt_service_client(client_or_resource_type, subscription_id=None, api_version=None,
+                            **kwargs):
+    if isinstance(client_or_resource_type, ResourceType):
+        # Get the versioned client
+        client_type = get_client_class(client_or_resource_type)
+        api_version = api_version or get_api_version(client_or_resource_type)
+    else:
+        # Get the non-versioned client
+        client_type = client_or_resource_type
     client, _ = _get_mgmt_service_client(client_type, subscription_id=subscription_id,
                                          api_version=api_version, **kwargs)
     return client
@@ -28,7 +38,7 @@ def get_subscription_service_client(client_type):
 
 
 def configure_common_settings(client):
-    client = _debug.allow_debug_connection(client)
+    client = _debug.change_ssl_cert_verification(client)
 
     client.config.add_user_agent(UA_AGENT)
     try:
@@ -84,7 +94,8 @@ def get_data_service_client(service_type, account_name, account_key, connection_
             client_kwargs['endpoint_suffix'] = endpoint_suffix
         client = service_type(**client_kwargs)
     except ValueError as exc:
-        from azure.storage._error import _ERROR_STORAGE_MISSING_INFO
+        _ERROR_STORAGE_MISSING_INFO = \
+            get_sdk(ResourceType.DATA_STORAGE, '_error#_ERROR_STORAGE_MISSING_INFO')
         if _ERROR_STORAGE_MISSING_INFO in str(exc):
             raise ValueError(exc)
         else:

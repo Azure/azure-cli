@@ -41,3 +41,8 @@ helps['cloud update'] = """
             type: command
             short-summary: Update the configuration for a cloud.
 """
+
+helps['cloud list-profiles'] = """
+            type: command
+            short-summary: List the profiles a given cloud supports.
+"""

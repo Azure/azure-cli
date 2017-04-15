@@ -9,6 +9,7 @@ from argparse import Namespace
 from azure.cli.command_modules.storage._validators import (get_permission_validator,
                                                            get_datetime_type, datetime, ipv4_range_type, resource_type_type,
                                                            services_type, process_blob_source_uri)
+from azure.cli.core.profiles import get_sdk, ResourceType
 
 
 class TestStorageValidators(unittest.TestCase):
@@ -19,7 +20,7 @@ class TestStorageValidators(unittest.TestCase):
         self.io.close()
 
     def test_permission_validator(self):
-        from azure.storage.blob.models import ContainerPermissions
+        ContainerPermissions = get_sdk(ResourceType.DATA_STORAGE, 'blob.models#ContainerPermissions')
 
         ns1 = Namespace(permission='rwdl')
         ns2 = Namespace(permission='abc')

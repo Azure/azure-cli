@@ -27,19 +27,21 @@ from azure.cli.command_modules.storage._transformers import \
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.util import empty_on_404
+from azure.cli.core.profiles import supported_api_version, get_sdk, ResourceType
 
 mgmt_path = 'azure.mgmt.storage.operations.storage_accounts_operations#StorageAccountsOperations.'
 custom_path = 'azure.cli.command_modules.storage.custom#'
-file_service_path = 'azure.storage.file.fileservice#FileService.'
-block_blob_path = 'azure.storage.blob.blockblobservice#BlockBlobService.'
-page_blob_path = 'azure.storage.blob.pageblobservice#PageBlobService.'
-base_blob_path = 'azure.storage.blob.baseblobservice#BaseBlobService.'
-table_path = 'azure.storage.table.tableservice#TableService.'
-queue_path = 'azure.storage.queue.queueservice#QueueService.'
+file_service_path = 'azure.multiapi.storage.file.fileservice#FileService.'
+block_blob_path = 'azure.multiapi.storage.blob.blockblobservice#BlockBlobService.'
+page_blob_path = 'azure.multiapi.storage.blob.pageblobservice#PageBlobService.'
+base_blob_path = 'azure.multiapi.storage.blob.baseblobservice#BaseBlobService.'
+table_path = 'azure.multiapi.storage.table.tableservice#TableService.'
+queue_path = 'azure.multiapi.storage.queue.queueservice#QueueService.'
 
 
 def _dont_fail_not_exist(ex):
-    from azure.storage._error import AzureMissingResourceHttpError
+    AzureMissingResourceHttpError = \
+        get_sdk(ResourceType.DATA_STORAGE, '_error#AzureMissingResourceHttpError')
     if isinstance(ex, AzureMissingResourceHttpError):
         return None
     else:
@@ -51,17 +53,24 @@ factory = lambda kwargs: storage_client_factory().storage_accounts  # noqa: E731
 cli_command(__name__, 'storage account check-name', mgmt_path + 'check_name_availability', factory)
 cli_command(__name__, 'storage account delete', mgmt_path + 'delete', factory, confirmation=True)
 cli_command(__name__, 'storage account show', mgmt_path + 'get_properties', factory, exception_handler=empty_on_404)
-cli_command(__name__, 'storage account create', custom_path + 'create_storage_account')
 cli_command(__name__, 'storage account list', custom_path + 'list_storage_accounts')
 cli_command(__name__, 'storage account show-usage', custom_path + 'show_storage_account_usage')
 cli_command(__name__, 'storage account show-connection-string', custom_path + 'show_storage_account_connection_string')
-cli_command(__name__, 'storage account keys renew', mgmt_path + 'regenerate_key', factory, transform=lambda x: x.keys)
-cli_command(__name__, 'storage account keys list', mgmt_path + 'list_keys', factory, transform=lambda x: x.keys)
-cli_generic_update_command(__name__, 'storage account update',
-                           mgmt_path + 'get_properties',
-                           mgmt_path + 'update', factory,
-                           custom_function_op=custom_path + 'update_storage_account')
-cli_storage_data_plane_command('storage account generate-sas', 'azure.storage.cloudstorageaccount#CloudStorageAccount.generate_shared_access_signature', cloud_storage_account_service_factory)
+cli_command(__name__, 'storage account keys renew', mgmt_path + 'regenerate_key', factory, transform=lambda x: getattr(x, 'keys', x))
+cli_command(__name__, 'storage account keys list', mgmt_path + 'list_keys', factory, transform=lambda x: getattr(x, 'keys', x))
+
+if supported_api_version(ResourceType.MGMT_STORAGE, max_api='2015-06-15'):
+    cli_command(__name__, 'storage account create', custom_path + 'create_storage_account_with_account_type')
+else:
+    cli_command(__name__, 'storage account create', custom_path + 'create_storage_account')
+
+if supported_api_version(ResourceType.MGMT_STORAGE, min_api='2016-12-01'):
+    cli_generic_update_command(__name__, 'storage account update',
+                               mgmt_path + 'get_properties',
+                               mgmt_path + 'update', factory,
+                               custom_function_op=custom_path + 'update_storage_account')
+
+cli_storage_data_plane_command('storage account generate-sas', 'azure.multiapi.storage.cloudstorageaccount#CloudStorageAccount.generate_shared_access_signature', cloud_storage_account_service_factory)
 
 # container commands
 factory = blob_data_service_factory
@@ -188,7 +197,10 @@ cli_storage_data_plane_command('storage entity delete', table_path + 'delete_ent
 # queue commands
 factory = queue_data_service_factory
 cli_storage_data_plane_command('storage queue generate-sas', queue_path + 'generate_queue_shared_access_signature', factory)
-cli_storage_data_plane_command('storage queue stats', queue_path + 'get_queue_service_stats', factory)
+
+if supported_api_version(ResourceType.DATA_STORAGE, min_api='2016-05-31'):
+    cli_storage_data_plane_command('storage queue stats', queue_path + 'get_queue_service_stats', factory)
+
 cli_storage_data_plane_command('storage queue list', queue_path + 'list_queues', factory, transform=transform_storage_list_output)
 cli_storage_data_plane_command('storage queue create', queue_path + 'create_queue', factory, transform=create_boolean_result_output_transformer('created'), table_transformer=transform_boolean_for_table)
 cli_storage_data_plane_command('storage queue delete', queue_path + 'delete_queue', factory, transform=create_boolean_result_output_transformer('deleted'), table_transformer=transform_boolean_for_table)
