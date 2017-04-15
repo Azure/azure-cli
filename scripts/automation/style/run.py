@@ -36,7 +36,7 @@ def run_pep8(modules):
     print('\n\nRun flake8 for PEP8 compliance')
     print('Modules: {}'.format(', '.join(name for name, _ in modules)))
 
-    command = 'flake8 --statistics --append-config={} {}'.format(
+    command = 'flake8 --statistics --exclude=azure_bdist_wheel.py --append-config={} {}'.format(
         os.path.join(automation_path.get_repo_root(), '.flake8'),
         ' '.join(path for _, path in modules))
 
