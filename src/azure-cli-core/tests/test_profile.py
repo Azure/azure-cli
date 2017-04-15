@@ -238,7 +238,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         storage_mock = {'subscriptions': []}
         profile = Profile(storage_mock)
         profile._management_resource_uri = 'https://management.core.windows.net/'
-        profile._subscription_finder = finder
+        profile._subscription_finder_attr = finder
         profile.find_subscriptions_on_login(False, '1234', 'my-secret', True, self.tenant_id)
         # action
         extended_info = profile.get_expanded_subscription_info()
