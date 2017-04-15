@@ -121,6 +121,8 @@ register_cli_argument('webapp deployment slot', 'auto_swap_slot', help='target s
 register_cli_argument('webapp deployment slot', 'disable', help='disable auto swap', action='store_true')
 register_cli_argument('webapp deployment slot', 'target_slot', help="target slot to swap, default to 'production'")
 register_cli_argument('webapp deployment slot create', 'configuration_source', help="source slot to clone configurations from. Use webapp's name to refer to the production slot")
+register_cli_argument('webapp deployment slot swap', 'action', help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
+                      **enum_choice_list(['swap', 'preview', 'reset']))
 
 
 two_states_switch = ['true', 'false']
@@ -211,7 +213,8 @@ register_cli_argument('appservice web deployment slot', 'auto_swap_slot', help='
 register_cli_argument('appservice web deployment slot', 'disable', help='disable auto swap', action='store_true')
 register_cli_argument('appservice web deployment slot', 'target_slot', help="target slot to swap, default to 'production'")
 register_cli_argument('appservice web deployment slot create', 'configuration_source', help="source slot to clone configurations from. Use webapp's name to refer to the production slot")
-
+register_cli_argument('appservice web deployment slot swap', 'action', help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
+                      **enum_choice_list(['swap', 'preview', 'reset']))
 register_cli_argument('appservice web log config', 'application_logging', help='configure application logging to file system', **enum_choice_list(two_states_switch))
 register_cli_argument('appservice web log config', 'detailed_error_messages', help='configure detailed error messages', **enum_choice_list(two_states_switch))
 register_cli_argument('appservice web log config', 'failed_request_tracing', help='configure failed request tracing', **enum_choice_list(two_states_switch))
