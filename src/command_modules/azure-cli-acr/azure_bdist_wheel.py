@@ -29,6 +29,7 @@ of the bottom with some Microsoft extension for Azure SDK for Python
 
 """
 
+ # noqa
 import csv
 import hashlib
 import os
