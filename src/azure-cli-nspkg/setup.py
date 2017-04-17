@@ -41,7 +41,7 @@ setup(
     zip_safe=False,
     classifiers=CLASSIFIERS,
     install_requires=[
-        'azure-nspkg>=3.0.0'
+        'azure-nspkg>=2.0.0'
     ],
     packages=[
         'azure',
