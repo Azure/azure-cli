@@ -3,6 +3,9 @@
 Release History
 ===============
 
+* Adding update command which also adds the ability to scale for redis cache
+* Deprecates the 'update-settings' command.
+
 0.1.1b3 (2017-02-22)
 ++++++++++++++++++++
 
