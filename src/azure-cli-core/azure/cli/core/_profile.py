@@ -111,17 +111,17 @@ class Profile(object):
         allow_debug_adal_connection()
         subscriptions = []
         if interactive:
-            subscriptions = self._subscription_finder.find_through_interactive_flow(
+            subscriptions = self.subscription_finder.find_through_interactive_flow(
                 tenant, self._ad_resource_uri)
         else:
             if is_service_principal:
                 if not tenant:
                     raise CLIError('Please supply tenant using "--tenant"')
                 sp_auth = ServicePrincipalAuth(password)
-                subscriptions = self._subscription_finder.find_from_service_principal_id(
+                subscriptions = self.subscription_finder.find_from_service_principal_id(
                     username, sp_auth, tenant, self._ad_resource_uri)
             else:
-                subscriptions = self._subscription_finder.find_from_user_account(
+                subscriptions = self.subscription_finder.find_from_user_account(
                     username, password, tenant, self._ad_resource_uri)
 
         if not subscriptions:
