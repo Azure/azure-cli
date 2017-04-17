@@ -3,6 +3,19 @@
 Release History
 ===============
 
+2.0.3 (2017-04-17)
+++++++++++++++++++
+
+* Fix resource parsing and api version lookup. (#2781)
+* Add docs for az lock update. (#2702)
+* Error out if you try to list resources for a group that doesn't exist. (#2769)
+* [Compute] Fix issues with VMSS and VM availability set update. (#2773)
+* Add some more error checking/handling. (#2768)
+* Make argument parameters match up. (#2717)
+* Fix lock create and delete if parent-resource-path is None (#2742)
+* Apply core changes required for API profile support (#2834) & JSON string parsing from shell (#2705)
+
+
 2.0.2 (2017-04-03)
 ++++++++++++++++++
 
