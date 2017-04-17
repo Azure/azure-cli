@@ -11,7 +11,7 @@ scripts_root=$(cd $(dirname $0); pwd)
 
 export PYTHONPATH=$PATHONPATH:./src
 
-python -m azure.cli -h
+python -m azure.cli -h --debug
 
 # Ensure tokens are erased from VCR recordings
 python -m automation.tests.check_vcr_recordings

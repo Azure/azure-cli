@@ -16,13 +16,14 @@ from azure.cli.command_modules.vm.custom import (_get_access_extension_upgrade_i
                                                  _get_extension_instance_name)
 from azure.cli.command_modules.vm.custom import \
     (attach_unmanaged_data_disk, detach_data_disk, get_vmss_instance_view)
-from azure.cli.command_modules.vm.disk_encryption import enable, disable, _check_encrypt_is_supported
+from azure.cli.command_modules.vm.disk_encryption import (enable,
+                                                          disable,
+                                                          _check_encrypt_is_supported)
 from azure.mgmt.compute.models import (NetworkProfile, StorageProfile, DataDisk, OSDisk,
                                        OperatingSystemTypes, InstanceViewStatus,
                                        VirtualMachineExtensionInstanceView,
-                                       VirtualMachineExtension, ImageReference)
-from azure.mgmt.compute.models.compute_management_client_enums import (DiskCreateOptionTypes,
-                                                                       CachingTypes)
+                                       VirtualMachineExtension, ImageReference,
+                                       DiskCreateOptionTypes, CachingTypes)
 
 
 class Test_Vm_Custom(unittest.TestCase):

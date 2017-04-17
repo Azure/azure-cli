@@ -10,9 +10,7 @@ try:
 except ImportError:
     import mock
 
-from azure.mgmt.network import NetworkManagementClient
-from azure.mgmt.storage import StorageManagementClient
-from azure.mgmt.resource.resources import ResourceManagementClient
+from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.vm._validators import (_validate_vm_create_vnet,
                                                       _validate_vmss_create_subnet,
@@ -25,9 +23,9 @@ from azure.cli.command_modules.vm._validators import (_validate_vm_create_vnet,
 # pylint: disable=too-many-lines
 
 
-def _mock_resource_client(client_class):
+def _mock_resource_client(client_type):
     client = mock.MagicMock()
-    if client_class is NetworkManagementClient:
+    if client_type is ResourceType.MGMT_NETWORK:
         def _mock_list(rg):
 
             def _get_mock_vnet(name, rg, location):
@@ -47,7 +45,7 @@ def _mock_resource_client(client_class):
             ]
             return [x for x in all_mocks if x.rg == rg]
         client.virtual_networks.list = _mock_list
-    elif client_class is ResourceManagementClient:
+    elif client_type is ResourceType.MGMT_RESOURCE_RESOURCES:
         def _mock_get(rg):
             def _get_mock_rg(name, location):
                 mock_rg = mock.MagicMock()
@@ -60,7 +58,7 @@ def _mock_resource_client(client_class):
             ]
             return next((x for x in all_mocks if x.name == rg), _get_mock_rg(rg, 'unknown'))
         client.resource_groups.get = _mock_get
-    elif client_class is StorageManagementClient:
+    elif client_type is ResourceType.MGMT_STORAGE:
         def _mock_list_by_resource_group(rg):
             def _get_mock_sa(name, rg, location, tier):
                 mock_sa = mock.MagicMock()
