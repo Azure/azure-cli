@@ -30,8 +30,7 @@ def main(args, file=sys.stdout):  # pylint: disable=redefined-builtin
     CONFIG.load(os.path.join(azure_folder, 'az.json'))
     SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
 
-    config = Configuration(args)
-    APPLICATION.initialize(config)
+    APPLICATION.initialize(Configuration())
 
     try:
         cmd_result = APPLICATION.execute(args)

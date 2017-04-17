@@ -9,7 +9,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup
 
-VERSION = "2.0.2+dev"
+VERSION = "2.0.3+dev"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -95,6 +95,7 @@ setup(
         'azure.cli.core.commands',
         'azure.cli.core.extensions',
         'azure.cli.core.sdk',
+        'azure.cli.core.profiles',
     ],
     install_requires=DEPENDENCIES
 )

@@ -16,14 +16,14 @@ from azure.cli.core.commands.parameters import (
     resource_group_name_type,
     get_one_of_subscription_locations,
     get_resource_name_completion_list)
-from azure.mgmt.compute.models import ContainerServiceOchestratorTypes
+from azure.mgmt.compute.containerservice.models import ContainerServiceOchestratorTypes
 from azure.cli.command_modules.vm._validators import validate_ssh_key
 
 
 def _compute_client_factory(**_):
-    from azure.mgmt.compute import ComputeManagementClient
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(ComputeManagementClient)
+    return get_mgmt_service_client(ResourceType.MGMT_COMPUTE)
 
 
 def get_vm_sizes(location):
@@ -74,6 +74,8 @@ register_extra_cli_argument('acs create', 'generate_ssh_keys', action='store_tru
 register_cli_argument('acs create', 'agent_vm_size', completer=get_vm_size_completion_list)
 
 register_cli_argument('acs create', 'windows', action='store_true', help='If true, deploy a windows container cluster.')
+register_cli_argument('acs create', 'validate', action='store_true', help='Generate and validate the ARM template without creating any resources')
+
 
 register_cli_argument('acs', 'disable_browser', help='Do not open browser after opening a proxy to the cluster web user interface')
 register_cli_argument('acs dcos browse', 'name', name_arg_type)

@@ -6,8 +6,11 @@
 import os
 from unittest import TestCase, skipIf
 from datetime import datetime
-from azure.storage.blob.baseblobservice import BaseBlobService
-from azure.storage.file.fileservice import FileService
+from azure.cli.core.profiles import get_sdk, ResourceType
+
+BaseBlobService, FileService = get_sdk(ResourceType.DATA_STORAGE,
+                                       'blob.baseblobservice#BaseBlobService',
+                                       'file.fileservice#FileService')
 
 
 @skipIf(os.environ.get('Travis', 'false') == 'true', 'Integration tests are skipped in Travis CI')

@@ -3,7 +3,7 @@
 
 Azure CLI uses the VCR.py library to record the HTTP messages exchanged during a program run and play them back at a later time, making it useful for creating command level scenario tests. These tests can be replayed at a later time without any network activity, allowing us to detect regressions in the handling of parameters and in the compatability between AzureCLI and the PythonSDK.
 
-##Overview
+## Overview
 
 Each command module has a `tests` folder with a file called: `test_<module>_commands.py`. This is where you will define tests. 
 
@@ -15,7 +15,7 @@ After adding your test, run it. The test driver will automatically detect the te
 
 If the tests are run on TravisCI, any tests which cannot be replayed will automatically fail. 
 
-##Authoring Tests
+## Authoring Tests
 
 To create a new test, simply create a class in the `test_<module>_commands.py` file with the following structure:
 
@@ -49,7 +49,7 @@ The `set_up` and `tear_down` methods are optional and can be omitted. For the Re
 
 A number of helper methods are available for structuring your script tests.
 
-####cmd(command_string, checks=None, allowed_exceptions=None, debug=False)
+#### cmd(command_string, checks=None, allowed_exceptions=None, debug=False)
 
 This method executes a given command and returns the output. If the output is in JSON format, the method will return the results as a JSON object for easier manuipulation.
 
@@ -59,18 +59,18 @@ The `allowed_exceptions` parameter allows you to specify one or more (as a list)
 
 The `checks` parameter allows you to specify one or more (as a list) checks to automatically validate the output. A number of Check objects exist for this purpose. You can create your own as long as they implement the compare method (see existing checks for examples):
 
-#####JMESPathCheck(query, expected_result)
+#### JMESPathCheck(query, expected_result)
 
 Use the JMESPathCheck object to validate the result using any valid JMESPath query. This is useful for checking that the JSON result has fields you were expecting, arrays of certain lengths etc. See www.jmespath.org for guidance on writing JMESPath queries.
 
-######Usage
+##### Usage
 ```
 JMESPathCheck(query, expected_result)
 ```
 - `query` - JMESPath query as a string.
 - `expected_result` - The expected result from the JMESPath query (see [jmespath.search()](https://github.com/jmespath/jmespath.py#api))
 
-######Example
+##### Example
 
 The example below shows how you can use a JMESPath query to validate the values from a command.
 When calling `test(command_string, checks)` you can pass in just one JMESPathComparator or a list of JMESPathComparators.
@@ -81,27 +81,27 @@ self.cmd('vm list-ip-addresses --resource-group myResourceGroup', checks=[
   JMESPathCheck('[0].virtualMachine.name', 'myVMName')
 ])
 ```
-#####NoneCheck()
+#### NoneCheck()
 
 Use this to verify that the output contains nothing. Note that this is different from `checks=None` which will skip any validation.
 
-#####StringCheck(expected_result)
+#### StringCheck(expected_result)
 
 Matches string output to expected.
 
-#####BooleanCheck(expected_result)
+#### BooleanCheck(expected_result)
 
 Compares truthy responses (True, 'true', 1, etc.) to a Boolean True or False.
 
-####set_env(variable_name, value)
+#### set_env(variable_name, value)
 
 This method is a wrapper around `os.environ` and simply sets an environment variable to the specified value.
 
-####pop_env(variable_name)
+#### pop_env(variable_name)
 
 Another wrapper around `os.environ` this pops the value of the indicated environment variable.
 
-##Test Issues
+## Test Issues
 
 Here are some common issues that occur when authoring tests that you should be aware of.
 

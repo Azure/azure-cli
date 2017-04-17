@@ -21,6 +21,8 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.application import APPLICATION
 from azure.cli.core.prompting import prompt_y_n, NoTTYException
 from azure.cli.core._config import az_config, DEFAULTS_SECTION
+from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles._shared import get_versioned_sdk_path
 
 from ._introspection import (extract_args_from_signature,
                              extract_full_summary_from_signature)
@@ -249,7 +251,7 @@ def load_params(command):
         return
     module_to_load = command_module[:command_module.rfind('.')]
     import_module(module_to_load).load_params(command)
-    _update_command_definitions(command_table)
+    _apply_parameter_info(command, command_table[command])
 
 
 def get_command_table(module_name=None):
@@ -326,6 +328,13 @@ def cli_command(module_name, name, operation,
 
 def get_op_handler(operation):
     """ Import and load the operation handler """
+    # Patch the unversioned sdk path to include the appropriate API version for the
+    # resource type in question.
+    from azure.cli.core._profile import CLOUD
+    for rt in ResourceType:
+        if operation.startswith(rt.import_prefix):
+            operation = operation.replace(rt.import_prefix,
+                                          get_versioned_sdk_path(CLOUD.profile, rt))
     try:
         mod_to_import, attr_path = operation.split('#')
         op = import_module(mod_to_import)
@@ -336,6 +345,37 @@ def get_op_handler(operation):
         raise ValueError("The operation '{}' is invalid.".format(operation))
 
 
+def _load_client_exception_class():
+    # Since loading msrest is expensive, we avoid it until we have to
+    from msrest.exceptions import ClientException
+    return ClientException
+
+
+def _load_azure_exception_class():
+    # Since loading msrest is expensive, we avoid it until we have to
+    from azure.common import AzureException
+    return AzureException
+
+
+def _is_paged(obj):
+    # Since loading msrest is expensive, we avoid it until we have to
+    import collections
+    if isinstance(obj, collections.Iterable) \
+            and not isinstance(obj, list) \
+            and not isinstance(obj, dict):
+        from msrest.paging import Paged
+        return isinstance(obj, Paged)
+    return False
+
+
+def _is_poller(obj):
+    # Since loading msrest is expensive, we avoid it until we have to
+    if obj.__class__.__name__ == 'AzureOperationPoller':
+        from msrestazure.azure_operation import AzureOperationPoller
+        return isinstance(obj, AzureOperationPoller)
+    return False
+
+
 def create_command(module_name, name, operation,
                    transform_result, table_transformer, client_factory,
                    no_wait_param=None, confirmation=None, exception_handler=None,
@@ -344,10 +384,6 @@ def create_command(module_name, name, operation,
         raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
     def _execute_command(kwargs):
-        from msrest.paging import Paged
-        from msrest.exceptions import ClientException
-        from msrestazure.azure_operation import AzureOperationPoller
-        from azure.common import AzureException
 
         if confirmation \
             and not kwargs.get(CONFIRM_PARAM_NAME) \
@@ -374,19 +410,18 @@ def create_command(module_name, name, operation,
                 return transform_result(result)
 
             # otherwise handle based on return type of results
-            if isinstance(result, AzureOperationPoller):
+            if _is_poller(result):
                 return LongRunningOperation('Starting {}'.format(name))(result)
-            elif isinstance(result, Paged):
+            elif _is_paged(result):
                 return list(result)
-            else:
-                return result
-        except ClientException as client_exception:
+            return result
+        except _load_client_exception_class() as client_exception:
             fault_type = name.replace(' ', '-') + '-client-error'
             telemetry.set_exception(client_exception, fault_type=fault_type,
                                     summary='Unexpected client exception during command creation')
             message = getattr(client_exception, 'message', client_exception)
             raise _polish_rp_not_registerd_error(CLIError(message))
-        except AzureException as azure_exception:
+        except _load_azure_exception_class() as azure_exception:
             fault_type = name.replace(' ', '-') + '-service-error'
             telemetry.set_exception(azure_exception, fault_type=fault_type,
                                     summary='Unexpected azure exception during command creation')
@@ -485,13 +520,17 @@ _cli_argument_registry = _ArgumentRegistry()
 _cli_extra_argument_registry = defaultdict(lambda: {})
 
 
+def _apply_parameter_info(command_name, command):
+    for argument_name in command.arguments:
+        overrides = _get_cli_argument(command_name, argument_name)
+        command.update_argument(argument_name, overrides)
+
+    # Add any arguments explicitly registered for this command
+    for argument_name, argument_definition in _get_cli_extra_arguments(command_name):
+        command.arguments[argument_name] = argument_definition
+        command.update_argument(argument_name, _get_cli_argument(command_name, argument_name))
+
+
 def _update_command_definitions(command_table_to_update):
     for command_name, command in command_table_to_update.items():
-        for argument_name in command.arguments:
-            overrides = _get_cli_argument(command_name, argument_name)
-            command.update_argument(argument_name, overrides)
-
-        # Add any arguments explicitly registered for this command
-        for argument_name, argument_definition in _get_cli_extra_arguments(command_name):
-            command.arguments[argument_name] = argument_definition
-            command.update_argument(argument_name, _get_cli_argument(command_name, argument_name))
+        _apply_parameter_info(command_name, command)

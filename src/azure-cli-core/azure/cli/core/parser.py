@@ -178,14 +178,19 @@ class AzCliCommandParser(argparse.ArgumentParser):
         self.exit()
 
     def is_group(self):
-        return getattr(self, '_subparsers', None) is not None
+        """ Determine if this parser instance represents a group
+            or a command. Anything that has a func default is considered
+            a group. This includes any dummy commands served up by the
+            "filter out irrelevant commands based on argv" command filter """
+        return not self._defaults.get('func', None)
 
     def __getattribute__(self, name):
         """ Since getting the description can be expensive (require module loads), we defer
             this until someone actually wants to use it (i.e. show help for the command)
         """
         if name == 'description':
-            if callable(self._description):
-                self.description = self._description()
+            if self._description:
+                self.description = self._description() \
+                    if callable(self._description) else self._description
                 self._description = None
         return object.__getattribute__(self, name)

@@ -9,16 +9,13 @@ import collections
 import errno
 import json
 import os.path
-from pprint import pformat
 from copy import deepcopy
 from enum import Enum
 
-import adal
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import CLIError, get_file_json
-from azure.cli.core.adal_authentication import AdalAuthentication
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
 logger = azlogging.get_az_logger(__name__)
@@ -60,6 +57,7 @@ _COMMON_TENANT = 'common'
 
 
 def _authentication_context_factory(authority, cache):
+    import adal
     return adal.AuthenticationContext(authority, cache=cache, api_version=None)
 
 
@@ -67,9 +65,7 @@ _AUTH_CTX_FACTORY = _authentication_context_factory
 
 CLOUD = get_active_cloud()
 
-logger.debug("Current active cloud '%s'", CLOUD.name)
-logger.debug(pformat(vars(CLOUD.endpoints)))
-logger.debug(pformat(vars(CLOUD.suffixes)))
+logger.debug('Current cloud config:\n%s', str(CLOUD))
 
 
 def get_authority_url(tenant=None):
@@ -102,7 +98,7 @@ class Profile(object):
         factory = auth_ctx_factory or _AUTH_CTX_FACTORY
         self._creds_cache = CredsCache(factory)
         self._subscription_finder = SubscriptionFinder(factory, self._creds_cache.adal_token_cache)
-        self._management_resource_uri = CLOUD.endpoints.management
+        self._ad_resource_uri = CLOUD.endpoints.active_directory_resource_id
 
     def find_subscriptions_on_login(self,  # pylint: disable=too-many-arguments
                                     interactive,
@@ -115,17 +111,17 @@ class Profile(object):
         subscriptions = []
         if interactive:
             subscriptions = self._subscription_finder.find_through_interactive_flow(
-                tenant, self._management_resource_uri)
+                tenant, self._ad_resource_uri)
         else:
             if is_service_principal:
                 if not tenant:
                     raise CLIError('Please supply tenant using "--tenant"')
                 sp_auth = ServicePrincipalAuth(password)
                 subscriptions = self._subscription_finder.find_from_service_principal_id(
-                    username, sp_auth, tenant, self._management_resource_uri)
+                    username, sp_auth, tenant, self._ad_resource_uri)
             else:
                 subscriptions = self._subscription_finder.find_from_user_account(
-                    username, password, tenant, self._management_resource_uri)
+                    username, password, tenant, self._ad_resource_uri)
 
         if not subscriptions:
             raise CLIError('No subscriptions found for this account.')
@@ -260,7 +256,7 @@ class Profile(object):
             raise CLIError("Please run 'az account set' to select active account.")
         return result[0]
 
-    def get_login_credentials(self, resource=CLOUD.endpoints.management,
+    def get_login_credentials(self, resource=CLOUD.endpoints.active_directory_resource_id,
                               subscription_id=None):
         account = self.get_subscription(subscription_id)
         user_type = account[_USER_ENTITY][_USER_TYPE]
@@ -274,6 +270,7 @@ class Profile(object):
                 return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
                                                                               resource)
 
+        from azure.cli.core.adal_authentication import AdalAuthentication
         auth_object = AdalAuthentication(_retrieve_token)
 
         return (auth_object,
@@ -325,8 +322,8 @@ class SubscriptionFinder(object):
     '''finds all subscriptions for a user or service principal'''
 
     def __init__(self, auth_context_factory, adal_token_cache, arm_client_factory=None):
-        from azure.mgmt.resource.subscriptions import SubscriptionClient
-        from azure.cli.core._debug import allow_debug_connection
+        from azure.mgmt.resource import SubscriptionClient
+        from azure.cli.core._debug import change_ssl_cert_verification
 
         self._adal_token_cache = adal_token_cache
         self._auth_context_factory = auth_context_factory
@@ -336,7 +333,7 @@ class SubscriptionFinder(object):
             if arm_client_factory:
                 return arm_client_factory(config)
             else:
-                return allow_debug_connection(SubscriptionClient(
+                return change_ssl_cert_verification(SubscriptionClient(
                     config, base_url=CLOUD.endpoints.resource_manager))
 
         self._arm_client_factory = create_arm_client_factory
@@ -382,6 +379,7 @@ class SubscriptionFinder(object):
         return self._auth_context_factory(authority, token_cache)
 
     def _find_using_common_tenant(self, access_token, resource):
+        import adal
         from msrest.authentication import BasicTokenAuthentication
 
         all_subscriptions = []
@@ -480,6 +478,7 @@ class CredsCache(object):
         return cred[_ACCESS_TOKEN]
 
     def _load_creds(self):
+        import adal
         if self.adal_token_cache is not None:
             return self.adal_token_cache
         all_entries = _load_tokens_from_file(self._token_file)
@@ -497,7 +496,7 @@ class CredsCache(object):
             # pylint: disable=line-too-long
             if (sp_entry.get(_ACCESS_TOKEN, None) != getattr(matched[0], _ACCESS_TOKEN, None) or
                     sp_entry.get(_SERVICE_PRINCIPAL_CERT_FILE, None) != getattr(matched[0], _SERVICE_PRINCIPAL_CERT_FILE, None)):
-                self._service_principal_creds.pop(matched[0])
+                self._service_principal_creds.remove(matched[0])
                 self._service_principal_creds.append(matched[0])
                 state_changed = True
         else:

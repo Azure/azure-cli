@@ -79,7 +79,7 @@ def _mock_get_mgmt_service_client(client_type, subscription_bound=True, subscrip
     else:
         client = client_type(cred, **client_kwargs)
 
-    client = _debug.allow_debug_connection(client)
+    client = _debug.change_ssl_cert_verification(client)
 
     client.config.add_user_agent("AZURECLI/TEST/{}".format(core_version))
 
@@ -488,13 +488,15 @@ class ResourceGroupVCRTestBase(VCRTestBase):
     # pylint: disable=too-many-arguments
 
     def __init__(self, test_file, test_name, resource_group='vcr_resource_group', run_live=False,
-                 debug=False, debug_vcr=False, skip_setup=False, skip_teardown=False):
+                 debug=False, debug_vcr=False, skip_setup=False, skip_teardown=False,
+                 random_tag_format=None):
         super(ResourceGroupVCRTestBase, self).__init__(test_file, test_name, run_live=run_live,
                                                        debug=debug, debug_vcr=debug_vcr,
                                                        skip_setup=skip_setup,
                                                        skip_teardown=skip_teardown)
         self.resource_group_original = resource_group
-        random_tag = '_{}_'.format(''.join((choice(ascii_lowercase + digits) for _ in range(4))))
+        random_tag = (random_tag_format or '_{}_').format(
+            ''.join((choice(ascii_lowercase + digits) for _ in range(4))))
         self.resource_group = '{}{}'.format(resource_group, '' if self.playback else random_tag)
         self.location = 'westus'
 

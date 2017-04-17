@@ -9,7 +9,7 @@ from argcomplete.completers import FilesCompleter
 
 from azure.mgmt.network.models import \
     (IPAllocationMethod, RouteNextHopType)
-from azure.mgmt.network.models.network_management_client_enums import \
+from azure.mgmt.network.models import \
     (ApplicationGatewaySkuName, ApplicationGatewayCookieBasedAffinity,
      ApplicationGatewayFirewallMode, ApplicationGatewayProtocol,
      ApplicationGatewayRequestRoutingRuleType, ExpressRouteCircuitSkuFamily,
@@ -21,7 +21,7 @@ from azure.cli.core.commands import \
     (CliArgumentType, register_cli_argument, register_extra_cli_argument)
 from azure.cli.core.commands.parameters import (location_type, get_resource_name_completion_list,
                                                 enum_choice_list, tags_type, ignore_type,
-                                                get_generic_completion_list, file_type)
+                                                file_type)
 from azure.cli.core.commands.validators import \
     (MarkSpecifiedAction, get_default_location_from_resource_group)
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
@@ -537,7 +537,7 @@ register_cli_argument('network traffic-manager profile check-dns', 'type', help=
 # Traffic manager endpoints
 endpoint_types = ['azureEndpoints', 'externalEndpoints', 'nestedEndpoints']
 register_cli_argument('network traffic-manager endpoint', 'endpoint_name', name_arg_type, id_part='child_name', help='Endpoint name.', completer=get_tm_endpoint_completion_list())
-register_cli_argument('network traffic-manager endpoint', 'endpoint_type', options_list=('--type',), help='Endpoint type.  Values include: {}.'.format(', '.join(endpoint_types)), completer=get_generic_completion_list(endpoint_types))
+register_cli_argument('network traffic-manager endpoint', 'endpoint_type', options_list=['--type', '-t'], help='Endpoint type.', id_part='child_name', **enum_choice_list(endpoint_types))
 register_cli_argument('network traffic-manager endpoint', 'profile_name', help='Name of parent profile.', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'), id_part='name')
 register_cli_argument('network traffic-manager endpoint', 'endpoint_location', help="Location of the external or nested endpoints when using the 'Performance' routing method.")
 register_cli_argument('network traffic-manager endpoint', 'endpoint_monitor_status', help='The monitoring status of the endpoint.')

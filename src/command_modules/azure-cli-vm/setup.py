@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = '2.0.2+dev'
+VERSION = '2.0.3+dev'
 
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
@@ -25,12 +25,12 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-compute==0.33.1rc1',
+    'azure-mgmt-compute==1.0.0rc1',
     'azure-mgmt-keyvault==0.30.0',
     'azure-keyvault==0.1.0',
-    'azure-mgmt-network==0.30.0',
-    'azure-mgmt-resource==0.30.2',
-    'azure-storage==0.34.0',
+    'azure-mgmt-network==1.0.0rc1',
+    'azure-mgmt-resource==1.0.0rc1',
+    'azure-multiapi-storage==0.1.0',
     'azure-cli-core',
     'paramiko'
 ]

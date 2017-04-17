@@ -3,9 +3,11 @@
 Release History
 ===============
 
-Unreleased
+2.0.3 (2017-04-17)
 ++++++++++++++++++
 
+* expose 'az acs create --no-wait' and 'az acs wait' for async creation
+* expose 'az acs create --validate' for dry-run validations
 * remove windows profile before PUT call for scale command (#2755)
 
 2.0.2 (2017-04-03)

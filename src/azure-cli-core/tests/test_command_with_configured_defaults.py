@@ -56,8 +56,8 @@ class TestCommandWithConfiguredDefaults(unittest.TestCase):
         _update_command_definitions(command_table)
 
         self.argv = 'az test sample-vm-list'.split()
-        config = Configuration(self.argv)
-        config.get_command_table = lambda: command_table
+        config = Configuration()
+        config.get_command_table = lambda argv: command_table
         self.application = Application(config)
 
     @mock.patch.dict(os.environ, {AzConfig.env_var_name('defaults', 'group'): 'myRG'})

@@ -6,6 +6,7 @@
 import argparse
 import time
 import random
+from azure.cli.core.profiles import ResourceType
 
 
 def validate_tags(ns):
@@ -43,9 +44,8 @@ def generate_deployment_name(namespace):
 
 def get_default_location_from_resource_group(namespace):
     if not namespace.location:
-        from azure.mgmt.resource.resources import ResourceManagementClient
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        resource_client = get_mgmt_service_client(ResourceManagementClient)
+        resource_client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
         rg = resource_client.resource_groups.get(namespace.resource_group_name)
         namespace.location = rg.location  # pylint: disable=no-member
 

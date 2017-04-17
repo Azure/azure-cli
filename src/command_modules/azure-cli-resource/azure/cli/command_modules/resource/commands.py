@@ -86,7 +86,7 @@ cli_command(__name__, 'group deployment validate', 'azure.cli.command_modules.re
 cli_command(__name__, 'group deployment export', 'azure.cli.command_modules.resource.custom#export_deployment_as_template')
 
 # Resource group deployment operations commands
-cli_command(__name__, 'group deployment operation list', 'azure.mgmt.resource.resources.operations.deployment_operations_operations#DeploymentOperationsOperations.list', cf_deployment_operations)
+cli_command(__name__, 'group deployment operation list', 'azure.mgmt.resource.resources.operations.deployment_operations#DeploymentOperations.list', cf_deployment_operations)
 cli_command(__name__, 'group deployment operation show', 'azure.cli.command_modules.resource.custom#get_deployment_operations', cf_deployment_operations, exception_handler=empty_on_404)
 
 cli_generic_update_command(__name__, 'resource update',

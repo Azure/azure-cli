@@ -3,6 +3,12 @@
 Release History
 ===============
 
+2.0.3 (2017-04-17)
+^^^^^^^^^^^^^^^^^^
+
+* Improve performance of package load and command execution (#2819)
+* Alter JSON string parsing from shell (#2705)
+
 2.0.2 (2017-04-03)
 ^^^^^^^^^^^^^^^^^^
 

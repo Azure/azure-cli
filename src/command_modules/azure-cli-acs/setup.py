@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = '2.0.2+dev'
+VERSION = '2.0.3+dev'
 
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
@@ -26,7 +26,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-mgmt-authorization==0.30.0rc6',
-    'azure-mgmt-compute==0.33.1rc1',
+    'azure-mgmt-compute==1.0.0rc1',
     'azure-graphrbac==0.30.0rc6',
     'azure-cli-core',
     'paramiko',
@@ -57,11 +57,7 @@ setup(
         'azure.cli.command_modules',
     ],
     packages=[
-        'azure.cli.command_modules.acs',
-        'azure.cli.command_modules.acs.mgmt_acs',
-        'azure.cli.command_modules.acs.mgmt_acs.lib',
-        'azure.cli.command_modules.acs.mgmt_acs.lib.models',
-        'azure.cli.command_modules.acs.mgmt_acs.lib.operations',
+        'azure.cli.command_modules.acs'
     ],
     install_requires=DEPENDENCIES,
 )
