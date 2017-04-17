@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.0.1 (2017-04-17)
+++++++++++++++++++
+
+* SQL - ability to connect directly to resource provider (#2832)
+* Fix doc references to azure.cli.commands (#2740)
+* Apply core changes required for API profile support (#2834) & JSON string parsing from shell (#2705)
+
 2.0.0 (2017-04-03)
 ++++++++++++++++++
 
