@@ -3,7 +3,7 @@
 Release History
 ===============
 
-0.1.3 (2017-04-04)
+0.1.3 (2017-04-17)
 ++++++++++++++++++++
 
 * Use the app service plan's resource group for cert operations (#2750)

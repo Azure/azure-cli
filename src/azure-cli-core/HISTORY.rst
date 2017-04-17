@@ -2,7 +2,8 @@
 
 Release History
 ===============
-2.0.3 (unreleased)
+
+2.0.3 (2017-04-17)
 ^^^^^^^^^^^^^^^^^^
 *core: fix a failure when login using a service principal twice (#2800)
 *core: Allow file path of accessTokens.json to be configurable through an env var(#2605)
