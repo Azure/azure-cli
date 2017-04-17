@@ -766,6 +766,8 @@ class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
                 location = self.rcf.resource_groups.get(rg_name).location
 
             res = GenericResource(location=location, properties=res)
+        elif res.get('location', None) is None:
+            raise IncorrectUsageError("location of the resource is required")
 
         if self.resource_id:
             resource = self.rcf.resources.create_or_update_by_id(self.resource_id,
