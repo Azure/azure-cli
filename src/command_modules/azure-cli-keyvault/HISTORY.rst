@@ -3,6 +3,12 @@
 Release History
 ===============
 
+2.0.1 (2017-04-17)
+++++++++++++++++++++
+
+* keyvault fix for import of pem and pfx (#2754)
+* Apply core changes required for API profile support (#2834) & JSON string parsing from shell (#2705)
+
 2.0.0 (2017-04-03)
 ++++++++++++++++++++
 
