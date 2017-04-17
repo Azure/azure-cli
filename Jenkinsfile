@@ -16,6 +16,7 @@ pipeline {
         } 
         stage ('Performance-Test') {
             agent { label 'perf-ubuntu-a0' }
+            when { expression { return env.BRANCH_NAME == 'master' || env.BRANCH.startsWith('performance') } }
             steps {
                 sh 'pip install -U virtualenv'
                 sh 'python -m virtualenv --clear env'
