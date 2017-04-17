@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = '0.1.2+dev'
+VERSION = '0.1.3+dev'
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
