@@ -3,8 +3,8 @@
 Release History
 ===============
 
-unreleased
-++++++++++
+2.0.1 (2017-04-17)
+++++++++++++++++++
 * Add profile switching params and profile listing command
 * Modify ‘az cloud register’ and ‘az cloud update’ to include the ‘—profile’ parameter
 
