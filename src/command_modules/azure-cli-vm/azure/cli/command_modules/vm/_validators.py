@@ -665,7 +665,7 @@ def _validate_admin_password(password, os_type):
 
 def validate_ssh_key(namespace):
     string_or_file = (namespace.ssh_key_value or
-                      os.path.join(os.path.expanduser('~'), '.ssh/id_rsa.pub'))
+                      os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
     content = string_or_file
     if os.path.exists(string_or_file):
         logger.info('Use existing SSH public key file: %s', string_or_file)
@@ -681,7 +681,10 @@ def validate_ssh_key(namespace):
             else:
                 private_key_filepath = public_key_filepath + '.private'
             content = _generate_ssh_keys(private_key_filepath, public_key_filepath)
-            logger.warning('Created SSH key files: %s,%s',
+            logger.warning("SSH key files '%s' and '%s' have been generated under ~/.ssh to "
+                           "allow SSH access to the VM. If using machines without "
+                           "permanent storage like Azure Cloud Shell without an attached "
+                           "file share, back up your keys to a safe location",
                            private_key_filepath, public_key_filepath)
         else:
             raise CLIError('An RSA key file or key value must be supplied to SSH Key Value. '
