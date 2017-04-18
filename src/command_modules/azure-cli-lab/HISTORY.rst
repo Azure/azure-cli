@@ -2,6 +2,10 @@
 
 Release History
 ===============
+(2017-04-18)
++++++++++++++++++++++
+
+* Adding show, delete & list commands for environment in the lab.
 
 0.0.2 (2017-04-17)
 +++++++++++++++++++++
