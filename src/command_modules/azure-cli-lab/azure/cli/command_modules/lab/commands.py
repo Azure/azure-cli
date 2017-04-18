@@ -161,7 +161,7 @@ environment_operations = create_service_adapter(
     'EnvironmentOperations')
 
 with ServiceGroup(__name__, get_devtestlabs_secret_operation,
-                  secret_operations) as s:
+                  environment_operations) as s:
     with s.group('lab environment') as c:
         c.command('show', 'get_resource')
         c.command('list', 'list')
