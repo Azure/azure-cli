@@ -47,6 +47,7 @@ def transform_resource_list(result):
         transformed.append(res)
     return transformed
 
+cli_command(__name__, 'resource create', 'azure.cli.command_modules.resource.custom#create_resource')
 cli_command(__name__, 'resource delete', 'azure.cli.command_modules.resource.custom#delete_resource')
 cli_command(__name__, 'resource show', 'azure.cli.command_modules.resource.custom#show_resource', exception_handler=empty_on_404)
 cli_command(__name__, 'resource list', 'azure.cli.command_modules.resource.custom#list_resources', table_transformer=transform_resource_list)

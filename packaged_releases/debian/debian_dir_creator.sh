@@ -32,6 +32,12 @@ echo '1.0' > $debian_dir/source/format
 echo '9' > $debian_dir/compat
 
 cat > $debian_dir/changelog <<- EOM
+azure-cli (0.2.5-1) unstable; urgency=low
+
+  * Packaged release 0.2.5.
+
+ -- Azure Python CLI Team <azpycli@microsoft.com>  Mon, 17 Apr 2017 20:00:00 +0000
+
 azure-cli (0.2.4-1) unstable; urgency=low
 
   * Packaged release 0.2.4.

@@ -6,6 +6,7 @@
 #pylint: disable=line-too-long
 
 from azure.cli.core.commands import cli_command
+from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.command_modules.redis._client_factory import (cf_redis, cf_patch_schedules)
 
 cli_command(__name__, 'redis create', 'azure.cli.command_modules.redis.custom#cli_redis_create', cf_redis)
@@ -19,6 +20,10 @@ cli_command(__name__, 'redis list-keys', 'azure.mgmt.redis.operations.redis_oper
 cli_command(__name__, 'redis regenerate-keys', 'azure.mgmt.redis.operations.redis_operations#RedisOperations.regenerate_key', cf_redis)
 cli_command(__name__, 'redis show', 'azure.mgmt.redis.operations.redis_operations#RedisOperations.get', cf_redis)
 cli_command(__name__, 'redis update-settings', 'azure.cli.command_modules.redis.custom#cli_redis_update_settings', cf_redis)
+
+cli_generic_update_command(__name__, 'redis update', 'azure.mgmt.redis.operations.redis_operations#RedisOperations.get',
+						                     'azure.mgmt.redis.operations.redis_operations#RedisOperations.create_or_update',
+						                     cf_redis, custom_function_op='azure.cli.command_modules.redis.custom#cli_redis_update')
 
 cli_command(__name__, 'redis patch-schedule set', 'azure.mgmt.redis.operations.patch_schedules_operations#PatchSchedulesOperations.create_or_update', cf_patch_schedules)
 cli_command(__name__, 'redis patch-schedule delete', 'azure.mgmt.redis.operations.patch_schedules_operations#PatchSchedulesOperations.delete', cf_patch_schedules)

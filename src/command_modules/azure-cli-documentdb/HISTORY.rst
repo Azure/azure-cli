@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.1.3 (2017-04-17)
+++++++++++++++++++
+
+* Apply core changes required for API profile support (#2834)
+
 0.1.2 (2017-04-03)
 ++++++++++++++++++
 

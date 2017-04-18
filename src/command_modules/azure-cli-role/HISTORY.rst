@@ -3,7 +3,7 @@
 Release History
 ===============
 
-2.0.2 (unreleased)
+2.0.2 (2017-04-17)
 ++++++++++++++++++
 * role: fix issues on role definition update (#2745)
 * create-for-rbac: ensure user provided password is picked up

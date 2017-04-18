@@ -3,7 +3,7 @@
 Release History
 ===============
 
-Unreleased
+2.0.3 (2017-04-17)
 ++++++++++++++++++
 
 * expose 'az acs create --no-wait' and 'az acs wait' for async creation
