@@ -98,7 +98,6 @@ class Profile(object):
         self.auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
         self._creds_cache = CredsCache(self.auth_ctx_factory)
         self._management_resource_uri = CLOUD.endpoints.management
-        self._subscription_finder_attr = None
         self._ad_resource_uri = CLOUD.endpoints.active_directory_resource_id
 
     def find_subscriptions_on_login(self,  # pylint: disable=too-many-arguments
@@ -106,22 +105,27 @@ class Profile(object):
                                     username,
                                     password,
                                     is_service_principal,
-                                    tenant):
+                                    tenant,
+                                    subscription_finder=None):
         from azure.cli.core._debug import allow_debug_adal_connection
         allow_debug_adal_connection()
         subscriptions = []
+
+        if not subscription_finder:
+            subscription_finder = SubscriptionFinder(self.auth_ctx_factory,
+                                                     self._creds_cache.adal_token_cache)
         if interactive:
-            subscriptions = self.subscription_finder.find_through_interactive_flow(
+            subscriptions = subscription_finder.find_through_interactive_flow(
                 tenant, self._ad_resource_uri)
         else:
             if is_service_principal:
                 if not tenant:
                     raise CLIError('Please supply tenant using "--tenant"')
                 sp_auth = ServicePrincipalAuth(password)
-                subscriptions = self.subscription_finder.find_from_service_principal_id(
+                subscriptions = subscription_finder.find_from_service_principal_id(
                     username, sp_auth, tenant, self._ad_resource_uri)
             else:
-                subscriptions = self.subscription_finder.find_from_user_account(
+                subscriptions = subscription_finder.find_from_user_account(
                     username, password, tenant, self._ad_resource_uri)
 
         if not subscriptions:
@@ -133,19 +137,12 @@ class Profile(object):
 
         if self._creds_cache.adal_token_cache.has_state_changed:
             self._creds_cache.persist_cached_creds()
-        consolidated = Profile._normalize_properties(self.subscription_finder.user_id,
+        consolidated = Profile._normalize_properties(subscription_finder.user_id,
                                                      subscriptions,
                                                      is_service_principal)
         self._set_subscriptions(consolidated)
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
-
-    @property
-    def subscription_finder(self):
-        if self._subscription_finder_attr is None:
-            self._subscription_finder_attr = SubscriptionFinder(self.auth_ctx_factory,
-                                                                self._creds_cache.adal_token_cache)
-        return self._subscription_finder_attr
 
     @staticmethod
     def _normalize_properties(user, subscriptions, is_service_principal):
