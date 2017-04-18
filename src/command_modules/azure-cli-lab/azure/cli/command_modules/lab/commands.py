@@ -160,7 +160,7 @@ environment_operations = create_service_adapter(
     mgmt_operations_path.format('environment_operations'),
     'EnvironmentOperations')
 
-with ServiceGroup(__name__, get_devtestlabs_secret_operation,
+with ServiceGroup(__name__, get_devtestlabs_environment_operation,
                   environment_operations) as s:
     with s.group('lab environment') as c:
         c.command('show', 'get_resource')
