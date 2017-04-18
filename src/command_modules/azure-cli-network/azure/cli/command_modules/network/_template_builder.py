@@ -93,7 +93,8 @@ def build_application_gateway_resource(name, location, tags, sku_name, sku_tier,
                                        cookie_based_affinity,
                                        http_settings_protocol, http_settings_port,
                                        http_listener_protocol, routing_rule_type, public_ip_id,
-                                       subnet_id):
+                                       subnet_id, connection_draining_timeout):
+    from azure.cli.core.profiles import ResourceType, supported_api_version, get_api_version
 
     # set the default names
     frontend_ip_name = 'appGatewayFrontendIP'
@@ -142,18 +143,24 @@ def build_application_gateway_resource(name, location, tags, sku_name, sku_tier,
             }
         }
 
+    backend_http_settings = {
+        'name': http_settings_name,
+        'properties': {
+            'Port': http_settings_port,
+            'Protocol': http_settings_protocol,
+            'CookieBasedAffinity': cookie_based_affinity
+        }
+    }
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01'):
+        backend_http_settings['properties']['connectionDraining'] = {
+            'enabled': bool(connection_draining_timeout),
+            'drainTimeoutInSec': connection_draining_timeout \
+                if connection_draining_timeout else 1
+        }
+
     ag_properties = {
         'backendAddressPools': [backend_address_pool],
-        'backendHttpSettingsCollection': [
-            {
-                'name': http_settings_name,
-                'properties': {
-                    'Port': http_settings_port,
-                    'Protocol': http_settings_protocol,
-                    'CookieBasedAffinity': cookie_based_affinity
-                }
-            }
-        ],
+        'backendHttpSettingsCollection': [backend_http_settings],
         'frontendIPConfigurations': [frontend_ip_config],
         'frontendPorts': [
             {
@@ -197,7 +204,7 @@ def build_application_gateway_resource(name, location, tags, sku_name, sku_tier,
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': '2015-06-15',
+        'apiVersion': get_api_version(ResourceType.MGMT_NETWORK),
         'dependsOn': [],
         'properties': ag_properties
     }
