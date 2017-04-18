@@ -208,6 +208,14 @@ def export_deployment_as_template(resource_group_name, deployment_name):
     result = smc.deployments.export_template(resource_group_name, deployment_name)
     print(json.dumps(result.template, indent=2))#pylint: disable=no-member
 
+def create_resource(properties, resource_group_name=None, resource_provider_namespace=None,
+                    parent_resource_path=None, resource_type=None, resource_name=None,
+                    resource_id=None, api_version=None, location=None, is_full_object=False):
+    res = _ResourceUtils(resource_group_name, resource_provider_namespace,
+                         parent_resource_path, resource_type, resource_name,
+                         resource_id, api_version)
+    return res.create_resource(properties, location, is_full_object)
+
 def show_resource(resource_group_name=None, resource_provider_namespace=None,
                   parent_resource_path=None, resource_type=None, resource_name=None,
                   resource_id=None, api_version=None):
@@ -746,6 +754,34 @@ class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
         self.resource_name = resource_name
         self.resource_id = resource_id
         self.api_version = api_version
+
+    def create_resource(self, properties, location, is_full_object):
+        res = json.loads(properties)
+        if not is_full_object:
+            if not location:
+                if self.resource_id:
+                    rg_name = parse_resource_id(self.resource_id)['resource_group']
+                else:
+                    rg_name = self.resource_group_name
+                location = self.rcf.resource_groups.get(rg_name).location
+
+            res = GenericResource(location=location, properties=res)
+        elif res.get('location', None) is None:
+            raise IncorrectUsageError("location of the resource is required")
+
+        if self.resource_id:
+            resource = self.rcf.resources.create_or_update_by_id(self.resource_id,
+                                                                 self.api_version,
+                                                                 res)
+        else:
+            resource = self.rcf.resources.create_or_update(self.resource_group_name,
+                                                           self.resource_provider_namespace,
+                                                           self.parent_resource_path or '',
+                                                           self.resource_type,
+                                                           self.resource_name,
+                                                           self.api_version,
+                                                           res)
+        return resource
 
     def get_resource(self):
         if self.resource_id:
