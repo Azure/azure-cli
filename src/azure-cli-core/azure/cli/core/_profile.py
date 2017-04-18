@@ -95,9 +95,9 @@ class CredentialType(Enum):  # pylint: disable=too-few-public-methods
 class Profile(object):
     def __init__(self, storage=None, auth_ctx_factory=None):
         self._storage = storage or ACCOUNT
-        factory = auth_ctx_factory or _AUTH_CTX_FACTORY
-        self._creds_cache = CredsCache(factory)
-        self._subscription_finder = SubscriptionFinder(factory, self._creds_cache.adal_token_cache)
+        self.auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
+        self._creds_cache = CredsCache(self.auth_ctx_factory)
+        self._management_resource_uri = CLOUD.endpoints.management
         self._ad_resource_uri = CLOUD.endpoints.active_directory_resource_id
 
     def find_subscriptions_on_login(self,  # pylint: disable=too-many-arguments
@@ -105,22 +105,27 @@ class Profile(object):
                                     username,
                                     password,
                                     is_service_principal,
-                                    tenant):
+                                    tenant,
+                                    subscription_finder=None):
         from azure.cli.core._debug import allow_debug_adal_connection
         allow_debug_adal_connection()
         subscriptions = []
+
+        if not subscription_finder:
+            subscription_finder = SubscriptionFinder(self.auth_ctx_factory,
+                                                     self._creds_cache.adal_token_cache)
         if interactive:
-            subscriptions = self._subscription_finder.find_through_interactive_flow(
+            subscriptions = subscription_finder.find_through_interactive_flow(
                 tenant, self._ad_resource_uri)
         else:
             if is_service_principal:
                 if not tenant:
                     raise CLIError('Please supply tenant using "--tenant"')
                 sp_auth = ServicePrincipalAuth(password)
-                subscriptions = self._subscription_finder.find_from_service_principal_id(
+                subscriptions = subscription_finder.find_from_service_principal_id(
                     username, sp_auth, tenant, self._ad_resource_uri)
             else:
-                subscriptions = self._subscription_finder.find_from_user_account(
+                subscriptions = subscription_finder.find_from_user_account(
                     username, password, tenant, self._ad_resource_uri)
 
         if not subscriptions:
@@ -132,7 +137,7 @@ class Profile(object):
 
         if self._creds_cache.adal_token_cache.has_state_changed:
             self._creds_cache.persist_cached_creds()
-        consolidated = Profile._normalize_properties(self._subscription_finder.user_id,
+        consolidated = Profile._normalize_properties(subscription_finder.user_id,
                                                      subscriptions,
                                                      is_service_principal)
         self._set_subscriptions(consolidated)
@@ -255,6 +260,9 @@ class Profile(object):
         if len(result) != 1:
             raise CLIError("Please run 'az account set' to select active account.")
         return result[0]
+
+    def get_subscription_id(self):
+        return self.get_subscription()[_SUBSCRIPTION_ID]
 
     def get_login_credentials(self, resource=CLOUD.endpoints.active_directory_resource_id,
                               subscription_id=None):
@@ -428,8 +436,7 @@ class CredsCache(object):
                             os.path.join(get_config_dir(), 'accessTokens.json'))
         self._service_principal_creds = []
         self._auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
-        self.adal_token_cache = None
-        self._load_creds()
+        self._adal_token_cache_attr = None
 
     def persist_cached_creds(self):
         with os.fdopen(os.open(self._token_file, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600),
@@ -459,6 +466,7 @@ class CredsCache(object):
         return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN])
 
     def retrieve_token_for_service_principal(self, sp_id, resource):
+        self.load_adal_token_cache()
         matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
         if not matched:
             raise CLIError("Please run 'az account set' to select active account.")
@@ -471,23 +479,28 @@ class CredsCache(object):
         return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN])
 
     def retrieve_secret_of_service_principal(self, sp_id):
+        self.load_adal_token_cache()
         matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
         if not matched:
             raise CLIError("No matched service principal found")
         cred = matched[0]
         return cred[_ACCESS_TOKEN]
 
-    def _load_creds(self):
-        import adal
-        if self.adal_token_cache is not None:
-            return self.adal_token_cache
-        all_entries = _load_tokens_from_file(self._token_file)
-        self._load_service_principal_creds(all_entries)
-        real_token = [x for x in all_entries if x not in self._service_principal_creds]
-        self.adal_token_cache = adal.TokenCache(json.dumps(real_token))
-        return self.adal_token_cache
+    @property
+    def adal_token_cache(self):
+        return self.load_adal_token_cache()
+
+    def load_adal_token_cache(self):
+        if self._adal_token_cache_attr is None:
+            import adal
+            all_entries = _load_tokens_from_file(self._token_file)
+            self._load_service_principal_creds(all_entries)
+            real_token = [x for x in all_entries if x not in self._service_principal_creds]
+            self._adal_token_cache_attr = adal.TokenCache(json.dumps(real_token))
+        return self._adal_token_cache_attr
 
     def save_service_principal_cred(self, sp_entry):
+        self.load_adal_token_cache()
         matched = [x for x in self._service_principal_creds
                    if sp_entry[_SERVICE_PRINCIPAL_ID] == x[_SERVICE_PRINCIPAL_ID] and
                    sp_entry[_SERVICE_PRINCIPAL_TENANT] == x[_SERVICE_PRINCIPAL_TENANT]]
