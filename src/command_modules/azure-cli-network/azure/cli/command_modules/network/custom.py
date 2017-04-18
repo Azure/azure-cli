@@ -139,7 +139,6 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
                                subnet='default', subnet_address_prefix='10.0.0.0/24',
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                                public_ip_address_type=None, subnet_type=None, validate=False):
-    from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.util import random_string
     from azure.cli.command_modules.network._template_builder import \
         (ArmTemplateBuilder, build_application_gateway_resource, build_public_ip_resource,
@@ -1253,7 +1252,6 @@ def create_vpn_connection(client, resource_group_name, connection_name, vnet_gat
     :param bool no_wait: Do not wait for the long running operation to finish.
     :param bool validate: Display and validate the ARM template but do not create any resources.
     """
-    from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.util import random_string
     from azure.cli.command_modules.network._template_builder import \
         ArmTemplateBuilder, build_vpn_connection_resource
@@ -2252,14 +2250,14 @@ def _create_network_watchers(client, resource_group_name, locations, tags):
     if resource_group_name is None:
         raise CLIError("usage error: '--resource-group' required when enabling new regions")
 
-    from azure.mgmt.network.models import NetworkWatcher
+    NetworkWatcher = get_sdk(ResourceType.MGMT_NETWORK, 'NetworkWatcher', mod='models')
     for location in locations:
         client.create_or_update(
             resource_group_name, '{}-watcher'.format(location),
             NetworkWatcher(location=location, tags=tags))
 
 def _update_network_watchers(client, watchers, tags):
-    from azure.mgmt.network.models import NetworkWatcher
+    NetworkWatcher = get_sdk(ResourceType.MGMT_NETWORK, 'NetworkWatcher', mod='models')
     for watcher in watchers:
         id_parts = parse_resource_id(watcher.id)
         watcher_rg = id_parts['resource_group']
@@ -2308,7 +2306,8 @@ def configure_network_watcher(client, locations, resource_group_name=None, enabl
 
 def check_nw_ip_flow(client, vm, watcher_rg, watcher_name, direction, protocol, local, remote,
                      resource_group_name=None, nic=None, location=None):
-    from azure.mgmt.network.models import VerificationIPFlowParameters
+    VerificationIPFlowParameters = \
+        get_sdk(ResourceType.MGMT_NETWORK, 'VerificationIPFlowParameters', mod='models')
 
     local_ip_address, local_port = local.split(':')
     remote_ip_address, remote_port = remote.split(':')
@@ -2331,7 +2330,7 @@ def check_nw_ip_flow(client, vm, watcher_rg, watcher_name, direction, protocol, 
 
 def show_nw_next_hop(client, resource_group_name, vm, watcher_rg, watcher_name,
                      source_ip, dest_ip, nic=None, location=None):
-    from azure.mgmt.network.models import NextHopParameters
+    NextHopParameters = get_sdk(ResourceType.MGMT_NETWORK, 'NextHopParameters', mod='models')
 
     if not is_valid_resource_id(vm):
         vm = resource_id(
@@ -2361,7 +2360,10 @@ def create_nw_packet_capture(client, resource_group_name, capture_name, vm,
                              watcher_rg, watcher_name, location=None,
                              storage_account=None, storage_path=None, file_path=None,
                              capture_size=None, capture_limit=None, time_limit=None):
-    from azure.mgmt.network.models import PacketCapture, PacketCaptureStorageLocation
+    PacketCapture, PacketCaptureStorageLocation = \
+        get_sdk(ResourceType.MGMT_NETWORK, 'PacketCapture', 'PacketCaptureStorageLocation',
+                mod='models')
+
     storage_settings = PacketCaptureStorageLocation(storage_account, storage_path, file_path)
     capture_params = PacketCapture(vm, storage_settings, capture_size, capture_limit, time_limit)
     return client.create(watcher_rg, watcher_name, capture_name, capture_params)
@@ -2378,11 +2380,14 @@ def set_nsg_flow_logging(client, watcher_rg, watcher_name, nsg, storage_account=
         if storage_account is not None:
             config.storage_id = storage_account
         if retention is not None:
-            from azure.mgmt.network.models import RetentionPolicyParameters
+            RetentionPolicyParameters = \
+                get_sdk(ResourceType.MGMT_NETWORK, 'RetentionPolicyParameters', mod='models')
             config.retention_policy = RetentionPolicyParameters(retention, int(retention) > 0)
     except CloudError:
         # create
-        from azure.mgmt.network.models import FlowLogInformation, RetentionPolicyParameters
+        FlowLogInformation, RetentionPolicyParameters = \
+            get_sdk(ResourceType.MGMT_NETWORK, 'FlowLogInformation', 'RetentionPolicyParameters',
+                    mod='models')
         config = FlowLogInformation(nsg, storage_account, enabled,
                                     RetentionPolicyParameters(retention, int(retention) > 0))
     return client.set_flow_log_configuration(watcher_rg, watcher_name, config)
@@ -2395,7 +2400,8 @@ def show_nsg_flow_logging(client, watcher_rg, watcher_name, nsg, resource_group_
 def start_nw_troubleshooting(client, watcher_name, watcher_rg, resource, storage_account,
                              storage_path, resource_type=None, resource_group_name=None,
                              no_wait=False):
-    from azure.mgmt.network.models import TroubleshootingParameters
+    TroubleshootingParameters = get_sdk(ResourceType.MGMT_NETWORK, 'TroubleshootingParameters',
+                                        mod='models')
     params = TroubleshootingParameters(resource, storage_account, storage_path)
     return client.get_troubleshooting(watcher_rg, watcher_name, params, raw=no_wait)
 

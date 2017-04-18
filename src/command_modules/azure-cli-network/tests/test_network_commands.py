@@ -1156,7 +1156,7 @@ class NetworkActiveActiveCrossPremiseScenarioTest(ResourceGroupVCRTestBase): # p
 class NetworkActiveActiveVnetVnetScenarioTest(ResourceGroupVCRTestBase): # pylint: disable=too-many-instance-attributes
 
     def __init__(self, test_method):
-        super(NetworkActiveActiveVnetVnetScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_active_active_vnet_vnet_connection')
+        super(NetworkActiveActiveVnetVnetScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_active_active_vnet_vnet_connection', debug=True)
         self.gw_subnet = 'GatewaySubnet'
 
         # First VNet
@@ -1213,6 +1213,16 @@ class NetworkActiveActiveVnetVnetScenarioTest(ResourceGroupVCRTestBase): # pylin
         # create and connect the VNet gateways
         self.cmd('network vpn-connection create -g {} -n {} --vnet-gateway1 {} --vnet-gateway2 {} --shared-key {} --enable-bgp'.format(rg, conn12, gw1, gw2, shared_key))
         self.cmd('network vpn-connection create -g {} -n {} --vnet-gateway1 {} --vnet-gateway2 {} --shared-key {} --enable-bgp'.format(rg, conn21, gw2, gw1, shared_key))
+
+        # test network watcher troubleshooting commands
+        storage_account = 'clitestnwstorage2'
+        container_name = 'troubleshooting-results'
+        self.cmd('storage account create -g {} -l westus --sku Standard_LRS -n {}'.format(rg, storage_account))
+        self.cmd('storage container create --account-name {} -n {}'.format(storage_account, container_name))
+        storage_path = 'https://{}.blob.core.windows.net/{}'.format(storage_account, container_name)
+        self.cmd('network watcher configure -g {} --locations westus --enabled'.format(rg))
+        self.cmd('network watcher troubleshooting start -g {} --resource {} --resource-type vpnConnection --storage-account {} --storage-path {}'.format(rg, conn12, storage_account, storage_path))
+        self.cmd('network watcher troubleshooting show -g {} --resource {} --resource-type vpnConnection'.format(rg, conn12))
 
 
 class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase): # pylint: disable=too-many-instance-attributes
@@ -1482,6 +1492,7 @@ class NetworkWatcherScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network watcher flow-log configure -g {} --nsg {} --enabled --retention 5 --storage-account {}'.format(resource_group, nsg, storage_account))
         self.cmd('network watcher flow-log configure -g {} --nsg {} --retention 0'.format(resource_group, nsg))
         self.cmd('network watcher flow-log show -g {} --nsg {}'.format(resource_group, nsg))
+
 
 if __name__ == '__main__':
     unittest.main()

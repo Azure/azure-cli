@@ -15,6 +15,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.commands.template_create import get_folded_parameter_validator
 from azure.cli.core.commands.validators import SPECIFIED_SENTINEL
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
+from azure.cli.core.profiles import ResourceType, get_sdk
 
 # PARAMETER VALIDATORS
 
@@ -264,7 +265,6 @@ def get_nsg_validator(has_type_field=False, allow_none=False, allow_new=False, d
     return complex_validator_with_type if has_type_field else simple_validator
 
 def validate_servers(namespace):
-    from azure.mgmt.network.models import ApplicationGatewayBackendAddress
     servers = []
     for item in namespace.servers if namespace.servers else []:
         try:
@@ -386,7 +386,8 @@ def process_ag_create_namespace(namespace):
     validate_cert(namespace)
 
 def process_auth_create_namespace(namespace):
-    from azure.mgmt.network.models import ExpressRouteCircuitAuthorization
+    ExpressRouteCircuitAuthorization = \
+        get_sdk(ResourceType.MGMT_NETWORK, 'ExpressRouteCircuitAuthorization', mod='models')
     namespace.authorization_parameters = ExpressRouteCircuitAuthorization()
 
 def process_lb_create_namespace(namespace):
@@ -453,7 +454,7 @@ def process_public_ip_create_namespace(namespace):
 
 
 def process_route_table_create_namespace(namespace):
-    from azure.mgmt.network.models import RouteTable
+    RouteTable = get_sdk(ResourceType.MGMT_NETWORK, 'RouteTable', mod='models')
     get_default_location_from_resource_group(namespace)
     validate_tags(namespace)
     namespace.parameters = RouteTable(location=namespace.location, tags=namespace.tags)
@@ -607,10 +608,9 @@ def load_cert_file(param_name):
 
 
 def get_network_watcher_from_vm(namespace):
-    from azure.mgmt.compute import ComputeManagementClient
     from azure.cli.core.commands.arm import parse_resource_id
 
-    compute_client = get_mgmt_service_client(ComputeManagementClient).virtual_machines
+    compute_client = get_mgmt_service_client(ResourceType.MGMT_COMPUTE).virtual_machines
     vm_name = parse_resource_id(namespace.vm)['name']
     vm = compute_client.get(namespace.resource_group_name, vm_name)
     namespace.location = vm.location  # pylint: disable=no-member
@@ -618,10 +618,9 @@ def get_network_watcher_from_vm(namespace):
 
 
 def get_network_watcher_from_resource(namespace):
-    from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.cli.core.commands.arm import parse_resource_id
 
-    resource_client = get_mgmt_service_client(ResourceManagementClient).resources
+    resource_client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).resources
     resource = resource_client.get_by_id(namespace.resource, '2016-09-01')
     namespace.location = resource.location  # pylint: disable=no-member
     get_network_watcher_from_location(remove=True)(namespace)
@@ -630,11 +629,10 @@ def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
                                       rg_name='watcher_rg'):
 
     def _validator(namespace):
-        from azure.mgmt.network import NetworkManagementClient
         from azure.cli.core.commands.arm import parse_resource_id
 
         location = namespace.location
-        network_client = get_mgmt_service_client(NetworkManagementClient).network_watchers
+        network_client = get_mgmt_service_client(ResourceType.MGMT_NETWORK).network_watchers
         watcher = next((x for x in network_client.list_all() if x.location == location), None)
         if not watcher:
             raise CLIError("network watcher is not enabled for region '{}'.".format(location))
@@ -650,7 +648,6 @@ def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
 
 def process_nw_flow_log_set_namespace(namespace):
 
-    from azure.mgmt.network import NetworkManagementClient
     from azure.cli.core.commands.arm import parse_resource_id
 
     if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
@@ -664,7 +661,7 @@ def process_nw_flow_log_set_namespace(namespace):
     process_nw_flow_log_show_namespace(namespace)
 
 def process_nw_flow_log_show_namespace(namespace):
-    from azure.mgmt.network import NetworkManagementClient
+
     from azure.cli.core.commands.arm import parse_resource_id
 
     if not is_valid_resource_id(namespace.nsg):
@@ -675,7 +672,7 @@ def process_nw_flow_log_show_namespace(namespace):
             type='networkSecurityGroups',
             name=namespace.nsg)
 
-    network_client = get_mgmt_service_client(NetworkManagementClient).network_security_groups
+    network_client = get_mgmt_service_client(ResourceType.MGMT_NETWORK).network_security_groups
     id_parts = parse_resource_id(namespace.nsg)
     nsg_name = id_parts['name']
     rg = id_parts['resource_group']
@@ -688,8 +685,9 @@ def process_nw_topology_namespace(namespace):
 
     location = namespace.location
     if not location:
-        from azure.mgmt.resource import ResourceManagementClient
-        resource_client = get_mgmt_service_client(ResourceManagementClient).resource_groups
+
+        resource_client = \
+            get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).resource_groups
         resource_group = resource_client.get(namespace.target_resource_group_name)
         location = resource_group.location  # pylint: disable=no-member
 

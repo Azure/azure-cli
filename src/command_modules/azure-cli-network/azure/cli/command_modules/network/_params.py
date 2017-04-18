@@ -7,16 +7,6 @@
 import argparse
 from argcomplete.completers import FilesCompleter
 
-from azure.mgmt.network.models import \
-    (IPAllocationMethod, RouteNextHopType, Direction, Protocol)
-from azure.mgmt.network.models import \
-    (ApplicationGatewaySkuName, ApplicationGatewayCookieBasedAffinity,
-     ApplicationGatewayFirewallMode, ApplicationGatewayProtocol,
-     ApplicationGatewayRequestRoutingRuleType, ExpressRouteCircuitSkuFamily,
-     ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType, IPVersion, LoadDistribution,
-     ProbeProtocol, TransportProtocol, SecurityRuleAccess, SecurityRuleProtocol,
-     SecurityRuleDirection, VirtualNetworkGatewayType, VirtualNetworkGatewaySkuName, VpnType)
-
 from azure.cli.core.commands import \
     (CliArgumentType, register_cli_argument, register_extra_cli_argument)
 from azure.cli.core.commands.parameters import (location_type, get_resource_name_completion_list,
@@ -48,8 +38,26 @@ from azure.cli.command_modules.network._validators import \
      validate_peering_type, validate_dns_record_type,
      get_public_ip_validator, get_nsg_validator, get_subnet_validator,
      get_network_watcher_from_vm, get_network_watcher_from_location)
-from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
+from azure.cli.core.profiles import ResourceType, get_sdk
+
+ApplicationGatewaySkuName, ApplicationGatewayCookieBasedAffinity, \
+ApplicationGatewayFirewallMode, ApplicationGatewayProtocol, \
+ApplicationGatewayRequestRoutingRuleType, ApplicationGatewaySslProtocol, \
+ExpressRouteCircuitSkuFamily, \
+ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType, IPVersion, LoadDistribution, \
+ProbeProtocol, TransportProtocol, SecurityRuleAccess, SecurityRuleProtocol, \
+SecurityRuleDirection, VirtualNetworkGatewayType, VirtualNetworkGatewaySkuName, VpnType, \
+IPAllocationMethod, RouteNextHopType, Direction, Protocol = \
+    get_sdk(ResourceType.MGMT_NETWORK, 'ApplicationGatewaySkuName',
+            'ApplicationGatewayCookieBasedAffinity', 'ApplicationGatewayFirewallMode',
+            'ApplicationGatewayProtocol', 'ApplicationGatewayRequestRoutingRuleType',
+            'ApplicationGatewaySslProtocol', 'ExpressRouteCircuitSkuFamily',
+            'ExpressRouteCircuitSkuTier', 'ExpressRouteCircuitPeeringType', 'IPVersion',
+            'LoadDistribution', 'ProbeProtocol', 'TransportProtocol', 'SecurityRuleAccess',
+            'SecurityRuleProtocol', 'SecurityRuleDirection', 'VirtualNetworkGatewayType',
+            'VirtualNetworkGatewaySkuName', 'VpnType', 'IPAllocationMethod', 'RouteNextHopType',
+            'Direction', 'Protocol', mod='models')
 
 # CHOICE LISTS
 

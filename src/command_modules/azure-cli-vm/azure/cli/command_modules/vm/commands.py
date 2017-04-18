@@ -21,8 +21,8 @@ from azure.cli.core.profiles import supported_api_version, ResourceType
 custom_path = 'azure.cli.command_modules.vm.custom#{}'
 mgmt_path = 'azure.mgmt.compute.compute.operations.{}#{}.{}'
 
-# VM
 
+# VM
 def transform_ip_addresses(result):
     transformed = []
     for r in result:
