@@ -38,6 +38,10 @@ register_cli_argument('resource', 'tag', tag_type)
 register_cli_argument('resource', 'tags', tags_type)
 register_cli_argument('resource list', 'name', resource_name_type)
 register_cli_argument('resource move', 'ids', nargs='+')
+register_cli_argument('resource create', 'properties', options_list=('--properties', '-p'),
+                      help='a JSON-formatted string containing resource properties')
+register_cli_argument('resource create', 'is_full_object', action='store_true',
+                      help='Indicates that the properties object includes other options such as location, tags, sku, and/or plan.')
 
 register_cli_argument('provider', 'top', ignore_type)
 register_cli_argument('provider', 'resource_provider_namespace', options_list=('--namespace', '-n'), completer=get_providers_completion_list,
