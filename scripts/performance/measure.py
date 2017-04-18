@@ -52,4 +52,7 @@ def scenario(command):
     print('')
 
 scenario('az')
+scenario('az cl')
+scenario('az cloud')
 scenario('az cloud list')
+scenario('az cloud show --this-does-not-exist')
