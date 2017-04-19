@@ -21,7 +21,7 @@ from azure.cli.core.commands import \
     (CliArgumentType, register_cli_argument, register_extra_cli_argument)
 from azure.cli.core.commands.parameters import (location_type, get_resource_name_completion_list,
                                                 enum_choice_list, tags_type, ignore_type,
-                                                file_type, model_choice_list)
+                                                file_type, model_choice_list, three_state_flag)
 from azure.cli.core.commands.validators import \
     (MarkSpecifiedAction, get_default_location_from_resource_group)
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
@@ -533,6 +533,11 @@ register_extra_cli_argument('network vnet-gateway update', 'address_prefixes', o
 # VPN connection
 register_cli_argument('network vpn-connection', 'virtual_network_gateway_connection_name', options_list=('--name', '-n'), metavar='NAME', id_part='name', help='Connection name.')
 register_cli_argument('network vpn-connection', 'shared_key', help='Shared IPSec key.')
+
+if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):
+    register_cli_argument('network vpn-connection', 'use_policy_based_traffic_selectors', help='Enable policy-based traffic selectors.', **three_state_flag())
+else:
+    register_cli_argument('network vpn-connection', 'use_policy_based_traffic_selectors', ignore_type)
 
 register_cli_argument('network vpn-connection create', 'connection_name', options_list=('--name', '-n'), metavar='NAME', help='Connection name.')
 register_cli_argument('network vpn-connection create', 'vnet_gateway1', validator=process_vpn_connection_create_namespace)
