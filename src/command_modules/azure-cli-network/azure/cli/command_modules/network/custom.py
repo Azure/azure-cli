@@ -566,7 +566,9 @@ def delete_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
         resource_group_name, application_gateway_name, ag)
 
 def set_ag_waf_config(resource_group_name, application_gateway_name, enabled,
-                      firewall_mode=ApplicationGatewayFirewallMode.detection.value, no_wait=False):
+                      firewall_mode=ApplicationGatewayFirewallMode.detection.value,
+                      rule_set_type='OWASP', rule_set_version=None, disabled_rule_groups=None,
+                      no_wait=False):
     ApplicationGatewayWebApplicationFirewallConfiguration = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayWebApplicationFirewallConfiguration', mod='models')
@@ -574,6 +576,9 @@ def set_ag_waf_config(resource_group_name, application_gateway_name, enabled,
     ag = ncf.get(resource_group_name, application_gateway_name)
     ag.web_application_firewall_configuration = \
         ApplicationGatewayWebApplicationFirewallConfiguration(enabled == 'true', firewall_mode)
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):
+        # TODO: Add these noodles
+        pass
     return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 def show_ag_waf_config(resource_group_name, application_gateway_name):

@@ -82,6 +82,9 @@ cli_command(__name__, 'network application-gateway url-path-map rule delete', cu
 cli_command(__name__, 'network application-gateway waf-config set', custom_path + 'set_ag_waf_config', no_wait_param='no_wait')
 cli_command(__name__, 'network application-gateway waf-config show', custom_path + 'show_ag_waf_config', exception_handler=empty_on_404)
 
+if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):
+    cli_command(__name__, 'network application-gateway waf-config list-rule-sets', ag_path + 'list_available_waf_rule_sets', cf_application_gateways)
+
 # ExpressRouteCircuitAuthorizationsOperations
 erca_path = 'azure.mgmt.network.operations.express_route_circuit_authorizations_operations#ExpressRouteCircuitAuthorizationsOperations.'
 cli_command(__name__, 'network express-route auth delete', erca_path + 'delete', cf_express_route_circuit_authorizations)

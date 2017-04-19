@@ -464,6 +464,19 @@ helps['network application-gateway waf-config'] = """
 helps['network application-gateway waf-config set'] = """
     type: command
     short-summary: Update the firewall configuration of a web application.
+    parameters:
+        - name: --rule-set-type
+          short-summary: Rule set type.
+          populator-commands:
+          - az application-gateway waf-config list-rule-sets
+        - name: --rule-set-version
+          short-summary: Rule set version.
+          populator-commands:
+          - az application-gateway waf-config list-rule-sets
+        - name: --disabled-rule-groups
+          short-summary: Space separated list of rule groups to disable.
+          populator-commands:
+          - az application-gateway waf-config list-rule-sets
 """
 
 helps['network application-gateway waf-config show'] = """
