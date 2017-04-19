@@ -280,7 +280,7 @@ class HelpFile(HelpObject):  # pylint: disable=too-few-public-methods,too-many-i
         self.type = ''
         self.short_summary = ''
         self.long_summary = ''
-        self.examples = ''
+        self.examples = []
 
     def load(self, options):
         description = getattr(options, 'description', None)
@@ -305,6 +305,18 @@ class HelpFile(HelpObject):  # pylint: disable=too-few-public-methods,too-many-i
         if file_data:
             self._load_from_data(file_data)
 
+    @staticmethod
+    def _should_include_example(ex):
+        min_profile = ex.get('min_profile')
+        max_profile = ex.get('max_profile')
+        if min_profile or max_profile:
+            from azure.cli.core.profiles import supported_api_version
+            # yaml will load this as a datetime if it's a date, we need a string.
+            min_profile = str(min_profile) if min_profile else None
+            max_profile = str(max_profile) if max_profile else None
+            return supported_api_version(None, min_api=min_profile, max_api=max_profile)
+        return True
+
     def _load_from_data(self, data):
         if not data:
             return
@@ -322,7 +334,10 @@ class HelpFile(HelpObject):  # pylint: disable=too-few-public-methods,too-many-i
         self.long_summary = data.get('long-summary')
 
         if 'examples' in data:
-            self.examples = [HelpExample(d) for d in data['examples']]
+            self.examples = []
+            for d in data['examples']:
+                if HelpFile._should_include_example(d):
+                    self.examples.append(HelpExample(d))
 
 
 class GroupHelpFile(HelpFile):  # pylint: disable=too-few-public-methods
