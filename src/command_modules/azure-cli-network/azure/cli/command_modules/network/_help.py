@@ -1458,6 +1458,70 @@ helps['network route-table route update'] = """
 
 #endregion
 
+# region Route Filter
+
+helps['network route-filter'] = """
+    type: group
+    short-summary: Manage route filters.
+"""
+
+helps['network route-filter create'] = """
+    type: command
+    short-summary: Create a route filter.
+"""
+
+helps['network route-filter delete'] = """
+    type: command
+    short-summary: Delete a route filter.
+"""
+
+helps['network route-filter list'] = """
+    type: command
+    short-summary: List route filters.
+"""
+
+helps['network route-filter show'] = """
+    type: command
+    short-summary: Show details of a route filter.
+"""
+
+helps['network route-filter update'] = """
+    type: command
+    short-summary: Update a route filter.
+"""
+
+helps['network route-filter rule'] = """
+    type: group
+    short-summary: Manage rules in a route filter.
+"""
+
+helps['network route-filter rule create'] = """
+    type: command
+    short-summary: Create a rule in a route filter.
+"""
+
+helps['network route-filter rule delete'] = """
+    type: command
+    short-summary: Delete a rule from a route filter.
+"""
+
+helps['network route-filter rule list'] = """
+    type: command
+    short-summary: List rules in a route filter.
+"""
+
+helps['network route-filter rule show'] = """
+    type: command
+    short-summary: Show details of a rule in a route filter.
+"""
+
+helps['network route-filter rule update'] = """
+    type: command
+    short-summary: Update a rule in a route filter.
+"""
+
+#endregion
+
 # region Traffic Manager
 
 helps['network traffic-manager'] = """

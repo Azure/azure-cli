@@ -21,7 +21,7 @@ from azure.cli.core.commands import \
     (CliArgumentType, register_cli_argument, register_extra_cli_argument)
 from azure.cli.core.commands.parameters import (location_type, get_resource_name_completion_list,
                                                 enum_choice_list, tags_type, ignore_type,
-                                                file_type)
+                                                file_type, model_choice_list)
 from azure.cli.core.commands.validators import \
     (MarkSpecifiedAction, get_default_location_from_resource_group)
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
@@ -41,7 +41,7 @@ from azure.cli.command_modules.network._validators import \
      validate_auth_cert, validate_cert, validate_inbound_nat_rule_id_list,
      validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
      validate_address_pool_name_or_id, validate_servers, load_cert_file, validate_metadata,
-     validate_peering_type, validate_dns_record_type,
+     validate_peering_type, validate_dns_record_type, validate_route_filter,
      get_public_ip_validator, get_nsg_validator, get_subnet_validator)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
@@ -276,6 +276,10 @@ register_cli_argument('network express-route peering', 'primary_peer_address_pre
 register_cli_argument('network express-route peering', 'secondary_peer_address_prefix', options_list=('--secondary-peer-subnet',))
 register_cli_argument('network express-route peering', 'customer_asn', arg_group='Microsoft Peering')
 register_cli_argument('network express-route peering', 'routing_registry_name', arg_group='Microsoft Peering', **enum_choice_list(routing_registry_values))
+if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01'):
+    register_cli_argument('network express-route peering', 'route_filter', help='Name or ID of a route filter to apply to the peering settings.', validator=validate_route_filter)
+else:
+    register_cli_argument('network express-route peering', 'route_filter', ignore_type)
 
 # Local Gateway
 register_cli_argument('network local-gateway', 'local_network_gateway_name', name_arg_type, help='Name of the local network gateway.', completer=get_resource_name_completion_list('Microsoft.Network/localNetworkGateways'), id_part='name')
@@ -391,6 +395,19 @@ register_cli_argument('network route-table route', 'route_table_name', options_l
 register_cli_argument('network route-table route', 'next_hop_type', help='The type of Azure hop the packet should be sent to.', **enum_choice_list(RouteNextHopType))
 register_cli_argument('network route-table route', 'next_hop_ip_address', help='The IP address packets should be forwarded to when using the VirtualAppliance hop type.')
 register_cli_argument('network route-table route', 'address_prefix', help='The destination CIDR to which the route applies.')
+
+# Route Filter
+register_cli_argument('network route-filter', 'route_filter_name', name_arg_type, help='Name of the route filter.')
+register_cli_argument('network route-filter', 'expand', **enum_choice_list(['peerings']))
+
+register_cli_argument('network route-filter create', 'location', location_type, validator=get_default_location_from_resource_group)
+
+register_cli_argument('network route-filter rule', 'route_filter_name', options_list=['--filter-name'], help='Name of the route filter.', id_part='name')
+register_cli_argument('network route-filter rule', 'rule_name', name_arg_type, help='Name of the route filter rule.', id_part='child_name')
+register_cli_argument('network route-filter rule', 'access', help='The access type of the rule.', **model_choice_list(ResourceType.MGMT_NETWORK, 'Access'))
+register_cli_argument('network route-filter rule', 'communities', help='Space separated list of BGP community values to filter on. (e.g.: 12076:5010)', nargs='+')
+
+register_cli_argument('network route-filter rule create', 'location', location_type, validator=get_default_location_from_resource_group)
 
 # VNET
 register_cli_argument('network vnet', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), id_part='name')

@@ -124,3 +124,12 @@ def cf_dns_mgmt_record_sets(_):
     from azure.mgmt.dns import DnsManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(DnsManagementClient).record_sets
+
+def cf_route_filters(_):
+    return _network_client_factory().route_filters
+
+def cf_route_filter_rules(_):
+    return _network_client_factory().route_filter_rules
+
+def cf_service_community(_):
+    return _network_client_factory().bgp_service_communities
