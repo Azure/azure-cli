@@ -55,7 +55,7 @@ def account_clear():
 
 
 def login(username=None, password=None, service_principal=None, tenant=None,
-          all=False):
+          allow_no_subscriptions=False):
     """Log in to access Azure subscriptions"""
     from adal.adal_error import AdalError
     import requests
@@ -78,7 +78,7 @@ def login(username=None, password=None, service_principal=None, tenant=None,
             password,
             service_principal,
             tenant,
-            include_bare_tenants=all)
+            allow_no_subscriptions=allow_no_subscriptions)
     except AdalError as err:
         # try polish unfriendly server errors
         if username:

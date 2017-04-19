@@ -106,7 +106,7 @@ class Profile(object):
                                     password,
                                     is_service_principal,
                                     tenant,
-                                    include_bare_tenants=False,
+                                    allow_no_subscriptions=False,
                                     subscription_finder=None):
         from azure.cli.core._debug import allow_debug_adal_connection
         allow_debug_adal_connection()
@@ -129,9 +129,10 @@ class Profile(object):
                 subscriptions = subscription_finder.find_from_user_account(
                     username, password, tenant, self._ad_resource_uri)
 
-        if not include_bare_tenants and not subscriptions:
+        if not allow_no_subscriptions and not subscriptions:
             raise CLIError("No subscriptions were found for '{}'. If this is expected, use "
-                           "'--all' to have a tenant level account".format(username))
+                           "'--allow-no-subscriptions' to have a tenant level account".format(
+                               username))
 
         if is_service_principal:
             self._creds_cache.save_service_principal_cred(sp_auth.get_entry_to_persist(username,
@@ -139,7 +140,7 @@ class Profile(object):
         if self._creds_cache.adal_token_cache.has_state_changed:
             self._creds_cache.persist_cached_creds()
 
-        if include_bare_tenants:
+        if allow_no_subscriptions:
             t_list = [s.tenant_id for s in subscriptions]
             bare_tenants = [t for t in subscription_finder.tenants if t not in t_list]
             subscriptions = Profile._build_tenant_level_accounts(bare_tenants)

@@ -273,7 +273,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
                                                      'my-secret',
                                                      True,
                                                      self.tenant_id,
-                                                     include_bare_tenants=True,
+                                                     allow_no_subscriptions=True,
                                                      subscription_finder=finder)
 
         # assert
