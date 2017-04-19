@@ -27,6 +27,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-mgmt-resource==1.0.0rc1',
     'azure-cli-core',
+    'azure-mgmt-authorization'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

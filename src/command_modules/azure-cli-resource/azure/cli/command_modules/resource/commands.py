@@ -59,7 +59,8 @@ cli_command(__name__, 'provider list', 'azure.mgmt.resource.resources.operations
 cli_command(__name__, 'provider show', 'azure.mgmt.resource.resources.operations.providers_operations#ProvidersOperations.get', cf_providers, exception_handler=empty_on_404)
 cli_command(__name__, 'provider register', 'azure.cli.command_modules.resource.custom#register_provider')
 cli_command(__name__, 'provider unregister', 'azure.cli.command_modules.resource.custom#unregister_provider')
-
+cli_command(__name__, 'provider operation list', 'azure.cli.command_modules.resource.custom#list_provider_operations')
+cli_command(__name__, 'provider operation show', 'azure.cli.command_modules.resource.custom#show_provider_operations')
 # Resource feature commands
 cli_command(__name__, 'feature list', 'azure.cli.command_modules.resource.custom#list_features', cf_features)
 cli_command(__name__, 'feature show', 'azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.get', cf_features, exception_handler=empty_on_404)
