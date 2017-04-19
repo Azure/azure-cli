@@ -19,6 +19,7 @@ from azure.cli.core.cloud import (Cloud,
                                   CloudEndpointNotSetException)
 from azure.cli.core._config import get_config_parser
 from azure.cli.core._profile import Profile
+from azure.cli.core.util import CLIError
 
 
 class TestCloud(unittest.TestCase):
@@ -79,9 +80,8 @@ class TestCloud(unittest.TestCase):
                              c.profile)
 
     def test_add_get_cloud_with_invalid_profile(self):
-        ''' Cloud has profile that doesn't exist so we default to latest '''
+        ''' Cloud has profile that doesn't exist so an exception should be raised '''
         profile = 'none-existent-profile'
-        default_profile = 'latest'
         c = Cloud('MyOwnCloud', profile=profile)
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
                 config_file:
@@ -90,10 +90,8 @@ class TestCloud(unittest.TestCase):
             config.read(config_file)
             self.assertTrue(c.name in config.sections())
             self.assertEqual(config.get(c.name, 'profile'), profile)
-            custom_clouds = get_custom_clouds()
-            self.assertEqual(len(custom_clouds), 1)
-            self.assertEqual(custom_clouds[0].name, c.name)
-            self.assertEqual(custom_clouds[0].profile, default_profile)
+            with self.assertRaises(CLIError):
+                get_custom_clouds()
 
     def test_get_default_latest_profile(self):
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]):
@@ -106,7 +104,7 @@ class TestCloud(unittest.TestCase):
         endpoint_rm = 'http://management.contoso.com'
         endpoint_mgmt = 'http://management.core.contoso.com'
         endpoints = CloudEndpoints(resource_manager=endpoint_rm, management=endpoint_mgmt)
-        profile = '2017-01-01-test'
+        profile = '2016-00-00-preview'
         c = Cloud('MyOwnCloud', endpoints=endpoints, profile=profile)
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]):
             add_cloud(c)
@@ -123,7 +121,7 @@ class TestCloud(unittest.TestCase):
             if only ARM endpoint is set '''
         endpoint_rm = 'http://management.contoso.com'
         endpoints = CloudEndpoints(resource_manager=endpoint_rm)
-        profile = '2017-01-01-test'
+        profile = '2016-00-00-preview'
         c = Cloud('MyOwnCloud', endpoints=endpoints, profile=profile)
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]):
             add_cloud(c)

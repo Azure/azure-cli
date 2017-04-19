@@ -259,9 +259,7 @@ def get_clouds():
             # If profile isn't set, use latest
             setattr(c, 'profile', 'latest')
         if c.profile not in API_PROFILES:
-            # The profile doesn't exist. Maybe it was renamed or is user error.
-            logger.info('Profile %s does not exist, using latest.', c.profile)
-            setattr(c, 'profile', 'latest')
+            raise CLIError('Profile {} does not exist or is not supported.'.format(c.profile))
         if not c.endpoints.has_endpoint_set('management') and \
                 c.endpoints.has_endpoint_set('resource_manager'):
             # If management endpoint not set, use resource manager endpoint
