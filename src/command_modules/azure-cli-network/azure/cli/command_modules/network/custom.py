@@ -1561,7 +1561,8 @@ def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None
 def create_express_route_peering(
         client, resource_group_name, circuit_name, peering_type, peer_asn, vlan_id,
         primary_peer_address_prefix, secondary_peer_address_prefix, shared_key=None,
-        advertised_public_prefixes=None, customer_asn=None, routing_registry_name=None):
+        advertised_public_prefixes=None, customer_asn=None, routing_registry_name=None,
+        route_filter=None):
     """
     :param str peer_asn: Autonomous system number of the customer/connectivity provider.
     :param str vlan_id: Identifier used to identify the customer.
@@ -1608,7 +1609,9 @@ def create_express_route_peering(
         secondary_peer_address_prefix=secondary_peer_address_prefix,
         shared_key=shared_key,
         microsoft_peering_config=peering_config)
-
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01'):
+        RouteFilter = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilter', mod='models')
+        peering.route_filter = RouteFilter(id=route_filter)
     return client.create_or_update(
         resource_group_name, circuit_name, peering_type, peering)
 
@@ -1681,6 +1684,29 @@ def update_route(instance, address_prefix=None, next_hop_type=None, next_hop_ip_
 update_route.__doc__ = Route.__doc__
 
 #endregion
+
+#region RouteFilter Commands
+
+def create_route_filter(client, resource_group_name, route_filter_name, location=None, tags=None):
+    RouteFilter = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilter', mod='models')
+    return client.create_or_update(resource_group_name, route_filter_name,
+                                   RouteFilter(location=location, tags=tags))
+
+def list_route_filters(client, resource_group_name=None):
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+    else:
+        return client.list()
+
+def create_route_filter_rule(client, resource_group_name, route_filter_name, rule_name, access,
+                             communities, location=None, tags=None):
+    RouteFilterRule = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilterRule', mod='models')
+    return client.create_or_update(resource_group_name, route_filter_name, rule_name,
+                                   RouteFilterRule(access, communities,
+                                                   location=location, tags=tags))
+
+#endregion
+
 
 #region Local Gateway commands
 
