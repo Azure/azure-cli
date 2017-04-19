@@ -250,6 +250,13 @@ register_cli_argument('network application-gateway waf-config', 'firewall_mode',
 for item in ['ssl-policy', 'waf-config']:
     register_cli_argument('network application-gateway {}'.format(item), 'application_gateway_name', options_list=('--gateway-name',), help='The name of the application gateway.')
 
+if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):
+    register_cli_argument('network application-gateway waf-config', 'disabled_rule_groups', nargs='+')
+else:
+    register_cli_argument('network application-gateway waf-config', 'rule_set_type', ignore_type)
+    register_cli_argument('network application-gateway waf-config', 'rule_set_version', ignore_type)
+    register_cli_argument('network application-gateway waf-config', 'disabled_rule_groups', ignore_type)
+
 # ExpressRoutes
 register_cli_argument('network express-route', 'circuit_name', circuit_name_type, options_list=('--name', '-n'))
 register_cli_argument('network express-route', 'sku_family', help='Chosen SKU family of ExpressRoute circuit.', **enum_choice_list(ExpressRouteCircuitSkuFamily))
