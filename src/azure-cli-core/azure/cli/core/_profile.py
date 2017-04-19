@@ -106,7 +106,7 @@ class Profile(object):
                                     password,
                                     is_service_principal,
                                     tenant,
-                                    no_subscriptions=False,
+                                    include_bare_tenants=False,
                                     subscription_finder=None):
         from azure.cli.core._debug import allow_debug_adal_connection
         allow_debug_adal_connection()
@@ -129,9 +129,9 @@ class Profile(object):
                 subscriptions = subscription_finder.find_from_user_account(
                     username, password, tenant, self._ad_resource_uri)
 
-        if not no_subscriptions and not subscriptions:
-            raise CLIError("No subscriptions were found for '{}'. If this is expected, "
-                           "use '--no-subscriptions' to have a tenant level account".format(username))
+        if not include_bare_tenants and not subscriptions:
+            raise CLIError("No subscriptions were found for '{}'. If this is expected, use "
+                           "'--all' to have a tenant level account".format(username))
 
         if is_service_principal:
             self._creds_cache.save_service_principal_cred(sp_auth.get_entry_to_persist(username,
@@ -139,14 +139,14 @@ class Profile(object):
         if self._creds_cache.adal_token_cache.has_state_changed:
             self._creds_cache.persist_cached_creds()
 
-        if subscriptions:
-            consolidated = Profile._normalize_properties(subscription_finder.user_id,
-                                                         subscriptions,
-                                                         is_service_principal)
-        else:
-            consolidated = Profile._build_tenant_level_accounts(subscription_finder.user_id,
-                                                                subscription_finder.tenants,
-                                                                is_service_principal)
+        if include_bare_tenants:
+            t_list = [s.tenant_id for s in subscriptions]
+            bare_tenants = [t for t in subscription_finder.tenants if t not in t_list]
+            subscriptions = Profile._build_tenant_level_accounts(bare_tenants)
+
+        consolidated = Profile._normalize_properties(subscription_finder.user_id,
+                                                     subscriptions,
+                                                     is_service_principal)
 
         self._set_subscriptions(consolidated)
         # use deepcopy as we don't want to persist these changes to file.
@@ -171,21 +171,20 @@ class Profile(object):
         return consolidated
 
     @staticmethod
-    def _build_tenant_level_accounts(user, tenants, is_service_principal):
+    def _build_tenant_level_accounts(tenants):
+        from azure.cli.core.profiles import get_sdk, ResourceType
+        SubscriptionType = get_sdk(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS,
+                                   'Subscription', mod='models')
+        StateType = get_sdk(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS,
+                            'SubscriptionState', mod='models')
         result = []
         for t in tenants:
-            s = {
-                _SUBSCRIPTION_ID: t,
-                _SUBSCRIPTION_NAME: 'N/A(tenant level account)',
-                _STATE: 'N/A',
-                _USER_ENTITY: {
-                    _USER_NAME: user,
-                    _USER_TYPE: _SERVICE_PRINCIPAL if is_service_principal else _USER
-                },
-                _IS_DEFAULT_SUBSCRIPTION: False,
-                _TENANT_ID: t,
-                _ENVIRONMENT_NAME: CLOUD.name
-            }
+            s = SubscriptionType()
+            s.id = '/subscriptions/' + t
+            s.subscription = t
+            s.tenant_id = t
+            s.display_name = 'N/A(tenant level account)'
+            s.state = StateType.enabled
             result.append(s)
         return result
 
