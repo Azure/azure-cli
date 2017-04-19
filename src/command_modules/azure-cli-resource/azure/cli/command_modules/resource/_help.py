@@ -276,7 +276,7 @@ helps['provider unregister'] = """
 """
 helps['provider operation'] = """
     type: group
-    short-summary: get provider operations.
+    short-summary: Get provider operations metadatas.
 """
 helps['provider operation show'] = """
     type: command
