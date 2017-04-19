@@ -286,7 +286,9 @@ def build_vnet_resource(name, location, tags, vnet_prefix=None, subnet=None,
 
 
 def build_vpn_connection_resource(name, location, tags, gateway1, gateway2, vpn_type,
-                                  authorization_key, enable_bgp, routing_weight, shared_key):
+                                  authorization_key, enable_bgp, routing_weight, shared_key,
+                                  use_policy_based_traffic_selectors):
+    from azure.cli.core.profiles import ResourceType, supported_api_version, get_api_version
     vpn_properties = {
         'virtualNetworkGateway1': {'id': gateway1},
         'authorizationKey': authorization_key,
@@ -294,6 +296,8 @@ def build_vpn_connection_resource(name, location, tags, gateway1, gateway2, vpn_
         'connectionType': vpn_type,
         'routingWeight': routing_weight
     }
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):
+        vpn_properties['usePolicyBasedTrafficSelectors'] = use_policy_based_traffic_selectors
 
     # add scenario specific properties
     if vpn_type == 'IPSec':

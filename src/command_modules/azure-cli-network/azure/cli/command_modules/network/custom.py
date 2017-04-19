@@ -1252,7 +1252,8 @@ def create_vpn_connection(client, resource_group_name, connection_name, vnet_gat
                           location=None, tags=None, no_wait=False, validate=False,
                           vnet_gateway2=None, express_route_circuit2=None, local_gateway2=None,
                           authorization_key=None, enable_bgp=False, routing_weight=10,
-                          connection_type=None, shared_key=None):
+                          connection_type=None, shared_key=None,
+                          use_policy_based_traffic_selectors=False):
     """
     :param str vnet_gateway1: Name or ID of the source virtual network gateway.
     :param str vnet_gateway2: Name or ID of the destination virtual network gateway to connect to
@@ -1280,7 +1281,8 @@ def create_vpn_connection(client, resource_group_name, connection_name, vnet_gat
     vpn_connection_resource = build_vpn_connection_resource(
         connection_name, location, tags, vnet_gateway1,
         vnet_gateway2 or local_gateway2 or express_route_circuit2,
-        connection_type, authorization_key, enable_bgp, routing_weight, shared_key)
+        connection_type, authorization_key, enable_bgp, routing_weight, shared_key,
+        use_policy_based_traffic_selectors)
     master_template.add_resource(vpn_connection_resource)
     master_template.add_output('resource', connection_name, output_type='object')
 
@@ -1299,7 +1301,7 @@ def create_vpn_connection(client, resource_group_name, connection_name, vnet_gat
 
 
 def update_vpn_connection(instance, routing_weight=None, shared_key=None, tags=None,
-                          enable_bgp=None):
+                          enable_bgp=None, use_policy_based_traffic_selectors=None):
     ncf = _network_client_factory()
 
     if routing_weight is not None:
@@ -1313,6 +1315,9 @@ def update_vpn_connection(instance, routing_weight=None, shared_key=None, tags=N
 
     if enable_bgp is not None:
         instance.enable_bgp = enable_bgp
+
+    if use_policy_based_traffic_selectors is not None:
+        instance.use_policy_based_traffic_selectors = use_policy_based_traffic_selectors
 
     # TODO: Remove these when issue #1615 is fixed
     gateway1_id = parse_resource_id(instance.virtual_network_gateway1.id)
@@ -1329,6 +1334,43 @@ def update_vpn_connection(instance, routing_weight=None, shared_key=None, tags=N
         instance.local_network_gateway2 = ncf.local_network_gateways.get(
             gateway2_id['resource_group'], gateway2_id['name'])
 
+    return instance
+
+def create_vpn_conn_ipsec_policy(resource_group_name, connection_name, sa_lifetime,
+                                 sa_data_size, ipsec_encryption, ipsec_integrity,
+                                 ike_encryption, ike_integrity, dh_group, pfs_group, no_wait=False):
+    IpsecPolicy = get_sdk(ResourceType.MGMT_NETWORK, 'IpsecPolicy', mod='models')
+    ncf = _network_client_factory().virtual_network_gateway_connections
+    conn = ncf.get(resource_group_name, connection_name)
+    new_policy = IpsecPolicy(sa_lifetime, sa_data_size, ipsec_encryption, ipsec_integrity,
+                             ike_encryption, ike_integrity, dh_group, pfs_group)
+    #_upsert(conn, 'ipsec_policies', new_policy, 'name')
+    if conn.ipsec_policies:
+        conn.ipsec_policies.append(new_policy)
+    else:
+        conn.ipsec_policies = [new_policy]
+    return ncf.create_or_update(resource_group_name, connection_name, conn, raw=no_wait)
+
+
+def update_vpn_conn_ipsec_policy(instance, sa_lifetime=None, sa_data_size=None,
+                                 ipsec_encryption=None, ipsec_integrity=None, ike_encryption=None,
+                                 ike_integrity=None, dh_group=None, pfs_group=None):
+    if sa_lifetime is not None:
+        instance.sa_life_time_seconds = sa_lifetime
+    if sa_data_size is not None:
+        instance.sa_data_size_kilobytes = sa_data_size
+    if ipsec_encryption is not None:
+        instance.ipsec_encryption = ipsec_encryption
+    if ipsec_integrity is not None:
+        instance.ipsec_integrity = ipsec_integrity
+    if ike_encryption is not None:
+        instance.ike_encryption = ike_encryption
+    if ike_integrity is not None:
+        instance.ike_integrity = ike_integrity
+    if dh_group  is not None:
+        instance.dh_group = dh_group
+    if pfs_group is not None:
+        instance.pfs_group = pfs_group
     return instance
 
 def _validate_bgp_peering(instance, asn, bgp_peering_address, peer_weight):

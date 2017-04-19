@@ -1797,6 +1797,40 @@ helps['network vpn-connection shared-key update'] = """
 
 #endregion
 
+# region VPN Connection IPSec Policy
+
+helps['network vpn-connection ipsec-policy'] = """
+    type: group
+    short-summary: Manage VPN connection IPSec policies.
+"""
+
+helps['network vpn-connection ipsec-policy create'] = """
+    type: command
+    short-summary: Create a VPN connection IPSec policy.
+"""
+
+helps['network vpn-connection ipsec-policy show'] = """
+    type: command
+    short-summary: Show a VPN connection IPSec policy.
+"""
+
+helps['network vpn-connection ipsec-policy list'] = """
+    type: command
+    short-summary: List IPSec policies associated with a VPN connection.
+"""
+
+helps['network vpn-connection ipsec-policy delete'] = """
+    type: command
+    short-summary: Delete a VPN connection IPSec policy.
+"""
+
+helps['network vpn-connection ipsec-policy update'] = """
+    type: command
+    short-summary: Update a VPN connection IPSec policy.
+"""
+
+#endregion
+
 # region VNet Gateway
 
 helps['network vnet-gateway'] = """
