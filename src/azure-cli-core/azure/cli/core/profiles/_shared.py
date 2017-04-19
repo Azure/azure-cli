@@ -70,7 +70,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.DATA_STORAGE: '2016-05-31'
     },
-    '2016-sample': {
+    '2016-00-00-preview': {
         ResourceType.MGMT_STORAGE: '2016-12-01',
         ResourceType.MGMT_NETWORK: '2016-09-01',
         ResourceType.MGMT_CONTAINER_SERVICE: '2017-01-31',
@@ -83,7 +83,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.DATA_STORAGE: '2016-05-31'
     },
-    '2015-sample': {
+    '2015-00-00-preview': {
         ResourceType.MGMT_STORAGE: '2015-06-15',
         ResourceType.MGMT_NETWORK: '2015-06-15',
         ResourceType.MGMT_CONTAINER_SERVICE: '2017-01-31',
@@ -118,29 +118,39 @@ def get_api_version(api_profile, resource_type):
 @total_ordering  # pylint: disable=too-few-public-methods
 class _DateAPIFormat(object):
     """ Class to support comparisons for API versions in
-        YYYY-MM-DD or YYYY-MM-DD-preview format
+        YYYY-MM-DD or YYYY-MM-DD-preview format. A special case is made for 'latest'.
     """
 
     def __init__(self, api_version_str):
         try:
-            if 'preview' in api_version_str:
-                yyyy, mm, dd, _ = api_version_str.split('-')
-                self.preview = True
+            self.latest = self.preview = False
+            self.yyyy = self.mm = self.dd = None
+            if api_version_str == 'latest':
+                self.latest = True
             else:
-                yyyy, mm, dd = api_version_str.split('-')
-                self.preview = False
-            self.yyyy = int(yyyy)
-            self.mm = int(mm)
-            self.dd = int(dd)
+                if 'preview' in api_version_str:
+                    yyyy, mm, dd, _ = api_version_str.split('-')
+                    self.preview = True
+                else:
+                    yyyy, mm, dd = api_version_str.split('-')
+                self.yyyy = int(yyyy)
+                self.mm = int(mm)
+                self.dd = int(dd)
         except (ValueError, TypeError):
-            raise ValueError('The API version {} is not in '
-                             'YYYY-MM-DD or YYYY-MM-DD-preview format'.format(api_version_str))
+            raise ValueError('The API version {} is not in a '
+                             'supported format'.format(api_version_str))
 
     def __eq__(self, other):
-        return self.yyyy == other.yyyy and self.mm == other.mm and \
+        return self.latest == other.latest and self.yyyy == other.yyyy and self.mm == other.mm and \
             self.dd == other.dd and self.preview == other.preview
 
-    def __lt__(self, other):
+    def __lt__(self, other):  # pylint: disable=too-many-return-statements
+        if self.latest or other.latest:
+            if not self.latest and other.latest:
+                return True
+            if self.latest and not other.latest:
+                return False
+            return False
         if self.yyyy < other.yyyy:
             return True
         if self.yyyy == other.yyyy:
@@ -158,12 +168,14 @@ class _DateAPIFormat(object):
 def supported_api_version(api_profile, resource_type, min_api=None, max_api=None):
     """
     Returns True if current API version for the resource type satisfies min/max range.
+    To compare profile versions, set resource type to None.
     note: Currently supports YYYY-MM-DD or YYYY-MM-DD-preview formatted API versions.
     """
     if min_api is None and max_api is None:
         # No range specified so supported.
         return True
-    api_version = _DateAPIFormat(get_api_version(api_profile, resource_type))
+    api_version_str = get_api_version(api_profile, resource_type) if resource_type else api_profile
+    api_version = _DateAPIFormat(api_version_str)
     if min_api and api_version < _DateAPIFormat(min_api):
         return False
     if max_api and api_version > _DateAPIFormat(max_api):

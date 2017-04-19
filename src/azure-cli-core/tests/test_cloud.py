@@ -60,7 +60,7 @@ class TestCloud(unittest.TestCase):
     def test_add_get_cloud_with_profile(self):
         endpoint_rm = 'http://management.contoso.com'
         endpoints = CloudEndpoints(resource_manager=endpoint_rm)
-        profile = '2017-01-01-test'
+        profile = '2015-00-00-preview'
         c = Cloud('MyOwnCloud', endpoints=endpoints, profile=profile)
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
                 config_file:
@@ -77,6 +77,23 @@ class TestCloud(unittest.TestCase):
                              c.endpoints.resource_manager)
             self.assertEqual(custom_clouds[0].profile,
                              c.profile)
+
+    def test_add_get_cloud_with_invalid_profile(self):
+        ''' Cloud has profile that doesn't exist so we default to latest '''
+        profile = 'none-existent-profile'
+        default_profile = 'latest'
+        c = Cloud('MyOwnCloud', profile=profile)
+        with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
+                config_file:
+            add_cloud(c)
+            config = get_config_parser()
+            config.read(config_file)
+            self.assertTrue(c.name in config.sections())
+            self.assertEqual(config.get(c.name, 'profile'), profile)
+            custom_clouds = get_custom_clouds()
+            self.assertEqual(len(custom_clouds), 1)
+            self.assertEqual(custom_clouds[0].name, c.name)
+            self.assertEqual(custom_clouds[0].profile, default_profile)
 
     def test_get_default_latest_profile(self):
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]):
