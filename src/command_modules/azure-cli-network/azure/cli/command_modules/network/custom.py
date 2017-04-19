@@ -2371,25 +2371,16 @@ def create_nw_packet_capture(client, resource_group_name, capture_name, vm,
 
 def set_nsg_flow_logging(client, watcher_rg, watcher_name, nsg, storage_account=None,
                          resource_group_name=None, enabled=None, retention=0):
-    try:
-        # update
-        from azure.cli.core.commands import LongRunningOperation
-        config = LongRunningOperation()(client.get_flow_log_status(watcher_rg, watcher_name, nsg))
-        if enabled is not None:
-            config.enabled = enabled
-        if storage_account is not None:
-            config.storage_id = storage_account
-        if retention is not None:
-            RetentionPolicyParameters = \
-                get_sdk(ResourceType.MGMT_NETWORK, 'RetentionPolicyParameters', mod='models')
-            config.retention_policy = RetentionPolicyParameters(retention, int(retention) > 0)
-    except CloudError:
-        # create
-        FlowLogInformation, RetentionPolicyParameters = \
-            get_sdk(ResourceType.MGMT_NETWORK, 'FlowLogInformation', 'RetentionPolicyParameters',
-                    mod='models')
-        config = FlowLogInformation(nsg, storage_account, enabled,
-                                    RetentionPolicyParameters(retention, int(retention) > 0))
+    from azure.cli.core.commands import LongRunningOperation
+    config = LongRunningOperation()(client.get_flow_log_status(watcher_rg, watcher_name, nsg))
+    if enabled is not None:
+        config.enabled = enabled
+    if storage_account is not None:
+        config.storage_id = storage_account
+    if retention is not None:
+        RetentionPolicyParameters = \
+            get_sdk(ResourceType.MGMT_NETWORK, 'RetentionPolicyParameters', mod='models')
+        config.retention_policy = RetentionPolicyParameters(retention, int(retention) > 0)
     return client.set_flow_log_configuration(watcher_rg, watcher_name, config)
 
 

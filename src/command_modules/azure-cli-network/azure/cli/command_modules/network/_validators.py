@@ -15,7 +15,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.commands.template_create import get_folded_parameter_validator
 from azure.cli.core.commands.validators import SPECIFIED_SENTINEL
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
-from azure.cli.core.profiles import ResourceType, get_sdk
+from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
 
 # PARAMETER VALIDATORS
 
@@ -621,7 +621,8 @@ def get_network_watcher_from_resource(namespace):
     from azure.cli.core.commands.arm import parse_resource_id
 
     resource_client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).resources
-    resource = resource_client.get_by_id(namespace.resource, '2016-09-01')
+    resource = resource_client.get_by_id(namespace.resource,
+                                         get_api_version(ResourceType.MGMT_NETWORK))
     namespace.location = resource.location  # pylint: disable=no-member
     get_network_watcher_from_location(remove=True)(namespace)
 

@@ -1836,7 +1836,7 @@ helps['network watcher configure'] = """
 
 helps['network watcher troubleshooting'] = """
     type: group
-    short-summary: (PREVIEW) Commands to managed Network Watcher troubleshooting sessions.
+    short-summary: (PREVIEW) Commands to manage Network Watcher troubleshooting sessions.
 """
 
 helps['network watcher troubleshooting start'] = """
@@ -1891,7 +1891,7 @@ helps['network watcher show-topology'] = """
         - name: --resource-group -g
           short-summary: The name of the target resource group to perform topology on.
         - name: --location -l
-          short-summary: Location. Defaults to the location of the target resource garoup.
+          short-summary: Location. Defaults to the location of the target resource group.
           long-summary: Topology information is only shown for resources within the target
             resource group that are within the specified region.
 """

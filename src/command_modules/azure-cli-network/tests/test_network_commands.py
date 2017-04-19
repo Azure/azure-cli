@@ -1156,7 +1156,7 @@ class NetworkActiveActiveCrossPremiseScenarioTest(ResourceGroupVCRTestBase): # p
 class NetworkActiveActiveVnetVnetScenarioTest(ResourceGroupVCRTestBase): # pylint: disable=too-many-instance-attributes
 
     def __init__(self, test_method):
-        super(NetworkActiveActiveVnetVnetScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_active_active_vnet_vnet_connection', debug=True)
+        super(NetworkActiveActiveVnetVnetScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_active_active_vnet_vnet_connection')
         self.gw_subnet = 'GatewaySubnet'
 
         # First VNet
@@ -1213,16 +1213,6 @@ class NetworkActiveActiveVnetVnetScenarioTest(ResourceGroupVCRTestBase): # pylin
         # create and connect the VNet gateways
         self.cmd('network vpn-connection create -g {} -n {} --vnet-gateway1 {} --vnet-gateway2 {} --shared-key {} --enable-bgp'.format(rg, conn12, gw1, gw2, shared_key))
         self.cmd('network vpn-connection create -g {} -n {} --vnet-gateway1 {} --vnet-gateway2 {} --shared-key {} --enable-bgp'.format(rg, conn21, gw2, gw1, shared_key))
-
-        # test network watcher troubleshooting commands
-        storage_account = 'clitestnwstorage2'
-        container_name = 'troubleshooting-results'
-        self.cmd('storage account create -g {} -l westus --sku Standard_LRS -n {}'.format(rg, storage_account))
-        self.cmd('storage container create --account-name {} -n {}'.format(storage_account, container_name))
-        storage_path = 'https://{}.blob.core.windows.net/{}'.format(storage_account, container_name)
-        self.cmd('network watcher configure -g {} --locations westus --enabled'.format(rg))
-        self.cmd('network watcher troubleshooting start -g {} --resource {} --resource-type vpnConnection --storage-account {} --storage-path {}'.format(rg, conn12, storage_account, storage_path))
-        self.cmd('network watcher troubleshooting show -g {} --resource {} --resource-type vpnConnection'.format(rg, conn12))
 
 
 class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase): # pylint: disable=too-many-instance-attributes
@@ -1292,10 +1282,22 @@ class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase): # pylint: disable
             JMESPathCheck('bgpSettings.peerWeight', 50)
         ])
 
+        conn12 = 'conn1to2'
         gateway1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworkGateways/{}'.format(subscription_id, rg, self.gateway1_name)
-        self.cmd('network vpn-connection create -n myconnection -g {} --shared-key 123 --vnet-gateway1 {} --vnet-gateway2 {}'.format(rg, gateway1_id, self.gateway2_name))
-        self.cmd('network vpn-connection update -n myconnection -g {} --routing-weight 25'.format(rg),
+        self.cmd('network vpn-connection create -n {} -g {} --shared-key 123 --vnet-gateway1 {} --vnet-gateway2 {}'.format(conn12, rg, gateway1_id, self.gateway2_name))
+        self.cmd('network vpn-connection update -n {} -g {} --routing-weight 25'.format(conn12, rg),
             checks=JMESPathCheck('routingWeight', 25))
+
+        # test network watcher troubleshooting commands
+        storage_account = 'clitestnwstorage2'
+        container_name = 'troubleshooting-results'
+        self.cmd('storage account create -g {} -l westus --sku Standard_LRS -n {}'.format(rg, storage_account))
+        self.cmd('storage container create --account-name {} -n {}'.format(storage_account, container_name))
+        storage_path = 'https://{}.blob.core.windows.net/{}'.format(storage_account, container_name)
+        self.cmd('network watcher configure -g {} --locations westus --enabled'.format(rg))
+        self.cmd('network watcher troubleshooting start -g {} --resource {} --resource-type vpnConnection --storage-account {} --storage-path {}'.format(rg, conn12, storage_account, storage_path))
+        self.cmd('network watcher troubleshooting show -g {} --resource {} --resource-type vpnConnection'.format(rg, conn12))
+
 
 class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
 
@@ -1466,7 +1468,7 @@ class NetworkWatcherScenarioTest(ResourceGroupVCRTestBase):
         vm = 'vm1'
         # create VM with NetworkWatcher extension
         self.cmd('storage account create -g {} -l westus --sku Standard_LRS -n {}'.format(resource_group, storage_account))
-        self.cmd('vm create -g {} -n {} --image UbuntuLTS'.format(resource_group, vm))
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-password PassPass10!)'.format(resource_group, vm))
         self.cmd('vm extension set -g {} --vm-name {} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher'.format(resource_group, vm))
 
         self.cmd('network watcher show-topology -g {} -l westus'.format(resource_group))
