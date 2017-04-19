@@ -27,7 +27,8 @@ from azure.cli.core.profiles import get_sdk, ResourceType
 from ._client_factory import (_resource_client_factory,
                               _resource_policy_client_factory,
                               _resource_lock_client_factory,
-                              _resource_links_client_factory)
+                              _resource_links_client_factory,
+                              _authorization_management_client)
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -351,6 +352,26 @@ def _update_provider(namespace, registering):
     action = 'Registering' if registering else 'Unregistering'
     msg_template = '%s is still on-going. You can monitor using \'az provider show -n %s\''
     logger.warning(msg_template, action, namespace)
+
+
+def list_provider_operations(api_version=None):
+    api_version = api_version or _get_auth_provider_latest_api_version()
+    auth_client = _authorization_management_client()
+    return auth_client.provider_operations_metadata.list(api_version)
+
+
+def show_provider_operations(resource_provider_namespace, api_version=None):
+    api_version = api_version or _get_auth_provider_latest_api_version()
+    auth_client = _authorization_management_client()
+    return auth_client.provider_operations_metadata.get(resource_provider_namespace, api_version)
+
+
+def _get_auth_provider_latest_api_version():
+    rcf = _resource_client_factory()
+    api_version = _ResourceUtils.resolve_api_version(rcf, 'Microsoft.Authorization',
+                                                     None, 'providerOperations')
+    return api_version
+
 
 def move_resource(ids, destination_group, destination_subscription_id=None):
     '''Moves resources from one resource group to another(can be under different subscription)
@@ -804,10 +825,10 @@ class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
             else:
                 _validate_resource_inputs(resource_group_name, resource_provider_namespace,
                                           resource_type, resource_name)
-                api_version = _ResourceUtils._resolve_api_version(self.rcf,
-                                                                  resource_provider_namespace,
-                                                                  parent_resource_path,
-                                                                  resource_type)
+                api_version = _ResourceUtils.resolve_api_version(self.rcf,
+                                                                 resource_provider_namespace,
+                                                                 parent_resource_path,
+                                                                 resource_type)
 
         self.resource_group_name = resource_group_name
         self.resource_provider_namespace = resource_provider_namespace
@@ -909,7 +930,7 @@ class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
                 parameters)
 
     @staticmethod
-    def _resolve_api_version(rcf, resource_provider_namespace, parent_resource_path, resource_type):
+    def resolve_api_version(rcf, resource_provider_namespace, parent_resource_path, resource_type):
         provider = rcf.providers.get(resource_provider_namespace)
 
         #If available, we will use parent resource's api-version
@@ -949,4 +970,4 @@ class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
             parent = None
             resource_type = parts['type']
 
-        return _ResourceUtils._resolve_api_version(rcf, namespace, parent, resource_type)
+        return _ResourceUtils.resolve_api_version(rcf, namespace, parent, resource_type)
