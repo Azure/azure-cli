@@ -19,7 +19,7 @@ from azure.cli.core.prompting import prompt_y_n, NoTTYException
 from azure.cli.core._config import az_config
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError, todict, shell_safe_json_parse
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, supported_api_version
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -228,7 +228,8 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
                                child_collection_prop_name=None, child_collection_key='name',
                                child_arg_name='item_name', custom_function_op=None,
                                no_wait_param=None, transform=None, confirmation=None,
-                               exception_handler=None, formatter_class=None):
+                               exception_handler=None, formatter_class=None,
+                               version_constraint=None):
     if not isinstance(getter_op, string_types):
         raise ValueError("Getter operation must be a string. Got '{}'".format(getter_op))
     if not isinstance(setter_op, string_types):
@@ -236,6 +237,11 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
     if custom_function_op and not isinstance(custom_function_op, string_types):
         raise ValueError("Custom function operation must be a string. Got '{}'".format(
             custom_function_op))
+
+    if version_constraint and not supported_api_version(version_constraint.resource_type,
+                                                        min_api=version_constraint.min_api,
+                                                        max_api=version_constraint.max_api):
+        return
 
     def get_arguments_loader():
         return dict(extract_args_from_signature(get_op_handler(getter_op)))
@@ -381,10 +387,16 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
     main_command_module_map[name] = module_name
 
 
-def cli_generic_wait_command(module_name, name, getter_op, factory=None, exception_handler=None):
+def cli_generic_wait_command(module_name, name, getter_op, factory=None, exception_handler=None,
+                             version_constraint=None):
 
     if not isinstance(getter_op, string_types):
         raise ValueError("Getter operation must be a string. Got '{}'".format(type(getter_op)))
+
+    if version_constraint and not supported_api_version(version_constraint.resource_type,
+                                                        min_api=version_constraint.min_api,
+                                                        max_api=version_constraint.max_api):
+        return
 
     def get_arguments_loader():
         return dict(extract_args_from_signature(get_op_handler(getter_op)))

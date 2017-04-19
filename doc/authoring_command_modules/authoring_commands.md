@@ -44,6 +44,7 @@ You will generally only specify `name`, `operation` and possibly `table_transfor
       - For example if `operation='azure.mgmt.compute.operations.virtual_machines_operations#VirtualMachinesOperations.get'`, the CLI will import `azure.mgmt.compute.operations.virtual_machines_operations`, get the `VirtualMachinesOperations` attribute and then the `get` attribute of `VirtualMachinesOperations`.
   - `table_transformer` (optional) - Supply a callable that takes, transforms and returns a result for table output.
   - `confirmation` (optional) - Supply True to enable default confirmation. Alternatively, supply a callable that takes the command arguments as a dict and returning a boolean. Alternatively, supply a string for the prompt.
+  - `version_constraint` (optional) - Supply a VersionConstraint object if this command only applies for a range of API versions.
 
 At this point, you should be able to access your command using `az [name]` and access the built-in help with `az [name] -h/--help`. Your command will automatically be 'wired up' with the global parameters.
 

@@ -4,14 +4,21 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import create_command, command_table
+from azure.cli.core.profiles import supported_api_version
 from ._validators import validate_client_parameters
 
 
 def cli_storage_data_plane_command(name, operation, client_factory,  # pylint: disable=too-many-arguments
-                                   transform=None, table_transformer=None, exception_handler=None):
+                                   transform=None, table_transformer=None, exception_handler=None,
+                                   version_constraint=None):
     """ Registers an Azure CLI Storage Data Plane command. These commands always include the
     four parameters which can be used to obtain a storage client: account-name, account-key,
     connection-string, and sas-token. """
+    if version_constraint and not supported_api_version(version_constraint.resource_type,
+                                                        min_api=version_constraint.min_api,
+                                                        max_api=version_constraint.max_api):
+        return
+
     command = create_command(__name__, name, operation, transform, table_transformer,
                              client_factory, exception_handler=exception_handler)
     # add parameters required to create a storage client

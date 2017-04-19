@@ -6,7 +6,7 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_wait_command
-from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
+from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command, VersionConstraint
 from ._client_factory import * # pylint: disable=wildcard-import, unused-wildcard-import
 from azure.cli.core.util import empty_on_404
 
@@ -22,7 +22,7 @@ from ._format import \
      transform_vpn_connection, transform_vpn_connection_list,
      transform_vpn_connection_create_output)
 
-from azure.cli.core.profiles import supported_api_version, ResourceType
+from azure.cli.core.profiles import ResourceType
 
 custom_path = 'azure.cli.command_modules.network.custom#{}'
 
@@ -34,8 +34,7 @@ cli_command(__name__, 'network application-gateway list', custom_path.format('li
 cli_command(__name__, 'network application-gateway start', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.start', cf_application_gateways)
 cli_command(__name__, 'network application-gateway stop', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.stop', cf_application_gateways)
 
-if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
-    cli_command(__name__, 'network application-gateway show-backend-health', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.backend_health', cf_application_gateways)
+cli_command(__name__, 'network application-gateway show-backend-health', 'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.backend_health', cf_application_gateways, version_constraint=VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01'))
 
 cli_generic_update_command(__name__, 'network application-gateway update',
                            'azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.get',
@@ -102,25 +101,24 @@ cli_generic_update_command(__name__, 'network express-route peering update',
                            custom_function_op=custom_path.format('update_express_route_peering'))
 cli_command(__name__, 'network express-route peering create', custom_path.format('create_express_route_peering'), cf_express_route_circuit_peerings)
 
-if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
-    # ExpressRouteCircuitsOperations
-    cli_command(__name__, 'network express-route delete', 'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.delete', cf_express_route_circuits, no_wait_param='raw')
-    cli_command(__name__, 'network express-route show', 'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.get', cf_express_route_circuits, exception_handler=empty_on_404)
-    cli_command(__name__, 'network express-route get-stats', 'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.get_stats', cf_express_route_circuits)
-    cli_command(__name__, 'network express-route list-arp-tables', 'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.list_arp_table', cf_express_route_circuits)
-    cli_command(__name__, 'network express-route list-route-tables', 'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.list_routes_table', cf_express_route_circuits)
-    cli_command(__name__, 'network express-route create', custom_path.format('create_express_route'), no_wait_param='no_wait')
-    cli_command(__name__, 'network express-route list', custom_path.format('list_express_route_circuits'))
-    cli_generic_update_command(__name__, 'network express-route update',
-                               'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.get',
-                               'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.create_or_update',
-                               cf_express_route_circuits,
-                               custom_function_op=custom_path.format('update_express_route'),
-                               no_wait_param='raw')
-    cli_generic_wait_command(__name__, 'network express-route wait', 'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.get', cf_express_route_circuits)
+# ExpressRouteCircuitsOperations
+cli_command(__name__, 'network express-route delete', 'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.delete', cf_express_route_circuits, no_wait_param='raw', version_constraint=VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01'))
+cli_command(__name__, 'network express-route show', 'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.get', cf_express_route_circuits, exception_handler=empty_on_404, version_constraint=VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01'))
+cli_command(__name__, 'network express-route get-stats', 'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.get_stats', cf_express_route_circuits, version_constraint=VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01'))
+cli_command(__name__, 'network express-route list-arp-tables', 'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.list_arp_table', cf_express_route_circuits, version_constraint=VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01'))
+cli_command(__name__, 'network express-route list-route-tables', 'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.list_routes_table', cf_express_route_circuits, version_constraint=VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01'))
+cli_command(__name__, 'network express-route create', custom_path.format('create_express_route'), no_wait_param='no_wait', version_constraint=VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01'))
+cli_command(__name__, 'network express-route list', custom_path.format('list_express_route_circuits'), version_constraint=VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01'))
+cli_generic_update_command(__name__, 'network express-route update',
+                           'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.get',
+                           'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.create_or_update',
+                           cf_express_route_circuits,
+                           custom_function_op=custom_path.format('update_express_route'),
+                           no_wait_param='raw', version_constraint=VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01'))
+cli_generic_wait_command(__name__, 'network express-route wait', 'azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.get', cf_express_route_circuits, version_constraint=VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01'))
 
-    # ExpressRouteServiceProvidersOperations
-    cli_command(__name__, 'network express-route list-service-providers', 'azure.mgmt.network.operations.express_route_service_providers_operations#ExpressRouteServiceProvidersOperations.list', cf_express_route_service_providers)
+# ExpressRouteServiceProvidersOperations
+cli_command(__name__, 'network express-route list-service-providers', 'azure.mgmt.network.operations.express_route_service_providers_operations#ExpressRouteServiceProvidersOperations.list', cf_express_route_service_providers, version_constraint=VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01'))
 
 # LoadBalancersOperations
 cli_command(__name__, 'network lb create', custom_path.format('create_load_balancer'), transform=DeploymentOutputLongRunningOperation('Starting network lb create'), no_wait_param='no_wait')
@@ -205,9 +203,9 @@ cli_generic_update_command(__name__, 'network nic update',
                            'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.create_or_update',
                            cf_network_interfaces,
                            custom_function_op=custom_path.format('update_nic'))
-if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
-    cli_command(__name__, 'network nic show-effective-route-table', 'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.get_effective_route_table', cf_network_interfaces)
-    cli_command(__name__, 'network nic list-effective-nsg', 'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.list_effective_network_security_groups', cf_network_interfaces)
+
+cli_command(__name__, 'network nic show-effective-route-table', 'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.get_effective_route_table', cf_network_interfaces, version_constraint=VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01'))
+cli_command(__name__, 'network nic list-effective-nsg', 'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.list_effective_network_security_groups', cf_network_interfaces, version_constraint=VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01'))
 
 resource = 'network_interfaces'
 subresource = 'ip_configurations'
@@ -339,8 +337,8 @@ cli_command(__name__, 'network vnet-gateway revoked-cert delete', custom_path.fo
 cli_command(__name__, 'network vnet delete', 'azure.mgmt.network.operations.virtual_networks_operations#VirtualNetworksOperations.delete', cf_virtual_networks)
 cli_command(__name__, 'network vnet show', 'azure.mgmt.network.operations.virtual_networks_operations#VirtualNetworksOperations.get', cf_virtual_networks, exception_handler=empty_on_404)
 cli_command(__name__, 'network vnet list', custom_path.format('list_vnet'))
-if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
-    cli_command(__name__, 'network vnet check-ip-address', 'azure.mgmt.network.operations.virtual_networks_operations#VirtualNetworksOperations.check_ip_address_availability', cf_virtual_networks)
+
+cli_command(__name__, 'network vnet check-ip-address', 'azure.mgmt.network.operations.virtual_networks_operations#VirtualNetworksOperations.check_ip_address_availability', cf_virtual_networks, version_constraint=VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01'))
 cli_command(__name__, 'network vnet create', custom_path.format('create_vnet'), transform=transform_vnet_create_output)
 cli_generic_update_command(__name__, 'network vnet update',
                            'azure.mgmt.network.operations.virtual_networks_operations#VirtualNetworksOperations.get',
@@ -348,17 +346,16 @@ cli_generic_update_command(__name__, 'network vnet update',
                            cf_virtual_networks,
                            custom_function_op=custom_path.format('update_vnet'))
 
-if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
-    # VNET Peering Operations
-    cli_command(__name__, 'network vnet peering create', custom_path.format('create_vnet_peering'))
-    cli_command(__name__, 'network vnet peering show', 'azure.mgmt.network.operations.virtual_network_peerings_operations#VirtualNetworkPeeringsOperations.get', cf_virtual_network_peerings, exception_handler=empty_on_404)
-    cli_command(__name__, 'network vnet peering list', 'azure.mgmt.network.operations.virtual_network_peerings_operations#VirtualNetworkPeeringsOperations.list', cf_virtual_network_peerings)
-    cli_command(__name__, 'network vnet peering delete', 'azure.mgmt.network.operations.virtual_network_peerings_operations#VirtualNetworkPeeringsOperations.delete', cf_virtual_network_peerings)
-    cli_generic_update_command(__name__, 'network vnet peering update',
-                               'azure.mgmt.network.operations.virtual_network_peerings_operations#VirtualNetworkPeeringsOperations.get',
-                               'azure.mgmt.network.operations.virtual_network_peerings_operations#VirtualNetworkPeeringsOperations.create_or_update',
-                               cf_virtual_network_peerings,
-                               setter_arg_name='virtual_network_peering_parameters')
+# VNET Peering Operations
+cli_command(__name__, 'network vnet peering create', custom_path.format('create_vnet_peering'), version_constraint=VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01'))
+cli_command(__name__, 'network vnet peering show', 'azure.mgmt.network.operations.virtual_network_peerings_operations#VirtualNetworkPeeringsOperations.get', cf_virtual_network_peerings, exception_handler=empty_on_404, version_constraint=VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01'))
+cli_command(__name__, 'network vnet peering list', 'azure.mgmt.network.operations.virtual_network_peerings_operations#VirtualNetworkPeeringsOperations.list', cf_virtual_network_peerings, version_constraint=VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01'))
+cli_command(__name__, 'network vnet peering delete', 'azure.mgmt.network.operations.virtual_network_peerings_operations#VirtualNetworkPeeringsOperations.delete', cf_virtual_network_peerings, version_constraint=VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01'))
+cli_generic_update_command(__name__, 'network vnet peering update',
+                           'azure.mgmt.network.operations.virtual_network_peerings_operations#VirtualNetworkPeeringsOperations.get',
+                           'azure.mgmt.network.operations.virtual_network_peerings_operations#VirtualNetworkPeeringsOperations.create_or_update',
+                           cf_virtual_network_peerings,
+                           setter_arg_name='virtual_network_peering_parameters', version_constraint=VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01'))
 
 # Traffic Manager ProfileOperations
 cli_command(__name__, 'network traffic-manager profile check-dns', 'azure.mgmt.trafficmanager.operations.profiles_operations#ProfilesOperations.check_traffic_manager_relative_dns_name_availability', cf_traffic_manager_mgmt_profiles)
