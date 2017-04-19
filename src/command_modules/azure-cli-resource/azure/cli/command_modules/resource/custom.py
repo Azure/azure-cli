@@ -536,6 +536,63 @@ def list_locks(resource_group_name=None, resource_provider_namespace=None,
         resource_group_name, resource_provider_namespace, parent_resource_path, resource_type,
         resource_name, filter=filter_string)
 
+def _validate_lock_params_match_lock(
+        lock_client, name, resource_group_name, resource_provider_namespace,
+        parent_resource_path, resource_type, resource_name):
+    '''
+    Locks are scoped to subscription, resource group or resource.
+    However, the az list command returns all locks for the current scopes
+    and all lower scopes (e.g. resource group level also includes resource locks).
+    This can lead to a confusing user experience where the user specifies a lock
+    name and assumes that it will work, even if they haven't given the right
+    scope. This function attempts to validate the parameters and help the
+    user find the right scope, by first finding the lock, and then infering
+    what it's parameters should be.
+    '''
+    locks = lock_client.management_locks.list_at_subscription_level()
+    found_count = 0 # locks at different levels can have the same name
+    lock_resource_id = None
+    for lock in locks:
+        if lock.name == name:
+            found_count = found_count + 1
+            lock_resource_id = lock.id
+    if found_count == 1:
+        # If we only found one lock, let's validate that the parameters are correct,
+        # if we found more than one, we'll assume the user knows what they're doing
+        # TODO: Add validation for that case too?
+        resource = parse_resource_id(lock_resource_id)
+        _resource_group = resource.get('resource_group', None)
+        _resource_namespace = resource.get('namespace', None)
+        if _resource_group is None:
+            return
+        if resource_group_name != _resource_group:
+            raise CLIError(
+                'Unexpected --resource-group for lock {}, expected {}'.format(
+                    name, _resource_group))
+        if _resource_namespace is None:
+            return
+        if resource_provider_namespace != _resource_namespace:
+            raise CLIError(
+                'Unexpected --namespace for lock {}, expected {}'.format(name, _resource_namespace))
+        if resource.get('grandchild_type', None) is None:
+            _resource_type = resource.get('type', None)
+            _resource_name = resource.get('name', None)
+        else:
+            _resource_type = resource.get('child_type', None)
+            _resource_name = resource.get('child_name', None)
+            parent = (resource['type'] + '/' +  resource['name'])
+            if parent != parent_resource_path:
+                raise CLIError(
+                    'Unexpected --parent for lock {}, expected {}'.format(
+                        name, parent))
+        if resource_type != _resource_type:
+            raise CLIError('Unexpected --resource-type for lock {}, expected {}'.format(
+                name, _resource_type))
+        if resource_name != _resource_name:
+            raise CLIError('Unexpected --resource-name for lock {}, expected {}'.format(
+                name, _resource_name))
+
+
 def get_lock(name, resource_group_name=None):
     '''
     :param name: Name of the lock.
@@ -563,10 +620,15 @@ def delete_lock(name, resource_group_name=None, resource_provider_namespace=None
     lock_client = _resource_lock_client_factory()
     lock_resource = _validate_lock_params(resource_group_name, resource_provider_namespace,
                                           parent_resource_path, resource_type, resource_name)
+    _validate_lock_params_match_lock(lock_client, name, resource_group_name,
+                                     resource_provider_namespace, parent_resource_path,
+                                     resource_type, resource_name)
+
     resource_group_name = lock_resource[0]
     resource_name = lock_resource[1]
     resource_provider_namespace = lock_resource[2]
     resource_type = lock_resource[3]
+
 
     if resource_group_name is None:
         return lock_client.management_locks.delete_at_subscription_level(name)
@@ -632,7 +694,7 @@ def create_lock(name, resource_group_name=None, resource_provider_namespace=None
     :type notes: str
     '''
     if level != 'ReadOnly' and level != 'CanNotDelete':
-        raise CLIError('--level must be one of "ReadOnly" or "CanNotDelete"')
+        raise CLIError('--lock-type must be one of "ReadOnly" or "CanNotDelete"')
     parameters = ManagementLockObject(level=level, notes=notes, name=name)
 
     lock_client = _resource_lock_client_factory()
