@@ -31,7 +31,7 @@ def _resource_links_client_factory(**_):
 def _authorization_management_client(**_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.authorization import AuthorizationManagementClient
-    return get_mgmt_service_client(AuthorizationManagementClient) # .provider_operations_metadata
+    return get_mgmt_service_client(AuthorizationManagementClient)
 
 
 def cf_resource_groups(_):
