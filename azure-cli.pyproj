@@ -25,6 +25,8 @@
     <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="azure-cli-command_modules-nspkg\azure\cli\command_modules\__init__.py" />
+    <Compile Include="azure-cli-command_modules-nspkg\setup.py" />
     <Compile Include="azure-cli-core\azure\cli\core\adal_authentication.py" />
     <Compile Include="azure-cli-core\azure\cli\core\application.py" />
     <Compile Include="azure-cli-core\azure\cli\core\azlogging.py" />
@@ -58,6 +60,8 @@
     <Compile Include="azure-cli-core\azure\cli\core\telemetry.py" />
     <Compile Include="azure-cli-core\azure\cli\core\util.py" />
     <Compile Include="azure-cli-core\azure\cli\core\__init__.py" />
+    <Compile Include="azure-cli-core\azure\cli\__init__.py" />
+    <Compile Include="azure-cli-core\azure\__init__.py" />
     <Compile Include="azure-cli-core\setup.py" />
     <Compile Include="azure-cli-core\tests\test_add_resourcegroup_transform.py" />
     <Compile Include="azure-cli-core\tests\test_application.py" />
@@ -78,6 +82,7 @@
     <Compile Include="azure-cli-core\tests\test_util.py" />
     <Compile Include="azure-cli-core\tests\test_vcr_security.py" />
     <Compile Include="azure-cli-core\tests\__init__.py" />
+    <Compile Include="azure-cli-nspkg\azure\cli\__init__.py" />
     <Compile Include="azure-cli-nspkg\setup.py" />
     <Compile Include="azure-cli-testsdk\azure\cli\testsdk\base.py" />
     <Compile Include="azure-cli-testsdk\azure\cli\testsdk\checkers.py" />
@@ -89,6 +94,7 @@
     <Compile Include="azure-cli-testsdk\azure\cli\testsdk\utilities.py" />
     <Compile Include="azure-cli-testsdk\azure\cli\testsdk\__init__.py" />
     <Compile Include="azure-cli-testsdk\setup.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\__init__.py" />
     <Compile Include="azure-cli\azure\cli\main.py" />
     <Compile Include="azure-cli\azure\cli\__init__.py" />
     <Compile Include="azure-cli\azure\cli\__main__.py" />
@@ -604,6 +610,10 @@
     <Compile Include="command_modules\azure-cli-vm\tests\__init__.py" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="azure-cli-command_modules-nspkg\" />
+    <Folder Include="azure-cli-command_modules-nspkg\azure\" />
+    <Folder Include="azure-cli-command_modules-nspkg\azure\cli\" />
+    <Folder Include="azure-cli-command_modules-nspkg\azure\cli\command_modules\" />
     <Folder Include="azure-cli-core\" />
     <Folder Include="azure-cli-core\azure\" />
     <Folder Include="azure-cli-core\azure\cli\" />
@@ -614,6 +624,8 @@
     <Folder Include="azure-cli-core\tests\" />
     <Folder Include="azure-cli-core\tests\__pycache__\" />
     <Folder Include="azure-cli-nspkg\" />
+    <Folder Include="azure-cli-nspkg\azure\" />
+    <Folder Include="azure-cli-nspkg\azure\cli\" />
     <Folder Include="azure-cli-testsdk\" />
     <Folder Include="azure-cli-testsdk\azure\" />
     <Folder Include="azure-cli-testsdk\azure\cli\" />
@@ -798,10 +810,15 @@
     <Folder Include="command_modules\azure-cli-dls\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="azure-cli-command_modules-nspkg\HISTORY.rst" />
+    <Content Include="azure-cli-command_modules-nspkg\MANIFEST.in" />
+    <Content Include="azure-cli-command_modules-nspkg\README.rst" />
+    <Content Include="azure-cli-command_modules-nspkg\setup.cfg" />
     <Content Include="azure-cli-core\HISTORY.rst" />
     <Content Include="azure-cli-core\setup.cfg" />
     <Content Include="azure-cli-nspkg\HISTORY.rst" />
     <Content Include="azure-cli-testsdk\HISTORY.rst" />
+    <Content Include="azure-cli-testsdk\setup.cfg" />
     <Content Include="azure-cli\az.completion.sh" />
     <Content Include="azure-cli\HISTORY.rst" />
     <Content Include="azure-cli\setup.cfg" />

@@ -100,7 +100,6 @@ setup(
     packages=[
         'azure',
         'azure.cli',
-        'azure.cli',
     ],
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass
