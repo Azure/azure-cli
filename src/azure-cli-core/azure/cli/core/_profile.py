@@ -106,6 +106,7 @@ class Profile(object):
                                     password,
                                     is_service_principal,
                                     tenant,
+                                    no_subscriptions=False,
                                     subscription_finder=None):
         from azure.cli.core._debug import allow_debug_adal_connection
         allow_debug_adal_connection()
@@ -128,18 +129,25 @@ class Profile(object):
                 subscriptions = subscription_finder.find_from_user_account(
                     username, password, tenant, self._ad_resource_uri)
 
-        if not subscriptions:
-            raise CLIError('No subscriptions found for this account.')
+        if not no_subscriptions and not subscriptions:
+            raise CLIError("No subscriptions were found for '{}'. If this is expected, "
+                           "use '--no-subscriptions' to have a tenant level account".format(username))
 
         if is_service_principal:
             self._creds_cache.save_service_principal_cred(sp_auth.get_entry_to_persist(username,
                                                                                        tenant))
-
         if self._creds_cache.adal_token_cache.has_state_changed:
             self._creds_cache.persist_cached_creds()
-        consolidated = Profile._normalize_properties(subscription_finder.user_id,
-                                                     subscriptions,
-                                                     is_service_principal)
+
+        if subscriptions:
+            consolidated = Profile._normalize_properties(subscription_finder.user_id,
+                                                         subscriptions,
+                                                         is_service_principal)
+        else:
+            consolidated = Profile._build_tenant_level_accounts(subscription_finder.user_id,
+                                                                subscription_finder.tenants,
+                                                                is_service_principal)
+
         self._set_subscriptions(consolidated)
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
@@ -161,6 +169,25 @@ class Profile(object):
                 _ENVIRONMENT_NAME: CLOUD.name
             })
         return consolidated
+
+    @staticmethod
+    def _build_tenant_level_accounts(user, tenants, is_service_principal):
+        result = []
+        for t in tenants:
+            s = {
+                _SUBSCRIPTION_ID: t,
+                _SUBSCRIPTION_NAME: 'N/A(tenant level account)',
+                _STATE: 'N/A',
+                _USER_ENTITY: {
+                    _USER_NAME: user,
+                    _USER_TYPE: _SERVICE_PRINCIPAL if is_service_principal else _USER
+                },
+                _IS_DEFAULT_SUBSCRIPTION: False,
+                _TENANT_ID: t,
+                _ENVIRONMENT_NAME: CLOUD.name
+            }
+            result.append(s)
+        return result
 
     def _set_subscriptions(self, new_subscriptions):
         existing_ones = self.load_cached_subscriptions(all_clouds=True)
@@ -345,6 +372,7 @@ class SubscriptionFinder(object):
                     config, base_url=CLOUD.endpoints.resource_manager))
 
         self._arm_client_factory = create_arm_client_factory
+        self.tenants = []
 
     def find_from_user_account(self, username, password, tenant, resource):
         context = self._create_auth_context(tenant or _COMMON_TENANT)
@@ -379,6 +407,7 @@ class SubscriptionFinder(object):
         token_entry = sp_auth.acquire_token(context, resource, client_id)
         self.user_id = client_id
         result = self._find_using_specific_tenant(tenant, token_entry[_ACCESS_TOKEN])
+        self.tenants = [tenant]
         return result
 
     def _create_auth_context(self, tenant, use_token_cache=True):
@@ -410,6 +439,7 @@ class SubscriptionFinder(object):
                 temp_credentials[_ACCESS_TOKEN])
             all_subscriptions.extend(subscriptions)
 
+        self.tenants = tenants
         return all_subscriptions
 
     def _find_using_specific_tenant(self, tenant, access_token):
@@ -422,6 +452,7 @@ class SubscriptionFinder(object):
         for s in subscriptions:
             setattr(s, 'tenant_id', tenant)
             all_subscriptions.append(s)
+        self.tenants = [tenant]
         return all_subscriptions
 
 
