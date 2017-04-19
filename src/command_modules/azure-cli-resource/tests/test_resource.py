@@ -262,6 +262,25 @@ class ProviderRegistrationTest(VCRTestBase): # Not RG test base because it opera
             result = self.cmd('provider show -n {}'.format(provider))
             self.assertTrue(result['registrationState'] in ['Registering', 'Registered'])
 
+
+class ProviderOperationTest(VCRTestBase): # Not RG test base because it operates only on the subscription
+    def __init__(self, test_method):
+        super(ProviderOperationTest, self).__init__(__file__, test_method)
+
+    def test_provider_operation(self):
+        self.execute()
+
+    def body(self):
+        self.cmd('provider operation show --namespace microsoft.compute', checks=[
+            JMESPathCheck('id', '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
+            JMESPathCheck('type', 'Microsoft.Authorization/providerOperations')
+        ]) 
+        self.cmd('provider operation show --namespace microsoft.compute --api-version 2015-07-01', checks=[
+            JMESPathCheck('id', '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
+            JMESPathCheck('type', 'Microsoft.Authorization/providerOperations')
+        ])
+
+
 class DeploymentTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
         super(DeploymentTest, self).__init__(__file__, test_method, resource_group='azure-cli-deployment-test')

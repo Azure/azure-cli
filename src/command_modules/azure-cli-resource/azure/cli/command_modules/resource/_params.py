@@ -46,6 +46,8 @@ register_cli_argument('resource create', 'is_full_object', action='store_true',
 register_cli_argument('provider', 'top', ignore_type)
 register_cli_argument('provider', 'resource_provider_namespace', options_list=('--namespace', '-n'), completer=get_providers_completion_list,
                       help=_PROVIDER_HELP_TEXT)
+register_cli_argument('provider operation', 'api_version', help="The api version of the 'Microsoft.Authorization/providerOperations' resource (omit for latest)")
+
 
 register_cli_argument('feature', 'resource_provider_namespace', options_list=('--namespace',), required=True, help=_PROVIDER_HELP_TEXT)
 register_cli_argument('feature list', 'resource_provider_namespace', options_list=('--namespace',), required=False, help=_PROVIDER_HELP_TEXT)

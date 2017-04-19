@@ -274,6 +274,18 @@ helps['provider unregister'] = """
     type: command
     short-summary: Unregister a provider.
 """
+helps['provider operation'] = """
+    type: group
+    short-summary: Get provider operations metadatas.
+"""
+helps['provider operation show'] = """
+    type: command
+    short-summary: Get an individual provider's operations.
+"""
+helps['provider operation list'] = """
+    type: command
+    short-summary: Get operations from all providers.
+"""
 helps['tag'] = """
     type: group
     short-summary: Manage resource tags.
