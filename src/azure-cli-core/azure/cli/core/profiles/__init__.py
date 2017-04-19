@@ -13,8 +13,8 @@ from azure.cli.core.profiles._shared import (AZURE_API_PROFILES,
 # API Profiles currently supported in the CLI.
 API_PROFILES = {
     'latest': AZURE_API_PROFILES['latest'],
-    '2016-sample': AZURE_API_PROFILES['2016-sample'],
-    '2015-sample': AZURE_API_PROFILES['2015-sample']
+    '2016-00-00-preview': AZURE_API_PROFILES['2016-00-00-preview'],
+    '2015-00-00-preview': AZURE_API_PROFILES['2015-00-00-preview']
 }
 
 
@@ -31,6 +31,8 @@ def get_api_version(resource_type):
 
 def supported_api_version(resource_type, min_api=None, max_api=None):
     """ Method to check if the current API version for a given resource_type is supported.
+        If resource_type is set to None, the current profile version will be used as the basis of
+        the comparison.
 
     :param resource_type: The resource type.
     :type resource_type: ResourceType.
