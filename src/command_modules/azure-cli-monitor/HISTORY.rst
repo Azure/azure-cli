@@ -3,6 +3,11 @@
 Release History
 ===============
 
+unreleased
++++++++++++++++++++++
+
+* Update azure-mgmt-monitor to version 0.2.0 and azure-monitor to version 0.3.0
+
 0.0.2 (2017-04-17)
 +++++++++++++++++++++
 
