@@ -250,9 +250,7 @@ def create_diagnostics_settings(client, target_resource_id, resource_group=None,
         ServiceDiagnosticSettingsResource
 
     # https://github.com/Azure/azure-rest-api-specs/issues/1058
-    # https://github.com/Azure/azure-rest-api-specs/issues/1059
     parameters = ServiceDiagnosticSettingsResource(location='',
-                                                   name='',
                                                    storage_account_id=storage_account,
                                                    service_bus_rule_id=service_bus_rule_id,
                                                    metrics=metrics,
