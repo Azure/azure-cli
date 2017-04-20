@@ -243,6 +243,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
                                             'my-secret',
                                             True,
                                             self.tenant_id,
+                                            False,
                                             finder)
         # action
         extended_info = profile.get_expanded_subscription_info()
@@ -252,6 +253,35 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         self.assertEqual('1234', extended_info['client'])
         self.assertEqual('https://login.microsoftonline.com',
                          extended_info['endpoints'].active_directory)
+
+    @mock.patch('adal.AuthenticationContext', autospec=True)
+    def test_create_account_without_subscriptions(self, mock_auth_context):
+        mock_auth_context.acquire_token_with_client_credentials.return_value = self.token_entry1
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.subscriptions.list.return_value = []
+        finder = SubscriptionFinder(lambda _, _2: mock_auth_context,
+                                    None,
+                                    lambda _: mock_arm_client)
+
+        storage_mock = {'subscriptions': []}
+        profile = Profile(storage_mock)
+        profile._management_resource_uri = 'https://management.core.windows.net/'
+
+        # action
+        result = profile.find_subscriptions_on_login(False,
+                                                     '1234',
+                                                     'my-secret',
+                                                     True,
+                                                     self.tenant_id,
+                                                     allow_no_subscriptions=True,
+                                                     subscription_finder=finder)
+
+        # assert
+        self.assertTrue(1, len(result))
+        self.assertEqual(result[0]['id'], self.tenant_id)
+        self.assertEqual(result[0]['state'], 'Enabled')
+        self.assertEqual(result[0]['tenantId'], self.tenant_id)
+        self.assertEqual(result[0]['name'], 'N/A(tenant level account)')
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     def test_get_current_account_user(self, mock_read_cred_file):
