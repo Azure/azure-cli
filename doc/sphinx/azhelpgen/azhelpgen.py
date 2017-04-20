@@ -33,7 +33,7 @@ class AzHelpGenDirective(Directive):
             help_file = _help.GroupHelpFile(cmd, parser) if _is_group(parser) else _help.CommandHelpFile(cmd, parser)
             try:
                 help_file.load(parser)
-            catch Exception as ex:
+            except Exception as ex:
                 print(ex)
             help_files.append(help_file)
         help_files = sorted(help_files, key=lambda x: x.command)
