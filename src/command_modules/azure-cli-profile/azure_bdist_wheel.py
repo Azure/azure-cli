@@ -28,7 +28,7 @@ This file is a copy of the official bdist_wheel file from wheel 0.30.0a0, enhanc
 of the bottom with some Microsoft extension for Azure SDK for Python
 
 """
-# noqa
+
 import csv
 import hashlib
 import os
@@ -496,26 +496,29 @@ class azure_bdist_wheel(bdist_wheel):
     description = "Create an Azure wheel distribution"
 
     user_options = bdist_wheel.user_options + \
-        [('init-file-root=', None,
-            "dash-separated path to first init file to leave")]
+        [('azure-namespace-package=', None,
+            "Name of the deepest nspkg used")]
 
     def initialize_options(self):
         bdist_wheel.initialize_options(self)
-        self.init_file_root = None
-        self.azure_cli_namespace_package = 'azure-cli-nspkg'
+        self.azure_namespace_package = None
+
+    def finalize_options(self):
+        bdist_wheel.finalize_options(self)
+        if self.azure_namespace_package and not self.azure_namespace_package.endswith("-nspkg"):
+            raise ValueError("azure_namespace_package must finish by -nspkg")
 
     def run(self):
         if not self.distribution.install_requires:
             self.distribution.install_requires = []
         self.distribution.install_requires.append(
-            "{}>=3.0.0".format(self.azure_cli_namespace_package))
+            "{}>=2.0.0".format(self.azure_namespace_package))
         bdist_wheel.run(self)
 
     def write_record(self, bdist_dir, distinfo_dir):
-        if self.init_file_root:
-            # Split up to but not including the last part since that is expected
-            # to be the first __init__.py file to leave
-            subparts = self.init_file_root.split('-')[0:-1]
+        if self.azure_namespace_package:
+            # Split and remove last part, assuming it's "nspkg"
+            subparts = self.azure_namespace_package.split('-')[0:-1]
         folder_with_init = [os.path.join(*subparts[0:i+1]) for i in range(len(subparts))]
         for azure_sub_package in folder_with_init:
             init_file = os.path.join(bdist_dir, azure_sub_package, '__init__.py')
@@ -523,7 +526,7 @@ class azure_bdist_wheel(bdist_wheel):
                 logger.info("manually remove {} while building the wheel".format(init_file))
                 os.remove(init_file)
             else:
-                raise ValueError("Unable to find {}. Are you sure of your init-file-root?".format(init_file))
+                raise ValueError("Unable to find {}. Are you sure of your namespace package?".format(init_file))
         bdist_wheel.write_record(self, bdist_dir, distinfo_dir)
 cmdclass = {
     'bdist_wheel': azure_bdist_wheel,

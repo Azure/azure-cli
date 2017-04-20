@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = "1.0.0+dev"
+VERSION = "2.0.0+dev"
 
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
@@ -41,7 +41,7 @@ setup(
     zip_safe=False,
     classifiers=CLASSIFIERS,
     install_requires=[
-        'azure-cli-nspkg>=3.0.0'
+        'azure-cli-nspkg>=1.0.0'
     ],
     packages=[
         'azure',
