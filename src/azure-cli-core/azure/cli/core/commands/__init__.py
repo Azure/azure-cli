@@ -8,12 +8,13 @@ from __future__ import print_function
 import json
 import pkgutil
 import re
+import sys
 import time
 import timeit
 import traceback
 from collections import OrderedDict, defaultdict
 from importlib import import_module
-from six import string_types
+from six import string_types, reraise
 
 import azure.cli.core.azlogging as azlogging
 import azure.cli.core.telemetry as telemetry
@@ -400,7 +401,7 @@ def create_command(module_name, name, operation,
                 if exception_handler:
                     result = exception_handler(ex)
                 else:
-                    raise ex
+                    reraise(*sys.exc_info())
 
             if no_wait_param and kwargs.get(no_wait_param, None):
                 return None  # return None for 'no-wait'
