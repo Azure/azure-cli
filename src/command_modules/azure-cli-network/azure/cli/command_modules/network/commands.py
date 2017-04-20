@@ -411,6 +411,9 @@ cli_generic_update_command(__name__, 'network traffic-manager endpoint update',
                            tm_endpoint_path + 'get', tm_endpoint_path + 'create_or_update', cf_traffic_manager_mgmt_endpoints,
                            custom_function_op=custom_path + 'update_traffic_manager_endpoint')
 
+tm_geographic_path = 'azure.mgmt.trafficmanager.operations.geographic_hierarchies_operations#GeographicHierarchiesOperations.'
+cli_command(__name__, 'network traffic-manager endpoint show-geographic-hierarchy', tm_geographic_path + 'get_default', cf_tm_geographic)
+
 # DNS ZonesOperations
 dns_zone_path = 'azure.mgmt.dns.operations.zones_operations#ZonesOperations.'
 cli_command(__name__, 'network dns zone show', dns_zone_path + 'get', cf_dns_mgmt_zones, table_transformer=transform_dns_zone_table_output, exception_handler=empty_on_404)

@@ -114,6 +114,12 @@ def cf_traffic_manager_mgmt_endpoints(_):
     return get_mgmt_service_client(TrafficManagerManagementClient).endpoints
 
 
+def cf_tm_geographic(_):
+    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(TrafficManagerManagementClient).geographic_hierarchies
+
+
 def cf_dns_mgmt_zones(_):
     from azure.mgmt.dns import DnsManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
