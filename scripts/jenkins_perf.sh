@@ -2,6 +2,7 @@
 
 # Run performance in jenkins build
 
+python -m virtualenv --clear env
 . ./env/bin/activate
 
 echo "Run performance test on $(hostname)"
