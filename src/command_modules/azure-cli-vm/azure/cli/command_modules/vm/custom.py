@@ -1184,7 +1184,8 @@ def vm_open_port(resource_group_name, vm_name, port, priority=900, network_secur
         nsg = subnet.network_security_group
 
     if not nsg:
-        from azure.mgmt.network.models import NetworkSecurityGroup
+        NetworkSecurityGroup = \
+            get_sdk(ResourceType.MGMT_NETWORK, 'NetworkSecurityGroup', mod='models')
         nsg = LongRunningOperation('Creating network security group')(
             network.network_security_groups.create_or_update(
                 resource_group_name=resource_group_name,
@@ -1194,7 +1195,7 @@ def vm_open_port(resource_group_name, vm_name, port, priority=900, network_secur
         )
 
     # update the NSG with the new rule to allow inbound traffic
-    from azure.mgmt.network.models import SecurityRule
+    SecurityRule = get_sdk(ResourceType.MGMT_NETWORK, 'SecurityRule', mod='models')
     rule_name = 'open-port-all' if port == '*' else 'open-port-{}'.format(port)
     rule = SecurityRule(protocol='*', access='allow', direction='inbound', name=rule_name,
                         source_port_range='*', destination_port_range=port, priority=priority,

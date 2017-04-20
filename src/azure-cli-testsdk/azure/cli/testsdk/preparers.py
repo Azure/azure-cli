@@ -109,7 +109,7 @@ class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
                  parameter_name_for_location='resource_group_location', location='westus',
                  dev_setting_name='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME',
                  dev_setting_location='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_LOCATION'):
-        super(ResourceGroupPreparer, self).__init__(name_prefix, 90)
+        super(ResourceGroupPreparer, self).__init__(name_prefix, 75)
         self.location = location
         self.parameter_name = parameter_name
         self.parameter_name_for_location = parameter_name_for_location
