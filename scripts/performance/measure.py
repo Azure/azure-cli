@@ -29,11 +29,10 @@ def pstdev(data):
     return (ss/n) ** 0.5
 
 
-def scenario(command):
+def scenario(command, loop=10):
     real = []
     user = []
     syst = []
-    loop = 100
 
     test_command = 'time -p ' + command
     for i in range(loop):
