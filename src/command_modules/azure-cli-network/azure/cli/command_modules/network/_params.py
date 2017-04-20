@@ -7,21 +7,12 @@
 import argparse
 from argcomplete.completers import FilesCompleter
 
-from azure.mgmt.network.models import \
-    (IPAllocationMethod, RouteNextHopType)
-from azure.mgmt.network.models import \
-    (ApplicationGatewaySkuName, ApplicationGatewayCookieBasedAffinity,
-     ApplicationGatewayFirewallMode, ApplicationGatewayProtocol,
-     ApplicationGatewayRequestRoutingRuleType, ExpressRouteCircuitSkuFamily,
-     ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType, IPVersion, LoadDistribution,
-     ProbeProtocol, TransportProtocol, SecurityRuleAccess, SecurityRuleProtocol,
-     SecurityRuleDirection, VirtualNetworkGatewayType, VirtualNetworkGatewaySkuName, VpnType)
-
 from azure.cli.core.commands import \
     (CliArgumentType, register_cli_argument, register_extra_cli_argument)
 from azure.cli.core.commands.parameters import (location_type, get_resource_name_completion_list,
                                                 enum_choice_list, tags_type, ignore_type,
-                                                file_type, model_choice_list, three_state_flag)
+                                                file_type, get_resource_group_completion_list,
+                                                three_state_flag)
 from azure.cli.core.commands.validators import \
     (MarkSpecifiedAction, get_default_location_from_resource_group)
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
@@ -37,15 +28,37 @@ from azure.cli.command_modules.network._validators import \
      process_tm_endpoint_create_namespace, process_vnet_create_namespace,
      process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
      process_vpn_connection_create_namespace,
+     process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
+     process_nw_flow_log_set_namespace, process_nw_flow_log_show_namespace,
      process_ag_ssl_policy_set_namespace, process_route_table_create_namespace,
+     process_nw_topology_namespace, process_nw_packet_capture_create_namespace,
      validate_auth_cert, validate_cert, validate_inbound_nat_rule_id_list,
      validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
      validate_address_pool_name_or_id, validate_servers, load_cert_file, validate_metadata,
      validate_peering_type, validate_dns_record_type, validate_route_filter,
-     get_public_ip_validator, get_nsg_validator, get_subnet_validator)
+     get_public_ip_validator, get_nsg_validator, get_subnet_validator,
+     get_network_watcher_from_vm, get_network_watcher_from_location)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
-from azure.cli.core.profiles import ResourceType, supported_api_version
+from azure.cli.core.profiles import ResourceType, supported_api_version, get_sdk
+
+ApplicationGatewaySkuName, ApplicationGatewayCookieBasedAffinity, \
+ApplicationGatewayFirewallMode, ApplicationGatewayProtocol, \
+ApplicationGatewayRequestRoutingRuleType, ApplicationGatewaySslProtocol, \
+ExpressRouteCircuitSkuFamily, \
+ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType, IPVersion, LoadDistribution, \
+ProbeProtocol, TransportProtocol, SecurityRuleAccess, SecurityRuleProtocol, \
+SecurityRuleDirection, VirtualNetworkGatewayType, VirtualNetworkGatewaySkuName, VpnType, \
+IPAllocationMethod, RouteNextHopType, Direction, Protocol = \
+    get_sdk(ResourceType.MGMT_NETWORK, 'ApplicationGatewaySkuName',
+            'ApplicationGatewayCookieBasedAffinity', 'ApplicationGatewayFirewallMode',
+            'ApplicationGatewayProtocol', 'ApplicationGatewayRequestRoutingRuleType',
+            'ApplicationGatewaySslProtocol', 'ExpressRouteCircuitSkuFamily',
+            'ExpressRouteCircuitSkuTier', 'ExpressRouteCircuitPeeringType', 'IPVersion',
+            'LoadDistribution', 'ProbeProtocol', 'TransportProtocol', 'SecurityRuleAccess',
+            'SecurityRuleProtocol', 'SecurityRuleDirection', 'VirtualNetworkGatewayType',
+            'VirtualNetworkGatewaySkuName', 'VpnType', 'IPAllocationMethod', 'RouteNextHopType',
+            'Direction', 'Protocol', mod='models')
 
 # CHOICE LISTS
 
@@ -651,3 +664,55 @@ register_cli_argument('network dns record-set srv', 'weight', options_list=('--w
 register_cli_argument('network dns record-set srv', 'port', options_list=('--port', '-r'), help='Service port.')
 register_cli_argument('network dns record-set srv', 'target', options_list=('--target', '-t'), help='Target domain name.')
 register_cli_argument('network dns record-set txt', 'value', options_list=('--value', '-v'), nargs='+', help='Space separated list of text values which will be concatenated together.')
+
+# NetworkWatcher commands
+register_cli_argument('network watcher', 'network_watcher_name', name_arg_type, help='Name of the Network Watcher.')
+
+register_cli_argument('network watcher configure', 'locations', location_type, options_list=['--locations', '-l'], nargs='+')
+register_cli_argument('network watcher configure', 'enabled', **three_state_flag())
+
+register_cli_argument('network watcher show-topology', 'network_watcher_name', ignore_type, options_list=['--watcher'])
+register_cli_argument('network watcher show-topology', 'resource_group_name', ignore_type, options_list=['--watcher-resource-group'])
+register_cli_argument('network watcher show-topology', 'target_resource_group_name', options_list=['--resource-group', '-g'], completer=get_resource_group_completion_list)
+register_extra_cli_argument('network watcher show-topology', 'location', validator=process_nw_topology_namespace)
+
+register_cli_argument('network watcher create', 'location', validator=get_default_location_from_resource_group)
+
+register_cli_argument('network watcher', 'watcher_rg', ignore_type)
+register_cli_argument('network watcher', 'watcher_name', ignore_type)
+
+for item in ['test-ip-flow', 'show-next-hop', 'show-security-group-view', 'packet-capture create']:
+    register_cli_argument('network watcher {}'.format(item), 'watcher_name', ignore_type, validator=get_network_watcher_from_vm)
+    register_cli_argument('network watcher {}'.format(item), 'location', ignore_type)
+    register_cli_argument('network watcher {}'.format(item), 'watcher_rg', ignore_type)
+    register_cli_argument('network watcher {}'.format(item), 'vm', help='Name or ID of the VM to target.')
+    register_cli_argument('network watcher {}'.format(item), 'resource_group_name', help='Name of the resource group the target VM is in. Do not use when supplying VM ID.')
+    register_cli_argument('network watcher {}'.format(item), 'nic', help='Name or ID of the NIC resource to test. If the VM has multiple NICs and IP forwarding is enabled on any of them, this parameter is required.')
+
+register_cli_argument('network watcher packet-capture', 'capture_name', name_arg_type, help='Name of the packet capture session.')
+register_cli_argument('network watcher packet-capture', 'storage_account', arg_group='Storage')
+register_cli_argument('network watcher packet-capture', 'storage_path', arg_group='Storage')
+register_cli_argument('network watcher packet-capture', 'file_path', arg_group='Storage')
+
+register_cli_argument('network watcher flow-log', 'enabled', validator=process_nw_flow_log_set_namespace, **three_state_flag())
+
+register_cli_argument('network watcher flow-log show', 'nsg', validator=process_nw_flow_log_show_namespace)
+
+for item in ['list', 'stop', 'delete', 'show', 'show-status']:
+    register_extra_cli_argument('network watcher packet-capture {}'.format(item), 'location')
+    register_cli_argument('network watcher packet-capture {}'.format(item), 'location', location_type, required=True)
+    register_cli_argument('network watcher packet-capture {}'.format(item), 'packet_capture_name', name_arg_type)
+    register_cli_argument('network watcher packet-capture {}'.format(item), 'network_watcher_name', ignore_type, options_list=['--network-watcher-name'], validator=get_network_watcher_from_location(remove=True, rg_name='resource_group_name', watcher_name='network_watcher_name'))
+    register_cli_argument('network watcher packet-capture {}'.format(item), 'resource_group_name', ignore_type)
+
+register_cli_argument('network watcher packet-capture create', 'vm', validator=process_nw_packet_capture_create_namespace)
+
+register_cli_argument('network watcher test-ip-flow', 'direction', **enum_choice_list(Direction))
+register_cli_argument('network watcher test-ip-flow', 'protocol', **enum_choice_list(Protocol))
+
+register_cli_argument('network watcher show-next-hop', 'source_ip', help='Source IPv4 address.')
+register_cli_argument('network watcher show-next-hop', 'dest_ip', help='Destination IPv4 address.')
+
+register_cli_argument('network watcher troubleshooting', 'resource_type', options_list=['--resource-type', '-t'], id_part='resource_type', **enum_choice_list(['vnetGateway', 'vpnConnection']))
+register_cli_argument('network watcher troubleshooting start', 'resource', help='Name or ID of the resource to troubleshoot.', validator=process_nw_troubleshooting_start_namespace)
+register_cli_argument('network watcher troubleshooting show', 'resource', help='Name or ID of the resource to troubleshoot.', validator=process_nw_troubleshooting_show_namespace)
