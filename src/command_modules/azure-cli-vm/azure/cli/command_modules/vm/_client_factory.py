@@ -17,12 +17,12 @@ def _subscription_client_factory(**_):
 
 
 def cf_ni(_):
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.network import NetworkManagementClient
     # TODO: Remove hard coded api-version once
     # https://github.com/Azure/azure-rest-api-specs/issues/570
     # is fixed.
-    ni = get_mgmt_service_client(NetworkManagementClient).network_interfaces
+    ni = get_mgmt_service_client(ResourceType.MGMT_NETWORK).network_interfaces
     ni.api_version = '2016-03-30'
     return ni
 
