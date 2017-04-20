@@ -11,7 +11,8 @@ from six import u as unicode_string
 from azure.cli.core._config import az_config
 from azure.cli.core.commands.parameters import \
     (ignore_type, tags_type, file_type, get_resource_name_completion_list, enum_choice_list,
-     model_choice_list, enum_default)
+     model_choice_list, enum_default, location_type)
+from azure.cli.core.commands.validators import get_default_location_from_resource_group
 import azure.cli.core.commands.arm  # pylint: disable=unused-import
 from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
 
@@ -283,6 +284,7 @@ register_cli_argument('storage account show-connection-string', 'key_name', opti
 for item in ['blob', 'file', 'queue', 'table']:
     register_cli_argument('storage account show-connection-string', '{}_endpoint'.format(item), help='Custom endpoint for {}s.'.format(item))
 
+register_cli_argument('storage account create', 'location', location_type, validator=get_default_location_from_resource_group)
 register_cli_argument('storage account create', 'account_type', help='The storage account type', **model_choice_list(ResourceType.MGMT_STORAGE, 'AccountType'))
 
 register_cli_argument('storage account create', 'account_name', account_name_type, options_list=('--name', '-n'), completer=None)
