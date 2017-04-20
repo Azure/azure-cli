@@ -355,14 +355,12 @@ def create_user(client, user_principal_name, display_name, password,  # pylint: 
 
 create_user.__doc__ = UserCreateParameters.__doc__
 
-
 def list_groups(client, display_name=None, query_filter=None):
     sub_filters = []
     if query_filter:
         sub_filters.append(query_filter)
     if display_name:
         sub_filters.append("startswith(displayName,'{}')".format(display_name))
-
     return client.list(filter=(' and ').join(sub_filters))
 
 

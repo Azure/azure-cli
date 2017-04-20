@@ -105,6 +105,9 @@ cli_command(__name__, 'ad user list', 'azure.cli.command_modules.role.custom#lis
 cli_command(__name__, 'ad user create', 'azure.cli.command_modules.role.custom#create_user',
             get_graph_client_users)
 
+cli_command(__name__, 'ad group create',
+            'azure.graphrbac.operations.groups_operations#GroupsOperations.create',
+            get_graph_client_groups)
 cli_command(__name__, 'ad group delete',
             'azure.graphrbac.operations.groups_operations#GroupsOperations.delete',
             get_graph_client_groups)
@@ -112,5 +115,19 @@ cli_command(__name__, 'ad group show',
             'azure.graphrbac.operations.groups_operations#GroupsOperations.get',
             get_graph_client_groups,
             exception_handler=empty_on_404)
-cli_command(__name__, 'ad group list', 'azure.cli.command_modules.role.custom#list_groups',
+cli_command(__name__, 'ad group list',
+            'azure.cli.command_modules.role.custom#list_groups',
+            get_graph_client_groups)
+cli_command(__name__, 'ad group list-memberships',
+            'azure.cli.command_modules.role.custom#get_member_groups',
+            get_graph_client_groups)
+
+cli_command(__name__, 'ad group member list',
+            'azure.graphrbac.operations.groups_operations#GroupsOperations.get_group_members',
+            get_graph_client_groups)
+cli_command(__name__, 'ad group member create', 'azure.graphrbac.operations.groups_operations#GroupsOperations.add_member',
+            get_graph_client_groups)
+cli_command(__name__, 'ad group member delete', 'azure.graphrbac.operations.groups_operations#GroupsOperations.remove_member',
+            get_graph_client_groups)
+cli_command(__name__, 'ad group member check', 'azure.graphrbac.operations.groups_operations#GroupsOperations.is_member_of',
             get_graph_client_groups)
