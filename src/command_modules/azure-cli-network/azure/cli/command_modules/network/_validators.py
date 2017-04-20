@@ -752,9 +752,9 @@ def process_nw_troubleshooting_show_namespace(namespace):
 
     resource_usage = CLIError('usage error: --resource ID | --resource NAME --resource-type TYPE '
                               '--resource-group-name NAME')
-    forbidden_if_id_params = [namespace.resource_type, namespace.resource_group_name]
+    id_params = [namespace.resource_type, namespace.resource_group_name]
     if not is_valid_resource_id(namespace.resource):
-        if not all(forbidden_if_id_params):
+        if not all(id_params):
             raise resource_usage
         type_map = {
             'vnetGateway': 'virtualNetworkGateways',
@@ -767,7 +767,7 @@ def process_nw_troubleshooting_show_namespace(namespace):
             type=type_map[namespace.resource_type],
             name=namespace.resource)
     else:
-        if any(forbidden_if_id_params):
+        if any(id_params):
             raise resource_usage
 
     get_network_watcher_from_resource(namespace)
