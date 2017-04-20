@@ -52,7 +52,7 @@ def _update_progress(current, total):
 
 # CUSTOM METHODS
 
-def create_storage_account(resource_group_name, account_name, sku, location,
+def create_storage_account(resource_group_name, account_name, sku, location=None,
                            kind=None, tags=None, custom_domain=None,
                            encryption=None, access_tier=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier = get_sdk(
@@ -75,7 +75,8 @@ def create_storage_account(resource_group_name, account_name, sku, location,
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
 
-def create_storage_account_with_account_type(resource_group_name, account_name, location, account_type, tags=None):
+def create_storage_account_with_account_type(resource_group_name, account_name, account_type,
+                                             location=None, tags=None):
     StorageAccountCreateParameters, AccountType = get_sdk(
         ResourceType.MGMT_STORAGE,
         'StorageAccountCreateParameters',

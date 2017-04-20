@@ -3,6 +3,11 @@
 Release History
 ===============
 
+unreleased
+++++++++++++++++++
+
+* Default location to resource group location for `storage account create`.
+
 2.0.3 (2017-04-17)
 ++++++++++++++++++
 
