@@ -131,7 +131,7 @@ class Profile(object):
 
         if not allow_no_subscriptions and not subscriptions:
             raise CLIError("No subscriptions were found for '{}'. If this is expected, use "
-                           "'--allow-no-subscriptions' to have a tenant level account".format(
+                           "'--allow-no-subscriptions' to have tenant level accesses".format(
                                username))
 
         if is_service_principal:
