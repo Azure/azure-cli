@@ -249,6 +249,30 @@ cli_command(__name__, 'network watcher flow-log show', custom_path + 'show_nsg_f
 cli_command(__name__, 'network watcher troubleshooting start', custom_path + 'start_nw_troubleshooting', cf_network_watcher, no_wait_param='no_wait')
 cli_command(__name__, 'network watcher troubleshooting show', custom_path + 'show_nw_troubleshooting_result', cf_network_watcher)
 
+# NetworkWatcherOperations
+nw_path = 'azure.mgmt.network.operations.network_watchers_operations#NetworkWatchersOperations.'
+nw_pc_path = 'azure.mgmt.network.operations.packet_captures_operations#PacketCapturesOperations.'
+cli_command(__name__, 'network watcher configure', custom_path + 'configure_network_watcher', cf_network_watcher)
+cli_command(__name__, 'network watcher list', nw_path + 'list_all', cf_network_watcher)
+
+cli_command(__name__, 'network watcher test-ip-flow', custom_path + 'check_nw_ip_flow', cf_network_watcher)
+cli_command(__name__, 'network watcher show-next-hop', custom_path + 'show_nw_next_hop', cf_network_watcher)
+cli_command(__name__, 'network watcher show-security-group-view', custom_path + 'show_nw_security_view', cf_network_watcher)
+cli_command(__name__, 'network watcher show-topology', nw_path + 'get_topology', cf_network_watcher)
+
+cli_command(__name__, 'network watcher packet-capture create', custom_path + 'create_nw_packet_capture', cf_packet_capture)
+cli_command(__name__, 'network watcher packet-capture show', nw_pc_path + 'get', cf_packet_capture)
+cli_command(__name__, 'network watcher packet-capture show-status', nw_pc_path + 'get_status', cf_packet_capture)
+cli_command(__name__, 'network watcher packet-capture delete', nw_pc_path + 'delete', cf_packet_capture)
+cli_command(__name__, 'network watcher packet-capture stop', nw_pc_path + 'stop', cf_packet_capture)
+cli_command(__name__, 'network watcher packet-capture list', nw_pc_path + 'list', cf_packet_capture)
+
+cli_command(__name__, 'network watcher flow-log configure', custom_path + 'set_nsg_flow_logging', cf_network_watcher)
+cli_command(__name__, 'network watcher flow-log show', custom_path + 'show_nsg_flow_logging', cf_network_watcher)
+
+cli_command(__name__, 'network watcher troubleshooting start', custom_path + 'start_nw_troubleshooting', cf_network_watcher, no_wait_param='no_wait')
+cli_command(__name__, 'network watcher troubleshooting show', custom_path + 'show_nw_troubleshooting_result', cf_network_watcher)
+
 # PublicIPAddressesOperations
 public_ip_path = 'azure.mgmt.network.operations.public_ip_addresses_operations#PublicIPAddressesOperations.'
 cli_command(__name__, 'network public-ip delete', public_ip_path + 'delete', cf_public_ip_addresses)
