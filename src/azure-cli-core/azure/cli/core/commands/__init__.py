@@ -21,7 +21,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.application import APPLICATION
 from azure.cli.core.prompting import prompt_y_n, NoTTYException
 from azure.cli.core._config import az_config, DEFAULTS_SECTION
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, supported_api_version
 from azure.cli.core.profiles._shared import get_versioned_sdk_path
 
 from ._introspection import (extract_args_from_signature,
@@ -233,6 +233,14 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
         return self.handler(**kwargs)
 
 
+class VersionConstraint(object):
+
+    def __init__(self, resource_type, min_api=None, max_api=None):
+        self.resource_type = resource_type
+        self.min_api = min_api
+        self.max_api = max_api
+
+
 command_table = CommandTable()
 
 # Map to determine what module a command was registered in
@@ -318,10 +326,15 @@ def register_extra_cli_argument(command, dest, **kwargs):
 def cli_command(module_name, name, operation,
                 client_factory=None, transform=None, table_transformer=None,
                 no_wait_param=None, confirmation=None, exception_handler=None,
-                formatter_class=None):
+                formatter_class=None, version_constraint=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
-    command_table[name] = create_command(module_name, name, operation, transform, table_transformer,
-                                         client_factory, no_wait_param, confirmation=confirmation,
+    if version_constraint and not supported_api_version(version_constraint.resource_type,
+                                                        min_api=version_constraint.min_api,
+                                                        max_api=version_constraint.max_api):
+        return
+    command_table[name] = create_command(module_name, name, operation, transform,
+                                         table_transformer, client_factory, no_wait_param,
+                                         confirmation=confirmation,
                                          exception_handler=exception_handler,
                                          formatter_class=formatter_class)
 

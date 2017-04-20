@@ -11,10 +11,12 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_vmss, cf_vmss_vm,
                                                           cf_vm_sizes, cf_disks, cf_snapshots,
                                                           cf_images)
-from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
+from azure.cli.core.commands import (DeploymentOutputLongRunningOperation,
+                                     VersionConstraint,
+                                     cli_command)
 from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_wait_command
 from azure.cli.core.util import empty_on_404
-from azure.cli.core.profiles import supported_api_version, ResourceType
+from azure.cli.core.profiles import ResourceType
 
 # pylint: disable=line-too-long
 
@@ -110,11 +112,10 @@ cli_generic_update_command(__name__, 'vm update',
                            no_wait_param='raw')
 cli_generic_wait_command(__name__, 'vm wait', 'azure.cli.command_modules.vm.custom#get_instance_view')
 
-if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
-    cli_command(__name__, 'vm convert', mgmt_path.format(op_var, op_class, 'convert_to_managed_disks'), cf_vm)
-    cli_command(__name__, 'vm encryption enable', 'azure.cli.command_modules.vm.disk_encryption#enable')
-    cli_command(__name__, 'vm encryption disable', 'azure.cli.command_modules.vm.disk_encryption#disable')
-    cli_command(__name__, 'vm encryption show', 'azure.cli.command_modules.vm.disk_encryption#show', exception_handler=empty_on_404)
+cli_command(__name__, 'vm convert', mgmt_path.format(op_var, op_class, 'convert_to_managed_disks'), cf_vm, version_constraint=VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'))
+cli_command(__name__, 'vm encryption enable', 'azure.cli.command_modules.vm.disk_encryption#enable', version_constraint=VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'))
+cli_command(__name__, 'vm encryption disable', 'azure.cli.command_modules.vm.disk_encryption#disable', version_constraint=VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'))
+cli_command(__name__, 'vm encryption show', 'azure.cli.command_modules.vm.disk_encryption#show', exception_handler=empty_on_404, version_constraint=VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'))
 
 # VM NIC
 cli_command(__name__, 'vm nic add', custom_path.format('vm_add_nics'))
@@ -242,36 +243,35 @@ cli_command(__name__, 'vmss list-instance-connection-info', custom_path.format('
 cli_command(__name__, 'vm list-sizes', mgmt_path.format('virtual_machine_sizes_operations', 'VirtualMachineSizesOperations', 'list'), cf_vm_sizes)
 
 
-if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
-    # VM Disk
-    op_var = 'disks_operations'
-    op_class = 'DisksOperations'
-    cli_command(__name__, 'disk create', custom_path.format('create_managed_disk'))
-    cli_command(__name__, 'disk list', custom_path.format('list_managed_disks'))
-    cli_command(__name__, 'disk show', mgmt_path.format(op_var, op_class, 'get'), cf_disks, exception_handler=empty_on_404)
-    cli_command(__name__, 'disk delete', mgmt_path.format(op_var, op_class, 'delete'), cf_disks)
-    cli_command(__name__, 'disk grant-access', custom_path.format('grant_disk_access'))
-    cli_command(__name__, 'disk revoke-access', mgmt_path.format(op_var, op_class, 'revoke_access'), cf_disks)
-    cli_generic_update_command(__name__, 'disk update', 'azure.mgmt.compute.compute.operations.{}#{}.get'.format(op_var, op_class),
-                               'azure.mgmt.compute.compute.operations.{}#{}.create_or_update'.format(op_var, op_class),
-                               custom_function_op=custom_path.format('update_managed_disk'),
-                               setter_arg_name='disk', factory=cf_disks)
-    op_var = 'snapshots_operations'
-    op_class = 'SnapshotsOperations'
-    cli_command(__name__, 'snapshot create', custom_path.format('create_snapshot'))
-    cli_command(__name__, 'snapshot list', custom_path.format('list_snapshots'))
-    cli_command(__name__, 'snapshot show', mgmt_path.format(op_var, op_class, 'get'), cf_snapshots, exception_handler=empty_on_404)
-    cli_command(__name__, 'snapshot delete', mgmt_path.format(op_var, op_class, 'delete'), cf_snapshots)
-    cli_command(__name__, 'snapshot grant-access', custom_path.format('grant_snapshot_access'))
-    cli_command(__name__, 'snapshot revoke-access', mgmt_path.format(op_var, op_class, 'revoke_access'), cf_snapshots)
-    cli_generic_update_command(__name__, 'snapshot update', 'azure.mgmt.compute.compute.operations.{}#{}.get'.format(op_var, op_class),
-                               'azure.mgmt.compute.compute.operations.{}#{}.create_or_update'.format(op_var, op_class),
-                               custom_function_op=custom_path.format('update_snapshot'),
-                               setter_arg_name='snapshot', factory=cf_snapshots)
+# VM Disk
+op_var = 'disks_operations'
+op_class = 'DisksOperations'
+cli_command(__name__, 'disk create', custom_path.format('create_managed_disk'), version_constraint=VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'))
+cli_command(__name__, 'disk list', custom_path.format('list_managed_disks'), version_constraint=VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'))
+cli_command(__name__, 'disk show', mgmt_path.format(op_var, op_class, 'get'), cf_disks, exception_handler=empty_on_404, version_constraint=VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'))
+cli_command(__name__, 'disk delete', mgmt_path.format(op_var, op_class, 'delete'), cf_disks, version_constraint=VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'))
+cli_command(__name__, 'disk grant-access', custom_path.format('grant_disk_access'), version_constraint=VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'))
+cli_command(__name__, 'disk revoke-access', mgmt_path.format(op_var, op_class, 'revoke_access'), cf_disks, version_constraint=VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'))
+cli_generic_update_command(__name__, 'disk update', 'azure.mgmt.compute.compute.operations.{}#{}.get'.format(op_var, op_class),
+                           'azure.mgmt.compute.compute.operations.{}#{}.create_or_update'.format(op_var, op_class),
+                           custom_function_op=custom_path.format('update_managed_disk'),
+                           setter_arg_name='disk', factory=cf_disks, version_constraint=VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'))
+op_var = 'snapshots_operations'
+op_class = 'SnapshotsOperations'
+cli_command(__name__, 'snapshot create', custom_path.format('create_snapshot'), version_constraint=VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'))
+cli_command(__name__, 'snapshot list', custom_path.format('list_snapshots', version_constraint=VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview')))
+cli_command(__name__, 'snapshot show', mgmt_path.format(op_var, op_class, 'get'), cf_snapshots, exception_handler=empty_on_404, version_constraint=VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'))
+cli_command(__name__, 'snapshot delete', mgmt_path.format(op_var, op_class, 'delete'), cf_snapshots, version_constraint=VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'))
+cli_command(__name__, 'snapshot grant-access', custom_path.format('grant_snapshot_access'), version_constraint=VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'))
+cli_command(__name__, 'snapshot revoke-access', mgmt_path.format(op_var, op_class, 'revoke_access'), cf_snapshots, version_constraint=VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'))
+cli_generic_update_command(__name__, 'snapshot update', 'azure.mgmt.compute.compute.operations.{}#{}.get'.format(op_var, op_class),
+                           'azure.mgmt.compute.compute.operations.{}#{}.create_or_update'.format(op_var, op_class),
+                           custom_function_op=custom_path.format('update_snapshot'),
+                           setter_arg_name='snapshot', factory=cf_snapshots, version_constraint=VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'))
 
-    op_var = 'images_operations'
-    op_class = 'ImagesOperations'
-    cli_command(__name__, 'image create', custom_path.format('create_image'))
-    cli_command(__name__, 'image list', custom_path.format('list_images'))
-    cli_command(__name__, 'image show', mgmt_path.format(op_var, op_class, 'get'), cf_images, exception_handler=empty_on_404)
-    cli_command(__name__, 'image delete', mgmt_path.format(op_var, op_class, 'delete'), cf_images)
+op_var = 'images_operations'
+op_class = 'ImagesOperations'
+cli_command(__name__, 'image create', custom_path.format('create_image'), version_constraint=VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'))
+cli_command(__name__, 'image list', custom_path.format('list_images'), version_constraint=VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'))
+cli_command(__name__, 'image show', mgmt_path.format(op_var, op_class, 'get'), cf_images, exception_handler=empty_on_404, version_constraint=VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'))
+cli_command(__name__, 'image delete', mgmt_path.format(op_var, op_class, 'delete'), cf_images, version_constraint=VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'))
