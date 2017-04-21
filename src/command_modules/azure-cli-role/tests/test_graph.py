@@ -111,31 +111,50 @@ class GraphGroupScenarioTest(VCRTestBase):
             # create group
             group_result = self.cmd('ad group create --display-name {0} --mail-nickname {0}'.format(group))
             # add user1 into group
-            self.cmd('ad group member add -g {} --member-id {}'.format(group, user1_result['objectId']))
+            self.cmd('ad group member add -g {} --member-id {}'.format(group, user1_result['objectId']), checks=NoneCheck())
             # add user2 into group
-            self.cmd('ad group member add -g {} --member-id {}'.format(group, user2_result['objectId']))
+            self.cmd('ad group member add -g {} --member-id {}'.format(group, user2_result['objectId']), checks=NoneCheck())
             # show group
-            self.cmd('ad group show -g ' + group)
-            self.cmd('ad group show -g ' + group_result['objectId'])
+            self.cmd('ad group show -g ' + group, checks=[
+                JMESPathCheck('objectId', group_result['objectId']),
+                JMESPathCheck('displayName', group)
+            ])
+            self.cmd('ad group show -g ' + group_result['objectId'], checks=[
+                JMESPathCheck('displayName', group)
+            ])
             # list group
-            self.cmd('ad group list --display-name ' + group)
-            # show member groups 
-            self.cmd('ad group get-member-groups -g ' + group)
+            self.cmd('ad group list --display-name ' + group, checks=[
+                JMESPathCheck('[0].displayName', group)
+            ])
+            # show member groups
+            self.cmd('ad group get-member-groups -g ' + group, checks=[
+                JMESPathCheck('length([])', 0)
+            ])
             # check user1 memebership
-            self.cmd('ad group member check -g {} --member-id {}'.format(group, user1_result['objectId']))
+            self.cmd('ad group member check -g {} --member-id {}'.format(group, user1_result['objectId']), checks=[
+                JMESPathCheck('value', True)
+            ])
             # check user2 memebership
-            self.cmd('ad group member check -g {} --member-id {}'.format(group, user2_result['objectId']))
+            self.cmd('ad group member check -g {} --member-id {}'.format(group, user2_result['objectId']), checks=[
+                JMESPathCheck('value', True)
+            ])
             # list memebers
-            self.cmd('ad group member list -g ' + group)
+            self.cmd('ad group member list -g ' + group, checks=[
+                JMESPathCheck("length([?displayName=='{}'])".format(user1), 1),
+                JMESPathCheck("length([?displayName=='{}'])".format(user2), 1),
+                JMESPathCheck("length([])", 2),
+            ])
             # remove user1
             self.cmd('ad group member remove -g {} --member-id {}'.format(group, user1_result['objectId']))
             # check user1 memebership
-            self.cmd('ad group member check -g {} --member-id {}'.format(group, user1_result['objectId']))
+            self.cmd('ad group member check -g {} --member-id {}'.format(group, user1_result['objectId']), checks=[
+                JMESPathCheck('value', False)
+            ])
             # delete the group
             self.cmd('ad group delete -g ' + group)
-            self.cmd('ad group list')
-        except:
+            self.cmd('ad group list', checks=[
+                JMESPathCheck("length([?displayName=='{}'])".format(group), 0)
+            ])
+        finally:
             self.cmd('ad user delete --upn-or-object-id ' + user1_result['objectId'])
             self.cmd('ad user delete --upn-or-object-id ' + user2_result['objectId'])
-        
-        pass
