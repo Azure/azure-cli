@@ -211,7 +211,7 @@ class ScenarioTest(IntegrationTestBase):  # pylint: disable=too-many-instance-at
     @classmethod
     def _custom_request_query_matcher(cls, r1, r2):
         """ Ensure method, path, and query parameters match. """
-        from six.moves.urllib_parse import urlparse, parse_qs
+        from six.moves.urllib_parse import urlparse, parse_qs  # pylint: disable=import-error
 
         url1 = urlparse(r1.uri)
         url2 = urlparse(r2.uri)
