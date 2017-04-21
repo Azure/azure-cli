@@ -28,6 +28,12 @@ def _resource_links_client_factory(**_):
     from azure.cli.core.profiles import ResourceType
     return get_mgmt_service_client(ResourceType.MGMT_RESOURCE_LINKS)
 
+def _authorization_management_client(**_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.authorization import AuthorizationManagementClient
+    return get_mgmt_service_client(AuthorizationManagementClient)
+
+
 def cf_resource_groups(_):
     return _resource_client_factory().resource_groups
 

@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.4 (unreleased)
+* Support 'provider operation' commands (#2908)
+* Support generic resource create (#2606)
 
 2.0.3 (2017-04-17)
 ++++++++++++++++++

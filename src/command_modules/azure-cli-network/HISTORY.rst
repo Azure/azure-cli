@@ -11,6 +11,7 @@ Release History
 * Fix bug where '--key-length' argument of 'vpn-connection create' was not parsed correctly.
 * Fix bug in `dns zone import` where records were not imported correctly.
 * Fix bug where `traffic-manager endpoint update` did not work.
+* Add 'network watcher' preview commands.
 
 2.0.2 (2017-04-03)
 ++++++++++++++++++
