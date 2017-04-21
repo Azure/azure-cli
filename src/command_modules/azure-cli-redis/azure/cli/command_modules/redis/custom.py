@@ -3,29 +3,24 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from msrest.exceptions import ClientException
 from azure.cli.core.util import CLIError
-
-from azure.mgmt.redis.models import (
-    ImportRDBParameters,
-    ExportRDBParameters,
-    RedisCreateOrUpdateParameters,
-    Sku,
-)
 
 import azure.cli.core.azlogging as azlogging
 logger = azlogging.get_az_logger(__name__)
 
 def cli_redis_export(client, resource_group_name, name, prefix, container, file_format=None):
     # pylint:disable=too-many-arguments
+    from azure.mgmt.redis.models import ExportRDBParameters
     parameters = ExportRDBParameters(prefix, container, file_format)
     return client.export(resource_group_name, name, parameters)
 
 def cli_redis_import_method(client, resource_group_name, name, file_format, files):
+    from azure.mgmt.redis.models import ImportRDBParameters
     parameters = ImportRDBParameters(files, file_format)
     return client.import_method(resource_group_name, name, files, parameters)
 
 def cli_redis_update_settings(client, resource_group_name, name, redis_configuration):
+    from azure.mgmt.redis.models import RedisCreateOrUpdateParameters
     logger.warning('This command is getting deprecated. Please use "redis update" command')
 
     existing = client.get(resource_group_name, name)
@@ -72,8 +67,10 @@ def cli_redis_update(instance, sku=None, vm_size=None):
 
 def wrong_vmsize_argument_exception_handler(ex):
 	# pylint:disable=line-too-long
-    if ("The value of the parameter 'properties.sku.family/properties.sku.capacity' is invalid" in format(ex)) or ("The value of the parameter 'properties.sku.family' is invalid" in format(ex)):
-        raise CLIError('Invalid VM size. Example for Valid values: For C family (C0, C1, C2, C3, C4, C5, C6), for P family (P1, P2, P3, P4)')
+    from msrest.exceptions import ClientException
+    if isinstance(ex, ClientException):
+        if ("The value of the parameter 'properties.sku.family/properties.sku.capacity' is invalid" in format(ex)) or ("The value of the parameter 'properties.sku.family' is invalid" in format(ex)):
+            raise CLIError('Invalid VM size. Example for Valid values: For C family (C0, C1, C2, C3, C4, C5, C6), for P family (P1, P2, P3, P4)')
     raise ex
 
 def cli_redis_create(client, resource_group_name, name, location, sku, # pylint:disable=too-many-arguments
@@ -106,7 +103,4 @@ def cli_redis_create(client, resource_group_name, name, location, sku, # pylint:
         subnet_id,
         static_ip)
 
-    try:
-        return client.create_or_update(resource_group_name, name, params)
-    except ClientException as err:
-        wrong_vmsize_argument_exception_handler(err)
+    return client.create_or_update(resource_group_name, name, params)
