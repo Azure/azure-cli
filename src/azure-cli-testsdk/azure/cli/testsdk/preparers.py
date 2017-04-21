@@ -182,21 +182,29 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
 
 class RoleBasedServicePrincipalPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='http://clitest', skip_assignment=True, parameter_name='sp_name',
-                 parameter_password='sp_password'):
+                 parameter_password='sp_password', dev_setting_sp_name='AZURE_CLI_TEST_DEV_SP_NAME',
+                 dev_setting_sp_password='AZURE_CLI_TEST_DEV_SP_PASSWORD'):
         super(RoleBasedServicePrincipalPreparer, self).__init__(name_prefix, 24)
         self.skip_assignment = skip_assignment
         self.result = {}
         self.parameter_name = parameter_name
         self.parameter_password = parameter_password
+        self.dev_setting_sp_name = os.environ.get(dev_setting_sp_name, None)
+        self.dev_setting_sp_password = os.environ.get(dev_setting_sp_password, None)
 
     def create_resource(self, name, **kwargs):
-        command = 'az ad sp create-for-rbac -n {}{}'.format(
-            name, ' --skip-assignment' if self.skip_assignment else '')
-        self.result = execute(command).get_output_in_json()
-        return {self.parameter_name: name, self.parameter_password: self.result['password']}
+        if not self.dev_setting_sp_name:
+            command = 'az ad sp create-for-rbac -n {}{}'\
+                      .format(name, ' --skip-assignment' if self.skip_assignment else '')
+            self.result = execute(command).get_output_in_json()
+            return {self.parameter_name: name, self.parameter_password: self.result['password']}
+        else:
+            return {self.parameter_name: self.dev_setting_sp_name,
+                    self.parameter_password: self.dev_setting_sp_password}
 
     def remove_resource(self, name, **kwargs):
-        execute('az ad sp delete --id {}'.format(self.result['appId']))
+        if not self.dev_setting_sp_name:
+            execute('az ad sp delete --id {}'.format(self.result['appId']))
 
 
 # Utility
