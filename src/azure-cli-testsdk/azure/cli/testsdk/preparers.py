@@ -181,8 +181,9 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
 # Role based access control service principal preparer
 
 class RoleBasedServicePrincipalPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='http://clitest', skip_assignment=True, parameter_name='sp_name',
-                 parameter_password='sp_password', dev_setting_sp_name='AZURE_CLI_TEST_DEV_SP_NAME',
+    def __init__(self, name_prefix='http://clitest',  # pylint: disable=too-many-arguments
+                 skip_assignment=True, parameter_name='sp_name', parameter_password='sp_password',
+                 dev_setting_sp_name='AZURE_CLI_TEST_DEV_SP_NAME',
                  dev_setting_sp_password='AZURE_CLI_TEST_DEV_SP_PASSWORD'):
         super(RoleBasedServicePrincipalPreparer, self).__init__(name_prefix, 24)
         self.skip_assignment = skip_assignment
