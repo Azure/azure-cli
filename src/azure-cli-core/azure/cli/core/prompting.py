@@ -4,8 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
+
 import sys
 import getpass
+import humanfriendly
 from six.moves import input  # pylint: disable=redefined-builtin
 
 import azure.cli.core.azlogging as azlogging
@@ -21,6 +23,21 @@ def _verify_is_a_tty():
     if not sys.stdin.isatty():
         logger.debug('No tty available.')
         raise NoTTYException()
+
+
+if sys.platform == 'win32':
+    # This is hack-tastic monkey patching because the windows console
+    # doesn't fully understand the codes that are sent.
+    humanfriendly.erase_line_code = ''
+    humanfriendly.hide_cursor_code = ''
+    humanfriendly.show_cursor_code = ''
+
+
+def spin(msg):
+    _verify_is_a_tty()
+    spinner = humanfriendly.Spinner(label=msg)
+    spinner.hide_cursor = False
+    return spinner
 
 
 def prompt(msg, help_string=None):

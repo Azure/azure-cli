@@ -50,6 +50,7 @@ DEPENDENCIES = [
     'argcomplete>=1.8.0',
     'azure-cli-nspkg',
     'colorama',
+    'humanfriendly>=2.4',
     'jmespath',
     'msrest>=0.4.4',
     'msrestazure>=0.4.7',
