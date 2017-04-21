@@ -45,7 +45,7 @@ def get_server_location(server_name, resource_group_name):
 
 
 ###############################################
-#                sql db                       #
+#                sql                          #
 ###############################################
 
 
@@ -85,24 +85,28 @@ def capabilities_get(  # pylint: disable=too-many-arguments
         # If edition filter is requested then apply it.
         if edition is not None:
             sv.supported_editions = [e for e in sv.supported_editions if e.name == edition]
+            for e in sv.supported_editions:
+                # This edition was not removed by the filter, so this is the chosen edition.
+                # Remember to be more lenient to it and its parents when filtering by status.
+                lenient_nodes += [sv, e]
+
+            sv.supported_elastic_pool_editions = [e for e in sv.supported_elastic_pool_editions if e.name == edition]
+            for e in sv.supported_elastic_pool_editions:
+                # This edition was not removed by the filter, so this is the chosen edition.
+                # Remember to be more lenient to it and its parents when filtering by status.
+                lenient_nodes += [sv, e]
 
         for e in sv.supported_editions:
-            # If edition filter was applied then this is the chosen edition. Remember to be more
-            # lenient to it and its parents when filtering by status.
-            if edition is not None:
-                lenient_nodes += [sv, e]
 
             # If service objective filter is requested then apply it.
             if service_objective is not None:
                 e.supported_service_level_objectives = [
                     slo for slo in e.supported_service_level_objectives
                     if slo.name == service_objective]
-
-            for slo in e.supported_service_level_objectives:
-                # If service objective filter was applied then this is the chosen service
-                # objective. Remember to be more lenient to it and its parents when
-                # filtering by status.
-                if service_objective is not None:
+                for slo in e.supported_service_level_objectives:
+                    # This service objective was not removed by the filter, so this is the chosen
+                    # service objective. Remember to be more lenient to it and its parents when
+                    # filtering by status.
                     lenient_nodes += [sv, e, slo]
 
     # ############# Phase 2: Filter by status. #############
@@ -139,6 +143,25 @@ def capabilities_get(  # pylint: disable=too-many-arguments
                 # Filter max sizes.
                 slo.supported_max_sizes = filter_by_status(slo.supported_max_sizes)
 
+        # Filter elastic pool editions
+        sv.supported_elastic_pool_editions = filter_by_status(sv.supported_elastic_pool_editions)
+
+        for e in sv.supported_elastic_pool_editions:
+            # Filter supported DTUs
+            e.supported_elastic_pool_dtus = filter_by_status(e.supported_elastic_pool_dtus)
+
+            for pool_dtu in e.supported_elastic_pool_dtus:
+                # Filter per database max DTUs
+                pool_dtu.supported_per_database_max_dtus = filter_by_status(pool_dtu.supported_per_database_max_dtus)
+
+                for db_max_dtu in pool_dtu.supported_per_database_max_dtus:
+                    # Filter per database min DTUs
+                    db_max_dtu.supported_per_database_min_dtus = filter_by_status(db_max_dtu.supported_per_database_min_dtus)
+
+                # Filter per database max size
+                pool_dtu.supported_per_database_max_sizes = filter_by_status(pool_dtu.supported_per_database_max_sizes)                 
+
+
     # ############# Phase 3: Prune items which have no children due to filters. #############
     # This must be completed before pruning based on depth, because after depth-pruning the
     # remaining leaf nodes will have no children; we don't want no-children-pruning to prune those
@@ -169,6 +192,11 @@ def capabilities_get(  # pylint: disable=too-many-arguments
                         # Prune max sizes if that is too much detail
                         if hide == CapabilityDetail.max_size:
                             del slo.supported_max_sizes
+
+            # for e in sv.supported_elastic_pool_editions:
+            #     # Prune supported dtus and below if that is too much detail
+            #     if hide == CapabilityDetail.service_objective:
+            #         del e.supported_elastic_pool_dtus
 
     return capabilities
 
