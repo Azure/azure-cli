@@ -1,10 +1,11 @@
 # Build packages in Jenkins server.
 # The script expects a virtualenv created under ./env folder as prerequisite
 
+# Activate virtual environment
 python -m virtualenv --clear env
 . ./env/bin/activate
 
-echo 'Build Azure CLI and its command modules '
+echo 'Build Azure CLI and its command modules'
 
 if [ -d ./artifacts ]; then
     rm -rf ./artifacts
