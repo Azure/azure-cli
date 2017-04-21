@@ -30,7 +30,7 @@ with open('HISTORY.rst', 'r', encoding='utf-8') as f:
     HISTORY = f.read()
 
 setup(
-    name='azure-cli-command_modules-nspkg',
+    name='azure-cli-command-modules-nspkg',
     version=VERSION,
     description='Microsoft Azure CLI Command Modules Namespace Package',
     long_description=README + '\n\n' + HISTORY,
