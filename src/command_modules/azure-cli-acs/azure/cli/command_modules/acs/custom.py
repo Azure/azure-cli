@@ -471,7 +471,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                                   location=location, service_principal=service_principal,
                                   client_secret=client_secret, master_count=master_count,
                                   windows=windows, admin_password=admin_password,
-                                  validate=validate, no_wait=no_wait)
+                                  validate=validate, no_wait=no_wait, tags=tags)
 
     if windows:
         raise CLIError('--windows is only supported for Kubernetes clusters')
@@ -523,7 +523,7 @@ def load_acs_service_principals(config_path):
 def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value,
                        admin_username="azureuser", agent_count="3", agent_vm_size="Standard_D2_v2",
                        location=None, service_principal=None, client_secret=None, master_count="1",
-                       windows=False, admin_password='', validate=False, no_wait=False):
+                       windows=False, admin_password='', validate=False, no_wait=False, tags=None):
     if not location:
         location = '[resourceGroup().location]'
     windows_profile = None
@@ -556,6 +556,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
                 "location": location,
                 "type": "Microsoft.ContainerService/containerServices",
                 "name": name,
+                "tags": tags,
                 "properties": {
                     "orchestratorProfile": {
                         "orchestratorType": "kubernetes"
