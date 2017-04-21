@@ -357,6 +357,9 @@ create_user.__doc__ = UserCreateParameters.__doc__
 
 
 def list_groups(client, display_name=None, query_filter=None):
+    '''
+    list groups in the directory
+    '''
     sub_filters = []
     if query_filter:
         sub_filters.append(query_filter)

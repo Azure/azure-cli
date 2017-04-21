@@ -140,6 +140,10 @@ helps['ad group'] = """
     type: group
     short-summary: Manage Azure Active Directory groups.
 """
+helps['ad group member'] = """
+    type: group
+    short-summary: Manage Azure Active Directory group members.
+"""
 helps['ad sp'] = """
     type: group
     short-summary: Manage Azure Active Directory service principals for automation authentication.
