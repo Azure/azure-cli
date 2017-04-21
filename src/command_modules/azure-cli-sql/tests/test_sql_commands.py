@@ -59,7 +59,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer()
     def test_sql_server_mgmt(self, resource_group, resource_group_location):
-        servers = ['cliautomation51', 'cliautomation52']  # TODO: Server names should be randomized
+        servers = ['cliautomation53', 'cliautomation54']  # TODO: Server names should be randomized
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
@@ -109,6 +109,10 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', servers[0]),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('administratorLogin', user)])
+
+        self.cmd('sql server list-usages -g {} -n {}'
+                 .format(rg, servers[0]), 
+                 checks=[JMESPathCheck('[0].resourceName', servers[0])])
 
         # test delete sql server
         self.cmd('sql server delete -g {} --name {} --yes'
@@ -264,10 +268,9 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', rg)])
 
-        # # Usages will not be included in the first batch of GA commands
-        # self.cmd('sql db show-usage -g {} --server {} --name {}'
-        #          .format(rg, server, database_name), checks=[
-        #              JMESPathCheck('[0].resourceName', database_name)])
+        self.cmd('sql db list-usages -g {} --server {} --name {}'
+                 .format(rg, server, database_name), 
+                 checks=[JMESPathCheck('[0].resourceName', database_name)])
 
         self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --max-size {}'
                  ' --set tags.key1=value1'
