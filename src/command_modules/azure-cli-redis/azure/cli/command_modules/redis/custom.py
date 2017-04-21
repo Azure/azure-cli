@@ -43,6 +43,7 @@ def cli_redis_update_settings(client, resource_group_name, name, redis_configura
     return client.create_or_update(resource_group_name, name, parameters=update_params)
 
 def cli_redis_update(instance, sku=None, vm_size=None):
+    from azure.mgmt.redis.models import RedisCreateOrUpdateParameters
     if sku != None:
         instance.sku.name = sku
 
@@ -91,6 +92,7 @@ def cli_redis_create(client, resource_group_name, name, location, sku, # pylint:
     :param subnet_id: The full resource ID of a subnet in a virtual network to deploy the redis cache in. Example format /subscriptions/{subid}/resourceGroups/{resourceGroupName}/Microsoft.{Network|ClassicNetwork}/VirtualNetworks/vnet1/subnets/subnet1
     :param static_ip: Required when deploying a redis cache inside an existing Azure Virtual Network.
     """
+    from azure.mgmt.redis.models import RedisCreateOrUpdateParameters, Sku
     params = RedisCreateOrUpdateParameters(
         location,
         Sku(sku, vm_size[0], vm_size[1:]),
