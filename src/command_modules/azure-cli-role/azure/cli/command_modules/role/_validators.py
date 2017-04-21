@@ -4,17 +4,16 @@
 # --------------------------------------------------------------------------------------------
 
 import uuid
-
 from azure.cli.core.util import CLIError
-
 from ._client_factory import _graph_client_factory
+
+VARIANT_GROUP_ID_ARGS = ['object_id', 'group_id', 'group_object_id'] 
 
 def validate_group(namespace):
     # For AD auto-commands, here we resolve logic names to object ids needed by SDK methods
-    attr, value = next(((x, getattr(namespace, x, None)) for x in ['object_id', 'group_id',
-                                                                   'group_object_id']))
+    attr, value = next(((x, getattr(namespace, x)) for x in VARIANT_GROUP_ID_ARGS if hasattr(namespace, x)))
     try:
-        uuid.UUID(attr)
+        uuid.UUID(value)
     except ValueError:
         client = _graph_client_factory()
         sub_filters = []
@@ -28,3 +27,15 @@ def validate_group(namespace):
             raise CLIError("No group matches the name of '{}'".format(value))
         else:
             raise CLIError("More than one groups match the name of '{}'" + value)
+
+
+def validate_member_id(namespace):
+    from azure.cli.core._profile import Profile, CLOUD
+    try:
+        uuid.UUID(namespace.url)
+        profile = Profile()
+        _, _2, tenant_id = profile.get_login_credentials()
+        namespace.url = '{}{}/directoryObjects/{}'.format(CLOUD.endpoints.active_directory_graph_resource_id,
+                                                          tenant_id, namespace.url)
+    except ValueError:
+        pass  # let it go, invalid values will be caught by server anyway

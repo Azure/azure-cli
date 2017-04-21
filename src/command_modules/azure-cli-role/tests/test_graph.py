@@ -85,3 +85,57 @@ class ApplicationSetScenarioTest(VCRTestBase):
         # delete app
         self.cmd('ad app delete --id {}'.format(app_id_uri))
         self.cmd('ad app list --identifier-uri {}'.format(app_id_uri), checks=NoneCheck())
+
+
+class GraphGroupScenarioTest(VCRTestBase):
+    def __init__(self, test_method):
+        super(GraphGroupScenarioTest, self).__init__(__file__, test_method)
+        self.user1 = 'deleteme1'
+        self.user1 = 'deleteme2'
+
+    def test_graph_group_scenario(self):
+        self.execute()
+
+    def body(self):
+        upn = self.cmd('account show --query "user.name" -o tsv')
+        _, domain = upn.split('@', 1)
+        user1 = 'deleteme1'
+        user2 = 'deleteme2'
+        group = 'deleteme_g'
+        password = 'Test1234!!'
+        try:
+            # create user1
+            user1_result = self.cmd('ad user create --display-name {0} --password {1} --user-principal-name {0}@{2}'.format(user1, password, domain))
+            # create user2
+            user2_result = self.cmd('ad user create --display-name {0} --password {1} --user-principal-name {0}@{2}'.format(user2, password, domain))
+            # create group
+            group_result = self.cmd('ad group create --display-name {0} --mail-nickname {0}'.format(group))
+            # add user1 into group
+            self.cmd('ad group member add -g {} --member-id {}'.format(group, user1_result['objectId']))
+            # add user2 into group
+            self.cmd('ad group member add -g {} --member-id {}'.format(group, user2_result['objectId']))
+            # show group
+            self.cmd('ad group show -g ' + group)
+            self.cmd('ad group show -g ' + group_result['objectId'])
+            # list group
+            self.cmd('ad group list --display-name ' + group)
+            # show member groups 
+            self.cmd('ad group get-member-groups -g ' + group)
+            # check user1 memebership
+            self.cmd('ad group member check -g {} --member-id {}'.format(group, user1_result['objectId']))
+            # check user2 memebership
+            self.cmd('ad group member check -g {} --member-id {}'.format(group, user2_result['objectId']))
+            # list memebers
+            self.cmd('ad group member list -g ' + group)
+            # remove user1
+            self.cmd('ad group member remove -g {} --member-id {}'.format(group, user1_result['objectId']))
+            # check user1 memebership
+            self.cmd('ad group member check -g {} --member-id {}'.format(group, user1_result['objectId']))
+            # delete the group
+            self.cmd('ad group delete -g ' + group)
+            self.cmd('ad group list')
+        except:
+            self.cmd('ad user delete --upn-or-object-id ' + user1_result['objectId'])
+            self.cmd('ad user delete --upn-or-object-id ' + user2_result['objectId'])
+        
+        pass

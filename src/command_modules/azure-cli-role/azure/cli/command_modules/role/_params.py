@@ -8,7 +8,7 @@ from azure.cli.core.commands import CliArgumentType
 from azure.cli.core.commands import register_cli_argument
 from azure.cli.core.commands.parameters import enum_choice_list
 from .custom import get_role_definition_name_completion_list
-from ._validators import validate_group
+from ._validators import validate_group, validate_member_id, VARIANT_GROUP_ID_ARGS
 
 register_cli_argument('ad app', 'application_object_id', options_list=('--object-id',))
 register_cli_argument('ad app', 'display_name', help='the display name of the application')
@@ -49,9 +49,13 @@ register_cli_argument('ad user', 'mail_nickname', help='mail alias. Defaults to 
 register_cli_argument('ad user', 'force_change_password_next_login', action='store_true')
 
 group_help_msg = "group's object id or display name(prefix also works if there is a unique match)"
-register_cli_argument('ad group', 'group_id', options_list=('--group', '-g'), validator=validate_group, help=group_help_msg)
-register_cli_argument('ad group', 'object_id', options_list=('--group', '-g'), validator=validate_group, help=group_help_msg)
-register_cli_argument('ad group', 'group_object_id', options_list=('--group', '-g'), validator=validate_group, help=group_help_msg)
+for arg in VARIANT_GROUP_ID_ARGS:
+    register_cli_argument('ad group', arg, options_list=('--group', '-g'), validator=validate_group, help=group_help_msg)
+
+register_cli_argument('ad group get-member-groups', 'security_enabled_only', action='store_true', default=False, required=False)
+member_id_help_msg = 'The object ID of the contact, group, user, or service principal'
+register_cli_argument('ad group member add', 'url', options_list='--member-id', validator=validate_member_id, help=member_id_help_msg)
+register_cli_argument('ad group member', 'member_object_id', options_list='--member-id', help=member_id_help_msg)
 
 register_cli_argument('role', 'scope', help='scope at which the role assignment or definition applies to, e.g., /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333, /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, or /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM')
 register_cli_argument('role assignment', 'role_assignment_name', options_list=('--name', '-n'))
