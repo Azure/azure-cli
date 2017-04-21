@@ -82,7 +82,13 @@ class AbstractPreparer(object):
 class SingleValueReplacer(RecordingProcessor):
     # pylint: disable=no-member
     def process_request(self, request):
-        request.uri = request.uri.replace(self.random_name, self.moniker)
+        from six.moves.urllib_parse import quote_plus
+        if self.random_name in request.uri:
+            request.uri = request.uri.replace(self.random_name, self.moniker)
+        elif quote_plus(self.random_name) in request.uri:
+            request.uri = request.uri.replace(quote_plus(self.random_name),
+                                              quote_plus(self.moniker))
+
         if request.body:
             body = str(request.body)
             if self.random_name in body:
@@ -108,8 +114,9 @@ class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
                  parameter_name='resource_group',
                  parameter_name_for_location='resource_group_location', location='westus',
                  dev_setting_name='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME',
-                 dev_setting_location='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_LOCATION'):
-        super(ResourceGroupPreparer, self).__init__(name_prefix, 75)
+                 dev_setting_location='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_LOCATION',
+                 random_name_length=75):
+        super(ResourceGroupPreparer, self).__init__(name_prefix, random_name_length)
         self.location = location
         self.parameter_name = parameter_name
         self.parameter_name_for_location = parameter_name_for_location
@@ -169,6 +176,27 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
                        'decorator @{} in front of this storage account preparer.'
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
+
+
+# Role based access control service principal preparer
+
+class RoleBasedServicePrincipalPreparer(AbstractPreparer, SingleValueReplacer):
+    def __init__(self, name_prefix='http://clitest', skip_assignment=True, parameter_name='sp_name',
+                 parameter_password='sp_password'):
+        super(RoleBasedServicePrincipalPreparer, self).__init__(name_prefix, 24)
+        self.skip_assignment = skip_assignment
+        self.result = {}
+        self.parameter_name = parameter_name
+        self.parameter_password = parameter_password
+
+    def create_resource(self, name, **kwargs):
+        command = 'az ad sp create-for-rbac -n {}{}'.format(
+            name, ' --skip-assignment' if self.skip_assignment else '')
+        self.result = execute(command).get_output_in_json()
+        return {self.parameter_name: name, self.parameter_password: self.result['password']}
+
+    def remove_resource(self, name, **kwargs):
+        execute('az ad sp delete --id {}'.format(self.result['appId']))
 
 
 # Utility

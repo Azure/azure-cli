@@ -1,0 +1,1046 @@
+interactions:
+- request:
+    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group create]
+      Connection: [keep-alive]
+      Content-Length: ['50']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001?api-version=2016-09-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001","name":"clitest000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['238']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 21 Apr 2017 16:39:29 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ad sp create-for-rbac]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?api-version=1.6&$filter=servicePrincipalNames%2Fany%28x%3Ax%20eq%20%27http%3A%2F%2Fclitest000002%27%29
+  response:
+    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal","value":[]}'}
+    headers:
+      access-control-allow-origin: ['*']
+      cache-control: [no-cache]
+      content-length: ['166']
+      content-type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 21 Apr 2017 16:39:31 GMT']
+      duration: ['617004']
+      expires: ['-1']
+      ocp-aad-diagnostics-server-name: [3REN8PcGue/e5AWb8nD4jShqtmG1vL1Ow9Ix2s+7fkQ=]
+      ocp-aad-session-key: [lHOnwKbxDCMcfIcCTls_TjX1p-tHqO5inhxBbF9iQr7IAtD_6V6cQmxVYmbQ2v0c9sm-WkMzI-oE7Q8QJfz8yyJ96bE5yr6Bknt14vwNzqyRwkIqpB8O9XIilDZmvEmX19e9_YhNybVOHHE4umsxx-tlt4LeyxA4D18QCZqi0BGQntfinmVTqbdzMdOHiQ7ROOKWBAgSH4jsVg2Q-XN5tA.MkriCLJiOfBvsPDWACo22cQehBRVvk13BuSWsJIyhBM]
+      pragma: [no-cache]
+      request-id: [8e356af7-4f88-4f0b-addc-a62c21c8664c]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-dirapi-data-contract-version: ['1.6']
+      x-powered-by: [ASP.NET, ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: 'b''{"availableToOtherTenants": false, "passwordCredentials": [{"startDate":
+      "2017-04-21T16:39:31.14551Z", "keyId": "6557de8a-7772-4cdd-a1da-b0adbe5166b8",
+      "endDate": "2018-04-21T16:39:31.14551Z", "value": "9c469072-431e-4495-85ff-f2a919775c20"}],
+      "displayName": "azure-cli-2017-04-21-16-39-31", "homepage": "http://azure-cli-2017-04-21-16-39-31",
+      "identifierUris": ["http://clitest000002"]}'''
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ad sp create-for-rbac]
+      Connection: [keep-alive]
+      Content-Length: ['391']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: POST
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/applications?api-version=1.6
+  response:
+    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/Microsoft.DirectoryServices.Application/@Element","odata.type":"Microsoft.DirectoryServices.Application","objectType":"Application","objectId":"e19e1bf2-dfef-4c46-b5b2-c32374f383fe","deletionTimestamp":null,"addIns":[],"appId":"d7541fd9-743e-454a-8602-ccb1eefe59e0","appRoles":[],"availableToOtherTenants":false,"displayName":"azure-cli-2017-04-21-16-39-31","errorUrl":null,"groupMembershipClaims":null,"homepage":"http://azure-cli-2017-04-21-16-39-31","identifierUris":["http://clitest000002"],"keyCredentials":[],"knownClientApplications":[],"logoutUrl":null,"oauth2AllowImplicitFlow":false,"oauth2AllowUrlPathMatching":false,"oauth2Permissions":[{"adminConsentDescription":"Allow
+        the application to access azure-cli-2017-04-21-16-39-31 on behalf of the signed-in
+        user.","adminConsentDisplayName":"Access azure-cli-2017-04-21-16-39-31","id":"ae27bde7-49ce-4e65-9a1f-756d3e4d7f0a","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        the application to access azure-cli-2017-04-21-16-39-31 on your behalf.","userConsentDisplayName":"Access
+        azure-cli-2017-04-21-16-39-31","value":"user_impersonation"}],"oauth2RequirePostResponse":false,"optionalClaims":null,"passwordCredentials":[{"customKeyIdentifier":null,"endDate":"2018-04-21T16:39:31.14551Z","keyId":"6557de8a-7772-4cdd-a1da-b0adbe5166b8","startDate":"2017-04-21T16:39:31.14551Z","value":null}],"publicClient":null,"recordConsentConditions":null,"replyUrls":[],"requiredResourceAccess":[],"samlMetadataUrl":null}'}
+    headers:
+      access-control-allow-origin: ['*']
+      cache-control: [no-cache]
+      content-length: ['1592']
+      content-type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 21 Apr 2017 16:39:31 GMT']
+      duration: ['10242716']
+      expires: ['-1']
+      location: ['https://graph.windows.net/00000000-0000-0000-0000-000000000000/directoryObjects/e19e1bf2-dfef-4c46-b5b2-c32374f383fe/Microsoft.DirectoryServices.Application']
+      ocp-aad-diagnostics-server-name: [ORhHSxoP7gbeVycmhEV/VfewNBXh57nO/a7ftbjT4DE=]
+      ocp-aad-session-key: [mnkVLc7WAPGY9zqm_PU3sETiowcnNqtVddO6IX0quvbO3dnXFdTjTiF0BfQn23ISxnOnhU8us0cWd4wNAQO1zWqHPB9NVut_muSksmpNi8RLHI4qFEkaRfh0MIo6X_013zMDfSiLoVIr44WNVMWWRpoWrkTaupiIo8mtheztFJZzUiNjwAP3vbbIOLZ7b06Ld7jiVs00Zq6V815NZlpWyw.aZkeaH0rfh_6NHlx2CADeW28LonCMdrJD9I9lunGvtc]
+      pragma: [no-cache]
+      request-id: [0312e3ba-917b-4dbe-a0ce-2ca8896f9c6d]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-dirapi-data-contract-version: ['1.6']
+      x-powered-by: [ASP.NET, ASP.NET]
+    status: {code: 201, message: Created}
+- request:
+    body: '{"appId": "d7541fd9-743e-454a-8602-ccb1eefe59e0", "accountEnabled": true}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ad sp create-for-rbac]
+      Connection: [keep-alive]
+      Content-Length: ['73']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: POST
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?api-version=1.6
+  response:
+    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal/@Element","odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"6cda40c3-1fa6-47b8-af42-4162fee42fe3","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"azure-cli-2017-04-21-16-39-31","appId":"d7541fd9-743e-454a-8602-ccb1eefe59e0","appOwnerTenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"azure-cli-2017-04-21-16-39-31","errorUrl":null,"homepage":"http://azure-cli-2017-04-21-16-39-31","keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
+        the application to access azure-cli-2017-04-21-16-39-31 on behalf of the signed-in
+        user.","adminConsentDisplayName":"Access azure-cli-2017-04-21-16-39-31","id":"ae27bde7-49ce-4e65-9a1f-756d3e4d7f0a","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        the application to access azure-cli-2017-04-21-16-39-31 on your behalf.","userConsentDisplayName":"Access
+        azure-cli-2017-04-21-16-39-31","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"Microsoft","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["d7541fd9-743e-454a-8602-ccb1eefe59e0","http://clitest000002"],"servicePrincipalType":"Application","tags":[]}'}
+    headers:
+      access-control-allow-origin: ['*']
+      cache-control: [no-cache]
+      content-length: ['1495']
+      content-type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 21 Apr 2017 16:39:32 GMT']
+      duration: ['3469047']
+      expires: ['-1']
+      location: ['https://graph.windows.net/00000000-0000-0000-0000-000000000000/directoryObjects/6cda40c3-1fa6-47b8-af42-4162fee42fe3/Microsoft.DirectoryServices.ServicePrincipal']
+      ocp-aad-diagnostics-server-name: [Km1ubV4XVihTTZ0FrEpSoQSdIyTJOWSdg4kF/k2AVzc=]
+      ocp-aad-session-key: [be6Yf_XiaePYA3-ficE8G5VIO5aAm5nplduWo2AjwKm4qf5ILe-7cGXobTCjCurPqOjdvXq3cqd4_V5OGe1hrZx4mm3SFY3ukaAqQIN81CsQ59edmYv8D0QvBE0HLfKQowcqbgSHctzxXNa4id5DJHG6DOLeEbTGFXoNhsNnUtrdK9xqICbNA-30g_BVzSzUivkdoYXdveZceI-FeswiNA.sz0AOLR10uKuzj4WPZN6snWZTcO1XpogZGWhOnfMfHc]
+      pragma: [no-cache]
+      request-id: [dce740ff-2f87-444b-872c-6c27c1dd3725]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-dirapi-data-contract-version: ['1.6']
+      x-powered-by: [ASP.NET, ASP.NET]
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acs create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network?api-version=2016-09-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network","namespace":"Microsoft.Network","authorization":{"applicationId":"2cf9eb86-36b5-49dc-86ae-9a63135dfa8c","roleDefinitionId":"13ba9ab4-19f0-4804-adc4-14ece36cc7a1"},"resourceTypes":[{"resourceType":"virtualNetworks","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South"],"apiVersions":["2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"publicIPAddresses","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South"],"apiVersions":["2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"networkInterfaces","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South"],"apiVersions":["2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"loadBalancers","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South"],"apiVersions":["2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"networkSecurityGroups","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South"],"apiVersions":["2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"routeTables","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South"],"apiVersions":["2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"networkWatchers","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South"],"apiVersions":["2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"virtualNetworkGateways","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South"],"apiVersions":["2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"localNetworkGateways","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South"],"apiVersions":["2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"connections","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South"],"apiVersions":["2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"applicationGateways","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South"],"apiVersions":["2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"capabilities":"None"},{"resourceType":"locations","locations":[],"apiVersions":["2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"]},{"resourceType":"locations/operations","locations":[],"apiVersions":["2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"]},{"resourceType":"locations/operationResults","locations":[],"apiVersions":["2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"]},{"resourceType":"locations/CheckDnsNameAvailability","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South"],"apiVersions":["2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"]},{"resourceType":"locations/usages","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South"],"apiVersions":["2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"]},{"resourceType":"dnszones","locations":["global"],"apiVersions":["2016-04-01","2015-05-04-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"dnsOperationResults","locations":["global"],"apiVersions":["2016-04-01"]},{"resourceType":"dnsOperationStatuses","locations":["global"],"apiVersions":["2016-04-01"]},{"resourceType":"dnszones/A","locations":["global"],"apiVersions":["2016-04-01","2015-05-04-preview"]},{"resourceType":"dnszones/AAAA","locations":["global"],"apiVersions":["2016-04-01","2015-05-04-preview"]},{"resourceType":"dnszones/CNAME","locations":["global"],"apiVersions":["2016-04-01","2015-05-04-preview"]},{"resourceType":"dnszones/PTR","locations":["global"],"apiVersions":["2016-04-01","2015-05-04-preview"]},{"resourceType":"dnszones/MX","locations":["global"],"apiVersions":["2016-04-01","2015-05-04-preview"]},{"resourceType":"dnszones/TXT","locations":["global"],"apiVersions":["2016-04-01","2015-05-04-preview"]},{"resourceType":"dnszones/SRV","locations":["global"],"apiVersions":["2016-04-01","2015-05-04-preview"]},{"resourceType":"trafficmanagerprofiles","locations":["global"],"apiVersions":["2017-03-01","2015-11-01","2015-04-28-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"checkTrafficManagerNameAvailability","locations":["global"],"apiVersions":["2017-03-01","2015-11-01","2015-04-28-preview"]},{"resourceType":"trafficManagerGeographicHierarchies","locations":["global"],"apiVersions":["2017-03-01"]},{"resourceType":"expressRouteCircuits","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South"],"apiVersions":["2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"capabilities":"None"},{"resourceType":"expressRouteServiceProviders","locations":[],"apiVersions":["2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"]},{"resourceType":"applicationGatewayAvailableWafRuleSets","locations":[],"apiVersions":["2017-04-01","2017-03-01"]},{"resourceType":"routeFilters","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South"],"apiVersions":["2017-04-01","2017-03-01","2016-12-01"],"capabilities":"None"},{"resourceType":"bgpServiceCommunities","locations":[],"apiVersions":["2017-04-01","2017-03-01","2016-12-01"]}],"registrationState":"Registered"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['13437']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 21 Apr 2017 16:39:32 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acs create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute?api-version=2016-09-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute","namespace":"Microsoft.Compute","authorization":{"applicationId":"60e6cd67-9c8c-4951-9b3c-23c25a2169af","roleDefinitionId":"e4770acb-272e-4dc8-87f3-12f44a612224"},"resourceTypes":[{"resourceType":"availabilitySets","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Brazil South","South India","Central India","West
+        India","Canada Central","Canada East","West US 2","West Central US","UK South","UK
+        West","Korea Central","Korea South"],"apiVersions":["2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"virtualMachines","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Brazil South","South India","Central India","West
+        India","Canada Central","Canada East","West US 2","West Central US","UK South","UK
+        West","Korea Central","Korea South"],"apiVersions":["2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"virtualMachines/extensions","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Brazil South","South India","Central India","West
+        India","Canada Central","Canada East","West US 2","West Central US","UK South","UK
+        West","Korea Central","Korea South"],"apiVersions":["2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"virtualMachineScaleSets","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Brazil South","South India","Central India","West
+        India","Canada Central","Canada East","West US 2","West Central US","UK South","UK
+        West","Korea Central","Korea South"],"apiVersions":["2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"virtualMachineScaleSets/extensions","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Brazil South","South India","Central India","West
+        India","Canada Central","Canada East","West US 2","West Central US","UK South","UK
+        West","Korea Central","Korea South"],"apiVersions":["2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"]},{"resourceType":"virtualMachineScaleSets/virtualMachines","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Brazil South","South India","Central India","West
+        India","Canada Central","Canada East","West US 2","West Central US","UK South","UK
+        West","Korea Central","Korea South"],"apiVersions":["2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"]},{"resourceType":"virtualMachineScaleSets/networkInterfaces","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Brazil South","South India","Central India","West
+        India","Canada Central","Canada East","West US 2","West Central US","UK South","UK
+        West","Korea Central","Korea South"],"apiVersions":["2017-03-30","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"]},{"resourceType":"virtualMachineScaleSets/virtualMachines/networkInterfaces","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Brazil South","South India","Central India","West
+        India","Canada Central","Canada East","West US 2","West Central US","UK South","UK
+        West","Korea Central","Korea South"],"apiVersions":["2017-03-30","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"]},{"resourceType":"virtualMachineScaleSets/publicIPAddresses","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Brazil South","South India","Central India","West
+        India","Canada Central","Canada East","West US 2","West Central US","UK South","UK
+        West","Korea Central","Korea South"],"apiVersions":["2017-03-30"]},{"resourceType":"locations","locations":[],"apiVersions":["2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"]},{"resourceType":"locations/operations","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Brazil South","South India","Central India","West
+        India","Canada Central","Canada East","West US 2","West Central US","UK South","UK
+        West","Korea Central","Korea South"],"apiVersions":["2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"]},{"resourceType":"locations/vmSizes","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Brazil South","South India","Central India","West
+        India","Canada Central","Canada East","West US 2","West Central US","UK South","UK
+        West","Korea Central","Korea South"],"apiVersions":["2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"]},{"resourceType":"locations/runCommands","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Brazil South","South India","Central India","West
+        India","Canada Central","Canada East","West US 2","West Central US","UK South","UK
+        West","Korea Central","Korea South"],"apiVersions":["2017-03-30"]},{"resourceType":"locations/usages","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Brazil South","South India","Central India","West
+        India","Canada Central","Canada East","West US 2","West Central US","UK South","UK
+        West","Korea Central","Korea South"],"apiVersions":["2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"]},{"resourceType":"locations/virtualMachines","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Brazil South","South India","Central India","West
+        India","Canada Central","Canada East","West US 2","West Central US","UK South","UK
+        West","Korea Central","Korea South"],"apiVersions":["2017-03-30","2016-08-30"]},{"resourceType":"locations/publishers","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Brazil South","South India","Central India","West
+        India","Canada Central","Canada East","West US 2","West Central US","UK South","UK
+        West","Korea Central","Korea South"],"apiVersions":["2017-03-30","2016-08-30","2016-04-30-preview","2016-03-30","2015-06-15","2015-05-01-preview"]},{"resourceType":"operations","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Brazil South","South India","Central India","West
+        India","Canada Central","Canada East","West US 2","West Central US","UK South","UK
+        West","Korea Central","Korea South"],"apiVersions":["2017-03-30","2016-08-30","2016-03-30","2015-06-15","2015-05-01-preview"]},{"resourceType":"disks","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India"],"apiVersions":["2017-03-30","2016-04-30-preview"],"capabilities":"None"},{"resourceType":"snapshots","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India"],"apiVersions":["2017-03-30","2016-04-30-preview"],"capabilities":"None"},{"resourceType":"locations/diskoperations","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India"],"apiVersions":["2017-03-30","2016-04-30-preview"]},{"resourceType":"images","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India"],"apiVersions":["2017-03-30","2016-04-30-preview"],"capabilities":"None"},{"resourceType":"restorePointCollections","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India"],"apiVersions":["2017-03-30"],"capabilities":"None"},{"resourceType":"restorePointCollections/restorePoints","locations":["Southeast
+        Asia","East US 2","Central US","West Europe","East US","North Central US","South
+        Central US","West US","North Europe","East Asia","Brazil South","West US 2","West
+        Central US","UK West","UK South","Japan East","Japan West","Canada Central","Canada
+        East","Central India","South India","Australia East","Australia Southeast","Korea
+        Central","Korea South","West India"],"apiVersions":["2017-03-30"]},{"resourceType":"virtualMachines/diagnosticSettings","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Brazil South","South India","Central India","West
+        India","Canada Central","Canada East","West US 2","West Central US","UK South","UK
+        West","Korea Central","Korea South"],"apiVersions":["2014-04-01"]},{"resourceType":"virtualMachines/metricDefinitions","locations":["East
+        US","East US 2","West US","Central US","North Central US","South Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","Brazil South","South India","Central India","West
+        India","Canada Central","Canada East","West US 2","West Central US","UK South","UK
+        West","Korea Central","Korea South"],"apiVersions":["2014-04-01"]}],"registrationState":"Registered"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['13259']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 21 Apr 2017 16:39:32 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acs create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage?api-version=2016-09-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage","namespace":"Microsoft.Storage","authorization":{"applicationId":"a6aa9161-5291-40bb-8c5c-923b567bee3b","roleDefinitionId":"070ab87f-0efc-4423-b18b-756f3bdb0236"},"resourceTypes":[{"resourceType":"storageAccounts","locations":["East
+        US","East US 2","East US 2 (Stage)","West US","West Europe","East Asia","Southeast
+        Asia","Japan East","Japan West","North Central US","South Central US","Central
+        US","North Europe","Brazil South","Australia East","Australia Southeast","South
+        India","Central India","West India","Canada East","Canada Central","West US
+        2","West Central US","UK South","UK West","Korea Central","Korea South"],"apiVersions":["2017-06-01","2016-12-01","2016-05-01","2016-01-01","2015-06-15","2015-05-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"operations","locations":[],"apiVersions":["2017-06-01","2016-12-01","2016-05-01","2016-01-01","2015-06-15","2015-05-01-preview"]},{"resourceType":"storageAccounts/listAccountSas","locations":[],"apiVersions":["2017-06-01","2016-12-01","2016-05-01"]},{"resourceType":"storageAccounts/listServiceSas","locations":[],"apiVersions":["2017-06-01","2016-12-01","2016-05-01"]},{"resourceType":"locations","locations":[],"apiVersions":["2017-06-01","2016-12-01","2016-07-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":[],"apiVersions":["2017-06-01","2016-12-01","2016-07-01"]},{"resourceType":"usages","locations":[],"apiVersions":["2017-06-01","2016-12-01","2016-05-01","2016-01-01","2015-06-15","2015-05-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2017-06-01","2016-12-01","2016-05-01","2016-01-01","2015-06-15","2015-05-01-preview"]},{"resourceType":"storageAccounts/services","locations":["East
+        US","West US","East US 2 (Stage)","West Europe","North Europe","East Asia","Southeast
+        Asia","Japan East","Japan West","North Central US","South Central US","East
+        US 2","Central US","Australia East","Australia Southeast","Brazil South","South
+        India","Central India","West India","Canada East","Canada Central","West US
+        2","West Central US","UK South","UK West","Korea Central","Korea South"],"apiVersions":["2014-04-01"]},{"resourceType":"storageAccounts/services/metricDefinitions","locations":["East
+        US","West US","East US 2 (Stage)","West Europe","North Europe","East Asia","Southeast
+        Asia","Japan East","Japan West","North Central US","South Central US","East
+        US 2","Central US","Australia East","Australia Southeast","Brazil South","South
+        India","Central India","West India","Canada East","Canada Central","West US
+        2","West Central US","UK South","UK West","Korea Central","Korea South"],"apiVersions":["2014-04-01"]}],"registrationState":"Registered"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['2860']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 21 Apr 2017 16:39:32 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acs create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001?api-version=2016-09-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001","name":"clitest000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['238']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 21 Apr 2017 16:39:33 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acs create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?api-version=1.6&$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%27http%3A%2F%2Fclitest000002%27%29
+  response:
+    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"6cda40c3-1fa6-47b8-af42-4162fee42fe3","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"azure-cli-2017-04-21-16-39-31","appId":"d7541fd9-743e-454a-8602-ccb1eefe59e0","appOwnerTenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"azure-cli-2017-04-21-16-39-31","errorUrl":null,"homepage":"http://azure-cli-2017-04-21-16-39-31","keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
+        the application to access azure-cli-2017-04-21-16-39-31 on behalf of the signed-in
+        user.","adminConsentDisplayName":"Access azure-cli-2017-04-21-16-39-31","id":"ae27bde7-49ce-4e65-9a1f-756d3e4d7f0a","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        the application to access azure-cli-2017-04-21-16-39-31 on your behalf.","userConsentDisplayName":"Access
+        azure-cli-2017-04-21-16-39-31","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"Microsoft","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["http://clitest000002","d7541fd9-743e-454a-8602-ccb1eefe59e0"],"servicePrincipalType":"Application","tags":[]}]}'}
+    headers:
+      access-control-allow-origin: ['*']
+      cache-control: [no-cache]
+      content-length: ['1498']
+      content-type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 21 Apr 2017 16:39:34 GMT']
+      duration: ['659868']
+      expires: ['-1']
+      ocp-aad-diagnostics-server-name: [ZDyrwS0Q0fNOakB51YqI1QigVQdgE6YA2KB+kie4Tvc=]
+      ocp-aad-session-key: [5rz6laBNwEEWT1dxP3R32NNQxisdMYm6vNn34EvAtvrLpy-r9Fzpb1V6HDMtWA-S7LASFTW3rEsN0YLnGYGSVvRFFpGFWUf2zKOcXp-33gS_2eKndWimxyUJZ0hE-id5KVZ-19V4B52ecAtSS00ZaCSR70_8temhvIFtaYxB8Mln8QBPOO7l11SyrbIK9olDa__7e84-exhMlRp1uza5Wg.QIUIrFO5JvQwCZpo4T4BeMfjuJ3alxxyoCimawFnwmI]
+      pragma: [no-cache]
+      request-id: [c004c19c-1d1c-4a63-8a2c-e97e141e27b2]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-dirapi-data-contract-version: ['1.6']
+      x-powered-by: [ASP.NET, ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acs create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals/6cda40c3-1fa6-47b8-af42-4162fee42fe3?api-version=1.6
+  response:
+    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal/@Element","odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"6cda40c3-1fa6-47b8-af42-4162fee42fe3","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"azure-cli-2017-04-21-16-39-31","appId":"d7541fd9-743e-454a-8602-ccb1eefe59e0","appOwnerTenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"azure-cli-2017-04-21-16-39-31","errorUrl":null,"homepage":"http://azure-cli-2017-04-21-16-39-31","keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
+        the application to access azure-cli-2017-04-21-16-39-31 on behalf of the signed-in
+        user.","adminConsentDisplayName":"Access azure-cli-2017-04-21-16-39-31","id":"ae27bde7-49ce-4e65-9a1f-756d3e4d7f0a","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        the application to access azure-cli-2017-04-21-16-39-31 on your behalf.","userConsentDisplayName":"Access
+        azure-cli-2017-04-21-16-39-31","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"Microsoft","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["http://clitest000002","d7541fd9-743e-454a-8602-ccb1eefe59e0"],"servicePrincipalType":"Application","tags":[]}'}
+    headers:
+      access-control-allow-origin: ['*']
+      cache-control: [no-cache]
+      content-length: ['1495']
+      content-type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 21 Apr 2017 16:39:33 GMT']
+      duration: ['935972']
+      expires: ['-1']
+      ocp-aad-diagnostics-server-name: [6rYfSx5eihZ9Q2i6FKQXKKC19x05KAqAuf33k4227ww=]
+      ocp-aad-session-key: [vq2ZmAts3JYb2NzTTWw94eB9dUHT3WUluoaMllxjxrGjjVXyyer4tG6NjfV0mALBdNooQzSW2AUoksn_c1q0jyOF7Uc-6Mvp86DxncFlg9E4g0eET2kaCNjeeiS4_gU1AFlb0RoWeVqDX8a0w_mUNKxkW1sQMPKBxQ6XKFFLh8j6CNIVZR3K5EwA9ks3kpLXbyqb5XMGnWSjZeMmZESOSA.62nGADzzZzWdMqiISfHoQo3s7BWpF8jRkfVhn7Y3Sw0]
+      pragma: [no-cache]
+      request-id: [ec5be986-b421-4aaf-b700-5157edb7bce2]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-dirapi-data-contract-version: ['1.6']
+      x-powered-by: [ASP.NET, ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: 'b''b\''b\\\''{"properties": {"mode": "Incremental", "template": {"$schema":
+      "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "resources": [{"apiVersion": "2017-01-31", "type": "Microsoft.ContainerService/containerServices",
+      "location": "[resourceGroup().location]", "name": "cliacstest000003", "properties":
+      {"servicePrincipalProfile": {"Secret": "[parameters(\\\\\\\''clientSecret\\\\\\\'')]",
+      "ClientId": "http://clitest000002"}, "linuxProfile": {"ssh": {"publicKeys":
+      [{"keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==
+      test@example.com\\\\\\\\n"}]}, "adminUsername": "azureuser"}, "windowsProfile":
+      null, "agentPoolProfiles": [{"count": "3", "osType": "Linux", "dnsPrefix": "cliacstest000003-clitest000001-00977c-k8s-agents",
+      "name": "agentpools", "vmSize": "Standard_D2_v2"}], "orchestratorProfile": {"orchestratorType":
+      "kubernetes"}, "masterProfile": {"count": "1", "dnsPrefix": "cliacstest000003-clitest000001-00977c"}}}],
+      "parameters": {"clientSecret": {"metadata": {"description": "The client secret
+      for the service principal"}, "type": "secureString"}}, "contentVersion": "1.0.0.0"},
+      "parameters": {"clientSecret": {"value": "9c469072-431e-4495-85ff-f2a919775c20"}}}}\\\''\'''''
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acs create]
+      Connection: [keep-alive]
+      Content-Length: ['1901']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2016-09-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Resources/deployments/azurecli1492792772.91507242260","name":"azurecli1492792772.91507242260","properties":{"templateHash":"6926870589428756398","parameters":{"clientSecret":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-04-21T16:39:36.1230953Z","duration":"PT0.5711261S","correlationId":"41a5cf86-04e0-4c74-a7f2-7eafefe115d7","providers":[{"namespace":"Microsoft.ContainerService","resourceTypes":[{"resourceType":"containerServices","locations":["westus"]}]}],"dependencies":[]}}'}
+    headers:
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.Resources/deployments/azurecli1492792772.91507242260/operationStatuses/08587088141099256522?api-version=2016-09-01']
+      cache-control: [no-cache]
+      content-length: ['654']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 21 Apr 2017 16:39:36 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acs create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587088141099256522?api-version=2016-09-01
+  response:
+    body: {string: '{"status":"Running"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['20']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 21 Apr 2017 16:40:05 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acs create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587088141099256522?api-version=2016-09-01
+  response:
+    body: {string: '{"status":"Running"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['20']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 21 Apr 2017 16:40:36 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acs create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587088141099256522?api-version=2016-09-01
+  response:
+    body: {string: '{"status":"Running"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['20']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 21 Apr 2017 16:41:07 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acs create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587088141099256522?api-version=2016-09-01
+  response:
+    body: {string: '{"status":"Running"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['20']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 21 Apr 2017 16:41:37 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acs create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587088141099256522?api-version=2016-09-01
+  response:
+    body: {string: '{"status":"Running"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['20']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 21 Apr 2017 16:42:07 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acs create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587088141099256522?api-version=2016-09-01
+  response:
+    body: {string: '{"status":"Running"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['20']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 21 Apr 2017 16:42:38 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acs create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587088141099256522?api-version=2016-09-01
+  response:
+    body: {string: '{"status":"Running"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['20']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 21 Apr 2017 16:43:09 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acs create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587088141099256522?api-version=2016-09-01
+  response:
+    body: {string: '{"status":"Running"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['20']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 21 Apr 2017 16:43:39 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acs create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587088141099256522?api-version=2016-09-01
+  response:
+    body: {string: '{"status":"Running"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['20']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 21 Apr 2017 16:44:09 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acs create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587088141099256522?api-version=2016-09-01
+  response:
+    body: {string: '{"status":"Running"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['20']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 21 Apr 2017 16:44:40 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acs create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587088141099256522?api-version=2016-09-01
+  response:
+    body: {string: '{"status":"Running"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['20']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 21 Apr 2017 16:45:10 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acs create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587088141099256522?api-version=2016-09-01
+  response:
+    body: {string: '{"status":"Succeeded"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['22']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 21 Apr 2017 16:45:41 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acs create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2016-09-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Resources/deployments/azurecli1492792772.91507242260","name":"azurecli1492792772.91507242260","properties":{"templateHash":"6926870589428756398","parameters":{"clientSecret":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-04-21T16:45:12.0273216Z","duration":"PT5M36.4753524S","correlationId":"41a5cf86-04e0-4c74-a7f2-7eafefe115d7","providers":[{"namespace":"Microsoft.ContainerService","resourceTypes":[{"resourceType":"containerServices","locations":["westus"]}]}],"dependencies":[],"outputResources":[{"id":"Microsoft.ContainerService/containerServices/cliacstest000003"}]}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['749']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 21 Apr 2017 16:45:41 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ad sp delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?api-version=1.6&$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%27d7541fd9-743e-454a-8602-ccb1eefe59e0%27%29
+  response:
+    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"6cda40c3-1fa6-47b8-af42-4162fee42fe3","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"azure-cli-2017-04-21-16-39-31","appId":"d7541fd9-743e-454a-8602-ccb1eefe59e0","appOwnerTenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"azure-cli-2017-04-21-16-39-31","errorUrl":null,"homepage":"http://azure-cli-2017-04-21-16-39-31","keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
+        the application to access azure-cli-2017-04-21-16-39-31 on behalf of the signed-in
+        user.","adminConsentDisplayName":"Access azure-cli-2017-04-21-16-39-31","id":"ae27bde7-49ce-4e65-9a1f-756d3e4d7f0a","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        the application to access azure-cli-2017-04-21-16-39-31 on your behalf.","userConsentDisplayName":"Access
+        azure-cli-2017-04-21-16-39-31","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"Microsoft","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["http://clitest000002","d7541fd9-743e-454a-8602-ccb1eefe59e0"],"servicePrincipalType":"Application","tags":[]}]}'}
+    headers:
+      access-control-allow-origin: ['*']
+      cache-control: [no-cache]
+      content-length: ['1498']
+      content-type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Fri, 21 Apr 2017 16:45:42 GMT']
+      duration: ['1020402']
+      expires: ['-1']
+      ocp-aad-diagnostics-server-name: [wd9qgL5hBVnIjnQRmkpF60hSnwJExV+15mdxUQC0XRQ=]
+      ocp-aad-session-key: [XXk0T3cvXqnT5H-gdxO04NvFRxW7c6rDqWncx6h-lVqPDWzbHsVnoxfQGwRW-_AO7kUPPmPm3sy4fbYgXRUgAwupNWYRwnA8O36vgP_fm5_u6bHPn1VXPsPhcATW3jR0_1jv5hqeaCUtm_-CzcWTd_0g7cvvF-3XoHtr5LkYpSwf_GfZRKks9oAHOIVpkVgY8VvFMdpHb1molAe2B69TGw.oMgcWVUIy9gvBOqNQZfyjF-S_ebWcNu33rZTbNx4TNI]
+      pragma: [no-cache]
+      request-id: [970e2352-6cc1-4295-8b42-d57b89455da6]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-dirapi-data-contract-version: ['1.6']
+      x-powered-by: [ASP.NET, ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ad sp delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 graphrbacmanagementclient/0.30.0rc6 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals/6cda40c3-1fa6-47b8-af42-4162fee42fe3?api-version=1.6
+  response:
+    body: {string: ''}
+    headers:
+      access-control-allow-origin: ['*']
+      cache-control: [no-cache]
+      dataserviceversion: [1.0;]
+      date: ['Fri, 21 Apr 2017 16:45:43 GMT']
+      duration: ['2602996']
+      expires: ['-1']
+      ocp-aad-diagnostics-server-name: [DJl/5bFSkj1cqgm9u7PtSoh9YAGkLAPecUruXCQn6TE=]
+      ocp-aad-session-key: [QJ7nG4y3okj5fGC9fmPSOEZwT5w_fWMN8s4JhvujNoNmjb4ocAMAkB5c2OO0s65VTUQGRexvscg6Lv8tYypbvmmBU4IlEuJLfrqZMBLJAdwjHBMqIabIm_23Cy19DxVOPUH1ITuVd7wr11rT_-Ud5CB24QMva1I5B2OhWnXmwB9rE1r1o1CSgBgV2FZ2Y0AQp2sFGR-Q5GPb33WckXPFTg.nBoX0EdWYItLdm0qG7AlroMyw8Ffhn9u4PwYouhyQS8]
+      pragma: [no-cache]
+      request-id: [35f3fa88-f4f8-409d-8f6c-7f20a04abcbc]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-dirapi-data-contract-version: ['1.6']
+      x-powered-by: [ASP.NET, ASP.NET]
+    status: {code: 204, message: No Content}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Darwin-16.5.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.3+dev]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001?api-version=2016-09-01
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Fri, 21 Apr 2017 16:45:44 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUQjIwRTY3OUJGMjI3NjI1NDAyN0U3QzEtV0VTVFVTIiwiam9iTG9jYXRpb24iOiJ3ZXN0dXMifQ?api-version=2016-09-01']
+      pragma: [no-cache]
+      retry-after: ['15']
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 202, message: Accepted}
+version: 1

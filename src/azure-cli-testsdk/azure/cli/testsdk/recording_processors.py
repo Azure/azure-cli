@@ -44,8 +44,16 @@ class SubscriptionRecordingProcessor(RecordingProcessor):
 
     def _replace_subscription_id(self, val):
         import re
-        return re.sub('/subscriptions/([^/]+)/', '/subscriptions/{}/'.format(self._replacement),
-                      val)
+        # subscription presents in all api call
+        retval = re.sub('/subscriptions/([^/]+)/',
+                        '/subscriptions/{}/'.format(self._replacement),
+                        val)
+
+        # subscription is also used in graph call
+        retval = re.sub('https://graph.windows.net/([^/]+)/',
+                        'https://graph.windows.net/{}/'.format(self._replacement),
+                        retval)
+        return retval
 
 
 class LargeRequestBodyProcessor(RecordingProcessor):
@@ -109,6 +117,14 @@ class OAuthRequestResponsesFilter(RecordingProcessor):
         import re
         if not re.match('https://login.microsoftonline.com/([^/]+)/oauth2/token', request.uri):
             return request
+
+
+class DeploymentNameReplacer(RecordingProcessor):
+    """Replace the random deployment name with a fixed mock name."""
+    def process_request(self, request):
+        import re
+        request.uri = re.sub('/deployments/([^/?]+)', '/deployments/mock-deployment', request.uri)
+        return request
 
 
 class GeneralNameReplacer(RecordingProcessor):

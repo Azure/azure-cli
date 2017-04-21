@@ -4,14 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 from .base import ScenarioTest, LiveTest
-from .preparers import StorageAccountPreparer, ResourceGroupPreparer
+from .preparers import (StorageAccountPreparer, ResourceGroupPreparer,
+                        RoleBasedServicePrincipalPreparer)
 from .exceptions import CliTestError
 from .checkers import JMESPathCheck, JMESPathCheckExists, NoneCheck
 from .decorators import live_only
 from .utilities import get_sha1_hash
 
 __all__ = ['ScenarioTest', 'LiveTest',
-           'ResourceGroupPreparer', 'StorageAccountPreparer',
+           'ResourceGroupPreparer', 'StorageAccountPreparer', 'RoleBasedServicePrincipalPreparer',
            'CliTestError',
            'JMESPathCheck', 'JMESPathCheckExists', 'NoneCheck', 'live_only',
            'get_sha1_hash']
