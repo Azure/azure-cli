@@ -419,8 +419,7 @@ def create_command(module_name, name, operation,
             fault_type = name.replace(' ', '-') + '-client-error'
             telemetry.set_exception(client_exception, fault_type=fault_type,
                                     summary='Unexpected client exception during command creation')
-            message = getattr(client_exception, 'message', client_exception)
-            raise _polish_rp_not_registerd_error(CLIError(message))
+            raise _polish_rp_not_registerd_error(client_exception)
         except _load_azure_exception_class() as azure_exception:
             fault_type = name.replace(' ', '-') + '-service-error'
             telemetry.set_exception(azure_exception, fault_type=fault_type,
@@ -466,26 +465,15 @@ def _user_confirmed(confirmation, command_args):
         return False
 
 
-def _polish_rp_not_registerd_error(cli_error):
-    msg = str(cli_error)
-    pertinent_text_namespace = 'The subscription must be registered to use namespace'
-    pertinent_text_feature = 'is not registered for feature'
-    # pylint: disable=line-too-long
-    if pertinent_text_namespace in msg:
-        reg = r".*{} '(.*)'".format(pertinent_text_namespace)
-        match = re.match(reg, msg)
-        cli_error = CLIError(
-            "Run 'az provider register -n {}' to register the namespace first".format(
-                match.group(1)))
-    elif pertinent_text_feature in msg:
-        reg = r".*{}\s+([^\s]+)\s+".format(pertinent_text_feature)
-        match = re.match(reg, msg)
-        parts = match.group(1).split('/')
-        if len(parts) == 2:
-            cli_error = CLIError(
-                "Run 'az feature register --namespace {} -n {}' to enable the feature first".format(
-                    parts[0], parts[1]))
-    return cli_error
+def _polish_rp_not_registerd_error(ex):
+    try:
+        response = json.loads(ex.response.content.decode())
+        if response['error']['code'] == 'MissingSubscriptionRegistration':
+            match = re.match(r".*'(.*)'", response['error']['message'])
+            ex = CLIError("Run 'az provider register -n {}' to register the namespace first".format(match.group(1)))  # pylint: disable=line-too-long
+    except Exception:  # pylint: disable=broad-except
+        pass
+    return ex
 
 
 def _get_cli_argument(command, argname):
