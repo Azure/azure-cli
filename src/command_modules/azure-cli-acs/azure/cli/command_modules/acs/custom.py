@@ -110,8 +110,7 @@ def wait_then_open_async(url):
     t.start()
 
 
-def acs_browse(resource_group, name, disable_browser=False,
-               ssh_key_file=os.path.join(os.path.expanduser("~"), '.ssh', 'id_rsa')):
+def acs_browse(resource_group, name, disable_browser=False, ssh_key_file=None):
     """
     Opens a browser to the web interface for the cluster orchestrator
 
@@ -141,8 +140,7 @@ def _acs_browse_internal(acs_info, resource_group, name, disable_browser, ssh_ke
         raise CLIError('Unsupported orchestrator type {} for browse'.format(orchestrator_type))
 
 
-def k8s_browse(name, resource_group, disable_browser=False,
-               ssh_key_file=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa')):
+def k8s_browse(name, resource_group, disable_browser=False, ssh_key_file=None):
     """
     Launch a proxy and browse the Kubernetes web UI.
     :param disable_browser: If true, don't launch a web browser after estabilishing the proxy
@@ -168,8 +166,7 @@ def _k8s_browse_internal(name, acs_info, disable_browser, ssh_key_file):
     subprocess.call(["kubectl", "--kubeconfig", browse_path, "proxy"])
 
 
-def dcos_browse(name, resource_group, disable_browser=False,
-                ssh_key_file=os.path.join(os.path.expanduser("~"), '.ssh', 'id_rsa')):
+def dcos_browse(name, resource_group, disable_browser=False, ssh_key_file=None):
     """
     Creates an SSH tunnel to the Azure container service, and opens the Mesosphere DC/OS dashboard in the browser.
 
@@ -677,7 +674,7 @@ def _invoke_deployment(resource_group_name, deployment_name, template, parameter
 
 def k8s_get_credentials(name, resource_group_name,
                         path=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
-                        ssh_key_file=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa')):
+                        ssh_key_file=None):
     """Download and install kubectl credentials from the cluster master
     :param name: The name of the cluster.
     :type name: str
@@ -693,7 +690,7 @@ def k8s_get_credentials(name, resource_group_name,
 
 
 def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file):
-    if not os.path.isfile(ssh_key_file):
+    if ssh_key_file is not None and not os.path.isfile(ssh_key_file):
         raise CLIError('Private key file {} does not exist'.format(ssh_key_file))
 
     dns_prefix = acs_info.master_profile.dns_prefix  # pylint: disable=no-member
