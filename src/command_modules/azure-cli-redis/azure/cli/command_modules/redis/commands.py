@@ -11,7 +11,8 @@ from azure.cli.command_modules.redis._client_factory import (cf_redis, cf_patch_
 
 from azure.cli.command_modules.redis.custom import wrong_vmsize_argument_exception_handler
 
-cli_command(__name__, 'redis create', 'azure.cli.command_modules.redis.custom#cli_redis_create', cf_redis)
+cli_command(__name__, 'redis create', 'azure.cli.command_modules.redis.custom#cli_redis_create', cf_redis,
+            exception_handler=wrong_vmsize_argument_exception_handler)
 cli_command(__name__, 'redis delete', 'azure.mgmt.redis.operations.redis_operations#RedisOperations.delete', cf_redis)
 cli_command(__name__, 'redis export', 'azure.cli.command_modules.redis.custom#cli_redis_export', cf_redis)
 cli_command(__name__, 'redis force-reboot', 'azure.mgmt.redis.operations.redis_operations#RedisOperations.force_reboot', cf_redis)
