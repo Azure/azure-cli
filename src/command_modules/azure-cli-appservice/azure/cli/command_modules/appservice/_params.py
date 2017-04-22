@@ -59,8 +59,16 @@ register_cli_argument('appservice plan', 'admin_site_name', help='The name of th
 register_cli_argument('appservice web', 'slot', options_list=('--slot', '-s'), help="the name of the slot. Default to the productions slot if not specified")
 register_cli_argument('appservice web', 'name', configured_default='web',
                       arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
-                      help="name of the web. You can configure the default using `az configure --defaults web=<name>`")
+                      help="name of the web. You can configure the default using 'az configure --defaults web=<name>'")
 register_cli_argument('appservice web create', 'name', options_list=('--name', '-n'), help='name of the new webapp')
+register_cli_argument('appservice web create', 'deployment_local_git', action='store_true', help='enable local git')
+register_cli_argument('appservice web create', 'deployment_source_url', help='the URL to the Git repository')
+register_cli_argument('appservice web create', 'deployment_source_branch', help='the branch to deploy')
+register_cli_argument('appservice web create', 'deployment_container_image_name', options_list=('--deployment-container-image-name', '-i'),
+                      help='Container image name from Docker Hub, e.g. publisher/image-name:version')
+register_cli_argument('appservice web create', 'runtime', options_list=('--runtime', '-r'), help='canonicalized web runtime in the format of Framework|Version. For example, PHP|5.6')  # TODO ADD completer
+register_cli_argument('appservice web list-runtimes', 'linux', action='store_true', help='list runtime stacks for linux based webapps')  # TODO ADD completer
+
 register_cli_argument('appservice web create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                       help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
 

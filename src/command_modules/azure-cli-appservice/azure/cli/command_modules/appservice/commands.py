@@ -8,7 +8,7 @@ from azure.cli.core.commands import LongRunningOperation, cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.util import empty_on_404
 
-from ._client_factory import cf_web_client, cf_plans
+from ._client_factory import cf_web_client, cf_plans, cf_providers
 
 
 def output_slots_in_table(slots):
@@ -20,7 +20,7 @@ def transform_list_location_output(result):
 
 
 def transform_web_output(web):
-    props = ['name', 'state', 'location', 'resourceGroup', 'defaultHostName', 'appServicePlanId']
+    props = ['name', 'state', 'location', 'resourceGroup', 'defaultHostName', 'appServicePlanId', 'ftpPublishingUrl']
     result = {k: web[k] for k in web if k in props}
     # to get width under control, also the plan usually is in the same RG
     result['appServicePlan'] = result.pop('appServicePlanId').split('/')[-1]
@@ -118,4 +118,5 @@ cli_generic_update_command(__name__, 'appservice plan update', 'azure.mgmt.web.o
                            setter_arg_name='app_service_plan', factory=cf_plans)
 
 cli_command(__name__, 'appservice web deployment user show', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.get_publishing_user', cf_web_client, exception_handler=empty_on_404)
+cli_command(__name__, 'appservice web list-runtimes', 'azure.cli.command_modules.appservice.custom#list_runtimes')
 cli_command(__name__, 'appservice list-locations', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.list_geo_regions', cf_web_client, transform=transform_list_location_output)
