@@ -310,8 +310,9 @@ def _validate_service_principal(client, sp_id):
             'Failed to validate service principal, if this persists try deleting $HOME/.azure/acsServicePrincipal.json')
 
 
-def _build_service_principal(client, name, url, client_secret):
-    sys.stdout.write('creating service principal')
+def _build_service_principal(client, name, url, client_secret, output=True):
+    if output:
+        sys.stdout.write('creating service principal')
     result = create_application(client.applications, name, url, [url], password=client_secret)
     service_principal = result.app_id  # pylint: disable=no-member
     for x in range(0, 10):
@@ -322,7 +323,8 @@ def _build_service_principal(client, name, url, client_secret):
             sys.stdout.write('.')
             sys.stdout.flush()
             time.sleep(2 + 2 * x)
-    print('done')
+    if output:
+        print('done')
     return service_principal
 
 
@@ -452,11 +454,11 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                 salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
                 url = 'http://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
-                service_principal = _build_service_principal(client, name, url, client_secret)
+                service_principal = _build_service_principal(client, name, url, client_secret, output=False)
                 logger.info('Created a service principal: %s', service_principal)
                 store_acs_service_principal(subscription_id, client_secret, service_principal)
             # Either way, update the role assignment, this fixes things if we fail part-way through
-            if not _add_role_assignment('Contributor', service_principal):
+            if not _add_role_assignment('Contributor', service_principal, output=False):
                 raise CLIError(
                     'Could not create a service principal with the right permissions. Are you an Owner on this project?')
         else:
