@@ -93,12 +93,64 @@ class CliCommandArgument(object):
         self.type.settings[name] = value
 
 
+class StandardOut(object):
+    """ custom output for progress reporting """
+    def __init__(self, out=None):
+        self.out = out or sys.stdout
+        self.total_val = None
+
+    def start(self, message, total_value):
+        """ start reporting progress """
+        self.out.write(message)
+        self.total_val = total_value
+
+    def write(self, message, value, total_value):
+        """ writes the progress """
+        if value and total_value:
+            self.out.write(self._format_value(value, total_value) + "\n")
+        self.out.write(message + '\n')
+
+    def _format_value(self, val, total_val):
+        percent = val / total_val
+        bar_len = 100
+        completed = int(bar_len*percent)
+
+        message = '\r['
+        for i in range(bar_len):
+            if i < completed:
+                message += '#'
+            else:
+                message += ' '
+        message += ']  {:.4%}'.format(percent)
+        return message
+
+    def flush(self):
+        """ flushes the message"""
+        self.out.flush()
+
+    def end(self, message=''):
+        """ stop reporting progress """
+        self.out.write('Finished {}'.format(message))
+
+
 class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, start_msg='', finish_msg='', poller_done_interval_ms=1000.0):
+    def __init__(self, start_msg='', finish_msg='',
+                 poller_done_interval_ms=1000.0, out=None, total_val=None):
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms
+        from azclishell.app import ProgressView
+        self.out = out or ProgressView()
+        self.curr_message = 'Running'
+        self.curr_val = None
+        self.total_val = total_val
+
+    def add(self, curr_val, total_val, label):
+        """ add a progress report """
+        self.curr_message = label
+        self.curr_val = curr_val
+        self.total_val = total_val
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
@@ -108,6 +160,8 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         logger.info("Starting long running operation '%s'", self.start_msg)
         correlation_message = ''
         while not poller.done():
+            self.out.write(self.curr_message + '\n', self.curr_val, self.total_val)
+            self.out.flush()
             try:
                 # pylint: disable=protected-access
                 correlation_id = json.loads(
@@ -122,8 +176,10 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             except KeyboardInterrupt:
                 logger.error('Long running operation wait cancelled.  %s', correlation_message)
                 raise
+
         try:
             result = poller.result()
+
         except ClientException as client_exception:
             telemetry.set_exception(
                 client_exception,
@@ -145,6 +201,8 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
         logger.info("Long running operation '%s' completed with result %s",
                     self.start_msg, result)
+        self.out.end("\n")
+        self.out.flush()
         return result
 
 
