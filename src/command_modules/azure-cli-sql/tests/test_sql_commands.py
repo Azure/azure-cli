@@ -111,7 +111,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', user)])
 
         self.cmd('sql server list-usages -g {} -n {}'
-                 .format(rg, servers[0]), 
+                 .format(rg, servers[0]),
                  checks=[JMESPathCheck('[0].resourceName', servers[0])])
 
         # test delete sql server
@@ -269,7 +269,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', rg)])
 
         self.cmd('sql db list-usages -g {} --server {} --name {}'
-                 .format(rg, server, database_name), 
+                 .format(rg, server, database_name),
                  checks=[JMESPathCheck('[0].resourceName', database_name)])
 
         self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --max-size {}'
