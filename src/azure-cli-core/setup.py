@@ -54,7 +54,6 @@ DEPENDENCIES = [
     'adal>=0.4.3',
     'applicationinsights',
     'argcomplete>=1.8.0',
-    'azure-cli-nspkg',
     'colorama',
     'jmespath',
     'msrest>=0.4.4',
