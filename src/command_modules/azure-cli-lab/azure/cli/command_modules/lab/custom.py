@@ -46,8 +46,37 @@ def create_lab_vm(client, resource_group, lab_name, name, notes=None, image=None
 
 # pylint: disable=redefined-builtin
 def list_vm(client, resource_group, lab_name, order_by=None, top=None,
-            filters=None, all=None, claimable=None, expand=None, object_id=None):
+            filters=None, all=None, claimable=None, environment=None, expand=None, object_id=None):
     """ Command to list vms by resource group in the Azure DevTest Lab """
 
     return client.list(resource_group, lab_name,
                        expand=expand, filter=filters, top=top, order_by=order_by)
+
+
+def show_arm_template(client, resource_group, lab_name, name,
+                      artifact_source_name, export_parameters=False):
+    """ Command to show azure resource manager template in the Azure DevTest Lab """
+
+    arm_template = client.get(resource_group, lab_name, artifact_source_name, name)
+    if export_parameters:
+        return _export_parameters(arm_template)
+    return arm_template
+
+
+def _export_parameters(arm_template):
+    parameters = []
+    if arm_template and arm_template.contents and arm_template.contents['parameters']:
+        if arm_template.parameters_value_files_info:
+            default_values = dict()
+            for parameter_value_file_info in arm_template.parameters_value_files_info:
+                if isinstance(parameter_value_file_info.parameters_value_info, dict):
+                    for k in parameter_value_file_info.parameters_value_info:
+                        default_values[k] = parameter_value_file_info.parameters_value_info[k].get('value', "")  # pylint: disable=line-too-long
+
+        if isinstance(arm_template.contents['parameters'], dict):
+            for k in arm_template.contents['parameters']:
+                param = dict()
+                param['name'] = k
+                param['value'] = default_values.get(k, "")
+                parameters.append(param)
+    return parameters

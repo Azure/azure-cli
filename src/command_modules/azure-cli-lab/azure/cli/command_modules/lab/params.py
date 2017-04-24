@@ -61,6 +61,7 @@ with ParametersContext(command='lab vm list') as c:
     c.argument('filters', arg_group=filter_arg_group_name)
     c.argument('all', action='store_true', arg_group=filter_arg_group_name)
     c.argument('claimable', action='store_true', arg_group=filter_arg_group_name)
+    c.argument('environment', arg_group=filter_arg_group_name)
     c.register_alias('resource_group', ('--resource-group', '-g'), validator=validate_lab_vm_list)
 
 
@@ -91,3 +92,24 @@ with ParametersContext(command='lab environment') as c:
     c.register_alias('name', ('--name', '-n'))
     c.ignore('user_name')
     c.argument('lab_name', validator=validate_user_name)
+
+
+with ParametersContext(command='lab environment create') as c:
+    from azure.cli.command_modules.lab.sdk.devtestlabs.models.environment_deployment_properties\
+        import EnvironmentDeploymentProperties
+    from azure.cli.command_modules.lab.sdk.devtestlabs.models.dtl_environment import DtlEnvironment
+
+    c.expand('deployment_properties', EnvironmentDeploymentProperties)
+    c.argument('parameters', type=json.loads)
+
+    c.expand('dtl_environment', DtlEnvironment)
+    c.ignore('arm_template_display_name')
+    c.ignore('location')
+    c.ignore('provisioning_state')
+    c.ignore('unique_identifier')
+
+with ParametersContext(command='lab arm-template') as c:
+    c.register_alias('name', ('--name', '-n'))
+
+with ParametersContext(command='lab arm-template show') as c:
+    c.argument('export_parameters', action='store_true')
