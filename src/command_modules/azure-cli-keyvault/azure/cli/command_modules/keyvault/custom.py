@@ -543,8 +543,10 @@ create_certificate.__doc__ = KeyVaultClient.create_certificate.__doc__
 
 
 def _asn1_to_iso8601(asn1_date):
-    import dateutil
-    return dateutil.parser.parse(asn1_date.decode('utf-8'))
+    import dateutil.parser
+    if isinstance(asn1_date, bytes):
+        asn1_date = asn1_date.decode('utf-8')
+    return dateutil.parser.parse(asn1_date)
 
 
 def import_certificate(client, vault_base_url, certificate_name, certificate_data,
