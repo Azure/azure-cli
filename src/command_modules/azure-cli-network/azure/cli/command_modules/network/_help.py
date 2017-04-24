@@ -1585,6 +1585,11 @@ helps['network traffic-manager profile update'] = """
 helps['network traffic-manager endpoint create'] = """
     type: command
     short-summary: Create an endpoint.
+    parameters:
+        - name: --geo-mapping
+          short-summary: Space separated list of country/region codes mapped to this endpoint when using the 'Geographic' routing method.
+          populator-commands:
+          - az network traffic-manager endpoint show-geographic-hierarchy
 """
 
 helps['network traffic-manager endpoint delete'] = """

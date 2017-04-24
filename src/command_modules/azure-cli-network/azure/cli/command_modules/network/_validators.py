@@ -486,7 +486,8 @@ def process_tm_endpoint_create_namespace(namespace):
         'min_child_endpoints': '--min-child-endpoints',
         'priority': '--priority',
         'weight': '--weight',
-        'endpoint_location': '--endpoint-location'
+        'endpoint_location': '--endpoint-location',
+        'geo_mapping': '--geo-mapping'
     }
     required_options = []
 
@@ -507,6 +508,9 @@ def process_tm_endpoint_create_namespace(namespace):
     if endpoint_type.lower() in ['nestedendpoints', 'externalendpoints'] and \
         routing_type.lower() == 'performance':
         required_options.append('endpoint_location')
+
+    if routing_type.lower() == 'geographic':
+        required_options.append('geo_mapping')
 
     # ensure required options are provided
     missing_options = [props_to_options[x] for x in required_options \
