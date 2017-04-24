@@ -76,14 +76,17 @@ certificate_file_encoding_values = ['binary', 'string']
 
 # KEY ATTRIBUTE PARAMETER REGISTRATION
 
-def register_attributes_argument(scope, name, attr_class, create=False):
+def register_attributes_argument(scope, name, attr_class, create=False, ignore=None):
+    ignore = ignore or []
     register_cli_argument(scope, '{}_attributes'.format(name), ignore_type, validator=get_attribute_validator(name, attr_class, create))
     if create:
         register_extra_cli_argument(scope, 'disabled', help='Create {} in disabled state.'.format(name), **three_state_flag())
     else:
         register_extra_cli_argument(scope, 'enabled', help='Enable the {}.'.format(name), **three_state_flag())
-    register_extra_cli_argument(scope, 'expires', default=None, help='Expiration UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
-    register_extra_cli_argument(scope, 'not_before', default=None, help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
+    if 'expires' not in ignore:
+        register_extra_cli_argument(scope, 'expires', default=None, help='Expiration UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
+    if 'not_before' not in ignore:
+        register_extra_cli_argument(scope, 'not_before', default=None, help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
 
 # ARGUMENT DEFINITIONS
 
@@ -154,10 +157,10 @@ register_cli_argument('keyvault secret download', 'file_path', options_list=('--
 register_cli_argument('keyvault secret download', 'encoding', options_list=('--encoding', '-e'), help="Encoding of the destination file. By default, will look for the 'file-encoding' tag on the secret. Otherwise will assume 'utf-8'.", default=None, **enum_choice_list(secret_encoding_values))
 
 register_cli_argument('keyvault certificate', 'certificate_version', options_list=('--version', '-v'), help='The certificate version. If omitted, uses the latest version.', default='', required=False, completer=get_keyvault_version_completion_list('certificate'))
-register_attributes_argument('keyvault certificate create', 'certificate', CertificateAttributes, True)
-register_attributes_argument('keyvault certificate set-attributes', 'certificate', CertificateAttributes)
-register_cli_argument('keyvault certificate set-attributes', 'expires', ignore_type)
-register_cli_argument('keyvault certificate set-attributes', 'not_before', ignore_type)
+register_cli_argument('keyvault certificate', 'validity', type=int, help='Number of months the certificate is valid for. Overrides the value specified with --policy/-p')
+# TODO: Remove workaround when https://github.com/Azure/azure-rest-api-specs/issues/1153 is fixed
+register_attributes_argument('keyvault certificate create', 'certificate', CertificateAttributes, True, ignore=['expires', 'not_before'])
+register_attributes_argument('keyvault certificate set-attributes', 'certificate', CertificateAttributes, ignore=['expires', 'not_before'])
 
 for item in ['create', 'set-attributes', 'import']:
     register_cli_argument('keyvault certificate {}'.format(item), 'certificate_policy', options_list=('--policy', '-p'), help='JSON encoded policy defintion. Use @{file} to load from a file.', type=get_json_object)
