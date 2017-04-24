@@ -9,7 +9,7 @@ from msrest.serialization import Model
 
 
 class Subnet(Model):
-    """Subnet.
+    """Subnet information.
 
     :param resource_id: The resource ID of the subnet.
     :type resource_id: str
@@ -19,7 +19,7 @@ class Subnet(Model):
      public IP addresses (i.e. Allow, Deny)). Possible values include:
      'Default', 'Deny', 'Allow'
     :type allow_public_ip: str or :class:`UsagePermissionType
-     <azure.mgmt.devtestlabs.models.UsagePermissionType>`
+     <devtestlabs.models.UsagePermissionType>`
     """
 
     _attribute_map = {

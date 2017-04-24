@@ -9,12 +9,12 @@ from msrest.serialization import Model
 
 
 class Port(Model):
-    """Port.
+    """Properties of a network port.
 
     :param transport_protocol: Protocol type of the port. Possible values
      include: 'Tcp', 'Udp'
     :type transport_protocol: str or :class:`TransportProtocol
-     <azure.mgmt.devtestlabs.models.TransportProtocol>`
+     <devtestlabs.models.TransportProtocol>`
     :param backend_port: Backend port of the target virtual machine.
     :type backend_port: int
     """

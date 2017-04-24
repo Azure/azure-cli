@@ -9,7 +9,9 @@ from msrest.serialization import Model
 
 
 class ShutdownNotificationContent(Model):
-    """ShutdownNotificationContent.
+    """The contents of a shutdown notification. Webhooks can use this type to
+    deserialize the request body when they get notified of an imminent
+    shutdown.
 
     :param skip_url: The URL to skip auto-shutdown.
     :type skip_url: str

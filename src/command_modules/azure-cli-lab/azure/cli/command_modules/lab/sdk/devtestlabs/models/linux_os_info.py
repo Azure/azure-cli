@@ -15,7 +15,7 @@ class LinuxOsInfo(Model):
      DeprovisionRequested, DeprovisionApplied). Possible values include:
      'NonDeprovisioned', 'DeprovisionRequested', 'DeprovisionApplied'
     :type linux_os_state: str or :class:`LinuxOsState
-     <azure.mgmt.devtestlabs.models.LinuxOsState>`
+     <devtestlabs.models.LinuxOsState>`
     """
 
     _attribute_map = {

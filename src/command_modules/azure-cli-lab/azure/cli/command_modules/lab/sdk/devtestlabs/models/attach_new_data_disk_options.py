@@ -18,7 +18,7 @@ class AttachNewDataDiskOptions(Model):
     :param disk_type: The storage type for the disk (i.e. Standard, Premium).
      Possible values include: 'Standard', 'Premium'
     :type disk_type: str or :class:`StorageType
-     <azure.mgmt.devtestlabs.models.StorageType>`
+     <devtestlabs.models.StorageType>`
     """
 
     _attribute_map = {
