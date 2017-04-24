@@ -137,3 +137,18 @@ def transform_nsg_create_output(result):
 
 def transform_vnet_gateway_create_output(result):
     return {'vnetGateway': result.result()}
+
+def transform_geographic_hierachy_table_output(result):
+    transformed = []
+    
+    def _extract_values(obj):
+        obj = obj if isinstance(obj, list) else [obj]
+        for item in obj:
+            item_obj = {
+                'code': item['code'],
+                'name': item['name']
+            }
+            transformed.append(item_obj)
+            _extract_values(item['regions'])
+    _extract_values(result['geographicHierarchy'])
+    return transformed

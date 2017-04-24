@@ -1840,7 +1840,7 @@ def create_traffic_manager_endpoint(resource_group_name, profile_name, endpoint_
                                     target_resource_id=None, target=None,
                                     endpoint_status=None, weight=None, priority=None,
                                     endpoint_location=None, endpoint_monitor_status=None,
-                                    min_child_endpoints=None):
+                                    min_child_endpoints=None, geo_mapping=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     from azure.mgmt.trafficmanager.models import Endpoint
     ncf = get_mgmt_service_client(TrafficManagerManagementClient).endpoints
@@ -1849,7 +1849,8 @@ def create_traffic_manager_endpoint(resource_group_name, profile_name, endpoint_
                         endpoint_status=endpoint_status, weight=weight, priority=priority,
                         endpoint_location=endpoint_location,
                         endpoint_monitor_status=endpoint_monitor_status,
-                        min_child_endpoints=min_child_endpoints)
+                        min_child_endpoints=min_child_endpoints,
+                        geo_mapping=geo_mapping)
 
     return ncf.create_or_update(resource_group_name, profile_name, endpoint_type, endpoint_name,
                                 endpoint)
@@ -1857,7 +1858,7 @@ def create_traffic_manager_endpoint(resource_group_name, profile_name, endpoint_
 def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_location=None,
                                     endpoint_status=None, endpoint_monitor_status=None,
                                     priority=None, target=None, target_resource_id=None,
-                                    weight=None, min_child_endpoints=None):
+                                    weight=None, min_child_endpoints=None, geo_mapping=None):
     if endpoint_location is not None:
         instance.endpoint_location = endpoint_location
     if endpoint_status is not None:
@@ -1874,6 +1875,8 @@ def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_locat
         instance.weight = weight
     if min_child_endpoints is not None:
         instance.min_child_endpoints = min_child_endpoints
+    if geo_mapping is not None:
+        instance.geo_mapping = geo_mapping
 
     return instance
 

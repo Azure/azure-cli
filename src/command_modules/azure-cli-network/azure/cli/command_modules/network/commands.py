@@ -20,7 +20,7 @@ from ._format import \
      transform_traffic_manager_create_output, transform_nic_create_output,
      transform_nsg_create_output, transform_vnet_gateway_create_output,
      transform_vpn_connection, transform_vpn_connection_list,
-     transform_vpn_connection_create_output)
+     transform_vpn_connection_create_output, transform_geographic_hierachy_table_output)
 
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
@@ -412,7 +412,7 @@ cli_generic_update_command(__name__, 'network traffic-manager endpoint update',
                            custom_function_op=custom_path + 'update_traffic_manager_endpoint')
 
 tm_geographic_path = 'azure.mgmt.trafficmanager.operations.geographic_hierarchies_operations#GeographicHierarchiesOperations.'
-cli_command(__name__, 'network traffic-manager endpoint show-geographic-hierarchy', tm_geographic_path + 'get_default', cf_tm_geographic)
+cli_command(__name__, 'network traffic-manager endpoint show-geographic-hierarchy', tm_geographic_path + 'get_default', cf_tm_geographic, table_transformer=transform_geographic_hierachy_table_output)
 
 # DNS ZonesOperations
 dns_zone_path = 'azure.mgmt.dns.operations.zones_operations#ZonesOperations.'
