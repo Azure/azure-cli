@@ -532,13 +532,13 @@ def create_service_principal_for_rbac(
     # pylint: disable=protected-access
     public_cert_string = None
     cert_file = None
-
+    end_date = None
     if len([x for x in [cert, create_cert, password] if x]) > 1:
         raise CLIError('Usage error: --cert | --create-cert | --password')
     if create_cert:
         public_cert_string, cert_file = _create_self_signed_cert(years)
     elif cert:
-        public_cert_string = cert
+        public_cert_string, end_date = _normalize_cert(cert)
     else:
         password = password or str(uuid.uuid4())
 
@@ -548,7 +548,7 @@ def create_service_principal_for_rbac(
     if name is None:
         name = 'http://' + app_display_name  # just a valid uri, no need to exist
 
-    end_date = start_date + relativedelta(years=years)
+    end_date = end_date or start_date + relativedelta(years=years)
 
     aad_application = create_application(graph_client.applications,
                                          display_name=app_display_name,
@@ -673,6 +673,21 @@ def _create_self_signed_cert(years):
     return (cert_string, creds_file)
 
 
+def _normalize_cert(cert):
+    pem_data = cert
+    cert_header = '-----BEGIN CERTIFICATE-----'
+    cert_end = '-----END CERTIFICATE-----'
+    if not pem_data.startswith(cert_header):
+        pem_data = cert_header + '\n' + pem_data + '\n' + cert_end
+
+    import OpenSSL.crypto
+    x509 = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, pem_data)
+    pkey = x509.get_notAfter().decode()
+    end_date = dateutil.parser.parse(pkey)
+
+    return cert.replace(cert_header, '').replace(cert_end, '').strip(), end_date
+
+
 def reset_service_principal_credential(name, password=None, create_cert=False, cert=None, years=1):
     '''reset credential, on expiration or you forget it.
 
@@ -698,16 +713,17 @@ def reset_service_principal_credential(name, password=None, create_cert=False, c
     # build a new password/cert credential and patch it
     public_cert_string = None
     cert_file = None
+    end_date = None
     if len([x for x in [cert, create_cert, password] if x]) > 1:
         raise CLIError('Usage error: --cert | --create-cert | --password')
     if create_cert:
         public_cert_string, cert_file = _create_self_signed_cert(years)
     elif cert:
-        public_cert_string = cert
+        public_cert_string, end_date = _normalize_cert(cert)
     else:
         password = password or str(uuid.uuid4())
     start_date = datetime.datetime.utcnow()
-    end_date = start_date + relativedelta(years=years)
+    end_date = end_date or start_date + relativedelta(years=years)
     key_id = str(uuid.uuid4())
     app_creds = [PasswordCredential(start_date, end_date, key_id, password)] if password else None
     cert_creds = [KeyCredential(start_date, end_date, public_cert_string, str(uuid.uuid4()),
