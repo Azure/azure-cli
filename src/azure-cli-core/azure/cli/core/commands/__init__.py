@@ -396,7 +396,16 @@ def create_command(module_name, name, operation,
         try:
             op = get_op_handler(operation)
             try:
-                result = op(client, **kwargs) if client else op(**kwargs)
+                try:
+                    result = op(client, **kwargs) if client else op(**kwargs)
+                except Exception as ex:  # pylint: disable=broad-except
+                    rp = _is_rp_unregistered_err(ex)
+                    if rp:
+                        _register_rp(rp)
+                        result = op(client, **kwargs) if client else op(**kwargs)
+                    else:
+                        reraise(*sys.exc_info())
+
                 if no_wait_param and kwargs.get(no_wait_param, None):
                     return None  # return None for 'no-wait'
 
@@ -415,11 +424,12 @@ def create_command(module_name, name, operation,
                     exception_handler(ex)
                 else:
                     reraise(*sys.exc_info())
+
         except _load_client_exception_class() as client_exception:
             fault_type = name.replace(' ', '-') + '-client-error'
             telemetry.set_exception(client_exception, fault_type=fault_type,
                                     summary='Unexpected client exception during command creation')
-            raise _polish_rp_not_registerd_error(client_exception)
+            raise client_exception
         except _load_azure_exception_class() as azure_exception:
             fault_type = name.replace(' ', '-') + '-service-error'
             telemetry.set_exception(azure_exception, fault_type=fault_type,
@@ -431,8 +441,6 @@ def create_command(module_name, name, operation,
             telemetry.set_exception(value_error, fault_type=fault_type,
                                     summary='Unexpected value exception during command creation')
             raise CLIError(value_error)
-        except CLIError as cli_error:
-            raise _polish_rp_not_registerd_error(cli_error)
 
     command_module_map[name] = module_name
     name = ' '.join(name.split())
@@ -465,15 +473,29 @@ def _user_confirmed(confirmation, command_args):
         return False
 
 
-def _polish_rp_not_registerd_error(ex):
+def _is_rp_unregistered_err(ex):
     try:
         response = json.loads(ex.response.content.decode())
         if response['error']['code'] == 'MissingSubscriptionRegistration':
             match = re.match(r".*'(.*)'", response['error']['message'])
-            ex = CLIError("Run 'az provider register -n {}' to register the namespace first".format(match.group(1)))  # pylint: disable=line-too-long
+            return match.group(1)
     except Exception:  # pylint: disable=broad-except
         pass
-    return ex
+    return None
+
+
+def _register_rp(rp):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    rcf = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
+    logger.warning("Resouce provider '%s' used by the command is not "
+                   "registered. We are registering for you", rp)
+    rcf.providers.register(rp)
+    while True:
+        time.sleep(10)
+        rp_info = rcf.providers.get(rp)
+        if rp_info.registration_state == 'Registered':
+            logger.warning("Registeration succeeded.")
+            break
 
 
 def _get_cli_argument(command, argname):
