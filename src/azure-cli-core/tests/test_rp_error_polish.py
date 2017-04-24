@@ -7,7 +7,7 @@
 import unittest
 import mock
 
-from azure.cli.core.commands import  _polish_rp_not_registerd_error
+from azure.cli.core.commands import _polish_rp_not_registerd_error
 
 
 class TestRPErrorPolish(unittest.TestCase):
