@@ -8,23 +8,7 @@ import unittest
 from azure.cli.command_modules.resource.custom  import _merge_parameters
 
 class TestCustom(unittest.TestCase):
-    
-    @classmethod
-    def setUpClass(cls):
-        pass
-
-    @classmethod
-    def tearDownClass(cls):
-        pass
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
-
-    def test_merge_parameters(self):
+    def test_resource_merge_parameters(self):
         tests = [
             {
                 "parameter_list": [],
