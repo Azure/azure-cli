@@ -20,7 +20,8 @@ from ._format import \
      transform_traffic_manager_create_output, transform_nic_create_output,
      transform_nsg_create_output, transform_vnet_gateway_create_output,
      transform_vpn_connection, transform_vpn_connection_list,
-     transform_vpn_connection_create_output, transform_geographic_hierachy_table_output)
+     transform_vpn_connection_create_output, transform_geographic_hierachy_table_output,
+     transform_service_community_table_output)
 
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
@@ -289,7 +290,7 @@ if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01'):
 
     # ServiceCommunitiesOperations
     sc_path = 'azure.mgmt.network.operations#BgpServiceCommunitiesOperations.'
-    cli_command(__name__, 'network route-filter rule list-service-communities', sc_path + 'list', cf_service_community)
+    cli_command(__name__, 'network route-filter rule list-service-communities', sc_path + 'list', cf_service_community, table_transformer=transform_service_community_table_output)
 
 # SecurityRulesOperations
 sr_path = 'azure.mgmt.network.operations.security_rules_operations#SecurityRulesOperations.'

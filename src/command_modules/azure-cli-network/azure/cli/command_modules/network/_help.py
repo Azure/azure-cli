@@ -1475,7 +1475,7 @@ helps['network route-table route update'] = """
 
 helps['network route-filter'] = """
     type: group
-    short-summary: Manage route filters.
+    short-summary: (PREVIEW) Manage route filters.
 """
 
 helps['network route-filter create'] = """
@@ -1505,12 +1505,18 @@ helps['network route-filter update'] = """
 
 helps['network route-filter rule'] = """
     type: group
-    short-summary: Manage rules in a route filter.
+    short-summary: (PREVIEW) Manage rules in a route filter.
 """
 
 helps['network route-filter rule create'] = """
     type: command
     short-summary: Create a rule in a route filter.
+    parameters:
+        - name: --communities
+          short-summary: |
+                Space separated list of BGP community values to filter on. (e.g.: 12076:5010)
+          populator-commands:
+            - az network route-filter rule list-service-communities
 """
 
 helps['network route-filter rule delete'] = """
