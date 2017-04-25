@@ -144,7 +144,7 @@ def _acs_browse_internal(acs_info, resource_group, name, disable_browser, ssh_ke
 def k8s_browse(name, resource_group, disable_browser=False,
                ssh_key_file=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa')):
     """
-    Wrapper on the 'kubectl proxy' command, for consistency with 'az dcos browse'
+    Launch a proxy and browse the Kubernetes web UI.
     :param disable_browser: If true, don't launch a web browser after estabilishing the proxy
     :type disable_browser: bool
     """
@@ -678,7 +678,7 @@ def _invoke_deployment(resource_group_name, deployment_name, template, parameter
 def k8s_get_credentials(name, resource_group_name,
                         path=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
                         ssh_key_file=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa')):
-    """Create a new Acs.
+    """Download and install kubectl credentials from the cluster master
     :param name: The name of the cluster.
     :type name: str
     :param resource_group_name: The name of the resource group.
