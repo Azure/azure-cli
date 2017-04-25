@@ -7,6 +7,12 @@
 
 from codecs import open
 from setuptools import setup
+try:
+    from azure_bdist_wheel import cmdclass
+except ImportError:
+    from distutils import log as logger
+    logger.warn("Wheel is not available, disabling bdist_wheel hook")
+    cmdclass = {}
 
 VERSION = "0.1.0+dev"
 
@@ -46,12 +52,11 @@ setup(
     url='https://github.com/Azure/azure-cli',
     zip_safe=False,
     classifiers=CLASSIFIERS,
-    namespace_packages=[
+    packages=[
         'azure',
         'azure.cli',
-    ],
-    packages=[
         'azure.cli.testsdk'
     ],
-    install_requires=DEPENDENCIES
+    install_requires=DEPENDENCIES,
+    cmdclass=cmdclass
 )

@@ -3,12 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os.path
 import socket
 import threading
 from time import sleep
 
 import paramiko
+import paramiko.agent
 from sshtunnel import SSHTunnelForwarder
 from scp import SCPClient
 
@@ -29,12 +29,21 @@ def _load_key(key_filename):
 
 
 def SecureCopy(user, host, src, dest,  # pylint: disable=too-many-arguments
-               key_filename=os.path.join(os.path.expanduser("~"), '.ssh', 'id_rsa')):
+               key_filename=None,
+               allow_agent=True):
     ssh = paramiko.SSHClient()
     ssh.load_system_host_keys()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-    pkey = _load_key(key_filename)
+    keys = []
+    pkey = None
+    if key_filename is not None:
+        key = _load_key(key_filename)
+        keys.append(key)
+    if allow_agent:
+        agent = paramiko.agent.Agent()
+        for key in agent.get_keys():
+            keys.append(key)
 
     ssh.connect(host, username=user, pkey=pkey)
 
@@ -62,7 +71,7 @@ class ACSClient(object):
             self.tunnel_server.close_tunnel()
 
     def connect(self, host, username, port=2200,  # pylint: disable=too-many-arguments
-                key_filename=os.path.join(os.path.expanduser("~"), '.ssh', 'id_rsa')):
+                key_filename=None):
         """
         Creates a connection to the remote server.
 
@@ -91,7 +100,9 @@ class ACSClient(object):
             self.client = paramiko.SSHClient()
             self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-            pkey = _load_key(key_filename)
+            pkey = None
+            if key_filename is not None:
+                pkey = _load_key(key_filename)
             self.client.connect(
                 hostname=host,
                 port=port,
