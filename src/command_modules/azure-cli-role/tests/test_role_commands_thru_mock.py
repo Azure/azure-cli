@@ -126,6 +126,7 @@ class TestRoleMocked(unittest.TestCase):
 
         def mock_app_create(parameters):
             end_date = parameters.key_credentials[0].end_date
+            # sample check the cert's expiration time
             self.assertEqual(end_date.day, 21)
             self.assertEqual(end_date.month, 4)
             return app
@@ -152,7 +153,7 @@ class TestRoleMocked(unittest.TestCase):
         # assert
         self.assertEqual(result['name'], 'http://' + name)
         self.assertEqual(result['appId'], test_app_id)
-        self.assertTrue(logger_mock.warning.called)
+        self.assertTrue(logger_mock.warning.called)  # we should warn 'years' will be dropped
         self.assertTrue(faked_graph_client.applications.create.called)
 
 
