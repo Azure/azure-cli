@@ -240,16 +240,15 @@ def _filter_for_container_settings(settings):
 
 def add_hostname(resource_group_name, webapp, hostname, slot=None):
     client = web_client_factory()
-    webapp = client.web_apps.get(resource_group_name, webapp)
-    binding = HostNameBinding(webapp.location, host_name_binding_name=hostname,
-                              site_name=webapp.name)
+    webapp_info = client.web_apps.get(resource_group_name, webapp)
+    binding = HostNameBinding(webapp_info.location, host_name_binding_name=hostname,
+                              site_name=webapp_info.name)
     if slot is None:
-        poller = client.web_apps.create_or_update_host_name_binding(
-            resource_group_name, webapp.name, hostname, binding)
+        return client.web_apps.create_or_update_host_name_binding(
+            resource_group_name, webapp_info.name, hostname, binding)
     else:
-        poller = client.web_apps.create_or_update_host_name_binding_slot(
-            resource_group_name, webapp.name, hostname, binding, slot)
-    return AppServiceLongRunningOperation()(poller)
+        return client.web_apps.create_or_update_host_name_binding_slot(
+            resource_group_name, webapp_info.name, hostname, binding, slot)
 
 
 def delete_hostname(resource_group_name, webapp, hostname, slot=None):
