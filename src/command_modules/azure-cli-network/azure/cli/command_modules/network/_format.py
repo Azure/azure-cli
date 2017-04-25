@@ -140,7 +140,7 @@ def transform_vnet_gateway_create_output(result):
 
 def transform_geographic_hierachy_table_output(result):
     transformed = []
-    
+
     def _extract_values(obj):
         obj = obj if isinstance(obj, list) else [obj]
         for item in obj:
@@ -163,3 +163,26 @@ def transform_service_community_table_output(result):
             item_obj['supportedRegion'] = community['serviceSupportedRegion']
             transformed.append(item_obj)
     return transformed
+
+
+def transform_waf_rule_sets_table_output(result):
+    transformed = []
+    for item in result:
+        rule_set_name = item['name']
+        for group in item['ruleGroups']:
+            rule_group_name = group['ruleGroupName']
+            if group['rules']:
+                for rule in group['rules']:
+                    item_obj = OrderedDict()
+                    item_obj['ruleSet'] = rule_set_name
+                    item_obj['ruleGroup'] = rule_group_name
+                    item_obj['ruleId'] = rule['ruleId']
+                    item_obj['description'] = rule['description']
+                    transformed.append(item_obj)
+            else:
+                item_obj = OrderedDict()
+                item_obj['ruleSet'] = rule_set_name
+                item_obj['ruleGroup'] = rule_group_name
+                transformed.append(item_obj)
+    return transformed
+    

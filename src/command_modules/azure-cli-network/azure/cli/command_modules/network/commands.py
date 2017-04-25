@@ -21,7 +21,7 @@ from ._format import \
      transform_nsg_create_output, transform_vnet_gateway_create_output,
      transform_vpn_connection, transform_vpn_connection_list,
      transform_vpn_connection_create_output, transform_geographic_hierachy_table_output,
-     transform_service_community_table_output)
+     transform_service_community_table_output, transform_waf_rule_sets_table_output)
 
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
@@ -59,7 +59,11 @@ property_map = {
 }
 def _make_singular(value):
     try:
-        return value[:-1] if value.endswith('s') else value
+        if value.endswith('ies'):
+            value = value[:-3] + 'y'
+        elif value.endswith('s'):
+            value = value[:-1]
+        return value
     except AttributeError:
         return value
 
@@ -84,7 +88,7 @@ cli_command(__name__, 'network application-gateway waf-config set', custom_path 
 cli_command(__name__, 'network application-gateway waf-config show', custom_path + 'show_ag_waf_config', exception_handler=empty_on_404)
 
 if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):
-    cli_command(__name__, 'network application-gateway waf-config list-rule-sets', ag_path + 'list_available_waf_rule_sets', cf_application_gateways)
+    cli_command(__name__, 'network application-gateway waf-config list-rule-sets', custom_path + 'list_ag_waf_rule_sets', cf_application_gateways, table_transformer=transform_waf_rule_sets_table_output)
 
 # ExpressRouteCircuitAuthorizationsOperations
 erca_path = 'azure.mgmt.network.operations.express_route_circuit_authorizations_operations#ExpressRouteCircuitAuthorizationsOperations.'
@@ -266,7 +270,7 @@ rtr_path = 'azure.mgmt.network.operations.routes_operations#RoutesOperations.'
 cli_command(__name__, 'network route-table route delete', rtr_path + 'delete', cf_routes)
 cli_command(__name__, 'network route-table route show', rtr_path + 'get', cf_routes, exception_handler=empty_on_404)
 cli_command(__name__, 'network route-table route list', rtr_path + 'list', cf_routes)
-cli_generic_update_command(__name__, 'network route-table route update', 
+cli_generic_update_command(__name__, 'network route-table route update',
                            rtr_path + 'get', rtr_path + 'create_or_update', cf_routes,
                            custom_function_op=custom_path + 'update_route', setter_arg_name='route_parameters')
 cli_command(__name__, 'network route-table route create', custom_path + 'create_route')
@@ -333,15 +337,6 @@ cli_generic_update_command(__name__, 'network vpn-connection shared-key update',
 property_map = {
     'ipsec_policies': 'ipsec-policy',
 }
-def _make_singular(value):
-    try:
-        if value.endswith('ies'):
-            value = value[:-3] + 'y'
-        elif value.endswith('s'):
-            value = value[:-1]
-        return value
-    except AttributeError:
-        return value
 
 for subresource, alias in property_map.items():
     cli_command(__name__, 'network vpn-connection {} list'.format(alias), 'azure.cli.command_modules.network._util#{}'.format(list_network_resource_property('virtual_network_gateway_connections', subresource)))

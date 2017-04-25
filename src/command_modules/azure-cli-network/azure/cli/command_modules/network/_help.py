@@ -474,7 +474,12 @@ helps['network application-gateway waf-config set'] = """
           populator-commands:
           - az application-gateway waf-config list-rule-sets
         - name: --disabled-rule-groups
-          short-summary: Space separated list of rule groups to disable.
+          short-summary: Space separated list of rule groups to disable. This disables the entire group.
+            To disable specifc rules, use '--disabled-rule-ids'.
+          populator-commands:
+          - az application-gateway waf-config list-rule-sets
+        - name: --disabled-rules
+          short-summary: Space separated list of rule IDs to disable.
           populator-commands:
           - az application-gateway waf-config list-rule-sets
 """
@@ -483,6 +488,31 @@ helps['network application-gateway waf-config show'] = """
     type: command
     short-summary: Show the firewall configuration of a web application.
 """
+
+helps['network application-gateway waf-config list-rule-sets'] = """
+    type: command
+    short-summary: (PREVIEW) Lookup information on available WAF rule sets, rule groups, and rule IDs.
+    parameters:
+        - name: --group
+          short-summary:
+            List rules for the specified rule group. Use '*' to list rules for all groups.
+            Omit to suppress listing individual rules.
+        - name: --type
+          short-summary: Rule set type to list. Omit to list all types.
+        - name: --version
+          short-summary: Rule set version to list. Omit to list all versions.
+    examples:
+        - name: List available rule groups in OWASP type rule sets.
+          text: >
+            az network application-gateway waf-config list-rule-sets --type OWASP
+        - name: List available rules in the OWASP 3.0 rule set.
+          text: >
+            az network application-gateway waf-config list-rule-sets --group * --type OWASP --version 3.0
+        - name: List available rules in the 'crs_35_bad_robots' rule group.
+          text: >
+            az network application-gateway waf-config list-rule-sets --group crs_35_bad_robots
+"""
+
 # endregion
 
 # region DNS record-set
