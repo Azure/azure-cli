@@ -16,6 +16,14 @@ from azure.mgmt.resource.resources.models import GenericResource
 from azure.mgmt.resource.locks.models import ManagementLockObject
 from azure.mgmt.resource.links.models import ResourceLinkProperties
 
+from azure.mgmt.resource.appliances.models import Appliance
+from azure.mgmt.resource.appliances.models import ApplianceProperties
+from azure.mgmt.resource.appliances.models import ApplianceDefinition
+from azure.mgmt.resource.appliances.models import ApplianceDefinitionProperties
+from azure.mgmt.resource.appliances.models import ApplianceLockLevel
+from azure.mgmt.resource.appliances.models import ApplianceArtifactType
+from azure.mgmt.resource.appliances.models import ApplianceProviderAuthorization
+
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int
 from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
@@ -28,7 +36,8 @@ from ._client_factory import (_resource_client_factory,
                               _resource_policy_client_factory,
                               _resource_lock_client_factory,
                               _resource_links_client_factory,
-                              _authorization_management_client)
+                              authorization_management_client,
+                              _resource_appliances_client_factory)
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -63,6 +72,106 @@ def create_resource_group(rg_name, location, tags=None):
         tags=tags
     )
     return rcf.resource_groups.create_or_update(rg_name, parameters)
+
+def create_appliance(rg_name, appliance_name, managed_rg_id, location, appliance_definition_id, tags=None, parameters=None):
+    ''' Create a new appliance.
+    :param str resource_group_name:the desired resource group name
+    :param str appliance_name:the appliance name
+    :param str tags:tags in 'a=b c' format
+    '''
+    racf = _resource_appliances_client_factory()
+    applianceProperties = ApplianceProperties(managed_rg_id, appliance_definition_id)
+    applianceParameters = None
+
+    if parameters:
+        if os.path.exists(parameters):
+            applianceParameters = get_file_json(parameters)
+        else:
+            applianceParameters = shell_safe_json_parse(parameters)
+
+    applianceProperties.parameters = applianceParameters
+    parameters = Appliance(
+        location=location,
+        properties=applianceProperties,
+        kind="ServiceCatalog",
+        tags=tags
+    )
+    return racf.appliances.create_or_update(rg_name, appliance_name, parameters)
+
+def create_appliancedefinition(rg_name, appliance_definition_name, location, lock_level, package_file_uri, authorizations, description, display_name, tags=None):
+    ''' Create a new appliance definition.
+    :param str resource_group_name:the desired resource group name
+    :param str appliance_definition_name:the appliance definition name
+    :param str tags:tags in 'a=b c' format
+    '''
+    racf = _resource_appliances_client_factory()
+    authorizations = authorizations or []
+    applianceAuth = []
+
+
+    for name_value in authorizations:
+        # split at the first ':', both principalId and roldeDefinitionId should not have a ':'
+        principalId, roleDefinitionId = name_value.split(':', 1)
+        #print('>>>>>>>principalId: {}'.format(principalId))
+        #print('>>>>>>>roleDefinitionId: {}'.format(roleDefinitionId))
+
+        applianceAuth1 = ApplianceProviderAuthorization(principalId, roleDefinitionId)
+        applianceAuth.append(applianceAuth1)
+    #applianceAuth1 = ApplianceProviderAuthorization("d5d74787-be93-4a54-baae-e9ed29bfe353","8e3af657-a8ff-443c-a75c-2fe8c4bcb635")
+    #applianceAuth = [applianceAuth1]
+    #applianceDefProperties = ApplianceDefinitionProperties(ApplianceLockLevel.can_not_delete, applianceAuth, package_file_uri, display_name, None, description)
+    applianceDefProperties = ApplianceDefinitionProperties(lock_level, applianceAuth, package_file_uri, display_name, None, description)
+
+    parameters = ApplianceDefinition(
+        location=location,
+        properties=applianceDefProperties,
+        tags=tags
+    )
+    return racf.appliance_definitions.create_or_update(rg_name, appliance_definition_name, parameters)
+
+def update_appliance(rg_name, location, tags=None):
+    ''' Updates an existing appliance.
+    :param str resource_group_name:the desired resource group name
+    :param str location:the resource group location
+    :param str tags:tags in 'a=b c' format
+    '''
+    rcf = _resource_client_factory()
+
+    parameters = ResourceGroup(
+        location=location,
+        tags=tags
+    )
+    return rcf.resource_groups.create_or_update(rg_name, parameters)
+
+def update_appliancedefinition(rg_name, appliance_definition_name, location, lock_level, package_file_uri, authorizations, description, display_name, tags=None):
+    ''' Create a new appliance definition.
+    :param str resource_group_name:the desired resource group name
+    :param str appliance_definition_name:the appliance definition name
+    :param str tags:tags in 'a=b c' format
+    '''
+    racf = _resource_appliances_client_factory()
+    applianceAuth1 = ApplianceProviderAuthorization("test","test")
+    applianceAuth = [applianceAuth1]
+    applianceDefProperties = ApplianceDefinitionProperties(ApplianceLockLevel.CanNotDelete, applianceAuth, "testUri", display_name)
+
+    parameters = ApplianceDefinition(
+        location=location,
+        properties=applianceProperties,
+        tags=tags
+    )
+    return racf.appliance_definitions.create_or_update(rg_name, appliance_definition_name, parameters)
+
+def list_appliances(resource_group_name=None):
+    racf = _resource_appliances_client_factory()
+
+    if resource_group_name is not None:
+        return racf.appliances.list_at_resource_group(resource_group_name)
+
+def list_appliancedefinitions(resource_group_name=None):
+    racf = _resource_appliances_client_factory()
+
+    if resource_group_name is not None:
+        return racf.appliance_definitions.list_at_resource_group(resource_group_name)
 
 def export_group_as_template(
         resource_group_name, include_comments=False, include_parameter_default_value=False):
