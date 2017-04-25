@@ -61,7 +61,7 @@ class TestCloud(unittest.TestCase):
     def test_add_get_cloud_with_profile(self):
         endpoint_rm = 'http://management.contoso.com'
         endpoints = CloudEndpoints(resource_manager=endpoint_rm)
-        profile = '2015-00-00-preview'
+        profile = '2017-03-09-profile-preview'
         c = Cloud('MyOwnCloud', endpoints=endpoints, profile=profile)
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
                 config_file:
@@ -104,7 +104,7 @@ class TestCloud(unittest.TestCase):
         endpoint_rm = 'http://management.contoso.com'
         endpoint_mgmt = 'http://management.core.contoso.com'
         endpoints = CloudEndpoints(resource_manager=endpoint_rm, management=endpoint_mgmt)
-        profile = '2016-00-00-preview'
+        profile = '2017-03-09-profile-preview'
         c = Cloud('MyOwnCloud', endpoints=endpoints, profile=profile)
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]):
             add_cloud(c)
@@ -121,7 +121,7 @@ class TestCloud(unittest.TestCase):
             if only ARM endpoint is set '''
         endpoint_rm = 'http://management.contoso.com'
         endpoints = CloudEndpoints(resource_manager=endpoint_rm)
-        profile = '2016-00-00-preview'
+        profile = '2017-03-09-profile-preview'
         c = Cloud('MyOwnCloud', endpoints=endpoints, profile=profile)
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]):
             add_cloud(c)

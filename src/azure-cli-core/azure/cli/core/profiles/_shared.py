@@ -74,20 +74,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.DATA_STORAGE: '2016-05-31'
     },
-    '2016-00-00-preview': {
-        ResourceType.MGMT_STORAGE: '2016-12-01',
-        ResourceType.MGMT_NETWORK: '2016-09-01',
-        ResourceType.MGMT_CONTAINER_SERVICE: '2017-01-31',
-        ResourceType.MGMT_COMPUTE: '2016-04-30-preview',
-        ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
-        ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
-        ResourceType.MGMT_RESOURCE_RESOURCES: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
-        ResourceType.DATA_STORAGE: '2016-05-31'
-    },
-    '2015-00-00-preview': {
+    '2017-03-09-profile-preview': {
         ResourceType.MGMT_STORAGE: '2015-06-15',
         ResourceType.MGMT_NETWORK: '2015-06-15',
         ResourceType.MGMT_CONTAINER_SERVICE: '2017-01-31',
