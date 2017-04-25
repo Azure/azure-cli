@@ -220,6 +220,7 @@ def update_application_gateway(instance, sku=None, capacity=None, tags=None):
         instance.tags = tags
     return instance
 
+
 def create_ag_authentication_certificate(resource_group_name, application_gateway_name, item_name,
                                          cert_data, no_wait=False):
     AuthCert = get_sdk(ResourceType.MGMT_NETWORK,
@@ -568,22 +569,77 @@ def delete_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
 def set_ag_waf_config(resource_group_name, application_gateway_name, enabled,
                       firewall_mode=ApplicationGatewayFirewallMode.detection.value,
                       rule_set_type='OWASP', rule_set_version=None, disabled_rule_groups=None,
-                      no_wait=False):
+                      disabled_rules=None, no_wait=False):
     ApplicationGatewayWebApplicationFirewallConfiguration = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayWebApplicationFirewallConfiguration', mod='models')
     ncf = _network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
-    ag.web_application_firewall_configuration = \
-        ApplicationGatewayWebApplicationFirewallConfiguration(enabled == 'true', firewall_mode)
-    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):
-        # TODO: Add these noodles
-        pass
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):  # pylint: disable=too-many-nested-blocks
+        ag.web_application_firewall_configuration = \
+            ApplicationGatewayWebApplicationFirewallConfiguration(
+                enabled == 'true', firewall_mode, rule_set_type, rule_set_version)
+        if disabled_rule_groups or disabled_rules:
+            ApplicationGatewayFirewallDisabledRuleGroup = get_sdk(
+                ResourceType.MGMT_NETWORK,
+                'ApplicationGatewayFirewallDisabledRuleGroup', mod='models')
+
+            disabled_groups = []
+
+            # disabled groups can be added directly
+            for group in disabled_rule_groups or []:
+                disabled_groups.append(ApplicationGatewayFirewallDisabledRuleGroup(group))
+
+            # for disabled rules, we have to look up the IDs
+            if disabled_rules:
+                results = list_ag_waf_rule_sets(
+                    ncf, _type=rule_set_type, version=rule_set_version, group='*')
+                for item in results:
+                    for group in item.rule_groups:
+                        disabled_group = ApplicationGatewayFirewallDisabledRuleGroup(
+                            group.rule_group_name, [])
+
+                        for rule in group.rules:
+                            if str(rule.rule_id) in disabled_rules:
+                                disabled_group.rules.append(rule.rule_id)
+                        if disabled_group.rules:
+                            disabled_groups.append(disabled_group)
+            ag.web_application_firewall_configuration.disabled_rule_groups = disabled_groups
+    else:
+        ag.web_application_firewall_configuration = \
+            ApplicationGatewayWebApplicationFirewallConfiguration(
+                enabled == 'true', firewall_mode)
+
     return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 def show_ag_waf_config(resource_group_name, application_gateway_name):
     return _network_client_factory().application_gateways.get(
         resource_group_name, application_gateway_name).web_application_firewall_configuration
+
+
+def list_ag_waf_rule_sets(client, _type=None, version=None, group=None):
+    results = client.list_available_waf_rule_sets().value
+    filtered_results = []
+    # filter by rule set name or version
+    for rule_set in results:
+        if _type and _type.lower() != rule_set.rule_set_type.lower():
+            continue
+        if version and version.lower() != rule_set.rule_set_version.lower():
+            continue
+
+        filtered_groups = []
+        for rule_group in rule_set.rule_groups:
+            if not group:
+                rule_group.rules = None
+                filtered_groups.append(rule_group)
+            elif group.lower() == rule_group.rule_group_name.lower() or group == '*':
+                filtered_groups.append(rule_group)
+
+        if filtered_groups:
+            rule_set.rule_groups = filtered_groups
+            filtered_results.append(rule_set)
+
+    return filtered_results
 
 #endregion
 
@@ -1478,13 +1534,15 @@ def create_vnet_gateway(resource_group_name, virtual_network_gateway_name, publi
     subnet = virtual_network + '/subnets/GatewaySubnet'
     active_active = len(public_ip_address) == 2
     vnet_gateway = VirtualNetworkGateway(
-        [], gateway_type, vpn_type, location=location, tags=tags,
-        sku=VirtualNetworkGatewaySku(sku, sku), active_active=active_active)
+        gateway_type=gateway_type, vpn_type=vpn_type, location=location, tags=tags,
+        sku=VirtualNetworkGatewaySku(sku, sku), active_active=active_active, ip_configurations=[])
     for i, public_ip in enumerate(public_ip_address):
         ip_configuration = VirtualNetworkGatewayIPConfiguration(
-            SubResource(subnet),
-            SubResource(public_ip),
-            private_ip_allocation_method='Dynamic', name='vnetGatewayConfig{}'.format(i))
+            subnet=SubResource(subnet),
+            public_ip_address=SubResource(public_ip),
+            private_ip_allocation_method='Dynamic',
+            name='vnetGatewayConfig{}'.format(i)
+        )
         vnet_gateway.ip_configurations.append(ip_configuration)
     if asn or bgp_peering_address or peer_weight:
         vnet_gateway.enable_bgp = True

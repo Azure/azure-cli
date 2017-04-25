@@ -45,7 +45,7 @@ from azure.cli.command_modules.network._validators import \
      get_public_ip_validator, get_nsg_validator, get_subnet_validator)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
-from azure.cli.core.profiles import ResourceType, get_sdk, supported_api_version
+from azure.cli.core.profiles import ResourceType, supported_api_version
 
 # CHOICE LISTS
 
@@ -252,10 +252,13 @@ for item in ['ssl-policy', 'waf-config']:
 
 if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):
     register_cli_argument('network application-gateway waf-config', 'disabled_rule_groups', nargs='+')
+    register_cli_argument('network application-gateway waf-config', 'disabled_rules', nargs='+')
+    register_cli_argument('network application-gateway waf-config list-rule-sets', '_type', options_list=['--type'])
 else:
     register_cli_argument('network application-gateway waf-config', 'rule_set_type', ignore_type)
     register_cli_argument('network application-gateway waf-config', 'rule_set_version', ignore_type)
     register_cli_argument('network application-gateway waf-config', 'disabled_rule_groups', ignore_type)
+    register_cli_argument('network application-gateway waf-config', 'disabled_rules', ignore_type)
 
 # ExpressRoutes
 register_cli_argument('network express-route', 'circuit_name', circuit_name_type, options_list=('--name', '-n'))
