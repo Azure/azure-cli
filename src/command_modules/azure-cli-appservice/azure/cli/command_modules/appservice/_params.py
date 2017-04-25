@@ -119,8 +119,9 @@ register_cli_argument('appservice web config ssl upload', 'certificate_password'
 register_cli_argument('appservice web config ssl upload', 'certificate_file', type=file_type, help='The filepath for the .pfx file')
 register_cli_argument('appservice web config ssl', 'certificate_thumbprint', help='The ssl cert thumbprint')
 
-register_cli_argument('appservice web config hostname', 'name', help="webapp name", completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
-register_cli_argument('appservice web config hostname', 'hostname', arg_type=name_arg_type, completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name')
+register_cli_argument('appservice web config hostname', 'webapp', options_list='--webapp-name', help="webapp name. You can configure the default using 'az configure --defaults web=<name>'", configured_default='web',
+                      completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
+register_cli_argument('appservice web config hostname', 'hostname', completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name')
 
 register_cli_argument('appservice web config backup', 'storage_account_url', help='URL with SAS token to the blob storage container', options_list=['--container-url'])
 register_cli_argument('appservice web config backup', 'webapp_name', help='The name of the webapp')

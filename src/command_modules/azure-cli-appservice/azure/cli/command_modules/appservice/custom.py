@@ -238,9 +238,9 @@ def _filter_for_container_settings(settings):
     return [x for x in settings if x['name'] in CONTAINER_APPSETTING_NAMES]
 
 
-def add_hostname(resource_group_name, name, hostname, slot=None):
+def add_hostname(resource_group_name, webapp, hostname, slot=None):
     client = web_client_factory()
-    webapp = client.web_apps.get(resource_group_name, name)
+    webapp = client.web_apps.get(resource_group_name, webapp)
     binding = HostNameBinding(webapp.location, host_name_binding_name=hostname,
                               site_name=webapp.name)
     if slot is None:
@@ -252,27 +252,27 @@ def add_hostname(resource_group_name, name, hostname, slot=None):
     return AppServiceLongRunningOperation()(poller)
 
 
-def delete_hostname(resource_group_name, name, hostname, slot=None):
+def delete_hostname(resource_group_name, webapp, hostname, slot=None):
     client = web_client_factory()
     if slot is None:
-        return client.web_apps.delete_host_name_binding(resource_group_name, name, hostname)
+        return client.web_apps.delete_host_name_binding(resource_group_name, webapp, hostname)
     else:
         return client.web_apps.delete_host_name_binding_slot(resource_group_name,
-                                                             name, slot, hostname)
+                                                             webapp, slot, hostname)
 
 
-def list_hostnames(resource_group_name, name, slot=None):
-    result = list(_generic_site_operation(resource_group_name, name,
+def list_hostnames(resource_group_name, webapp, slot=None):
+    result = list(_generic_site_operation(resource_group_name, webapp,
                                           'list_host_name_bindings', slot))
     for r in result:
         r.name = r.name.split('/')[-1]
     return result
 
 
-def get_external_ip(resource_group_name, name):
+def get_external_ip(resource_group_name, webapp):
     # logics here are ported from portal
     client = web_client_factory()
-    webapp = client.web_apps.get(resource_group_name, name)
+    webapp = client.web_apps.get(resource_group_name, webapp)
     if webapp.hosting_environment_profile:
         address = client.app_service_environments.list_vips(
             resource_group_name, webapp.hosting_environment_profile.name)
