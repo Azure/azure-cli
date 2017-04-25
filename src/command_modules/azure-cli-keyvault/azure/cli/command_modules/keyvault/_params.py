@@ -149,7 +149,7 @@ register_cli_argument('keyvault secret set', 'content_type', options_list=('--de
 register_attributes_argument('keyvault secret set', 'secret', SecretAttributes, create=True)
 register_cli_argument('keyvault secret set', 'value', options_list=('--value',), help="Plain text secret value. Cannot be used with '--file' or '--encoding'", required=False, arg_group='Content Source')
 register_extra_cli_argument('keyvault secret set', 'file_path', options_list=('--file', '-f'), type=file_type, help="Source file for secret. Use in conjunction with '--encoding'", completer=FilesCompleter(), arg_group='Content Source')
-register_extra_cli_argument('keyvault secret set', 'encoding', options_list=('--encoding', '-e'), help='Source file encoding. The value is saved as a tag (file-encoding=<val>) and used during download to automtically encode the resulting file.', default='utf-8', validator=process_secret_set_namespace, arg_group='Content Source', **enum_choice_list(secret_encoding_values))
+register_extra_cli_argument('keyvault secret set', 'encoding', options_list=('--encoding', '-e'), help='Source file encoding. The value is saved as a tag (`file-encoding=<val>`) and used during download to automtically encode the resulting file.', default='utf-8', validator=process_secret_set_namespace, arg_group='Content Source', **enum_choice_list(secret_encoding_values))
 
 register_attributes_argument('keyvault secret set-attributes', 'secret', SecretAttributes)
 
