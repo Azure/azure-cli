@@ -3,6 +3,11 @@
 Release History
 ===============
 
+unreleased
++++++++++++++++++++++
+
+* Bug fix - diagnostic settings create does not accept logs/metrics from show commands (#2913)
+
 0.0.2 (2017-04-17)
 +++++++++++++++++++++
 
