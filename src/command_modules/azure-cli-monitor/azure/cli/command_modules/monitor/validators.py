@@ -55,6 +55,13 @@ def validate_diagnostic_settings(namespace):
                                           resource_group=namespace.resource_group,
                                           namespace='microsoft.OperationalInsights',
                                           type='workspaces', name=namespace.workspace)
+
+    if namespace.logs:
+        namespace.logs = _validate_logs(namespace.logs)
+
+    if namespace.metrics:
+        namespace.metrics = _validate_metrics(namespace.metrics)
+
     _validate_tags(namespace)
 
 
@@ -74,3 +81,20 @@ def _validate_tag(string):
         comps = string.split('=', 1)
         result = {comps[0]: comps[1]} if len(comps) > 1 else {string: ''}
     return result
+
+
+def _validate_logs(logs):
+    if logs and isinstance(logs, list):
+        for log in logs:
+            if isinstance(log, dict) and 'retentionPolicy' in log:
+                log['retention_policy'] = log.pop('retentionPolicy')
+    return logs
+
+
+def _validate_metrics(metrics):
+    if metrics and isinstance(metrics, list):
+        for metric in metrics:
+            if isinstance(metric, dict) and 'retentionPolicy' in metric:
+                metric['retention_policy'] = metric.pop('retentionPolicy')
+                metric['time_grain'] = metric.pop('timeGrain')
+    return metrics
