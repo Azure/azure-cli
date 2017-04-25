@@ -144,11 +144,22 @@ def transform_geographic_hierachy_table_output(result):
     def _extract_values(obj):
         obj = obj if isinstance(obj, list) else [obj]
         for item in obj:
-            item_obj = {
-                'code': item['code'],
-                'name': item['name']
-            }
+            item_obj = OrderedDict()
+            item_obj['code'] = item['code']
+            item_obj['name'] = item['name']
             transformed.append(item_obj)
             _extract_values(item['regions'])
     _extract_values(result['geographicHierarchy'])
+    return transformed
+
+def transform_service_community_table_output(result):
+    transformed = []
+    for item in result:
+        service_name = item['serviceName']
+        for community in item['bgpCommunities']:
+            item_obj = OrderedDict()
+            item_obj['serviceName'] = service_name
+            item_obj['communityValue'] = community['communityValue']
+            item_obj['supportedRegion'] = community['serviceSupportedRegion']
+            transformed.append(item_obj)
     return transformed

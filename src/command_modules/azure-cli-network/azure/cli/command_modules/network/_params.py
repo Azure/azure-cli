@@ -284,7 +284,7 @@ register_cli_argument('network express-route peering', 'secondary_peer_address_p
 register_cli_argument('network express-route peering', 'customer_asn', arg_group='Microsoft Peering')
 register_cli_argument('network express-route peering', 'routing_registry_name', arg_group='Microsoft Peering', **enum_choice_list(routing_registry_values))
 if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01'):
-    register_cli_argument('network express-route peering', 'route_filter', help='Name or ID of a route filter to apply to the peering settings.', validator=validate_route_filter)
+    register_cli_argument('network express-route peering', 'route_filter', help='Name or ID of a route filter to apply to the peering settings.', validator=validate_route_filter, arg_group='Microsoft Peering')
 else:
     register_cli_argument('network express-route peering', 'route_filter', ignore_type)
 
@@ -412,7 +412,7 @@ register_cli_argument('network route-filter create', 'location', location_type, 
 register_cli_argument('network route-filter rule', 'route_filter_name', options_list=['--filter-name'], help='Name of the route filter.', id_part='name')
 register_cli_argument('network route-filter rule', 'rule_name', name_arg_type, help='Name of the route filter rule.', id_part='child_name')
 register_cli_argument('network route-filter rule', 'access', help='The access type of the rule.', **model_choice_list(ResourceType.MGMT_NETWORK, 'Access'))
-register_cli_argument('network route-filter rule', 'communities', help='Space separated list of BGP community values to filter on. (e.g.: 12076:5010)', nargs='+')
+register_cli_argument('network route-filter rule', 'communities', nargs='+')
 
 register_cli_argument('network route-filter rule create', 'location', location_type, validator=get_default_location_from_resource_group)
 
