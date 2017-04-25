@@ -45,12 +45,12 @@ name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 multi_ids_type = CliArgumentType(nargs='+')
 existing_vm_name = CliArgumentType(overrides=name_arg_type,
                                    configured_default='vm',
-                                   help="The name of the Virtual Machine. You can configure the default using 'az configure --defaults vm=<name>'",
+                                   help="The name of the Virtual Machine. You can configure the default using `az configure --defaults vm=<name>`",
                                    completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'), id_part='name')
 vmss_name_type = CliArgumentType(name_arg_type,
                                  configured_default='vmss',
                                  completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'),
-                                 help="Scale set name. You can configure the default using 'az configure --defaults vmss=<name>'",
+                                 help="Scale set name. You can configure the default using `az configure --defaults vmss=<name>`",
                                  id_part='name')
 disk_sku = CliArgumentType(required=False, help='underlying storage sku', **enum_choice_list(['Premium_LRS', 'Standard_LRS']))
 
@@ -229,7 +229,7 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'public_ip_address', help='Name of the public IP address when creating one (default) or referencing an existing one. Can also reference an existing public IP by ID or specify "" for None.', arg_group='Network')
     register_cli_argument(scope, 'public_ip_address_allocation', help=None, arg_group='Network', **enum_choice_list(['dynamic', 'static']))
     register_cli_argument(scope, 'public_ip_address_dns_name', help='Globally unique DNS name for a newly created Public IP.', arg_group='Network')
-    register_cli_argument(scope, 'secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via \'@<file path>\' containing \'[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]\'', type=file_type, completer=FilesCompleter())
+    register_cli_argument(scope, 'secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via `@<file path>` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`', type=file_type, completer=FilesCompleter())
     register_cli_argument(scope, 'os_caching', options_list=['--storage-caching', '--os-disk-caching'], arg_group='Storage', help='Storage caching type for the VM OS disk.', **enum_choice_list([CachingTypes.read_only.value, CachingTypes.read_write.value]))
     register_cli_argument(scope, 'data_caching', options_list=['--data-disk-caching'], arg_group='Storage', help='Storage caching type for the VM data disk(s).', **enum_choice_list(CachingTypes))
 
