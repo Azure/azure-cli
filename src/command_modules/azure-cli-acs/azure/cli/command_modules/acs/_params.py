@@ -56,7 +56,7 @@ def _get_default_install_location(exe_name):
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
 register_cli_argument('acs', 'name', arg_type=name_arg_type, configured_default='acs',
-                      help="ACS cluster name. You can configure the default using 'az configure --defaults acs=<name>'",
+                      help="ACS cluster name. You can configure the default using `az configure --defaults acs=<name>`",
                       completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'))
 
 register_cli_argument('acs', 'resource_group', arg_type=resource_group_name_type)
