@@ -104,11 +104,14 @@ def transform_vpn_connection_create_output(result):
     from msrest.pipeline import ClientRawResponse
     from msrestazure.azure_operation import AzureOperationPoller
     if isinstance(result, AzureOperationPoller):
+        # normally returns a LRO poller
         result = DeploymentOutputLongRunningOperation('Starting network vpn-connection create')(result)
         return result['resource']
     elif isinstance(result, ClientRawResponse):
+        # returns a raw response if --no-wait used
         return
     else:
+        # returns a plain response (not a poller) if --validate used
         return result
 
 
