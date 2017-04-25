@@ -238,30 +238,30 @@ def _filter_for_container_settings(settings):
     return [x for x in settings if x['name'] in CONTAINER_APPSETTING_NAMES]
 
 
-def add_hostname(resource_group_name, webapp, hostname, slot=None):
+def add_hostname(resource_group_name, webapp_name, hostname, slot=None):
     client = web_client_factory()
-    webapp_info = client.web_apps.get(resource_group_name, webapp)
-    binding = HostNameBinding(webapp_info.location, host_name_binding_name=hostname,
-                              site_name=webapp_info.name)
+    webapp = client.web_apps.get(resource_group_name, webapp_name)
+    binding = HostNameBinding(webapp.location, host_name_binding_name=hostname,
+                              site_name=webapp.name)
     if slot is None:
         return client.web_apps.create_or_update_host_name_binding(
-            resource_group_name, webapp_info.name, hostname, binding)
+            resource_group_name, webapp.name, hostname, binding)
     else:
         return client.web_apps.create_or_update_host_name_binding_slot(
-            resource_group_name, webapp_info.name, hostname, binding, slot)
+            resource_group_name, webapp.name, hostname, binding, slot)
 
 
-def delete_hostname(resource_group_name, webapp, hostname, slot=None):
+def delete_hostname(resource_group_name, webapp_name, hostname, slot=None):
     client = web_client_factory()
     if slot is None:
-        return client.web_apps.delete_host_name_binding(resource_group_name, webapp, hostname)
+        return client.web_apps.delete_host_name_binding(resource_group_name, webapp_name, hostname)
     else:
         return client.web_apps.delete_host_name_binding_slot(resource_group_name,
-                                                             webapp, slot, hostname)
+                                                             webapp_name, slot, hostname)
 
 
-def list_hostnames(resource_group_name, webapp, slot=None):
-    result = list(_generic_site_operation(resource_group_name, webapp,
+def list_hostnames(resource_group_name, webapp_name, slot=None):
+    result = list(_generic_site_operation(resource_group_name, webapp_name,
                                           'list_host_name_bindings', slot))
     for r in result:
         r.name = r.name.split('/')[-1]
