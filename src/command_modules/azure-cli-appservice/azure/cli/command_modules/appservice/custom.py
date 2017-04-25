@@ -22,6 +22,7 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan,
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
+from azure.cli.core.commands import LongRunningOperation
 
 from azure.cli.core.prompting import prompt_pass, NoTTYException
 import azure.cli.core.azlogging as azlogging
@@ -268,8 +269,8 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
     clone_from_prod = None
     slot_def.site_config = SiteConfig(location)
 
-    result = client.web_apps.create_or_update_slot(resource_group_name, webapp, slot_def, slot)()
-
+    poller = client.web_apps.create_or_update_slot(resource_group_name, webapp, slot_def, slot)
+    result = LongRunningOperation()(poller)
     if configuration_source:
         clone_from_prod = configuration_source.lower() == webapp.lower()
         site_config = get_site_configs(
