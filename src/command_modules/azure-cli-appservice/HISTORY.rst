@@ -2,6 +2,9 @@
 
 Release History
 ===============
+0.1.4 (unreleased)
+++++++++++++++++++++
+* Rename arg of '-n/--name' to '--hostname', and wire up default webapp name (#2946, #2947, #2949)
 
 0.1.3 (2017-04-17)
 ++++++++++++++++++++
