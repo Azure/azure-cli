@@ -122,12 +122,14 @@ class NetworkAppGatewayNoWaitScenarioTest(ResourceGroupVCRTestBase):
 
     def body(self):
         rg = self.resource_group
-        self.cmd('network application-gateway create -g {} -n ag1 --no-wait'.format(rg), checks=NoneCheck())
+        self.cmd('network application-gateway create -g {} -n ag1 --no-wait --connection-draining-timeout 180'.format(rg), checks=NoneCheck())
         self.cmd('network application-gateway create -g {} -n ag2 --no-wait'.format(rg), checks=NoneCheck())
         self.cmd('network application-gateway wait -g {} -n ag1 --created --interval 120'.format(rg), checks=NoneCheck())
         self.cmd('network application-gateway wait -g {} -n ag2 --created --interval 120'.format(rg), checks=NoneCheck())
         self.cmd('network application-gateway show -g {} -n ag1'.format(rg), checks=[
-            JMESPathCheck('provisioningState', 'Succeeded')
+            JMESPathCheck('provisioningState', 'Succeeded'),
+            JMESPathCheck('backendHttpSettingsCollection[0].connectionDraining.enabled', True),
+            JMESPathCheck('backendHttpSettingsCollection[0].connectionDraining.drainTimeoutInSec', 180),
             ])
         self.cmd('network application-gateway show -g {} -n ag2'.format(rg), checks=[
             JMESPathCheck('provisioningState', 'Succeeded')
