@@ -7,6 +7,7 @@ import re
 import os
 import uuid
 from dateutil.relativedelta import relativedelta
+from dateutil.tz import tzutc
 import dateutil.parser
 
 from azure.cli.core.util import CLIError, todict, get_file_json, shell_safe_json_parse
@@ -498,7 +499,7 @@ def _resolve_service_principal(client, identifier):
 
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-arguments,too-many-statements,too-many-locals, too-many-branches
-        name=None, password=None, years=1,
+        name=None, password=None, years=None,
         create_cert=False, cert=None,
         scopes=None, role='Contributor',
         expanded_view=None, skip_assignment=False):
@@ -529,6 +530,10 @@ def create_service_principal_for_rbac(
         if aad_sps:
             raise CLIError("'{}' already exists.".format(name))
 
+    start_date = datetime.datetime.utcnow()
+    app_display_name = app_display_name or ('azure-cli-' +
+                                            start_date.strftime('%Y-%m-%d-%H-%M-%S'))
+
     # pylint: disable=protected-access
     public_cert_string = None
     cert_file = None
@@ -536,19 +541,18 @@ def create_service_principal_for_rbac(
     if len([x for x in [cert, create_cert, password] if x]) > 1:
         raise CLIError('Usage error: --cert | --create-cert | --password')
     if create_cert:
-        public_cert_string, cert_file = _create_self_signed_cert(years)
+        public_cert_string, cert_file = _create_self_signed_cert(years or 1)
     elif cert:
         public_cert_string, end_date = _normalize_cert(cert)
+        if years and start_date.replace(tzinfo=tzutc()) + relativedelta(years=years) > end_date:
+            logger.warning("Use cert's expiration date as supplied '--years' exceeds it")
     else:
         password = password or str(uuid.uuid4())
 
-    start_date = datetime.datetime.utcnow()
-    app_display_name = app_display_name or ('azure-cli-' +
-                                            start_date.strftime('%Y-%m-%d-%H-%M-%S'))
     if name is None:
         name = 'http://' + app_display_name  # just a valid uri, no need to exist
 
-    end_date = end_date or start_date + relativedelta(years=years)
+    end_date = end_date or start_date + relativedelta(years=years or 1)
 
     aad_application = create_application(graph_client.applications,
                                          display_name=app_display_name,
@@ -679,16 +683,15 @@ def _normalize_cert(cert):
     cert_end = '-----END CERTIFICATE-----'
     if not pem_data.startswith(cert_header):
         pem_data = cert_header + '\n' + pem_data + '\n' + cert_end
-
     import OpenSSL.crypto
     x509 = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, pem_data)
     pkey = x509.get_notAfter().decode()
     end_date = dateutil.parser.parse(pkey)
-
     return cert.replace(cert_header, '').replace(cert_end, '').strip(), end_date
 
 
-def reset_service_principal_credential(name, password=None, create_cert=False, cert=None, years=1):
+def reset_service_principal_credential(name, password=None, create_cert=False,
+                                       cert=None, years=None):
     '''reset credential, on expiration or you forget it.
 
     :param str name: the name, can be the app id uri, app id guid, or display name
@@ -710,6 +713,7 @@ def reset_service_principal_credential(name, password=None, create_cert=False, c
             'more than one entry matches the name, please provide unique names like app id guid, or app id uri')  # pylint: disable=line-too-long
     app = show_application(client.applications, aad_sps[0].app_id)
 
+    start_date = datetime.datetime.utcnow()
     # build a new password/cert credential and patch it
     public_cert_string = None
     cert_file = None
@@ -717,13 +721,14 @@ def reset_service_principal_credential(name, password=None, create_cert=False, c
     if len([x for x in [cert, create_cert, password] if x]) > 1:
         raise CLIError('Usage error: --cert | --create-cert | --password')
     if create_cert:
-        public_cert_string, cert_file = _create_self_signed_cert(years)
+        public_cert_string, cert_file = _create_self_signed_cert(years or 1)
     elif cert:
         public_cert_string, end_date = _normalize_cert(cert)
+        if years and start_date.replace(tzinfo=tzutc()) + relativedelta(years=years) > end_date:
+            logger.warning("Use cert's expiration date as supplied '--years' exceeds it")
     else:
         password = password or str(uuid.uuid4())
-    start_date = datetime.datetime.utcnow()
-    end_date = end_date or start_date + relativedelta(years=years)
+    end_date = end_date or start_date + relativedelta(years=years or 1)
     key_id = str(uuid.uuid4())
     app_creds = [PasswordCredential(start_date, end_date, key_id, password)] if password else None
     cert_creds = [KeyCredential(start_date, end_date, public_cert_string, str(uuid.uuid4()),
