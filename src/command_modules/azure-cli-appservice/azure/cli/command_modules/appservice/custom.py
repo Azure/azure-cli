@@ -268,21 +268,21 @@ def list_hostnames(resource_group_name, webapp_name, slot=None):
     return result
 
 
-def get_external_ip(resource_group_name, webapp):
+def get_external_ip(resource_group_name, webapp_name):
     # logics here are ported from portal
     client = web_client_factory()
-    webapp = client.web_apps.get(resource_group_name, webapp)
-    if webapp.hosting_environment_profile:
+    webapp_name = client.web_apps.get(resource_group_name, webapp_name)
+    if webapp_name.hosting_environment_profile:
         address = client.app_service_environments.list_vips(
-            resource_group_name, webapp.hosting_environment_profile.name)
+            resource_group_name, webapp_name.hosting_environment_profile.name)
         if address.internal_ip_address:
             ip_address = address.internal_ip_address
         else:
-            vip = next((s for s in webapp.host_name_ssl_states
+            vip = next((s for s in webapp_name.host_name_ssl_states
                         if s.ssl_state == SslState.ip_based_enabled), None)
             ip_address = (vip and vip.virtual_ip) or address.service_ip_address
     else:
-        ip_address = _resolve_hostname_through_dns(webapp.default_host_name)
+        ip_address = _resolve_hostname_through_dns(webapp_name.default_host_name)
 
     return {'ip': ip_address}
 
