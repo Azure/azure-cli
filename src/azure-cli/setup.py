@@ -8,7 +8,12 @@
 from __future__ import print_function
 from codecs import open
 from setuptools import setup
-
+try:
+    from azure_bdist_wheel import cmdclass
+except ImportError:
+    from distutils import log as logger
+    logger.warn("Wheel is not available, disabling bdist_wheel hook")
+    cmdclass = {}
 VERSION = "2.0.3+dev"
 
 # If we have source, validate that our version numbers match
@@ -92,12 +97,10 @@ setup(
         'az.completion.sh',
         'az.bat',
     ],
-    namespace_packages=[
+    packages=[
         'azure',
         'azure.cli',
     ],
-    packages=[
-        'azure.cli',
-    ],
-    install_requires=DEPENDENCIES
+    install_requires=DEPENDENCIES,
+    cmdclass=cmdclass
 )
