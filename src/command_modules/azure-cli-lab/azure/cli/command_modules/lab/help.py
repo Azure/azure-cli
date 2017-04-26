@@ -214,6 +214,19 @@ helps['lab environment'] = """
 helps['lab environment create'] = """
             type: command
             short-summary: Create an environment.
+            parameters:
+                - name: --lab-name
+                  short-summary: Name of the Lab
+                - name: --name -n
+                  short-summary: Name of the environment
+                - name: --resource-group -g
+                  short-summary: Name of lab's resource group
+                - name: --arm-template-id
+                  short-summary: Fully qualified Azure Resource Manager template's identifier in the lab
+                - name: --parameters
+                  short-summary: JSON encoded list of parameters. Use @{file} to load from a file
+                - name: --tags
+                  short-summary: The tags of the resource
             """
 helps['lab environment delete'] = """
             type: command

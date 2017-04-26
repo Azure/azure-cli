@@ -8,7 +8,7 @@ from azure.cli.command_modules.lab.validators import (validate_lab_vm_create,
                                                       validate_lab_vm_list,
                                                       validate_user_name)
 from azure.cli.core.commands.parameters import resource_group_name_type
-from azure.cli.core.sdk.util import ParametersContext
+from azure.cli.core.sdk.util import ParametersContext, patch_arg_make_required
 
 
 with ParametersContext(command='lab') as c:
@@ -99,7 +99,10 @@ with ParametersContext(command='lab environment create') as c:
         import EnvironmentDeploymentProperties
     from azure.cli.command_modules.lab.sdk.devtestlabs.models.dtl_environment import DtlEnvironment
 
-    c.expand('deployment_properties', EnvironmentDeploymentProperties)
+    c.expand('deployment_properties', EnvironmentDeploymentProperties, patches={
+        'arm_template_id': patch_arg_make_required,
+        'parameters': patch_arg_make_required
+    })
     c.argument('parameters', type=json.loads)
 
     c.expand('dtl_environment', DtlEnvironment)
