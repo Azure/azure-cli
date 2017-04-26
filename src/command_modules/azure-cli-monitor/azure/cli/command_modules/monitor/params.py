@@ -20,7 +20,7 @@ with ParametersContext(command='monitor alert-rules create') as c:
                type=get_json_object,
                help='JSON encoded condition configuration. Use @{file} to load from a file.')
     c.register('actions', ('--actions',),
-               type=json.loads,
+               type=get_json_object,
                help='JSON encoded array of actions that are performed when the alert '
                     'rule becomes active, and when an alert condition is resolved. '
                     'Use @{file} to load from a file.')
