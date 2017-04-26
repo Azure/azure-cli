@@ -5,25 +5,73 @@
 import sys
 
 
-class StandardOut(object):
-    """ custom output for progress reporting """
-    def __init__(self, out=None):
-        self.out = out or sys.stdout
-        self.total_val = None
+class ProgressView(object):
+    """ a view base for progress reporting """
+    def __init__(self, out, format_percent=None):
+        self.out = out
+        self.format_percent = format_percent
 
-    def start(self, message, total_value):
+    def begin(self, message='', percent=None):
         """ start reporting progress """
-        self.out.write(message)
-        self.total_val = total_value
+        if not message:
+            message = 'Begining Process'
+        self.out.write(message, percent)
 
-    def write(self, message, value, total_value):
+    def write(self, message, percent):
         """ writes the progress """
-        if value and total_value:
-            self.out.write(self._format_value(value, total_value) + "\n")
+        if percent:
+            progress = self.format_percent(percent) if callable(self.format_percent) else percent
+            self.out.write(progress + "\n")
         self.out.write(message + '\n')
 
-    def _format_value(self, val, total_val):
-        percent = val / total_val
+    def flush(self):
+        """ flushes the message out the pipeline"""
+        self.out.flush()
+
+    def end(self, message=''):
+        """ stop reporting progress """
+        self.out.write('Finished{}'.format(message))
+
+
+class ProgressReporter(object):
+    """ generic progress reporter """
+    def __init__(self, total_value):
+        self.message = ''
+        self.curr_val = 0 if total_value else None
+        self.total_val = total_value
+
+    def add(self, message='', value=None, total_val=None):
+        """ adds a progress report """
+        if total_val:
+            self.total_val = total_val
+        if value and self.total_val:
+            self.curr_val = value
+        self.message = message
+
+    def report(self):
+        """ report the progress """
+        percent = self.curr_val / self.total_val if self.curr_val and self.total_val else None
+
+        return self.message, percent
+
+
+class ProgressHook(object):
+    """ sends the progress to the view """
+    def __init__(self, reporter, view):
+        self.reporter = reporter
+        self.view = view
+
+    def update(self):
+        """ updates the view with the progress """
+        self.view.write(self.reporter.report())
+
+
+class StandardOut(ProgressView):
+    """ custom output for progress reporting """
+    def __init__(self, out=None):
+        super(StandardOut, self).__init__(out if out else sys.stdout, self._format_value)
+
+    def _format_value(self, percent):
         bar_len = 100
         completed = int(bar_len*percent)
 
@@ -35,40 +83,3 @@ class StandardOut(object):
                 message += ' '
         message += ']  {:.4%}'.format(percent)
         return message
-
-    def flush(self):
-        """ flushes the message"""
-        self.out.flush()
-
-    def end(self, message=''):
-        """ stop reporting progress """
-        self.out.write('Finished{}'.format(message))
-
-
-class ProgressReporter(object):
-    """ generic progress reporter """
-    def __init__(self, transform_progress=None, out=sys.stdout):
-        self.message = ''
-        self.curr_val = None
-        self.total_val = None
-        self.tranform_progress = transform_progress
-        self.out = out
-
-    def add(self, message='', value=None):
-        """ adds a progress report """
-        if value:
-            self.curr_val = value
-        self.message = message
-
-    def report(self):
-        """ report the progress """
-        progress = None
-        if self.curr_val and self.total_val:
-            percent = self.curr_val / self.total_val
-
-            bar_len = 100
-            completed = int(bar_len*percent)
-            if self.tranform_progress and callable(self.tranform_progress):
-                progress = self.tranform_progress(completed, bar_len)
-
-        return progress, self.message
