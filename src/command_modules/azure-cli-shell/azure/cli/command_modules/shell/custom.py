@@ -10,6 +10,5 @@ logger = azlogging.get_az_logger(__name__)
 
 
 def start_shell(style=None):
-    # TODO-DEREK Need to support adding the params
     from azclishell.__main__ import main
     main(style=style)
