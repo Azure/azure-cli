@@ -185,3 +185,11 @@ helps['lab secret set'] = """
                 - name: --value
                   short-summary: Value of the secret
             """
+helps['lab environment'] = """
+            type: group
+            short-summary: Commands to manage environments in a DevTest Lab.
+            """
+helps['lab environment list'] = """
+            type: command
+            short-summary: List environments.
+            """
