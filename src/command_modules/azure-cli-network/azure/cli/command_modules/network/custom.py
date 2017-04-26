@@ -1392,42 +1392,41 @@ def update_vpn_connection(instance, routing_weight=None, shared_key=None, tags=N
 
     return instance
 
-def create_vpn_conn_ipsec_policy(resource_group_name, connection_name, sa_lifetime,
-                                 sa_data_size, ipsec_encryption, ipsec_integrity,
-                                 ike_encryption, ike_integrity, dh_group, pfs_group, no_wait=False):
-    IpsecPolicy = get_sdk(ResourceType.MGMT_NETWORK, 'IpsecPolicy', mod='models')
+def add_vpn_conn_ipsec_policy(resource_group_name, connection_name,
+                              sa_life_time_seconds, sa_data_size_kilobytes,
+                              ipsec_encryption, ipsec_integrity,
+                              ike_encryption, ike_integrity, dh_group, pfs_group, no_wait=False):
     ncf = _network_client_factory().virtual_network_gateway_connections
     conn = ncf.get(resource_group_name, connection_name)
-    new_policy = IpsecPolicy(sa_lifetime, sa_data_size, ipsec_encryption, ipsec_integrity,
+    new_policy = IpsecPolicy(sa_life_time_seconds, sa_data_size_kilobytes,
+                             ipsec_encryption, ipsec_integrity,
                              ike_encryption, ike_integrity, dh_group, pfs_group)
-    #_upsert(conn, 'ipsec_policies', new_policy, 'name')
     if conn.ipsec_policies:
         conn.ipsec_policies.append(new_policy)
     else:
         conn.ipsec_policies = [new_policy]
     return ncf.create_or_update(resource_group_name, connection_name, conn, raw=no_wait)
 
+if supported_api_version(ResourceType.MGMT_NETWORK, '2017-03-01'):
+    IpsecPolicy = get_sdk(ResourceType.MGMT_NETWORK, 'IpsecPolicy', mod='models')
+    add_vpn_conn_ipsec_policy.__doc__ = IpsecPolicy.__doc__
+def list_vpn_conn_ipsec_policies(resource_group_name, connection_name):
+    ncf = _network_client_factory().virtual_network_gateway_connections
+    return ncf.get(resource_group_name, connection_name).ipsec_policies
 
-def update_vpn_conn_ipsec_policy(instance, sa_lifetime=None, sa_data_size=None,
-                                 ipsec_encryption=None, ipsec_integrity=None, ike_encryption=None,
-                                 ike_integrity=None, dh_group=None, pfs_group=None):
-    if sa_lifetime is not None:
-        instance.sa_life_time_seconds = sa_lifetime
-    if sa_data_size is not None:
-        instance.sa_data_size_kilobytes = sa_data_size
-    if ipsec_encryption is not None:
-        instance.ipsec_encryption = ipsec_encryption
-    if ipsec_integrity is not None:
-        instance.ipsec_integrity = ipsec_integrity
-    if ike_encryption is not None:
-        instance.ike_encryption = ike_encryption
-    if ike_integrity is not None:
-        instance.ike_integrity = ike_integrity
-    if dh_group  is not None:
-        instance.dh_group = dh_group
-    if pfs_group is not None:
-        instance.pfs_group = pfs_group
-    return instance
+
+def clear_vpn_conn_ipsec_policies(resource_group_name, connection_name, no_wait=False):
+    ncf = _network_client_factory().virtual_network_gateway_connections
+    conn = ncf.get(resource_group_name, connection_name)
+    conn.ipsec_policies = None
+    conn.use_policy_based_traffic_selectors = False
+    if no_wait:
+        return ncf.create_or_update(resource_group_name, connection_name, conn, raw=no_wait)
+    else:
+        from azure.cli.core.commands import LongRunningOperation
+        poller = ncf.create_or_update(resource_group_name, connection_name, conn, raw=no_wait)
+        return LongRunningOperation()(poller).ipsec_policies
+
 
 def _validate_bgp_peering(instance, asn, bgp_peering_address, peer_weight):
     if any([asn, bgp_peering_address, peer_weight]):

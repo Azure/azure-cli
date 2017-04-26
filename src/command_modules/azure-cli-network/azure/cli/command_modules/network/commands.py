@@ -334,20 +334,9 @@ cli_command(__name__, 'network vpn-connection shared-key show', vpn_conn_path + 
 cli_command(__name__, 'network vpn-connection shared-key reset', vpn_conn_path + 'reset_shared_key', cf_virtual_network_gateway_connections)
 cli_generic_update_command(__name__, 'network vpn-connection shared-key update', vpn_conn_path + 'get', vpn_conn_path + 'set_shared_key', cf_virtual_network_gateway_connections)
 
-property_map = {
-    'ipsec_policies': 'ipsec-policy',
-}
-
-for subresource, alias in property_map.items():
-    cli_command(__name__, 'network vpn-connection {} list'.format(alias), 'azure.cli.command_modules.network._util#{}'.format(list_network_resource_property('virtual_network_gateway_connections', subresource)))
-    cli_command(__name__, 'network vpn-connection {} show'.format(alias), 'azure.cli.command_modules.network._util#{}'.format(get_network_resource_property_entry('virtual_network_gateway_connections', subresource)), exception_handler=empty_on_404)
-    cli_command(__name__, 'network vpn-connection {} delete'.format(alias), 'azure.cli.command_modules.network._util#{}'.format(delete_network_resource_property_entry('virtual_network_gateway_connections', subresource)), no_wait_param='no_wait')
-    cli_command(__name__, 'network vpn-connection {} create'.format(alias), custom_path + 'create_vpn_conn_{}'.format(_make_singular(subresource)), no_wait_param='no_wait')
-    cli_generic_update_command(__name__, 'network vpn-connection {} update'.format(alias),
-                               ag_path + 'get', ag_path + 'create_or_update', cf_virtual_network_gateway_connections,
-                               no_wait_param='raw',
-                               custom_function_op=custom_path + 'update_vpn_conn_{}'.format(_make_singular(subresource)),
-                               child_collection_prop_name=subresource)
+cli_command(__name__, 'network vpn-connection ipsec-policy add', custom_path + 'add_vpn_conn_ipsec_policy', no_wait_param='no_wait')
+cli_command(__name__, 'network vpn-connection ipsec-policy list', custom_path + 'list_vpn_conn_ipsec_policies')
+cli_command(__name__, 'network vpn-connection ipsec-policy clear', custom_path + 'clear_vpn_conn_ipsec_policies', no_wait_param='no_wait')
 
 # VirtualNetworkGatewaysOperations
 vgw_path = 'azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.'
