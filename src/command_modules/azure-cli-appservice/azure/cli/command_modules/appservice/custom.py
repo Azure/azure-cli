@@ -270,6 +270,8 @@ def update_connection_strings(resource_group_name, name, connection_string_type,
     for name_value in settings + slot_settings:
         # split at the first '=', connection string should not have '=' in the name
         conn_string_name, value = name_value.split('=', 1)
+        if value[0] in ["'", '"']:  # strip away the quots used as separators
+            value = value[1:-1]
         conn_strings.properties[conn_string_name] = ConnStringValueTypePair(value,
                                                                             connection_string_type)
 

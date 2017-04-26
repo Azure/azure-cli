@@ -104,6 +104,13 @@ register_cli_argument('webapp log config', 'web_server_logging', help='configure
 register_cli_argument('webapp log tail', 'provider', help="scope the live traces to certain providers/folders, for example:'application', 'http' for server log, 'kudu/trace', etc")
 register_cli_argument('webapp log download', 'log_file', default='webapp_logs.zip', type=file_type, completer=FilesCompleter(), help='the downloaded zipped log file path')
 
+for scope in ['appsettings', 'connection-string']:
+    register_cli_argument('webapp config ' + scope, 'settings', nargs='+', help="space separated {} in a format of <name>=<value>".format(scope))
+    register_cli_argument('webapp config ' + scope, 'slot_settings', nargs='+', help="space separated slot {} in a format of <name>=<value>".format(scope))
+    register_cli_argument('webapp config ' + scope, 'setting_names', nargs='+', help="space separated {} names".format(scope))
+register_cli_argument('webapp config connection-string', 'connection_string_type',
+                      options_list=('--connection-string-type', '-t'), help='connection string type', **enum_choice_list(ConnectionStringType))
+
 register_cli_argument('webapp config appsettings', 'settings', nargs='+', help="space separated app settings in a format of `<name>=<value>`")
 register_cli_argument('webapp config appsettings', 'slot_settings', nargs='+', help="space separated slot app settings in a format of `<name>=<value>`")
 register_cli_argument('webapp config appsettings', 'setting_names', nargs='+', help="space separated app setting names")
@@ -117,7 +124,7 @@ register_cli_argument('webapp config update', 'remote_debugging_enabled', help='
 register_cli_argument('webapp config update', 'web_sockets_enabled', help='enable or disable web sockets', **enum_choice_list(two_states_switch))
 register_cli_argument('webapp config update', 'always_on', help='ensure webapp gets loaded all the time, rather unloaded after been idle. Recommended when you have continuous web jobs running', **enum_choice_list(two_states_switch))
 register_cli_argument('webapp config update', 'auto_heal_enabled', help='enable or disable auto heal', **enum_choice_list(two_states_switch))
-register_cli_argument('webapp config update', 'use32_bit_worker_process', options_list=('--use-32bit-worker-process',), help='use 32 bits worker process or not', **enum_choice_list(two_states_switch))
+register_cli_argument('webapp config update', 'use3`_bit_worker_process', options_list=('--use-32bit-worker-process',), help='use 32 bits worker process or not', **enum_choice_list(two_states_switch))
 register_cli_argument('webapp config update', 'node_version', help='The version used to run your web app if using node, e.g., 4.4.7, 4.5.0, 6.2.2, 6.6.0')
 register_cli_argument('webapp config update', 'php_version', help='The version used to run your web app if using PHP, e.g., 5.5, 5.6, 7.0')
 register_cli_argument('webapp config update', 'python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
@@ -206,12 +213,9 @@ register_cli_argument('appservice web log config', 'web_server_logging', help='c
 register_cli_argument('appservice web log tail', 'provider', help="scope the live traces to certain providers/folders, for example:'application', 'http' for server log, 'kudu/trace', etc")
 register_cli_argument('appservice web log download', 'log_file', default='webapp_logs.zip', type=file_type, completer=FilesCompleter(), help='the downloaded zipped log file path')
 
-for scope in ['appsettings', 'connection-string']:
-    register_cli_argument('appservice web config ' + scope, 'settings', nargs='+', help="space separated {} in a format of <name>=<value>".format(scope))
-    register_cli_argument('appservice web config ' + scope, 'slot_settings', nargs='+', help="space separated slot {} in a format of <name>=<value>".format(scope))
-    register_cli_argument('appservice web config ' + scope, 'setting_names', nargs='+', help="space separated {} names".format(scope))
-register_cli_argument('appservice web config connection-string', 'connection_string_type',
-                      options_list=('--connection-string-type', '-t'), help='connection string type', **enum_choice_list(ConnectionStringType))
+register_cli_argument('appservice web config appsettings', 'settings', nargs='+', help='space separated appsettings in a format of <name>=<value>')
+register_cli_argument('appservice web config appsettings', 'slot_settings', nargs='+', help='space separated slot appsettings in a format of <name>=<value>')
+register_cli_argument('appservice web config appsettings', 'setting_names', nargs='+', help='space separated sppsettings names')
 
 register_cli_argument('appservice web config container', 'docker_registry_server_url', options_list=('--docker-registry-server-url', '-r'), help='the container registry server url')
 register_cli_argument('appservice web config container', 'docker_custom_image_name', options_list=('--docker-custom-image-name', '-c'), help='the container custom image name and optionally the tag name')

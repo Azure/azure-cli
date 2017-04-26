@@ -59,9 +59,32 @@ helps['webapp config appsettings update'] = """
             --settings WEBSITE_NODE_DEFAULT_VERSION=6.9.1
 """
 
-helps['webapp config appsettings delete'] = """
+helps['webapp config connection-string'] = """
+    type: group
+    short-summary: Configure web app connection strings.
+"""
+
+helps['webapp config connection-string show'] = """
     type: command
-    short-summary: Delete web app settings.
+    short-summary: Show connection strings
+"""
+
+helps['webapp config connection-string delete'] = """
+    type: command
+    short-summary: delete connection strings
+"""
+
+helps['webapp config connection-string update'] = """
+    type: command
+    short-summary: Create or update connection strings.
+    examples:
+        - name: add a mysql connection string.
+          text: >
+            az appservice web config connection-string update
+            -g MyResourceGroup
+            -n MyUniqueApp
+            -t mysql
+            --settings mysql1='Server=myServer;Database=myDB;Uid=myUser;Pwd=myPwd;'
 """
 
 helps['webapp config container'] = """
