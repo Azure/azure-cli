@@ -7,13 +7,18 @@ import uuid
 import datetime
 import hashlib
 
+RANDOM_NAME_COUNT = 0
 
 def create_random_name(prefix='clitest', length=24):
+    global RANDOM_NAME_COUNT
+
     if len(prefix) > length:
         raise 'The length of the prefix must not be longer than random name length'
 
-    identity = '{}-{}'.format(str(uuid.getnode()),
-                              datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S%f')).encode('utf-8')
+    identity = '{}-{}-{}'.format(str(uuid.getnode()),
+                              datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S%f'),
+                              RANDOM_NAME_COUNT).encode('utf-8')
+    RANDOM_NAME_COUNT += 1
     prefix += str(hashlib.sha256(identity).hexdigest())
     return prefix[:length]
 

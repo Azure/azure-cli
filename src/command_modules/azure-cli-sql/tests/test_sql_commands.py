@@ -25,19 +25,21 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
     # pylint: disable=too-many-arguments
     def __init__(self, name_prefix=server_name_prefix, parameter_name='server', location='westus',
                  admin_user='admin123', admin_password='SecretPassword123',
-                 resource_group_parameter_name='resource_group', skip_delete=True):
+                 resource_group_parameter_name='resource_group', skip_create=False, skip_delete=True):
         super(SqlServerPreparer, self).__init__(name_prefix, server_name_max_length)
         self.location = location
         self.parameter_name = parameter_name
         self.admin_user = admin_user
         self.admin_password = admin_password
         self.resource_group_parameter_name = resource_group_parameter_name
+        self.skip_create = skip_create
         self.skip_delete = skip_delete
 
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
         template = 'az sql server create -l {} -g {} -n {} -u {} -p {}'
-        execute(template.format(self.location, group, name, self.admin_user, self.admin_password))
+        if not self.skip_create:
+            execute(template.format(self.location, group, name, self.admin_user, self.admin_password))
         return {self.parameter_name: name}
 
     def remove_resource(self, name, **kwargs):
@@ -58,8 +60,12 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
 class SqlServerMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer()
-    def test_sql_server_mgmt(self, resource_group, resource_group_location):
-        servers = ['cliautomation51', 'cliautomation52']  # TODO: Server names should be randomized
+    # Skip create in SqlServerPreparer because we want to create in the test. So why even use 
+    # SqlServerPreparer? We still want to generate random server name and replace it in the test
+    # recording, which SqlServerPreparer does very nicely.
+    @SqlServerPreparer(skip_create=True, parameter_name='server1')
+    @SqlServerPreparer(skip_create=True, parameter_name='server2')
+    def test_sql_server_mgmt(self, resource_group, resource_group_location, server1, server2):
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
@@ -70,9 +76,9 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         # test create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} -l {} '
                  '--admin-user {} --admin-password {}'
-                 .format(rg, servers[0], loc, user, admin_passwords[0]),
+                 .format(rg, server1, loc, user, admin_passwords[0]),
                  checks=[
-                     JMESPathCheck('name', servers[0]),
+                     JMESPathCheck('name', server1),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('administratorLogin', user),
                      JMESPathCheck('administratorLoginPassword', admin_passwords[0])])
@@ -82,9 +88,9 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
 
         # test update sql server
         self.cmd('sql server update -g {} --name {} --admin-password {}'
-                 .format(rg, servers[0], admin_passwords[1]),
+                 .format(rg, server1, admin_passwords[1]),
                  checks=[
-                     JMESPathCheck('name', servers[0]),
+                     JMESPathCheck('name', server1),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('administratorLogin', user),
                      JMESPathCheck('administratorLoginPassword', admin_passwords[1])])
@@ -92,9 +98,9 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         # test create another sql server
         self.cmd('sql server create -g {} --name {} -l {} '
                  '--admin-user {} --admin-password {}'
-                 .format(rg, servers[1], loc, user, admin_passwords[0]),
+                 .format(rg, server2, loc, user, admin_passwords[0]),
                  checks=[
-                     JMESPathCheck('name', servers[1]),
+                     JMESPathCheck('name', server2),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('administratorLogin', user),
                      JMESPathCheck('administratorLoginPassword', admin_passwords[0])])
@@ -104,17 +110,17 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
 
         # test show sql server
         self.cmd('sql server show -g {} --name {}'
-                 .format(rg, servers[0]),
+                 .format(rg, server1),
                  checks=[
-                     JMESPathCheck('name', servers[0]),
+                     JMESPathCheck('name', server1),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('administratorLogin', user)])
 
         # test delete sql server
         self.cmd('sql server delete -g {} --name {} --yes'
-                 .format(rg, servers[0]), checks=NoneCheck())
+                 .format(rg, server1), checks=NoneCheck())
         self.cmd('sql server delete -g {} --name {} --yes'
-                 .format(rg, servers[1]), checks=NoneCheck())
+                 .format(rg, server2), checks=NoneCheck())
 
         # test list sql server should be 0
         self.cmd('sql server list -g {}'.format(rg), checks=[NoneCheck()])
@@ -288,11 +294,11 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
 class SqlServerDbCopyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group_1')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
-    @SqlServerPreparer(parameter_name='server_1', resource_group_parameter_name='resource_group_1')
-    @SqlServerPreparer(parameter_name='server_2', resource_group_parameter_name='resource_group_2')
+    @SqlServerPreparer(parameter_name='server1', resource_group_parameter_name='resource_group_1')
+    @SqlServerPreparer(parameter_name='server2', resource_group_parameter_name='resource_group_2')
     def test_sql_db_copy(self, resource_group_1, resource_group_2,
                          resource_group_location,
-                         server_1, server_2):
+                         server1, server2):
 
         database_name = "cliautomationdb01"
         database_copy_name = "cliautomationdb02"
@@ -303,7 +309,7 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
 
         # create database
         self.cmd('sql db create -g {} --server {} --name {}'
-                 .format(rg, server_1, database_name),
+                 .format(rg, server1, database_name),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name),
@@ -314,7 +320,7 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
         # copy database to same server (min parameters)
         self.cmd('sql db copy -g {} --server {} --name {} '
                  '--dest-name {}'
-                 .format(rg, server_1, database_name, database_copy_name),
+                 .format(rg, server1, database_name, database_copy_name),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_copy_name)
@@ -324,8 +330,8 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
         self.cmd('sql db copy -g {} --server {} --name {} '
                  '--dest-name {} --dest-resource-group {} --dest-server {} '
                  '--service-objective {}'
-                 .format(rg, server_1, database_name, database_copy_name,
-                         resource_group_2, server_2, service_objective),
+                 .format(rg, server1, database_name, database_copy_name,
+                         resource_group_2, server2, service_objective),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group_2),
                      JMESPathCheck('name', database_copy_name),
