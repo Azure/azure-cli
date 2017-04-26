@@ -508,7 +508,7 @@ def create_service_principal_for_rbac(
     '''create a service principal and configure its access to Azure resources
     :param str name: a display name or an app id uri. Command will generate one if missing.
     :param str password: the password used to login. If missing, command will generate one.
-    :param str cert: PEM formatted public certificate. Do not include private key info.
+    :param str cert: string or @file_path PEM formatted public certificate. Do not include private key info.
     :param str years: Years the password will be valid. Default: 1 year
     :param str scopes: space separated scopes the service principal's role assignment applies to.
            Defaults to the root of the current subscription.
