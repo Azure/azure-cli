@@ -25,7 +25,7 @@ GESTURE_INFO = {
     SELECT_SYMBOL['query'] + "[path]": "query previous command using jmespath syntax",
     "[cmd] " + SELECT_SYMBOL['example'] + " [num]": "do a step by step tutorial of example",
     SELECT_SYMBOL['exit_code']: "get the exit code of the previous command",
-    SELECT_SYMBOL['scope'] + '[cmd]': "set a scope",
+    SELECT_SYMBOL['scope'] + '[cmd]': "set a scope, and scopes can be chained with spaces",
     SELECT_SYMBOL['scope'] + ' ' + SELECT_SYMBOL['unscope']: "go back a scope",
     "Ctrl+N": "Scroll down the documentation",
     "Ctrl+Y": "Scroll up the documentation"
@@ -37,6 +37,7 @@ GESTURE_LENGTH = 20
 
 
 def help_text(values):
+    """ reformats the help text """
     result = ""
     for key in values:
         result += key + ' '.join('' for x in range(GESTURE_LENGTH - len(key))) +\
@@ -57,12 +58,14 @@ class Configuration(object):
     def __init__(self):
         self.config = configparser.ConfigParser({
             'firsttime': 'yes',
-            'style': 'default'
+            'style' : 'default',
+            'given feedback' : 'no'
         })
         self.config.add_section('Help Files')
         self.config.add_section('Layout')
         self.config.set('Help Files', 'command', 'help_dump.json')
         self.config.set('Help Files', 'history', 'history.txt')
+        self.config.set('Help Files', 'frequency', 'frequency.json')
         self.config.set('Layout', 'command_description', 'yes')
         self.config.set('Layout', 'param_description', 'yes')
         self.config.set('Layout', 'examples', 'yes')
@@ -86,6 +89,10 @@ class Configuration(object):
         """ returns where the command table is cached """
         return self.config.get('Help Files', 'command')
 
+    def get_frequency(self):
+        """ returns the name of the frequency file """
+        return self.config.get('Help Files', 'frequency')
+
     def load(self, path):
         """ loads the configuration settings """
         self.config.read(path)
@@ -103,6 +110,15 @@ class Configuration(object):
     def get_style(self):
         """ gets the last style they used """
         return self.config.get('DEFAULT', 'style')
+
+    def has_feedback(self):
+        """ returns whether user has given feedback """
+        return self.BOOLEAN_STATES[self.config.get('DEFAULT', 'given feedback')]
+
+    def set_feedback(self, value):
+        """ sets the feedback in the config """
+        self.config.set('DEFAULT', 'given feedback', value)
+        self.update()
 
     def set_style(self, val):
         """ sets the style they used """

@@ -517,9 +517,13 @@ class Shell(object):
         return continue_flag, cmd
 
     def cli_execute(self, cmd):
+        """ runs a command through the CLI """
         try:
             args = parse_quotes(cmd)
             azlogging.configure_logging(args)
+
+            if 'feedback' in args:
+                SHELL_CONFIGURATION.set_feedback('yes')
 
             azure_folder = get_config_dir()
             if not os.path.exists(azure_folder):
@@ -531,6 +535,7 @@ class Shell(object):
             config = Configuration()
             self.app.initialize(config)
             result = self.app.execute(args)
+
             self.last_exit = 0
             if result and result.result is not None:
                 from azure.cli.core._output import OutputProducer
