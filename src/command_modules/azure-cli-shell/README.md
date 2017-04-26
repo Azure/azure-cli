@@ -32,7 +32,7 @@ A list of common install issues and their resolutions are available at [install 
 To start the application
 
 ```bash
-   $ az-shell
+   $ az shell
 ```
 
 Then type your commands and hit [Enter]
