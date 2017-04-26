@@ -20,7 +20,7 @@ def main(args, file=sys.stdout):  # pylint: disable=redefined-builtin
     azlogging.configure_logging(args)
     logger.debug('Command arguments %s', args)
 
-    if len(args) > 0 and args[0] == '--version':
+    if len(args) > 0 and (args[0] == '--version' or args[0] == '-v'):
         show_version_info_exit(file)
 
     azure_folder = get_config_dir()
