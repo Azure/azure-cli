@@ -29,7 +29,7 @@ helps['dla job submit'] = """
         - name: --script
           type: string
           short-summary: 'The script to submit'
-          long-summary: This is either the script contents or use \'@<file path>\' to load the script from a file
+          long-summary: This is either the script contents or use `@<file path>` to load the script from a file
         - name: --runtime-version
           short-summary: 'The runtime version to use'
           long-summary: This parameter is used for explicitly overwriting the default runtime. It should only be done if you know what you are doing.

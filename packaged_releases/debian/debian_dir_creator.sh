@@ -183,6 +183,7 @@ ${TAB}dh \$@ --with python-virtualenv
 
 override_dh_virtualenv:
 ${TAB}dh_virtualenv --sourcedirectory src/azure-cli-nspkg --install-suffix az
+${TAB}dh_virtualenv --sourcedirectory src/azure-cli-command_modules-nspkg --install-suffix az
 ${TAB}dh_virtualenv --sourcedirectory src/azure-cli-core --install-suffix az
 ${TAB}for d in src/command_modules/azure-cli-*/; do dh_virtualenv --sourcedirectory \$d --install-suffix az; done;
 ${TAB}dh_virtualenv --sourcedirectory src/azure-cli --install-suffix az

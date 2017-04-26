@@ -11,6 +11,10 @@ from __future__ import print_function
 import os
 import time
 import unittest
+from datetime import datetime
+from dateutil import tz
+
+from azure.cli.command_modules.keyvault.custom import _asn1_to_iso8601
 
 from azure.cli.core.util import CLIError
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck,
@@ -44,6 +48,20 @@ def _create_keyvault(test, vault_name, resource_group, location, retry_wait=30, 
                 time.sleep(retry_wait)
             else:
                 raise ex
+
+
+class DateTimeParseTest(unittest.TestCase):
+
+    def test_parse_asn1_date(self):
+        expected = datetime(year=2017,
+                            month=4,
+                            day=24,
+                            hour=16,
+                            minute=37,
+                            second=20,
+                            tzinfo=tz.tzutc())
+        self.assertEqual(_asn1_to_iso8601("20170424163720Z"), expected)
+
 
 
 class KeyVaultMgmtScenarioTest(ResourceGroupVCRTestBase):

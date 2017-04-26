@@ -45,3 +45,7 @@ def get_devtestlabs_formula_operation(kwargs):
 
 def get_devtestlabs_secret_operation(kwargs):
     return get_devtestlabs_management_client(kwargs).secret
+
+
+def get_devtestlabs_environment_operation(kwargs):
+    return get_devtestlabs_management_client(kwargs).environment

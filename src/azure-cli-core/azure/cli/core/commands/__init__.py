@@ -397,25 +397,24 @@ def create_command(module_name, name, operation,
             op = get_op_handler(operation)
             try:
                 result = op(client, **kwargs) if client else op(**kwargs)
+                if no_wait_param and kwargs.get(no_wait_param, None):
+                    return None  # return None for 'no-wait'
+
+                # apply results transform if specified
+                if transform_result:
+                    return transform_result(result)
+
+                # otherwise handle based on return type of results
+                if _is_poller(result):
+                    return LongRunningOperation('Starting {}'.format(name))(result)
+                elif _is_paged(result):
+                    return list(result)
+                return result
             except Exception as ex:  # pylint: disable=broad-except
                 if exception_handler:
-                    result = exception_handler(ex)
+                    exception_handler(ex)
                 else:
                     reraise(*sys.exc_info())
-
-            if no_wait_param and kwargs.get(no_wait_param, None):
-                return None  # return None for 'no-wait'
-
-            # apply results transform if specified
-            if transform_result:
-                return transform_result(result)
-
-            # otherwise handle based on return type of results
-            if _is_poller(result):
-                return LongRunningOperation('Starting {}'.format(name))(result)
-            elif _is_paged(result):
-                return list(result)
-            return result
         except _load_client_exception_class() as client_exception:
             fault_type = name.replace(' ', '-') + '-client-error'
             telemetry.set_exception(client_exception, fault_type=fault_type,

@@ -31,38 +31,8 @@ from ._params import web_client_factory, _generic_site_operation
 
 logger = azlogging.get_az_logger(__name__)
 
+
 # pylint:disable=no-member,superfluous-parens
-
-
-class AppServiceLongRunningOperation(LongRunningOperation):  # pylint: disable=too-few-public-methods
-
-    def __init__(self, creating_plan=False):
-        super(AppServiceLongRunningOperation, self).__init__(self)
-        self._creating_plan = creating_plan
-
-    def __call__(self, poller):
-        try:
-            return super(AppServiceLongRunningOperation, self).__call__(poller)
-        except Exception as ex:
-            raise self._get_detail_error(ex)
-
-    def _get_detail_error(self, ex):
-        try:
-            # workaround that app service's error doesn't comform to LRO spec
-            detail = json.loads(ex.response.text)['Message']
-            if self._creating_plan:
-                if 'Requested features are not supported in region' in detail:
-                    detail = ("Plan with linux worker is not supported in current region. For " +
-                              "supported regions, please refer to https://docs.microsoft.com/en-us/"
-                              "azure/app-service-web/app-service-linux-intro")
-                elif 'Not enough available reserved instance servers to satisfy' in detail:
-                    detail = ("Plan with Linux worker can only be created in a group " +
-                              "which has never contained a Windows worker, and vice versa. " +
-                              "Please use a new resource group. Original error:" + detail)
-            return CLIError(detail)
-        except:  # pylint: disable=bare-except
-            return ex
-
 
 def create_webapp(resource_group_name, name, plan):
     client = web_client_factory()
@@ -70,8 +40,7 @@ def create_webapp(resource_group_name, name, plan):
         plan = parse_resource_id(plan)['name']
     location = _get_location_from_app_service_plan(client, resource_group_name, plan)
     webapp_def = Site(server_farm_id=plan, location=location)
-    poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
-    return AppServiceLongRunningOperation()(poller)
+    return client.web_apps.create_or_update(resource_group_name, name, webapp_def)
 
 
 def show_webapp(resource_group_name, name, slot=None):
@@ -238,47 +207,51 @@ def _filter_for_container_settings(settings):
     return [x for x in settings if x['name'] in CONTAINER_APPSETTING_NAMES]
 
 
-def add_hostname(resource_group_name, webapp_name, name, slot=None):
+def add_hostname(resource_group_name, webapp_name, hostname, slot=None):
     client = web_client_factory()
     webapp = client.web_apps.get(resource_group_name, webapp_name)
-    binding = HostNameBinding(webapp.location, host_name_binding_name=name, site_name=webapp.name)
+    binding = HostNameBinding(webapp.location, host_name_binding_name=hostname,
+                              site_name=webapp.name)
     if slot is None:
         return client.web_apps.create_or_update_host_name_binding(
-            resource_group_name, webapp.name, name, binding)
+            resource_group_name, webapp.name, hostname, binding)
     else:
         return client.web_apps.create_or_update_host_name_binding_slot(
-            resource_group_name, webapp.name, name, binding, slot)
+            resource_group_name, webapp.name, hostname, binding, slot)
 
 
-def delete_hostname(resource_group_name, webapp_name, name, slot=None):
+def delete_hostname(resource_group_name, webapp_name, hostname, slot=None):
     client = web_client_factory()
     if slot is None:
-        return client.web_apps.delete_host_name_binding(resource_group_name, webapp_name, name)
+        return client.web_apps.delete_host_name_binding(resource_group_name, webapp_name, hostname)
     else:
         return client.web_apps.delete_host_name_binding_slot(resource_group_name,
-                                                             webapp_name, slot, name)
+                                                             webapp_name, slot, hostname)
 
 
 def list_hostnames(resource_group_name, webapp_name, slot=None):
-    return _generic_site_operation(resource_group_name, webapp_name, 'list_host_name_bindings',
-                                   slot)
+    result = list(_generic_site_operation(resource_group_name, webapp_name,
+                                          'list_host_name_bindings', slot))
+    for r in result:
+        r.name = r.name.split('/')[-1]
+    return result
 
 
 def get_external_ip(resource_group_name, webapp_name):
     # logics here are ported from portal
     client = web_client_factory()
-    webapp = client.web_apps.get(resource_group_name, webapp_name)
-    if webapp.hosting_environment_profile:
+    webapp_name = client.web_apps.get(resource_group_name, webapp_name)
+    if webapp_name.hosting_environment_profile:
         address = client.app_service_environments.list_vips(
-            resource_group_name, webapp.hosting_environment_profile.name)
+            resource_group_name, webapp_name.hosting_environment_profile.name)
         if address.internal_ip_address:
             ip_address = address.internal_ip_address
         else:
-            vip = next((s for s in webapp.host_name_ssl_states
+            vip = next((s for s in webapp_name.host_name_ssl_states
                         if s.ssl_state == SslState.ip_based_enabled), None)
             ip_address = (vip and vip.virtual_ip) or address.service_ip_address
     else:
-        ip_address = _resolve_hostname_through_dns(webapp.default_host_name)
+        ip_address = _resolve_hostname_through_dns(webapp_name.default_host_name)
 
     return {'ip': ip_address}
 
@@ -297,8 +270,7 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
     slot_def.site_config = SiteConfig(location)
 
     poller = client.web_apps.create_or_update_slot(resource_group_name, webapp, slot_def, slot)
-    result = AppServiceLongRunningOperation()(poller)
-
+    result = LongRunningOperation()(poller)
     if configuration_source:
         clone_from_prod = configuration_source.lower() == webapp.lower()
         site_config = get_site_configs(
@@ -343,10 +315,9 @@ def config_source_control(resource_group_name, name, repo_url, repository_type=N
     source_control = SiteSourceControl(location, repo_url=repo_url, branch=branch,
                                        is_manual_integration=manual_integration,
                                        is_mercurial=(repository_type != 'git'))
-    poller = _generic_site_operation(resource_group_name, name,
-                                     'create_or_update_source_control',
-                                     slot, source_control)
-    return AppServiceLongRunningOperation()(poller)
+    return _generic_site_operation(resource_group_name, name,
+                                   'create_or_update_source_control',
+                                   slot, source_control)
 
 
 def update_git_token(git_token=None):
@@ -432,8 +403,7 @@ def create_app_service_plan(resource_group_name, name, is_linux, sku='B1', numbe
     sku_def = SkuDescription(tier=_get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location, app_service_plan_name=name,
                               sku=sku_def, reserved=(is_linux or None))
-    poller = client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
-    return AppServiceLongRunningOperation(creating_plan=True)(poller)
+    return client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
 
 
 def update_app_service_plan(instance, sku=None, number_of_workers=None,
@@ -768,12 +738,10 @@ def list_slots(resource_group_name, webapp):
 def swap_slot(resource_group_name, webapp, slot, target_slot=None):
     client = web_client_factory()
     if target_slot is None:
-        poller = client.web_apps.swap_slot_with_production(resource_group_name, webapp, slot, True)
+        return client.web_apps.swap_slot_with_production(resource_group_name, webapp, slot, True)
     else:
-        poller = client.web_apps.swap_slot_slot(resource_group_name, webapp,
-                                                slot, target_slot, True)
-
-    return AppServiceLongRunningOperation()(poller)
+        return client.web_apps.swap_slot_slot(resource_group_name, webapp,
+                                              slot, target_slot, True)
 
 
 def delete_slot(resource_group_name, webapp, slot):

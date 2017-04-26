@@ -17,6 +17,10 @@ helps['acs kubernetes'] = """
     type: group
     short-summary: Manage a Kubernetes orchestrated Azure Container service.
 """
+helps['acs kubernetes get-credentials'] = """
+    type: command
+    short-summary: Download and install credentials to access your cluster.
+"""
 helps['acs scale'] = """
     type: command
     short-summary: Change the private agent count of a container service.

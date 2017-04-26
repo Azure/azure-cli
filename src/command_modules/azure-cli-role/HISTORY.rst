@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.3 (unreleased)
+++++++++++++++++++
+* create-for-rbac: ensure SP's end date will not exceed certificate's expiration date (#2989)
+* RBAC: add full support for 'ad group' (#2016)
 
 2.0.2 (2017-04-17)
 ++++++++++++++++++
