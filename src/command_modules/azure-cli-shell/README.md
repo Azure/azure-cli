@@ -113,7 +113,7 @@ There is a docker image on docker hub
 ```bash
    $ docker pull azuresdk/azure-cli-shell:latest
    $ docker run -it azuresdk/azure-cli-shell:latest
-   root#: az-shell
+   root#: az shell
 ```
 
 
