@@ -4,6 +4,9 @@
 # --------------------------------------------------------------------------------------------
 import json
 from azure.cli.core.test_utils.vcr_test_base import VCRTestBase, JMESPathCheck, NoneCheck
+from azure.cli.testsdk import ScenarioTest
+from azure.cli.testsdk import JMESPathCheck as JMESPathCheck2
+from azure.cli.testsdk import NoneCheck as NoneCheck2
 
 
 class ServicePrincipalExpressCreateScenarioTest(VCRTestBase):
@@ -86,10 +89,6 @@ class ApplicationSetScenarioTest(VCRTestBase):
         self.cmd('ad app delete --id {}'.format(app_id_uri))
         self.cmd('ad app list --identifier-uri {}'.format(app_id_uri), checks=NoneCheck())
 
-
-from azure.cli.testsdk import ScenarioTest
-from azure.cli.testsdk import JMESPathCheck as JMESPathCheck2
-from azure.cli.testsdk import NoneCheck as NoneCheck2
 
 class GraphGroupScenarioTest(ScenarioTest):
 
