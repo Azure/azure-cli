@@ -28,7 +28,7 @@ def validate_group(namespace):
         elif count == 0:
             raise CLIError("No group matches the name of '{}'".format(value))
         else:
-            raise CLIError("More than one groups match the name of '{}'" + value)
+            raise CLIError("More than one groups match the name of '{}'".format(value))
 
 
 def validate_member_id(namespace):
