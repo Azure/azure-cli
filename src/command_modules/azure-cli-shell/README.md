@@ -90,6 +90,15 @@ Pick the example you want with:
 
 Only clears the appended suggestion when you restart the shell
 
+## Change colors
+
+```bash
+   $ az shell --styles [option]
+```
+
+The color option will be saved.
+
+
 
 ## Dev Setup
 
