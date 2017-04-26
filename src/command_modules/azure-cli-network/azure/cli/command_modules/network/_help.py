@@ -1845,14 +1845,9 @@ helps['network vpn-connection ipsec-policy'] = """
     short-summary: Manage VPN connection IPSec policies.
 """
 
-helps['network vpn-connection ipsec-policy create'] = """
+helps['network vpn-connection ipsec-policy add'] = """
     type: command
-    short-summary: Create a VPN connection IPSec policy.
-"""
-
-helps['network vpn-connection ipsec-policy show'] = """
-    type: command
-    short-summary: Show a VPN connection IPSec policy.
+    short-summary: Add a VPN connection IPSec policy.
 """
 
 helps['network vpn-connection ipsec-policy list'] = """
@@ -1860,14 +1855,9 @@ helps['network vpn-connection ipsec-policy list'] = """
     short-summary: List IPSec policies associated with a VPN connection.
 """
 
-helps['network vpn-connection ipsec-policy delete'] = """
+helps['network vpn-connection ipsec-policy clear'] = """
     type: command
-    short-summary: Delete a VPN connection IPSec policy.
-"""
-
-helps['network vpn-connection ipsec-policy update'] = """
-    type: command
-    short-summary: Update a VPN connection IPSec policy.
+    short-summary: Delete all IPSec policies on a VPN connection.
 """
 
 #endregion

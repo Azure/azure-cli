@@ -536,6 +536,7 @@ register_extra_cli_argument('network vnet-gateway update', 'address_prefixes', o
 # VPN connection
 register_cli_argument('network vpn-connection', 'virtual_network_gateway_connection_name', options_list=('--name', '-n'), metavar='NAME', id_part='name', help='Connection name.')
 register_cli_argument('network vpn-connection', 'shared_key', help='Shared IPSec key.')
+register_cli_argument('network vpn-connection', 'connection_name', help='Connection name.')
 
 if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):
     register_cli_argument('network vpn-connection', 'use_policy_based_traffic_selectors', help='Enable policy-based traffic selectors.', **three_state_flag())
@@ -556,6 +557,20 @@ register_cli_argument('network vpn-connection update', 'enable_bgp', help='Enabl
 register_cli_argument('network vpn-connection shared-key', 'connection_shared_key_name', options_list=('--name', '-n'), id_part='name')
 register_cli_argument('network vpn-connection shared-key', 'virtual_network_gateway_connection_name', options_list=('--connection-name',), metavar='NAME', id_part='name')
 register_cli_argument('network vpn-connection shared-key', 'key_length', type=int)
+
+# VPN connection IPSec policy
+param_map = {
+    'dh_group': 'DhGroup',
+    'ike_encryption': 'IkeEncryption',
+    'ike_integrity': 'IkeIntegrity',
+    'ipsec_encryption': 'IpsecEncryption',
+    'ipsec_integrity': 'IpsecIntegrity',
+    'pfs_group': 'PfsGroup'
+}
+for dest, model_name in param_map.items():
+    register_cli_argument('network vpn-connection ipsec-policy', dest, **model_choice_list(ResourceType.MGMT_NETWORK, model_name))
+register_cli_argument('network vpn-connection ipsec-policy', 'sa_data_size_kilobytes', options_list=['--sa-max-size'], type=int)
+register_cli_argument('network vpn-connection ipsec-policy', 'sa_life_time_seconds', options_list=['--sa-lifetime'], type=int)
 
 # Traffic manager profiles
 register_cli_argument('network traffic-manager profile', 'traffic_manager_profile_name', name_arg_type, id_part='name', help='Traffic manager profile name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
