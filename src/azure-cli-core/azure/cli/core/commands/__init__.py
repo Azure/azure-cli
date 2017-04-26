@@ -100,8 +100,8 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms
-        from azclishell.app import ProgressView
-        self.out = out or ProgressView()
+        from azclishell.progress import ShellProgressView
+        self.out = out or ShellProgressView()
         self.curr_message = 'Running'
         self.curr_val = None
         self.total_val = total_val
@@ -121,7 +121,8 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         correlation_message = ''
         self.out.begin()
         while not poller.done():
-            self.out.write(self.curr_message + '\n', self.curr_val, self.total_val)
+            percent = self.curr_val / self.total_val if self.curr_val and self.total_val else None
+            self.out.write(self.curr_message + '\n', percent)
             self.out.flush()
             try:
                 # pylint: disable=protected-access

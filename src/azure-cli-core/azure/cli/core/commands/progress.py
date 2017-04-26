@@ -15,7 +15,7 @@ class ProgressView(object):
         """ start reporting progress """
         if not message:
             message = 'Begining Process'
-        self.out.write(message, percent)
+        self.write(message, percent)
 
     def write(self, message, percent):
         """ writes the progress """

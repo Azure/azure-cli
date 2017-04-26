@@ -30,13 +30,13 @@ from azclishell.command_tree import in_tree
 from azclishell.gather_commands import add_random_new_lines
 from azclishell.key_bindings import registry, get_section, sub_section
 from azclishell.layout import create_layout, create_tutorial_layout, set_scope
+from azclishell.progress import get_progress_message, DONE_STR, progress_view
 from azclishell.telemetry import TC as telemetry
 from azclishell.util import get_window_dim, parse_quotes
 
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.application import Configuration
 from azure.cli.core.commands import LongRunningOperation, get_op_handler
-from azure.cli.core.commands.progress import ProgressView, StandardOut
 from azure.cli.core.cloud import get_active_cloud_name
 from azure.cli.core._config import az_config, DEFAULTS_SECTION
 from azure.cli.core._environment import get_config_dir
@@ -53,7 +53,6 @@ NOTIFICATIONS = ""
 PROFILE = Profile()
 SELECT_SYMBOL = azclishell.configuration.SELECT_SYMBOL
 PART_SCREEN_EXAMPLE = .3
-SPINNING_WHEEL = {1 :'|', 2 : '/', 3 : '-', 0 : '\\'}
 
 
 def handle_cd(cmd):
@@ -109,26 +108,6 @@ def space_toolbar(settings_items, cols, empty_space):
 
     empty_space = empty_space[len(NOTIFICATIONS) + len(settings) + 1:]
     return settings, empty_space
-
-PROGRESS = ''
-DONE_STR = 'Finished'
-class ShellProgressView(StandardOut):
-    """ custom output for progress reporting """
-
-    def write(self, message, percent):
-        """ writes the progres """
-        global PROGRESS
-        if percent:
-            progress = self._format_value(percent) + "\n"
-        PROGRESS = message
-
-    def flush(self):
-        """ flushes the message"""
-        pass
-
-    def end(self, message=''):
-        global PROGRESS
-        PROGRESS = DONE_STR
 
 
 # pylint: disable=too-many-instance-attributes
@@ -198,9 +177,11 @@ class Shell(object):
         cli.buffers['default_values'].reset(
             initial_document=Document(
                 u'{}'.format(self.config_default if self.config_default else 'No Default Values')))
-        self._update_toolbar(return_val=False)
+        self._update_toolbar()
+        cli.request_redraw()
 
-    def _update_toolbar(self, return_val=True):
+
+    def _update_toolbar(self):
         cli = self.cli
         _, cols = get_window_dim()
         cols = int(cols)
@@ -209,14 +190,14 @@ class Shell(object):
         for i in range(cols):  # pylint: disable=unused-variable
             empty_space += " "
 
-        settings, stop = self._toolbar_info()
+        settings = self._toolbar_info()
         settings, empty_space = space_toolbar(settings, cols, empty_space)
         cli.buffers['bottom_toolbar'].reset(
             initial_document=Document(u'{}{}{}'.format(NOTIFICATIONS, settings, empty_space)))
 
-        cli.request_redraw()
-        if return_val:
-            return stop
+        # cli.request_redraw()
+        # if return_val:
+        #     return stop
 
     def _toolbar_info(self):
         sub_name = ""
@@ -228,16 +209,17 @@ class Shell(object):
         curr_cloud = "Cloud: {}".format(get_active_cloud_name())
         tool_val = '{}'.format('Subscription: {}'.format(sub_name) if sub_name else curr_cloud)
 
-        tool_val2 = PROGRESS
-        if PROGRESS and PROGRESS != DONE_STR:
-            if self.spin_val >= 0:
-                self.spin_val = (self.spin_val + 1) % 4
-                tool_val2 = SPINNING_WHEEL[self.spin_val]
-            else:
-                self.spin_val = 0
-                tool_val2 = SPINNING_WHEEL[self.spin_val]
-        elif PROGRESS == DONE_STR:
-            tool_val2 = ''
+        # progress = get_progress_message()
+        # tool_val2 = progress
+        # if progress and progress != DONE_STR:
+        #     if self.spin_val >= 0:
+        #         self.spin_val = (self.spin_val + 1) % 4
+        #         tool_val2 = SPINNING_WHEEL[self.spin_val]
+        #     else:
+        #         self.spin_val = 0
+        #         tool_val2 = SPINNING_WHEEL[self.spin_val]
+        # elif progress == DONE_STR:
+        #     tool_val2 = ''
 
 
         settings_items = [
@@ -245,10 +227,10 @@ class Shell(object):
             "[F2]Defaults",
             "[F3]Keys",
             "[Ctrl+D]Quit",
-            tool_val,
-            tool_val2
+            tool_val
+            # tool_val2
         ]
-        return settings_items, PROGRESS == DONE_STR
+        return settings_items
 
     def generate_help_text(self, text):
         """ generates the help text based on commands typed """
@@ -313,7 +295,8 @@ class Shell(object):
             'bottom_toolbar' : Buffer(is_multiline=True),
             'example_line' : Buffer(is_multiline=True),
             'default_values' : Buffer(),
-            'symbols' : Buffer()
+            'symbols' : Buffer(),
+            'progress' : Buffer()
         }
 
         writing_buffer = Buffer(
@@ -585,15 +568,15 @@ class Shell(object):
             config = Configuration()
             self.app.initialize(config)
 
-            if '--no-wait' in args:
-                args.remove('--no-wait')
+            if '--progress' in args:
+                args.remove('--progress')
                 thread = ExecuteThread(self.app.execute, args)
                 thread.daemon = True
                 thread.start()
                 self.threads.append(thread)
                 self.curr_thread = thread
 
-                thread = ToolbarThread(self._update_toolbar)
+                thread = ProgressViewThread(progress_view, self)
                 thread.daemon = True
                 thread.start()
                 self.threads.append(thread)
@@ -676,17 +659,18 @@ class ExecuteThread(threading.Thread):
         self.func(self.args)
 
 
-class ToolbarThread(threading.Thread):
+class ProgressViewThread(threading.Thread):
     """ thread to keep the toolbar spinner spinning """
-    def __init__(self, func):
-        super(ToolbarThread, self).__init__()
+    def __init__(self, func, arg):
+        super(ProgressViewThread, self).__init__()
         self.func = func
+        self.arg = arg
 
     def run(self):
         import time
         try:
             while True:
-                if self.func():
+                if self.func(self.arg):
                     time.sleep(4)
                     break
                 time.sleep(.25)
