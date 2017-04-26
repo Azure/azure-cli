@@ -93,8 +93,8 @@ helps['keyvault certificate create'] = """
 
 helps['keyvault certificate import'] = """
     type: command
-    long-summary: >
-        Import a certificate into Key Vault. Certificates can also be used as a secrets in provisioned virtual machines.
+    short-summary: Import a certificate into KeyVault.
+    long-summary: Certificates can also be used as a secrets in provisioned virtual machines.
     examples:
         - name: Create a service principal with a certificate, add the certificate to Key Vault and provision a VM with that certificate.
           text: >

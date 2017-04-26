@@ -85,3 +85,9 @@ with ParametersContext(command='lab secret') as c:
 with ParametersContext(command='lab formula export-artifacts') as c:
     # Exporting artifacts does not need expand filter
     c.ignore('expand')
+
+
+with ParametersContext(command='lab environment') as c:
+    c.register_alias('name', ('--name', '-n'))
+    c.ignore('user_name')
+    c.argument('lab_name', validator=validate_user_name)

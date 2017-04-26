@@ -3,8 +3,14 @@
 Release History
 ===============
 
+unreleased
+++++++++++++++++++
+
+* Fix bug with `vpn-connection create` when using the `--no-wait` or `--validate` parameters.
+
 2.0.3 (2017-04-17)
 ++++++++++++++++++
+
 * Add support for active-active VNet gateways
 * Remove nulls values from output of `network vpn-connection list/show` commands.
 * BC: Fix bug in the output of `vpn-connection create` 

@@ -8,6 +8,12 @@
 from __future__ import print_function
 from codecs import open
 from setuptools import setup
+try:
+    from azure_bdist_wheel import cmdclass
+except ImportError:
+    from distutils import log as logger
+    logger.warn("Wheel is not available, disabling bdist_wheel hook")
+    cmdclass = {}
 
 VERSION = "2.0.3+dev"
 
@@ -48,7 +54,6 @@ DEPENDENCIES = [
     'adal>=0.4.3',
     'applicationinsights',
     'argcomplete>=1.8.0',
-    'azure-cli-nspkg',
     'colorama',
     'jmespath',
     'msrest>=0.4.4',
@@ -86,16 +91,15 @@ setup(
     url='https://github.com/Azure/azure-cli',
     zip_safe=False,
     classifiers=CLASSIFIERS,
-    namespace_packages=[
-        'azure',
-        'azure.cli'
-    ],
     packages=[
+        'azure',
+        'azure.cli',
         'azure.cli.core',
         'azure.cli.core.commands',
         'azure.cli.core.extensions',
         'azure.cli.core.sdk',
         'azure.cli.core.profiles',
     ],
-    install_requires=DEPENDENCIES
+    install_requires=DEPENDENCIES,
+    cmdclass=cmdclass
 )
