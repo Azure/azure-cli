@@ -399,7 +399,7 @@ def create_command(module_name, name, operation,
                 try:
                     result = op(client, **kwargs) if client else op(**kwargs)
                 except Exception as ex:  # pylint: disable=broad-except
-                    rp = _is_rp_unregistered_err(ex)
+                    rp = _check_rp_not_registered_err(ex)
                     if rp:
                         _register_rp(rp)
                         result = op(client, **kwargs) if client else op(**kwargs)
@@ -473,7 +473,7 @@ def _user_confirmed(confirmation, command_args):
         return False
 
 
-def _is_rp_unregistered_err(ex):
+def _check_rp_not_registered_err(ex):
     try:
         response = json.loads(ex.response.content.decode())
         if response['error']['code'] == 'MissingSubscriptionRegistration':
@@ -487,7 +487,7 @@ def _is_rp_unregistered_err(ex):
 def _register_rp(rp):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     rcf = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
-    logger.warning("Resouce provider '%s' used by the command is not "
+    logger.warning("Resource provider '%s' used by the command is not "
                    "registered. We are registering for you", rp)
     rcf.providers.register(rp)
     while True:
