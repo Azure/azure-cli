@@ -28,8 +28,7 @@ with ServiceGroup(__name__, get_sql_databases_operations, database_operations, c
         c.custom_command('restore', 'db_restore')
         c.command('show', 'get')
         c.custom_command('list', 'db_list')
-        # # Usages will not be included in the first batch of GA commands
-        # c.command('show-usage', 'list_usages')
+        c.command('list-usages', 'list_usages')
         c.command('delete', 'delete', confirmation=True)
         c.generic_update_command('update', 'get', 'create_or_update', custom_func_name='db_update')
         c.custom_command('import', 'db_import')
@@ -125,8 +124,7 @@ with ServiceGroup(__name__, get_sql_servers_operations, servers_operations, cust
         c.command('create', 'create_or_update')
         c.command('delete', 'delete', confirmation=True)
         c.command('show', 'get')
-        # Usages will not be included in the first batch of GA commands
-        # c.command('show-usage', 'list_usages')
+        c.command('list-usages', 'list_usages')
         c.command('list', 'list_by_resource_group')
         c.generic_update_command('update', 'get', 'create_or_update',
                                  custom_func_name='server_update')
