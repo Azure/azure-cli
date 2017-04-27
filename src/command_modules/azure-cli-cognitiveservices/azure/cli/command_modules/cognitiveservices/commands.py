@@ -12,8 +12,6 @@ from azure.cli.command_modules.cognitiveservices._client_factory import cognitiv
 mgmt_path = 'azure.mgmt.cognitiveservices.operations.cognitive_services_accounts_operations#CognitiveServicesAccountsOperations.'
 custom_path = 'azure.cli.command_modules.cognitiveservices.custom#'
 
-terms = 'Microsoft may use data you send to the Cognitive Services to improve Microsoft products and services. For example we may use content that you provide to the Cognitive Services to improve our underlying algorithms and models over time. Where you send personal data to the Cognitive Services, you are responsible for obtaining sufficient consent from the data subjects. The General Privacy and Security Terms in the Online Services Terms (https://www.microsoft.com/en-us/Licensing/product-licensing/products.aspx) do not apply to the Cognitive Services. You must comply with use and display requirements for the Bing Search APIs. \nPlease refer to the Microsoft Cognitive Services section in the Online Services Terms for details.'
-
 cli_command(__name__, 'cognitiveservices account create', custom_path + 'create', cognitiveservices_client_factory)
 cli_command(__name__, 'cognitiveservices account delete', mgmt_path + 'delete', cognitiveservices_client_factory)
 cli_command(__name__, 'cognitiveservices account show',  mgmt_path + 'get_properties', cognitiveservices_client_factory)
@@ -22,6 +20,5 @@ cli_command(__name__, 'cognitiveservices account update', custom_path + 'update'
 cli_command(__name__, 'cognitiveservices account keys regenerate', mgmt_path + 'regenerate_key', cognitiveservices_client_factory)
 cli_command(__name__, 'cognitiveservices account keys list', mgmt_path + 'list_keys', cognitiveservices_client_factory)
 cli_command(__name__, 'cognitiveservices account list-skus', mgmt_path + 'list_skus', cognitiveservices_client_factory)
-#cli_command(__name__, 'cognitiveservices checkskuavailability', custom_path + 'checkskuavailability')
 
 

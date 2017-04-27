@@ -35,12 +35,5 @@ def update(client, resource_group_name, account_name, sku_name=None, tags=None, 
     sku =  Sku(sku_name)
     return client.update(resource_group_name, account_name, sku, tags)
 
-def checkskuavailability(location=None, sku_name=None, kind=None, type=None):
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
-    checkskuclient = get_mgmt_service_client(CognitiveServicesManagementClient, location=location).check_sku_availability
-    sku = []
-    sku.append(Sku(sku_name))
-    return checkskuclient.list(sku, kind, type)
 
     

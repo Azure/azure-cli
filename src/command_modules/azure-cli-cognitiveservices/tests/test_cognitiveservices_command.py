@@ -56,8 +56,8 @@ class CognitiveServicesTests(ScenarioTest):
         assert oldkeys != newkeys
 
         #test to list cognitive service accounts under current resource group
-        resourceResult = self.cmd('az cognitiveservices list -g {}'.format(resource_group)).get_output_in_json()
-        JMESPathCheck(contains(resourceResult, sname), True)
+        self.cmd('az cognitiveservices list -g {}'.format(resource_group), checks=[
+        JMESPathCheck('length(@)', 1)])
 
         #test to delete the cognitive services account
         exitcode= self.cmd('az cognitiveservices account delete -n {} -g {}'.format(
