@@ -25,21 +25,19 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
     # pylint: disable=too-many-arguments
     def __init__(self, name_prefix=server_name_prefix, parameter_name='server', location='westus',
                  admin_user='admin123', admin_password='SecretPassword123',
-                 resource_group_parameter_name='resource_group', skip_create=False, skip_delete=True):
+                 resource_group_parameter_name='resource_group', skip_delete=True):
         super(SqlServerPreparer, self).__init__(name_prefix, server_name_max_length)
         self.location = location
         self.parameter_name = parameter_name
         self.admin_user = admin_user
         self.admin_password = admin_password
         self.resource_group_parameter_name = resource_group_parameter_name
-        self.skip_create = skip_create
         self.skip_delete = skip_delete
 
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
         template = 'az sql server create -l {} -g {} -n {} -u {} -p {}'
-        if not self.skip_create:
-            execute(template.format(self.location, group, name, self.admin_user, self.admin_password))
+        execute(template.format(self.location, group, name, self.admin_user, self.admin_password))
         return {self.parameter_name: name}
 
     def remove_resource(self, name, **kwargs):
@@ -60,12 +58,9 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
 class SqlServerMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer()
-    # Skip create in SqlServerPreparer because we want to create in the test. So why even use
-    # SqlServerPreparer? We still want to generate random server name and replace it in the test
-    # recording, which SqlServerPreparer does very nicely.
-    @SqlServerPreparer(skip_create=True, parameter_name='server1')
-    @SqlServerPreparer(skip_create=True, parameter_name='server2')
-    def test_sql_server_mgmt(self, resource_group, resource_group_location, server1, server2):
+    def test_sql_server_mgmt(self, resource_group, resource_group_location):
+        server1 = self.create_random_name(server_name_prefix, server_name_max_length)
+        server2 = self.create_random_name(server_name_prefix, server_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
