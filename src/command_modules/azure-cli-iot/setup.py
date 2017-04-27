@@ -33,7 +33,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-iothub==0.2.1',
+    'azure-mgmt-iothub==0.2.2',
     'pyOpenSSL',
     'azure-cli-core',
 ]
