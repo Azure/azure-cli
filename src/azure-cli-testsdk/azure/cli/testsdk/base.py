@@ -31,7 +31,7 @@ from .decorators import live_only
 class IntegrationTestBase(unittest.TestCase):
     def __init__(self, method_name):
         super(IntegrationTestBase, self).__init__(method_name)
-        self.diagnose = os.environ.get(ENV_TEST_DIAGNOSE, None) == 'True'
+        self.diagnose = True # os.environ.get(ENV_TEST_DIAGNOSE, None) == 'True'
 
     def cmd(self, command, checks=None, expect_failure=False):
         if self.diagnose:

@@ -6,6 +6,9 @@
 def cognitiveservices_client_factory(_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
-    return get_mgmt_service_client(CognitiveServicesManagementClient).cognitive_services_accounts
+    return get_mgmt_service_client(CognitiveServicesManagementClient, location='notused').cognitive_services_accounts
 
-
+def cognitiveservices_account_client_factory(_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
+    return get_mgmt_service_client(CognitiveServicesManagementClient, location='notused').accounts
