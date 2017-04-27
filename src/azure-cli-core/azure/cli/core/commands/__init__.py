@@ -100,8 +100,10 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms
-        from azclishell.progress import ShellProgressView
-        self.out = out or ShellProgressView()
+        from azure.cli.core.commands.progress import StandardOut
+        # from azclishell.progress import ShellProgressView
+
+        self.out = out or StandardOut()
         self.curr_message = 'Running'
         self.curr_val = None
         self.total_val = total_val
@@ -119,13 +121,13 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         from msrest.exceptions import ClientException
         logger.info("Starting long running operation '%s'", self.start_msg)
         correlation_message = ''
-        percent = 0.0
+        percent = None
         self.out.begin('Starting', percent)
         # self.out.begin('Starting')
 
         self.out.flush()
         while not poller.done():
-            percent += .005
+            # percent += .005
             self.out.write(self.curr_message, percent)
             self.out.flush()
             try:

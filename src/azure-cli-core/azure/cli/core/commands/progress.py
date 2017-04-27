@@ -3,6 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import sys
+import humanfriendly
+import time
+
+# SPINNING_WHEEL = {1 :'|', 2 : '/', 3 : '-', 0 : '\\'}
+# COUNTER = None
 
 
 class ProgressView(object):
@@ -70,6 +75,8 @@ class StandardOut(ProgressView):
     """ custom output for progress reporting """
     def __init__(self, out=None):
         super(StandardOut, self).__init__(out if out else sys.stderr, self._format_value)
+        self.spinner = humanfriendly.Spinner(label='In Progress')
+        self.spinner.hide_cursor = False
 
     def _format_value(self, percent):
         bar_len = 100
@@ -83,3 +90,15 @@ class StandardOut(ProgressView):
                 message += ' '
         message += ']  {:.4%}'.format(percent)
         return message
+
+    def write(self, message, percent):
+        """ writes the progress """
+        if percent:
+            progress = self.format_percent(percent) if callable(self.format_percent) else percent
+            self.out.write(progress + "\n")
+        # self.out.write(message + '\n')
+        # self.spinner = humanfriendly.Spinner(label=message)
+        # self.spinner.hide_cursor = False
+        # self.spinner.
+        self.spinner.step(message)
+        # time.sleep(.1)

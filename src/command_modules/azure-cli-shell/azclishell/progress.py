@@ -13,7 +13,7 @@ from azclishell.util import get_window_dim
 PROGRESS = ''
 PROGRESS_BAR = ''
 DONE_STR = 'Finished'
-SPINNING_WHEEL = {1 :'|', 2 : '/', 3 : '-', 0 : '\\'}
+# SPINNING_WHEEL = {1 :'|', 2 : '/', 3 : '-', 0 : '\\'}
 #  have 2 down beats to make the odds work out better
 HEART_BEAT_VALUES = {0 : "__", 1 : "/\\", 2 : '/^\\', 3 : "__"}
 HEART_BEAT = ''
