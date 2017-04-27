@@ -32,7 +32,7 @@ helps['ad sp create-for-rbac'] = """
                 - name: Create using certificate from Key Vault
                   text: >
                     az keyvault certificate download --vault-name vault -n cert-name -f cert.pem \n
-                    az ad sp create-for-rbac --cert cert.pem
+                    az ad sp create-for-rbac --cert @cert.pem
             """
 
 helps['role'] = """
