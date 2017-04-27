@@ -20,7 +20,7 @@ pipeline {
           def test_tasks = [:]
 
           // Add live test tasks
-          def modules = ['keyvault', 'acs']
+          def modules = ['acs', 'keyvault', 'storage']
           for (int i = 0; i < modules.size(); ++i) {
             def name = modules.get(i)
             test_tasks["Live Test: ${name}"] = {
