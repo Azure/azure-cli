@@ -27,7 +27,7 @@ class TestRPAutoRegister(ScenarioTest):
             if result.lower().strip() != 'unregistered':
                 self.cmd('provider unregister -n Microsoft.Sql --wait')
                 time.sleep(30)  # a bit random but like to ensure unregistering went through
-        return super().setUp()
+        return super(TestRPAutoRegister, self).setUp()
 
     @ResourceGroupPreparer()
     def test_rp_auto_register(self, resource_group, resource_group_location):
