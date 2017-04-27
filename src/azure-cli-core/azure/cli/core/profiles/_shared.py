@@ -120,13 +120,11 @@ class _DateAPIFormat(object):
                 self.latest = True
             else:
                 if 'preview' in api_version_str:
-                    yyyy, mm, dd, _ = api_version_str.split('-')
                     self.preview = True
-                else:
-                    yyyy, mm, dd = api_version_str.split('-')
-                self.yyyy = int(yyyy)
-                self.mm = int(mm)
-                self.dd = int(dd)
+                parts = api_version_str.split('-')
+                self.yyyy = int(parts[0])
+                self.mm = int(parts[1])
+                self.dd = int(parts[2])
         except (ValueError, TypeError):
             raise ValueError('The API version {} is not in a '
                              'supported format'.format(api_version_str))
