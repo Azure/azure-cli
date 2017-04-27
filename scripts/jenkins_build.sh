@@ -18,7 +18,7 @@ for setup_file in $(find src -name 'setup.py'); do
     cd $(dirname $setup_file)
     echo ""
     echo "Components at $(pwd) is being built ..."
-    python setup.py sdist -d $artifacts bdist_wheel -d $artifacts
+    python setup.py bdist_wheel -d $artifacts sdist -d $artifacts
     cd $working_dir
 done
 
