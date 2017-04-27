@@ -7,7 +7,7 @@
 from azure.cli.core.commands import CliArgumentType
 from azure.cli.core.commands import register_cli_argument
 from azure.cli.core.commands.parameters import enum_choice_list
-from .custom import get_role_definition_name_completion_list
+from .custom import get_role_definition_name_completion_list, x509_type
 from ._validators import validate_group, validate_member_id, VARIANT_GROUP_ID_ARGS
 
 register_cli_argument('ad app', 'application_object_id', options_list=('--object-id',))
@@ -36,6 +36,8 @@ register_cli_argument('ad sp create-for-rbac', 'create_cert', action='store_true
 register_cli_argument('ad sp create-for-rbac', 'role', completer=get_role_definition_name_completion_list)
 register_cli_argument('ad sp create-for-rbac', 'skip_assignment', action='store_true', help='do not create default assignment')
 register_cli_argument('ad sp create-for-rbac', 'expanded_view', action='store_true', help='Once created, display more information like subscription and cloud environments')
+register_cli_argument('ad sp create-for-rbac', 'cert', type=x509_type)
+
 register_cli_argument('ad sp reset-credentials', 'name', name_arg_type)
 register_cli_argument('ad sp reset-credentials', 'years', type=int, default=None)
 register_cli_argument('ad sp reset-credentials', 'create_cert', action='store_true', help='re-create and upload self-signed certificate')

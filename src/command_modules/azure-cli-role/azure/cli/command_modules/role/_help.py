@@ -29,6 +29,10 @@ helps['ad sp create-for-rbac'] = """
                   text: az role assignment create --assignee <name> --role Contributor
                 - name: Revoke the service principal when done with it.
                   text: az ad app delete --id <name>
+                - name: Create using certificate from Key Vault
+                  text: >
+                    az keyvault certificate download --vault-name vault -n cert-name -f cert.pem \n
+                    az ad sp create-for-rbac --cert @cert.pem
             """
 
 helps['role'] = """
