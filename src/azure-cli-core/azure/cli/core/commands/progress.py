@@ -69,7 +69,7 @@ class ProgressHook(object):
 class StandardOut(ProgressView):
     """ custom output for progress reporting """
     def __init__(self, out=None):
-        super(StandardOut, self).__init__(out if out else sys.stdout, self._format_value)
+        super(StandardOut, self).__init__(out if out else sys.stderr, self._format_value)
 
     def _format_value(self, percent):
         bar_len = 100

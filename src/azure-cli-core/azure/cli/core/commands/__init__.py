@@ -119,13 +119,13 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         from msrest.exceptions import ClientException
         logger.info("Starting long running operation '%s'", self.start_msg)
         correlation_message = ''
-        percent = None
-        # self.out.begin('Starting', percent)
-        self.out.begin('Starting')
+        percent = 0.0
+        self.out.begin('Starting', percent)
+        # self.out.begin('Starting')
 
         self.out.flush()
         while not poller.done():
-            # percent += .005
+            percent += .005
             self.out.write(self.curr_message, percent)
             self.out.flush()
             try:
