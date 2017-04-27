@@ -53,13 +53,19 @@ def patch_long_run_operation_delay(unit_test):
     def _shortcut_long_run_operation(*args, **kwargs):  # pylint: disable=unused-argument
         return
 
-
     _mock_in_unit_test(unit_test,
                        'msrestazure.azure_operation.AzureOperationPoller._delay',
                        _shortcut_long_run_operation)
     _mock_in_unit_test(unit_test,
                        'azure.cli.core.commands.LongRunningOperation._delay',
                        _shortcut_long_run_operation)
+
+
+def patch_time_sleep_api(unit_test):
+    def _time_sleep_skip(*_):
+        return
+
+    _mock_in_unit_test(unit_test, 'time.sleep', _time_sleep_skip)
 
 
 def _mock_in_unit_test(unit_test, target, replacement):

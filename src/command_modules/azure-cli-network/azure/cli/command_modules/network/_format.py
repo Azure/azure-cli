@@ -79,6 +79,42 @@ def transform_local_gateway_table_output(result):
     return final_result
 
 
+def transform_vpn_connection_list(result):
+    return [transform_vpn_connection(v) for v in result]
+
+
+def transform_vpn_connection(result):
+
+    if result:
+        properties_to_strip = \
+            ['virtual_network_gateway1', 'virtual_network_gateway2', 'local_network_gateway2', 'peer']
+        for prop in properties_to_strip:
+            prop_val = getattr(result, prop, None)
+            if not prop_val:
+                delattr(result, prop)
+            else:
+                null_props = [key for key in prop_val.__dict__ if not prop_val.__dict__[key]]
+                for prop in null_props:
+                    delattr(prop_val, prop)
+    return result
+
+
+def transform_vpn_connection_create_output(result):
+    from azure.cli.core.commands import DeploymentOutputLongRunningOperation
+    from msrest.pipeline import ClientRawResponse
+    from msrestazure.azure_operation import AzureOperationPoller
+    if isinstance(result, AzureOperationPoller):
+        # normally returns a LRO poller
+        result = DeploymentOutputLongRunningOperation('Starting network vpn-connection create')(result)
+        return result['resource']
+    elif isinstance(result, ClientRawResponse):
+        # returns a raw response if --no-wait used
+        return
+    else:
+        # returns a plain response (not a poller) if --validate used
+        return result
+
+
 def transform_vnet_create_output(result):
     return {'newVNet': result.result()}
 

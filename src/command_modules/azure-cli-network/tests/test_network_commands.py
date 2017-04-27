@@ -10,12 +10,12 @@
 import os
 import unittest
 
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core.commands.arm import resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
                                            NoneCheck, MOCKED_SUBSCRIPTION_ID)
-
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 class NetworkMultiIdsShowScenarioTest(ResourceGroupVCRTestBase):
@@ -278,10 +278,9 @@ class NetworkExpressRouteScenarioTest(ResourceGroupVCRTestBase):
         _create_peering('AzurePrivatePeering', 10001, 101, '102.0.0.0/30', '103.0.0.0/30')
 
         self.cmd('network express-route peering create -g {} --circuit-name {} --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30 --advertised-public-prefixes 104.0.0.0/30 --customer-asn 10000 --routing-registry-name level3'.format(rg, circuit),
-            allowed_exceptions='An error occured.')
+            allowed_exceptions='not authorized for creating Microsoft Peering')
         self.cmd('network express-route peering show -g {} --circuit-name {} -n MicrosoftPeering'.format(rg, circuit), checks=[
             JMESPathCheck('microsoftPeeringConfig.advertisedPublicPrefixes[0]', '104.0.0.0/30'),
-            JMESPathCheck('microsoftPeeringConfig.advertisedPublicPrefixesState', 'ValidationNeeded'),
             JMESPathCheck('microsoftPeeringConfig.customerAsn', 10000),
             JMESPathCheck('microsoftPeeringConfig.routingRegistryName', 'LEVEL3')
         ])
@@ -1091,6 +1090,130 @@ class NetworkSubnetSetScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network vnet delete --resource-group {} --name {}'.format(self.resource_group, self.vnet_name))
         self.cmd('network nsg delete --resource-group {} --name {}'.format(self.resource_group, nsg_name))
 
+class NetworkActiveActiveCrossPremiseScenarioTest(ResourceGroupVCRTestBase): # pylint: disable=too-many-instance-attributes
+
+    def __init__(self, test_method):
+        super(NetworkActiveActiveCrossPremiseScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_active_active_cross_premise_connection')
+        self.vnet1 = 'vnet1'
+        self.gw_subnet = 'GatewaySubnet'
+        self.vnet_prefix1 = '10.11.0.0/16'
+        self.vnet_prefix2 = '10.12.0.0/16'
+        self.gw_subnet_prefix = '10.12.255.0/27'
+        self.gw_ip1 = 'gwip1'
+        self.gw_ip2 = 'gwip2'
+
+    def test_network_active_active_cross_premise_connection(self):
+        self.execute()
+
+    def set_up(self):
+        super(NetworkActiveActiveCrossPremiseScenarioTest, self).set_up()
+        rg = self.resource_group
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix {} {} --subnet-name {} --subnet-prefix {}'.format(rg, self.vnet1, self.vnet_prefix1, self.vnet_prefix2, self.gw_subnet, self.gw_subnet_prefix))
+        self.cmd('network public-ip create -g {} -n {}'.format(rg, self.gw_ip1))
+        self.cmd('network public-ip create -g {} -n {}'.format(rg, self.gw_ip2))
+
+    def body(self):
+        rg = self.resource_group
+        vnet1 = self.vnet1
+        vnet1_asn = 65010
+        gw1 = 'gw1'
+
+        lgw2 = 'lgw2'
+        lgw_ip = '131.107.72.22'
+        lgw_prefix = '10.52.255.253/32'
+        bgp_peer1 = '10.52.255.253'
+        lgw_asn = 65050
+        lgw_loc = 'eastus'
+        conn_151 = 'Vnet1toSite5_1'
+        conn_152 = 'Vnet1toSite5_2'
+        shared_key = 'abc123'
+        shared_key2 = 'a1b2c3'
+
+        # create the vnet gateway with active-active feature
+        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --sku HighPerformance --asn {} --public-ip-addresses {} {}'.format(rg, gw1, vnet1, vnet1_asn, self.gw_ip1, self.gw_ip2))
+
+        # create and connect first local-gateway
+        self.cmd('network local-gateway create -g {} -n {} -l {} --gateway-ip-address {} --local-address-prefixes {} --asn {} --bgp-peering-address {}'.format(rg, lgw2, lgw_loc, lgw_ip, lgw_prefix, lgw_asn, bgp_peer1))
+        self.cmd('network vpn-connection create -g {} -n {} --vnet-gateway1 {} --local-gateway2 {} --shared-key {} --enable-bgp'.format(rg, conn_151, gw1, lgw2, shared_key))
+        self.cmd('network vpn-connection shared-key reset -g {} --connection-name {} --key-length 128'.format(rg, conn_151))
+        sk1 = self.cmd('network vpn-connection shared-key show -g {} --connection-name {}'.format(rg, conn_151))
+        self.cmd('network vpn-connection shared-key update -g {} --connection-name {} --value {}'.format(rg, conn_151, shared_key2))
+        sk2 = self.cmd('network vpn-connection shared-key show -g {} --connection-name {}'.format(rg, conn_151),
+            checks=JMESPathCheck('value', shared_key2))
+        self.assertNotEqual(sk1, sk2)
+
+        lgw3 = 'lgw3'
+        lgw3_ip = '131.107.72.23'
+        lgw3_prefix = '10.52.255.254/32'
+        bgp_peer2 = '10.52.255.254'
+
+        # create and connect second local-gateway
+        self.cmd('network local-gateway create -g {} -n {} -l {} --gateway-ip-address {} --local-address-prefixes {} --asn {} --bgp-peering-address {}'.format(rg, lgw3, lgw_loc, lgw3_ip, lgw3_prefix, lgw_asn, bgp_peer2))
+        self.cmd('network vpn-connection create -g {} -n {} --vnet-gateway1 {} --local-gateway2 {} --shared-key {} --enable-bgp'.format(rg, conn_152, gw1, lgw3, shared_key))
+
+
+class NetworkActiveActiveVnetVnetScenarioTest(ResourceGroupVCRTestBase): # pylint: disable=too-many-instance-attributes
+
+    def __init__(self, test_method):
+        super(NetworkActiveActiveVnetVnetScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_active_active_vnet_vnet_connection')
+        self.gw_subnet = 'GatewaySubnet'
+
+        # First VNet
+        self.vnet1 = 'vnet1'
+        self.vnet1_prefix = '10.21.0.0/16'
+        self.gw1_subnet_prefix = '10.21.255.0/27'
+        self.gw1_ip1 = 'gw1ip1'
+        self.gw1_ip2 = 'gw1ip2'
+
+        # Second VNet
+        self.vnet2 = 'vnet2'
+        self.vnet2_prefix = '10.22.0.0/16'
+        self.gw2_subnet_prefix = '10.22.255.0/27'
+        self.gw2_ip1 = 'gw2ip1'
+        self.gw2_ip2 = 'gw2ip2'
+
+    def test_network_active_active_vnet_vnet_connection(self):
+        self.execute()
+
+    def set_up(self):
+        super(NetworkActiveActiveVnetVnetScenarioTest, self).set_up()
+        rg = self.resource_group
+
+        # Create one VNet with two public IPs
+        self.cmd('network vnet create -g {} -n {} --address-prefix {} --subnet-name {} --subnet-prefix {}'.format(rg, self.vnet1, self.vnet1_prefix, self.gw_subnet, self.gw1_subnet_prefix))
+        self.cmd('network public-ip create -g {} -n {}'.format(rg, self.gw1_ip1))
+        self.cmd('network public-ip create -g {} -n {}'.format(rg, self.gw1_ip2))
+
+        # Create second VNet with two public IPs
+        self.cmd('network vnet create -g {} -n {} --address-prefix {} --subnet-name {} --subnet-prefix {}'.format(rg, self.vnet2, self.vnet2_prefix, self.gw_subnet, self.gw2_subnet_prefix))
+        self.cmd('network public-ip create -g {} -n {}'.format(rg, self.gw2_ip1))
+        self.cmd('network public-ip create -g {} -n {}'.format(rg, self.gw2_ip2))
+
+    def body(self):
+        rg = self.resource_group
+        vnet1 = self.vnet1
+        vnet1_asn = 65010
+        gw1 = 'vgw1'
+        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --sku HighPerformance --asn {} --public-ip-addresses {} {} --no-wait'.format(rg, gw1, vnet1, vnet1_asn, self.gw1_ip1, self.gw1_ip2))
+
+        vnet2 = self.vnet2
+        vnet2_asn = 65020
+        gw2 = 'vgw2'
+        self.cmd('network vnet-gateway create -g {} -n {} --vnet {} --sku HighPerformance --asn {} --public-ip-addresses {} {} --no-wait'.format(rg, gw2, vnet2, vnet2_asn, self.gw2_ip1, self.gw2_ip2))
+
+        # wait for gateway completion to finish
+        self.cmd('network vnet-gateway wait -g {} -n {} --created'.format(rg, gw1))
+        self.cmd('network vnet-gateway wait -g {} -n {} --created'.format(rg, gw2))
+
+        conn12 = 'vnet1to2'
+        conn21 = 'vnet2to1'
+        shared_key = 'abc123'
+
+        # create and connect the VNet gateways
+        self.cmd('network vpn-connection create -g {} -n {} --vnet-gateway1 {} --vnet-gateway2 {} --shared-key {} --enable-bgp'.format(rg, conn12, gw1, gw2, shared_key))
+        self.cmd('network vpn-connection create -g {} -n {} --vnet-gateway1 {} --vnet-gateway2 {} --shared-key {} --enable-bgp'.format(rg, conn21, gw2, gw1, shared_key))
+
 
 class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase): # pylint: disable=too-many-instance-attributes
 
@@ -1159,10 +1282,22 @@ class NetworkVpnGatewayScenarioTest(ResourceGroupVCRTestBase): # pylint: disable
             JMESPathCheck('bgpSettings.peerWeight', 50)
         ])
 
+        conn12 = 'conn1to2'
         gateway1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworkGateways/{}'.format(subscription_id, rg, self.gateway1_name)
-        self.cmd('network vpn-connection create -n myconnection -g {} --shared-key 123 --vnet-gateway1 {} --vnet-gateway2 {}'.format(rg, gateway1_id, self.gateway2_name))
-        self.cmd('network vpn-connection update -n myconnection -g {} --routing-weight 25'.format(rg),
+        self.cmd('network vpn-connection create -n {} -g {} --shared-key 123 --vnet-gateway1 {} --vnet-gateway2 {}'.format(conn12, rg, gateway1_id, self.gateway2_name))
+        self.cmd('network vpn-connection update -n {} -g {} --routing-weight 25'.format(conn12, rg),
             checks=JMESPathCheck('routingWeight', 25))
+
+        # test network watcher troubleshooting commands
+        storage_account = 'clitestnwstorage2'
+        container_name = 'troubleshooting-results'
+        self.cmd('storage account create -g {} -l westus --sku Standard_LRS -n {}'.format(rg, storage_account))
+        self.cmd('storage container create --account-name {} -n {}'.format(storage_account, container_name))
+        storage_path = 'https://{}.blob.core.windows.net/{}'.format(storage_account, container_name)
+        self.cmd('network watcher configure -g {} --locations westus --enabled'.format(rg))
+        self.cmd('network watcher troubleshooting start -g {} --resource {} --resource-type vpnConnection --storage-account {} --storage-path {}'.format(rg, conn12, storage_account, storage_path))
+        self.cmd('network watcher troubleshooting show -g {} --resource {} --resource-type vpnConnection'.format(rg, conn12))
+
 
 class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
 
@@ -1178,15 +1313,30 @@ class NetworkTrafficManagerScenarioTest(ResourceGroupVCRTestBase):
         unique_dns_name = 'mytrafficmanager001100a'
 
         self.cmd('network traffic-manager profile check-dns -n myfoobar1')
-        self.cmd('network traffic-manager profile create -n {} -g {} --routing-method weighted --unique-dns-name {}'.format(tm_name, self.resource_group, unique_dns_name),
-            checks=JMESPathCheck('TrafficManagerProfile.trafficRoutingMethod', 'Weighted'))
+        self.cmd('network traffic-manager profile create -n {} -g {} --routing-method priority --unique-dns-name {}'.format(tm_name, self.resource_group, unique_dns_name),
+            checks=JMESPathCheck('TrafficManagerProfile.trafficRoutingMethod', 'Priority'))
         self.cmd('network traffic-manager profile show -g {} -n {}'.format(self.resource_group, tm_name),
             checks=JMESPathCheck('dnsConfig.relativeName', unique_dns_name))
+        self.cmd('network traffic-manager profile update -n {} -g {} --routing-method weighted'.format(tm_name, self.resource_group),
+            checks=JMESPathCheck('trafficRoutingMethod', 'Weighted'))
+        self.cmd('network traffic-manager profile list -g {}'.format(self.resource_group))
 
+        # Endpoint tests
         self.cmd('network traffic-manager endpoint create -n {} --profile-name {} -g {} --type externalEndpoints --weight 50 --target www.microsoft.com'.format(endpoint_name, tm_name, self.resource_group),
             checks=JMESPathCheck('type', 'Microsoft.Network/trafficManagerProfiles/externalEndpoints'))
-        self.cmd('network traffic-manager endpoint show --profile-name {} --type  externalEndpoints -n {} -g {}'.format(tm_name, endpoint_name, self.resource_group),
-            checks=JMESPathCheck('target', 'www.microsoft.com'))
+        self.cmd('network traffic-manager endpoint update -n {} --profile-name {} -g {} --type externalEndpoints --weight 25 --target www.contoso.com'.format(endpoint_name, tm_name, self.resource_group), checks=[
+            JMESPathCheck('weight', 25),
+            JMESPathCheck('target', 'www.contoso.com')
+        ])
+        self.cmd('network traffic-manager endpoint show -g {} --profile-name {} -t externalEndpoints -n {}'.format(self.resource_group, tm_name, endpoint_name))
+        self.cmd('network traffic-manager endpoint list -g {} --profile-name {} -t externalEndpoints'.format(self.resource_group, tm_name),
+            checks=JMESPathCheck('length(@)', 1))
+        self.cmd('network traffic-manager endpoint delete -g {} --profile-name {} -t externalEndpoints -n {}'.format(self.resource_group, tm_name, endpoint_name))
+        self.cmd('network traffic-manager endpoint list -g {} --profile-name {} -t externalEndpoints'.format(self.resource_group, tm_name),
+            checks=JMESPathCheck('length(@)', 0))
+
+        self.cmd('network traffic-manager profile delete -g {} -n {}'.format(self.resource_group, tm_name))
+
 
 class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
 
@@ -1296,6 +1446,55 @@ class NetworkZoneImportExportTest(ResourceGroupVCRTestBase):
         self.cmd('network dns zone import -n {} -g {} --file-name "{}"'
                  .format(zone_name, self.resource_group, zone_file_path))
         self.cmd('network dns zone export -n {} -g {}'.format(zone_name, self.resource_group))
+
+class NetworkWatcherScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(NetworkWatcherScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_network_watcher')
+
+    def test_network_watcher(self):
+        self.execute()
+
+    def body(self):
+
+        resource_group = self.resource_group
+        storage_account = 'clitestnwstorage1'
+
+        self.cmd('network watcher configure -g {} --locations westus westus2 --enabled'.format(resource_group))
+        self.cmd('network watcher configure --locations westus westus2 --tags foo=doo')
+        self.cmd('network watcher configure -l westus2 --enabled false')
+        self.cmd('network watcher list')
+
+        vm = 'vm1'
+        # create VM with NetworkWatcher extension
+        self.cmd('storage account create -g {} -l westus --sku Standard_LRS -n {}'.format(resource_group, storage_account))
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-password PassPass10!)'.format(resource_group, vm))
+        self.cmd('vm extension set -g {} --vm-name {} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher'.format(resource_group, vm))
+
+        self.cmd('network watcher show-topology -g {} -l westus'.format(resource_group))
+
+        self.cmd('network watcher test-ip-flow -g {} --vm {} --direction inbound --local 10.0.0.4:22 --protocol tcp --remote 100.1.2.3:*'.format(resource_group, vm))
+        self.cmd('network watcher test-ip-flow -g {} --vm {} --direction outbound --local 10.0.0.4:* --protocol tcp --remote 100.1.2.3:80'.format(resource_group, vm))
+
+        self.cmd('network watcher show-security-group-view -g {} --vm {}'.format(resource_group, vm))
+
+        self.cmd('network watcher show-next-hop -g {} --vm {} --source-ip 123.4.5.6 --dest-ip 10.0.0.6'.format(resource_group, vm))
+
+        capture = 'capture1'
+        location = 'westus'
+        self.cmd('network watcher packet-capture create -g {} --vm {} -n {} --file-path capture/capture.cap'.format(resource_group, vm, capture))
+        self.cmd('network watcher packet-capture show -l {} -n {}'.format(location, capture))
+        self.cmd('network watcher packet-capture stop -l {} -n {}'.format(location, capture))
+        self.cmd('network watcher packet-capture show-status -l {} -n {}'.format(location, capture))
+        self.cmd('network watcher packet-capture list -l {}'.format(location, capture))
+        self.cmd('network watcher packet-capture delete -l {} -n {}'.format(location, capture))
+        self.cmd('network watcher packet-capture list -l {}'.format(location, capture))
+
+        nsg = '{}NSG'.format(vm)
+        self.cmd('network watcher flow-log configure -g {} --nsg {} --enabled --retention 5 --storage-account {}'.format(resource_group, nsg, storage_account))
+        self.cmd('network watcher flow-log configure -g {} --nsg {} --retention 0'.format(resource_group, nsg))
+        self.cmd('network watcher flow-log show -g {} --nsg {}'.format(resource_group, nsg))
+
 
 if __name__ == '__main__':
     unittest.main()

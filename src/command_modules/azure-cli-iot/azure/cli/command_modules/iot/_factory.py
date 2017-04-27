@@ -9,6 +9,6 @@ def iot_hub_service_factory(_):
     return get_mgmt_service_client(IotHubClient).iot_hub_resource
 
 def resource_service_factory(**_):
-    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(ResourceManagementClient)

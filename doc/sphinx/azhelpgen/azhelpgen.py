@@ -10,10 +10,10 @@ from docutils.statemachine import ViewList
 from sphinx.util.compat import Directive
 from sphinx.util.nodes import nested_parse_with_titles
 
-from azure.cli.core.application import APPLICATION, Configuration
+from azure.cli.core.application import Application, Configuration
 import azure.cli.core._help as _help
 
-app = APPLICATION
+app = Application(Configuration())
 for cmd in app.configuration.get_command_table():
     try:
         app.execute(cmd.split() + ['-h'])
@@ -30,8 +30,11 @@ class AzHelpGenDirective(Directive):
 
         help_files = []
         for cmd, parser in parser_dict.items():
-            help_file = _help.GroupHelpFile(cmd, parser) if _is_group(parser) else _help.CommandHelpFile(cmd, parser) 
-            help_file.load(parser)
+            help_file = _help.GroupHelpFile(cmd, parser) if _is_group(parser) else _help.CommandHelpFile(cmd, parser)
+            try:
+                help_file.load(parser)
+            except Exception as ex:
+                print(ex)
             help_files.append(help_file)
         help_files = sorted(help_files, key=lambda x: x.command)
 

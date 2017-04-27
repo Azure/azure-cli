@@ -6,24 +6,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
           msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3c2594ae-f530-11e6-8aee-a0b3ccf7272a]
+      x-ms-client-request-id: [05ca4bd2-14bc-11e7-8717-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?api-version=2016-09-01&$filter=resourceGroup%20eq%20%27cli_test_ag_public_ip%27%20and%20name%20eq%20%27vnet4%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FvirtualNetworks%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"value":[]}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip","name":"cli_test_ag_public_ip","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
-      cache-control: [no-cache]
-      content-length: ['12']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:43:40 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:12:23 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
+      content-length: ['232']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -32,64 +32,107 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
           msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3ce4c600-f530-11e6-a1c3-a0b3ccf7272a]
+      x-ms-client-request-id: [0600cb2c-14bc-11e7-bc18-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?api-version=2016-09-01&$filter=resourceGroup%20eq%20%27cli_test_ag_public_ip%27%20and%20name%20eq%20%27publicip4%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FpublicIPAddresses%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27cli_test_ag_public_ip%27%20and%20name%20eq%20%27vnet4%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FvirtualNetworks%27&api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"value":[]}'}
+    body: {string: '{"value":[]}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:12:23 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['12']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:43:40 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '{"properties": {"templateLink": {"uri": "https://azuresdkci.blob.core.windows.net/templatehost/CreateAppGateway_2016-11-16/azuredeploy.json"},
-      "mode": "Incremental", "parameters": {"applicationGatewayName": {"value": "test4"},
-      "skuTier": {"value": "Standard"}, "httpSettingsPort": {"value": 80}, "publicIpAddressAllocation":
-      {"value": "dynamic"}, "subnetAddressPrefix": {"value": "10.0.0.1/28"}, "servers":
-      {"value": []}, "httpListenerProtocol": {"value": "http"}, "skuName": {"value":
-      "Standard_Medium"}, "subnetType": {"value": "new"}, "_artifactsLocation": {"value":
-      "https://azuresdkci.blob.core.windows.net/templatehost/CreateAppGateway_2016-11-16"},
-      "httpSettingsProtocol": {"value": "http"}, "vnetAddressPrefix": {"value": "10.0.0.1/16"},
-      "privateIpAddressAllocation": {"value": "dynamic"}, "subnet": {"value": "subnet1"},
-      "capacity": {"value": 2}, "routingRuleType": {"value": "Basic"}, "frontendType":
-      {"value": "publicIp"}, "httpSettingsCookieBasedAffinity": {"value": "disabled"},
-      "publicIpAddressType": {"value": "new"}, "publicIpAddress": {"value": "publicip4"},
-      "frontendPort": {"value": 80}, "virtualNetworkName": {"value": "vnet4"}}}}'
+    body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Length: ['1150']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2015-11-01
+      x-ms-client-request-id: [0632c078-14bc-11e7-8fc8-a0b3ccf7272a]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27cli_test_ag_public_ip%27%20and%20name%20eq%20%27publicip4%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FpublicIPAddresses%27&api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/azurecli1487349819.7655514","name":"azurecli1487349819.7655514","properties":{"templateLink":{"uri":"https://azuresdkci.blob.core.windows.net/templatehost/CreateAppGateway_2016-11-16/azuredeploy.json","contentVersion":"1.0.0.0"},"templateHash":"3276783378463952418","parameters":{"_artifactsLocation":{"type":"String","value":"https://azuresdkci.blob.core.windows.net/templatehost/CreateAppGateway_2016-11-16"},"applicationGatewayName":{"type":"String","value":"test4"},"capacity":{"type":"Int","value":2},"certData":{"type":"String","value":""},"certPassword":{"type":"SecureString"},"frontendPort":{"type":"Int","value":80},"frontendType":{"type":"String","value":"publicIp"},"httpListenerProtocol":{"type":"String","value":"http"},"httpSettingsCookieBasedAffinity":{"type":"String","value":"disabled"},"httpSettingsPort":{"type":"Int","value":80},"httpSettingsProtocol":{"type":"String","value":"http"},"location":{"type":"String","value":"westus"},"privateIpAddress":{"type":"String","value":""},"privateIpAddressAllocation":{"type":"String","value":"dynamic"},"publicIpAddress":{"type":"String","value":"publicip4"},"publicIpAddressType":{"type":"String","value":"new"},"publicIpAddressAllocation":{"type":"String","value":"dynamic"},"routingRuleType":{"type":"String","value":"Basic"},"servers":{"type":"Array","value":[]},"skuName":{"type":"String","value":"Standard_Medium"},"skuTier":{"type":"String","value":"Standard"},"subnet":{"type":"String","value":"subnet1"},"subnetAddressPrefix":{"type":"String","value":"10.0.0.1/28"},"subnetType":{"type":"String","value":"new"},"tags":{"type":"Object","value":{}},"virtualNetworkName":{"type":"String","value":"vnet4"},"vnetAddressPrefix":{"type":"String","value":"10.0.0.1/16"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-02-17T16:43:43.244075Z","duration":"PT0.7926953S","correlationId":"f7f80588-239d-48b6-a762-1a786742afb0","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"applicationGateways","locations":["westus"]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/VNETtest4","resourceType":"Microsoft.Resources/deployments","resourceName":"VNETtest4"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/PublicIptest4","resourceType":"Microsoft.Resources/deployments","resourceName":"PublicIptest4"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4","resourceType":"Microsoft.Network/applicationGateways","resourceName":"test4"}]}}'}
+    body: {string: '{"value":[]}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/azurecli1487349819.7655514/operationStatuses/08587142570630263134?api-version=2015-11-01']
-      cache-control: [no-cache]
-      content-length: ['3025']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:43:43 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:12:24 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
+      content-length: ['12']
+    status: {code: 200, message: OK}
+- request:
+    body: '{"properties": {"parameters": {}, "mode": "Incremental", "template": {"variables":
+      {"appGwID": "[resourceId(''Microsoft.Network/applicationGateways'', ''test4'')]"},
+      "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "outputs": {"applicationGateway": {"type": "object",
+      "value": "[reference(''test4'')]"}}, "parameters": {}, "resources": [{"type":
+      "Microsoft.Network/virtualNetworks", "dependsOn": [], "properties": {"addressSpace":
+      {"addressPrefixes": ["10.0.0.1/16"]}, "subnets": [{"name": "subnet1", "properties":
+      {"addressPrefix": "10.0.0.1/28"}}]}, "apiVersion": "2015-06-15", "name": "vnet4",
+      "location": "westus", "tags": {}}, {"type": "Microsoft.Network/publicIPAddresses",
+      "name": "publicip4", "properties": {"publicIPAllocationMethod": "Dynamic"},
+      "apiVersion": "2015-06-15", "tags": {}, "location": "westus", "dependsOn": []},
+      {"type": "Microsoft.Network/applicationGateways", "name": "test4", "properties":
+      {"backendAddressPools": [{"name": "appGatewayBackendPool"}], "frontendPorts":
+      [{"name": "appGatewayFrontendPort", "properties": {"Port": 80}}], "httpListeners":
+      [{"name": "appGatewayHttpListener", "properties": {"SslCertificate": null, "Protocol":
+      "Http", "FrontendIpConfiguration": {"Id": "[concat(variables(''appGwID''), ''/frontendIPConfigurations/appGatewayFrontendIP'')]"},
+      "FrontendPort": {"Id": "[concat(variables(''appGwID''), ''/frontendPorts/appGatewayFrontendPort'')]"}}}],
+      "backendHttpSettingsCollection": [{"name": "appGatewayBackendHttpSettings",
+      "properties": {"Port": 80, "Protocol": "Http", "CookieBasedAffinity": "Disabled"}}],
+      "frontendIPConfigurations": [{"name": "appGatewayFrontendIP", "properties":
+      {"publicIPAddress": {"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/publicIPAddresses/publicip4"}}}],
+      "gatewayIPConfigurations": [{"name": "appGatewayFrontendIP", "properties": {"subnet":
+      {"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/virtualNetworks/vnet4/subnets/subnet1"}}}],
+      "requestRoutingRules": [{"Name": "rule1", "properties": {"RuleType": "Basic",
+      "httpListener": {"id": "[concat(variables(''appGwID''), ''/httpListeners/appGatewayHttpListener'')]"},
+      "backendHttpSettings": {"id": "[concat(variables(''appGwID''), ''/backendHttpSettingsCollection/appGatewayBackendHttpSettings'')]"},
+      "backendAddressPool": {"id": "[concat(variables(''appGwID''), ''/backendAddressPools/appGatewayBackendPool'')]"}}}],
+      "sku": {"tier": "Standard", "name": "Standard_Medium", "capacity": 2}}, "apiVersion":
+      "2015-06-15", "tags": {}, "location": "westus", "dependsOn": ["Microsoft.Network/virtualNetworks/vnet4",
+      "Microsoft.Network/publicIpAddresses/publicip4"]}]}}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['2808']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2016-09-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/ag_deploy_iGYXgp26WIT2lIpvHiZDS5ecAOan61PF","name":"ag_deploy_iGYXgp26WIT2lIpvHiZDS5ecAOan61PF","properties":{"templateHash":"13303981556869109413","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-03-29T20:12:26.6048913Z","duration":"PT0.6934402S","correlationId":"acada4ab-2527-44d9-b198-d2f6d29b0a76","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"applicationGateways","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/virtualNetworks/vnet4","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vnet4"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/publicIpAddresses/publicip4","resourceType":"Microsoft.Network/publicIpAddresses","resourceName":"publicip4"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4","resourceType":"Microsoft.Network/applicationGateways","resourceName":"test4"}]}}'}
+    headers:
+      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/ag_deploy_iGYXgp26WIT2lIpvHiZDS5ecAOan61PF/operationStatuses/08587107885395661728?api-version=2016-09-01']
+      Cache-Control: [no-cache]
+      Content-Length: ['1466']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:12:25 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -98,24 +141,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Running"}'}
+    body: {string: '{"status":"Running"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:12:56 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:44:13 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -124,24 +167,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Running"}'}
+    body: {string: '{"status":"Running"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:13:26 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:44:44 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -150,24 +193,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Running"}'}
+    body: {string: '{"status":"Running"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:13:56 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:45:13 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -176,24 +219,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Running"}'}
+    body: {string: '{"status":"Running"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:14:28 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:45:44 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -202,24 +245,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Running"}'}
+    body: {string: '{"status":"Running"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:14:59 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:46:14 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -228,24 +271,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Running"}'}
+    body: {string: '{"status":"Running"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:15:29 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:46:45 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -254,24 +297,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Running"}'}
+    body: {string: '{"status":"Running"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:15:59 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:47:14 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -280,24 +323,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Running"}'}
+    body: {string: '{"status":"Running"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:16:30 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:47:45 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -306,24 +349,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Running"}'}
+    body: {string: '{"status":"Running"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:17:00 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:48:16 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -332,24 +375,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Running"}'}
+    body: {string: '{"status":"Running"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:17:31 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:48:46 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -358,24 +401,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Running"}'}
+    body: {string: '{"status":"Running"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:18:01 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:49:16 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -384,24 +427,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Running"}'}
+    body: {string: '{"status":"Running"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:18:32 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:49:47 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -410,24 +453,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Running"}'}
+    body: {string: '{"status":"Running"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:19:02 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:50:17 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -436,24 +479,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Running"}'}
+    body: {string: '{"status":"Running"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:19:32 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:50:49 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -462,24 +505,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Running"}'}
+    body: {string: '{"status":"Running"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:20:03 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:51:19 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -488,24 +531,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Running"}'}
+    body: {string: '{"status":"Running"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:20:33 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:51:49 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -514,24 +557,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Running"}'}
+    body: {string: '{"status":"Running"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:21:03 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:52:20 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -540,24 +583,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Running"}'}
+    body: {string: '{"status":"Running"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:21:33 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:52:50 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -566,24 +609,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Running"}'}
+    body: {string: '{"status":"Running"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:22:04 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:53:21 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -592,24 +635,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Running"}'}
+    body: {string: '{"status":"Running"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:22:35 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:53:52 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -618,24 +661,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Running"}'}
+    body: {string: '{"status":"Running"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:23:05 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:54:23 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -644,24 +687,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Running"}'}
+    body: {string: '{"status":"Running"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:23:35 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:54:53 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -670,24 +713,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587142570630263134?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587107885395661728?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"status":"Succeeded"}'}
+    body: {string: '{"status":"Succeeded"}'}
     headers:
-      cache-control: [no-cache]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:24:06 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
       content-length: ['22']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:55:23 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -696,23 +739,23 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.11 (Windows-10-10.0.14393) requests/2.9.1 msrest/0.4.4
-          msrest_azure/0.4.7 appgatewaycreationclient/2015-11-01 Azure-SDK-For-Python
-          AZURECLI/TEST/0.1.1b3+dev]
+      User-Agent: [python/3.5.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.1+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3d221d21-f530-11e6-bdf4-a0b3ccf7272a]
+      x-ms-client-request-id: [0663d646-14bc-11e7-9db0-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2015-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/azurecli1487349819.7655514","name":"azurecli1487349819.7655514","properties":{"templateLink":{"uri":"https://azuresdkci.blob.core.windows.net/templatehost/CreateAppGateway_2016-11-16/azuredeploy.json","contentVersion":"1.0.0.0"},"templateHash":"3276783378463952418","parameters":{"_artifactsLocation":{"type":"String","value":"https://azuresdkci.blob.core.windows.net/templatehost/CreateAppGateway_2016-11-16"},"applicationGatewayName":{"type":"String","value":"test4"},"capacity":{"type":"Int","value":2},"certData":{"type":"String","value":""},"certPassword":{"type":"SecureString"},"frontendPort":{"type":"Int","value":80},"frontendType":{"type":"String","value":"publicIp"},"httpListenerProtocol":{"type":"String","value":"http"},"httpSettingsCookieBasedAffinity":{"type":"String","value":"disabled"},"httpSettingsPort":{"type":"Int","value":80},"httpSettingsProtocol":{"type":"String","value":"http"},"location":{"type":"String","value":"westus"},"privateIpAddress":{"type":"String","value":""},"privateIpAddressAllocation":{"type":"String","value":"dynamic"},"publicIpAddress":{"type":"String","value":"publicip4"},"publicIpAddressType":{"type":"String","value":"new"},"publicIpAddressAllocation":{"type":"String","value":"dynamic"},"routingRuleType":{"type":"String","value":"Basic"},"servers":{"type":"Array","value":[]},"skuName":{"type":"String","value":"Standard_Medium"},"skuTier":{"type":"String","value":"Standard"},"subnet":{"type":"String","value":"subnet1"},"subnetAddressPrefix":{"type":"String","value":"10.0.0.1/28"},"subnetType":{"type":"String","value":"new"},"tags":{"type":"Object","value":{}},"virtualNetworkName":{"type":"String","value":"vnet4"},"vnetAddressPrefix":{"type":"String","value":"10.0.0.1/16"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-02-17T16:55:14.1705911Z","duration":"PT11M31.7192114S","correlationId":"f7f80588-239d-48b6-a762-1a786742afb0","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"applicationGateways","locations":["westus"]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/VNETtest4","resourceType":"Microsoft.Resources/deployments","resourceName":"VNETtest4"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/PublicIptest4","resourceType":"Microsoft.Resources/deployments","resourceName":"PublicIptest4"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4","resourceType":"Microsoft.Network/applicationGateways","resourceName":"test4"}],"outputs":{"applicationGateway":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"9e0ed27b-258c-42d6-afa0-41af4de55d13","sku":{"name":"Standard_Medium","tier":"Standard","capacity":2},"gatewayIPConfigurations":[{"name":"appGatewayIpConfig","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/gatewayIPConfigurations/appGatewayIpConfig","etag":"W/\"3c02116b-aa36-4e12-ac9f-264cfdcb809b\"","properties":{"provisioningState":"Succeeded","subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/virtualNetworks/vnet4/subnets/subnet1"}}}],"sslCertificates":[],"authenticationCertificates":[],"frontendIPConfigurations":[{"name":"appGatewayFrontendIP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/frontendIPConfigurations/appGatewayFrontendIP","etag":"W/\"3c02116b-aa36-4e12-ac9f-264cfdcb809b\"","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/publicIPAddresses/publicip4"},"httpListeners":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/httpListeners/appGatewayHttpListener"}]}}],"frontendPorts":[{"name":"appGatewayFrontendPort","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/frontendPorts/appGatewayFrontendPort","etag":"W/\"3c02116b-aa36-4e12-ac9f-264cfdcb809b\"","properties":{"provisioningState":"Succeeded","port":80,"httpListeners":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/httpListeners/appGatewayHttpListener"}]}}],"backendAddressPools":[{"name":"appGatewayBackendPool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/backendAddressPools/appGatewayBackendPool","etag":"W/\"3c02116b-aa36-4e12-ac9f-264cfdcb809b\"","properties":{"provisioningState":"Succeeded","backendAddresses":[],"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/requestRoutingRules/rule1"}]}}],"backendHttpSettingsCollection":[{"name":"appGatewayBackendHttpSettings","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/backendHttpSettingsCollection/appGatewayBackendHttpSettings","etag":"W/\"3c02116b-aa36-4e12-ac9f-264cfdcb809b\"","properties":{"provisioningState":"Succeeded","port":80,"protocol":"Http","cookieBasedAffinity":"Disabled","requestTimeout":30,"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/requestRoutingRules/rule1"}]}}],"httpListeners":[{"name":"appGatewayHttpListener","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/httpListeners/appGatewayHttpListener","etag":"W/\"3c02116b-aa36-4e12-ac9f-264cfdcb809b\"","properties":{"provisioningState":"Succeeded","frontendIPConfiguration":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/frontendIPConfigurations/appGatewayFrontendIP"},"frontendPort":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/frontendPorts/appGatewayFrontendPort"},"protocol":"Http","requireServerNameIndication":false,"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/requestRoutingRules/rule1"}]}}],"urlPathMaps":[],"requestRoutingRules":[{"name":"rule1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/requestRoutingRules/rule1","etag":"W/\"3c02116b-aa36-4e12-ac9f-264cfdcb809b\"","properties":{"provisioningState":"Succeeded","ruleType":"Basic","httpListener":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/httpListeners/appGatewayHttpListener"},"backendAddressPool":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/backendAddressPools/appGatewayBackendPool"},"backendHttpSettings":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/backendHttpSettingsCollection/appGatewayBackendHttpSettings"}}}],"probes":[]}}},"outputResources":[{"id":"Microsoft.Network/applicationGateways/test4"},{"id":"Microsoft.Network/publicIPAddresses/publicip4"},{"id":"Microsoft.Network/virtualNetworks/vnet4"}]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Resources/deployments/ag_deploy_iGYXgp26WIT2lIpvHiZDS5ecAOan61PF","name":"ag_deploy_iGYXgp26WIT2lIpvHiZDS5ecAOan61PF","properties":{"templateHash":"13303981556869109413","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-03-29T20:23:57.5244321Z","duration":"PT11M31.612981S","correlationId":"acada4ab-2527-44d9-b198-d2f6d29b0a76","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"applicationGateways","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/virtualNetworks/vnet4","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vnet4"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/publicIpAddresses/publicip4","resourceType":"Microsoft.Network/publicIpAddresses","resourceName":"publicip4"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4","resourceType":"Microsoft.Network/applicationGateways","resourceName":"test4"}],"outputs":{"applicationGateway":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"fe18cfe3-6190-430f-8f9a-295cbd3aa2d1","sku":{"name":"Standard_Medium","tier":"Standard","capacity":2},"gatewayIPConfigurations":[{"name":"appGatewayFrontendIP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/gatewayIPConfigurations/appGatewayFrontendIP","etag":"W/\"6b385ba6-14f2-4084-aaf7-e8836bb9cc80\"","properties":{"provisioningState":"Succeeded","subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/virtualNetworks/vnet4/subnets/subnet1"}}}],"sslCertificates":[],"authenticationCertificates":[],"frontendIPConfigurations":[{"name":"appGatewayFrontendIP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/frontendIPConfigurations/appGatewayFrontendIP","etag":"W/\"6b385ba6-14f2-4084-aaf7-e8836bb9cc80\"","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/publicIPAddresses/publicip4"},"httpListeners":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/httpListeners/appGatewayHttpListener"}]}}],"frontendPorts":[{"name":"appGatewayFrontendPort","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/frontendPorts/appGatewayFrontendPort","etag":"W/\"6b385ba6-14f2-4084-aaf7-e8836bb9cc80\"","properties":{"provisioningState":"Succeeded","port":80,"httpListeners":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/httpListeners/appGatewayHttpListener"}]}}],"backendAddressPools":[{"name":"appGatewayBackendPool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/backendAddressPools/appGatewayBackendPool","etag":"W/\"6b385ba6-14f2-4084-aaf7-e8836bb9cc80\"","properties":{"provisioningState":"Succeeded","backendAddresses":[],"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/requestRoutingRules/rule1"}]}}],"backendHttpSettingsCollection":[{"name":"appGatewayBackendHttpSettings","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/backendHttpSettingsCollection/appGatewayBackendHttpSettings","etag":"W/\"6b385ba6-14f2-4084-aaf7-e8836bb9cc80\"","properties":{"provisioningState":"Succeeded","port":80,"protocol":"Http","cookieBasedAffinity":"Disabled","requestTimeout":30,"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/requestRoutingRules/rule1"}]}}],"httpListeners":[{"name":"appGatewayHttpListener","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/httpListeners/appGatewayHttpListener","etag":"W/\"6b385ba6-14f2-4084-aaf7-e8836bb9cc80\"","properties":{"provisioningState":"Succeeded","frontendIPConfiguration":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/frontendIPConfigurations/appGatewayFrontendIP"},"frontendPort":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/frontendPorts/appGatewayFrontendPort"},"protocol":"Http","requireServerNameIndication":false,"requestRoutingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/requestRoutingRules/rule1"}]}}],"urlPathMaps":[],"requestRoutingRules":[{"name":"rule1","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/requestRoutingRules/rule1","etag":"W/\"6b385ba6-14f2-4084-aaf7-e8836bb9cc80\"","properties":{"provisioningState":"Succeeded","ruleType":"Basic","httpListener":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/httpListeners/appGatewayHttpListener"},"backendAddressPool":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/backendAddressPools/appGatewayBackendPool"},"backendHttpSettings":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_public_ip/providers/Microsoft.Network/applicationGateways/test4/backendHttpSettingsCollection/appGatewayBackendHttpSettings"}}}],"probes":[]}}},"outputResources":[{"id":"Microsoft.Network/applicationGateways/test4"},{"id":"Microsoft.Network/publicIPAddresses/publicip4"},{"id":"Microsoft.Network/virtualNetworks/vnet4"}]}}'}
     headers:
-      cache-control: [no-cache]
-      content-length: ['8715']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Feb 2017 16:55:25 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 29 Mar 2017 20:24:06 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
+      content-length: ['7158']
     status: {code: 200, message: OK}
 version: 1

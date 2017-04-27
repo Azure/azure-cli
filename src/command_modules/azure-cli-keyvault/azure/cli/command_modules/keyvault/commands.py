@@ -8,7 +8,7 @@
 
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
-from azure.cli.core._util import empty_on_404
+from azure.cli.core.util import empty_on_404
 
 from ._client_factory import keyvault_client_factory
 from ._command_type import cli_keyvault_data_plane_command
@@ -26,6 +26,7 @@ cli_command(__name__, 'keyvault delete', mgmt_path.format('VaultsOperations.dele
 
 cli_command(__name__, 'keyvault set-policy', custom_path.format('set_policy'), factory)
 cli_command(__name__, 'keyvault delete-policy', custom_path.format('delete_policy'), factory)
+
 
 
 cli_generic_update_command(__name__,
@@ -61,7 +62,7 @@ cli_keyvault_data_plane_command('keyvault certificate list-versions', convenienc
 cli_keyvault_data_plane_command('keyvault certificate show', base_client_path.format('KeyVaultClient.get_certificate'))
 cli_keyvault_data_plane_command('keyvault certificate delete', convenience_path.format('KeyVaultClient.delete_certificate'))
 cli_keyvault_data_plane_command('keyvault certificate set-attributes', base_client_path.format('KeyVaultClient.update_certificate'))
-cli_keyvault_data_plane_command('keyvault certificate import', convenience_path.format('KeyVaultClient.import_certificate'))
+cli_keyvault_data_plane_command('keyvault certificate import', custom_path.format('import_certificate'))
 cli_keyvault_data_plane_command('keyvault certificate download', custom_path.format('download_certificate'))
 
 cli_keyvault_data_plane_command('keyvault key list', convenience_path.format('KeyVaultClient.get_keys'))

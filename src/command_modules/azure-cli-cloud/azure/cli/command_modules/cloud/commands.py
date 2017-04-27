@@ -11,3 +11,4 @@ cli_command(__name__, 'cloud register', 'azure.cli.command_modules.cloud.custom#
 cli_command(__name__, 'cloud unregister', 'azure.cli.command_modules.cloud.custom#unregister_cloud')
 cli_command(__name__, 'cloud set', 'azure.cli.command_modules.cloud.custom#set_cloud')
 cli_command(__name__, 'cloud update', 'azure.cli.command_modules.cloud.custom#modify_cloud')
+cli_command(__name__, 'cloud list-profiles', 'azure.cli.command_modules.cloud.custom#list_profiles')

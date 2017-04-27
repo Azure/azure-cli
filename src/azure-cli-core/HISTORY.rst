@@ -3,6 +3,37 @@
 Release History
 ===============
 
+2.0.3 (2017-04-17)
+^^^^^^^^^^^^^^^^^^
+*core: fix a failure when login using a service principal twice (#2800)
+*core: Allow file path of accessTokens.json to be configurable through an env var(#2605)
+*core: Allow configured defaults to apply on optional args(#2703)
+*core: Improved performance
+*core: Support for multiple API versions
+*core: Custom CA Certs - Support setting REQUESTS_CA_BUNDLE environment variable
+*core: Cloud configuration - use 'resource manager' endpoint if 'management' endpoint not set
+
+2.0.2 (2017-04-03)
+^^^^^^^^^^^^^^^^^^
+* Avoid loading azure.storage simply to getting an internal string to be used in exceptional cases when trying to instantiate a storage data plane client. (#2673)
+* [KeyVault] KeyVault create fix (#2648)
+* Azure DevTest Lab command module in CLI (#2631)
+* Allow = in generic update values. (#2638)
+* Allowing command module authors to inject formatter class. (#2622)
+* Login: skip erroneous tenant (#2634)
+* Removed duplicate sql utils code (#2629)
+* Refactoring SDK reflaction utils into core.sdk (#2599)
+* Add blank line after each example. (#2574)
+* login: set default subscription to one with the state of "Enabled" (#2575)
+* Add wait commands and --no-wait support (#2524)
+* choice list outside of named arguments (#2521)
+* core: support login using service principal with a cert (#2457)
+* Revert "get choices for completion (#2476)" (#2516)
+* Add prompting for missing template parameters. (#2364)
+* [KeyVault] Command fixes (#2474)
+* get choices for completion (#2476)
+* Fix issue with "single tuple" options_list (#2495)
+
 2.0.1 (2017-03-13)
 ^^^^^^^^^^^^^^^^^^
 

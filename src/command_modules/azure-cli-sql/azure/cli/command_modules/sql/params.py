@@ -5,19 +5,25 @@
 
 import itertools
 from enum import Enum
-from ._util import ParametersContext, patch_arg_make_required
 from azure.cli.core.commands import CliArgumentType
-from azure.cli.core.commands.parameters import enum_choice_list
-from azure.cli.core.commands.parameters import ignore_type
+from azure.cli.core.commands.parameters import (
+    enum_choice_list,
+    ignore_type)
+from azure.cli.core.sdk.util import ParametersContext, patch_arg_make_required
 from azure.mgmt.sql.models.database import Database
 from azure.mgmt.sql.models.elastic_pool import ElasticPool
+from azure.mgmt.sql.models.import_extension_request \
+    import ImportExtensionRequest
+from azure.mgmt.sql.models.export_request import ExportRequest
 from azure.mgmt.sql.models.server import Server
-from azure.mgmt.sql.models.import_extension_request_parameters \
-    import ImportExtensionRequestParameters
-from azure.mgmt.sql.models.export_request_parameters import ExportRequestParameters
-from azure.mgmt.sql.models.sql_management_client_enums import CreateMode
-from azure.mgmt.sql.models.sql_management_client_enums import StorageKeyType
-from azure.mgmt.sql.models.sql_management_client_enums import AuthenticationType
+from azure.mgmt.sql.models.sql_management_client_enums import (
+    AuthenticationType,
+    BlobAuditingPolicyState,
+    CreateMode,
+    SecurityAlertPolicyState,
+    SecurityAlertPolicyEmailAccountAdmins,
+    StorageKeyType)
+
 
 #####
 #           Reusable param type definitions
@@ -29,7 +35,7 @@ server_param_type = CliArgumentType(
     help='Name of the Azure SQL server.')
 
 #####
-#           SizeWithUnitConverter - consider moving to common code (azure.cli.commands.parameters)
+#        SizeWithUnitConverter - consider moving to common code (azure.cli.core.commands.parameters)
 #####
 
 
@@ -137,6 +143,9 @@ def _configure_db_create_params(
     if create_mode not in [CreateMode.restore, CreateMode.point_in_time_restore]:
         cmd.ignore('restore_point_in_time')
 
+    # Only applicable to restore create mode. However using this from CLI isn't tested yet.
+    cmd.ignore('source_database_deletion_date')
+
     # 'collation', 'edition', and 'max_size_bytes' are ignored (or rejected) when creating a copy
     # or secondary because their values are determined by the source db.
     if create_mode in [CreateMode.copy, CreateMode.non_readable_secondary,
@@ -157,6 +166,10 @@ def _configure_db_create_params(
 
         # Edition is always 'DataWarehouse'
         c.ignore('edition')
+
+    # recovery_services_recovery_point_resource_id is only for long-term-retention restore
+    if create_mode != CreateMode.restore_long_term_retention_backup:
+        c.ignore('recovery_services_recovery_point_resource_id')
 
 
 with ParametersContext(command='sql db') as c:
@@ -268,21 +281,27 @@ with ParametersContext(command='sql db update') as c:
     c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
 
 with ParametersContext(command='sql db export') as c:
-    c.expand('parameters', ExportRequestParameters)
+    c.expand('parameters', ExportRequest)
     c.register_alias('administrator_login', ('--admin-user', '-u'))
     c.register_alias('administrator_login_password', ('--admin-password', '-p'))
-    c.argument('authentication_type', options_list=('--auth_type',),
+    c.argument('authentication_type', options_list=('--auth-type',),
                **enum_choice_list(AuthenticationType))
     c.argument('storage_key_type', **enum_choice_list(StorageKeyType))
 
 with ParametersContext(command='sql db import') as c:
-    c.expand('parameters', ImportExtensionRequestParameters)
+    c.expand('parameters', ImportExtensionRequest)
     c.register_alias('administrator_login', ('--admin-user', '-u'))
     c.register_alias('administrator_login_password', ('--admin-password', '-p'))
-    c.argument('authentication_type', options_list=('--auth_type',),
+    c.argument('authentication_type', options_list=('--auth-type',),
                **enum_choice_list(AuthenticationType))
     c.argument('storage_key_type', **enum_choice_list(StorageKeyType))
-    c.argument('name', options_list=('--slkdjflksdjf',), arg_type=ignore_type)
+
+    c.ignore('type')
+
+    # The parameter name '--name' is used for 'database_name', so we need to give a different name
+    # for the import extension 'name' parameter to avoid conflicts. This parameter is actually not
+    # needed, but we still need to avoid this conflict.
+    c.argument('name', options_list=('--not-name',), arg_type=ignore_type)
 
 
 #####
@@ -333,18 +352,82 @@ with ParametersContext(command='sql db replica delete-link') as c:
 
 
 #####
-#           sql db <<other subgroups>>
+#           sql db audit-policy & threat-policy
 #####
 
+def _configure_security_policy_storage_params(cmd):
+    storage_arg_group = 'Storage'
 
-# Service tier advisor will not be included in the first batch of GA commands
-# with ParametersContext(command='sql db service-tier-advisor') as c:
-#     c.register_alias('database_name', ('--database', '-d'))
+    cmd.argument('storage_account',
+                 options_list=('--storage-account',),
+                 arg_group=storage_arg_group,
+                 help='Name of the storage account.')
 
-# TDE will not be included in the first batch of GA commands
-# with ParametersContext(command='sql db transparent-data-encryption') as c:
-#     c.register_alias('database_name', ('--database', '-d'))
+    cmd.argument('storage_account_access_key',
+                 options_list=('--storage-key',),
+                 arg_group=storage_arg_group,
+                 help='Access key for the storage account.')
 
+    cmd.argument('storage_endpoint',
+                 arg_group=storage_arg_group,
+                 help='The storage account endpoint.')
+
+
+with ParametersContext(command='sql db audit-policy update') as c:
+    _configure_security_policy_storage_params(c)
+
+    policy_arg_group = 'Policy'
+
+    c.argument('state',
+               arg_group=policy_arg_group,
+               help='Auditing policy state',
+               **enum_choice_list(BlobAuditingPolicyState))
+
+    c.argument('audit_actions_and_groups',
+               options_list=('--actions',),
+               arg_group=policy_arg_group,
+               help='List of actions and action groups to audit.',
+               nargs='+')
+
+    c.argument('retention_days',
+               arg_group=policy_arg_group,
+               help='The number of days to retain audit logs.')
+
+
+with ParametersContext(command='sql db threat-policy update') as c:
+    _configure_security_policy_storage_params(c)
+
+    policy_arg_group = 'Policy'
+    notification_arg_group = 'Notification'
+
+    c.argument('state',
+               arg_group=policy_arg_group,
+               help='Threat detection policy state',
+               **enum_choice_list(SecurityAlertPolicyState))
+
+    c.argument('retention_days',
+               arg_group=policy_arg_group,
+               help='The number of days to retain threat detection logs.')
+
+    c.argument('disabled_alerts',
+               arg_group=policy_arg_group,
+               options_list=('--disabled-alerts',),
+               help='List of disabled alerts.',
+               nargs='+')
+
+    c.argument('email_addresses',
+               arg_group=notification_arg_group,
+               options_list=('--email-addresses',),
+               help='List of email addresses that alerts are sent to.',
+               nargs='+')
+
+    c.argument('email_account_admins',
+               arg_group=notification_arg_group,
+               options_list=('--email-account-admins',),
+               help='Whether the alert is sent to the account administrators.',
+               **enum_choice_list(SecurityAlertPolicyEmailAccountAdmins))
+
+    # TODO: use server default
 
 ###############################################
 #                sql dw                       #

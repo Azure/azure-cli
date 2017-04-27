@@ -9,11 +9,8 @@ import os
 import textwrap
 import shutil
 
+import re
 import six
-from whoosh.highlight import UppercaseFormatter, ContextFragmenter
-from whoosh.qparser import MultifieldParser
-from whoosh import index
-from whoosh.fields import TEXT, Schema
 
 from azure.cli.command_modules.find._gather_commands import build_command_table
 import azure.cli.core.azlogging as azlogging
@@ -21,20 +18,27 @@ from azure.cli.core._environment import get_config_dir
 
 logger = azlogging.get_az_logger(__name__)
 
-INDEX_PATH = os.path.join(get_config_dir(), 'search_index')
+INDEX_DIR_PREFIX = 'search_index'
+INDEX_VERSION = 'v1'
+INDEX_PATH = os.path.join(get_config_dir(), '{}_{}'.format(INDEX_DIR_PREFIX, INDEX_VERSION))
 
-schema = Schema(
-    cmd_name=TEXT(stored=True),
-    short_summary=TEXT(stored=True),
-    long_summary=TEXT(stored=True),
-    examples=TEXT(stored=True))
 
+def _get_schema():
+    from whoosh.fields import TEXT, Schema
+    from whoosh.analysis import StemmingAnalyzer
+    stem_ana = StemmingAnalyzer()
+    return Schema(
+        cmd_name=TEXT(stored=True, analyzer=stem_ana, field_boost=1.3),
+        short_summary=TEXT(stored=True, analyzer=stem_ana),
+        long_summary=TEXT(stored=True, analyzer=stem_ana),
+        examples=TEXT(stored=True, analyzer=stem_ana))
 
 def _cli_index_corpus():
     return build_command_table()
 
 
 def _index_help():
+    from whoosh import index
     ix = index.open_dir(INDEX_PATH)
     writer = ix.writer()
     for cmd, document in list(_cli_index_corpus().items()):
@@ -47,15 +51,17 @@ def _index_help():
     writer.commit()
 
 
-def _remove_index():
-    if os.path.exists(INDEX_PATH):
-        shutil.rmtree(INDEX_PATH)
+def _purge():
+    for f in os.listdir(get_config_dir()):
+        if re.search("^{}_*".format(INDEX_DIR_PREFIX), f):
+            shutil.rmtree(os.path.join(get_config_dir(), f))
 
 
 def _create_index():
-    _remove_index()
+    from whoosh import index
+    _purge()
     os.mkdir(INDEX_PATH)
-    index.create_in(INDEX_PATH, schema)
+    index.create_in(INDEX_PATH, _get_schema())
     _index_help()
 
 
@@ -65,6 +71,7 @@ def _ensure_index():
 
 
 def _get_index():
+    from whoosh import index
     _ensure_index()
     return index.open_dir(INDEX_PATH)
 
@@ -93,13 +100,21 @@ def find(criteria, reindex=False):
     :return:
     :rtype: None
     """
+    from whoosh.qparser import MultifieldParser
     if reindex:
         _create_index()
 
-    ix = _get_index()
+    try:
+        ix = _get_index()
+    except ValueError:
+        # got a pickle error because the index was written by a different python version
+        # recreate the index and proceed
+        _create_index()
+        ix = _get_index()
+
     qp = MultifieldParser(
         ['cmd_name', 'short_summary', 'long_summary', 'examples'],
-        schema=schema
+        schema=_get_schema()
     )
 
     if 'OR' in criteria or 'AND' in criteria:
@@ -107,9 +122,11 @@ def find(criteria, reindex=False):
         q = qp.parse(" ".join(criteria))
     else:
         # let's help out with some OR's to provide a less restrictive search
-        q = qp.parse(" OR ".join(criteria))
+        expanded_query = " OR ".join(criteria) + " OR '{}'".format(criteria)
+        q = qp.parse(expanded_query)
 
     with ix.searcher() as searcher:
+        from whoosh.highlight import UppercaseFormatter, ContextFragmenter
         results = searcher.search(q)
         results.fragmenter = ContextFragmenter(maxchars=300, surround=200)
         results.formatter = UppercaseFormatter()

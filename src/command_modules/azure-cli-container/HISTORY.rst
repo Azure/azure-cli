@@ -3,6 +3,17 @@
 Release History
 ===============
 
+0.1.3 (2017-04-17)
+++++++++++++++++++
+
+* Apply core changes required for JSON string parsing from shell (#2705)
+
+0.1.2 (2017-04-03)
+++++++++++++++++++
+
+* Checks for local dockerfile when remote url is provided (#2572)
+* Add note about being in preview (#2512)
+
 0.1.1b4 (2017-02-27)
 +++++++++++++++++++++
 

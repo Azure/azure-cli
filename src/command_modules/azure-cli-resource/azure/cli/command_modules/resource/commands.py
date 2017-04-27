@@ -8,7 +8,7 @@ from collections import OrderedDict
 
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_wait_command
-from azure.cli.core._util import empty_on_404
+from azure.cli.core.util import empty_on_404
 
 from azure.cli.command_modules.resource._client_factory import (_resource_client_factory,
                                                                 cf_resource_groups,
@@ -47,6 +47,7 @@ def transform_resource_list(result):
         transformed.append(res)
     return transformed
 
+cli_command(__name__, 'resource create', 'azure.cli.command_modules.resource.custom#create_resource')
 cli_command(__name__, 'resource delete', 'azure.cli.command_modules.resource.custom#delete_resource')
 cli_command(__name__, 'resource show', 'azure.cli.command_modules.resource.custom#show_resource', exception_handler=empty_on_404)
 cli_command(__name__, 'resource list', 'azure.cli.command_modules.resource.custom#list_resources', table_transformer=transform_resource_list)
@@ -58,7 +59,8 @@ cli_command(__name__, 'provider list', 'azure.mgmt.resource.resources.operations
 cli_command(__name__, 'provider show', 'azure.mgmt.resource.resources.operations.providers_operations#ProvidersOperations.get', cf_providers, exception_handler=empty_on_404)
 cli_command(__name__, 'provider register', 'azure.cli.command_modules.resource.custom#register_provider')
 cli_command(__name__, 'provider unregister', 'azure.cli.command_modules.resource.custom#unregister_provider')
-
+cli_command(__name__, 'provider operation list', 'azure.cli.command_modules.resource.custom#list_provider_operations')
+cli_command(__name__, 'provider operation show', 'azure.cli.command_modules.resource.custom#show_provider_operations')
 # Resource feature commands
 cli_command(__name__, 'feature list', 'azure.cli.command_modules.resource.custom#list_features', cf_features)
 cli_command(__name__, 'feature show', 'azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.get', cf_features, exception_handler=empty_on_404)
@@ -86,13 +88,12 @@ cli_command(__name__, 'group deployment validate', 'azure.cli.command_modules.re
 cli_command(__name__, 'group deployment export', 'azure.cli.command_modules.resource.custom#export_deployment_as_template')
 
 # Resource group deployment operations commands
-cli_command(__name__, 'group deployment operation list', 'azure.mgmt.resource.resources.operations.deployment_operations_operations#DeploymentOperationsOperations.list', cf_deployment_operations)
+cli_command(__name__, 'group deployment operation list', 'azure.mgmt.resource.resources.operations.deployment_operations#DeploymentOperations.list', cf_deployment_operations)
 cli_command(__name__, 'group deployment operation show', 'azure.cli.command_modules.resource.custom#get_deployment_operations', cf_deployment_operations, exception_handler=empty_on_404)
 
 cli_generic_update_command(__name__, 'resource update',
-                           'azure.mgmt.resource.resources.operations.resources_operations#ResourcesOperations.get',
-                           'azure.mgmt.resource.resources.operations.resources_operations#ResourcesOperations.create_or_update',
-                           lambda: _resource_client_factory().resources)
+                           'azure.cli.command_modules.resource.custom#show_resource',
+                           'azure.cli.command_modules.resource.custom#update_resource')
 
 cli_generic_update_command(__name__, 'group update',
                            'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get',

@@ -2,6 +2,30 @@
 
 Release History
 ===============
+2.0.4 (unreleased)
+++++++++++++++++++
+* vm/vmss: improve the warning text when generates ssh key pairs
+
+2.0.3 (2017-04-17)
+++++++++++++++++++
+* vm/vmss: support create from a market place image which requires plan info(#1209)
+* Fix bug with `vmss update` and `vm availability-set update`
+
+2.0.2 (2017-04-03)
+++++++++++++++++++
+
+* vmss: bug fixes on ip address handling (#2683)
+* Fix #2641 (#2670)
+* Update storage dependencies (#2654)
+* vm: fix the bug that missing fallback default using 'next' (#2624)
+* [Compute] Add AppGateway support to VMSS create (#2570)
+* [VM/VMSS] Improved disk caching support (#2522)
+* VM/VMSS: incorporate credentials validation logic used by portal (#2537)
+* Add wait commands and --no-wait support (#2524)
+* vm: fix distro check mechanism used by disk encryption (#2511)
+* fixed typo in help text (#2519)
+* [KeyVault] Command fixes (#2474)
+* vm: catch more general exception on querying encryption extension status (#2498)
 
 2.0.1 (2017-03-13)
 ++++++++++++++++++

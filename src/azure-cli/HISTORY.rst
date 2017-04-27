@@ -3,6 +3,21 @@
 Release History
 ===============
 
+unreleased
+^^^^^^^^^^^^^^^^^^
+
+* Add 'az -v' as shortcut for 'az --version' (#2926)
+
+2.0.3 (2017-04-17)
+^^^^^^^^^^^^^^^^^^
+
+* Improve performance of package load and command execution (#2819)
+* Alter JSON string parsing from shell (#2705)
+
+2.0.2 (2017-04-03)
+^^^^^^^^^^^^^^^^^^
+
+* Add acr, lab and monitor modules to default list.
 
 2.0.1 (2017-03-13)
 ^^^^^^^^^^^^^^^^^^

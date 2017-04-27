@@ -8,8 +8,13 @@
 from __future__ import print_function
 from codecs import open
 from setuptools import setup
-
-VERSION = "2.0.1+dev"
+try:
+    from azure_bdist_wheel import cmdclass
+except ImportError:
+    from distutils import log as logger
+    logger.warn("Wheel is not available, disabling bdist_wheel hook")
+    cmdclass = {}
+VERSION = "2.0.3+dev"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -44,6 +49,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    'azure-cli-acr',
     'azure-cli-acs',
     'azure-cli-appservice',
     'azure-cli-batch',
@@ -57,12 +63,15 @@ DEPENDENCIES = [
     'azure-cli-find',
     'azure-cli-iot',
     'azure-cli-keyvault',
+    'azure-cli-lab',
+    'azure-cli-monitor',
     'azure-cli-network',
     'azure-cli-nspkg',
     'azure-cli-profile',
     'azure-cli-redis',
     'azure-cli-resource',
     'azure-cli-role',
+    'azure-cli-shell',
     'azure-cli-sql',
     'azure-cli-storage',
     'azure-cli-vm'
@@ -89,12 +98,10 @@ setup(
         'az.completion.sh',
         'az.bat',
     ],
-    namespace_packages=[
+    packages=[
         'azure',
         'azure.cli',
     ],
-    packages=[
-        'azure.cli',
-    ],
-    install_requires=DEPENDENCIES
+    install_requires=DEPENDENCIES,
+    cmdclass=cmdclass
 )

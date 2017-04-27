@@ -15,7 +15,7 @@ from six import StringIO, text_type, u, string_types
 import colorama
 from tabulate import tabulate
 
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 import azure.cli.core.azlogging as azlogging
 
 logger = azlogging.get_az_logger(__name__)

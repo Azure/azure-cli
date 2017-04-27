@@ -18,8 +18,12 @@ class JMESPathCheck(object):  # pylint: disable=too-few-public-methods
         actual_result = jmespath.search(self._query, json_value,
                                         jmespath.Options(collections.OrderedDict))
         if not actual_result == self._expected_result:
-            raise JMESPathCheckAssertionError(self._query, self._expected_result, actual_result,
-                                              execution_result.output)
+            if actual_result:
+                raise JMESPathCheckAssertionError(self._query, self._expected_result, actual_result,
+                                                  execution_result.output)
+            else:
+                raise JMESPathCheckAssertionError(self._query, self._expected_result, 'None',
+                                                  execution_result.output)
 
 
 class JMESPathCheckExists(object):  # pylint: disable=too-few-public-methods
@@ -44,3 +48,30 @@ class NoneCheck(object):  # pylint: disable=too-few-public-methods
         except AssertionError:
             raise AssertionError("Actual value '{}' != Expected value falsy (None, '', []) or "
                                  "string in {}".format(data, none_strings))
+
+
+class StringCheck(object):  # pylint: disable=too-few-public-methods
+    def __init__(self, expected_result):
+        self.expected_result = expected_result
+
+    def __call__(self, execution_result):
+        try:
+            result = execution_result.output.strip().strip('"')
+            assert result == self.expected_result
+        except AssertionError:
+            raise AssertionError(
+                "Actual value '{}' != Expected value {}".format(result, self.expected_result))
+
+
+class StringContainCheck(object):  # pylint: disable=too-few-public-methods
+    def __init__(self, expected_result):
+        self.expected_result = expected_result
+
+    def __call__(self, execution_result):
+        try:
+            result = execution_result.output.strip('"')
+            assert self.expected_result in result
+        except AssertionError:
+            raise AssertionError(
+                "Actual value '{}' doesn't contain Expected value {}".format(result,
+                                                                             self.expected_result))

@@ -3,6 +3,20 @@
 Release History
 ===============
 
+2.0.3 (2017-04-17)
+++++++++++++++++++
+
+* expose 'az acs create --no-wait' and 'az acs wait' for async creation
+* expose 'az acs create --validate' for dry-run validations
+* remove windows profile before PUT call for scale command (#2755)
+
+2.0.2 (2017-04-03)
+++++++++++++++++++
+
+* Fix kubectl version, always use latest stable. (#2517)
+* [ACS] Adding support for configuring a default ACS cluster (#2554)
+* [ACS] Provide a short name alias for the orchestrator type flag (#2553)
+
 2.0.1 (2017-03-13)
 ++++++++++++++++++
 

@@ -3,29 +3,35 @@
 Release History
 ===============
 
+2.0.3 (2017-04-17)
+++++++++++++++++++
+
+* Apply core changes required for API profile support (#2834) & JSON string parsing from shell (#2705)
+
+2.0.2 (2017-04-03)
+++++++++++++++++++
+
+* Adding alias for defaults flag (#2540)
+
 2.0.1 (2017-03-13)
 ++++++++++++++++++
 
 * Core: Support setting default values for common arguments like default resource group, default web, default vm (#2414)
-
 
 2.0.0 (2017-02-27)
 ++++++++++++++++++
 
 * GA release
 
-
 0.1.2rc2 (2017-02-22)
 +++++++++++++++++++++
 
 * Switch question ordering for ‘az configure’.
 
-
 0.1.2rc1 (2017-02-17)
 +++++++++++++++++++++
 
 * Release candidate.
-
 
 0.1.1b3 (2017-01-30)
 +++++++++++++++++++++

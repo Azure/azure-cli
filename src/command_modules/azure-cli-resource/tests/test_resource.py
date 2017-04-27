@@ -5,6 +5,7 @@
 
 import os
 import time
+import unittest
 # AZURE CLI RESOURCE TEST DEFINITIONS
 from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase, JMESPathCheck, NoneCheck,
                                                      BooleanCheck,
@@ -159,11 +160,40 @@ class ResourceIDScenarioTest(ResourceGroupVCRTestBase):
             subscription_id, self.resource_group, self.vnet_name, self.subnet_name)
         s.cmd('resource show --id {}'.format(subnet_resource_id), checks=[
             JMESPathCheck('name', self.subnet_name),
-            JMESPathCheck('resourceGroup', self.resource_group)
+            JMESPathCheck('resourceGroup', self.resource_group),
+            JMESPathCheck('properties.addressPrefix', '10.0.0.0/24')
         ])
+
+        s.cmd('resource update --id {} --set properties.addressPrefix=10.0.0.0/22'.format(subnet_resource_id), checks=[
+            JMESPathCheck('properties.addressPrefix', '10.0.0.0/22')
+            ])
 
         s.cmd('resource delete --id {}'.format(subnet_resource_id), checks=NoneCheck())
         s.cmd('resource delete --id {}'.format(vnet_resource_id), checks=NoneCheck())
+
+
+class ResourceCreateScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(ResourceCreateScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_resource_create')
+
+    def test_resource_create(self):
+        self.execute()
+
+    def body(self):
+        appservice_plan = 'cli_res_create_plan'
+        webapp = 'clirescreateweb'
+
+        self.cmd('resource create -g {} -n {} --resource-type Microsoft.web/serverFarms --is-full-object --properties "{{\\"location\\":\\"{}\\",\\"sku\\":{{\\"name\\":\\"B1\\",\\"tier\\":\\"BASIC\\"}}}}"'.format(
+            self.resource_group, appservice_plan, self.location), checks=[JMESPathCheck('name', appservice_plan)])
+
+        result = self.cmd('resource create -g {} -n {} --resource-type Microsoft.web/sites --properties "{{\\"serverFarmId\\":\\"{}\\"}}"'.format(
+            self.resource_group, webapp, appservice_plan), checks=[JMESPathCheck('name', webapp)])
+
+        app_settings_id = result['id'] + '/config/appsettings'
+        self.cmd('resource create --id {} --properties "{{\\"key2\\":\\"value12\\"}}"'.format(
+            app_settings_id), checks=[JMESPathCheck('properties.key2', 'value12')])
+
 
 class TagScenarioTest(VCRTestBase): # Not RG test base because it operates only on the subscription
 
@@ -189,7 +219,7 @@ class TagScenarioTest(VCRTestBase): # Not RG test base because it operates only 
         s.cmd('tag create -n {}'.format(tn), checks=[
             JMESPathCheck('tagName', tn),
             JMESPathCheck('values', []),
-            JMESPathCheck('count.value', '0')
+            JMESPathCheck('count.value', 0)
         ])
         s.cmd('tag add-value -n {} --value test'.format(tn))
         s.cmd('tag add-value -n {} --value test2'.format(tn))
@@ -231,6 +261,25 @@ class ProviderRegistrationTest(VCRTestBase): # Not RG test base because it opera
             self.cmd('provider register -n {}'.format(provider), checks=None)
             result = self.cmd('provider show -n {}'.format(provider))
             self.assertTrue(result['registrationState'] in ['Registering', 'Registered'])
+
+
+class ProviderOperationTest(VCRTestBase): # Not RG test base because it operates only on the subscription
+    def __init__(self, test_method):
+        super(ProviderOperationTest, self).__init__(__file__, test_method)
+
+    def test_provider_operation(self):
+        self.execute()
+
+    def body(self):
+        self.cmd('provider operation show --namespace microsoft.compute', checks=[
+            JMESPathCheck('id', '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
+            JMESPathCheck('type', 'Microsoft.Authorization/providerOperations')
+        ]) 
+        self.cmd('provider operation show --namespace microsoft.compute --api-version 2015-07-01', checks=[
+            JMESPathCheck('id', '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
+            JMESPathCheck('type', 'Microsoft.Authorization/providerOperations')
+        ])
+
 
 class DeploymentTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
@@ -443,3 +492,6 @@ class PolicyScenarioTest(ResourceGroupVCRTestBase):
         time.sleep(10) # ensure the policy is gone when run live.
         self.cmd('policy definition list', checks=[
             JMESPathCheck("length([?name=='{}'])".format(policy_name), 0)])
+
+if __name__ == '__main__':
+    unittest.main()

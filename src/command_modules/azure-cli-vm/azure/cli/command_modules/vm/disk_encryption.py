@@ -5,7 +5,7 @@
 import uuid
 from azure.cli.core.commands.arm import parse_resource_id
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from .custom import set_vm, _compute_client_factory
 logger = azlogging.get_az_logger(__name__)
 
@@ -171,7 +171,7 @@ def disable(resource_group_name, vm_name, volume_type=None, force=False):
                     status = show(resource_group_name, vm_name)
                     if status['osDisk'] == _STATUS_ENCRYPTED:
                         raise CLIError("VM's OS disk is encrypted. Disabling encryption on data "
-                                       "disk can still cause VM unbootable. Use '--force' "
+                                       "disk can render the VM unbootable. Use '--force' "
                                        "to continue")
                 else:
                     raise CLIError("Only data disk is supported to disable on Linux VM")

@@ -16,7 +16,7 @@ from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list, resource_group_name_type,
     tags_type, ignore_type, enum_choice_list, file_type, three_state_flag)
 from azure.cli.core._profile import Profile
-from azure.cli.core._util import get_json_object
+from azure.cli.core.util import get_json_object
 from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
 
 from azure.keyvault.generated.models.key_vault_client_enums import \
@@ -24,7 +24,7 @@ from azure.keyvault.generated.models.key_vault_client_enums import \
 from azure.keyvault.generated.models import \
     (KeyAttributes, SecretAttributes, CertificateAttributes)
 from azure.cli.command_modules.keyvault._validators import \
-    (datetime_type, base64_encoded_certificate_type,
+    (datetime_type, certificate_type,
      get_attribute_validator,
      vault_base_url_type, validate_key_import_source,
      validate_key_type, validate_key_ops, validate_policy_permissions,
@@ -76,14 +76,17 @@ certificate_file_encoding_values = ['binary', 'string']
 
 # KEY ATTRIBUTE PARAMETER REGISTRATION
 
-def register_attributes_argument(scope, name, attr_class, create=False):
+def register_attributes_argument(scope, name, attr_class, create=False, ignore=None):
+    ignore = ignore or []
     register_cli_argument(scope, '{}_attributes'.format(name), ignore_type, validator=get_attribute_validator(name, attr_class, create))
     if create:
         register_extra_cli_argument(scope, 'disabled', help='Create {} in disabled state.'.format(name), **three_state_flag())
     else:
         register_extra_cli_argument(scope, 'enabled', help='Enable the {}.'.format(name), **three_state_flag())
-    register_extra_cli_argument(scope, 'expires', default=None, help='Expiration UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
-    register_extra_cli_argument(scope, 'not_before', default=None, help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
+    if 'expires' not in ignore:
+        register_extra_cli_argument(scope, 'expires', default=None, help='Expiration UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
+    if 'not_before' not in ignore:
+        register_extra_cli_argument(scope, 'not_before', default=None, help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
 
 # ARGUMENT DEFINITIONS
 
@@ -146,7 +149,7 @@ register_cli_argument('keyvault secret set', 'content_type', options_list=('--de
 register_attributes_argument('keyvault secret set', 'secret', SecretAttributes, create=True)
 register_cli_argument('keyvault secret set', 'value', options_list=('--value',), help="Plain text secret value. Cannot be used with '--file' or '--encoding'", required=False, arg_group='Content Source')
 register_extra_cli_argument('keyvault secret set', 'file_path', options_list=('--file', '-f'), type=file_type, help="Source file for secret. Use in conjunction with '--encoding'", completer=FilesCompleter(), arg_group='Content Source')
-register_extra_cli_argument('keyvault secret set', 'encoding', options_list=('--encoding', '-e'), help='Source file encoding. The value is saved as a tag (file-encoding=<val>) and used during download to automtically encode the resulting file.', default='utf-8', validator=process_secret_set_namespace, arg_group='Content Source', **enum_choice_list(secret_encoding_values))
+register_extra_cli_argument('keyvault secret set', 'encoding', options_list=('--encoding', '-e'), help='Source file encoding. The value is saved as a tag (`file-encoding=<val>`) and used during download to automtically encode the resulting file.', default='utf-8', validator=process_secret_set_namespace, arg_group='Content Source', **enum_choice_list(secret_encoding_values))
 
 register_attributes_argument('keyvault secret set-attributes', 'secret', SecretAttributes)
 
@@ -154,16 +157,17 @@ register_cli_argument('keyvault secret download', 'file_path', options_list=('--
 register_cli_argument('keyvault secret download', 'encoding', options_list=('--encoding', '-e'), help="Encoding of the destination file. By default, will look for the 'file-encoding' tag on the secret. Otherwise will assume 'utf-8'.", default=None, **enum_choice_list(secret_encoding_values))
 
 register_cli_argument('keyvault certificate', 'certificate_version', options_list=('--version', '-v'), help='The certificate version. If omitted, uses the latest version.', default='', required=False, completer=get_keyvault_version_completion_list('certificate'))
-register_attributes_argument('keyvault certificate create', 'certificate', CertificateAttributes, True)
-register_attributes_argument('keyvault certificate import', 'certificate', CertificateAttributes, True)
-register_attributes_argument('keyvault certificate set-attributes', 'certificate', CertificateAttributes)
-register_cli_argument('keyvault certificate set-attributes', 'expires', ignore_type)
-register_cli_argument('keyvault certificate set-attributes', 'not_before', ignore_type)
+register_cli_argument('keyvault certificate', 'validity', type=int, help='Number of months the certificate is valid for. Overrides the value specified with --policy/-p')
+# TODO: Remove workaround when https://github.com/Azure/azure-rest-api-specs/issues/1153 is fixed
+register_attributes_argument('keyvault certificate create', 'certificate', CertificateAttributes, True, ignore=['expires', 'not_before'])
+register_attributes_argument('keyvault certificate set-attributes', 'certificate', CertificateAttributes, ignore=['expires', 'not_before'])
 
 for item in ['create', 'set-attributes', 'import']:
     register_cli_argument('keyvault certificate {}'.format(item), 'certificate_policy', options_list=('--policy', '-p'), help='JSON encoded policy defintion. Use @{file} to load from a file.', type=get_json_object)
 
-register_cli_argument('keyvault certificate import', 'base64_encoded_certificate', options_list=('--file', '-f'), completer=FilesCompleter(), help='PKCS12 file or PEM file containing the certificate and private key.', type=base64_encoded_certificate_type)
+register_cli_argument('keyvault certificate import', 'certificate_data', options_list=('--file', '-f'), completer=FilesCompleter(), help='PKCS12 file or PEM file containing the certificate and private key.', type=certificate_type)
+register_cli_argument('keyvault certificate import', 'password', help="If the private key in certificate is encrypted, the password used for encryption.")
+register_extra_cli_argument('keyvault certificate import', 'disabled', help='Import the certificate in disabled state.', **three_state_flag())
 
 register_cli_argument('keyvault certificate download', 'file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter(), help='File to receive the binary certificate contents.')
 register_cli_argument('keyvault certificate download', 'encoding', options_list=('--encoding', '-e'), help='How to store base64 certificate contents in file.', **enum_choice_list(certificate_file_encoding_values))

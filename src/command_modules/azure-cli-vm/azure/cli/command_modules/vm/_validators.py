@@ -10,10 +10,11 @@ from msrestazure.azure_exceptions import CloudError
 
 from azure.mgmt.keyvault import KeyVaultManagementClient
 from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid_resource_id
-from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from azure.cli.core._util import CLIError, random_string
+from azure.cli.core.commands.validators import \
+    (get_default_location_from_resource_group, validate_file_or_dict)
+from azure.cli.core.util import CLIError, random_string
 from ._client_factory import _compute_client_factory
-from azure.cli.command_modules.vm._vm_utils import check_existence, load_json
+from azure.cli.command_modules.vm._vm_utils import check_existence
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.azlogging as azlogging
 
@@ -95,7 +96,7 @@ def _validate_secrets(secrets, os_type):
     errors = []
 
     try:
-        loaded_secret = [load_json(secret) for secret in secrets]
+        loaded_secret = [validate_file_or_dict(secret) for secret in secrets]
     except Exception as err:
         raise CLIError('Error decoding secrets: {0}'.format(err))
 
@@ -153,6 +154,32 @@ def _parse_image_argument(namespace):
         namespace.os_offer = urn_match.group(2)
         namespace.os_sku = urn_match.group(3)
         namespace.os_version = urn_match.group(4)
+        compute_client = _compute_client_factory()
+        if namespace.os_version.lower() == 'latest':
+            top_one = compute_client.virtual_machine_images.list(namespace.location,
+                                                                 namespace.os_publisher,
+                                                                 namespace.os_offer,
+                                                                 namespace.os_sku,
+                                                                 top=1,
+                                                                 orderby='name desc')
+            if len(top_one) == 0:
+                raise CLIError("Can't resolve the vesion of '{}'".format(namespace.image))
+
+            image_version = top_one[0].name
+        else:
+            image_version = namespace.os_version
+
+        image = compute_client.virtual_machine_images.get(namespace.location,
+                                                          namespace.os_publisher,
+                                                          namespace.os_offer,
+                                                          namespace.os_sku,
+                                                          image_version)
+
+        # pylint: disable=no-member
+        if image.plan:
+            namespace.plan_name = image.plan.name
+            namespace.plan_product = image.plan.product
+            namespace.plan_publisher = image.plan.publisher
         return 'urn'
 
     # 4 - check if a fully-qualified ID (assumes it is an image ID)
@@ -199,7 +226,15 @@ storage_profile_param_options = {
 }
 
 
-def _validate_required_forbidden_parameters(namespace, required, forbidden):
+network_balancer_param_options = {
+    'application_gateway': '--application-gateway',
+    'load_balancer': '--load-balancer',
+    'app_gateway_subnet_address_prefix': '--app-gateway-subnet-address-prefix',
+    'backend_pool_name': '--backend-pool-name'
+}
+
+
+def _validate_storage_required_forbidden_parameters(namespace, required, forbidden):
     missing_required = [x for x in required if not getattr(namespace, x)]
     included_forbidden = [x for x in forbidden if getattr(namespace, x)]
     if missing_required or included_forbidden:
@@ -212,6 +247,22 @@ def _validate_required_forbidden_parameters(namespace, required, forbidden):
         if included_forbidden:
             forbidden_string = ', '.join(
                 storage_profile_param_options[x] for x in included_forbidden)
+            error = '{}\n\tnot applicable: {}'.format(error, forbidden_string)
+        raise CLIError(error)
+
+
+def _validate_network_balancer_required_forbidden_parameters(namespace, required, forbidden, desc):
+    missing_required = [x for x in required if not getattr(namespace, x)]
+    included_forbidden = [x for x in forbidden if getattr(namespace, x)]
+    if missing_required or included_forbidden:
+        error = 'invalid usage for network balancer: {}'.format(desc)
+        if missing_required:
+            missing_string = ', '.join(
+                network_balancer_param_options[x] for x in missing_required)
+            error = '{}\n\tmissing: {}'.format(error, missing_string)
+        if included_forbidden:
+            forbidden_string = ', '.join(
+                network_balancer_param_options[x] for x in included_forbidden)
             error = '{}\n\tnot applicable: {}'.format(error, forbidden_string)
         raise CLIError(error)
 
@@ -309,7 +360,7 @@ def _validate_vm_create_storage_profile(namespace, for_scale_set=False):
         namespace.storage_sku = 'Standard_LRS' if for_scale_set else 'Premium_LRS'
 
     # Now verify that the status of required and forbidden parameters
-    _validate_required_forbidden_parameters(namespace, required, forbidden)
+    _validate_storage_required_forbidden_parameters(namespace, required, forbidden)
 
     if namespace.storage_profile == StorageProfile.ManagedCustomImage:
         # extract additional information from a managed custom image
@@ -341,9 +392,9 @@ def _validate_vm_create_storage_account(namespace):
             # 2 - params for new storage account specified
             namespace.storage_account_type = 'new'
     else:
-        from azure.mgmt.storage import StorageManagementClient
+        from azure.cli.core.profiles import ResourceType
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        storage_client = get_mgmt_service_client(StorageManagementClient).storage_accounts
+        storage_client = get_mgmt_service_client(ResourceType.MGMT_STORAGE).storage_accounts  # pylint: disable=line-too-long
 
         # find storage account in target resource group that matches the VM's location
         sku_tier = 'Premium' if 'Premium' in namespace.storage_sku else 'Standard'
@@ -388,9 +439,9 @@ def _validate_vm_create_vnet(namespace, for_scale_set=False):
 
     if not vnet and not subnet and not nics:  # pylint: disable=too-many-nested-blocks
         # if nothing specified, try to find an existing vnet and subnet in the target resource group
-        from azure.mgmt.network import NetworkManagementClient
+        from azure.cli.core.profiles import ResourceType
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        client = get_mgmt_service_client(NetworkManagementClient).virtual_networks
+        client = get_mgmt_service_client(ResourceType.MGMT_NETWORK).virtual_networks
 
         # find VNET in target resource group that matches the VM's location with a matching subnet
         for vnet_match in (v for v in client.list(rg) if v.location == location and v.subnets):
@@ -452,6 +503,10 @@ def _validate_vmss_create_subnet(namespace):
                 raise CLIError(err.format(namespace.instance_count))
             namespace.subnet_address_prefix = '{}/{}'.format(cidr, i)
 
+        if namespace.app_gateway_type and namespace.app_gateway_subnet_address_prefix is None:
+            raise CLIError('Must specify --gateway-subnet-address-prefix to create an '
+                           'application gateway.')
+
 
 def _validate_vm_create_nsg(namespace):
 
@@ -481,10 +536,10 @@ def _validate_vm_create_public_ip(namespace):
 
 
 def _validate_vmss_create_public_ip(namespace):
-    if namespace.load_balancer_type is None:
+    if namespace.load_balancer_type is None and namespace.app_gateway_type is None:
         if namespace.public_ip_address:
-            raise CLIError('--public-ip-address is not applicable when there is no load-balancer '
-                           'attached, or implictly disabled due to 100+ instance count')
+            raise CLIError('--public-ip-address can only be used  when creating a new load '
+                           'balancer or application gateway frontend.')
         namespace.public_ip_address = ''
     _validate_vm_create_public_ip(namespace)
 
@@ -610,7 +665,7 @@ def _validate_admin_password(password, os_type):
 
 def validate_ssh_key(namespace):
     string_or_file = (namespace.ssh_key_value or
-                      os.path.join(os.path.expanduser('~'), '.ssh/id_rsa.pub'))
+                      os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
     content = string_or_file
     if os.path.exists(string_or_file):
         logger.info('Use existing SSH public key file: %s', string_or_file)
@@ -626,7 +681,10 @@ def validate_ssh_key(namespace):
             else:
                 private_key_filepath = public_key_filepath + '.private'
             content = _generate_ssh_keys(private_key_filepath, public_key_filepath)
-            logger.warning('Created SSH key files: %s,%s',
+            logger.warning("SSH key files '%s' and '%s' have been generated under ~/.ssh to "
+                           "allow SSH access to the VM. If using machines without "
+                           "permanent storage like Azure Cloud Shell without an attached "
+                           "file share, back up your keys to a safe location",
                            private_key_filepath, public_key_filepath)
         else:
             raise CLIError('An RSA key file or key value must be supplied to SSH Key Value. '
@@ -696,36 +754,90 @@ def process_vm_create_namespace(namespace):
 
 # region VMSS Create Validators
 
+def _get_vmss_create_instance_threshold():
+    return 100
 
-def _validate_vmss_create_load_balancer(namespace):
+
+def _validate_vmss_create_load_balancer_or_app_gateway(namespace):
+
+    INSTANCE_THRESHOLD = _get_vmss_create_instance_threshold()
+
     # convert the single_placement_group to boolean for simpler logic beyond
     if namespace.single_placement_group is None:
-        namespace.single_placement_group = namespace.instance_count <= 100
+        namespace.single_placement_group = namespace.instance_count <= INSTANCE_THRESHOLD
     else:
         namespace.single_placement_group = (namespace.single_placement_group == 'true')
 
-    if not namespace.single_placement_group:
-        if namespace.load_balancer:
-            raise CLIError('--load-balancer is not applicable when --single-placement-group is '
-                           'explictly turned off or implictly turned off for 100+ instance count')
-        namespace.load_balancer = ''
+    if not namespace.single_placement_group and namespace.load_balancer:
+        raise CLIError(
+            '--load-balancer is not applicable when --single-placement-group is turned off.')
 
-    if namespace.load_balancer:
-        if check_existence(namespace.load_balancer, namespace.resource_group_name,
-                           'Microsoft.Network', 'loadBalancers'):
-            namespace.load_balancer_type = 'existing'
-        else:
+    if namespace.load_balancer and namespace.application_gateway:
+        raise CLIError('incorrect usage: --load-balancer NAME_OR_ID | '
+                       '--application-gateway NAME_OR_ID')
+
+    if namespace.instance_count > INSTANCE_THRESHOLD and namespace.load_balancer:
+        raise CLIError(
+            '--load-balancer cannot be used with --instance_count is > {}'.format(
+                INSTANCE_THRESHOLD))
+
+    # Resolve the type of balancer (if any) being used
+    balancer_type = 'None'
+    if namespace.load_balancer is None and namespace.application_gateway is None:
+        # use defaulting rules to determine
+        balancer_type = 'loadBalancer' if namespace.instance_count <= INSTANCE_THRESHOLD \
+            else 'applicationGateway'
+    elif namespace.load_balancer:
+        balancer_type = 'loadBalancer'
+    elif namespace.application_gateway:
+        balancer_type = 'applicationGateway'
+
+    if balancer_type == 'applicationGateway':
+
+        if namespace.application_gateway:
+            if check_existence(namespace.application_gateway, namespace.resource_group_name,
+                               'Microsoft.Network', 'applicationGateways'):
+                namespace.app_gateway_type = 'existing'
+            else:
+                namespace.app_gateway_type = 'new'
+        elif namespace.application_gateway == '':
+            namespace.app_gateway_type = None
+        elif namespace.application_gateway is None:
+            namespace.app_gateway_type = 'new'
+
+        # AppGateway frontend
+        required = []
+        if namespace.app_gateway_type == 'new':
+            required.append('app_gateway_subnet_address_prefix')
+        elif namespace.app_gateway_type == 'existing':
+            required.append('backend_pool_name')
+        forbidden = ['nat_pool_name', 'load_balancer']
+        _validate_network_balancer_required_forbidden_parameters(
+            namespace, required, forbidden, 'application gateway')
+
+    elif balancer_type == 'loadBalancer':
+        # LoadBalancer frontend
+        required = []
+        forbidden = ['app_gateway_subnet_address_prefix', 'application_gateway']
+        _validate_network_balancer_required_forbidden_parameters(
+            namespace, required, forbidden, 'load balancer')
+
+        if namespace.load_balancer:
+            if check_existence(namespace.load_balancer, namespace.resource_group_name,
+                               'Microsoft.Network', 'loadBalancers'):
+                namespace.load_balancer_type = 'existing'
+            else:
+                namespace.load_balancer_type = 'new'
+        elif namespace.load_balancer == '':
+            namespace.load_balancer_type = None
+        elif namespace.load_balancer is None:
             namespace.load_balancer_type = 'new'
-    elif namespace.load_balancer == '':
-        namespace.load_balancer_type = None
-    elif namespace.load_balancer is None:
-        namespace.load_balancer_type = 'new'
 
 
 def process_vmss_create_namespace(namespace):
     get_default_location_from_resource_group(namespace)
     _validate_vm_create_storage_profile(namespace, for_scale_set=True)
-    _validate_vmss_create_load_balancer(namespace)
+    _validate_vmss_create_load_balancer_or_app_gateway(namespace)
     _validate_vm_create_vnet(namespace, for_scale_set=True)
     _validate_vmss_create_subnet(namespace)
     _validate_vmss_create_public_ip(namespace)

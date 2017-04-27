@@ -8,9 +8,11 @@ import json
 import re
 
 from six import string_types
-from msrest.exceptions import DeserializationError
+from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
+
 
 from azure.cli.command_modules.batch import _validators as validators
+from azure.cli.command_modules.batch import _format as transformers
 from azure.cli.core.commands import (
     CONFIRM_PARAM_NAME,
     command_table,
@@ -338,6 +340,7 @@ class BatchArgumentTree(object):
         :param dict kwargs: The request kwargs
         :param dict json_obj: The loaded JSON content
         """
+        from msrest.exceptions import DeserializationError
         message = "Failed to deserialized JSON file into object {}"
         try:
             kwargs[self._request_param['name']] = client._deserialize(  # pylint: disable=protected-access
@@ -481,8 +484,8 @@ class BatchArgumentTree(object):
 class AzureBatchDataPlaneCommand(object):
     # pylint:disable=too-many-instance-attributes, too-few-public-methods
 
-    def __init__(self, module_name, name, operation, factory, transform_result,  # pylint:disable=too-many-arguments
-                 table_transformer, flatten, ignore, validator, silent):
+    def __init__(self, module_name, name, operation, factory, transform_result,  # pylint:disable=too-many-arguments, too-many-statements
+                 flatten, ignore, validator, silent):
 
         if not isinstance(operation, string_types):
             raise ValueError("Operation must be a string. Got '{}'".format(operation))
@@ -495,6 +498,7 @@ class AzureBatchDataPlaneCommand(object):
         self.parser = None
         self.validator = validator
         self.confirmation = 'delete' in operation
+        self.head_cmd = False
 
         # The name of the request options parameter
         self._options_param = format_options_name(operation)
@@ -507,7 +511,7 @@ class AzureBatchDataPlaneCommand(object):
             from msrest.paging import Paged
             from msrest.exceptions import ValidationError, ClientRequestError
             from azure.batch.models import BatchErrorException
-            from azure.cli.core._util import CLIError
+            from azure.cli.core.util import CLIError
             from azure.cli.core._config import az_config
             from azure.cli.core.commands import _user_confirmed
 
@@ -543,7 +547,13 @@ class AzureBatchDataPlaneCommand(object):
 
                 # Make request
                 op = get_op_handler(operation)
+                if self.head_cmd:
+                    kwargs['raw'] = True
                 result = op(client, **kwargs)
+
+                # Head output
+                if self.head_cmd:
+                    return transformers.transform_response_headers(result)
 
                 # File download
                 if stream_output:
@@ -572,7 +582,12 @@ class AzureBatchDataPlaneCommand(object):
                     raise CLIError(ex)
             except (ValidationError, ClientRequestError) as ex:
                 raise CLIError(ex)
-
+        table_transformer = None
+        try:
+            transform_func = '_'.join(name.split()[1:]).replace('-', '_')
+            table_transformer = getattr(transformers, transform_func + "_table_format")
+        except AttributeError:
+            pass
         command_module_map[name] = module_name
         self.cmd = CliCommand(
             ' '.join(name.split()),
@@ -815,7 +830,8 @@ class AzureBatchDataPlaneCommand(object):
                                                  help=docstring))
             elif arg[0] not in self.ignore:
                 yield arg
-        if find_return_type(handler) == 'Generator':
+        return_type = find_return_type(handler)
+        if return_type == 'Generator':
             param = 'destination'
             docstring = "The path to the destination file or directory."
             yield (param, CliCommandArgument(param,
@@ -826,6 +842,8 @@ class AzureBatchDataPlaneCommand(object):
                                              type=file_type,
                                              validator=validators.validate_file_destination,
                                              help=docstring))
+        if return_type == 'None' and handler.__name__.startswith('get'):
+            self.head_cmd = True
         if self.confirmation:
             param = CONFIRM_PARAM_NAME
             docstring = 'Do not prompt for confirmation.'
@@ -836,18 +854,56 @@ class AzureBatchDataPlaneCommand(object):
                                              help=docstring))
 
 
+def validate_client_parameters(namespace):
+    """Retrieves Batch connection parameters from environment variables"""
+    from azure.mgmt.batch import BatchManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core._config import az_config
+
+    # simply try to retrieve the remaining variables from environment variables
+    if not namespace.account_name:
+        namespace.account_name = az_config.get('batch', 'account', None)
+    if not namespace.account_key:
+        namespace.account_key = az_config.get('batch', 'access_key', None)
+    if not namespace.account_endpoint:
+        namespace.account_endpoint = az_config.get('batch', 'endpoint', None)
+
+    # if account name is specified but no key, attempt to query if we use shared key auth
+    if namespace.account_name and namespace.account_endpoint and not namespace.account_key:
+        if az_config.get('batch', 'auth_mode', 'shared_key') == 'shared_key':
+            endpoint = urlsplit(namespace.account_endpoint)
+            host = endpoint.netloc
+            client = get_mgmt_service_client(BatchManagementClient)
+            acc = next((x for x in client.batch_account.list()
+                        if x.name == namespace.account_name and x.account_endpoint == host), None)
+            if acc:
+                from azure.cli.core.commands.arm import parse_resource_id
+                rg = parse_resource_id(acc.id)['resource_group']
+                namespace.account_key = \
+                    client.batch_account.get_keys(rg, namespace.account_name).primary  # pylint: disable=no-member
+            else:
+                raise ValueError("Batch account '{}' not found.".format(namespace.account_name))
+    else:
+        if not namespace.account_name:
+            raise ValueError("Specify batch account in command line or enviroment variable.")
+        if not namespace.account_endpoint:
+            raise ValueError("Specify batch endpoint in command line or enviroment variable.")
+
+    if az_config.get('batch', 'auth_mode', 'shared_key') == 'aad':
+        namespace.account_key = None
+
+
 def cli_batch_data_plane_command(name, operation, client_factory, transform=None,  # pylint:disable=too-many-arguments
-                                 table_transformer=None, flatten=FLATTEN,
-                                 ignore=None, validator=None, silent=None):
+                                 flatten=FLATTEN, ignore=None, validator=None, silent=None):
     """ Registers an Azure CLI Batch Data Plane command. These commands must respond to a
     challenge from the service when they make requests. """
     command = AzureBatchDataPlaneCommand(__name__, name, operation, client_factory, transform,
-                                         table_transformer, flatten, ignore, validator, silent)
+                                         flatten, ignore, validator, silent)
 
     # add parameters required to create a batch client
     group_name = 'Batch Account'
     command.cmd.add_argument('account_name', '--account-name', required=False, default=None,
-                             validator=validators.validate_client_parameters, arg_group=group_name,
+                             validator=validate_client_parameters, arg_group=group_name,
                              help='Batch account name. Alternatively, set by environment variable: '
                              'AZURE_BATCH_ACCOUNT')
     command.cmd.add_argument('account_key', '--account-key', required=False, default=None,

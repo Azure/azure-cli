@@ -13,7 +13,7 @@ import azure.cli.core.application as application
 class TestVMImage(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.vm.custom.urlopen', autospec=True)
     def test_read_images_from_alias_doc(self, mock_urlopen):
-        config = application.Configuration([])
+        config = application.Configuration()
         application.APPLICATION = application.Application(config)
         from azure.cli.command_modules.vm.custom import list_vm_images
 

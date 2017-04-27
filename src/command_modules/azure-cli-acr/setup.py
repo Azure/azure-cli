@@ -7,8 +7,14 @@
 
 from codecs import open
 from setuptools import setup
+try:
+    from azure_bdist_wheel import cmdclass
+except ImportError:
+    from distutils import log as logger
+    logger.warn("Wheel is not available, disabling bdist_wheel hook")
+    cmdclass = {}
 
-VERSION = '0.1.1b5+dev'
+VERSION = '2.0.1+dev'
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -26,8 +32,8 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'azure-mgmt-resource==0.30.2',
-    'azure-mgmt-storage==0.31.0',
+    'azure-mgmt-resource==1.0.0rc1',
+    'azure-mgmt-storage==1.0.0rc1',
     'azure-mgmt-containerregistry==0.2.0',
 ]
 
@@ -46,14 +52,13 @@ setup(
     author_email='azpycli@microsoft.com',
     url='https://github.com/Azure/azure-cli',
     classifiers=CLASSIFIERS,
-    namespace_packages=[
+    packages=[
         'azure',
         'azure.cli',
         'azure.cli.command_modules',
-    ],
-    packages=[
         'azure.cli.command_modules.acr',
     ],
     install_requires=DEPENDENCIES,
     package_data={'azure.cli.command_modules.acr': ['template.json', 'template_existing_storage.json']},
+    cmdclass=cmdclass
 )

@@ -6,8 +6,6 @@
 import base64
 from six import string_types
 
-import adal
-
 from azure.cli.core.commands import (command_table,
                                      command_module_map,
                                      CliCommand,
@@ -16,7 +14,7 @@ from azure.cli.core.commands import (command_table,
 from azure.cli.core.commands._introspection import \
     (extract_full_summary_from_signature, extract_args_from_signature)
 
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 def _encode_hex(item):
     """ Recursively crawls the object structure and converts bytes or bytearrays to base64
@@ -56,6 +54,7 @@ def _create_key_vault_command(module_name, name, operation, transform_result, ta
         try:
 
             def get_token(server, resource, scope): # pylint: disable=unused-argument
+                import adal
                 try:
                     return Profile().get_login_credentials(resource)[0]._token_retriever() # pylint: disable=protected-access
                 except adal.AdalError as err:

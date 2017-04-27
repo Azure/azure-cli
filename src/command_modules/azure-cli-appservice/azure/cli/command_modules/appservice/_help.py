@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps #pylint: disable=unused-import
+from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
-#pylint: disable=line-too-long
+# pylint: disable=line-too-long
 
 helps['appservice'] = """
     type: group
@@ -302,6 +302,11 @@ helps['appservice web config hostname delete'] = """
 helps['appservice web config hostname list'] = """
     type: command
     short-summary: List all hostname bindings.
+"""
+
+helps['appservice web config hostname get-external-ip'] = """
+    type: command
+    short-summary: get the ip address to configure your DNS settings for A records
 """
 
 helps['appservice web config backup list'] = """

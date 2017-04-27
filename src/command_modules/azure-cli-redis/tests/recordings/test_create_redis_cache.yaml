@@ -1,0 +1,176 @@
+interactions:
+- request:
+    body: '{"location": "westus", "tags": {"use": "az-test"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group create]
+      Connection: [keep-alive]
+      Content-Length: ['50']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/2.0.2+dev]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2016-09-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['326']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 13 Apr 2017 17:18:10 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 201, message: Created}
+- request:
+    body: '{"location": "WestUS", "properties": {"sku": {"name": "Basic", "family":
+      "C", "capacity": 0}}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [redis create]
+      Connection: [keep-alive]
+      Content-Length: ['94']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 redismanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/2.0.2+dev]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cache/Redis/cli000002?api-version=2016-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cache/Redis/cli000002","location":"West
+        US","name":"cli000002","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Creating","redisVersion":"3.2","sku":{"name":"Basic","family":"C","capacity":0},"enableNonSslPort":false,"redisConfiguration":{"maxclients":"256","maxmemory-reserved":"2","maxfragmentationmemory-reserved":"12","maxmemory-delta":"2"},"accessKeys":{"primaryKey":"lr7S+XpwKd7wmVgX60N9Ajz6RNPTf+0VlsPNaWXKUYY=","secondaryKey":"lakNGov3L8Ki919D/yxR1ATPCEl6TlQON5iaeqO4Eaw="},"hostName":"cli000002.redis.cache.windows.net","port":6379,"sslPort":6380}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['798']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 13 Apr 2017 17:18:13 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cache/redis/cli000002?api-version=2016-04-01']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-rp-server-mvid: [5a0a88c0-0183-48c7-85e3-df64396b7fab]
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [redis show]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 redismanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/2.0.2+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cache/Redis/cli000002?api-version=2016-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cache/Redis/cli000002","location":"West
+        US","name":"cli000002","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Creating","redisVersion":"3.2","sku":{"name":"Basic","family":"C","capacity":0},"enableNonSslPort":false,"redisConfiguration":{"maxclients":"256","maxmemory-reserved":"2","maxfragmentationmemory-reserved":"12","maxmemory-delta":"2"},"accessKeys":null,"hostName":"cli000002.redis.cache.windows.net","port":6379,"sslPort":6380}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['679']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 13 Apr 2017 17:18:14 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-rp-server-mvid: [5a0a88c0-0183-48c7-85e3-df64396b7fab]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [redis list]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 redismanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/2.0.2+dev]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cache/Redis/?api-version=2016-04-01
+  response:
+    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cache/Redis/cli000002","location":"West
+        US","name":"cli000002","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Creating","redisVersion":"3.2","sku":{"name":"Basic","family":"C","capacity":0},"enableNonSslPort":false,"redisConfiguration":{"maxclients":"256","maxmemory-reserved":"2","maxfragmentationmemory-reserved":"12","maxmemory-delta":"2"},"accessKeys":null,"hostName":"cli000002.redis.cache.windows.net","port":6379,"sslPort":6380}}]}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['691']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 13 Apr 2017 17:18:15 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-rp-server-mvid: [5a0a88c0-0183-48c7-85e3-df64396b7fab]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [redis list-keys]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 redismanagementclient/1.0.0 Azure-SDK-For-Python AZURECLI/2.0.2+dev]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cache/Redis/cli000002/listKeys?api-version=2016-04-01
+  response:
+    body: {string: '{"primaryKey":"lr7S+XpwKd7wmVgX60N9Ajz6RNPTf+0VlsPNaWXKUYY=","secondaryKey":"lakNGov3L8Ki919D/yxR1ATPCEl6TlQON5iaeqO4Eaw="}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['123']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 13 Apr 2017 17:18:17 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-rp-server-mvid: [5a0a88c0-0183-48c7-85e3-df64396b7fab]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/0.30.2 Azure-SDK-For-Python
+          AZURECLI/2.0.2+dev]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2016-09-01
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Thu, 13 Apr 2017 17:18:18 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkc0NjQ5Qzc5M0FDODdGQzFGNkJENEQzRjRCNEQ4RENGODBEQ3w1Njg3QUMzOEYxM0I3RjBDLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2016-09-01']
+      pragma: [no-cache]
+      retry-after: ['15']
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 202, message: Accepted}
+version: 1

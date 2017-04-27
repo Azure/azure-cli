@@ -32,6 +32,18 @@ echo '1.0' > $debian_dir/source/format
 echo '9' > $debian_dir/compat
 
 cat > $debian_dir/changelog <<- EOM
+azure-cli (0.2.5-1) unstable; urgency=low
+
+  * Packaged release 0.2.5.
+
+ -- Azure Python CLI Team <azpycli@microsoft.com>  Mon, 17 Apr 2017 20:00:00 +0000
+
+azure-cli (0.2.4-1) unstable; urgency=low
+
+  * Packaged release 0.2.4.
+
+ -- Azure Python CLI Team <azpycli@microsoft.com>  Mon, 03 Apr 2017 20:00:00 +0000
+
 azure-cli (0.2.3-1) unstable; urgency=low
 
   * Packaged release 0.2.3.
@@ -171,6 +183,7 @@ ${TAB}dh \$@ --with python-virtualenv
 
 override_dh_virtualenv:
 ${TAB}dh_virtualenv --sourcedirectory src/azure-cli-nspkg --install-suffix az
+${TAB}dh_virtualenv --sourcedirectory src/azure-cli-command_modules-nspkg --install-suffix az
 ${TAB}dh_virtualenv --sourcedirectory src/azure-cli-core --install-suffix az
 ${TAB}for d in src/command_modules/azure-cli-*/; do dh_virtualenv --sourcedirectory \$d --install-suffix az; done;
 ${TAB}dh_virtualenv --sourcedirectory src/azure-cli --install-suffix az

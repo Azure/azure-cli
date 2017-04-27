@@ -3,6 +3,16 @@
 Release History
 ===============
 
+0.1.3 (2017-04-17)
++++++++++++++++++++++
+
+* Apply core changes required for API profile support (#2834) & JSON string parsing from shell (#2705)
+
+0.1.2 (2017-04-03)
++++++++++++++++++++++
+
+* Add note about being in preview (#2512)
+
 0.1.1b3 (2017-02-22)
 +++++++++++++++++++++
 

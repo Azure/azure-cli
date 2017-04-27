@@ -5,13 +5,12 @@
 
 from __future__ import print_function
 import os
-from six.moves import configparser  # pylint: disable=redefined-builtin
-from adal.adal_error import AdalError
+from six.moves import configparser
 
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._config import (GLOBAL_CONFIG_PATH, ENV_VAR_PREFIX, set_global_config,
-                                    set_global_config_value, DEFAULTS_SECTION)
-from azure.cli.core._util import CLIError
+                                    set_global_config_value, DEFAULTS_SECTION, get_config_parser)
+from azure.cli.core.util import CLIError
 from azure.cli.core.prompting import (prompt,
                                       prompt_y_n,
                                       prompt_choice_list,
@@ -48,8 +47,9 @@ def _print_cur_configuration(file_config):
         print('\n'.join(['{} = {}'.format(ev, os.environ[ev]) for ev in env_vars]))
 
 def _config_env_public_azure(_):
+    from adal.adal_error import AdalError
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core._profile import Profile
     # Determine if user logged in
     try:
@@ -96,9 +96,9 @@ def _handle_global_configuration():
     # print location of global configuration
     print(MSG_GLOBAL_SETTINGS_LOCATION.format(GLOBAL_CONFIG_PATH))
     # set up the config parsers
-    file_config = configparser.SafeConfigParser()
+    file_config = get_config_parser()
     config_exists = file_config.read([GLOBAL_CONFIG_PATH])
-    global_config = configparser.SafeConfigParser()
+    global_config = get_config_parser()
     global_config.read(GLOBAL_CONFIG_PATH)
     should_modify_global_config = False
     if config_exists:

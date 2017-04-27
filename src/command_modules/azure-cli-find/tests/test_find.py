@@ -15,7 +15,7 @@ from nose import with_setup
 from six import StringIO
 
 from azure.cli.main import main as cli_main
-from azure.cli.command_modules.find.custom import _remove_index
+from azure.cli.command_modules.find.custom import _purge
 
 
 @contextlib.contextmanager
@@ -40,22 +40,22 @@ def execute(cmd):
 
 
 def exec_json(cmd):
-    json.loads(execute(cmd))
+    shell_safe_json_parse(execute(cmd))
 
 
 class SearchIndexTest(unittest.TestCase):
 
     def setUp(self):
-        _remove_index()
+        _purge()
 
     def test_search_index(self):
         six.assertRegex(
             self,
             execute('find -q keyvault list'),
-            'az keyvault certificate list-versions')
+            'az keyvault list')
 
     def test_search_reindex(self):
         six.assertRegex(
             self,
             execute('find -q keyvault list --reindex'),
-            'az keyvault certificate list-versions')
+            'az keyvault list')

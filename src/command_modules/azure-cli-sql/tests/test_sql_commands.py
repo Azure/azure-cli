@@ -9,8 +9,8 @@ from azure.cli.testsdk import (
     JMESPathCheck,
     NoneCheck,
     ResourceGroupPreparer,
-    StorageAccountPreparer,
-    ScenarioTest)
+    ScenarioTest,
+    StorageAccountPreparer)
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
@@ -59,7 +59,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer()
     def test_sql_server_mgmt(self, resource_group, resource_group_location):
-        servers = ['cliautomation51', 'cliautomation52']  # TODO: Server names should be randomized
+        servers = ['cliautomation53', 'cliautomation54']  # TODO: Server names should be randomized
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
@@ -109,6 +109,10 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', servers[0]),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('administratorLogin', user)])
+
+        self.cmd('sql server list-usages -g {} -n {}'
+                 .format(rg, servers[0]),
+                 checks=[JMESPathCheck('[0].resourceName', servers[0])])
 
         # test delete sql server
         self.cmd('sql server delete -g {} --name {} --yes'
@@ -264,10 +268,9 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', rg)])
 
-        # # Usages will not be included in the first batch of GA commands
-        # self.cmd('sql db show-usage -g {} --server {} --name {}'
-        #          .format(rg, server, database_name), checks=[
-        #              JMESPathCheck('[0].resourceName', database_name)])
+        self.cmd('sql db list-usages -g {} --server {} --name {}'
+                 .format(rg, server, database_name),
+                 checks=[JMESPathCheck('[0].resourceName', database_name)])
 
         self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --max-size {}'
                  ' --set tags.key1=value1'
@@ -395,6 +398,146 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
                           JMESPathCheck('status', 'Online')])
 
 
+class SqlServerDbSecurityScenarioTest(ScenarioTest):
+    def _get_storage_endpoint(self, storage_account, resource_group):
+        return self.cmd('storage account show -g {} -n {}'
+                        ' --query primaryEndpoints.blob'
+                        .format(resource_group, storage_account)).get_output_in_json()
+
+    def _get_storage_key(self, storage_account, resource_group):
+        return self.cmd('storage account keys list -g {} -n {} --query [0].value'
+                        .format(resource_group, storage_account)).get_output_in_json()
+
+    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(parameter_name='resource_group_2')
+    @SqlServerPreparer()
+    @StorageAccountPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_2',
+                            resource_group_parameter_name='resource_group_2')
+    def test_sql_db_security_mgmt(self, resource_group, resource_group_2,
+                                  resource_group_location, server,
+                                  storage_account, storage_account_2):
+        database_name = "cliautomationdb01"
+
+        # get storage account endpoint and key
+        storage_endpoint = self._get_storage_endpoint(storage_account, resource_group)
+        key = self._get_storage_key(storage_account, resource_group)
+
+        # create db
+        self.cmd('sql db create -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('status', 'Online')])
+
+        # get audit policy
+        self.cmd('sql db audit-policy show -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[JMESPathCheck('resourceGroup', resource_group)])
+
+        # update audit policy - enable
+        state_enabled = 'Enabled'
+        key
+        retention_days = 30
+        audit_actions_input = 'DATABASE_LOGOUT_GROUP DATABASE_ROLE_MEMBER_CHANGE_GROUP'
+        audit_actions_expected = ['DATABASE_LOGOUT_GROUP',
+                                  'DATABASE_ROLE_MEMBER_CHANGE_GROUP']
+
+        self.cmd('sql db audit-policy update -g {} -s {} -n {}'
+                 ' --state {} --storage-key {} --storage-endpoint={}'
+                 ' --retention-days={} --actions {}'
+                 .format(resource_group, server, database_name, state_enabled, key,
+                         storage_endpoint, retention_days, audit_actions_input),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('storageAccountAccessKey', ''),  # service doesn't return it
+                     JMESPathCheck('storageEndpoint', storage_endpoint),
+                     JMESPathCheck('retentionDays', retention_days),
+                     JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
+
+        # update audit policy - specify storage account and resource group. use secondary key
+        storage_endpoint_2 = self._get_storage_endpoint(storage_account_2, resource_group_2)
+        self.cmd('sql db audit-policy update -g {} -s {} -n {} --storage-account {}'
+                 .format(resource_group, server, database_name, storage_account_2,
+                         resource_group_2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('storageAccountAccessKey', ''),  # service doesn't return it
+                     JMESPathCheck('storageEndpoint', storage_endpoint_2),
+                     JMESPathCheck('retentionDays', retention_days),
+                     JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
+
+        # update audit policy - disable
+        state_disabled = 'Disabled'
+        self.cmd('sql db audit-policy update -g {} -s {} -n {} --state {}'
+                 .format(resource_group, server, database_name, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled),
+                     JMESPathCheck('storageAccountAccessKey', ''),  # service doesn't return it
+                     JMESPathCheck('storageEndpoint', storage_endpoint_2),
+                     JMESPathCheck('retentionDays', retention_days),
+                     JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
+
+        # get threat detection policy
+        self.cmd('sql db threat-policy show -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[JMESPathCheck('resourceGroup', resource_group)])
+
+        # update threat detection policy - enable
+        disabled_alerts_input = 'Sql_Injection_Vulnerability Access_Anomaly'
+        disabled_alerts_expected = 'Sql_Injection_Vulnerability;Access_Anomaly'
+        email_addresses_input = 'test1@example.com test2@example.com'
+        email_addresses_expected = 'test1@example.com;test2@example.com'
+        email_account_admins = 'Enabled'
+
+        self.cmd('sql db threat-policy update -g {} -s {} -n {}'
+                 ' --state {} --storage-key {} --storage-endpoint {}'
+                 ' --retention-days {} --email-addresses {} --disabled-alerts {}'
+                 ' --email-account-admins {}'
+                 .format(resource_group, server, database_name, state_enabled, key,
+                         storage_endpoint, retention_days, email_addresses_input,
+                         disabled_alerts_input, email_account_admins),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('storageAccountAccessKey', key),
+                     JMESPathCheck('storageEndpoint', storage_endpoint),
+                     JMESPathCheck('retentionDays', retention_days),
+                     JMESPathCheck('emailAddresses', email_addresses_expected),
+                     JMESPathCheck('disabledAlerts', disabled_alerts_expected),
+                     JMESPathCheck('emailAccountAdmins', email_account_admins)])
+
+        # update threat policy - specify storage account and resource group. use secondary key
+        key_2 = self._get_storage_key(storage_account_2, resource_group_2)
+        self.cmd('sql db threat-policy update -g {} -s {} -n {} --storage-account {}'
+                 .format(resource_group, server, database_name, storage_account_2,
+                         resource_group_2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('storageAccountAccessKey', key_2),
+                     JMESPathCheck('storageEndpoint', storage_endpoint_2),
+                     JMESPathCheck('retentionDays', retention_days),
+                     JMESPathCheck('emailAddresses', email_addresses_expected),
+                     JMESPathCheck('disabledAlerts', disabled_alerts_expected),
+                     JMESPathCheck('emailAccountAdmins', email_account_admins)])
+
+        # update threat policy - disable
+        self.cmd('sql db audit-policy update -g {} -s {} -n {} --state {}'
+                 .format(resource_group, server, database_name, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled),
+                     JMESPathCheck('storageAccountAccessKey', ''),  # service doesn't return it
+                     JMESPathCheck('storageEndpoint', storage_endpoint_2),
+                     JMESPathCheck('retentionDays', retention_days),
+                     JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
+
+
 class SqlServerDwMgmtScenarioTest(ScenarioTest):
     # pylint: disable=too-many-instance-attributes
     @ResourceGroupPreparer()
@@ -429,10 +572,9 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
                  .format(rg, server),
                  checks=[
                      JMESPathCheck('length(@)', 2),  # includes dw and master
-                     JMESPathCheck('[1].name', 'master'),
-                     JMESPathCheck('[1].resourceGroup', rg),
-                     JMESPathCheck('[0].name', database_name),
-                     JMESPathCheck('[0].resourceGroup', rg)])
+                     JMESPathCheck('sort([].name)', sorted([database_name, 'master'])),
+                     JMESPathCheck('[0].resourceGroup', rg),
+                     JMESPathCheck('[1].resourceGroup', rg)])
 
         self.cmd('sql dw list -g {} --server {}'
                  .format(rg, server),
@@ -878,72 +1020,132 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
         admin_password = 'SecretPassword123'
         db_name = 'cliautomationdb01'
         db_name2 = 'cliautomationdb02'
+        db_name3 = 'cliautomationdb03'
+        blob = 'testbacpac.bacpac'
+        blob2 = 'testbacpac2.bacpac'
+
         container = 'bacpacs'
 
         firewall_rule_1 = 'allowAllIps'
         start_ip_address_1 = '0.0.0.0'
-        end_ip_address_1 = '255.255.255.255'
-
-        loc_long = location_long_name
-        rg = resource_group
-        sa = storage_account
+        end_ip_address_1 = '0.0.0.0'
 
         # create server firewall rule
         self.cmd('sql server firewall-rule create --name {} -g {} --server {} '
                  '--start-ip-address {} --end-ip-address {}'
-                 .format(firewall_rule_1, rg, server,
+                 .format(firewall_rule_1, resource_group, server,
                          start_ip_address_1, end_ip_address_1),
                  checks=[
                      JMESPathCheck('name', firewall_rule_1),
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('startIpAddress', start_ip_address_1),
                      JMESPathCheck('endIpAddress', end_ip_address_1)])
 
-        # create db
+        # create dbs
         self.cmd('sql db create -g {} --server {} --name {}'
-                 .format(rg, server, db_name),
+                 .format(resource_group, server, db_name),
                  checks=[
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', db_name),
-                     JMESPathCheck('location', loc_long),
+                     JMESPathCheck('location', location_long_name),
                      JMESPathCheck('elasticPoolName', None),
                      JMESPathCheck('status', 'Online')])
 
         self.cmd('sql db create -g {} --server {} --name {}'
-                 .format(rg, server, db_name2),
+                 .format(resource_group, server, db_name2),
                  checks=[
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', db_name2),
-                     JMESPathCheck('location', loc_long),
+                     JMESPathCheck('location', location_long_name),
                      JMESPathCheck('elasticPoolName', None),
                      JMESPathCheck('status', 'Online')])
 
-        # Backup to new dacpac
+        self.cmd('sql db create -g {} --server {} --name {}'
+                 .format(resource_group, server, db_name3),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', db_name3),
+                     JMESPathCheck('location', location_long_name),
+                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('status', 'Online')])
+
         # get storage account endpoint
         storage_endpoint = self.cmd('storage account show -g {} -n {}'
                                     ' --query primaryEndpoints.blob'
-                                    .format(rg, storage_account)).get_output_in_json()
+                                    .format(resource_group, storage_account)).get_output_in_json()
+        bacpacUri = '{}{}/{}'.format(storage_endpoint, container, blob)
+        bacpacUri2 = '{}{}/{}'.format(storage_endpoint, container, blob2)
 
         # get storage account key
-        key = self.cmd('storage account keys list -g {} -n {} --query [0].value'
-                       .format(rg, storage_account)).get_output_in_json()
+        storageKey = self.cmd('storage account keys list -g {} -n {} --query [0].value'
+                              .format(resource_group, storage_account)).get_output_in_json()
+
+        # Set Expiry
+        expiryString = '9999-12-25T00:00:00Z'
+
+        # Get sas key
+        sasKey = self.cmd('storage blob generate-sas --account-name {} -c {} -n {} --permissions rw --expiry {}'.format(
+            storage_account, container, blob2, expiryString)).get_output_in_json()
 
         # create storage account blob container
         self.cmd('storage container create -n {} --account-name {} --account-key {} '
-                 .format(container, sa, key),
+                 .format(container, storage_account, storageKey),
                  checks=[
                      JMESPathCheck('created', True)])
 
-        # export database to blob container
+        # export database to blob container using both keys
         self.cmd('sql db export -s {} -n {} -g {} -p {} -u {}'
                  ' --storage-key {} --storage-key-type StorageAccessKey'
-                 ' --storage-uri {}{}/testbacpac.bacpac'
-                 .format(server, db_name, rg, admin_password, admin_login, key,
-                         storage_endpoint, container))
+                 ' --storage-uri {}'
+                 .format(server, db_name, resource_group, admin_password, admin_login, storageKey,
+                         bacpacUri),
+                 checks=[
+                     JMESPathCheck('blobUri', bacpacUri),
+                     JMESPathCheck('databaseName', db_name),
+                     JMESPathCheck('requestType', 'Export'),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('serverName', server),
+                     JMESPathCheck('status', 'Completed')])
 
-        # import bacpac to second database
+        self.cmd('sql db export -s {} -n {} -g {} -p {} -u {}'
+                 ' --storage-key {} --storage-key-type SharedAccessKey'
+                 ' --storage-uri {}'
+                 .format(server, db_name, resource_group, admin_password, admin_login, sasKey,
+                         bacpacUri2),
+                 checks=[
+                     JMESPathCheck('blobUri', bacpacUri2),
+                     JMESPathCheck('databaseName', db_name),
+                     JMESPathCheck('requestType', 'Export'),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('serverName', server),
+                     JMESPathCheck('status', 'Completed')])
+
+        # import bacpac to second database using Storage Key
         self.cmd('sql db import -s {} -n {} -g {} -p {} -u {}'
                  ' --storage-key {} --storage-key-type StorageAccessKey'
-                 ' --storage-uri {}{}/testbacpac.bacpac'
-                 .format(server, db_name2, rg, admin_password, admin_login, key,
-                         storage_endpoint, container))
+                 ' --storage-uri {}'
+                 .format(server, db_name2, resource_group, admin_password, admin_login, storageKey,
+                         bacpacUri),
+                 checks=[
+                     JMESPathCheck('blobUri', bacpacUri),
+                     JMESPathCheck('databaseName', db_name2),
+                     JMESPathCheck('name', 'import'),
+                     JMESPathCheck('requestType', 'Import'),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('serverName', server),
+                     JMESPathCheck('status', 'Completed')])
+
+        # import bacpac to third database using SAS key
+        self.cmd('sql db import -s {} -n {} -g {} -p {} -u {}'
+                 ' --storage-key {} --storage-key-type SharedAccessKey'
+                 ' --storage-uri {}'
+                 .format(server, db_name3, resource_group, admin_password, admin_login, sasKey,
+                         bacpacUri2),
+                 checks=[
+                     JMESPathCheck('blobUri', bacpacUri2),
+                     JMESPathCheck('databaseName', db_name3),
+                     JMESPathCheck('name', 'import'),
+                     JMESPathCheck('requestType', 'Import'),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('serverName', server),
+                     JMESPathCheck('status', 'Completed')])

@@ -2,6 +2,27 @@
 
 Release History
 ===============
+2.0.4 (unreleased)
+++++++++++++++++++
+* Support login when there are no subscriptions found (#2560)
+* Support short param name in az account set --subscription (#2980)
+
+2.0.3 (2017-04-17)
+++++++++++++++++++
+
+* API Profile Support (#2834)
+* Fix #2839. (#2844)
+* [Network] Make DNS Zone record imports relative (#2825)
+* [Network] VPN-connection shared key fixes (#2798)
+* [Network] Support active-active VNet gateways (#2751)
+* [Network] Remove nulls from VPN connection show/list output (#2748)
+* Alter JSON string parsing from shell (#2705)
+
+2.0.2 (2017-04-03)
+++++++++++++++++++
+
+* account: do not show not enabled subscription by default (#2664)
+* core: support login using service principal with a cert (#2457)
 
 2.0.1 (2017-03-13)
 ++++++++++++++++++

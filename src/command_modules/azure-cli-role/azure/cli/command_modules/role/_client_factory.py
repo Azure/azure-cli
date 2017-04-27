@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+
 def _auth_client_factory(scope=None):
     import re
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -13,6 +14,7 @@ def _auth_client_factory(scope=None):
         if matched:
             subscription_id = matched.groupdict()['subscription']
     return get_mgmt_service_client(AuthorizationManagementClient, subscription_id=subscription_id)
+
 
 def _graph_client_factory(**_):
     from azure.cli.core._profile import Profile, CLOUD

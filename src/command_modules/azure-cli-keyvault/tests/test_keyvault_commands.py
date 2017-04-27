@@ -10,8 +10,13 @@ from __future__ import print_function
 
 import os
 import time
+import unittest
+from datetime import datetime
+from dateutil import tz
 
-from azure.cli.core._util import CLIError
+from azure.cli.command_modules.keyvault.custom import _asn1_to_iso8601
+
+from azure.cli.core.util import CLIError
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck,
                                                      NoneCheck)
 
@@ -43,6 +48,20 @@ def _create_keyvault(test, vault_name, resource_group, location, retry_wait=30, 
                 time.sleep(retry_wait)
             else:
                 raise ex
+
+
+class DateTimeParseTest(unittest.TestCase):
+
+    def test_parse_asn1_date(self):
+        expected = datetime(year=2017,
+                            month=4,
+                            day=24,
+                            hour=16,
+                            minute=37,
+                            second=20,
+                            tzinfo=tz.tzutc())
+        self.assertEqual(_asn1_to_iso8601("20170424163720Z"), expected)
+
 
 
 class KeyVaultMgmtScenarioTest(ResourceGroupVCRTestBase):
@@ -458,3 +477,7 @@ class KeyVaultCertificateScenarioTest(ResourceGroupVCRTestBase):
         pfx_plain_file = os.path.join(TEST_DIR, 'import_pfx.pfx')
         pfx_policy_path = os.path.join(TEST_DIR, 'policy_import_pfx.json')
         self.cmd('keyvault certificate import --vault-name {} -n pfx-cert --file "{}" -p @"{}"'.format(kv, pfx_plain_file, pfx_policy_path))
+
+
+if __name__ == '__main__':
+    unittest.main()
