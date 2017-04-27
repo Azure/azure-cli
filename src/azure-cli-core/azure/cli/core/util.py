@@ -206,7 +206,7 @@ def b64_to_hex(s):
     decoded = base64.b64decode(s)
     hex_data = binascii.hexlify(decoded).upper()
     if isinstance(hex_data, bytes):
-        return hex_data.decode("utf-8")
+        return str(hex_data.decode("utf-8"))
     return hex_data
 
 
