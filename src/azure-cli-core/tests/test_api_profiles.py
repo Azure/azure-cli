@@ -8,6 +8,7 @@ import mock
 
 from azure.cli.core.profiles import (get_api_version,
                                      supported_api_version,
+                                     PROFILE_TYPE,
                                      ResourceType)
 from azure.cli.core.profiles._shared import APIVersionException
 from azure.cli.core.cloud import Cloud
@@ -47,34 +48,40 @@ class TestAPIProfiles(unittest.TestCase):
                 get_api_version(None)
 
     def test_supported_api_profile_no_constraints(self):
-        self.assertTrue(supported_api_version(None))
+        ''' At least a min or max version must be specified '''
+        with self.assertRaises(ValueError):
+            supported_api_version(PROFILE_TYPE)
 
     @mock.patch('azure.cli.core._profile.CLOUD', Cloud('TestCloud', profile='2000-01-01'))
     def test_supported_api_profile_min_constraint(self):
-        self.assertTrue(supported_api_version(None, min_api='2000-01-01'))
+        self.assertTrue(supported_api_version(PROFILE_TYPE, min_api='2000-01-01'))
 
     @mock.patch('azure.cli.core._profile.CLOUD', Cloud('TestCloud', profile='2000-01-01'))
     def test_supported_api_profile_min_constraint_not_supported(self):
-        self.assertFalse(supported_api_version(None, min_api='2000-01-02'))
+        self.assertFalse(supported_api_version(PROFILE_TYPE, min_api='2000-01-02'))
 
     @mock.patch('azure.cli.core._profile.CLOUD', Cloud('TestCloud', profile='2000-01-01'))
     def test_supported_api_profile_min_max_constraint(self):
-        self.assertTrue(supported_api_version(None, min_api='2000-01-01', max_api='2000-01-01'))
+        self.assertTrue(supported_api_version(PROFILE_TYPE,
+                                              min_api='2000-01-01',
+                                              max_api='2000-01-01'))
 
     @mock.patch('azure.cli.core._profile.CLOUD', Cloud('TestCloud', profile='2000-01-01'))
     def test_supported_api_profile_max_constraint_not_supported(self):
-        self.assertFalse(supported_api_version(None, max_api='1999-12-30'))
+        self.assertFalse(supported_api_version(PROFILE_TYPE, max_api='1999-12-30'))
 
     @mock.patch('azure.cli.core._profile.CLOUD', Cloud('TestCloud', profile='2000-01-01'))
     def test_supported_api_profile_preview_constraint(self):
-        self.assertTrue(supported_api_version(None, min_api='2000-01-01-preview'))
+        self.assertTrue(supported_api_version(PROFILE_TYPE, min_api='2000-01-01-preview'))
 
     @mock.patch('azure.cli.core._profile.CLOUD', Cloud('TestCloud', profile='latest'))
     def test_supported_api_profile_latest(self):
-        self.assertTrue(supported_api_version(None, min_api='2000-01-01'))
+        self.assertTrue(supported_api_version(PROFILE_TYPE, min_api='2000-01-01'))
 
     def test_supported_api_version_no_constraints(self):
-        self.assertTrue(supported_api_version(ResourceType.MGMT_STORAGE))
+        ''' At least a min or max version must be specified '''
+        with self.assertRaises(ValueError):
+            supported_api_version(ResourceType.MGMT_STORAGE)
 
     @mock.patch('azure.cli.core._profile.CLOUD', Cloud('TestCloud', profile='myprofile'))
     def test_supported_api_version_min_constraint(self):
