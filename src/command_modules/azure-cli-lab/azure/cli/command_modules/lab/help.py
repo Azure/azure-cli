@@ -221,8 +221,11 @@ helps['lab environment create'] = """
                   short-summary: Name of the environment
                 - name: --resource-group -g
                   short-summary: Name of lab's resource group
-                - name: --arm-template-id
-                  short-summary: Fully qualified Azure Resource Manager template's identifier in the lab
+                - name: --arm-template
+                  short-summary: Name or ID of Azure Resource Manager template in the lab.
+                - name: --artifact-source-name
+                  short-summary: Name of the artifact source in the lab. Use az lab artifact-source list to see
+                                 available artifact sources
                 - name: --parameters
                   short-summary: JSON encoded list of parameters. Use @{file} to load from a file
                 - name: --tags

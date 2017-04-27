@@ -168,6 +168,12 @@ with ServiceGroup(__name__, get_devtestlabs_environment_operation,
         c.command('delete', 'delete')
         c.command('create', 'create_or_update')
 
+# Environment Operations Custom Commands
+with ServiceGroup(__name__, get_devtestlabs_environment_operation,
+                  custom_operations) as s:
+    with s.group('lab environment') as c:
+        c.command('create', 'create_environment')
+
 # ARM Templates Operations Commands
 arm_template_operations = create_service_adapter(
     mgmt_operations_path.format('arm_templates_operations'),

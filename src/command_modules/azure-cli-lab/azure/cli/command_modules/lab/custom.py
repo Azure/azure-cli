@@ -53,6 +53,22 @@ def list_vm(client, resource_group, lab_name, order_by=None, top=None,
                        expand=expand, filter=filters, top=top, order_by=order_by)
 
 
+# pylint: disable=too-many-locals, unused-argument
+def create_environment(client, resource_group, lab_name, name, arm_template, parameters=None,
+                       artifact_source_name=None, user_name=None, tags=None):
+    """ Command to create an environment the Azure DevTest Lab """
+
+    from azure.cli.command_modules.lab.sdk.devtestlabs.models.environment_deployment_properties \
+        import EnvironmentDeploymentProperties
+    from azure.cli.command_modules.lab.sdk.devtestlabs.models.dtl_environment import DtlEnvironment
+
+    environment_deployment_properties = EnvironmentDeploymentProperties(arm_template, parameters)
+    dtl_environment = DtlEnvironment(tags=tags,
+                                     deployment_properties=environment_deployment_properties)
+
+    return client.create_or_update(resource_group, lab_name, user_name, name, dtl_environment)
+
+
 def show_arm_template(client, resource_group, lab_name, name,
                       artifact_source_name, export_parameters=False):
     """ Command to show azure resource manager template in the Azure DevTest Lab """

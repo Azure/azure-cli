@@ -3,12 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import json
 from azure.cli.command_modules.lab.validators import (validate_lab_vm_create,
                                                       validate_lab_vm_list,
-                                                      validate_user_name)
+                                                      validate_user_name,
+                                                      validate_template_id)
 from azure.cli.core.commands.parameters import resource_group_name_type
-from azure.cli.core.sdk.util import ParametersContext, patch_arg_make_required
+from azure.cli.core.sdk.util import ParametersContext
+from azure.cli.core.util import get_json_object
 
 
 with ParametersContext(command='lab') as c:
@@ -30,7 +31,7 @@ with ParametersContext(command='lab vm create') as c:
     c.argument('saved_secret', arg_group=authentication_group_name)
 
     # Add Artifacts from json object
-    c.argument('artifacts', type=json.loads)
+    c.argument('artifacts', type=get_json_object)
 
     # Image related arguments
     c.ignore('os_type')
@@ -66,7 +67,7 @@ with ParametersContext(command='lab vm list') as c:
 
 
 with ParametersContext(command='lab vm apply-artifacts') as c:
-    c.register('artifacts', ('--artifacts',), type=json.loads)
+    c.register('artifacts', ('--artifacts',), type=get_json_object)
     c.register_alias('name', ('--name', '-n'))
 
 
@@ -95,21 +96,8 @@ with ParametersContext(command='lab environment') as c:
 
 
 with ParametersContext(command='lab environment create') as c:
-    from azure.cli.command_modules.lab.sdk.devtestlabs.models.environment_deployment_properties\
-        import EnvironmentDeploymentProperties
-    from azure.cli.command_modules.lab.sdk.devtestlabs.models.dtl_environment import DtlEnvironment
-
-    c.expand('deployment_properties', EnvironmentDeploymentProperties, patches={
-        'arm_template_id': patch_arg_make_required,
-        'parameters': patch_arg_make_required
-    })
-    c.argument('parameters', type=json.loads)
-
-    c.expand('dtl_environment', DtlEnvironment)
-    c.ignore('arm_template_display_name')
-    c.ignore('location')
-    c.ignore('provisioning_state')
-    c.ignore('unique_identifier')
+    c.argument('arm_template', validator=validate_template_id)
+    c.argument('parameters', type=get_json_object)
 
 with ParametersContext(command='lab arm-template') as c:
     c.register_alias('name', ('--name', '-n'))

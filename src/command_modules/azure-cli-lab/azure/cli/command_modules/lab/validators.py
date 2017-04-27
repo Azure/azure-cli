@@ -96,6 +96,24 @@ def validate_user_name(namespace):
     namespace.user_name = "@me"
 
 
+def validate_template_id(namespace):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    if not is_valid_resource_id(namespace.arm_template):
+        if not namespace.artifact_source_name:
+            raise CLIError("--artifact-source-name is required when name is "
+                           "provided for --arm-template")
+
+        namespace.arm_template = resource_id(subscription=get_subscription_id(),
+                                             resource_group=namespace.resource_group,
+                                             namespace='Microsoft.DevTestLab',
+                                             type='labs',
+                                             name=namespace.lab_name,
+                                             child_type='artifactSources',
+                                             child_name=namespace.artifact_source_name,
+                                             grandchild_type='armTemplates',
+                                             grandchild_name=namespace.arm_template)
+
+
 def _get_owner_object_id():
     from azure.cli.core._profile import Profile, CLOUD
     from azure.graphrbac.models import GraphErrorException
