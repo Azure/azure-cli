@@ -28,7 +28,8 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-mgmt-documentdb==0.1.1',
-    'azure-cli-core'
+    'azure-cli-core',
+    'pydocumentdb>=2.0.1'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
