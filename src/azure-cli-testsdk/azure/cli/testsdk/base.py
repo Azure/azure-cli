@@ -48,9 +48,6 @@ class IntegrationTestBase(unittest.TestCase):
 
         return result.assert_with_checks(checks)
 
-    def create_random_name(self, prefix, length):  # for override pylint: disable=no-self-use
-        return create_random_name(prefix, length)
-
     def create_temp_file(self, size_kb, full_random=False):
         """
         Create a temporary file for testing. The test harness will delete the file during tearing
