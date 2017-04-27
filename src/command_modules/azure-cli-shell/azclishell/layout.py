@@ -22,7 +22,7 @@ from pygments.lexer import Lexer as PygLex
 
 import azclishell.configuration
 from azclishell.key_bindings import get_show_default, get_symbols
-from azclishell.progress import get_progress_message
+from azclishell.progress import get_progress_message, DONE_STR
 
 MAX_COMPLETION = 16
 DEFAULT_COMMAND = ""
@@ -69,7 +69,8 @@ class ShowSymbol(Filter):
 class ShowProgress(Filter):
     """ toggle showing the progress """
     def __call__(self, *a, **kw):
-        return get_progress_message() != ''
+        progress =  get_progress_message()
+        return progress != '' and progress != DONE_STR
 
 
 def get_scope():

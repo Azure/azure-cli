@@ -4,16 +4,18 @@
 # --------------------------------------------------------------------------------------------
 from prompt_toolkit.document import Document
 
-from random import random
+from random import randint
 
 from azure.cli.core.commands.progress import ProgressView, StandardOut
 from azclishell.util import get_window_dim
 
 
 PROGRESS = ''
+PROGRESS_BAR = ''
 DONE_STR = 'Finished'
 SPINNING_WHEEL = {1 :'|', 2 : '/', 3 : '-', 0 : '\\'}
-HEART_BEAT_VALUES = {0 : "__", 1 : "/\\"}
+#  have 2 down beats to make the odds work out better
+HEART_BEAT_VALUES = {0 : "__", 1 : "/\\", 2 : '/^\\', 3 : "__"}
 HEART_BEAT = ''
 
 class ShellProgressView(StandardOut):
@@ -21,10 +23,24 @@ class ShellProgressView(StandardOut):
 
     def write(self, message, percent):
         """ writes the progres """
-        global PROGRESS
+        global PROGRESS, PROGRESS_BAR
         if percent:
-            progress = self._format_value(percent) + "\n"
+            PROGRESS_BAR = self._format_value(message, percent)
         PROGRESS = message
+
+    def _format_value(self, msg, percent):
+        _, col = get_window_dim()
+        bar_len = int(col) - len(msg) - 10
+        completed = int(bar_len*percent)
+        message = '['
+        for i in range(bar_len):
+            if i < completed:
+                message += '#'
+            else:
+                message += ' '
+        message += ']  {:.1%}'.format(percent)
+        return message
+
 
     def flush(self):
         """ flushes the message"""
@@ -45,26 +61,32 @@ def progress_view(shell):
     _, col = get_window_dim()
     col = int(col)
     progress = get_progress_message()
+    buffer_size = col - len(progress) - 4
 
-    if progress and progress != DONE_STR:
-        if shell.spin_val >= 0:
-            beat = HEART_BEAT_VALUES[_get_heart_frequency()]
-            HEART_BEAT += beat
-            HEART_BEAT = HEART_BEAT[len(beat):]
-            len_beat = len(HEART_BEAT)
-            if len_beat > col - len(progress) - 1:
-                HEART_BEAT = HEART_BEAT[len_beat - (col - len(progress) - 1):]
+    if PROGRESS_BAR:
+        doc = u'{}:{}'.format(progress, PROGRESS_BAR)
+    else:
+        if progress and progress != DONE_STR:
+            if shell.spin_val >= 0:
+                beat = HEART_BEAT_VALUES[_get_heart_frequency()]
+                HEART_BEAT += beat
+                HEART_BEAT = HEART_BEAT[len(beat):]
+                len_beat = len(HEART_BEAT)
+                if len_beat > buffer_size:
+                    HEART_BEAT = HEART_BEAT[len_beat - buffer_size:]
 
-        else:
-            shell.spin_val = 0
-            for _ in range(int(round(col - len(progress) - 2) / 2.0)):
-                HEART_BEAT += HEART_BEAT_VALUES[_get_heart_frequency()]
-
-    doc = u'{}:{}'.format(progress, HEART_BEAT)
+            else:
+                shell.spin_val = 0
+                counter = 0
+                while counter < buffer_size:
+                    beat = HEART_BEAT_VALUES[_get_heart_frequency()]
+                    HEART_BEAT += beat
+                    counter += len(beat)
+        doc = u'{}:{}'.format(progress, HEART_BEAT)
     shell.cli.buffers['progress'].reset(
         initial_document=Document(doc))
     shell.cli.request_redraw()
 
 
 def _get_heart_frequency():
-    return int(round(random()))
+    return int(round(randint(0, 3)))
