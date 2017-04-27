@@ -6,6 +6,7 @@
 #  pylint: disable=unused-import
 from azure.cli.core.profiles._shared import (AZURE_API_PROFILES,
                                              ResourceType,
+                                             PROFILE_TYPE,
                                              get_api_version as _sdk_get_api_version,
                                              supported_api_version as _sdk_supported_api_version,
                                              get_versioned_sdk as _sdk_get_versioned_sdk)
