@@ -21,7 +21,7 @@ def create_random_name(prefix='clitest', length=24):
     random_bytes = os.urandom(int(math.ceil(float(padding_size) / 8) * 5))
     random_padding = base64.b32encode(random_bytes)[:padding_size]
 
-    return prefix + random_padding.decode().lower()
+    return str(prefix + random_padding.decode().lower())
 
 
 def get_sha1_hash(file_path):
