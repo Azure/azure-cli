@@ -34,8 +34,8 @@ RUN /bin/bash -c 'TMP_PKG_DIR=$(mktemp -d); \
     for f in $TMP_PKG_DIR/*; \
     do MODULE_NAMES="$MODULE_NAMES $f"; \
     done; \
-    pip install $MODULE_NAMES;'
-    pip install azure-nspkg azure-mgmt-nspkg --force-reinstall -U
+    pip install $MODULE_NAMES; \
+    pip install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg;'
 
 # Tab completion
 RUN echo -e "\
