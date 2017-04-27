@@ -122,7 +122,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         self.out.begin()
         while not poller.done():
             percent = self.curr_val / self.total_val if self.curr_val and self.total_val else None
-            self.out.write(self.curr_message + '\n', percent)
+            self.out.write(self.curr_message, percent)
             self.out.flush()
             try:
                 # pylint: disable=protected-access

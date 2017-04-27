@@ -187,7 +187,7 @@ class Shell(object):
         cols = int(cols)
 
         empty_space = ""
-        for i in range(cols):  # pylint: disable=unused-variable
+        for _ in range(cols):
             empty_space += " "
 
         settings = self._toolbar_info()
@@ -296,7 +296,7 @@ class Shell(object):
             'example_line' : Buffer(is_multiline=True),
             'default_values' : Buffer(),
             'symbols' : Buffer(),
-            'progress' : Buffer()
+            'progress' : Buffer(is_multiline=False)
         }
 
         writing_buffer = Buffer(

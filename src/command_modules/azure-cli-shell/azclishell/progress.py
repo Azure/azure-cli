@@ -4,12 +4,17 @@
 # --------------------------------------------------------------------------------------------
 from prompt_toolkit.document import Document
 
+from random import random
+
 from azure.cli.core.commands.progress import ProgressView, StandardOut
+from azclishell.util import get_window_dim
+
 
 PROGRESS = ''
 DONE_STR = 'Finished'
 SPINNING_WHEEL = {1 :'|', 2 : '/', 3 : '-', 0 : '\\'}
-
+HEART_BEAT_VALUES = {0 : "__", 1 : "/\\"}
+HEART_BEAT = ''
 
 class ShellProgressView(StandardOut):
     """ custom output for progress reporting """
@@ -36,18 +41,30 @@ def get_progress_message():
 
 def progress_view(shell):
     """ updates the view """
-    row, col = get_window_dim()
+    global HEART_BEAT
+    _, col = get_window_dim()
+    col = int(col)
     progress = get_progress_message()
-    tool_val2 = ''
+
     if progress and progress != DONE_STR:
         if shell.spin_val >= 0:
-            shell.spin_val = (shell.spin_val + 1) % 4
-            tool_val2 = SPINNING_WHEEL[shell.spin_val]
+            beat = HEART_BEAT_VALUES[_get_heart_frequency()]
+            HEART_BEAT += beat
+            HEART_BEAT = HEART_BEAT[len(beat):]
+            len_beat = len(HEART_BEAT)
+            if len_beat > col - len(progress) - 1:
+                HEART_BEAT = HEART_BEAT[len_beat - (col - len(progress) - 1):]
+
         else:
             shell.spin_val = 0
-            tool_val2 = SPINNING_WHEEL[shell.spin_val]
-    doc = u'{}\n{}'.format(progress, tool_val2)
+            for _ in range(int(round(col - len(progress) - 2) / 2.0)):
+                HEART_BEAT += HEART_BEAT_VALUES[_get_heart_frequency()]
+
+    doc = u'{}:{}'.format(progress, HEART_BEAT)
     shell.cli.buffers['progress'].reset(
         initial_document=Document(doc))
     shell.cli.request_redraw()
 
+
+def _get_heart_frequency():
+    return int(round(random()))
