@@ -37,7 +37,7 @@ from azure.cli.main import main as cli_main
 from azure.cli.core import __version__ as core_version
 import azure.cli.core._debug as _debug
 from azure.cli.core._profile import Profile, CLOUD
-from azure.cli.core.util import CLIError, random_string
+from azure.cli.core.util import CLIError
 
 LIVE_TEST_CONTROL_ENV = 'AZURE_CLI_TEST_RUN_LIVE'
 COMMAND_COVERAGE_CONTROL_ENV = 'AZURE_CLI_TEST_COMMAND_COVERAGE'
@@ -506,39 +506,3 @@ class ResourceGroupVCRTestBase(VCRTestBase):
 
     def tear_down(self):
         self.cmd('group delete --name {} --no-wait --yes'.format(self.resource_group))
-
-
-class StorageAccountVCRTestBase(VCRTestBase):
-    account_location = 'westus'
-    account_sku = 'Standard_LRS'
-
-    # pylint: disable=too-many-arguments
-    def __init__(self, test_file, test_name, resource_group='vcr_resource_group', run_live=False,
-                 debug=False, debug_vcr=False, skip_setup=False, skip_teardown=False):
-        super(StorageAccountVCRTestBase, self).__init__(test_file, test_name, run_live=run_live,
-                                                        debug=debug, debug_vcr=debug_vcr,
-                                                        skip_setup=skip_setup,
-                                                        skip_teardown=skip_teardown)
-        self.resource_group_original = resource_group
-        self.resource_group = '{}{}'.format(resource_group,
-                                            '' if self.playback else self.generate_random_tag())
-        self.account = MOCKED_STORAGE_ACCOUNT if self.playback else self.generate_account_name()
-
-    def set_up(self):
-        self.cmd('group create --location {} --name {} --tags use=az-test'.format(
-            self.account_location, self.resource_group))
-        self.cmd('storage account create --sku {} -l {} -n {} -g {}'.format(
-            self.account_sku, self.account_location, self.account, self.resource_group))
-
-    def tear_down(self):
-        self.cmd('storage account delete -g {} -n {} --yes'.format(
-            self.resource_group, self.account))
-        self.cmd('group delete --name {} --no-wait --yes'.format(self.resource_group))
-
-    @classmethod
-    def generate_account_name(cls):
-        return 'vcrstorage{}'.format(random_string(12, digits_only=True))
-
-    @classmethod
-    def generate_random_tag(cls):
-        return '_{}_'.format(random_string(4, force_lower=True))

@@ -21,10 +21,10 @@ def create_random_name(prefix='clitest', length=24):
         raise 'The randomized part of the name is shorter than 8, which may not be able to offer ' \
               'enough randomness'
 
-    random_bytes = os.urandom(math.ceil(padding_size / 8) * 5)
+    random_bytes = os.urandom(int(math.ceil(float(padding_size) / 8) * 5))
     random_padding = base64.b32encode(random_bytes)[:padding_size]
 
-    return prefix + random_padding.decode().lower()
+    return str(prefix + random_padding.decode().lower())
 
 
 def get_sha1_hash(file_path):

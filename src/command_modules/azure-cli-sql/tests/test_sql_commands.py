@@ -60,7 +60,7 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
 class SqlServerMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer()
-    # Skip create in SqlServerPreparer because we want to create in the test. So why even use 
+    # Skip create in SqlServerPreparer because we want to create in the test. So why even use
     # SqlServerPreparer? We still want to generate random server name and replace it in the test
     # recording, which SqlServerPreparer does very nicely.
     @SqlServerPreparer(skip_create=True, parameter_name='server1')
@@ -115,6 +115,10 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', server1),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('administratorLogin', user)])
+
+        self.cmd('sql server list-usages -g {} -n {}'
+                 .format(rg, server1),
+                 checks=[JMESPathCheck('[0].resourceName', server1)])
 
         # test delete sql server
         self.cmd('sql server delete -g {} --name {} --yes'
@@ -270,10 +274,9 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', rg)])
 
-        # # Usages will not be included in the first batch of GA commands
-        # self.cmd('sql db show-usage -g {} --server {} --name {}'
-        #          .format(rg, server, database_name), checks=[
-        #              JMESPathCheck('[0].resourceName', database_name)])
+        self.cmd('sql db list-usages -g {} --server {} --name {}'
+                 .format(rg, server, database_name),
+                 checks=[JMESPathCheck('[0].resourceName', database_name)])
 
         self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --max-size {}'
                  ' --set tags.key1=value1'
