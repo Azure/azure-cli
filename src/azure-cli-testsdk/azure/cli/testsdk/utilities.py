@@ -8,11 +8,8 @@ import math
 import os
 import base64
 
-RANDOM_NAME_COUNT = 0
 
 def create_random_name(prefix='clitest', length=24):
-    global RANDOM_NAME_COUNT
-
     if len(prefix) > length:
         raise 'The length of the prefix must not be longer than random name length'
 
