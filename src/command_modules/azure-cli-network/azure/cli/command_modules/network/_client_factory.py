@@ -54,6 +54,14 @@ def cf_network_security_groups(_):
     return _network_client_factory().network_security_groups
 
 
+def cf_network_watcher(_):
+    return _network_client_factory().network_watchers
+
+
+def cf_packet_capture(_):
+    return _network_client_factory().packet_captures
+
+
 def cf_public_ip_addresses(_):
     return _network_client_factory().public_ip_addresses
 

@@ -164,7 +164,7 @@ helps['resource create'] = """
     type: command
     short-summary: create a resource.
     examples:
-       - name: Create a resource by providing a full resource object json. Note, you can also use "@<file>" to load from a json file.
+       - name: Create a resource by providing a full resource object json. Note, you can also use `@<file>` to load from a json file.
          text: >
             az resource create -g myRG -n myPlan --resource-type Microsoft.web/serverFarms --is-full-object --properties "{ \\"location\\":\\"westus\\",\\"sku\\":{\\"name\\":\\"B1\\",\\"tier\\":\\"BASIC\\"}}"
        - name: Create a resource by only providing resource properties
@@ -273,6 +273,18 @@ helps['provider register'] = """
 helps['provider unregister'] = """
     type: command
     short-summary: Unregister a provider.
+"""
+helps['provider operation'] = """
+    type: group
+    short-summary: Get provider operations metadatas.
+"""
+helps['provider operation show'] = """
+    type: command
+    short-summary: Get an individual provider's operations.
+"""
+helps['provider operation list'] = """
+    type: command
+    short-summary: Get operations from all providers.
 """
 helps['tag'] = """
     type: group

@@ -8,12 +8,13 @@ from __future__ import print_function
 import json
 import pkgutil
 import re
+import sys
 import time
 import timeit
 import traceback
 from collections import OrderedDict, defaultdict
 from importlib import import_module
-from six import string_types
+from six import string_types, reraise
 
 import azure.cli.core.azlogging as azlogging
 import azure.cli.core.telemetry as telemetry
@@ -396,25 +397,24 @@ def create_command(module_name, name, operation,
             op = get_op_handler(operation)
             try:
                 result = op(client, **kwargs) if client else op(**kwargs)
+                if no_wait_param and kwargs.get(no_wait_param, None):
+                    return None  # return None for 'no-wait'
+
+                # apply results transform if specified
+                if transform_result:
+                    return transform_result(result)
+
+                # otherwise handle based on return type of results
+                if _is_poller(result):
+                    return LongRunningOperation('Starting {}'.format(name))(result)
+                elif _is_paged(result):
+                    return list(result)
+                return result
             except Exception as ex:  # pylint: disable=broad-except
                 if exception_handler:
-                    result = exception_handler(ex)
+                    exception_handler(ex)
                 else:
-                    raise ex
-
-            if no_wait_param and kwargs.get(no_wait_param, None):
-                return None  # return None for 'no-wait'
-
-            # apply results transform if specified
-            if transform_result:
-                return transform_result(result)
-
-            # otherwise handle based on return type of results
-            if _is_poller(result):
-                return LongRunningOperation('Starting {}'.format(name))(result)
-            elif _is_paged(result):
-                return list(result)
-            return result
+                    reraise(*sys.exc_info())
         except _load_client_exception_class() as client_exception:
             fault_type = name.replace(' ', '-') + '-client-error'
             telemetry.set_exception(client_exception, fault_type=fault_type,

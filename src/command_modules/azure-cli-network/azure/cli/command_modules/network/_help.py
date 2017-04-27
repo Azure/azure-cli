@@ -1099,7 +1099,7 @@ helps['network nic list'] = """
     examples:
         - name: List all NICs by internal DNS suffix.
           text: >
-            az network nic list --query "[?dnsSettings.internalDomainNameSuffix=='<dns_suffix>']"
+            az network nic list --query "[?dnsSettings.internalDomainNameSuffix==`<dns_suffix>`]"
 """
 
 helps['network nic show'] = """
@@ -1769,6 +1769,7 @@ helps['network vnet-gateway wait'] = """
     type: command
     short-summary: Place the CLI in a waiting state until a condition of the virtual network gateway is met.
 """
+
 #endregion
 
 # region VNet Gateway Revoke Cert
@@ -1807,3 +1808,148 @@ helps['network vnet-gateway root-cert delete'] = """
 """
 
 #endregion
+
+# region Network Watcher
+helps['network watcher'] = """
+    type: group
+    short-summary: (PREVIEW) Commands to manage Network Watcher.
+"""
+
+helps['network watcher list'] = """
+    type: command
+    short-summary: List Network Watchers.
+"""
+
+helps['network watcher configure'] = """
+    type: command
+    short-summary: Configure the Network Watcher service for different regions.
+    parameters:
+        - name: --enabled
+          short-summary: Enabled status of Network Watch in the specified regions.
+        - name: --locations -l
+          short-summary: Space separated list of locations to configure.
+        - name: --resource-group -g
+          short-summary: Name of resource group. Required when enabling new regions.
+          long-summary: When a previously disabled region is enabled to use Network Watcher, a
+            Network Watcher resource will be created in this resource group.
+"""
+
+helps['network watcher troubleshooting'] = """
+    type: group
+    short-summary: (PREVIEW) Commands to manage Network Watcher troubleshooting sessions.
+"""
+
+helps['network watcher troubleshooting start'] = """
+    type: command
+    short-summary: Troubleshoot issues with VPN connections or gateway connectivity.
+    parameters:
+        - name: --resource-type -t
+          short-summary: The type of target resource to troubleshoot, if resource ID is not specified.
+        - name: --storage-account
+          short-summary: Name or ID of the storage account in which to store the troubleshooting results.
+        - name: --storage-path
+          short-summary: Fully qualified URI to the storage blob container at which to store the troubleshooting results.
+"""
+
+helps['network watcher troubleshooting show'] = """
+    type: command
+    short-summary: Show results of the last troubleshooting operation.
+"""
+
+helps['network watcher test-ip-flow'] = """
+    type: command
+    short-summary: Test IP flow to/from a VM given the currently configured NSG rules.
+    long-summary: Requires that Network Watcher is enabled for the region in which the VM is located.
+    parameters:
+        - name: --local
+          short-summary: The private IPv4 address for the VM's NIC and the port of the packet in 
+            X.X.X.X:PORT format. '*' can be used for port when direction is outbound.
+        - name: --remote
+          short-summary: The IPv4 address and port for the remote side of the packet 
+            X.X.X.X:PORT format. '*' can be used for port when direction is inbound.
+        - name: --direction
+          short-summary: Direction of the packet relative to the VM.
+        - name: --protocol
+          short-summary: Protocol to test.
+"""
+
+helps['network watcher show-next-hop'] = """
+    type: command
+    short-summary: Show information on the 'next hop' for a VM.
+    long-summary: Requires that Network Watcher is enabled for the region in which the VM is located.
+"""
+
+helps['network watcher show-security-group-view'] = """
+    type: command
+    short-summary: Show detailed security information on a VM given the currently configured NSG.
+"""
+
+helps['network watcher show-topology'] = """
+    type: command
+    short-summary: Show the network topology for a resource group.
+    parameters:
+        - name: --resource-group -g
+          short-summary: The name of the target resource group to perform topology on.
+        - name: --location -l
+          short-summary: Location. Defaults to the location of the target resource group.
+          long-summary: Topology information is only shown for resources within the target
+            resource group that are within the specified region.
+"""
+
+helps['network watcher packet-capture'] = """
+    type: group
+    short-summary: (PREVIEW) Commands to manage packet capture sessions on VMs.
+    long-summary: |
+        Requires that Network Watcher is enabled for the region in which the VM is located
+        and that the AzureNetworkWatcherExtension is enabled on the VM.
+"""
+
+helps['network watcher packet-capture create'] = """
+    type: command
+    short-summary: Create and start a packet capture session.
+    parameters:
+        - name: --capture-limit
+          short-summary: The maximum size in bytes of the capture output.
+        - name: --capture-size
+          short-summary: Number of bytes captured per packet. Excess bytes are truncated.
+        - name: --time-limit
+          short-summary: Maximum duration of the capture session in seconds.
+        - name: --storage-account
+          short-summary: Name or ID of a storage account into which to save the packet capture.
+        - name: --storage-path
+          short-summary: Fully qualified URI to an existing storage container in which to store the capture file.
+          long-summary: If not specified, the container 'network-watcher-logs' will be
+            created if it does not exist and the capture file will be stored there.
+        - name: --file-path
+          short-summary:
+                Local path on the targeted VM at which to save the packet capture. For Linux VMs, the
+                path must start with /var/captures.
+        - name: --vm
+          short-summary: Name or ID of the VM to target.
+"""
+
+helps['network watcher flow-log'] = """
+    type: group
+    short-summary: (PREVIEW) Commands to manage NSG flow logging.
+"""
+
+helps['network watcher flow-log configure'] = """
+    type: command
+    short-summary: Configure flow logging on a Network Security Group (NSG).
+    parameters:
+        - name: --nsg
+          short-summary: Name or ID of the Network Security Group to target.
+        - name: --enabled
+          short-summary: Enable logging.
+        - name: --retention
+          short-summary: Number of days to retain logs.
+        - name: --storage-account
+          short-summary: Name or ID of the storage account in which to save the flow logs.
+"""
+
+helps['network watcher flow-log show'] = """
+    type: command
+    short-summary: Show flow log configuration for an NSG.
+"""
+
+# endregion

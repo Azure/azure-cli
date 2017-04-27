@@ -46,6 +46,8 @@ register_cli_argument('resource create', 'is_full_object', action='store_true',
 register_cli_argument('provider', 'top', ignore_type)
 register_cli_argument('provider', 'resource_provider_namespace', options_list=('--namespace', '-n'), completer=get_providers_completion_list,
                       help=_PROVIDER_HELP_TEXT)
+register_cli_argument('provider operation', 'api_version', help="The api version of the 'Microsoft.Authorization/providerOperations' resource (omit for latest)")
+
 
 register_cli_argument('feature', 'resource_provider_namespace', options_list=('--namespace',), required=True, help=_PROVIDER_HELP_TEXT)
 register_cli_argument('feature list', 'resource_provider_namespace', options_list=('--namespace',), required=False, help=_PROVIDER_HELP_TEXT)
@@ -70,7 +72,7 @@ register_cli_argument('group', 'tags', tags_type)
 register_cli_argument('group', 'resource_group_name', resource_group_name_type, options_list=('--name', '-n'))
 register_cli_argument('group deployment', 'resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list)
 register_cli_argument('group deployment', 'deployment_name', options_list=('--name', '-n'), required=True, help='The deployment name.')
-register_cli_argument('group deployment', 'parameters', action='append', completer=FilesCompleter(), help="provide deployment parameter values, either json string, or use '@<file path>' to load from a file. Can be repeated. If a the same parameter is present in multiple arguments, the last value wins.")
+register_cli_argument('group deployment', 'parameters', action='append', completer=FilesCompleter(), help="provide deployment parameter values, either json string, or use `@<file path>` to load from a file. Can be repeated. If a the same parameter is present in multiple arguments, the last value wins.")
 register_cli_argument('group deployment', 'template_file', completer=FilesCompleter(), type=file_type, help="a template file path in the file system")
 register_cli_argument('group deployment', 'template_uri', help='a uri to a remote template file')
 register_cli_argument('group deployment', 'mode', help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)', **enum_choice_list(DeploymentMode))

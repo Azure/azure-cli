@@ -138,6 +138,12 @@ Install nightly builds with pip in a virtual environment.
 $ pip install --pre azure-cli --extra-index-url https://azureclinightly.blob.core.windows.net/packages
 ```
 
+To upgrade your current nightly build pass the `--upgrade` option.
+
+```bash
+$ pip install --upgrade --pre azure-cli --extra-index-url https://azureclinightly.blob.core.windows.net/packages
+```
+
 - Builds happen at 21:00:00 PDT each night. They are published shortly afterwards.
 - Whilst all command modules are built each night, not all are included on install.
 - Install additional components with:  

@@ -3,6 +3,11 @@
 Release History
 ===============
 
+unreleased
+^^^^^^^^^^^^^^^^^^
+
+* Add 'az -v' as shortcut for 'az --version' (#2926)
+
 2.0.3 (2017-04-17)
 ^^^^^^^^^^^^^^^^^^
 

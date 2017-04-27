@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import sys
-from subprocess import check_output, STDOUT
+from subprocess import check_output, STDOUT, CalledProcessError
 
 def mean(data):
     """Return the sample arithmetic mean of data."""
@@ -29,15 +29,17 @@ def pstdev(data):
     return (ss/n) ** 0.5
 
 
-def scenario(command):
+def scenario(command, loop=10):
     real = []
     user = []
     syst = []
-    loop = 100
 
     test_command = 'time -p ' + command
     for i in range(loop):
-        lines = check_output([test_command], shell=True, stderr=STDOUT).split('\n')
+        try:
+            lines = check_output([test_command], shell=True, stderr=STDOUT).split('\n')
+        except CalledProcessError as e:
+            lines = e.output.split('\n')
         real_time = float(lines[-4].split()[1])
         real.append(float(lines[-4].split()[1]))
         user.append(float(lines[-3].split()[1]))
@@ -52,4 +54,7 @@ def scenario(command):
     print('')
 
 scenario('az')
+scenario('az cl')
+scenario('az cloud')
 scenario('az cloud list')
+scenario('az cloud show --this-does-not-exist')

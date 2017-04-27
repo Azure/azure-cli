@@ -11,6 +11,7 @@ import azure.cli.core.azlogging as azlogging
 from azure.cli.core._config import \
     (GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH, set_global_config_value, get_config_parser)
 from azure.cli.core.util import CLIError
+from azure.cli.core.profiles import API_PROFILES
 
 CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
 
@@ -257,6 +258,8 @@ def get_clouds():
         if c.profile is None:
             # If profile isn't set, use latest
             setattr(c, 'profile', 'latest')
+        if c.profile not in API_PROFILES:
+            raise CLIError('Profile {} does not exist or is not supported.'.format(c.profile))
         if not c.endpoints.has_endpoint_set('management') and \
                 c.endpoints.has_endpoint_set('resource_manager'):
             # If management endpoint not set, use resource manager endpoint

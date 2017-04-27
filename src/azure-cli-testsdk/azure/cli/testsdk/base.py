@@ -17,12 +17,14 @@ import six
 import vcr
 
 from .patches import (patch_load_cached_subscriptions, patch_main_exception_handler,
-                      patch_retrieve_token_for_user, patch_long_run_operation_delay)
+                      patch_retrieve_token_for_user, patch_long_run_operation_delay,
+                      patch_time_sleep_api)
 from .exceptions import CliExecutionError
 from .const import (ENV_LIVE_TEST, ENV_SKIP_ASSERT, ENV_TEST_DIAGNOSE, MOCKED_SUBSCRIPTION_ID)
 from .recording_processors import (SubscriptionRecordingProcessor, OAuthRequestResponsesFilter,
                                    GeneralNameReplacer, LargeRequestBodyProcessor,
-                                   LargeResponseBodyProcessor, LargeResponseBodyReplacer)
+                                   LargeResponseBodyProcessor, LargeResponseBodyReplacer,
+                                   DeploymentNameReplacer)
 from .utilities import create_random_name
 from .decorators import live_only
 
@@ -45,9 +47,6 @@ class IntegrationTestBase(unittest.TestCase):
                 duration.total_seconds(), result.exit_code, result.output))
 
         return result.assert_with_checks(checks)
-
-    def create_random_name(self, prefix, length):  # for override pylint: disable=no-self-use
-        return create_random_name(prefix, length)
 
     def create_temp_file(self, size_kb, full_random=False):
         """
@@ -112,8 +111,9 @@ class ScenarioTest(IntegrationTestBase):  # pylint: disable=too-many-instance-at
                                      OAuthRequestResponsesFilter(),
                                      LargeRequestBodyProcessor(),
                                      LargeResponseBodyProcessor(),
+                                     DeploymentNameReplacer(),
                                      self.name_replacer]
-        self.replay_processors = [LargeResponseBodyReplacer()]
+        self.replay_processors = [LargeResponseBodyReplacer(), DeploymentNameReplacer()]
 
         test_file_path = inspect.getfile(self.__class__)
         recordings_dir = os.path.join(os.path.dirname(test_file_path), 'recordings')
@@ -127,6 +127,7 @@ class ScenarioTest(IntegrationTestBase):  # pylint: disable=too-many-instance-at
             record_mode='once' if not live_test else 'all',
             filter_headers=self.FILTER_HEADERS
         )
+        self.vcr.register_matcher('query', self._custom_request_query_matcher)
 
         self.recording_file = os.path.join(recordings_dir, '{}.yaml'.format(method_name))
         if live_test and os.path.exists(self.recording_file):
@@ -148,6 +149,7 @@ class ScenarioTest(IntegrationTestBase):  # pylint: disable=too-many-instance-at
         patch_main_exception_handler(self)
 
         if not self.in_recording:
+            patch_time_sleep_api(self)
             patch_long_run_operation_delay(self)
             patch_load_cached_subscriptions(self)
             patch_retrieve_token_for_user(self)
@@ -204,6 +206,27 @@ class ScenarioTest(IntegrationTestBase):  # pylint: disable=too-many-instance-at
                     break
 
         return response
+
+    @classmethod
+    def _custom_request_query_matcher(cls, r1, r2):
+        """ Ensure method, path, and query parameters match. """
+        from six.moves.urllib_parse import urlparse, parse_qs  # pylint: disable=import-error
+
+        url1 = urlparse(r1.uri)
+        url2 = urlparse(r2.uri)
+
+        q1 = parse_qs(url1.query)
+        q2 = parse_qs(url2.query)
+        shared_keys = set(q1.keys()).intersection(set(q2.keys()))
+
+        if len(shared_keys) != len(q1) or len(shared_keys) != len(q2):
+            return False
+
+        for key in shared_keys:
+            if q1[key][0].lower() != q2[key][0].lower():
+                return False
+
+        return True
 
 
 class ExecutionResult(object):  # pylint: disable=too-few-public-methods

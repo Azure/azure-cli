@@ -3,9 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import uuid
-import datetime
 import hashlib
+import math
+import os
+import base64
 
 RANDOM_NAME_COUNT = 0
 
@@ -15,12 +16,15 @@ def create_random_name(prefix='clitest', length=24):
     if len(prefix) > length:
         raise 'The length of the prefix must not be longer than random name length'
 
-    identity = '{}-{}-{}'.format(str(uuid.getnode()),
-                              datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S%f'),
-                              RANDOM_NAME_COUNT).encode('utf-8')
-    RANDOM_NAME_COUNT += 1
-    prefix += str(hashlib.sha256(identity).hexdigest())
-    return prefix[:length]
+    padding_size = length - len(prefix)
+    if padding_size < 8:
+        raise 'The randomized part of the name is shorter than 8, which may not be able to offer ' \
+              'enough randomness'
+
+    random_bytes = os.urandom(math.ceil(padding_size / 8) * 5)
+    random_padding = base64.b32encode(random_bytes)[:padding_size]
+
+    return prefix + random_padding.decode().lower()
 
 
 def get_sha1_hash(file_path):

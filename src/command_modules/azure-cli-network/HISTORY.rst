@@ -3,14 +3,21 @@
 Release History
 ===============
 
+unreleased
+++++++++++++++++++
+
+* Fix bug with `vpn-connection create` when using the `--no-wait` or `--validate` parameters.
+
 2.0.3 (2017-04-17)
 ++++++++++++++++++
+
 * Add support for active-active VNet gateways
 * Remove nulls values from output of `network vpn-connection list/show` commands.
 * BC: Fix bug in the output of `vpn-connection create` 
 * Fix bug where '--key-length' argument of 'vpn-connection create' was not parsed correctly.
 * Fix bug in `dns zone import` where records were not imported correctly.
 * Fix bug where `traffic-manager endpoint update` did not work.
+* Add 'network watcher' preview commands.
 
 2.0.2 (2017-04-03)
 ++++++++++++++++++
