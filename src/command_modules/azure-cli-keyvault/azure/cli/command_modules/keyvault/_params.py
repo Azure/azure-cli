@@ -72,7 +72,6 @@ secret_permission_values = ', '.join([x.value for x in SecretPermissions])
 certificate_permission_values = ', '.join([x.value for x in CertificatePermissions])
 json_web_key_op_values = ', '.join([x.value for x in JsonWebKeyOperation])
 secret_encoding_values = secret_text_encoding_values + secret_binary_encoding_values
-certificate_file_encoding_values = ['binary', 'string']
 certificate_format_values = ['PEM', 'DER']
 
 # KEY ATTRIBUTE PARAMETER REGISTRATION
