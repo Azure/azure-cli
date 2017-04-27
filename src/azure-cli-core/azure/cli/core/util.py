@@ -204,7 +204,10 @@ def b64_to_hex(s):
     :rtype: str
     """
     decoded = base64.b64decode(s)
-    return binascii.hexlify(decoded).upper()
+    hex_data = binascii.hexlify(decoded).upper()
+    if isinstance(hex_data, bytes):
+        return hex_data.decode("utf-8")
+    return hex_data
 
 
 def random_string(length=16, force_lower=False, digits_only=False):
