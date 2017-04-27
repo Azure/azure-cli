@@ -512,7 +512,7 @@ class azure_bdist_wheel(bdist_wheel):
         if not self.distribution.install_requires:
             self.distribution.install_requires = []
         self.distribution.install_requires.append(
-            "{}>=2.0.0".format(self.azure_namespace_package))
+            "{}>=2.0.0".format(self.azure_namespace_package.replace('_', '-')))
         bdist_wheel.run(self)
 
     def write_record(self, bdist_dir, distinfo_dir):
