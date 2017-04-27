@@ -84,7 +84,11 @@ cli_command(__name__, 'network application-gateway ssl-policy show', custom_path
 cli_command(__name__, 'network application-gateway url-path-map rule create', custom_path + 'create_ag_url_path_map_rule')
 cli_command(__name__, 'network application-gateway url-path-map rule delete', custom_path + 'delete_ag_url_path_map_rule')
 
-cli_command(__name__, 'network application-gateway waf-config set', custom_path + 'set_ag_waf_config', no_wait_param='no_wait')
+if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):
+    cli_command(__name__, 'network application-gateway waf-config set', custom_path + 'set_ag_waf_config_2017_03_01', no_wait_param='no_wait')
+else:
+    cli_command(__name__, 'network application-gateway waf-config set', custom_path + 'set_ag_waf_config_2016_09_01', no_wait_param='no_wait')
+
 cli_command(__name__, 'network application-gateway waf-config show', custom_path + 'show_ag_waf_config', exception_handler=empty_on_404)
 
 if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):

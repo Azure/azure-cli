@@ -569,10 +569,11 @@ def delete_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag)
 
-def set_ag_waf_config(resource_group_name, application_gateway_name, enabled,
-                      firewall_mode=ApplicationGatewayFirewallMode.detection.value,
-                      rule_set_type='OWASP', rule_set_version=None, disabled_rule_groups=None,
-                      disabled_rules=None, no_wait=False):
+
+def _set_ag_waf_config(resource_group_name, application_gateway_name, enabled,
+                        firewall_mode=ApplicationGatewayFirewallMode.detection.value,
+                        rule_set_type='OWASP', rule_set_version=None, disabled_rule_groups=None,
+                        disabled_rules=None, no_wait=False):
     ApplicationGatewayWebApplicationFirewallConfiguration = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayWebApplicationFirewallConfiguration', mod='models')
@@ -614,6 +615,22 @@ def set_ag_waf_config(resource_group_name, application_gateway_name, enabled,
                 enabled == 'true', firewall_mode)
 
     return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
+
+def set_ag_waf_config_2016_09_01(resource_group_name, application_gateway_name, enabled,
+                                 firewall_mode=ApplicationGatewayFirewallMode.detection.value,
+                                 no_wait=False):
+    return _set_ag_waf_config(resource_group_name, application_gateway_name, enabled,
+                              firewall_mode, None, None, None, None, no_wait)
+
+def set_ag_waf_config_2017_03_01(resource_group_name, application_gateway_name, enabled,
+                                 firewall_mode=ApplicationGatewayFirewallMode.detection.value,
+                                 rule_set_type='OWASP', rule_set_version=None,
+                                 disabled_rule_groups=None,
+                                 disabled_rules=None, no_wait=False):
+    return _set_ag_waf_config(resource_group_name, application_gateway_name, enabled,
+                                firewall_mode, rule_set_type, rule_set_version,
+                                disabled_rule_groups, disabled_rules, no_wait)
+
 
 def show_ag_waf_config(resource_group_name, application_gateway_name):
     return _network_client_factory().application_gateways.get(
