@@ -310,11 +310,13 @@ class HelpFile(HelpObject):  # pylint: disable=too-few-public-methods,too-many-i
         min_profile = ex.get('min_profile')
         max_profile = ex.get('max_profile')
         if min_profile or max_profile:
-            from azure.cli.core.profiles import supported_api_version
+            from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
             # yaml will load this as a datetime if it's a date, we need a string.
             min_profile = str(min_profile) if min_profile else None
             max_profile = str(max_profile) if max_profile else None
-            return supported_api_version(None, min_api=min_profile, max_api=max_profile)
+            return supported_api_version(PROFILE_TYPE,
+                                         min_api=min_profile,
+                                         max_api=max_profile)
         return True
 
     def _load_from_data(self, data):
