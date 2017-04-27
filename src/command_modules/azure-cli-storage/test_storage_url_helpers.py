@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from ..storage_url_helpers import StorageResourceIdentifier
+from azure.cli.command_modules.storage.storage_url_helpers import StorageResourceIdentifier
 
 # pylint: disable=line-too-long
 
