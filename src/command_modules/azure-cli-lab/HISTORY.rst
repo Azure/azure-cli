@@ -2,6 +2,10 @@
 
 Release History
 ===============
+unreleased
++++++++++++++++++++++
+
+* Adding table output formatter for az lab arm-template & az lab artifact-source
 
 0.0.3 (2017-04-28)
 +++++++++++++++++++++
