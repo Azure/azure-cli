@@ -61,7 +61,7 @@ def _default_certificate_profile():
                 KeyUsageType.key_cert_sign
             ],
             subject='C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=www.contoso.com',
-            ekus=[]
+            validity_in_months=12
         ),
         lifetime_actions=[LifetimeAction(
             trigger=Trigger(
@@ -79,12 +79,10 @@ def _default_certificate_profile():
         )
     )
     del template.id
-    del template.attributes.created
-    del template.attributes.updated
+    del template.attributes
     del template.issuer_parameters.certificate_type
     del template.lifetime_actions[0].trigger.lifetime_percentage
     del template.x509_certificate_properties.subject_alternative_names
-    del template.x509_certificate_properties.validity_in_months
     del template.x509_certificate_properties.ekus
     return template
 
@@ -135,8 +133,7 @@ def _scaffold_certificate_profile():
         )
     )
     del template.id
-    del template.attributes.created
-    del template.attributes.updated
+    del template.attributes
     return template
 
 
@@ -505,9 +502,13 @@ def download_secret(client, vault_base_url, secret_name, file_path, encoding=Non
 
 
 def create_certificate(client, vault_base_url, certificate_name, certificate_policy,
-                       disabled=False, expires=None, not_before=None, tags=None):
-    cert_attrs = CertificateAttributes(not disabled, not_before, expires)
+                       disabled=False, tags=None, validity=None):
+    cert_attrs = CertificateAttributes(not disabled)
     logger.info("Starting long running operation 'keyvault certificate create'")
+
+    if validity is not None:
+        certificate_policy['x509_certificate_properties']['validity_in_months'] = validity
+
     client.create_certificate(
         vault_base_url, certificate_name, certificate_policy, cert_attrs, tags)
 
@@ -543,8 +544,10 @@ create_certificate.__doc__ = KeyVaultClient.create_certificate.__doc__
 
 
 def _asn1_to_iso8601(asn1_date):
-    import dateutil
-    return dateutil.parser.parse(asn1_date.decode('utf-8'))
+    import dateutil.parser
+    if isinstance(asn1_date, bytes):
+        asn1_date = asn1_date.decode('utf-8')
+    return dateutil.parser.parse(asn1_date)
 
 
 def import_certificate(client, vault_base_url, certificate_name, certificate_data,
@@ -612,7 +615,7 @@ def import_certificate(client, vault_base_url, certificate_name, certificate_dat
 
 
 def download_certificate(client, vault_base_url, certificate_name, file_path,
-                         encoding='binary', certificate_version=''):
+                         encoding='PEM', certificate_version=''):
     """ Download a certificate from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
@@ -622,15 +625,16 @@ def download_certificate(client, vault_base_url, certificate_name, file_path,
 
     try:
         with open(file_path, 'wb') as f:
-            if encoding == 'binary':
+            if encoding == 'DER':
                 f.write(cert)
             else:
                 import base64
-                try:
-                    f.write(base64.encodebytes(cert))
-                except AttributeError:
-                    f.write(base64.encodestring(cert)) # pylint: disable=deprecated-method
-    except Exception as ex: # pylint: disable=broad-except
+                encoded = base64.encodestring(cert)  # pylint:disable=deprecated-method
+                if isinstance(encoded, bytes):
+                    encoded = encoded.decode("utf-8")  # pylint:disable=redefined-variable-type
+                encoded = '-----BEGIN CERTIFICATE-----\n' + encoded + '-----END CERTIFICATE-----\n'
+                f.write(encoded.encode("utf-8"))
+    except Exception as ex:  # pylint: disable=broad-except
         if os.path.isfile(file_path):
             os.remove(file_path)
         raise ex

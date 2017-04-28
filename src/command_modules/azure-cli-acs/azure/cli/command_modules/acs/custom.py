@@ -110,8 +110,7 @@ def wait_then_open_async(url):
     t.start()
 
 
-def acs_browse(resource_group, name, disable_browser=False,
-               ssh_key_file=os.path.join(os.path.expanduser("~"), '.ssh', 'id_rsa')):
+def acs_browse(resource_group, name, disable_browser=False, ssh_key_file=None):
     """
     Opens a browser to the web interface for the cluster orchestrator
 
@@ -141,10 +140,9 @@ def _acs_browse_internal(acs_info, resource_group, name, disable_browser, ssh_ke
         raise CLIError('Unsupported orchestrator type {} for browse'.format(orchestrator_type))
 
 
-def k8s_browse(name, resource_group, disable_browser=False,
-               ssh_key_file=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa')):
+def k8s_browse(name, resource_group, disable_browser=False, ssh_key_file=None):
     """
-    Wrapper on the 'kubectl proxy' command, for consistency with 'az dcos browse'
+    Launch a proxy and browse the Kubernetes web UI.
     :param disable_browser: If true, don't launch a web browser after estabilishing the proxy
     :type disable_browser: bool
     """
@@ -168,8 +166,7 @@ def _k8s_browse_internal(name, acs_info, disable_browser, ssh_key_file):
     subprocess.call(["kubectl", "--kubeconfig", browse_path, "proxy"])
 
 
-def dcos_browse(name, resource_group, disable_browser=False,
-                ssh_key_file=os.path.join(os.path.expanduser("~"), '.ssh', 'id_rsa')):
+def dcos_browse(name, resource_group, disable_browser=False, ssh_key_file=None):
     """
     Creates an SSH tunnel to the Azure container service, and opens the Mesosphere DC/OS dashboard in the browser.
 
@@ -357,8 +354,8 @@ def _get_subscription_id():
 
 
 def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None,  # pylint: disable=too-many-locals
-               admin_username="azureuser", agent_count="3",
-               agent_vm_size="Standard_D2_v2", location=None, master_count="1",
+               admin_username="azureuser", agent_count=3,
+               agent_vm_size="Standard_D2_v2", location=None, master_count=1,
                orchestrator_type="dcos", service_principal=None, client_secret=None, tags=None,
                windows=False, admin_password="", generate_ssh_keys=False,  # pylint: disable=unused-argument
                validate=False, no_wait=False):
@@ -387,13 +384,13 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     :param agent_count: The number of agents for the cluster.  Note, for
      DC/OS clusters you will also get 1 or 2 public agents in addition to
      these selected masters.
-    :type agent_count: str
+    :type agent_count: int
     :param agent_vm_size: The size of the Virtual Machine.
     :type agent_vm_size: str
     :param location: Location for VM resources.
     :type location: str
     :param master_count: The number of masters for the cluster.
-    :type master_count: str
+    :type master_count: int
     :param orchestrator_type: The type of orchestrator used to manage the
      applications on the cluster. Possible values include: 'dcos', 'swarm'
     :type orchestrator_type: str or :class:`orchestratorType
@@ -471,7 +468,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
                                   location=location, service_principal=service_principal,
                                   client_secret=client_secret, master_count=master_count,
                                   windows=windows, admin_password=admin_password,
-                                  validate=validate, no_wait=no_wait)
+                                  validate=validate, no_wait=no_wait, tags=tags)
 
     if windows:
         raise CLIError('--windows is only supported for Kubernetes clusters')
@@ -521,9 +518,9 @@ def load_acs_service_principals(config_path):
 
 
 def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value,
-                       admin_username="azureuser", agent_count="3", agent_vm_size="Standard_D2_v2",
-                       location=None, service_principal=None, client_secret=None, master_count="1",
-                       windows=False, admin_password='', validate=False, no_wait=False):
+                       admin_username="azureuser", agent_count=3, agent_vm_size="Standard_D2_v2",
+                       location=None, service_principal=None, client_secret=None, master_count=1,
+                       windows=False, admin_password='', validate=False, no_wait=False, tags=None):
     if not location:
         location = '[resourceGroup().location]'
     windows_profile = None
@@ -556,6 +553,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
                 "location": location,
                 "type": "Microsoft.ContainerService/containerServices",
                 "name": name,
+                "tags": tags,
                 "properties": {
                     "orchestratorProfile": {
                         "orchestratorType": "kubernetes"
@@ -677,8 +675,8 @@ def _invoke_deployment(resource_group_name, deployment_name, template, parameter
 
 def k8s_get_credentials(name, resource_group_name,
                         path=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
-                        ssh_key_file=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa')):
-    """Create a new Acs.
+                        ssh_key_file=None):
+    """Download and install kubectl credentials from the cluster master
     :param name: The name of the cluster.
     :type name: str
     :param resource_group_name: The name of the resource group.
@@ -693,7 +691,7 @@ def k8s_get_credentials(name, resource_group_name,
 
 
 def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file):
-    if not os.path.isfile(ssh_key_file):
+    if ssh_key_file is not None and not os.path.isfile(ssh_key_file):
         raise CLIError('Private key file {} does not exist'.format(ssh_key_file))
 
     dns_prefix = acs_info.master_profile.dns_prefix  # pylint: disable=no-member

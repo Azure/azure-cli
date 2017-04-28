@@ -11,6 +11,10 @@ from __future__ import print_function
 import os
 import time
 import unittest
+from datetime import datetime
+from dateutil import tz
+
+from azure.cli.command_modules.keyvault.custom import _asn1_to_iso8601
 
 from azure.cli.core.util import CLIError
 from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck,
@@ -44,6 +48,19 @@ def _create_keyvault(test, vault_name, resource_group, location, retry_wait=30, 
                 time.sleep(retry_wait)
             else:
                 raise ex
+
+
+class DateTimeParseTest(unittest.TestCase):
+
+    def test_parse_asn1_date(self):
+        expected = datetime(year=2017,
+                            month=4,
+                            day=24,
+                            hour=16,
+                            minute=37,
+                            second=20,
+                            tzinfo=tz.tzutc())
+        self.assertEqual(_asn1_to_iso8601("20170424163720Z"), expected)
 
 
 class KeyVaultMgmtScenarioTest(ResourceGroupVCRTestBase):
@@ -364,6 +381,8 @@ class KeyVaultCertificateScenarioTest(ResourceGroupVCRTestBase):
             allowed_exceptions='Pending certificate not found')
 
     def _test_certificate_download(self):
+        import OpenSSL.crypto
+
         kv = self.keyvault_name
         pem_file = os.path.join(TEST_DIR, 'import_pem_plain.pem')
         pem_policy_path = os.path.join(TEST_DIR, 'policy_import_pem.json')
@@ -373,24 +392,31 @@ class KeyVaultCertificateScenarioTest(ResourceGroupVCRTestBase):
         dest_binary = os.path.join(TEST_DIR, 'download-binary')
         dest_string = os.path.join(TEST_DIR, 'download-string')
 
-        try:
-            self.cmd('keyvault certificate download --vault-name {} -n pem-cert1 --file "{}"'.format(kv, dest_binary))
-            self.cmd('keyvault certificate download --vault-name {} -n pem-cert1 --file "{}" -e string'.format(kv, dest_string))
-            self.cmd('keyvault certificate delete --vault-name {} -n pem-cert1'.format(kv))
-            with open(dest_binary, 'rb') as f:
-                import base64
-                downloaded_binary = base64.b64encode(f.read()).decode('utf-8')
+        expected_pem = "-----BEGIN CERTIFICATE-----\n" + \
+                       cert_data + \
+                       '-----END CERTIFICATE-----\n'
+        expected_pem = expected_pem.replace('\n', '')
 
-            with open(dest_string, 'r') as f:
-                downloaded_string = f.read().replace('\r\n', '\n').replace('\n', '')
+        try:
+            self.cmd('keyvault certificate download --vault-name {} -n pem-cert1 --file "{}" -e DER'.format(kv, dest_binary))
+            self.cmd('keyvault certificate download --vault-name {} -n pem-cert1 --file "{}" -e PEM'.format(kv, dest_string))
+            self.cmd('keyvault certificate delete --vault-name {} -n pem-cert1'.format(kv))
+
+            def verify(path, file_type):
+                with open(path, 'rb') as f:
+                    x509 = OpenSSL.crypto.load_certificate(file_type, f.read())
+                    actual_pem = OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, x509)
+                    if isinstance(actual_pem, bytes):
+                        actual_pem = actual_pem.decode("utf-8")
+                    self.assertIn(expected_pem, actual_pem.replace('\n', ''))
+
+            verify(dest_binary, OpenSSL.crypto.FILETYPE_ASN1)
+            verify(dest_string, OpenSSL.crypto.FILETYPE_PEM)
         finally:
             if os.path.exists(dest_binary):
                 os.remove(dest_binary)
             if os.path.exists(dest_string):
                 os.remove(dest_string)
-
-        self.assertEqual(cert_data, downloaded_string)
-        self.assertEqual(cert_data, downloaded_binary)
 
     def body(self):
         _create_keyvault(self, self.keyvault_name, self.resource_group, self.location)

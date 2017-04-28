@@ -55,6 +55,7 @@ def validate_diagnostic_settings(namespace):
                                           resource_group=namespace.resource_group,
                                           namespace='microsoft.OperationalInsights',
                                           type='workspaces', name=namespace.workspace)
+
     _validate_tags(namespace)
 
 
