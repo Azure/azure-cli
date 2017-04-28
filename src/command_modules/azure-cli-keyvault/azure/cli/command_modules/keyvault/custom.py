@@ -615,7 +615,7 @@ def import_certificate(client, vault_base_url, certificate_name, certificate_dat
 
 
 def download_certificate(client, vault_base_url, certificate_name, file_path,
-                         encoding='binary', certificate_version=''):
+                         encoding='PEM', certificate_version=''):
     """ Download a certificate from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
@@ -625,15 +625,16 @@ def download_certificate(client, vault_base_url, certificate_name, file_path,
 
     try:
         with open(file_path, 'wb') as f:
-            if encoding == 'binary':
+            if encoding == 'DER':
                 f.write(cert)
             else:
                 import base64
-                try:
-                    f.write(base64.encodebytes(cert))
-                except AttributeError:
-                    f.write(base64.encodestring(cert)) # pylint: disable=deprecated-method
-    except Exception as ex: # pylint: disable=broad-except
+                encoded = base64.encodestring(cert)  # pylint:disable=deprecated-method
+                if isinstance(encoded, bytes):
+                    encoded = encoded.decode("utf-8")  # pylint:disable=redefined-variable-type
+                encoded = '-----BEGIN CERTIFICATE-----\n' + encoded + '-----END CERTIFICATE-----\n'
+                f.write(encoded.encode("utf-8"))
+    except Exception as ex:  # pylint: disable=broad-except
         if os.path.isfile(file_path):
             os.remove(file_path)
         raise ex

@@ -9,6 +9,7 @@ from azure.cli.core.test_utils.vcr_test_base import (
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 TEMPLATE = '{}/lab_template.json'.format(TEST_DIR)
+ENV_PARAMTERS = '@{}/docdbenv_paramters.json'.format(TEST_DIR)
 LAB_NAME = 'cliautomationlab'
 
 
@@ -78,6 +79,41 @@ class LabGalleryVMMgmtScenarioTest(ResourceGroupVCRTestBase):
                  .format(rg, LAB_NAME, linux_vm_name), checks=[NoneCheck()])
         self.cmd('lab vm delete -g {} --lab-name {} --name {}'
                  .format(rg, LAB_NAME, windows_vm_name), checks=[NoneCheck()])
+
+        # Delete the lab
+        self.cmd('lab delete -g {} --name {}'.format(rg, LAB_NAME), checks=[NoneCheck()])
+
+
+class LabEnvironmentMgmtScenarioTest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(LabEnvironmentMgmtScenarioTest, self).__init__(__file__, test_method,
+                                                             resource_group='cliautomation01')
+
+    def test_lab_environment_mgmt(self):
+        self.execute()
+
+    def body(self):
+        rg = self.resource_group
+        env_name = 'docdbenv'
+        arm_template = 'documentdb-webapp'
+
+        self.cmd('group deployment create -g {} --template-file {}'.format(rg, TEMPLATE),
+                 checks=[JMESPathCheck('properties.provisioningState', 'Succeeded')])
+
+        artifact_sources = self.cmd('lab artifact-source list -g {} --lab-name {}'
+                                    .format(rg, LAB_NAME))
+
+        # Create environment in the lab
+        self.cmd('lab environment create -g {} --lab-name {} --name {} '
+                 '--arm-template {} --artifact-source-name {} --parameters {}'
+                 .format(rg, LAB_NAME, env_name, arm_template, artifact_sources[0]['name'], ENV_PARAMTERS),
+                 checks=[JMESPathCheck('provisioningState', 'Succeeded'),
+                         JMESPathCheck('type', 'Microsoft.DevTestLab/labs/users/environments')])
+
+        # Delete environment from the lab
+        self.cmd('lab environment delete -g {} --lab-name {} --name {}'
+                 .format(rg, LAB_NAME, env_name), checks=[NoneCheck()])
 
         # Delete the lab
         self.cmd('lab delete -g {} --name {}'.format(rg, LAB_NAME), checks=[NoneCheck()])

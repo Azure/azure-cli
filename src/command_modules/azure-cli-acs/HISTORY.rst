@@ -3,6 +3,12 @@
 Release History
 ===============
 
+2.0.4 (2017-04-28)
+++++++++++++++++++
+
+* New packaging system.
+* fix the master and agent count to be integer instead of string
+
 2.0.3 (2017-04-17)
 ++++++++++++++++++
 

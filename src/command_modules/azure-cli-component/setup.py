@@ -13,7 +13,8 @@ except ImportError:
     from distutils import log as logger
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
-VERSION = '2.0.1+dev'
+
+VERSION = '2.0.2+dev'
 
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
