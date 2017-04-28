@@ -291,6 +291,12 @@ class Profile(object):
     def get_subscription_id(self):
         return self.get_subscription()[_SUBSCRIPTION_ID]
 
+    def get_access_token_for_resource(self, username, tenant, resource):
+        tenant = tenant or 'common'
+        _, access_token = self._creds_cache.retrieve_token_for_user(
+            username, tenant, resource)
+        return access_token
+
     def get_login_credentials(self, resource=CLOUD.endpoints.active_directory_resource_id,
                               subscription_id=None):
         account = self.get_subscription(subscription_id)

@@ -37,6 +37,7 @@ DEPENDENCIES = [
     'urllib3[secure]==1.16',
     'xmltodict',
     'pyOpenSSL',
+    'vsts-cd-manager',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
