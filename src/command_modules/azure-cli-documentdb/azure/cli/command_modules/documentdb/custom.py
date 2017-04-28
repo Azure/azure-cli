@@ -3,17 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 from azure.mgmt.documentdb.models import (
     ConsistencyPolicy,
     DatabaseAccountCreateUpdateParameters,
     Location
 )
 from azure.mgmt.documentdb.models.document_db_enums import DatabaseAccountKind
-from pydocumentdb import document_client;
 from azure.cli.core.util import CLIError
 import azure.cli.core.azlogging as azlogging
-import json
-
+from pydocumentdb import document_client;
 
 logger = azlogging.get_az_logger(__name__)
 
