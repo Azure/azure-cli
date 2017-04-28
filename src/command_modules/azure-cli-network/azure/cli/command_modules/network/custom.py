@@ -570,66 +570,61 @@ def delete_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
         resource_group_name, application_gateway_name, ag)
 
 
-def _set_ag_waf_config(resource_group_name, application_gateway_name, enabled,
-                        firewall_mode=ApplicationGatewayFirewallMode.detection.value,
-                        rule_set_type='OWASP', rule_set_version=None, disabled_rule_groups=None,
-                        disabled_rules=None, no_wait=False):
+def set_ag_waf_config_2016_09_01(resource_group_name, application_gateway_name, enabled,
+                                 firewall_mode=ApplicationGatewayFirewallMode.detection.value,
+                                 no_wait=False):
     ApplicationGatewayWebApplicationFirewallConfiguration = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayWebApplicationFirewallConfiguration', mod='models')
     ncf = _network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
-    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):  # pylint: disable=too-many-nested-blocks
-        ag.web_application_firewall_configuration = \
-            ApplicationGatewayWebApplicationFirewallConfiguration(
-                enabled == 'true', firewall_mode, rule_set_type, rule_set_version)
-        if disabled_rule_groups or disabled_rules:
-            ApplicationGatewayFirewallDisabledRuleGroup = get_sdk(
-                ResourceType.MGMT_NETWORK,
-                'ApplicationGatewayFirewallDisabledRuleGroup', mod='models')
-
-            disabled_groups = []
-
-            # disabled groups can be added directly
-            for group in disabled_rule_groups or []:
-                disabled_groups.append(ApplicationGatewayFirewallDisabledRuleGroup(group))
-
-            # for disabled rules, we have to look up the IDs
-            if disabled_rules:
-                results = list_ag_waf_rule_sets(
-                    ncf, _type=rule_set_type, version=rule_set_version, group='*')
-                for item in results:
-                    for group in item.rule_groups:
-                        disabled_group = ApplicationGatewayFirewallDisabledRuleGroup(
-                            group.rule_group_name, [])
-
-                        for rule in group.rules:
-                            if str(rule.rule_id) in disabled_rules:
-                                disabled_group.rules.append(rule.rule_id)
-                        if disabled_group.rules:
-                            disabled_groups.append(disabled_group)
-            ag.web_application_firewall_configuration.disabled_rule_groups = disabled_groups
-    else:
-        ag.web_application_firewall_configuration = \
-            ApplicationGatewayWebApplicationFirewallConfiguration(
-                enabled == 'true', firewall_mode)
+    ag.web_application_firewall_configuration = \
+        ApplicationGatewayWebApplicationFirewallConfiguration(
+            enabled == 'true', firewall_mode)
 
     return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
-
-def set_ag_waf_config_2016_09_01(resource_group_name, application_gateway_name, enabled,
-                                 firewall_mode=ApplicationGatewayFirewallMode.detection.value,
-                                 no_wait=False):
-    return _set_ag_waf_config(resource_group_name, application_gateway_name, enabled,
-                              firewall_mode, None, None, None, None, no_wait)
 
 def set_ag_waf_config_2017_03_01(resource_group_name, application_gateway_name, enabled,
                                  firewall_mode=ApplicationGatewayFirewallMode.detection.value,
                                  rule_set_type='OWASP', rule_set_version=None,
                                  disabled_rule_groups=None,
                                  disabled_rules=None, no_wait=False):
-    return _set_ag_waf_config(resource_group_name, application_gateway_name, enabled,
-                                firewall_mode, rule_set_type, rule_set_version,
-                                disabled_rule_groups, disabled_rules, no_wait)
+    ApplicationGatewayWebApplicationFirewallConfiguration = get_sdk(
+        ResourceType.MGMT_NETWORK,
+        'ApplicationGatewayWebApplicationFirewallConfiguration', mod='models')
+    ncf = _network_client_factory().application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    ag.web_application_firewall_configuration = \
+        ApplicationGatewayWebApplicationFirewallConfiguration(
+            enabled == 'true', firewall_mode, rule_set_type, rule_set_version)
+    if disabled_rule_groups or disabled_rules:  # pylint: disable=too-many-nested-blocks
+        ApplicationGatewayFirewallDisabledRuleGroup = get_sdk(
+            ResourceType.MGMT_NETWORK,
+            'ApplicationGatewayFirewallDisabledRuleGroup', mod='models')
+
+        disabled_groups = []
+
+        # disabled groups can be added directly
+        for group in disabled_rule_groups or []:
+            disabled_groups.append(ApplicationGatewayFirewallDisabledRuleGroup(group))
+
+        # for disabled rules, we have to look up the IDs
+        if disabled_rules:
+            results = list_ag_waf_rule_sets(
+                ncf, _type=rule_set_type, version=rule_set_version, group='*')
+            for item in results:
+                for group in item.rule_groups:
+                    disabled_group = ApplicationGatewayFirewallDisabledRuleGroup(
+                        group.rule_group_name, [])
+
+                    for rule in group.rules:
+                        if str(rule.rule_id) in disabled_rules:
+                            disabled_group.rules.append(rule.rule_id)
+                    if disabled_group.rules:
+                        disabled_groups.append(disabled_group)
+        ag.web_application_firewall_configuration.disabled_rule_groups = disabled_groups
+
+    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 
 def show_ag_waf_config(resource_group_name, application_gateway_name):

@@ -12,6 +12,12 @@ def get_nose_runner(report_folder, parallel=True, process_timeout=600, process_r
     def _run_nose(test_folders):
         import nose
         import os.path
+        from six import StringIO
+        import sys
+
+        tempout = StringIO()
+        original_stderr = sys.stderr
+        sys.stderr = tempout
 
         if not report_folder \
                 or not os.path.exists(report_folder) \
@@ -37,8 +43,17 @@ def get_nose_runner(report_folder, parallel=True, process_timeout=600, process_r
         arguments += ['--debug-log={}'.format(debug_file)]
         arguments += ['--nologcapture']
         arguments.extend(test_folders)
-
         result = nose.run(argv=arguments)
-        return result, test_report
+
+        sys.stderr = original_stderr
+        output = tempout.getvalue().splitlines()
+        tempout.close()
+
+        failed_tests = []
+        for line in output:
+            if line.startswith('test_') and line.endswith('ERROR') or line.endswith('FAIL'):
+                failed_tests.append(line)
+
+        return result, test_report, failed_tests
 
     return _run_nose

@@ -30,11 +30,19 @@ def run_tests(modules, parallel, run_live):
 
     # run tests
     overall_result = True
+    failed_tests = []
     for name, _, test_path in modules:
         print('\n\n==== Test module {} ===='.format(name))
-        result, test_result = run_nose([test_path])
+        result, test_result, module_failed_tests = run_nose([test_path])
+        failed_tests += module_failed_tests
         overall_result &= result
         print('==== Test module {} result ====\n{}\n==========\n'.format(name, test_result))
+        if failed_tests:
+            print('==== FAILED TESTS ====')
+            for test in failed_tests:
+                print(test)
+        else:
+            print('==== ALL TESTS PASSED! ====')
 
     return overall_result
 

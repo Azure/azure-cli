@@ -8,7 +8,7 @@ import argparse
 from argcomplete.completers import FilesCompleter
 
 from azure.cli.core.commands import \
-    (CliArgumentType, register_cli_argument, register_extra_cli_argument)
+    (VersionConstraint, CliArgumentType, register_cli_argument, register_extra_cli_argument)
 from azure.cli.core.commands.parameters import (location_type, get_resource_name_completion_list,
                                                 enum_choice_list, tags_type, ignore_type,
                                                 file_type, get_resource_group_completion_list,
@@ -40,7 +40,7 @@ from azure.cli.command_modules.network._validators import \
      get_network_watcher_from_vm, get_network_watcher_from_location)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
-from azure.cli.core.profiles import ResourceType, supported_api_version, get_sdk
+from azure.cli.core.profiles import ResourceType, get_sdk
 
 ApplicationGatewaySkuName, ApplicationGatewayCookieBasedAffinity, \
 ApplicationGatewayFirewallMode, ApplicationGatewayProtocol, \
@@ -166,11 +166,9 @@ register_cli_argument('network application-gateway create', 'capacity', help='Th
 register_cli_argument('network application-gateway create', 'cert_password', help='The certificate password', arg_group='Gateway')
 register_cli_argument('network application-gateway create', 'http_settings_port', help='The HTTP settings port.', arg_group='Gateway')
 
-for item in ['create', 'http-settings']:
-    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01'):
-        register_cli_argument('network application-gateway {}'.format(item), 'connection_draining_timeout', type=int, help='The time in seconds after a backend server is removed during which on open connection remains active. Range: 0 (disabled) to 3600', arg_group='Gateway' if item == 'create' else None)
-    else:
-        register_cli_argument('network application-gateway {}'.format(item), 'connection_draining_timeout', ignore_type)
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-12-01') as c:
+    for item in ['create', 'http-settings']:
+        c.register_cli_argument('network application-gateway {}'.format(item), 'connection_draining_timeout', type=int, help='The time in seconds after a backend server is removed during which on open connection remains active. Range: 0 (disabled) to 3600', arg_group='Gateway' if item == 'create' else None)
 
 register_cli_argument('network application-gateway update', 'sku', arg_group=None)
 
@@ -293,10 +291,9 @@ register_cli_argument('network express-route peering', 'primary_peer_address_pre
 register_cli_argument('network express-route peering', 'secondary_peer_address_prefix', options_list=('--secondary-peer-subnet',))
 register_cli_argument('network express-route peering', 'customer_asn', arg_group='Microsoft Peering')
 register_cli_argument('network express-route peering', 'routing_registry_name', arg_group='Microsoft Peering', **enum_choice_list(routing_registry_values))
-if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01'):
-    register_cli_argument('network express-route peering', 'route_filter', help='Name or ID of a route filter to apply to the peering settings.', validator=validate_route_filter, arg_group='Microsoft Peering')
-else:
-    register_cli_argument('network express-route peering', 'route_filter', ignore_type)
+
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-12-01') as c:
+    c.register_cli_argument('network express-route peering', 'route_filter', help='Name or ID of a route filter to apply to the peering settings.', validator=validate_route_filter, arg_group='Microsoft Peering')
 
 # Local Gateway
 register_cli_argument('network local-gateway', 'local_network_gateway_name', name_arg_type, help='Name of the local network gateway.', completer=get_resource_name_completion_list('Microsoft.Network/localNetworkGateways'), id_part='name')
@@ -545,10 +542,8 @@ register_cli_argument('network vpn-connection', 'virtual_network_gateway_connect
 register_cli_argument('network vpn-connection', 'shared_key', help='Shared IPSec key.')
 register_cli_argument('network vpn-connection', 'connection_name', help='Connection name.')
 
-if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):
-    register_cli_argument('network vpn-connection', 'use_policy_based_traffic_selectors', help='Enable policy-based traffic selectors.', **three_state_flag())
-else:
-    register_cli_argument('network vpn-connection', 'use_policy_based_traffic_selectors', ignore_type)
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-03-01') as c:
+    c.register_cli_argument('network vpn-connection', 'use_policy_based_traffic_selectors', help='Enable policy-based traffic selectors.', **three_state_flag())
 
 register_cli_argument('network vpn-connection create', 'connection_name', options_list=('--name', '-n'), metavar='NAME', help='Connection name.')
 register_cli_argument('network vpn-connection create', 'vnet_gateway1', validator=process_vpn_connection_create_namespace)

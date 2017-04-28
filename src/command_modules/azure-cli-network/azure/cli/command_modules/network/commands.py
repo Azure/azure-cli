@@ -6,7 +6,8 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_wait_command
-from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
+from azure.cli.core.commands import \
+    (DeploymentOutputLongRunningOperation, cli_command)
 from ._client_factory import * # pylint: disable=wildcard-import, unused-wildcard-import
 from azure.cli.core.util import empty_on_404
 
