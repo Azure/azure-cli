@@ -37,6 +37,8 @@ register_cli_argument('ad sp create-for-rbac', 'role', completer=get_role_defini
 register_cli_argument('ad sp create-for-rbac', 'skip_assignment', action='store_true', help='do not create default assignment')
 register_cli_argument('ad sp create-for-rbac', 'expanded_view', action='store_true', help='Once created, display more information like subscription and cloud environments')
 register_cli_argument('ad sp create-for-rbac', 'cert', type=x509_type)
+register_cli_argument('ad sp create-for-rbac', 'cert_name', arg_group='KeyVault')
+register_cli_argument('ad sp create-for-rbac', 'key_vault', arg_group='KeyVault')
 
 register_cli_argument('ad sp reset-credentials', 'name', name_arg_type)
 register_cli_argument('ad sp reset-credentials', 'years', type=int, default=None)

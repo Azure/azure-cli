@@ -505,12 +505,48 @@ def _resolve_service_principal(client, identifier):
         raise CLIError("service principal '{}' doesn't exist".format(identifier))
 
 
+def _process_service_principal_creds(years, cert, create_cert, password, key_vault, cert_name):
+    # pylint: disable=protected-access
+    public_cert_string = None
+    cert_file = None
+    end_date = None
+
+    cred_usage_error = CLIError('Usage error: --cert | --create-cert [--key-vault --cert-name] | --password | --key-vault --cert-name')
+    if cert:
+        # 1 - User-supplied public cert data
+        if any(create_cert, password, key_vault, cert_name):
+            raise cred_usage_error
+        public_cert_string, end_date = _normalize_cert(cert)
+        if years:
+            if start_date.replace(tzinfo=tzutc()) + relativedelta(years=years) > end_date:
+                logger.warning("Use cert's expiration date as supplied '--years' exceeds it")
+            else:
+                end_date = None  # we will pick up --years
+    elif create_cert:
+        if password or cert or (key_vault and not cert_name):
+            raise cred_usage_error
+        # 2 - Create self-signed cert (with or without KeyVault)
+        public_cert_string, cert_file = \
+            _create_self_signed_cert(years, key_vault, cert_name)
+    elif key_vault:
+        if password or cert or not cert_name:
+            raise cred_usage_error
+        # 3 - Use existing cert from KeyVault
+        raise CLIError('TODO: Existing KeyVault cert!')
+    else:
+        # 4 - Nothing supplied or user-supplied password
+        password = password or str(uuid.uuid4())
+
+    end_date = end_date or start_date + relativedelta(years=years or 1)
+    return password, public_cert_string, cert_file, start_date, end_date
+
+
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-arguments,too-many-statements,too-many-locals, too-many-branches
         name=None, password=None, years=None,
         create_cert=False, cert=None,
         scopes=None, role='Contributor',
-        expanded_view=None, skip_assignment=False):
+        expanded_view=None, skip_assignment=False, key_vault=None, cert_name=None):
     '''create a service principal and configure its access to Azure resources
     :param str name: a display name or an app id uri. Command will generate one if missing.
     :param str password: the password used to login. If missing, command will generate one.
@@ -520,6 +556,9 @@ def create_service_principal_for_rbac(
     :param str scopes: space separated scopes the service principal's role assignment applies to.
            Defaults to the root of the current subscription.
     :param str role: role the service principal has on the resources.
+    :param str key_vault: Name or ID of a KeyVault.
+    :param str cert_name: Name to use when creating a self-signed certificate in KeyVault, or the
+        name of an existing KeyVault certificate to use.
     '''
     import time
     graph_client = _graph_client_factory()
@@ -542,29 +581,11 @@ def create_service_principal_for_rbac(
     start_date = datetime.datetime.utcnow()
     app_display_name = app_display_name or ('azure-cli-' +
                                             start_date.strftime('%Y-%m-%d-%H-%M-%S'))
-
-    # pylint: disable=protected-access
-    public_cert_string = None
-    cert_file = None
-    end_date = None
-    if len([x for x in [cert, create_cert, password] if x]) > 1:
-        raise CLIError('Usage error: --cert | --create-cert | --password')
-    if create_cert:
-        public_cert_string, cert_file = _create_self_signed_cert(years or 1)
-    elif cert:
-        public_cert_string, end_date = _normalize_cert(cert)
-        if years:
-            if start_date.replace(tzinfo=tzutc()) + relativedelta(years=years) > end_date:
-                logger.warning("Use cert's expiration date as supplied '--years' exceeds it")
-            else:
-                end_date = None  # we will pick up --years
-    else:
-        password = password or str(uuid.uuid4())
-
     if name is None:
         name = 'http://' + app_display_name  # just a valid uri, no need to exist
 
-    end_date = end_date or start_date + relativedelta(years=years or 1)
+    password, public_cert_string, cert_file, start_date, end_date = \
+        _process_service_principal_creds(years, cert, create_cert, password, key_vault, cert_name)
 
     aad_application = create_application(graph_client.applications,
                                          display_name=app_display_name,
@@ -641,51 +662,59 @@ def create_service_principal_for_rbac(
     return result
 
 
-def _create_self_signed_cert(years):
+def _create_self_signed_cert(years, key_vault, key_vault_cert_name):
     from os import path
     import tempfile
     from OpenSSL import crypto, SSL
     from datetime import timedelta
 
-    _, cert_file = tempfile.mkstemp()
-    _, key_file = tempfile.mkstemp()
+    years = years or 1
 
-    # create a file with both cert & key so users can use to login
-    # leverage tempfile ot produce a random file name
-    _, temp_file = tempfile.mkstemp()
-    creds_file = path.join(path.expanduser("~"), path.basename(temp_file) + '.pem')
+    if not key_vault and not key_vault_cert_name:
+        _, cert_file = tempfile.mkstemp()
+        _, key_file = tempfile.mkstemp()
 
-    # create a key pair
-    k = crypto.PKey()
-    k.generate_key(crypto.TYPE_RSA, 2048)
+        # create a file with both cert & key so users can use to login
+        # leverage tempfile ot produce a random file name
+        _, temp_file = tempfile.mkstemp()
+        creds_file = path.join(path.expanduser("~"), path.basename(temp_file) + '.pem')
 
-    # create a self-signed cert
-    cert = crypto.X509()
-    subject = cert.get_subject()
-    # as long it works, we skip fileds C, ST, L, O, OU, which we have no reasonable defaults for
-    subject.CN = 'CLI-Login'
-    cert.set_serial_number(1000)
-    cert.gmtime_adj_notBefore(0)
-    cert.gmtime_adj_notAfter(int(timedelta(days=366 * years, hours=1).total_seconds()))
-    cert.set_issuer(cert.get_subject())
-    cert.set_pubkey(k)
-    cert.sign(k, 'sha1')
+        # create a key pair
+        k = crypto.PKey()
+        k.generate_key(crypto.TYPE_RSA, 2048)
 
-    with open(cert_file, "wt") as f:
-        f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode())
-    with open(key_file, "wt") as f:
-        f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k).decode())
+        # create a self-signed cert
+        cert = crypto.X509()
+        subject = cert.get_subject()
+        # as long it works, we skip fileds C, ST, L, O, OU, which we have no reasonable defaults for
+        subject.CN = 'CLI-Login'
+        cert.set_serial_number(1000)
+        cert.gmtime_adj_notBefore(0)
+        cert.gmtime_adj_notAfter(int(timedelta(days=366 * years, hours=1).total_seconds()))
+        cert.set_issuer(cert.get_subject())
+        cert.set_pubkey(k)
+        cert.sign(k, 'sha1')
 
-    cert_string = None
-    with open(creds_file, 'wt') as cf:
-        with open(key_file, 'rt') as f:
-            cf.write(f.read())
-        with open(cert_file, "rt") as f:
-            cert_string = f.read()
-            cf.write(cert_string)
+        with open(cert_file, "wt") as f:
+            f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode())
+        with open(key_file, "wt") as f:
+            f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k).decode())
 
-    # get rid of the header and tails for upload to AAD: ----BEGIN CERT....----
-    cert_string = re.sub(r'\-+[A-z\s]+\-+', '', cert_string).strip()
+        cert_string = None
+        with open(creds_file, 'wt') as cf:
+            with open(key_file, 'rt') as f:
+                cf.write(f.read())
+            with open(cert_file, "rt") as f:
+                cert_string = f.read()
+                cf.write(cert_string)
+
+        # get rid of the header and tails for upload to AAD: ----BEGIN CERT....----
+        cert_string = re.sub(r'\-+[A-z\s]+\-+', '', cert_string).strip()
+    elif key_vault and key_vault_cert_name:
+        # TODO create in KeyVault
+        raise CLIError('TODO: Create in KeyVault!')
+    else:
+        raise CLIError('Usage error: --create-cert | --create-cert --key-vault --cert-name')
     return (cert_string, creds_file)
 
 

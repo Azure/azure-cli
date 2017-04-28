@@ -34,6 +34,7 @@ DEPENDENCIES = [
     'azure-cli-core',
     'azure-mgmt-authorization==0.30.0rc6',
     'azure-graphrbac==0.30.0rc6',
+    'azure-keyvault==0.2.0'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
