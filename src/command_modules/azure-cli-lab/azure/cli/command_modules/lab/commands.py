@@ -49,10 +49,10 @@ def transform_artifact_source(result):
 
 
 def transform_arm_template_list(arm_template_list):
-    return [transform_arm_template_source(v) for v in arm_template_list]
+    return [transform_arm_template(v) for v in arm_template_list]
 
 
-def transform_arm_template_source(result):
+def transform_arm_template(result):
     return OrderedDict([('name', result['name']),
                         ('resourceGroup', result['resourceGroup']),
                         ('publisher', result.get('publisher'))])
@@ -210,4 +210,4 @@ with ServiceGroup(__name__, get_devtestlabs_arm_template_operation,
 with ServiceGroup(__name__, get_devtestlabs_arm_template_operation,
                   custom_operations) as s:
     with s.group('lab arm-template') as c:
-        c.command('show', 'show_arm_template', table_transformer=transform_arm_template_source)
+        c.command('show', 'show_arm_template', table_transformer=transform_arm_template)
