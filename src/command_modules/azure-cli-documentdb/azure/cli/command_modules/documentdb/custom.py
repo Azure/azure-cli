@@ -135,10 +135,8 @@ def _get_offer_link(database_id, offer_id):
 def cli_documentdb_database_exists(client, database_id):
     """Returns a boolean indicating whether the database exists
     """
-    if len(list(client.QueryDatabases({'query': 'SELECT * FROM root r WHERE r.id=@id',
-            'parameters': [
-                { 'name':'@id', 'value': database_id }
-            ]}))) > 0:
+    if len(list(client.QueryDatabases({ 'query': 'SELECT * FROM root r WHERE r.id=@id',
+                                        'parameters': [{ 'name':'@id', 'value': database_id }]}))) > 0:
         return True
     else:
         return False
@@ -169,10 +167,8 @@ def cli_documentdb_collection_exists(client, database_id, collection_id):
     """Returns a boolean indicating whether the collection exists
     """
     if len(list(client.QueryCollections(_get_database_link(database_id),
-        {'query': 'SELECT * FROM root r WHERE r.id=@id',
-            'parameters': [
-                { 'name':'@id', 'value': collection_id }
-            ]}))) > 0:
+        { 'query': 'SELECT * FROM root r WHERE r.id=@id',
+          'parameters': [{ 'name':'@id', 'value': collection_id }]}))) > 0:
         return True
     else:
         return False
