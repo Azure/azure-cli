@@ -38,7 +38,7 @@ class VstsContinuousDeliveryProvider(object):
                                                               cd_create_account, auth_token)
         return vsts_cd_status
 
-    def remove_continuous_delivery(self): # pylint: disable=no-self-use
+    def remove_continuous_delivery(self):  # pylint: disable=no-self-use
         """
         To be Implemented
         """
