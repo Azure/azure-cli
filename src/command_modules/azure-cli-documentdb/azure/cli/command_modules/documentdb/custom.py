@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import json
 from azure.mgmt.documentdb.models import (
     ConsistencyPolicy,
     DatabaseAccountCreateUpdateParameters,
@@ -192,7 +191,7 @@ def _populate_collection_definition(collection,
     changed = False
 
     if partition_key_path:
-        if not 'partitionKey' in collection:
+        if 'partitionKey' not in collection:
             collection['partitionKey'] = {}
         collection['partitionKey'] = {'paths' : [partition_key_path]}
         changed = True
@@ -264,75 +263,3 @@ def cli_documentdb_collection_update(client,
 
         result['offer'] = client.ReplaceOffer(offer['_self'], offer)
     return result
-
-def duplicate_resource_exception_handler(ex):
-    # pylint:disable=line-too-long
-    # wraps DocumentDB 409 error in CLIError
-    from pydocumentdb.errors import HTTPFailure
-    if isinstance(ex, HTTPFailure) and ex.status_code == 409:
-        raise CLIError('Operation Failed: Resource Already Exists (Server returned status code 409)')
-    raise ex
-
-def resource_not_found_exception_handler(ex):
-    # pylint:disable=line-too-long
-    # wraps DocumentDB 404 error in CLIError
-    from pydocumentdb.errors import HTTPFailure
-    if isinstance(ex, HTTPFailure) and ex.status_code == 404:
-        raise CLIError('Operation Failed: Resource Not Found (Server returned status code 404)')
-    raise ex
-
-def invalid_arg_found_exception_handler(ex):
-    # wraps DocumentDB 400 error in CLIError
-    from pydocumentdb.errors import HTTPFailure
-    if isinstance(ex, HTTPFailure) and ex.status_code == 400:
-        cliError = None
-        try:
-            # pylint:disable=protected-access
-            if ex._http_error_message:
-                msg = json.loads(ex._http_error_message)
-                if msg['message']:
-                    msg = msg['message'].split('\n')[0]
-                    msg = msg[len('Message: '):] if msg.find('Message: ') == 0 else msg
-                    # pylint:disable=line-too-long
-                    cliError = CLIError('Operation Failed: Invalid Arg (Server returned status code 400 {})'.format(str(msg)))
-        # pylint:disable=broad-except
-        except Exception:
-            pass
-        if cliError:
-            # pylint:disable=raising-bad-type
-            raise cliError
-        # pylint:disable=line-too-long
-        raise CLIError('Operation Failed: Invalid Arg (Server returned status code 400 {})'.format(str(ex)))
-    raise ex
-
-def exception_handler_chain_builder(handlers):
-    # creates a handler which chains the handler
-    # as soon as one of the chained handlers raises CLIError, it raises CLIError
-    # if no handler raises CLIError it raises the original exception
-    # pylint:disable=broad-except
-    def chained_handler(ex):
-        if isinstance(ex, CLIError):
-            raise ex
-        for h in handlers:
-            try:
-                h(ex)
-            except CLIError as cliError:
-                raise cliError
-            except Exception:
-                pass
-        raise ex
-    return chained_handler
-
-def network_exception_handler(ex):
-    import requests as requests
-    # wraps a connection exception in CLIError
-    # pylint:disable=line-too-long
-    if isinstance(ex, requests.exceptions.ConnectionError) or isinstance(ex, requests.exceptions.HTTPError):
-        raise CLIError('Please ensure you have network connection. Error detail: ' + str(ex))
-    raise ex
-
-def generic_exception_handler(ex):
-    # pylint:disable=line-too-long
-    logger.debug(ex)
-    chained_handler = exception_handler_chain_builder([duplicate_resource_exception_handler, resource_not_found_exception_handler, invalid_arg_found_exception_handler, network_exception_handler])
-    chained_handler(ex)

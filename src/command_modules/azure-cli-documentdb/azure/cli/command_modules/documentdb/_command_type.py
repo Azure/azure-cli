@@ -4,14 +4,18 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import create_command, command_table
-from .custom import generic_exception_handler
 
 def cli_documentdb_data_plane_command(name, operation, client_factory,  # pylint: disable=too-many-arguments
                                       transform=None, table_transformer=None,
-                                      exception_handler=generic_exception_handler):
+                                      exception_handler=None):
     """ Registers an Azure CLI DocumentDB Data Plane command. These commands always include the
     four parameters which can be used to obtain a documentdb client: account-name, account-key,
     connection-string, and sas-token. """
+
+    if not exception_handler:
+        from ._exception_handler import generic_exception_handler
+        exception_handler = generic_exception_handler
+
     command = create_command(__name__, name, operation, transform, table_transformer,
                              client_factory, exception_handler=exception_handler)
     # add parameters required to create a documentdb client
@@ -36,4 +40,3 @@ def cli_documentdb_data_plane_command(name, operation, client_factory,  # pylint
                          'AZURE_DOCUMENTDB_URL_CONNECTION')
 
     command_table[command.name] = command
-

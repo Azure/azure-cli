@@ -3,7 +3,7 @@
 Release History
 ===============
 
-0.1.5 (2017-04-28)
+0.1.5 (unreleased)
 ++++++++++++++++++
 
 * Added support for documentdb data-plane APIs:
