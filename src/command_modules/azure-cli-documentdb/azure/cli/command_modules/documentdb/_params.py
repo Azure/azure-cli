@@ -12,6 +12,8 @@ from azure.cli.core.commands.parameters import (
     file_type
     )
 
+from azure.cli.core.util import shell_safe_json_parse
+
 from ._client_factory import get_document_client_factory
 from azure.cli.core.commands import register_cli_argument
 import azure.cli.core.commands.arm # pylint: disable=unused-import
@@ -68,34 +70,22 @@ register_cli_argument('documentdb update', 'max_staleness_prefix', help="when us
 register_cli_argument('documentdb update', 'max_interval', help="when used with Bounded Staleness consistency, this value represents the time amount of staleness (in seconds) tolerated. Accepted range for this value is 1 - 100", type=int)
 register_cli_argument('documentdb update', 'ip_range_filter', validator=validate_ip_range_filter, help="firewall support. Specifies the set of IP addresses or IP address ranges in CIDR form to be included as the allowed list of client IPs for a given database account. IP addresses/ranges must be comma separated and must not contain any spaces", nargs='+')
 
-
 # database id
-database_id = CliArgumentType(options_list=('--database-id'), help='Database ID')
-register_cli_argument('documentdb database read', 'database_id', database_id)
-register_cli_argument('documentdb database create', 'database_id', database_id)
-register_cli_argument('documentdb database delete', 'database_id', database_id)
-register_cli_argument('documentdb collection create', 'database_id', database_id)
-register_cli_argument('documentdb collection read', 'database_id', database_id)
-register_cli_argument('documentdb collection list', 'database_id', database_id)
+database_id = CliArgumentType(options_list=('--database-id', '-d'), help='Database ID')
+register_cli_argument('documentdb database', 'database_id', database_id)
+register_cli_argument('documentdb collection', 'database_id', database_id)
 
-# collection id
-collection_id = CliArgumentType(options_list=('--collection-id'), help='Collection ID')
-register_cli_argument('documentdb collection create', 'collection_id', collection_id)
-register_cli_argument('documentdb collection read', 'collection_id', collection_id)
-register_cli_argument('documentdb collection update', 'collection_id', collection_id)
-register_cli_argument('documentdb collection delete', 'collection_id', collection_id)
+register_cli_argument('documentdb collection', 'collection_id', 
+                      options_list=('--collection-id', '-c'), help='Collection ID')
 
-# throughput
-throughput = CliArgumentType(options_list=('--throughput'), help='Offer Throughput')
-register_cli_argument('documentdb collection create', 'throughput', throughput)
-register_cli_argument('documentdb collection update', 'throughput', throughput)
+register_cli_argument('documentdb collection', 'throughput', 
+                      options_list=('--throughput'), help='Offer Throughput', type=int)
 
-# partition key
-partition_key_path = CliArgumentType(options_list=('--partition-key-path'), help='Partition Key Path, e.g., \'/properties/name\'')
-register_cli_argument('documentdb collection create', 'partition_key_path', partition_key_path)
-register_cli_argument('documentdb collection update', 'partition_key_path', partition_key_path)
+register_cli_argument('documentdb collection', 'partition_key_path', 
+                      options_list=('--partition-key-path'), 
+                      help='Partition Key Path, e.g., \'/properties/name\'')
 
-# indexing policy as a json file
-indexing_policy_json_file = CliArgumentType(options_list=('--indexing-policy-json-file'), help='Indexing Policy Json file', type=file_type, completer=FilesCompleter())
-register_cli_argument('documentdb collection create', 'indexing_policy_json_file', indexing_policy_json_file)
-register_cli_argument('documentdb collection update', 'indexing_policy_json_file', indexing_policy_json_file)
+register_cli_argument('documentdb collection', 'indexing_policy',
+                      options_list=('--indexing-policy'), 
+                      help='Indexing Policy, you can enter it as a string or as a file, e.g., --indexing-policy @policy-file.json)',
+                      type=shell_safe_json_parse, completer=FilesCompleter())

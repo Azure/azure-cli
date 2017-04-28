@@ -14,10 +14,10 @@ helps['documentdb'] = """
 
 helps['documentdb database'] = """
     type: group
-    short-summary: Manage Azure DocumentDB (NoSQL) databases.
+    short-summary: Manage Azure DocumentDB databases.
 """
 
 helps['documentdb collection'] = """
     type: group
-    short-summary: Manage Azure DocumentDB (NoSQL) collections.
+    short-summary: Manage Azure DocumentDB collections.
 """

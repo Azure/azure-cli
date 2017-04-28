@@ -30,16 +30,17 @@ cli_command(__name__, 'documentdb list', custome_path + 'cli_documentdb_list', d
 
 
 ## database operations
-cli_documentdb_data_plane_command('documentdb database read', custome_path + 'cli_documentdb_database_read', get_document_client_factory)
+cli_documentdb_data_plane_command('documentdb database show', custome_path + 'cli_documentdb_database_show', get_document_client_factory)
 cli_documentdb_data_plane_command('documentdb database list', custome_path + 'cli_documentdb_database_list', get_document_client_factory)
 cli_documentdb_data_plane_command('documentdb database exists', custome_path + 'cli_documentdb_database_exists', get_document_client_factory)
 cli_documentdb_data_plane_command('documentdb database create', custome_path + 'cli_documentdb_database_create', get_document_client_factory)
 cli_documentdb_data_plane_command('documentdb database delete', custome_path + 'cli_documentdb_database_delete', get_document_client_factory)
 
 # collection operations
-cli_documentdb_data_plane_command('documentdb collection read', custome_path + 'cli_documentdb_collection_read', get_document_client_factory)
+cli_documentdb_data_plane_command('documentdb collection show', custome_path + 'cli_documentdb_collection_show', get_document_client_factory)
 cli_documentdb_data_plane_command('documentdb collection list', custome_path + 'cli_documentdb_collection_list', get_document_client_factory)
 cli_documentdb_data_plane_command('documentdb collection exists', custome_path + 'cli_documentdb_collection_exists', get_document_client_factory)
 cli_documentdb_data_plane_command('documentdb collection create', custome_path + 'cli_documentdb_collection_create', get_document_client_factory)
 cli_documentdb_data_plane_command('documentdb collection delete', custome_path + 'cli_documentdb_collection_delete', get_document_client_factory)
 cli_documentdb_data_plane_command('documentdb collection update', custome_path + 'cli_documentdb_collection_update', get_document_client_factory)
+

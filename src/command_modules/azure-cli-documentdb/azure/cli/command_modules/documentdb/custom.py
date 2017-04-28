@@ -119,7 +119,7 @@ def cli_documentdb_list(client,
         return client.list()
     
 ######################    
-# control plane APIs
+# data plane APIs
 ######################    
 
 # database operations
@@ -144,8 +144,8 @@ def cli_documentdb_database_exists(client, database_id):
     else:
         return False
 
-def cli_documentdb_database_read(client, database_id):
-    """Reads an Azure DocumentDB database
+def cli_documentdb_database_show(client, database_id):
+    """Shows an Azure DocumentDB database
     """
     return client.ReadDatabase(_get_database_link(database_id));
 
@@ -157,12 +157,12 @@ def cli_documentdb_database_list(client):
 def cli_documentdb_database_create(client, database_id):
     """Creates an Azure DocumentDB database
     """
-    return client.CreateDatabase( { 'id': database_id} )
+    client.CreateDatabase( { 'id': database_id } )
     
 def cli_documentdb_database_delete(client, database_id):
     """Deletes an Azure DocumentDB database
     """
-    return client.DeleteDatabase(_get_database_link(database_id))
+    client.DeleteDatabase(_get_database_link(database_id))
 
 # collection operations
 
@@ -178,10 +178,12 @@ def cli_documentdb_collection_exists(client, database_id, collection_id):
     else:
         return False
 
-def cli_documentdb_collection_read(client, database_id, collection_id):
-    """Reads an Azure DocumentDB collection
+def cli_documentdb_collection_show(client, database_id, collection_id):
+    """Shows an Azure DocumentDB collection and its offer
     """
-    return client.ReadCollection(_get_collection_link(database_id, collection_id));
+    collection = client.ReadCollection(_get_collection_link(database_id, collection_id));
+    offer = _find_offer(client, collection['_self'])
+    return { 'collection' : collection, 'offer' : offer }
     
 def cli_documentdb_collection_list(client, database_id):
     """Lists all Azure DocumentDB collections
@@ -191,12 +193,12 @@ def cli_documentdb_collection_list(client, database_id):
 def cli_documentdb_collection_delete(client, database_id, collection_id):
     """Deletes an Azure DocumentDB collection
     """
-    return client.DeleteCollection(_get_collection_link(database_id, collection_id))
+    client.DeleteCollection(_get_collection_link(database_id, collection_id))
 
 def _populate_collection_definition(collection,
                                     partition_key_path=None,
-                                    indexing_policy_json_file=None):
-    
+                                    indexing_policy=None):
+
     changed = False
     
     if (partition_key_path):
@@ -205,13 +207,9 @@ def _populate_collection_definition(collection,
         collection['partitionKey'] = { 'paths' : [partition_key_path] }
         changed = True
 
-    if (indexing_policy_json_file):
+    if (indexing_policy):
         changed = True
-        logger.info('Reading %s', indexing_policy_json_file)
-        with open(indexing_policy_json_file, 'r') as f:
-            json_data = f.read()
-            indexing_policy = json.loads(json_data)
-            collection['indexingPolicy'] = indexing_policy
+        collection['indexingPolicy'] = indexing_policy
     return changed
 
 def cli_documentdb_collection_create(client,
@@ -219,7 +217,7 @@ def cli_documentdb_collection_create(client,
                                      collection_id,
                                      throughput=None,
                                      partition_key_path=None,
-                                     indexing_policy_json_file=None):
+                                     indexing_policy=None):
     """Creates an Azure DocumentDB collection
     """
     collection = { 'id': collection_id }
@@ -230,45 +228,39 @@ def cli_documentdb_collection_create(client,
     
     _populate_collection_definition(collection, 
                                     partition_key_path, 
-                                    indexing_policy_json_file)
+                                    indexing_policy)
     
-    return client.CreateCollection(_get_database_link(database_id), collection, options)
+    client.CreateCollection(_get_database_link(database_id), collection, options)
+
+def _find_offer(client, collection_self_link):
+    logger.debug('finding offer')
+    offers = client.ReadOffers()
+    for o in offers:
+        if o['resource'] == collection_self_link:
+            return o
+    return None
 
 def cli_documentdb_collection_update(client, 
                                      database_id, 
                                      collection_id,
                                      throughput=None,
-                                     partition_key_path=None,
-                                     indexing_policy_json_file=None):
+                                     indexing_policy=None):
     """Updates an Azure DocumentDB collection
     """
+    logger.debug('reading collection')
+    collection = client.ReadCollection(_get_collection_link(database_id, collection_id))
     
-    colls = list(client.QueryCollections(_get_database_link(database_id),
-        {'query': 'SELECT * FROM root r WHERE r.id=@id',
-            'parameters': [
-                { 'name':'@id', 'value': collection_id }
-            ]}))
-    
-    if not colls:
-        # no such collection exists
-        raise CLIError('No Such Collection')
-
-    
-    collection = colls[0]
-
     if(_populate_collection_definition(collection, 
-                                       partition_key_path, 
-                                       indexing_policy_json_file)):
-        client.ReplaceCollection(_get_collection_link(database_id, collection_id), collection)
+                                       None, 
+                                       indexing_policy)):
+        logger.debug('replacing collection')
+        updated_collection = client.ReplaceCollection(_get_collection_link(database_id, collection_id), collection)
 
     if (throughput):
+        logger.debug('updating offer')
         offers = client.ReadOffers()
-        offer = None
-        for o in offers:
-            if o['resource'] == collection['_self']:
-                offer = o
-                break
-            
+        offer = _find_offer(client, collection['_self'])
+
         if (offer is None):
             raise CLIError("Cannot find offer for collection {}".format(collection_id))
 
@@ -276,4 +268,72 @@ def cli_documentdb_collection_update(client,
             offer['content'] = {}
         offer['content']['offerThroughput'] = throughput
         
-        return client.ReplaceOffer(offer['_self'], offer)
+        updated_offer = client.ReplaceOffer(offer['_self'], offer)
+
+def duplicate_resource_exception_handler(ex):
+    # pylint:disable=line-too-long
+    # wraps DocumentDB 409 error in CLIError
+    from pydocumentdb.errors import HTTPFailure
+    if isinstance(ex, HTTPFailure) and ex.status_code == 409:
+        raise CLIError('Operation Failed: Resource Already Exists (Server returned status code 409)')
+    raise ex
+
+def resource_not_found_exception_handler(ex):
+    # pylint:disable=line-too-long
+    # wraps DocumentDB 404 error in CLIError
+    from pydocumentdb.errors import HTTPFailure
+    if isinstance(ex, HTTPFailure) and ex.status_code == 404:
+        raise CLIError('Operation Failed: Resource Not Found (Server returned status code 404)')
+    raise ex
+
+def invalid_arg_found_exception_handler(ex):
+    # wraps DocumentDB 400 error in CLIError
+    from pydocumentdb.errors import HTTPFailure
+    if isinstance(ex, HTTPFailure) and ex.status_code == 400:
+        cliError = None
+        try:
+            if (ex._http_error_message):
+                import json
+                msg = json.loads(ex._http_error_message)
+                if (msg['message']):
+                    msg = msg['message'].split('\n')[0]
+                    msg = msg[len('Message: '):] if msg.find('Message: ') == 0 else msg
+                    cliError = CLIError('Operation Failed: Invalid Arg (Server returned status code 400 {})'.format(str(msg)))
+        except:
+            pass
+        if (cliError):
+            raise cliError
+        raise CLIError('Operation Failed: Invalid Arg (Server returned status code 400 {})'.format(str(ex)))
+    raise ex
+
+def exception_handler_chain_builder(handlers):
+    # creates a handler which chains the handler
+    # as soon as one of the chained handlers raises CLIError, it raises CLIError
+    # if no handler raises CLIError it raises the original exception
+    def chained_handler(ex):
+        if isinstance(ex, CLIError):
+            raise ex
+        for h in handlers:
+            try:
+               h(ex)
+            except CLIError as cliError:
+                 raise cliError
+            except Exception:
+                pass
+        raise ex
+    return chained_handler
+
+def network_exception_handler(ex):
+    # wraps a connection exception in CLIError
+    from requests.exceptions import ConnectionError
+    from requests.exceptions import HTTPError
+
+    if isinstance(ex, ConnectionError) or isinstance(ex, HTTPError):
+        raise CLIError('Please ensure you have network connection. Error detail: ' + str(ex))
+    raise ex
+
+def generic_exception_handler(ex):
+    # pylint:disable=line-too-long
+    logger.debug(ex)
+    chained_handler = exception_handler_chain_builder([duplicate_resource_exception_handler, resource_not_found_exception_handler, invalid_arg_found_exception_handler, network_exception_handler])
+    chained_handler(ex)

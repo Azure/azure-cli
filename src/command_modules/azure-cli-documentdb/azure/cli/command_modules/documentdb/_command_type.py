@@ -5,11 +5,11 @@
 
 from azure.cli.core.commands import create_command, command_table
 from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
-
+from .custom import generic_exception_handler
 
 
 def cli_documentdb_data_plane_command(name, operation, client_factory,  # pylint: disable=too-many-arguments
-                                   transform=None, table_transformer=None, exception_handler=None):
+                                   transform=None, table_transformer=None, exception_handler=generic_exception_handler):
     """ Registers an Azure CLI DocumentDB Data Plane command. These commands always include the
     four parameters which can be used to obtain a documentdb client: account-name, account-key,
     connection-string, and sas-token. """
@@ -17,22 +17,21 @@ def cli_documentdb_data_plane_command(name, operation, client_factory,  # pylint
                              client_factory, exception_handler=exception_handler)
     # add parameters required to create a documentdb client
     group_name = 'DocumentDB Account'
-     
+
     command.add_argument('account_key', '--account-key', required=False, default=None,
                          arg_group=group_name,
                          help='DocumentDB account key. Must be used in conjunction with documentdb '
-                         'account key. Environment variable: '
+                         'account-name or url-connection. Environment variable: '
                          'AZURE_DOCUMENTDB_KEY')
-    
-    ## TODO: this doesn't get picked up
-    command.add_argument('account_name', '--account-name', required=False, default=None,
+    command.add_argument('account', '--account-name', required=False, default=None,
                          arg_group=group_name,
                          help='DocumentDB account name. Must be used in conjunction with documentdb '
-                         'account name. Environment variable: '
+                         'account-key. Environment variable: '
                          'AZURE_DOCUMENTDB_ACCOUNT')
     command.add_argument('url_connection', '--url-connection', required=False, default=None,
                          arg_group=group_name,
-                         help='DocumentDB account url connection. Environment variable: '
+                         help='DocumentDB account url connection. Must be used in conjunction with documentdb '
+                         'account-key. Environment variable: '
                          'AZURE_DOCUMENTDB_URL_CONNECTION')
 
     command_table[command.name] = command
