@@ -35,6 +35,7 @@ def get_nose_runner(report_folder, parallel=True, process_timeout=600, process_r
 
         debug_file = os.path.join(report_folder, 'test-debug.log')
         arguments += ['--debug-log={}'.format(debug_file)]
+        arguments += ['--nologcapture']
         arguments.extend(test_folders)
 
         result = nose.run(argv=arguments)
