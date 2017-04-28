@@ -3,7 +3,7 @@
 Release History
 ===============
 
-unreleased
+2.0.4 (2017-04-28)
 ++++++++++++++++++
 
 * Fix bug with `vpn-connection create` when using the `--no-wait` or `--validate` parameters.
