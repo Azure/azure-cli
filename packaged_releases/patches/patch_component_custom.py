@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 MSG_TMPL = """
 az component and subcommands are not available with the current Azure CLI installation.
