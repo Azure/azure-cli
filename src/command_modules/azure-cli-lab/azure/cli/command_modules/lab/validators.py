@@ -342,8 +342,14 @@ def _validate_other_parameters(namespace, formula=None):
 def _validate_artifacts(namespace):
     if namespace.artifacts:
         from azure.cli.core.commands.client_factory import get_subscription_id
+        if hasattr(namespace, 'resource_group'):
+            resource_group = namespace.resource_group
+        else:
+            # some SDK methods have parameter name as 'resource_group_name'
+            resource_group = namespace.resource_group_name
+
         lab_resource_id = resource_id(subscription=get_subscription_id(),
-                                      resource_group=namespace.resource_group,
+                                      resource_group=resource_group,
                                       namespace='Microsoft.DevTestLab',
                                       type='labs',
                                       name=namespace.lab_name)
@@ -356,7 +362,7 @@ def _update_artifacts(artifacts, lab_resource_id):
 
     result_artifacts = []
     for artifact in artifacts:
-        artifact_id = artifact.get('artifactId', None)
+        artifact_id = artifact.get('artifact_id', None)
         if artifact_id:
             result_artifact = dict()
             result_artifact['artifact_id'] = _update_artifact_id(artifact_id, lab_resource_id)

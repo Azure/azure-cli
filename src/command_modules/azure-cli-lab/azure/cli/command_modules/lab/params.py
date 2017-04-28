@@ -6,7 +6,8 @@
 from azure.cli.command_modules.lab.validators import (validate_lab_vm_create,
                                                       validate_lab_vm_list,
                                                       validate_user_name,
-                                                      validate_template_id)
+                                                      validate_template_id,
+                                                      _validate_artifacts)
 from azure.cli.core.commands.parameters import resource_group_name_type
 from azure.cli.core.sdk.util import ParametersContext
 from azure.cli.core.util import get_json_object
@@ -67,7 +68,7 @@ with ParametersContext(command='lab vm list') as c:
 
 
 with ParametersContext(command='lab vm apply-artifacts') as c:
-    c.register('artifacts', ('--artifacts',), type=get_json_object)
+    c.register('artifacts', ('--artifacts',), type=get_json_object, validator=_validate_artifacts)
     c.register_alias('name', ('--name', '-n'))
 
 
