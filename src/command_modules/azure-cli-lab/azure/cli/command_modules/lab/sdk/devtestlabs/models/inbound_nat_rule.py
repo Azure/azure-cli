@@ -9,12 +9,13 @@ from msrest.serialization import Model
 
 
 class InboundNatRule(Model):
-    """InboundNatRule.
+    """A rule for NAT - exposing a VM's port (backendPort) on the public IP
+    address using a load balancer.
 
     :param transport_protocol: The transport protocol for the endpoint.
      Possible values include: 'Tcp', 'Udp'
     :type transport_protocol: str or :class:`TransportProtocol
-     <azure.mgmt.devtestlabs.models.TransportProtocol>`
+     <devtestlabs.models.TransportProtocol>`
     :param frontend_port: The external endpoint port of the inbound
      connection. Possible values range between 1 and 65535, inclusive. If
      unspecified, a value will be allocated automatically.

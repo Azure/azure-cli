@@ -9,7 +9,7 @@ from msrest.serialization import Model
 
 
 class LabCostSummaryProperties(Model):
-    """LabCostSummaryProperties.
+    """The properties of the cost summary.
 
     :param estimated_lab_cost: The cost component of the cost item.
     :type estimated_lab_cost: float

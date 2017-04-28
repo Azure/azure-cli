@@ -15,7 +15,7 @@ class WindowsOsInfo(Model):
      SysprepRequested, SysprepApplied). Possible values include:
      'NonSysprepped', 'SysprepRequested', 'SysprepApplied'
     :type windows_os_state: str or :class:`WindowsOsState
-     <azure.mgmt.devtestlabs.models.WindowsOsState>`
+     <devtestlabs.models.WindowsOsState>`
     """
 
     _attribute_map = {

@@ -13,7 +13,7 @@ class EvaluatePoliciesRequest(Model):
 
     :param policies: Policies to evaluate.
     :type policies: list of :class:`EvaluatePoliciesProperties
-     <azure.mgmt.devtestlabs.models.EvaluatePoliciesProperties>`
+     <devtestlabs.models.EvaluatePoliciesProperties>`
     """
 
     _attribute_map = {

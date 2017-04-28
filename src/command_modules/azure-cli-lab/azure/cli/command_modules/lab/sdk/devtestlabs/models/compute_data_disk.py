@@ -9,7 +9,7 @@ from msrest.serialization import Model
 
 
 class ComputeDataDisk(Model):
-    """ComputeDataDisk.
+    """A data disks attached to a virtual machine.
 
     :param name: Gets data disk name.
     :type name: str

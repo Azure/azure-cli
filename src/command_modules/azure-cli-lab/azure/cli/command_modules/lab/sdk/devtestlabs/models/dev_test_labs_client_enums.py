@@ -144,13 +144,3 @@ class UsagePermissionType(Enum):
     default = "Default"
     deny = "Deny"
     allow = "Allow"
-
-
-class SubscriptionNotificationState(Enum):
-
-    not_defined = "NotDefined"
-    registered = "Registered"
-    unregistered = "Unregistered"
-    warned = "Warned"
-    suspended = "Suspended"
-    deleted = "Deleted"

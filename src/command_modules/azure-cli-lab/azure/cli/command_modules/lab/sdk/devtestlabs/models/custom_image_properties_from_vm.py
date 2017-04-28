@@ -15,10 +15,9 @@ class CustomImagePropertiesFromVm(Model):
     :type source_vm_id: str
     :param windows_os_info: The Windows OS information of the VM.
     :type windows_os_info: :class:`WindowsOsInfo
-     <azure.mgmt.devtestlabs.models.WindowsOsInfo>`
+     <devtestlabs.models.WindowsOsInfo>`
     :param linux_os_info: The Linux OS information of the VM.
-    :type linux_os_info: :class:`LinuxOsInfo
-     <azure.mgmt.devtestlabs.models.LinuxOsInfo>`
+    :type linux_os_info: :class:`LinuxOsInfo <devtestlabs.models.LinuxOsInfo>`
     """
 
     _attribute_map = {

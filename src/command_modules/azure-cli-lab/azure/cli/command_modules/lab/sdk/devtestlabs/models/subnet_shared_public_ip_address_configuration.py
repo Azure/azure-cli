@@ -9,12 +9,11 @@ from msrest.serialization import Model
 
 
 class SubnetSharedPublicIpAddressConfiguration(Model):
-    """SubnetSharedPublicIpAddressConfiguration.
+    """Configuration for public IP address sharing.
 
     :param allowed_ports: Backend ports that virtual machines on this subnet
      are allowed to expose
-    :type allowed_ports: list of :class:`Port
-     <azure.mgmt.devtestlabs.models.Port>`
+    :type allowed_ports: list of :class:`Port <devtestlabs.models.Port>`
     """
 
     _attribute_map = {

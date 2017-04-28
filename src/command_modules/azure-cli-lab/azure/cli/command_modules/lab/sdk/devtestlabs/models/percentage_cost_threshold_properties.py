@@ -9,7 +9,7 @@ from msrest.serialization import Model
 
 
 class PercentageCostThresholdProperties(Model):
-    """PercentageCostThresholdProperties.
+    """Properties of a percentage cost threshold.
 
     :param threshold_value: The cost threshold value.
     :type threshold_value: float

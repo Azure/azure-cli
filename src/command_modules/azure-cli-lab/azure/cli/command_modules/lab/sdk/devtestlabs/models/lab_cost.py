@@ -5,24 +5,37 @@
 # --------------------------------------------------------------------------------------------
 # coding: utf-8
 # pylint: skip-file
-from msrest.serialization import Model
+from .resource import Resource
 
 
-class LabCost(Model):
+class LabCost(Resource):
     """A cost item.
 
+    Variables are only populated by the server, and will be ignored when
+    sending a request.
+
+    :ivar id: The identifier of the resource.
+    :vartype id: str
+    :ivar name: The name of the resource.
+    :vartype name: str
+    :ivar type: The type of the resource.
+    :vartype type: str
+    :param location: The location of the resource.
+    :type location: str
+    :param tags: The tags of the resource.
+    :type tags: dict
     :param target_cost: The target cost properties
     :type target_cost: :class:`TargetCostProperties
-     <azure.mgmt.devtestlabs.models.TargetCostProperties>`
-    :param lab_cost_summary: The lab cost summary component of the cost data.
-    :type lab_cost_summary: :class:`LabCostSummaryProperties
-     <azure.mgmt.devtestlabs.models.LabCostSummaryProperties>`
-    :param lab_cost_details: The lab cost details component of the cost data.
-    :type lab_cost_details: list of :class:`LabCostDetailsProperties
-     <azure.mgmt.devtestlabs.models.LabCostDetailsProperties>`
-    :param resource_costs: The resource cost component of the cost data.
-    :type resource_costs: list of :class:`LabResourceCostProperties
-     <azure.mgmt.devtestlabs.models.LabResourceCostProperties>`
+     <devtestlabs.models.TargetCostProperties>`
+    :ivar lab_cost_summary: The lab cost summary component of the cost data.
+    :vartype lab_cost_summary: :class:`LabCostSummaryProperties
+     <devtestlabs.models.LabCostSummaryProperties>`
+    :ivar lab_cost_details: The lab cost details component of the cost data.
+    :vartype lab_cost_details: list of :class:`LabCostDetailsProperties
+     <devtestlabs.models.LabCostDetailsProperties>`
+    :ivar resource_costs: The resource cost component of the cost data.
+    :vartype resource_costs: list of :class:`LabResourceCostProperties
+     <devtestlabs.models.LabResourceCostProperties>`
     :param currency_code: The currency code of the cost.
     :type currency_code: str
     :param start_date_time: The start time of the cost data.
@@ -36,19 +49,23 @@ class LabCost(Model):
     :param unique_identifier: The unique immutable identifier of a resource
      (Guid).
     :type unique_identifier: str
-    :param id: The identifier of the resource.
-    :type id: str
-    :param name: The name of the resource.
-    :type name: str
-    :param type: The type of the resource.
-    :type type: str
-    :param location: The location of the resource.
-    :type location: str
-    :param tags: The tags of the resource.
-    :type tags: dict
     """
 
+    _validation = {
+        'id': {'readonly': True},
+        'name': {'readonly': True},
+        'type': {'readonly': True},
+        'lab_cost_summary': {'readonly': True},
+        'lab_cost_details': {'readonly': True},
+        'resource_costs': {'readonly': True},
+    }
+
     _attribute_map = {
+        'id': {'key': 'id', 'type': 'str'},
+        'name': {'key': 'name', 'type': 'str'},
+        'type': {'key': 'type', 'type': 'str'},
+        'location': {'key': 'location', 'type': 'str'},
+        'tags': {'key': 'tags', 'type': '{str}'},
         'target_cost': {'key': 'properties.targetCost', 'type': 'TargetCostProperties'},
         'lab_cost_summary': {'key': 'properties.labCostSummary', 'type': 'LabCostSummaryProperties'},
         'lab_cost_details': {'key': 'properties.labCostDetails', 'type': '[LabCostDetailsProperties]'},
@@ -59,26 +76,17 @@ class LabCost(Model):
         'created_date': {'key': 'properties.createdDate', 'type': 'iso-8601'},
         'provisioning_state': {'key': 'properties.provisioningState', 'type': 'str'},
         'unique_identifier': {'key': 'properties.uniqueIdentifier', 'type': 'str'},
-        'id': {'key': 'id', 'type': 'str'},
-        'name': {'key': 'name', 'type': 'str'},
-        'type': {'key': 'type', 'type': 'str'},
-        'location': {'key': 'location', 'type': 'str'},
-        'tags': {'key': 'tags', 'type': '{str}'},
     }
 
-    def __init__(self, target_cost=None, lab_cost_summary=None, lab_cost_details=None, resource_costs=None, currency_code=None, start_date_time=None, end_date_time=None, created_date=None, provisioning_state=None, unique_identifier=None, id=None, name=None, type=None, location=None, tags=None):
+    def __init__(self, location=None, tags=None, target_cost=None, currency_code=None, start_date_time=None, end_date_time=None, created_date=None, provisioning_state=None, unique_identifier=None):
+        super(LabCost, self).__init__(location=location, tags=tags)
         self.target_cost = target_cost
-        self.lab_cost_summary = lab_cost_summary
-        self.lab_cost_details = lab_cost_details
-        self.resource_costs = resource_costs
+        self.lab_cost_summary = None
+        self.lab_cost_details = None
+        self.resource_costs = None
         self.currency_code = currency_code
         self.start_date_time = start_date_time
         self.end_date_time = end_date_time
         self.created_date = created_date
         self.provisioning_state = provisioning_state
         self.unique_identifier = unique_identifier
-        self.id = id
-        self.name = name
-        self.type = type
-        self.location = location
-        self.tags = tags

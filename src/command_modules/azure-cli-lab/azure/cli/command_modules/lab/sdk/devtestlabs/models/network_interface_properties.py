@@ -34,7 +34,7 @@ class NetworkInterfaceProperties(Model):
      sharing a public IP address across multiple virtual machines.
     :type shared_public_ip_address_configuration:
      :class:`SharedPublicIpAddressConfiguration
-     <azure.mgmt.devtestlabs.models.SharedPublicIpAddressConfiguration>`
+     <devtestlabs.models.SharedPublicIpAddressConfiguration>`
     """
 
     _attribute_map = {

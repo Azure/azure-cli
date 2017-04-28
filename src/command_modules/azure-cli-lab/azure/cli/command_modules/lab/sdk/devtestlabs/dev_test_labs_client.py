@@ -1,5 +1,4 @@
 # coding=utf-8
-# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -10,27 +9,27 @@ from msrest.service_client import ServiceClient
 from msrest import Serializer, Deserializer
 from msrestazure import AzureConfiguration
 from .version import VERSION
-from .operations.lab_operations import LabOperations
-from .operations.global_schedule_operations import GlobalScheduleOperations
-from .operations.artifact_source_operations import ArtifactSourceOperations
-from .operations.arm_template_operations import ArmTemplateOperations
-from .operations.artifact_operations import ArtifactOperations
-from .operations.cost_operations import CostOperations
-from .operations.custom_image_operations import CustomImageOperations
-from .operations.formula_operations import FormulaOperations
-from .operations.gallery_image_operations import GalleryImageOperations
-from .operations.notification_channel_operations import NotificationChannelOperations
-from .operations.policy_set_operations import PolicySetOperations
-from .operations.policy_operations import PolicyOperations
-from .operations.schedule_operations import ScheduleOperations
-from .operations.service_runner_operations import ServiceRunnerOperations
-from .operations.user_operations import UserOperations
-from .operations.disk_operations import DiskOperations
-from .operations.environment_operations import EnvironmentOperations
-from .operations.secret_operations import SecretOperations
-from .operations.virtual_machine_operations import VirtualMachineOperations
-from .operations.virtual_machine_schedule_operations import VirtualMachineScheduleOperations
-from .operations.virtual_network_operations import VirtualNetworkOperations
+from .operations.labs_operations import LabsOperations
+from .operations.global_schedules_operations import GlobalSchedulesOperations
+from .operations.artifact_sources_operations import ArtifactSourcesOperations
+from .operations.arm_templates_operations import ArmTemplatesOperations
+from .operations.artifacts_operations import ArtifactsOperations
+from .operations.costs_operations import CostsOperations
+from .operations.custom_images_operations import CustomImagesOperations
+from .operations.formulas_operations import FormulasOperations
+from .operations.gallery_images_operations import GalleryImagesOperations
+from .operations.notification_channels_operations import NotificationChannelsOperations
+from .operations.policy_sets_operations import PolicySetsOperations
+from .operations.policies_operations import PoliciesOperations
+from .operations.schedules_operations import SchedulesOperations
+from .operations.service_runners_operations import ServiceRunnersOperations
+from .operations.users_operations import UsersOperations
+from .operations.disks_operations import DisksOperations
+from .operations.environments_operations import EnvironmentsOperations
+from .operations.secrets_operations import SecretsOperations
+from .operations.virtual_machines_operations import VirtualMachinesOperations
+from .operations.virtual_machine_schedules_operations import VirtualMachineSchedulesOperations
+from .operations.virtual_networks_operations import VirtualNetworksOperations
 from . import models
 
 
@@ -61,7 +60,7 @@ class DevTestLabsClientConfiguration(AzureConfiguration):
 
         super(DevTestLabsClientConfiguration, self).__init__(base_url)
 
-        self.add_user_agent('devtestlabs/{}'.format(VERSION))
+        self.add_user_agent('devtestlabsclient/{}'.format(VERSION))
         self.add_user_agent('Azure-SDK-For-Python')
 
         self.credentials = credentials
@@ -74,48 +73,48 @@ class DevTestLabsClient(object):
     :ivar config: Configuration for client.
     :vartype config: DevTestLabsClientConfiguration
 
-    :ivar lab: Lab operations
-    :vartype lab: .operations.LabOperations
-    :ivar global_schedule: GlobalSchedule operations
-    :vartype global_schedule: .operations.GlobalScheduleOperations
-    :ivar artifact_source: ArtifactSource operations
-    :vartype artifact_source: .operations.ArtifactSourceOperations
-    :ivar arm_template: ArmTemplate operations
-    :vartype arm_template: .operations.ArmTemplateOperations
-    :ivar artifact: Artifact operations
-    :vartype artifact: .operations.ArtifactOperations
-    :ivar cost: Cost operations
-    :vartype cost: .operations.CostOperations
-    :ivar custom_image: CustomImage operations
-    :vartype custom_image: .operations.CustomImageOperations
-    :ivar formula: Formula operations
-    :vartype formula: .operations.FormulaOperations
-    :ivar gallery_image: GalleryImage operations
-    :vartype gallery_image: .operations.GalleryImageOperations
-    :ivar notification_channel: NotificationChannel operations
-    :vartype notification_channel: .operations.NotificationChannelOperations
-    :ivar policy_set: PolicySet operations
-    :vartype policy_set: .operations.PolicySetOperations
-    :ivar policy: Policy operations
-    :vartype policy: .operations.PolicyOperations
-    :ivar schedule: Schedule operations
-    :vartype schedule: .operations.ScheduleOperations
-    :ivar service_runner: ServiceRunner operations
-    :vartype service_runner: .operations.ServiceRunnerOperations
-    :ivar user: User operations
-    :vartype user: .operations.UserOperations
-    :ivar disk: Disk operations
-    :vartype disk: .operations.DiskOperations
-    :ivar environment: Environment operations
-    :vartype environment: .operations.EnvironmentOperations
-    :ivar secret: Secret operations
-    :vartype secret: .operations.SecretOperations
-    :ivar virtual_machine: VirtualMachine operations
-    :vartype virtual_machine: .operations.VirtualMachineOperations
-    :ivar virtual_machine_schedule: VirtualMachineSchedule operations
-    :vartype virtual_machine_schedule: .operations.VirtualMachineScheduleOperations
-    :ivar virtual_network: VirtualNetwork operations
-    :vartype virtual_network: .operations.VirtualNetworkOperations
+    :ivar labs: Labs operations
+    :vartype labs: .operations.LabsOperations
+    :ivar global_schedules: GlobalSchedules operations
+    :vartype global_schedules: .operations.GlobalSchedulesOperations
+    :ivar artifact_sources: ArtifactSources operations
+    :vartype artifact_sources: .operations.ArtifactSourcesOperations
+    :ivar arm_templates: ArmTemplates operations
+    :vartype arm_templates: .operations.ArmTemplatesOperations
+    :ivar artifacts: Artifacts operations
+    :vartype artifacts: .operations.ArtifactsOperations
+    :ivar costs: Costs operations
+    :vartype costs: .operations.CostsOperations
+    :ivar custom_images: CustomImages operations
+    :vartype custom_images: .operations.CustomImagesOperations
+    :ivar formulas: Formulas operations
+    :vartype formulas: .operations.FormulasOperations
+    :ivar gallery_images: GalleryImages operations
+    :vartype gallery_images: .operations.GalleryImagesOperations
+    :ivar notification_channels: NotificationChannels operations
+    :vartype notification_channels: .operations.NotificationChannelsOperations
+    :ivar policy_sets: PolicySets operations
+    :vartype policy_sets: .operations.PolicySetsOperations
+    :ivar policies: Policies operations
+    :vartype policies: .operations.PoliciesOperations
+    :ivar schedules: Schedules operations
+    :vartype schedules: .operations.SchedulesOperations
+    :ivar service_runners: ServiceRunners operations
+    :vartype service_runners: .operations.ServiceRunnersOperations
+    :ivar users: Users operations
+    :vartype users: .operations.UsersOperations
+    :ivar disks: Disks operations
+    :vartype disks: .operations.DisksOperations
+    :ivar environments: Environments operations
+    :vartype environments: .operations.EnvironmentsOperations
+    :ivar secrets: Secrets operations
+    :vartype secrets: .operations.SecretsOperations
+    :ivar virtual_machines: VirtualMachines operations
+    :vartype virtual_machines: .operations.VirtualMachinesOperations
+    :ivar virtual_machine_schedules: VirtualMachineSchedules operations
+    :vartype virtual_machine_schedules: .operations.VirtualMachineSchedulesOperations
+    :ivar virtual_networks: VirtualNetworks operations
+    :vartype virtual_networks: .operations.VirtualNetworksOperations
 
     :param credentials: Credentials needed for the client to connect to Azure.
     :type credentials: :mod:`A msrestazure Credentials
@@ -136,45 +135,45 @@ class DevTestLabsClient(object):
         self._serialize = Serializer(client_models)
         self._deserialize = Deserializer(client_models)
 
-        self.lab = LabOperations(
+        self.labs = LabsOperations(
             self._client, self.config, self._serialize, self._deserialize)
-        self.global_schedule = GlobalScheduleOperations(
+        self.global_schedules = GlobalSchedulesOperations(
             self._client, self.config, self._serialize, self._deserialize)
-        self.artifact_source = ArtifactSourceOperations(
+        self.artifact_sources = ArtifactSourcesOperations(
             self._client, self.config, self._serialize, self._deserialize)
-        self.arm_template = ArmTemplateOperations(
+        self.arm_templates = ArmTemplatesOperations(
             self._client, self.config, self._serialize, self._deserialize)
-        self.artifact = ArtifactOperations(
+        self.artifacts = ArtifactsOperations(
             self._client, self.config, self._serialize, self._deserialize)
-        self.cost = CostOperations(
+        self.costs = CostsOperations(
             self._client, self.config, self._serialize, self._deserialize)
-        self.custom_image = CustomImageOperations(
+        self.custom_images = CustomImagesOperations(
             self._client, self.config, self._serialize, self._deserialize)
-        self.formula = FormulaOperations(
+        self.formulas = FormulasOperations(
             self._client, self.config, self._serialize, self._deserialize)
-        self.gallery_image = GalleryImageOperations(
+        self.gallery_images = GalleryImagesOperations(
             self._client, self.config, self._serialize, self._deserialize)
-        self.notification_channel = NotificationChannelOperations(
+        self.notification_channels = NotificationChannelsOperations(
             self._client, self.config, self._serialize, self._deserialize)
-        self.policy_set = PolicySetOperations(
+        self.policy_sets = PolicySetsOperations(
             self._client, self.config, self._serialize, self._deserialize)
-        self.policy = PolicyOperations(
+        self.policies = PoliciesOperations(
             self._client, self.config, self._serialize, self._deserialize)
-        self.schedule = ScheduleOperations(
+        self.schedules = SchedulesOperations(
             self._client, self.config, self._serialize, self._deserialize)
-        self.service_runner = ServiceRunnerOperations(
+        self.service_runners = ServiceRunnersOperations(
             self._client, self.config, self._serialize, self._deserialize)
-        self.user = UserOperations(
+        self.users = UsersOperations(
             self._client, self.config, self._serialize, self._deserialize)
-        self.disk = DiskOperations(
+        self.disks = DisksOperations(
             self._client, self.config, self._serialize, self._deserialize)
-        self.environment = EnvironmentOperations(
+        self.environments = EnvironmentsOperations(
             self._client, self.config, self._serialize, self._deserialize)
-        self.secret = SecretOperations(
+        self.secrets = SecretsOperations(
             self._client, self.config, self._serialize, self._deserialize)
-        self.virtual_machine = VirtualMachineOperations(
+        self.virtual_machines = VirtualMachinesOperations(
             self._client, self.config, self._serialize, self._deserialize)
-        self.virtual_machine_schedule = VirtualMachineScheduleOperations(
+        self.virtual_machine_schedules = VirtualMachineSchedulesOperations(
             self._client, self.config, self._serialize, self._deserialize)
-        self.virtual_network = VirtualNetworkOperations(
+        self.virtual_networks = VirtualNetworksOperations(
             self._client, self.config, self._serialize, self._deserialize)

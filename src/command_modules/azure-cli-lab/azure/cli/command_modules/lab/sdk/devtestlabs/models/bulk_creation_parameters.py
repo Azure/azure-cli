@@ -9,7 +9,7 @@ from msrest.serialization import Model
 
 
 class BulkCreationParameters(Model):
-    """BulkCreationParameters.
+    """Parameters for creating multiple virtual machines as a single action.
 
     :param instance_count: The number of virtual machine instances to create.
     :type instance_count: int
