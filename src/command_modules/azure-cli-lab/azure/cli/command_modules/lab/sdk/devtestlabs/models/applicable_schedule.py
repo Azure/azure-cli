@@ -5,47 +5,51 @@
 # --------------------------------------------------------------------------------------------
 # coding: utf-8
 # pylint: skip-file
-from msrest.serialization import Model
+from .resource import Resource
 
 
-class ApplicableSchedule(Model):
-    """ApplicableSchedule.
+class ApplicableSchedule(Resource):
+    """Schedules applicable to a virtual machine. The schedules may have been
+    defined on a VM or on lab level.
 
-    :param lab_vms_shutdown: The auto-shutdown schedule, if one has been set
-     at the lab or lab resource level.
-    :type lab_vms_shutdown: :class:`Schedule
-     <azure.mgmt.devtestlabs.models.Schedule>`
-    :param lab_vms_startup: The auto-startup schedule, if one has been set at
-     the lab or lab resource level.
-    :type lab_vms_startup: :class:`Schedule
-     <azure.mgmt.devtestlabs.models.Schedule>`
-    :param id: The identifier of the resource.
-    :type id: str
-    :param name: The name of the resource.
-    :type name: str
-    :param type: The type of the resource.
-    :type type: str
+    Variables are only populated by the server, and will be ignored when
+    sending a request.
+
+    :ivar id: The identifier of the resource.
+    :vartype id: str
+    :ivar name: The name of the resource.
+    :vartype name: str
+    :ivar type: The type of the resource.
+    :vartype type: str
     :param location: The location of the resource.
     :type location: str
     :param tags: The tags of the resource.
     :type tags: dict
+    :param lab_vms_shutdown: The auto-shutdown schedule, if one has been set
+     at the lab or lab resource level.
+    :type lab_vms_shutdown: :class:`Schedule <devtestlabs.models.Schedule>`
+    :param lab_vms_startup: The auto-startup schedule, if one has been set at
+     the lab or lab resource level.
+    :type lab_vms_startup: :class:`Schedule <devtestlabs.models.Schedule>`
     """
 
+    _validation = {
+        'id': {'readonly': True},
+        'name': {'readonly': True},
+        'type': {'readonly': True},
+    }
+
     _attribute_map = {
-        'lab_vms_shutdown': {'key': 'properties.labVmsShutdown', 'type': 'Schedule'},
-        'lab_vms_startup': {'key': 'properties.labVmsStartup', 'type': 'Schedule'},
         'id': {'key': 'id', 'type': 'str'},
         'name': {'key': 'name', 'type': 'str'},
         'type': {'key': 'type', 'type': 'str'},
         'location': {'key': 'location', 'type': 'str'},
         'tags': {'key': 'tags', 'type': '{str}'},
+        'lab_vms_shutdown': {'key': 'properties.labVmsShutdown', 'type': 'Schedule'},
+        'lab_vms_startup': {'key': 'properties.labVmsStartup', 'type': 'Schedule'},
     }
 
-    def __init__(self, lab_vms_shutdown=None, lab_vms_startup=None, id=None, name=None, type=None, location=None, tags=None):
+    def __init__(self, location=None, tags=None, lab_vms_shutdown=None, lab_vms_startup=None):
+        super(ApplicableSchedule, self).__init__(location=location, tags=tags)
         self.lab_vms_shutdown = lab_vms_shutdown
         self.lab_vms_startup = lab_vms_startup
-        self.id = id
-        self.name = name
-        self.type = type
-        self.location = location
-        self.tags = tags

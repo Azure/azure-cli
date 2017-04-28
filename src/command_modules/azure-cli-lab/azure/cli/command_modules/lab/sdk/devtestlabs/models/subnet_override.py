@@ -19,17 +19,17 @@ class SubnetOverride(Model):
      used during virtual machine creation (i.e. Allow, Deny). Possible values
      include: 'Default', 'Deny', 'Allow'
     :type use_in_vm_creation_permission: str or :class:`UsagePermissionType
-     <azure.mgmt.devtestlabs.models.UsagePermissionType>`
+     <devtestlabs.models.UsagePermissionType>`
     :param use_public_ip_address_permission: Indicates whether public IP
      addresses can be assigned to virtual machines on this subnet (i.e. Allow,
      Deny). Possible values include: 'Default', 'Deny', 'Allow'
     :type use_public_ip_address_permission: str or :class:`UsagePermissionType
-     <azure.mgmt.devtestlabs.models.UsagePermissionType>`
+     <devtestlabs.models.UsagePermissionType>`
     :param shared_public_ip_address_configuration: Properties that virtual
      machines on this subnet will share.
     :type shared_public_ip_address_configuration:
      :class:`SubnetSharedPublicIpAddressConfiguration
-     <azure.mgmt.devtestlabs.models.SubnetSharedPublicIpAddressConfiguration>`
+     <devtestlabs.models.SubnetSharedPublicIpAddressConfiguration>`
     :param virtual_network_pool_name: The virtual network pool associated with
      this subnet.
     :type virtual_network_pool_name: str

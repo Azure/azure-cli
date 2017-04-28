@@ -9,7 +9,7 @@ from msrest.serialization import Model
 
 
 class ExternalSubnet(Model):
-    """ExternalSubnet.
+    """Subnet information as returned by the Microsoft.Network API.
 
     :param id: Gets or sets the identifier.
     :type id: str

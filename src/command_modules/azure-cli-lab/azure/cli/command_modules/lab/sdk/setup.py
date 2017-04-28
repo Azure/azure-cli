@@ -7,8 +7,8 @@
 # pylint: skip-file
 from setuptools import setup, find_packages
 
-NAME = "devtestlabs"
-VERSION = "0.2.0"
+NAME = "devtestlabsclient"
+VERSION = "2.0.0"
 
 # To install the library, run the following
 #

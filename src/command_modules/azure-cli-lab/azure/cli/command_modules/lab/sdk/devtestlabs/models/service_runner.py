@@ -5,40 +5,45 @@
 # --------------------------------------------------------------------------------------------
 # coding: utf-8
 # pylint: skip-file
-from msrest.serialization import Model
+from .resource import Resource
 
 
-class ServiceRunner(Model):
+class ServiceRunner(Resource):
     """A container for a managed identity to execute DevTest lab services.
 
-    :param identity: The identity of the resource.
-    :type identity: :class:`IdentityProperties
-     <azure.mgmt.devtestlabs.models.IdentityProperties>`
-    :param id: The identifier of the resource.
-    :type id: str
-    :param name: The name of the resource.
-    :type name: str
-    :param type: The type of the resource.
-    :type type: str
+    Variables are only populated by the server, and will be ignored when
+    sending a request.
+
+    :ivar id: The identifier of the resource.
+    :vartype id: str
+    :ivar name: The name of the resource.
+    :vartype name: str
+    :ivar type: The type of the resource.
+    :vartype type: str
     :param location: The location of the resource.
     :type location: str
     :param tags: The tags of the resource.
     :type tags: dict
+    :param identity: The identity of the resource.
+    :type identity: :class:`IdentityProperties
+     <devtestlabs.models.IdentityProperties>`
     """
 
+    _validation = {
+        'id': {'readonly': True},
+        'name': {'readonly': True},
+        'type': {'readonly': True},
+    }
+
     _attribute_map = {
-        'identity': {'key': 'identity', 'type': 'IdentityProperties'},
         'id': {'key': 'id', 'type': 'str'},
         'name': {'key': 'name', 'type': 'str'},
         'type': {'key': 'type', 'type': 'str'},
         'location': {'key': 'location', 'type': 'str'},
         'tags': {'key': 'tags', 'type': '{str}'},
+        'identity': {'key': 'identity', 'type': 'IdentityProperties'},
     }
 
-    def __init__(self, identity=None, id=None, name=None, type=None, location=None, tags=None):
+    def __init__(self, location=None, tags=None, identity=None):
+        super(ServiceRunner, self).__init__(location=location, tags=tags)
         self.identity = identity
-        self.id = id
-        self.name = name
-        self.type = type
-        self.location = location
-        self.tags = tags

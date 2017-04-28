@@ -9,7 +9,7 @@ from msrest.serialization import Model
 
 
 class AttachDiskProperties(Model):
-    """AttachDiskProperties.
+    """Properties of the disk to attach.
 
     :param leased_by_lab_vm_id: The resource ID of the Lab virtual machine to
      which the disk is attached.

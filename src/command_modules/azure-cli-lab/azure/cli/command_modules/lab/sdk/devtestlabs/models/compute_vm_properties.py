@@ -9,11 +9,11 @@ from msrest.serialization import Model
 
 
 class ComputeVmProperties(Model):
-    """ComputeVmProperties.
+    """Properties of a virtual machine returned by the Microsoft.Compute API.
 
     :param statuses: Gets the statuses of the virtual machine.
     :type statuses: list of :class:`ComputeVmInstanceViewStatus
-     <azure.mgmt.devtestlabs.models.ComputeVmInstanceViewStatus>`
+     <devtestlabs.models.ComputeVmInstanceViewStatus>`
     :param os_type: Gets the OS type of the virtual machine.
     :type os_type: str
     :param vm_size: Gets the size of the virtual machine.
@@ -27,7 +27,7 @@ class ComputeVmProperties(Model):
     :type data_disk_ids: list of str
     :param data_disks: Gets all data disks attached to the virtual machine.
     :type data_disks: list of :class:`ComputeDataDisk
-     <azure.mgmt.devtestlabs.models.ComputeDataDisk>`
+     <devtestlabs.models.ComputeDataDisk>`
     """
 
     _attribute_map = {

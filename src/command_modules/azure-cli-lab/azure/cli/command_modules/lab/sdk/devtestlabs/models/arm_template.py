@@ -5,41 +5,63 @@
 # --------------------------------------------------------------------------------------------
 # coding: utf-8
 # pylint: skip-file
-from msrest.serialization import Model
+from .resource import Resource
 
 
-class ArmTemplate(Model):
+class ArmTemplate(Resource):
     """An Azure Resource Manager template.
 
-    :param display_name: The display name of the ARM template.
-    :type display_name: str
-    :param description: The description of the ARM template.
-    :type description: str
-    :param publisher: The publisher of the ARM template.
-    :type publisher: str
-    :param icon: The URI to the icon of the ARM template.
-    :type icon: str
-    :param contents: The contents of the ARM template.
-    :type contents: object
-    :param created_date: The creation date of the armTemplate.
-    :type created_date: datetime
-    :param parameters_value_files_info: File name and parameter values
-     information from all azuredeploy.*.parameters.json for the ARM template.
-    :type parameters_value_files_info: list of :class:`ParametersValueFileInfo
-     <azure.mgmt.devtestlabs.models.ParametersValueFileInfo>`
-    :param id: The identifier of the resource.
-    :type id: str
-    :param name: The name of the resource.
-    :type name: str
-    :param type: The type of the resource.
-    :type type: str
+    Variables are only populated by the server, and will be ignored when
+    sending a request.
+
+    :ivar id: The identifier of the resource.
+    :vartype id: str
+    :ivar name: The name of the resource.
+    :vartype name: str
+    :ivar type: The type of the resource.
+    :vartype type: str
     :param location: The location of the resource.
     :type location: str
     :param tags: The tags of the resource.
     :type tags: dict
+    :ivar display_name: The display name of the ARM template.
+    :vartype display_name: str
+    :ivar description: The description of the ARM template.
+    :vartype description: str
+    :ivar publisher: The publisher of the ARM template.
+    :vartype publisher: str
+    :ivar icon: The URI to the icon of the ARM template.
+    :vartype icon: str
+    :ivar contents: The contents of the ARM template.
+    :vartype contents: object
+    :ivar created_date: The creation date of the armTemplate.
+    :vartype created_date: datetime
+    :ivar parameters_value_files_info: File name and parameter values
+     information from all azuredeploy.*.parameters.json for the ARM template.
+    :vartype parameters_value_files_info: list of
+     :class:`ParametersValueFileInfo
+     <devtestlabs.models.ParametersValueFileInfo>`
     """
 
+    _validation = {
+        'id': {'readonly': True},
+        'name': {'readonly': True},
+        'type': {'readonly': True},
+        'display_name': {'readonly': True},
+        'description': {'readonly': True},
+        'publisher': {'readonly': True},
+        'icon': {'readonly': True},
+        'contents': {'readonly': True},
+        'created_date': {'readonly': True},
+        'parameters_value_files_info': {'readonly': True},
+    }
+
     _attribute_map = {
+        'id': {'key': 'id', 'type': 'str'},
+        'name': {'key': 'name', 'type': 'str'},
+        'type': {'key': 'type', 'type': 'str'},
+        'location': {'key': 'location', 'type': 'str'},
+        'tags': {'key': 'tags', 'type': '{str}'},
         'display_name': {'key': 'properties.displayName', 'type': 'str'},
         'description': {'key': 'properties.description', 'type': 'str'},
         'publisher': {'key': 'properties.publisher', 'type': 'str'},
@@ -47,23 +69,14 @@ class ArmTemplate(Model):
         'contents': {'key': 'properties.contents', 'type': 'object'},
         'created_date': {'key': 'properties.createdDate', 'type': 'iso-8601'},
         'parameters_value_files_info': {'key': 'properties.parametersValueFilesInfo', 'type': '[ParametersValueFileInfo]'},
-        'id': {'key': 'id', 'type': 'str'},
-        'name': {'key': 'name', 'type': 'str'},
-        'type': {'key': 'type', 'type': 'str'},
-        'location': {'key': 'location', 'type': 'str'},
-        'tags': {'key': 'tags', 'type': '{str}'},
     }
 
-    def __init__(self, display_name=None, description=None, publisher=None, icon=None, contents=None, created_date=None, parameters_value_files_info=None, id=None, name=None, type=None, location=None, tags=None):
-        self.display_name = display_name
-        self.description = description
-        self.publisher = publisher
-        self.icon = icon
-        self.contents = contents
-        self.created_date = created_date
-        self.parameters_value_files_info = parameters_value_files_info
-        self.id = id
-        self.name = name
-        self.type = type
-        self.location = location
-        self.tags = tags
+    def __init__(self, location=None, tags=None):
+        super(ArmTemplate, self).__init__(location=location, tags=tags)
+        self.display_name = None
+        self.description = None
+        self.publisher = None
+        self.icon = None
+        self.contents = None
+        self.created_date = None
+        self.parameters_value_files_info = None

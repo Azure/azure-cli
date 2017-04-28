@@ -14,7 +14,7 @@ class SharedPublicIpAddressConfiguration(Model):
 
     :param inbound_nat_rules: The incoming NAT rules
     :type inbound_nat_rules: list of :class:`InboundNatRule
-     <azure.mgmt.devtestlabs.models.InboundNatRule>`
+     <devtestlabs.models.InboundNatRule>`
     """
 
     _attribute_map = {

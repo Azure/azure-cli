@@ -9,17 +9,20 @@ from msrest.serialization import Model
 
 
 class LabVirtualMachineCreationParameter(Model):
-    """LabVirtualMachineCreationParameter.
+    """Properties for creating a virtual machine.
 
     :param bulk_creation_parameters: The number of virtual machine instances
      to create.
     :type bulk_creation_parameters: :class:`BulkCreationParameters
-     <azure.mgmt.devtestlabs.models.BulkCreationParameters>`
+     <devtestlabs.models.BulkCreationParameters>`
     :param notes: The notes of the virtual machine.
     :type notes: str
     :param owner_object_id: The object identifier of the owner of the virtual
      machine.
     :type owner_object_id: str
+    :param owner_user_principal_name: The user principal name of the virtual
+     machine owner.
+    :type owner_user_principal_name: str
     :param created_by_user_id: The object identifier of the creator of the
      virtual machine.
     :type created_by_user_id: str
@@ -28,9 +31,6 @@ class LabVirtualMachineCreationParameter(Model):
     :type created_by_user: str
     :param created_date: The creation date of the virtual machine.
     :type created_date: datetime
-    :param compute_id: The resource identifier (Microsoft.Compute) of the
-     virtual machine.
-    :type compute_id: str
     :param custom_image_id: The custom image identifier of the virtual
      machine.
     :type custom_image_id: str
@@ -59,28 +59,28 @@ class LabVirtualMachineCreationParameter(Model):
     :type disallow_public_ip_address: bool
     :param artifacts: The artifacts to be installed on the virtual machine.
     :type artifacts: list of :class:`ArtifactInstallProperties
-     <azure.mgmt.devtestlabs.models.ArtifactInstallProperties>`
+     <devtestlabs.models.ArtifactInstallProperties>`
     :param artifact_deployment_status: The artifact deployment status for the
      virtual machine.
     :type artifact_deployment_status:
      :class:`ArtifactDeploymentStatusProperties
-     <azure.mgmt.devtestlabs.models.ArtifactDeploymentStatusProperties>`
+     <devtestlabs.models.ArtifactDeploymentStatusProperties>`
     :param gallery_image_reference: The Microsoft Azure Marketplace image
      reference of the virtual machine.
     :type gallery_image_reference: :class:`GalleryImageReference
-     <azure.mgmt.devtestlabs.models.GalleryImageReference>`
+     <devtestlabs.models.GalleryImageReference>`
     :param compute_vm: The compute virtual machine properties.
     :type compute_vm: :class:`ComputeVmProperties
-     <azure.mgmt.devtestlabs.models.ComputeVmProperties>`
+     <devtestlabs.models.ComputeVmProperties>`
     :param network_interface: The network interface properties.
     :type network_interface: :class:`NetworkInterfaceProperties
-     <azure.mgmt.devtestlabs.models.NetworkInterfaceProperties>`
+     <devtestlabs.models.NetworkInterfaceProperties>`
     :param applicable_schedule: The applicable schedule for the virtual
      machine.
     :type applicable_schedule: :class:`ApplicableSchedule
-     <azure.mgmt.devtestlabs.models.ApplicableSchedule>`
+     <devtestlabs.models.ApplicableSchedule>`
     :param expiration_date: The expiration date for VM.
-    :type expiration_date: str
+    :type expiration_date: datetime
     :param allow_claim: Indicates whether another user can take ownership of
      the virtual machine
     :type allow_claim: bool
@@ -92,7 +92,7 @@ class LabVirtualMachineCreationParameter(Model):
      'FromCustomImage', 'FromGalleryImage'
     :type virtual_machine_creation_source: str or
      :class:`VirtualMachineCreationSource
-     <azure.mgmt.devtestlabs.models.VirtualMachineCreationSource>`
+     <devtestlabs.models.VirtualMachineCreationSource>`
     :param environment_id: The resource ID of the environment that contains
      this virtual machine, if any.
     :type environment_id: str
@@ -101,13 +101,9 @@ class LabVirtualMachineCreationParameter(Model):
     :param unique_identifier: The unique immutable identifier of a resource
      (Guid).
     :type unique_identifier: str
-    :param id: The identifier of the resource.
-    :type id: str
-    :param name: The name of the resource.
+    :param name: The name of the virtual machine or environment
     :type name: str
-    :param type: The type of the resource.
-    :type type: str
-    :param location: The location of the resource.
+    :param location: The location of the new virtual machine or environment
     :type location: str
     :param tags: The tags of the resource.
     :type tags: dict
@@ -117,10 +113,10 @@ class LabVirtualMachineCreationParameter(Model):
         'bulk_creation_parameters': {'key': 'properties.bulkCreationParameters', 'type': 'BulkCreationParameters'},
         'notes': {'key': 'properties.notes', 'type': 'str'},
         'owner_object_id': {'key': 'properties.ownerObjectId', 'type': 'str'},
+        'owner_user_principal_name': {'key': 'properties.ownerUserPrincipalName', 'type': 'str'},
         'created_by_user_id': {'key': 'properties.createdByUserId', 'type': 'str'},
         'created_by_user': {'key': 'properties.createdByUser', 'type': 'str'},
         'created_date': {'key': 'properties.createdDate', 'type': 'iso-8601'},
-        'compute_id': {'key': 'properties.computeId', 'type': 'str'},
         'custom_image_id': {'key': 'properties.customImageId', 'type': 'str'},
         'os_type': {'key': 'properties.osType', 'type': 'str'},
         'size': {'key': 'properties.size', 'type': 'str'},
@@ -138,28 +134,26 @@ class LabVirtualMachineCreationParameter(Model):
         'compute_vm': {'key': 'properties.computeVm', 'type': 'ComputeVmProperties'},
         'network_interface': {'key': 'properties.networkInterface', 'type': 'NetworkInterfaceProperties'},
         'applicable_schedule': {'key': 'properties.applicableSchedule', 'type': 'ApplicableSchedule'},
-        'expiration_date': {'key': 'properties.expirationDate', 'type': 'str'},
+        'expiration_date': {'key': 'properties.expirationDate', 'type': 'iso-8601'},
         'allow_claim': {'key': 'properties.allowClaim', 'type': 'bool'},
         'storage_type': {'key': 'properties.storageType', 'type': 'str'},
         'virtual_machine_creation_source': {'key': 'properties.virtualMachineCreationSource', 'type': 'str'},
         'environment_id': {'key': 'properties.environmentId', 'type': 'str'},
         'provisioning_state': {'key': 'properties.provisioningState', 'type': 'str'},
         'unique_identifier': {'key': 'properties.uniqueIdentifier', 'type': 'str'},
-        'id': {'key': 'id', 'type': 'str'},
         'name': {'key': 'name', 'type': 'str'},
-        'type': {'key': 'type', 'type': 'str'},
         'location': {'key': 'location', 'type': 'str'},
         'tags': {'key': 'tags', 'type': '{str}'},
     }
 
-    def __init__(self, bulk_creation_parameters=None, notes=None, owner_object_id=None, created_by_user_id=None, created_by_user=None, created_date=None, compute_id=None, custom_image_id=None, os_type=None, size=None, user_name=None, password=None, ssh_key=None, is_authentication_with_ssh_key=None, fqdn=None, lab_subnet_name=None, lab_virtual_network_id=None, disallow_public_ip_address=None, artifacts=None, artifact_deployment_status=None, gallery_image_reference=None, compute_vm=None, network_interface=None, applicable_schedule=None, expiration_date=None, allow_claim=None, storage_type=None, virtual_machine_creation_source=None, environment_id=None, provisioning_state=None, unique_identifier=None, id=None, name=None, type=None, location=None, tags=None):
+    def __init__(self, bulk_creation_parameters=None, notes=None, owner_object_id=None, owner_user_principal_name=None, created_by_user_id=None, created_by_user=None, created_date=None, custom_image_id=None, os_type=None, size=None, user_name=None, password=None, ssh_key=None, is_authentication_with_ssh_key=None, fqdn=None, lab_subnet_name=None, lab_virtual_network_id=None, disallow_public_ip_address=None, artifacts=None, artifact_deployment_status=None, gallery_image_reference=None, compute_vm=None, network_interface=None, applicable_schedule=None, expiration_date=None, allow_claim=None, storage_type=None, virtual_machine_creation_source=None, environment_id=None, provisioning_state=None, unique_identifier=None, name=None, location=None, tags=None):
         self.bulk_creation_parameters = bulk_creation_parameters
         self.notes = notes
         self.owner_object_id = owner_object_id
+        self.owner_user_principal_name = owner_user_principal_name
         self.created_by_user_id = created_by_user_id
         self.created_by_user = created_by_user
         self.created_date = created_date
-        self.compute_id = compute_id
         self.custom_image_id = custom_image_id
         self.os_type = os_type
         self.size = size
@@ -184,8 +178,6 @@ class LabVirtualMachineCreationParameter(Model):
         self.environment_id = environment_id
         self.provisioning_state = provisioning_state
         self.unique_identifier = unique_identifier
-        self.id = id
         self.name = name
-        self.type = type
         self.location = location
         self.tags = tags

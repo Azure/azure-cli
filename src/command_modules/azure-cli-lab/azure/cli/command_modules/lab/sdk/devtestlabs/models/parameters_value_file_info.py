@@ -9,11 +9,11 @@ from msrest.serialization import Model
 
 
 class ParametersValueFileInfo(Model):
-    """ParametersValueFileInfo.
+    """A file containing a set of parameter values for an ARM template.
 
     :param file_name: File name.
     :type file_name: str
-    :param parameters_value_info: Parameters value information in the file.
+    :param parameters_value_info: Contents of the file.
     :type parameters_value_info: object
     """
 

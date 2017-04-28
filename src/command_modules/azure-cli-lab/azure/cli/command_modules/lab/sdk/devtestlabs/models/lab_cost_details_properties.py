@@ -17,8 +17,7 @@ class LabCostDetailsProperties(Model):
     :type cost: float
     :param cost_type: The type of the cost. Possible values include:
      'Unavailable', 'Reported', 'Projected'
-    :type cost_type: str or :class:`CostType
-     <azure.mgmt.devtestlabs.models.CostType>`
+    :type cost_type: str or :class:`CostType <devtestlabs.models.CostType>`
     """
 
     _attribute_map = {
