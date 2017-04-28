@@ -12,13 +12,13 @@ from azure.cli.command_modules.lab.validators import (_update_artifacts)
 class ValidatorsCommandTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.jdk_artifact = {'artifactId': '/artifactsources/public repo/artifacts/linux-java',
+        cls.jdk_artifact = {'artifact_id': '/artifactsources/public repo/artifacts/linux-java',
                             'deploymentStatusMessage': None,
                             'installTime': None,
                             'parameters': [],
                             'status': None,
                             'vmExtensionStatusMessage': None}
-        cls.apt_get_artifact = {'artifactId': '/artifactsources/public repo/artifacts/linux-java',
+        cls.apt_get_artifact = {'artifact_id': '/artifactsources/public repo/artifacts/linux-java',
                                 'deploymentStatusMessage': None,
                                 'installTime': None,
                                 'parameters': [{'name': 'packages',
@@ -31,10 +31,9 @@ class ValidatorsCommandTest(unittest.TestCase):
                                 'vmExtensionStatusMessage': None}
         cls.lab_resource_id = "/subscriptions/abcd-abcd-abcd-abcd-abcd/resourceGroups/MyRG/" \
                               "providers/Microsoft.DevTestLab/labs/MyLab"
-        cls.full_artifact = {'artifactId': '/subscriptions/abcd-abcd-abcd-abcd-abcd/'
-                                           'resourceGroups/MyRG/providers/Microsoft.DevTestLab/'
-                                           'labs/MyLab/artifactsources/public repo/'
-                                           'artifacts/linux-java',
+        cls.full_artifact = {'artifact_id': '/subscriptions/abcd-abcd-abcd-abcd-abcd/resourceGroups'
+                                            '/MyRG/providers/Microsoft.DevTestLab/labs/MyLab'
+                                            '/artifactsources/public repo/artifacts/linux-java',
                              'parameters': []}
 
     def test_update_artifacts(self):
@@ -45,7 +44,7 @@ class ValidatorsCommandTest(unittest.TestCase):
         for artifact in result:
             assert is_valid_resource_id(artifact.get('artifact_id'))
             self.assertEqual('{}{}'.format(self.lab_resource_id,
-                                           self.jdk_artifact.get('artifactId')),
+                                           self.jdk_artifact.get('artifact_id')),
                              artifact.get('artifact_id'))
 
         result = _update_artifacts([self.jdk_artifact, self.apt_get_artifact],
@@ -57,12 +56,12 @@ class ValidatorsCommandTest(unittest.TestCase):
                                    self.lab_resource_id)
         for artifact in result:
             assert is_valid_resource_id(artifact.get('artifact_id'))
-            self.assertEqual(artifact.get('artifact_id'), self.full_artifact.get('artifactId'))
+            self.assertEqual(artifact.get('artifact_id'), self.full_artifact.get('artifact_id'))
 
         with self.assertRaises(CLIError):
             _update_artifacts({}, self.lab_resource_id)
 
         invalid_artifact = self.jdk_artifact
-        del invalid_artifact['artifactId']
+        del invalid_artifact['artifact_id']
         with self.assertRaises(CLIError):
             _update_artifacts([invalid_artifact], self.lab_resource_id)

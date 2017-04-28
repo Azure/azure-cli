@@ -3,11 +3,16 @@
 Release History
 ===============
 
-0.1.4 (2017-04-27))
+0.1.5 (2017-04-28)
 ++++++++++++++++++
 
 * Added support for documentdb data-plane APIs:
   database and collection management
+
+0.1.4 (2017-04-28)
+++++++++++++++++++
+
+* New packaging system.
 
 0.1.3 (2017-04-17)
 ++++++++++++++++++

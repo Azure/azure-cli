@@ -51,7 +51,8 @@ RUN /bin/bash -c 'cd /cli-src/*; tmp_pkg_dir=$(mktemp -d); \
     for d in src/azure-cli src/azure-cli-core src/azure-cli-nspkg src/azure-cli-command_modules-nspkg src/command_modules/azure-cli-*/; \
     do cd $d; python setup.py bdist_wheel -d $tmp_pkg_dir; cd -; \
     done; \
-    pip install azure-cli -f $tmp_pkg_dir;'
+    pip install azure-cli -f $tmp_pkg_dir; \
+    pip install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg;'
 # Tab completion
 RUN cat /cli-src/*/az.completion >> ~/.bashrc
 

@@ -14,7 +14,8 @@ except ImportError:
     from distutils import log as logger
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
-VERSION = "2.0.3+dev"
+
+VERSION = "2.0.4+dev"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -71,7 +72,6 @@ DEPENDENCIES = [
     'azure-cli-redis',
     'azure-cli-resource',
     'azure-cli-role',
-    'azure-cli-shell',
     'azure-cli-sql',
     'azure-cli-storage',
     'azure-cli-vm'
