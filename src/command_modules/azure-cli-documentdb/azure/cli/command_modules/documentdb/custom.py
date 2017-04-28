@@ -12,7 +12,6 @@ from azure.mgmt.documentdb.models import (
 from azure.mgmt.documentdb.models.document_db_enums import DatabaseAccountKind
 from azure.cli.core.util import CLIError
 import azure.cli.core.azlogging as azlogging
-from pydocumentdb import document_client;
 
 logger = azlogging.get_az_logger(__name__)
 
