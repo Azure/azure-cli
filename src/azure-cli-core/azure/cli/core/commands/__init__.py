@@ -100,19 +100,12 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms
-        from azure.cli.core.commands.progress import StandardOut
+        from azure.cli.core.commands.progress import StandardOut, ProgressReporter, ProgressHook
         # from azclishell.progress import ShellProgressView
-
-        self.out = out or StandardOut()
+        self.reporter = ProgressReporter()
+        self.view = StandardOut()
+        self.controller = ProgressHook(self.reporter, self.view)
         self.curr_message = 'Running'
-        self.curr_val = None
-        self.total_val = total_val
-
-    def add(self, curr_val, total_val, label):
-        """ add a progress report """
-        self.curr_message = label
-        self.curr_val = curr_val
-        self.total_val = total_val
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
@@ -121,15 +114,11 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         from msrest.exceptions import ClientException
         logger.info("Starting long running operation '%s'", self.start_msg)
         correlation_message = ''
-        percent = None
-        self.out.begin('Starting', percent)
-        # self.out.begin('Starting')
+        self.reporter.begin()
 
-        self.out.flush()
         while not poller.done():
-            # percent += .005
-            self.out.write(self.curr_message, percent)
-            self.out.flush()
+            self.reporter.add(self.curr_message, None, None)
+            self.controller.update()
             try:
                 # pylint: disable=protected-access
                 correlation_id = json.loads(
@@ -169,8 +158,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
         logger.info("Long running operation '%s' completed with result %s",
                     self.start_msg, result)
-        self.out.end("\n")
-        self.out.flush()
+        self.reporter.end()
         return result
 
 

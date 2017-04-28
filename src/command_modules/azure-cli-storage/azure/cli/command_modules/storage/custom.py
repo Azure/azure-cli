@@ -38,16 +38,14 @@ BlockBlobService, BaseBlobService, \
                            'table#TableService',
                            'queue#QueueService')
 
-
+from azure.cli.core.commands.progress import StandardOut, ProgressReporter, ProgressHook
+VIEW = StandardOut()
+REPORT = ProgressReporter()
+HOOK = ProgressHook(REPORT, VIEW)
 def _update_progress(current, total):
     if total:
-        message = 'Percent complete: %'
-        percent_done = current * 100 / total
-        message += '{: >5.1f}'.format(percent_done)
-        print('\b' * len(message) + message, end='', file=stderr)
-        stderr.flush()
-        if current == total:
-            print('', file=stderr)
+        REPORT.add(current, total)
+        HOOK.update()
 
 
 # CUSTOM METHODS

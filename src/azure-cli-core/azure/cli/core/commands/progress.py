@@ -40,10 +40,18 @@ class ProgressView(object):
 
 class ProgressReporter(object):
     """ generic progress reporter """
-    def __init__(self, total_value):
+    def __init__(self, total_value=None):
         self.message = ''
         self.curr_val = 0 if total_value else None
         self.total_val = total_value
+
+    def begin(self):
+        """ start reporting progress """
+        self.add('Starting')
+
+    def end(self):
+        """ ending reporting of progress """
+        self.add("Finished")
 
     def add(self, message='', value=None, total_val=None):
         """ adds a progress report """
@@ -68,7 +76,8 @@ class ProgressHook(object):
 
     def update(self):
         """ updates the view with the progress """
-        self.view.write(self.reporter.report())
+        msg, percent = self.reporter.report()
+        self.view.write(msg, percent)
 
 
 class StandardOut(ProgressView):
@@ -96,9 +105,5 @@ class StandardOut(ProgressView):
         if percent:
             progress = self.format_percent(percent) if callable(self.format_percent) else percent
             self.out.write(progress + "\n")
-        # self.out.write(message + '\n')
-        # self.spinner = humanfriendly.Spinner(label=message)
-        # self.spinner.hide_cursor = False
-        # self.spinner.
-        self.spinner.step(message)
-        # time.sleep(.1)
+        else:
+            self.spinner.step()
