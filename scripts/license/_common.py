@@ -38,6 +38,6 @@ def get_files_without_header():
                 with open(cur_file_path, 'r') as f:
                     file_text = f.read()
 
-                if not contains_header(file_text):
+                if len(file_text) > 0 and not contains_header(file_text):
                     files_without_header.append((cur_file_path, file_text))
     return files_without_header

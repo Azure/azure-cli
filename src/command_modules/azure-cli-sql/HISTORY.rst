@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.0.2 (2017-04-28)
+++++++++++++++++++
+
+* Added az sql server list-usages and az sql db list-usages commands.
+
 2.0.1 (2017-04-17)
 ++++++++++++++++++
 

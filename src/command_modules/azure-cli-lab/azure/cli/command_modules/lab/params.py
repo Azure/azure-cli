@@ -3,12 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import json
 from azure.cli.command_modules.lab.validators import (validate_lab_vm_create,
                                                       validate_lab_vm_list,
-                                                      validate_user_name)
+                                                      validate_user_name,
+                                                      validate_template_id,
+                                                      _validate_artifacts)
 from azure.cli.core.commands.parameters import resource_group_name_type
 from azure.cli.core.sdk.util import ParametersContext
+from azure.cli.core.util import get_json_object
 
 
 with ParametersContext(command='lab') as c:
@@ -30,7 +32,7 @@ with ParametersContext(command='lab vm create') as c:
     c.argument('saved_secret', arg_group=authentication_group_name)
 
     # Add Artifacts from json object
-    c.argument('artifacts', type=json.loads)
+    c.argument('artifacts', type=get_json_object)
 
     # Image related arguments
     c.ignore('os_type')
@@ -61,11 +63,12 @@ with ParametersContext(command='lab vm list') as c:
     c.argument('filters', arg_group=filter_arg_group_name)
     c.argument('all', action='store_true', arg_group=filter_arg_group_name)
     c.argument('claimable', action='store_true', arg_group=filter_arg_group_name)
+    c.argument('environment', arg_group=filter_arg_group_name)
     c.register_alias('resource_group', ('--resource-group', '-g'), validator=validate_lab_vm_list)
 
 
 with ParametersContext(command='lab vm apply-artifacts') as c:
-    c.register('artifacts', ('--artifacts',), type=json.loads)
+    c.register('artifacts', ('--artifacts',), type=get_json_object, validator=_validate_artifacts)
     c.register_alias('name', ('--name', '-n'))
 
 
@@ -74,7 +77,7 @@ with ParametersContext(command='lab formula') as c:
 
 
 with ParametersContext(command='lab secret') as c:
-    from .sdk.devtestlabs.models.secret import Secret
+    from azure.mgmt.devtestlabs.models.secret import Secret
 
     c.register_alias('name', ('--name', '-n'))
     c.register_alias('secret', ('--value', ), type=lambda x: Secret(value=x))
@@ -85,3 +88,20 @@ with ParametersContext(command='lab secret') as c:
 with ParametersContext(command='lab formula export-artifacts') as c:
     # Exporting artifacts does not need expand filter
     c.ignore('expand')
+
+
+with ParametersContext(command='lab environment') as c:
+    c.register_alias('name', ('--name', '-n'))
+    c.ignore('user_name')
+    c.argument('lab_name', validator=validate_user_name)
+
+
+with ParametersContext(command='lab environment create') as c:
+    c.argument('arm_template', validator=validate_template_id)
+    c.argument('parameters', type=get_json_object)
+
+with ParametersContext(command='lab arm-template') as c:
+    c.register_alias('name', ('--name', '-n'))
+
+with ParametersContext(command='lab arm-template show') as c:
+    c.argument('export_parameters', action='store_true')

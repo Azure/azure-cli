@@ -14,9 +14,9 @@ import automation.utilities.path as automation_path
 
 def run_pylint(modules):
     print('\n\nRun pylint')
-    print('Modules: {}'.format(', '.join(name for name, _ in modules)))
+    print('Modules: {}'.format(', '.join([name for name, _ in modules if not name.endswith('-nspkg')])))
 
-    modules_list = ' '.join(os.path.join(path, 'azure') for _, path in modules)
+    modules_list = ' '.join([os.path.join(path, 'azure') for name, path in modules if not name.endswith('-nspkg')])
     arguments = '{} --rcfile={} -j {} -r n -d I0013'.format(
         modules_list,
         os.path.join(automation_path.get_repo_root(), 'pylintrc'),
@@ -36,7 +36,7 @@ def run_pep8(modules):
     print('\n\nRun flake8 for PEP8 compliance')
     print('Modules: {}'.format(', '.join(name for name, _ in modules)))
 
-    command = 'flake8 --statistics --append-config={} {}'.format(
+    command = 'flake8 --statistics --exclude=azure_bdist_wheel.py --append-config={} {}'.format(
         os.path.join(automation_path.get_repo_root(), '.flake8'),
         ' '.join(path for _, path in modules))
 

@@ -112,6 +112,8 @@ helps['lab vm list'] = """
                   short-summary: List of claimable virtual machines in the lab. Cannot be used with --filters
                 - name: --all
                   short-summary: List all virtual machines in the lab. Cannot be used with --filters
+                - name: --environment
+                  short-summary: Name or ID of the environment to list all virtual machines in the environment. Cannot be used with --filters
                 - name: --object-id
                   short-summary: Owner's object id. If omitted, we'll pick one if available
             """
@@ -184,4 +186,60 @@ helps['lab secret set'] = """
                   short-summary: Name of the secret
                 - name: --value
                   short-summary: Value of the secret
+            """
+helps['lab arm-template'] = """
+            type: group
+            short-summary: Commands to manage ARM templates in a DevTest Lab.
+            """
+helps['lab arm-template show'] = """
+            type: command
+            short-summary: Commands to show ARM templates in a DevTest Lab.
+            parameters:
+                - name: --lab-name
+                  short-summary: Name of the Lab
+                - name: --name -n
+                  short-summary: Name of the azure Resource Manager template
+                - name: --resource-group -g
+                  short-summary: Name of lab's resource group
+                - name: --export-parameters
+                  short-summary: Whether to export parameters template or not. This parameter template
+                                 can be used in creation of environment from this ARM template
+                - name: --artifact-source-name
+                  short-summary: Name of the artifact source
+            """
+helps['lab environment'] = """
+            type: group
+            short-summary: Commands to manage environments in a DevTest Lab.
+            """
+helps['lab environment create'] = """
+            type: command
+            short-summary: Create an environment.
+            parameters:
+                - name: --lab-name
+                  short-summary: Name of the Lab
+                - name: --name -n
+                  short-summary: Name of the environment
+                - name: --resource-group -g
+                  short-summary: Name of lab's resource group
+                - name: --arm-template
+                  short-summary: Name or ID of Azure Resource Manager template in the lab.
+                - name: --artifact-source-name
+                  short-summary: Name of the artifact source in the lab. Use az lab artifact-source list to see
+                                 available artifact sources
+                - name: --parameters
+                  short-summary: JSON encoded list of parameters. Use @{file} to load from a file
+                - name: --tags
+                  short-summary: The tags of the resource
+            """
+helps['lab environment delete'] = """
+            type: command
+            short-summary: Delete an environment.
+            """
+helps['lab environment list'] = """
+            type: command
+            short-summary: List environments.
+            """
+helps['lab environment show'] = """
+            type: command
+            short-summary: Get an environment.
             """

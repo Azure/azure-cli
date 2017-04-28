@@ -20,6 +20,10 @@ class APIVersionException(Exception):
             self.type_name, self.api_profile)
 
 
+# Sentinel value for profile
+PROFILE_TYPE = object()
+
+
 class ResourceType(Enum):  # pylint: disable=too-few-public-methods
 
     MGMT_STORAGE = ('azure.mgmt.storage',
@@ -171,10 +175,12 @@ def supported_api_version(api_profile, resource_type, min_api=None, max_api=None
     To compare profile versions, set resource type to None.
     note: Currently supports YYYY-MM-DD or YYYY-MM-DD-preview formatted API versions.
     """
+    if not isinstance(resource_type, ResourceType) and resource_type != PROFILE_TYPE:
+        raise TypeError()
     if min_api is None and max_api is None:
-        # No range specified so supported.
-        return True
-    api_version_str = get_api_version(api_profile, resource_type) if resource_type else api_profile
+        raise ValueError('At least a min or max version must be specified')
+    api_version_str = get_api_version(api_profile, resource_type) \
+        if isinstance(resource_type, ResourceType) else api_profile
     api_version = _DateAPIFormat(api_version_str)
     if min_api and api_version < _DateAPIFormat(min_api):
         return False

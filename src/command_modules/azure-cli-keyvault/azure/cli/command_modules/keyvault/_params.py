@@ -72,7 +72,7 @@ secret_permission_values = ', '.join([x.value for x in SecretPermissions])
 certificate_permission_values = ', '.join([x.value for x in CertificatePermissions])
 json_web_key_op_values = ', '.join([x.value for x in JsonWebKeyOperation])
 secret_encoding_values = secret_text_encoding_values + secret_binary_encoding_values
-certificate_file_encoding_values = ['binary', 'string']
+certificate_format_values = ['PEM', 'DER']
 
 # KEY ATTRIBUTE PARAMETER REGISTRATION
 
@@ -149,7 +149,7 @@ register_cli_argument('keyvault secret set', 'content_type', options_list=('--de
 register_attributes_argument('keyvault secret set', 'secret', SecretAttributes, create=True)
 register_cli_argument('keyvault secret set', 'value', options_list=('--value',), help="Plain text secret value. Cannot be used with '--file' or '--encoding'", required=False, arg_group='Content Source')
 register_extra_cli_argument('keyvault secret set', 'file_path', options_list=('--file', '-f'), type=file_type, help="Source file for secret. Use in conjunction with '--encoding'", completer=FilesCompleter(), arg_group='Content Source')
-register_extra_cli_argument('keyvault secret set', 'encoding', options_list=('--encoding', '-e'), help='Source file encoding. The value is saved as a tag (file-encoding=<val>) and used during download to automtically encode the resulting file.', default='utf-8', validator=process_secret_set_namespace, arg_group='Content Source', **enum_choice_list(secret_encoding_values))
+register_extra_cli_argument('keyvault secret set', 'encoding', options_list=('--encoding', '-e'), help='Source file encoding. The value is saved as a tag (`file-encoding=<val>`) and used during download to automtically encode the resulting file.', default='utf-8', validator=process_secret_set_namespace, arg_group='Content Source', **enum_choice_list(secret_encoding_values))
 
 register_attributes_argument('keyvault secret set-attributes', 'secret', SecretAttributes)
 
@@ -170,7 +170,7 @@ register_cli_argument('keyvault certificate import', 'password', help="If the pr
 register_extra_cli_argument('keyvault certificate import', 'disabled', help='Import the certificate in disabled state.', **three_state_flag())
 
 register_cli_argument('keyvault certificate download', 'file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter(), help='File to receive the binary certificate contents.')
-register_cli_argument('keyvault certificate download', 'encoding', options_list=('--encoding', '-e'), help='How to store base64 certificate contents in file.', **enum_choice_list(certificate_file_encoding_values))
+register_cli_argument('keyvault certificate download', 'encoding', options_list=('--encoding', '-e'), help='Encoding of the certificate. DER will create a binary DER formatted x509 certificate, and PEM will create a base64 PEM x509 certificate.', **enum_choice_list(certificate_format_values))
 
 register_cli_argument('keyvault certificate pending merge', 'x509_certificates', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter(), help='File containing the certificate or certificate chain to merge.', validator=validate_x509_certificate_chain)
 register_attributes_argument('keyvault certificate pending merge', 'certificate', CertificateAttributes, True)

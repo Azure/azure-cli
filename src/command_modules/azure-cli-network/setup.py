@@ -7,6 +7,12 @@
 
 from codecs import open
 from setuptools import setup
+try:
+    from azure_bdist_wheel import cmdclass
+except ImportError:
+    from distutils import log as logger
+    logger.warn("Wheel is not available, disabling bdist_wheel hook")
+    cmdclass = {}
 
 VERSION = '2.0.3+dev'
 
@@ -27,7 +33,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-mgmt-network==1.0.0rc2',
     'azure-mgmt-trafficmanager==0.30.0rc6',
-    'azure-mgmt-dns==1.0.0',
+    'azure-mgmt-dns==1.0.1',
     'azure-mgmt-resource==1.0.0rc1',
     'azure-cli-core'
 ]
@@ -47,14 +53,13 @@ setup(
     author_email='azpycli@microsoft.com',
     url='https://github.com/Azure/azure-cli',
     classifiers=CLASSIFIERS,
-    namespace_packages=[
+    packages=[
         'azure',
         'azure.cli',
         'azure.cli.command_modules',
-    ],
-    packages=[
         'azure.cli.command_modules.network',
         'azure.cli.command_modules.network.zone_file'
     ],
     install_requires=DEPENDENCIES,
+    cmdclass=cmdclass
 )

@@ -3,6 +3,13 @@
 Release History
 ===============
 
+0.1.4 (2017-04-28)
+++++++++++++++++++++
+
+* Rename arg of '-n/--name' to '--hostname', and wire up default webapp name (#2946, #2947, #2949)
+* Polish errors from appservice commands (#2948)
+* New packaging system.
+
 0.1.3 (2017-04-17)
 ++++++++++++++++++++
 

@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import json
+import os
 import tempfile
 import unittest
 import uuid
@@ -115,6 +116,46 @@ class TestRoleMocked(unittest.TestCase):
         self.assertEqual(result['password'], test_pwd)
         self.assertEqual(result['name'], 'http://' + name)
         self.assertEqual(result['appId'], test_app_id)
+
+    @mock.patch('azure.cli.command_modules.role.custom._auth_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.role.custom.logger', autospec=True)
+    def test_create_for_rbac_use_cert_date(self, logger_mock, graph_client_mock, auth_client_mock):
+        import OpenSSL.crypto
+        test_app_id = 'app_id_123'
+        app = Application(app_id=test_app_id)
+
+        def mock_app_create(parameters):
+            end_date = parameters.key_credentials[0].end_date
+            # sample check the cert's expiration time
+            self.assertEqual(end_date.day, 21)
+            self.assertEqual(end_date.month, 4)
+            return app
+
+        faked_role_client = mock.MagicMock()
+        auth_client_mock.return_value = faked_role_client
+        faked_role_client.config.subscription_id = self.subscription_id
+        faked_graph_client = mock.MagicMock()
+        graph_client_mock.return_value = faked_graph_client
+
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        cert_file = os.path.join(curr_dir, 'cert.pem').replace('\\', '\\\\')
+        with open(cert_file) as f:
+            cert = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, f.read())
+
+        name = 'mysp'
+        faked_graph_client.applications.create.side_effect = mock_app_create
+        sp = ServicePrincipal(object_id='does not matter')
+        faked_graph_client.service_principals.create.return_value = sp
+
+        # action
+        result = create_service_principal_for_rbac(name, cert=cert, years=2, skip_assignment=True)
+
+        # assert
+        self.assertEqual(result['name'], 'http://' + name)
+        self.assertEqual(result['appId'], test_app_id)
+        self.assertTrue(logger_mock.warning.called)  # we should warn 'years' will be dropped
+        self.assertTrue(faked_graph_client.applications.create.called)
 
 
 class FakedResponse(object):  # pylint: disable=too-few-public-methods

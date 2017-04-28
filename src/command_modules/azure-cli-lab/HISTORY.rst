@@ -2,6 +2,12 @@
 
 Release History
 ===============
+unreleased
++++++++++++++++++++++
+
+* Adding create, show, delete & list commands for environment in the lab.
+* Adding show & list commands to view ARM templates in the lab.
+* Adding --environment flag in `az lab vm list` to filter VMs by environment in the lab.
 
 0.0.2 (2017-04-17)
 +++++++++++++++++++++
