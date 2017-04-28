@@ -126,6 +126,8 @@ class Application(object):
 
         self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
         self.configuration = configuration
+        from azure.cli.core.commands.progress import _StandardOut
+        self.progress_view = _StandardOut()
 
     def initialize(self, configuration):
         self.configuration = configuration

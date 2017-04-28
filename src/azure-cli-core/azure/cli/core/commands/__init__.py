@@ -102,7 +102,8 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms
         self.controller = ProgressHook(REPORTER)
-        self.curr_message = 'Running'
+        from azure.cli.core.application import APPLICATION
+        self.controller.init_progress(APPLICATION.progress_view)
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
@@ -114,7 +115,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         self.controller.begin()
 
         while not poller.done():
-            self.controller.add(self.curr_message, None, None)
+            self.controller.add('Running', None, None)
             try:
                 # pylint: disable=protected-access
                 correlation_id = json.loads(
