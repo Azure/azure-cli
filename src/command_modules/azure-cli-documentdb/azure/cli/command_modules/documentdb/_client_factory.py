@@ -70,7 +70,7 @@ def get_document_client_factory(kwargs):
 
         auth = { 'masterKey': account_key }
 
-        client = document_client.DocumentClient(url_connection = url_connection, auth = auth)
+        client = document_client.DocumentClient(url_connection=url_connection, auth=auth)
     except Exception as ex:
         if isinstance(ex, CLIError):
             raise ex
