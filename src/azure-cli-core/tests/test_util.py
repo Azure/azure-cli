@@ -145,7 +145,7 @@ class TestUtils(unittest.TestCase):
 class TestBase64ToHex(unittest.TestCase):
 
     def setUp(self):
-        self.base64 = 'PvOJgaPq5R004GyT1tB0IW3XUyM='
+        self.base64 = 'PvOJgaPq5R004GyT1tB0IW3XUyM='.encode('ascii')
 
     def test_b64_to_hex(self):
         self.assertEquals('3EF38981A3EAE51D34E06C93D6D074216DD75323', b64_to_hex(self.base64))
