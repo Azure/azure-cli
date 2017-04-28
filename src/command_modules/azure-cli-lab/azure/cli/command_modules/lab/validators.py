@@ -10,11 +10,11 @@ from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
 from ._client_factory import (get_devtestlabs_management_client)
-from .sdk.devtestlabs.models.gallery_image_reference import GalleryImageReference
-from .sdk.devtestlabs.models.network_interface_properties import NetworkInterfaceProperties
-from .sdk.devtestlabs.models.shared_public_ip_address_configuration import \
+from azure.mgmt.devtestlabs.models.gallery_image_reference import GalleryImageReference
+from azure.mgmt.devtestlabs.models.network_interface_properties import NetworkInterfaceProperties
+from azure.mgmt.devtestlabs.models.shared_public_ip_address_configuration import \
     SharedPublicIpAddressConfiguration
-from .sdk.devtestlabs.models.inbound_nat_rule import InboundNatRule
+from azure.mgmt.devtestlabs.models.inbound_nat_rule import InboundNatRule
 from azure.graphrbac import GraphRbacManagementClient
 import azure.cli.core.azlogging as azlogging
 

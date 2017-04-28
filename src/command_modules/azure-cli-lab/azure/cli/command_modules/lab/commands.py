@@ -18,7 +18,7 @@ from azure.cli.core.sdk.util import (ServiceGroup, create_service_adapter)
 
 
 custom_path = 'azure.cli.command_modules.lab.custom'
-mgmt_operations_path = 'azure.cli.command_modules.lab.sdk.devtestlabs.operations.{}'
+mgmt_operations_path = 'azure.mgmt.devtestlabs.operations.{}'
 
 
 def _export_artifacts(formula):
