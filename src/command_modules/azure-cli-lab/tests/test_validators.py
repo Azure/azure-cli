@@ -31,10 +31,9 @@ class ValidatorsCommandTest(unittest.TestCase):
                                 'vmExtensionStatusMessage': None}
         cls.lab_resource_id = "/subscriptions/abcd-abcd-abcd-abcd-abcd/resourceGroups/MyRG/" \
                               "providers/Microsoft.DevTestLab/labs/MyLab"
-        cls.full_artifact = {'artifact_id': '/subscriptions/abcd-abcd-abcd-abcd-abcd/'
-                                           'resourceGroups/MyRG/providers/Microsoft.DevTestLab/'
-                                           'labs/MyLab/artifactsources/public repo/'
-                                           'artifacts/linux-java',
+        cls.full_artifact = {'artifact_id': '/subscriptions/abcd-abcd-abcd-abcd-abcd/resourceGroups'
+                                            '/MyRG/providers/Microsoft.DevTestLab/labs/MyLab'
+                                            '/artifactsources/public repo/artifacts/linux-java',
                              'parameters': []}
 
     def test_update_artifacts(self):
