@@ -3,7 +3,7 @@
 Release History
 ===============
 
-unreleased
+0.0.3 (2017-04-28)
 +++++++++++++++++++++
 
 * Bug Fix: Modeling `--actions` of `az alert-rules create` to consume JSON string (#3009)
