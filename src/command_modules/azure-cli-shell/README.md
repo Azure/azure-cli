@@ -18,15 +18,6 @@
 
 ![Overview](docs/shell_tutorial.gif)
 
-## Installation
-
-```bash
-   $ pip install --user azure-cli-shell
-```
-
-A list of common install issues and their resolutions are available at [install troubleshooting](https://github.com/azure/azure-cli-shell/blob/master/docs/install_troubleshooting.md).
-
-
 ## Running
 
 To start the application
@@ -97,49 +88,3 @@ Only clears the appended suggestion when you restart the shell
 ```
 
 The color option will be saved.
-
-
-
-## Dev Setup
-
-Fork and clone repository
-
-```bash
-   $ . dev_setup.py
-```
-
-To get the Exit Code of the previous command:
-
-```
-   $ $
-```
-
-## Docker Image
-
-
-There is a docker image on docker hub
-
-```bash
-   $ docker pull azuresdk/azure-cli-shell:latest
-   $ docker run -it azuresdk/azure-cli-shell:latest
-   root#: az shell
-```
-
-
-## License
-
-```
-Azure CLI Shell
-
-Copyright (c) Microsoft Corporation
-
-All rights reserved. 
-
-MIT License
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ""Software""), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-```
