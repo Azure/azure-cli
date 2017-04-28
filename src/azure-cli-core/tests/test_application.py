@@ -12,7 +12,7 @@ from six import StringIO
 
 from azure.cli.core.application import Application, Configuration, IterateAction
 from azure.cli.core.commands import CliCommand
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 
 class TestApplication(unittest.TestCase):
@@ -40,8 +40,8 @@ class TestApplication(unittest.TestCase):
         def other_handler(**kwargs):  # pylint: disable=unused-variable
             self.assertEqual(kwargs['args'], 'secret sauce')
 
-        config = Configuration([])
-        app = Application(config)
+        app = Application()
+        app.initialize(Configuration())
 
         app.raise_event('was_handler_called', args=handler_called)
         self.assertFalse(handler_called[0],
@@ -72,8 +72,8 @@ class TestApplication(unittest.TestCase):
         cmd_table = {'test command': command}
 
         argv = 'az test command --hello world sir --something else'.split()
-        config = Configuration(argv)
-        config.get_command_table = lambda: cmd_table
+        config = Configuration()
+        config.get_command_table = lambda argv: cmd_table
         application = Application(config)
         application.execute(argv[1:])
 

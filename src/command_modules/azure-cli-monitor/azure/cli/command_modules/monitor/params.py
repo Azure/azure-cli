@@ -3,8 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import json
 from azure.cli.core.sdk.util import ParametersContext
+from azure.cli.core.util import get_json_object
 from azure.cli.command_modules.monitor.validators import (validate_diagnostic_settings)
 
 
@@ -17,8 +17,13 @@ with ParametersContext(command='monitor alert-rules create') as c:
 
     c.expand('parameters', AlertRuleResource)
     c.register('condition', ('--condition',),
-               type=json.loads,
+               type=get_json_object,
                help='JSON encoded condition configuration. Use @{file} to load from a file.')
+    c.register('actions', ('--actions',),
+               type=get_json_object,
+               help='JSON encoded array of actions that are performed when the alert '
+                    'rule becomes active, and when an alert condition is resolved. '
+                    'Use @{file} to load from a file.')
 
 with ParametersContext(command='monitor alert-rules show') as c:
     c.argument('rule_name', id_part='name')
@@ -39,7 +44,7 @@ with ParametersContext(command='monitor autoscale-settings') as c:
 
 with ParametersContext(command='monitor autoscale-settings create') as c:
     c.register('parameters', ('--parameters',),
-               type=json.loads,
+               type=get_json_object,
                help='JSON encoded parameters configuration. Use @{file} to load from a file.'
                     'Use az autoscale-settings get-parameters-template to export json template.')
 
@@ -60,8 +65,8 @@ with ParametersContext(command='monitor diagnostic-settings create') as c:
     c.register_alias('resource_group', ('--resource-group', '-g'))
     c.register_alias('target_resource_id', ('--resource-id',),
                      validator=validate_diagnostic_settings)
-    c.register('logs', ('--logs',), type=json.loads)
-    c.register('metrics', ('--metrics',), type=json.loads)
+    c.register('logs', ('--logs',), type=get_json_object)
+    c.register('metrics', ('--metrics',), type=get_json_object)
     c.argument('tags', nargs='*')
 
     # Service Bus argument group

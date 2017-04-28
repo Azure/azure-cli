@@ -6,26 +6,18 @@
 import argparse
 import os
 import re
-from collections import OrderedDict
 from datetime import datetime, timedelta
 
-from azure.cli.core._config import az_config
+from azure.cli.core.util import CLIError
 from azure.cli.core._profile import CLOUD
-from azure.cli.core._util import CLIError
+from azure.cli.core._config import az_config
+from azure.cli.core.profiles import get_sdk, ResourceType
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
-from azure.mgmt.storage import StorageManagementClient
-from azure.storage.sharedaccesssignature import SharedAccessSignature
-from azure.storage.blob import Include, PublicAccess
-from azure.storage.blob.baseblobservice import BaseBlobService
-from azure.storage.blob.models import ContentSettings as BlobContentSettings, BlobPermissions
-from azure.storage.file import FileService
-from azure.storage.file.models import ContentSettings as FileContentSettings
-from azure.storage.models import ResourceTypes, Services
-from azure.storage.table import TablePermissions, TablePayloadFormat
 
 from ._factory import get_storage_data_service_client
 from .util import glob_files_locally
+
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
@@ -33,7 +25,7 @@ storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 # Utilities
 
 def _query_account_key(account_name):
-    scf = get_mgmt_service_client(StorageManagementClient)
+    scf = get_mgmt_service_client(ResourceType.MGMT_STORAGE)
     acc = next((x for x in scf.storage_accounts.list() if x.name == account_name), None)
     if acc:
         from azure.cli.core.commands.arm import parse_resource_id
@@ -44,6 +36,10 @@ def _query_account_key(account_name):
 
 
 def _create_short_lived_blob_sas(account_name, account_key, container, blob):
+    SharedAccessSignature, BlobPermissions = \
+        get_sdk(ResourceType.DATA_STORAGE,
+                'sharedaccesssignature#SharedAccessSignature',
+                'blob.models#BlobPermissions')
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     sas = SharedAccessSignature(account_name, account_key)
     return sas.generate_blob(container, blob, permission=BlobPermissions(read=True), expiry=expiry,
@@ -51,6 +47,10 @@ def _create_short_lived_blob_sas(account_name, account_key, container, blob):
 
 
 def _create_short_lived_file_sas(account_name, account_key, share, directory_name, file_name):
+    SharedAccessSignature, BlobPermissions = \
+        get_sdk(ResourceType.DATA_STORAGE,
+                'sharedaccesssignature#SharedAccessSignature',
+                'blob.models#BlobPermissions')
     # if dir is empty string change it to None
     directory_name = directory_name if directory_name else None
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -62,6 +62,7 @@ def _create_short_lived_file_sas(account_name, account_key, share, directory_nam
 # region PARAMETER VALIDATORS
 
 def validate_accept(namespace):
+    TablePayloadFormat = get_sdk(ResourceType.DATA_STORAGE, 'table#TablePayloadFormat')
     if namespace.accept:
         formats = {
             'none': TablePayloadFormat.JSON_NO_METADATA,
@@ -101,6 +102,83 @@ def validate_client_parameters(namespace):
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key and not n.sas_token:
         n.account_key = _query_account_key(n.account_name)
+
+
+def process_blob_source_uri(namespace):
+    """
+    Validate the parameters referenced to a blob source and create the source URI from them.
+    """
+    usage_string = \
+        'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
+        '\n\t   --source-uri' \
+        '\n\tOR --source-container --source-blob --source-snapshot [--source-account-name & sas] ' \
+        '\n\tOR --source-container --source-blob --source-snapshot [--source-account-name & key] '
+
+    ns = vars(namespace)
+
+    # source as blob
+    container = ns.pop('source_container', None)
+    blob = ns.pop('source_blob', None)
+    snapshot = ns.pop('source_snapshot', None)
+
+    # source credential clues
+    source_account_name = ns.pop('source_account_name', None)
+    source_account_key = ns.pop('source_account_key', None)
+    sas = ns.pop('source_sas', None)
+
+    # source in the form of an uri
+    uri = ns.get('copy_source', None)
+    if uri:
+        if any([container, blob, sas, snapshot, source_account_name, source_account_key]):
+            raise ValueError(usage_string.format('Unused parameters are given in addition to the '
+                                                 'source URI'))
+        else:
+            # simplest scenario--no further processing necessary
+            return
+
+    validate_client_parameters(namespace)  # must run first to resolve storage account
+
+    # determine if the copy will happen in the same storage account
+    if not source_account_name and source_account_key:
+        raise ValueError(usage_string.format('Source account key is given but account name is not'))
+    elif not source_account_name and not source_account_key:
+        # neither source account name or key is given, assume that user intends to copy blob in
+        # the same account
+        source_account_name = ns.get('account_name', None)
+        source_account_key = ns.get('account_key', None)
+    elif source_account_name and not source_account_key:
+        if source_account_name == ns.get('account_name', None):
+            # the source account name is same as the destination account name
+            source_account_key = ns.get('account_key', None)
+        else:
+            # the source account is different from destination account but the key is missing
+            # try to query one.
+            try:
+                source_account_key = _query_account_key(source_account_name)
+            except ValueError:
+                raise ValueError('Source storage account {} not found.'.format(source_account_name))
+    # else: both source account name and key are given by user
+
+    if not source_account_name:
+        raise ValueError(usage_string.format('Storage account name not found'))
+
+    if not sas:
+        sas = _create_short_lived_blob_sas(source_account_name, source_account_key, container, blob)
+
+    query_params = []
+    if sas:
+        query_params.append(sas)
+    if snapshot:
+        query_params.append('snapshot={}'.format(snapshot))
+
+    uri = 'https://{}.blob.{}/{}/{}{}{}'.format(source_account_name,
+                                                CLOUD.suffixes.storage_endpoint,
+                                                container,
+                                                blob,
+                                                '?' if query_params else '',
+                                                '&'.join(query_params))
+
+    namespace.copy_source = uri
 
 
 def validate_source_uri(namespace):  # pylint: disable=too-many-statements
@@ -194,7 +272,7 @@ def validate_source_uri(namespace):  # pylint: disable=too-many-statements
     if sas:
         query_params.append(sas)
     if snapshot:
-        query_params.append(snapshot)
+        query_params.append('snapshot={}'.format(snapshot))
 
     uri = 'https://{0}.{1}.{6}/{2}/{3}{4}{5}'.format(
         source_account_name,
@@ -218,6 +296,14 @@ def get_content_setting_validator(settings_class, update):
         return class_type.__module__ + "." + class_type.__class__.__name__
 
     def validator(namespace):
+        BaseBlobService, FileService, \
+            BlobContentSettings, FileContentSettings = get_sdk(
+                ResourceType.DATA_STORAGE,
+                'blob.baseblobservice#BaseBlobService',
+                'file#FileService',
+                'blob.models#ContentSettings',
+                'file.models#ContentSettings')
+
         # must run certain validators first for an update
         if update:
             validate_client_parameters(namespace)
@@ -282,7 +368,12 @@ def validate_encryption(namespace):
     ''' Builds up the encryption object for storage account operations based on the
     list of services passed in. '''
     if namespace.encryption:
-        from azure.mgmt.storage.models import Encryption, EncryptionServices, EncryptionService
+        Encryption, EncryptionServices, \
+            EncryptionService = get_sdk(ResourceType.MGMT_STORAGE,
+                                        'Encryption',
+                                        'EncryptionServices',
+                                        'EncryptionService',
+                                        mod='models')
         services = {service: EncryptionService(True) for service in namespace.encryption}
         namespace.encryption = Encryption(EncryptionServices(**services))
 
@@ -352,6 +443,7 @@ def validate_included_datasets(namespace):
         if set(include) - set('cms'):
             help_string = '(c)opy-info (m)etadata (s)napshots'
             raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
+        Include = get_sdk(ResourceType.DATA_STORAGE, 'blob#Include')
         namespace.include = Include('s' in include, 'm' in include, False, 'c' in include)
 
 
@@ -386,6 +478,7 @@ def get_permission_validator(permission_class):
 
 def table_permission_validator(namespace):
     """ A special case for table because the SDK associates the QUERY permission with 'r' """
+    TablePermissions = get_sdk(ResourceType.DATA_STORAGE, 'table#TablePermissions')
     if namespace.permission:
         if set(namespace.permission) - set('raud'):
             help_string = '(r)ead/query (a)dd (u)pdate (d)elete'
@@ -393,10 +486,10 @@ def table_permission_validator(namespace):
         namespace.permission = TablePermissions(_str=namespace.permission)
 
 
-public_access_types = {'off': None, 'blob': PublicAccess.Blob, 'container': PublicAccess.Container}
-
-
 def validate_public_access(namespace):
+    BaseBlobService = get_sdk(ResourceType.DATA_STORAGE, 'blob.baseblobservice#BaseBlobService')
+    from ._params import public_access_types
+
     if namespace.public_access:
         namespace.public_access = public_access_types[namespace.public_access.lower()]
 
@@ -427,6 +520,9 @@ def get_source_file_or_blob_service_client(namespace):
     indicates that user want to copy files or blobs in the same storage account, therefore the
     destination client will be set None hence the command will use destination client.
     """
+    FileService, BlockBlobService = get_sdk(ResourceType.DATA_STORAGE,
+                                            'file#FileService',
+                                            'blob.blockblobservice#BlockBlobService')
     usage_string = 'invalid usage: supply only one of the following argument sets:' + \
                    '\n\t   --source-uri' + \
                    '\n\tOR --source-container' + \
@@ -478,7 +574,6 @@ def get_source_file_or_blob_service_client(namespace):
             source_key = _query_account_key(source_account)
 
         if source_container:
-            from azure.storage.blob.blockblobservice import BlockBlobService
             ns['source_client'] = BlockBlobService(account_name=source_account,
                                                    account_key=source_key,
                                                    sas_token=source_sas)
@@ -503,7 +598,6 @@ def get_source_file_or_blob_service_client(namespace):
                 identifier.filename or nor_container_or_share:
             raise ValueError('incorrect usage: --source-uri has to be blob container or file share')
         elif identifier.container:
-            from azure.storage.blob.blockblobservice import BlockBlobService
             ns['source_client'] = BlockBlobService(account_name=identifier.account_name,
                                                    sas_token=identifier.sas_token)
         elif identifier.share:
@@ -698,6 +792,7 @@ def ipv4_range_type(string):
 def resource_type_type(string):
     ''' Validates that resource types string contains only a combination
     of (s)ervice, (c)ontainer, (o)bject '''
+    ResourceTypes = get_sdk(ResourceType.DATA_STORAGE, 'models#ResourceTypes')
     if set(string) - set("sco"):
         raise ValueError
     return ResourceTypes(_str=''.join(set(string)))
@@ -706,111 +801,9 @@ def resource_type_type(string):
 def services_type(string):
     ''' Validates that services string contains only a combination
     of (b)lob, (q)ueue, (t)able, (f)ile '''
+    Services = get_sdk(ResourceType.DATA_STORAGE, 'models#Services')
     if set(string) - set("bqtf"):
         raise ValueError
     return Services(_str=''.join(set(string)))
-
-# endregion
-
-# region TRANSFORMS
-
-
-def transform_acl_list_output(result):
-    """ Transform to convert SDK output into a form that is more readily
-    usable by the CLI and tools such as jpterm. """
-    new_result = []
-    for key in sorted(result.keys()):
-        new_entry = OrderedDict()
-        new_entry['Name'] = key
-        new_entry['Start'] = result[key]['start']
-        new_entry['Expiry'] = result[key]['expiry']
-        new_entry['Permissions'] = result[key]['permission']
-        new_result.append(new_entry)
-    return new_result
-
-
-def transform_container_permission_output(result):
-    return {'publicAccess': result.public_access or 'off'}
-
-
-def transform_cors_list_output(result):
-    new_result = []
-    for service in sorted(result.keys()):
-        service_name = service
-        for i, rule in enumerate(result[service]):
-            new_entry = OrderedDict()
-            new_entry['Service'] = service_name
-            service_name = ''
-            new_entry['Rule'] = i + 1
-
-            new_entry['AllowedMethods'] = ', '.join((x for x in rule.allowed_methods))
-            new_entry['AllowedOrigins'] = ', '.join((x for x in rule.allowed_origins))
-            new_entry['ExposedHeaders'] = ', '.join((x for x in rule.exposed_headers))
-            new_entry['AllowedHeaders'] = ', '.join((x for x in rule.allowed_headers))
-            new_entry['MaxAgeInSeconds'] = rule.max_age_in_seconds
-            new_result.append(new_entry)
-    return new_result
-
-
-def transform_entity_query_output(result):
-    new_results = []
-    ignored_keys = ['etag', 'Timestamp', 'RowKey', 'PartitionKey']
-    for row in result['items']:
-        new_entry = OrderedDict()
-        new_entry['PartitionKey'] = row['PartitionKey']
-        new_entry['RowKey'] = row['RowKey']
-        other_keys = sorted([x for x in row.keys() if x not in ignored_keys])
-        for key in other_keys:
-            new_entry[key] = row[key]
-        new_results.append(new_entry)
-    return new_results
-
-
-def transform_logging_list_output(result):
-    new_result = []
-    for key in sorted(result.keys()):
-        new_entry = OrderedDict()
-        new_entry['Service'] = key
-        new_entry['Read'] = str(result[key]['read'])
-        new_entry['Write'] = str(result[key]['write'])
-        new_entry['Delete'] = str(result[key]['delete'])
-        new_entry['RetentionPolicy'] = str(result[key]['retentionPolicy']['days'])
-        new_result.append(new_entry)
-    return new_result
-
-
-def transform_metrics_list_output(result):
-    new_result = []
-    for service in sorted(result.keys()):
-        service_name = service
-        for interval in sorted(result[service].keys()):
-            item = result[service][interval]
-            new_entry = OrderedDict()
-            new_entry['Service'] = service_name
-            service_name = ''
-            new_entry['Interval'] = str(interval)
-            new_entry['Enabled'] = str(item['enabled'])
-            new_entry['IncludeApis'] = str(item['includeApis'])
-            new_entry['RetentionPolicy'] = str(item['retentionPolicy']['days'])
-            new_result.append(new_entry)
-    return new_result
-
-
-def create_boolean_result_output_transformer(property_name):
-    def _transformer(result):
-        return {property_name: result}
-
-    return _transformer
-
-
-def transform_storage_list_output(result):
-    return list(result)
-
-
-def transform_url(result):
-    """ Ensures the resulting URL string does not contain extra / characters """
-    result = re.sub('//', '/', result)
-    result = re.sub('/', '//', result, count=1)
-    return result
 
 # endregion

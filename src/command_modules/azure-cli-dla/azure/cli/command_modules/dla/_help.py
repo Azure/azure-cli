@@ -9,7 +9,7 @@ from azure.cli.core.help_files import helps
 # pylint: disable=line-too-long
 helps['dla'] = """
     type: group
-    short-summary: Commands to manage Data Lake Analytics accounts, jobs and catalogs.
+    short-summary: Commands to manage Data Lake Analytics accounts, jobs, and catalogs.
     long-summary: If you don't have the Data Lake Analytics component installed, add it with `az component update --add dla`. These commands are in preview.
 """
 
@@ -29,7 +29,7 @@ helps['dla job submit'] = """
         - name: --script
           type: string
           short-summary: 'The script to submit'
-          long-summary: This is either the script contents or use \'@<file path>\' to load the script from a file
+          long-summary: This is either the script contents or use `@<file path>` to load the script from a file
         - name: --runtime-version
           short-summary: 'The runtime version to use'
           long-summary: This parameter is used for explicitly overwriting the default runtime. It should only be done if you know what you are doing.
@@ -273,10 +273,10 @@ helps['dla account firewall create'] = """
     parameters:
         - name: --end-ip-address
           type: string
-          short-summary: 'The end of the valid ip range for the firewall rule.'
+          short-summary: 'The end of the valid IP range for the firewall rule.'
         - name: --start-ip-address
           type: string
-          short-summary: 'The start of the valid ip range for the firewall rule.'
+          short-summary: 'The start of the valid IP range for the firewall rule.'
         - name: --firewall-rule-name
           type: string
           short-summary: 'The name of the firewall rule.'

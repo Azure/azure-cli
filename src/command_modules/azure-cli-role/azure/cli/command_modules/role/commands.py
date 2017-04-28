@@ -7,10 +7,9 @@
 from collections import OrderedDict
 
 from azure.cli.core.commands import cli_command
-from azure.cli.core.commands.arm import cli_generic_update_command
-from azure.cli.core._util import empty_on_404
+from azure.cli.core.util import empty_on_404
 
-from .custom import (_auth_client_factory, _graph_client_factory)
+from ._client_factory import (_auth_client_factory, _graph_client_factory)
 
 
 def transform_definition_list(result):
@@ -56,10 +55,8 @@ cli_command(__name__, 'role definition delete',
             'azure.cli.command_modules.role.custom#delete_role_definition')
 cli_command(__name__, 'role definition create',
             'azure.cli.command_modules.role.custom#create_role_definition')
-cli_generic_update_command(__name__, 'role definition update',
-                           get_role_definition_op('get'),
-                           get_role_definition_op('create_or_update'),
-                           get_role_definitions)
+cli_command(__name__, 'role definition update',
+            'azure.cli.command_modules.role.custom#update_role_definition')
 
 cli_command(__name__, 'role assignment delete',
             'azure.cli.command_modules.role.custom#delete_role_assignments')
@@ -108,12 +105,23 @@ cli_command(__name__, 'ad user list', 'azure.cli.command_modules.role.custom#lis
 cli_command(__name__, 'ad user create', 'azure.cli.command_modules.role.custom#create_user',
             get_graph_client_users)
 
-cli_command(__name__, 'ad group delete',
-            'azure.graphrbac.operations.groups_operations#GroupsOperations.delete',
-            get_graph_client_groups)
-cli_command(__name__, 'ad group show',
-            'azure.graphrbac.operations.groups_operations#GroupsOperations.get',
-            get_graph_client_groups,
+group_path = 'azure.graphrbac.operations.groups_operations#GroupsOperations.{}'
+cli_command(__name__, 'ad group create', group_path.format('create'), get_graph_client_groups)
+cli_command(__name__, 'ad group delete', group_path.format('delete'), get_graph_client_groups)
+cli_command(__name__, 'ad group show', group_path.format('get'), get_graph_client_groups,
             exception_handler=empty_on_404)
-cli_command(__name__, 'ad group list', 'azure.cli.command_modules.role.custom#list_groups',
+cli_command(__name__, 'ad group list',
+            'azure.cli.command_modules.role.custom#list_groups',
+            get_graph_client_groups)
+
+cli_command(__name__, 'ad group get-member-groups', group_path.format('get_member_groups'),
+            get_graph_client_groups)
+
+cli_command(__name__, 'ad group member list', group_path.format('get_group_members'),
+            get_graph_client_groups)
+cli_command(__name__, 'ad group member add', group_path.format('add_member'),
+            get_graph_client_groups)
+cli_command(__name__, 'ad group member remove', group_path.format('remove_member'),
+            get_graph_client_groups)
+cli_command(__name__, 'ad group member check', group_path.format('is_member_of'),
             get_graph_client_groups)

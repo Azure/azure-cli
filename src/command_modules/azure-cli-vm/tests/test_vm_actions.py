@@ -8,13 +8,14 @@ import tempfile
 import unittest
 import mock
 
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 from azure.cli.command_modules.vm._validators import (validate_ssh_key,
                                                       _is_valid_ssh_rsa_public_key,
                                                       _figure_out_storage_source,
                                                       _validate_admin_username,
-                                                      _validate_admin_password)
+                                                      _validate_admin_password,
+                                                      _parse_image_argument)
 
 
 class TestActions(unittest.TestCase):
@@ -131,3 +132,25 @@ class TestActions(unittest.TestCase):
         with self.assertRaises(CLIError) as context:
             _validate_admin_password(admin_password, is_linux)
         self.assertTrue(expected_err in str(context.exception))
+
+    @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
+    def test_parse_image_argument(self, client_factory_mock):
+        compute_client = mock.MagicMock()
+        image = mock.MagicMock()
+        image.plan.name = 'plan1'
+        image.plan.product = 'product1'
+        image.plan.publisher = 'publisher1'
+        compute_client.virtual_machine_images.get.return_value = image
+        client_factory_mock.return_value = compute_client
+
+        np = mock.MagicMock()
+        np.location = 'some region'
+        np.image = 'publisher1:offer1:sku1:1.0.0'
+
+        # action
+        _parse_image_argument(np)
+
+        # assert
+        self.assertEqual('plan1', np.plan_name)
+        self.assertEqual('product1', np.plan_product)
+        self.assertEqual('publisher1', np.plan_publisher)

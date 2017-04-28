@@ -16,7 +16,7 @@ from azure.mgmt.keyvault.models.key_vault_management_client_enums import \
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import parse_resource_id
 from azure.cli.core.commands.validators import validate_tags
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 from azure.keyvault.generated.models.key_vault_client_enums \
     import JsonWebKeyOperation
@@ -111,8 +111,8 @@ def get_attribute_validator(name, attribute_class, create=False):
         enabled = not ns_dict.pop('disabled') if create else ns_dict.pop('enabled')
         attributes = attribute_class(
             enabled,
-            ns_dict.pop('not_before'),
-            ns_dict.pop('expires'))
+            ns_dict.pop('not_before', None),
+            ns_dict.pop('expires', None))
         setattr(ns, '{}_attributes'.format(name), attributes)
 
     return validator
@@ -210,15 +210,11 @@ def validate_x509_certificate_chain(ns):
 # ARGUMENT TYPES
 
 
-def base64_encoded_certificate_type(string):
+def certificate_type(string):
     """ Loads file and outputs contents as base64 encoded string. """
-    with open(string, 'rb') as f:
+    import os
+    with open(os.path.expanduser(string), 'rb') as f:
         cert_data = f.read()
-    try:
-        # for PEM files (including automatic endline conversion for Windows)
-        cert_data = cert_data.decode('utf-8').replace('\r\n', '\n')
-    except UnicodeDecodeError:
-        cert_data = binascii.b2a_base64(cert_data).decode('utf-8')
     return cert_data
 
 

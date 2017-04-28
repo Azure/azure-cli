@@ -21,64 +21,27 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.commands.arm import parse_resource_id
+from azure.cli.core.commands.arm import is_valid_resource_id, parse_resource_id
 from azure.cli.core.commands import LongRunningOperation
 
 from azure.cli.core.prompting import prompt_pass, NoTTYException
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from ._params import web_client_factory, _generic_site_operation
+from .vsts_cd_provider import VstsContinuousDeliveryProvider
 
 logger = azlogging.get_az_logger(__name__)
 
+
 # pylint:disable=no-member,superfluous-parens
 
-
-class AppServiceLongRunningOperation(LongRunningOperation):  # pylint: disable=too-few-public-methods
-
-    def __init__(self, creating_plan=False):
-        super(AppServiceLongRunningOperation, self).__init__(self)
-        self._creating_plan = creating_plan
-
-    def __call__(self, poller):
-        try:
-            return super(AppServiceLongRunningOperation, self).__call__(poller)
-        except Exception as ex:
-            raise self._get_detail_error(ex)
-
-    def _get_detail_error(self, ex):
-        try:
-            # workaround that app service's error doesn't comform to LRO spec
-            detail = json.loads(ex.response.text)['Message']
-            if self._creating_plan:
-                if 'Requested features are not supported in region' in detail:
-                    detail = ("Plan with linux worker is not supported in current region. For " +
-                              "supported regions, please refer to https://docs.microsoft.com/en-us/"
-                              "azure/app-service-web/app-service-linux-intro")
-                elif 'Not enough available reserved instance servers to satisfy' in detail:
-                    detail = ("Plan with Linux worker can only be created in a group " +
-                              "which has never contained a Windows worker, and vice versa. " +
-                              "Please use a new resource group. Original error:" + detail)
-            return CLIError(detail)
-        except:  # pylint: disable=bare-except
-            return ex
-
-
-def create_webapp(resource_group_name, name,
-                  plan=None, create_plan=False,
-                  sku=None, is_linux=False, number_of_workers=None,
-                  location=None):
+def create_webapp(resource_group_name, name, plan):
     client = web_client_factory()
-    plan_id = plan
-    if create_plan:
-        logger.warning("Create appservice plan: '%s'", plan)
-        result = create_app_service_plan(resource_group_name, plan, is_linux,
-                                         sku or 'S1', number_of_workers or 1, location)
-        plan_id = result.id
-
-    webapp_def = Site(server_farm_id=plan_id, location=location)
-    poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
-    return AppServiceLongRunningOperation()(poller)
+    if is_valid_resource_id(plan):
+        plan = parse_resource_id(plan)['name']
+    location = _get_location_from_app_service_plan(client, resource_group_name, plan)
+    webapp_def = Site(server_farm_id=plan, location=location)
+    return client.web_apps.create_or_update(resource_group_name, name, webapp_def)
 
 
 def show_webapp(resource_group_name, name, slot=None):
@@ -89,9 +52,9 @@ def show_webapp(resource_group_name, name, slot=None):
 def list_webapp(resource_group_name=None):
     client = web_client_factory()
     if resource_group_name:
-        result = client.web_apps.list_by_resource_group(resource_group_name)
+        result = list(client.web_apps.list_by_resource_group(resource_group_name))
     else:
-        result = client.web_apps.list()
+        result = list(client.web_apps.list())
     for webapp in result:
         _rename_server_farm_props(webapp)
     return result
@@ -245,30 +208,58 @@ def _filter_for_container_settings(settings):
     return [x for x in settings if x['name'] in CONTAINER_APPSETTING_NAMES]
 
 
-def add_hostname(resource_group_name, webapp_name, name, slot=None):
+def add_hostname(resource_group_name, webapp_name, hostname, slot=None):
     client = web_client_factory()
     webapp = client.web_apps.get(resource_group_name, webapp_name)
-    binding = HostNameBinding(webapp.location, host_name_binding_name=name, site_name=webapp.name)
+    binding = HostNameBinding(webapp.location, host_name_binding_name=hostname,
+                              site_name=webapp.name)
     if slot is None:
         return client.web_apps.create_or_update_host_name_binding(
-            resource_group_name, webapp.name, name, binding)
+            resource_group_name, webapp.name, hostname, binding)
     else:
         return client.web_apps.create_or_update_host_name_binding_slot(
-            resource_group_name, webapp.name, name, binding, slot)
+            resource_group_name, webapp.name, hostname, binding, slot)
 
 
-def delete_hostname(resource_group_name, webapp_name, name, slot=None):
+def delete_hostname(resource_group_name, webapp_name, hostname, slot=None):
     client = web_client_factory()
     if slot is None:
-        return client.web_apps.delete_host_name_binding(resource_group_name, webapp_name, name)
+        return client.web_apps.delete_host_name_binding(resource_group_name, webapp_name, hostname)
     else:
         return client.web_apps.delete_host_name_binding_slot(resource_group_name,
-                                                             webapp_name, slot, name)
+                                                             webapp_name, slot, hostname)
 
 
 def list_hostnames(resource_group_name, webapp_name, slot=None):
-    return _generic_site_operation(resource_group_name, webapp_name, 'list_host_name_bindings',
-                                   slot)
+    result = list(_generic_site_operation(resource_group_name, webapp_name,
+                                          'list_host_name_bindings', slot))
+    for r in result:
+        r.name = r.name.split('/')[-1]
+    return result
+
+
+def get_external_ip(resource_group_name, webapp_name):
+    # logics here are ported from portal
+    client = web_client_factory()
+    webapp_name = client.web_apps.get(resource_group_name, webapp_name)
+    if webapp_name.hosting_environment_profile:
+        address = client.app_service_environments.list_vips(
+            resource_group_name, webapp_name.hosting_environment_profile.name)
+        if address.internal_ip_address:
+            ip_address = address.internal_ip_address
+        else:
+            vip = next((s for s in webapp_name.host_name_ssl_states
+                        if s.ssl_state == SslState.ip_based_enabled), None)
+            ip_address = (vip and vip.virtual_ip) or address.service_ip_address
+    else:
+        ip_address = _resolve_hostname_through_dns(webapp_name.default_host_name)
+
+    return {'ip': ip_address}
+
+
+def _resolve_hostname_through_dns(hostname):
+    import socket
+    return socket.gethostbyname(hostname)
 
 
 def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=None):
@@ -277,15 +268,16 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
     clone_from_prod = None
-    if configuration_source:
-        clone_from_prod = configuration_source.lower() == webapp.lower()
-        slot_def.site_config = get_site_configs(
-            resource_group_name, webapp, None if clone_from_prod else configuration_source)
-    else:
-        slot_def.site_config = SiteConfig(location)
+    slot_def.site_config = SiteConfig(location)
 
     poller = client.web_apps.create_or_update_slot(resource_group_name, webapp, slot_def, slot)
-    result = AppServiceLongRunningOperation()(poller)
+    result = LongRunningOperation()(poller)
+    if configuration_source:
+        clone_from_prod = configuration_source.lower() == webapp.lower()
+        site_config = get_site_configs(
+            resource_group_name, webapp, None if clone_from_prod else configuration_source)
+        _generic_site_operation(resource_group_name, webapp,
+                                'update_configuration', slot, site_config)
 
     # slot create doesn't clone over the app-settings and connection-strings, so we do it here
     # also make sure slot settings don't get propagated.
@@ -301,7 +293,7 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
         connection_strings = _generic_site_operation(resource_group_name, webapp,
                                                      'list_connection_strings',
                                                      src_slot)
-        for a in slot_cfg_names.connection_string_names:
+        for a in (slot_cfg_names.connection_string_names or []):
             connection_strings.properties.pop(a, None)
 
         _generic_site_operation(resource_group_name, webapp, 'update_application_settings',
@@ -313,21 +305,31 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
 
 
 def config_source_control(resource_group_name, name, repo_url, repository_type=None, branch=None,
-                          git_token=None, manual_integration=None, slot=None):
-    from azure.mgmt.web.models import SiteSourceControl, SourceControl
+                          git_token=None, manual_integration=None, slot=None, cd_provider=None,
+                          cd_app_type=None, cd_account=None, cd_account_must_exist=None):
     client = web_client_factory()
     location = _get_location_from_webapp(client, resource_group_name, name)
-    if git_token:
-        sc = SourceControl(location, name='GitHub', token=git_token)
-        client.update_source_control('GitHub', sc)
 
-    source_control = SiteSourceControl(location, repo_url=repo_url, branch=branch,
-                                       is_manual_integration=manual_integration,
-                                       is_mercurial=(repository_type != 'git'))
-    poller = _generic_site_operation(resource_group_name, name,
-                                     'create_or_update_source_control',
-                                     slot, source_control)
-    return AppServiceLongRunningOperation()(poller)
+    if cd_provider == 'vsts':
+        create_account = not cd_account_must_exist
+        vsts_provider = VstsContinuousDeliveryProvider()
+        status = vsts_provider.setup_continuous_delivery(resource_group_name, name, repo_url,
+                                                         branch, git_token, slot, cd_app_type,
+                                                         cd_account, create_account, location)
+        logger.warning(status.status_message)
+        return status
+    else:
+        from azure.mgmt.web.models import SiteSourceControl, SourceControl
+        if git_token:
+            sc = SourceControl(location, name='GitHub', token=git_token)
+            client.update_source_control('GitHub', sc)
+
+        source_control = SiteSourceControl(location, repo_url=repo_url, branch=branch,
+                                           is_manual_integration=manual_integration,
+                                           is_mercurial=(repository_type != 'git'))
+        return _generic_site_operation(resource_group_name, name,
+                                       'create_or_update_source_control',
+                                       slot, source_control)
 
 
 def update_git_token(git_token=None):
@@ -382,9 +384,9 @@ def _extract_real_error(ex):
 def list_app_service_plans(resource_group_name=None):
     client = web_client_factory()
     if resource_group_name is None:
-        plans = client.app_service_plans.list()
+        plans = list(client.app_service_plans.list())
     else:
-        plans = client.app_service_plans.list_by_resource_group(resource_group_name)
+        plans = list(client.app_service_plans.list_by_resource_group(resource_group_name))
     for plan in plans:
         # prune a few useless fields
         del plan.app_service_plan_name
@@ -393,19 +395,27 @@ def list_app_service_plans(resource_group_name=None):
     return plans
 
 
+def _linux_sku_check(sku):
+    tier = _get_sku_name(sku)
+    if tier in ['BASIC', 'STANDARD']:
+        return
+    format_string = 'usage error: {0} is not a valid sku for linux plan, please use one of the following: {1}'  # pylint: disable=line-too-long
+    raise CLIError(format_string.format(sku, 'B1, B2, B3, S1, S2, S3'))
+
+
 def create_app_service_plan(resource_group_name, name, is_linux, sku='B1', number_of_workers=None,
                             location=None):
     client = web_client_factory()
     sku = _normalize_sku(sku)
     if location is None:
         location = _get_location_from_resource_group(resource_group_name)
-
+    if is_linux:
+        _linux_sku_check(sku)
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=_get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location, app_service_plan_name=name,
                               sku=sku_def, reserved=(is_linux or None))
-    poller = client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
-    return AppServiceLongRunningOperation(creating_plan=True)(poller)
+    return client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
 
 
 def update_app_service_plan(instance, sku=None, number_of_workers=None,
@@ -586,7 +596,7 @@ def _get_sku_name(tier):
 
 
 def _get_location_from_resource_group(resource_group_name):
-    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource import ResourceManagementClient
     client = get_mgmt_service_client(ResourceManagementClient)
     group = client.resource_groups.get(resource_group_name)
     return group.location
@@ -729,7 +739,7 @@ def config_slot_auto_swap(resource_group_name, webapp, slot, auto_swap_slot=None
 
 def list_slots(resource_group_name, webapp):
     client = web_client_factory()
-    slots = client.web_apps.list_slots(resource_group_name, webapp)
+    slots = list(client.web_apps.list_slots(resource_group_name, webapp))
     for slot in slots:
         slot.name = slot.name.split('/')[-1]
         setattr(slot, 'app_service_plan', parse_resource_id(slot.server_farm_id)['name'])
@@ -740,12 +750,10 @@ def list_slots(resource_group_name, webapp):
 def swap_slot(resource_group_name, webapp, slot, target_slot=None):
     client = web_client_factory()
     if target_slot is None:
-        poller = client.web_apps.swap_slot_with_production(resource_group_name, webapp, slot, True)
+        return client.web_apps.swap_slot_with_production(resource_group_name, webapp, slot, True)
     else:
-        poller = client.web_apps.swap_slot_slot(resource_group_name, webapp,
-                                                slot, target_slot, True)
-
-    return AppServiceLongRunningOperation()(poller)
+        return client.web_apps.swap_slot_slot(resource_group_name, webapp,
+                                              slot, target_slot, True)
 
 
 def delete_slot(resource_group_name, webapp, slot):
@@ -823,6 +831,7 @@ def _stream_trace(streaming_url, user_name, password):
 def upload_ssl_cert(resource_group_name, name, certificate_password, certificate_file):
     client = web_client_factory()
     webapp = _generic_site_operation(resource_group_name, name, 'get')
+    cert_resource_group_name = parse_resource_id(webapp.server_farm_id)['resource_group']
     cert_file = open(certificate_file, 'rb')
     cert_contents = cert_file.read()
     hosting_environment_profile_param = webapp.hosting_environment_profile
@@ -831,10 +840,10 @@ def upload_ssl_cert(resource_group_name, name, certificate_password, certificate
 
     thumb_print = _get_cert(certificate_password, certificate_file)
     cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
-                                    webapp.location, resource_group_name)
+                                    webapp.location, cert_resource_group_name)
     cert = Certificate(password=certificate_password, pfx_blob=cert_contents,
                        location=webapp.location)
-    return client.certificates.create_or_update(resource_group_name, cert_name, cert)
+    return client.certificates.create_or_update(cert_resource_group_name, cert_name, cert)
 
 
 def _generate_cert_name(thumb_print, hosting_environment, location, resource_group_name):
@@ -879,7 +888,8 @@ def _update_host_name_ssl_state(resource_group_name, webapp_name, location,
 def _update_ssl_binding(resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
     client = web_client_factory()
     webapp = client.web_apps.get(resource_group_name, name)
-    webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
+    cert_resource_group_name = parse_resource_id(webapp.server_farm_id)['resource_group']
+    webapp_certs = client.certificates.list_by_resource_group(cert_resource_group_name)
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
             if len(webapp_cert.host_names) == 1 and not webapp_cert.host_names[0].startswith('*'):

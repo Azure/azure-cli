@@ -10,7 +10,8 @@ import json
 
 from enum import Enum
 
-from azure.cli.core._util import b64encode
+from azure.cli.core.util import b64encode
+from azure.cli.core.profiles import get_api_version, supported_api_version, ResourceType
 
 
 class ArmTemplateBuilder(object):
@@ -77,7 +78,7 @@ class StorageProfile(Enum):
 
 
 def build_deployment_resource(name, template, dependencies=None):
-    from azure.cli.core._util import random_string
+    from azure.cli.core.util import random_string
     dependencies = dependencies or []
     deployment = {
         'name': name,
@@ -94,7 +95,7 @@ def build_deployment_resource(name, template, dependencies=None):
 
 def build_output_deployment_resource(key, property_name, property_provider, property_type,
                                      parent_name=None, output_type='object', path=None):
-    from azure.cli.core._util import random_string
+    from azure.cli.core.util import random_string
     output_tb = ArmTemplateBuilder()
     output_tb.add_output(key, property_name, property_provider, property_type,
                          output_type=output_type, path=path)
@@ -376,8 +377,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals
     if not attach_os_disk:
         vm_properties['osProfile'] = _build_os_profile()
 
+    vm_api_version = get_api_version(ResourceType.MGMT_COMPUTE)
     vm = {
-        'apiVersion': '2016-04-30-preview',
+        'apiVersion': vm_api_version,
         'type': 'Microsoft.Compute/virtualMachines',
         'name': name,
         'location': location,
@@ -411,8 +413,8 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
     return profile
 
 
-def _build_frontend_ip_config(name, public_ip_id=None, private_ip_allocation=None,
-                              private_ip_address=None, subnet_id=None):
+def _build_frontend_ip_config(name, public_ip_id=None, private_ip_address=None,
+                              private_ip_allocation=None, subnet_id=None):
     frontend_ip_config = {
         'name': name
     }
@@ -698,7 +700,6 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
     # Build VMSS
     vmss_properties = {
         'overprovision': overprovision,
-        'singlePlacementGroup': single_placement_group,
         'upgradePolicy': {
             'mode': upgrade_policy_mode
         },
@@ -716,12 +717,17 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
             }
         }
     }
+
+    if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
+        vmss_properties['singlePlacementGroup'] = single_placement_group
+
+    vmss_api_version = get_api_version(ResourceType.MGMT_COMPUTE)
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': '2016-04-30-preview',
+        'apiVersion': vmss_api_version,
         'dependsOn': [],
         'sku': {
             'name': vm_sku,
@@ -735,12 +741,13 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
 
 def build_av_set_resource(name, location, tags,
                           platform_update_domain_count, platform_fault_domain_count, unmanaged):
+    av_set_api_version = get_api_version(ResourceType.MGMT_COMPUTE)
     av_set = {
         'type': 'Microsoft.Compute/availabilitySets',
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': '2016-04-30-preview',
+        'apiVersion': av_set_api_version,
         'sku': {
             'name': 'Classic' if unmanaged else 'Aligned'
         },

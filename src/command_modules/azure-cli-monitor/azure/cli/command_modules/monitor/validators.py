@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands.arm import is_valid_resource_id, resource_id, parse_resource_id
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 
 # pylint: disable=line-too-long
@@ -55,6 +55,7 @@ def validate_diagnostic_settings(namespace):
                                           resource_group=namespace.resource_group,
                                           namespace='microsoft.OperationalInsights',
                                           type='workspaces', name=namespace.workspace)
+
     _validate_tags(namespace)
 
 

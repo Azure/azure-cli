@@ -32,7 +32,7 @@ from azure.mgmt.keyvault.models import (VaultProperties,
                                         SkuName)
 from azure.graphrbac import GraphRbacManagementClient
 import azure.cli.core.telemetry as telemetry
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 import azure.cli.core.azlogging as azlogging
 from azure.keyvault import KeyVaultClient
 from azure.cli.command_modules.keyvault._validators import secret_text_encoding_values
@@ -61,7 +61,7 @@ def _default_certificate_profile():
                 KeyUsageType.key_cert_sign
             ],
             subject='C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=www.contoso.com',
-            ekus=[]
+            validity_in_months=12
         ),
         lifetime_actions=[LifetimeAction(
             trigger=Trigger(
@@ -79,12 +79,10 @@ def _default_certificate_profile():
         )
     )
     del template.id
-    del template.attributes.created
-    del template.attributes.updated
+    del template.attributes
     del template.issuer_parameters.certificate_type
     del template.lifetime_actions[0].trigger.lifetime_percentage
     del template.x509_certificate_properties.subject_alternative_names
-    del template.x509_certificate_properties.validity_in_months
     del template.x509_certificate_properties.ekus
     return template
 
@@ -135,8 +133,7 @@ def _scaffold_certificate_profile():
         )
     )
     del template.id
-    del template.attributes.created
-    del template.attributes.updated
+    del template.attributes
     return template
 
 
@@ -224,6 +221,7 @@ def create_keyvault(client, resource_group_name, vault_name, location=None, #pyl
                     tags=None):
     from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
     from azure.cli.core._profile import Profile, CLOUD
+    from azure.graphrbac.models import GraphErrorException
     profile = Profile()
     cred, _, tenant_id = profile.get_login_credentials(
         resource=CLOUD.endpoints.active_directory_graph_resource_id)
@@ -244,7 +242,10 @@ def create_keyvault(client, resource_group_name, vault_name, location=None, #pyl
                                         KeyPermissions.restore],
                                   secrets=[SecretPermissions.all],
                                   certificates=[CertificatePermissions.all])
-        object_id = _get_object_id(graph_client, subscription=subscription)
+        try:
+            object_id = _get_current_user_object_id(graph_client)
+        except GraphErrorException:
+            object_id = _get_object_id(graph_client, subscription=subscription)
         if not object_id:
             raise CLIError('Cannot create vault.\n'
                            'Unable to query active directory for information '\
@@ -501,9 +502,13 @@ def download_secret(client, vault_base_url, secret_name, file_path, encoding=Non
 
 
 def create_certificate(client, vault_base_url, certificate_name, certificate_policy,
-                       disabled=False, expires=None, not_before=None, tags=None):
-    cert_attrs = CertificateAttributes(not disabled, not_before, expires)
+                       disabled=False, tags=None, validity=None):
+    cert_attrs = CertificateAttributes(not disabled)
     logger.info("Starting long running operation 'keyvault certificate create'")
+
+    if validity is not None:
+        certificate_policy['x509_certificate_properties']['validity_in_months'] = validity
+
     client.create_certificate(
         vault_base_url, certificate_name, certificate_policy, cert_attrs, tags)
 
@@ -538,8 +543,79 @@ def create_certificate(client, vault_base_url, certificate_name, certificate_pol
 create_certificate.__doc__ = KeyVaultClient.create_certificate.__doc__
 
 
+def _asn1_to_iso8601(asn1_date):
+    import dateutil.parser
+    if isinstance(asn1_date, bytes):
+        asn1_date = asn1_date.decode('utf-8')
+    return dateutil.parser.parse(asn1_date)
+
+
+def import_certificate(client, vault_base_url, certificate_name, certificate_data,
+                       disabled=False, password=None, certificate_policy=None, tags=None):
+    import binascii
+
+    x509 = None
+    content_type = None
+    try:
+        x509 = crypto.load_certificate(crypto.FILETYPE_PEM, certificate_data)
+        # if we get here, we know it was a PEM file
+        content_type = 'application/x-pem-file'
+        try:
+            # for PEM files (including automatic endline conversion for Windows)
+            certificate_data = certificate_data.decode('utf-8').replace('\r\n', '\n')
+        except UnicodeDecodeError:
+            certificate_data = binascii.b2a_base64(certificate_data).decode('utf-8')
+    except (ValueError, crypto.Error):
+        pass
+
+    if not x509:
+        try:
+            if password:
+                x509 = crypto.load_pkcs12(certificate_data, password).get_certificate()
+            else:
+                x509 = crypto.load_pkcs12(certificate_data).get_certificate()
+            content_type = 'application/x-pkcs12'
+            certificate_data = binascii.b2a_base64(certificate_data).decode('utf-8')
+        except crypto.Error:
+            raise CLIError('We could not parse the provided certificate as .pem or .pfx. Please verify the certificate with OpenSSL.') # pylint: disable=line-too-long
+
+    not_before, not_after = None, None
+
+    if x509.get_notBefore():
+        not_before = _asn1_to_iso8601(x509.get_notBefore())
+
+    if x509.get_notAfter():
+        not_after = _asn1_to_iso8601(x509.get_notAfter())
+
+    cert_attrs = CertificateAttributes(
+        enabled=not disabled,
+        not_before=not_before,
+        expires=not_after)
+
+    if certificate_policy:
+        secret_props = certificate_policy.get('secret_properties')
+        if secret_props:
+            secret_props['content_type'] = content_type
+        elif certificate_policy and not secret_props:
+            certificate_policy['secret_properties'] = SecretProperties(content_type=content_type)
+    else:
+        certificate_policy = CertificatePolicy(
+            secret_properties=SecretProperties(content_type=content_type))
+
+    logger.info("Starting 'keyvault certificate import'")
+    result = client.import_certificate(vault_base_url=vault_base_url,
+                                       certificate_name=certificate_name,
+                                       base64_encoded_certificate=certificate_data,
+                                       certificate_attributes=cert_attrs,
+                                       certificate_policy=certificate_policy,
+                                       tags=tags,
+                                       password=password)
+    logger.info("Finished 'keyvault certificate import'")
+    return result
+
+
 def download_certificate(client, vault_base_url, certificate_name, file_path,
-                         encoding='binary', certificate_version=''):
+                         encoding='PEM', certificate_version=''):
     """ Download a certificate from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
@@ -549,15 +625,16 @@ def download_certificate(client, vault_base_url, certificate_name, file_path,
 
     try:
         with open(file_path, 'wb') as f:
-            if encoding == 'binary':
+            if encoding == 'DER':
                 f.write(cert)
             else:
                 import base64
-                try:
-                    f.write(base64.encodebytes(cert))
-                except AttributeError:
-                    f.write(base64.encodestring(cert)) # pylint: disable=deprecated-method
-    except Exception as ex: # pylint: disable=broad-except
+                encoded = base64.encodestring(cert)  # pylint:disable=deprecated-method
+                if isinstance(encoded, bytes):
+                    encoded = encoded.decode("utf-8")  # pylint:disable=redefined-variable-type
+                encoded = '-----BEGIN CERTIFICATE-----\n' + encoded + '-----END CERTIFICATE-----\n'
+                f.write(encoded.encode("utf-8"))
+    except Exception as ex:  # pylint: disable=broad-except
         if os.path.isfile(file_path):
             os.remove(file_path)
         raise ex

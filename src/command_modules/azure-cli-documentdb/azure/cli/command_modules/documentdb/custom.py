@@ -3,14 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# --locations
-# -ipRangeFilter
-# -defaultConsistencyLevel
-# - MaxIntervalInSeconds
-# - MaxStalenessPrefix
-# - resource-group-location
-# -Kind
-
 from azure.mgmt.documentdb.models import (
     ConsistencyPolicy,
     DatabaseAccountCreateUpdateParameters,
@@ -37,7 +29,7 @@ def cli_documentdb_create(client,
     if default_consistency_level is not None:
         consistency_policy = ConsistencyPolicy(default_consistency_level, max_staleness_prefix, max_interval)
 
-    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     resource_client = get_mgmt_service_client(ResourceManagementClient)
     rg = resource_client.resource_groups.get(resource_group_name)

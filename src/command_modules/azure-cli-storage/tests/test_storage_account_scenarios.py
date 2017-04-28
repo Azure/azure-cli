@@ -5,9 +5,10 @@
 
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer,
                                StorageAccountPreparer)
+from .storage_test_util import StorageScenarioMixin
 
 
-class StorageAccountTests(ScenarioTest):
+class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_create_storage_account(self, resource_group, location):
         name = self.create_random_name(prefix='cli', length=24)
@@ -20,7 +21,7 @@ class StorageAccountTests(ScenarioTest):
             JMESPathCheck('reason', 'AlreadyExists')
         ])
 
-        self.cmd('storage account list -g {}'.format(resource_group, name), checks=[
+        self.cmd('storage account list -g {}'.format(resource_group), checks=[
             JMESPathCheck('[0].location', 'westus'),
             JMESPathCheck('[0].sku.name', 'Standard_LRS'),
             JMESPathCheck('[0].resourceGroup', resource_group)
@@ -84,15 +85,15 @@ class StorageAccountTests(ScenarioTest):
             'storage account show-connection-string -g {} -n {} -otsv'
             .format(resource_group, storage_account)).output
 
-        self.cmd('storage metrics show --connection-string {}'.format(connection_string), checks=[
+        self.cmd('storage metrics show --connection-string "{}"'.format(connection_string), checks=[
             JMESPathCheck('file.hour.enabled', True),
             JMESPathCheck('file.minute.enabled', False),
         ])
 
         self.cmd('storage metrics update --services f --hour false --retention 1 '
-                 '--connection-string {}'.format(connection_string))
+                 '--connection-string "{}"'.format(connection_string))
 
-        self.cmd('storage metrics show --connection-string {}'.format(connection_string), checks=[
+        self.cmd('storage metrics show --connection-string "{}"'.format(connection_string), checks=[
             JMESPathCheck('file.hour.enabled', False),
             JMESPathCheck('file.minute.enabled', False),
         ])
@@ -132,8 +133,8 @@ class StorageAccountTests(ScenarioTest):
         sas = self.cmd('storage account generate-sas --resource-types o --services b '
                        '--expiry 2046-12-31T08:23Z --permissions r --https-only --account-name {}'
                        .format(storage_account)).output
-        sas_keys = dict(pair.split('=') for pair in sas.split('&'))
-        assert u'sig' in sas_keys
+        self.assertIn('sig=', sas, 'SAS token {} does not contain sig segment'.format(sas))
+        self.assertIn('se=', sas, 'SAS token {} does not contain se segment'.format(sas))
 
     def test_list_locations(self):
         self.cmd('az account list-locations',

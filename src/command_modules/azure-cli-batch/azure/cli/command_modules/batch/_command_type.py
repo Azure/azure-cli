@@ -8,7 +8,8 @@ import json
 import re
 
 from six import string_types
-from msrest.exceptions import DeserializationError
+from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
+
 
 from azure.cli.command_modules.batch import _validators as validators
 from azure.cli.command_modules.batch import _format as transformers
@@ -339,6 +340,7 @@ class BatchArgumentTree(object):
         :param dict kwargs: The request kwargs
         :param dict json_obj: The loaded JSON content
         """
+        from msrest.exceptions import DeserializationError
         message = "Failed to deserialized JSON file into object {}"
         try:
             kwargs[self._request_param['name']] = client._deserialize(  # pylint: disable=protected-access
@@ -509,7 +511,7 @@ class AzureBatchDataPlaneCommand(object):
             from msrest.paging import Paged
             from msrest.exceptions import ValidationError, ClientRequestError
             from azure.batch.models import BatchErrorException
-            from azure.cli.core._util import CLIError
+            from azure.cli.core.util import CLIError
             from azure.cli.core._config import az_config
             from azure.cli.core.commands import _user_confirmed
 
@@ -852,6 +854,45 @@ class AzureBatchDataPlaneCommand(object):
                                              help=docstring))
 
 
+def validate_client_parameters(namespace):
+    """Retrieves Batch connection parameters from environment variables"""
+    from azure.mgmt.batch import BatchManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core._config import az_config
+
+    # simply try to retrieve the remaining variables from environment variables
+    if not namespace.account_name:
+        namespace.account_name = az_config.get('batch', 'account', None)
+    if not namespace.account_key:
+        namespace.account_key = az_config.get('batch', 'access_key', None)
+    if not namespace.account_endpoint:
+        namespace.account_endpoint = az_config.get('batch', 'endpoint', None)
+
+    # if account name is specified but no key, attempt to query if we use shared key auth
+    if namespace.account_name and namespace.account_endpoint and not namespace.account_key:
+        if az_config.get('batch', 'auth_mode', 'shared_key') == 'shared_key':
+            endpoint = urlsplit(namespace.account_endpoint)
+            host = endpoint.netloc
+            client = get_mgmt_service_client(BatchManagementClient)
+            acc = next((x for x in client.batch_account.list()
+                        if x.name == namespace.account_name and x.account_endpoint == host), None)
+            if acc:
+                from azure.cli.core.commands.arm import parse_resource_id
+                rg = parse_resource_id(acc.id)['resource_group']
+                namespace.account_key = \
+                    client.batch_account.get_keys(rg, namespace.account_name).primary  # pylint: disable=no-member
+            else:
+                raise ValueError("Batch account '{}' not found.".format(namespace.account_name))
+    else:
+        if not namespace.account_name:
+            raise ValueError("Specify batch account in command line or enviroment variable.")
+        if not namespace.account_endpoint:
+            raise ValueError("Specify batch endpoint in command line or enviroment variable.")
+
+    if az_config.get('batch', 'auth_mode', 'shared_key') == 'aad':
+        namespace.account_key = None
+
+
 def cli_batch_data_plane_command(name, operation, client_factory, transform=None,  # pylint:disable=too-many-arguments
                                  flatten=FLATTEN, ignore=None, validator=None, silent=None):
     """ Registers an Azure CLI Batch Data Plane command. These commands must respond to a
@@ -862,7 +903,7 @@ def cli_batch_data_plane_command(name, operation, client_factory, transform=None
     # add parameters required to create a batch client
     group_name = 'Batch Account'
     command.cmd.add_argument('account_name', '--account-name', required=False, default=None,
-                             validator=validators.validate_client_parameters, arg_group=group_name,
+                             validator=validate_client_parameters, arg_group=group_name,
                              help='Batch account name. Alternatively, set by environment variable: '
                              'AZURE_BATCH_ACCOUNT')
     command.cmd.add_argument('account_key', '--account-key', required=False, default=None,

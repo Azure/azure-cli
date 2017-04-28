@@ -3,14 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import datetime
-import json
 import re
 import os
 import uuid
 from dateutil.relativedelta import relativedelta
+from dateutil.tz import tzutc
 import dateutil.parser
 
-from azure.cli.core._util import CLIError, todict, get_file_json
+from azure.cli.core.util import CLIError, todict, get_file_json, shell_safe_json_parse
 import azure.cli.core.azlogging as azlogging
 
 from azure.mgmt.authorization.models import (RoleAssignmentProperties, Permission, RoleDefinition,
@@ -44,12 +44,27 @@ def get_role_definition_name_completion_list(prefix, **kwargs):  # pylint: disab
     return [x.properties.role_name for x in list(definitions)]
 
 
+def x509_type(cert):
+    x509 = _try_x509_pem(cert) or _try_x509_der(cert)
+    if not x509:
+        raise CLIError("The value provided for --cert was not a PEM or a DER file.")
+    return x509
+
+
 def create_role_definition(role_definition):
-    role_id = uuid.uuid4()
+    return _create_update_role_definition(role_definition, for_update=False)
+
+
+def update_role_definition(role_definition):
+    return _create_update_role_definition(role_definition, for_update=True)
+
+
+def _create_update_role_definition(role_definition, for_update):
+    definitions_client = _auth_client_factory().role_definitions
     if os.path.exists(role_definition):
         role_definition = get_file_json(role_definition)
     else:
-        role_definition = json.loads(role_definition)
+        role_definition = shell_safe_json_parse(role_definition)
 
     # to workaround service defects, ensure property names are camel case
     names = [p for p in role_definition if p[:1].isupper()]
@@ -57,14 +72,29 @@ def create_role_definition(role_definition):
         new_name = n[:1].lower() + n[1:]
         role_definition[new_name] = role_definition.pop(n)
 
-    if 'name' not in role_definition:
-        raise CLIError("please provide 'name'")
-    if 'assignableScopes' not in role_definition:
+    role_name = role_definition.get('name', None)
+    if not role_name:
+        raise CLIError("please provide role name")
+    if for_update:  # for update, we need to use guid style unique name
+        scopes_in_definition = role_definition.get('assignableScopes', None)
+        scope = (scopes_in_definition[0] if scopes_in_definition else
+                 '/subscriptions/' + definitions_client.config.subscription_id)
+        matched = _search_role_definitions(definitions_client, role_name, scope)
+        if len(matched) != 1:
+            raise CLIError('Please provide the unique logic name of an existing role')
+        role_definition['name'] = matched[0].name
+        # ensure correct logical name and guid name. For update we accept both
+        role_name = matched[0].properties.role_name
+        role_id = matched[0].name
+    else:
+        role_id = uuid.uuid4()
+
+    if not for_update and 'assignableScopes' not in role_definition:
         raise CLIError("please provide 'assignableScopes'")
 
     permission = Permission(actions=role_definition.get('actions', None),
                             not_actions=role_definition.get('notActions', None))
-    properties = RoleDefinitionProperties(role_name=role_definition['name'],
+    properties = RoleDefinitionProperties(role_name=role_name,
                                           description=role_definition.get('description', None),
                                           type=_CUSTOM_RULE,
                                           assignable_scopes=role_definition['assignableScopes'],
@@ -72,7 +102,6 @@ def create_role_definition(role_definition):
 
     definition = RoleDefinition(name=role_id, properties=properties)
 
-    definitions_client = _auth_client_factory().role_definitions
     return definitions_client.create_or_update(role_definition_id=role_id,
                                                scope=properties.assignable_scopes[0],
                                                role_definition=definition)
@@ -89,7 +118,9 @@ def delete_role_definition(name, resource_group_name=None, scope=None,
 
 
 def _search_role_definitions(definitions_client, name, scope, custom_role_only=False):
-    roles = definitions_client.list(scope, filter="roleName eq '{}'".format(name) if name else None)
+    roles = list(definitions_client.list(scope))
+    if name:
+        roles = [r for r in roles if r.name == name or r.properties.role_name == name]
     if custom_role_only:
         roles = [r for r in roles if r.properties.type == _CUSTOM_RULE]
     return roles
@@ -254,20 +285,26 @@ def _build_role_scope(resource_group_name, scope, subscription_id):
 
 def _resolve_role_id(role, scope, definitions_client):
     role_id = None
-    try:
-        uuid.UUID(role)
+    if re.match(r'/subscriptions/.+/providers/Microsoft.Authorization/roleDefinitions/',
+                role, re.I):
         role_id = role
-    except ValueError:
-        pass
-    if not role_id:  # retrieve role id
-        role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
-        if not role_defs:
-            raise CLIError("Role '{}' doesn't exist.".format(role))
-        elif len(role_defs) > 1:
-            ids = [r.id for r in role_defs]
-            err = "More than one role matches the given name '{}'. Please pick a value from '{}'"
-            raise CLIError(err.format(role, ids))
-        role_id = role_defs[0].id
+    else:
+        # pylint: disable=line-too-long
+        try:
+            uuid.UUID(role)
+            role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(
+                definitions_client.config.subscription_id, role)
+        except ValueError:
+            pass
+        if not role_id:  # retrieve role id
+            role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
+            if not role_defs:
+                raise CLIError("Role '{}' doesn't exist.".format(role))
+            elif len(role_defs) > 1:
+                ids = [r.id for r in role_defs]
+                err = "More than one role matches the given name '{}'. Please pick a value from '{}'"
+                raise CLIError(err.format(role, ids))
+            role_id = role_defs[0].id
     return role_id
 
 
@@ -327,12 +364,14 @@ create_user.__doc__ = UserCreateParameters.__doc__
 
 
 def list_groups(client, display_name=None, query_filter=None):
+    '''
+    list groups in the directory
+    '''
     sub_filters = []
     if query_filter:
         sub_filters.append(query_filter)
     if display_name:
         sub_filters.append("startswith(displayName,'{}')".format(display_name))
-
     return client.list(filter=(' and ').join(sub_filters))
 
 
@@ -469,15 +508,16 @@ def _resolve_service_principal(client, identifier):
 
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-arguments,too-many-statements,too-many-locals, too-many-branches
-        name=None, password=None, years=1,
+        name=None, password=None, years=None,
         create_cert=False, cert=None,
         scopes=None, role='Contributor',
         expanded_view=None, skip_assignment=False):
     '''create a service principal and configure its access to Azure resources
     :param str name: a display name or an app id uri. Command will generate one if missing.
     :param str password: the password used to login. If missing, command will generate one.
-    :param str cert: PEM formatted public certificate. Do not include private key info.
-    :param str years: Years the password will be valid.
+    :param str cert: PEM or DER formatted public certificate using string or `@<file path>` to
+        load from a file. Do not include private key info.
+    :param str years: Years the password will be valid. Default: 1 year
     :param str scopes: space separated scopes the service principal's role assignment applies to.
            Defaults to the root of the current subscription.
     :param str role: role the service principal has on the resources.
@@ -500,27 +540,32 @@ def create_service_principal_for_rbac(
         if aad_sps:
             raise CLIError("'{}' already exists.".format(name))
 
-    # pylint: disable=protected-access
-    public_cert_string = None
-    cert_file = None
-    password = None
-
-    if len([x for x in [cert, create_cert, password] if x]) > 1:
-        raise CLIError('Usage error: --cert | --create-cert | --password')
-    if create_cert:
-        public_cert_string, cert_file = _create_self_signed_cert(years)
-    elif cert:
-        public_cert_string = cert
-    else:
-        password = password or str(uuid.uuid4())
-
     start_date = datetime.datetime.utcnow()
     app_display_name = app_display_name or ('azure-cli-' +
                                             start_date.strftime('%Y-%m-%d-%H-%M-%S'))
+
+    # pylint: disable=protected-access
+    public_cert_string = None
+    cert_file = None
+    end_date = None
+    if len([x for x in [cert, create_cert, password] if x]) > 1:
+        raise CLIError('Usage error: --cert | --create-cert | --password')
+    if create_cert:
+        public_cert_string, cert_file = _create_self_signed_cert(years or 1)
+    elif cert:
+        public_cert_string, end_date = _normalize_cert(cert)
+        if years:
+            if start_date.replace(tzinfo=tzutc()) + relativedelta(years=years) > end_date:
+                logger.warning("Use cert's expiration date as supplied '--years' exceeds it")
+            else:
+                end_date = None  # we will pick up --years
+    else:
+        password = password or str(uuid.uuid4())
+
     if name is None:
         name = 'http://' + app_display_name  # just a valid uri, no need to exist
 
-    end_date = start_date + relativedelta(years=years)
+    end_date = end_date or start_date + relativedelta(years=years or 1)
 
     aad_application = create_application(graph_client.applications,
                                          display_name=app_display_name,
@@ -645,13 +690,59 @@ def _create_self_signed_cert(years):
     return (cert_string, creds_file)
 
 
-def reset_service_principal_credential(name, password=None, create_cert=False, cert=None, years=1):
+def _try_x509_pem(cert):
+    import OpenSSL.crypto
+    try:
+        return OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, cert)
+    except OpenSSL.crypto.Error:
+        # could not load the pem, try with headers
+        try:
+            pem_with_headers = '-----BEGIN CERTIFICATE-----\n' \
+                               + cert + \
+                               '-----END CERTIFICATE-----\n'
+            return OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, pem_with_headers)
+        except OpenSSL.crypto.Error:
+            return None
+    except UnicodeEncodeError:
+        # this must be a binary encoding
+        return None
+
+
+def _try_x509_der(cert):
+    import OpenSSL.crypto
+    import base64
+    try:
+        cert = base64.b64decode(cert)
+        return OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_ASN1, cert)
+    except OpenSSL.crypto.Error:
+        return None
+
+
+def _get_public(x509):
+    import OpenSSL.crypto
+    pem = OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, x509)
+    if isinstance(pem, bytes):
+        pem = pem.decode("utf-8")
+    stripped = pem.replace('-----BEGIN CERTIFICATE-----\n', '')
+    stripped = stripped.replace('-----END CERTIFICATE-----\n', '')
+    return stripped
+
+
+def _normalize_cert(x509):
+    logger.debug("normalizing x509 certificate with fingerprint %s", x509.digest("sha1"))
+    pkey = x509.get_notAfter().decode()
+    end_date = dateutil.parser.parse(pkey)
+    return _get_public(x509), end_date
+
+
+def reset_service_principal_credential(name, password=None, create_cert=False,
+                                       cert=None, years=None):
     '''reset credential, on expiration or you forget it.
 
     :param str name: the name, can be the app id uri, app id guid, or display name
     :param str password: the password used to login. If missing, command will generate one.
     :param str cert: PEM formatted public certificate. Do not include private key info.
-    :param str years: Years the password will be valid.
+    :param str years: Years the password will be valid. Default: 1 year
     '''
     client = _graph_client_factory()
 
@@ -667,19 +758,25 @@ def reset_service_principal_credential(name, password=None, create_cert=False, c
             'more than one entry matches the name, please provide unique names like app id guid, or app id uri')  # pylint: disable=line-too-long
     app = show_application(client.applications, aad_sps[0].app_id)
 
+    start_date = datetime.datetime.utcnow()
     # build a new password/cert credential and patch it
     public_cert_string = None
     cert_file = None
+    end_date = None
     if len([x for x in [cert, create_cert, password] if x]) > 1:
         raise CLIError('Usage error: --cert | --create-cert | --password')
     if create_cert:
-        public_cert_string, cert_file = _create_self_signed_cert(years)
+        public_cert_string, cert_file = _create_self_signed_cert(years or 1)
     elif cert:
-        public_cert_string = cert
+        public_cert_string, end_date = _normalize_cert(cert)
+        if years:
+            if start_date.replace(tzinfo=tzutc()) + relativedelta(years=years) > end_date:
+                logger.warning("Use cert's expiration date as supplied '--years' exceeds it")
+            else:
+                end_date = None  # we will pick up --years
     else:
         password = password or str(uuid.uuid4())
-    start_date = datetime.datetime.utcnow()
-    end_date = start_date + relativedelta(years=years)
+    end_date = end_date or start_date + relativedelta(years=years or 1)
     key_id = str(uuid.uuid4())
     app_creds = [PasswordCredential(start_date, end_date, key_id, password)] if password else None
     cert_creds = [KeyCredential(start_date, end_date, public_cert_string, str(uuid.uuid4()),

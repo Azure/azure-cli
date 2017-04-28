@@ -11,7 +11,8 @@ from azure.mgmt.compute.models import (CachingTypes,
 from azure.mgmt.storage.models import SkuName
 
 from azure.cli.core.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
-from azure.cli.core.commands.validators import get_default_location_from_resource_group
+from azure.cli.core.commands.validators import \
+    (get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.commands.parameters import \
     (location_type, get_one_of_subscription_locations,
      get_resource_name_completion_list, tags_type, file_type, enum_choice_list, ignore_type)
@@ -44,12 +45,12 @@ name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 multi_ids_type = CliArgumentType(nargs='+')
 existing_vm_name = CliArgumentType(overrides=name_arg_type,
                                    configured_default='vm',
-                                   help="The name of the Virtual Machine. You can configure the default using 'az configure --defaults vm=<name>'",
+                                   help="The name of the Virtual Machine. You can configure the default using `az configure --defaults vm=<name>`",
                                    completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'), id_part='name')
 vmss_name_type = CliArgumentType(name_arg_type,
                                  configured_default='vmss',
                                  completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'),
-                                 help="Scale set name. You can configure the default using 'az configure --defaults vmss=<name>'",
+                                 help="Scale set name. You can configure the default using `az configure --defaults vmss=<name>`",
                                  id_part='name')
 disk_sku = CliArgumentType(required=False, help='underlying storage sku', **enum_choice_list(['Premium_LRS', 'Standard_LRS']))
 
@@ -140,14 +141,17 @@ register_cli_argument('vmss extension image', 'orderby', help='The sort to apply
 register_cli_argument('vmss extension image', 'top', help='Return top number of records')
 register_cli_argument('vmss extension image', 'version', help='Extension version')
 
+
 for scope in ['vm diagnostics', 'vmss diagnostics']:
     register_cli_argument(scope, 'version', help='version of the diagnostics extension. Will use the latest if not specfied')
-    register_cli_argument(scope, 'settings', help='json string or a file path, which defines data to be collected.', type=file_type, completer=FilesCompleter())
-    register_cli_argument(scope, 'protected_settings', help='json string or a file path containing private configurations such as storage account keys, etc.', type=file_type, completer=FilesCompleter())
+    register_cli_argument(scope, 'settings', help='json string or a file path, which defines data to be collected.', type=validate_file_or_dict, completer=FilesCompleter())
+    register_cli_argument(scope, 'protected_settings', help='json string or a file path containing private configurations such as storage account keys, etc.', type=validate_file_or_dict, completer=FilesCompleter())
 
 for scope in ['vm', 'vmss']:
     register_cli_argument(scope, 'no_auto_upgrade', action='store_true', help='by doing this, extension system will not pick the highest minor version for the specified version number, and will not auto update to the latest build/revision number on any scale set updates in future.')
     register_cli_argument('{} create'.format(scope), 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing', arg_group='Authentication')
+    register_cli_argument('{} extension'.format(scope), 'settings', type=validate_file_or_dict)
+    register_cli_argument('{} extension'.format(scope), 'protected_settings', type=validate_file_or_dict)
 
 
 register_cli_argument('vm image list', 'image_location', location_type)
@@ -181,7 +185,7 @@ register_cli_argument('vmss create', 'nat_backend_port', default=None, help='Bac
 register_cli_argument('vmss create', 'single_placement_group', default=None, help="Enable single placement group. This flag will default to True if instance count <=100, and default to False for instance count >100.", **enum_choice_list(['true', 'false']))
 
 for scope in ['vm create', 'vmss create']:
-    register_cli_argument(scope, 'location', location_type, help='Location in which to create VM and related resources. Defaults to the resource group\'s location.')
+    register_cli_argument(scope, 'location', location_type, help='Location in which to create VM and related resources. If default location is not configured, will default to the resource group\'s location')
     register_cli_argument(scope, 'tags', tags_type)
     register_cli_argument(scope, 'no_wait', help='Do not wait for the long running operation to finish.')
     register_cli_argument(scope, 'validate', options_list=('--validate',), help='Generate and validate the ARM template without creating any resources.', action='store_true')
@@ -208,6 +212,9 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'use_unmanaged_disk', action='store_true', help='Do not use managed disk to persist VM', arg_group='Storage')
     register_cli_argument(scope, 'data_disk_sizes_gb', nargs='+', type=int, help='space separated empty managed data disk sizes in GB to create', arg_group='Storage')
     register_cli_argument(scope, 'image_data_disks', ignore_type)
+    register_cli_argument(scope, 'plan_name', ignore_type)
+    register_cli_argument(scope, 'plan_product', ignore_type)
+    register_cli_argument(scope, 'plan_publisher', ignore_type)
     for item in ['storage_account', 'public_ip', 'nsg', 'nic', 'vnet', 'load_balancer', 'app_gateway']:
         register_cli_argument(scope, '{}_type'.format(item), ignore_type)
 
@@ -222,7 +229,7 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'public_ip_address', help='Name of the public IP address when creating one (default) or referencing an existing one. Can also reference an existing public IP by ID or specify "" for None.', arg_group='Network')
     register_cli_argument(scope, 'public_ip_address_allocation', help=None, arg_group='Network', **enum_choice_list(['dynamic', 'static']))
     register_cli_argument(scope, 'public_ip_address_dns_name', help='Globally unique DNS name for a newly created Public IP.', arg_group='Network')
-    register_cli_argument(scope, 'secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via \'@<file path>\' containing \'[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]\'', type=file_type, completer=FilesCompleter())
+    register_cli_argument(scope, 'secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via `@<file path>` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`', type=file_type, completer=FilesCompleter())
     register_cli_argument(scope, 'os_caching', options_list=['--storage-caching', '--os-disk-caching'], arg_group='Storage', help='Storage caching type for the VM OS disk.', **enum_choice_list([CachingTypes.read_only.value, CachingTypes.read_write.value]))
     register_cli_argument(scope, 'data_caching', options_list=['--data-disk-caching'], arg_group='Storage', help='Storage caching type for the VM data disk(s).', **enum_choice_list(CachingTypes))
 

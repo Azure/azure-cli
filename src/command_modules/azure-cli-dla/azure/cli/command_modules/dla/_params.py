@@ -54,7 +54,7 @@ register_cli_argument('dla account list', 'resource_group_name', resource_group_
 # pylint: disable=line-too-long
 register_cli_argument('dla job submit', 'compile_mode', help='Indicates the type of compilation to be done on this job. Valid values are: \'Semantic\' (Only performs semantic checks and necessary sanity checks), \'Full\' (full compilation) and \'SingleBox\' (Full compilation performed locally)', **enum_choice_list(CompileMode))
 register_cli_argument('dla job submit', 'compile_only', help='Indicates that the submission should only build the job and not execute if set to true.', action='store_true')
-register_cli_argument('dla job submit', 'script', completer=FilesCompleter(), help="The script to submit. This is either the script contents or use '@<file path>' to load the script from a file")
+register_cli_argument('dla job submit', 'script', completer=FilesCompleter(), help="The script to submit. This is either the script contents or use `@<file path>` to load the script from a file")
 register_cli_argument('dla job wait', 'max_wait_time_sec', help='The maximum amount of time to wait before erroring out. Default value is to never timeout. Any value <= 0 means never timeout', type=int)
 register_cli_argument('dla job wait', 'wait_interval_sec', help='The polling interval between checks for the job status, in seconds.', type=int)
 register_cli_argument('dla job list', 'submitted_after', help='A filter which returns jobs only submitted after the specified time, in ISO-8601 format.', type=datetime_format)

@@ -15,9 +15,10 @@ from msrestazure.azure_exceptions import CloudError
 
 from azure.cli.command_modules.acs.custom import (merge_kubernetes_configurations,
                                                   _acs_browse_internal, _add_role_assignment)
-from azure.mgmt.compute.models import (ContainerServiceOchestratorTypes, ContainerService,
-                                       ContainerServiceOrchestratorProfile)
-from azure.cli.core._util import CLIError
+from azure.mgmt.compute.containerservice.models import (ContainerServiceOchestratorTypes,
+                                                        ContainerService,
+                                                        ContainerServiceOrchestratorProfile)
+from azure.cli.core.util import CLIError
 
 
 class AcsCustomCommandTest(unittest.TestCase):
