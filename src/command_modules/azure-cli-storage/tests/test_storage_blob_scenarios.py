@@ -8,12 +8,13 @@ import re
 import unittest
 from datetime import datetime, timedelta
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
-                               JMESPathCheck, NoneCheck)
+                               JMESPathCheck, NoneCheck, profile_version_constraint)
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.storage._factory import NO_CREDENTIALS_ERROR_MESSAGE
 from .storage_test_util import StorageScenarioMixin
 
 
+@profile_version_constraint(min_api='latest')
 class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='source_account')

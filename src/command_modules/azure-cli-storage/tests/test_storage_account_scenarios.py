@@ -2,13 +2,16 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import unittest
 
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer,
-                               StorageAccountPreparer)
+                               StorageAccountPreparer, profile_version_constraint)
 from .storage_test_util import StorageScenarioMixin
 
 
+@profile_version_constraint(min_api='latest')
 class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
+
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_create_storage_account(self, resource_group, location):
         name = self.create_random_name(prefix='cli', length=24)

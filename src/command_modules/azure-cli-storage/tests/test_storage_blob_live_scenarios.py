@@ -5,9 +5,10 @@
 
 import os
 from azure.cli.testsdk import (LiveTest, ResourceGroupPreparer, StorageAccountPreparer,
-                               JMESPathCheck)
+                               JMESPathCheck, profile_version_constraint)
 
 
+@profile_version_constraint(min_api='latest')
 class StorageBlobUploadLiveTests(LiveTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer()

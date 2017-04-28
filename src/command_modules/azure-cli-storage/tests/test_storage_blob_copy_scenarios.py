@@ -3,8 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import (LiveTest, ResourceGroupPreparer, StorageAccountPreparer)
+from azure.cli.testsdk import (LiveTest, ResourceGroupPreparer, StorageAccountPreparer,
+                               profile_version_constraint)
 from .storage_test_util import StorageScenarioMixin
+from azure.cli.core.profiles import ResourceType
 
 
 class StorageBlobCopyTests(StorageScenarioMixin, LiveTest):

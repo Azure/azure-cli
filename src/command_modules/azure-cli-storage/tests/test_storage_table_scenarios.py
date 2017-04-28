@@ -4,10 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
-                               JMESPathCheck, NoneCheck)
+                               JMESPathCheck, NoneCheck, profile_version_constraint)
 from .storage_test_util import StorageScenarioMixin
 
 
+@profile_version_constraint(min_api='latest')
 class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(sku='Standard_RAGRS')
