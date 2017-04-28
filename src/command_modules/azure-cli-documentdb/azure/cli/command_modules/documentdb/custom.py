@@ -134,16 +134,14 @@ def _get_offer_link(database_id, offer_id):
 def cli_documentdb_database_exists(client, database_id):
     """Returns a boolean indicating whether the database exists
     """
-    if len(list(client.QueryDatabases({ 'query': 'SELECT * FROM root r WHERE r.id=@id',
-                                        'parameters': [{ 'name':'@id', 'value': database_id }]}))) > 0:
-        return True
-    else:
-        return False
+    # pylint:disable=line-too-long
+    return len(list(client.QueryDatabases({'query': 'SELECT * FROM root r WHERE r.id=@id',
+                                           'parameters': [{'name':'@id', 'value': database_id}]}))) > 0
 
 def cli_documentdb_database_show(client, database_id):
     """Shows an Azure DocumentDB database
     """
-    return client.ReadDatabase(_get_database_link(database_id));
+    return client.ReadDatabase(_get_database_link(database_id))
 
 def cli_documentdb_database_list(client):
     """Lists all Azure DocumentDB databases
@@ -153,7 +151,7 @@ def cli_documentdb_database_list(client):
 def cli_documentdb_database_create(client, database_id):
     """Creates an Azure DocumentDB database
     """
-    client.CreateDatabase({ 'id': database_id })
+    return client.CreateDatabase({'id': database_id})
 
 def cli_documentdb_database_delete(client, database_id):
     """Deletes an Azure DocumentDB database
@@ -165,19 +163,17 @@ def cli_documentdb_database_delete(client, database_id):
 def cli_documentdb_collection_exists(client, database_id, collection_id):
     """Returns a boolean indicating whether the collection exists
     """
-    if len(list(client.QueryCollections(_get_database_link(database_id),
-        { 'query': 'SELECT * FROM root r WHERE r.id=@id',
-          'parameters': [{ 'name':'@id', 'value': collection_id }]}))) > 0:
-        return True
-    else:
-        return False
+    # pylint:disable=line-too-long
+    return len(list(client.QueryCollections(_get_database_link(database_id),
+                                            {'query': 'SELECT * FROM root r WHERE r.id=@id',
+                                             'parameters': [{'name':'@id', 'value': collection_id}]}))) > 0
 
 def cli_documentdb_collection_show(client, database_id, collection_id):
     """Shows an Azure DocumentDB collection and its offer
     """
-    collection = client.ReadCollection(_get_collection_link(database_id, collection_id));
+    collection = client.ReadCollection(_get_collection_link(database_id, collection_id))
     offer = _find_offer(client, collection['_self'])
-    return { 'collection' : collection, 'offer' : offer }
+    return {'collection' : collection, 'offer' : offer}
 
 def cli_documentdb_collection_list(client, database_id):
     """Lists all Azure DocumentDB collections
@@ -195,13 +191,13 @@ def _populate_collection_definition(collection,
 
     changed = False
 
-    if (partition_key_path):
+    if partition_key_path:
         if not 'partitionKey' in collection:
             collection['partitionKey'] = {}
-        collection['partitionKey'] = { 'paths' : [partition_key_path] }
+        collection['partitionKey'] = {'paths' : [partition_key_path]}
         changed = True
 
-    if (indexing_policy):
+    if indexing_policy:
         changed = True
         collection['indexingPolicy'] = indexing_policy
     return changed
@@ -214,17 +210,20 @@ def cli_documentdb_collection_create(client,
                                      indexing_policy=None):
     """Creates an Azure DocumentDB collection
     """
-    collection = { 'id': collection_id }
+    collection = {'id': collection_id}
 
     options = {}
-    if (throughput):
+    if throughput:
         options['offerThroughput'] = throughput
 
     _populate_collection_definition(collection,
                                     partition_key_path,
                                     indexing_policy)
 
-    client.CreateCollection(_get_database_link(database_id), collection, options)
+    # pylint:disable=line-too-long
+    created_collection = client.CreateCollection(_get_database_link(database_id), collection, options)
+    offer = _find_offer(client, created_collection['_self'])
+    return {'collection': created_collection, 'offer': offer}
 
 def _find_offer(client, collection_self_link):
     logger.debug('finding offer')
@@ -243,26 +242,28 @@ def cli_documentdb_collection_update(client,
     """
     logger.debug('reading collection')
     collection = client.ReadCollection(_get_collection_link(database_id, collection_id))
+    result = {}
 
     if(_populate_collection_definition(collection,
                                        None,
                                        indexing_policy)):
         logger.debug('replacing collection')
-        updated_collection = client.ReplaceCollection(_get_collection_link(database_id, collection_id), collection)
+        # pylint:disable=line-too-long
+        result['collection'] = client.ReplaceCollection(_get_collection_link(database_id, collection_id), collection)
 
-    if (throughput):
+    if throughput:
         logger.debug('updating offer')
-        offers = client.ReadOffers()
         offer = _find_offer(client, collection['_self'])
 
-        if (offer is None):
+        if offer is None:
             raise CLIError("Cannot find offer for collection {}".format(collection_id))
 
-        if ('content' not in offer):
+        if 'content' not in offer:
             offer['content'] = {}
         offer['content']['offerThroughput'] = throughput
 
-        updated_offer = client.ReplaceOffer(offer['_self'], offer)
+        result['offer'] = client.ReplaceOffer(offer['_self'], offer)
+    return result
 
 def duplicate_resource_exception_handler(ex):
     # pylint:disable=line-too-long
@@ -286,17 +287,21 @@ def invalid_arg_found_exception_handler(ex):
     if isinstance(ex, HTTPFailure) and ex.status_code == 400:
         cliError = None
         try:
-            if (ex._http_error_message):
-                import json
+            # pylint:disable=protected-access
+            if ex._http_error_message:
                 msg = json.loads(ex._http_error_message)
-                if (msg['message']):
+                if msg['message']:
                     msg = msg['message'].split('\n')[0]
                     msg = msg[len('Message: '):] if msg.find('Message: ') == 0 else msg
+                    # pylint:disable=line-too-long
                     cliError = CLIError('Operation Failed: Invalid Arg (Server returned status code 400 {})'.format(str(msg)))
-        except:
+        # pylint:disable=broad-except
+        except Exception:
             pass
-        if (cliError):
+        if cliError:
+            # pylint:disable=raising-bad-type
             raise cliError
+        # pylint:disable=line-too-long
         raise CLIError('Operation Failed: Invalid Arg (Server returned status code 400 {})'.format(str(ex)))
     raise ex
 
@@ -304,14 +309,15 @@ def exception_handler_chain_builder(handlers):
     # creates a handler which chains the handler
     # as soon as one of the chained handlers raises CLIError, it raises CLIError
     # if no handler raises CLIError it raises the original exception
+    # pylint:disable=broad-except
     def chained_handler(ex):
         if isinstance(ex, CLIError):
             raise ex
         for h in handlers:
             try:
-               h(ex)
+                h(ex)
             except CLIError as cliError:
-                 raise cliError
+                raise cliError
             except Exception:
                 pass
         raise ex

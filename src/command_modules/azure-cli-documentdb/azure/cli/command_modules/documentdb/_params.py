@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+# pylint: disable=unused-import
+from argcomplete.completers import FilesCompleter
 from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list,
     enum_choice_list,
@@ -15,15 +17,13 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.core.util import shell_safe_json_parse
 
 from ._client_factory import get_document_client_factory
-from azure.cli.core.commands import register_cli_argument
-import azure.cli.core.commands.arm  # pylint: disable=unused-import
+import azure.cli.core.commands.arm
 from azure.mgmt.documentdb.models.document_db_enums import KeyKind
 from azure.mgmt.documentdb.models.document_db_enums import DefaultConsistencyLevel
 from azure.mgmt.documentdb.models.document_db_enums import DatabaseAccountKind
 from azure.mgmt.documentdb.models.failover_policy import FailoverPolicy
 from azure.mgmt.documentdb.models.location import Location
 from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
-from argcomplete.completers import FilesCompleter
 
 def validate_failover_policies(ns):
     ''' Extracts multiple space-separated failoverPolicies in regionName=failoverPriority format '''

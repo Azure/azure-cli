@@ -7,8 +7,6 @@ import os
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
 from azure.cli.core import __version__ as core_version
-from azure.mgmt.datalake.analytics import account
-from pydocumentdb.http_constants import HttpHeaders
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -45,7 +43,7 @@ def get_document_client_factory(kwargs):
     try:
         from azure.cli.core._config import az_config
         def extract_param(cmd_arg_name, config_arg_name):
-            if (cmd_arg_name in kwargs):
+            if cmd_arg_name in kwargs:
                 val = kwargs.pop(cmd_arg_name)
             if val is None:
                 val = az_config.get('documentdb', config_arg_name, None)
@@ -68,12 +66,13 @@ def get_document_client_factory(kwargs):
         elif 'account' in kwargs:
             kwargs.pop('account')
 
-        auth = { 'masterKey': account_key }
+        auth = {'masterKey': account_key}
 
         client = document_client.DocumentClient(url_connection=url_connection, auth=auth)
     except Exception as ex:
         if isinstance(ex, CLIError):
             raise ex
+        # pylint:disable=line-too-long
         raise CLIError('Failed to instantiate an Azure DocumentDB client using the provided credential ' + str(ex))
     _add_headers(client)
     return client
