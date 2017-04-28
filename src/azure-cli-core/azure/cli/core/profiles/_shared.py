@@ -109,7 +109,8 @@ def get_api_version(api_profile, resource_type):
 @total_ordering  # pylint: disable=too-few-public-methods
 class _DateAPIFormat(object):
     """ Class to support comparisons for API versions in
-        YYYY-MM-DD or YYYY-MM-DD-preview format. A special case is made for 'latest'.
+        YYYY-MM-DD, YYYY-MM-DD-preview, YYYY-MM-DD-profile, YYYY-MM-DD-profile-preview
+        or any string that starts with YYYY-MM-DD format. A special case is made for 'latest'.
     """
 
     def __init__(self, api_version_str):
@@ -158,7 +159,8 @@ def supported_api_version(api_profile, resource_type, min_api=None, max_api=None
     """
     Returns True if current API version for the resource type satisfies min/max range.
     To compare profile versions, set resource type to None.
-    note: Currently supports YYYY-MM-DD or YYYY-MM-DD-preview formatted API versions.
+    note: Currently supports YYYY-MM-DD, YYYY-MM-DD-preview, YYYY-MM-DD-profile
+    or YYYY-MM-DD-profile-preview  formatted strings.
     """
     if not isinstance(resource_type, ResourceType) and resource_type != PROFILE_TYPE:
         raise TypeError()
