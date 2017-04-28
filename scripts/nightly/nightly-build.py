@@ -35,7 +35,7 @@ def print_heading(heading, f=None):
 
 def build_package(path_to_package, dist_dir):
     print_heading('Building {}'.format(path_to_package))
-    check_call('python setup.py sdist -d {0} bdist_wheel -d {0}'.format(dist_dir).split(), cwd=path_to_package)
+    check_call('python setup.py bdist_wheel -d {0} sdist -d {0}'.format(dist_dir).split(), cwd=path_to_package)
     print_heading('Built {}'.format(path_to_package))
 
 UPLOADED_PACKAGE_LINKS = []

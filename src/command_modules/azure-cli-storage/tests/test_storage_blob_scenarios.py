@@ -8,7 +8,7 @@ import re
 import unittest
 from datetime import datetime, timedelta
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
-                               JMESPathCheck)
+                               JMESPathCheck, NoneCheck)
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.storage._factory import NO_CREDENTIALS_ERROR_MESSAGE
 from .storage_test_util import StorageScenarioMixin
@@ -81,8 +81,9 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                          account_info, blob_name, container)
 
         self.storage_cmd('storage blob show -n {} -c {}', account_info, blob_name, container) \
-            .assert_with_checks([JMESPathCheck('properties.contentSettings.contentType', 'application/test-content'),
-                                 JMESPathCheck('properties.contentLength', file_size_kb * 1024)])
+            .assert_with_checks(
+            [JMESPathCheck('properties.contentSettings.contentType', 'application/test-content'),
+             JMESPathCheck('properties.contentLength', file_size_kb * 1024)])
 
         self.storage_cmd('storage blob service-properties show', account_info) \
             .assert_with_checks(JMESPathCheck('hourMetrics.enabled', True))
@@ -122,6 +123,155 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(block_count, len(put_blocks),
                          'The expected number of block put requests is {} but the actual '
                          'number is {}.'.format(block_count, len(put_blocks)))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_blob_lease_operations(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        local_file = self.create_temp_file(128, full_random=True)
+        c = self.create_container(account_info)
+        b = self.create_random_name('blob', 24)
+        proposed_lease_id = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'
+        new_lease_id = 'dcbadcba-dcba-dcba-dcba-dcbadcbadcba'
+        date = '2016-04-01t12:00z'
+
+        self.storage_cmd('storage blob upload -c {} -n {} -f {}', account_info, c, b, local_file)
+
+        # test lease operations
+        self.storage_cmd('storage blob lease acquire --lease-duration 60 -b {} -c {} '
+                         '--if-modified-since {} --proposed-lease-id {}', account_info, b, c, date,
+                         proposed_lease_id)
+        self.storage_cmd('storage blob show -n {} -c {}', account_info, b, c) \
+            .assert_with_checks(JMESPathCheck('properties.lease.duration', 'fixed'),
+                                JMESPathCheck('properties.lease.state', 'leased'),
+                                JMESPathCheck('properties.lease.status', 'locked'))
+        self.storage_cmd('storage blob lease change -b {} -c {} --lease-id {} '
+                         '--proposed-lease-id {}', account_info, b, c, proposed_lease_id,
+                         new_lease_id)
+        self.storage_cmd('storage blob lease renew -b {} -c {} --lease-id {}', account_info, b, c,
+                         new_lease_id)
+        self.storage_cmd('storage blob show -n {} -c {}', account_info, b, c) \
+            .assert_with_checks(JMESPathCheck('properties.lease.duration', 'fixed'),
+                                JMESPathCheck('properties.lease.state', 'leased'),
+                                JMESPathCheck('properties.lease.status', 'locked'))
+        self.storage_cmd('storage blob lease break -b {} -c {} --lease-break-period 30',
+                         account_info, b, c)
+        self.storage_cmd('storage blob show -n {} -c {}', account_info, b, c) \
+            .assert_with_checks(JMESPathCheck('properties.lease.duration', None),
+                                JMESPathCheck('properties.lease.state', 'breaking'),
+                                JMESPathCheck('properties.lease.status', 'locked'))
+        self.storage_cmd('storage blob lease release -b {} -c {} --lease-id {}', account_info, b, c,
+                         new_lease_id)
+        self.storage_cmd('storage blob show -n {} -c {}', account_info, b, c) \
+            .assert_with_checks(JMESPathCheck('properties.lease.duration', None),
+                                JMESPathCheck('properties.lease.state', 'available'),
+                                JMESPathCheck('properties.lease.status', 'unlocked'))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_blob_snapshot_operations(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        local_file = self.create_temp_file(128, full_random=True)
+        c = self.create_container(account_info)
+        b = self.create_random_name('blob', 24)
+
+        self.storage_cmd('storage blob upload -c {} -n {} -f {}', account_info, c, b, local_file)
+
+        snapshot_dt = self.storage_cmd('storage blob snapshot -c {} -n {}', account_info, c, b) \
+            .get_output_in_json()['snapshot']
+        self.storage_cmd('storage blob exists -n {} -c {} --snapshot {}', account_info, b, c,
+                         snapshot_dt) \
+            .assert_with_checks(JMESPathCheck('exists', True))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_blob_metadata_operations(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        local_file = self.create_temp_file(128, full_random=True)
+        c = self.create_container(account_info)
+        b = self.create_random_name('blob', 24)
+
+        self.storage_cmd('storage blob upload -c {} -n {} -f {}', account_info, c, b, local_file)
+        self.storage_cmd('storage blob metadata update -n {} -c {} --metadata a=b c=d',
+                         account_info, b, c)
+        self.storage_cmd('storage blob metadata show -n {} -c {}', account_info, b, c) \
+            .assert_with_checks(JMESPathCheck('a', 'b'), JMESPathCheck('c', 'd'))
+        self.storage_cmd('storage blob metadata update -n {} -c {}', account_info, b, c)
+        self.storage_cmd('storage blob metadata show -n {} -c {}', account_info, b, c) \
+            .assert_with_checks(NoneCheck())
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_blob_container_operations(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        c = self.create_container(account_info)
+        proposed_lease_id = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'
+        new_lease_id = 'dcbadcba-dcba-dcba-dcba-dcbadcbadcba'
+        date = '2016-04-01t12:00z'
+
+        self.storage_cmd('storage container exists -n {}', account_info, c) \
+            .assert_with_checks(JMESPathCheck('exists', True))
+
+        self.storage_cmd('storage container set-permission -n {} --public-access blob',
+                         account_info, c)
+        self.storage_cmd('storage container show-permission -n {}', account_info, c) \
+            .assert_with_checks(JMESPathCheck('publicAccess', 'blob'))
+        self.storage_cmd('storage container set-permission -n {} --public-access off', account_info,
+                         c)
+        self.storage_cmd('storage container show-permission -n {}', account_info, c) \
+            .assert_with_checks(JMESPathCheck('publicAccess', 'off'))
+
+        self.storage_cmd('storage container show -n {}', account_info, c) \
+            .assert_with_checks(JMESPathCheck('name', c))
+
+        self.assertIn(c, self.storage_cmd('storage container list --query "[].name"',
+                                          account_info).get_output_in_json())
+
+        self.storage_cmd('storage container metadata update -n {} --metadata foo=bar moo=bak',
+                         account_info, c)
+        self.storage_cmd('storage container metadata show -n {}', account_info, c) \
+            .assert_with_checks(JMESPathCheck('foo', 'bar'), JMESPathCheck('moo', 'bak'))
+        self.storage_cmd('storage container metadata update -n {}', account_info, c)
+        self.storage_cmd('storage container metadata show -n {}', account_info, c) \
+            .assert_with_checks(NoneCheck())
+
+        # test lease operations
+        self.storage_cmd('storage container lease acquire --lease-duration 60 -c {} '
+                         '--if-modified-since {} --proposed-lease-id {}', account_info, c, date,
+                         proposed_lease_id)
+        self.storage_cmd('storage container show --name {}', account_info, c) \
+            .assert_with_checks(JMESPathCheck('properties.lease.duration', 'fixed'),
+                                JMESPathCheck('properties.lease.state', 'leased'),
+                                JMESPathCheck('properties.lease.status', 'locked'))
+        self.storage_cmd('storage container lease change -c {} --lease-id {} '
+                         '--proposed-lease-id {}', account_info, c, proposed_lease_id, new_lease_id)
+        self.storage_cmd('storage container lease renew -c {} --lease-id {}',
+                         account_info, c, new_lease_id)
+        self.storage_cmd('storage container show -n {}', account_info, c) \
+            .assert_with_checks(JMESPathCheck('properties.lease.duration', 'fixed'),
+                                JMESPathCheck('properties.lease.state', 'leased'),
+                                JMESPathCheck('properties.lease.status', 'locked'))
+        self.storage_cmd('storage container lease break -c {} --lease-break-period 30',
+                         account_info, c)
+        self.storage_cmd('storage container show --name {}', account_info, c) \
+            .assert_with_checks(JMESPathCheck('properties.lease.duration', None),
+                                JMESPathCheck('properties.lease.state', 'breaking'),
+                                JMESPathCheck('properties.lease.status', 'locked'))
+        self.storage_cmd('storage container lease release -c {} --lease-id {}', account_info, c,
+                         new_lease_id)
+        self.storage_cmd('storage container show --name {}', account_info, c) \
+            .assert_with_checks(JMESPathCheck('properties.lease.duration', None),
+                                JMESPathCheck('properties.lease.state', 'available'),
+                                JMESPathCheck('properties.lease.status', 'unlocked'))
+
+        self.assertIn('sig=', self.storage_cmd('storage container generate-sas -n {}', account_info,
+                                               c).output)
+
+        # verify delete operation
+        self.storage_cmd('storage container delete --name {} --fail-not-exist', account_info, c) \
+            .assert_with_checks(JMESPathCheck('deleted', True))
+        self.storage_cmd('storage container exists -n {}', account_info, c) \
+            .assert_with_checks(JMESPathCheck('exists', False))
 
 
 if __name__ == '__main__':
