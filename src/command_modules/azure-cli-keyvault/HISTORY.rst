@@ -3,9 +3,10 @@
 Release History
 ===============
 
-unreleased
+2.0.2 (2017-04-28)
 ++++++++++++++++++++
 
+* New packaging system.
 * BC:`az keyvault certificate download` change -e from string or binary to PEM or DER to better represent the options
 * BC: Remove --expires and --not-before from `keyvault certificate create` as these parameters are not supported by the service.
 * Adds the --validity parameter to `keyvault certificate create` to selectively override the value in --policy
