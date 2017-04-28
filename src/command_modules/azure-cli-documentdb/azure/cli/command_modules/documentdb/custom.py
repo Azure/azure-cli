@@ -15,6 +15,28 @@ import azure.cli.core.azlogging as azlogging
 
 logger = azlogging.get_az_logger(__name__)
 
+DEFAULT_INDEXING_POLICY = """{
+  "indexingMode": "consistent",
+  "automatic": true,
+  "includedPaths": [
+    {
+      "path": "/*",
+      "indexes": [
+        {
+          "kind": "Range",
+          "dataType": "String",
+          "precision": -1
+        },
+        {
+          "kind": "Range",
+          "dataType": "Number",
+          "precision": -1
+        }
+      ]
+    }
+  ]
+}"""
+
 # pylint:disable=too-many-arguments
 def cli_documentdb_create(client,
                           resource_group_name,
@@ -207,7 +229,7 @@ def cli_documentdb_collection_create(client,
                                      collection_id,
                                      throughput=None,
                                      partition_key_path=None,
-                                     indexing_policy=None):
+                                     indexing_policy=DEFAULT_INDEXING_POLICY):
     """Creates an Azure DocumentDB collection
     """
     collection = {'id': collection_id}
