@@ -15,7 +15,7 @@
 - Optional "az" component 
 - Fun Colors 
 
-![Overview](docs/shell_tutorial.gif)
+![Overview](docs/shell.gif)
 
 ## Running
 
