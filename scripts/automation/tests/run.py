@@ -37,14 +37,8 @@ def run_tests(modules, parallel, run_live):
         failed_tests += module_failed_tests
         overall_result &= result
         print('==== Test module {} result ====\n{}\n==========\n'.format(name, test_result))
-        if failed_tests:
-            print('==== FAILED TESTS ====')
-            for test in failed_tests:
-                print(test)
-        else:
-            print('==== ALL TESTS PASSED! ====')
 
-    return overall_result
+    return overall_result, failed_tests
 
 
 if __name__ == '__main__':
@@ -69,6 +63,13 @@ if __name__ == '__main__':
         parse.print_help()
         sys.exit(1)
 
-    retval = run_tests(selected_modules, not args.non_parallel, args.live)
+    retval, failed_tests = run_tests(selected_modules, not args.non_parallel, args.live)
+    if failed_tests:
+        print('==== FAILED TESTS ====')
+        for test in failed_tests:
+            print(test)
+    else:
+        print('==== ALL TESTS PASSED! ====')
+
 
     sys.exit(0 if retval else 1)

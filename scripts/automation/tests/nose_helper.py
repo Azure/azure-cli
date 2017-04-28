@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from __future__ import print_function
 
 # pylint: disable=too-many-arguments
 def get_nose_runner(report_folder, parallel=True, process_timeout=600, process_restart=True,
@@ -46,11 +47,13 @@ def get_nose_runner(report_folder, parallel=True, process_timeout=600, process_r
         result = nose.run(argv=arguments)
 
         sys.stderr = original_stderr
-        output = tempout.getvalue().splitlines()
+        output = tempout.getvalue()
         tempout.close()
 
+        print(output, file=sys.stderr)
+
         failed_tests = []
-        for line in output:
+        for line in output.splitlines():
             if line.startswith('test_') and line.endswith('ERROR') or line.endswith('FAIL'):
                 failed_tests.append(line)
 
