@@ -1,5 +1,4 @@
 # Azure CLI Interactive Shell
-[![Travis](https://travis-ci.org/Azure/azure-cli-shell.svg?branch=master)](https://travis-ci.org/Azure/azure-cli-shell)
 
 ## The interactive shell for Microsoft Azure CLI (Command Line Interface)
 
