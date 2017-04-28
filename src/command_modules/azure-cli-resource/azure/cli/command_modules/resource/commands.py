@@ -11,6 +11,7 @@ from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_
 from azure.cli.core.util import empty_on_404
 
 from azure.cli.command_modules.resource._client_factory import (_resource_client_factory,
+                                                                _resource_appliances_client_factory,
                                                                 cf_resource_groups,
                                                                 cf_providers,
                                                                 cf_features,
@@ -126,12 +127,11 @@ cli_command(__name__, 'resource link update', 'azure.cli.command_modules.resourc
 
 cli_command(__name__, 'appliance create', 'azure.cli.command_modules.resource.custom#create_appliance')
 cli_command(__name__, 'appliance delete', 'azure.mgmt.resource.appliances.operations#AppliancesOperations.delete', cf_resource_appliances)
-cli_command(__name__, 'appliance show', 'azure.mgmt.resource.appliances.operations#AppliancesOperations.get', cf_resource_appliances, exception_handler=empty_on_404)
+cli_command(__name__, 'appliance show', 'azure.cli.command_modules.resource.custom#show_appliance', exception_handler=empty_on_404)
 cli_command(__name__, 'appliance list', 'azure.cli.command_modules.resource.custom#list_appliances')
-cli_command(__name__, 'appliance update', 'azure.cli.command_modules.resource.custom#update_appliance')
 
 cli_command(__name__, 'appliance definition create', 'azure.cli.command_modules.resource.custom#create_appliancedefinition')
 cli_command(__name__, 'appliance definition delete', 'azure.mgmt.resource.appliances.operations#ApplianceDefinitionsOperations.delete', cf_resource_appliances)
-cli_command(__name__, 'appliance definition show', 'azure.mgmt.resource.appliances.operations#ApplianceDefinitionsOperations.get', cf_resource_appliances, exception_handler=empty_on_404)
-cli_command(__name__, 'appliance definition list', 'azure.cli.command_modules.resource.custom#list_appliancedefinitions')
+cli_command(__name__, 'appliance definition show', 'azure.cli.command_modules.resource.custom#show_appliancedefinition')
+cli_command(__name__, 'appliance definition list', 'azure.mgmt.resource.appliances.operations#ApplianceDefinitionsOperations.list_at_resource_group', cf_resource_appliances, exception_handler=empty_on_404)
 cli_command(__name__, 'appliance definition update', 'azure.cli.command_modules.resource.custom#update_appliancedefinition')
