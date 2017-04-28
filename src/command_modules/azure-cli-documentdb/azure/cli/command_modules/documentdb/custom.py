@@ -51,7 +51,7 @@ def cli_documentdb_create(client,
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
-    docdb_account = client.get(resource_group_name, account_name) # Workaround
+    docdb_account = client.get(resource_group_name, account_name)  # Workaround
     return docdb_account
 
 def cli_documentdb_update(client,
@@ -102,7 +102,7 @@ def cli_documentdb_update(client,
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
-    docdb_account = client.get(resource_group_name, account_name) # Workaround
+    docdb_account = client.get(resource_group_name, account_name)  # Workaround
     return docdb_account
 
 
@@ -115,10 +115,10 @@ def cli_documentdb_list(client,
         return client.list_by_resource_group(resource_group_name)
     else:
         return client.list()
-    
-######################    
+
+######################
 # data plane APIs
-######################    
+######################
 
 # database operations
 
@@ -153,8 +153,8 @@ def cli_documentdb_database_list(client):
 def cli_documentdb_database_create(client, database_id):
     """Creates an Azure DocumentDB database
     """
-    client.CreateDatabase( { 'id': database_id } )
-    
+    client.CreateDatabase({ 'id': database_id })
+
 def cli_documentdb_database_delete(client, database_id):
     """Deletes an Azure DocumentDB database
     """
@@ -178,7 +178,7 @@ def cli_documentdb_collection_show(client, database_id, collection_id):
     collection = client.ReadCollection(_get_collection_link(database_id, collection_id));
     offer = _find_offer(client, collection['_self'])
     return { 'collection' : collection, 'offer' : offer }
-    
+
 def cli_documentdb_collection_list(client, database_id):
     """Lists all Azure DocumentDB collections
     """
@@ -194,7 +194,7 @@ def _populate_collection_definition(collection,
                                     indexing_policy=None):
 
     changed = False
-    
+
     if (partition_key_path):
         if not 'partitionKey' in collection:
             collection['partitionKey'] = {}
@@ -215,15 +215,15 @@ def cli_documentdb_collection_create(client,
     """Creates an Azure DocumentDB collection
     """
     collection = { 'id': collection_id }
-    
+
     options = {}
     if (throughput):
         options['offerThroughput'] = throughput
-    
-    _populate_collection_definition(collection, 
-                                    partition_key_path, 
+
+    _populate_collection_definition(collection,
+                                    partition_key_path,
                                     indexing_policy)
-    
+
     client.CreateCollection(_get_database_link(database_id), collection, options)
 
 def _find_offer(client, collection_self_link):
@@ -234,8 +234,8 @@ def _find_offer(client, collection_self_link):
             return o
     return None
 
-def cli_documentdb_collection_update(client, 
-                                     database_id, 
+def cli_documentdb_collection_update(client,
+                                     database_id,
                                      collection_id,
                                      throughput=None,
                                      indexing_policy=None):
@@ -243,9 +243,9 @@ def cli_documentdb_collection_update(client,
     """
     logger.debug('reading collection')
     collection = client.ReadCollection(_get_collection_link(database_id, collection_id))
-    
-    if(_populate_collection_definition(collection, 
-                                       None, 
+
+    if(_populate_collection_definition(collection,
+                                       None,
                                        indexing_policy)):
         logger.debug('replacing collection')
         updated_collection = client.ReplaceCollection(_get_collection_link(database_id, collection_id), collection)
@@ -261,7 +261,7 @@ def cli_documentdb_collection_update(client,
         if ('content' not in offer):
             offer['content'] = {}
         offer['content']['offerThroughput'] = throughput
-        
+
         updated_offer = client.ReplaceOffer(offer['_self'], offer)
 
 def duplicate_resource_exception_handler(ex):

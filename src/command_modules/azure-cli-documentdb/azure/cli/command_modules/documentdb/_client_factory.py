@@ -24,24 +24,24 @@ UA_AGENT = "AZURECLI/{}".format(core_version)
 ENV_ADDITIONAL_USER_AGENT = 'AZURE_HTTP_USER_AGENT'
 
 def _add_headers(client):
-        
+
     agents = [client.default_headers['User-Agent'], UA_AGENT]
     try:
         agents.append(os.environ[ENV_ADDITIONAL_USER_AGENT])
     except KeyError:
-        pass 
+        pass
     client.default_headers['User-Agent'] = ' '.join(agents)
 
- 
+
 def get_document_client_factory(kwargs):
 
     from pydocumentdb import document_client
     from azure.cli.core.commands.client_factory import get_data_service_client
     from azure.cli.core._profile import CLOUD
     service_type = document_client.DocumentClient
-    
+
     logger.debug('Getting data service client service_type=%s', service_type.__name__)
-    
+
     try:
         from azure.cli.core._config import az_config
         def extract_param(cmd_arg_name, config_arg_name):

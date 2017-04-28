@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-#pylint: disable=line-too-long
+# pylint: disable=line-too-long
 
 from azure.cli.core.commands import cli_command
 from azure.cli.command_modules.documentdb._client_factory import (cf_documentdb)
@@ -29,7 +29,7 @@ cli_command(__name__, 'documentdb update', custome_path + 'cli_documentdb_update
 cli_command(__name__, 'documentdb list', custome_path + 'cli_documentdb_list', db_accounts_factory)
 
 
-## database operations
+# # database operations
 cli_documentdb_data_plane_command('documentdb database show', custome_path + 'cli_documentdb_database_show', get_document_client_factory)
 cli_documentdb_data_plane_command('documentdb database list', custome_path + 'cli_documentdb_database_list', get_document_client_factory)
 cli_documentdb_data_plane_command('documentdb database exists', custome_path + 'cli_documentdb_database_exists', get_document_client_factory)

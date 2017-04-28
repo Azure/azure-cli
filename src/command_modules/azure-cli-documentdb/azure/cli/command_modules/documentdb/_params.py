@@ -16,7 +16,7 @@ from azure.cli.core.util import shell_safe_json_parse
 
 from ._client_factory import get_document_client_factory
 from azure.cli.core.commands import register_cli_argument
-import azure.cli.core.commands.arm # pylint: disable=unused-import
+import azure.cli.core.commands.arm  # pylint: disable=unused-import
 from azure.mgmt.documentdb.models.document_db_enums import KeyKind
 from azure.mgmt.documentdb.models.document_db_enums import DefaultConsistencyLevel
 from azure.mgmt.documentdb.models.document_db_enums import DatabaseAccountKind
@@ -75,17 +75,17 @@ database_id = CliArgumentType(options_list=('--database-id', '-d'), help='Databa
 register_cli_argument('documentdb database', 'database_id', database_id)
 register_cli_argument('documentdb collection', 'database_id', database_id)
 
-register_cli_argument('documentdb collection', 'collection_id', 
+register_cli_argument('documentdb collection', 'collection_id',
                       options_list=('--collection-id', '-c'), help='Collection ID')
 
-register_cli_argument('documentdb collection', 'throughput', 
+register_cli_argument('documentdb collection', 'throughput',
                       options_list=('--throughput'), help='Offer Throughput', type=int)
 
-register_cli_argument('documentdb collection', 'partition_key_path', 
-                      options_list=('--partition-key-path'), 
+register_cli_argument('documentdb collection', 'partition_key_path',
+                      options_list=('--partition-key-path'),
                       help='Partition Key Path, e.g., \'/properties/name\'')
 
 register_cli_argument('documentdb collection', 'indexing_policy',
-                      options_list=('--indexing-policy'), 
+                      options_list=('--indexing-policy'),
                       help='Indexing Policy, you can enter it as a string or as a file, e.g., --indexing-policy @policy-file.json)',
                       type=shell_safe_json_parse, completer=FilesCompleter())
