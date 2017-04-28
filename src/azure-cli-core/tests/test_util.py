@@ -9,7 +9,7 @@ import unittest
 import tempfile
 
 from azure.cli.core.util import \
-    (get_file_json, todict, to_snake_case, truncate_text, shell_safe_json_parse)
+    (get_file_json, todict, to_snake_case, truncate_text, shell_safe_json_parse, b64_to_hex)
 
 
 class TestUtils(unittest.TestCase):
@@ -140,6 +140,18 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(
             len(failed_strings), 0,
             'The following patterns failed: {}'.format(failed_strings))
+
+
+class TestBase64ToHex(unittest.TestCase):
+
+    def setUp(self):
+        self.base64 = 'PvOJgaPq5R004GyT1tB0IW3XUyM='.encode('ascii')
+
+    def test_b64_to_hex(self):
+        self.assertEquals('3EF38981A3EAE51D34E06C93D6D074216DD75323', b64_to_hex(self.base64))
+
+    def test_b64_to_hex_type(self):
+        self.assertIsInstance(b64_to_hex(self.base64), str)
 
 
 if __name__ == '__main__':
