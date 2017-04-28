@@ -38,10 +38,8 @@ BlockBlobService, BaseBlobService, \
                            'table#TableService',
                            'queue#QueueService')
 
-from azure.cli.core.commands.progress import StandardOut, ProgressReporter, ProgressHook
-VIEW = StandardOut()
-REPORT = ProgressReporter()
-HOOK = ProgressHook(REPORT, VIEW)
+from azure.cli.core.commands.progress import REPORTER, ProgressHook
+HOOK = ProgressHook(REPORTER)
 def _update_progress(current, total):
     if total:
         HOOK.add(current, total)

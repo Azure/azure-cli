@@ -8,6 +8,9 @@ import time
 
 # SPINNING_WHEEL = {1 :'|', 2 : '/', 3 : '-', 0 : '\\'}
 # COUNTER = None
+# def ProgressType():
+#     Determinate
+#     Indeterminate
 
 
 class ProgressView(object):
@@ -15,12 +18,6 @@ class ProgressView(object):
     def __init__(self, out, format_percent=None):
         self.out = out
         self.format_percent = format_percent
-
-    def begin(self, message='', percent=None):
-        """ start reporting progress """
-        if not message:
-            message = 'Begining Process'
-        self.write(message, percent)
 
     def write(self, message, percent):
         """ writes the progress """
@@ -32,10 +29,6 @@ class ProgressView(object):
     def flush(self):
         """ flushes the message out the pipeline"""
         self.out.flush()
-
-    def end(self, message=''):
-        """ stop reporting progress """
-        self.out.write('Finished{}'.format(message))
 
 
 class ProgressReporter(object):
@@ -62,13 +55,15 @@ class ProgressReporter(object):
 
 class ProgressHook(object):
     """ sends the progress to the view """
-    def __init__(self, reporter, view):
-        self.reporter = reporter
-        self.view = view
+    def __init__(self, reporter=None):
+        self.reporter = reporter or ProgressReporter()
+        from azclishell.progress import ShellProgressView
+        self.view = ShellProgressView()
+        # self.view = self.report.view_factory()
 
     def add(self, message='', value=None, total_val=None):
         """ adds a progress report """
-        self.view.add(message, value, total_val)
+        self.reporter.add(message, value, total_val)
         self.update()
 
     def update(self):
@@ -85,10 +80,10 @@ class ProgressHook(object):
         self.add("Finished")
 
 
-class StandardOut(ProgressView):
+class _StandardOut(ProgressView):
     """ custom output for progress reporting """
     def __init__(self, out=None):
-        super(StandardOut, self).__init__(out if out else sys.stderr, self._format_value)
+        super(_StandardOut, self).__init__(out if out else sys.stderr, self._format_value)
         self.spinner = humanfriendly.Spinner(label='In Progress')
         self.spinner.hide_cursor = False
 
@@ -112,3 +107,6 @@ class StandardOut(ProgressView):
             self.out.write(progress + "\n")
         else:
             self.spinner.step()
+
+
+REPORTER = ProgressReporter()

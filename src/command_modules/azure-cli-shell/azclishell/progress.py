@@ -2,11 +2,11 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from prompt_toolkit.document import Document
-
 from random import randint
 
-from azure.cli.core.commands.progress import ProgressView, StandardOut
+from prompt_toolkit.document import Document
+
+from azure.cli.core.commands.progress import ProgressView, _StandardOut
 from azclishell.util import get_window_dim
 
 
@@ -18,7 +18,7 @@ HEART_BEAT_VALUES = {0 : "__", 1 : "/\\", 2 : '/^\\', 3 : "__"}
 HEART_BEAT = ''
 
 
-class ShellProgressView(StandardOut):
+class ShellProgressView(_StandardOut):
     """ custom output for progress reporting """
 
     def write(self, message, percent):
@@ -44,10 +44,6 @@ class ShellProgressView(StandardOut):
     def flush(self):
         """ flushes the message"""
         pass
-
-    def end(self, message=''):
-        global PROGRESS
-        PROGRESS = DONE_STR
 
 
 def get_progress_message():

@@ -20,6 +20,7 @@ import azure.cli.core.azlogging as azlogging
 import azure.cli.core.telemetry as telemetry
 from azure.cli.core.util import CLIError
 from azure.cli.core.application import APPLICATION
+from azure.cli.core.commands.progress import REPORTER, ProgressHook, _StandardOut
 from azure.cli.core.prompting import prompt_y_n, NoTTYException
 from azure.cli.core._config import az_config, DEFAULTS_SECTION
 from azure.cli.core.profiles import ResourceType
@@ -100,11 +101,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms
-        from azure.cli.core.commands.progress import StandardOut, ProgressReporter, ProgressHook
-        # from azclishell.progress import ShellProgressView
-        self.reporter = ProgressReporter()
-        self.view = StandardOut()
-        self.controller = ProgressHook(self.reporter, self.view)
+        self.controller = ProgressHook(REPORTER)
         self.curr_message = 'Running'
 
     def _delay(self):
@@ -114,7 +111,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         from msrest.exceptions import ClientException
         logger.info("Starting long running operation '%s'", self.start_msg)
         correlation_message = ''
-        self.reporter.begin()
+        self.controller.begin()
 
         while not poller.done():
             self.controller.add(self.curr_message, None, None)
