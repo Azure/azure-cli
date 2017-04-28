@@ -45,14 +45,6 @@ class ProgressReporter(object):
         self.curr_val = 0 if total_value else None
         self.total_val = total_value
 
-    def begin(self):
-        """ start reporting progress """
-        self.add('Starting')
-
-    def end(self):
-        """ ending reporting of progress """
-        self.add("Finished")
-
     def add(self, message='', value=None, total_val=None):
         """ adds a progress report """
         if total_val:
@@ -74,10 +66,23 @@ class ProgressHook(object):
         self.reporter = reporter
         self.view = view
 
+    def add(self, message='', value=None, total_val=None):
+        """ adds a progress report """
+        self.view.add(message, value, total_val)
+        self.update()
+
     def update(self):
         """ updates the view with the progress """
         msg, percent = self.reporter.report()
         self.view.write(msg, percent)
+
+    def begin(self):
+        """ start reporting progress """
+        self.add('Starting')
+
+    def end(self):
+        """ ending reporting of progress """
+        self.add("Finished")
 
 
 class StandardOut(ProgressView):

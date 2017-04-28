@@ -44,9 +44,7 @@ REPORT = ProgressReporter()
 HOOK = ProgressHook(REPORT, VIEW)
 def _update_progress(current, total):
     if total:
-        REPORT.add(current, total)
-        HOOK.update()
-
+        HOOK.add(current, total)
 
 # CUSTOM METHODS
 

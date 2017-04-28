@@ -117,8 +117,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         self.reporter.begin()
 
         while not poller.done():
-            self.reporter.add(self.curr_message, None, None)
-            self.controller.update()
+            self.controller.add(self.curr_message, None, None)
             try:
                 # pylint: disable=protected-access
                 correlation_id = json.loads(
@@ -158,7 +157,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
         logger.info("Long running operation '%s' completed with result %s",
                     self.start_msg, result)
-        self.reporter.end()
+        self.controller.end()
         return result
 
 

@@ -17,6 +17,7 @@ DONE_STR = 'Finished'
 HEART_BEAT_VALUES = {0 : "__", 1 : "/\\", 2 : '/^\\', 3 : "__"}
 HEART_BEAT = ''
 
+
 class ShellProgressView(StandardOut):
     """ custom output for progress reporting """
 
@@ -40,7 +41,6 @@ class ShellProgressView(StandardOut):
         message += ']  {:.1%}'.format(percent)
         return message
 
-
     def flush(self):
         """ flushes the message"""
         pass
@@ -48,6 +48,7 @@ class ShellProgressView(StandardOut):
     def end(self, message=''):
         global PROGRESS
         PROGRESS = DONE_STR
+
 
 def get_progress_message():
     """ gets the progress message """
