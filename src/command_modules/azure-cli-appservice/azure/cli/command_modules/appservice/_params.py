@@ -67,7 +67,7 @@ register_cli_argument('webapp', 'name', configured_default='web',
                       help="name of the web. You can configure the default using 'az configure --defaults web=<name>'")
 register_cli_argument('webapp create', 'name', options_list=('--name', '-n'), help='name of the new webapp')
 register_cli_argument('webapp create', 'deployment_local_git', action='store_true', options_list=('--deployment-local-git', '-l'), help='enable local git')
-register_cli_argument('webapp create', 'deployment_source_url', options_list=('--deployment-source-url', '-u'), help='the URL to the Git repository')
+register_cli_argument('webapp create', 'deployment_source_url', options_list=('--deployment-source-url', '-u'), help='Git repository URL to link with manual integration')
 register_cli_argument('webapp create', 'deployment_source_branch', options_list=('--deployment-source-branch', '-b'), help='the branch to deploy')
 register_cli_argument('webapp create', 'deployment_container_image_name', options_list=('--deployment-container-image-name', '-i'),
                       help='Linux only. Container image name from Docker Hub, e.g. publisher/image-name:version')
@@ -172,7 +172,7 @@ register_cli_argument('appservice web', 'name', configured_default='web',
                       help="name of the web. You can configure the default using 'az configure --defaults web=<name>'")
 register_cli_argument('appservice web create', 'name', options_list=('--name', '-n'), help='name of the new webapp')
 register_cli_argument('appservice web create', 'deployment_local_git', action='store_true', options_list=('--deployment-local-git', '-l'), help='enable local git')
-register_cli_argument('appservice web create', 'deployment_source_url', options_list=('--deployment-source-url', '-u'), help='the URL to the Git repository')
+register_cli_argument('appservice web create', 'deployment_source_url', options_list=('--deployment-source-url', '-u'), help='Git repository URL to link with manual integration')
 register_cli_argument('appservice web create', 'deployment_source_branch', options_list=('--deployment-source-branch', '-b'), help='the branch to deploy')
 register_cli_argument('appservice web create', 'deployment_container_image_name', options_list=('--deployment-container-image-name', '-i'),
                       help='Linux only. Container image name from Docker Hub, e.g. publisher/image-name:version')
