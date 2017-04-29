@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from collections import OrderedDict
 from ._client_factory import (get_devtestlabs_virtual_machine_operation,
                               get_devtestlabs_custom_image_operation,
                               get_devtestlabs_gallery_image_operation,
@@ -34,6 +35,27 @@ def _export_artifacts(formula):
             del artifact.vm_extension_status_message
             del artifact.install_time
     return artifacts
+
+
+def transform_artifact_source_list(artifact_source_list):
+    return [transform_artifact_source(v) for v in artifact_source_list]
+
+
+def transform_artifact_source(result):
+    return OrderedDict([('name', result['name']),
+                        ('sourceType', result['sourceType']),
+                        ('status', result.get('status')),
+                        ('uri', result.get('uri'))])
+
+
+def transform_arm_template_list(arm_template_list):
+    return [transform_arm_template(v) for v in arm_template_list]
+
+
+def transform_arm_template(result):
+    return OrderedDict([('name', result['name']),
+                        ('resourceGroup', result['resourceGroup']),
+                        ('publisher', result.get('publisher'))])
 
 
 # Custom Command's service adapter
@@ -115,8 +137,8 @@ artifact_source_operations = create_service_adapter(
 with ServiceGroup(__name__, get_devtestlabs_artifact_source_operation,
                   artifact_source_operations) as s:
     with s.group('lab artifact-source') as c:
-        c.command('list', 'list')
-        c.command('show', 'get')
+        c.command('list', 'list', table_transformer=transform_artifact_source_list)
+        c.command('show', 'get', table_transformer=transform_artifact_source)
 
 # Virtual Network Operations Commands
 virtual_network_operations = create_service_adapter(
@@ -182,10 +204,10 @@ arm_template_operations = create_service_adapter(
 with ServiceGroup(__name__, get_devtestlabs_arm_template_operation,
                   arm_template_operations) as s:
     with s.group('lab arm-template') as c:
-        c.command('list', 'list')
+        c.command('list', 'list', table_transformer=transform_arm_template_list)
 
 # ARM Templates Operations Custom Commands
 with ServiceGroup(__name__, get_devtestlabs_arm_template_operation,
                   custom_operations) as s:
     with s.group('lab arm-template') as c:
-        c.command('show', 'show_arm_template')
+        c.command('show', 'show_arm_template', table_transformer=transform_arm_template)
