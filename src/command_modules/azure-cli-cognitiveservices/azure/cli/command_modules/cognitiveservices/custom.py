@@ -23,7 +23,8 @@ def create(client, resource_group_name, account_name, sku_name, kind, location, 
     if yes:
         logger.warning(terms)
     else:
-        option = prompt_y_n(terms + hint)
+        logger.warning(terms)
+        option = prompt_y_n(hint)
         if(not option):
              raise CLIError('Operation cancelled.')
     sku =  Sku(sku_name)
