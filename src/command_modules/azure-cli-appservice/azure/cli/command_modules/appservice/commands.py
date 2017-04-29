@@ -108,6 +108,9 @@ cli_command(__name__, 'webapp deployment slot create', 'azure.cli.command_module
 cli_command(__name__, 'webapp deployment user set', 'azure.cli.command_modules.appservice.custom#set_deployment_user')
 cli_command(__name__, 'webapp deployment list-publishing-profiles',
             'azure.cli.command_modules.appservice.custom#list_publish_profiles')
+cli_command(__name__, 'webapp deployment user show', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.get_publishing_user', cf_web_client, exception_handler=empty_on_404)
+cli_command(__name__, 'webapp list-runtimes', 'azure.cli.command_modules.appservice.custom#list_runtimes')
+
 # end of the new ones #
 # beginning of the old ones ###
 cli_command(__name__, 'appservice web create', 'azure.cli.command_modules.appservice.custom#create_webapp', exception_handler=ex_handler_factory())
@@ -164,11 +167,9 @@ cli_command(__name__, 'appservice web deployment slot create', 'azure.cli.comman
 cli_command(__name__, 'appservice web deployment user set', 'azure.cli.command_modules.appservice.custom#set_deployment_user')
 cli_command(__name__, 'appservice web deployment list-publishing-profiles',
             'azure.cli.command_modules.appservice.custom#list_publish_profiles')
-
+cli_command(__name__, 'appservice web deployment user show', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.get_publishing_user', cf_web_client, exception_handler=empty_on_404)
 # end of the old ones ###
 
-cli_command(__name__, 'appservice web deployment user show', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.get_publishing_user', cf_web_client, exception_handler=empty_on_404)
-cli_command(__name__, 'appservice web list-runtimes', 'azure.cli.command_modules.appservice.custom#list_runtimes')
 
 cli_command(__name__, 'appservice plan create', 'azure.cli.command_modules.appservice.custom#create_app_service_plan', exception_handler=ex_handler_factory(creating_plan=True))
 cli_command(__name__, 'appservice plan delete', 'azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.delete', cf_plans, confirmation=True)

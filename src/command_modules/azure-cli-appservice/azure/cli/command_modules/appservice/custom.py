@@ -1053,22 +1053,15 @@ class _StackRuntimeHelper(object):
         for name, properties in [(s['name'], s['properties']) for s in stacks
                                  if s['name'] in config_mappings]:
             for major in properties['majorVersions']:
-                has_minor = bool(major['minorVersions'])
-                if has_minor:
-                    for minor in major['minorVersions']:
-                        result.append({
-                            'displayName': name + '|' + minor['displayVersion'],
-                            'configs': {
-                                config_mappings[name]: minor['runtimeVersion']
-                            }
-                        })
-                else:
-                    result.append({
-                        'displayName': name + '|' + major['displayVersion'],
-                        'configs': {
-                            config_mappings[name]: major['runtimeVersion']
-                        }
-                    })
+                default_minor = next((m for m in (major['minorVersions'] or []) if m['isDefault']),
+                                     None)
+                result.append({
+                    'displayName': name + '|' + major['displayVersion'],
+                    'configs': {
+                        config_mappings[name]: (default_minor['runtimeVersion']
+                                                if default_minor else major['runtimeVersion'])
+                    }
+                })
 
         # deal with java, which pair with java container
         java_stack = next((s for s in stacks if s['name'] == 'java'))

@@ -215,17 +215,17 @@ helps['webapp deployment slot'] = """
     short-summary: Manage deployment slots.
 """
 
-helps['webapp source-control'] = """
+helps['webapp deployment source'] = """
     type: group
     short-summary: Manage source control systems.
 """
 
-helps['webapp source-control config'] = """
+helps['webapp deployment source config'] = """
     type: command
     short-summary: Associate to Git or Mercurial repositories.
 """
 
-helps['webapp source-control config-local-git'] = """
+helps['webapp deployment source config-local-git'] = """
     type: command
     short-summary: Enable local git.
     long-summary: Get an endpoint to clone and later push to the web app.
@@ -239,17 +239,17 @@ helps['webapp source-control config-local-git'] = """
                 https://<deploy_user_name>@MyUniqueApp.scm.azurewebsites.net/MyUniqueApp.git
 """
 
-helps['webapp source-control delete'] = """
+helps['webapp deployment source delete'] = """
     type: command
     short-summary: Delete source control configurations.
 """
 
-helps['webapp source-control show'] = """
+helps['webapp deployment source show'] = """
     type: command
     short-summary: Show source control configurations.
 """
 
-helps['webapp source-control sync'] = """
+helps['webapp deployment source sync'] = """
     type: command
     short-summary: Synchronize from the source repository, only needed under maunal integration mode.
 """
@@ -361,6 +361,11 @@ helps['webapp create'] = """
             -g MyResourceGroup
             -p MyPlan
             -n MyUniqueApp
+"""
+
+helps['webapp list-runtimes'] = """
+    type: command
+    short-summary: List built-in web stack runtimes you can use to create new webapps.
 """
 
 helps['webapp delete'] = """
