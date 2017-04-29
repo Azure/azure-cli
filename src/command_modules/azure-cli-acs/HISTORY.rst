@@ -3,6 +3,11 @@
 Release History
 ===============
 
+unreleased
+----------
+
+* Fix to use one of the loaded keys.
+
 2.0.4 (2017-04-28)
 ++++++++++++++++++
 
