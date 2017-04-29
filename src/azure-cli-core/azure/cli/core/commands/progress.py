@@ -60,7 +60,7 @@ class InDeterminateProgressView(_ProgressViewBase):
         self.out.write(message + '\n')
 
 
-class ProgressReporter(object):
+class DetProgressReporter(object):
     """ generic progress reporter """
     def __init__(self, total_value=None):
         self.message = ''
@@ -82,10 +82,27 @@ class ProgressReporter(object):
         return self.message, percent
 
 
+class InDetProgressReporter(object):
+    """ generic progress reporter """
+    def __init__(self):
+        self.message = ''
+
+    def add(self, message=''):
+        """ adds a progress report """
+        self.message = message
+
+    def report(self):
+        """ report the progress """
+        return self.message
+
+
 class ProgressHook(object):
     """ sends the progress to the view """
-    def __init__(self, reporter=None):
-        self.reporter = reporter or ProgressReporter()
+    def __init__(self, progress_type):
+        if progress_type == ProgressType.Determinate:
+            self.reporter = DetProgressReporter()
+        elif progress_type == ProgressType.Indeterminate:
+            self.reporter = InDetProgressReporter()
         from azclishell.progress import ShellProgressView
         self.registery = [_InDeterminateStandardOut, _DeterminateStandardOut, ShellProgressView]
         self.active_progress = []
