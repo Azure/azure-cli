@@ -29,7 +29,7 @@ def invalid_arg_found_exception_handler(ex):
     # wraps DocumentDB 400 error in CLIError
     from pydocumentdb.errors import HTTPFailure
     if isinstance(ex, HTTPFailure) and ex.status_code == 400:
-        cliError = None
+        cli_error = None
         try:
             # pylint:disable=protected-access
             if ex._http_error_message:
@@ -38,13 +38,13 @@ def invalid_arg_found_exception_handler(ex):
                     msg = msg['message'].split('\n')[0]
                     msg = msg[len('Message: '):] if msg.find('Message: ') == 0 else msg
                     # pylint:disable=line-too-long
-                    cliError = CLIError('Operation Failed: Invalid Arg (Server returned status code 400 {})'.format(str(msg)))
+                    cli_error = CLIError('Operation Failed: Invalid Arg (Server returned status code 400 {})'.format(str(msg)))
         # pylint:disable=broad-except
         except Exception:
             pass
-        if cliError:
+        if cli_error:
             # pylint:disable=raising-bad-type
-            raise cliError
+            raise cli_error
         # pylint:disable=line-too-long
         raise CLIError('Operation Failed: Invalid Arg (Server returned status code 400\n {})'.format(str(ex)))
     raise ex
@@ -60,8 +60,8 @@ def exception_handler_chain_builder(handlers):
         for h in handlers:
             try:
                 h(ex)
-            except CLIError as cliError:
-                raise cliError
+            except CLIError as cli_error:
+                raise cli_error
             except Exception:
                 pass
         raise ex
