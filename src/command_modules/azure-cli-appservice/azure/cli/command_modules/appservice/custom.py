@@ -1009,7 +1009,7 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
     return matched
 
 
-class _StackRuntimeHelper:
+class _StackRuntimeHelper(object):
 
     def __init__(self, client):
         self._client = client
