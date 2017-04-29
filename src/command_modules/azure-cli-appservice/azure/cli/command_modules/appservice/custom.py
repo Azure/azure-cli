@@ -71,10 +71,8 @@ def create_webapp(resource_group_name, name, plan, runtime=None,
         match = helper.resolve(runtime)
         if not match:
             raise CLIError("Runtime '{}' is not supported. Please invoke 'list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
-        configs = get_site_configs(resource_group_name, name, None)
-        for k, v in match['configs'].items():
-            setattr(configs, k, v)
-        _generic_site_operation(resource_group_name, name, 'update_configuration', None, configs)
+
+        match['setter'](match, resource_group_name, name)
 
     if deployment_local_git and deployment_source_url:
         raise CLIError('usage error: --deployment-local-git | --deployment-source-url')
@@ -1025,13 +1023,26 @@ class _StackRuntimeHelper(object):
         self._load_stacks()
         return self._stacks
 
+    @staticmethod
+    def update_site_config(stack, resource_group_name, webapp_name):
+        configs = get_site_configs(resource_group_name, webapp_name, None)
+        for k, v in stack['configs'].items():
+            setattr(configs, k, v)
+        _generic_site_operation(resource_group_name, webapp_name,
+                                'update_configuration', None, configs)
+
+    @staticmethod
+    def update_site_appsettings(stack, resource_group_name, webapp_name):
+        settings = ['{}={}'.format(k, v) for k, v in stack['configs'].items()]
+        update_app_settings(resource_group_name, webapp_name, settings=settings)
+
     def _load_stacks(self):
         if self._stacks:
             return
         raw_list = self._client.provider.get_available_stacks()
         stacks = raw_list['value']
         config_mappings = {
-            'node': 'node_version',
+            'node': 'WEBSITE_NODE_DEFAULT_VERSION',
             'python': 'python_version',
             'php': 'php_version',
             'aspnet': 'net_framework_version'
@@ -1042,12 +1053,22 @@ class _StackRuntimeHelper(object):
         for name, properties in [(s['name'], s['properties']) for s in stacks
                                  if s['name'] in config_mappings]:
             for major in properties['majorVersions']:
-                result.append({
-                    'displayName': name + '|' + major['displayVersion'],
-                    'configs': {
-                        config_mappings[name]: major['runtimeVersion']
-                    }
-                })
+                has_minor = bool(major['minorVersions'])
+                if has_minor:
+                    for minor in major['minorVersions']:
+                        result.append({
+                            'displayName': name + '|' + minor['displayVersion'],
+                            'configs': {
+                                config_mappings[name]: minor['runtimeVersion']
+                            }
+                        })
+                else:
+                    result.append({
+                        'displayName': name + '|' + major['displayVersion'],
+                        'configs': {
+                            config_mappings[name]: major['runtimeVersion']
+                        }
+                    })
 
         # deal with java, which pair with java container
         java_stack = next((s for s in stacks if s['name'] == 'java'))
@@ -1066,4 +1087,7 @@ class _StackRuntimeHelper(object):
                         }
                     })
 
+        for r in result:
+            r['setter'] = (_StackRuntimeHelper.update_site_appsettings if 'node' in
+                           r['displayName'] else _StackRuntimeHelper.update_site_config)
         self._stacks = result
