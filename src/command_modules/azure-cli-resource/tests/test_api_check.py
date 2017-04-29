@@ -4,17 +4,18 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
+
 try:
     from unittest.mock import MagicMock
 except ImportError:
     from mock import MagicMock
 
 from azure.cli.core.util import CLIError
-# pylint: disable=line-too-long
-from azure.cli.command_modules.resource.custom  import _ResourceUtils, _validate_resource_inputs, parse_resource_id
+from azure.cli.command_modules.resource.custom import (_ResourceUtils, _validate_resource_inputs,
+                                                       parse_resource_id)
+
 
 class TestApiCheck(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         pass
@@ -29,13 +30,16 @@ class TestApiCheck(unittest.TestCase):
     def tearDown(self):
         pass
 
-
     def test_parse_resource(self):
-        parts = parse_resource_id('/subscriptions/00000/resourcegroups/bocconitestlabrg138089/providers/microsoft.devtestlab/labs/bocconitestlab/virtualmachines/tasktest1')
+        parts = parse_resource_id('/subscriptions/00000/resourcegroups/bocconitestlabrg138089/'
+                                  'providers/microsoft.devtestlab/labs/bocconitestlab/'
+                                  'virtualmachines/tasktest1')
         self.assertIsNotNone(parts.get('type'))
 
     def test_parse_resource_capital(self):
-        parts = parse_resource_id('/subscriptions/00000/resourceGroups/bocconitestlabrg138089/providers/microsoft.devtestlab/labs/bocconitestlab/virtualmachines/tasktest1')
+        parts = parse_resource_id('/subscriptions/00000/resourceGroups/bocconitestlabrg138089/'
+                                  'providers/microsoft.devtestlab/labs/bocconitestlab/'
+                                  'virtualmachines/tasktest1')
         self.assertIsNotNone(parts.get('type'))
 
     def test_validate_resource_inputs(self):
@@ -48,21 +52,26 @@ class TestApiCheck(unittest.TestCase):
     def test_resolve_api_provider_backup(self):
         """ Verifies provider is used as backup if api-version not specified. """
         rcf = self._get_mock_client()
-        res_utils = _ResourceUtils(resource_type='Mock/test', resource_name='vnet1', resource_group_name='rg', rcf=rcf)
+        res_utils = _ResourceUtils(resource_type='Mock/test', resource_name='vnet1',
+                                   resource_group_name='rg', rcf=rcf)
         self.assertEqual(res_utils.api_version, "2016-01-01")
 
     def test_resolve_api_provider_with_parent_backup(self):
         """ Verifies provider (with parent) is used as backup if api-version not specified. """
         rcf = self._get_mock_client()
         res_utils = _ResourceUtils(parent_resource_path='foo/testfoo123', resource_group_name='rg',
-                                   resource_provider_namespace='Mock', resource_type='test', resource_name='vnet1',
+                                   resource_provider_namespace='Mock', resource_type='test',
+                                   resource_name='vnet1',
                                    rcf=rcf)
         self.assertEqual(res_utils.api_version, "1999-01-01")
 
     def test_resolve_api_all_previews(self):
-        """ Verifies most recent preview version returned only if there are no non-preview versions. """
+        """
+        Verifies most recent preview version returned only if there are no non-preview versions.
+        """
         rcf = self._get_mock_client()
-        res_utils = _ResourceUtils(resource_type='Mock/preview', resource_name='vnet1', resource_group_name='rg', rcf=rcf)
+        res_utils = _ResourceUtils(resource_type='Mock/preview', resource_name='vnet1',
+                                   resource_group_name='rg', rcf=rcf)
         self.assertEqual(res_utils.api_version, "2005-01-01-preview")
 
     def _get_mock_client(self):
@@ -77,11 +86,12 @@ class TestApiCheck(unittest.TestCase):
         client.providers.get.return_value = provider
         return client
 
-    def _get_mock_resource_type(self, name, api_versions): #pylint: disable=no-self-use
+    def _get_mock_resource_type(self, name, api_versions):  # pylint: disable=no-self-use
         rt = MagicMock()
         rt.resource_type = name
         rt.api_versions = api_versions
         return rt
+
 
 if __name__ == '__main__':
     unittest.main()

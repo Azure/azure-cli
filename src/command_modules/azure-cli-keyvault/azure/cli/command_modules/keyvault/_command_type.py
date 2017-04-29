@@ -16,6 +16,7 @@ from azure.cli.core.commands._introspection import \
 
 from azure.cli.core.util import CLIError
 
+
 def _encode_hex(item):
     """ Recursively crawls the object structure and converts bytes or bytearrays to base64
     encoded strings. """
@@ -34,8 +35,8 @@ def _encode_hex(item):
     else:
         return item
 
-def _create_key_vault_command(module_name, name, operation, transform_result, table_transformer):
 
+def _create_key_vault_command(module_name, name, operation, transform_result, table_transformer):
     if not isinstance(operation, string_types):
         raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
@@ -53,15 +54,15 @@ def _create_key_vault_command(module_name, name, operation, transform_result, ta
 
         try:
 
-            def get_token(server, resource, scope): # pylint: disable=unused-argument
+            def get_token(server, resource, scope):  # pylint: disable=unused-argument
                 import adal
                 try:
-                    return Profile().get_login_credentials(resource)[0]._token_retriever() # pylint: disable=protected-access
+                    return Profile().get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
                 except adal.AdalError as err:
-                    #pylint: disable=no-member
+                    # pylint: disable=no-member
                     if (hasattr(err, 'error_response') and
-                            ('error_description' in err.error_response)
-                            and ('AADSTS70008:' in err.error_response['error_description'])):
+                            ('error_description' in err.error_response) and
+                            ('AADSTS70008:' in err.error_response['error_description'])):
                         raise CLIError(
                             "Credentials have expired due to inactivity. Please run 'az login'")
                     raise CLIError(err)
@@ -72,7 +73,7 @@ def _create_key_vault_command(module_name, name, operation, transform_result, ta
             if 'generated' in op.__module__:
                 client = BaseKeyVaultClient(KeyVaultAuthentication(get_token))
             else:
-                client = KeyVaultClient(KeyVaultAuthentication(get_token)) # pylint: disable=redefined-variable-type
+                client = KeyVaultClient(KeyVaultAuthentication(get_token))  # pylint: disable=redefined-variable-type
             result = op(client, **kwargs)
 
             # apply results transform if specified
@@ -105,11 +106,17 @@ def _create_key_vault_command(module_name, name, operation, transform_result, ta
 
     command_module_map[name] = module_name
     name = ' '.join(name.split())
-    arguments_loader = lambda: extract_args_from_signature(get_op_handler(operation))
-    description_loader = lambda: extract_full_summary_from_signature(get_op_handler(operation))
+
+    def arguments_loader():
+        return extract_args_from_signature(get_op_handler(operation))
+
+    def description_loader():
+        return extract_full_summary_from_signature(get_op_handler(operation))
+
     cmd = CliCommand(name, _execute_command, table_transformer=table_transformer,
                      arguments_loader=arguments_loader, description_loader=description_loader)
     return cmd
+
 
 def cli_keyvault_data_plane_command(
         name, operation, transform=None, table_transformer=None):

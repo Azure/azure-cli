@@ -18,7 +18,7 @@ def get_nose_runner(report_folder, parallel=True, process_timeout=600, process_r
                 or not os.path.isdir(report_folder):
             raise ValueError('Report folder {} does not exist'.format(report_folder))
 
-        arguments = [__file__, '-v']
+        arguments = [__file__, '-v', '--nologcapture']
         if parallel:
             arguments += ['--processes=-1', '--process-timeout={}'.format(process_timeout)]
             if process_restart:

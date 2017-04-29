@@ -5,7 +5,8 @@
 
 import unittest
 
-from azure.cli.command_modules.resource.custom  import _merge_parameters
+from azure.cli.command_modules.resource.custom import _merge_parameters
+
 
 class TestCustom(unittest.TestCase):
     def test_resource_merge_parameters(self):

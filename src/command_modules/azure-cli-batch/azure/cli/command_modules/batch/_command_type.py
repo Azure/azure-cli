@@ -10,7 +10,6 @@ import re
 from six import string_types
 from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
 
-
 from azure.cli.command_modules.batch import _validators as validators
 from azure.cli.command_modules.batch import _format as transformers
 from azure.cli.core.commands import (
@@ -23,7 +22,6 @@ from azure.cli.core.commands import (
 from azure.cli.core.commands._introspection import (
     extract_full_summary_from_signature,
     extract_args_from_signature)
-
 
 _CLASS_NAME = re.compile(r"<(.*?)>")  # Strip model name from class docstring
 _UNDERSCORE_CASE = re.compile('(?!^)([A-Z]+)')  # Convert from CamelCase to underscore_case
@@ -206,11 +204,13 @@ def group_title(path):
     :param str path: The complex object path of the argument.
     :returns: str
     """
+
     def filter_group(group):
         for suffix in ["_patch_parameter", "_update_parameter", "_parameter"]:
             if group.endswith(suffix):
                 group = group[:0 - len(suffix)]
         return group
+
     group_path = path.split('.')
     group_path = list(map(filter_group, group_path))  # pylint: disable=bad-builtin
     title = ': '.join(group_path)
@@ -353,7 +353,8 @@ class BatchArgumentTree(object):
                 raise ValueError(message.format(self._request_param['model']))
 
     def queue_argument(self, name=None, path=None, root=None,  # pylint:disable=too-many-arguments
-                       options=None, type=None, dependencies=None):  # pylint: disable=redefined-builtin
+                       options=None, type=None,  # pylint: disable=redefined-builtin
+                       dependencies=None):
         """Add pending command line argument
         :param str name: The name of the command line argument.
         :param str path: The complex object path to the parameter.
@@ -482,9 +483,9 @@ class BatchArgumentTree(object):
 
 
 class AzureBatchDataPlaneCommand(object):
-    # pylint:disable=too-many-instance-attributes, too-few-public-methods
-
-    def __init__(self, module_name, name, operation, factory, transform_result,  # pylint:disable=too-many-arguments, too-many-statements
+    # pylint: disable=too-many-instance-attributes, too-few-public-methods
+    def __init__(self, module_name, name,  # pylint:disable=too-many-arguments, too-many-statements
+                 operation, factory, transform_result,
                  flatten, ignore, validator, silent):
 
         if not isinstance(operation, string_types):
@@ -582,6 +583,7 @@ class AzureBatchDataPlaneCommand(object):
                     raise CLIError(ex)
             except (ValidationError, ClientRequestError) as ex:
                 raise CLIError(ex)
+
         table_transformer = None
         try:
             transform_func = '_'.join(name.split()[1:]).replace('-', '_')
@@ -605,10 +607,10 @@ class AzureBatchDataPlaneCommand(object):
         :param dict kwargs: The request arguments.
         :returns: bool
         """
-        return self.confirmation \
-            and not kwargs.get(CONFIRM_PARAM_NAME) \
-            and not config.getboolean('core', 'disable_confirm_prompt', fallback=False) \
-            and not user(self.confirmation, kwargs)
+        return not (not self.confirmation or
+                    kwargs.get(CONFIRM_PARAM_NAME) or
+                    config.getboolean('core', 'disable_confirm_prompt', fallback=False) or
+                    user(self.confirmation, kwargs))
 
     def _build_parameters(self, path, kwargs, param, value):
         """Recursively build request parameter dictionary from command line args.
@@ -665,8 +667,10 @@ class AzureBatchDataPlaneCommand(object):
         """
         for attr, details in model._attribute_map.items():  # pylint: disable=protected-access
             conditions = []
-            conditions.append(model._validation.get(attr, {}).get('readonly'))  # pylint: disable=protected-access
-            conditions.append(model._validation.get(attr, {}).get('constant'))  # pylint: disable=protected-access
+            conditions.append(
+                model._validation.get(attr, {}).get('readonly'))  # pylint: disable=protected-access
+            conditions.append(
+                model._validation.get(attr, {}).get('constant'))  # pylint: disable=protected-access
             conditions.append('.'.join([path, attr]) in self.ignore)
             conditions.append(details['type'][0] in ['{'])
             if not any(conditions):
@@ -693,7 +697,8 @@ class AzureBatchDataPlaneCommand(object):
                 options['options_list'] = [arg_name(param)]
                 yield (param, CliCommandArgument(param, **options))
 
-    def _resolve_conflict(self, arg, param, path, options, typestr, dependencies, conflicting):  # pylint:disable=too-many-arguments
+    def _resolve_conflict(self,  # pylint:disable=too-many-arguments
+                          arg, param, path, options, typestr, dependencies, conflicting):
         """Resolve conflicting command line arguments.
         :param str arg: Name of the command line argument.
         :param str param: Original request parameter name.
@@ -723,15 +728,16 @@ class AzureBatchDataPlaneCommand(object):
         else:
             self.parser.queue_argument(arg, path, param, options, typestr, dependencies)
 
-    def _flatten_object(self, path, param_model, conflict_names=[]):  # pylint: disable=dangerous-default-value
+    def _flatten_object(self, path, param_model,  # pylint: disable=dangerous-default-value
+                        conflict_names=[]):
         """Flatten a complex parameter object into command line arguments.
         :param str path: The complex parameter namespace.
         :param class param_model: The complex parameter class.
         :param list conflict_name: List of argument names that conflict.
         """
         if self._should_flatten(path):
-            required_attrs = [key for key,
-                              val in param_model._validation.items() if val.get('required')]  # pylint: disable=protected-access
+            validations = param_model._validation.items()  # pylint: disable=protected-access
+            required_attrs = [key for key, val in validations if val.get('required')]
 
             for param_attr, details in self._get_attrs(param_model, path):
                 if param_attr in IGNORE_PARAMETERS:
@@ -774,7 +780,7 @@ class AzureBatchDataPlaneCommand(object):
                         values_index = options['help'].find(' Possible values include')
                         if values_index >= 0:
                             choices = options['help'][values_index + 25:].split(', ')
-                            options['choices'] = [enum_value(c) \
+                            options['choices'] = [enum_value(c)
                                                   for c in choices if enum_value(c) != "unmapped"]
                             options['help'] = options['help'][0:values_index]
                         self._resolve_conflict(param_attr, param_attr, path, options,
@@ -880,7 +886,8 @@ def validate_client_parameters(namespace):
                 from azure.cli.core.commands.arm import parse_resource_id
                 rg = parse_resource_id(acc.id)['resource_group']
                 namespace.account_key = \
-                    client.batch_account.get_keys(rg, namespace.account_name).primary  # pylint: disable=no-member
+                    client.batch_account.get_keys(rg,  # pylint: disable=no-member
+                                                  namespace.account_name).primary
             else:
                 raise ValueError("Batch account '{}' not found.".format(namespace.account_name))
     else:
@@ -893,8 +900,9 @@ def validate_client_parameters(namespace):
         namespace.account_key = None
 
 
-def cli_batch_data_plane_command(name, operation, client_factory, transform=None,  # pylint:disable=too-many-arguments
-                                 flatten=FLATTEN, ignore=None, validator=None, silent=None):
+def cli_batch_data_plane_command(name,  # pylint:disable=too-many-arguments
+                                 operation, client_factory, transform=None, flatten=FLATTEN,
+                                 ignore=None, validator=None, silent=None):
     """ Registers an Azure CLI Batch Data Plane command. These commands must respond to a
     challenge from the service when they make requests. """
     command = AzureBatchDataPlaneCommand(__name__, name, operation, client_factory, transform,
@@ -905,13 +913,13 @@ def cli_batch_data_plane_command(name, operation, client_factory, transform=None
     command.cmd.add_argument('account_name', '--account-name', required=False, default=None,
                              validator=validate_client_parameters, arg_group=group_name,
                              help='Batch account name. Alternatively, set by environment variable: '
-                             'AZURE_BATCH_ACCOUNT')
+                                  'AZURE_BATCH_ACCOUNT')
     command.cmd.add_argument('account_key', '--account-key', required=False, default=None,
                              arg_group=group_name,
                              help='Batch account key. Alternatively, set by environment'
-                             ' variable: AZURE_BATCH_ACCESS_KEY')
+                                  ' variable: AZURE_BATCH_ACCESS_KEY')
     command.cmd.add_argument('account_endpoint', '--account-endpoint', required=False, default=None,
                              arg_group=group_name,
                              help='Batch service endpoint. Alternatively, set by environment'
-                             ' variable: AZURE_BATCH_ENDPOINT')
+                                  ' variable: AZURE_BATCH_ENDPOINT')
     command_table[command.cmd.name] = command.cmd
