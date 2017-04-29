@@ -78,7 +78,7 @@ def create_webapp(resource_group_name, name, plan, runtime=None,
         raise CLIError('usage error: --deployment-local-git | --deployment-source-url')
 
     if deployment_source_url:
-        logger.warning("Link to git repository '%s' with auto-sync mode", deployment_source_url)
+        logger.warning("Linking to git repository '%s' with auto-sync mode", deployment_source_url)
         try:
             poller = config_source_control(resource_group_name, name, deployment_source_url, 'git',
                                            deployment_source_branch)
@@ -86,7 +86,7 @@ def create_webapp(resource_group_name, name, plan, runtime=None,
         except Exception as ex:  # pylint: disable=broad-except
             ex = ex_handler_factory(no_throw=True)(ex)
             if 'SourceControlToken' in str(ex):
-                logger.warning("Link to git repository with auto-sync mode failed for missing "
+                logger.warning("Linking to git repository with auto-sync mode failed for missing "
                                "git token. You can correct it later using 'az appservie web "
                                "source-control config' ")
             else:

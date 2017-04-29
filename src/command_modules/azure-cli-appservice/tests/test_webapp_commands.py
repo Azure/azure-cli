@@ -109,10 +109,11 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name = 'webapp-quick'
         plan = 'plan-quick'
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        r = self.cmd('appservice web create -g {} -n {} --plan {} --deployment-local-git -r "node|6.2"'.format(resource_group, webapp_name, plan)).get_output_in_json()
+        r = self.cmd('appservice web create -g {} -n {} --plan {} --deployment-local-git -r "node|6.1.0"'.format(resource_group, webapp_name, plan)).get_output_in_json()
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
-        self.cmd('appservice web config show -g {} -n {}'.format(resource_group, webapp_name, checks=[
-            JMESPathCheckV2('nodeVersion', '6.2')
+        self.cmd('appservice web config appsettings show -g {} -n {}'.format(resource_group, webapp_name, checks=[
+            JMESPathCheckV2('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
+            JMESPathCheckV2('[0].value', '6.1.0'),
         ]))
 
     @ResourceGroupPreparer(location='westus')
