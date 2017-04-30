@@ -49,6 +49,14 @@ def invalid_arg_found_exception_handler(ex):
         raise CLIError('Operation Failed: Invalid Arg (Server returned status code 400\n {})'.format(str(ex)))
     raise ex
 
+def unknown_server_failure_exception_handler(ex):
+    # wraps unknown documentdb error in CLIError
+    from pydocumentdb.errors import HTTPFailure
+    if isinstance(ex, HTTPFailure):
+        # pylint:disable=line-too-long
+        raise CLIError('Operation Failed: {}'.format(str(ex)))
+    raise ex
+
 def exception_handler_chain_builder(handlers):
     # creates a handler which chains the handler
     # as soon as one of the chained handlers raises CLIError, it raises CLIError
@@ -78,5 +86,9 @@ def network_exception_handler(ex):
 def generic_exception_handler(ex):
     # pylint:disable=line-too-long
     logger.debug(ex)
-    chained_handler = exception_handler_chain_builder([duplicate_resource_exception_handler, resource_not_found_exception_handler, invalid_arg_found_exception_handler, network_exception_handler])
+    chained_handler = exception_handler_chain_builder([duplicate_resource_exception_handler,
+                                                       resource_not_found_exception_handler,
+                                                       invalid_arg_found_exception_handler,
+                                                       unknown_server_failure_exception_handler,
+                                                       network_exception_handler])
     chained_handler(ex)

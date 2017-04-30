@@ -12,10 +12,9 @@ logger = azlogging.get_az_logger(__name__)
 
 NO_CREDENTIALS_ERROR_MESSAGE = """
 No credentials specified to access DocumentDB service. Please provide any of the following:
-    (1) account name and key (--account-name and --account-key options or
-        set AZURE_DOCUMENTDB_ACCOUNT and AZURE_DOCUMENTDB_KEY environment variables)
-    (2) url-connection and key (--url-connection and --account-key options or
-        set AZURE_DOCUMENTDB_URL_CONNECTION and AZURE_DOCUMENTDB_KEY environment variables)
+    (1) resource group name and account name
+    (2) account name and key
+    (3) url-connection and key
 """
 
 UA_AGENT = "AZURECLI/{}".format(core_version)
@@ -30,6 +29,13 @@ def _add_headers(client):
         pass
     client.default_headers['User-Agent'] = ' '.join(agents)
 
+def _get_url_connection(url_collection, account_name):
+    if url_collection:
+        return url_collection
+    elif account_name:
+        return 'https://{}.documents.azure.com:443'.format(account_name)
+    else:
+        return None
 
 def get_document_client_factory(kwargs):
 
@@ -39,35 +45,22 @@ def get_document_client_factory(kwargs):
     service_type = document_client.DocumentClient
 
     logger.debug('Getting data service client service_type=%s', service_type.__name__)
-
     try:
-        from azure.cli.core._config import az_config
-        def extract_param(cmd_arg_name, config_arg_name):
-            if cmd_arg_name in kwargs:
-                val = kwargs.pop(cmd_arg_name)
-            if val is None:
-                val = az_config.get('documentdb', config_arg_name, None)
-            return val
+        name = kwargs.pop('db_account_name', None)
+        key = kwargs.pop('db_account_key', None)
+        url_connection = kwargs.pop('db_url_connection', None)
+        resource_group = kwargs.pop('db_resource_group_name', None)
 
-        # command-line option: --account-name, env: AZURE_DOCUMENTDB_ACCOUNT
-        # command-line option: --account-key, env: AZURE_DOCUMENTDB_KEY
-        # command-line option: --url-connection, env: AZURE_DOCUMENTDB_URL_CONNECTION
+        if name and resource_group and not key:
+            # if resource group name is provided find key
+            keys = cf_documentdb().database_accounts.list_keys(resource_group, name)
+            key = keys.primary_master_key
 
-        account_key = extract_param('account_key', 'key')
-        if not account_key:
+        url_connection = _get_url_connection(url_connection, name)
+
+        if not key and not url_connection:
             raise CLIError(NO_CREDENTIALS_ERROR_MESSAGE)
-
-        url_connection = extract_param('url_connection', 'url_connection')
-        if not url_connection:
-            account_name = extract_param('account', 'account')
-            if not account_name:
-                raise CLIError(NO_CREDENTIALS_ERROR_MESSAGE)
-            url_connection = 'https://{}.documents.azure.com:443'.format(account_name)
-        elif 'account' in kwargs:
-            kwargs.pop('account')
-
-        auth = {'masterKey': account_key}
-
+        auth = {'masterKey': key}
         client = document_client.DocumentClient(url_connection=url_connection, auth=auth)
     except Exception as ex:
         if isinstance(ex, CLIError):

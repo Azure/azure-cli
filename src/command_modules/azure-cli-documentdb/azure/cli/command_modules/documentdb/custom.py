@@ -126,7 +126,6 @@ def cli_documentdb_update(client,
     docdb_account = client.get(resource_group_name, account_name)  # Workaround
     return docdb_account
 
-
 def cli_documentdb_list(client,
                         resource_group_name=None):
     """Lists all Azure DocumentDB database accounts within a given resource group or subscription.

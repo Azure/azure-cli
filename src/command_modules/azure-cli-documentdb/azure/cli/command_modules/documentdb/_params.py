@@ -71,12 +71,12 @@ register_cli_argument('documentdb update', 'max_interval', help="when used with 
 register_cli_argument('documentdb update', 'ip_range_filter', validator=validate_ip_range_filter, help="firewall support. Specifies the set of IP addresses or IP address ranges in CIDR form to be included as the allowed list of client IPs for a given database account. IP addresses/ranges must be comma separated and must not contain any spaces", nargs='+')
 
 # database id
-database_id = CliArgumentType(options_list=('--database-id', '-d'), help='Database ID')
+database_id = CliArgumentType(options_list=('--db-name', '-d'), help='Database Name')
 register_cli_argument('documentdb database', 'database_id', database_id)
 register_cli_argument('documentdb collection', 'database_id', database_id)
 
 register_cli_argument('documentdb collection', 'collection_id',
-                      options_list=('--collection-id', '-c'), help='Collection ID')
+                      options_list=('--coll-name', '-c'), help='Collection Name')
 
 register_cli_argument('documentdb collection', 'throughput',
                       options_list=('--throughput'), help='Offer Throughput', type=int)
