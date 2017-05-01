@@ -7,6 +7,8 @@
 
 from collections import OrderedDict
 
+from azure.cli.core.profiles import get_sdk, ResourceType
+
 
 def build_table_output(result, projection):
 
@@ -128,7 +130,7 @@ def transform_file_directory_result(result):
     in order to align the object's properties so as to offer a better view to the file and dir
     list.
     """
-    from azure.storage.file.models import File, Directory
+    File, Directory = get_sdk(ResourceType.DATA_STORAGE, 'File', 'Directory', mod='file.models')
     return_list = []
     for each in result:
         if isinstance(each, File):

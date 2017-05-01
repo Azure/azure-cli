@@ -97,7 +97,7 @@ def get_test_results_dir(with_timestamp=None, prefix=None):
     return result
 
 
-def filter_blacklisted_modules(black_list_modules):
+def filter_blacklisted_modules(*black_list_modules):
     """Returns the paths to the modules except those in the black list."""
     import itertools
 

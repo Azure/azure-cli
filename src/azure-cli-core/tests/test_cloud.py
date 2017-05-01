@@ -11,6 +11,7 @@ from azure.cli.core.cloud import (Cloud,
                                   CloudEndpoints,
                                   CloudSuffixes,
                                   add_cloud,
+                                  get_clouds,
                                   get_custom_clouds,
                                   remove_cloud,
                                   get_active_cloud_name,
@@ -18,6 +19,7 @@ from azure.cli.core.cloud import (Cloud,
                                   CloudEndpointNotSetException)
 from azure.cli.core._config import get_config_parser
 from azure.cli.core._profile import Profile
+from azure.cli.core.util import CLIError
 
 
 class TestCloud(unittest.TestCase):
@@ -55,6 +57,81 @@ class TestCloud(unittest.TestCase):
                 remove_cloud(c.name)
             custom_clouds = get_custom_clouds()
             self.assertEqual(len(custom_clouds), 0)
+
+    def test_add_get_cloud_with_profile(self):
+        endpoint_rm = 'http://management.contoso.com'
+        endpoints = CloudEndpoints(resource_manager=endpoint_rm)
+        profile = '2017-03-09-profile-preview'
+        c = Cloud('MyOwnCloud', endpoints=endpoints, profile=profile)
+        with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
+                config_file:
+            add_cloud(c)
+            config = get_config_parser()
+            config.read(config_file)
+            self.assertTrue(c.name in config.sections())
+            self.assertEqual(config.get(c.name, 'endpoint_resource_manager'), endpoint_rm)
+            self.assertEqual(config.get(c.name, 'profile'), profile)
+            custom_clouds = get_custom_clouds()
+            self.assertEqual(len(custom_clouds), 1)
+            self.assertEqual(custom_clouds[0].name, c.name)
+            self.assertEqual(custom_clouds[0].endpoints.resource_manager,
+                             c.endpoints.resource_manager)
+            self.assertEqual(custom_clouds[0].profile,
+                             c.profile)
+
+    def test_add_get_cloud_with_invalid_profile(self):
+        ''' Cloud has profile that doesn't exist so an exception should be raised '''
+        profile = 'none-existent-profile'
+        c = Cloud('MyOwnCloud', profile=profile)
+        with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
+                config_file:
+            add_cloud(c)
+            config = get_config_parser()
+            config.read(config_file)
+            self.assertTrue(c.name in config.sections())
+            self.assertEqual(config.get(c.name, 'profile'), profile)
+            with self.assertRaises(CLIError):
+                get_custom_clouds()
+
+    def test_get_default_latest_profile(self):
+        with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]):
+            clouds = get_clouds()
+            for c in clouds:
+                self.assertEqual(c.profile, 'latest')
+
+    def test_custom_cloud_management_endpoint_set(self):
+        ''' We have set management endpoint so don't override it '''
+        endpoint_rm = 'http://management.contoso.com'
+        endpoint_mgmt = 'http://management.core.contoso.com'
+        endpoints = CloudEndpoints(resource_manager=endpoint_rm, management=endpoint_mgmt)
+        profile = '2017-03-09-profile-preview'
+        c = Cloud('MyOwnCloud', endpoints=endpoints, profile=profile)
+        with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]):
+            add_cloud(c)
+            custom_clouds = get_custom_clouds()
+            self.assertEqual(len(custom_clouds), 1)
+            self.assertEqual(custom_clouds[0].endpoints.resource_manager,
+                             c.endpoints.resource_manager)
+            # CLI logic should keep our set management endpoint
+            self.assertEqual(custom_clouds[0].endpoints.management,
+                             c.endpoints.management)
+
+    def test_custom_cloud_no_management_endpoint_set(self):
+        ''' Use ARM 'resource manager' endpoint as 'management' (old ASM) endpoint
+            if only ARM endpoint is set '''
+        endpoint_rm = 'http://management.contoso.com'
+        endpoints = CloudEndpoints(resource_manager=endpoint_rm)
+        profile = '2017-03-09-profile-preview'
+        c = Cloud('MyOwnCloud', endpoints=endpoints, profile=profile)
+        with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]):
+            add_cloud(c)
+            custom_clouds = get_custom_clouds()
+            self.assertEqual(len(custom_clouds), 1)
+            self.assertEqual(custom_clouds[0].endpoints.resource_manager,
+                             c.endpoints.resource_manager)
+            # CLI logic should add management endpoint to equal resource_manager as we didn't set it
+            self.assertEqual(custom_clouds[0].endpoints.management,
+                             c.endpoints.resource_manager)
 
     def test_get_active_cloud_name_default(self):
         expected = AZURE_PUBLIC_CLOUD.name

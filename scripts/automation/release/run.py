@@ -27,7 +27,7 @@ def build(pkg_path, dest):
     pkg_path - Full path to directory of the package to build
     dest - Destination for the built package
     """
-    check_call(['python', 'setup.py', 'sdist', '-d', dest, 'bdist_wheel', '-d', dest], cwd=pkg_path)
+    check_call(['python', 'setup.py', 'bdist_wheel', '-d', dest, 'sdist', '-d', dest], cwd=pkg_path)
 
 
 def release(pkg_dir, repo):

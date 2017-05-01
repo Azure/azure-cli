@@ -27,7 +27,8 @@ DEPENDENCIES = [
     'autopep8==1.2.4',
     'coverage==4.2',
     'flake8==3.2.1',
-    'pycodestyle==2.2.0'
+    'pycodestyle==2.2.0',
+    'nose==1.3.7'
 ]
 
 setup(

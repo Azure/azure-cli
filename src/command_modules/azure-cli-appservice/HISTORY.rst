@@ -2,6 +2,32 @@
 
 Release History
 ===============
+0.1.5 (unreleased)
+++++++++++++++++++++
+* Adding Team Services (vsts) as a continuous delivery option to "appservice web source-control config"
+
+0.1.4 (2017-04-28)
+++++++++++++++++++++
+
+* Rename arg of '-n/--name' to '--hostname', and wire up default webapp name (#2946, #2947, #2949)
+* Polish errors from appservice commands (#2948)
+* New packaging system.
+
+0.1.3 (2017-04-17)
+++++++++++++++++++++
+
+* Use the app service plan's resource group for cert operations (#2750)
+
+0.1.2 (2017-04-03)
+++++++++++++++++++++
+
+* appservice: rollback the change of auto creating plans (#2671)
+* Check sku when creating linux ASP (#2651)
+* appservice: include site config on cloning slot (#2644)
+* appservice: support to get external ip address used for DNS A records (#2627)
+* appservice: support binding wildcard certificates (#2625)
+* appservice:improve table output format of web show/list (#2614)
+* appservice: support list publishing profiles (#2504)
 
 0.1.1b6 (2017-03-13)
 ++++++++++++++++++++

@@ -59,7 +59,7 @@ register_cli_argument('appservice plan', 'admin_site_name', help='The name of th
 register_cli_argument('appservice web', 'slot', options_list=('--slot', '-s'), help="the name of the slot. Default to the productions slot if not specified")
 register_cli_argument('appservice web', 'name', configured_default='web',
                       arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
-                      help="name of the web. You can configure the default using 'az configure --defaults web=<name>'")
+                      help="name of the web. You can configure the default using `az configure --defaults web=<name>`")
 register_cli_argument('appservice web create', 'name', options_list=('--name', '-n'), help='name of the new webapp')
 register_cli_argument('appservice web create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                       help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
@@ -90,8 +90,8 @@ register_cli_argument('appservice web log config', 'web_server_logging', help='c
 register_cli_argument('appservice web log tail', 'provider', help="scope the live traces to certain providers/folders, for example:'application', 'http' for server log, 'kudu/trace', etc")
 register_cli_argument('appservice web log download', 'log_file', default='webapp_logs.zip', type=file_type, completer=FilesCompleter(), help='the downloaded zipped log file path')
 
-register_cli_argument('appservice web config appsettings', 'settings', nargs='+', help="space separated app settings in a format of <name>=<value>")
-register_cli_argument('appservice web config appsettings', 'slot_settings', nargs='+', help="space separated slot app settings in a format of <name>=<value>")
+register_cli_argument('appservice web config appsettings', 'settings', nargs='+', help="space separated app settings in a format of `<name>=<value>`")
+register_cli_argument('appservice web config appsettings', 'slot_settings', nargs='+', help="space separated slot app settings in a format of `<name>=<value>`")
 register_cli_argument('appservice web config appsettings', 'setting_names', nargs='+', help="space separated app setting names")
 
 register_cli_argument('appservice web config container', 'docker_registry_server_url', options_list=('--docker-registry-server-url', '-r'), help='the container registry server url')
@@ -119,8 +119,9 @@ register_cli_argument('appservice web config ssl upload', 'certificate_password'
 register_cli_argument('appservice web config ssl upload', 'certificate_file', type=file_type, help='The filepath for the .pfx file')
 register_cli_argument('appservice web config ssl', 'certificate_thumbprint', help='The ssl cert thumbprint')
 
-register_cli_argument('appservice web config hostname', 'webapp_name', help="webapp name", completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
-register_cli_argument('appservice web config hostname', 'name', arg_type=name_arg_type, completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name')
+register_cli_argument('appservice web config hostname', 'webapp_name', help="webapp name. You can configure the default using 'az configure --defaults web=<name>'", configured_default='web',
+                      completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
+register_cli_argument('appservice web config hostname', 'hostname', completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name')
 
 register_cli_argument('appservice web config backup', 'storage_account_url', help='URL with SAS token to the blob storage container', options_list=['--container-url'])
 register_cli_argument('appservice web config backup', 'webapp_name', help='The name of the webapp')
@@ -142,5 +143,9 @@ register_cli_argument('appservice web config backup restore', 'ignore_hostname_c
 register_cli_argument('appservice web source-control', 'manual_integration', action='store_true', help='disable automatic sync between source control and web')
 register_cli_argument('appservice web source-control', 'repo_url', help='repository url to pull the latest source from, e.g. https://github.com/foo/foo-web')
 register_cli_argument('appservice web source-control', 'branch', help='the branch name of the repository')
+register_cli_argument('appservice web source-control', 'cd_provider', help='type of CI/CD provider', default='kudu', **enum_choice_list(['kudu', 'vsts']))
+register_cli_argument('appservice web source-control', 'cd_app_type', arg_group='VSTS CD Provider', help='web application framework you used to develop your app', default='AspNetWap', **enum_choice_list(['AspNetWap', 'AspNetCore', 'NodeJSWithGulp', 'NodeJSWithGrunt']))
+register_cli_argument('appservice web source-control', 'cd_account', arg_group='VSTS CD Provider', help='name of the Team Services account to create/use for continuous delivery')
+register_cli_argument('appservice web source-control', 'cd_account_must_exist', arg_group='VSTS CD Provider', help='specifies that the account must already exist. If not specified, the account will be created if it does not already exist (existing accounts are updated)', action='store_true')
 register_cli_argument('appservice web source-control', 'repository_type', help='repository type', default='git', **enum_choice_list(['git', 'mercurial']))
 register_cli_argument('appservice web source-control', 'git_token', help='git access token required for auto sync')

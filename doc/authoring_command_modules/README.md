@@ -88,7 +88,7 @@ def load_commands():
 ```
 
 ```python
-from azure.cli.commands import cli_command
+from azure.cli.core.commands import cli_command
 
 def example(my_required_arg, my_optional_arg='MyDefault'):
     '''Returns the params you passed in.
@@ -101,7 +101,7 @@ cli_command('example', example)
 ```
 
 The snippet above shows what it takes to author a basic command.
-1. Import `cli_command` from `azure.cli.commands`  
+1. Import `cli_command` from `azure.cli.core.commands`  
     This holds the core logic for creating commands.
 2. Use `cli_command` to create your command  
     The only required parameters to this method are:  
@@ -134,14 +134,56 @@ $ az example --my-required-arg abc
 Testing
 -------
 
+Run all tests in a module:
+
 ```
-python -m unittest discover -s <path_to_your_command_module>/azure/cli/command_modules/<module_name>/tests
+run_tests --module <module>
+OR
+python -m unittest discover -s <path_to_your_command_module>/tests
 ```
+
+Run an individual test:
+
+```
+python <path_to_your_command_module>/<file> <class name>
+```
+For example `python src/command_modules/azure-cli-appservice/tests/test_webapp_commands.py WebappBasicE2ETest`
+
+Note:  
+The following is required in the test file when running an individual test.  
+```
+if __name__ == '__main__':
+    unittest.main()
+```
+
+PyLint
+------
 
 ```
 pylint -r n <path_to_your_command_module>/azure
 ```
 
+Submitting Pull Requests
+------------------------
+
+### Modify Change Log
+
+Modify the `HISTORY.rst` for all changed modules.
+
+Add your change log to the 'unreleased' heading in the file.
+
+If that heading doesn't exist yet, create it.
+
+This will be the release notes for the next release.
+
+e.g.:  
+```
+unreleased
+----------
+
+* This is my change.
+
+```
 
 Packaging/Publishing
 --------------------

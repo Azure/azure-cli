@@ -7,8 +7,11 @@ import os
 from datetime import datetime, timedelta
 from .integration_test_base import StorageIntegrationTestBase
 from ..util import glob_files_remotely
-from azure.storage.blob.models import BlobPermissions
-from azure.storage.file.models import FilePermissions
+from azure.cli.core.profiles import get_sdk, ResourceType
+
+BlobPermissions, FilePermissions = get_sdk(ResourceType.DATA_STORAGE,
+                                           'blob.models#BlobPermissions',
+                                           'file.models#FilePermissions')
 
 
 def _cli_main(command, *args):

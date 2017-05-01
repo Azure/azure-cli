@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import unittest
 import os
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
@@ -169,7 +170,7 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
         # hostnames
         self.cmd('appservice web config hostname list -g {} --webapp-name {}'.format(self.resource_group, self.webapp_name), checks=[
             JMESPathCheck('length(@)', 1),
-            JMESPathCheck('[0].name', '{0}/{0}.azurewebsites.net'.format(self.webapp_name))
+            JMESPathCheck('[0].name', '{0}.azurewebsites.net'.format(self.webapp_name))
         ])
 
         # see deployment user
@@ -325,7 +326,7 @@ class WebappGitScenarioTest(ResourceGroupVCRTestBase):
 
 class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(WebappSlotScenarioTest, self).__init__(__file__, test_method, resource_group='cli-webapp-slot2')
+        super(WebappSlotScenarioTest, self).__init__(__file__, test_method, resource_group='cli-webapp-slot')
         self.plan = 'webapp-slot-test2-plan'
         self.webapp = 'web-slot-test2'
 
@@ -548,3 +549,7 @@ class WebappBackupRestoreScenarioTest(ResourceGroupVCRTestBase):
 
         self.cmd('appservice web config backup restore -g {} --webapp-name {} --container-url {} --backup-name {} --db-connection-string "{}" --db-name {} --db-type {} --ignore-hostname-conflict --overwrite --debug'
                  .format(self.resource_group, self.webapp_name, sas_url, backup_name, db_conn_str, database_name, database_type), checks=JMESPathCheck('name', self.webapp_name))
+
+
+if __name__ == '__main__':
+    unittest.main()

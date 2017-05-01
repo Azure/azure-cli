@@ -5,25 +5,28 @@
 
 import argparse
 import re
-import json
 from six import string_types
 
 from azure.cli.core.commands import (CliCommand,
                                      get_op_handler,
                                      command_table as main_command_table,
-                                     command_module_map as main_command_module_map)
+                                     command_module_map as main_command_module_map,
+                                     CONFIRM_PARAM_NAME)
 from azure.cli.core.commands._introspection import extract_args_from_signature
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.application import APPLICATION, IterateValue
+from azure.cli.core.prompting import prompt_y_n, NoTTYException
+from azure.cli.core._config import az_config
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._util import CLIError, todict
+from azure.cli.core.util import CLIError, todict, shell_safe_json_parse
+from azure.cli.core.profiles import ResourceType
 
 logger = azlogging.get_az_logger(__name__)
 
 regex = re.compile(
-    '/subscriptions/(?P<subscription>[^/]*)/resource[gG]roups/(?P<resource_group>[^/]*)'
+    '/subscriptions/(?P<subscription>[^/]*)(/resource[gG]roups/(?P<resource_group>[^/]*))?'
     '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)'
-    '(/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?'
+    '((/providers/(?P<child_namespace>[^/]*))?/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?'
     '(/(?P<grandchild_type>[^/]*)/(?P<grandchild_name>[^/]*))?')
 
 
@@ -96,11 +99,11 @@ class ResourceId(str):
 def resource_exists(resource_group, name, namespace, type, **_):  # pylint: disable=redefined-builtin
     '''Checks if the given resource exists.
     '''
-    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource import ResourceManagementClient
 
     odata_filter = "resourceGroup eq '{}' and name eq '{}'" \
         " and resourceType eq '{}/{}'".format(resource_group, name, namespace, type)
-    client = get_mgmt_service_client(ResourceManagementClient).resources
+    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).resources
     existing = len(list(client.list(filter=odata_filter))) == 1
     return existing
 
@@ -207,12 +210,25 @@ def _get_child(parent, collection_name, item_name, collection_key):
         return result
 
 
+def _user_confirmed(confirmation, command_args):
+    if callable(confirmation):
+        return confirmation(command_args)
+    try:
+        if isinstance(confirmation, string_types):
+            return prompt_y_n(confirmation)
+        return prompt_y_n('Are you sure you want to perform this operation?')
+    except NoTTYException:
+        logger.warning('Unable to prompt for confirmation as no tty available. Use --yes.')
+        return False
+
+
 # pylint: disable=too-many-arguments
 def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=None,
                                setter_arg_name='parameters', table_transformer=None,
                                child_collection_prop_name=None, child_collection_key='name',
                                child_arg_name='item_name', custom_function_op=None,
-                               no_wait_param=None, transform=None):
+                               no_wait_param=None, transform=None, confirmation=None,
+                               exception_handler=None, formatter_class=None):
     if not isinstance(getter_op, string_types):
         raise ValueError("Getter operation must be a string. Got '{}'".format(getter_op))
     if not isinstance(setter_op, string_types):
@@ -246,6 +262,12 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
     def handler(args):  # pylint: disable=too-many-branches,too-many-statements
         from msrestazure.azure_operation import AzureOperationPoller
 
+        if confirmation \
+            and not args.items().get(CONFIRM_PARAM_NAME) \
+            and not az_config.getboolean('core', 'disable_confirm_prompt', fallback=False) \
+                and not _user_confirmed(confirmation, args.items()):
+            raise CLIError('Operation cancelled.')
+
         ordered_arguments = args.pop('ordered_arguments', [])
         for item in ['properties_to_add', 'properties_to_set', 'properties_to_remove']:
             if args[item]:
@@ -259,66 +281,73 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
 
         getterargs = {key: val for key, val in args.items() if key in get_arguments_loader()}
         getter = get_op_handler(getter_op)
-        if child_collection_prop_name:
-            parent = getter(client, **getterargs) if client else getter(**getterargs)
-            instance = _get_child(
-                parent,
-                child_collection_prop_name,
-                args.get(child_arg_name),
-                child_collection_key
-            )
-        else:
-            parent = None
-            instance = getter(client, **getterargs) if client else getter(**getterargs)
-
-        # pass instance to the custom_function, if provided
-        if custom_function_op:
-            custom_function = get_op_handler(custom_function_op)
-            custom_func_args = {k: v for k, v in args.items() if k in function_arguments_loader()}
+        try:
             if child_collection_prop_name:
-                parent = custom_function(instance, parent, **custom_func_args)
+                parent = getter(client, **getterargs) if client else getter(**getterargs)
+                instance = _get_child(
+                    parent,
+                    child_collection_prop_name,
+                    args.get(child_arg_name),
+                    child_collection_key
+                )
             else:
-                instance = custom_function(instance, **custom_func_args)
+                parent = None
+                instance = getter(client, **getterargs) if client else getter(**getterargs)
 
-        # apply generic updates after custom updates
-        setterargs = {key: val for key, val in args.items() if key in set_arguments_loader()}
+            # pass instance to the custom_function, if provided
+            if custom_function_op:
+                custom_function = get_op_handler(custom_function_op)
+                custom_func_args = \
+                    {k: v for k, v in args.items() if k in function_arguments_loader()}
+                if child_collection_prop_name:
+                    parent = custom_function(instance, parent, **custom_func_args)
+                else:
+                    instance = custom_function(instance, **custom_func_args)
 
-        for arg in ordered_arguments:
-            arg_type, arg_values = arg
-            if arg_type == '--set':
-                try:
-                    for expression in arg_values:
-                        set_properties(instance, expression)
-                except ValueError:
-                    raise CLIError('invalid syntax: {}'.format(set_usage))
-            elif arg_type == '--add':
-                try:
-                    add_properties(instance, arg_values)
-                except ValueError:
-                    raise CLIError('invalid syntax: {}'.format(add_usage))
-            elif arg_type == '--remove':
-                try:
-                    remove_properties(instance, arg_values)
-                except ValueError:
-                    raise CLIError('invalid syntax: {}'.format(remove_usage))
+            # apply generic updates after custom updates
+            setterargs = {key: val for key, val in args.items() if key in set_arguments_loader()}
 
-        # Done... update the instance!
-        setterargs[setter_arg_name] = parent if child_collection_prop_name else instance
-        setter = get_op_handler(setter_op)
+            for arg in ordered_arguments:
+                arg_type, arg_values = arg
+                if arg_type == '--set':
+                    try:
+                        for expression in arg_values:
+                            set_properties(instance, expression)
+                    except ValueError:
+                        raise CLIError('invalid syntax: {}'.format(set_usage))
+                elif arg_type == '--add':
+                    try:
+                        add_properties(instance, arg_values)
+                    except ValueError:
+                        raise CLIError('invalid syntax: {}'.format(add_usage))
+                elif arg_type == '--remove':
+                    try:
+                        remove_properties(instance, arg_values)
+                    except ValueError:
+                        raise CLIError('invalid syntax: {}'.format(remove_usage))
 
-        opres = setter(client, **setterargs) if client else setter(**setterargs)
+            # Done... update the instance!
+            setterargs[setter_arg_name] = parent if child_collection_prop_name else instance
+            setter = get_op_handler(setter_op)
 
-        if setterargs.get(no_wait_param, None):
-            return None
+            opres = setter(client, **setterargs) if client else setter(**setterargs)
 
-        result = opres.result() if isinstance(opres, AzureOperationPoller) else opres
-        if child_collection_prop_name:
-            result = _get_child(
-                result,
-                child_collection_prop_name,
-                args.get(child_arg_name),
-                child_collection_key
-            )
+            if setterargs.get(no_wait_param, None):
+                return None
+
+            result = opres.result() if isinstance(opres, AzureOperationPoller) else opres
+            if child_collection_prop_name:
+                result = _get_child(
+                    result,
+                    child_collection_prop_name,
+                    args.get(child_arg_name),
+                    child_collection_key
+                )
+        except Exception as ex:  # pylint: disable=broad-except
+            if exception_handler:
+                result = exception_handler(ex)
+            else:
+                raise ex
 
         # apply results transform if specified
         if transform:
@@ -334,7 +363,7 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
             namespace.ordered_arguments.append((option_string, values))
 
     cmd = CliCommand(name, handler, table_transformer=table_transformer,
-                     arguments_loader=arguments_loader)
+                     arguments_loader=arguments_loader, formatter_class=formatter_class)
     group_name = 'Generic Update'
     cmd.add_argument('properties_to_set', '--set', nargs='+', action=OrderedArgsAction, default=[],
                      help='Update an object by specifying a property path and value to set.'
@@ -352,7 +381,7 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
     main_command_module_map[name] = module_name
 
 
-def cli_generic_wait_command(module_name, name, getter_op, factory=None):
+def cli_generic_wait_command(module_name, name, getter_op, factory=None, exception_handler=None):
 
     if not isinstance(getter_op, string_types):
         raise ValueError("Getter operation must be a string. Got '{}'".format(type(getter_op)))
@@ -373,6 +402,12 @@ def cli_generic_wait_command(module_name, name, getter_op, factory=None):
             if properties:
                 provisioning_state = getattr(properties, 'provisioning_state', None)
         return provisioning_state
+
+    def _handle_exception(ex):
+        if exception_handler:
+            return exception_handler(ex)
+        else:
+            raise ex
 
     def handler(args):
         from msrest.exceptions import ClientException
@@ -418,9 +453,11 @@ def cli_generic_wait_command(module_name, name, getter_op, factory=None):
                     if wait_for_deleted:
                         return
                     if not any([wait_for_created, wait_for_exists, custom_condition]):
-                        raise
+                        _handle_exception(ex)
                 else:
-                    raise
+                    _handle_exception(ex)
+            except Exception as ex:  # pylint: disable=broad-except
+                _handle_exception(ex)
 
             time.sleep(interval)
 
@@ -498,7 +535,7 @@ def set_properties(instance, expression):
     key, value = _split_key_value_pair(expression)
 
     try:
-        value = json.loads(value)
+        value = shell_safe_json_parse(value)
     except:  # pylint:disable=bare-except
         pass
 
@@ -530,7 +567,7 @@ def set_properties(instance, expression):
             setattr(instance, name, value)
     except IndexError:
         raise CLIError('index {} doesn\'t exist on {}'.format(index_value, name))
-    except (AttributeError, KeyError):
+    except (AttributeError, KeyError, TypeError):
         show_options(instance, name, key.split('.'))
 
 
@@ -563,7 +600,7 @@ def add_properties(instance, argument_values):
 
             # attempt to convert anything else to JSON and fallback to string if error
             try:
-                argument = json.loads(argument)
+                argument = shell_safe_json_parse(argument)
             except ValueError:
                 pass
             list_to_add_to.append(argument)
@@ -668,7 +705,7 @@ def _update_instance(instance, part, path):
             if '=' in index.group(1):
                 key, value = index.group(1).split('=', 1)
                 try:
-                    value = json.loads(value)
+                    value = shell_safe_json_parse(value)
                 except:  # pylint: disable=bare-except
                     pass
                 matches = []

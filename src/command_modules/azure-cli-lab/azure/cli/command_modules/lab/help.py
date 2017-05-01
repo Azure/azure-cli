@@ -32,8 +32,9 @@ helps['lab vm create'] = """
                 - name: --image-type
                   short-summary: Type of the image. Allowed values are gallery, custom
                 - name: --formula
-                  short-summary: Name of the formula. Use az lab formula list for available formulas. Use --artifacts to pass-in
-                                 parameters required by the artifacts of the formula
+                  short-summary: Name of the formula. Use az lab formula list for available formulas.
+                                 Use az lab formula with --export-artifacts flag to export & update artifacts then supply
+                                 it via --artifacts argument
                 - name: --size
                   short-summary: The VM size to be created. See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.
                                  Required when creating VM from gallery or custom image
@@ -45,6 +46,10 @@ helps['lab vm create'] = """
                   short-summary: The SSH public key or public key file path. Use --generate-ssh-keys to regen ssh keys
                 - name: --authentication-type
                   short-summary: Type of authentication to use with the VM. Allowed values are password, ssh
+                - name: --saved-secret
+                  short-summary: Name of the saved secret to be used for authentication. When provided,
+                                 we'll use it inplace of --admin-password for password based authentication or
+                                 inplace of --ssh-key for ssh based authentication
                 - name: --vnet-name
                   short-summary: Name of the virtual network to reference an existing one in lab. If omitted, lab's existing one
                                  VNet and subnet will be selected automatically
@@ -87,7 +92,7 @@ helps['lab vm create'] = """
                     az lab vm create --lab-name MyLab -g MyRG --name MyVM --image "Ubuntu Server 16.04 LTS" --image-type gallery --size Standard_DS1_v2 --ip-configuration public
                 - name: Create a Virtual Machine from a formula.
                   text: >
-                    az lab vm create --lab-name MyLab -g MyRG --name MyVM --formula MyFormula
+                    az lab vm create --lab-name MyLab -g MyRG --name MyVM --formula MyFormula --artifacts @/artifacts.json
             """
 helps['lab vm list'] = """
             type: command
@@ -107,6 +112,8 @@ helps['lab vm list'] = """
                   short-summary: List of claimable virtual machines in the lab. Cannot be used with --filters
                 - name: --all
                   short-summary: List all virtual machines in the lab. Cannot be used with --filters
+                - name: --environment
+                  short-summary: Name or ID of the environment to list all virtual machines in the environment. Cannot be used with --filters
                 - name: --object-id
                   short-summary: Owner's object id. If omitted, we'll pick one if available
             """
@@ -146,4 +153,93 @@ helps['lab vnet'] = """
 helps['lab formula'] = """
             type: group
             short-summary: Commands to manage formulas of a DevTest Lab.
+            """
+helps['lab formula show'] = """
+            type: command
+            short-summary: Commands to show formula from the Azure DevTest Lab.
+            parameters:
+                - name: --lab-name
+                  short-summary: Name of the Lab
+                - name: --name -n
+                  short-summary: Name of the formula
+            """
+helps['lab formula export-artifacts'] = """
+            type: command
+            short-summary: Export artifacts from a formula.
+            parameters:
+                - name: --lab-name
+                  short-summary: Name of the Lab
+                - name: --name -n
+                  short-summary: Name of the formula
+            """
+helps['lab secret'] = """
+            type: group
+            short-summary: Commands to manage secrets of a DevTest Lab.
+            """
+helps['lab secret set'] = """
+            type: command
+            short-summary: Sets a secret in the DevTest Lab.
+            parameters:
+                - name: --lab-name
+                  short-summary: Name of the Lab
+                - name: --name -n
+                  short-summary: Name of the secret
+                - name: --value
+                  short-summary: Value of the secret
+            """
+helps['lab arm-template'] = """
+            type: group
+            short-summary: Commands to manage ARM templates in a DevTest Lab.
+            """
+helps['lab arm-template show'] = """
+            type: command
+            short-summary: Commands to show ARM templates in a DevTest Lab.
+            parameters:
+                - name: --lab-name
+                  short-summary: Name of the Lab
+                - name: --name -n
+                  short-summary: Name of the azure Resource Manager template
+                - name: --resource-group -g
+                  short-summary: Name of lab's resource group
+                - name: --export-parameters
+                  short-summary: Whether to export parameters template or not. This parameter template
+                                 can be used in creation of environment from this ARM template
+                - name: --artifact-source-name
+                  short-summary: Name of the artifact source
+            """
+helps['lab environment'] = """
+            type: group
+            short-summary: Commands to manage environments in a DevTest Lab.
+            """
+helps['lab environment create'] = """
+            type: command
+            short-summary: Create an environment.
+            parameters:
+                - name: --lab-name
+                  short-summary: Name of the Lab
+                - name: --name -n
+                  short-summary: Name of the environment
+                - name: --resource-group -g
+                  short-summary: Name of lab's resource group
+                - name: --arm-template
+                  short-summary: Name or ID of Azure Resource Manager template in the lab.
+                - name: --artifact-source-name
+                  short-summary: Name of the artifact source in the lab. Use az lab artifact-source list to see
+                                 available artifact sources
+                - name: --parameters
+                  short-summary: JSON encoded list of parameters. Use @{file} to load from a file
+                - name: --tags
+                  short-summary: The tags of the resource
+            """
+helps['lab environment delete'] = """
+            type: command
+            short-summary: Delete an environment.
+            """
+helps['lab environment list'] = """
+            type: command
+            short-summary: List environments.
+            """
+helps['lab environment show'] = """
+            type: command
+            short-summary: Get an environment.
             """

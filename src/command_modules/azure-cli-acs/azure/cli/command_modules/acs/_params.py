@@ -9,21 +9,25 @@ import platform
 
 from argcomplete.completers import FilesCompleter
 
-from azure.cli.core.commands import register_cli_argument, CliArgumentType, register_extra_cli_argument
+from azure.cli.core.commands import (
+    CliArgumentType,
+    register_cli_argument,
+    register_extra_cli_argument)
+from azure.cli.core.commands.parameters import tags_type
 from azure.cli.core.commands.parameters import (
     enum_choice_list,
     file_type,
     resource_group_name_type,
     get_one_of_subscription_locations,
     get_resource_name_completion_list)
-from azure.mgmt.compute.models import ContainerServiceOchestratorTypes
+from azure.mgmt.compute.containerservice.models import ContainerServiceOchestratorTypes
 from azure.cli.command_modules.vm._validators import validate_ssh_key
 
 
 def _compute_client_factory(**_):
-    from azure.mgmt.compute import ComputeManagementClient
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(ComputeManagementClient)
+    return get_mgmt_service_client(ResourceType.MGMT_COMPUTE)
 
 
 def get_vm_sizes(location):
@@ -55,8 +59,10 @@ def _get_default_install_location(exe_name):
 
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
+register_cli_argument('acs', 'tags', tags_type)
+
 register_cli_argument('acs', 'name', arg_type=name_arg_type, configured_default='acs',
-                      help="ACS cluster name. You can configure the default using 'az configure --defaults acs=<name>'",
+                      help="ACS cluster name. You can configure the default using `az configure --defaults acs=<name>`",
                       completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'))
 
 register_cli_argument('acs', 'resource_group', arg_type=resource_group_name_type)
@@ -74,6 +80,8 @@ register_extra_cli_argument('acs create', 'generate_ssh_keys', action='store_tru
 register_cli_argument('acs create', 'agent_vm_size', completer=get_vm_size_completion_list)
 
 register_cli_argument('acs create', 'windows', action='store_true', help='If true, deploy a windows container cluster.')
+register_cli_argument('acs create', 'validate', action='store_true', help='Generate and validate the ARM template without creating any resources')
+
 
 register_cli_argument('acs', 'disable_browser', help='Do not open browser after opening a proxy to the cluster web user interface')
 register_cli_argument('acs dcos browse', 'name', name_arg_type)

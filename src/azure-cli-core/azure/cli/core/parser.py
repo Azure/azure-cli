@@ -10,7 +10,7 @@ import argcomplete
 
 import azure.cli.core.telemetry as telemetry
 import azure.cli.core._help as _help
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core._pkg_util import handle_module_not_installed
 
 import azure.cli.core.azlogging as azlogging
@@ -50,6 +50,10 @@ class AzCliCommandParser(argparse.ArgumentParser):
         self.subparsers = {}
         self.parents = kwargs.get('parents', [])
         self.help_file = kwargs.pop('help_file', None)
+        # We allow a callable for description to be passed in in order to delay-load any help
+        # or description for a command. We better stash it away before handing it off for
+        # "normal" argparse handling...
+        self._description = kwargs.pop('description', None)
         super(AzCliCommandParser, self).__init__(**kwargs)
 
     def load_command_table(self, command_table):
@@ -174,4 +178,19 @@ class AzCliCommandParser(argparse.ArgumentParser):
         self.exit()
 
     def is_group(self):
-        return getattr(self, '_subparsers', None) is not None
+        """ Determine if this parser instance represents a group
+            or a command. Anything that has a func default is considered
+            a group. This includes any dummy commands served up by the
+            "filter out irrelevant commands based on argv" command filter """
+        return not self._defaults.get('func', None)
+
+    def __getattribute__(self, name):
+        """ Since getting the description can be expensive (require module loads), we defer
+            this until someone actually wants to use it (i.e. show help for the command)
+        """
+        if name == 'description':
+            if self._description:
+                self.description = self._description() \
+                    if callable(self._description) else self._description
+                self._description = None
+        return object.__getattribute__(self, name)

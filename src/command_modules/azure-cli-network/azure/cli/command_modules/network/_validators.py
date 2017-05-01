@@ -11,10 +11,11 @@ import os
 from azure.cli.core.commands.arm import is_valid_resource_id, resource_id
 from azure.cli.core.commands.validators import \
     (validate_tags, get_default_location_from_resource_group)
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core.commands.template_create import get_folded_parameter_validator
 from azure.cli.core.commands.validators import SPECIFIED_SENTINEL
-from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
+from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
 
 # PARAMETER VALIDATORS
 
@@ -59,6 +60,7 @@ def _generate_lb_id_list_from_names_or_ids(namespace, prop, child_type):
                 result.append({'id': _generate_lb_subproperty_id(
                     namespace, child_type, item)})
     setattr(namespace, prop, result)
+
 
 def validate_address_pool_id_list(namespace):
     _generate_lb_id_list_from_names_or_ids(
@@ -168,21 +170,40 @@ def validate_private_ip_address(namespace):
     if namespace.private_ip_address and hasattr(namespace, 'private_ip_address_allocation'):
         namespace.private_ip_address_allocation = 'static'
 
+def validate_route_filter(namespace):
+    if namespace.route_filter:
+        if not is_valid_resource_id(namespace.route_filter):
+            namespace.route_filter = resource_id(
+                subscription=get_subscription_id(),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Network',
+                type='routeFilters',
+                name=namespace.route_filter)
+
 def get_public_ip_validator(has_type_field=False, allow_none=False, allow_new=False,
                             default_none=False):
     """ Retrieves a validator for public IP address. Accepting all defaults will perform a check
     for an existing name or ID with no ARM-required -type parameter. """
     def simple_validator(namespace):
         if namespace.public_ip_address:
-            # determine if public_ip_address is name or ID
-            is_id = is_valid_resource_id(namespace.public_ip_address)
-            if not is_id:
-                namespace.public_ip_address = resource_id(
+            is_list = isinstance(namespace.public_ip_address, list)
+
+            def _validate_name_or_id(public_ip):
+                # determine if public_ip_address is name or ID
+                is_id = is_valid_resource_id(public_ip)
+                return public_ip if is_id else resource_id(
                     subscription=get_subscription_id(),
                     resource_group=namespace.resource_group_name,
                     namespace='Microsoft.Network',
                     type='publicIPAddresses',
-                    name=namespace.public_ip_address)
+                    name=public_ip)
+
+            if is_list:
+                for i, public_ip in enumerate(namespace.public_ip_address):
+                    namespace.public_ip_address[i] = _validate_name_or_id(public_ip)
+            else:
+                namespace.public_ip_address = _validate_name_or_id(namespace.public_ip_address)
+
 
     def complex_validator_with_type(namespace):
         get_folded_parameter_validator(
@@ -254,7 +275,6 @@ def get_nsg_validator(has_type_field=False, allow_none=False, allow_new=False, d
     return complex_validator_with_type if has_type_field else simple_validator
 
 def validate_servers(namespace):
-    from azure.mgmt.network.models import ApplicationGatewayBackendAddress
     servers = []
     for item in namespace.servers if namespace.servers else []:
         try:
@@ -376,7 +396,8 @@ def process_ag_create_namespace(namespace):
     validate_cert(namespace)
 
 def process_auth_create_namespace(namespace):
-    from azure.mgmt.network.models import ExpressRouteCircuitAuthorization
+    ExpressRouteCircuitAuthorization = \
+        get_sdk(ResourceType.MGMT_NETWORK, 'ExpressRouteCircuitAuthorization', mod='models')
     namespace.authorization_parameters = ExpressRouteCircuitAuthorization()
 
 def process_lb_create_namespace(namespace):
@@ -443,13 +464,12 @@ def process_public_ip_create_namespace(namespace):
 
 
 def process_route_table_create_namespace(namespace):
-    from azure.mgmt.network.models import RouteTable
+    RouteTable = get_sdk(ResourceType.MGMT_NETWORK, 'RouteTable', mod='models')
     get_default_location_from_resource_group(namespace)
     validate_tags(namespace)
     namespace.parameters = RouteTable(location=namespace.location, tags=namespace.tags)
 
 def process_tm_endpoint_create_namespace(namespace):
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
 
     client = get_mgmt_service_client(TrafficManagerManagementClient).profiles
@@ -466,7 +486,8 @@ def process_tm_endpoint_create_namespace(namespace):
         'min_child_endpoints': '--min-child-endpoints',
         'priority': '--priority',
         'weight': '--weight',
-        'endpoint_location': '--endpoint-location'
+        'endpoint_location': '--endpoint-location',
+        'geo_mapping': '--geo-mapping'
     }
     required_options = []
 
@@ -487,6 +508,9 @@ def process_tm_endpoint_create_namespace(namespace):
     if endpoint_type.lower() in ['nestedendpoints', 'externalendpoints'] and \
         routing_type.lower() == 'performance':
         required_options.append('endpoint_location')
+
+    if routing_type.lower() == 'geographic':
+        required_options.append('geo_mapping')
 
     # ensure required options are provided
     missing_options = [props_to_options[x] for x in required_options \
@@ -521,10 +545,27 @@ def process_vnet_create_namespace(namespace):
 def process_vnet_gateway_create_namespace(namespace):
     ns = namespace
     get_default_location_from_resource_group(ns)
+    get_virtual_network_validator()(ns)
+
+    get_public_ip_validator()(ns)
+    public_ip_count = len(ns.public_ip_address or [])
+    if public_ip_count > 2:
+        raise CLIError('Specify a single public IP to create an active-standby gateway or two '
+                       'public IPs to create an active-active gateway.')
+
     enable_bgp = any([ns.asn, ns.bgp_peering_address, ns.peer_weight])
     if enable_bgp and not ns.asn:
         raise ValueError(
             'incorrect usage: --asn ASN [--peer-weight WEIGHT --bgp-peering-address IP ]')
+
+def process_vnet_gateway_update_namespace(namespace):
+    ns = namespace
+    get_virtual_network_validator()(ns)
+    get_public_ip_validator()(ns)
+    public_ip_count = len(ns.public_ip_address or [])
+    if public_ip_count > 2:
+        raise CLIError('Specify a single public IP to create an active-standby gateway or two '
+                       'public IPs to create an active-active gateway.')
 
 def process_vpn_connection_create_namespace(namespace):
 
@@ -578,6 +619,173 @@ def load_cert_file(param_name):
         if attr and os.path.isfile(attr):
             setattr(namespace, param_name, read_base_64_file(attr))
     return load_cert_validator
+
+
+def get_network_watcher_from_vm(namespace):
+    from azure.cli.core.commands.arm import parse_resource_id
+
+    compute_client = get_mgmt_service_client(ResourceType.MGMT_COMPUTE).virtual_machines
+    vm_name = parse_resource_id(namespace.vm)['name']
+    vm = compute_client.get(namespace.resource_group_name, vm_name)
+    namespace.location = vm.location  # pylint: disable=no-member
+    get_network_watcher_from_location()(namespace)
+
+
+def get_network_watcher_from_resource(namespace):
+    from azure.cli.core.commands.arm import parse_resource_id
+
+    resource_client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).resources
+    resource = resource_client.get_by_id(namespace.resource,
+                                         get_api_version(ResourceType.MGMT_NETWORK))
+    namespace.location = resource.location  # pylint: disable=no-member
+    get_network_watcher_from_location(remove=True)(namespace)
+
+def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
+                                      rg_name='watcher_rg'):
+
+    def _validator(namespace):
+        from azure.cli.core.commands.arm import parse_resource_id
+
+        location = namespace.location
+        network_client = get_mgmt_service_client(ResourceType.MGMT_NETWORK).network_watchers
+        watcher = next((x for x in network_client.list_all() if x.location == location), None)
+        if not watcher:
+            raise CLIError("network watcher is not enabled for region '{}'.".format(location))
+        id_parts = parse_resource_id(watcher.id)
+        setattr(namespace, rg_name, id_parts['resource_group'])
+        setattr(namespace, watcher_name, id_parts['name'])
+
+        if remove:
+            del namespace.location
+
+    return _validator
+
+
+def process_nw_flow_log_set_namespace(namespace):
+
+    from azure.cli.core.commands.arm import parse_resource_id
+
+    if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
+        namespace.storage_account = resource_id(
+            subscription=get_subscription_id(),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Storage',
+            type='storageAccounts',
+            name=namespace.storage_account)
+
+    process_nw_flow_log_show_namespace(namespace)
+
+def process_nw_flow_log_show_namespace(namespace):
+
+    from azure.cli.core.commands.arm import parse_resource_id
+
+    if not is_valid_resource_id(namespace.nsg):
+        namespace.nsg = resource_id(
+            subscription=get_subscription_id(),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network',
+            type='networkSecurityGroups',
+            name=namespace.nsg)
+
+    network_client = get_mgmt_service_client(ResourceType.MGMT_NETWORK).network_security_groups
+    id_parts = parse_resource_id(namespace.nsg)
+    nsg_name = id_parts['name']
+    rg = id_parts['resource_group']
+    nsg = network_client.get(rg, nsg_name)
+    namespace.location = nsg.location  # pylint: disable=no-member
+    get_network_watcher_from_location(remove=True)(namespace)
+
+
+def process_nw_topology_namespace(namespace):
+
+    location = namespace.location
+    if not location:
+
+        resource_client = \
+            get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).resource_groups
+        resource_group = resource_client.get(namespace.target_resource_group_name)
+        location = resource_group.location  # pylint: disable=no-member
+
+    get_network_watcher_from_location(
+        watcher_name='network_watcher_name', rg_name='resource_group_name')(namespace)
+
+
+def process_nw_packet_capture_create_namespace(namespace):
+
+    get_network_watcher_from_vm(namespace)
+
+    storage_usage = CLIError('usage error: --storage-account NAME_OR_ID [--storage-path '
+                             'PATH] [--file-path PATH] | --file-path PATH')
+    if not namespace.storage_account and not namespace.file_path:
+        raise storage_usage
+
+    if namespace.storage_path and not namespace.storage_account:
+        raise storage_usage
+
+    if not is_valid_resource_id(namespace.vm):
+        namespace.vm = resource_id(
+            subscription=get_subscription_id(),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Compute',
+            type='virtualMachines',
+            name=namespace.vm)
+
+    if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
+        namespace.storage_account = resource_id(
+            subscription=get_subscription_id(),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Storage',
+            type='storageAccounts',
+            name=namespace.storage_account)
+
+    if namespace.file_path:
+        file_path = namespace.file_path
+        if not file_path.endswith('.cap'):
+            raise CLIError("usage error: --file-path PATH must end with the '*.cap' extension")
+        file_path = file_path.replace('/', '\\')
+        namespace.file_path = file_path
+
+def process_nw_troubleshooting_start_namespace(namespace):
+
+    storage_usage = CLIError('usage error: --storage-account NAME_OR_ID [--storage-path PATH]')
+    if namespace.storage_path and not namespace.storage_account:
+        raise storage_usage
+
+    if not is_valid_resource_id(namespace.storage_account):
+        namespace.storage_account = resource_id(
+            subscription=get_subscription_id(),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Storage',
+            type='storageAccounts',
+            name=namespace.storage_account)
+
+    process_nw_troubleshooting_show_namespace(namespace)
+
+
+def process_nw_troubleshooting_show_namespace(namespace):
+
+    resource_usage = CLIError('usage error: --resource ID | --resource NAME --resource-type TYPE '
+                              '--resource-group-name NAME')
+    id_params = [namespace.resource_type, namespace.resource_group_name]
+    if not is_valid_resource_id(namespace.resource):
+        if not all(id_params):
+            raise resource_usage
+        type_map = {
+            'vnetGateway': 'virtualNetworkGateways',
+            'vpnConnection': 'connections'
+        }
+        namespace.resource = resource_id(
+            subscription=get_subscription_id(),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network',
+            type=type_map[namespace.resource_type],
+            name=namespace.resource)
+    else:
+        if any(id_params):
+            raise resource_usage
+
+    get_network_watcher_from_resource(namespace)
+
 
 # ACTIONS
 

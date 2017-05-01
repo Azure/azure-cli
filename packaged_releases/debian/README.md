@@ -4,10 +4,7 @@ Debian Packaging
 Updating the Debian package
 ---------------------------
 
-Firstly, in `debian_dir_creator.sh`, modify debian/changelog with the new release information.
-Create a PR for this change so it is tracked in the repo for next time.
-
-Next, on a build machine (e.g. new Ubuntu 14.04 VM), run the build script.
+On a build machine (e.g. new Ubuntu 14.04 VM), run the build script.
 
 For example:
 
@@ -20,8 +17,8 @@ $ chmod +x debian_build.sh debian_dir_creator.sh
 
 Then execute it with the appropriate environment variable values.
 ```
-$ export CLI_VERSION=0.2.3 \
-    && export CLI_DOWNLOAD_SHA256=e27ed69af1e7a3922fe25359a899954bca6d551437fd3edab3e54a8e141ec151 \
+$ export CLI_VERSION=0.2.6 \
+    && export CLI_DOWNLOAD_SHA256=d2a6abae2a64a0262a9ab97170cb280a67656f3f82837dbb8b42c0f9737f0049 \
     && ~/debian_build.sh ~/debian_dir_creator.sh
 ```
 

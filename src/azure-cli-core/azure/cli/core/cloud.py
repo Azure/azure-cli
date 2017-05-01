@@ -4,12 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+from pprint import pformat
 from six.moves import configparser
 
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._config import \
     (GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH, set_global_config_value, get_config_parser)
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
+from azure.cli.core.profiles import API_PROFILES
 
 CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
 
@@ -67,6 +69,16 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
         self.active_directory_resource_id = active_directory_resource_id
         self.active_directory_graph_resource_id = active_directory_graph_resource_id
 
+    def has_endpoint_set(self, endpoint_name):
+        try:
+            # Can't simply use hasattr here as we override __getattribute__ below.
+            # Python 3 hasattr() only returns False if an AttributeError is raised but we raise
+            # CloudEndpointNotSetException. This exception is not a subclass of AttributeError.
+            getattr(self, endpoint_name)
+            return True
+        except Exception:  # pylint: disable=broad-except
+            return False
+
     def __getattribute__(self, name):
         val = object.__getattribute__(self, name)
         if val is None:
@@ -106,11 +118,23 @@ class Cloud(object):  # pylint: disable=too-few-public-methods
                  name,
                  endpoints=None,
                  suffixes=None,
+                 profile=None,
                  is_active=False):
         self.name = name
         self.endpoints = endpoints or CloudEndpoints()
         self.suffixes = suffixes or CloudSuffixes()
+        self.profile = profile
         self.is_active = is_active
+
+    def __str__(self):
+        o = {
+            'profile': self.profile,
+            'name': self.name,
+            'is_active': self.is_active,
+            'endpoints': vars(self.endpoints),
+            'suffixes': vars(self.suffixes),
+        }
+        return pformat(o)
 
 
 AZURE_PUBLIC_CLOUD = Cloud(
@@ -225,10 +249,21 @@ def get_clouds():
     for section in config.sections():
         c = Cloud(section)
         for option in config.options(section):
+            if option == 'profile':
+                c.profile = config.get(section, option)
             if option.startswith('endpoint_'):
                 setattr(c.endpoints, option.replace('endpoint_', ''), config.get(section, option))
             elif option.startswith('suffix_'):
                 setattr(c.suffixes, option.replace('suffix_', ''), config.get(section, option))
+        if c.profile is None:
+            # If profile isn't set, use latest
+            setattr(c, 'profile', 'latest')
+        if c.profile not in API_PROFILES:
+            raise CLIError('Profile {} does not exist or is not supported.'.format(c.profile))
+        if not c.endpoints.has_endpoint_set('management') and \
+                c.endpoints.has_endpoint_set('resource_manager'):
+            # If management endpoint not set, use resource manager endpoint
+            c.endpoints.management = c.endpoints.resource_manager
         clouds.append(c)
     active_cloud_name = get_active_cloud_name()
     for c in clouds:
@@ -314,6 +349,8 @@ def _save_cloud(cloud, overwrite=False):
     except configparser.DuplicateSectionError:
         if not overwrite:
             raise CloudAlreadyRegisteredException(cloud.name)
+    if cloud.profile:
+        config.set(cloud.name, 'profile', cloud.profile)
     for k, v in cloud.endpoints.__dict__.items():
         if v is not None:
             config.set(cloud.name, 'endpoint_{}'.format(k), v)

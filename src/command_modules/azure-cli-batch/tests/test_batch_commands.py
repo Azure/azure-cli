@@ -12,7 +12,7 @@ import mock
 from msrest.exceptions import ValidationError, ClientRequestError
 from azure.batch import models, operations, BatchServiceClient
 from azure.batch.batch_auth import SharedKeyCredentials
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 from azure.cli.command_modules.batch import _validators
 from azure.cli.command_modules.batch import _command_type
@@ -460,7 +460,7 @@ class TestBatchLoader(unittest.TestCase):
             'batch_tests_job',
             'azure.batch.operations.job_operations#JobOperations.add',
             get_client, None, 3,
-            ['job.job_manager_task', 'job.job_preparation_task', \
+            ['job.job_manager_task', 'job.job_preparation_task',
              'job.job_release_task'], None, None)
         self.command_task = _command_type.AzureBatchDataPlaneCommand(
             'batch_unit_tests',
@@ -656,7 +656,7 @@ class TestBatchLoader(unittest.TestCase):
             error = models.BatchError()
             error.code = 'InvalidHeaderValue'
             error.message = models.ErrorMessage('en-US', 'The value for one of the HTTP '
-                                                'headers is not in the correct format')
+                                                         'headers is not in the correct format')
             error.values = [
                 models.BatchErrorDetail('HeaderName', 'Content-Type'),
                 models.BatchErrorDetail('HeaderValue', 'application/json')

@@ -11,7 +11,7 @@ from ._util import (
 from azure.cli.core.commands.client_factory import (
     get_mgmt_service_client,
     get_subscription_id)
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.mgmt.sql.models.sql_management_client_enums import (
     BlobAuditingPolicyState,
     CreateMode,
@@ -21,7 +21,7 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
     ServiceObjectiveName,
     StorageKeyType
 )
-from azure.mgmt.resource.resources import ResourceManagementClient
+from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.storage import StorageManagementClient
 
 # url parse package has different names in Python 2 and 3. 'six' package works cross-version.

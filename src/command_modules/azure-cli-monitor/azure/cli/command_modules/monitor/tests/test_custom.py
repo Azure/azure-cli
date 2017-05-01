@@ -5,7 +5,7 @@
 
 import unittest
 import re
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.command_modules.monitor.custom import (_metric_names_filter_builder,
                                                       _metrics_odata_filter_builder,
                                                       _build_activity_log_odata_filter,

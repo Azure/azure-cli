@@ -12,7 +12,7 @@ import sys
 from azure.cli.core.application import APPLICATION, Application, Configuration
 from azure.cli.core.commands import CliArgumentType, register_cli_argument
 from azure.cli.core.commands.arm import cli_generic_update_command
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 
 class ListTestObject(object):
@@ -75,8 +75,9 @@ class GenericUpdateTest(unittest.TestCase):
         def my_set(**kwargs):  # pylint:disable=unused-argument
             return my_obj
 
-        config = Configuration([])
-        app = Application(config)
+        config = Configuration()
+        app = Application()
+        app.initialize(config)
 
         setattr(sys.modules[__name__], my_get.__name__, my_get)
         setattr(sys.modules[__name__], my_set.__name__, my_set)
@@ -187,8 +188,9 @@ class GenericUpdateTest(unittest.TestCase):
         def my_set(**kwargs):  # pylint:disable=unused-argument
             return my_obj
 
-        config = Configuration([])
-        app = Application(config)
+        config = Configuration()
+        app = Application()
+        app.initialize(config)
 
         setattr(sys.modules[__name__], my_get.__name__, my_get)
         setattr(sys.modules[__name__], my_set.__name__, my_set)
@@ -240,11 +242,11 @@ class GenericUpdateTest(unittest.TestCase):
 
         app.execute("gencommand --a1 1 --a2 2 --set myDict={'foo':'bar'}".split())
         _execute_with_error('gencommand --a1 1 --a2 2 --set myDict.foo.doo=boo',
-                            "Couldn't find 'foo' in 'myDict'. 'myDict' does not support further indexing.",
+                            "Couldn't find 'doo' in 'myDict.foo'. 'myDict.foo' does not support further indexing.",
                             'Cannot dot index from a scalar value')
 
         _execute_with_error('gencommand --a1 1 --a2 2 --set myDict.foo[0]=boo',
-                            "Couldn't find 'foo' in 'myDict'. 'myDict' does not support further indexing.",
+                            "Couldn't find '[0]' in 'myDict'. 'myDict' does not support further indexing.",
                             'Cannot list index from a scalar value')
 
         _execute_with_error('gencommand --a1 1 --a2 2 --add myDict la=da',
@@ -264,55 +266,6 @@ class GenericUpdateTest(unittest.TestCase):
             "item with value 'foo' doesn\'t exist for key 'myKey' on myListOfCamelDicts",
             'no match found when indexing by key and value')
 
-    # TODO Re-introduce this test
-    # def test_generic_update_ids(self):
-    #     my_objs = [
-    #         {
-    #             'prop': 'val',
-    #             'list': [
-    #                 'a',
-    #                 'b',
-    #                 ['c', {'d': 'e'}]
-    #                 ]
-    #         },
-    #         {
-    #             'prop': 'val',
-    #             'list': [
-    #                 'a',
-    #                 'b',
-    #                 ['c', {'d': 'e'}]
-    #                 ]
-    #         }]
-
-    #     def my_get(name, resource_group): #pylint:disable=unused-argument
-    #         # name is None when tests are run in a batch on Python <=2.7.9
-    #         if sys.version_info < (2, 7, 10):
-    #             return my_objs[0]
-    #         return my_objs[int(name)]
-
-    #     def my_set(**kwargs): #pylint:disable=unused-argument
-    #         return my_objs
-
-    #     register_cli_argument('gencommand', 'name', CliArgumentType(options_list=('--name', '-n'),
-    #                                                                 metavar='NAME', id_part='name'))
-    #     setattr(sys.modules[__name__], my_get.__name__, my_get)
-    #     setattr(sys.modules[__name__], my_set.__name__, my_set)
-    # cli_generic_update_command(None, 'gencommand', '{}#{}'.format(__name__,
-    # my_get.__name__), '{}#{}'.format(__name__, my_set.__name__))
-
-    #     config = Configuration([])
-    #     APPLICATION.initialize(config)
-
-    #     id_str = ('/subscriptions/00000000-0000-0000-0000-0000000000000/resourceGroups/rg/'
-    #               'providers/Microsoft.Compute/virtualMachines/')
-
-    #     APPLICATION.execute('gencommand --ids {0}0 {0}1 --resource-group bar --set prop=newval'
-    #                         .format(id_str).split())
-    #     self.assertEqual(my_objs[0]['prop'], 'newval', 'first object updated')
-    #     # name is None when tests are run in a batch on Python <=2.7.9
-    #     if not sys.version_info < (2, 7, 10):
-    #         self.assertEqual(my_objs[1]['prop'], 'newval', 'second object updated')
-
     def test_generic_update_empty_nodes(self):
         my_obj = {
             'prop': None,
@@ -329,8 +282,9 @@ class GenericUpdateTest(unittest.TestCase):
         def my_set(**kwargs):  # pylint:disable=unused-argument
             return my_obj
 
-        config = Configuration([])
-        app = Application(config)
+        config = Configuration()
+        app = Application()
+        app.initialize(config)
 
         setattr(sys.modules[__name__], my_get.__name__, my_get)
         setattr(sys.modules[__name__], my_set.__name__, my_set)

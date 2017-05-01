@@ -35,7 +35,7 @@ server_param_type = CliArgumentType(
     help='Name of the Azure SQL server.')
 
 #####
-#           SizeWithUnitConverter - consider moving to common code (azure.cli.commands.parameters)
+#        SizeWithUnitConverter - consider moving to common code (azure.cli.core.commands.parameters)
 #####
 
 

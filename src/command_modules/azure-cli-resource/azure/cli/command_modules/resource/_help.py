@@ -3,13 +3,25 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps #pylint: disable=unused-import
+from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
-#pylint: disable=line-too-long
+# pylint: disable=line-too-long, too-many-lines
 helps['lock'] = """
     type: group
     short-summary: Manage Azure locks.
 """
+helps['lock update'] = """
+    type: command
+    short-summary: Update the properties of a lock.
+    parameters:
+        - name: --notes
+          type: string
+          short-summary: 'Notes about this lock'
+    examples:
+        - name: Update a subscription level lock with new notes
+          text: >
+            az lock update --name lockName --resource-group group --notes newNotesHere
+    """
 helps['policy'] = """
     type: group
     short-summary: Manage resource policies.
@@ -116,7 +128,7 @@ helps['resource show'] = """
             az resource show --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/MySubnet
         - name: Show an application gateway path rule.
           text: >
-            az resource show -g MyResourceGroup --namespace Microsoft.Network --parent applicationGateways/ag1/urlPathMaps/map1 --resource-type pathRules -n rule1  
+            az resource show -g MyResourceGroup --namespace Microsoft.Network --parent applicationGateways/ag1/urlPathMaps/map1 --resource-type pathRules -n rule1
 """
 
 helps['resource delete'] = """
@@ -146,6 +158,18 @@ helps['resource tag'] = """
         - name: Tag a web app using a resource identifier.
           text: >
             az resource tag --tags vmlist=vm1 --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp
+"""
+
+helps['resource create'] = """
+    type: command
+    short-summary: create a resource.
+    examples:
+       - name: Create a resource by providing a full resource object json. Note, you can also use `@<file>` to load from a json file.
+         text: >
+            az resource create -g myRG -n myPlan --resource-type Microsoft.web/serverFarms --is-full-object --properties "{ \\"location\\":\\"westus\\",\\"sku\\":{\\"name\\":\\"B1\\",\\"tier\\":\\"BASIC\\"}}"
+       - name: Create a resource by only providing resource properties
+         text: >
+            az resource create -g myRG -n myWeb --resource-type Microsoft.web/sites --properties "{\\"serverFarmId\\":\\"myPlan\\"}"
 """
 
 helps['resource update'] = """
@@ -218,7 +242,7 @@ helps['group deployment create'] = """
         - name: Create a deployment from a remote template file.
           text: >
             az group deployment create -g MyResourceGroup --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
-        - name: Create a deployment from a local template file and use parameter values in a string. 
+        - name: Create a deployment from a local template file and use parameter values in a string.
           text: >
             az group deployment create -g MyResourceGroup --template-file azuredeploy.json --parameters "{\\"location\\": {\\"value\\": \\"westus\\"}}"
 """
@@ -249,6 +273,18 @@ helps['provider register'] = """
 helps['provider unregister'] = """
     type: command
     short-summary: Unregister a provider.
+"""
+helps['provider operation'] = """
+    type: group
+    short-summary: Get provider operations metadatas.
+"""
+helps['provider operation show'] = """
+    type: command
+    short-summary: Get an individual provider's operations.
+"""
+helps['provider operation list'] = """
+    type: command
+    short-summary: Get operations from all providers.
 """
 helps['tag'] = """
     type: group

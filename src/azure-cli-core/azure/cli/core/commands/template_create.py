@@ -8,7 +8,7 @@ import argparse
 import platform
 
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core.commands import register_cli_argument
 from azure.cli.core.commands.arm import (
     is_valid_resource_id,

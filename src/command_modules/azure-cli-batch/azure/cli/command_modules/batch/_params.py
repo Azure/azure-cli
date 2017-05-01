@@ -17,9 +17,11 @@ from azure.cli.core.commands.parameters import \
 
 from azure.cli.command_modules.batch._validators import \
     (application_enabled, datetime_format, storage_account_id, application_package_reference_format,
-     validate_client_parameters, validate_pool_resize_parameters, metadata_item_format,
+     validate_pool_resize_parameters, metadata_item_format,
      certificate_reference_format, validate_json_file, validate_cert_file, keyvault_id,
      environment_setting_format, validate_cert_settings, resource_file_format, load_node_agent_skus)
+
+from azure.cli.command_modules.batch._command_type import validate_client_parameters
 
 # pylint: disable=line-too-long
 # ARGUMENT DEFINITIONS

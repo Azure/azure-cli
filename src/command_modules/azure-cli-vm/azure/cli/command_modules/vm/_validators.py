@@ -10,10 +10,11 @@ from msrestazure.azure_exceptions import CloudError
 
 from azure.mgmt.keyvault import KeyVaultManagementClient
 from azure.cli.core.commands.arm import resource_id, parse_resource_id, is_valid_resource_id
-from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from azure.cli.core._util import CLIError, random_string
+from azure.cli.core.commands.validators import \
+    (get_default_location_from_resource_group, validate_file_or_dict)
+from azure.cli.core.util import CLIError, random_string
 from ._client_factory import _compute_client_factory
-from azure.cli.command_modules.vm._vm_utils import check_existence, load_json
+from azure.cli.command_modules.vm._vm_utils import check_existence
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.azlogging as azlogging
 
@@ -95,7 +96,7 @@ def _validate_secrets(secrets, os_type):
     errors = []
 
     try:
-        loaded_secret = [load_json(secret) for secret in secrets]
+        loaded_secret = [validate_file_or_dict(secret) for secret in secrets]
     except Exception as err:
         raise CLIError('Error decoding secrets: {0}'.format(err))
 
@@ -153,6 +154,32 @@ def _parse_image_argument(namespace):
         namespace.os_offer = urn_match.group(2)
         namespace.os_sku = urn_match.group(3)
         namespace.os_version = urn_match.group(4)
+        compute_client = _compute_client_factory()
+        if namespace.os_version.lower() == 'latest':
+            top_one = compute_client.virtual_machine_images.list(namespace.location,
+                                                                 namespace.os_publisher,
+                                                                 namespace.os_offer,
+                                                                 namespace.os_sku,
+                                                                 top=1,
+                                                                 orderby='name desc')
+            if len(top_one) == 0:
+                raise CLIError("Can't resolve the vesion of '{}'".format(namespace.image))
+
+            image_version = top_one[0].name
+        else:
+            image_version = namespace.os_version
+
+        image = compute_client.virtual_machine_images.get(namespace.location,
+                                                          namespace.os_publisher,
+                                                          namespace.os_offer,
+                                                          namespace.os_sku,
+                                                          image_version)
+
+        # pylint: disable=no-member
+        if image.plan:
+            namespace.plan_name = image.plan.name
+            namespace.plan_product = image.plan.product
+            namespace.plan_publisher = image.plan.publisher
         return 'urn'
 
     # 4 - check if a fully-qualified ID (assumes it is an image ID)
@@ -365,9 +392,9 @@ def _validate_vm_create_storage_account(namespace):
             # 2 - params for new storage account specified
             namespace.storage_account_type = 'new'
     else:
-        from azure.mgmt.storage import StorageManagementClient
+        from azure.cli.core.profiles import ResourceType
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        storage_client = get_mgmt_service_client(StorageManagementClient).storage_accounts
+        storage_client = get_mgmt_service_client(ResourceType.MGMT_STORAGE).storage_accounts  # pylint: disable=line-too-long
 
         # find storage account in target resource group that matches the VM's location
         sku_tier = 'Premium' if 'Premium' in namespace.storage_sku else 'Standard'
@@ -412,9 +439,9 @@ def _validate_vm_create_vnet(namespace, for_scale_set=False):
 
     if not vnet and not subnet and not nics:  # pylint: disable=too-many-nested-blocks
         # if nothing specified, try to find an existing vnet and subnet in the target resource group
-        from azure.mgmt.network import NetworkManagementClient
+        from azure.cli.core.profiles import ResourceType
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        client = get_mgmt_service_client(NetworkManagementClient).virtual_networks
+        client = get_mgmt_service_client(ResourceType.MGMT_NETWORK).virtual_networks
 
         # find VNET in target resource group that matches the VM's location with a matching subnet
         for vnet_match in (v for v in client.list(rg) if v.location == location and v.subnets):
@@ -638,7 +665,7 @@ def _validate_admin_password(password, os_type):
 
 def validate_ssh_key(namespace):
     string_or_file = (namespace.ssh_key_value or
-                      os.path.join(os.path.expanduser('~'), '.ssh/id_rsa.pub'))
+                      os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
     content = string_or_file
     if os.path.exists(string_or_file):
         logger.info('Use existing SSH public key file: %s', string_or_file)
@@ -654,7 +681,10 @@ def validate_ssh_key(namespace):
             else:
                 private_key_filepath = public_key_filepath + '.private'
             content = _generate_ssh_keys(private_key_filepath, public_key_filepath)
-            logger.warning('Created SSH key files: %s,%s',
+            logger.warning("SSH key files '%s' and '%s' have been generated under ~/.ssh to "
+                           "allow SSH access to the VM. If using machines without "
+                           "permanent storage like Azure Cloud Shell without an attached "
+                           "file share, back up your keys to a safe location",
                            private_key_filepath, public_key_filepath)
         else:
             raise CLIError('An RSA key file or key value must be supplied to SSH Key Value. '

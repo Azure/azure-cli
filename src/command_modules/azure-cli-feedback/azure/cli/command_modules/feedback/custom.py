@@ -7,7 +7,7 @@ from __future__ import print_function
 import sys
 
 from azure.cli.core import __version__ as core_version
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core.prompting import prompt, NoTTYException
 import azure.cli.core.azlogging as azlogging
 

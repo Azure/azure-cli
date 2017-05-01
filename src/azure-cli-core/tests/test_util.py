@@ -8,7 +8,8 @@ from collections import namedtuple
 import unittest
 import tempfile
 
-from azure.cli.core._util import get_file_json, todict, to_snake_case, truncate_text
+from azure.cli.core.util import \
+    (get_file_json, todict, to_snake_case, truncate_text, shell_safe_json_parse, b64_to_hex)
 
 
 class TestUtils(unittest.TestCase):
@@ -106,6 +107,51 @@ class TestUtils(unittest.TestCase):
     def test_truncate_text_negative_width(self):
         with self.assertRaises(ValueError):
             truncate_text('string to shorten', width=-1)
+
+    def test_shell_safe_json_parse(self):
+        dict_obj = {'a': 'b & c'}
+        list_obj = [{'a': 'b & c'}]
+        failed_strings = []
+
+        valid_dict_strings = [
+            '{"a": "b & c"}',
+            "{'a': 'b & c'}",
+            "{\"a\": \"b & c\"}"
+        ]
+        for string in valid_dict_strings:
+            actual = shell_safe_json_parse(string)
+            try:
+                self.assertEqual(actual, dict_obj)
+            except AssertionError:
+                failed_strings.append(string)
+
+        valid_list_strings = [
+            '[{"a": "b & c"}]',
+            "[{'a': 'b & c'}]",
+            "[{\"a\": \"b & c\"}]"
+        ]
+        for string in valid_list_strings:
+            actual = shell_safe_json_parse(string)
+            try:
+                self.assertEqual(actual, list_obj)
+            except AssertionError:
+                failed_strings.append(string)
+
+        self.assertEqual(
+            len(failed_strings), 0,
+            'The following patterns failed: {}'.format(failed_strings))
+
+
+class TestBase64ToHex(unittest.TestCase):
+
+    def setUp(self):
+        self.base64 = 'PvOJgaPq5R004GyT1tB0IW3XUyM='.encode('ascii')
+
+    def test_b64_to_hex(self):
+        self.assertEquals('3EF38981A3EAE51D34E06C93D6D074216DD75323', b64_to_hex(self.base64))
+
+    def test_b64_to_hex_type(self):
+        self.assertIsInstance(b64_to_hex(self.base64), str)
 
 
 if __name__ == '__main__':
