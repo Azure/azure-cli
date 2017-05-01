@@ -109,7 +109,7 @@ class ProgressHook(object):
 
     def init_progress(self, progress_view):
         """ activate a view """
-        assert any(isinstance(progress_view, view) for view in self.registery)
+        assert all(isinstance(progress_view, view) for view in self.registery)
         self.active_progress.append(progress_view)
 
     def register_view(self, progress_view):
@@ -125,7 +125,7 @@ class ProgressHook(object):
     def update(self):
         """ updates the view with the progress """
         msg, percent = self.reporter.report()
-        for view in self.registery:
+        for view in self.active_progress:
             view.write(msg, percent)
 
     def begin(self):
