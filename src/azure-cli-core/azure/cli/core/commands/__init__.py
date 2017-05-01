@@ -20,7 +20,7 @@ import azure.cli.core.azlogging as azlogging
 import azure.cli.core.telemetry as telemetry
 from azure.cli.core.util import CLIError
 from azure.cli.core.application import APPLICATION
-from azure.cli.core.commands.progress import ProgressType, ProgressHook, _StandardOut
+from azure.cli.core.commands.progress import ProgressType, ProgressHook
 from azure.cli.core.prompting import prompt_y_n, NoTTYException
 from azure.cli.core._config import az_config, DEFAULTS_SECTION
 from azure.cli.core.profiles import ResourceType
@@ -102,7 +102,6 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms
         self.controller = ProgressHook(progress_type=ProgressType.Indeterminate)
-        from azure.cli.core.application import APPLICATION
         self.controller.init_progress(APPLICATION.progress_view)
 
     def _delay(self):

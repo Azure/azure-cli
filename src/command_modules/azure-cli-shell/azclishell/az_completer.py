@@ -199,7 +199,8 @@ class AzCompleter(Completer):
                             for comp in gen_dyn_completion(
                                     comp, started_param, prefix, text):
                                 yield comp
-
+                    except AttributeError:  # for non-robust completion logic
+                        pass
                     except TypeError:
                         try:
                             for comp in self.cmdtab[self.curr_command].\
