@@ -2,6 +2,9 @@
 
 Release History
 ===============
+0.1.5 (unreleased)
+++++++++++++++++++++
+* Adding Team Services (vsts) as a continuous delivery option to "appservice web source-control config"
 
 0.1.4 (2017-04-28)
 ++++++++++++++++++++

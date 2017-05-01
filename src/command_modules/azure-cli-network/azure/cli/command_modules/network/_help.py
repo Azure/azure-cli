@@ -464,12 +464,55 @@ helps['network application-gateway waf-config'] = """
 helps['network application-gateway waf-config set'] = """
     type: command
     short-summary: Update the firewall configuration of a web application.
+    parameters:
+        - name: --rule-set-type
+          short-summary: Rule set type.
+          populator-commands:
+          - az application-gateway waf-config list-rule-sets
+        - name: --rule-set-version
+          short-summary: Rule set version.
+          populator-commands:
+          - az application-gateway waf-config list-rule-sets
+        - name: --disabled-rule-groups
+          short-summary: Space separated list of rule groups to disable. This disables the entire group.
+            To disable specifc rules, use '--disabled-rule-ids'.
+          populator-commands:
+          - az application-gateway waf-config list-rule-sets
+        - name: --disabled-rules
+          short-summary: Space separated list of rule IDs to disable.
+          populator-commands:
+          - az application-gateway waf-config list-rule-sets
 """
 
 helps['network application-gateway waf-config show'] = """
     type: command
     short-summary: Show the firewall configuration of a web application.
 """
+
+helps['network application-gateway waf-config list-rule-sets'] = """
+    type: command
+    short-summary: (PREVIEW) Lookup information on available WAF rule sets, rule groups, and rule IDs.
+    parameters:
+        - name: --group
+          short-summary:
+            List rules for the specified rule group. Use '*' to list rules for all groups.
+            Omit to suppress listing individual rules.
+        - name: --type
+          short-summary: Rule set type to list. Omit to list all types.
+        - name: --version
+          short-summary: Rule set version to list. Omit to list all versions.
+    examples:
+        - name: List available rule groups in OWASP type rule sets.
+          text: >
+            az network application-gateway waf-config list-rule-sets --type OWASP
+        - name: List available rules in the OWASP 3.0 rule set.
+          text: >
+            az network application-gateway waf-config list-rule-sets --group * --type OWASP --version 3.0
+        - name: List available rules in the 'crs_35_bad_robots' rule group.
+          text: >
+            az network application-gateway waf-config list-rule-sets --group crs_35_bad_robots
+"""
+
 # endregion
 
 # region DNS record-set
@@ -1458,6 +1501,76 @@ helps['network route-table route update'] = """
 
 #endregion
 
+# region Route Filter
+
+helps['network route-filter'] = """
+    type: group
+    short-summary: (PREVIEW) Manage route filters.
+"""
+
+helps['network route-filter create'] = """
+    type: command
+    short-summary: Create a route filter.
+"""
+
+helps['network route-filter delete'] = """
+    type: command
+    short-summary: Delete a route filter.
+"""
+
+helps['network route-filter list'] = """
+    type: command
+    short-summary: List route filters.
+"""
+
+helps['network route-filter show'] = """
+    type: command
+    short-summary: Show details of a route filter.
+"""
+
+helps['network route-filter update'] = """
+    type: command
+    short-summary: Update a route filter.
+"""
+
+helps['network route-filter rule'] = """
+    type: group
+    short-summary: (PREVIEW) Manage rules in a route filter.
+"""
+
+helps['network route-filter rule create'] = """
+    type: command
+    short-summary: Create a rule in a route filter.
+    parameters:
+        - name: --communities
+          short-summary: |
+                Space separated list of BGP community values to filter on. (e.g.: 12076:5010)
+          populator-commands:
+            - az network route-filter rule list-service-communities
+"""
+
+helps['network route-filter rule delete'] = """
+    type: command
+    short-summary: Delete a rule from a route filter.
+"""
+
+helps['network route-filter rule list'] = """
+    type: command
+    short-summary: List rules in a route filter.
+"""
+
+helps['network route-filter rule show'] = """
+    type: command
+    short-summary: Show details of a rule in a route filter.
+"""
+
+helps['network route-filter rule update'] = """
+    type: command
+    short-summary: Update a rule in a route filter.
+"""
+
+#endregion
+
 # region Traffic Manager
 
 helps['network traffic-manager'] = """
@@ -1508,6 +1621,11 @@ helps['network traffic-manager profile update'] = """
 helps['network traffic-manager endpoint create'] = """
     type: command
     short-summary: Create an endpoint.
+    parameters:
+        - name: --geo-mapping
+          short-summary: Space separated list of country/region codes mapped to this endpoint when using the 'Geographic' routing method.
+          populator-commands:
+          - az network traffic-manager endpoint show-geographic-hierarchy
 """
 
 helps['network traffic-manager endpoint delete'] = """
@@ -1716,6 +1834,30 @@ helps['network vpn-connection shared-key show'] = """
 helps['network vpn-connection shared-key update'] = """
     type: command
     short-summary: Update a VPN connection shared key.
+"""
+
+#endregion
+
+# region VPN Connection IPSec Policy
+
+helps['network vpn-connection ipsec-policy'] = """
+    type: group
+    short-summary: Manage VPN connection IPSec policies.
+"""
+
+helps['network vpn-connection ipsec-policy add'] = """
+    type: command
+    short-summary: Add a VPN connection IPSec policy.
+"""
+
+helps['network vpn-connection ipsec-policy list'] = """
+    type: command
+    short-summary: List IPSec policies associated with a VPN connection.
+"""
+
+helps['network vpn-connection ipsec-policy clear'] = """
+    type: command
+    short-summary: Delete all IPSec policies on a VPN connection.
 """
 
 #endregion

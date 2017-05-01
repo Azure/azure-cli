@@ -8,7 +8,9 @@ from azure.cli.core.util import CLIError
 from ._factory import get_acr_service_client
 
 import azure.cli.core.azlogging as azlogging
+
 logger = azlogging.get_az_logger(__name__)
+
 
 def validate_registry_name(namespace):
     if namespace.registry_name:
@@ -17,5 +19,5 @@ def validate_registry_name(namespace):
 
         result = client.check_name_availability(registry_name)
 
-        if not result.name_available: #pylint: disable=no-member
-            raise CLIError(result.message) #pylint: disable=no-member
+        if not result.name_available:  # pylint: disable=no-member
+            raise CLIError(result.message)  # pylint: disable=no-member

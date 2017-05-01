@@ -32,102 +32,11 @@ echo '1.0' > $debian_dir/source/format
 echo '9' > $debian_dir/compat
 
 cat > $debian_dir/changelog <<- EOM
-azure-cli (0.2.5-1) unstable; urgency=low
+azure-cli (${CLI_VERSION}-1) unstable; urgency=low
 
-  * Packaged release 0.2.5.
+  * Debian package release.
 
- -- Azure Python CLI Team <azpycli@microsoft.com>  Mon, 17 Apr 2017 20:00:00 +0000
-
-azure-cli (0.2.4-1) unstable; urgency=low
-
-  * Packaged release 0.2.4.
-
- -- Azure Python CLI Team <azpycli@microsoft.com>  Mon, 03 Apr 2017 20:00:00 +0000
-
-azure-cli (0.2.3-1) unstable; urgency=low
-
-  * Packaged release 0.2.3.
-
- -- Azure Python CLI Team <azpycli@microsoft.com>  Mon, 13 Mar 2017 20:00:00 +0000
-
-azure-cli (0.2.2-1) unstable; urgency=low
-
-  * Packaged release 0.2.2.
-
- -- Azure Python CLI Team <azpycli@microsoft.com>  Mon, 27 Feb 2017 20:00:00 +0000
-
-azure-cli (0.2.1-1) unstable; urgency=low
-
-  * Packaged release 0.2.1.
-
- -- Azure Python CLI Team <azpycli@microsoft.com>  Wed, 22 Feb 2017 20:00:00 +0000
-
-azure-cli (0.2.0-1) unstable; urgency=low
-
-  * Packaged release 0.2.0.
-
- -- Azure Python CLI Team <azpycli@microsoft.com>  Fri, 17 Feb 2017 20:00:00 +0000
-
-azure-cli (0.1.9-1) unstable; urgency=low
-
-  * Packaged release 0.1.9.
-
- -- Azure Python CLI Team <azpycli@microsoft.com>  Wed, 08 Feb 2017 20:00:00 +0000
-
-azure-cli (0.1.8-1) unstable; urgency=low
-
-  * Packaged release 0.1.8.
-
- -- Azure Python CLI Team <azpycli@microsoft.com>  Mon, 30 Jan 2017 20:00:00 +0000
-
-azure-cli (0.1.7-1) unstable; urgency=low
-
-  * Packaged release 0.1.7.
-
- -- Azure Python CLI Team <azpycli@microsoft.com>  Thu, 19 Jan 2017 20:00:00 +0000
-
-azure-cli (0.1.6-1) unstable; urgency=low
-
-  * Packaged release 0.1.6.
-
- -- Azure Python CLI Team <azpycli@microsoft.com>  Tue, 17 Jan 2017 20:00:00 +0000
-
-azure-cli (0.1.5-1) unstable; urgency=low
-
-  * Packaged release 0.1.5.
-
- -- Azure Python CLI Team <azpycli@microsoft.com>  Wed, 11 Jan 2017 20:00:00 +0000
-
-azure-cli (0.1.4-1) unstable; urgency=low
-
-  * Includes version 0.1.0b11 of all required command modules
-
- -- Azure Python CLI Team <azpycli@microsoft.com>  Mon, 12 Dec 2016 20:00:00 +0000
-
-azure-cli (0.1.3-1) unstable; urgency=low
-
-  * Includes version 0.1.0b10 of all required command modules
-
- -- Azure Python CLI Team <azpycli@microsoft.com>  Mon, 28 Nov 2016 20:00:00 +0000
-
-azure-cli (0.1.2-1) unstable; urgency=low
-
-  * Includes version 0.1.0b9 of all required command modules
-
- -- Azure Python CLI Team <azpycli@microsoft.com>  Mon, 14 Nov 2016 22:00:00 +0000
-
-azure-cli (0.1.1-1) unstable; urgency=low
-
-  * Includes version 0.1.0b8 of all required command modules
-
- -- Azure Python CLI Team <azpycli@microsoft.com>  Mon, 24 Oct 2016 20:00:00 +0000
-
-azure-cli (0.1.0-1) unstable; urgency=low
-
-  * Initial preview release
-  * Includes version 0.1.0b7 of all required command modules
-
- -- Azure Python CLI Team <azpycli@microsoft.com>  Sun, 25 Sep 2016 17:00:00 -0700
+ -- Azure Python CLI Team <azpycli@microsoft.com>  Mon, 01 Jan 2017 00:00:00 -0700
 
 EOM
 
@@ -187,6 +96,8 @@ ${TAB}dh_virtualenv --sourcedirectory src/azure-cli-command_modules-nspkg --inst
 ${TAB}dh_virtualenv --sourcedirectory src/azure-cli-core --install-suffix az
 ${TAB}for d in src/command_modules/azure-cli-*/; do dh_virtualenv --sourcedirectory \$d --install-suffix az; done;
 ${TAB}dh_virtualenv --sourcedirectory src/azure-cli --install-suffix az
+${TAB}echo -n > debian/azure-cli/opt/az/lib/*/site-packages/azure/__init__.py
+${TAB}echo -n > debian/azure-cli/opt/az/lib/*/site-packages/azure/mgmt/__init__.py
 ${TAB}mkdir -p debian/azure-cli/usr/bin/
 ${TAB}echo "\043!/usr/bin/env bash\n/opt/az/bin/python -m azure.cli \"\044\100\"" > debian/azure-cli/usr/bin/az
 ${TAB}chmod 0755 debian/azure-cli/usr/bin/az

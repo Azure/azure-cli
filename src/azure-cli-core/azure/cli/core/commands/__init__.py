@@ -22,7 +22,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.application import APPLICATION
 from azure.cli.core.prompting import prompt_y_n, NoTTYException
 from azure.cli.core._config import az_config, DEFAULTS_SECTION
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, supported_api_version
 from azure.cli.core.profiles._shared import get_versioned_sdk_path
 
 from ._introspection import (extract_args_from_signature,
@@ -36,6 +36,35 @@ logger = azlogging.get_az_logger(__name__)
 CONFIRM_PARAM_NAME = 'yes'
 
 BLACKLISTED_MODS = ['context']
+
+
+class VersionConstraint(object):
+    def __init__(self, resource_type, min_api=None, max_api=None):
+        self._type = resource_type
+        self._min_api = min_api
+        self._max_api = max_api
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+    def register_cli_argument(self, *args, **kwargs):
+        if supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api):
+            register_cli_argument(*args, **kwargs)
+        else:
+            from azure.cli.core.commands.parameters import ignore_type
+            kwargs = {'arg_type': ignore_type}
+            register_cli_argument(*args, **kwargs)
+
+    def register_extra_cli_argument(self, *args, **kwargs):
+        if supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api):
+            register_extra_cli_argument(*args, **kwargs)
+
+    def cli_command(self, *args, **kwargs):
+        if supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api):
+            cli_command(*args, **kwargs)
 
 
 class CliArgumentType(object):
@@ -385,7 +414,7 @@ def create_command(module_name, name, operation,
         raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
     def _execute_command(kwargs):
-
+        from msrestazure.azure_exceptions import CloudError
         if confirmation \
             and not kwargs.get(CONFIRM_PARAM_NAME) \
             and not az_config.getboolean('core', 'disable_confirm_prompt', fallback=False) \
@@ -396,7 +425,16 @@ def create_command(module_name, name, operation,
         try:
             op = get_op_handler(operation)
             try:
-                result = op(client, **kwargs) if client else op(**kwargs)
+                try:
+                    result = op(client, **kwargs) if client else op(**kwargs)
+                except CloudError as ex:
+                    rp = _check_rp_not_registered_err(ex)
+                    if rp:
+                        _register_rp(rp)
+                        result = op(client, **kwargs) if client else op(**kwargs)
+                    else:
+                        reraise(*sys.exc_info())
+
                 if no_wait_param and kwargs.get(no_wait_param, None):
                     return None  # return None for 'no-wait'
 
@@ -415,12 +453,12 @@ def create_command(module_name, name, operation,
                     exception_handler(ex)
                 else:
                     reraise(*sys.exc_info())
+
         except _load_client_exception_class() as client_exception:
             fault_type = name.replace(' ', '-') + '-client-error'
             telemetry.set_exception(client_exception, fault_type=fault_type,
                                     summary='Unexpected client exception during command creation')
-            message = getattr(client_exception, 'message', client_exception)
-            raise _polish_rp_not_registerd_error(CLIError(message))
+            raise client_exception
         except _load_azure_exception_class() as azure_exception:
             fault_type = name.replace(' ', '-') + '-service-error'
             telemetry.set_exception(azure_exception, fault_type=fault_type,
@@ -432,8 +470,6 @@ def create_command(module_name, name, operation,
             telemetry.set_exception(value_error, fault_type=fault_type,
                                     summary='Unexpected value exception during command creation')
             raise CLIError(value_error)
-        except CLIError as cli_error:
-            raise _polish_rp_not_registerd_error(cli_error)
 
     command_module_map[name] = module_name
     name = ' '.join(name.split())
@@ -466,26 +502,29 @@ def _user_confirmed(confirmation, command_args):
         return False
 
 
-def _polish_rp_not_registerd_error(cli_error):
-    msg = str(cli_error)
-    pertinent_text_namespace = 'The subscription must be registered to use namespace'
-    pertinent_text_feature = 'is not registered for feature'
-    # pylint: disable=line-too-long
-    if pertinent_text_namespace in msg:
-        reg = r".*{} '(.*)'".format(pertinent_text_namespace)
-        match = re.match(reg, msg)
-        cli_error = CLIError(
-            "Run 'az provider register -n {}' to register the namespace first".format(
-                match.group(1)))
-    elif pertinent_text_feature in msg:
-        reg = r".*{}\s+([^\s]+)\s+".format(pertinent_text_feature)
-        match = re.match(reg, msg)
-        parts = match.group(1).split('/')
-        if len(parts) == 2:
-            cli_error = CLIError(
-                "Run 'az feature register --namespace {} -n {}' to enable the feature first".format(
-                    parts[0], parts[1]))
-    return cli_error
+def _check_rp_not_registered_err(ex):
+    try:
+        response = json.loads(ex.response.content.decode())
+        if response['error']['code'] == 'MissingSubscriptionRegistration':
+            match = re.match(r".*'(.*)'", response['error']['message'])
+            return match.group(1)
+    except Exception:  # pylint: disable=broad-except
+        pass
+    return None
+
+
+def _register_rp(rp):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    rcf = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
+    logger.warning("Resource provider '%s' used by the command is not "
+                   "registered. We are registering for you", rp)
+    rcf.providers.register(rp)
+    while True:
+        time.sleep(10)
+        rp_info = rcf.providers.get(rp)
+        if rp_info.registration_state == 'Registered':
+            logger.warning("Registration succeeded.")
+            break
 
 
 def _get_cli_argument(command, argname):

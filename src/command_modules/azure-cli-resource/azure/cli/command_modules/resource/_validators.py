@@ -4,13 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+
 try:
     from urllib.parse import urlparse, urlsplit
 except ImportError:
-    from urlparse import urlparse, urlsplit # pylint: disable=import-error
+    from urlparse import urlparse, urlsplit  # pylint: disable=import-error
+
 
 def validate_deployment_name(namespace):
-    #If missing,try come out with a name associated with the template name
+    # If missing,try come out with a name associated with the template name
     if namespace.deployment_name is None:
         template_filename = None
         if namespace.template_file and os.path.isfile(namespace.template_file):

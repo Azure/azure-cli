@@ -52,7 +52,7 @@ def _size_windows():
         return lines, columns
 
 
-def parse_quotes(cmd, quotes=True):
+def parse_quotes(cmd, quotes=True, string=True):
     """ parses quotes """
     string_literals = ['\'', '\"']
     args = []
@@ -82,7 +82,10 @@ def parse_quotes(cmd, quotes=True):
     else:
         args = words.split()
 
-    str_args = []
-    for arg in args:
-        str_args.append(str(arg))
-    return str_args
+    if string:
+        str_args = []
+        for arg in args:
+            str_args.append(str(arg))
+        return str_args
+    else:
+        return args
