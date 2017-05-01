@@ -35,7 +35,7 @@ class ShellProgressView(_ProgressViewBase):
         _, col = get_window_dim()
         bar_len = int(col) - len(msg) - 10
         completed = int(bar_len*percent)
-        message = '['
+        message = '{}['.format(msg)
         for i in range(bar_len):
             if i < completed:
                 message += '#'

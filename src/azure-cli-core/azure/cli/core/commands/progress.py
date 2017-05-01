@@ -7,6 +7,8 @@ import humanfriendly
 import time
 from enum import Enum
 
+BAR_LEN = 100
+
 
 class ProgressType(Enum):
     """ the types of progress """
@@ -156,7 +158,7 @@ class _IndeterminateStandardOut(InDeterminateProgressView):
         self.spinner.hide_cursor = False
 
     def _format_value(self, percent):
-        bar_len = 100
+        bar_len = BAR_LEN
         completed = int(bar_len*percent)
 
         message = '\r['
@@ -181,11 +183,11 @@ class _DeterminateStandardOut(DeterminateProgressView):
         self.spinner = humanfriendly.Spinner(label='In Progress')
         self.spinner.hide_cursor = False
 
-    def _format_value(self, percent):
-        bar_len = 100
+    def _format_value(self, msg, percent):
+        bar_len = BAR_LEN - len(msg) - 1
         completed = int(bar_len*percent)
 
-        message = '\r['
+        message = '\r{}['.format(msg)
         for i in range(bar_len):
             if i < completed:
                 message += '#'
@@ -197,11 +199,10 @@ class _DeterminateStandardOut(DeterminateProgressView):
     def write(self, args):
         """ writes the progress """
         args = args[0]
-
-        if 'message' in args:
-            self.out.write(args['message'])
+        msg = args['message'] if 'message' in args else ''
 
         if 'value' in args and 'total_val' in args:
             percent = args["value"] / args['total_val']
-            progress = self.format_percent(percent) if callable(self.format_percent) else percent
+            progress = self.format_percent(
+                msg, percent) if callable(self.format_percent) else percent
             self.out.write(progress)
