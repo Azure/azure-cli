@@ -36,8 +36,8 @@ DEFAULT_INDEXING_POLICY = """{
   ]
 }"""
 
-# pylint:disable=too-many-arguments
-def cli_documentdb_create(client,
+
+def cli_documentdb_create(client,  # pylint:disable=too-many-arguments
                           resource_group_name,
                           account_name,
                           locations=None,
@@ -46,13 +46,12 @@ def cli_documentdb_create(client,
                           max_staleness_prefix=100,
                           max_interval=5,
                           ip_range_filter=None):
-    # pylint:disable=line-too-long
-    """Create a new Azure DocumentDB database account.
-    """
+    """Create a new Azure DocumentDB database account."""
 
     consistency_policy = None
     if default_consistency_level is not None:
-        consistency_policy = ConsistencyPolicy(default_consistency_level, max_staleness_prefix, max_interval)
+        consistency_policy = ConsistencyPolicy(default_consistency_level, max_staleness_prefix,
+                                               max_interval)
 
     from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -75,7 +74,8 @@ def cli_documentdb_create(client,
     docdb_account = client.get(resource_group_name, account_name)  # Workaround
     return docdb_account
 
-def cli_documentdb_update(client,
+
+def cli_documentdb_update(client,  # pylint: disable=too-many-arguments
                           resource_group_name,
                           account_name,
                           locations=None,
@@ -83,13 +83,13 @@ def cli_documentdb_update(client,
                           max_staleness_prefix=None,
                           max_interval=None,
                           ip_range_filter=None):
-    # pylint:disable=line-too-long
-    """Update an existing Azure DocumentDB database account.
-    """
+    """Update an existing Azure DocumentDB database account. """
     existing = client.get(resource_group_name, account_name)
 
     update_consistency_policy = False
-    if max_interval is not None or max_staleness_prefix is not None or default_consistency_level is not None:
+    if max_interval is not None or \
+       max_staleness_prefix is not None or \
+       default_consistency_level is not None:
         update_consistency_policy = True
 
     if max_staleness_prefix is None:
@@ -103,13 +103,15 @@ def cli_documentdb_update(client,
 
     consistency_policy = None
     if update_consistency_policy:
-        consistency_policy = ConsistencyPolicy(default_consistency_level, max_staleness_prefix, max_interval)
+        consistency_policy = ConsistencyPolicy(default_consistency_level, max_staleness_prefix,
+                                               max_interval)
     else:
         consistency_policy = existing.consistency_policy
 
     if not locations:
         for loc in existing.read_locations:
-            locations.append(Location(location_name=loc.location_name, failover_priority=loc.failover_priority))
+            locations.append(
+                Location(location_name=loc.location_name, failover_priority=loc.failover_priority))
 
     if ip_range_filter is None:
         ip_range_filter = existing.ip_range_filter
@@ -126,15 +128,16 @@ def cli_documentdb_update(client,
     docdb_account = client.get(resource_group_name, account_name)  # Workaround
     return docdb_account
 
-def cli_documentdb_list(client,
-                        resource_group_name=None):
-    """Lists all Azure DocumentDB database accounts within a given resource group or subscription.
-    """
 
+def cli_documentdb_list(client, resource_group_name=None):
+    """
+    Lists all Azure DocumentDB database accounts within a given resource group or subscription.
+    """
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     else:
         return client.list()
+
 
 ######################
 # data plane APIs
@@ -145,76 +148,78 @@ def cli_documentdb_list(client,
 def _get_database_link(database_id):
     return 'dbs/{}'.format(database_id)
 
+
 def _get_collection_link(database_id, collection_id):
     return 'dbs/{}/colls/{}'.format(database_id, collection_id)
+
 
 def _get_offer_link(database_id, offer_id):
     return 'dbs/{}/colls/{}'.format(database_id, offer_id)
 
+
 def cli_documentdb_database_exists(client, database_id):
-    """Returns a boolean indicating whether the database exists
-    """
-    # pylint:disable=line-too-long
-    return len(list(client.QueryDatabases({'query': 'SELECT * FROM root r WHERE r.id=@id',
-                                           'parameters': [{'name':'@id', 'value': database_id}]}))) > 0
+    """Returns a boolean indicating whether the database exists """
+    return len(list(client.QueryDatabases(
+        {'query': 'SELECT * FROM root r WHERE r.id=@id',
+         'parameters': [{'name': '@id', 'value': database_id}]}))) > 0
+
 
 def cli_documentdb_database_show(client, database_id):
-    """Shows an Azure DocumentDB database
-    """
+    """Shows an Azure DocumentDB database """
     return client.ReadDatabase(_get_database_link(database_id))
 
+
 def cli_documentdb_database_list(client):
-    """Lists all Azure DocumentDB databases
-    """
+    """Lists all Azure DocumentDB databases """
     return list(client.ReadDatabases())
 
+
 def cli_documentdb_database_create(client, database_id):
-    """Creates an Azure DocumentDB database
-    """
+    """Creates an Azure DocumentDB database """
     return client.CreateDatabase({'id': database_id})
 
+
 def cli_documentdb_database_delete(client, database_id):
-    """Deletes an Azure DocumentDB database
-    """
+    """Deletes an Azure DocumentDB database """
     client.DeleteDatabase(_get_database_link(database_id))
+
 
 # collection operations
 
 def cli_documentdb_collection_exists(client, database_id, collection_id):
-    """Returns a boolean indicating whether the collection exists
-    """
-    # pylint:disable=line-too-long
-    return len(list(client.QueryCollections(_get_database_link(database_id),
-                                            {'query': 'SELECT * FROM root r WHERE r.id=@id',
-                                             'parameters': [{'name':'@id', 'value': collection_id}]}))) > 0
+    """Returns a boolean indicating whether the collection exists """
+    return len(list(client.QueryCollections(
+        _get_database_link(database_id),
+        {'query': 'SELECT * FROM root r WHERE r.id=@id',
+         'parameters': [{'name': '@id', 'value': collection_id}]}))) > 0
+
 
 def cli_documentdb_collection_show(client, database_id, collection_id):
-    """Shows an Azure DocumentDB collection and its offer
-    """
+    """Shows an Azure DocumentDB collection and its offer """
     collection = client.ReadCollection(_get_collection_link(database_id, collection_id))
     offer = _find_offer(client, collection['_self'])
-    return {'collection' : collection, 'offer' : offer}
+    return {'collection': collection, 'offer': offer}
+
 
 def cli_documentdb_collection_list(client, database_id):
-    """Lists all Azure DocumentDB collections
-    """
+    """Lists all Azure DocumentDB collections """
     return list(client.ReadCollections(_get_database_link(database_id)))
 
+
 def cli_documentdb_collection_delete(client, database_id, collection_id):
-    """Deletes an Azure DocumentDB collection
-    """
+    """Deletes an Azure DocumentDB collection """
     client.DeleteCollection(_get_collection_link(database_id, collection_id))
+
 
 def _populate_collection_definition(collection,
                                     partition_key_path=None,
                                     indexing_policy=None):
-
     changed = False
 
     if partition_key_path:
         if 'partitionKey' not in collection:
             collection['partitionKey'] = {}
-        collection['partitionKey'] = {'paths' : [partition_key_path]}
+        collection['partitionKey'] = {'paths': [partition_key_path]}
         changed = True
 
     if indexing_policy:
@@ -222,14 +227,14 @@ def _populate_collection_definition(collection,
         collection['indexingPolicy'] = indexing_policy
     return changed
 
-def cli_documentdb_collection_create(client,
+
+def cli_documentdb_collection_create(client,  # pylint: disable=too-many-arguments
                                      database_id,
                                      collection_id,
                                      throughput=None,
                                      partition_key_path=None,
                                      indexing_policy=DEFAULT_INDEXING_POLICY):
-    """Creates an Azure DocumentDB collection
-    """
+    """Creates an Azure DocumentDB collection """
     collection = {'id': collection_id}
 
     options = {}
@@ -240,10 +245,11 @@ def cli_documentdb_collection_create(client,
                                     partition_key_path,
                                     indexing_policy)
 
-    # pylint:disable=line-too-long
-    created_collection = client.CreateCollection(_get_database_link(database_id), collection, options)
+    created_collection = client.CreateCollection(_get_database_link(database_id), collection,
+                                                 options)
     offer = _find_offer(client, created_collection['_self'])
     return {'collection': created_collection, 'offer': offer}
+
 
 def _find_offer(client, collection_self_link):
     logger.debug('finding offer')
@@ -253,23 +259,23 @@ def _find_offer(client, collection_self_link):
             return o
     return None
 
-def cli_documentdb_collection_update(client,
+
+def cli_documentdb_collection_update(client,  # pylint: disable=too-many-arguments
                                      database_id,
                                      collection_id,
                                      throughput=None,
                                      indexing_policy=None):
-    """Updates an Azure DocumentDB collection
-    """
+    """Updates an Azure DocumentDB collection """
     logger.debug('reading collection')
     collection = client.ReadCollection(_get_collection_link(database_id, collection_id))
     result = {}
 
-    if(_populate_collection_definition(collection,
-                                       None,
-                                       indexing_policy)):
+    if (_populate_collection_definition(collection,
+                                        None,
+                                        indexing_policy)):
         logger.debug('replacing collection')
-        # pylint:disable=line-too-long
-        result['collection'] = client.ReplaceCollection(_get_collection_link(database_id, collection_id), collection)
+        result['collection'] = client.ReplaceCollection(
+            _get_collection_link(database_id, collection_id), collection)
 
     if throughput:
         logger.debug('updating offer')
