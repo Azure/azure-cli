@@ -494,7 +494,7 @@ def _register_rp(rp):
         time.sleep(10)
         rp_info = rcf.providers.get(rp)
         if rp_info.registration_state == 'Registered':
-            logger.warning("Registeration succeeded.")
+            logger.warning("Registration succeeded.")
             break
 
 
