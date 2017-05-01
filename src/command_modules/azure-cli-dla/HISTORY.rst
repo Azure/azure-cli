@@ -2,6 +2,16 @@
 
 Release History
 ===============
+0.0.4 (2017-05-01)
+++++++++++++++++++
+
+* Add support for new catalog item type: package. accessed through: `az dla catalog package`
+* Made it possible to list the following catalog items from within a database (no schema specification required):
+
+  * Table
+  * Table valued function
+  * View
+  * Table Statistics. This can also be listed with a schema, but without specifying a table name.
 
 0.0.3 (2017-04-28)
 ++++++++++++++++++
