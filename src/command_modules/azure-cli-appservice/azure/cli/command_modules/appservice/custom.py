@@ -1066,7 +1066,7 @@ class _StackRuntimeHelper(object):
             for fx in java_container_stack['properties']['frameworks']:
                 for fx_version in fx['majorVersions']:
                     result.append({
-                        'displayName': 'jave|{}|{}|{}'.format(java_version['displayVersion'],
+                        'displayName': 'java|{}|{}|{}'.format(java_version['displayVersion'],
                                                               fx['display'],
                                                               fx_version['displayVersion']),
                         'configs': {
