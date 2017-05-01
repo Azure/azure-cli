@@ -72,12 +72,11 @@ class DetProgressReporter(object):
         self.curr_val = 0 if total_value else None
         self.total_val = total_value
 
-    def add(self, message='', value=None, total_val=None):
+    def add(self, message, value, total_val):
         """ adds a progress report """
-        if total_val:
-            self.total_val = total_val
-        if value and self.total_val:
-            self.curr_val = value
+        assert value >= 0 and value <= total_val and total_val >= 0
+        self.total_val = total_val
+        self.curr_val = value
         self.message = message
 
     def report(self):
@@ -98,7 +97,7 @@ class InDetProgressReporter(object):
 
     def report(self):
         """ report the progress """
-        return (self.message)
+        return self.message
 
 
 class ProgressHook(object):
