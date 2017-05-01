@@ -191,4 +191,4 @@ class _DeterminateStandardOut(DeterminateProgressView):
             self.out.write(progress + "\n")
 
 
-REPORTER = ProgressReporter()
+# REPORTER = ProgressReporter()
