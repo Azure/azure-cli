@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.5 (Unreleased)
+^^^^^^^^^^^^^^^^^^
+* core: capture exceptions caused by unregistered provider and auto-register it   
 
 2.0.4 (2017-04-28)
 ^^^^^^^^^^^^^^^^^^
