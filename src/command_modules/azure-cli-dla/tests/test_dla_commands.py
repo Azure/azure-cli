@@ -48,7 +48,66 @@ class DataLakeAnalyticsCatalogScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('dls account create -g {} -n {} -l {} --disable-encryption'.format(self.resource_group, self.adls_name, self.location))
         self.cmd('dla account create -g {} -n {} -l {} --default-data-lake-store {}'.format(self.resource_group, self.adla_name, self.location, self.adls_name))
         # run job to construct catalog
-        catalog_script = 'DROP DATABASE IF EXISTS {0}; CREATE DATABASE {0}; CREATE TABLE {0}.dbo.{1} (UserId int, Start DateTime, Region string, Query string, Duration int, Urls string, ClickedUrls string, INDEX idx1 CLUSTERED (Region ASC) PARTITIONED BY (UserId) HASH (Region)); ALTER TABLE {0}.dbo.{1} ADD IF NOT EXISTS PARTITION (1); DROP FUNCTION IF EXISTS {0}.dbo.{2}; CREATE FUNCTION {0}.dbo.{2}() RETURNS @result TABLE (s_date DateTime, s_time string, s_sitename string, cs_method string, cs_uristem string, cs_uriquery string, s_port int, cs_username string, c_ip string, cs_useragent string, cs_cookie string, cs_referer string, cs_host string, sc_status int, sc_substatus int, sc_win32status int, sc_bytes int, cs_bytes int, s_timetaken int) AS BEGIN @result = EXTRACT s_date DateTime, s_time string, s_sitename string, cs_method string, cs_uristem string, cs_uriquery string, s_port int, cs_username string, c_ip string, cs_useragent string, cs_cookie string, cs_referer string, cs_host string, sc_status int, sc_substatus int, sc_win32status int, sc_bytes int, cs_bytes int, s_timetaken int FROM \\"@/Samples/Data/WebLog.log\\" USING Extractors.Text(delimiter:\' \'); RETURN; END; CREATE VIEW {0}.dbo.{3} AS SELECT * FROM (VALUES(1,2),(2,4)) AS T(a, b); CREATE PROCEDURE {0}.dbo.{4}() AS BEGIN CREATE VIEW {0}.dbo.{3} AS SELECT * FROM (VALUES(1,2),(2,4)) AS T(a, b); END;'
+        catalog_script = '''DROP DATABASE IF EXISTS {0};
+CREATE DATABASE {0};
+CREATE TABLE {0}.dbo.{1} (
+  UserId int,
+  Start DateTime,
+  Region string,
+  Query string,
+  Duration int,
+  Urls string,
+  ClickedUrls string,
+  INDEX idx1 CLUSTERED (Region ASC)
+    PARTITIONED BY (UserId) HASH (Region));
+ALTER TABLE {0}.dbo.{1} ADD IF NOT EXISTS PARTITION (1);
+DROP FUNCTION IF EXISTS {0}.dbo.{2};
+CREATE FUNCTION {0}.dbo.{2}()
+  RETURNS @result TABLE (
+    s_date DateTime,
+    s_time string,
+    s_sitename string,
+    cs_method string,
+    cs_uristem string,
+    cs_uriquery string,
+    s_port int,
+    cs_username string,
+    c_ip string,
+    cs_useragent string,
+    cs_cookie string,
+    cs_referer string,
+    cs_host string,
+    sc_status int,
+    sc_substatus int,
+    sc_win32status int,
+    sc_bytes int,
+    cs_bytes int,
+    s_timetaken int) AS
+      BEGIN
+        @result = EXTRACT
+          s_date DateTime,
+          s_time string,
+          s_sitename string,
+          cs_method string,
+          cs_uristem string,
+          cs_uriquery string,
+          s_port int,
+          cs_username string,
+          c_ip string,
+          cs_useragent string,
+          cs_cookie string,
+          cs_referer string,
+          cs_host string,
+          sc_status int,
+          sc_substatus int,
+          sc_win32status int,
+          sc_bytes int,
+          cs_bytes int,
+          s_timetaken int FROM \\"@/Samples/Data/WebLog.log\\" USING Extractors.Text(delimiter:' ');
+        RETURN;
+    END;
+CREATE VIEW {0}.dbo.{3} AS SELECT * FROM (VALUES(1,2),(2,4)) AS T(a, b);
+CREATE PROCEDURE {0}.dbo.{4}() AS BEGIN CREATE VIEW {0}.dbo.{3} AS SELECT * FROM (VALUES(1,2),(2,4)) AS T(a, b); END;'''
         catalog_script = catalog_script.format(self.db_name, self.table_name, self.tvf_name, self.view_name, self.proc_name)
         result = self.cmd('dla job submit -n {} --job-name "{}" --script "{}"'.format(self.adla_name, 'python cli catalog job', catalog_script))
         result = self.cmd('dla job wait -n {} --job-id {}'.format(self.adla_name, result['jobId']))
