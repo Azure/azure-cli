@@ -190,5 +190,3 @@ class _DeterminateStandardOut(DeterminateProgressView):
             progress = self.format_percent(percent) if callable(self.format_percent) else percent
             self.out.write(progress + "\n")
 
-
-# REPORTER = ProgressReporter()
