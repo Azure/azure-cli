@@ -187,7 +187,7 @@ class AzCompleter(Completer):
                     yield comp
 
                 parse_args = self.argsfinder.get_parsed_args(
-                    parse_quotes(text, quotes=False))
+                    parse_quotes(text, quotes=False, string=False))
 
                 # there are 3 formats for completers the cli uses
                 # this try catches which format it is
