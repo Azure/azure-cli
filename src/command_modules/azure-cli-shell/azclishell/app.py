@@ -399,7 +399,7 @@ class Shell(object):
         if self.default_command:
             cmd = self.default_command + " " + cmd
 
-        if cmd.strip() == "quit" or cmd.strip() == "exit":
+        if text.strip() == "quit" or text.strip() == "exit":
             break_flag = True
         elif text.strip() == "clear":  # clears the history, but only when you restart
             outside = True
