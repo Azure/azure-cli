@@ -114,7 +114,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         self.controller.begin()
 
         while not poller.done():
-            self.controller.add('Running', None, None)
+            self.controller.add(message='Running')
             try:
                 # pylint: disable=protected-access
                 correlation_id = json.loads(
