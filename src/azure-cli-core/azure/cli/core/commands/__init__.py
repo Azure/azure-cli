@@ -100,7 +100,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms
-        self.controller = ProgressHook(progress_type=ProgressType.Determinate)
+        self.controller = ProgressHook(progress_type=ProgressType.Indeterminate)
         from azure.cli.core.application import APPLICATION
         self.controller.init_progress(APPLICATION.progress_view)
 

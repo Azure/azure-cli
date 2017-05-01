@@ -38,9 +38,9 @@ BlockBlobService, BaseBlobService, \
                            'table#TableService',
                            'queue#QueueService')
 
-from azure.cli.core.commands.progress import ProgressType, ProgressHook, _DeterminateStandardOut
+from azure.cli.core.commands.progress import ProgressType, ProgressHook, DeterminateStandardOut
 HOOK = ProgressHook(ProgressType.Determinate)
-HOOK.init_progress(_DeterminateStandardOut())
+HOOK.init_progress(DeterminateStandardOut())
 def _update_progress(current, total):
     if total:
         HOOK.add(current, total)

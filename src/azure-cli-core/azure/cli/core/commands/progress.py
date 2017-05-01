@@ -44,25 +44,12 @@ class DeterminateProgressView(_ProgressViewBase):
     def __init__(self, out, format_percent=None):
         super(DeterminateProgressView, self).__init__(out, ProgressType.Determinate, format_percent)
 
-    def write(self, args):
-        """ writes the progress """
-        message = args[0]
-        percent = args[1]
-        if percent:
-            progress = self.format_percent(percent) if callable(self.format_percent) else percent
-            self.out.write(progress + "\n")
-        self.out.write(message + '\n')
-
 
 class InDeterminateProgressView(_ProgressViewBase):
     """ a view base for progress reporting """
     def __init__(self, out, format_percent=None):
         super(InDeterminateProgressView, self).__init__(
             out, ProgressType.Indeterminate, format_percent)
-
-    def write(self, args):
-        """ writes the progress """
-        self.out.write(args[0] + '\n')
 
 
 class DetProgressReporter(object):
@@ -109,7 +96,7 @@ class ProgressHook(object):
             self.reporter = InDetProgressReporter()
         self.progress_type = progress_type
         from azclishell.progress import ShellProgressView
-        self.registery = [_IndeterminateStandardOut, _DeterminateStandardOut, ShellProgressView]
+        self.registery = [IndeterminateStandardOut, DeterminateStandardOut, ShellProgressView]
         self.active_progress = []
 
     def init_progress(self, progress_view):
@@ -148,39 +135,24 @@ class ProgressHook(object):
             self.add(message='Finished')
 
 
-class _IndeterminateStandardOut(InDeterminateProgressView):
+class IndeterminateStandardOut(InDeterminateProgressView):
     """ custom output for progress reporting """
     def __init__(self, out=None):
-        super(_IndeterminateStandardOut, self).__init__(
-            out if out else sys.stderr, self._format_value)
+        super(IndeterminateStandardOut, self).__init__(out if out else sys.stderr)
         self.spinner = humanfriendly.Spinner(label='In Progress')
         self.spinner.hide_cursor = False
-
-    def _format_value(self, percent):
-        bar_len = BAR_LEN
-        completed = int(bar_len*percent)
-
-        message = '\r['
-        for i in range(bar_len):
-            if i < completed:
-                message += '#'
-            else:
-                message += ' '
-        message += ']  {:.4%}'.format(percent)
-        return message
 
     def write(self, args):
         """ writes the progress """
-        self.spinner.step()
+        msg = args['message'] if 'message' in args else 'In Progress'
+        self.spinner.step(label=msg)
 
 
-class _DeterminateStandardOut(DeterminateProgressView):
+class DeterminateStandardOut(DeterminateProgressView):
     """ custom output for progress reporting """
     def __init__(self, out=None):
-        super(_DeterminateStandardOut, self).__init__(
+        super(DeterminateStandardOut, self).__init__(
             out if out else sys.stderr, self._format_value)
-        self.spinner = humanfriendly.Spinner(label='In Progress')
-        self.spinner.hide_cursor = False
 
     def _format_value(self, msg, percent):
         bar_len = BAR_LEN - len(msg) - 1

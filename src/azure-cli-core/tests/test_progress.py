@@ -7,11 +7,10 @@ import mock
 
 import azure.cli.core.commands.progress as progress
 
+# @mock.patch('azure.cli.core.progress', ...)
+
 class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-methods
     """ test the progress reporting """
-
-    # @mock.patch('azure.cli.core.progress', ...)
-    # def test_stuff(self):
 
     def test_det_model(self):
         """ test the determinate progress reporter """
@@ -46,6 +45,23 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
 
         message = reporter.report()
         self.assertEqual(message, 'Progress')
+
+    def test_indet_stdview(self):
+        """ tests the indeterminate progress standardout view """
+        view = progress.IndeterminateStandardOut()
+        self.assertEqual(view.get_type, progress.ProgressType.Indeterminate)
+        before = view.spinner.total
+        self.assertEqual(view.spinner.label, 'In Progress')
+        view.write({})
+        after = view.spinner.total
+        self.assertTrue(after > before)
+        view.write({'message':'TESTING'})
+        self.assertEqual(view.spinner.label, 'TESTING')
+
+    def test_det_stdview(self):
+        """ test the determinate progress standardout view """
+        view = progress.DeterminateStandardOut()
+        self.assertEqual(view.get_type, progress.ProgressType.Determinate)
 
 
 
