@@ -75,18 +75,10 @@ Pick the example you want with:
 ## Clear History
 
 ```bash
-   $ clear-history
-```
-
-Only clears the appended suggestion when you restart the shell
-
-
-## Clear Screen
-
-```bash
    $ clear
 ```
 
+Only clears the appended suggestion when you restart the shell
 
 ## Change colors
 
