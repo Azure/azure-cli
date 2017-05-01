@@ -240,7 +240,7 @@ helps['appservice web source-control show'] = """
 
 helps['appservice web source-control sync'] = """
     type: command
-    short-summary: Synchronize from the source repository, only needed under maunal integration mode.
+    short-summary: Synchronize from the source repository, only needed under manual integration mode.
 """
 
 helps['appservice plan'] = """

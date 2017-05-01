@@ -13,7 +13,8 @@ except ImportError:
     from distutils import log as logger
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
-VERSION = '0.1.3+dev'
+
+VERSION = '0.1.4+dev'
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -31,11 +32,12 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'azure-mgmt-web==0.31.0',
+    'azure-mgmt-web==0.31.1',
     # v1.17 breaks on wildcard cert https://github.com/shazow/urllib3/issues/981
     'urllib3[secure]==1.16',
     'xmltodict',
     'pyOpenSSL',
+    'vsts-cd-manager',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

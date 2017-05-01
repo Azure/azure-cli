@@ -12,9 +12,9 @@ from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase, JMESPathCheck,
                                                      ResourceGroupVCRTestBase,
                                                      MOCKED_SUBSCRIPTION_ID)
 
-#pylint: disable=method-hidden, line-too-long
-class ResourceGroupScenarioTest(VCRTestBase): # Not RG test base because it tests the actual deletion of a resource group
 
+# pylint: disable=method-hidden
+class ResourceGroupScenarioTest(VCRTestBase):
     def test_resource_group(self):
         self.execute()
 
@@ -31,16 +31,16 @@ class ResourceGroupScenarioTest(VCRTestBase): # Not RG test base because it test
         rg = self.resource_group
         s.cmd('group create -n {} -l westus --tag a=b c'.format(rg), checks=[
             JMESPathCheck('name', rg),
-            JMESPathCheck('tags', {'a':'b', 'c':''})
+            JMESPathCheck('tags', {'a': 'b', 'c': ''})
         ])
         s.cmd('group exists -n {}'.format(rg), checks=BooleanCheck(True))
         s.cmd('group show -n {}'.format(rg), checks=[
             JMESPathCheck('name', rg),
-            JMESPathCheck('tags', {'a':'b', 'c':''})
+            JMESPathCheck('tags', {'a': 'b', 'c': ''})
         ])
         s.cmd('group list --tag a=b', checks=[
             JMESPathCheck('[0].name', rg),
-            JMESPathCheck('[0].tags', {'a':'b', 'c':''})
+            JMESPathCheck('[0].tags', {'a': 'b', 'c': ''})
         ])
         s.cmd('group delete -n {} --yes'.format(rg))
         s.cmd('group exists -n {}'.format(rg), checks=NoneCheck())
@@ -49,8 +49,8 @@ class ResourceGroupScenarioTest(VCRTestBase): # Not RG test base because it test
         if self.cmd('group exists -n {}'.format(self.resource_group)):
             self.cmd('group delete -n {} --yes'.format(self.resource_group))
 
-class ResourceGroupNoWaitScenarioTest(VCRTestBase): # Not RG test base because it tests the actual deletion of a resource group
 
+class ResourceGroupNoWaitScenarioTest(VCRTestBase):
     def test_resource_group_no_wait(self):
         self.execute()
 
@@ -74,13 +74,14 @@ class ResourceGroupNoWaitScenarioTest(VCRTestBase): # Not RG test base because i
         s.cmd('group wait --deleted -n {}'.format(rg), checks=NoneCheck())
         s.cmd('group exists -n {}'.format(rg), checks=NoneCheck())
 
-class ResourceScenarioTest(ResourceGroupVCRTestBase):
 
+class ResourceScenarioTest(ResourceGroupVCRTestBase):
     def test_resource_scenario(self):
         self.execute()
 
     def __init__(self, test_method):
-        super(ResourceScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_resource_scenario')
+        super(ResourceScenarioTest, self).__init__(__file__, test_method,
+                                                   resource_group='cli_test_resource_scenario')
         self.vnet_name = 'cli-test-vnet1'
         self.subnet_name = 'cli-test-subnet1'
 
@@ -90,8 +91,10 @@ class ResourceScenarioTest(ResourceGroupVCRTestBase):
     def body(self):
         s = self
         rg = self.resource_group
-        vnet_count = s.cmd("resource list --query \"length([?name=='{}'])\"".format(self.vnet_name)) or 0
-        self.cmd('network vnet create -g {} -n {} --subnet-name {} --tags cli-test=test'.format(self.resource_group, self.vnet_name, self.subnet_name))
+        vnet_count = s.cmd(
+            "resource list --query \"length([?name=='{}'])\"".format(self.vnet_name)) or 0
+        self.cmd('network vnet create -g {} -n {} --subnet-name {} --tags cli-test=test'.format(
+            self.resource_group, self.vnet_name, self.subnet_name))
         vnet_count += 1
 
         s.cmd('resource list',
@@ -108,37 +111,44 @@ class ResourceScenarioTest(ResourceGroupVCRTestBase):
               checks=JMESPathCheck("length([?name=='{}'])".format(self.vnet_name), vnet_count))
 
         # check for simple resource with tag
-        s.cmd('resource show -n {} -g {} --resource-type Microsoft.Network/virtualNetworks'.format(self.vnet_name, rg), checks=[
+        s.cmd('resource show -n {} -g {} --resource-type Microsoft.Network/virtualNetworks'.format(
+            self.vnet_name, rg), checks=[
             JMESPathCheck('name', self.vnet_name),
             JMESPathCheck('location', 'westus'),
             JMESPathCheck('resourceGroup', rg),
             JMESPathCheck('tags', {'cli-test': 'test'})
         ])
-        #check for child resource
-        s.cmd('resource show -n {} -g {} --namespace Microsoft.Network --parent virtualNetworks/{} --resource-type subnets'.format(
-            self.subnet_name, self.resource_group, self.vnet_name), checks=[
+        # check for child resource
+        s.cmd(
+            'resource show -n {} -g {} --namespace Microsoft.Network --parent virtualNetworks/{}'
+            ' --resource-type subnets'.format(
+                self.subnet_name, self.resource_group, self.vnet_name), checks=[
                 JMESPathCheck('name', self.subnet_name),
                 JMESPathCheck('resourceGroup', rg),
             ])
 
         # clear tag and verify
-        s.cmd('resource tag -n {} -g {} --resource-type Microsoft.Network/virtualNetworks --tags'.format(self.vnet_name, rg))
-        s.cmd('resource show -n {} -g {} --resource-type Microsoft.Network/virtualNetworks'.format(self.vnet_name, rg),
-              checks=JMESPathCheck('tags', {}))
+        s.cmd('resource tag -n {} -g {} --resource-type Microsoft.Network/virtualNetworks --tags'
+              .format(self.vnet_name, rg))
+        s.cmd('resource show -n {} -g {} --resource-type Microsoft.Network/virtualNetworks'
+              .format(self.vnet_name, rg), checks=JMESPathCheck('tags', {}))
+
 
 class ResourceIDScenarioTest(ResourceGroupVCRTestBase):
-
     def test_resource_id_scenario(self):
         self.execute()
 
     def __init__(self, test_method):
-        super(ResourceIDScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_resource_id')
+        super(ResourceIDScenarioTest, self).__init__(__file__, test_method,
+                                                     resource_group='cli_test_resource_id')
         self.vnet_name = 'cli_test_resource_id_vnet'
         self.subnet_name = 'cli_test_resource_id_subnet'
 
     def set_up(self):
         super(ResourceIDScenarioTest, self).set_up()
-        self.cmd('network vnet create -g {} -n {} --subnet-name {}'.format(self.resource_group, self.vnet_name, self.subnet_name))
+        self.cmd('network vnet create -g {} -n {} --subnet-name {}'.format(self.resource_group,
+                                                                           self.vnet_name,
+                                                                           self.subnet_name))
 
     def body(self):
         if self.playback:
@@ -147,8 +157,10 @@ class ResourceIDScenarioTest(ResourceGroupVCRTestBase):
             subscription_id = self.cmd('account list --query "[?isDefault].id" -o tsv')
 
         s = self
-        vnet_resource_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}'.format(
-            subscription_id, self.resource_group, self.vnet_name)
+        vnet_resource_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/' \
+                           'virtualNetworks/{}'.format(subscription_id,
+                                                       self.resource_group,
+                                                       self.vnet_name)
         s.cmd('resource tag --id {} --tags {}'.format(vnet_resource_id, 'tag-vnet'))
         s.cmd('resource show --id {}'.format(vnet_resource_id), checks=[
             JMESPathCheck('name', self.vnet_name),
@@ -156,26 +168,30 @@ class ResourceIDScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('tags', {'tag-vnet': ''})
         ])
 
-        subnet_resource_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
-            subscription_id, self.resource_group, self.vnet_name, self.subnet_name)
+        subnet_resource_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/' \
+                             'virtualNetworks/{}/subnets/{}'.format(subscription_id,
+                                                                    self.resource_group,
+                                                                    self.vnet_name,
+                                                                    self.subnet_name)
         s.cmd('resource show --id {}'.format(subnet_resource_id), checks=[
             JMESPathCheck('name', self.subnet_name),
             JMESPathCheck('resourceGroup', self.resource_group),
             JMESPathCheck('properties.addressPrefix', '10.0.0.0/24')
         ])
 
-        s.cmd('resource update --id {} --set properties.addressPrefix=10.0.0.0/22'.format(subnet_resource_id), checks=[
+        s.cmd('resource update --id {} --set properties.addressPrefix=10.0.0.0/22'.format(
+            subnet_resource_id), checks=[
             JMESPathCheck('properties.addressPrefix', '10.0.0.0/22')
-            ])
+        ])
 
         s.cmd('resource delete --id {}'.format(subnet_resource_id), checks=NoneCheck())
         s.cmd('resource delete --id {}'.format(vnet_resource_id), checks=NoneCheck())
 
 
 class ResourceCreateScenarioTest(ResourceGroupVCRTestBase):
-
     def __init__(self, test_method):
-        super(ResourceCreateScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_resource_create')
+        super(ResourceCreateScenarioTest, self).__init__(__file__, test_method,
+                                                         resource_group='cli_test_resource_create')
 
     def test_resource_create(self):
         self.execute()
@@ -184,19 +200,26 @@ class ResourceCreateScenarioTest(ResourceGroupVCRTestBase):
         appservice_plan = 'cli_res_create_plan'
         webapp = 'clirescreateweb'
 
-        self.cmd('resource create -g {} -n {} --resource-type Microsoft.web/serverFarms --is-full-object --properties "{{\\"location\\":\\"{}\\",\\"sku\\":{{\\"name\\":\\"B1\\",\\"tier\\":\\"BASIC\\"}}}}"'.format(
-            self.resource_group, appservice_plan, self.location), checks=[JMESPathCheck('name', appservice_plan)])
+        self.cmd('resource create -g {} -n {} --resource-type Microsoft.web/serverFarms '
+                 '--is-full-object --properties "{{\\"location\\":\\"{}\\",\\"sku\\":{{\\"name\\":'
+                 '\\"B1\\",\\"tier\\":\\"BASIC\\"}}}}"'.format(self.resource_group,
+                                                               appservice_plan,
+                                                               self.location),
+                 checks=[JMESPathCheck('name', appservice_plan)])
 
-        result = self.cmd('resource create -g {} -n {} --resource-type Microsoft.web/sites --properties "{{\\"serverFarmId\\":\\"{}\\"}}"'.format(
-            self.resource_group, webapp, appservice_plan), checks=[JMESPathCheck('name', webapp)])
+        result = self.cmd(
+            'resource create -g {} -n {} --resource-type Microsoft.web/sites --properties '
+            '"{{\\"serverFarmId\\":\\"{}\\"}}"'.format(self.resource_group,
+                                                       webapp,
+                                                       appservice_plan),
+            checks=[JMESPathCheck('name', webapp)])
 
         app_settings_id = result['id'] + '/config/appsettings'
         self.cmd('resource create --id {} --properties "{{\\"key2\\":\\"value12\\"}}"'.format(
             app_settings_id), checks=[JMESPathCheck('properties.key2', 'value12')])
 
 
-class TagScenarioTest(VCRTestBase): # Not RG test base because it operates only on the subscription
-
+class TagScenarioTest(VCRTestBase):
     def test_tag_scenario(self):
         self.execute()
 
@@ -237,7 +260,8 @@ class TagScenarioTest(VCRTestBase): # Not RG test base because it operates only 
         s.cmd('tag delete -n {}'.format(tn))
         s.cmd('tag list --query "[?tagName == \'{}\']"'.format(self.tag_name), checks=NoneCheck())
 
-class ProviderRegistrationTest(VCRTestBase): # Not RG test base because it operates only on the subscription
+
+class ProviderRegistrationTest(VCRTestBase):
     def __init__(self, test_method):
         super(ProviderRegistrationTest, self).__init__(__file__, test_method)
 
@@ -263,7 +287,7 @@ class ProviderRegistrationTest(VCRTestBase): # Not RG test base because it opera
             self.assertTrue(result['registrationState'] in ['Registering', 'Registered'])
 
 
-class ProviderOperationTest(VCRTestBase): # Not RG test base because it operates only on the subscription
+class ProviderOperationTest(VCRTestBase):
     def __init__(self, test_method):
         super(ProviderOperationTest, self).__init__(__file__, test_method)
 
@@ -272,18 +296,23 @@ class ProviderOperationTest(VCRTestBase): # Not RG test base because it operates
 
     def body(self):
         self.cmd('provider operation show --namespace microsoft.compute', checks=[
-            JMESPathCheck('id', '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
-            JMESPathCheck('type', 'Microsoft.Authorization/providerOperations')
-        ]) 
-        self.cmd('provider operation show --namespace microsoft.compute --api-version 2015-07-01', checks=[
-            JMESPathCheck('id', '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
+            JMESPathCheck('id',
+                          '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
             JMESPathCheck('type', 'Microsoft.Authorization/providerOperations')
         ])
+        self.cmd('provider operation show --namespace microsoft.compute --api-version 2015-07-01',
+                 checks=[
+                     JMESPathCheck(
+                         'id',
+                         '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
+                     JMESPathCheck('type', 'Microsoft.Authorization/providerOperations')
+                 ])
 
 
 class DeploymentTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(DeploymentTest, self).__init__(__file__, test_method, resource_group='azure-cli-deployment-test')
+        super(DeploymentTest, self).__init__(__file__, test_method,
+                                             resource_group='azure-cli-deployment-test')
 
     def test_group_deployment(self):
         self.execute()
@@ -291,34 +320,39 @@ class DeploymentTest(ResourceGroupVCRTestBase):
     def body(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_file = os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\')
-        parameters_file = os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\')
+        parameters_file = os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\',
+                                                                                          '\\\\')
         deployment_name = 'azure-cli-deployment'
 
         self.cmd('group deployment validate -g {} --template-file {} --parameters @{}'.format(
             self.resource_group, template_file, parameters_file), checks=[
-                JMESPathCheck('properties.provisioningState', 'Accepted')
-                ])
+            JMESPathCheck('properties.provisioningState', 'Accepted')
+        ])
         self.cmd('group deployment create -g {} -n {} --template-file {} --parameters @{}'.format(
             self.resource_group, deployment_name, template_file, parameters_file), checks=[
-                JMESPathCheck('properties.provisioningState', 'Succeeded'),
-                JMESPathCheck('resourceGroup', self.resource_group),
-                ])
+            JMESPathCheck('properties.provisioningState', 'Succeeded'),
+            JMESPathCheck('resourceGroup', self.resource_group),
+        ])
         self.cmd('group deployment list -g {}'.format(self.resource_group), checks=[
             JMESPathCheck('[0].name', deployment_name),
             JMESPathCheck('[0].resourceGroup', self.resource_group)
-            ])
-        self.cmd('group deployment show -g {} -n {}'.format(self.resource_group, deployment_name), checks=[
-            JMESPathCheck('name', deployment_name),
-            JMESPathCheck('resourceGroup', self.resource_group)
-            ])
-        self.cmd('group deployment operation list -g {} -n {}'.format(self.resource_group, deployment_name), checks=[
+        ])
+        self.cmd('group deployment show -g {} -n {}'.format(self.resource_group, deployment_name),
+                 checks=[
+                     JMESPathCheck('name', deployment_name),
+                     JMESPathCheck('resourceGroup', self.resource_group)
+                 ])
+        self.cmd('group deployment operation list -g {} -n {}'.format(self.resource_group,
+                                                                      deployment_name), checks=[
             JMESPathCheck('length([])', 2),
             JMESPathCheck('[0].resourceGroup', self.resource_group)
-            ])
+        ])
+
 
 class DeploymentnoWaitTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(DeploymentnoWaitTest, self).__init__(__file__, test_method, resource_group='azure-cli-deployment-test')
+        super(DeploymentnoWaitTest, self).__init__(__file__, test_method,
+                                                   resource_group='azure-cli-deployment-test')
 
     def test_group_deployment_no_wait(self):
         self.execute()
@@ -326,47 +360,62 @@ class DeploymentnoWaitTest(ResourceGroupVCRTestBase):
     def body(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_file = os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\')
-        parameters_file = os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\')
+        parameters_file = os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\',
+                                                                                          '\\\\')
         deployment_name = 'azure-cli-deployment'
 
-        self.cmd('group deployment create -g {} -n {} --template-file {} --parameters @{} --no-wait'.format(
-            self.resource_group, deployment_name, template_file, parameters_file), checks=NoneCheck())
+        self.cmd('group deployment create -g {} -n {} --template-file {} --parameters @{} '
+                 '--no-wait'.format(self.resource_group,
+                                    deployment_name,
+                                    template_file,
+                                    parameters_file),
+                 checks=NoneCheck())
 
-        self.cmd('group deployment wait -g {} -n {} --created'.format(self.resource_group, deployment_name), checks=NoneCheck())
+        self.cmd('group deployment wait -g {} -n {} --created'.format(self.resource_group,
+                                                                      deployment_name),
+                 checks=NoneCheck())
 
-        self.cmd('group deployment show -g {} -n {}'.format(self.resource_group, deployment_name), checks=[
-            JMESPathCheck('properties.provisioningState', 'Succeeded')
-            ])
+        self.cmd('group deployment show -g {} -n {}'.format(self.resource_group, deployment_name),
+                 checks=[
+                     JMESPathCheck('properties.provisioningState', 'Succeeded')
+                 ])
+
 
 class DeploymentThruUriTest(ResourceGroupVCRTestBase):
     def __init__(self, test_method):
-        super(DeploymentThruUriTest, self).__init__(__file__, test_method, resource_group='azure-cli-deployment-uri-test')
+        super(DeploymentThruUriTest, self).__init__(__file__, test_method,
+                                                    resource_group='azure-cli-deployment-uri-test')
 
     def test_group_deployment_thru_uri(self):
         self.execute()
 
     def body(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        #same copy of the sample template file under current folder, but it is uri based now
-        template_uri = 'https://raw.githubusercontent.com/Azure/azure-cli/master/src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/tests/simple_deploy.json'
-        parameters_file = os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\')
-        deployment_name = 'simple_deploy' #auto-gen'd by command
+        # same copy of the sample template file under current folder, but it is uri based now
+        template_uri = 'https://raw.githubusercontent.com/Azure/azure-cli/master/src/' \
+                       'command_modules/azure-cli-resource/azure/cli/command_modules/resource/' \
+                       'tests/simple_deploy.json'
+        parameters_file = os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\',
+                                                                                          '\\\\')
+        deployment_name = 'simple_deploy'  # auto-gen'd by command
         result = self.cmd('group deployment create -g {} --template-uri {} --parameters @{}'.format(
             self.resource_group, template_uri, parameters_file), checks=[
-                JMESPathCheck('properties.provisioningState', 'Succeeded'),
-                JMESPathCheck('resourceGroup', self.resource_group),
-                ])
+            JMESPathCheck('properties.provisioningState', 'Succeeded'),
+            JMESPathCheck('resourceGroup', self.resource_group),
+        ])
 
-        result = self.cmd('group deployment show -g {} -n {}'.format(self.resource_group, deployment_name), checks=[
-            JMESPathCheck('name', deployment_name)
+        result = self.cmd(
+            'group deployment show -g {} -n {}'.format(self.resource_group, deployment_name),
+            checks=[
+                JMESPathCheck('name', deployment_name)
             ])
 
         self.cmd('group deployment delete -g {} -n {}'.format(self.resource_group, deployment_name))
         result = self.cmd('group deployment list -g {}'.format(self.resource_group))
         self.assertFalse(bool(result))
 
-class ResourceMoveScenarioTest(VCRTestBase): # Not RG test base because it uses two RGs and manually cleans them up
 
+class ResourceMoveScenarioTest(VCRTestBase):
     def __init__(self, test_method):
         super(ResourceMoveScenarioTest, self).__init__(__file__, test_method)
         self.source_group = 'res_move_src_group'
@@ -389,24 +438,30 @@ class ResourceMoveScenarioTest(VCRTestBase): # Not RG test base because it uses 
         else:
             subscription_id = self.cmd('account list --query "[?isDefault].id" -o tsv')
 
-        #use 'network security group' for testing as it is fast to create
+        # use 'network security group' for testing as it is fast to create
         nsg1 = 'nsg1'
-        nsg1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/networkSecurityGroups/{}'.format(
-            subscription_id, self.source_group, nsg1)
+        nsg1_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/' \
+                  'networkSecurityGroups/{}'.format(subscription_id,
+                                                    self.source_group,
+                                                    nsg1)
         nsg2 = 'nsg2'
         nsg2_id = nsg1_id.replace(nsg1, nsg2)
 
         self.cmd('network nsg create -g {} --name {}'.format(self.source_group, nsg1))
         self.cmd('network nsg create -g {} --name {}'.format(self.source_group, nsg2))
 
-        #move
-        self.cmd('resource move --ids {} {} --destination-group {}'.format(nsg1_id, nsg2_id, self.destination_group))
+        # move
+        self.cmd('resource move --ids {} {} --destination-group {}'.format(nsg1_id, nsg2_id,
+                                                                           self.destination_group))
 
-        #see they show up at destination
-        self.cmd('network nsg show -g {} -n {}'.format(self.destination_group, nsg1), [JMESPathCheck('name', nsg1)])
-        self.cmd('network nsg show -g {} -n {}'.format(self.destination_group, nsg2), [JMESPathCheck('name', nsg2)])
+        # see they show up at destination
+        self.cmd('network nsg show -g {} -n {}'.format(self.destination_group, nsg1),
+                 [JMESPathCheck('name', nsg1)])
+        self.cmd('network nsg show -g {} -n {}'.format(self.destination_group, nsg2),
+                 [JMESPathCheck('name', nsg2)])
 
-class FeatureScenarioTest(VCRTestBase): # Not RG test base because it operates only on the subscription
+
+class FeatureScenarioTest(VCRTestBase):
     def __init__(self, test_method):
         super(FeatureScenarioTest, self).__init__(__file__, test_method)
 
@@ -416,16 +471,17 @@ class FeatureScenarioTest(VCRTestBase): # Not RG test base because it operates o
     def body(self):
         self.cmd('feature list', checks=[
             JMESPathCheck("length([?name=='Microsoft.Xrm/uxdevelopment'])", 1)
-            ])
+        ])
 
         self.cmd('feature list --namespace {}'.format('Microsoft.Network'), checks=[
             JMESPathCheck("length([?name=='Microsoft.Network/SkipPseudoVipGeneration'])", 1)
-            ])
+        ])
+
 
 class PolicyScenarioTest(ResourceGroupVCRTestBase):
-
     def __init__(self, test_method):
-        super(PolicyScenarioTest, self).__init__(__file__, test_method, resource_group='azure-cli-policy-test-group')
+        super(PolicyScenarioTest, self).__init__(__file__, test_method,
+                                                 resource_group='azure-cli-policy-test-group')
 
     def test_resource_policy(self):
         self.execute()
@@ -436,51 +492,55 @@ class PolicyScenarioTest(ResourceGroupVCRTestBase):
         policy_description = 'test_policy_123'
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         rules_file = os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\')
-        #create a policy
-        self.cmd('policy definition create -n {} --rules {} --display-name {} --description {}'.format(
-            policy_name, rules_file, policy_display_name, policy_description), checks=[
+        # create a policy
+        self.cmd(
+            'policy definition create -n {} --rules {} --display-name {} --description {}'.format(
+                policy_name, rules_file, policy_display_name, policy_description), checks=[
                 JMESPathCheck('name', policy_name),
                 JMESPathCheck('displayName', policy_display_name),
                 JMESPathCheck('description', policy_description)
-                ])
-
-        #update it
-        new_policy_description = policy_description + '_new'
-        self.cmd('policy definition update -n {} --description {}'.format(policy_name, new_policy_description), checks=[
-            JMESPathCheck('description', new_policy_description)
             ])
 
-        #list and show it
+        # update it
+        new_policy_description = policy_description + '_new'
+        self.cmd('policy definition update -n {} --description {}'.format(policy_name,
+                                                                          new_policy_description),
+                 checks=[
+                     JMESPathCheck('description', new_policy_description)
+                 ])
+
+        # list and show it
         self.cmd('policy definition list', checks=[
             JMESPathCheck("length([?name=='{}'])".format(policy_name), 1)
-            ])
+        ])
         self.cmd('policy definition show -n {}'.format(policy_name), checks=[
             JMESPathCheck('name', policy_name),
             JMESPathCheck('displayName', policy_display_name)
-            ])
+        ])
 
-        #create a policy assignment on a resource group
+        # create a policy assignment on a resource group
         policy_assignment_name = 'azurecli-test-policy-assignment'
         policy_assignment_display_name = 'test_assignment_123'
         self.cmd('policy assignment create --policy {} -n {} --display-name {} -g {}'.format(
-            policy_name, policy_assignment_name, policy_assignment_display_name, self.resource_group), checks=[
-                JMESPathCheck('name', policy_assignment_name),
-                JMESPathCheck('displayName', policy_assignment_display_name),
-                ])
+            policy_name, policy_assignment_name, policy_assignment_display_name,
+            self.resource_group), checks=[
+            JMESPathCheck('name', policy_assignment_name),
+            JMESPathCheck('displayName', policy_assignment_display_name),
+        ])
 
         # listing at subscription level won't find the assignment made at a resource group
         import jmespath
         try:
             self.cmd('policy assignment list', checks=[
                 JMESPathCheck("length([?name=='{}'])".format(policy_assignment_name), 0),
-                ])
-        except jmespath.exceptions.JMESPathTypeError: #ok if query fails on None result
+            ])
+        except jmespath.exceptions.JMESPathTypeError:  # ok if query fails on None result
             pass
 
         # but enable --show-all works
         self.cmd('policy assignment list --disable-scope-strict-match', checks=[
             JMESPathCheck("length([?name=='{}'])".format(policy_assignment_name), 1),
-            ])
+        ])
 
         # delete the assignment
         self.cmd('policy assignment delete -n {} -g {}'.format(
@@ -489,9 +549,10 @@ class PolicyScenarioTest(ResourceGroupVCRTestBase):
 
         # delete the policy
         self.cmd('policy definition delete -n {}'.format(policy_name))
-        time.sleep(10) # ensure the policy is gone when run live.
+        time.sleep(10)  # ensure the policy is gone when run live.
         self.cmd('policy definition list', checks=[
             JMESPathCheck("length([?name=='{}'])".format(policy_name), 0)])
+
 
 if __name__ == '__main__':
     unittest.main()

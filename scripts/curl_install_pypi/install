@@ -9,7 +9,7 @@
 # Bash script to install the Azure CLI
 #
 INSTALL_SCRIPT_URL="https://azurecliprod.blob.core.windows.net/install.py"
-INSTALL_SCRIPT_SHA256=9fc71faaa27588835b56c22e39860627be097352354b7fcb062da4e833989630
+INSTALL_SCRIPT_SHA256=6258a6df3195407d2fdc7ba69b7fcc5f7fcd4fbc75221741053f129d8432f031
 _TTY=/dev/tty
 
 install_script=$(mktemp -t azure_cli_install_tmp_XXXX) || exit
@@ -19,6 +19,13 @@ shasum -v
 if [ "$?" -eq 0 ]
 then
   echo "$INSTALL_SCRIPT_SHA256  $install_script" | shasum -a 256 -c - || exit
+fi
+command -v python > /dev/null 2>&1
+if [ "$?" -ne 0 ]
+then
+  echo "ERROR: Python not found. 'command -v python' returned failure."
+  echo "If python is available on the system, add it to PATH. For example 'sudo ln -s /usr/bin/python3 /usr/bin/python'"
+  exit 1
 fi
 chmod 775 $install_script
 echo "Running install script."

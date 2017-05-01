@@ -12,7 +12,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = '0.0.2+dev'
+VERSION = '0.0.3+dev'
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -30,7 +30,8 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'azure-graphrbac==0.30.0rc6'
+    'azure-graphrbac==0.30.0rc6',
+    'azure-mgmt-devtestlabs==2.0.0'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -52,11 +53,7 @@ setup(
         'azure',
         'azure.cli',
         'azure.cli.command_modules',
-        'azure.cli.command_modules.lab',
-        'azure.cli.command_modules.lab.sdk',
-        'azure.cli.command_modules.lab.sdk.devtestlabs',
-        'azure.cli.command_modules.lab.sdk.devtestlabs.models',
-        'azure.cli.command_modules.lab.sdk.devtestlabs.operations'
+        'azure.cli.command_modules.lab'
     ],
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass

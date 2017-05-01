@@ -354,8 +354,8 @@ def _get_subscription_id():
 
 
 def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None,  # pylint: disable=too-many-locals
-               admin_username="azureuser", agent_count="3",
-               agent_vm_size="Standard_D2_v2", location=None, master_count="1",
+               admin_username="azureuser", agent_count=3,
+               agent_vm_size="Standard_D2_v2", location=None, master_count=1,
                orchestrator_type="dcos", service_principal=None, client_secret=None, tags=None,
                windows=False, admin_password="", generate_ssh_keys=False,  # pylint: disable=unused-argument
                validate=False, no_wait=False):
@@ -384,13 +384,13 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     :param agent_count: The number of agents for the cluster.  Note, for
      DC/OS clusters you will also get 1 or 2 public agents in addition to
      these selected masters.
-    :type agent_count: str
+    :type agent_count: int
     :param agent_vm_size: The size of the Virtual Machine.
     :type agent_vm_size: str
     :param location: Location for VM resources.
     :type location: str
     :param master_count: The number of masters for the cluster.
-    :type master_count: str
+    :type master_count: int
     :param orchestrator_type: The type of orchestrator used to manage the
      applications on the cluster. Possible values include: 'dcos', 'swarm'
     :type orchestrator_type: str or :class:`orchestratorType
@@ -518,8 +518,8 @@ def load_acs_service_principals(config_path):
 
 
 def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value,
-                       admin_username="azureuser", agent_count="3", agent_vm_size="Standard_D2_v2",
-                       location=None, service_principal=None, client_secret=None, master_count="1",
+                       admin_username="azureuser", agent_count=3, agent_vm_size="Standard_D2_v2",
+                       location=None, service_principal=None, client_secret=None, master_count=1,
                        windows=False, admin_password='', validate=False, no_wait=False, tags=None):
     if not location:
         location = '[resourceGroup().location]'

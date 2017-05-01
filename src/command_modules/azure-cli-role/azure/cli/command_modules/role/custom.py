@@ -44,6 +44,13 @@ def get_role_definition_name_completion_list(prefix, **kwargs):  # pylint: disab
     return [x.properties.role_name for x in list(definitions)]
 
 
+def x509_type(cert):
+    x509 = _try_x509_pem(cert) or _try_x509_der(cert)
+    if not x509:
+        raise CLIError("The value provided for --cert was not a PEM or a DER file.")
+    return x509
+
+
 def create_role_definition(role_definition):
     return _create_update_role_definition(role_definition, for_update=False)
 
@@ -508,7 +515,8 @@ def create_service_principal_for_rbac(
     '''create a service principal and configure its access to Azure resources
     :param str name: a display name or an app id uri. Command will generate one if missing.
     :param str password: the password used to login. If missing, command will generate one.
-    :param str cert: PEM formatted public certificate. Do not include private key info.
+    :param str cert: PEM or DER formatted public certificate using string or `@<file path>` to
+        load from a file. Do not include private key info.
     :param str years: Years the password will be valid. Default: 1 year
     :param str scopes: space separated scopes the service principal's role assignment applies to.
            Defaults to the root of the current subscription.
@@ -682,17 +690,49 @@ def _create_self_signed_cert(years):
     return (cert_string, creds_file)
 
 
-def _normalize_cert(cert):
-    pem_data = cert
-    cert_header = '-----BEGIN CERTIFICATE-----'
-    cert_end = '-----END CERTIFICATE-----'
-    if not pem_data.startswith(cert_header):
-        pem_data = cert_header + '\n' + pem_data + '\n' + cert_end
+def _try_x509_pem(cert):
     import OpenSSL.crypto
-    x509 = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, pem_data)
+    try:
+        return OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, cert)
+    except OpenSSL.crypto.Error:
+        # could not load the pem, try with headers
+        try:
+            pem_with_headers = '-----BEGIN CERTIFICATE-----\n' \
+                               + cert + \
+                               '-----END CERTIFICATE-----\n'
+            return OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, pem_with_headers)
+        except OpenSSL.crypto.Error:
+            return None
+    except UnicodeEncodeError:
+        # this must be a binary encoding
+        return None
+
+
+def _try_x509_der(cert):
+    import OpenSSL.crypto
+    import base64
+    try:
+        cert = base64.b64decode(cert)
+        return OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_ASN1, cert)
+    except OpenSSL.crypto.Error:
+        return None
+
+
+def _get_public(x509):
+    import OpenSSL.crypto
+    pem = OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, x509)
+    if isinstance(pem, bytes):
+        pem = pem.decode("utf-8")
+    stripped = pem.replace('-----BEGIN CERTIFICATE-----\n', '')
+    stripped = stripped.replace('-----END CERTIFICATE-----\n', '')
+    return stripped
+
+
+def _normalize_cert(x509):
+    logger.debug("normalizing x509 certificate with fingerprint %s", x509.digest("sha1"))
     pkey = x509.get_notAfter().decode()
     end_date = dateutil.parser.parse(pkey)
-    return cert.replace(cert_header, '').replace(cert_end, '').strip(), end_date
+    return _get_public(x509), end_date
 
 
 def reset_service_principal_credential(name, password=None, create_cert=False,
