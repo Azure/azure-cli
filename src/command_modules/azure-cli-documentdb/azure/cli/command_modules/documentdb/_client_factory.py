@@ -20,14 +20,15 @@ No credentials specified to access DocumentDB service. Please provide any of the
 UA_AGENT = "AZURECLI/{}".format(core_version)
 ENV_ADDITIONAL_USER_AGENT = 'AZURE_HTTP_USER_AGENT'
 
-def _add_headers(client):
 
+def _add_headers(client):
     agents = [client.default_headers['User-Agent'], UA_AGENT]
     try:
         agents.append(os.environ[ENV_ADDITIONAL_USER_AGENT])
     except KeyError:
         pass
     client.default_headers['User-Agent'] = ' '.join(agents)
+
 
 def _get_url_connection(url_collection, account_name):
     if url_collection:
@@ -37,8 +38,8 @@ def _get_url_connection(url_collection, account_name):
     else:
         return None
 
-def get_document_client_factory(kwargs):
 
+def get_document_client_factory(kwargs):
     from pydocumentdb import document_client
     from azure.cli.core.commands.client_factory import get_data_service_client
     from azure.cli.core._profile import CLOUD
@@ -66,9 +67,12 @@ def get_document_client_factory(kwargs):
         if isinstance(ex, CLIError):
             raise ex
         # pylint:disable=line-too-long
-        raise CLIError('Failed to instantiate an Azure DocumentDB client using the provided credential ' + str(ex))
+        raise CLIError(
+            'Failed to instantiate an Azure DocumentDB client using the provided credential ' + str(
+                ex))
     _add_headers(client)
     return client
+
 
 def cf_documentdb(**_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
