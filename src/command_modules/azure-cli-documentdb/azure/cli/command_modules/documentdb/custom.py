@@ -9,7 +9,32 @@ from azure.mgmt.documentdb.models import (
     Location
 )
 from azure.mgmt.documentdb.models.document_db_enums import DatabaseAccountKind
+from azure.cli.core.util import CLIError
+import azure.cli.core.azlogging as azlogging
 
+logger = azlogging.get_az_logger(__name__)
+
+DEFAULT_INDEXING_POLICY = """{
+  "indexingMode": "consistent",
+  "automatic": true,
+  "includedPaths": [
+    {
+      "path": "/*",
+      "indexes": [
+        {
+          "kind": "Range",
+          "dataType": "String",
+          "precision": -1
+        },
+        {
+          "kind": "Range",
+          "dataType": "Number",
+          "precision": -1
+        }
+      ]
+    }
+  ]
+}"""
 
 # pylint:disable=too-many-arguments
 def cli_documentdb_create(client,
@@ -47,7 +72,7 @@ def cli_documentdb_create(client,
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
-    docdb_account = client.get(resource_group_name, account_name) # Workaround
+    docdb_account = client.get(resource_group_name, account_name)  # Workaround
     return docdb_account
 
 def cli_documentdb_update(client,
@@ -98,9 +123,8 @@ def cli_documentdb_update(client,
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
-    docdb_account = client.get(resource_group_name, account_name) # Workaround
+    docdb_account = client.get(resource_group_name, account_name)  # Workaround
     return docdb_account
-
 
 def cli_documentdb_list(client,
                         resource_group_name=None):
@@ -111,3 +135,152 @@ def cli_documentdb_list(client,
         return client.list_by_resource_group(resource_group_name)
     else:
         return client.list()
+
+######################
+# data plane APIs
+######################
+
+# database operations
+
+def _get_database_link(database_id):
+    return 'dbs/{}'.format(database_id)
+
+def _get_collection_link(database_id, collection_id):
+    return 'dbs/{}/colls/{}'.format(database_id, collection_id)
+
+def _get_offer_link(database_id, offer_id):
+    return 'dbs/{}/colls/{}'.format(database_id, offer_id)
+
+def cli_documentdb_database_exists(client, database_id):
+    """Returns a boolean indicating whether the database exists
+    """
+    # pylint:disable=line-too-long
+    return len(list(client.QueryDatabases({'query': 'SELECT * FROM root r WHERE r.id=@id',
+                                           'parameters': [{'name':'@id', 'value': database_id}]}))) > 0
+
+def cli_documentdb_database_show(client, database_id):
+    """Shows an Azure DocumentDB database
+    """
+    return client.ReadDatabase(_get_database_link(database_id))
+
+def cli_documentdb_database_list(client):
+    """Lists all Azure DocumentDB databases
+    """
+    return list(client.ReadDatabases())
+
+def cli_documentdb_database_create(client, database_id):
+    """Creates an Azure DocumentDB database
+    """
+    return client.CreateDatabase({'id': database_id})
+
+def cli_documentdb_database_delete(client, database_id):
+    """Deletes an Azure DocumentDB database
+    """
+    client.DeleteDatabase(_get_database_link(database_id))
+
+# collection operations
+
+def cli_documentdb_collection_exists(client, database_id, collection_id):
+    """Returns a boolean indicating whether the collection exists
+    """
+    # pylint:disable=line-too-long
+    return len(list(client.QueryCollections(_get_database_link(database_id),
+                                            {'query': 'SELECT * FROM root r WHERE r.id=@id',
+                                             'parameters': [{'name':'@id', 'value': collection_id}]}))) > 0
+
+def cli_documentdb_collection_show(client, database_id, collection_id):
+    """Shows an Azure DocumentDB collection and its offer
+    """
+    collection = client.ReadCollection(_get_collection_link(database_id, collection_id))
+    offer = _find_offer(client, collection['_self'])
+    return {'collection' : collection, 'offer' : offer}
+
+def cli_documentdb_collection_list(client, database_id):
+    """Lists all Azure DocumentDB collections
+    """
+    return list(client.ReadCollections(_get_database_link(database_id)))
+
+def cli_documentdb_collection_delete(client, database_id, collection_id):
+    """Deletes an Azure DocumentDB collection
+    """
+    client.DeleteCollection(_get_collection_link(database_id, collection_id))
+
+def _populate_collection_definition(collection,
+                                    partition_key_path=None,
+                                    indexing_policy=None):
+
+    changed = False
+
+    if partition_key_path:
+        if 'partitionKey' not in collection:
+            collection['partitionKey'] = {}
+        collection['partitionKey'] = {'paths' : [partition_key_path]}
+        changed = True
+
+    if indexing_policy:
+        changed = True
+        collection['indexingPolicy'] = indexing_policy
+    return changed
+
+def cli_documentdb_collection_create(client,
+                                     database_id,
+                                     collection_id,
+                                     throughput=None,
+                                     partition_key_path=None,
+                                     indexing_policy=DEFAULT_INDEXING_POLICY):
+    """Creates an Azure DocumentDB collection
+    """
+    collection = {'id': collection_id}
+
+    options = {}
+    if throughput:
+        options['offerThroughput'] = throughput
+
+    _populate_collection_definition(collection,
+                                    partition_key_path,
+                                    indexing_policy)
+
+    # pylint:disable=line-too-long
+    created_collection = client.CreateCollection(_get_database_link(database_id), collection, options)
+    offer = _find_offer(client, created_collection['_self'])
+    return {'collection': created_collection, 'offer': offer}
+
+def _find_offer(client, collection_self_link):
+    logger.debug('finding offer')
+    offers = client.ReadOffers()
+    for o in offers:
+        if o['resource'] == collection_self_link:
+            return o
+    return None
+
+def cli_documentdb_collection_update(client,
+                                     database_id,
+                                     collection_id,
+                                     throughput=None,
+                                     indexing_policy=None):
+    """Updates an Azure DocumentDB collection
+    """
+    logger.debug('reading collection')
+    collection = client.ReadCollection(_get_collection_link(database_id, collection_id))
+    result = {}
+
+    if(_populate_collection_definition(collection,
+                                       None,
+                                       indexing_policy)):
+        logger.debug('replacing collection')
+        # pylint:disable=line-too-long
+        result['collection'] = client.ReplaceCollection(_get_collection_link(database_id, collection_id), collection)
+
+    if throughput:
+        logger.debug('updating offer')
+        offer = _find_offer(client, collection['_self'])
+
+        if offer is None:
+            raise CLIError("Cannot find offer for collection {}".format(collection_id))
+
+        if 'content' not in offer:
+            offer['content'] = {}
+        offer['content']['offerThroughput'] = throughput
+
+        result['offer'] = client.ReplaceOffer(offer['_self'], offer)
+    return result
