@@ -12,6 +12,7 @@ class ProgressType(Enum):
     """ the types of progress """
     Determinate = 0
     Indeterminate = 1
+    Both = 2
 
 
 class _ProgressViewBase(object):
@@ -104,12 +105,12 @@ class ProgressHook(object):
         elif progress_type == ProgressType.Indeterminate:
             self.reporter = InDetProgressReporter()
         from azclishell.progress import ShellProgressView
-        self.registery = [_InDeterminateStandardOut, _DeterminateStandardOut, ShellProgressView]
+        self.registery = [_IndeterminateStandardOut, _DeterminateStandardOut, ShellProgressView]
         self.active_progress = []
 
     def init_progress(self, progress_view):
         """ activate a view """
-        assert all(isinstance(progress_view, view) for view in self.registery)
+        assert any(isinstance(progress_view, view) for view in self.registery)
         self.active_progress.append(progress_view)
 
     def register_view(self, progress_view):
@@ -137,10 +138,10 @@ class ProgressHook(object):
         self.add("Finished")
 
 
-class _InDeterminateStandardOut(InDeterminateProgressView):
+class _IndeterminateStandardOut(InDeterminateProgressView):
     """ custom output for progress reporting """
     def __init__(self, out=None):
-        super(_InDeterminateStandardOut, self).__init__(
+        super(_IndeterminateStandardOut, self).__init__(
             out if out else sys.stderr, self._format_value)
         self.spinner = humanfriendly.Spinner(label='In Progress')
         self.spinner.hide_cursor = False
