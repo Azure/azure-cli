@@ -5,8 +5,9 @@ Release History
 0.1.5 (unreleased)
 ++++++++++++++++++++
 * Adding Team Services (vsts) as a continuous delivery option to "appservice web source-control config"
-* Rename "appservice web" to "webapp"(will maintain "appservice web" for 2 releases before removing)
-* Integrate CI, runtime stack configurations on "webapp create"
+* Create "az webapp" to replace "az appservice web" (for backward compat, "az appservice web" will stay for 2 releases)
+* Expose arguments to configure deployment and "runtime stacks" on webapp create
+* Expose "webapp list-runtimes"
 
 0.1.4 (2017-04-28)
 ++++++++++++++++++++

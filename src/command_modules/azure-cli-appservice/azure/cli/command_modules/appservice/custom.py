@@ -1002,6 +1002,7 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
     return matched
 
 
+# help class handles runtime stack in format like 'node|6.1', 'php|5.5'
 class _StackRuntimeHelper(object):
 
     def __init__(self, client):
@@ -1058,7 +1059,7 @@ class _StackRuntimeHelper(object):
                     }
                 })
 
-        # deal with java, which pair with java container
+        # deal with java, which pairs with java container version
         java_stack = next((s for s in stacks if s['name'] == 'java'))
         java_container_stack = next((s for s in stacks if s['name'] == 'javaContainers'))
         for java_version in java_stack['properties']['majorVersions']:
