@@ -100,9 +100,12 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms
-        self.controller = ProgressHook(progress_type=ProgressType.Indeterminate)
-        from azure.cli.core.application import APPLICATION
-        self.controller.init_progress(APPLICATION.progress_view)
+        self.controller = ProgressHook(progress_type=ProgressType.Determinate)
+        # from azure.cli.core.application import APPLICATION
+        # self.controller.init_progress(APPLICATION.progress_view)
+        from azure.cli.core.commands.progress import _DeterminateStandardOut
+        self.controller.init_progress(_DeterminateStandardOut(out=sys.stdout))
+
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
@@ -112,9 +115,10 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         logger.info("Starting long running operation '%s'", self.start_msg)
         correlation_message = ''
         self.controller.begin()
-
+        percent = 0.0
         while not poller.done():
-            self.controller.add(message='Running')
+            self.controller.add(message='Running', value=percent, total_val=1)
+            percent += .05
             try:
                 # pylint: disable=protected-access
                 correlation_id = json.loads(

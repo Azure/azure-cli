@@ -23,7 +23,7 @@ class _ProgressViewBase(object):
         self.progress_type = progress_type
         self.format_percent = format_percent
 
-    def write(self, *args):
+    def write(self, args):
         """ writes the progress """
         pass
 
@@ -42,7 +42,7 @@ class DeterminateProgressView(_ProgressViewBase):
     def __init__(self, out, format_percent=None):
         super(DeterminateProgressView, self).__init__(out, ProgressType.Determinate, format_percent)
 
-    def write(self, *args):
+    def write(self, args):
         """ writes the progress """
         message = args[0]
         percent = args[1]
@@ -58,7 +58,7 @@ class InDeterminateProgressView(_ProgressViewBase):
         super(InDeterminateProgressView, self).__init__(
             out, ProgressType.Indeterminate, format_percent)
 
-    def write(self, *args):
+    def write(self, args):
         """ writes the progress """
         self.out.write(args[0] + '\n')
 
@@ -82,7 +82,7 @@ class DetProgressReporter(object):
         """ report the progress """
         percent = self.curr_val / self.total_val if self.curr_val and self.total_val else None
 
-        return (self.message, percent)
+        return self.message, percent
 
 
 class InDetProgressReporter(object):
@@ -106,6 +106,7 @@ class ProgressHook(object):
             self.reporter = DetProgressReporter()
         elif progress_type == ProgressType.Indeterminate:
             self.reporter = InDetProgressReporter()
+        self.progress_type = progress_type
         from azclishell.progress import ShellProgressView
         self.registery = [_IndeterminateStandardOut, _DeterminateStandardOut, ShellProgressView]
         self.active_progress = []
@@ -129,14 +130,21 @@ class ProgressHook(object):
         """ updates the view with the progress """
         for view in self.active_progress:
             view.write(self.reporter.report())
+            view.flush()
 
     def begin(self):
         """ start reporting progress """
-        self.add(message='Starting')
+        if self.progress_type == ProgressType.Determinate:
+            self.add(message='Starting', value=0.0, total_val=1)
+        else:
+            self.add(message='Starting')
 
     def end(self):
         """ ending reporting of progress """
-        self.add(message="Finished")
+        if self.progress_type == ProgressType.Determinate:
+            self.add(message="Finished", value=1.0, total_val=1)
+        else:
+            self.add(message='Finished')
 
 
 class _IndeterminateStandardOut(InDeterminateProgressView):
@@ -160,7 +168,7 @@ class _IndeterminateStandardOut(InDeterminateProgressView):
         message += ']  {:.4%}'.format(percent)
         return message
 
-    def write(self, *args):
+    def write(self, args):
         """ writes the progress """
         self.spinner.step()
 
@@ -186,11 +194,14 @@ class _DeterminateStandardOut(DeterminateProgressView):
         message += ']  {:.4%}'.format(percent)
         return message
 
-    def write(self, *args):
+    def write(self, args):
         """ writes the progress """
-        msg = args[0]
-        percent = args[1]
-        if percent:
-            progress = self.format_percent(percent) if callable(self.format_percent) else percent
-            self.out.write(progress + "\n")
+        args = args[0]
 
+        if 'message' in args:
+            self.out.write(args['message'])
+
+        if 'value' in args and 'total_val' in args:
+            percent = args["value"] / args['total_val']
+            progress = self.format_percent(percent) if callable(self.format_percent) else percent
+            self.out.write(progress)
