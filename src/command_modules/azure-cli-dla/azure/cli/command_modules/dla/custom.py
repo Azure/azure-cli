@@ -205,40 +205,43 @@ def list_catalog_tables(client,
 
     return client.list_tables(account_name, database_name, schema_name)
 
+
 def list_catalog_views(client,
-                        account_name,
-                        database_name,
-                        schema_name=None):
+                       account_name,
+                       database_name,
+                       schema_name=None):
     if not schema_name:
         return client.list_views_by_database(account_name, database_name)
 
     return client.list_views(account_name, database_name, schema_name)
 
+
 def list_catalog_tvfs(client,
-                        account_name,
-                        database_name,
-                        schema_name=None):
+                      account_name,
+                      database_name,
+                      schema_name=None):
     if not schema_name:
         return client.list_table_valued_functions_by_database(account_name, database_name)
 
     return client.list_table_valued_functions(account_name, database_name, schema_name)
 
+
 def list_catalog_table_statistics(client,
-                        account_name,
-                        database_name,
-                        schema_name=None,
-                        table_name=None):
-    
+                                  account_name,
+                                  database_name,
+                                  schema_name=None,
+                                  table_name=None):
     if not schema_name and table_name:
-        logger.warning('--table-name must be specified with --schema-name to be used. Defaulting to list all statistics in the database: {}'.format(database_name))
-    
+        logger.warning('--table-name must be specified with --schema-name to be used. Defaulting to list all statistics in the database: %s', database_name)
+
     if not schema_name:
         return client.list_table_statistics_by_database(account_name, database_name)
 
     if not table_name:
         return client.list_table_statistics_by_database_and_schema(account_name, database_name, schema_name)
-    
+
     return client.list_table_statistics(account_name, database_name, schema_name, table_name)
+
 
 # job customizations
 # pylint: disable=too-many-arguments
