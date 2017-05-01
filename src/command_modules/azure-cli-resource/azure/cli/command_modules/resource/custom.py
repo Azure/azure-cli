@@ -358,25 +358,32 @@ def get_resource_types_completion_list(prefix, **kwargs):  # pylint: disable=unu
     return types
 
 
-def register_provider(resource_provider_namespace):
-    _update_provider(resource_provider_namespace, registering=True)
+def register_provider(resource_provider_namespace, wait=False):
+    _update_provider(resource_provider_namespace, registering=True, wait=wait)
 
 
-def unregister_provider(resource_provider_namespace):
-    _update_provider(resource_provider_namespace, registering=False)
+def unregister_provider(resource_provider_namespace, wait=False):
+    _update_provider(resource_provider_namespace, registering=False, wait=wait)
 
 
-def _update_provider(namespace, registering):
+def _update_provider(namespace, registering, wait):
+    import time
     rcf = _resource_client_factory()
     if registering:
         rcf.providers.register(namespace)
     else:
         rcf.providers.unregister(namespace)
 
-    # timeout'd, normal for resources with many regions, but let users know.
-    action = 'Registering' if registering else 'Unregistering'
-    msg_template = '%s is still on-going. You can monitor using \'az provider show -n %s\''
-    logger.warning(msg_template, action, namespace)
+    if wait:
+        while True:
+            time.sleep(10)
+            rp_info = rcf.providers.get(namespace)
+            if rp_info.registration_state == ('Registered' if registering else 'Unregistered'):
+                break
+    else:
+        action = 'Registering' if registering else 'Unregistering'
+        msg_template = '%s is still on-going. You can monitor using \'az provider show -n %s\''
+        logger.warning(msg_template, action, namespace)
 
 
 def list_provider_operations(api_version=None):
