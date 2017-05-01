@@ -102,6 +102,32 @@ class WebappBasicE2ETest(ResourceGroupVCRTestBase):
         ])
 
 
+class WebappQuickCreateTest(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    def test_win_webapp_quick_create(self, resource_group, resource_group_location):
+        webapp_name = 'webapp-quick'
+        plan = 'plan-quick'
+        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        r = self.cmd('appservice web create -g {} -n {} --plan {} --deployment-local-git -r "node|6.1"'.format(resource_group, webapp_name, plan)).get_output_in_json()
+        self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
+        self.cmd('appservice web config appsettings show -g {} -n {}'.format(resource_group, webapp_name, checks=[
+            JMESPathCheckV2('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
+            JMESPathCheckV2('[0].value', '6.1.0'),
+        ]))
+
+    @ResourceGroupPreparer(location='westus')
+    def test_linux_webapp_quick_create(self, resource_group, resource_group_location):
+        webapp_name = 'webapp-quick-linux'
+        plan = 'plan-quick-linux'
+        self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
+        self.cmd('appservice web create -g {} -n {} --plan {} -i naziml/ruby-hello'.format(resource_group, webapp_name, plan))
+        import requests
+        r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
+        # verify the web page
+        self.assertTrue('Ruby on Rails in Web Apps on Linux' in str(r.content))
+
+
 class WebappConfigureTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):

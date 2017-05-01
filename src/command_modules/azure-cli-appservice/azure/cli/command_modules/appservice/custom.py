@@ -15,7 +15,7 @@ import OpenSSL.crypto
 
 from msrestazure.azure_exceptions import CloudError
 
-from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan,
+from azure.mgmt.web.models import (Site, SiteConfig, SiteConfigResource, User, AppServicePlan,
                                    SkuDescription, SslState, HostNameBinding,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState)
@@ -27,26 +27,80 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.prompting import prompt_pass, NoTTYException
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
-from ._params import web_client_factory, _generic_site_operation
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
+from ._params import _generic_site_operation
+from ._client_factory import web_client_factory, ex_handler_factory
+
 
 logger = azlogging.get_az_logger(__name__)
 
-
 # pylint:disable=no-member,superfluous-parens
 
-def create_webapp(resource_group_name, name, plan):
+
+def create_webapp(resource_group_name, name, plan, runtime=None,
+                  startup_file=None, deployment_container_image_name=None,
+                  deployment_source_url=None, deployment_source_branch='master',
+                  deployment_local_git=None):
+    if deployment_source_url and deployment_local_git:
+        raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
+
     client = web_client_factory()
     if is_valid_resource_id(plan):
         plan = parse_resource_id(plan)['name']
-    location = _get_location_from_app_service_plan(client, resource_group_name, plan)
+    plan_info = client.app_service_plans.get(resource_group_name, plan)
+    is_linux = plan_info.reserved
+    location = plan_info.location
     webapp_def = Site(server_farm_id=plan, location=location)
-    return client.web_apps.create_or_update(resource_group_name, name, webapp_def)
+    poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
+    webapp = LongRunningOperation()(poller)
+
+    if is_linux:
+        if runtime and deployment_container_image_name:
+            raise CLIError('usage error: --runtime | --deployment-container-image-name')
+        if startup_file or runtime:
+            update_site_configs(resource_group_name, name, app_command_line=startup_file,
+                                linux_fx_version=runtime)
+        if deployment_container_image_name:
+            update_container_settings(resource_group_name, name,
+                                      docker_custom_image_name=deployment_container_image_name)
+    elif runtime:  # windows webapp
+        if startup_file or deployment_container_image_name:
+            raise CLIError("usage error: --startup-file or --deployment-container-image-name is "
+                           "only appliable on linux webapp")
+        helper = _StackRuntimeHelper(client)
+        match = helper.resolve(runtime)
+        if not match:
+            raise CLIError("Runtime '{}' is not supported. Please invoke 'list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
+
+        match['setter'](match, resource_group_name, name)
+
+    if deployment_local_git and deployment_source_url:
+        raise CLIError('usage error: --deployment-local-git | --deployment-source-url')
+
+    if deployment_source_url:
+        logger.warning("Linking to git repository '%s'", deployment_source_url)
+        try:
+            poller = config_source_control(resource_group_name, name, deployment_source_url, 'git',
+                                           deployment_source_branch, manual_integration=True)
+            LongRunningOperation()(poller)
+        except Exception as ex:  # pylint: disable=broad-except
+            ex = ex_handler_factory(no_throw=True)(ex)
+            logger.warning("Link to git repository failed due to error '%s'", ex)
+
+    if deployment_local_git:
+        local_git_info = enable_local_git(resource_group_name, name)
+        logger.warning("Local git is configured with url of '%s'", local_git_info['url'])
+        setattr(webapp, 'deploymentLocalGitUrl', local_git_info['url'])
+
+    _fill_ftp_publishing_url(webapp, resource_group_name, name)
+    return webapp
 
 
 def show_webapp(resource_group_name, name, slot=None):
     webapp = _generic_site_operation(resource_group_name, name, 'get', slot)
-    return _rename_server_farm_props(webapp)
+    webapp = _rename_server_farm_props(webapp)
+    _fill_ftp_publishing_url(webapp, resource_group_name, name, slot)
+    return webapp
 
 
 def list_webapp(resource_group_name=None):
@@ -58,6 +112,19 @@ def list_webapp(resource_group_name=None):
     for webapp in result:
         _rename_server_farm_props(webapp)
     return result
+
+
+def list_runtimes(linux=False):
+    client = web_client_factory()
+    if linux:
+        # workaround before API is exposed
+        logger.warning('You are viewing an offline list of runtimes. For up to date list, '
+                       'check out https://aka.ms/linux-stacks')
+        return ['node|6.4', 'node|4.5', 'node|6.2', 'node|6.6', 'node|6.9',
+                'php|5.6', 'php|7.0', 'dotnetcore|1.0', 'dotnetcore|1.1', 'ruby|2.3']
+    else:
+        runtime_helper = _StackRuntimeHelper(client)
+        return [s['displayName'] for s in runtime_helper.stacks]
 
 
 def _rename_server_farm_props(webapp):
@@ -94,6 +161,13 @@ def get_app_settings(resource_group_name, name, slot=None):
     result = [{'name': p, 'value': result.properties[p],
                'slotSetting': str(p in (slot_cfg_names.app_setting_names or []))} for p in result.properties]  # pylint: disable=line-too-long
     return result
+
+
+def _fill_ftp_publishing_url(webapp, resource_group_name, name, slot=None):
+    profiles = list_publish_profiles(resource_group_name, name, slot)
+    url = next(p['publishUrl'] for p in profiles if p['publishMethod'] == 'FTP')
+    setattr(webapp, 'ftpPublishingUrl', url)
+    return webapp
 
 
 def _add_linux_fx_version(resource_group_name, name, custom_image_name):
@@ -268,7 +342,7 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
     clone_from_prod = None
-    slot_def.site_config = SiteConfig(location)
+    slot_def.site_config = SiteConfig()
 
     poller = client.web_apps.create_or_update_slot(resource_group_name, webapp, slot_def, slot)
     result = LongRunningOperation()(poller)
@@ -354,7 +428,7 @@ def delete_source_control(resource_group_name, name, slot=None):
 def enable_local_git(resource_group_name, name, slot=None):
     client = web_client_factory()
     location = _get_location_from_webapp(client, resource_group_name, name)
-    site_config = SiteConfig(location)
+    site_config = SiteConfigResource(location)
     site_config.scm_type = 'LocalGit'
     if slot is None:
         client.web_apps.create_or_update_configuration(resource_group_name, name, site_config)
@@ -605,11 +679,6 @@ def _get_location_from_resource_group(resource_group_name):
 def _get_location_from_webapp(client, resource_group_name, webapp):
     webapp = client.web_apps.get(resource_group_name, webapp)
     return webapp.location
-
-
-def _get_location_from_app_service_plan(client, resource_group_name, plan):
-    plan = client.app_service_plans.get(resource_group_name, plan)
-    return plan.location
 
 
 def _get_local_git_url(client, resource_group_name, name, slot=None):
@@ -931,3 +1000,83 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
         elif hostname in hostnames_in_webapp:
             matched.add(hostname)
     return matched
+
+
+# help class handles runtime stack in format like 'node|6.1', 'php|5.5'
+class _StackRuntimeHelper(object):
+
+    def __init__(self, client):
+        self._client = client
+        self._stacks = []
+
+    def resolve(self, display_name):
+        self._load_stacks()
+        return next((s for s in self._stacks if s['displayName'].lower() == display_name.lower()),
+                    None)
+
+    @property
+    def stacks(self):
+        self._load_stacks()
+        return self._stacks
+
+    @staticmethod
+    def update_site_config(stack, resource_group_name, webapp_name):
+        configs = get_site_configs(resource_group_name, webapp_name, None)
+        for k, v in stack['configs'].items():
+            setattr(configs, k, v)
+        _generic_site_operation(resource_group_name, webapp_name,
+                                'update_configuration', None, configs)
+
+    @staticmethod
+    def update_site_appsettings(stack, resource_group_name, webapp_name):
+        settings = ['{}={}'.format(k, v) for k, v in stack['configs'].items()]
+        update_app_settings(resource_group_name, webapp_name, settings=settings)
+
+    def _load_stacks(self):
+        if self._stacks:
+            return
+        raw_list = self._client.provider.get_available_stacks()
+        stacks = raw_list['value']
+        config_mappings = {
+            'node': 'WEBSITE_NODE_DEFAULT_VERSION',
+            'python': 'python_version',
+            'php': 'php_version',
+            'aspnet': 'net_framework_version'
+        }
+
+        result = []
+        # get all stack version except 'java'
+        for name, properties in [(s['name'], s['properties']) for s in stacks
+                                 if s['name'] in config_mappings]:
+            for major in properties['majorVersions']:
+                default_minor = next((m for m in (major['minorVersions'] or []) if m['isDefault']),
+                                     None)
+                result.append({
+                    'displayName': name + '|' + major['displayVersion'],
+                    'configs': {
+                        config_mappings[name]: (default_minor['runtimeVersion']
+                                                if default_minor else major['runtimeVersion'])
+                    }
+                })
+
+        # deal with java, which pairs with java container version
+        java_stack = next((s for s in stacks if s['name'] == 'java'))
+        java_container_stack = next((s for s in stacks if s['name'] == 'javaContainers'))
+        for java_version in java_stack['properties']['majorVersions']:
+            for fx in java_container_stack['properties']['frameworks']:
+                for fx_version in fx['majorVersions']:
+                    result.append({
+                        'displayName': 'java|{}|{}|{}'.format(java_version['displayVersion'],
+                                                              fx['display'],
+                                                              fx_version['displayVersion']),
+                        'configs': {
+                            'java_version': java_version['runtimeVersion'],
+                            'java_container': fx['name'],
+                            'java_container_version': fx_version['runtimeVersion']
+                        }
+                    })
+
+        for r in result:
+            r['setter'] = (_StackRuntimeHelper.update_site_appsettings if 'node' in
+                           r['displayName'] else _StackRuntimeHelper.update_site_config)
+        self._stacks = result
