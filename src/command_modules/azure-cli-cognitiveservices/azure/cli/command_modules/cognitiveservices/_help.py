@@ -13,11 +13,6 @@ helps['cognitiveservices list'] = """
           text: az cognitiveservices list -g MyResourceGroup
 """
 
-#helps['cognitiveservices checkskuavailability'] = """
-#    type: command
-#    short-summary: check the available skus
-#"""
-
 helps['cognitiveservices account'] = """
     type: group
     short-summary: Manage and update cognitive services accounts

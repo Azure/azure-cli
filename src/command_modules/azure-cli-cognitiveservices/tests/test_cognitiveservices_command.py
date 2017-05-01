@@ -12,7 +12,7 @@ from azure.cli.core.util import CLIError
 class CognitiveServicesTests(ScenarioTest):
     @ResourceGroupPreparer()
         
-    def test_CRUDOperations_cognitiveservices(self, resource_group):
+    def test_cognitiveservices_crud(self, resource_group):
         sname = self.create_random_name(prefix='cog', length=12)
         resource_location = 'westeurope'
 
