@@ -603,7 +603,8 @@ class Shell(object):
     def run(self):
         """ starts the REPL """
         telemetry.start()
-
+        from azclishell.progress import ShellProgressView
+        self.app.progress_view = ShellProgressView()
         from azclishell.configuration import SHELL_HELP
         self.cli.buffers['symbols'].reset(
             initial_document=Document(u'{}'.format(SHELL_HELP)))

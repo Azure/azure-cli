@@ -44,7 +44,7 @@ class DeterminateProgressView(_ProgressViewBase):
 
     def write(self, *args):
         """ writes the progress """
-        msg = args[0]
+        message = args[0]
         percent = args[1]
         if percent:
             progress = self.format_percent(percent) if callable(self.format_percent) else percent

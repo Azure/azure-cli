@@ -21,15 +21,14 @@ HEART_BEAT = ''
 class ShellProgressView(_ProgressViewBase):
     """ custom output for progress reporting """
     def __init__(self):
-        super(ShellProgressView).__init__(self, None, ProgressType.Both, None)
+        super(ShellProgressView, self).__init__(None, ProgressType.Both, None)
 
     def write(self, *args):
         """ writes the progres """
         global PROGRESS, PROGRESS_BAR
         message = args[0]
-        percent = args[1]
-        if percent:
-            PROGRESS_BAR = self._format_value(message, percent)
+        if len(args) > 1:
+            PROGRESS_BAR = self._format_value(message, args[1])
         PROGRESS = message
 
     def _format_value(self, msg, percent):
