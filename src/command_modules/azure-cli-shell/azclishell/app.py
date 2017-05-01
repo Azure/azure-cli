@@ -432,12 +432,14 @@ class Shell(object):
 
         if cmd.strip() == "quit" or cmd.strip() == "exit":
             break_flag = True
-        elif text.strip() == "clear":  # clears the history, but only when you restart
+        elif text.strip() == "clear-history":  # clears the history, but only when you restart
             outside = True
             cmd = 'echo -n "" >' +\
                 os.path.join(
                     SHELL_CONFIG_DIR(),
                     SHELL_CONFIGURATION.get_history())
+        elif text.strip() == 'clear':
+            outside = True
         if '--version' in text:
             try:
                 continue_flag = True
