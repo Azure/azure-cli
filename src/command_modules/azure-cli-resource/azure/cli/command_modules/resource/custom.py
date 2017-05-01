@@ -37,6 +37,7 @@ from ._client_factory import (_resource_client_factory,
                               _resource_policy_client_factory,
                               _resource_lock_client_factory,
                               _resource_links_client_factory,
+                              _authorization_management_client,
                               _resource_appliances_client_factory)
 
 logger = azlogging.get_az_logger(__name__)
