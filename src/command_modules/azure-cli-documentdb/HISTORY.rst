@@ -3,6 +3,12 @@
 Release History
 ===============
 
+0.1.5 (unreleased)
+++++++++++++++++++
+
+* Added support for documentdb data-plane APIs:
+  database and collection management
+
 0.1.4 (2017-04-28)
 ++++++++++++++++++
 
