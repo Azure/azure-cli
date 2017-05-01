@@ -44,6 +44,23 @@ class Configuration(object):  # pylint: disable=too-few-public-methods
         matches = Configuration.find_matches(argv, command_tree)
         return dict(matches)
 
+    # raise customized exceptions on removed commands if the command module like
+    @staticmethod
+    def err_on_removed_command(argv):
+        import azure.cli.core.commands as commands
+        removed = commands.removed_commands
+        cmd_parts = []
+        for v in argv:
+            if v.startswith('-'):
+                break
+            else:
+                cmd_parts.append(v)
+        if cmd_parts:
+            for i in removed:
+                t = i.split(' ')
+                if cmd_parts[:len(t)] == t:
+                    raise CLIError(removed[i])
+
     def load_params(self, command):  # pylint: disable=no-self-use
         import azure.cli.core.commands as commands
         commands.load_params(command)
@@ -133,6 +150,7 @@ class Application(object):
     def execute(self, unexpanded_argv):  # pylint: disable=too-many-statements
         argv = Application._expand_file_prefixed_files(unexpanded_argv)
         command_table = self.configuration.get_command_table(argv)
+        Configuration.err_on_removed_command(argv)
         self.raise_event(self.COMMAND_TABLE_LOADED, command_table=command_table)
         self.parser.load_command_table(command_table)
         self.raise_event(self.COMMAND_PARSER_LOADED, parser=self.parser)
