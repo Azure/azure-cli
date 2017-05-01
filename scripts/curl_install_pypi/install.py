@@ -312,6 +312,7 @@ def verify_native_dependencies():
         # There's no distribution name so can't determine native dependencies required / or they may not be needed like on OS X
         return
     print_status('Verifying native dependencies.')
+    is_python3 = sys.version_info[0] == 3
     distname = distname.lower().strip()
     verify_cmd_args = None
     install_cmd_args = None
@@ -319,18 +320,22 @@ def verify_native_dependencies():
     if any(x in distname for x in ['ubuntu', 'debian']):
         verify_cmd_args = ['dpkg', '-s']
         install_cmd_args = ['apt-get', 'update', '&&', 'apt-get', 'install', '-y']
+        python_dep = 'python3-dev' if is_python3 else 'python-dev'
         if distname == 'ubuntu' and version in ['12.04', '14.04'] or distname == 'debian' and version.startswith('7'):
-            dep_list = ['libssl-dev', 'libffi-dev', 'python-dev']
+            dep_list = ['libssl-dev', 'libffi-dev', python_dep]
         elif distname == 'ubuntu' and version in ['15.10', '16.04']or distname == 'debian' and version.startswith('8'):
-            dep_list = ['libssl-dev', 'libffi-dev', 'python-dev', 'build-essential']
+            dep_list = ['libssl-dev', 'libffi-dev', python_dep, 'build-essential']
     elif any(x in distname for x in ['centos', 'rhel', 'red hat']):
         verify_cmd_args = ['rpm', '-q']
         install_cmd_args = ['yum', 'check-update', ';', 'yum', 'install', '-y']
-        dep_list = ['gcc', 'libffi-devel', 'python-devel', 'openssl-devel']
+        # python3-devel not available on yum but python3Xu-devel versions available.
+        python_dep = 'python3{}u-devel'.format(sys.version_info[1]) if is_python3 else 'python-devel'
+        dep_list = ['gcc', 'libffi-devel', python_dep, 'openssl-devel']
     elif any(x in distname for x in ['opensuse', 'suse']):
         verify_cmd_args = ['rpm', '-q']
         install_cmd_args = ['zypper', 'refresh', '&&', 'zypper', '--non-interactive', 'install']
-        dep_list = ['gcc', 'libffi-devel', 'python-devel', 'openssl-devel']
+        python_dep = 'python3-devel' if is_python3 else 'python-devel'
+        dep_list = ['gcc', 'libffi-devel', python_dep, 'openssl-devel']
     if verify_cmd_args and install_cmd_args and dep_list:
         _native_dependencies_for_dist(verify_cmd_args, install_cmd_args, dep_list)
     else:
