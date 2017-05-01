@@ -2,8 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
-# pylint: disable=line-too-long
 import os
 import platform
 from azure.mgmt.cognitiveservices.models import SkuName
@@ -26,8 +24,3 @@ register_cli_argument('cognitiveservices', 'kind', help='the API name of cogniti
 register_cli_argument('cognitiveservices', 'tags', tags_type)
 register_cli_argument('cognitiveservices', 'key_name', required=True, help='Key name to generate', choices=['key1', 'key2'])
 register_cli_argument('cognitiveservices account create', 'yes', action='store_true', help='Do not prompt for terms confirmation')
-
-
-
-
-

@@ -33,8 +33,8 @@ helps['cognitiveservices account create'] = """
     type: command
     short-summary: Create a cognitive services account.
     examples:
-        - name: create a S0 face Api cognitive services accounts in West Europe without confirmation required
-          text: az cognitiveservices create -n myresource -g myResrouceGroup --Kind Face --Sku S0 -l WestEurope --yes
+        - name: create a S0 face Api cognitive services account in West Europe without confirmation required
+          text: az cognitiveservices create -n myresource -g myResourceGroup --kind Face --sku S0 -l WestEurope --yes
 """
 
 helps['cognitiveservices account show'] = """

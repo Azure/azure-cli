@@ -2,12 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
-#pylint: disable=method-hidden
-#pylint: disable=line-too-long
-#pylint: disable=bad-continuation
-#from _future_ import print_function
-
 import os
 import time
 import unittest
@@ -18,7 +12,7 @@ from azure.cli.core.util import CLIError
 class CognitiveServicesTests(ScenarioTest):
     @ResourceGroupPreparer()
         
-    def test_cognitiveservices(self, resource_group):
+    def test_CRUDOperations_cognitiveservices(self, resource_group):
         sname = self.create_random_name(prefix='cog', length=12)
         resource_location = 'westeurope'
 

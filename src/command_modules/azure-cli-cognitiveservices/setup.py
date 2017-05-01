@@ -7,6 +7,13 @@
 from codecs import open
 from setuptools import setup
 
+try: 
+     from azure_bdist_wheel import cmdclass 
+except ImportError: 
+     from distutils import log as logger 
+     logger.warn("Wheel is not available, disabling bdist_wheel hook") 
+     cmdclass = {} 
+
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = [
@@ -30,7 +37,7 @@ with open('README.rst', 'r', encoding='utf-8') as f:
 
 setup(
     name='azure-cli-cognitiveservices',
-    version='1.0.0',
+    version='0.1.0',
     description='Microsoft Azure Command-Line Tools Cognitive Services Command Module',
     long_description=README,
     license='MIT',
@@ -38,13 +45,12 @@ setup(
     author_email='azpycli@microsoft.com',
     url='https://github.com/azure/azure-cli',
     classifiers=CLASSIFIERS,
-    namespace_packages = [
+    packages=[
         'azure',
         'azure.cli',
         'azure.cli.command_modules',
-    ],
-    packages=[
         'azure.cli.command_modules.cognitiveservices',
     ],
     install_requires=DEPENDENCIES,
+    cmdclass=cmdclass
 )
