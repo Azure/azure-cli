@@ -19,7 +19,6 @@ import subprocess
 import sys
 import threading
 import time
-import uuid
 import webbrowser
 import yaml
 import dateutil.parser
@@ -314,13 +313,13 @@ def _build_service_principal(client, name, url, client_secret):
     service_principal = result.app_id  # pylint: disable=no-member
     for x in range(0, 10):
         try:
-            _create_service_principal(client, service_principal)
+            create_service_principal(service_principal, client=client)
             break
         # TODO figure out what exception AAD throws here sometimes.
-        except Exception as ex:  # pylint: disable=bare-except
-            print(ex)
+        except Exception as ex:  # pylint: disable=broad-except
             sys.stdout.write('.')
             sys.stdout.flush()
+            logger.info(ex)
             time.sleep(2 + 2 * x)
     print('done')
     return service_principal
@@ -915,12 +914,10 @@ def _build_application_creds(password=None, key_value=None, key_type=None,
     return (password_creds, key_creds)
 
 
-def create_service_principal(identifier):
-    client = _graph_client_factory()
-    return _create_service_principal(client, identifier)
+def create_service_principal(identifier, resolve_app=True, client=None):
+    if client is None:
+        client = _graph_client_factory()
 
-
-def _create_service_principal(client, identifier, resolve_app=True):
     if resolve_app:
         try:
             uuid.UUID(identifier)

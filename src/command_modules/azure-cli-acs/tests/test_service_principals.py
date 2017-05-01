@@ -9,11 +9,11 @@ import unittest
 import mock
 
 from azure.cli.core.util import CLIError
-from azure.cli.command_modules.acs.custom import _validate_service_principal, \
-    load_acs_service_principal, store_acs_service_principal, \
-    _build_service_principal
-
-from azure.graphrbac.models import ApplicationCreateParameters
+from azure.cli.command_modules.acs.custom import (
+    _validate_service_principal,
+    load_acs_service_principal,
+    store_acs_service_principal,
+    _build_service_principal)
 
 
 class AcsServicePrincipalTest(unittest.TestCase):
@@ -72,7 +72,6 @@ class AcsServicePrincipalTest(unittest.TestCase):
 
         os.remove(store_file.name)
 
-
     def test_validate_service_principal_ok(self):
         client = mock.MagicMock()
         client.service_principals = mock.Mock()
@@ -117,12 +116,9 @@ class AcsServicePrincipalTest(unittest.TestCase):
                 filter="appId eq '{}'".format(app_id))
         ]
         client.applications.list.assert_has_calls(expected_calls)
+        # TODO better matcher here
+        client.applications.create.assert_called_with(mock.ANY)
 
-        expected_calls = [
-            mock.call(ApplicationCreateParameters(False, name, [url],
-                                homepage=url,
-                                reply_urls=None,
-                                key_credentials=None,
-                                password_credentials=None))
-        ]
-        client.applications.create.assert_has_calls(expected_calls)
+
+if __name__ == '__main__':
+    unittest.main()
