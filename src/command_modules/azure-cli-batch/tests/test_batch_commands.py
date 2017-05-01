@@ -460,7 +460,7 @@ class TestBatchLoader(unittest.TestCase):
             'batch_tests_job',
             'azure.batch.operations.job_operations#JobOperations.add',
             get_client, None, 3,
-            ['job.job_manager_task', 'job.job_preparation_task', \
+            ['job.job_manager_task', 'job.job_preparation_task',
              'job.job_release_task'], None, None)
         self.command_task = _command_type.AzureBatchDataPlaneCommand(
             'batch_unit_tests',
@@ -656,7 +656,7 @@ class TestBatchLoader(unittest.TestCase):
             error = models.BatchError()
             error.code = 'InvalidHeaderValue'
             error.message = models.ErrorMessage('en-US', 'The value for one of the HTTP '
-                                                'headers is not in the correct format')
+                                                         'headers is not in the correct format')
             error.values = [
                 models.BatchErrorDetail('HeaderName', 'Content-Type'),
                 models.BatchErrorDetail('HeaderValue', 'application/json')
