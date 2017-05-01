@@ -22,7 +22,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.application import APPLICATION
 from azure.cli.core.prompting import prompt_y_n, NoTTYException
 from azure.cli.core._config import az_config, DEFAULTS_SECTION
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, supported_api_version
 from azure.cli.core.profiles._shared import get_versioned_sdk_path
 
 from ._introspection import (extract_args_from_signature,
@@ -36,6 +36,35 @@ logger = azlogging.get_az_logger(__name__)
 CONFIRM_PARAM_NAME = 'yes'
 
 BLACKLISTED_MODS = ['context']
+
+
+class VersionConstraint(object):
+    def __init__(self, resource_type, min_api=None, max_api=None):
+        self._type = resource_type
+        self._min_api = min_api
+        self._max_api = max_api
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+    def register_cli_argument(self, *args, **kwargs):
+        if supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api):
+            register_cli_argument(*args, **kwargs)
+        else:
+            from azure.cli.core.commands.parameters import ignore_type
+            kwargs = {'arg_type': ignore_type}
+            register_cli_argument(*args, **kwargs)
+
+    def register_extra_cli_argument(self, *args, **kwargs):
+        if supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api):
+            register_extra_cli_argument(*args, **kwargs)
+
+    def cli_command(self, *args, **kwargs):
+        if supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api):
+            cli_command(*args, **kwargs)
 
 
 class CliArgumentType(object):

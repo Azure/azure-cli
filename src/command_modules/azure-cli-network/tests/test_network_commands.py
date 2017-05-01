@@ -13,8 +13,10 @@ import unittest
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands.arm import resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.profiles import supported_api_version, ResourceType
 from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
-                                           NoneCheck, MOCKED_SUBSCRIPTION_ID)
+                                                     NoneCheck, MOCKED_SUBSCRIPTION_ID)
+from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -122,12 +124,14 @@ class NetworkAppGatewayNoWaitScenarioTest(ResourceGroupVCRTestBase):
 
     def body(self):
         rg = self.resource_group
-        self.cmd('network application-gateway create -g {} -n ag1 --no-wait'.format(rg), checks=NoneCheck())
+        self.cmd('network application-gateway create -g {} -n ag1 --no-wait --connection-draining-timeout 180'.format(rg), checks=NoneCheck())
         self.cmd('network application-gateway create -g {} -n ag2 --no-wait'.format(rg), checks=NoneCheck())
         self.cmd('network application-gateway wait -g {} -n ag1 --created --interval 120'.format(rg), checks=NoneCheck())
         self.cmd('network application-gateway wait -g {} -n ag2 --created --interval 120'.format(rg), checks=NoneCheck())
         self.cmd('network application-gateway show -g {} -n ag1'.format(rg), checks=[
-            JMESPathCheck('provisioningState', 'Succeeded')
+            JMESPathCheck('provisioningState', 'Succeeded'),
+            JMESPathCheck('backendHttpSettingsCollection[0].connectionDraining.enabled', True),
+            JMESPathCheck('backendHttpSettingsCollection[0].connectionDraining.drainTimeoutInSec', 180),
             ])
         self.cmd('network application-gateway show -g {} -n ag2'.format(rg), checks=[
             JMESPathCheck('provisioningState', 'Succeeded')
@@ -180,36 +184,59 @@ class NetworkAppGatewayPublicIpScenarioTest(ResourceGroupVCRTestBase):
             JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic')
         ])
 
-class NetworkAppGatewayWafScenarioTest(ResourceGroupVCRTestBase):
 
-    def __init__(self, test_method):
-        super(NetworkAppGatewayWafScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_ag_waf')
+if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-03-01'):
 
-    def test_network_app_gateway_waf(self):
-        self.execute()
+    class NetworkAppGatewayWafConfigScenarioTest(ScenarioTest):
 
-    def body(self):
-        rg = self.resource_group
-        public_ip_name = 'pip1'
-        self.cmd('network application-gateway create -g {} -n ag1 --subnet subnet1 --vnet-name vnet4 --public-ip-address {} --sku WAF_Medium'.format(rg, public_ip_name), checks=[
-            JMESPathCheck("applicationGateway.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{}')".format(public_ip_name), True),
-            JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic')
-        ])
-        self.cmd('network application-gateway waf-config set -g {} --gateway-name ag1 --enabled true --firewall-mode detection --no-wait'.format(rg))
-        self.cmd('network application-gateway waf-config show -g {} --gateway-name ag1'.format(rg), checks=[
-            JMESPathCheck('enabled', True),
-            JMESPathCheck('firewallMode', 'Detection')
-        ])
-        self.cmd('network application-gateway waf-config set -g {} --gateway-name ag1 --enabled true --firewall-mode prevention --no-wait'.format(rg))
-        self.cmd('network application-gateway waf-config show -g {} --gateway-name ag1'.format(rg), checks=[
-            JMESPathCheck('enabled', True),
-            JMESPathCheck('firewallMode', 'Prevention')
-        ])
-        self.cmd('network application-gateway waf-config set -g {} --gateway-name ag1 --enabled false --no-wait'.format(rg))
-        self.cmd('network application-gateway waf-config show -g {} --gateway-name ag1'.format(rg), checks=[
-            JMESPathCheck('enabled', False),
-            JMESPathCheck('firewallMode', 'Detection')
-        ])
+        @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_config')
+        def test_network_app_gateway_waf_config(self, resource_group):
+            rg = resource_group
+            public_ip_name = 'pip1'
+            self.cmd('network application-gateway create -g {} -n ag1 --subnet subnet1 --vnet-name vnet1 --public-ip-address {} --sku WAF_Medium'.format(rg, public_ip_name), checks=[
+                JMESPathCheckV2("applicationGateway.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{}')".format(public_ip_name), True),
+                JMESPathCheckV2('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic')
+            ])
+            self.cmd('network application-gateway waf-config set -g {} --gateway-name ag1 --enabled true --firewall-mode prevention --rule-set-version 2.2.9 --disabled-rule-groups crs_30_http_policy --disabled-rules 981175 981176 --no-wait'.format(rg))
+            self.cmd('network application-gateway waf-config show -g {} --gateway-name ag1'.format(rg), checks=[
+                JMESPathCheckV2('enabled', True),
+                JMESPathCheckV2('firewallMode', 'Prevention'),
+                JMESPathCheckV2('length(disabledRuleGroups)', 2),
+                JMESPathCheckV2('length(disabledRuleGroups[1].rules)', 2)
+            ])
+else:
+
+    class NetworkAppGatewayWafScenarioTest(ResourceGroupVCRTestBase):
+
+        def __init__(self, test_method):
+            super(NetworkAppGatewayWafScenarioTest, self).__init__(__file__, test_method, resource_group='cli_test_ag_waf')
+
+        def test_network_app_gateway_waf(self):
+            self.execute()
+
+        def body(self):
+            rg = self.resource_group
+            public_ip_name = 'pip1'
+            self.cmd('network application-gateway create -g {} -n ag1 --subnet subnet1 --vnet-name vnet4 --public-ip-address {} --sku WAF_Medium'.format(rg, public_ip_name), checks=[
+                JMESPathCheck("applicationGateway.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{}')".format(public_ip_name), True),
+                JMESPathCheck('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic')
+            ])
+            self.cmd('network application-gateway waf-config set -g {} --gateway-name ag1 --enabled true --firewall-mode detection --no-wait'.format(rg))
+            self.cmd('network application-gateway waf-config show -g {} --gateway-name ag1'.format(rg), checks=[
+                JMESPathCheck('enabled', True),
+                JMESPathCheck('firewallMode', 'Detection')
+            ])
+            self.cmd('network application-gateway waf-config set -g {} --gateway-name ag1 --enabled true --firewall-mode prevention --no-wait'.format(rg))
+            self.cmd('network application-gateway waf-config show -g {} --gateway-name ag1'.format(rg), checks=[
+                JMESPathCheck('enabled', True),
+                JMESPathCheck('firewallMode', 'Prevention')
+            ])
+            self.cmd('network application-gateway waf-config set -g {} --gateway-name ag1 --enabled false --no-wait'.format(rg))
+            self.cmd('network application-gateway waf-config show -g {} --gateway-name ag1'.format(rg), checks=[
+                JMESPathCheck('enabled', False),
+                JMESPathCheck('firewallMode', 'Detection')
+            ])
+
 
 class NetworkPublicIpScenarioTest(ResourceGroupVCRTestBase):
 
