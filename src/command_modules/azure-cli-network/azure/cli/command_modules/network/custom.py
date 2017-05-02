@@ -2461,6 +2461,18 @@ def configure_network_watcher(client, locations, resource_group_name=None, enabl
 
     return client.list_all()
 
+
+def check_nw_connectivity(client, watcher_rg, watcher_name, source_resource, source_port=None,
+                          dest_resource=None, dest_port=None, dest_address=None,
+                          resource_group_name=None):
+    ConnectivitySource, ConnectivityDestination = \
+        get_sdk(ResourceType.MGMT_NETWORK, 'ConnectivitySource', 'ConnectivityDestination',
+                mod='models')
+    source = ConnectivitySource(source_resource, source_port)
+    dest = ConnectivityDestination(dest_resource, dest_address, dest_port)
+    return client.check_connectivity(watcher_rg, watcher_name, source, dest)
+
+
 def check_nw_ip_flow(client, vm, watcher_rg, watcher_name, direction, protocol, local, remote,
                      resource_group_name=None, nic=None, location=None):
     VerificationIPFlowParameters = \

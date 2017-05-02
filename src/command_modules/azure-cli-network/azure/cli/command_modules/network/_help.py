@@ -2015,6 +2015,25 @@ helps['network watcher test-ip-flow'] = """
           short-summary: Protocol to test.
 """
 
+helps['network watcher test-connectivity'] = """
+    type: command
+    short-summary: Test whether a direct TCP connection can be established between a Virtual
+        Machine and a given endpoint, such as another VM or an arbitrary remote server.
+    parameters:
+        - name: --source-resource
+          short-summary: Name or ID of the resource from which to originate traffic.
+          long-summary: Currently only Virtual Machines are supported.
+        - name: --source-port
+          short-summary: Port number from which to originate traffic.
+        - name: --dest-resource
+          short-summary: Name or ID of the resource to receive traffic.
+          long-summary: Currently only Virtual Machines are supported.
+        - name: --dest-port
+          short-summary: Port number on which to receive traffic.
+        - name: --dest-address
+          short-summary: The IP address or URI at which to receive traffic.
+"""
+
 helps['network watcher show-next-hop'] = """
     type: command
     short-summary: Show information on the 'next hop' for a VM.
