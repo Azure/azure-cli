@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=too-few-public-methods,no-self-use,too-many-arguments
+# pylint: disable=too-many-lines
 
 from __future__ import print_function
 import json
@@ -40,10 +40,11 @@ from ._client_factory import (_resource_client_factory,
 
 logger = azlogging.get_az_logger(__name__)
 
-def list_resource_groups(tag=None): # pylint: disable=no-self-use
-    ''' List resource groups, optionally filtered by a tag.
+
+def list_resource_groups(tag=None):  # pylint: disable=no-self-use
+    """ List resource groups, optionally filtered by a tag.
     :param str tag:tag to filter by in 'key[=value]' format
-    '''
+    """
     rcf = _resource_client_factory()
 
     filters = []
@@ -57,12 +58,13 @@ def list_resource_groups(tag=None): # pylint: disable=no-self-use
     groups = rcf.resource_groups.list(filter=filter_text)
     return list(groups)
 
+
 def create_resource_group(rg_name, location, tags=None):
-    ''' Create a new resource group.
+    """ Create a new resource group.
     :param str resource_group_name:the desired resource group name
     :param str location:the resource group location
     :param str tags:tags in 'a=b c' format
-    '''
+    """
     rcf = _resource_client_factory()
 
     ResourceGroup = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES, 'ResourceGroup', mod='models')
@@ -175,11 +177,11 @@ def list_appliances(resource_group_name=None):
 
 def export_group_as_template(
         resource_group_name, include_comments=False, include_parameter_default_value=False):
-    '''Captures a resource group as a template.
+    """Captures a resource group as a template.
     :param str resource_group_name:the name of the resoruce group.
     :param bool include_comments:export template with comments.
     :param bool include_parameter_default_value: export template parameter with default value.
-    '''
+    """
     rcf = _resource_client_factory()
 
     export_options = []
@@ -191,7 +193,7 @@ def export_group_as_template(
     options = ','.join(export_options) if export_options else None
 
     result = rcf.resource_groups.export_template(resource_group_name, '*', options=options)
-    #pylint: disable=no-member
+    # pylint: disable=no-member
     # On error, server still returns 200, with details in the error attribute
     if result.error:
         error = result.error
@@ -202,16 +204,19 @@ def export_group_as_template(
 
     print(json.dumps(result.template, indent=2))
 
-def deploy_arm_template(
-        resource_group_name, template_file=None, template_uri=None, deployment_name=None,
-        parameters=None, mode='incremental', no_wait=False):
+
+def deploy_arm_template(resource_group_name,  # pylint: disable=too-many-arguments
+                        template_file=None, template_uri=None, deployment_name=None,
+                        parameters=None, mode='incremental', no_wait=False):
     return _deploy_arm_template_core(resource_group_name, template_file, template_uri,
                                      deployment_name, parameters, mode, no_wait=no_wait)
+
 
 def validate_arm_template(resource_group_name, template_file=None, template_uri=None,
                           parameters=None, mode='incremental'):
     return _deploy_arm_template_core(resource_group_name, template_file, template_uri,
                                      'deployment_dry_run', parameters, mode, validate_only=True)
+
 
 def _find_missing_parameters(parameters, template):
     if template is None:
@@ -229,6 +234,7 @@ def _find_missing_parameters(parameters, template):
             continue
         missing[parameter_name] = parameter
     return missing
+
 
 def _prompt_for_parameters(missing_parameters):
     result = {}
@@ -263,6 +269,7 @@ def _prompt_for_parameters(missing_parameters):
                 break
     return {}
 
+
 def _merge_parameters(parameter_list):
     parameters = None
     for params in parameter_list or []:
@@ -275,9 +282,11 @@ def _merge_parameters(parameter_list):
             parameters.update(params_object)
     return parameters
 
-def _deploy_arm_template_core(resource_group_name, template_file=None, template_uri=None,
-                              deployment_name=None, parameter_list=None, mode='incremental',
-                              validate_only=False, no_wait=False):
+
+def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-arguments
+                              template_file=None, template_uri=None, deployment_name=None,
+                              parameter_list=None, mode='incremental', validate_only=False,
+                              no_wait=False):
     DeploymentProperties, TemplateLink = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES,
                                                  'DeploymentProperties',
                                                  'TemplateLink',
@@ -316,9 +325,11 @@ def _deploy_arm_template_core(resource_group_name, template_file=None, template_
 def export_deployment_as_template(resource_group_name, deployment_name):
     smc = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
     result = smc.deployments.export_template(resource_group_name, deployment_name)
-    print(json.dumps(result.template, indent=2))#pylint: disable=no-member
+    print(json.dumps(result.template, indent=2))  # pylint: disable=no-member
 
-def create_resource(properties, resource_group_name=None, resource_provider_namespace=None,
+
+def create_resource(properties,  # pylint: disable=too-many-arguments
+                    resource_group_name=None, resource_provider_namespace=None,
                     parent_resource_path=None, resource_type=None, resource_name=None,
                     resource_id=None, api_version=None, location=None, is_full_object=False):
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
@@ -326,24 +337,27 @@ def create_resource(properties, resource_group_name=None, resource_provider_name
                          resource_id, api_version)
     return res.create_resource(properties, location, is_full_object)
 
-def show_resource(resource_group_name=None, resource_provider_namespace=None,
-                  parent_resource_path=None, resource_type=None, resource_name=None,
-                  resource_id=None, api_version=None):
+
+def show_resource(resource_group_name=None,  # pylint: disable=too-many-arguments
+                  resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
+                  resource_name=None, resource_id=None, api_version=None):
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
                          parent_resource_path, resource_type, resource_name,
                          resource_id, api_version)
     return res.get_resource()
 
-def delete_resource(resource_group_name=None, resource_provider_namespace=None,
-                    parent_resource_path=None, resource_type=None, resource_name=None,
-                    resource_id=None, api_version=None):
+
+def delete_resource(resource_group_name=None,  # pylint: disable=too-many-arguments
+                    resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
+                    resource_name=None, resource_id=None, api_version=None):
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
                          parent_resource_path, resource_type, resource_name,
                          resource_id, api_version)
     return res.delete()
 
 
-def update_resource(parameters, resource_group_name=None, resource_provider_namespace=None,
+def update_resource(parameters,  # pylint: disable=too-many-arguments
+                    resource_group_name=None, resource_provider_namespace=None,
                     parent_resource_path=None, resource_type=None, resource_name=None,
                     resource_id=None, api_version=None):
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
@@ -352,15 +366,17 @@ def update_resource(parameters, resource_group_name=None, resource_provider_name
     return res.update(parameters)
 
 
-def tag_resource(tags, resource_group_name=None, resource_provider_namespace=None,
+def tag_resource(tags,  # pylint: disable=too-many-arguments
+                 resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None,
                  resource_id=None, api_version=None):
-    ''' Updates the tags on an existing resource. To clear tags, specify the --tag option
-    without anything else. '''
+    """ Updates the tags on an existing resource. To clear tags, specify the --tag option
+    without anything else. """
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
                          parent_resource_path, resource_type, resource_name,
                          resource_id, api_version)
     return res.tag(tags)
+
 
 def get_deployment_operations(client, resource_group_name, deployment_name, operation_ids):
     """get a deployment's operation.
@@ -371,8 +387,10 @@ def get_deployment_operations(client, resource_group_name, deployment_name, oper
         result.append(dep)
     return result
 
-def list_resources(resource_group_name=None, resource_provider_namespace=None,
-                   resource_type=None, name=None, tag=None, location=None):
+
+def list_resources(resource_group_name=None,  # pylint: disable=too-many-arguments
+                   resource_provider_namespace=None, resource_type=None, name=None, tag=None,
+                   location=None):
     rcf = _resource_client_factory()
 
     if resource_group_name is not None:
@@ -384,11 +402,12 @@ def list_resources(resource_group_name=None, resource_provider_namespace=None,
     resources = rcf.resources.list(filter=odata_filter)
     return list(resources)
 
-def _list_resources_odata_filter_builder(resource_group_name=None,
-                                         resource_provider_namespace=None, resource_type=None,
-                                         name=None, tag=None, location=None):
-    '''Build up OData filter string from parameters
-    '''
+
+def _list_resources_odata_filter_builder(resource_group_name=None,  # pylint: disable=too-many-arguments
+                                         resource_provider_namespace=None,
+                                         resource_type=None, name=None, tag=None, location=None):
+    """Build up OData filter string from parameters
+    """
     filters = []
 
     if resource_group_name:
@@ -408,7 +427,7 @@ def _list_resources_odata_filter_builder(resource_group_name=None,
                 raise CLIError(
                     'Malformed resource-type: '
                     '--resource-type=<namespace>/<resource-type> expected.')
-            #assume resource_type is <namespace>/<type>. The worst is to get a server error
+            # assume resource_type is <namespace>/<type>. The worst is to get a server error
             f = "'{}'".format(resource_type)
         filters.append("resourceType eq " + f)
     else:
@@ -430,12 +449,14 @@ def _list_resources_odata_filter_builder(resource_group_name=None,
                     filters.append("tagvalue eq '%s'" % tag_value)
     return ' and '.join(filters)
 
-def get_providers_completion_list(prefix, **kwargs): #pylint: disable=unused-argument
+
+def get_providers_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
     rcf = _resource_client_factory()
     result = rcf.providers.list()
     return [r.namespace for r in result]
 
-def get_resource_types_completion_list(prefix, **kwargs): #pylint: disable=unused-argument
+
+def get_resource_types_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
     rcf = _resource_client_factory()
     result = rcf.providers.list()
     types = []
@@ -444,23 +465,33 @@ def get_resource_types_completion_list(prefix, **kwargs): #pylint: disable=unuse
             types.append(p.namespace + '/' + r.resource_type)
     return types
 
-def register_provider(resource_provider_namespace):
-    _update_provider(resource_provider_namespace, registering=True)
 
-def unregister_provider(resource_provider_namespace):
-    _update_provider(resource_provider_namespace, registering=False)
+def register_provider(resource_provider_namespace, wait=False):
+    _update_provider(resource_provider_namespace, registering=True, wait=wait)
 
-def _update_provider(namespace, registering):
+
+def unregister_provider(resource_provider_namespace, wait=False):
+    _update_provider(resource_provider_namespace, registering=False, wait=wait)
+
+
+def _update_provider(namespace, registering, wait):
+    import time
     rcf = _resource_client_factory()
     if registering:
         rcf.providers.register(namespace)
     else:
         rcf.providers.unregister(namespace)
 
-    #timeout'd, normal for resources with many regions, but let users know.
-    action = 'Registering' if registering else 'Unregistering'
-    msg_template = '%s is still on-going. You can monitor using \'az provider show -n %s\''
-    logger.warning(msg_template, action, namespace)
+    if wait:
+        while True:
+            time.sleep(10)
+            rp_info = rcf.providers.get(namespace)
+            if rp_info.registration_state == ('Registered' if registering else 'Unregistered'):
+                break
+    else:
+        action = 'Registering' if registering else 'Unregistering'
+        msg_template = '%s is still on-going. You can monitor using \'az provider show -n %s\''
+        logger.warning(msg_template, action, namespace)
 
 
 def list_provider_operations(api_version=None):
@@ -483,15 +514,15 @@ def _get_auth_provider_latest_api_version():
 
 
 def move_resource(ids, destination_group, destination_subscription_id=None):
-    '''Moves resources from one resource group to another(can be under different subscription)
+    """Moves resources from one resource group to another(can be under different subscription)
 
     :param ids: the space separated resource ids to be moved
     :param destination_group: the destination resource group name
     :param destination_subscription_id: the destination subscription identifier
-    '''
+    """
     from azure.cli.core.commands.arm import resource_id
 
-    #verify all resource ids are valid and under the same group
+    # verify all resource ids are valid and under the same group
     resources = []
     for i in ids:
         if is_valid_resource_id(i):
@@ -510,11 +541,13 @@ def move_resource(ids, destination_group, destination_subscription_id=None):
 
     return rcf.resources.move_resources(resources[0]['resource_group'], ids, target)
 
+
 def list_features(client, resource_provider_namespace=None):
     if resource_provider_namespace:
         return client.list(resource_provider_namespace=resource_provider_namespace)
     else:
         return client.list_all()
+
 
 def create_policy_assignment(policy, name=None, display_name=None,
                              resource_group_name=None, scope=None):
@@ -528,17 +561,20 @@ def create_policy_assignment(policy, name=None, display_name=None,
                                                    name or uuid.uuid4(),
                                                    assignment)
 
+
 def delete_policy_assignment(name, resource_group_name=None, scope=None):
     policy_client = _resource_policy_client_factory()
     scope = _build_policy_scope(policy_client.config.subscription_id,
                                 resource_group_name, scope)
     policy_client.policy_assignments.delete(scope, name)
 
+
 def show_policy_assignment(name, resource_group_name=None, scope=None):
     policy_client = _resource_policy_client_factory()
     scope = _build_policy_scope(policy_client.config.subscription_id,
                                 resource_group_name, scope)
     return policy_client.policy_assignments.get(scope, name)
+
 
 def list_policy_assignment(disable_scope_strict_match=None, resource_group_name=None, scope=None):
     policy_client = _resource_policy_client_factory()
@@ -547,7 +583,7 @@ def list_policy_assignment(disable_scope_strict_match=None, resource_group_name=
         if len(parts) == 4:
             resource_group_name = parts[3]
         elif len(parts) == 2:
-            #rarely used, but still verify
+            # rarely used, but still verify
             if parts[1].lower() != policy_client.config.subscription_id.lower():
                 raise CLIError("Please use current active subscription's id")
         else:
@@ -560,7 +596,7 @@ def list_policy_assignment(disable_scope_strict_match=None, resource_group_name=
     if resource_group_name:
         result = policy_client.policy_assignments.list_for_resource_group(resource_group_name)
     elif scope:
-        #pylint: disable=redefined-builtin
+        # pylint: disable=redefined-builtin
         id = parse_resource_id(scope)
         parent_resource_path = '' if not id.get('child_name') else (id['type'] + '/' + id['name'])
         resource_type = id.get('child_type') or id['type']
@@ -576,6 +612,7 @@ def list_policy_assignment(disable_scope_strict_match=None, resource_group_name=
 
     return result
 
+
 def _build_policy_scope(subscription_id, resource_group_name, scope):
     subscription_scope = '/subscriptions/' + subscription_id
     if scope:
@@ -588,12 +625,14 @@ def _build_policy_scope(subscription_id, resource_group_name, scope):
         scope = subscription_scope
     return scope
 
+
 def _resolve_policy_id(policy, client):
     policy_id = policy
     if not is_valid_resource_id(policy):
         policy_def = client.policy_definitions.get(policy)
         policy_id = policy_def.id
     return policy_id
+
 
 def create_policy_definition(name, rules, display_name=None, description=None):
     if os.path.exists(rules):
@@ -607,6 +646,7 @@ def create_policy_definition(name, rules, display_name=None, description=None):
                                   display_name=display_name)
     return policy_client.policy_definitions.create_or_update(name, parameters)
 
+
 def update_policy_definition(policy_definition_name, rules=None,
                              display_name=None, description=None):
     if rules is not None:
@@ -617,27 +657,31 @@ def update_policy_definition(policy_definition_name, rules=None,
 
     policy_client = _resource_policy_client_factory()
     definition = policy_client.policy_definitions.get(policy_definition_name)
-    #pylint: disable=line-too-long,no-member
+    # pylint: disable=line-too-long,no-member
     PolicyDefinition = get_sdk(ResourceType.MGMT_RESOURCE_POLICY, 'PolicyDefinition', mod='models')
-    parameters = PolicyDefinition(policy_rule=rules if rules is not None else definition.policy_rule,
-                                  description=description if description is not None else definition.description,
-                                  display_name=display_name if display_name is not None else definition.display_name)
+    parameters = PolicyDefinition(
+        policy_rule=rules if rules is not None else definition.policy_rule,
+        description=description if description is not None else definition.description,
+        display_name=display_name if display_name is not None else definition.display_name)
     return policy_client.policy_definitions.create_or_update(policy_definition_name, parameters)
 
-def get_policy_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
+
+def get_policy_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
     policy_client = _resource_policy_client_factory()
     result = policy_client.policy_definitions.list()
     return [i.name for i in result]
 
-def get_policy_assignment_completion_list(prefix, **kwargs):#pylint: disable=unused-argument
+
+def get_policy_assignment_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
     policy_client = _resource_policy_client_factory()
     result = policy_client.policy_assignments.list()
     return [i.name for i in result]
 
-def list_locks(resource_group_name=None, resource_provider_namespace=None,
-               parent_resource_path=None, resource_type=None, resource_name=None,
-               filter_string=None):
-    '''
+
+def list_locks(resource_group_name=None,  # pylint: disable=too-many-arguments
+               resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
+               resource_name=None, filter_string=None):
+    """
     :param resource_provider_namespace: Name of a resource provider.
     :type resource_provider_namespace: str
     :param parent_resource_path: Path to a parent resource
@@ -648,10 +692,10 @@ def list_locks(resource_group_name=None, resource_provider_namespace=None,
     :type resource_name: str
     :param filter_string: A query filter to use to restrict the results.
     :type filter_string: str
-    '''
+    """
     lock_client = _resource_lock_client_factory()
-    lock_resource = _validate_lock_params(resource_group_name, resource_provider_namespace,
-                                          parent_resource_path, resource_type, resource_name)
+    lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
+                                         resource_type, resource_name)
     resource_group_name = lock_resource[0]
     resource_name = lock_resource[1]
     resource_provider_namespace = lock_resource[2]
@@ -666,10 +710,11 @@ def list_locks(resource_group_name=None, resource_provider_namespace=None,
         resource_group_name, resource_provider_namespace, parent_resource_path, resource_type,
         resource_name, filter=filter_string)
 
-def _validate_lock_params_match_lock(
-        lock_client, name, resource_group_name, resource_provider_namespace,
-        parent_resource_path, resource_type, resource_name):
-    '''
+
+def _validate_lock_params_match_lock(  # pylint: disable=too-many-arguments
+        lock_client, name, resource_group_name, resource_provider_namespace, parent_resource_path,
+        resource_type, resource_name):
+    """
     Locks are scoped to subscription, resource group or resource.
     However, the az list command returns all locks for the current scopes
     and all lower scopes (e.g. resource group level also includes resource locks).
@@ -678,9 +723,9 @@ def _validate_lock_params_match_lock(
     scope. This function attempts to validate the parameters and help the
     user find the right scope, by first finding the lock, and then infering
     what it's parameters should be.
-    '''
+    """
     locks = lock_client.management_locks.list_at_subscription_level()
-    found_count = 0 # locks at different levels can have the same name
+    found_count = 0  # locks at different levels can have the same name
     lock_resource_id = None
     for lock in locks:
         if lock.name == name:
@@ -710,7 +755,7 @@ def _validate_lock_params_match_lock(
         else:
             _resource_type = resource.get('child_type', None)
             _resource_name = resource.get('child_name', None)
-            parent = (resource['type'] + '/' +  resource['name'])
+            parent = (resource['type'] + '/' + resource['name'])
             if parent != parent_resource_path:
                 raise CLIError(
                     'Unexpected --parent for lock {}, expected {}'.format(
@@ -724,18 +769,20 @@ def _validate_lock_params_match_lock(
 
 
 def get_lock(name, resource_group_name=None):
-    '''
+    """
     :param name: Name of the lock.
     :type name: str
-    '''
+    """
     lock_client = _resource_lock_client_factory()
     if resource_group_name is None:
         return lock_client.management_locks.get_at_subscription_level(name)
     return lock_client.management_locks.get_at_resource_group_level(resource_group_name, name)
 
-def delete_lock(name, resource_group_name=None, resource_provider_namespace=None,
+
+def delete_lock(name,  # pylint: disable=too-many-arguments
+                resource_group_name=None, resource_provider_namespace=None,
                 parent_resource_path=None, resource_type=None, resource_name=None):
-    '''
+    """
     :param name: The name of the lock.
     :type name: str
     :param resource_provider_namespace: Name of a resource provider.
@@ -746,10 +793,10 @@ def delete_lock(name, resource_group_name=None, resource_provider_namespace=None
     :type resource_type: str
     :param resource_name: Name of a resource that has a lock.
     :type resource_name: str
-    '''
+    """
     lock_client = _resource_lock_client_factory()
-    lock_resource = _validate_lock_params(resource_group_name, resource_provider_namespace,
-                                          parent_resource_path, resource_type, resource_name)
+    lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
+                                         resource_type, resource_name)
     _validate_lock_params_match_lock(lock_client, name, resource_group_name,
                                      resource_provider_namespace, parent_resource_path,
                                      resource_type, resource_name)
@@ -758,7 +805,6 @@ def delete_lock(name, resource_group_name=None, resource_provider_namespace=None
     resource_name = lock_resource[1]
     resource_provider_namespace = lock_resource[2]
     resource_type = lock_resource[3]
-
 
     if resource_group_name is None:
         return lock_client.management_locks.delete_at_subscription_level(name)
@@ -769,47 +815,26 @@ def delete_lock(name, resource_group_name=None, resource_provider_namespace=None
         resource_group_name, resource_provider_namespace, parent_resource_path or '', resource_type,
         resource_name, name)
 
-def _validate_lock_params(resource_group_name, resource_provider_namespace, parent_resource_path,
-                          resource_type, resource_name):
+
+def _extract_lock_params(resource_group_name, resource_provider_namespace,
+                         resource_type, resource_name):
     if resource_group_name is None:
-        if resource_name is not None:
-            raise CLIError('--resource-name is ignored if --resource-group is not given.')
-        if resource_type is not None:
-            raise CLIError('--resource-type is ignored if --resource-group is not given.')
-        if resource_provider_namespace is not None:
-            raise CLIError('--namespace is ignored if --resource-group is not given.')
-        if parent_resource_path is not None:
-            raise CLIError('--parent is ignored if --resource-group is not given.')
         return (None, None, None, None)
 
     if resource_name is None:
-        if resource_type is not None:
-            raise CLIError('--resource-type is ignored if --resource-name is not given.')
-        if resource_provider_namespace is not None:
-            raise CLIError('--namespace is ignored if --resource-name is not given.')
-        if parent_resource_path is not None:
-            raise CLIError('--parent is ignored if --resource-name is not given.')
         return (resource_group_name, None, None, None)
-
-    if resource_type is None or len(resource_type) == 0:
-        raise CLIError('--resource-type is required if --resource-name is present')
 
     parts = resource_type.split('/')
     if resource_provider_namespace is None:
-        if len(parts) == 1:
-            raise CLIError('A resource namespace is required if --resource-name is present.'
-                           'Expected <namespace>/<type> or --namespace=<namespace>')
-        else:
-            resource_provider_namespace = parts[0]
-            resource_type = parts[1]
-    elif len(parts) != 1:
-        raise CLIError('Resource namespace specified in both --resource-type and --namespace')
+        resource_provider_namespace = parts[0]
+        resource_type = parts[1]
     return (resource_group_name, resource_name, resource_provider_namespace, resource_type)
 
-def create_lock(name, resource_group_name=None, resource_provider_namespace=None,
-                parent_resource_path=None, resource_type=None, resource_name=None,
-                level=None, notes=None):
-    '''
+
+def create_lock(name,  # pylint: disable=too-many-arguments
+                resource_group_name=None, resource_provider_namespace=None, notes=None,
+                parent_resource_path=None, resource_type=None, resource_name=None, level=None):
+    """
     :param name: The name of the lock.
     :type name: str
     :param resource_provider_namespace: Name of a resource provider.
@@ -822,14 +847,14 @@ def create_lock(name, resource_group_name=None, resource_provider_namespace=None
     :type resource_name: str
     :param notes: Notes about this lock.
     :type notes: str
-    '''
+    """
     if level != 'ReadOnly' and level != 'CanNotDelete':
         raise CLIError('--lock-type must be one of "ReadOnly" or "CanNotDelete"')
     parameters = ManagementLockObject(level=level, notes=notes, name=name)
 
     lock_client = _resource_lock_client_factory()
-    lock_resource = _validate_lock_params(resource_group_name, resource_provider_namespace,
-                                          parent_resource_path, resource_type, resource_name)
+    lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
+                                         resource_type, resource_name)
     resource_group_name = lock_resource[0]
     resource_name = lock_resource[1]
     resource_provider_namespace = lock_resource[2]
@@ -846,6 +871,7 @@ def create_lock(name, resource_group_name=None, resource_provider_namespace=None
         resource_group_name, resource_provider_namespace, parent_resource_path or '', resource_type,
         resource_name, name, parameters)
 
+
 def _update_lock_parameters(parameters, level, notes, lock_id, lock_type):
     if level is not None:
         parameters.level = level
@@ -855,6 +881,7 @@ def _update_lock_parameters(parameters, level, notes, lock_id, lock_type):
         parameters.id = lock_id
     if lock_type is not None:
         parameters.type = lock_type
+
 
 def update_lock(name, resource_group_name=None, level=None, notes=None):
     lock_client = _resource_lock_client_factory()
@@ -867,42 +894,47 @@ def update_lock(name, resource_group_name=None, level=None, notes=None):
     return lock_client.management_locks.create_or_update_at_resource_group_level(
         resource_group_name, name, params)
 
+
 def create_resource_link(link_id, target_id, notes=None):
-    '''
+    """
     :param target_id: The id of the resource link target.
     :type target_id: str
     :param notes: Notes for this link.
     :type notes: str
-    '''
+    """
     links_client = _resource_links_client_factory().resource_links
     properties = ResourceLinkProperties(target_id, notes)
     links_client.create_or_update(link_id, properties)
 
+
 def update_resource_link(link_id, target_id=None, notes=None):
-    '''
+    """
     :param target_id: The id of the resource link target.
     :type target_id: str
     :param notes: Notes for this link.
     :type notes: str
-    '''
+    """
     links_client = _resource_links_client_factory().resource_links
     params = links_client.get(link_id)
     properties = ResourceLinkProperties(
-        target_id if target_id is not None else params.properties.target_id, #pylint: disable=no-member
-        notes=notes if notes is not None else params.properties.notes) #pylint: disable=no-member
+        target_id if target_id is not None else params.properties.target_id,
+        # pylint: disable=no-member
+        notes=notes if notes is not None else params.properties.notes)  # pylint: disable=no-member
     links_client.create_or_update(link_id, properties)
 
+
 def list_resource_links(scope=None, filter_string=None):
-    '''
+    """
     :param scope: The scope for the links
     :type scope: str
     :param filter_string: A filter for restricting the results
     :type filter_string: str
-    '''
+    """
     links_client = _resource_links_client_factory().resource_links
     if scope is not None:
         return links_client.list_at_source_scope(scope, filter=filter_string)
     return links_client.list_at_subscription(filter=filter_string)
+
 
 def _validate_resource_inputs(resource_group_name, resource_provider_namespace,
                               resource_type, resource_name):
@@ -915,12 +947,14 @@ def _validate_resource_inputs(resource_group_name, resource_provider_namespace,
     if resource_provider_namespace is None:
         raise CLIError('--namespace is required')
 
-class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
-    def __init__(self, resource_group_name=None, resource_provider_namespace=None,
+
+class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
+    def __init__(self,  # pylint: disable=too-many-arguments
+                 resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None,
                  resource_id=None, api_version=None, rcf=None):
-        #if the resouce_type is in format 'namespace/type' split it.
-        #(we don't have to do this, but commands like 'vm show' returns such values)
+        # if the resouce_type is in format 'namespace/type' split it.
+        # (we don't have to do this, but commands like 'vm show' returns such values)
         if resource_type and not resource_provider_namespace and not parent_resource_path:
             parts = resource_type.split('/')
             if len(parts) > 1:
@@ -1042,7 +1076,7 @@ class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
     def resolve_api_version(rcf, resource_provider_namespace, parent_resource_path, resource_type):
         provider = rcf.providers.get(resource_provider_namespace)
 
-        #If available, we will use parent resource's api-version
+        # If available, we will use parent resource's api-version
         resource_type_str = (parent_resource_path.split('/')[0]
                              if parent_resource_path else resource_type)
 
@@ -1064,7 +1098,7 @@ class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
         parts = parse_resource_id(resource_id)
         namespace = parts.get('child_namespace', parts['namespace'])
         if parts.get('grandchild_type'):
-            parent = (parts['type'] + '/' +  parts['name'] + '/' +
+            parent = (parts['type'] + '/' + parts['name'] + '/' +
                       parts['child_type'] + '/' + parts['child_name'])
             resource_type = parts['grandchild_type']
         elif parts.get('child_type'):
@@ -1073,7 +1107,7 @@ class _ResourceUtils(object): #pylint: disable=too-many-instance-attributes
             if parts.get('child_namespace') is not None:
                 parent = ''
             else:
-                parent = parts['type'] + '/' +  parts['name']
+                parent = parts['type'] + '/' + parts['name']
             resource_type = parts['child_type']
         else:
             parent = None

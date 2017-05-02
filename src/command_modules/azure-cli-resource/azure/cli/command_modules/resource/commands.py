@@ -22,10 +22,11 @@ from azure.cli.command_modules.resource._client_factory import (_resource_client
                                                                 cf_resource_links,
                                                                 cf_resource_managedapplications)
 
+
 # Resource group commands
 def transform_resource_group_list(result):
-    return [OrderedDict([('Name', r['name']), \
-            ('Location', r['location']), ('Status', r['properties']['provisioningState'])]) for r in result]
+    return [OrderedDict([('Name', r['name']), ('Location', r['location']), ('Status', r['properties']['provisioningState'])]) for r in result]
+
 
 cli_command(__name__, 'group delete', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.delete', cf_resource_groups, no_wait_param='raw', confirmation=True)
 cli_generic_wait_command(__name__, 'group wait', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get', cf_resource_groups)
@@ -35,19 +36,20 @@ cli_command(__name__, 'group list', 'azure.cli.command_modules.resource.custom#l
 cli_command(__name__, 'group create', 'azure.cli.command_modules.resource.custom#create_resource_group')
 cli_command(__name__, 'group export', 'azure.cli.command_modules.resource.custom#export_group_as_template')
 
+
 # Resource commands
 
 def transform_resource_list(result):
     transformed = []
     for r in result:
-        res = OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']), \
-            ('Location', r['location']), ('Type', r['type'])])
+        res = OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']), ('Location', r['location']), ('Type', r['type'])])
         try:
             res['Status'] = r['properties']['provisioningStatus']
         except TypeError:
             res['Status'] = ' '
         transformed.append(res)
     return transformed
+
 
 cli_command(__name__, 'resource create', 'azure.cli.command_modules.resource.custom#create_resource')
 cli_command(__name__, 'resource delete', 'azure.cli.command_modules.resource.custom#delete_resource')
@@ -75,11 +77,12 @@ cli_command(__name__, 'tag delete', 'azure.mgmt.resource.resources.operations.ta
 cli_command(__name__, 'tag add-value', 'azure.mgmt.resource.resources.operations.tags_operations#TagsOperations.create_or_update_value', cf_tags)
 cli_command(__name__, 'tag remove-value', 'azure.mgmt.resource.resources.operations.tags_operations#TagsOperations.delete_value', cf_tags)
 
+
 # Resource group deployment commands
 def transform_deployments_list(result):
     sort_list = sorted(result, key=lambda deployment: deployment['properties']['timestamp'])
-    return [OrderedDict([('Name', r['name']), \
-            ('Timestamp', r['properties']['timestamp']), ('State', r['properties']['provisioningState'])]) for r in sort_list]
+    return [OrderedDict([('Name', r['name']), ('Timestamp', r['properties']['timestamp']), ('State', r['properties']['provisioningState'])]) for r in sort_list]
+
 
 cli_command(__name__, 'group deployment create', 'azure.cli.command_modules.resource.custom#deploy_arm_template', no_wait_param='no_wait')
 cli_generic_wait_command(__name__, 'group deployment wait', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.get', cf_deployments)
