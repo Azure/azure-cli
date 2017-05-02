@@ -96,7 +96,7 @@ class CliCommandArgument(object):
 class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, start_msg='', finish_msg='',
-                 poller_done_interval_ms=1000.0, out=None, total_val=None):
+                 poller_done_interval_ms=1000.0):
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms

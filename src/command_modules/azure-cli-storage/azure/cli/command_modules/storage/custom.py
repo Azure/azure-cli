@@ -6,7 +6,6 @@
 # pylint: disable=no-self-use,too-many-arguments,line-too-long
 
 from __future__ import print_function
-from sys import stderr
 
 from azure.cli.core.decorators import transfer_doc
 from azure.cli.core.util import CLIError
@@ -15,6 +14,7 @@ from azure.cli.core.profiles import get_sdk, ResourceType
 from azure.cli.command_modules.storage._factory import \
     (storage_client_factory, generic_data_service_factory)
 
+from azure.cli.core.commands.progress import ProgressType, ProgressHook, DeterminateStandardOut
 
 Logging, Metrics, CorsRule, \
     AccessPolicy, RetentionPolicy = get_sdk(ResourceType.DATA_STORAGE,
@@ -38,12 +38,11 @@ BlockBlobService, BaseBlobService, \
                            'table#TableService',
                            'queue#QueueService')
 
-from azure.cli.core.commands.progress import ProgressType, ProgressHook, DeterminateStandardOut
 HOOK = ProgressHook(ProgressType.Determinate)
 HOOK.init_progress(DeterminateStandardOut())
 def _update_progress(current, total):
     if total:
-        HOOK.add(current, total)
+        HOOK.add(message='Alive', value=current, total_val=total)
 
 # CUSTOM METHODS
 

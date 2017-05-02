@@ -4,13 +4,12 @@
 # --------------------------------------------------------------------------------------------
 import sys
 import humanfriendly
-import time
 from enum import Enum
 
 BAR_LEN = 100
 
 
-class ProgressType(Enum):
+class ProgressType(Enum):  # pylint: disable=too-few-public-methods
     """ the types of progress """
     Determinate = 0
     Indeterminate = 1
@@ -157,7 +156,7 @@ class DeterminateStandardOut(DeterminateProgressView):
         super(DeterminateStandardOut, self).__init__(
             out if out else sys.stderr, self._format_value)
 
-    def _format_value(self, msg, percent):
+    def _format_value(self, msg, percent):  # pylint: disable=no-self-use
         bar_len = BAR_LEN - len(msg) - 1
         completed = int(bar_len*percent)
 
