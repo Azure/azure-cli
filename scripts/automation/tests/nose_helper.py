@@ -54,7 +54,7 @@ def get_nose_runner(report_folder, parallel=True, process_timeout=600, process_r
 
         failed_tests = []
         for line in output.splitlines():
-            if line.startswith('test_') and line.endswith('ERROR') or line.endswith('FAIL'):
+            if line.endswith('... ERROR') or line.endswith('... FAIL'):
                 failed_tests.append(line)
 
         return result, test_report, failed_tests
