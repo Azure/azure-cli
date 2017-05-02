@@ -35,7 +35,6 @@ DEPENDENCIES = [
     'applicationinsights',
     'azure-cli-core',
     'jmespath',
-    'humanfriendly',
     'prompt_toolkit',
     'pyyaml',
     'six',
