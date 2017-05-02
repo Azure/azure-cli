@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+import unittest
 import six
 
 import azclishell.command_tree as tree
@@ -10,7 +10,7 @@ from azclishell.az_completer import AzCompleter
 from prompt_toolkit.document import Document
 from prompt_toolkit.completion import Completion
 
-import unittest
+import mock
 
 
 class _Commands():
@@ -155,6 +155,7 @@ class CompletionTest(unittest.TestCase):
         )
         self.completer = AzCompleter(commands, global_params=False)
 
+    @mock.patch('azclishell.argfinder.ArgFinder.outstream', six.StringIO())
     def test_command_completion(self):
         """ tests general command completion """
         self.init1()
@@ -182,6 +183,7 @@ class CompletionTest(unittest.TestCase):
         with self.assertRaises(StopIteration):
             six.next(gen)
 
+    @mock.patch('azclishell.argfinder.ArgFinder.outstream', six.StringIO())
     def test_param_completion(self):
         """ tests param completion """
         self.init2()
@@ -195,6 +197,7 @@ class CompletionTest(unittest.TestCase):
         with self.assertRaises(StopIteration):
             six.next(gen)
 
+    @mock.patch('azclishell.argfinder.ArgFinder.outstream', six.StringIO())
     def test_param_double(self):
         """ tests not generating doubles for parameters """
         self.init3()
@@ -208,6 +211,7 @@ class CompletionTest(unittest.TestCase):
         with self.assertRaises(StopIteration):
             six.next(gen)
 
+    @mock.patch('azclishell.argfinder.ArgFinder.outstream', six.StringIO())
     def test_second_completion(self):
         self.init3()
         doc = Document(u'crea ')
@@ -230,6 +234,7 @@ class CompletionTest(unittest.TestCase):
         self.assertEqual(six.next(gen), Completion(
             "--helloworld", -7))
 
+    @mock.patch('azclishell.argfinder.ArgFinder.outstream', six.StringIO())
     def test_substring_completion(self):
         self.init4()
         doc = Document(u'create')

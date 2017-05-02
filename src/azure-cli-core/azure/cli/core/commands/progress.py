@@ -101,19 +101,11 @@ class ProgressHook(object):
         elif progress_type == ProgressType.Indeterminate:
             self.reporter = InDetProgressReporter()  # pylint: disable=redefined-variable-type
         self.progress_type = progress_type
-        from azclishell.progress import ShellProgressView
-        self.registery = [IndeterminateStandardOut, DeterminateStandardOut, ShellProgressView]
         self.active_progress = []
 
     def init_progress(self, progress_view):
         """ activate a view """
-        assert any(isinstance(progress_view, view) for view in self.registery)
         self.active_progress.append(progress_view)
-
-    def register_view(self, progress_view):
-        """ register a view to report to """
-        assert issubclass(progress_view, _ProgressViewBase)
-        self.registery.append(progress_view)
 
     def add(self, **kwargs):
         """ adds a progress report """
