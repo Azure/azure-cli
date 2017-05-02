@@ -54,13 +54,17 @@ class InDeterminateProgressView(_ProgressViewBase):
 
 class DetProgressReporter(object):
     """ generic progress reporter """
-    def __init__(self, total_value=None):
+    def __init__(self, total_value=1):
         self.message = ''
         self.curr_val = 0 if total_value else None
         self.total_val = total_value
 
     def add(self, args):
-        """ adds a progress report """
+        """
+        adds a progress report
+
+        :param args: a dictionary with keys 'message', 'value', and 'total_val'
+        """
         value = args['value']
         total_val = args['total_val']
         message = args['message']
