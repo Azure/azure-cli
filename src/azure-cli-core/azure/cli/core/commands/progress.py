@@ -7,7 +7,7 @@ from enum import Enum
 
 import humanfriendly
 
-BAR_LEN = 100
+BAR_LEN = 70
 
 
 class ProgressType(Enum):  # pylint: disable=too-few-public-methods
@@ -59,15 +59,14 @@ class DetProgressReporter(object):
         self.curr_val = 0 if total_value else None
         self.total_val = total_value
 
-    def add(self, args):
+    def add(self, kwargs):
         """
         adds a progress report
-
-        :param args: a dictionary with keys 'message', 'value', and 'total_val'
+        :param kwargs: dictionary containing 'message', 'total_val', 'value'
         """
-        value = args['value']
-        total_val = args['total_val']
-        message = args['message']
+        message = kwargs.get('message', '')
+        total_val = kwargs.get('total_val', 1.0)
+        value = kwargs.get('value', 0.0)
         assert value >= 0 and value <= total_val and total_val >= 0
         self.total_val = total_val
         self.curr_val = value
@@ -76,8 +75,7 @@ class DetProgressReporter(object):
     def report(self):
         """ report the progress """
         percent = self.curr_val / self.total_val if self.curr_val and self.total_val else None
-
-        return self.message, percent
+        return {'message': self.message, 'percent': percent}
 
 
 class InDetProgressReporter(object):
@@ -91,7 +89,7 @@ class InDetProgressReporter(object):
 
     def report(self):
         """ report the progress """
-        return self.message
+        return {'message': self.message}
 
 
 class ProgressHook(object):
@@ -137,7 +135,7 @@ class ProgressHook(object):
     def end(self):
         """ ending reporting of progress """
         if self.progress_type == ProgressType.Determinate:
-            self.add(message="Finished", value=1.0, total_val=1)
+            self.add(message='Finished', value=1.0, total_val=1)
         else:
             self.add(message='Finished')
 
@@ -149,9 +147,12 @@ class IndeterminateStandardOut(InDeterminateProgressView):
         self.spinner = humanfriendly.Spinner(label='In Progress')
         self.spinner.hide_cursor = False
 
-    def write(self, args):
-        """ writes the progress """
-        msg = args['message'] if 'message' in args else 'In Progress'
+    def write(self, kwargs):
+        """
+        writes the progress
+        :param kwargs: dictionary containing key 'message'
+        """
+        msg = kwargs.get('message', 'In Progress')
         self.spinner.step(label=msg)
 
 
@@ -159,9 +160,10 @@ class DeterminateStandardOut(DeterminateProgressView):
     """ custom output for progress reporting """
     def __init__(self, out=None):
         super(DeterminateStandardOut, self).__init__(
-            out if out else sys.stderr, self._format_value)
+            out if out else sys.stderr, DeterminateStandardOut._format_value)
 
-    def _format_value(self, msg, percent):  # pylint: disable=no-self-use
+    @staticmethod
+    def _format_value(msg, percent):
         bar_len = BAR_LEN - len(msg) - 1
         completed = int(bar_len * percent)
 
@@ -174,13 +176,17 @@ class DeterminateStandardOut(DeterminateProgressView):
         message += ']  {:.4%}'.format(percent)
         return message
 
-    def write(self, args):
-        """ writes the progress """
-        args = args[0]
-        msg = args['message'] if 'message' in args else ''
+    def write(self, kwargs):
+        """
+        writes the progress
+        :param kwargs: kwargs is a dictionary containing 'percent', 'message'
+        """
+        percent = kwargs.get('percent', 0)
+        message = kwargs.get('message', '')
 
-        if 'value' in args and 'total_val' in args:
-            percent = args["value"] / args['total_val']
-            progress = self.format_percent(
-                msg, percent) if callable(self.format_percent) else percent
+        if percent:
+            percent = percent
+            progress = DeterminateStandardOut._format_value(
+                message, percent) if callable(DeterminateStandardOut._format_value) else percent
             self.out.write(progress)
+
