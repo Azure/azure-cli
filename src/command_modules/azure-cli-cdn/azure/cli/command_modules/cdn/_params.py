@@ -7,7 +7,7 @@ import argparse
 from azure.mgmt.cdn.models import (QueryStringCachingBehavior, SkuName)
 
 from azure.cli.core.commands import (register_cli_argument, CliArgumentType)
-from azure.cli.core.commands.parameters import enum_choice_list, three_state_flag
+from azure.cli.core.commands.parameters import enum_choice_list, three_state_flag, tags_type
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from ._validators import validate_origin
 
@@ -30,6 +30,7 @@ class OriginType(argparse._AppendAction):
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
 register_cli_argument('cdn', 'name', name_arg_type, id_part='name')
+register_cli_argument('cdn', 'tags', tags_type)
 
 register_cli_argument('cdn profile create',
                       'sku',

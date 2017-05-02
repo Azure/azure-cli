@@ -58,6 +58,16 @@ def generic_endpoint_command(name, custom_handler):
                                custom_function_op=custom(custom_handler))
 
 
+def generic_profile_command(name, custom_handler):
+    cli_generic_update_command(__name__,
+                               'cdn profile {}'.format(name),
+                               profile('get'),
+                               profile('update'),
+                               cf_cdn,
+                               setter_arg_name='profile_update_properties',
+                               custom_function_op=custom(custom_handler))
+
+
 def profile_command(name, method=None, use_custom=False):
     formatter = custom if use_custom else profile
     command('cdn profile {}'.format(name), method or name, formatter)
@@ -91,16 +101,17 @@ endpoint_command('validate-custom-domain', 'validate_custom_domain')
 endpoint_command('create', 'create_endpoint', use_custom=True)
 generic_endpoint_command('update', 'update_endpoint')
 
-for c in ['update', 'delete']:
-    profile_command(c)
+profile_command('delete')
 profile_command('show', 'get')
 profile_command('usage', 'list_resource_usage')
-profile_command('generate-sso-uri', 'generate_sso_uri')
+# profile_command('generate-sso-uri', 'generate_sso_uri') doesn't seem to ready for prime time
 profile_command('delete')
 profile_command('list', 'list_profiles', use_custom=True)
 profile_command('create', 'create_profile', use_custom=True)
+generic_profile_command('update', 'update_profile')
 
 domain_command('show', 'get')
+domain_command('list', 'list_by_endpoint')
 for c in ['delete', 'create']:
     domain_command(c)
 

@@ -12,6 +12,36 @@ helps['cdn'] = """
     short-summary: Manage Azure Content Delivery Networks (CDN)
 """
 
+helps['cdn profile create'] = """
+    type: command
+    examples:
+        - name: Create a CDN profile using Verizon premium CDN
+          text: >
+            az cdn profile create -g group -n profile --sku Premium_Verizon
+"""
+
+helps['cdn profile update'] = """
+    type: command
+    short-summary: Updates a CDN profile with a profile name under the specified resource group.
+"""
+
+helps['cdn profile delete'] = """
+    type: command
+    examples:
+        - name: Delete a CDN profile
+          text: >
+            az cdn profile create -g group -n profile
+"""
+
+helps['cdn profile list'] = """
+    type: command
+    short-summary: List your Azure Content Delivery Network (CDN) profiles
+    examples:
+        - name: List CDN profiles
+          text: >
+            az cdn profile list
+"""
+
 helps['cdn endpoint create'] = """
     type: command
     examples:
@@ -28,6 +58,20 @@ helps['cdn endpoint create'] = """
             az cdn endpoint create -g group -n endpoint --profile-name profile \\
                 --origin www.example.com --no-http --enable-compression
 """
+
+helps['cdn endpoint update'] = """
+    type: command
+    short-summary: Updates a CDN endpoint within a profile and resource group.
+    examples:
+        - name: Turn off HTTP traffic for the endpoint
+          text: >
+            az cdn endpoint update -g group -n endpoint --profile-name profile --no-http
+        - name: Enable content compression for the endpoint
+          text: >
+            az cdn endpoint update -g group -n endpoint --profile-name profile \\
+                --enable-compression
+"""
+
 
 helps['cdn endpoint delete'] = """
     type: command
