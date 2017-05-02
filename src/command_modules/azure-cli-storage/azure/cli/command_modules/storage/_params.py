@@ -125,31 +125,6 @@ class ArgumentGroupContext(CommandContext):
 
 
 def _get_client(service, parsed_args):
-    # if hasattr(parsed_args, 'account_name'):
-    #     account_name = parsed_args.account_name
-    # else:
-    #     account_name = az_config.get('storage', 'account', None)
-
-    # if hasattr(parsed_args, 'account_key'):
-    #     account_key = parsed_args.account_key
-    # else:
-    #     account_key = az_config.get('storage', 'key', None)
-
-    # if hasattr(parsed_args, 'connection_string'):
-    #     connection_string = parsed_args.connection_string
-    # else:
-    #     connection_string = az_config.get('storage', 'connection_string', None)
-
-    # if hasattr(parsed_args, 'sas_token'):
-    #     sas_token = parsed_args.sas_token
-    # else:
-    #     sas_token = az_config.get('storage', 'sas_token', None)
-
-    # return get_storage_data_service_client(service,
-    #                                        account_name,
-    #                                        account_key,
-    #                                        connection_string,
-    #                                        sas_token)
     account_name = parsed_args.account_name or az_config.get('storage', 'account', None)
     account_key = parsed_args.account_key or az_config.get('storage', 'key', None)
     connection_string = parsed_args.connection_string or az_config.get('storage', 'connection_string', None)

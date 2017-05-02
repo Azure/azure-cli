@@ -14,6 +14,7 @@ class ProgressType(Enum):  # pylint: disable=too-few-public-methods
     """ the types of progress """
     Determinate = 0
     Indeterminate = 1
+    # for views that want to accept both determinate and indeterminate progres
     Both = 2
 
 

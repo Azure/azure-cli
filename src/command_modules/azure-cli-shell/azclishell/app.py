@@ -409,8 +409,7 @@ class Shell(object):
         break_flag = False
         continue_flag = False
 
-        if text and len(text.split()) > 0\
-           and text.split()[0].lower() == 'az':
+        if text and len(text.split()) > 0 and text.split()[0].lower() == 'az':
             telemetry.track_ssg('az', text)
             cmd = ' '.join(text.split()[1:])
         if self.default_command:
@@ -532,11 +531,6 @@ class Shell(object):
         else:
             return continue_flag, cmd
         return continue_flag, cmd
-
-    def handle_long_process(self, args):
-        """ makes changes to indicates long running process """
-        print('pass')
-        """ in LongRUnningOperation there is the call method which could be usefull """
 
     def cli_execute(self, cmd):
         """ sends the command to the CLI to be executed """
