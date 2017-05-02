@@ -14,7 +14,7 @@ PROGRESS = ''
 PROGRESS_BAR = ''
 DONE_STR = 'Finished'
 #  have 2 down beats to make the odds work out better
-HEART_BEAT_VALUES = {0 : "__", 1 : "/\\", 2 : '/^\\', 3 : "__"}
+HEART_BEAT_VALUES = {0: "__", 1: "/\\", 2: '/^\\', 3: "__"}
 HEART_BEAT = ''
 
 
@@ -42,7 +42,7 @@ class ShellProgressView(_ProgressViewBase):
         _, col = get_window_dim()
         bar_len = int(col) - len(msg) - 10
 
-        completed = int(bar_len*percent)
+        completed = int(bar_len * percent)
         message = '{}['.format(msg)
         for i in range(bar_len):
             if i < completed:

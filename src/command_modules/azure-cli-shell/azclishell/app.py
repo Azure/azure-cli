@@ -180,7 +180,6 @@ class Shell(object):
         self._update_toolbar()
         cli.request_redraw()
 
-
     def _update_toolbar(self):
         cli = self.cli
         _, cols = get_window_dim()
@@ -208,19 +207,6 @@ class Shell(object):
 
         curr_cloud = "Cloud: {}".format(get_active_cloud_name())
         tool_val = '{}'.format('Subscription: {}'.format(sub_name) if sub_name else curr_cloud)
-
-        # progress = get_progress_message()
-        # tool_val2 = progress
-        # if progress and progress != DONE_STR:
-        #     if self.spin_val >= 0:
-        #         self.spin_val = (self.spin_val + 1) % 4
-        #         tool_val2 = SPINNING_WHEEL[self.spin_val]
-        #     else:
-        #         self.spin_val = 0
-        #         tool_val2 = SPINNING_WHEEL[self.spin_val]
-        # elif progress == DONE_STR:
-        #     tool_val2 = ''
-
 
         settings_items = [
             " [F1]Layout",
@@ -290,13 +276,13 @@ class Shell(object):
         buffers = {
             DEFAULT_BUFFER: Buffer(is_multiline=True),
             'description': Buffer(is_multiline=True, read_only=True),
-            'parameter' : Buffer(is_multiline=True, read_only=True),
-            'examples' : Buffer(is_multiline=True, read_only=True),
-            'bottom_toolbar' : Buffer(is_multiline=True),
-            'example_line' : Buffer(is_multiline=True),
-            'default_values' : Buffer(),
-            'symbols' : Buffer(),
-            'progress' : Buffer(is_multiline=False)
+            'parameter': Buffer(is_multiline=True, read_only=True),
+            'examples': Buffer(is_multiline=True, read_only=True),
+            'bottom_toolbar': Buffer(is_multiline=True),
+            'example_line': Buffer(is_multiline=True),
+            'default_values': Buffer(),
+            'symbols': Buffer(),
+            'progress': Buffer(is_multiline=False)
         }
 
         writing_buffer = Buffer(

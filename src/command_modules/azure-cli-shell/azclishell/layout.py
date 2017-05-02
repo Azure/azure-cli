@@ -69,7 +69,7 @@ class ShowSymbol(Filter):
 class ShowProgress(Filter):
     """ toggle showing the progress """
     def __call__(self, *a, **kw):
-        progress =  get_progress_message()
+        progress = get_progress_message()
         return progress != '' and progress != DONE_STR
 
 
