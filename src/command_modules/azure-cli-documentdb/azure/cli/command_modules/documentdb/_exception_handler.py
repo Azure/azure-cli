@@ -15,7 +15,7 @@ def duplicate_resource_exception_handler(ex):
     from pydocumentdb.errors import HTTPFailure
     if isinstance(ex, HTTPFailure) and ex.status_code == 409:
         raise CLIError(
-            'Operation Failed: Resource Already Exists (Server returned status code 409)')
+            'Operation Failed: Resource Already Exists')
     raise ex
 
 
@@ -23,7 +23,7 @@ def resource_not_found_exception_handler(ex):
     # wraps DocumentDB 404 error in CLIError
     from pydocumentdb.errors import HTTPFailure
     if isinstance(ex, HTTPFailure) and ex.status_code == 404:
-        raise CLIError('Operation Failed: Resource Not Found (Server returned status code 404)')
+        raise CLIError('Operation Failed: Resource Not Found')
     raise ex
 
 
@@ -38,16 +38,14 @@ def invalid_arg_found_exception_handler(ex):
                 if msg['message']:
                     msg = msg['message'].split('\n')[0]
                     msg = msg[len('Message: '):] if msg.find('Message: ') == 0 else msg
-                    cli_error = CLIError('Operation Failed: Invalid Arg '
-                                         '(Server returned status code 400) {}'.format(msg))
+                    cli_error = CLIError('Operation Failed: Invalid Arg {}'.format(msg))
         except Exception:  # pylint:disable=broad-except
             pass
 
         if cli_error:
             raise cli_error  # pylint:disable=raising-bad-type
 
-        raise CLIError('Operation Failed: Invalid Arg '
-                       '(Server returned status code 400) {}'.format(str(ex)))
+        raise CLIError('Operation Failed: Invalid Arg {}'.format(str(ex)))
     raise ex
 
 
