@@ -174,7 +174,7 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
         # site appsettings testing
 
         # update
-        self.cmd('appservice web config appsettings update -g {} -n {} --settings s1=foo s2=bar s3=bar2'.format(self.resource_group, self.webapp_name), checks=[
+        self.cmd('webapp config appsettings set -g {} -n {} --settings s1=foo s2=bar s3=bar2'.format(self.resource_group, self.webapp_name), checks=[
             JMESPathCheck('s1', 'foo'),
             JMESPathCheck('s2', 'bar'),
             JMESPathCheck('s3', 'bar2')
@@ -200,7 +200,7 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
         ])
 
         # site connection string tests
-        self.cmd('webapp config connection-string update -t mysql -g {} -n {} --settings c1="conn1" c2=conn2 --slot-settings c3=conn3'.format(self.resource_group, self.webapp_name))
+        self.cmd('webapp config connection-string set -t mysql -g {} -n {} --settings c1="conn1" c2=conn2 --slot-settings c3=conn3'.format(self.resource_group, self.webapp_name))
         result = self.cmd('webapp config connection-string show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=[
             JMESPathCheck('length([])', 3),
             JMESPathCheck("[?name=='c1']|[0].slotSetting", False),
@@ -386,7 +386,7 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         test_node_version = '6.6.0'
 
         # create a few app-settings to test they can be cloned
-        self.cmd('appservice web config appsettings update -g {} -n {} --settings s1=v1 --slot-settings s2=v2'.format(self.resource_group, self.webapp))
+        self.cmd('webapp config appsettings set -g {} -n {} --settings s1=v1 --slot-settings s2=v2'.format(self.resource_group, self.webapp))
 
         # create an empty slot
         self.cmd('appservice web deployment slot create -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot), checks=[
@@ -426,8 +426,8 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('appservice web config show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2), checks=[
             JMESPathCheck("nodeVersion", test_node_version),
         ])
-        self.cmd('appservice web config appsettings update -g {} -n {} --slot {} --settings s3=v3 --slot-settings s4=v4'.format(self.resource_group, self.webapp, slot2))
-        self.cmd('webapp config connection-string update -g {} -n {} -t mysql --slot {} --settings c1=connection1 --slot-settings c2=connection2'.format(self.resource_group, self.webapp, slot2))
+        self.cmd('webapp config appsettings set -g {} -n {} --slot {} --settings s3=v3 --slot-settings s4=v4'.format(self.resource_group, self.webapp, slot2))
+        self.cmd('webapp config connection-string set -g {} -n {} -t mysql --slot {} --settings c1=connection1 --slot-settings c2=connection2'.format(self.resource_group, self.webapp, slot2))
 
         # verify we can swap with non production slot
         self.cmd('appservice web deployment slot swap -g {} -n {} --slot {} --target-slot {}'.format(self.resource_group, self.webapp, slot, slot2), checks=NoneCheck())
