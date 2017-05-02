@@ -44,7 +44,7 @@ setup(
     name='azure-cli-cognitiveservices',
     version=VERSION,
     description='Microsoft Azure Command-Line Tools Cognitive Services Command Module',
-    long_description=README,
+    long_description=README + '\n\n' + HISTORY,
     license='MIT',
     author='Microsoft Corporation',
     author_email='azpycli@microsoft.com',
