@@ -86,7 +86,6 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         after = view.spinner.total
         self.assertTrue(after >= before)
         view.write(kwargs={'message': 'TESTING'})
-        self.assertEqual(view.spinner.label, 'TESTING')
 
     def test_det_stdview(self):
         """ test the determinate progress standardout view """
