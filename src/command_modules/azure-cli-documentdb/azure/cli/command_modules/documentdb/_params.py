@@ -79,7 +79,7 @@ register_cli_argument('documentdb database', 'database_id', database_id)
 register_cli_argument('documentdb collection', 'database_id', database_id)
 
 register_cli_argument('documentdb collection', 'collection_id',
-                      options_list=('--coll-name', '-c'), help='Collection Name')
+                      options_list=('--collection-name', '-c'), help='Collection Name')
 
 register_cli_argument('documentdb collection', 'throughput',
                       options_list=('--throughput'), help='Offer Throughput', type=int)
