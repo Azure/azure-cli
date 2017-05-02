@@ -19,7 +19,7 @@ from six import string_types, reraise
 import azure.cli.core.azlogging as azlogging
 import azure.cli.core.telemetry as telemetry
 from azure.cli.core.util import CLIError
-from azure.cli.core.application import APPLICATION
+from azure.cli.core.commands.progress import ProgressType, ProgressHook
 from azure.cli.core.prompting import prompt_y_n, NoTTYException
 from azure.cli.core._config import az_config, DEFAULTS_SECTION
 from azure.cli.core.profiles import ResourceType, supported_api_version
@@ -124,10 +124,14 @@ class CliCommandArgument(object):
 
 class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, start_msg='', finish_msg='', poller_done_interval_ms=1000.0):
+    def __init__(self, start_msg='', finish_msg='',
+                 poller_done_interval_ms=1000.0, out=None, total_val=None):
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms
+        self.controller = ProgressHook(progress_type=ProgressType.Indeterminate)
+        from azure.cli.core.application import APPLICATION
+        self.controller.init_progress(APPLICATION.progress_view)
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
@@ -136,7 +140,10 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         from msrest.exceptions import ClientException
         logger.info("Starting long running operation '%s'", self.start_msg)
         correlation_message = ''
+        self.controller.begin()
+
         while not poller.done():
+            self.controller.add('Running', None, None)
             try:
                 # pylint: disable=protected-access
                 correlation_id = json.loads(
@@ -151,8 +158,10 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             except KeyboardInterrupt:
                 logger.error('Long running operation wait cancelled.  %s', correlation_message)
                 raise
+
         try:
             result = poller.result()
+
         except ClientException as client_exception:
             telemetry.set_exception(
                 client_exception,
@@ -174,6 +183,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
         logger.info("Long running operation '%s' completed with result %s",
                     self.start_msg, result)
+        self.controller.end()
         return result
 
 
@@ -229,6 +239,8 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
 
     @staticmethod
     def _should_load_description():
+        from azure.cli.core.application import APPLICATION
+
         return not APPLICATION.session['completer_active']
 
     def load_arguments(self):
