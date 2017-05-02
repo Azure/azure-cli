@@ -192,9 +192,11 @@ class Shell(object):
 
         self._update_default_info()
 
-        now = datetime.datetime.now()
-        if self.user_feedback and (now - START_TIME).second < DISPLAY_TIME:
-            toolbar = ['Please give us feedback using the \'feedback\' command']
+        delta = datetime.datetime.now() - START_TIME
+        if self.user_feedback and delta.seconds < DISPLAY_TIME:
+            toolbar = [
+                ' Try out the \'feedback\' command',
+                'If refreshed disappear in: {}'.format(str(DISPLAY_TIME - delta.seconds))]
         else:
             toolbar = _toolbar_info()
 
@@ -534,6 +536,7 @@ class Shell(object):
 
             if 'feedback' in args:
                 SHELL_CONFIGURATION.set_feedback('yes')
+                self.user_feedback = False
 
             azure_folder = get_config_dir()
             if not os.path.exists(azure_folder):

@@ -54,5 +54,5 @@ def frequency_heuristic():
     return frequency_measurement() >= ACTIVE_STATUS
 
 
-# frequent_user = frequency_heuristic()
-frequent_user = True
+frequent_user = frequency_heuristic()
+# frequent_user = True

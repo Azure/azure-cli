@@ -54,8 +54,8 @@ def main(style=None):
         config.firsttime()
 
     ask_feedback = False
-    # if not config.has_feedback() and frequent_user:
-    if frequent_user:
+    if not config.has_feedback() and frequent_user:
+    # if frequent_user:
         print("\n\nPlease send us your feedback with the 'feedback' command." +
               " We would greatly appreciate it.\n")
         ask_feedback = True
@@ -67,6 +67,6 @@ def main(style=None):
             os.path.join(shell_config_dir(), config.get_history())),
         app=APPLICATION,
         styles=style_obj,
-        user_feedback= ask_feedback
+        user_feedback = ask_feedback
     )
     shell_app.run()
