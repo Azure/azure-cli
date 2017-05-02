@@ -21,7 +21,7 @@ def listresources(client, resource_group_name=None):
 def create(
         client, resource_group_name, account_name, sku_name, kind, location, tags=None, yes=None):
 
-    terms = 'Notice\nMicrosoft may use data you send to the Cognitive'\
+    terms = 'Notice\nMicrosoft will use data you send to the Cognitive'\
         'Services to improve Microsoft products and services.'\
         'For example we may use content that you provide to the Cognitive'\
         'Services to improve our underlying algorithms and models over time.'\
