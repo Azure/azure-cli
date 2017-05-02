@@ -7,6 +7,8 @@ Release History
 ++++++++++++++++++
 
 * Integrate shell into az
+* Color options
+* --progress flag
 
 
 0.2.1
