@@ -856,27 +856,15 @@ def reset_service_principal_credential(name, password=None, create_cert=False,
     cert_file = None
     end_date = None
 
-    # TODO: Port logic from create-for-rbac
-    raise CLIError("TODO: Update this too, blarg!")
-    if len([x for x in [cert, create_cert, password] if x]) > 1:
-        raise CLIError('Usage error: --cert | --create-cert | --password')
-    if create_cert:
-        public_cert_string, cert_file = _create_self_signed_cert(years or 1, key_vault, cert_name)
-    elif cert:
-        public_cert_string, end_date = _normalize_cert(cert)
-        if years:
-            if start_date.replace(tzinfo=tzutc()) + relativedelta(years=years) > end_date:
-                logger.warning("Use cert's expiration date as supplied '--years' exceeds it")
-            else:
-                end_date = None  # we will pick up --years
-    else:
-        password = password or str(uuid.uuid4())
-    end_date = end_date or start_date + relativedelta(years=years or 1)
-    key_id = str(uuid.uuid4())
-    app_creds = [PasswordCredential(start_date, end_date, key_id, password)] if password else None
+    password, public_cert_string, cert_file, end_date = \
+        _process_service_principal_creds(years, cert, create_cert, password, key_vault, cert_name,
+                                         start_date)
+
+    app_creds = [PasswordCredential(start_date, end_date, str(uuid.uuid4()), password)] if password else None
     cert_creds = [KeyCredential(start_date, end_date, public_cert_string, str(uuid.uuid4()),
                                 usage='Verify',
                                 type='AsymmetricX509Cert')] if public_cert_string else None  # pylint: disable=line-too-long
+
     app_create_param = ApplicationUpdateParameters(password_credentials=app_creds,
                                                    key_credentials=cert_creds)
 

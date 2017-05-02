@@ -22,6 +22,10 @@ helps['ad sp create-for-rbac'] = """
                   text: az ad sp create-for-rbac -n "http://MyApp" --role contributor --scopes /subscriptions/11111111-2222-3333-4444-555555555555/resourceGroups/MyResourceGroup /subscriptions/11111111-2222-3333-4444-666666666666/resourceGroups/MyAnotherResourceGroup
                 - name: Create using self-signed certificte
                   text: az ad sp create-for-rbac --create-cert
+                - name: Create self-signed certificate within KeyVault
+                  text: az ad sp create-for-rbac --key-vault <vault name> --cert-name <name> --create-cert
+                - name: Create using existing certificate in KeyVault
+                  text: az ad sp create-for-rbac --key-vault <vault name> --cert-name <name>
                 - name: Login with a service principal.
                   text: az login --service-principal -u <name> -p <password> --tenant <tenant>
                 - name: Login with self-signed certificate
@@ -32,10 +36,6 @@ helps['ad sp create-for-rbac'] = """
                   text: az role assignment create --assignee <name> --role Contributor
                 - name: Revoke the service principal when done with it.
                   text: az ad app delete --id <name>
-                - name: Create using certificate from Key Vault
-                  text: >
-                    az keyvault certificate download --vault-name vault -n cert-name -f cert.pem \n
-                    az ad sp create-for-rbac --cert @cert.pem
             """
 
 helps['ad sp reset-credentials'] = """
