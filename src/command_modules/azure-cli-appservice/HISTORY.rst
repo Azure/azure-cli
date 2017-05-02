@@ -2,10 +2,21 @@
 
 Release History
 ===============
-0.1.4 (unreleased)
+0.1.5 (unreleased)
 ++++++++++++++++++++
+
+* Adding Team Services (vsts) as a continuous delivery option to "appservice web source-control config"
+* Create "az webapp" to replace "az appservice web" (for backward compat, "az appservice web" will stay for 2 releases)
+* Expose arguments to configure deployment and "runtime stacks" on webapp create
+* Expose "webapp list-runtimes"
+* support configure connection strings (#2647)
+
+0.1.4 (2017-04-28)
+++++++++++++++++++++
+
 * Rename arg of '-n/--name' to '--hostname', and wire up default webapp name (#2946, #2947, #2949)
 * Polish errors from appservice commands (#2948)
+* New packaging system.
 
 0.1.3 (2017-04-17)
 ++++++++++++++++++++

@@ -3,11 +3,20 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps #pylint: disable=unused-import
+from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
-#pylint: disable=line-too-long
 
 helps['documentdb'] = """
     type: group
-    short-summary: Manage your Azure DocumentDB (NoSQL) database accounts.
+    short-summary: Manage Azure DocumentDB (NoSQL) database accounts.
+"""
+
+helps['documentdb database'] = """
+    type: group
+    short-summary: Manage Azure DocumentDB databases.
+"""
+
+helps['documentdb collection'] = """
+    type: group
+    short-summary: Manage Azure DocumentDB collections.
 """

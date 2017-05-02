@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps #pylint: disable=unused-import
+from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
-#pylint: disable=line-too-long
+# pylint: disable=line-too-long
 
 helps['keyvault'] = """
     type: group
@@ -52,6 +52,21 @@ helps['keyvault secret'] = """
 helps['keyvault certificate'] = """
     type: group
     short-summary: Manage certificates.
+"""
+
+helps['keyvault certificate download'] = """
+    long-summary: >
+        Download the public portion of a Key Vault certificate formatted as either PEM or DER. PEM
+        formatting is the default.
+    examples:
+        - name: Download a PEM and check it's fingerprint in openssl
+          text: >
+            az keyvault certificate download --vault-name vault -n cert-name -f cert.pem \n
+            openssl x509 -in cert.pem -inform PEM  -noout -sha1 -fingerprint
+        - name: Download a DER and check it's fingerprint in openssl
+          text: >
+            az keyvault certificate download --vault-name vault -n cert-name -f cert.crt -e DER \n
+            openssl x509 -in cert.crt -inform DER  -noout -sha1 -fingerprint
 """
 
 helps['keyvault certificate get-default-policy'] = """

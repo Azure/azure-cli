@@ -108,6 +108,18 @@ helps['dla catalog table'] = """
     long-summary: These commands are in preview.
 """
 
+helps['dla catalog table list'] = """
+    type: command
+    short-summary: Lists all tables in the database or in the database and schema combination
+    parameters:
+        - name: --database-name
+          type: string
+          short-summary: 'The name of the database to list tables for'
+        - name: --schema-name
+          type: string
+          short-summary: 'The name of the schema in the database to list tables for.'
+"""
+
 helps['dla catalog table-partition'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog table partitions.
@@ -118,6 +130,21 @@ helps['dla catalog table-stats'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog table statistics.
     long-summary: These commands are in preview.
+"""
+
+helps['dla catalog table-stats list'] = """
+    type: command
+    short-summary: Lists all table statistics in the database or in the database and schema or in a specific table
+    parameters:
+        - name: --database-name
+          type: string
+          short-summary: 'The name of the database to list table statitics for'
+        - name: --schema-name
+          type: string
+          short-summary: 'The name of the schema in the database to list table statistics for.'
+        - name: --table-name
+          type: string
+          short-summary: 'The name of the table to list statistics in. --schema-name must also be specified for this parameter to be honored'
 """
 
 helps['dla catalog table-type'] = """
@@ -132,10 +159,34 @@ helps['dla catalog tvf'] = """
     long-summary: These commands are in preview.
 """
 
+helps['dla catalog tvf list'] = """
+    type: command
+    short-summary: Lists all table valued functions in the database or in the database and schema combination
+    parameters:
+        - name: --database-name
+          type: string
+          short-summary: 'The name of the database to list table valued functions for'
+        - name: --schema-name
+          type: string
+          short-summary: 'The name of the schema in the database to list table valued functions for.'
+"""
+
 helps['dla catalog view'] = """
     type: group
     short-summary: Commands to manage Data Lake Analytics catalog views.
     long-summary: These commands are in preview.
+"""
+
+helps['dla catalog view list'] = """
+    type: command
+    short-summary: Lists all views in the database or in the database and schema combination
+    parameters:
+        - name: --database-name
+          type: string
+          short-summary: 'The name of the database to list views for'
+        - name: --schema-name
+          type: string
+          short-summary: 'The name of the schema in the database to list views for.'
 """
 
 helps['dla catalog credential'] = """
@@ -187,6 +238,12 @@ helps['dla catalog credential list'] = """
 helps['dla catalog credential delete'] = """
     type: command
     short-summary: deletes the catalog credential.
+"""
+
+helps['dla catalog package'] = """
+    type: group
+    short-summary: Commands to manage Data Lake Analytics catalog packages.
+    long-summary: These commands are in preview.
 """
 
 helps['dla account'] = """

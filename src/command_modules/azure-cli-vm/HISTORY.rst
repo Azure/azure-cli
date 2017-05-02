@@ -2,7 +2,8 @@
 
 Release History
 ===============
-2.0.4 (unreleased)
+
+2.0.4 (2017-04-28)
 ++++++++++++++++++
 * vm/vmss: improve the warning text when generates ssh key pairs
 

@@ -10,11 +10,11 @@ from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
 from ._client_factory import (get_devtestlabs_management_client)
-from .sdk.devtestlabs.models.gallery_image_reference import GalleryImageReference
-from .sdk.devtestlabs.models.network_interface_properties import NetworkInterfaceProperties
-from .sdk.devtestlabs.models.shared_public_ip_address_configuration import \
+from azure.mgmt.devtestlabs.models.gallery_image_reference import GalleryImageReference
+from azure.mgmt.devtestlabs.models.network_interface_properties import NetworkInterfaceProperties
+from azure.mgmt.devtestlabs.models.shared_public_ip_address_configuration import \
     SharedPublicIpAddressConfiguration
-from .sdk.devtestlabs.models.inbound_nat_rule import InboundNatRule
+from azure.mgmt.devtestlabs.models.inbound_nat_rule import InboundNatRule
 from azure.graphrbac import GraphRbacManagementClient
 import azure.cli.core.azlogging as azlogging
 
@@ -52,7 +52,14 @@ def validate_lab_vm_list(namespace):
     """ Validates parameters for lab vm list and updates namespace. """
     collection = [namespace.filters, namespace.all, namespace.claimable]
     if _any(collection) and not _single(collection):
-        raise CLIError("usage error: [--filters FILTER | --all | --claimable]")
+        raise CLIError("usage error: [--filters FILTER | [[--all | --claimable][--environment ENVIRONMENT]]")
+
+    collection = [namespace.filters, namespace.environment]
+    if _any(collection) and not _single(collection):
+        raise CLIError("usage error: [--filters FILTER | [[--all | --claimable][--environment ENVIRONMENT]]")
+
+    if namespace.filters:
+        return
 
     # Retrieve all the vms of the lab
     if namespace.all:
@@ -64,25 +71,63 @@ def validate_lab_vm_list(namespace):
     else:
         # Find out owner object id
         if not namespace.object_id:
-            from azure.cli.core._profile import Profile, CLOUD
-            from azure.graphrbac.models import GraphErrorException
-            profile = Profile()
-            cred, _, tenant_id = profile.get_login_credentials(
-                resource=CLOUD.endpoints.active_directory_graph_resource_id)
-            graph_client = GraphRbacManagementClient(cred,
-                                                     tenant_id,
-                                                     base_url=CLOUD.endpoints.active_directory_graph_resource_id)
-            subscription = profile.get_subscription()
-            try:
-                object_id = _get_current_user_object_id(graph_client)
-            except GraphErrorException:
-                object_id = _get_object_id(graph_client, subscription=subscription)
+            namespace.filters = "Properties/ownerObjectId eq '{}'".format(_get_owner_object_id())
 
-        namespace.filters = "Properties/ownerObjectId eq '{}'".format(object_id)
+    if namespace.environment:
+        if not is_valid_resource_id(namespace.environment):
+            from azure.cli.core.commands.client_factory import get_subscription_id
+            namespace.environment = resource_id(subscription=get_subscription_id(),
+                                                resource_group=namespace.resource_group,
+                                                namespace='Microsoft.DevTestLab',
+                                                type='labs',
+                                                name=namespace.lab_name,
+                                                child_type='users',
+                                                child_name=_get_owner_object_id(),
+                                                grandchild_type='environments',
+                                                grandchild_name=namespace.environment)
+        if namespace.filters is None:
+            namespace.filters = "Properties/environmentId eq '{}'".format(namespace.environment)
+        else:
+            namespace.filters = "{} and Properties/environmentId eq '{}'".format(namespace.filters,
+                                                                                 namespace.environment)
 
 
 def validate_user_name(namespace):
     namespace.user_name = "@me"
+
+
+def validate_template_id(namespace):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    if not is_valid_resource_id(namespace.arm_template):
+        if not namespace.artifact_source_name:
+            raise CLIError("--artifact-source-name is required when name is "
+                           "provided for --arm-template")
+
+        namespace.arm_template = resource_id(subscription=get_subscription_id(),
+                                             resource_group=namespace.resource_group,
+                                             namespace='Microsoft.DevTestLab',
+                                             type='labs',
+                                             name=namespace.lab_name,
+                                             child_type='artifactSources',
+                                             child_name=namespace.artifact_source_name,
+                                             grandchild_type='armTemplates',
+                                             grandchild_name=namespace.arm_template)
+
+
+def _get_owner_object_id():
+    from azure.cli.core._profile import Profile, CLOUD
+    from azure.graphrbac.models import GraphErrorException
+    profile = Profile()
+    cred, _, tenant_id = profile.get_login_credentials(
+        resource=CLOUD.endpoints.active_directory_graph_resource_id)
+    graph_client = GraphRbacManagementClient(cred,
+                                             tenant_id,
+                                             base_url=CLOUD.endpoints.active_directory_graph_resource_id)
+    subscription = profile.get_subscription()
+    try:
+        return _get_current_user_object_id(graph_client)
+    except GraphErrorException:
+        return _get_object_id(graph_client, subscription=subscription)
 
 
 # pylint: disable=no-member
@@ -91,8 +136,8 @@ def _validate_location(namespace):
     Selects the default location of the lab when location is not provided.
     """
     if namespace.location is None:
-        lab_operation = get_devtestlabs_management_client(None).lab
-        lab = lab_operation.get_resource(namespace.resource_group, namespace.lab_name)
+        lab_operation = get_devtestlabs_management_client(None).labs
+        lab = lab_operation.get(namespace.resource_group, namespace.lab_name)
         namespace.location = lab.location
 
 
@@ -107,7 +152,7 @@ def _validate_expiration_date(namespace):
 # pylint: disable=no-member
 def _validate_network_parameters(namespace, formula=None):
     """ Updates namespace for virtual network and subnet parameters """
-    vnet_operation = get_devtestlabs_management_client(None).virtual_network
+    vnet_operation = get_devtestlabs_management_client(None).virtual_networks
     lab_vnet = None
 
     if formula and formula.formula_content:
@@ -133,7 +178,7 @@ def _validate_network_parameters(namespace, formula=None):
             namespace.lab_virtual_network_id = lab_vnet.id
     # User did provide vnet or has been selected from formula
     else:
-        lab_vnet = vnet_operation.get_resource(namespace.resource_group, namespace.lab_name, namespace.vnet_name)
+        lab_vnet = vnet_operation.get(namespace.resource_group, namespace.lab_name, namespace.vnet_name)
         namespace.lab_virtual_network_id = lab_vnet.id
 
     # User did not provide subnet and not selected from formula
@@ -220,7 +265,7 @@ def _validate_image_argument(namespace, formula=None):
 # pylint: disable=no-member
 def _use_gallery_image(namespace):
     """ Retrieve gallery image from lab and update namespace """
-    gallery_image_operation = get_devtestlabs_management_client(None).gallery_image
+    gallery_image_operation = get_devtestlabs_management_client(None).gallery_images
     odata_filter = ODATA_NAME_FILTER.format(namespace.image)
     gallery_images = list(gallery_image_operation.list(namespace.resource_group,
                                                        namespace.lab_name,
@@ -249,7 +294,7 @@ def _use_custom_image(namespace):
     if is_valid_resource_id(namespace.image):
         namespace.custom_image_id = namespace.image
     else:
-        custom_image_operation = get_devtestlabs_management_client(None).custom_image
+        custom_image_operation = get_devtestlabs_management_client(None).custom_images
         odata_filter = ODATA_NAME_FILTER.format(namespace.image)
         custom_images = list(custom_image_operation.list(namespace.resource_group,
                                                          namespace.lab_name,
@@ -267,7 +312,7 @@ def _use_custom_image(namespace):
 
 def _get_formula(namespace):
     """ Retrieve formula image from lab """
-    formula_operation = get_devtestlabs_management_client(None).formula
+    formula_operation = get_devtestlabs_management_client(None).formulas
     odata_filter = ODATA_NAME_FILTER.format(namespace.formula)
     formula_images = list(formula_operation.list(namespace.resource_group,
                                                  namespace.lab_name,
@@ -297,8 +342,14 @@ def _validate_other_parameters(namespace, formula=None):
 def _validate_artifacts(namespace):
     if namespace.artifacts:
         from azure.cli.core.commands.client_factory import get_subscription_id
+        if hasattr(namespace, 'resource_group'):
+            resource_group = namespace.resource_group
+        else:
+            # some SDK methods have parameter name as 'resource_group_name'
+            resource_group = namespace.resource_group_name
+
         lab_resource_id = resource_id(subscription=get_subscription_id(),
-                                      resource_group=namespace.resource_group,
+                                      resource_group=resource_group,
                                       namespace='Microsoft.DevTestLab',
                                       type='labs',
                                       name=namespace.lab_name)
@@ -311,7 +362,7 @@ def _update_artifacts(artifacts, lab_resource_id):
 
     result_artifacts = []
     for artifact in artifacts:
-        artifact_id = artifact.get('artifactId', None)
+        artifact_id = artifact.get('artifact_id', None)
         if artifact_id:
             result_artifact = dict()
             result_artifact['artifact_id'] = _update_artifact_id(artifact_id, lab_resource_id)

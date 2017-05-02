@@ -20,9 +20,11 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          sync_site_repo,
                                                          _match_host_names_from_cert,
                                                          bind_ssl_cert,
-                                                         list_publish_profiles)
+                                                         list_publish_profiles,
+                                                         config_source_control)
 
 # pylint: disable=line-too-long
+from vsts_cd_manager.continuous_delivery_manager import ContinuousDeliveryResult
 
 
 class Test_Webapp_Mocked(unittest.TestCase):
@@ -145,6 +147,35 @@ class Test_Webapp_Mocked(unittest.TestCase):
 
         # assert, we return the virtual ip from the ip based ssl binding
         resolve_hostname_mock.assert_called_with('myweb.com')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.vsts_cd_provider.ContinuousDeliveryManager', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.vsts_cd_provider.Profile', autospec=True)
+    def test_config_source_control_vsts(self, profile_mock, cd_manager_mock, client_factory_mock):
+        # Mock the result of get auth token (avoiding REST call)
+        profile = mock.Mock()
+        profile.get_subscription.return_value = {'id': 'id1', 'name': 'sub1', 'tenantId': 'tenant1'}
+        profile.get_current_account_user.return_value = None
+        profile.get_login_credentials.return_value = None, None, None
+        profile.get_access_token_for_resource.return_value = None
+        profile_mock.return_value = profile
+
+        # Mock the cd manager class so no REST calls are made
+        cd_manager = mock.Mock()
+        status = ContinuousDeliveryResult(None, None, None, None, None, None, "message1", None, None, None)
+        cd_manager.setup_continuous_delivery.return_value = status
+        cd_manager_mock.return_value = cd_manager
+
+        # Mock the client and set the location
+        client = mock.Mock()
+        client_factory_mock.return_value = client
+        site = Site('antarctica')
+        site.default_host_name = 'myweb.com'
+        client.web_apps.get.return_value = site
+
+        config_source_control('group1', 'myweb', 'http://github.com/repo1', None, None,
+                              None, None, "slot1", 'vsts', 'ASPNetWap', 'account1', False)
+        cd_manager.setup_continuous_delivery.assert_called_with('slot1', 'ASPNetWap', 'account1', True, None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     def test_update_site_config(self, site_op_mock):

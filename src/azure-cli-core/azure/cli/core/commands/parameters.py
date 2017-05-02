@@ -7,7 +7,8 @@
 import argparse
 import platform
 
-from azure.cli.core.commands import CliArgumentType, register_cli_argument
+from azure.cli.core.commands import \
+    (CliArgumentType, register_cli_argument)
 from azure.cli.core.commands.validators import validate_tag, validate_tags
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands.validators import generate_deployment_name
