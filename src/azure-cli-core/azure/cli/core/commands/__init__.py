@@ -112,8 +112,10 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         logger.info("Starting long running operation '%s'", self.start_msg)
         correlation_message = ''
         self.controller.begin()
+        percent = 0.0
         while not poller.done():
-            self.controller.add(message='Running')
+            percent += .005
+            self.controller.add(message='Running', total_val=1, value=percent)
             try:
                 # pylint: disable=protected-access
                 correlation_id = json.loads(

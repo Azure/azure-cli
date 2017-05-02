@@ -26,17 +26,11 @@ class ShellProgressView(_ProgressViewBase):
     def write(self, args):
         """ writes the progres """
         global PROGRESS, PROGRESS_BAR
-        if isinstance(args, list):
-            message = args[0]
-            percent = args[1] or 0
-            if len(args) > 1:
-                PROGRESS_BAR = self._format_value(message, percent)
-            PROGRESS = message
-        else:
-            if 'message' in args:
-                PROGRESS = args['message']
-            else:
-                PROGRESS = args
+        message = args.get('message', '')
+        percent = args.get('percent', None)
+        if percent:
+            PROGRESS_BAR = self._format_value(message, percent)
+        PROGRESS = message
 
     def _format_value(self, msg, percent=0.0):
         _, col = get_window_dim()
