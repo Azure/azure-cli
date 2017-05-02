@@ -11,7 +11,7 @@ from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_
 from azure.cli.core.util import empty_on_404
 
 from azure.cli.command_modules.resource._client_factory import (_resource_client_factory,
-                                                                _resource_appliances_client_factory,
+                                                                _resource_managedapps_client_factory,
                                                                 cf_resource_groups,
                                                                 cf_providers,
                                                                 cf_features,
@@ -20,13 +20,12 @@ from azure.cli.command_modules.resource._client_factory import (_resource_client
                                                                 cf_deployment_operations,
                                                                 cf_policy_definitions,
                                                                 cf_resource_links,
-                                                                cf_resource_appliances)
-
+                                                                cf_resource_managedapplications)
 
 # Resource group commands
 def transform_resource_group_list(result):
-    return [OrderedDict([('Name', r['name']), ('Location', r['location']), ('Status', r['properties']['provisioningState'])]) for r in result]
-
+    return [OrderedDict([('Name', r['name']), \
+            ('Location', r['location']), ('Status', r['properties']['provisioningState'])]) for r in result]
 
 cli_command(__name__, 'group delete', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.delete', cf_resource_groups, no_wait_param='raw', confirmation=True)
 cli_generic_wait_command(__name__, 'group wait', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get', cf_resource_groups)
@@ -36,20 +35,19 @@ cli_command(__name__, 'group list', 'azure.cli.command_modules.resource.custom#l
 cli_command(__name__, 'group create', 'azure.cli.command_modules.resource.custom#create_resource_group')
 cli_command(__name__, 'group export', 'azure.cli.command_modules.resource.custom#export_group_as_template')
 
-
 # Resource commands
 
 def transform_resource_list(result):
     transformed = []
     for r in result:
-        res = OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']), ('Location', r['location']), ('Type', r['type'])])
+        res = OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']), \
+            ('Location', r['location']), ('Type', r['type'])])
         try:
             res['Status'] = r['properties']['provisioningStatus']
         except TypeError:
             res['Status'] = ' '
         transformed.append(res)
     return transformed
-
 
 cli_command(__name__, 'resource create', 'azure.cli.command_modules.resource.custom#create_resource')
 cli_command(__name__, 'resource delete', 'azure.cli.command_modules.resource.custom#delete_resource')
@@ -77,12 +75,11 @@ cli_command(__name__, 'tag delete', 'azure.mgmt.resource.resources.operations.ta
 cli_command(__name__, 'tag add-value', 'azure.mgmt.resource.resources.operations.tags_operations#TagsOperations.create_or_update_value', cf_tags)
 cli_command(__name__, 'tag remove-value', 'azure.mgmt.resource.resources.operations.tags_operations#TagsOperations.delete_value', cf_tags)
 
-
 # Resource group deployment commands
 def transform_deployments_list(result):
     sort_list = sorted(result, key=lambda deployment: deployment['properties']['timestamp'])
-    return [OrderedDict([('Name', r['name']), ('Timestamp', r['properties']['timestamp']), ('State', r['properties']['provisioningState'])]) for r in sort_list]
-
+    return [OrderedDict([('Name', r['name']), \
+            ('Timestamp', r['properties']['timestamp']), ('State', r['properties']['provisioningState'])]) for r in sort_list]
 
 cli_command(__name__, 'group deployment create', 'azure.cli.command_modules.resource.custom#deploy_arm_template', no_wait_param='no_wait')
 cli_generic_wait_command(__name__, 'group deployment wait', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.get', cf_deployments)
@@ -128,13 +125,12 @@ cli_command(__name__, 'resource link show', 'azure.mgmt.resource.links.operation
 cli_command(__name__, 'resource link list', 'azure.cli.command_modules.resource.custom#list_resource_links')
 cli_command(__name__, 'resource link update', 'azure.cli.command_modules.resource.custom#update_resource_link')
 
-cli_command(__name__, 'appliance create', 'azure.cli.command_modules.resource.custom#create_appliance')
-cli_command(__name__, 'appliance delete', 'azure.mgmt.resource.appliances.operations#AppliancesOperations.delete', cf_resource_appliances)
-cli_command(__name__, 'appliance show', 'azure.cli.command_modules.resource.custom#show_appliance', exception_handler=empty_on_404)
-cli_command(__name__, 'appliance list', 'azure.cli.command_modules.resource.custom#list_appliances')
+cli_command(__name__, 'managedapp create', 'azure.cli.command_modules.resource.custom#create_appliance')
+cli_command(__name__, 'managedapp delete', 'azure.mgmt.resource.managedapplications.operations#AppliancesOperations.delete', cf_resource_managedapplications)
+cli_command(__name__, 'managedapp show', 'azure.cli.command_modules.resource.custom#show_appliance', exception_handler=empty_on_404)
+cli_command(__name__, 'managedapp list', 'azure.cli.command_modules.resource.custom#list_appliances')
 
-cli_command(__name__, 'appliance definition create', 'azure.cli.command_modules.resource.custom#create_appliancedefinition')
-cli_command(__name__, 'appliance definition delete', 'azure.mgmt.resource.appliances.operations#ApplianceDefinitionsOperations.delete', cf_resource_appliances)
-cli_command(__name__, 'appliance definition show', 'azure.cli.command_modules.resource.custom#show_appliancedefinition')
-cli_command(__name__, 'appliance definition list', 'azure.mgmt.resource.appliances.operations#ApplianceDefinitionsOperations.list_at_resource_group', cf_resource_appliances, exception_handler=empty_on_404)
-cli_command(__name__, 'appliance definition update', 'azure.cli.command_modules.resource.custom#update_appliancedefinition')
+cli_command(__name__, 'managedapp definition create', 'azure.cli.command_modules.resource.custom#create_appliancedefinition')
+cli_command(__name__, 'managedapp definition delete', 'azure.mgmt.resource.managedapplications.operations#ApplianceDefinitionsOperations.delete', cf_resource_managedapplications)
+cli_command(__name__, 'managedapp definition show', 'azure.cli.command_modules.resource.custom#show_appliancedefinition')
+cli_command(__name__, 'managedapp definition list', 'azure.mgmt.resource.managedapplications.operations#ApplianceDefinitionsOperations.list_by_resource_group', cf_resource_managedapplications, exception_handler=empty_on_404)
