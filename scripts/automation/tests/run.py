@@ -63,8 +63,8 @@ if __name__ == '__main__':
         parse.print_help()
         sys.exit(1)
 
-    retval, failed_tests = run_tests(selected_modules, not args.non_parallel, args.live)
-    if failed_tests:
+    success, failed_tests = run_tests(selected_modules, not args.non_parallel, args.live)
+    if failed_tests or not success:
         print('==== FAILED TESTS ====')
         for test in failed_tests:
             print(test)
@@ -72,4 +72,4 @@ if __name__ == '__main__':
         print('==== ALL TESTS PASSED! ====')
 
 
-    sys.exit(0 if retval else 1)
+    sys.exit(0 if success else 1)
