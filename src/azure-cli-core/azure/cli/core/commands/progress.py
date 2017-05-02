@@ -169,11 +169,7 @@ class DeterminateStandardOut(DeterminateProgressView):
         completed = int(bar_len * percent)
 
         message = '\r{}['.format(msg)
-        for i in range(bar_len):
-            if i < completed:
-                message += '#'
-            else:
-                message += ' '
+        message += ('#' * completed).ljust(bar_len)
         message += ']  {:.4%}'.format(percent)
         return message
 
