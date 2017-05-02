@@ -3,8 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import sys
-import humanfriendly
 from enum import Enum
+
+import humanfriendly
 
 BAR_LEN = 100
 
