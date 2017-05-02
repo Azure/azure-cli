@@ -167,7 +167,7 @@ class WebappConfigureTest(ResourceGroupVCRTestBase):
             JMESPathCheck('use32BitWorkerProcess', False),
             JMESPathCheck('webSocketsEnabled', True)
         ]
-        self.cmd('webapp config update -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.0 --net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false --web-sockets-enabled=true'.format(
+        self.cmd('webapp config set -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.0 --net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false --web-sockets-enabled=true'.format(
             self.resource_group, self.webapp_name), checks=checks)
         self.cmd('webapp config show -g {} -n {}'.format(self.resource_group, self.webapp_name), checks=checks)
 
@@ -309,10 +309,10 @@ class LinuxWebappSceanrioTest(ResourceGroupVCRTestBase):
         self.cmd('webapp create -g {} -n {} --plan {}'.format(self.resource_group, webapp, plan), checks=[
             JMESPathCheck('name', webapp),
         ])
-        self.cmd('webapp config update -g {} -n {} --startup-file {}'.format(self.resource_group, webapp, 'process.json'), checks=[
+        self.cmd('webapp config set -g {} -n {} --startup-file {}'.format(self.resource_group, webapp, 'process.json'), checks=[
             JMESPathCheck('appCommandLine', 'process.json')
         ])
-        self.cmd('webapp config container update -g {} -n {} --docker-custom-image-name {} --docker-registry-server-password {} --docker-registry-server-user {} --docker-registry-server-url {}'.format(
+        self.cmd('webapp config container set -g {} -n {} --docker-custom-image-name {} --docker-registry-server-password {} --docker-registry-server-user {} --docker-registry-server-url {}'.format(
             self.resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url'))
         result = self.cmd('webapp config container show -g {} -n {} '.format(self.resource_group, webapp))
         self.assertEqual(set(x['name'] for x in result), set(['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME', 'DOCKER_CUSTOM_IMAGE_NAME', 'DOCKER_REGISTRY_SERVER_PASSWORD']))
@@ -417,7 +417,7 @@ class WebappSlotScenarioTest(ResourceGroupVCRTestBase):
         self.assertEqual(set([x['name'] for x in result]), set(['WEBSITE_NODE_DEFAULT_VERSION', 's1']))
 
         # create a new slot by cloning from prod slot
-        self.cmd('webapp config update -g {} -n {} --node-version {}'.format(self.resource_group, self.webapp, test_node_version))
+        self.cmd('webapp config set -g {} -n {} --node-version {}'.format(self.resource_group, self.webapp, test_node_version))
         self.cmd('webapp deployment slot create -g {} -n {} --slot {} --configuration-source {}'.format(self.resource_group, self.webapp, slot2, self.webapp))
         self.cmd('webapp config appsettings show -g {} -n {} --slot {}'.format(self.resource_group, self.webapp, slot2), checks=[
             JMESPathCheck("length([])", 1),

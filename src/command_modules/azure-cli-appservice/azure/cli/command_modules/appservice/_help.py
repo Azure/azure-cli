@@ -32,9 +32,9 @@ helps['webapp config show'] = """
     short-summary: Show web app configurations.
 """
 
-helps['webapp config update'] = """
+helps['webapp config set'] = """
     type: command
-    short-summary: Update web app configurations.
+    short-summary: create or update web app configurations.
 """
 
 helps['webapp config appsettings'] = """
@@ -47,13 +47,13 @@ helps['webapp config appsettings show'] = """
     short-summary: Show web app settings.
 """
 
-helps['webapp config appsettings update'] = """
+helps['webapp config appsettings set'] = """
     type: command
     short-summary: Create or update web app settings.
     examples:
         - name: Set the default node version for a specified web app.
           text: >
-            az webapp config appsettings update
+            az webapp config appsettings set
             -g MyResourceGroup
             -n MyUniqueApp
             --settings WEBSITE_NODE_DEFAULT_VERSION=6.9.1
@@ -74,13 +74,13 @@ helps['webapp config connection-string delete'] = """
     short-summary: delete connection strings
 """
 
-helps['webapp config connection-string update'] = """
+helps['webapp config connection-string set'] = """
     type: command
     short-summary: Create or update connection strings.
     examples:
         - name: add a mysql connection string.
           text: >
-            az webapp config connection-string update
+            az webapp config connection-string set
             -g MyResourceGroup
             -n MyUniqueApp
             -t mysql
@@ -97,9 +97,9 @@ helps['webapp config container show'] = """
     short-summary: Show container settings.
 """
 
-helps['webapp config container update'] = """
+helps['webapp config container set'] = """
     type: command
-    short-summary: Update container settings.
+    short-summary: create or update container settings.
 """
 
 helps['webapp config container delete'] = """
