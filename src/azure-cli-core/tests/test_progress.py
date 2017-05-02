@@ -46,9 +46,9 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
     def test_det_model(self):
         """ test the determinate progress reporter """
         reporter = progress.DetProgressReporter()
-        message, percent = reporter.report()
-        self.assertEqual(message, '')
-        self.assertEqual(percent, None)
+        args = reporter.report()
+        self.assertEqual(args['message'], '')
+        self.assertEqual(args['percent'], None)
 
         reporter.add({'message': 'Progress', 'total_val': 0, 'value': 10})
         self.assertEqual(reporter.message, 'Progress')
@@ -85,7 +85,7 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         self.assertEqual(view.spinner.label, 'In Progress')
         view.write({})
         after = view.spinner.total
-        self.assertTrue(after > before)
+        self.assertTrue(after >= before)
         view.write({'message': 'TESTING'})
         self.assertEqual(view.spinner.label, 'TESTING')
 
@@ -94,24 +94,14 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         outstream = MockOutstream()
         view = progress.DeterminateStandardOut(out=outstream)
         self.assertEqual(view.get_type().value, progress.ProgressType.Determinate.value)
-        args = {'message': 'hihi', 'total_val': 1, 'value': .5}
-        view.write({args})
+        view.write(message='hihi', total_val=1, value=.5)
         # 95 length, 48 complete, 4 dec percent
-        bar_str = ''
-        for i in range(95):
-            if i < 48:
-                bar_str += '#'
-            else:
-                bar_str += ' '
+        bar_str = ('#' * 48).ljust(95)
         self.assertEqual(view.flush(), '\rhihi[{}]  50.0000%'.format(bar_str))
-        args = {'message': '', 'total_val': 1, 'value': .9}
+
+        view.write(message='', total_val=1, value=.9)
         # 99 length, 90 complete, 4 dec percent
-        bar_str = ''
-        for i in range(95):
-            if i < 90:
-                bar_str += '#'
-            else:
-                bar_str += ' '
+        bar_str = ('#' * 90).ljust(95)
         self.assertEqual(view.flush(), '\r[{}]  90.0000%'.format(bar_str))
 
     def test_controller(self):
@@ -125,11 +115,11 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         controller.init_progress(view)
         self.assertTrue(view in controller.active_progress)
 
-        start = controller.begin()
-        self.assertEqual(start, 'Starting')
+        controller.begin()
+        self.assertEqual(controller.reporter.spinner.label, 'Starting')
 
-        end = controller.end()
-        self.assertEqual(end, 'Finished')
+        controller.end()
+        self.assertEqual(controller.reporter.spinner.label, 'Finished')
 
         controller = progress.ProgressHook(progress.ProgressType.Determinate)
         view = DetMockOutstream()
