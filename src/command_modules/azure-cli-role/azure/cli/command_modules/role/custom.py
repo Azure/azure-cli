@@ -505,13 +505,15 @@ def _resolve_service_principal(client, identifier):
         raise CLIError("service principal '{}' doesn't exist".format(identifier))
 
 
-def _process_service_principal_creds(years, cert, create_cert, password, key_vault, cert_name):
+def _process_service_principal_creds(years, cert, create_cert, password, key_vault, cert_name,  # pylint: disable=too-many-arguments
+                                     start_date):
     # pylint: disable=protected-access
     public_cert_string = None
     cert_file = None
     end_date = None
 
-    cred_usage_error = CLIError('Usage error: --cert | --create-cert [--key-vault --cert-name] | --password | --key-vault --cert-name')
+    cred_usage_error = CLIError('Usage error: --cert | --create-cert [--key-vault --cert-name] | '
+                                '--password | --key-vault --cert-name')
     if cert:
         # 1 - User-supplied public cert data
         if any(create_cert, password, key_vault, cert_name):
@@ -529,16 +531,23 @@ def _process_service_principal_creds(years, cert, create_cert, password, key_vau
         public_cert_string, cert_file = \
             _create_self_signed_cert(years, key_vault, cert_name)
     elif key_vault:
+        import base64
+
         if password or cert or not cert_name:
             raise cred_usage_error
         # 3 - Use existing cert from KeyVault
-        raise CLIError('TODO: Existing KeyVault cert!')
+        kv_client = _get_keyvault_client()
+        cert_id = \
+            'https://{}.vault.azure.net/certificates/{}'.format(key_vault, cert_name)
+        cert_obj = kv_client.get_certificate(cert_id)
+        public_cert_string = base64.b64encode(cert_obj.cer).decode('utf-8')  # pylint: disable=no-member
+        cert_file = None
     else:
         # 4 - Nothing supplied or user-supplied password
         password = password or str(uuid.uuid4())
 
     end_date = end_date or start_date + relativedelta(years=years or 1)
-    return password, public_cert_string, cert_file, start_date, end_date
+    return password, public_cert_string, cert_file, end_date
 
 
 def create_service_principal_for_rbac(
@@ -556,9 +565,6 @@ def create_service_principal_for_rbac(
     :param str scopes: space separated scopes the service principal's role assignment applies to.
            Defaults to the root of the current subscription.
     :param str role: role the service principal has on the resources.
-    :param str key_vault: Name or ID of a KeyVault.
-    :param str cert_name: Name to use when creating a self-signed certificate in KeyVault, or the
-        name of an existing KeyVault certificate to use.
     '''
     import time
     graph_client = _graph_client_factory()
@@ -584,8 +590,9 @@ def create_service_principal_for_rbac(
     if name is None:
         name = 'http://' + app_display_name  # just a valid uri, no need to exist
 
-    password, public_cert_string, cert_file, start_date, end_date = \
-        _process_service_principal_creds(years, cert, create_cert, password, key_vault, cert_name)
+    password, public_cert_string, cert_file, end_date = \
+        _process_service_principal_creds(years, cert, create_cert, password, key_vault, cert_name,
+                                         start_date)
 
     aad_application = create_application(graph_client.applications,
                                          display_name=app_display_name,
@@ -662,9 +669,21 @@ def create_service_principal_for_rbac(
     return result
 
 
-def _create_self_signed_cert(years, key_vault, key_vault_cert_name):
+def _get_keyvault_client():
+    from azure.cli.core._profile import Profile
+    from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
+
+    def _get_token(server, resource, scope):  # pylint: disable=unused-argument
+        return Profile().get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+
+    return KeyVaultClient(KeyVaultAuthentication(_get_token))
+
+
+def _create_self_signed_cert(years, key_vault, key_vault_cert_name):  # pylint: disable=too-many-locals
+    import base64
     from os import path
     import tempfile
+    import time
     from OpenSSL import crypto, SSL
     from datetime import timedelta
 
@@ -711,8 +730,52 @@ def _create_self_signed_cert(years, key_vault, key_vault_cert_name):
         # get rid of the header and tails for upload to AAD: ----BEGIN CERT....----
         cert_string = re.sub(r'\-+[A-z\s]+\-+', '', cert_string).strip()
     elif key_vault and key_vault_cert_name:
-        # TODO create in KeyVault
-        raise CLIError('TODO: Create in KeyVault!')
+
+        kv_client = _get_keyvault_client()
+        cert_policy = {
+            'issuer_parameters': {
+                'name': 'Self'
+            },
+            'key_properties': {
+                'exportable': True,
+                'key_size': 2048,
+                'key_type': 'RSA',
+                'reuse_key': True
+            },
+            'lifetime_actions': [{
+                'action': {
+                    'action_type': 'AutoRenew'
+                },
+                'trigger': {
+                    'days_before_expiry': 90
+                }
+            }],
+            'secret_properties': {
+                'content_type': 'application/x-pkcs12'
+            },
+            'x509_certificate_properties': {
+                'key_usage': [
+                    'cRLSign',
+                    'dataEncipherment',
+                    'digitalSignature',
+                    'keyEncipherment',
+                    'keyAgreement',
+                    'keyCertSign'
+                ],
+                'subject': 'CN=KeyVault Generated',
+                'validity_in_months': ((years * 12) + 1)
+            }
+        }
+        vault_base_url = 'https://{}.vault.azure.net/'.format(key_vault)
+        kv_client.create_certificate(vault_base_url, key_vault_cert_name, cert_policy)
+        while kv_client.get_certificate_operation(vault_base_url, key_vault_cert_name).status != 'completed':  # pylint: disable=no-member, line-too-long
+            time.sleep(10)
+
+        cert_id = \
+            'https://{}.vault.azure.net/certificates/{}'.format(key_vault, key_vault_cert_name)
+        cert = kv_client.get_certificate(cert_id)
+        cert_string = base64.b64encode(cert.cer).decode('utf-8')  # pylint: disable=no-member
+        creds_file = None
     else:
         raise CLIError('Usage error: --create-cert | --create-cert --key-vault --cert-name')
     return (cert_string, creds_file)
@@ -763,8 +826,9 @@ def _normalize_cert(x509):
     return _get_public(x509), end_date
 
 
+# pylint: disable=too-many-arguments
 def reset_service_principal_credential(name, password=None, create_cert=False,
-                                       cert=None, years=None):
+                                       cert=None, years=None, key_vault=None, cert_name=None):
     '''reset credential, on expiration or you forget it.
 
     :param str name: the name, can be the app id uri, app id guid, or display name
@@ -791,10 +855,13 @@ def reset_service_principal_credential(name, password=None, create_cert=False,
     public_cert_string = None
     cert_file = None
     end_date = None
+
+    # TODO: Port logic from create-for-rbac
+    raise CLIError("TODO: Update this too, blarg!")
     if len([x for x in [cert, create_cert, password] if x]) > 1:
         raise CLIError('Usage error: --cert | --create-cert | --password')
     if create_cert:
-        public_cert_string, cert_file = _create_self_signed_cert(years or 1)
+        public_cert_string, cert_file = _create_self_signed_cert(years or 1, key_vault, cert_name)
     elif cert:
         public_cert_string, end_date = _normalize_cert(cert)
         if years:

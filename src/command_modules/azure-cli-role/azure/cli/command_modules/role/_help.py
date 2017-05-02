@@ -8,6 +8,9 @@ from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long
 
 helps['ad sp create-for-rbac'] = """
+            parameters:
+                - name: --cert-name
+                  short-summary: Name to use when creating a self-signed certificate in KeyVault, or the name of an existing KeyVault certificate to use.
             examples:
                 - name: Create with a default role assignment.
                   text: az ad sp create-for-rbac
@@ -34,6 +37,14 @@ helps['ad sp create-for-rbac'] = """
                     az keyvault certificate download --vault-name vault -n cert-name -f cert.pem \n
                     az ad sp create-for-rbac --cert @cert.pem
             """
+
+helps['ad sp reset-credentials'] = """
+    type: command
+    parameters:
+        - name: --cert-name
+          short-summary: Name to use for the self-signed certificate in KeyVault.
+
+"""
 
 helps['role'] = """
     type: group
