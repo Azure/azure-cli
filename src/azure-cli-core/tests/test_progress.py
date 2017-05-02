@@ -50,7 +50,7 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         self.assertEqual(message, '')
         self.assertEqual(percent, None)
 
-        reporter.add('Progress', 0, 10)
+        reporter.add({'message': 'Progress', 'total_val': 0, 'value': 10})
         self.assertEqual(reporter.message, 'Progress')
         self.assertEqual(reporter.curr_val, 0)
         self.assertEqual(reporter.total_val, 10)
@@ -59,11 +59,11 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         self.assertEqual(percent, 0.0)
 
         with self.assertRaises(AssertionError):
-            reporter.add('In words', -1, 10)
+            reporter.add({'message': 'In words', 'total_val': -1, 'value': 10})
         with self.assertRaises(AssertionError):
-            reporter.add('In words', 1, -10)
+            reporter.add({'message': 'In words', 'total_val': 1, 'value': -10})
         with self.assertRaises(AssertionError):
-            reporter.add('In words', 490, 10)
+            reporter.add({'message': 'In words', 'total_val': 490, 'value': 10})
 
     def test_indet_model(self):
         """ test the indetermiante progress reporter """
@@ -80,7 +80,7 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
     def test_indet_stdview(self):
         """ tests the indeterminate progress standardout view """
         view = progress.IndeterminateStandardOut()
-        self.assertEqual(view.get_type, progress.ProgressType.Indeterminate)
+        self.assertEqual(view.get_type().value, progress.ProgressType.Indeterminate.value)
         before = view.spinner.total
         self.assertEqual(view.spinner.label, 'In Progress')
         view.write({})
@@ -93,7 +93,7 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         """ test the determinate progress standardout view """
         outstream = MockOutstream()
         view = progress.DeterminateStandardOut(out=outstream)
-        self.assertEqual(view.get_type, progress.ProgressType.Determinate)
+        self.assertEqual(view.get_type().value, progress.ProgressType.Determinate.value)
         args = {'message': 'hihi', 'total_val': 1, 'value': .5}
         view.write({args})
         # 95 length, 48 complete, 4 dec percent
@@ -121,7 +121,7 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         with self.assertRaises(AssertionError):
             controller.init_progress(view)
 
-        controller.registery.append(view)
+        controller.registery.append(MockOutstream)
         controller.init_progress(view)
         self.assertTrue(view in controller.active_progress)
 
