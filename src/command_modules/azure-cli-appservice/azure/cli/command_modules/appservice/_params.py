@@ -9,7 +9,7 @@ from azure.cli.core.commands import register_cli_argument
 from azure.cli.core.commands.parameters import (resource_group_name_type, location_type,
                                                 get_resource_name_completion_list, file_type,
                                                 CliArgumentType, ignore_type, enum_choice_list)
-from azure.mgmt.web.models import DatabaseType
+from azure.mgmt.web.models import DatabaseType, ConnectionStringType
 from ._client_factory import web_client_factory
 
 
@@ -104,6 +104,13 @@ register_cli_argument('webapp log config', 'web_server_logging', help='configure
 register_cli_argument('webapp log tail', 'provider', help="scope the live traces to certain providers/folders, for example:'application', 'http' for server log, 'kudu/trace', etc")
 register_cli_argument('webapp log download', 'log_file', default='webapp_logs.zip', type=file_type, completer=FilesCompleter(), help='the downloaded zipped log file path')
 
+for scope in ['appsettings', 'connection-string']:
+    register_cli_argument('webapp config ' + scope, 'settings', nargs='+', help="space separated {} in a format of <name>=<value>".format(scope))
+    register_cli_argument('webapp config ' + scope, 'slot_settings', nargs='+', help="space separated slot {} in a format of <name>=<value>".format(scope))
+    register_cli_argument('webapp config ' + scope, 'setting_names', nargs='+', help="space separated {} names".format(scope))
+register_cli_argument('webapp config connection-string', 'connection_string_type',
+                      options_list=('--connection-string-type', '-t'), help='connection string type', **enum_choice_list(ConnectionStringType))
+
 register_cli_argument('webapp config appsettings', 'settings', nargs='+', help="space separated app settings in a format of `<name>=<value>`")
 register_cli_argument('webapp config appsettings', 'slot_settings', nargs='+', help="space separated slot app settings in a format of `<name>=<value>`")
 register_cli_argument('webapp config appsettings', 'setting_names', nargs='+', help="space separated app setting names")
@@ -113,20 +120,20 @@ register_cli_argument('webapp config container', 'docker_custom_image_name', opt
 register_cli_argument('webapp config container', 'docker_registry_server_user', options_list=('--docker-registry-server-user', '-u'), help='the container registry server username')
 register_cli_argument('webapp config container', 'docker_registry_server_password', options_list=('--docker-registry-server-password', '-p'), help='the container registry server password')
 
-register_cli_argument('webapp config update', 'remote_debugging_enabled', help='enable or disable remote debugging', **enum_choice_list(two_states_switch))
-register_cli_argument('webapp config update', 'web_sockets_enabled', help='enable or disable web sockets', **enum_choice_list(two_states_switch))
-register_cli_argument('webapp config update', 'always_on', help='ensure webapp gets loaded all the time, rather unloaded after been idle. Recommended when you have continuous web jobs running', **enum_choice_list(two_states_switch))
-register_cli_argument('webapp config update', 'auto_heal_enabled', help='enable or disable auto heal', **enum_choice_list(two_states_switch))
-register_cli_argument('webapp config update', 'use32_bit_worker_process', options_list=('--use-32bit-worker-process',), help='use 32 bits worker process or not', **enum_choice_list(two_states_switch))
-register_cli_argument('webapp config update', 'node_version', help='The version used to run your web app if using node, e.g., 4.4.7, 4.5.0, 6.2.2, 6.6.0')
-register_cli_argument('webapp config update', 'php_version', help='The version used to run your web app if using PHP, e.g., 5.5, 5.6, 7.0')
-register_cli_argument('webapp config update', 'python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
-register_cli_argument('webapp config update', 'net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")
-register_cli_argument('webapp config update', 'linux_fx_version', help="The runtime stack used for your linux-based webapp, e.g., \"RUBY|2.3\", \"NODE|6.6\", \"PHP|5.6\", \"DOTNETCORE|1.1.0\". See https://aka.ms/linux-stacks for more info.")
-register_cli_argument('webapp config update', 'java_version', help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
-register_cli_argument('webapp config update', 'java_container', help="The java container, e.g., Tomcat, Jetty")
-register_cli_argument('webapp config update', 'java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
-register_cli_argument('webapp config update', 'app_command_line', options_list=('--startup-file',), help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
+register_cli_argument('webapp config set', 'remote_debugging_enabled', help='enable or disable remote debugging', **enum_choice_list(two_states_switch))
+register_cli_argument('webapp config set', 'web_sockets_enabled', help='enable or disable web sockets', **enum_choice_list(two_states_switch))
+register_cli_argument('webapp config set', 'always_on', help='ensure webapp gets loaded all the time, rather unloaded after been idle. Recommended when you have continuous web jobs running', **enum_choice_list(two_states_switch))
+register_cli_argument('webapp config set', 'auto_heal_enabled', help='enable or disable auto heal', **enum_choice_list(two_states_switch))
+register_cli_argument('webapp config set', 'use32_bit_worker_process', options_list=('--use-32bit-worker-process',), help='use 32 bits worker process or not', **enum_choice_list(two_states_switch))
+register_cli_argument('webapp config set', 'node_version', help='The version used to run your web app if using node, e.g., 4.4.7, 4.5.0, 6.2.2, 6.6.0')
+register_cli_argument('webapp config set', 'php_version', help='The version used to run your web app if using PHP, e.g., 5.5, 5.6, 7.0')
+register_cli_argument('webapp config set', 'python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
+register_cli_argument('webapp config set', 'net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")
+register_cli_argument('webapp config set', 'linux_fx_version', help="The runtime stack used for your linux-based webapp, e.g., \"RUBY|2.3\", \"NODE|6.6\", \"PHP|5.6\", \"DOTNETCORE|1.1.0\". See https://aka.ms/linux-stacks for more info.")
+register_cli_argument('webapp config set', 'java_version', help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
+register_cli_argument('webapp config set', 'java_container', help="The java container, e.g., Tomcat, Jetty")
+register_cli_argument('webapp config set', 'java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
+register_cli_argument('webapp config set', 'app_command_line', options_list=('--startup-file',), help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
 
 register_cli_argument('webapp config ssl bind', 'ssl_type', help='The ssl cert type', **enum_choice_list(['SNI', 'IP']))
 register_cli_argument('webapp config ssl upload', 'certificate_password', help='The ssl cert password')
@@ -206,9 +213,9 @@ register_cli_argument('appservice web log config', 'web_server_logging', help='c
 register_cli_argument('appservice web log tail', 'provider', help="scope the live traces to certain providers/folders, for example:'application', 'http' for server log, 'kudu/trace', etc")
 register_cli_argument('appservice web log download', 'log_file', default='webapp_logs.zip', type=file_type, completer=FilesCompleter(), help='the downloaded zipped log file path')
 
-register_cli_argument('appservice web config appsettings', 'settings', nargs='+', help="space separated app settings in a format of `<name>=<value>`")
-register_cli_argument('appservice web config appsettings', 'slot_settings', nargs='+', help="space separated slot app settings in a format of `<name>=<value>`")
-register_cli_argument('appservice web config appsettings', 'setting_names', nargs='+', help="space separated app setting names")
+register_cli_argument('appservice web config appsettings', 'settings', nargs='+', help='space separated appsettings in a format of <name>=<value>')
+register_cli_argument('appservice web config appsettings', 'slot_settings', nargs='+', help='space separated slot appsettings in a format of <name>=<value>')
+register_cli_argument('appservice web config appsettings', 'setting_names', nargs='+', help='space separated sppsettings names')
 
 register_cli_argument('appservice web config container', 'docker_registry_server_url', options_list=('--docker-registry-server-url', '-r'), help='the container registry server url')
 register_cli_argument('appservice web config container', 'docker_custom_image_name', options_list=('--docker-custom-image-name', '-c'), help='the container custom image name and optionally the tag name')
