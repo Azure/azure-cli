@@ -78,6 +78,8 @@ class CliArgumentType(object):
             kwargs['options_list'] = [options_list]
         self.settings = {}
         self.update(overrides, **kwargs)
+        self.required = None
+        self.default_name = None
 
     def update(self, other=None, **kwargs):
         if other:
@@ -247,8 +249,11 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
         arg.type.update(other=argtype)
 
     def _resolve_default_value_from_cfg_file(self, arg, overrides):
+        if arg.type.required == None:
+            arg.type.required = arg.type.settings.get('required', False)
         if 'configured_default' in overrides.settings:
             def_config = overrides.settings.pop('configured_default', None)
+            arg.type.default_name = def_config
             # same blunt mechanism like we handled id-parts, for create command, no name default
             if (self.name.split()[-1] == 'create' and
                     overrides.settings.get('metavar', None) == 'NAME'):
