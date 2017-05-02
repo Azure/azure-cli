@@ -62,16 +62,20 @@ cli_command(__name__, 'webapp stop', 'azure.cli.command_modules.appservice.custo
 cli_command(__name__, 'webapp start', 'azure.cli.command_modules.appservice.custom#start_webapp')
 cli_command(__name__, 'webapp restart', 'azure.cli.command_modules.appservice.custom#restart_webapp')
 
-cli_command(__name__, 'webapp config update', 'azure.cli.command_modules.appservice.custom#update_site_configs')
+cli_command(__name__, 'webapp config set', 'azure.cli.command_modules.appservice.custom#update_site_configs')
 cli_command(__name__, 'webapp config show', 'azure.cli.command_modules.appservice.custom#get_site_configs', exception_handler=empty_on_404)
 cli_command(__name__, 'webapp config appsettings show', 'azure.cli.command_modules.appservice.custom#get_app_settings', exception_handler=empty_on_404)
-cli_command(__name__, 'webapp config appsettings update', 'azure.cli.command_modules.appservice.custom#update_app_settings')
+cli_command(__name__, 'webapp config appsettings set', 'azure.cli.command_modules.appservice.custom#update_app_settings')
 cli_command(__name__, 'webapp config appsettings delete', 'azure.cli.command_modules.appservice.custom#delete_app_settings')
+cli_command(__name__, 'webapp config connection-string show', 'azure.cli.command_modules.appservice.custom#get_connection_strings', exception_handler=empty_on_404)
+cli_command(__name__, 'webapp config connection-string set', 'azure.cli.command_modules.appservice.custom#update_connection_strings')
+cli_command(__name__, 'webapp config connection-string delete', 'azure.cli.command_modules.appservice.custom#delete_connection_strings')
+
 cli_command(__name__, 'webapp config hostname add', 'azure.cli.command_modules.appservice.custom#add_hostname', exception_handler=ex_handler_factory())
 cli_command(__name__, 'webapp config hostname list', 'azure.cli.command_modules.appservice.custom#list_hostnames')
 cli_command(__name__, 'webapp config hostname delete', 'azure.cli.command_modules.appservice.custom#delete_hostname')
 cli_command(__name__, 'webapp config hostname get-external-ip', 'azure.cli.command_modules.appservice.custom#get_external_ip')
-cli_command(__name__, 'webapp config container update', 'azure.cli.command_modules.appservice.custom#update_container_settings')
+cli_command(__name__, 'webapp config container set', 'azure.cli.command_modules.appservice.custom#update_container_settings')
 cli_command(__name__, 'webapp config container delete', 'azure.cli.command_modules.appservice.custom#delete_container_settings')
 cli_command(__name__, 'webapp config container show', 'azure.cli.command_modules.appservice.custom#show_container_settings', exception_handler=empty_on_404)
 
@@ -126,6 +130,7 @@ cli_command(__name__, 'appservice web config show', 'azure.cli.command_modules.a
 cli_command(__name__, 'appservice web config appsettings show', 'azure.cli.command_modules.appservice.custom#get_app_settings', exception_handler=empty_on_404)
 cli_command(__name__, 'appservice web config appsettings update', 'azure.cli.command_modules.appservice.custom#update_app_settings')
 cli_command(__name__, 'appservice web config appsettings delete', 'azure.cli.command_modules.appservice.custom#delete_app_settings')
+
 cli_command(__name__, 'appservice web config hostname add', 'azure.cli.command_modules.appservice.custom#add_hostname', exception_handler=ex_handler_factory())
 cli_command(__name__, 'appservice web config hostname list', 'azure.cli.command_modules.appservice.custom#list_hostnames')
 cli_command(__name__, 'appservice web config hostname delete', 'azure.cli.command_modules.appservice.custom#delete_hostname')

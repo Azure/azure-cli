@@ -159,7 +159,16 @@ def get_app_settings(resource_group_name, name, slot=None):
     client = web_client_factory()
     slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
     result = [{'name': p, 'value': result.properties[p],
-               'slotSetting': str(p in (slot_cfg_names.app_setting_names or []))} for p in result.properties]  # pylint: disable=line-too-long
+               'slotSetting': p in (slot_cfg_names.app_setting_names or [])} for p in result.properties]  # pylint: disable=line-too-long
+    return result
+
+
+def get_connection_strings(resource_group_name, name, slot=None):
+    result = _generic_site_operation(resource_group_name, name, 'list_connection_strings', slot)
+    client = web_client_factory()
+    slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
+    result = [{'name': p, 'value': result.properties[p],
+               'slotSetting': p in (slot_cfg_names.connection_string_names or [])} for p in result.properties]  # pylint: disable=line-too-long
     return result
 
 
@@ -245,6 +254,58 @@ def delete_app_settings(resource_group_name, name, setting_names, slot=None):
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
     return _generic_site_operation(resource_group_name, name, 'update_application_settings',
                                    slot, app_settings)
+
+
+def update_connection_strings(resource_group_name, name, connection_string_type,
+                              settings=None, slot=None, slot_settings=None):
+    from azure.mgmt.web.models import ConnStringValueTypePair
+    if not settings and not slot_settings:
+        raise CLIError('Usage Error: --settings |--slot-settings')
+
+    settings = settings or []
+    slot_settings = slot_settings or []
+
+    conn_strings = _generic_site_operation(resource_group_name, name,
+                                           'list_connection_strings', slot)
+    for name_value in settings + slot_settings:
+        # split at the first '=', connection string should not have '=' in the name
+        conn_string_name, value = name_value.split('=', 1)
+        if value[0] in ["'", '"']:  # strip away the quots used as separators
+            value = value[1:-1]
+        conn_strings.properties[conn_string_name] = ConnStringValueTypePair(value,
+                                                                            connection_string_type)
+
+    result = _generic_site_operation(resource_group_name, name, 'update_connection_strings',
+                                     slot, conn_strings)
+
+    if slot_settings:
+        client = web_client_factory()
+        new_slot_setting_names = [n.split('=', 1)[0] for n in slot_settings]
+        slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
+        slot_cfg_names.connection_string_names = slot_cfg_names.connection_string_names or []
+        slot_cfg_names.connection_string_names += new_slot_setting_names
+        client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
+
+    return result.properties
+
+
+def delete_connection_strings(resource_group_name, name, setting_names, slot=None):
+    conn_strings = _generic_site_operation(resource_group_name, name,
+                                           'list_connection_strings', slot)
+    client = web_client_factory()
+
+    slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
+    is_slot_settings = False
+    for setting_name in setting_names:
+        conn_strings.properties.pop(setting_name, None)
+        if setting_name in (slot_cfg_names.connection_string_names or []):
+            slot_cfg_names.connection_string_names.remove(setting_name)
+            is_slot_settings = True
+
+    if is_slot_settings:
+        client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
+    return _generic_site_operation(resource_group_name, name, 'update_connection_strings',
+                                   slot, conn_strings)
 
 
 CONTAINER_APPSETTING_NAMES = ['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME',
