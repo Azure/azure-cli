@@ -24,9 +24,11 @@ def cli_documentdb_data_plane_command(name,  # pylint: disable=too-many-argument
 
     command.add_argument('db_resource_group_name', '--resource-group-name', '-g',
                          arg_group=group_name,
-                         help='name of the resource group')
+                         help='name of the resource group. Must be used in conjunction with '
+                              'documentdb account name.')
     command.add_argument('db_account_name', '--name', '-n', arg_group=group_name,
-                         help='DocumentDB account name.')
+                         help='DocumentDB account name. Must be used in conjunction with '
+                              'either name of the resource group or documentdb account key.')
 
     command.add_argument('db_account_key', '--key', required=False, default=None,
                          arg_group=group_name,

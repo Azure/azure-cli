@@ -39,7 +39,7 @@ def invalid_arg_found_exception_handler(ex):
                     msg = msg['message'].split('\n')[0]
                     msg = msg[len('Message: '):] if msg.find('Message: ') == 0 else msg
                     cli_error = CLIError('Operation Failed: Invalid Arg '
-                                         '(Server returned status code 400 {})'.format(str(msg)))
+                                         '(Server returned status code 400) {}'.format(msg))
         except Exception:  # pylint:disable=broad-except
             pass
 
@@ -47,7 +47,7 @@ def invalid_arg_found_exception_handler(ex):
             raise cli_error  # pylint:disable=raising-bad-type
 
         raise CLIError('Operation Failed: Invalid Arg '
-                       '(Server returned status code 400\n {})'.format(str(ex)))
+                       '(Server returned status code 400) {}'.format(str(ex)))
     raise ex
 
 
