@@ -75,7 +75,7 @@ class DetProgressReporter(object):
 
     def report(self):
         """ report the progress """
-        percent = self.curr_val / self.total_val if self.curr_val and self.total_val else None
+        percent = self.curr_val / self.total_val
         return {'message': self.message, 'percent': percent}
 
 
