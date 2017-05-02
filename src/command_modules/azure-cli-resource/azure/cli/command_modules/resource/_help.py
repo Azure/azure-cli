@@ -6,6 +6,22 @@
 from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
 # pylint: disable=line-too-long, too-many-lines
+helps['managedapp definition delete'] = """
+    type: command
+    short-summary: Delete a managed application definition.
+"""
+helps['managedapp definition list'] = """
+    type: command
+    short-summary: Lists managed application definitions.
+"""
+helps['managedapp delete'] = """
+    type: command
+    short-summary: Delete a managed application.
+"""
+helps['managedapp list'] = """
+    type: command
+    short-summary: Lists managed applications by resource group, or by subscription.
+"""
 helps['lock'] = """
     type: group
     short-summary: Manage Azure locks.
