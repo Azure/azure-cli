@@ -54,9 +54,9 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         self.assertEqual(reporter.message, 'Progress')
         self.assertEqual(reporter.curr_val, 0)
         self.assertEqual(reporter.total_val, 10)
-        message, percent = reporter.report()
-        self.assertEqual(message, 'Progress')
-        self.assertEqual(percent, 0.0)
+        args = reporter.report()
+        self.assertEqual(args['message'], 'Progress')
+        self.assertEqual(args['percent'], 0.0)
 
         with self.assertRaises(AssertionError):
             reporter.add({'message': 'In words', 'total_val': -1, 'value': 10})
@@ -86,7 +86,7 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         view.write({})
         after = view.spinner.total
         self.assertTrue(after >= before)
-        view.write({'message': 'TESTING'})
+        view.write('TESTING')
         self.assertEqual(view.spinner.label, 'TESTING')
 
     def test_det_stdview(self):
@@ -97,12 +97,12 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         view.write({'message': 'hihi', 'total_val': 1, 'value': .5})
         # 95 length, 48 complete, 4 dec percent
         bar_str = ('#' * 48).ljust(95)
-        self.assertEqual(view.flush(), '\rhihi[{}]  50.0000%'.format(bar_str))
+        self.assertEqual(view.string, '\rhihi[{}]  50.0000%'.format(bar_str))
 
         view.write({'message': '', 'total_val': 1, 'value': .9})
         # 99 length, 90 complete, 4 dec percent
         bar_str = ('#' * 90).ljust(95)
-        self.assertEqual(view.flush(), '\r[{}]  90.0000%'.format(bar_str))
+        self.assertEqual(view.string, '\r[{}]  90.0000%'.format(bar_str))
 
     def test_controller(self):
         """ tests the controller for progress reporting """
@@ -113,10 +113,10 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         self.assertTrue(view in controller.active_progress)
 
         controller.begin()
-        self.assertEqual(controller.active_progress[0].spinner.label, 'Starting')
+        self.assertEqual(controller.active_progress[0].string, 'Starting')
 
         controller.end()
-        self.assertEqual(controller.active_progress[0].spinner.label, 'Finished')
+        self.assertEqual(controller.active_progress[0].string, 'Finished')
 
         controller = progress.ProgressHook(progress.ProgressType.Determinate)
         view = DetMockOutstream()
