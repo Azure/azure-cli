@@ -42,6 +42,7 @@ from azure.cli.command_modules.network._validators import \
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
 from azure.cli.core.profiles import ResourceType, get_sdk
+from azure.cli.core.util import get_json_object
 
 ApplicationGatewaySkuName, ApplicationGatewayCookieBasedAffinity, \
 ApplicationGatewayFirewallMode, ApplicationGatewayProtocol, \
@@ -689,6 +690,7 @@ register_cli_argument('network watcher packet-capture', 'capture_name', name_arg
 register_cli_argument('network watcher packet-capture', 'storage_account', arg_group='Storage')
 register_cli_argument('network watcher packet-capture', 'storage_path', arg_group='Storage')
 register_cli_argument('network watcher packet-capture', 'file_path', arg_group='Storage')
+register_cli_argument('network watcher packet-capture', 'filters', type=get_json_object)
 
 register_cli_argument('network watcher flow-log', 'enabled', validator=process_nw_flow_log_set_namespace, **three_state_flag())
 

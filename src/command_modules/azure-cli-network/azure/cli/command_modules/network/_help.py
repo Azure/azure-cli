@@ -2087,6 +2087,8 @@ helps['network watcher packet-capture create'] = """
                 path must start with /var/captures.
         - name: --vm
           short-summary: Name or ID of the VM to target.
+        - name: --filters
+          short-summary: JSON encoded list of packet filters. Use `@<file path>` to load from file.
 """
 
 helps['network watcher flow-log'] = """

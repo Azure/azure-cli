@@ -2528,13 +2528,14 @@ def show_nw_security_view(client, resource_group_name, vm, watcher_rg, watcher_n
 def create_nw_packet_capture(client, resource_group_name, capture_name, vm,
                              watcher_rg, watcher_name, location=None,
                              storage_account=None, storage_path=None, file_path=None,
-                             capture_size=None, capture_limit=None, time_limit=None):
+                             capture_size=None, capture_limit=None, time_limit=None, filters=None):
     PacketCapture, PacketCaptureStorageLocation = \
         get_sdk(ResourceType.MGMT_NETWORK, 'PacketCapture', 'PacketCaptureStorageLocation',
                 mod='models')
 
     storage_settings = PacketCaptureStorageLocation(storage_account, storage_path, file_path)
-    capture_params = PacketCapture(vm, storage_settings, capture_size, capture_limit, time_limit)
+    capture_params = PacketCapture(vm, storage_settings, capture_size, capture_limit, time_limit,
+                                   filters)
     return client.create(watcher_rg, watcher_name, capture_name, capture_params)
 
 
