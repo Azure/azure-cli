@@ -10,7 +10,7 @@ helps['cognitiveservices list'] = """
     short-summary: list all the existing cognitive services accounts under a resource group or current azure subscription
     examples:
         - name: list all the cognitive services accounts in a resource group
-        text: az cognitiveservices list -g MyResourceGroup
+          text: az cognitiveservices list -g MyResourceGroup
 """
 
 helps['cognitiveservices account'] = """
