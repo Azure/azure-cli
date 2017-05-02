@@ -124,7 +124,7 @@ register_cli_argument('webapp config update', 'remote_debugging_enabled', help='
 register_cli_argument('webapp config update', 'web_sockets_enabled', help='enable or disable web sockets', **enum_choice_list(two_states_switch))
 register_cli_argument('webapp config update', 'always_on', help='ensure webapp gets loaded all the time, rather unloaded after been idle. Recommended when you have continuous web jobs running', **enum_choice_list(two_states_switch))
 register_cli_argument('webapp config update', 'auto_heal_enabled', help='enable or disable auto heal', **enum_choice_list(two_states_switch))
-register_cli_argument('webapp config update', 'use3`_bit_worker_process', options_list=('--use-32bit-worker-process',), help='use 32 bits worker process or not', **enum_choice_list(two_states_switch))
+register_cli_argument('webapp config update', 'use32_bit_worker_process', options_list=('--use-32bit-worker-process',), help='use 32 bits worker process or not', **enum_choice_list(two_states_switch))
 register_cli_argument('webapp config update', 'node_version', help='The version used to run your web app if using node, e.g., 4.4.7, 4.5.0, 6.2.2, 6.6.0')
 register_cli_argument('webapp config update', 'php_version', help='The version used to run your web app if using PHP, e.g., 5.5, 5.6, 7.0')
 register_cli_argument('webapp config update', 'python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
