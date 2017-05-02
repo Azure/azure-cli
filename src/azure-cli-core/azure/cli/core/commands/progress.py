@@ -189,4 +189,3 @@ class DeterminateStandardOut(DeterminateProgressView):
             progress = DeterminateStandardOut._format_value(
                 message, percent) if callable(DeterminateStandardOut._format_value) else percent
             self.out.write(progress)
-
