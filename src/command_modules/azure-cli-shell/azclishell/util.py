@@ -89,3 +89,11 @@ def parse_quotes(cmd, quotes=True, string=True):
         return str_args
     else:
         return args
+
+
+def get_os_clear_screen_word():
+    """ keyword to clear the screen """
+    if platform.system() == 'Windows':
+        return 'cls'
+    else:
+        return 'clear'

@@ -230,18 +230,18 @@ def get_custom_clouds():
     return [c for c in get_clouds() if c.name not in known_cloud_names]
 
 
-def _init_known_clouds():
+def init_known_clouds(force=False):
     config = get_config_parser()
     config.read(CLOUD_CONFIG_FILE)
     stored_cloud_names = config.sections()
     for c in KNOWN_CLOUDS:
-        if c.name not in stored_cloud_names:
-            _save_cloud(c)
+        if force or c.name not in stored_cloud_names:
+            _save_cloud(c, overwrite=force)
 
 
 def get_clouds():
     # ensure the known clouds are always in cloud config
-    _init_known_clouds()
+    init_known_clouds()
     clouds = []
     # load the config again as it may have changed
     config = get_config_parser()
