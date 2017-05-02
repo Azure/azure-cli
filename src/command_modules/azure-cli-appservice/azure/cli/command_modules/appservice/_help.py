@@ -80,7 +80,7 @@ helps['webapp config connection-string update'] = """
     examples:
         - name: add a mysql connection string.
           text: >
-            az appservice web config connection-string update
+            az webapp config connection-string update
             -g MyResourceGroup
             -n MyUniqueApp
             -t mysql
