@@ -14,7 +14,7 @@ from azure.cli.core.commands.parameters import (ignore_type, resource_group_name
                                                 enum_choice_list, no_wait_type, file_type)
 from .custom import (get_policy_completion_list, get_policy_assignment_completion_list,
                      get_resource_types_completion_list, get_providers_completion_list)
-from ._validators import validate_deployment_name
+from ._validators import validate_deployment_name, validate_lock_parameters
 
 # BASIC PARAMETER CONFIGURATION
 
@@ -87,7 +87,7 @@ register_cli_argument('group create', 'rg_name', options_list=('--name', '-n'), 
 register_cli_argument('tag', 'tag_name', options_list=('--name', '-n'))
 register_cli_argument('tag', 'tag_value', options_list=('--value',))
 
-register_cli_argument('lock', 'name', options_list=('--name', '-n'))
+register_cli_argument('lock', 'name', options_list=('--name', '-n'), validator=validate_lock_parameters)
 register_cli_argument('lock', 'level', options_list=('--lock-type', '-t'), **enum_choice_list(LockLevel))
 register_cli_argument('lock', 'parent_resource_path', resource_parent_type)
 register_cli_argument('lock', 'resource_provider_namespace', resource_namespace_type)
