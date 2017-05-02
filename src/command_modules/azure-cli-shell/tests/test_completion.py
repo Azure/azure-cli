@@ -180,7 +180,6 @@ class CompletionTest(unittest.TestCase):
         with self.assertRaises(StopIteration):
             six.next(gen)
 
-
     def test_param_completion(self):
         """ tests param completion """
         self.init2()
