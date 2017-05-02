@@ -59,8 +59,11 @@ class DetProgressReporter(object):
         self.curr_val = 0 if total_value else None
         self.total_val = total_value
 
-    def add(self, message, value, total_val):
+    def add(self, args):
         """ adds a progress report """
+        value = args['value']
+        total_val = args['total_val']
+        message = args['message']
         assert value >= 0 and value <= total_val and total_val >= 0
         self.total_val = total_val
         self.curr_val = value
