@@ -7,7 +7,7 @@ Release History
 
 * Adding Team Services (vsts) as a continuous delivery option to "appservice web source-control config"
 * Create "az webapp" to replace "az appservice web" (for backward compat, "az appservice web" will stay for 2 releases)
-* Expose arguments to configure deployment and "runtime stacks" on webapp create
+* Expose arguments to configure deployment, "runtime stacks", containers, and appsettings on webapp create
 * Expose "webapp list-runtimes"
 * support configure connection strings (#2647)
 
