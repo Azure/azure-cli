@@ -50,7 +50,7 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         self.assertEqual(args['message'], '')
         self.assertEqual(args['percent'], None)
 
-        reporter.add({'message': 'Progress', 'total_val': 0, 'value': 10})
+        reporter.add({'message': 'Progress', 'total_val': 10, 'value': 0})
         self.assertEqual(reporter.message, 'Progress')
         self.assertEqual(reporter.curr_val, 0)
         self.assertEqual(reporter.total_val, 10)
@@ -94,12 +94,12 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         outstream = MockOutstream()
         view = progress.DeterminateStandardOut(out=outstream)
         self.assertEqual(view.get_type().value, progress.ProgressType.Determinate.value)
-        view.write(message='hihi', total_val=1, value=.5)
+        view.write({'message': 'hihi', 'total_val': 1, 'value': .5})
         # 95 length, 48 complete, 4 dec percent
         bar_str = ('#' * 48).ljust(95)
         self.assertEqual(view.flush(), '\rhihi[{}]  50.0000%'.format(bar_str))
 
-        view.write(message='', total_val=1, value=.9)
+        view.write({'message': '', 'total_val': 1, 'value': .9})
         # 99 length, 90 complete, 4 dec percent
         bar_str = ('#' * 90).ljust(95)
         self.assertEqual(view.flush(), '\r[{}]  90.0000%'.format(bar_str))
@@ -113,10 +113,10 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         self.assertTrue(view in controller.active_progress)
 
         controller.begin()
-        self.assertEqual(controller.reporter.spinner.label, 'Starting')
+        self.assertEqual(controller.active_progress[0].spinner.label, 'Starting')
 
         controller.end()
-        self.assertEqual(controller.reporter.spinner.label, 'Finished')
+        self.assertEqual(controller.active_progress[0].spinner.label, 'Finished')
 
         controller = progress.ProgressHook(progress.ProgressType.Determinate)
         view = DetMockOutstream()

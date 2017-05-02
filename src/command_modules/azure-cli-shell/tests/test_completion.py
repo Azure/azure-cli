@@ -10,8 +10,6 @@ from azclishell.az_completer import AzCompleter
 from prompt_toolkit.document import Document
 from prompt_toolkit.completion import Completion
 
-import mock
-
 
 class _Commands():
     """ mock model for testing completer """
@@ -49,7 +47,7 @@ class CompletionTest(unittest.TestCase):
             command_tree=com_tree3,
             descrip=command_description
         )
-        self.completer = AzCompleter(commands, global_params=False)
+        self.completer = AzCompleter(commands, global_params=False, outstream=six.StringIO())
 
     def init2(self):
         """ a variation of initializing """
@@ -79,7 +77,7 @@ class CompletionTest(unittest.TestCase):
             param_descript=param_descript,
             descrip=command_description
         )
-        self.completer = AzCompleter(commands, global_params=False)
+        self.completer = AzCompleter(commands, global_params=False, outstream=six.StringIO())
 
     def init3(self):
         """ a variation of initializing """
@@ -116,7 +114,7 @@ class CompletionTest(unittest.TestCase):
             same_param_doubles=same_param_doubles,
             descrip=command_description
         )
-        self.completer = AzCompleter(commands, global_params=False)
+        self.completer = AzCompleter(commands, global_params=False, outstream=six.StringIO())
 
     def init4(self):
         """ a variation of initializing """
@@ -153,9 +151,8 @@ class CompletionTest(unittest.TestCase):
             same_param_doubles=same_param_doubles,
             descrip=command_description
         )
-        self.completer = AzCompleter(commands, global_params=False)
+        self.completer = AzCompleter(commands, global_params=False, outstream=six.StringIO())
 
-    @mock.patch('azclishell.argfinder.ArgFinder.outstream', six.StringIO())
     def test_command_completion(self):
         """ tests general command completion """
         self.init1()
@@ -183,7 +180,7 @@ class CompletionTest(unittest.TestCase):
         with self.assertRaises(StopIteration):
             six.next(gen)
 
-    @mock.patch('azclishell.argfinder.ArgFinder.outstream', six.StringIO())
+
     def test_param_completion(self):
         """ tests param completion """
         self.init2()
@@ -197,7 +194,6 @@ class CompletionTest(unittest.TestCase):
         with self.assertRaises(StopIteration):
             six.next(gen)
 
-    @mock.patch('azclishell.argfinder.ArgFinder.outstream', six.StringIO())
     def test_param_double(self):
         """ tests not generating doubles for parameters """
         self.init3()
@@ -211,7 +207,6 @@ class CompletionTest(unittest.TestCase):
         with self.assertRaises(StopIteration):
             six.next(gen)
 
-    @mock.patch('azclishell.argfinder.ArgFinder.outstream', six.StringIO())
     def test_second_completion(self):
         self.init3()
         doc = Document(u'crea ')
@@ -234,7 +229,6 @@ class CompletionTest(unittest.TestCase):
         self.assertEqual(six.next(gen), Completion(
             "--helloworld", -7))
 
-    @mock.patch('azclishell.argfinder.ArgFinder.outstream', six.StringIO())
     def test_substring_completion(self):
         self.init4()
         doc = Document(u'create')
