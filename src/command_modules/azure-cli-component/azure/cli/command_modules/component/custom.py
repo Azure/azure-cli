@@ -139,6 +139,14 @@ def _install_or_update(package_list, link, private, pre):
                               package_index_trusted_host] if package_index_trusted_host else []
     pip_args = ['install'] + options + package_list + pkg_index_options
     _run_pip(pip, pip_args)
+    # Fix to make sure that we have empty __init__.py files for the azure site-packages folder.
+    nspkg_pip_args = ['install'] + options + \
+                     ['--force-reinstall', 'azure-nspkg', 'azure-mgmt-nspkg'] + pkg_index_options
+    _run_pip(pip, nspkg_pip_args)
+    # Force reinstall azure-cli-component
+    c_pip_args = ['install'] + options + \
+                     ['--force-reinstall', 'azure-cli-component'] + pkg_index_options
+    _run_pip(pip, c_pip_args)
 
 
 def _verify_additional_components(components, private, allow_third_party):
