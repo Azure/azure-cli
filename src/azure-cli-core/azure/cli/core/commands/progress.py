@@ -89,7 +89,7 @@ class InDetProgressReporter(object):
 
     def report(self):
         """ report the progress """
-        return {'message': self.message}
+        return self.message
 
 
 class ProgressHook(object):
