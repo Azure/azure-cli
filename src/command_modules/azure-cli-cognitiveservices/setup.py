@@ -6,12 +6,12 @@
 from codecs import open
 from setuptools import setup
 
-try: 
-     from azure_bdist_wheel import cmdclass 
-except ImportError: 
-     from distutils import log as logger 
-     logger.warn("Wheel is not available, disabling bdist_wheel hook") 
-     cmdclass = {} 
+try:
+    from azure_bdist_wheel import cmdclass
+except ImportError:
+    from distutils import log as logger
+    logger.warn("Wheel is not available, disabling bdist_wheel hook")
+    cmdclass = {}
 
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -29,6 +29,8 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    'azure-mgmt-cognitiveservices==1.0.0',
+    'azure-cli-core',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

@@ -16,6 +16,7 @@ def listresources(client, resource_group_name=None):
     else:
         return client.list()
 
+
 # pylint: disable=too-many-arguments
 def create(
         client, resource_group_name, account_name, sku_name, kind, location, tags=None, yes=None):
@@ -45,9 +46,7 @@ def create(
     params = CognitiveServicesAccountCreateParameters(sku, kind, location, properties, tags)
     return client.create(resource_group_name, account_name, params)
 
+
 def update(client, resource_group_name, account_name, sku_name=None, tags=None):
     sku = Sku(sku_name)
     return client.update(resource_group_name, account_name, sku, tags)
-
-
-    

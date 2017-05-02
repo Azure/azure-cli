@@ -9,14 +9,13 @@ helps['cognitiveservices list'] = """
     type: command
     short-summary: list all the existing cognitive services accounts under a resource group or current azure subscription
     examples:
-        - name: list all the cognitive services accounts in a resource group 
-          text: az cognitiveservices list -g MyResourceGroup
+        - name: list all the cognitive services accounts in a resource group
+        text: az cognitiveservices list -g MyResourceGroup
 """
 
 helps['cognitiveservices account'] = """
     type: group
     short-summary: Manage and update cognitive services accounts
-    
 """
 
 helps['cognitiveservices account delete'] = """
@@ -62,6 +61,3 @@ helps['cognitiveservices account keys list'] = """
     type: command
     short-summary: List the keys of a cognitive services account.
 """
-
-
-

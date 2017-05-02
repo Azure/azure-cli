@@ -8,7 +8,7 @@ from azure.cli.command_modules.cognitiveservices._client_factory import (
     get_cognitiveservices_operations)
 
 mgmt_path = 'azure.mgmt.cognitiveservices.operations.cognitive_services_accounts_operations#'\
-'CognitiveServicesAccountsOperations.{}'
+    'CognitiveServicesAccountsOperations.{}'
 custom_path = 'azure.cli.command_modules.cognitiveservices.custom#{}'
 
 cli_command(__name__, 'cognitiveservices account create', custom_path.format('create'),
