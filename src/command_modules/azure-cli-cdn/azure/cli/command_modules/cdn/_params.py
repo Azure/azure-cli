@@ -7,7 +7,7 @@ import argparse
 from azure.mgmt.cdn.models import (QueryStringCachingBehavior, SkuName)
 
 from azure.cli.core.commands import (register_cli_argument, CliArgumentType)
-from azure.cli.core.commands.parameters import enum_choice_list
+from azure.cli.core.commands.parameters import enum_choice_list, three_state_flag
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from ._validators import validate_origin
 
@@ -41,12 +41,15 @@ register_cli_argument('cdn profile', 'profile_name', name_arg_type, id_part='nam
 register_cli_argument('cdn custom-domain create', 'location',
                       validator=get_default_location_from_resource_group)
 
+
 register_cli_argument('cdn endpoint', 'endpoint_name', name_arg_type, id_part='name')
 
-endpoint_create = 'cdn endpoint create'
-register_cli_argument(endpoint_create, 'location',
+# Endpoint Create #
+
+cdn_endpoint = 'cdn endpoint'
+register_cli_argument(cdn_endpoint, 'location',
                       validator=get_default_location_from_resource_group)
-register_cli_argument(endpoint_create,
+register_cli_argument(cdn_endpoint,
                       'origins',
                       options_list='--origin',
                       nargs='+',
@@ -55,25 +58,40 @@ register_cli_argument(endpoint_create,
                       help='Endpoint origin specified by the following space delimited 3 \
 tuple: `www.example.com http_port https_port`. The HTTP and HTTPs ports are \
 optional and will default to 80 and 443 respectively.')
-register_cli_argument(endpoint_create, 'is_http_allowed',
+register_cli_argument(cdn_endpoint, 'is_http_allowed',
                       options_list='--no-http',
-                      action='store_false',
                       help='Indicates whether HTTP traffic is not allowed on the endpoint. \
-Default is to allow HTTP traffic.')
-register_cli_argument(endpoint_create, 'is_https_allowed',
+Default is to allow HTTP traffic.',
+                      **three_state_flag(invert=True))
+register_cli_argument(cdn_endpoint, 'is_https_allowed',
                       options_list='--no-https',
-                      action='store_false',
                       help='Indicates whether HTTPS traffic is not allowed on the endpoint. \
-Default is to allow HTTPS traffic.')
-register_cli_argument(endpoint_create, 'is_compression_enabled',
+Default is to allow HTTPS traffic.',
+                      **three_state_flag(invert=True))
+register_cli_argument(cdn_endpoint, 'is_compression_enabled',
                       options_list='--enable-compression',
-                      action='store_true',
                       help='If compression is enabled, content will be served as compressed if \
 user requests for a compressed version. Content won\'t be compressed on CDN when requested content \
-is smaller than 1 byte or larger than 1 MB.')
+is smaller than 1 byte or larger than 1 MB.',
+                      **three_state_flag())
 caching_behavior = [item.value for item in QueryStringCachingBehavior.__members__.values()]
-register_cli_argument(endpoint_create,
+register_cli_argument(cdn_endpoint,
                       'query_string_caching_behavior',
                       options_list='--query-string-caching',
                       **enum_choice_list(caching_behavior))
-register_cli_argument(endpoint_create, 'content_types_to_compress', nargs='+')
+register_cli_argument(cdn_endpoint, 'content_types_to_compress', nargs='+')
+
+
+register_cli_argument(cdn_endpoint, 'content_types_to_compress', nargs='+')
+
+# Endpoint Load #
+
+register_cli_argument('cdn endpoint load', 'content_paths', nargs='+')
+
+# Endpoint Purge #
+
+register_cli_argument('cdn endpoint purge', 'content_paths', nargs='+')
+
+# Custom Domain #
+
+register_cli_argument('cdn custom-domain', 'custom_domain_name', name_arg_type, id_part='name')

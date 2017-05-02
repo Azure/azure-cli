@@ -6,6 +6,7 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.commands import cli_command
+from azure.cli.core.commands.arm import cli_generic_update_command
 from ._client_factory import cf_cdn
 
 
@@ -47,6 +48,16 @@ def endpoint_command(name, method=None, use_custom=False):
     command('cdn endpoint {}'.format(name), method or name, formatter)
 
 
+def generic_endpoint_command(name, custom_handler):
+    cli_generic_update_command(__name__,
+                               'cdn endpoint {}'.format(name),
+                               endpoint('get'),
+                               endpoint('update'),
+                               cf_cdn,
+                               setter_arg_name='endpoint_update_properties',
+                               custom_function_op=custom(custom_handler))
+
+
 def profile_command(name, method=None, use_custom=False):
     formatter = custom if use_custom else profile
     command('cdn profile {}'.format(name), method or name, formatter)
@@ -71,13 +82,14 @@ cli_command(__name__, 'cdn name-exists', mgmt('check_name_availability'), cf_cdn
 cli_command(__name__, 'cdn usage', mgmt('check_resource_usage'), cf_cdn)
 
 endpoint_command('show', 'get')
-for c in ['start', 'stop', 'delete', 'update']:
+for c in ['start', 'stop', 'delete']:
     endpoint_command(c)
 endpoint_command('list', 'list_by_profile')
 endpoint_command('load', 'load_content')
 endpoint_command('purge', 'purge_content')
 endpoint_command('validate-custom-domain', 'validate_custom_domain')
 endpoint_command('create', 'create_endpoint', use_custom=True)
+generic_endpoint_command('update', 'update_endpoint')
 
 for c in ['update', 'delete']:
     profile_command(c)
@@ -89,7 +101,8 @@ profile_command('list', 'list_profiles', use_custom=True)
 profile_command('create', 'create_profile', use_custom=True)
 
 domain_command('show', 'get')
-domain_command('delete')
+for c in ['delete', 'create']:
+    domain_command(c)
 
 origin_command('show', 'get')
 origin_command('list', 'list_by_endpoint')

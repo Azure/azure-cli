@@ -4,7 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import azure.cli.core.azlogging as azlogging
-from azure.mgmt.cdn.models import (Endpoint, QueryStringCachingBehavior, SkuName)
+from azure.mgmt.cdn.models import (Endpoint, QueryStringCachingBehavior, SkuName,
+                                   EndpointUpdateParameters)
 
 
 def list_profiles(client, resource_group_name=None):
@@ -12,6 +13,42 @@ def list_profiles(client, resource_group_name=None):
     profile_list = profiles.list_by_resource_group(resource_group_name=resource_group_name) \
         if resource_group_name else profiles.list()
     return list(profile_list)
+
+
+def _update_mapper(existing, new, keys):
+    for key in keys:
+        existing_value = getattr(existing, key)
+        new_value = getattr(new, key)
+        setattr(new, key, new_value if new_value is not None else existing_value)
+
+
+def update_endpoint(instance,
+                    origin_host_header=None,
+                    origin_path=None,
+                    content_types_to_compress=None,
+                    is_compression_enabled=None,
+                    is_http_allowed=None,
+                    is_https_allowed=None,
+                    query_string_caching_behavior=None):
+    params = EndpointUpdateParameters(
+                        origin_host_header=origin_host_header,
+                        origin_path=origin_path,
+                        content_types_to_compress=content_types_to_compress,
+                        is_compression_enabled=is_compression_enabled,
+                        is_http_allowed=is_http_allowed,
+                        is_https_allowed=is_https_allowed,
+                        query_string_caching_behavior=query_string_caching_behavior)
+    _update_mapper(instance, params, [
+        'origin_host_header',
+        'origin_path',
+        'content_types_to_compress',
+        'is_compression_enabled',
+        'is_http_allowed',
+        'is_https_allowed',
+        'query_string_caching_behavior'
+    ])
+    return params
+update_endpoint.__doc__ = EndpointUpdateParameters.__doc__
 
 
 def create_endpoint(client, resource_group_name, profile_name, name, origins, location=None,
@@ -32,7 +69,6 @@ def create_endpoint(client, resource_group_name, profile_name, name, origins, lo
                         is_https_allowed=is_https_allowed,
                         query_string_caching_behavior=query_string_caching_behavior)
     return client.endpoints.create(resource_group_name, profile_name, name, endpoint)
-
 create_endpoint.__doc__ = Endpoint.__doc__
 
 
