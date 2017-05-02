@@ -12,6 +12,8 @@ from azclishell.configuration import CONFIGURATION, get_config_dir
 SHELL_CONFIG = CONFIGURATION
 DAYS_AGO = 28
 ACTIVE_STATUS = 5
+DISPLAY_TIME = 20
+
 
 def today_format(now):
     """ returns the date format """
@@ -52,4 +54,5 @@ def frequency_heuristic():
     return frequency_measurement() >= ACTIVE_STATUS
 
 
-frequent_user = frequency_heuristic()
+# frequent_user = frequency_heuristic()
+frequent_user = True

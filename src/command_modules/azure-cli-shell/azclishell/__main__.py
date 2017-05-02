@@ -53,9 +53,12 @@ def main(style=None):
         print("When in doubt, ask for 'help'")
         config.firsttime()
 
-    if not config.has_feedback() and frequent_user:
+    ask_feedback = False
+    # if not config.has_feedback() and frequent_user:
+    if frequent_user:
         print("\n\nPlease send us your feedback with the 'feedback' command." +
               " We would greatly appreciate it.\n")
+        ask_feedback = True
 
     shell_app = Shell(
         completer=AZCOMPLETER,
@@ -63,6 +66,7 @@ def main(style=None):
         history=FileHistory(
             os.path.join(shell_config_dir(), config.get_history())),
         app=APPLICATION,
-        styles=style_obj
+        styles=style_obj,
+        user_feedback= ask_feedback
     )
     shell_app.run()
