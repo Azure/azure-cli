@@ -62,7 +62,7 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         with self.assertRaises(AssertionError):
             reporter.add({'message': 'In words', 'total_val': 1, 'value': -10})
         with self.assertRaises(AssertionError):
-            reporter.add({'message': 'In words', 'total_val': 490, 'value': 10})
+            reporter.add({'message': 'In words', 'total_val': 30, 'value': 12340})
 
     def test_indet_model(self):
         """ test the indetermiante progress reporter """
@@ -94,12 +94,12 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         self.assertEqual(view.get_type().value, progress.ProgressType.Determinate.value)
         view.write({'message': 'hihi', 'percent': .5})
         # 95 length, 48 complete, 4 dec percent
-        bar_str = ('#' * 48).ljust(95)
+        bar_str = ('#' * (.5 * 70)).ljust(70)
         self.assertEqual(outstream.string, '\rhihi[{}]  50.0000%'.format(bar_str))
 
         view.write({'message': '', 'percent': .9})
         # 99 length, 90 complete, 4 dec percent
-        bar_str = ('#' * 90).ljust(95)
+        bar_str = ('#' * (.9 * 70)).ljust(70)
         self.assertEqual(outstream.string, '\r[{}]  90.0000%'.format(bar_str))
 
     def test_controller(self):
@@ -122,11 +122,11 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         controller.init_progress(view)
         self.assertTrue(view in controller.active_progress)
 
-        start = controller.begin()
-        self.assertTrue('Starting' in start)
+        controller.begin()
+        self.assertEqual(controller.active_progress[0].string['message'], 'Finished')
 
-        end = controller.end()
-        self.assertTrue('Finished' in end)
+        controller.end()
+        self.assertEqual(controller.active_progress[0].string['message'], 'Finished')
 
 
 if __name__ == '__main__':
