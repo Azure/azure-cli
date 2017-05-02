@@ -230,7 +230,7 @@ def get_custom_clouds():
     return [c for c in get_clouds() if c.name not in known_cloud_names]
 
 
-def init_known_clouds(force=True):
+def init_known_clouds(force=False):
     config = get_config_parser()
     config.read(CLOUD_CONFIG_FILE)
     stored_cloud_names = config.sections()
