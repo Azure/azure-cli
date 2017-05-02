@@ -40,7 +40,6 @@ class DetMockOutstream(progress._ProgressViewBase):
         return self.string
 
 
-
 class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-methods
     """ test the progress reporting """
 
@@ -87,7 +86,7 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         view.write({})
         after = view.spinner.total
         self.assertTrue(after > before)
-        view.write({'message':'TESTING'})
+        view.write({'message': 'TESTING'})
         self.assertEqual(view.spinner.label, 'TESTING')
 
     def test_det_stdview(self):
@@ -95,7 +94,7 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         outstream = MockOutstream()
         view = progress.DeterminateStandardOut(out=outstream)
         self.assertEqual(view.get_type, progress.ProgressType.Determinate)
-        args = {'message':'hihi', 'total_val':1, 'value':.5}
+        args = {'message': 'hihi', 'total_val': 1, 'value': .5}
         view.write({args})
         # 95 length, 48 complete, 4 dec percent
         bar_str = ''
@@ -105,7 +104,7 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
             else:
                 bar_str += ' '
         self.assertEqual(view.flush(), '\rhihi[{}]  50.0000%'.format(bar_str))
-        args = {'message':'', 'total_val':1, 'value':.9}
+        args = {'message': '', 'total_val': 1, 'value': .9}
         # 99 length, 90 complete, 4 dec percent
         bar_str = ''
         for i in range(95):
@@ -114,7 +113,6 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
             else:
                 bar_str += ' '
         self.assertEqual(view.flush(), '\r[{}]  90.0000%'.format(bar_str))
-
 
     def test_controller(self):
         """ tests the controller for progress reporting """

@@ -32,7 +32,6 @@ class _ProgressViewBase(object):
         """ flushes the message out the pipeline"""
         self.out.flush()
 
-
     def get_type(self):
         """ returns the progress type """
         return self.progress_type
@@ -95,7 +94,7 @@ class ProgressHook(object):
         if progress_type == ProgressType.Determinate:
             self.reporter = DetProgressReporter()
         elif progress_type == ProgressType.Indeterminate:
-            self.reporter = InDetProgressReporter()
+            self.reporter = InDetProgressReporter()  # pylint: disable=redefined-variable-type
         self.progress_type = progress_type
         from azclishell.progress import ShellProgressView
         self.registery = [IndeterminateStandardOut, DeterminateStandardOut, ShellProgressView]
@@ -158,7 +157,7 @@ class DeterminateStandardOut(DeterminateProgressView):
 
     def _format_value(self, msg, percent):  # pylint: disable=no-self-use
         bar_len = BAR_LEN - len(msg) - 1
-        completed = int(bar_len*percent)
+        completed = int(bar_len * percent)
 
         message = '\r{}['.format(msg)
         for i in range(bar_len):

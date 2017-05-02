@@ -40,9 +40,12 @@ BlockBlobService, BaseBlobService, \
 
 HOOK = ProgressHook(ProgressType.Determinate)
 HOOK.init_progress(DeterminateStandardOut())
+
+
 def _update_progress(current, total):
     if total:
         HOOK.add(message='Alive', value=current, total_val=total)
+
 
 # CUSTOM METHODS
 
