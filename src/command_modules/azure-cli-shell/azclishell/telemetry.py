@@ -63,7 +63,10 @@ class TelThread(threading.Thread):
         self.threadfunc = threadfunc
 
     def run(self):
-        self.threadfunc()
+        try:
+            self.threadfunc()
+        except KeyboardInterrupt:
+            pass
 
 
 TC = Telemetry(INSTRUMENTATION_KEY)
