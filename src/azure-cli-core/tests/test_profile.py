@@ -283,6 +283,25 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         self.assertEqual(result[0]['tenantId'], self.tenant_id)
         self.assertEqual(result[0]['name'], 'N/A(tenant level account)')
 
+    @mock.patch('adal.AuthenticationContext', autospec=True)
+    def test_create_account_without_subscriptions_without_tenant(self, mock_auth_context):
+        finder = mock.MagicMock()
+        finder.find_through_interactive_flow.return_value = []
+        storage_mock = {'subscriptions': []}
+        profile = Profile(storage_mock)
+
+        # action
+        result = profile.find_subscriptions_on_login(True,
+                                                     '1234',
+                                                     'my-secret',
+                                                     False,
+                                                     None,
+                                                     allow_no_subscriptions=True,
+                                                     subscription_finder=finder)
+
+        # assert
+        self.assertTrue(0 == len(result))
+
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     def test_get_current_account_user(self, mock_read_cred_file):
         # setup
