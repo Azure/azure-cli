@@ -99,7 +99,7 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
 
         view.write({'message': '', 'percent': .9})
         # 99 length, 90 complete, 4 dec percent
-        bar_str = ('#' * int(.9 * 65)).ljust(65)
+        bar_str = ('#' * int(.9 * 69)).ljust(69)
         self.assertEqual(outstream.string, '\r[{}]  {:.4%}'.format(bar_str, .9))
 
     def test_controller(self):
