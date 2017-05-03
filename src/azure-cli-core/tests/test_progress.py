@@ -68,13 +68,13 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         """ test the indetermiante progress reporter """
         reporter = progress.InDetProgressReporter()
         message = reporter.report()
-        self.assertEqual(message, '')
+        self.assertEqual(message['message'], '')
 
-        reporter.add('Progress')
+        reporter.add({'message': 'Progress'})
         self.assertEqual(reporter.message, 'Progress')
 
         message = reporter.report()
-        self.assertEqual(message, 'Progress')
+        self.assertEqual(message['message'], 'Progress')
 
     def test_indet_stdview(self):
         """ tests the indeterminate progress standardout view """
@@ -95,12 +95,12 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         view.write({'message': 'hihi', 'percent': .5})
         # 95 length, 48 complete, 4 dec percent
         bar_str = ('#' * int(.5 * 70)).ljust(70)
-        self.assertEqual(outstream.string, '\rhihi[{}]  50.0000%'.format(bar_str))
+        self.assertEqual(outstream.string, '\rhihi[{}]  {:.4%}'.format(bar_str, .5))
 
         view.write({'message': '', 'percent': .9})
         # 99 length, 90 complete, 4 dec percent
         bar_str = ('#' * int(.9 * 70)).ljust(70)
-        self.assertEqual(outstream.string, '\r[{}]  90.0000%'.format(bar_str))
+        self.assertEqual(outstream.string, '\r[{}]  {:.4%}'.format(bar_str, .9))
 
     def test_controller(self):
         """ tests the controller for progress reporting """
@@ -123,7 +123,7 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         self.assertTrue(view in controller.active_progress)
 
         controller.begin()
-        self.assertEqual(controller.active_progress[0].string['message'], 'Finished')
+        self.assertEqual(controller.active_progress[0].string['message'], 'Starting')
 
         controller.end()
         self.assertEqual(controller.active_progress[0].string['message'], 'Finished')
