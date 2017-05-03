@@ -8,73 +8,100 @@ import json
 import os
 import tempfile
 import time
+import unittest
 
+from azure.cli.testsdk import \
+    (LiveTest, ResourceGroupPreparer, KeyVaultPreparer, JMESPathCheck as JMESPathCheckV2)
 from azure.cli.testsdk.vcr_test_base import VCRTestBase, JMESPathCheck, \
     ResourceGroupVCRTestBase, NoneCheck, MOCKED_SUBSCRIPTION_ID
 
 
-class RbacSPSecretScenarioTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(RbacSPSecretScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_create_rbac_sp'
-        self.sp_name = 'http://' + self.resource_group
+class RbacSPSecretScenarioTest(LiveTest):
 
-    def test_create_for_rbac_with_secret(self):
-        if self.playback:
-            return  # live-only test, will enable playback once resolve #635
-        self.execute()
+    @ResourceGroupPreparer(name_prefix='cli_create_rbac_sp_minimal')
+    def test_create_for_rbac_with_secret(self, resource_group):
+        subscription_id = self.cmd('account list --query "[?isDefault].id"').get_output_in_json()
+        scope = '/subscriptions/{}'.format(subscription_id[0])
+        sp_name = 'http://{}'.format(resource_group)
 
-    def body(self):
-        subscription_id = self.cmd('account list --query "[?isDefault].id" -o tsv')
-        scope = '/subscriptions/{}'.format(subscription_id)
-        self.cmd(
-            'ad sp create-for-rbac -n {0} --scopes {1} {1}/resourceGroups/{2}'.format(self.sp_name,
-                                                                                      scope,
-                                                                                      self.resource_group),
-            checks=[
-                JMESPathCheck('name', self.sp_name)
-            ])
-        self.cmd('ad sp create-for-rbac -n {}'.format(self.sp_name),
-                 allowed_exceptions="'{}' already exists.".format(self.sp_name))
-        self.cmd('role assignment list --assignee {} --scope {}'.format(self.sp_name, scope),
-                 checks=[JMESPathCheck("length([])", 1)])
-        self.cmd(
-            'role assignment list --assignee {} -g {}'.format(self.sp_name, self.resource_group),
-            checks=[JMESPathCheck("length([])", 1)])
-        self.cmd(
-            'role assignment delete --assignee {} -g {}'.format(self.sp_name, self.resource_group),
+        self.cmd('ad sp create-for-rbac -n {}2'.format(sp_name))
+        self.cmd('ad app delete --id {}2'.format(sp_name))
+
+    @ResourceGroupPreparer(name_prefix='cli_create_rbac_sp_with_password')
+    def test_create_for_rbac_with_secret(self, resource_group):
+        subscription_id = self.cmd('account list --query "[?isDefault].id"').get_output_in_json()
+        scope = '/subscriptions/{}'.format(subscription_id[0])
+        sp_name = 'http://{}'.format(resource_group)
+
+        self.cmd('ad sp create-for-rbac -n {0} --scopes {1} {1}/resourceGroups/{2}'.format(sp_name, scope, resource_group), checks=[
+            JMESPathCheckV2('name', sp_name)
+        ])
+        self.cmd('role assignment list --assignee {} --scope {}'.format(sp_name, scope),
+            checks=[JMESPathCheckV2("length([])", 1)])
+        self.cmd('role assignment list --assignee {} -g {}'.format(sp_name, resource_group),
+            checks=[JMESPathCheckV2("length([])", 1)])
+        self.cmd('role assignment delete --assignee {} -g {}'.format(sp_name, resource_group),
             checks=NoneCheck())
-        self.cmd('role assignment delete --assignee {}'.format(self.sp_name), checks=NoneCheck())
-        self.cmd('ad app delete --id {}'.format(self.sp_name))
+        self.cmd('role assignment delete --assignee {}'.format(sp_name), checks=NoneCheck())
+        self.cmd('ad app delete --id {}'.format(sp_name))
 
 
-class RBACSPCertScenarioTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(RBACSPCertScenarioTest, self).__init__(__file__, test_method)
-        self.resource_group = 'cli_create_rbac_sp_cert'
-        self.sp_name = 'http://' + self.resource_group
+class RbacSPCertScenarioTest(LiveTest):
+        
+    @ResourceGroupPreparer(name_prefix='cli_create_rbac_sp_with_cert')
+    def test_create_for_rbac_with_cert(self, resource_group):
 
-    def test_create_for_rbac_with_cert(self):
-        if self.playback:
-            return  # live-only test, will enable playback once resolve #635
-        self.execute()
+        subscription_id = self.cmd('account list --query "[?isDefault].id"').get_output_in_json()
+        scope = '/subscriptions/{}'.format(subscription_id[0])
+        sp_name = 'http://' + resource_group
 
-    def body(self):
-        subscription_id = self.cmd('account list --query "[?isDefault].id" -o tsv')
-        scope = '/subscriptions/{}'.format(subscription_id)
-
-        result = self.cmd(
-            'ad sp create-for-rbac -n {0} --scopes {1} {1}/resourceGroups/{2} --create-cert'.format(
-                self.sp_name, scope, self.resource_group))
-        self.assertEqual(self.sp_name, result['name'])
+        result = self.cmd('ad sp create-for-rbac -n {0} --scopes {1} {1}/resourceGroups/{2} --create-cert'.format(sp_name, scope, resource_group)).get_output_in_json()
+        self.assertEqual(sp_name, result['name'])
         self.assertTrue(result['fileWithCertAndPrivateKey'].endswith('.pem'))
         os.remove(result['fileWithCertAndPrivateKey'])
-        result = self.cmd('ad sp reset-credentials -n {0} --create-cert'.format(self.sp_name))
-        self.assertEqual(self.sp_name, result['name'])
+        result = self.cmd('ad sp reset-credentials -n {0} --create-cert'.format(sp_name)).get_output_in_json()
+        self.assertEqual(sp_name, result['name'])
         self.assertTrue(result['fileWithCertAndPrivateKey'].endswith('.pem'))
         os.remove(result['fileWithCertAndPrivateKey'])
+        self.cmd('ad app delete --id {}'.format(sp_name), checks=NoneCheck())
 
-        self.cmd('ad app delete --id {}'.format(self.sp_name), checks=NoneCheck())
+
+class RbacSPKeyVaultScenarioTest(LiveTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
+    @KeyVaultPreparer()
+    def test_create_for_rbac_with_new_kv_cert(self, resource_group, key_vault):
+        import time
+        sp_name = 'http://{}'.format(resource_group)
+
+        subscription_id = self.cmd('account list --query "[?isDefault].id"').get_output_in_json()
+        scope = '/subscriptions/{}'.format(subscription_id[0])
+        cert_name = 'cert1'
+        time.sleep(5)
+
+        result = self.cmd('ad sp create-for-rbac --scopes {0} {0}/resourceGroups/{1} --create-cert --key-vault {2} --cert-name {3} -n {4}'.format(
+            scope, resource_group, key_vault, cert_name, sp_name)).get_output_in_json()
+        self.cmd('ad sp reset-credentials -n {0} --create-cert --key-vault {1} --cert-name {2}'.format(sp_name, key_vault, cert_name))
+        self.cmd('ad app delete --id {}'.format(sp_name))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
+    @KeyVaultPreparer()
+    def test_create_for_rbac_with_existing_kv_cert(self, resource_group, key_vault):
+        import time
+        self.diagnose = True
+        sp_name = 'http://{}'.format(resource_group)
+
+        subscription_id = self.cmd('account list --query "[?isDefault].id"').get_output_in_json()
+        scope = '/subscriptions/{}'.format(subscription_id[0])
+        cert_name = 'cert1'
+        time.sleep(5)
+
+        policy = self.cmd('keyvault certificate get-default-policy').get_output_in_json()
+        self.cmd('keyvault certificate create --vault-name {} -n {} -p "{}"'.format(key_vault, cert_name, policy))
+        result = self.cmd('ad sp create-for-rbac --scopes {0} {0}/resourceGroups/{1} --key-vault {2} --cert-name {3} -n {4}'.format(
+            scope, resource_group, key_vault, cert_name, sp_name)).get_output_in_json()
+        self.cmd('ad sp reset-credentials -n {0} --key-vault {1} --cert-name {2}'.format(sp_name, key_vault, cert_name))
+        self.cmd('ad app delete --id {}'.format(sp_name))
 
 
 class RoleCreateScenarioTest(VCRTestBase):
@@ -82,8 +109,6 @@ class RoleCreateScenarioTest(VCRTestBase):
         super(RoleCreateScenarioTest, self).__init__(__file__, test_method)
 
     def test_role_create_scenario(self):
-        if self.playback:
-            return  # live-only test, so far unable to replace guid in binary encoded body
         self.execute()
 
     def body(self):
@@ -195,3 +220,6 @@ class RoleAssignmentScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('role assignment list --assignee {}'.format(self.user),
                  checks=[JMESPathCheck("length([])", 1)])
         self.cmd('role assignment delete --assignee {} --role reader'.format(self.user), None)
+
+if __name__ == '__main__':
+    unittest.main()

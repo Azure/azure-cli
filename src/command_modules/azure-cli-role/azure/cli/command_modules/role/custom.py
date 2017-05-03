@@ -847,7 +847,8 @@ def reset_service_principal_credential(name, password=None, create_cert=False,
         raise CLIError("can't find a service principal matching '{}'".format(name))
     if len(aad_sps) > 1:
         raise CLIError(
-            'more than one entry matches the name, please provide unique names like app id guid, or app id uri')  # pylint: disable=line-too-long
+            'more than one entry matches the name, please provide unique names like '
+            'app id guid, or app id uri')
     app = show_application(client.applications, aad_sps[0].app_id)
 
     start_date = datetime.datetime.utcnow()
@@ -860,10 +861,11 @@ def reset_service_principal_credential(name, password=None, create_cert=False,
         _process_service_principal_creds(years, cert, create_cert, password, key_vault, cert_name,
                                          start_date)
 
-    app_creds = [PasswordCredential(start_date, end_date, str(uuid.uuid4()), password)] if password else None
+    app_creds = [PasswordCredential(start_date, end_date, str(uuid.uuid4()), password)] \
+        if password else None
     cert_creds = [KeyCredential(start_date, end_date, public_cert_string, str(uuid.uuid4()),
                                 usage='Verify',
-                                type='AsymmetricX509Cert')] if public_cert_string else None  # pylint: disable=line-too-long
+                                type='AsymmetricX509Cert')] if public_cert_string else None
 
     app_create_param = ApplicationUpdateParameters(password_credentials=app_creds,
                                                    key_credentials=cert_creds)
