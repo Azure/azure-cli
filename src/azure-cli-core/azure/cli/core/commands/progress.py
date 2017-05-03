@@ -40,19 +40,6 @@ class _ProgressViewBase(object):
         return self.progress_type
 
 
-class DeterminateProgressView(_ProgressViewBase):
-    """ a view base for progress reporting """
-    def __init__(self, out, format_percent=None):
-        super(DeterminateProgressView, self).__init__(out, ProgressType.Determinate, format_percent)
-
-
-class InDeterminateProgressView(_ProgressViewBase):
-    """ a view base for progress reporting """
-    def __init__(self, out, format_percent=None):
-        super(InDeterminateProgressView, self).__init__(
-            out, ProgressType.Indeterminate, format_percent)
-
-
 class DetProgressReporter(object):
     """ generic progress reporter """
     def __init__(self, total_value=1):
@@ -133,10 +120,11 @@ class ProgressHook(object):
             self.add(message='Finished')
 
 
-class IndeterminateStandardOut(InDeterminateProgressView):
+class IndeterminateStandardOut(_ProgressViewBase):
     """ custom output for progress reporting """
     def __init__(self, out=None):
-        super(IndeterminateStandardOut, self).__init__(out if out else sys.stderr)
+        super(IndeterminateStandardOut, self).__init__(
+            out if out else sys.stderr, ProgressType.Indeterminate, None)
         self.spinner = humanfriendly.Spinner(label='In Progress')
         self.spinner.hide_cursor = False
 
@@ -149,11 +137,12 @@ class IndeterminateStandardOut(InDeterminateProgressView):
         self.spinner.step(label=msg)
 
 
-class DeterminateStandardOut(DeterminateProgressView):
+class DeterminateStandardOut(_ProgressViewBase):
     """ custom output for progress reporting """
     def __init__(self, out=None):
         super(DeterminateStandardOut, self).__init__(
-            out if out else sys.stderr, DeterminateStandardOut._format_value)
+            out if out else sys.stderr,
+            ProgressType.Determinate, DeterminateStandardOut._format_value)
 
     @staticmethod
     def _format_value(msg, percent):
