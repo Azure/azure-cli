@@ -88,3 +88,7 @@ def cf_resource_links():
 
 def cf_resource_managedapplications(_):
     return _resource_managedapps_client_factory().appliances
+
+
+def cf_resource_managedappdefinitions(_):
+    return _resource_managedapps_client_factory().appliance_definitions

@@ -19,7 +19,8 @@ from azure.cli.command_modules.resource._client_factory import (_resource_client
                                                                 cf_deployment_operations,
                                                                 cf_policy_definitions,
                                                                 cf_resource_links,
-                                                                cf_resource_managedapplications)
+                                                                cf_resource_managedapplications,
+                                                                cf_resource_managedappdefinitions)
 
 
 # Resource group commands
@@ -133,6 +134,6 @@ cli_command(__name__, 'managedapp show', 'azure.cli.command_modules.resource.cus
 cli_command(__name__, 'managedapp list', 'azure.cli.command_modules.resource.custom#list_appliances')
 
 cli_command(__name__, 'managedapp definition create', 'azure.cli.command_modules.resource.custom#create_appliancedefinition')
-cli_command(__name__, 'managedapp definition delete', 'azure.mgmt.resource.managedapplications.operations#ApplianceDefinitionsOperations.delete', cf_resource_managedapplications)
+cli_command(__name__, 'managedapp definition delete', 'azure.mgmt.resource.managedapplications.operations#ApplianceDefinitionsOperations.delete', cf_resource_managedappdefinitions)
 cli_command(__name__, 'managedapp definition show', 'azure.cli.command_modules.resource.custom#show_appliancedefinition')
-cli_command(__name__, 'managedapp definition list', 'azure.mgmt.resource.managedapplications.operations#ApplianceDefinitionsOperations.list_by_resource_group', cf_resource_managedapplications, exception_handler=empty_on_404)
+cli_command(__name__, 'managedapp definition list', 'azure.mgmt.resource.managedapplications.operations#ApplianceDefinitionsOperations.list_by_resource_group', cf_resource_managedappdefinitions, exception_handler=empty_on_404)
