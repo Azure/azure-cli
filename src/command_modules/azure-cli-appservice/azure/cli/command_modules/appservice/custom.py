@@ -1197,6 +1197,9 @@ def create_function(resource_group_name, name, storage_account, plan=None,
 
     update_app_settings(resource_group_name, name, settings, None)
 
+    if deployment_local_git and deployment_source_url:
+        raise CLIError('usage error: --deployment-local-git | --deployment-source-url')
+
     if deployment_source_url:
         logger.warning("Linking to git repository '%s'", deployment_source_url)
         try:
@@ -1237,9 +1240,24 @@ def _validate_and_get_connection_string(resource_group_name, storage_account):
     if error_message:
         raise CLIError(error_message)
 
-    keys = storage_client.storage_accounts.list_keys(resource_group_name, storage_account).keys
-    conn_string = 'DefaultEndpointsProtocol=https;AccountName={};AccountKey={}'.format(storage_account, keys[0].value)  # pylint: disable=line-too-long
-    return conn_string
+    from azure.cli.command_modules.storage._factory import (storage_client_factory)
+    from azure.cli.core._profile import CLOUD
+    scf = storage_client_factory()
+    obj = scf.storage_accounts.list_keys(resource_group_name, storage_account)  # pylint: disable=no-member
+    try:
+        keys = [obj.keys[0].value, obj.keys[1].value]  # pylint: disable=no-member
+    except AttributeError:
+        # Older API versions have a slightly different structure
+        keys = [obj.key1, obj.key2]  # pylint: disable=no-member
+
+    endpoint_suffix = CLOUD.suffixes.storage_endpoint
+    connection_string = 'DefaultEndpointsProtocol={};EndpointSuffix={};AccountName={};AccountKey={}'.format(   # pylint: disable=line-too-long
+        "https",
+        endpoint_suffix,
+        storage_account,
+        keys[0])  # pylint: disable=no-member
+
+    return connection_string
 
 
 def list_consumption_locations():
