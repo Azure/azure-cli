@@ -27,16 +27,16 @@ class ArgsFinder(CompletionFinder):
             # Python 2 argparse only properly works with byte strings.
             comp_words = [ensure_bytes(word) for word in comp_words]
 
-        try:
-            temp = self.outstream
-            self.outstream = os.open(os.devnull, "w")
+        # try:
+        #     temp = self.outstream
+        #     self.outstream = os.open(os.devnull, "w")
 
-            active_parsers[0].parse_known_args(comp_words, namespace=parsed_args)
+        #     active_parsers[0].parse_known_args(comp_words, namespace=parsed_args)
 
-            self.outstream.close()
-            self.outstream = temp
-        except BaseException:
-            pass
+        #     self.outstream.close()
+        #     self.outstream = temp
+        # except BaseException:
+        #     pass
 
         self.completing = False
         return parsed_args
