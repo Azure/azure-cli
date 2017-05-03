@@ -127,7 +127,7 @@ class Application(object):
 
         self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
         self.configuration = configuration
-        self.progress_view = progress.IndeterminateStandardOut()
+        self.progress_view = progress.DeterminateStandardOut()
 
     def initialize(self, configuration):
         self.configuration = configuration
