@@ -16,3 +16,4 @@ def validate_origin(namespace):
             origin.name = "{}-{}".format(origin.name, idx)
             check_port_range(origin.http_port, msg.format('HTTP', origin.name))
             check_port_range(origin.https_port, msg.format('HTTPS', origin.name))
+    return True

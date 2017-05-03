@@ -8,6 +8,17 @@ from azure.mgmt.cdn.models import (Endpoint, QueryStringCachingBehavior, SkuName
                                    EndpointUpdateParameters, ProfileUpdateParameters)
 
 
+def default_content_types():
+    return ["text/plain",
+            "text/html",
+            "text/css",
+            "text/javascript",
+            "application/x-javascript",
+            "application/javascript",
+            "application/json",
+            "application/xml"]
+
+
 def list_profiles(client, resource_group_name=None):
     profiles = client.profiles
     profile_list = profiles.list_by_resource_group(resource_group_name=resource_group_name) \
@@ -41,6 +52,10 @@ def update_endpoint(instance,
         query_string_caching_behavior=query_string_caching_behavior,
         tags=tags
     )
+
+    if is_compression_enabled and not instance.content_types_to_compress:
+        params.content_types_to_compress = default_content_types()
+
     _update_mapper(instance, params, [
         'origin_host_header',
         'origin_path',
@@ -52,6 +67,8 @@ def update_endpoint(instance,
         'tags'
     ])
     return params
+
+
 update_endpoint.__doc__ = EndpointUpdateParameters.__doc__
 
 
@@ -73,7 +90,12 @@ def create_endpoint(client, resource_group_name, profile_name, name, origins, lo
                         is_https_allowed=is_https_allowed,
                         query_string_caching_behavior=query_string_caching_behavior,
                         tags=tags)
+    if is_compression_enabled and not endpoint.content_types_to_compress:
+        endpoint.content_types_to_compress = default_content_types()
+
     return client.endpoints.create(resource_group_name, profile_name, name, endpoint)
+
+
 create_endpoint.__doc__ = Endpoint.__doc__
 
 
@@ -106,6 +128,8 @@ def update_profile(instance, tags=None):
     params = ProfileUpdateParameters(tags=tags)
     _update_mapper(instance, params, ['tags'])
     return params
+
+
 update_profile.__doc__ = ProfileUpdateParameters.__doc__
 
 

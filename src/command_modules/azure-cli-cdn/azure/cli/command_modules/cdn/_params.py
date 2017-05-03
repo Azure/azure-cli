@@ -96,3 +96,7 @@ register_cli_argument('cdn endpoint purge', 'content_paths', nargs='+')
 # Custom Domain #
 
 register_cli_argument('cdn custom-domain', 'custom_domain_name', name_arg_type, id_part='name')
+
+# Origin #
+
+register_cli_argument('cdn origin', 'origin_name', name_arg_type, id_part='name')

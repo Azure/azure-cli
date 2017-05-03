@@ -84,7 +84,7 @@ def origin_command(name, method=None, use_custom=False):
 
 
 def edge_command(name, method=None, use_custom=False):
-    formatter = custom if use_custom else profile
+    formatter = custom if use_custom else edge
     command('cdn edge-node {}'.format(name), method or name, formatter)
 
 
@@ -101,10 +101,8 @@ endpoint_command('validate-custom-domain', 'validate_custom_domain')
 endpoint_command('create', 'create_endpoint', use_custom=True)
 generic_endpoint_command('update', 'update_endpoint')
 
-profile_command('delete')
 profile_command('show', 'get')
 profile_command('usage', 'list_resource_usage')
-# profile_command('generate-sso-uri', 'generate_sso_uri') doesn't seem to ready for prime time
 profile_command('delete')
 profile_command('list', 'list_profiles', use_custom=True)
 profile_command('create', 'create_profile', use_custom=True)
