@@ -117,6 +117,22 @@ def _mock_operation_delay(_):
     return
 
 
+class _MockProgresssController(object):
+
+    def begin(self):
+        return
+
+    def add(self, msg):
+        return
+
+    def end(self):
+        return
+
+
+def _mock_controller_generator():
+    return _MockProgresssController()
+
+
 # TEST CHECKS
 
 
@@ -384,6 +400,8 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
     @mock.patch('azure.cli.core.commands.LongRunningOperation._delay', _mock_operation_delay)
     @mock.patch('azure.cli.core.commands.validators.generate_deployment_name',
                 _mock_generate_deployment_name)
+    @mock.patch('azure.cli.core.commands.LongRunningOperations._init_progress',
+                _mock_controller_generator)
     def _execute_playback(self):
         # pylint: disable=no-member
         with self.my_vcr.use_cassette(self.cassette_path):
