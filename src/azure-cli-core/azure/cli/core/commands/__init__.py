@@ -96,11 +96,11 @@ class CliCommandArgument(object):
 class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, start_msg='', finish_msg='',
-                 poller_done_interval_ms=1000.0):
+                 poller_done_interval_ms=1000.0, progress_controller=None):
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms
-        self.progress_controller = self._init_progress()
+        self.progress_controller = progress_controller or self._init_progress()
 
     def _init_progress(self):  # pylint: disable=no-self-use
         controller = ProgressHook(progress_type=ProgressType.Indeterminate)
@@ -130,6 +130,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             try:
                 self._delay()
             except KeyboardInterrupt:
+                self.progress_controller.stop()
                 logger.error('Long running operation wait cancelled.  %s', correlation_message)
                 raise
 
@@ -141,6 +142,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                 fault_type='failed-long-running-operation',
                 summary='Unexpected client exception in {}.'.format(LongRunningOperation.__name__))
             message = getattr(client_exception, 'message', client_exception)
+            self.progress_controller.stop()
 
             try:
                 message = '{} {}'.format(

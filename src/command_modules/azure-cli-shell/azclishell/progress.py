@@ -87,6 +87,8 @@ def progress_view(shell):
     shell.cli.buffers['progress'].reset(
         initial_document=Document(doc))
     shell.cli.request_redraw()
+    if PROGRESS == 'Finished' or PROGRESS == 'Interupted':
+        return True
 
 
 def _get_heart_frequency():

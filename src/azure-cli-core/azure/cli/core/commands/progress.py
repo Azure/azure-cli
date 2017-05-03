@@ -105,19 +105,26 @@ class ProgressHook(object):
             view.write(self.reporter.report())
             view.flush()
 
-    def begin(self):
+    def stop(self):
+        """ if there is an abupt stop before ending """
+        if self.progress_type == ProgressType.Determinate:
+            self.add(message='Interupted', value=0.0, total_val=1)
+        else:
+            self.add(message='Interupted')
+
+    def begin(self, msg='Starting'):
         """ start reporting progress """
         if self.progress_type == ProgressType.Determinate:
-            self.add(message='Starting', value=0.0, total_val=1)
+            self.add(message=msg, value=0.0, total_val=1)
         else:
-            self.add(message='Starting')
+            self.add(message=msg)
 
-    def end(self):
+    def end(self, msg='Finished'):
         """ ending reporting of progress """
         if self.progress_type == ProgressType.Determinate:
-            self.add(message='Finished', value=1.0, total_val=1)
+            self.add(message=msg, value=1.0, total_val=1)
         else:
-            self.add(message='Finished')
+            self.add(message=msg)
 
 
 class IndeterminateStandardOut(ProgressViewBase):
