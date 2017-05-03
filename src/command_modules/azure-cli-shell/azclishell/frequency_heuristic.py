@@ -55,4 +55,3 @@ def frequency_heuristic():
 
 
 frequent_user = frequency_heuristic()
-# frequent_user = True
