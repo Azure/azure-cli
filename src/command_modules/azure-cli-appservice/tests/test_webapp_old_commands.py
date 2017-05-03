@@ -121,11 +121,13 @@ class WebappQuickCreateTestOld(ScenarioTest):
         webapp_name = 'webapp-quick-linux'
         plan = 'plan-quick-linux'
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
-        self.cmd('appservice web create -g {} -n {} --plan {} -i naziml/ruby-hello'.format(resource_group, webapp_name, plan))
+        self.cmd('appservice web create -g {} -n {} --plan {} -i derekbekoe/commute-frontend:0.3 --settings COMMUTE_API=https://api_app_name.azurewebsites.net'.format(resource_group, webapp_name, plan))
+        import time
+        time.sleep(10)  # to mitigate random page loading erors
         import requests
-        r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
+        r = requests.get('https://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
-        self.assertTrue('Ruby on Rails in Web Apps on Linux' in str(r.content))
+        self.assertTrue('Derek Bekoe' in str(r.content))
 
 
 class WebappConfigureTestOld(ResourceGroupVCRTestBase):

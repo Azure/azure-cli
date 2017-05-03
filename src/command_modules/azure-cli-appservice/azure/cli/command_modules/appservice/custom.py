@@ -40,7 +40,7 @@ logger = azlogging.get_az_logger(__name__)
 def create_webapp(resource_group_name, name, plan, runtime=None,
                   startup_file=None, deployment_container_image_name=None,
                   deployment_source_url=None, deployment_source_branch='master',
-                  deployment_local_git=None):
+                  deployment_local_git=None, settings=None):
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
 
@@ -92,6 +92,8 @@ def create_webapp(resource_group_name, name, plan, runtime=None,
         logger.warning("Local git is configured with url of '%s'", local_git_info['url'])
         setattr(webapp, 'deploymentLocalGitUrl', local_git_info['url'])
 
+    if settings:
+        update_app_settings(resource_group_name, name, settings)
     _fill_ftp_publishing_url(webapp, resource_group_name, name)
     return webapp
 

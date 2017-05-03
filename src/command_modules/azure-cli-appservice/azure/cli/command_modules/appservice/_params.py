@@ -73,6 +73,7 @@ register_cli_argument('webapp create', 'deployment_container_image_name', option
                       help='Linux only. Container image name from Docker Hub, e.g. publisher/image-name:version')
 register_cli_argument('webapp create', 'startup_file', help="Linux only. The web's startup file")
 register_cli_argument('webapp create', 'runtime', options_list=('--runtime', '-r'), help='canonicalized web runtime in the format of Framework|Version. For example, PHP|5.6')  # TODO ADD completer
+register_cli_argument('webapp create', 'settings', nargs='+', help="space separated appsettings in a format of <name>=<value>")
 register_cli_argument('webapp list-runtimes', 'linux', action='store_true', help='list runtime stacks for linux based webapps')  # TODO ADD completer
 
 register_cli_argument('webapp create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
@@ -111,8 +112,7 @@ for scope in ['appsettings', 'connection-string']:
 register_cli_argument('webapp config connection-string', 'connection_string_type',
                       options_list=('--connection-string-type', '-t'), help='connection string type', **enum_choice_list(ConnectionStringType))
 
-register_cli_argument('webapp config appsettings', 'settings', nargs='+', help="space separated app settings in a format of `<name>=<value>`")
-register_cli_argument('webapp config appsettings', 'slot_settings', nargs='+', help="space separated slot app settings in a format of `<name>=<value>`")
+register_cli_argument('webapp config appsettings', 'slot_settings', nargs='+', help="space separated slot app settings in a format of '<name>=<value>'")
 register_cli_argument('webapp config appsettings', 'setting_names', nargs='+', help="space separated app setting names")
 
 register_cli_argument('webapp config container', 'docker_registry_server_url', options_list=('--docker-registry-server-url', '-r'), help='the container registry server url')
@@ -185,6 +185,8 @@ register_cli_argument('appservice web create', 'deployment_container_image_name'
                       help='Linux only. Container image name from Docker Hub, e.g. publisher/image-name:version')
 register_cli_argument('appservice web create', 'startup_file', help="Linux only. The web's startup file")
 register_cli_argument('appservice web create', 'runtime', options_list=('--runtime', '-r'), help='canonicalized web runtime in the format of Framework|Version. For example, PHP|5.6')  # TODO ADD completer
+register_cli_argument('appservice web create', 'settings', nargs='+', help="space separated appsettings in a format of <name>=<value>")
+
 register_cli_argument('appservice web list-runtimes', 'linux', action='store_true', help='list runtime stacks for linux based webapps')  # TODO ADD completer
 
 register_cli_argument('appservice web create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
