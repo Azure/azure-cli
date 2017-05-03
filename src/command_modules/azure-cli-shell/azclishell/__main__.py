@@ -66,6 +66,6 @@ def main(style=None):
             os.path.join(shell_config_dir(), config.get_history())),
         app=APPLICATION,
         styles=style_obj,
-        user_feedback = ask_feedback
+        user_feedback=ask_feedback
     )
     shell_app.run()
