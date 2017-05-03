@@ -1155,7 +1155,10 @@ class _StackRuntimeHelper(object):
 
 
 def create_function(resource_group_name, name, storage_account, plan=None,
-                    consumption_plan_location=None):
+                    consumption_plan_location=None, deployment_source_url=None,
+                    deployment_source_branch='master', deployment_local_git=None):
+    if deployment_source_url and deployment_local_git:
+        raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
 
     if bool(plan) == bool(consumption_plan_location):
         raise CLIError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
@@ -1193,6 +1196,21 @@ def create_function(resource_group_name, name, storage_account, plan=None,
         settings.append('WEBSITE_CONTENTSHARE=' + name.lower())
 
     update_app_settings(resource_group_name, name, settings, None)
+
+    if deployment_source_url:
+        logger.warning("Linking to git repository '%s'", deployment_source_url)
+        try:
+            poller = config_source_control(resource_group_name, name, deployment_source_url, 'git',
+                                           deployment_source_branch, manual_integration=True)
+            LongRunningOperation()(poller)
+        except Exception as ex:  # pylint: disable=broad-except
+            ex = ex_handler_factory(no_throw=True)(ex)
+            logger.warning("Link to git repository failed due to error '%s'", ex)
+
+    if deployment_local_git:
+        local_git_info = enable_local_git(resource_group_name, name)
+        logger.warning("Local git is configured with url of '%s'", local_git_info['url'])
+        setattr(functionapp, 'deploymentLocalGitUrl', local_git_info['url'])
 
     return functionapp
 

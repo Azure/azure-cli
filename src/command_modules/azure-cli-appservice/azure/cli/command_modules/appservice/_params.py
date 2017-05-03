@@ -303,3 +303,6 @@ register_cli_argument('functionapp create', 'consumption_plan_location', options
                       help="Geographic location where Function App will be hosted. Use 'functionapp list-consumption-locations' to view available locations.")
 register_cli_argument('functionapp create', 'storage_account', options_list=('--storage-account', '-s'),
                       help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
+register_cli_argument('functionapp create', 'deployment_local_git', action='store_true', options_list=('--deployment-local-git', '-l'), help='enable local git')
+register_cli_argument('functionapp create', 'deployment_source_url', options_list=('--deployment-source-url', '-u'), help='Git repository URL to link with manual integration')
+register_cli_argument('functionapp create', 'deployment_source_branch', options_list=('--deployment-source-branch', '-b'), help='the branch to deploy')
