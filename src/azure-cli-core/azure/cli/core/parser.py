@@ -110,7 +110,7 @@ class AzCliCommandParser(argparse.ArgumentParser):
                             raise
                 param.completer = arg.completer
 
-            command_parser.set_defaults(func=metadata.handler,
+            command_parser.set_defaults(func=lambda *args, **kwargs: metadata.execute(*args, **kwargs),
                                         command=command_name,
                                         _validators=argument_validators,
                                         _parser=command_parser)
