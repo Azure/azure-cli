@@ -78,7 +78,7 @@ def create_appliance(resource_group_name,  # pylint: disable=too-many-arguments
                      location, kind, managedapp_definition_id=None,
                      plan_name=None, plan_publisher=None, plan_product=None,
                      plan_version=None, tags=None, parameters=None):
-    ''' Create a new managed application.
+    """ Create a new managed application.
     :param str resource_group_name:the desired resource group name
     :param str appliance_name:the managed application name
     :param str kind:the managed application kind. can be marketplace or servicecatalog
@@ -87,7 +87,7 @@ def create_appliance(resource_group_name,  # pylint: disable=too-many-arguments
     :param str plan_product:the managed application package plan product
     :param str plan_version:the managed application package plan version
     :param str tags:tags in 'a=b c' format
-    '''
+    """
     racf = _resource_managedapps_client_factory()
     appliance = Appliance(
         location=location,
@@ -123,10 +123,10 @@ def create_appliance(resource_group_name,  # pylint: disable=too-many-arguments
 
 
 def show_appliance(resource_group_name=None, appliance_name=None, managedapp_id=None):
-    ''' Gets a managed application.
+    """ Gets a managed application.
     :param str resource_group_name:the resource group name
     :param str appliance_name:the managed application name
-    '''
+    """
     racf = _resource_managedapps_client_factory()
     if managedapp_id:
         appliance = racf.appliances.get_by_id(managedapp_id)
@@ -137,10 +137,10 @@ def show_appliance(resource_group_name=None, appliance_name=None, managedapp_id=
 
 def show_appliancedefinition(resource_group_name=None, appliance_definition_name=None,
                              managedapp_definition_id=None):
-    ''' Gets a managed application definition.
+    """ Gets a managed application definition.
     :param str resource_group_name:the resource group name
     :param str appliance_definition_name:the managed application definition name
-    '''
+    """
     racf = _resource_managedapps_client_factory()
     if managedapp_definition_id:
         appliancedef = racf.appliance_definitions.get_by_id(managedapp_definition_id)
@@ -154,20 +154,20 @@ def create_appliancedefinition(resource_group_name,  # pylint: disable=too-many-
                                appliance_definition_name, location,
                                lock_level, package_file_uri, authorizations,
                                description, display_name, tags=None):
-    ''' Create a new managed application definition.
+    """ Create a new managed application definition.
     :param str resource_group_name:the desired resource group name
     :param str appliance_definition_name:the managed application definition name
     :param str description:the managed application definition description
     :param str display_name:the managed application definition display name
     :param str package_file_uri:the managed application definition package file uri
     :param str tags:tags in 'a=b c' format
-    '''
+    """
     racf = _resource_managedapps_client_factory()
     authorizations = authorizations or []
     applianceAuthList = []
 
     for name_value in authorizations:
-        # split at the first ':', both principalId and roldeDefinitionId should not have a ':'
+        # split at the first ':', neither principalId nor roldeDefinitionId should have a ':'
         principalId, roleDefinitionId = name_value.split(':', 1)
         applianceAuth = ApplianceProviderAuthorization(principalId, roleDefinitionId)
         applianceAuthList.append(applianceAuth)
@@ -185,7 +185,7 @@ def create_appliancedefinition(resource_group_name,  # pylint: disable=too-many-
 def list_appliances(resource_group_name=None):
     racf = _resource_managedapps_client_factory()
 
-    if resource_group_name is not None:
+    if resource_group_name:
         return racf.appliances.list_by_resource_group(resource_group_name)
     else:
         return racf.appliances.list_by_subscription()
