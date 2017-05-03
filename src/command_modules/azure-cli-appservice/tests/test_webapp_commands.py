@@ -599,5 +599,54 @@ class WebappBackupRestoreScenarioTest(ResourceGroupVCRTestBase):
                  .format(self.resource_group, self.webapp_name, sas_url, backup_name, db_conn_str, database_name, database_type), checks=JMESPathCheck('name', self.webapp_name))
 
 
+class FunctionAppWithPlanE2ETest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(FunctionAppWithPlanE2ETest, self).__init__(__file__, test_method, resource_group='azurecli-functionapp-e2e')
+
+    def test_functionapp_asp_e2e(self):
+        self.execute()
+
+    def body(self):
+        functionapp_name = 'functionapp-e2e3'
+        plan = 'functionapp-e2e-plan'
+        storage = 'functionappplanstorage'
+        self.cmd('appservice plan create -g {} -n {}'.format(self.resource_group, plan))
+        self.cmd('appservice plan list -g {}'.format(self.resource_group))
+
+        self.cmd('storage account create --name {} -g {} -l westus --sku Standard_LRS'.format(storage, self.resource_group))
+
+        self.cmd('functionapp create -g {} -n {} -p {} -s {}'.format(self.resource_group, functionapp_name, plan, storage), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', functionapp_name),
+            JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')
+        ])
+
+        self.cmd('functionapp delete -g {} -n {}'.format(self.resource_group, functionapp_name))
+
+
+class FunctionAppWithConsumptionPlanE2ETest(ResourceGroupVCRTestBase):
+
+    def __init__(self, test_method):
+        super(FunctionAppWithConsumptionPlanE2ETest, self).__init__(__file__, test_method, resource_group='azurecli-functionapp-c-e2e')
+
+    def test_functionapp_consumption_e2e(self):
+        self.execute()
+
+    def body(self):
+        functionapp_name = 'functionappconsumption'
+        location = 'westus'
+        storage = 'functionaconstorage'
+
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, self.resource_group, location))
+        self.cmd('functionapp create -g {} -n {} -c {} -s {}'.format(self.resource_group, functionapp_name, location, storage), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', functionapp_name),
+            JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')
+        ])
+
+        self.cmd('functionapp delete -g {} -n {}'.format(self.resource_group, functionapp_name))
+
+
 if __name__ == '__main__':
     unittest.main()

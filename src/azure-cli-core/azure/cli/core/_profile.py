@@ -145,6 +145,8 @@ class Profile(object):
             t_list = [s.tenant_id for s in subscriptions]
             bare_tenants = [t for t in subscription_finder.tenants if t not in t_list]
             subscriptions = Profile._build_tenant_level_accounts(bare_tenants)
+            if not subscriptions:
+                return []
 
         consolidated = Profile._normalize_properties(subscription_finder.user_id,
                                                      subscriptions,
