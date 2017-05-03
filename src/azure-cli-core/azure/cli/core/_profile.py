@@ -16,7 +16,7 @@ import azure.cli.core.azlogging as azlogging
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import CLIError, get_file_json
-from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
+from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription, init_known_clouds
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -63,6 +63,7 @@ def _authentication_context_factory(authority, cache):
 
 _AUTH_CTX_FACTORY = _authentication_context_factory
 
+init_known_clouds(force=True)
 CLOUD = get_active_cloud()
 
 logger.debug('Current cloud config:\n%s', str(CLOUD))
@@ -290,6 +291,12 @@ class Profile(object):
 
     def get_subscription_id(self):
         return self.get_subscription()[_SUBSCRIPTION_ID]
+
+    def get_access_token_for_resource(self, username, tenant, resource):
+        tenant = tenant or 'common'
+        _, access_token = self._creds_cache.retrieve_token_for_user(
+            username, tenant, resource)
+        return access_token
 
     def get_login_credentials(self, resource=CLOUD.endpoints.active_directory_resource_id,
                               subscription_id=None):

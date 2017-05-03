@@ -3,9 +3,15 @@
 Release History
 ===============
 
-unreleased
+2.0.4 (2017-04-28)
 ++++++++++++++++++
 
+* Add support for Application Gateway connection draining.
+* Add support for Application Gateway WAF rule set configuration.
+* Add support for ExpressRoute route filters and rules.
+* Add support for TrafficManager geographic routing.
+* Add support for VPN connection policy-based traffic selectors.
+* Add support for VPN connection IPSec policies.
 * Fix bug with `vpn-connection create` when using the `--no-wait` or `--validate` parameters.
 
 2.0.3 (2017-04-17)

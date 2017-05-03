@@ -14,9 +14,11 @@ import automation.utilities.path as automation_path
 
 def run_pylint(modules):
     print('\n\nRun pylint')
-    print('Modules: {}'.format(', '.join([name for name, _ in modules if not name.endswith('-nspkg')])))
+    print(
+    'Modules: {}'.format(', '.join([name for name, _ in modules if not name.endswith('-nspkg')])))
 
-    modules_list = ' '.join([os.path.join(path, 'azure') for name, path in modules if not name.endswith('-nspkg')])
+    modules_list = ' '.join(
+        [os.path.join(path, 'azure') for name, path in modules if not name.endswith('-nspkg')])
     arguments = '{} --rcfile={} -j {} -r n -d I0013'.format(
         modules_list,
         os.path.join(automation_path.get_repo_root(), 'pylintrc'),
@@ -69,9 +71,7 @@ if __name__ == '__main__':
         return_code_sum = run_pylint(selected_modules)
 
         # Run flake8 on modules
-        pep8_ready_modules = automation_path.filter_blacklisted_modules(
-            ['acr', 'batch', 'configure', 'container', 'datalake', 'documentdb', 'find', 'iot',
-             'keyvault', 'network', 'redis', 'resource'])
+        pep8_ready_modules = automation_path.filter_blacklisted_modules('network')
 
         return_code_sum += run_pep8(pep8_ready_modules)
 

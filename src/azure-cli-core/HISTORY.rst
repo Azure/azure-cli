@@ -2,6 +2,16 @@
 
 Release History
 ===============
+2.0.5 (Unreleased)
+^^^^^^^^^^^^^^^^^^
+* core: capture exceptions caused by unregistered provider and auto-register it   
+
+2.0.4 (2017-04-28)
+^^^^^^^^^^^^^^^^^^
+* Fix bytes returned from hex fingerprint -o tsv (#3053)
+* Enhanced Key Vault Certificate Download and AAD SP Integration (#3003)
+* Add Python location to ‘az —version’ (#2986)
+* login: support login when there are no subscriptions (#2929)
 
 2.0.3 (2017-04-17)
 ^^^^^^^^^^^^^^^^^^
