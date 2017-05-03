@@ -72,8 +72,7 @@ class CliArgumentType(object):
 
     def __init__(self, overrides=None, **kwargs):
         if isinstance(overrides, str):
-            raise ValueError(
-                "Overrides has to be a CliArgumentType (cannot be a string)")
+            raise ValueError("Overrides has to be a CliArgumentType (cannot be a string)")
         options_list = kwargs.get('options_list', None)
         if options_list and isinstance(options_list, str):
             kwargs['options_list'] = [options_list]
@@ -87,8 +86,7 @@ class CliArgumentType(object):
 
 
 class CliCommandArgument(object):
-    _NAMED_ARGUMENTS = ('options_list', 'validator',
-                        'completer', 'id_part', 'arg_group')
+    _NAMED_ARGUMENTS = ('options_list', 'validator', 'completer', 'id_part', 'arg_group')
 
     def __init__(self, dest=None, argtype=None, **kwargs):
         self.type = CliArgumentType(overrides=argtype, **kwargs)
@@ -98,13 +96,11 @@ class CliCommandArgument(object):
         # We'll do an early fault detection to find any instances where we have inconsistent
         # set of parameters for argparse
         if not self.options_list and 'required' in self.options:  # pylint: disable=access-member-before-definition
-            raise ValueError(
-                message="You can't specify both required and an options_list")
+            raise ValueError(message="You can't specify both required and an options_list")
         if not self.options.get('dest', False):
             raise ValueError('Missing dest')
         if not self.options_list:  # pylint: disable=access-member-before-definition
-            self.options_list = (
-                '--{}'.format(self.options['dest'].replace('_', '-')),)
+            self.options_list = ('--{}'.format(self.options['dest'].replace('_', '-')),)
 
     def __getattr__(self, name):
         if name in self._NAMED_ARGUMENTS:
@@ -146,16 +142,14 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                 correlation_id = json.loads(
                     poller._response.__dict__['_content'])['properties']['correlationId']
 
-                correlation_message = 'Correlation ID: {}'.format(
-                    correlation_id)
+                correlation_message = 'Correlation ID: {}'.format(correlation_id)
             except:  # pylint: disable=bare-except
                 pass
 
             try:
                 self._delay()
             except KeyboardInterrupt:
-                logger.error(
-                    'Long running operation wait cancelled.  %s', correlation_message)
+                logger.error('Long running operation wait cancelled.  %s', correlation_message)
                 raise
         try:
             result = poller.result()
@@ -174,10 +168,8 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                 pass
 
             cli_error = CLIError('{}  {}'.format(message, correlation_message))
-            # capture response for downstream commands (webapp) to dig out more
-            # details
-            setattr(cli_error, 'response', getattr(
-                client_exception, 'response', None))
+            # capture response for downstream commands (webapp) to dig out more details
+            setattr(cli_error, 'response', getattr(client_exception, 'response', None))
             raise cli_error
 
         logger.info("Long running operation '%s' completed with result %s",
@@ -193,8 +185,7 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation):
 
         if isinstance(result, AzureOperationPoller):
             # most deployment operations return a poller
-            result = super(DeploymentOutputLongRunningOperation,
-                           self).__call__(result)
+            result = super(DeploymentOutputLongRunningOperation, self).__call__(result)
             outputs = result.properties.outputs
             return {key: val['value'] for key, val in outputs.items()} if outputs else {}
         elif isinstance(result, ClientRawResponse):
@@ -262,8 +253,7 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
         if 'configured_default' in overrides.settings:
             def_config = overrides.settings.pop('configured_default', None)
             setattr(arg.type, 'default_name_tooling', def_config)
-            # same blunt mechanism like we handled id-parts, for create
-            # command, no name default
+            # same blunt mechanism like we handled id-parts, for create command, no name default
             if (self.name.split()[-1] == 'create' and
                     overrides.settings.get('metavar', None) == 'NAME'):
                 return
@@ -309,14 +299,11 @@ def get_command_table(module_name=None):
     loaded = False
     if module_name and module_name not in BLACKLISTED_MODS:
         try:
-            import_module('azure.cli.command_modules.' +
-                          module_name).load_commands()
-            logger.debug(
-                "Successfully loaded command table from module '%s'.", module_name)
+            import_module('azure.cli.command_modules.' + module_name).load_commands()
+            logger.debug("Successfully loaded command table from module '%s'.", module_name)
             loaded = True
         except ImportError:
-            logger.debug("Loading all installed modules as module with name '%s' not found.",
-                         module_name)  # pylint: disable=line-too-long
+            logger.debug("Loading all installed modules as module with name '%s' not found.", module_name)  # pylint: disable=line-too-long
         except Exception:  # pylint: disable=broad-except
             pass
     if not loaded:
@@ -324,8 +311,7 @@ def get_command_table(module_name=None):
         try:
             mods_ns_pkg = import_module('azure.cli.command_modules')
             installed_command_modules = [modname for _, modname, _ in
-                                         pkgutil.iter_modules(
-                                             mods_ns_pkg.__path__)
+                                         pkgutil.iter_modules(mods_ns_pkg.__path__)
                                          if modname not in BLACKLISTED_MODS]
         except ImportError:
             pass
@@ -334,11 +320,9 @@ def get_command_table(module_name=None):
         for mod in installed_command_modules:
             try:
                 start_time = timeit.default_timer()
-                import_module('azure.cli.command_modules.' +
-                              mod).load_commands()
+                import_module('azure.cli.command_modules.' + mod).load_commands()
                 elapsed_time = timeit.default_timer() - start_time
-                logger.debug("Loaded module '%s' in %.3f seconds.",
-                             mod, elapsed_time)
+                logger.debug("Loaded module '%s' in %.3f seconds.", mod, elapsed_time)
                 cumulative_elapsed_time += elapsed_time
             except Exception as ex:  # pylint: disable=broad-except
                 # Changing this error message requires updating CI script that checks for failed
@@ -358,16 +342,14 @@ def get_command_table(module_name=None):
 def register_cli_argument(scope, dest, arg_type=None, **kwargs):
     '''Specify CLI specific metadata for a given argument for a given scope.
     '''
-    _cli_argument_registry.register_cli_argument(
-        scope, dest, arg_type, **kwargs)
+    _cli_argument_registry.register_cli_argument(scope, dest, arg_type, **kwargs)
 
 
 def register_extra_cli_argument(command, dest, **kwargs):
     '''Register extra parameters for the given command. Typically used to augment auto-command built
     commands to add more parameters than the specific SDK method introspected.
     '''
-    _cli_extra_argument_registry[command][dest] = CliCommandArgument(
-        dest, **kwargs)
+    _cli_extra_argument_registry[command][dest] = CliCommandArgument(dest, **kwargs)
 
 
 def cli_command(module_name, name, operation,
@@ -436,8 +418,7 @@ def create_command(module_name, name, operation,
                    no_wait_param=None, confirmation=None, exception_handler=None,
                    formatter_class=None):
     if not isinstance(operation, string_types):
-        raise ValueError(
-            "Operation must be a string. Got '{}'".format(operation))
+        raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
     def _execute_command(kwargs):
         from msrestazure.azure_exceptions import CloudError
@@ -457,8 +438,7 @@ def create_command(module_name, name, operation,
                     rp = _check_rp_not_registered_err(ex)
                     if rp:
                         _register_rp(rp)
-                        result = op(
-                            client, **kwargs) if client else op(**kwargs)
+                        result = op(client, **kwargs) if client else op(**kwargs)
                     else:
                         reraise(*sys.exc_info())
 
@@ -491,8 +471,7 @@ def create_command(module_name, name, operation,
             telemetry.set_exception(azure_exception, fault_type=fault_type,
                                     summary='Unexpected azure exception during command creation')
             message = re.search(r"([A-Za-z\t .])+", str(azure_exception))
-            raise CLIError('\n{}'.format(message.group(
-                0) if message else str(azure_exception)))
+            raise CLIError('\n{}'.format(message.group(0) if message else str(azure_exception)))
         except ValueError as value_error:
             fault_type = name.replace(' ', '-') + '-value-error'
             telemetry.set_exception(value_error, fault_type=fault_type,
@@ -526,8 +505,7 @@ def _user_confirmed(confirmation, command_args):
             return prompt_y_n(confirmation)
         return prompt_y_n('Are you sure you want to perform this operation?')
     except NoTTYException:
-        logger.warning(
-            'Unable to prompt for confirmation as no tty available. Use --yes.')
+        logger.warning('Unable to prompt for confirmation as no tty available. Use --yes.')
         return False
 
 
@@ -596,8 +574,7 @@ def _apply_parameter_info(command_name, command):
     # Add any arguments explicitly registered for this command
     for argument_name, argument_definition in _get_cli_extra_arguments(command_name):
         command.arguments[argument_name] = argument_definition
-        command.update_argument(
-            argument_name, _get_cli_argument(command_name, argument_name))
+        command.update_argument(argument_name, _get_cli_argument(command_name, argument_name))
 
 
 def _update_command_definitions(command_table_to_update):
