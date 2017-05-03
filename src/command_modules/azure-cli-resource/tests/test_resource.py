@@ -14,6 +14,7 @@ from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase, JMESPathCheck,
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck)
 
+
 # pylint: disable=method-hidden
 class ResourceGroupScenarioTest(VCRTestBase):
     def test_resource_group(self):
@@ -598,6 +599,10 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             JMESPathCheck('artifacts[1].name', 'CreateUiDefinition'),
             JMESPathCheck('artifacts[1].type', 'Custom')
         ])
+
+        # delete
+        self.cmd('managedapp definition delete -g {} -n {}'.format(resource_group, appdef_name))
+        self.cmd('managedapp definition list -g {}'.format(resource_group), checks=NoneCheck())
 
 
 if __name__ == '__main__':
