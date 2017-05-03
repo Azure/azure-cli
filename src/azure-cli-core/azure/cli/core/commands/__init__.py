@@ -259,6 +259,9 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
                 overrides.settings['default'] = config_value
                 overrides.settings['required'] = False
 
+    def execute(self, **kwargs):
+        return self(**kwargs)
+
     def __call__(self, *args, **kwargs):
         return self.handler(*args, **kwargs)
 
