@@ -45,7 +45,8 @@ def cli_documentdb_create(client,  # pylint:disable=too-many-arguments
                           default_consistency_level=None,
                           max_staleness_prefix=100,
                           max_interval=5,
-                          ip_range_filter=None):
+                          ip_range_filter=None,
+                          enable_automatic_failover=None):
     """Create a new Azure DocumentDB database account."""
 
     consistency_policy = None
@@ -67,7 +68,8 @@ def cli_documentdb_create(client,  # pylint:disable=too-many-arguments
         locations,
         kind=kind,
         consistency_policy=consistency_policy,
-        ip_range_filter=ip_range_filter)
+        ip_range_filter=ip_range_filter,
+        enable_automatic_failover=enable_automatic_failover)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
@@ -82,7 +84,8 @@ def cli_documentdb_update(client,  # pylint: disable=too-many-arguments
                           default_consistency_level=None,
                           max_staleness_prefix=None,
                           max_interval=None,
-                          ip_range_filter=None):
+                          ip_range_filter=None,
+                          enable_automatic_failover=None):
     """Update an existing Azure DocumentDB database account. """
     existing = client.get(resource_group_name, account_name)
 
@@ -115,6 +118,9 @@ def cli_documentdb_update(client,  # pylint: disable=too-many-arguments
 
     if ip_range_filter is None:
         ip_range_filter = existing.ip_range_filter
+
+    if enable_automatic_failover is None:
+        enable_automatic_failover = existing.enable_automatic_failover
 
     params = DatabaseAccountCreateUpdateParameters(
         existing.location,
