@@ -177,6 +177,13 @@ class AzCliCommandParser(argparse.ArgumentParser):
                         is_group)
         self.exit()
 
+    def _check_value(self, action, value):
+        # Override to customize the error message when a argument is not among the available choices
+        # converted value must be one of the choices (if specified)
+        if action.choices is not None and value not in action.choices:
+            msg = 'invalid choice: {}'.format(value)
+            raise argparse.ArgumentError(action, msg)
+
     def is_group(self):
         """ Determine if this parser instance represents a group
             or a command. Anything that has a func default is considered
