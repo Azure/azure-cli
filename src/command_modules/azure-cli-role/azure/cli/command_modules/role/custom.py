@@ -566,6 +566,7 @@ def create_service_principal_for_rbac(
            Defaults to the root of the current subscription.
     :param str role: role the service principal has on the resources.
     '''
+    from azure.graphrbac.models import GraphErrorException
     import time
     graph_client = _graph_client_factory()
     role_client = _auth_client_factory().role_assignments
@@ -593,17 +594,23 @@ def create_service_principal_for_rbac(
     password, public_cert_string, cert_file, end_date = \
         _process_service_principal_creds(years, cert, create_cert, password, key_vault, cert_name,
                                          start_date)
-
-    aad_application = create_application(graph_client.applications,
-                                         display_name=app_display_name,
-                                         # pylint: disable=too-many-function-args
-                                         homepage='http://' + app_display_name,
-                                         identifier_uris=[name],
-                                         available_to_other_tenants=False,
-                                         password=password,
-                                         key_value=public_cert_string,
-                                         start_date=start_date,
-                                         end_date=end_date)
+    print('START: {}'.format(start_date))
+    print('END: {}'.format(end_date))
+    try:
+        aad_application = create_application(graph_client.applications,
+                                             display_name=app_display_name,
+                                             # pylint: disable=too-many-function-args
+                                             homepage='http://' + app_display_name,
+                                             identifier_uris=[name],
+                                             available_to_other_tenants=False,
+                                             password=password,
+                                             key_value=public_cert_string,
+                                             start_date=start_date,
+                                             end_date=end_date)
+    except GraphErrorException as ex:
+        if 'date is invalid' in str(ex):
+            raise CLIError('{}\nStart: {}\nEnd: {}'.format(ex, start_date, end_date))
+        raise ex
     # pylint: disable=no-member
     app_id = aad_application.app_id
     # retry till server replication is done
