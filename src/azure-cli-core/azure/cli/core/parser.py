@@ -110,10 +110,11 @@ class AzCliCommandParser(argparse.ArgumentParser):
                             raise
                 param.completer = arg.completer
 
-            command_parser.set_defaults(func=lambda *args, **kwargs: metadata.execute(*args, **kwargs),
-                                        command=command_name,
-                                        _validators=argument_validators,
-                                        _parser=command_parser)
+            command_parser.set_defaults(
+                func=metadata,
+                command=command_name,
+                _validators=argument_validators,
+                _parser=command_parser)
 
     def _get_subparser(self, path):
         """For each part of the path, walk down the tree of
