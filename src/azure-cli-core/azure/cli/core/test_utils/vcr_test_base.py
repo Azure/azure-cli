@@ -132,7 +132,7 @@ class _MockProgresssController(object):
         return
 
 
-def _mock_controller_generator():
+def _mock_controller_generator(_):
     return _MockProgresssController()
 
 
