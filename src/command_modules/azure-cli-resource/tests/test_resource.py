@@ -12,7 +12,7 @@ from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase, JMESPathCheck,
                                                      ResourceGroupVCRTestBase,
                                                      MOCKED_SUBSCRIPTION_ID)
 
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck as JCheck)
 
 
 # pylint: disable=method-hidden
@@ -570,34 +570,34 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         # create a managedapp definition
         create_cmd = 'managedapp definition create -n {} --package-file-uri {} --display-name {} --description {} -l {} -a {} --lock-level {} -g {}'
         self.cmd(create_cmd.format(appdef_name, packageUri, appdef_display_name, appdef_description, location, auth, lock, resource_group), checks=[
-            JMESPathCheck('name', appdef_name),
-            JMESPathCheck('displayName', appdef_display_name),
-            JMESPathCheck('description', appdef_description),
-            JMESPathCheck('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
-            JMESPathCheck('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
-            JMESPathCheck('artifacts[0].name', 'ApplianceResourceTemplate'),
-            JMESPathCheck('artifacts[0].type', 'Template'),
-            JMESPathCheck('artifacts[1].name', 'CreateUiDefinition'),
-            JMESPathCheck('artifacts[1].type', 'Custom')
+            JCheck('name', appdef_name),
+            JCheck('displayName', appdef_display_name),
+            JCheck('description', appdef_description),
+            JCheck('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
+            JCheck('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
+            JCheck('artifacts[0].name', 'ApplianceResourceTemplate'),
+            JCheck('artifacts[0].type', 'Template'),
+            JCheck('artifacts[1].name', 'CreateUiDefinition'),
+            JCheck('artifacts[1].type', 'Custom')
                 ])
 
         # list and show it
         list_cmd = 'managedapp definition list -g {}'
         self.cmd(list_cmd.format(resource_group), checks=[
-            JMESPathCheck('value[0].name', appdef_name)
+            JCheck('value[0].name', appdef_name)
         ])
 
         show_cmd = 'managedapp definition show -g {} -n {}'
         self.cmd(show_cmd.format(resource_group, appdef_name), checks=[
-            JMESPathCheck('name', appdef_name),
-            JMESPathCheck('displayName', appdef_display_name),
-            JMESPathCheck('description', appdef_description),
-            JMESPathCheck('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
-            JMESPathCheck('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
-            JMESPathCheck('artifacts[0].name', 'ApplianceResourceTemplate'),
-            JMESPathCheck('artifacts[0].type', 'Template'),
-            JMESPathCheck('artifacts[1].name', 'CreateUiDefinition'),
-            JMESPathCheck('artifacts[1].type', 'Custom')
+            JCheck('name', appdef_name),
+            JCheck('displayName', appdef_display_name),
+            JCheck('description', appdef_description),
+            JCheck('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
+            JCheck('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
+            JCheck('artifacts[0].name', 'ApplianceResourceTemplate'),
+            JCheck('artifacts[0].type', 'Template'),
+            JCheck('artifacts[1].name', 'CreateUiDefinition'),
+            JCheck('artifacts[1].type', 'Custom')
         ])
 
         # delete
