@@ -7,7 +7,7 @@ import unittest
 import azure.cli.core.commands.progress as progress
 
 
-class MockOutstream(progress._ProgressViewBase):
+class MockOutstream(progress.ProgressViewBase):
     """ mock outstream for testing """
     def __init__(self, p_type=progress.ProgressType.Indeterminate):
         self.string = ''
@@ -23,7 +23,7 @@ class MockOutstream(progress._ProgressViewBase):
         return self.string
 
 
-class DetMockOutstream(progress._ProgressViewBase):
+class DetMockOutstream(progress.ProgressViewBase):
     """ mock outstream for testing """
     def __init__(self, p_type=progress.ProgressType.Determinate):
         self.string = ''
@@ -42,7 +42,7 @@ class DetMockOutstream(progress._ProgressViewBase):
 class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-methods
     """ test the progress reporting """
 
-    def test_det_model(self):
+    def test_progress_indicator_det_model(self):
         """ test the determinate progress reporter """
         reporter = progress.DetProgressReporter()
         args = reporter.report()
@@ -64,7 +64,7 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         with self.assertRaises(AssertionError):
             reporter.add({'message': 'In words', 'total_val': 30, 'value': 12340})
 
-    def test_indet_model(self):
+    def test_progress_indicator_indet_model(self):
         """ test the indetermiante progress reporter """
         reporter = progress.InDetProgressReporter()
         message = reporter.report()
@@ -76,7 +76,7 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         message = reporter.report()
         self.assertEqual(message['message'], 'Progress')
 
-    def test_indet_stdview(self):
+    def test_progress_indicator_indet_stdview(self):
         """ tests the indeterminate progress standardout view """
         view = progress.IndeterminateStandardOut()
         self.assertEqual(view.get_type().value, progress.ProgressType.Indeterminate.value)
@@ -87,7 +87,7 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         self.assertTrue(after >= before)
         view.write(kwargs={'message': 'TESTING'})
 
-    def test_det_stdview(self):
+    def test_progress_indicator_det_stdview(self):
         """ test the determinate progress standardout view """
         outstream = MockOutstream()
         view = progress.DeterminateStandardOut(out=outstream)
@@ -102,7 +102,7 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         bar_str = ('#' * int(.9 * 69)).ljust(69)
         self.assertEqual(outstream.string, '\r[{}]  {:.4%}'.format(bar_str, .9))
 
-    def test_controller(self):
+    def test_progress_indicator_controller(self):
         """ tests the controller for progress reporting """
         controller = progress.ProgressHook(progress.ProgressType.Indeterminate)
         view = MockOutstream()

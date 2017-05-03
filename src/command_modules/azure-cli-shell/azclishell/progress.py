@@ -6,7 +6,7 @@ from random import randint
 
 from prompt_toolkit.document import Document
 
-from azure.cli.core.commands.progress import _ProgressViewBase, ProgressType
+from azure.cli.core.commands.progress import ProgressViewBase, ProgressType
 from azclishell.util import get_window_dim
 
 
@@ -18,7 +18,7 @@ HEART_BEAT_VALUES = {0: "__", 1: "/\\", 2: '/^\\', 3: "__"}
 HEART_BEAT = ''
 
 
-class ShellProgressView(_ProgressViewBase):
+class ShellProgressView(ProgressViewBase):
     """ custom output for progress reporting """
     def __init__(self):
         super(ShellProgressView, self).__init__(None, ProgressType.Both, None)

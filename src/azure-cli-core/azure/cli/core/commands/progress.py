@@ -19,7 +19,7 @@ class ProgressType(Enum):  # pylint: disable=too-few-public-methods
     Both = 2
 
 
-class _ProgressViewBase(object):
+class ProgressViewBase(object):
     """ a view base for progress reporting """
     def __init__(self, out, progress_type, format_percent=None):
         self.out = out
@@ -120,7 +120,7 @@ class ProgressHook(object):
             self.add(message='Finished')
 
 
-class IndeterminateStandardOut(_ProgressViewBase):
+class IndeterminateStandardOut(ProgressViewBase):
     """ custom output for progress reporting """
     def __init__(self, out=None):
         super(IndeterminateStandardOut, self).__init__(
@@ -137,7 +137,7 @@ class IndeterminateStandardOut(_ProgressViewBase):
         self.spinner.step(label=msg)
 
 
-class DeterminateStandardOut(_ProgressViewBase):
+class DeterminateStandardOut(ProgressViewBase):
     """ custom output for progress reporting """
     def __init__(self, out=None):
         super(DeterminateStandardOut, self).__init__(

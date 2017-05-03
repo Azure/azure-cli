@@ -194,10 +194,6 @@ class Shell(object):
         cli.buffers['bottom_toolbar'].reset(
             initial_document=Document(u'{}{}{}'.format(NOTIFICATIONS, settings, empty_space)))
 
-        # cli.request_redraw()
-        # if return_val:
-        #     return stop
-
     def _toolbar_info(self):
         sub_name = ""
         try:
