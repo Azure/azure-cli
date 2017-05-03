@@ -85,9 +85,6 @@ register_cli_argument(cdn_endpoint,
                       **enum_choice_list(caching_behavior))
 register_cli_argument(cdn_endpoint, 'content_types_to_compress', nargs='+')
 
-
-register_cli_argument(cdn_endpoint, 'content_types_to_compress', nargs='+')
-
 # Endpoint Load #
 
 register_cli_argument('cdn endpoint load', 'content_paths', nargs='+')
