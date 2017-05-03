@@ -135,9 +135,10 @@ def three_state_flag(positive_label='true', negative_label='false', invert=False
     """ Creates a flag-like argument that can also accept positive/negative values. This allows
     consistency between create commands that typically use flags and update commands that require
     positive/negative values without introducing breaking changes. Flag-like behavior always
-    implies the affirmative.
+    implies the affirmative unless invert=True then invert the logic.
     - positive_label: label for the positive value (ex: 'enabled')
     - negative_label: label for the negative value (ex: 'disabled')
+    - invert: invert the boolean logic for the flag
     """
     choices = [positive_label, negative_label]
 
