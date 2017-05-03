@@ -28,13 +28,13 @@ class ArgsFinder(CompletionFinder):
 
         try:
             stderr = sys.stderr
-            sys.stderr = io.open(os.devnull, "w")
+            sys.stderr = os.open(os.devnull, "w")
 
             active_parsers[0].parse_known_args(comp_words, namespace=parsed_args)
 
             sys.stderr.close()
             sys.stderr = stderr
-        except BaseException:
+        except Exception:  # pylint: disable=broad-except
             pass
 
         self.completing = False

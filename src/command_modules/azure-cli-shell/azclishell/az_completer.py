@@ -222,6 +222,10 @@ class AzCompleter(Completer):
 
         except CLIError:  # if the user isn't logged in
             pass
+        except AttributeError:  # service client throws
+            pass
+        except ValueError:  # service client throws
+            pass
 
     def gen_cmd_completions(self, text):
         """ whether is a space or no text typed, send the current branch """

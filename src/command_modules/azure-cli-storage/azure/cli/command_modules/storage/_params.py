@@ -125,15 +125,25 @@ class ArgumentGroupContext(CommandContext):
 
 
 def _get_client(service, parsed_args):
-    account_name = parsed_args.account_name or az_config.get('storage', 'account', None)
-    account_key = parsed_args.account_key or az_config.get('storage', 'key', None)
-    connection_string = parsed_args.connection_string or az_config.get('storage', 'connection_string', None)
-    sas_token = parsed_args.sas_token or az_config.get('storage', 'sas_token', None)
-    return get_storage_data_service_client(service,
-                                           account_name,
-                                           account_key,
-                                           connection_string,
-                                           sas_token)
+    try:
+        account_name = parsed_args.account_name
+    except AttributeError:
+        account_name = az_config.get('storage', 'account', None)
+    try:
+        account_key = parsed_args.account_key
+    except AttributeError:
+        account_key = az_config.get('storage', 'key', None)
+    try:
+        connection_string = parsed_args.connection_string
+    except AttributeError:
+        connection_string = az_config.get('storage', 'connection_string', None)
+    try:
+        sas_token = parsed_args.sas_token
+    except AttributeError:
+        sas_token = az_config.get('storage', 'sas_token', None)
+
+    return get_storage_data_service_client(
+        service, account_name, account_key, connection_string, sas_token)
 
 
 def get_storage_name_completion_list(service, func, parent=None):
