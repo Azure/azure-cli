@@ -19,8 +19,6 @@ from azure.mgmt.resource.links.models import ResourceLinkProperties
 from azure.mgmt.resource.managedapplications.models import Appliance
 from azure.mgmt.resource.managedapplications.models import Plan
 from azure.mgmt.resource.managedapplications.models import ApplianceDefinition
-from azure.mgmt.resource.managedapplications.models import ApplianceLockLevel
-from azure.mgmt.resource.managedapplications.models import ApplianceArtifactType
 from azure.mgmt.resource.managedapplications.models import ApplianceProviderAuthorization
 
 from azure.cli.core.parser import IncorrectUsageError
@@ -75,7 +73,11 @@ def create_resource_group(rg_name, location, tags=None):
     return rcf.resource_groups.create_or_update(rg_name, parameters)
 
 
-def create_appliance(resource_group_name, appliance_name, managedby_resource_group_id, location, kind, managedapp_definition_id=None, plan_name=None, plan_publisher=None, plan_product=None, plan_version=None, tags=None, parameters=None):
+def create_appliance(resource_group_name,  # pylint: disable=too-many-arguments
+                     appliance_name, managedby_resource_group_id,
+                     location, kind, managedapp_definition_id=None,
+                     plan_name=None, plan_publisher=None, plan_product=None,
+                     plan_version=None, tags=None, parameters=None):
     ''' Create a new managed application.
     :param str resource_group_name:the desired resource group name
     :param str appliance_name:the managed application name
@@ -100,8 +102,10 @@ def create_appliance(resource_group_name, appliance_name, managedby_resource_gro
         else:
             raise CLIError('--managedapp-definition-id is required if kind is ServiceCatalog')
     elif kind.lower() == 'marketplace':
-        if plan_name is None and plan_product is None and plan_publisher is None and plan_version is None:
-            raise CLIError('--plan-name, --plan-product, --plan-publisher and --plan-version are all required if kind is MarketPlace')
+        if (plan_name is None and plan_product is None and
+                plan_publisher is None and plan_version is None):
+            raise CLIError('--plan-name, --plan-product, --plan-publisher and \
+            --plan-version are all required if kind is MarketPlace')
         else:
             appliance.plan = Plan(plan_name, plan_publisher, plan_product, plan_version)
 
@@ -131,7 +135,8 @@ def show_appliance(resource_group_name=None, appliance_name=None, managedapp_id=
     return appliance
 
 
-def show_appliancedefinition(resource_group_name=None, appliance_definition_name=None, managedapp_definition_id=None):
+def show_appliancedefinition(resource_group_name=None, appliance_definition_name=None,
+                             managedapp_definition_id=None):
     ''' Gets a managed application definition.
     :param str resource_group_name:the resource group name
     :param str appliance_definition_name:the managed application definition name
@@ -140,11 +145,15 @@ def show_appliancedefinition(resource_group_name=None, appliance_definition_name
     if managedapp_definition_id:
         appliancedef = racf.appliance_definitions.get_by_id(managedapp_definition_id)
     else:
-        appliancedef = racf.appliance_definitions.get(resource_group_name, appliance_definition_name)
+        appliancedef = racf.appliance_definitions.get(resource_group_name,
+                                                      appliance_definition_name)
     return appliancedef
 
 
-def create_appliancedefinition(resource_group_name, appliance_definition_name, location, lock_level, package_file_uri, authorizations, description, display_name, tags=None):
+def create_appliancedefinition(resource_group_name,  # pylint: disable=too-many-arguments
+                               appliance_definition_name, location,
+                               lock_level, package_file_uri, authorizations,
+                               description, display_name, tags=None):
     ''' Create a new managed application definition.
     :param str resource_group_name:the desired resource group name
     :param str appliance_definition_name:the managed application definition name
@@ -169,7 +178,8 @@ def create_appliancedefinition(resource_group_name, appliance_definition_name, l
     applianceDef.location = location
     applianceDef.tags = tags
 
-    return racf.appliance_definitions.create_or_update(resource_group_name, appliance_definition_name, applianceDef)
+    return racf.appliance_definitions.create_or_update(resource_group_name,
+                                                       appliance_definition_name, applianceDef)
 
 
 def list_appliances(resource_group_name=None):

@@ -11,7 +11,6 @@ from azure.cli.core.commands.arm import cli_generic_update_command, cli_generic_
 from azure.cli.core.util import empty_on_404
 
 from azure.cli.command_modules.resource._client_factory import (_resource_client_factory,
-                                                                _resource_managedapps_client_factory,
                                                                 cf_resource_groups,
                                                                 cf_providers,
                                                                 cf_features,
