@@ -100,10 +100,9 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms
-        self.progress_controller = LongRunningOperation._init_progress()
+        self.progress_controller = self._init_progress()
 
-    @staticmethod
-    def _init_progress():
+    def _init_progress(self):  # pylint: disable=no-self-use
         controller = ProgressHook(progress_type=ProgressType.Indeterminate)
         from azure.cli.core.application import APPLICATION
         controller.init_progress(APPLICATION.progress_view)
