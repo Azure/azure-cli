@@ -4,7 +4,7 @@ Release History
 ===============
 0.1.5 (unreleased)
 ++++++++++++++++++++
-
+* functionapp: add full functionapp supports, including create, show, list, delete, hostname, ssl, etc
 * Adding Team Services (vsts) as a continuous delivery option to "appservice web source-control config"
 * Create "az webapp" to replace "az appservice web" (for backward compat, "az appservice web" will stay for 2 releases)
 * Expose arguments to configure deployment and "runtime stacks" on webapp create
@@ -20,7 +20,6 @@ Release History
 
 0.1.3 (2017-04-17)
 ++++++++++++++++++++
-
 * Use the app service plan's resource group for cert operations (#2750)
 
 0.1.2 (2017-04-03)
