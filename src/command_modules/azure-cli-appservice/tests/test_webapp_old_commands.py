@@ -4,6 +4,9 @@
 # --------------------------------------------------------------------------------------------
 import unittest
 import os
+import sys
+
+from six import StringIO
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
@@ -13,6 +16,23 @@ from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase,
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 # pylint: disable=line-too-long
+
+
+class OldStuffCanWorkWithWarn(unittest.TestCase):
+
+    def setUp(self):
+        self.old_stderr = sys.stderr
+        sys.stderr = StringIO()
+
+    def tearDown(self):
+        sys.stderr = self.old_stderr
+
+    def test_warn_on_old_commands(self):
+        from azure.cli.main import main as cli_main
+        cmd = 'appservice web list'.split(' ')
+        cli_main(cmd)
+        err = "WARNING: This command is deprecating and will be removed in future releases. Use 'az webapp list' instead."
+        self.assertTrue(err in sys.stderr.getvalue())
 
 
 class WebappBasicE2ETestOLD(ResourceGroupVCRTestBase):
