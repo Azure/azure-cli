@@ -195,7 +195,7 @@ cli_command(__name__, 'functionapp start', 'azure.cli.command_modules.appservice
 cli_command(__name__, 'functionapp restart', 'azure.cli.command_modules.appservice.custom#restart_webapp')
 cli_command(__name__, 'functionapp list-consumption-locations', 'azure.cli.command_modules.appservice.custom#list_consumption_locations')
 cli_command(__name__, 'functionapp config appsettings show', 'azure.cli.command_modules.appservice.custom#get_app_settings', exception_handler=empty_on_404)
-cli_command(__name__, 'functionapp config appsettings update', 'azure.cli.command_modules.appservice.custom#update_app_settings')
+cli_command(__name__, 'functionapp config appsettings set', 'azure.cli.command_modules.appservice.custom#update_app_settings')
 cli_command(__name__, 'functionapp config appsettings delete', 'azure.cli.command_modules.appservice.custom#delete_app_settings')
 cli_command(__name__, 'functionapp config hostname add', 'azure.cli.command_modules.appservice.custom#add_hostname', exception_handler=ex_handler_factory())
 cli_command(__name__, 'functionapp config hostname list', 'azure.cli.command_modules.appservice.custom#list_hostnames')

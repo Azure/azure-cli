@@ -483,3 +483,135 @@ helps['functionapp stop'] = """
     type: command
     short-summary: Stop a function app.
 """
+
+helps['functionapp config'] = """
+    type: group
+    short-summary: Configure a function app.
+"""
+
+helps['functionapp config appsettings'] = """
+    type: group
+    short-summary: Configure function app settings.
+"""
+
+helps['functionapp config appsettings show'] = """
+    type: command
+    short-summary: Show function app settings.
+"""
+
+helps['functionapp config appsettings set'] = """
+    type: command
+    short-summary: Create or update function app settings.
+"""
+
+helps['functionapp config hostname'] = """
+    type: group
+    short-summary: Configure hostnames.
+"""
+helps['functionapp config hostname add'] = """
+    type: command
+    short-summary: Bind a hostname (custom domain) to a function app.
+"""
+
+helps['functionapp config hostname delete'] = """
+    type: command
+    short-summary: Unbind a hostname (custom domain) from a function app.
+"""
+
+helps['functionapp config hostname list'] = """
+    type: command
+    short-summary: List all hostname bindings.
+"""
+
+helps['functionapp config hostname get-external-ip'] = """
+    type: command
+    short-summary: get the ip address to configure your DNS settings for A records
+"""
+
+helps['functionapp config ssl'] = """
+    type: group
+    short-summary: Configure SSL certificates.
+"""
+
+helps['functionapp config ssl list'] = """
+    type: command
+    short-summary: List SSL certificates within a resource group
+"""
+
+helps['functionapp config ssl bind'] = """
+    type: command
+    short-summary: Bind an SSL certificate to a function app.
+"""
+
+helps['functionapp config ssl unbind'] = """
+    type: command
+    short-summary: Unbind an SSL certificate from a function app.
+"""
+
+helps['functionapp config ssl delete'] = """
+    type: command
+    short-summary: Delete an SSL certificate from a function app.
+"""
+
+helps['functionapp config ssl upload'] = """
+    type: command
+    short-summary: Upload an SSL certificate to a function app.
+"""
+helps['functionapp deployment'] = """
+    type: group
+    short-summary: Manage function app deployments.
+"""
+helps['functionapp deployment source'] = """
+    type: group
+    short-summary: Manage source control systems.
+"""
+
+helps['functionapp deployment source config'] = """
+    type: command
+    short-summary: Associate to Git or Mercurial repositories.
+"""
+
+helps['functionapp deployment source config-local-git'] = """
+    type: command
+    short-summary: Enable local git.
+    long-summary: Get an endpoint to clone and later push to the function app.
+    examples:
+        - name: Get a git endpoint for a web app and add it as a remote.
+          text: >
+            az functionapp source-control config-local-git \\
+                -g MyResourceGroup -n MyUniqueApp
+
+            git remote add azure \\
+                https://<deploy_user_name>@MyUniqueApp.scm.azurewebsites.net/MyUniqueApp.git
+"""
+
+helps['functionapp deployment source delete'] = """
+    type: command
+    short-summary: Delete source control configurations.
+"""
+
+helps['functionapp deployment source show'] = """
+    type: command
+    short-summary: Show source control configurations.
+"""
+
+helps['functionapp deployment source sync'] = """
+    type: command
+    short-summary: Synchronize from the source repository, only needed under manual integration mode.
+"""
+helps['functionapp deployment user'] = """
+    type: group
+    short-summary: Manage user credentials for a deployment.
+"""
+
+helps['functionapp deployment user set'] = """
+    type: command
+    short-summary: Update deployment credentials.
+    long-summary: All function/web apps in the subscription will be impacted since all apps share
+                  the same deployment credentials.
+    examples:
+        - name: Set FTP and git deployment credentials for all function/web apps.
+          text: >
+            az functionapp deployment user set
+            --user-name MyUserName
+"""
