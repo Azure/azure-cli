@@ -758,6 +758,6 @@ def build_av_set_resource(name, location, tags,
 
     # server defaults the UD to 5 unless set otherwise
     if platform_update_domain_count is not None:
-        av_set['properties']['platformUpdateDomainCount'] = platform_fault_domain_count
+        av_set['properties']['platformUpdateDomainCount'] = platform_update_domain_count
 
     return av_set
