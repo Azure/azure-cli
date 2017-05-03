@@ -4,30 +4,38 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+# pylint: disable=unused-import
+from argcomplete.completers import FilesCompleter
 from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list,
     enum_choice_list,
     name_type,
-    ignore_type)
-from azure.cli.core.commands import register_cli_argument
-import azure.cli.core.commands.arm # pylint: disable=unused-import
+    ignore_type,
+    file_type)
+
+from azure.cli.core.util import shell_safe_json_parse
+
+from ._client_factory import get_document_client_factory
+import azure.cli.core.commands.arm
 from azure.mgmt.documentdb.models.document_db_enums import KeyKind
 from azure.mgmt.documentdb.models.document_db_enums import DefaultConsistencyLevel
 from azure.mgmt.documentdb.models.document_db_enums import DatabaseAccountKind
 from azure.mgmt.documentdb.models.failover_policy import FailoverPolicy
 from azure.mgmt.documentdb.models.location import Location
+from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
 
 
 def validate_failover_policies(ns):
-    ''' Extracts multiple space-separated failoverPolicies in regionName=failoverPriority format '''
+    """ Extracts multiple space-separated failoverPolicies in regionName=failoverPriority format """
     fp_dict = []
     for item in ns.failover_policies:
         comps = item.split('=', 1)
         fp_dict.append(FailoverPolicy(comps[0], int(comps[1])))
     ns.failover_policies = fp_dict
 
+
 def validate_locations(ns):
-    ''' Extracts multiple space-separated locations in regionName=failoverPriority format '''
+    """ Extracts multiple space-separated locations in regionName=failoverPriority format """
     if ns.locations is None:
         ns.locations = []
         return
@@ -37,9 +45,11 @@ def validate_locations(ns):
         loc_dict.append(Location(location_name=comps[0], failover_priority=int(comps[1])))
     ns.locations = loc_dict
 
+
 def validate_ip_range_filter(ns):
     if ns.ip_range_filter:
         ns.ip_range_filter = ",".join(ns.ip_range_filter)
+
 
 register_cli_argument('documentdb', 'account_name', arg_type=name_type, help='Name of the DocumentDB database account', completer=get_resource_name_completion_list('Microsoft.DocumentDb/databaseAccounts'), id_part="name")
 
@@ -62,3 +72,23 @@ register_cli_argument('documentdb update', 'default_consistency_level', help="de
 register_cli_argument('documentdb update', 'max_staleness_prefix', help="when used with Bounded Staleness consistency, this value represents the number of stale requests tolerated. Accepted range for this value is 1 - 2,147,483,647", type=int)
 register_cli_argument('documentdb update', 'max_interval', help="when used with Bounded Staleness consistency, this value represents the time amount of staleness (in seconds) tolerated. Accepted range for this value is 1 - 100", type=int)
 register_cli_argument('documentdb update', 'ip_range_filter', validator=validate_ip_range_filter, help="firewall support. Specifies the set of IP addresses or IP address ranges in CIDR form to be included as the allowed list of client IPs for a given database account. IP addresses/ranges must be comma separated and must not contain any spaces", nargs='+')
+
+# database id
+database_id = CliArgumentType(options_list=('--db-name', '-d'), help='Database Name')
+register_cli_argument('documentdb database', 'database_id', database_id)
+register_cli_argument('documentdb collection', 'database_id', database_id)
+
+register_cli_argument('documentdb collection', 'collection_id',
+                      options_list=('--collection-name', '-c'), help='Collection Name')
+
+register_cli_argument('documentdb collection', 'throughput',
+                      options_list=('--throughput'), help='Offer Throughput', type=int)
+
+register_cli_argument('documentdb collection', 'partition_key_path',
+                      options_list=('--partition-key-path'),
+                      help='Partition Key Path, e.g., \'/properties/name\'')
+
+register_cli_argument('documentdb collection', 'indexing_policy',
+                      options_list=('--indexing-policy'),
+                      help='Indexing Policy, you can enter it as a string or as a file, e.g., --indexing-policy @policy-file.json)',
+                      type=shell_safe_json_parse, completer=FilesCompleter())

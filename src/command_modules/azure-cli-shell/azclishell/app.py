@@ -30,7 +30,7 @@ from azclishell.gather_commands import add_random_new_lines
 from azclishell.key_bindings import registry, get_section, sub_section
 from azclishell.layout import create_layout, create_tutorial_layout, set_scope
 from azclishell.telemetry import TC as telemetry
-from azclishell.util import get_window_dim, parse_quotes
+from azclishell.util import get_window_dim, parse_quotes, get_os_clear_screen_word
 
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.application import Configuration
@@ -50,6 +50,7 @@ NOTIFICATIONS = ""
 PROFILE = Profile()
 SELECT_SYMBOL = azclishell.configuration.SELECT_SYMBOL
 PART_SCREEN_EXAMPLE = .3
+CLEAR_WORD = get_os_clear_screen_word()
 
 
 def handle_cd(cmd):
@@ -399,14 +400,17 @@ class Shell(object):
         if self.default_command:
             cmd = self.default_command + " " + cmd
 
-        if cmd.strip() == "quit" or cmd.strip() == "exit":
+        if text.strip() == "quit" or text.strip() == "exit":
             break_flag = True
-        elif text.strip() == "clear":  # clears the history, but only when you restart
+        elif text.strip() == "clear-history":  # clears the history, but only when you restart
             outside = True
             cmd = 'echo -n "" >' +\
                 os.path.join(
                     SHELL_CONFIG_DIR(),
                     SHELL_CONFIGURATION.get_history())
+        elif text.strip() == CLEAR_WORD:
+            outside = True
+            cmd = CLEAR_WORD
         if '--version' in text:
             try:
                 continue_flag = True

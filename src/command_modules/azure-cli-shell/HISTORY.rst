@@ -8,6 +8,7 @@ Release History
 
 * Integrate shell into az
 
+
 0.2.1
 ++++++++++++++++++
 

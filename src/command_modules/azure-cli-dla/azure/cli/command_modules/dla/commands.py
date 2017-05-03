@@ -68,7 +68,7 @@ cli_command(__name__, 'dla catalog schema list', adla_format_path.format('catalo
 
 # table
 cli_command(__name__, 'dla catalog table show', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'get_table'), cf_dla_catalog)
-cli_command(__name__, 'dla catalog table list', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'list_tables'), cf_dla_catalog)
+cli_command(__name__, 'dla catalog table list', adla_custom_format_path.format('list_catalog_tables'), cf_dla_catalog)
 
 # assembly
 cli_command(__name__, 'dla catalog assembly show', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'get_assembly'), cf_dla_catalog)
@@ -88,7 +88,7 @@ cli_command(__name__, 'dla catalog table-partition list', adla_format_path.forma
 
 # get table statistics
 cli_command(__name__, 'dla catalog table-stats show', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'get_table_statistic'), cf_dla_catalog)
-cli_command(__name__, 'dla catalog table-stats list', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'list_table_statistics'), cf_dla_catalog)
+cli_command(__name__, 'dla catalog table-stats list', adla_custom_format_path.format('list_catalog_table_statistics'), cf_dla_catalog)
 
 # get table types
 cli_command(__name__, 'dla catalog table-type show', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'get_table_type'), cf_dla_catalog)
@@ -96,8 +96,12 @@ cli_command(__name__, 'dla catalog table-type list', adla_format_path.format('ca
 
 # get table valued functions
 cli_command(__name__, 'dla catalog tvf show', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'get_table_valued_function'), cf_dla_catalog)
-cli_command(__name__, 'dla catalog tvf list', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'list_table_valued_functions'), cf_dla_catalog)
+cli_command(__name__, 'dla catalog tvf list', adla_custom_format_path.format('list_catalog_tvfs'), cf_dla_catalog)
 
 # get views
 cli_command(__name__, 'dla catalog view show', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'get_view'), cf_dla_catalog)
-cli_command(__name__, 'dla catalog view list', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'list_views'), cf_dla_catalog)
+cli_command(__name__, 'dla catalog view list', adla_custom_format_path.format('list_catalog_views'), cf_dla_catalog)
+
+# get packages
+cli_command(__name__, 'dla catalog package show', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'get_package'), cf_dla_catalog)
+cli_command(__name__, 'dla catalog package list', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'list_packages'), cf_dla_catalog)

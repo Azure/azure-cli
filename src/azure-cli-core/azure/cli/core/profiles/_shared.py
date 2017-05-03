@@ -63,7 +63,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2016-12-01',
-        ResourceType.MGMT_NETWORK: '2016-09-01',
+        ResourceType.MGMT_NETWORK: '2017-03-01',
         ResourceType.MGMT_CONTAINER_SERVICE: '2017-01-31',
         ResourceType.MGMT_COMPUTE: '2016-04-30-preview',
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
@@ -74,20 +74,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.DATA_STORAGE: '2016-05-31'
     },
-    '2016-00-00-preview': {
-        ResourceType.MGMT_STORAGE: '2016-12-01',
-        ResourceType.MGMT_NETWORK: '2016-09-01',
-        ResourceType.MGMT_CONTAINER_SERVICE: '2017-01-31',
-        ResourceType.MGMT_COMPUTE: '2016-04-30-preview',
-        ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
-        ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
-        ResourceType.MGMT_RESOURCE_RESOURCES: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
-        ResourceType.DATA_STORAGE: '2016-05-31'
-    },
-    '2015-00-00-preview': {
+    '2017-03-09-profile-preview': {
         ResourceType.MGMT_STORAGE: '2015-06-15',
         ResourceType.MGMT_NETWORK: '2015-06-15',
         ResourceType.MGMT_CONTAINER_SERVICE: '2017-01-31',
@@ -122,7 +109,8 @@ def get_api_version(api_profile, resource_type):
 @total_ordering  # pylint: disable=too-few-public-methods
 class _DateAPIFormat(object):
     """ Class to support comparisons for API versions in
-        YYYY-MM-DD or YYYY-MM-DD-preview format. A special case is made for 'latest'.
+        YYYY-MM-DD, YYYY-MM-DD-preview, YYYY-MM-DD-profile, YYYY-MM-DD-profile-preview
+        or any string that starts with YYYY-MM-DD format. A special case is made for 'latest'.
     """
 
     def __init__(self, api_version_str):
@@ -133,13 +121,11 @@ class _DateAPIFormat(object):
                 self.latest = True
             else:
                 if 'preview' in api_version_str:
-                    yyyy, mm, dd, _ = api_version_str.split('-')
                     self.preview = True
-                else:
-                    yyyy, mm, dd = api_version_str.split('-')
-                self.yyyy = int(yyyy)
-                self.mm = int(mm)
-                self.dd = int(dd)
+                parts = api_version_str.split('-')
+                self.yyyy = int(parts[0])
+                self.mm = int(parts[1])
+                self.dd = int(parts[2])
         except (ValueError, TypeError):
             raise ValueError('The API version {} is not in a '
                              'supported format'.format(api_version_str))
@@ -173,7 +159,8 @@ def supported_api_version(api_profile, resource_type, min_api=None, max_api=None
     """
     Returns True if current API version for the resource type satisfies min/max range.
     To compare profile versions, set resource type to None.
-    note: Currently supports YYYY-MM-DD or YYYY-MM-DD-preview formatted API versions.
+    note: Currently supports YYYY-MM-DD, YYYY-MM-DD-preview, YYYY-MM-DD-profile
+    or YYYY-MM-DD-profile-preview  formatted strings.
     """
     if not isinstance(resource_type, ResourceType) and resource_type != PROFILE_TYPE:
         raise TypeError()

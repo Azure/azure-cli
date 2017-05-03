@@ -391,11 +391,6 @@ class CommandHelpFile(HelpFile):  # pylint: disable=too-few-public-methods
                 param.update_from_data(loaded_param)
             loaded_params.append(param)
 
-        extra_param = next((p for p in data['parameters']
-                            if p['name'] not in [lp.name for lp in loaded_params]),
-                           None)
-        if extra_param:
-            raise HelpAuthoringException('Extra help param {0}'.format(extra_param['name']))
         self.parameters = loaded_params
 
 

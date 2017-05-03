@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps #pylint: disable=unused-import
+from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
-#pylint: disable=line-too-long, too-many-lines
+# pylint: disable=line-too-long, too-many-lines
 helps['lock'] = """
     type: group
     short-summary: Manage Azure locks.
@@ -128,7 +128,7 @@ helps['resource show'] = """
             az resource show --id /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/MySubnet
         - name: Show an application gateway path rule.
           text: >
-            az resource show -g MyResourceGroup --namespace Microsoft.Network --parent applicationGateways/ag1/urlPathMaps/map1 --resource-type pathRules -n rule1  
+            az resource show -g MyResourceGroup --namespace Microsoft.Network --parent applicationGateways/ag1/urlPathMaps/map1 --resource-type pathRules -n rule1
 """
 
 helps['resource delete'] = """
@@ -242,7 +242,7 @@ helps['group deployment create'] = """
         - name: Create a deployment from a remote template file.
           text: >
             az group deployment create -g MyResourceGroup --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
-        - name: Create a deployment from a local template file and use parameter values in a string. 
+        - name: Create a deployment from a local template file and use parameter values in a string.
           text: >
             az group deployment create -g MyResourceGroup --template-file azuredeploy.json --parameters "{\\"location\\": {\\"value\\": \\"westus\\"}}"
 """

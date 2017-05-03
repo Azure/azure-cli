@@ -26,12 +26,14 @@ import azure.cli.core.azlogging as azlogging
 
 logger = azlogging.get_az_logger(__name__)
 
+
 def transfer_doc(source_func, *additional_source_funcs):
     def _decorator(func):
         func.__doc__ = source_func.__doc__
         for f in additional_source_funcs:
             func.__doc__ += "\n" + f.__doc__
         return func
+
     return _decorator
 
 
@@ -44,8 +46,9 @@ def list_accounts(client, resource_group_name=None):
 
 
 @transfer_doc(AutoStorageBaseProperties)
-def create_account(client, resource_group_name, account_name, location,  # pylint:disable=too-many-arguments
-                   tags=None, storage_account=None, keyvault=None, keyvault_url=None):
+def create_account(client,  # pylint:disable=too-many-arguments
+                   resource_group_name, account_name, location, tags=None, storage_account=None,
+                   keyvault=None, keyvault_url=None):
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
     parameters = BatchAccountCreateParameters(location=location,
@@ -96,8 +99,9 @@ def login_account(client, resource_group_name, account_name, shared_key_auth=Fal
 
 
 @transfer_doc(UpdateApplicationParameters)
-def update_application(client, resource_group_name, account_name, application_id,  # pylint:disable=too-many-arguments
-                       allow_updates=None, display_name=None, default_version=None):
+def update_application(client,  # pylint:disable=too-many-arguments
+                       resource_group_name, account_name, application_id, allow_updates=None,
+                       display_name=None, default_version=None):
     parameters = UpdateApplicationParameters(allow_updates=allow_updates,
                                              display_name=display_name,
                                              default_version=default_version)
@@ -133,9 +137,9 @@ def _upload_package_blob(package_file, url):
 
 
 @transfer_doc(ApplicationPackageOperations.create)
-def create_application_package(client, resource_group_name, account_name,  # pylint:disable=too-many-arguments
-                               application_id, version, package_file):
-
+def create_application_package(client,  # pylint:disable=too-many-arguments
+                               resource_group_name, account_name, application_id, version,
+                               package_file):
     # create application if not exist
     mgmt_client = get_mgmt_service_client(BatchManagementClient)
     try:
@@ -228,10 +232,11 @@ def resize_pool(client, pool_id, target_dedicated=None,  # pylint:disable=too-ma
 
 
 @transfer_doc(PoolUpdatePropertiesParameter, StartTask)
-def update_pool(client, pool_id, json_file=None, start_task_command_line=None,  # pylint:disable=too-many-arguments
-                certificate_references=None, application_package_references=None,
-                metadata=None, start_task_environment_settings=None,
-                start_task_wait_for_success=None, start_task_max_task_retry_count=None):
+def update_pool(client,  # pylint:disable=too-many-arguments
+                pool_id, json_file=None, start_task_command_line=None, certificate_references=None,
+                application_package_references=None, metadata=None,
+                start_task_environment_settings=None, start_task_wait_for_success=None,
+                start_task_max_task_retry_count=None):
     def action():
         client.update_properties(pool_id=pool_id, pool_update_properties_parameter=param)
         return client.get(pool_id)
@@ -241,7 +246,8 @@ def update_pool(client, pool_id, json_file=None, start_task_command_line=None,  
             json_obj = json.load(f)
             param = None
             try:
-                param = client._deserialize('PoolUpdatePropertiesParameter', json_obj)  # pylint: disable=protected-access
+                param = client._deserialize(  # pylint: disable=protected-access
+                    'PoolUpdatePropertiesParameter', json_obj)
             except DeserializationError:
                 pass
             if not param:
@@ -272,7 +278,8 @@ def update_pool(client, pool_id, json_file=None, start_task_command_line=None,  
     return _handle_batch_exception(action)
 
 
-def list_job(client, job_schedule_id=None, filter=None, select=None, expand=None):  # pylint: disable=redefined-builtin
+def list_job(client, job_schedule_id=None, filter=None,  # pylint: disable=redefined-builtin
+             select=None, expand=None):
     def action():
         if job_schedule_id:
             option1 = JobListFromJobScheduleOptions(filter=filter,
@@ -290,9 +297,10 @@ def list_job(client, job_schedule_id=None, filter=None, select=None, expand=None
 
 
 @transfer_doc(TaskAddParameter, TaskConstraints)
-def create_task(client, job_id, json_file=None, task_id=None, command_line=None,  # pylint:disable=too-many-arguments
-                resource_files=None, environment_settings=None, affinity_info=None,
-                max_wall_clock_time=None, retention_time=None, max_task_retry_count=None,
+def create_task(client,  # pylint:disable=too-many-arguments
+                job_id, json_file=None, task_id=None, command_line=None, resource_files=None,
+                environment_settings=None, affinity_info=None, max_wall_clock_time=None,
+                retention_time=None, max_task_retry_count=None,
                 application_package_references=None):
     def action():
         if task is not None:
@@ -307,10 +315,12 @@ def create_task(client, job_id, json_file=None, task_id=None, command_line=None,
         with open(json_file) as f:
             json_obj = json.load(f)
             try:
-                task = client._deserialize('TaskAddParameter', json_obj)  # pylint: disable=protected-access
+                task = client._deserialize(  # pylint: disable=protected-access
+                    'TaskAddParameter', json_obj)
             except DeserializationError:
                 try:
-                    tasks = client._deserialize('[TaskAddParameter]', json_obj)  # pylint: disable=protected-access
+                    tasks = client._deserialize(  # pylint: disable=protected-access
+                        '[TaskAddParameter]', json_obj)
                 except DeserializationError:
                     raise ValueError("JSON file '{}' is not in reqired format.".format(json_file))
     else:

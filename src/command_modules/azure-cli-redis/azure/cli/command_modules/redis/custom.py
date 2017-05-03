@@ -6,7 +6,9 @@
 from azure.cli.core.util import CLIError
 
 import azure.cli.core.azlogging as azlogging
+
 logger = azlogging.get_az_logger(__name__)
+
 
 def cli_redis_export(client, resource_group_name, name, prefix, container, file_format=None):
     # pylint:disable=too-many-arguments
@@ -14,10 +16,12 @@ def cli_redis_export(client, resource_group_name, name, prefix, container, file_
     parameters = ExportRDBParameters(prefix, container, file_format)
     return client.export(resource_group_name, name, parameters)
 
+
 def cli_redis_import_method(client, resource_group_name, name, file_format, files):
     from azure.mgmt.redis.models import ImportRDBParameters
     parameters = ImportRDBParameters(files, file_format)
     return client.import_method(resource_group_name, name, files, parameters)
+
 
 def cli_redis_update_settings(client, resource_group_name, name, redis_configuration):
     from azure.mgmt.redis.models import RedisCreateOrUpdateParameters
@@ -39,15 +43,16 @@ def cli_redis_update_settings(client, resource_group_name, name, redis_configura
         existing.shard_count,
         existing.subnet_id,
         existing.static_ip,
-        )
+    )
     return client.create_or_update(resource_group_name, name, parameters=update_params)
+
 
 def cli_redis_update(instance, sku=None, vm_size=None):
     from azure.mgmt.redis.models import RedisCreateOrUpdateParameters
-    if sku != None:
+    if sku is not None:
         instance.sku.name = sku
 
-    if vm_size != None:
+    if vm_size is not None:
         instance.sku.family = vm_size[0]
         instance.sku.capacity = vm_size[1:]
 
@@ -62,22 +67,29 @@ def cli_redis_update(instance, sku=None, vm_size=None):
         instance.shard_count,
         instance.subnet_id,
         instance.static_ip,
-        )
+    )
 
     return update_params
 
+
 def wrong_vmsize_argument_exception_handler(ex):
-	# pylint:disable=line-too-long
+    # pylint:disable=line-too-long
     from msrest.exceptions import ClientException
     if isinstance(ex, ClientException):
-        if ("The value of the parameter 'properties.sku.family/properties.sku.capacity' is invalid" in format(ex)) or ("The value of the parameter 'properties.sku.family' is invalid" in format(ex)):
-            raise CLIError('Invalid VM size. Example for Valid values: For C family (C0, C1, C2, C3, C4, C5, C6), for P family (P1, P2, P3, P4)')
+        if ("The value of the parameter 'properties.sku.family/properties.sku.capacity' is invalid"
+                in format(ex)) \
+                or ("The value of the parameter 'properties.sku.family' is invalid"
+                    in format(ex)):
+            raise CLIError('Invalid VM size. Example for Valid values: '
+                           'For C family (C0, C1, C2, C3, C4, C5, C6), '
+                           'for P family (P1, P2, P3, P4)')
     raise ex
 
-def cli_redis_create(client, resource_group_name, name, location, sku, # pylint:disable=too-many-arguments
-                     vm_size, tags=None, redis_configuration=None,
-                     enable_non_ssl_port=None, tenant_settings=None, shard_count=None,
-                     subnet_id=None, static_ip=None):
+
+def cli_redis_create(client,  # pylint:disable=too-many-arguments
+                     resource_group_name, name, location, sku, vm_size, tags=None,
+                     redis_configuration=None, enable_non_ssl_port=None, tenant_settings=None,
+                     shard_count=None, subnet_id=None, static_ip=None):
     # pylint:disable=line-too-long
     """Create new Redis Cache instance
     :param resource_group_name: Name of resource group
@@ -97,7 +109,7 @@ def cli_redis_create(client, resource_group_name, name, location, sku, # pylint:
         location,
         Sku(sku, vm_size[0], vm_size[1:]),
         tags,
-        None, # Version is deprecated and ignored
+        None,  # Version is deprecated and ignored
         redis_configuration,
         enable_non_ssl_port,
         tenant_settings,

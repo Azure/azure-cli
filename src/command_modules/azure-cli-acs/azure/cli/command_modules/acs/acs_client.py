@@ -44,7 +44,8 @@ def SecureCopy(user, host, src, dest,  # pylint: disable=too-many-arguments
         agent = paramiko.agent.Agent()
         for key in agent.get_keys():
             keys.append(key)
-
+    if keys:
+        pkey = keys[0]
     ssh.connect(host, username=user, pkey=pkey)
 
     scp = SCPClient(ssh.get_transport())
