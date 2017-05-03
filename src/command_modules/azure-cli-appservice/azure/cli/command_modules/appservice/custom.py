@@ -15,7 +15,8 @@ import OpenSSL.crypto
 
 from msrestazure.azure_exceptions import CloudError
 
-from azure.mgmt.web.models import (Site, SiteConfig, SiteConfigResource, User, AppServicePlan,
+from azure.mgmt.storage import StorageManagementClient
+from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteConfigResource,
                                    SkuDescription, SslState, HostNameBinding,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState)
@@ -96,19 +97,29 @@ def create_webapp(resource_group_name, name, plan, runtime=None,
     return webapp
 
 
-def show_webapp(resource_group_name, name, slot=None):
-    webapp = _generic_site_operation(resource_group_name, name, 'get', slot)
-    webapp = _rename_server_farm_props(webapp)
+def show_webapp(resource_group_name, name, slot=None, app_instance=None):
+    webapp = (_generic_site_operation(resource_group_name, name, 'get', slot)
+              if slot else app_instance)
+    _rename_server_farm_props(webapp)
     _fill_ftp_publishing_url(webapp, resource_group_name, name, slot)
     return webapp
 
 
 def list_webapp(resource_group_name=None):
+    return _list_app('app', resource_group_name)
+
+
+def list_function_app(resource_group_name=None):
+    return _list_app('functionapp', resource_group_name)
+
+
+def _list_app(app_type, resource_group_name=None):
     client = web_client_factory()
     if resource_group_name:
         result = list(client.web_apps.list_by_resource_group(resource_group_name))
     else:
         result = list(client.web_apps.list())
+    result = [x for x in result if x.kind == app_type]
     for webapp in result:
         _rename_server_farm_props(webapp)
     return result
@@ -1141,3 +1152,79 @@ class _StackRuntimeHelper(object):
             r['setter'] = (_StackRuntimeHelper.update_site_appsettings if 'node' in
                            r['displayName'] else _StackRuntimeHelper.update_site_config)
         self._stacks = result
+
+
+def create_function(resource_group_name, name, storage_account, plan=None,
+                    consumption_plan_location=None):
+
+    if bool(plan) == bool(consumption_plan_location):
+        raise CLIError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
+
+    functionapp_def = Site(location='')
+    client = web_client_factory()
+    if consumption_plan_location:
+        locations = list_consumption_locations()
+        location = next((l for l in locations if l['name'].lower() == consumption_plan_location.lower()), None)  # pylint: disable=line-too-long
+        if location is None:
+            raise CLIError("Location is invalid. Use: az functionapp list-consumption-locations")
+        functionapp_def.location = consumption_plan_location
+    else:
+        if is_valid_resource_id(plan):
+            plan = parse_resource_id(plan)['name']
+        plan_info = client.app_service_plans.get(resource_group_name, plan)
+        location = plan_info.location
+        functionapp_def.server_farm_id = plan
+        functionapp_def.location = location
+
+    con_string = _validate_and_get_connection_string(resource_group_name, storage_account)
+
+    functionapp_def.kind = 'functionapp'
+    poller = client.web_apps.create_or_update(resource_group_name, name, functionapp_def)
+    functionapp = LongRunningOperation()(poller)
+
+    # adding appsetting to site to make it a function
+    settings = ['AzureWebJobsStorage=' + con_string, 'AzureWebJobsDashboard=' + con_string,
+                'WEBSITE_NODE_DEFAULT_VERSION=6.5.0', 'FUNCTIONS_EXTENSION_VERSION=~1']
+
+    if consumption_plan_location is None:
+        update_site_configs(resource_group_name, name, always_on='true')
+    else:
+        settings.append('WEBSITE_CONTENTAZUREFILECONNECTIONSTRING=' + con_string)
+        settings.append('WEBSITE_CONTENTSHARE=' + name.lower())
+
+    update_app_settings(resource_group_name, name, settings, None)
+
+    return functionapp
+
+
+def _validate_and_get_connection_string(resource_group_name, storage_account):
+    sa_resource_group = resource_group_name
+    if is_valid_resource_id(storage_account):
+        sa_resource_group = parse_resource_id(storage_account)['resource_group']
+        storage_account = parse_resource_id(storage_account)['name']
+    storage_client = get_mgmt_service_client(StorageManagementClient)
+    storage_properties = storage_client.storage_accounts.get_properties(sa_resource_group,
+                                                                        storage_account)
+    error_message = ''
+    endpoints = storage_properties.primary_endpoints
+    sku = storage_properties.sku.name.value
+    allowed_storage_types = ['Standard_GRS', 'Standard_LRS', 'Standard_ZRS', 'Premium_LRS']
+
+    for e in ['blob', 'queue', 'table']:
+        if not getattr(endpoints, e, None):
+            error_message = "Storage account '{}' has no '{}' endpoint. It must have table, queue, and blob endpoints all enabled".format(e, storage_account)   # pylint: disable=line-too-long
+    if sku not in allowed_storage_types:
+        error_message += 'Storage type {} is not allowed'.format(sku)
+
+    if error_message:
+        raise CLIError(error_message)
+
+    keys = storage_client.storage_accounts.list_keys(resource_group_name, storage_account).keys
+    conn_string = 'DefaultEndpointsProtocol=https;AccountName={};AccountKey={}'.format(storage_account, keys[0].value)  # pylint: disable=line-too-long
+    return conn_string
+
+
+def list_consumption_locations():
+    client = web_client_factory()
+    regions = client.list_geo_regions(sku='Dynamic')
+    return [{'name': x.name.lower().replace(" ", "")} for x in regions]
