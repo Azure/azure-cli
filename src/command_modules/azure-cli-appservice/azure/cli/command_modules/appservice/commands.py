@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-import,line-too-long
-from azure.cli.core.commands import LongRunningOperation, cli_command
+from azure.cli.core.commands import LongRunningOperation, cli_command, cli_commands_removed
 from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.util import empty_on_404
 
@@ -117,8 +117,14 @@ cli_command(__name__, 'webapp list-runtimes', 'azure.cli.command_modules.appserv
 
 # end of the new ones #
 # beginning of the old ones ###
+
+# in June, remove all olds stuff below and replace with one following line
+# cli_commands_removed('appservice web', "'az appservice web' is forever gone. You should use 'az webapp'")
+
 cli_command(__name__, 'appservice web create', 'azure.cli.command_modules.appservice.custom#create_webapp', exception_handler=ex_handler_factory())
-cli_command(__name__, 'appservice web list', 'azure.cli.command_modules.appservice.custom#list_webapp', table_transformer=transform_web_list_output)
+cli_command(__name__, 'appservice web list', 'azure.cli.command_modules.appservice.custom#list_webapp',
+            deprecating_info='webapp list',  # this will emit a warning and point to the new command
+            table_transformer=transform_web_list_output)
 cli_command(__name__, 'appservice web show', 'azure.cli.command_modules.appservice.custom#show_webapp', exception_handler=empty_on_404, table_transformer=transform_web_output)
 cli_command(__name__, 'appservice web delete', 'azure.cli.command_modules.appservice.custom#delete_webapp')
 cli_command(__name__, 'appservice web stop', 'azure.cli.command_modules.appservice.custom#stop_webapp')

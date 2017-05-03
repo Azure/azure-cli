@@ -348,12 +348,26 @@ def register_extra_cli_argument(command, dest, **kwargs):
 def cli_command(module_name, name, operation,
                 client_factory=None, transform=None, table_transformer=None,
                 no_wait_param=None, confirmation=None, exception_handler=None,
-                formatter_class=None):
+                formatter_class=None, deprecating_info=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
+    deprecating_msg = None
+    if deprecating_info is not None:
+        deprecating_msg = ('Deprecating! {} will be removed in future releases'.format(name)
+                           if deprecating_info == ''
+                           else "Deprecating! Please switch to '{}'".format(deprecating_info))
     command_table[name] = create_command(module_name, name, operation, transform, table_transformer,
                                          client_factory, no_wait_param, confirmation=confirmation,
                                          exception_handler=exception_handler,
-                                         formatter_class=formatter_class)
+                                         formatter_class=formatter_class,
+                                         deprecating_msg=deprecating_msg)
+
+
+# Be very nice, a command module can register here for better errors on removed commands.
+removed_commands = {}
+
+
+def cli_commands_removed(name, msg):
+    removed_commands[name] = msg
 
 
 def get_op_handler(operation):
@@ -409,11 +423,13 @@ def _is_poller(obj):
 def create_command(module_name, name, operation,
                    transform_result, table_transformer, client_factory,
                    no_wait_param=None, confirmation=None, exception_handler=None,
-                   formatter_class=None):
+                   formatter_class=None, deprecating_msg=None):
     if not isinstance(operation, string_types):
         raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
     def _execute_command(kwargs):
+        if deprecating_msg:
+            logger.warning(deprecating_msg)
         from msrestazure.azure_exceptions import CloudError
         if confirmation \
             and not kwargs.get(CONFIRM_PARAM_NAME) \
