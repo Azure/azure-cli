@@ -42,9 +42,6 @@ def create_webapp(resource_group_name, name, plan, runtime=None,
                   startup_file=None, deployment_container_image_name=None,
                   deployment_source_url=None, deployment_source_branch='master',
                   deployment_local_git=None):
-    if deployment_source_url and deployment_local_git:
-        raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
-
     client = web_client_factory()
     if is_valid_resource_id(plan):
         plan = parse_resource_id(plan)['name']
@@ -75,23 +72,8 @@ def create_webapp(resource_group_name, name, plan, runtime=None,
 
         match['setter'](match, resource_group_name, name)
 
-    if deployment_local_git and deployment_source_url:
-        raise CLIError('usage error: --deployment-local-git | --deployment-source-url')
-
-    if deployment_source_url:
-        logger.warning("Linking to git repository '%s'", deployment_source_url)
-        try:
-            poller = config_source_control(resource_group_name, name, deployment_source_url, 'git',
-                                           deployment_source_branch, manual_integration=True)
-            LongRunningOperation()(poller)
-        except Exception as ex:  # pylint: disable=broad-except
-            ex = ex_handler_factory(no_throw=True)(ex)
-            logger.warning("Link to git repository failed due to error '%s'", ex)
-
-    if deployment_local_git:
-        local_git_info = enable_local_git(resource_group_name, name)
-        logger.warning("Local git is configured with url of '%s'", local_git_info['url'])
-        setattr(webapp, 'deploymentLocalGitUrl', local_git_info['url'])
+    _set_remote_or_local_git(webapp, resource_group_name, name, deployment_source_url,
+                             deployment_source_branch, deployment_local_git)
 
     _fill_ftp_publishing_url(webapp, resource_group_name, name)
     return webapp
@@ -1157,9 +1139,6 @@ class _StackRuntimeHelper(object):
 def create_function(resource_group_name, name, storage_account, plan=None,
                     consumption_plan_location=None, deployment_source_url=None,
                     deployment_source_branch='master', deployment_local_git=None):
-    if deployment_source_url and deployment_local_git:
-        raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
-
     if bool(plan) == bool(consumption_plan_location):
         raise CLIError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
 
@@ -1197,8 +1176,17 @@ def create_function(resource_group_name, name, storage_account, plan=None,
 
     update_app_settings(resource_group_name, name, settings, None)
 
-    if deployment_local_git and deployment_source_url:
-        raise CLIError('usage error: --deployment-local-git | --deployment-source-url')
+    _set_remote_or_local_git(functionapp, resource_group_name, name, deployment_source_url,
+                             deployment_source_branch, deployment_local_git)
+
+    return functionapp
+
+
+def _set_remote_or_local_git(webapp, resource_group_name, name, deployment_source_url=None,
+                             deployment_source_branch='master', deployment_local_git=None):
+
+    if deployment_source_url and deployment_local_git:
+        raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
 
     if deployment_source_url:
         logger.warning("Linking to git repository '%s'", deployment_source_url)
@@ -1213,9 +1201,7 @@ def create_function(resource_group_name, name, storage_account, plan=None,
     if deployment_local_git:
         local_git_info = enable_local_git(resource_group_name, name)
         logger.warning("Local git is configured with url of '%s'", local_git_info['url'])
-        setattr(functionapp, 'deploymentLocalGitUrl', local_git_info['url'])
-
-    return functionapp
+        setattr(webapp, 'deploymentLocalGitUrl', local_git_info['url'])
 
 
 def _validate_and_get_connection_string(resource_group_name, storage_account):
@@ -1240,10 +1226,8 @@ def _validate_and_get_connection_string(resource_group_name, storage_account):
     if error_message:
         raise CLIError(error_message)
 
-    from azure.cli.command_modules.storage._factory import (storage_client_factory)
     from azure.cli.core._profile import CLOUD
-    scf = storage_client_factory()
-    obj = scf.storage_accounts.list_keys(resource_group_name, storage_account)  # pylint: disable=no-member
+    obj = storage_client.storage_accounts.list_keys(resource_group_name, storage_account)  # pylint: disable=no-member
     try:
         keys = [obj.keys[0].value, obj.keys[1].value]  # pylint: disable=no-member
     except AttributeError:
