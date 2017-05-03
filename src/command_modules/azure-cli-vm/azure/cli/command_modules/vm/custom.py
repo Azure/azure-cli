@@ -1897,7 +1897,7 @@ def create_vmss(vmss_name, resource_group_name, image,
 
 
 def create_av_set(availability_set_name, resource_group_name,
-                  platform_update_domain_count, platform_fault_domain_count,
+                  platform_fault_domain_count, platform_update_domain_count=None,
                   location=None, no_wait=False,
                   unmanaged=False, tags=None, validate=False):
     from azure.cli.core.util import random_string
