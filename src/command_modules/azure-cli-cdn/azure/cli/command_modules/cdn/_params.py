@@ -12,11 +12,13 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 from ._validators import validate_origin
 
 
+# pylint:disable=protected-access
+# pylint:disable=too-few-public-methods
 class OriginType(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         from azure.mgmt.cdn.models import DeepCreatedOrigin
 
-        if not (1 <= len(values) <= 3):
+        if not 1 <= len(values) <= 3:
             msg = '%s takes 1, 2 or 3 values, %d given'
             raise argparse.ArgumentError(self, msg % (option_string, len(values)))
 
@@ -27,6 +29,7 @@ class OriginType(argparse._AppendAction):
             deep_created_origin.https_port = int(values[3])
         super(OriginType, self).__call__(parser, namespace, deep_created_origin, option_string)
 
+
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
 register_cli_argument('cdn', 'name', name_arg_type, id_part='name')
@@ -34,7 +37,7 @@ register_cli_argument('cdn', 'tags', tags_type)
 
 register_cli_argument('cdn profile create',
                       'sku',
-                      **enum_choice_list([item.value for item in SkuName.__members__.values()]))
+                      **enum_choice_list([item.value for item in list(SkuName)]))
 register_cli_argument('cdn profile create', 'location',
                       validator=get_default_location_from_resource_group)
 register_cli_argument('cdn profile', 'profile_name', name_arg_type, id_part='name')
@@ -75,7 +78,7 @@ register_cli_argument(cdn_endpoint, 'is_compression_enabled',
 user requests for a compressed version. Content won\'t be compressed on CDN when requested content \
 is smaller than 1 byte or larger than 1 MB.',
                       **three_state_flag())
-caching_behavior = [item.value for item in QueryStringCachingBehavior.__members__.values()]
+caching_behavior = [item.value for item in list(QueryStringCachingBehavior)]
 register_cli_argument(cdn_endpoint,
                       'query_string_caching_behavior',
                       options_list='--query-string-caching',

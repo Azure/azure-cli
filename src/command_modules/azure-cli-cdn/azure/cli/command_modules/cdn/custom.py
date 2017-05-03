@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import azure.cli.core.azlogging as azlogging
 from azure.mgmt.cdn.models import (Endpoint, QueryStringCachingBehavior, SkuName,
                                    EndpointUpdateParameters, ProfileUpdateParameters)
 
@@ -42,6 +41,7 @@ def update_endpoint(instance,
                     is_https_allowed=None,
                     query_string_caching_behavior=None,
                     tags=None):
+    # pylint: disable=too-many-arguments
     params = EndpointUpdateParameters(
         origin_host_header=origin_host_header,
         origin_path=origin_path,
@@ -77,6 +77,7 @@ def create_endpoint(client, resource_group_name, profile_name, name, origins, lo
                     is_compression_enabled=None, is_http_allowed=None, is_https_allowed=None,
                     query_string_caching_behavior=QueryStringCachingBehavior.ignore_query_string.
                     value, tags=None):
+    # pylint: disable=too-many-arguments
     is_compression_enabled = False if is_compression_enabled is None else is_compression_enabled
     is_http_allowed = True if is_http_allowed is None else is_http_allowed
     is_https_allowed = True if is_https_allowed is None else is_https_allowed
@@ -101,6 +102,7 @@ create_endpoint.__doc__ = Endpoint.__doc__
 
 def create_custom_domain(client, resource_group_name, profile_name, endpoint_name, name, hostname,
                          location=None, tags=None):
+    # pylint: disable=too-many-arguments
     """
     Creates a new custom domain within an endpoint.
     :param client: CdnManagementClint
@@ -136,6 +138,7 @@ update_profile.__doc__ = ProfileUpdateParameters.__doc__
 def create_profile(client, resource_group_name, name,
                    sku=SkuName.standard_akamai.value,
                    location=None, tags=None):
+    # pylint: disable=too-many-arguments
     """
     Creates a new CDN profile with a profile name under the specified resource group.
     :param client: CdnManagementClint
