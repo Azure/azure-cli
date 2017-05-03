@@ -579,7 +579,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             JCheck('artifacts[0].type', 'Template'),
             JCheck('artifacts[1].name', 'CreateUiDefinition'),
             JCheck('artifacts[1].type', 'Custom')
-                ])
+        ])
 
         # list and show it
         list_cmd = 'managedapp definition list -g {}'
@@ -603,6 +603,53 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         # delete
         self.cmd('managedapp definition delete -g {} -n {}'.format(resource_group, appdef_name))
         self.cmd('managedapp definition list -g {}'.format(resource_group), checks=NoneCheck())
+
+
+class ManagedAppScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_managedapp(self, resource_group):
+        location = 'brazil'
+        appdef_name = 'testappdefname'
+        appdef_display_name = 'test_appdef_123'
+        appdef_description = 'test_appdef_123'
+        packageUri = 'https:\/\/wud.blob.core.windows.net\/appliance\/SingleStorageAccount.zip'
+        auth = '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635'
+        lock = 'None'
+
+        # create a managedapp definition
+        create_cmd = 'managedapp definition create -n {} --package-file-uri {} --display-name {} --description {} -l {} -a {} --lock-level {} -g {}'
+        managedappdef = self.cmd(create_cmd.format(appdef_name, packageUri, appdef_display_name,
+                                                   appdef_description, location, auth, lock, resource_group)).get_output_in_json()
+
+        # create a managedapp
+        managedapp_name = 'mymanagedapp'
+        managedapp_loc = 'westcentralus'
+        managedapp_kind = 'servicecatalog'
+        newrg = self.create_random_name('climanagedapp', 25)
+        managedrg = '/subscriptions/{}/resourceGroups/{}'.format(managedappdef['id'].split("/")[2], newrg)
+        create_cmd = 'managedapp create -n {} -g {} -l {} --kind {} -m {} -d {}'
+        self.cmd(create_cmd.format(managedapp_name, resource_group, managedapp_loc, managedapp_kind, managedrg, managedappdef['id']), checks=[
+            JCheck('name', managedapp_name),
+            JCheck('type', 'Microsoft.Solutions/appliances'),
+            JCheck('kind', 'servicecatalog'),
+            JCheck('managedResourceGroupId', managedrg),
+            JCheck('applianceDefinitionId', managedappdef['id'])
+        ])
+
+        # list and show
+        list_byrg_cmd = 'managedapp list -g {}'
+        self.cmd(list_byrg_cmd.format(resource_group), checks=[
+            JCheck('[0].name', managedapp_name)
+        ])
+
+        show_cmd = 'managedapp show -g {} -n {}'
+        self.cmd(show_cmd.format(resource_group, managedapp_name), checks=[
+            JCheck('name', managedapp_name),
+            JCheck('type', 'Microsoft.Solutions/appliances'),
+            JCheck('kind', 'servicecatalog'),
+            JCheck('managedResourceGroupId', managedrg),
+            JCheck('applianceDefinitionId', managedappdef['id'])
+        ])
 
 
 if __name__ == '__main__':
