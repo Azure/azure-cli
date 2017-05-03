@@ -84,13 +84,13 @@ class InDetProgressReporter(object):
     def __init__(self):
         self.message = ''
 
-    def add(self, message=''):
+    def add(self, kwargs):
         """ adds a progress report """
-        self.message = message
+        self.message = kwargs.get('message', '')
 
     def report(self):
         """ report the progress """
-        return self.message
+        return {'message': self.message}
 
 
 class ProgressHook(object):

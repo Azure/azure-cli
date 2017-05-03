@@ -94,12 +94,12 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         self.assertEqual(view.get_type().value, progress.ProgressType.Determinate.value)
         view.write({'message': 'hihi', 'percent': .5})
         # 95 length, 48 complete, 4 dec percent
-        bar_str = ('#' * (.5 * 70)).ljust(70)
+        bar_str = ('#' * int(.5 * 70)).ljust(70)
         self.assertEqual(outstream.string, '\rhihi[{}]  50.0000%'.format(bar_str))
 
         view.write({'message': '', 'percent': .9})
         # 99 length, 90 complete, 4 dec percent
-        bar_str = ('#' * (.9 * 70)).ljust(70)
+        bar_str = ('#' * int(.9 * 70)).ljust(70)
         self.assertEqual(outstream.string, '\r[{}]  90.0000%'.format(bar_str))
 
     def test_controller(self):
