@@ -6,6 +6,25 @@
 from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
 # pylint: disable=line-too-long, too-many-lines
+helps['managedapp create'] = """
+    type: command
+    short-summary: Creates a managed application.
+    examples:
+        - name: Create a managed application of kind 'ServiceCatalog'. This requires a valid managed application definition id.
+          text: >
+            az managedapp create -g MyResourceGroup -n MyManagedApp -l westcentralus --kind ServiceCatalog -m "/subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myManagedRG" -d "/subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Solutions/applianceDefinitions/myManagedAppDef"
+        - name: Create a managed application of kind 'MarketPlace'. This requires a valid plan, containing details about existing marketplace package like plan name, version, publisher and product
+          text: >
+            az managedapp create -g MyResourceGroup -n MyManagedApp -l westcentralus --kind MarketPlace -m "/subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/myManagedRG" -plan-name DatabricksAppliance --plan-version "1.0" --plan-product "databricks-appliance" --plan-publisher Microsoft
+"""
+helps['managedapp definition create'] = """
+    type: command
+    short-summary: Creates a managed application definition.
+    examples:
+        - name: Create a managed application defintion.
+          text: >
+            az managedapp definition create -g MyResourceGroup -n MyManagedAppDef -l eastus --display-name "MyManagedAppDef" --description "My Managed App Def description" -a "myPrincipalId:myRoleId" --lock-level None --package-file-uri "https://path/to/myPackage.zip"
+"""
 helps['managedapp definition delete'] = """
     type: command
     short-summary: Delete a managed application definition.
