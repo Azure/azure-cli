@@ -55,7 +55,6 @@ START_TIME = datetime.datetime.now()
 CLEAR_WORD = get_os_clear_screen_word()
 
 
-
 def handle_cd(cmd):
     """changes dir """
     if len(cmd) != 2:
