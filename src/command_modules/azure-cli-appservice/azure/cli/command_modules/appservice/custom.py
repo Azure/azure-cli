@@ -42,6 +42,8 @@ def create_webapp(resource_group_name, name, plan, runtime=None,
                   startup_file=None, deployment_container_image_name=None,
                   deployment_source_url=None, deployment_source_branch='master',
                   deployment_local_git=None):
+    if deployment_source_url and deployment_local_git:
+        raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
     client = web_client_factory()
     if is_valid_resource_id(plan):
         plan = parse_resource_id(plan)['name']
@@ -1139,6 +1141,8 @@ class _StackRuntimeHelper(object):
 def create_function(resource_group_name, name, storage_account, plan=None,
                     consumption_plan_location=None, deployment_source_url=None,
                     deployment_source_branch='master', deployment_local_git=None):
+    if deployment_source_url and deployment_local_git:
+        raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if bool(plan) == bool(consumption_plan_location):
         raise CLIError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
 
@@ -1184,10 +1188,6 @@ def create_function(resource_group_name, name, storage_account, plan=None,
 
 def _set_remote_or_local_git(webapp, resource_group_name, name, deployment_source_url=None,
                              deployment_source_branch='master', deployment_local_git=None):
-
-    if deployment_source_url and deployment_local_git:
-        raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
-
     if deployment_source_url:
         logger.warning("Linking to git repository '%s'", deployment_source_url)
         try:
@@ -1205,6 +1205,7 @@ def _set_remote_or_local_git(webapp, resource_group_name, name, deployment_sourc
 
 
 def _validate_and_get_connection_string(resource_group_name, storage_account):
+    from azure.cli.core._profile import CLOUD
     sa_resource_group = resource_group_name
     if is_valid_resource_id(storage_account):
         sa_resource_group = parse_resource_id(storage_account)['resource_group']
@@ -1226,7 +1227,6 @@ def _validate_and_get_connection_string(resource_group_name, storage_account):
     if error_message:
         raise CLIError(error_message)
 
-    from azure.cli.core._profile import CLOUD
     obj = storage_client.storage_accounts.list_keys(resource_group_name, storage_account)  # pylint: disable=no-member
     try:
         keys = [obj.keys[0].value, obj.keys[1].value]  # pylint: disable=no-member
