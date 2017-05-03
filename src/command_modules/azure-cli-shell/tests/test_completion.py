@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
+from io import StringIO
 import six
 
 import azclishell.command_tree as tree
@@ -48,7 +49,7 @@ class CompletionTest(unittest.TestCase):
             command_tree=com_tree3,
             descrip=command_description
         )
-        self.completer = AzCompleter(commands, global_params=False, outstream=None)
+        self.completer = AzCompleter(commands, global_params=False, outstream=StringIO())
 
     def init2(self):
         """ a variation of initializing """
@@ -78,7 +79,7 @@ class CompletionTest(unittest.TestCase):
             param_descript=param_descript,
             descrip=command_description
         )
-        self.completer = AzCompleter(commands, global_params=False, outstream=None)
+        self.completer = AzCompleter(commands, global_params=False, outstream=StringIO())
 
     def init3(self):
         """ a variation of initializing """
@@ -115,7 +116,7 @@ class CompletionTest(unittest.TestCase):
             same_param_doubles=same_param_doubles,
             descrip=command_description
         )
-        self.completer = AzCompleter(commands, global_params=False, outstream=None)
+        self.completer = AzCompleter(commands, global_params=False, outstream=StringIO())
 
     def init4(self):
         """ a variation of initializing """
@@ -152,7 +153,7 @@ class CompletionTest(unittest.TestCase):
             same_param_doubles=same_param_doubles,
             descrip=command_description
         )
-        self.completer = AzCompleter(commands, global_params=False, outstream=None)
+        self.completer = AzCompleter(commands, global_params=False, outstream=StringIO())
 
     def test_command_completion(self):
         """ tests general command completion """

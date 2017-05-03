@@ -18,26 +18,25 @@ class ArgsFinder(CompletionFinder):
 
     def get_parsed_args(self, comp_words):
         """ gets the parsed args from a patched parser """
-        # active_parsers = self._patch_argument_parser()
+        active_parsers = self._patch_argument_parser()
 
         parsed_args = argparse.Namespace()
-        if comp_words:
+
+        self.completing = True
+        if USING_PYTHON2:
+            # Python 2 argparse only properly works with byte strings.
+            comp_words = [ensure_bytes(word) for word in comp_words]
+
+        try:
+            temp = self.outstream
+            self.outstream = os.open(os.devnull, "w")
+
+            active_parsers[0].parse_known_args(comp_words, namespace=parsed_args)
+
+            self.outstream.close()
+            self.outstream = temp
+        except BaseException:
             pass
-        # self.completing = True
-        # if USING_PYTHON2:
-        #     # Python 2 argparse only properly works with byte strings.
-        #     comp_words = [ensure_bytes(word) for word in comp_words]
 
-        # # try:
-        # #     temp = self.outstream
-        # #     self.outstream = os.open(os.devnull, "w")
-
-        # #     active_parsers[0].parse_known_args(comp_words, namespace=parsed_args)
-
-        # #     self.outstream.close()
-        # #     self.outstream = temp
-        # # except BaseException:
-        # #     pass
-
-        # self.completing = False
+        self.completing = False
         return parsed_args
