@@ -52,6 +52,7 @@ def ex_handler_factory(creating_plan=False):
         raise ex
     return _polish_bad_errors
 
+
 custom_path = 'azure.cli.command_modules.appservice.custom#'
 
 # beginning of the new ones #
