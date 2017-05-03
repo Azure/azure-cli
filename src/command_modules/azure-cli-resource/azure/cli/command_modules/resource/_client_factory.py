@@ -45,6 +45,7 @@ def _resource_managedapps_client_factory(**_):
     from azure.mgmt.resource.managedapplications import ManagedApplicationClient
     return get_mgmt_service_client(ManagedApplicationClient)
 
+
 def cf_resource_groups(_):
     return _resource_client_factory().resource_groups
 
@@ -83,6 +84,7 @@ def cf_management_locks(_):
 
 def cf_resource_links():
     return _resource_links_client_factory().resource_links
+
 
 def cf_resource_managedapplications(_):
     return _resource_managedapps_client_factory().appliances

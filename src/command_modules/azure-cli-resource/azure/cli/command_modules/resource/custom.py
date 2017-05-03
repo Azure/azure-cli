@@ -74,6 +74,7 @@ def create_resource_group(rg_name, location, tags=None):
     )
     return rcf.resource_groups.create_or_update(rg_name, parameters)
 
+
 def create_appliance(resource_group_name, appliance_name, managedby_resource_group_id, location, kind, managedapp_definition_id=None, plan_name=None, plan_publisher=None, plan_product=None, plan_version=None, tags=None, parameters=None):
     ''' Create a new managed application.
     :param str resource_group_name:the desired resource group name
@@ -116,6 +117,7 @@ def create_appliance(resource_group_name, appliance_name, managedby_resource_gro
 
     return racf.appliances.create_or_update(resource_group_name, appliance_name, appliance)
 
+
 def show_appliance(resource_group_name=None, appliance_name=None, managedapp_id=None):
     ''' Gets a managed application.
     :param str resource_group_name:the resource group name
@@ -128,6 +130,7 @@ def show_appliance(resource_group_name=None, appliance_name=None, managedapp_id=
         appliance = racf.appliances.get(resource_group_name, appliance_name)
     return appliance
 
+
 def show_appliancedefinition(resource_group_name=None, appliance_definition_name=None, managedapp_definition_id=None):
     ''' Gets a managed application definition.
     :param str resource_group_name:the resource group name
@@ -139,6 +142,7 @@ def show_appliancedefinition(resource_group_name=None, appliance_definition_name
     else:
         appliancedef = racf.appliance_definitions.get(resource_group_name, appliance_definition_name)
     return appliancedef
+
 
 def create_appliancedefinition(resource_group_name, appliance_definition_name, location, lock_level, package_file_uri, authorizations, description, display_name, tags=None):
     ''' Create a new managed application definition.
@@ -167,6 +171,7 @@ def create_appliancedefinition(resource_group_name, appliance_definition_name, l
 
     return racf.appliance_definitions.create_or_update(resource_group_name, appliance_definition_name, applianceDef)
 
+
 def list_appliances(resource_group_name=None):
     racf = _resource_managedapps_client_factory()
 
@@ -174,6 +179,7 @@ def list_appliances(resource_group_name=None):
         return racf.appliances.list_by_resource_group(resource_group_name)
     else:
         return racf.appliances.list_by_subscription()
+
 
 def export_group_as_template(
         resource_group_name, include_comments=False, include_parameter_default_value=False):
