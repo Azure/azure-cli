@@ -10,6 +10,7 @@ Release History
 * Expose arguments to configure deployment and "runtime stacks" on webapp create
 * Expose "webapp list-runtimes"
 * support configure connection strings (#2647)
+* support slot swap with prevew
 
 0.1.4 (2017-04-28)
 ++++++++++++++++++++
