@@ -165,7 +165,7 @@ helps['cdn custom-domain show'] = """
 
 helps['cdn custom-domain create'] = """
     type: command
-    short-summary: Creates a new custom domain which provides a custom hostname for an endpoint 
+    short-summary: Creates a new custom domain which provides a custom hostname for an endpoint
         origin
     long-summary: >
         Creates a new custom domain which must point to the hostname of the endpoint.
