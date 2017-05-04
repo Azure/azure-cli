@@ -520,7 +520,7 @@ class VMAvailSetScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
     def body(self):
-        self.cmd('vm availability-set create -g {} -n {} --platform-fault-domain-count 2'.format(
+        self.cmd('vm availability-set create -g {} -n {}'.format(
             self.resource_group, self.name), checks=[
                 JMESPathCheck('name', self.name),
                 JMESPathCheck('platformFaultDomainCount', 2),
