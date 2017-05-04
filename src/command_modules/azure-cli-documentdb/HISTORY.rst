@@ -8,6 +8,9 @@ Release History
 
 * Added support for documentdb data-plane APIs:
   database and collection management
+* Added support for enabling automatic failover on database accounts
+* Added support for new consistency policy ConsistentPrefix
+* Upgraded pypi package dependency for azure-mgmt-documentdb to 0.1.3
 
 0.1.4 (2017-04-28)
 ++++++++++++++++++
