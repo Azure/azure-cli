@@ -28,12 +28,6 @@ class ArgsFinder(CompletionFinder):
             comp_words = [ensure_bytes(word) for word in comp_words]
 
         try:
-            # temp = argparse.ArgumentParser.error
-            # argparse.ArgumentParser.error = lambda self, message: None
-
-            # active_parsers[0].parse_known_args(comp_words, namespace=parsed_args)
-
-            # argparse.ArgumentParser.error = temp
             temp = self.outstream
             self.outstream = os.fdopen(os.devnull, "w")
 
