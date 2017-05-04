@@ -9,7 +9,7 @@ from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer
 class DocumentDBTests(ScenarioTest):
     @ResourceGroupPreparer()
     def test_create_database_account(self, resource_group):
-        name = self.create_random_name(prefix='cli', length=24)
+        name = self.create_random_name(prefix='cli', length=40)
         self.cmd(
             'az documentdb create -n {} -g {} '
             '--enable-automatic-failover {} --default-consistency-level {}'
