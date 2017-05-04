@@ -26,7 +26,7 @@ class ProgressViewBase(object):
         self.progress_type = progress_type
         self.format_percent = format_percent
 
-    def write(self, args):
+    def write(self, **args):
         """ writes the progress """
         pass
 
