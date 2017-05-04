@@ -105,10 +105,10 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         self.assertTrue(view in controller.active_progress)
 
         controller.begin()
-        self.assertEqual(controller.active_progress[0].string, 'Starting')
+        self.assertEqual(controller.active_progress[0].string['message'], 'Starting')
 
         controller.end()
-        self.assertEqual(controller.active_progress[0].string, 'Finished')
+        self.assertEqual(controller.active_progress[0].string['message'], 'Finished')
 
         controller = progress.ProgressHook(progress.ProgressType.Determinate)
         view = DetMockOutstream()
@@ -117,10 +117,10 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         self.assertTrue(view in controller.active_progress)
 
         controller.begin()
-        self.assertEqual(controller.active_progress[0].string, 'Starting')
+        self.assertEqual(controller.active_progress[0].string['message'], 'Starting')
 
         controller.end()
-        self.assertEqual(controller.active_progress[0].string, 'Finished')
+        self.assertEqual(controller.active_progress[0].string['message'], 'Finished')
 
 
 if __name__ == '__main__':
