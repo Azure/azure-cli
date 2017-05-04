@@ -94,5 +94,6 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
 
         controller = progress.ProgressHook()
 
+
 if __name__ == '__main__':
     unittest.main()

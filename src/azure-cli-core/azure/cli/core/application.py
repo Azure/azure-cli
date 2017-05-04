@@ -132,7 +132,6 @@ class Application(object):
         self.progress_view = progress.IndeterminateStandardOut()
         self.progress_controller.init_progress(self.progress_view)
 
-
     def initialize(self, configuration):
         self.configuration = configuration
 

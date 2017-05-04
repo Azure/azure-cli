@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import division
 import sys
-from enum import Enum
 
 import humanfriendly
 

@@ -19,7 +19,6 @@ from six import string_types, reraise
 import azure.cli.core.azlogging as azlogging
 import azure.cli.core.telemetry as telemetry
 from azure.cli.core.util import CLIError
-from azure.cli.core.commands.progress import ProgressHook
 from azure.cli.core.prompting import prompt_y_n, NoTTYException
 from azure.cli.core._config import az_config, DEFAULTS_SECTION
 from azure.cli.core.profiles import ResourceType, supported_api_version
