@@ -110,8 +110,8 @@ generic_profile_command('update', 'update_profile')
 
 domain_command('show', 'get')
 domain_command('list', 'list_by_endpoint')
-for c in ['delete', 'create']:
-    domain_command(c)
+domain_command('delete')
+domain_command('create', 'create_custom_domain', use_custom=True)
 
 origin_command('show', 'get')
 origin_command('list', 'list_by_endpoint')

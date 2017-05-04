@@ -103,19 +103,6 @@ create_endpoint.__doc__ = Endpoint.__doc__
 def create_custom_domain(client, resource_group_name, profile_name, endpoint_name, name, hostname,
                          location=None, tags=None):
     # pylint: disable=too-many-arguments
-    """
-    Creates a new custom domain within an endpoint.
-    :param client: CdnManagementClint
-    :param resource_group_name: Name of resource group.
-    :param profile_name: Name of the CDN profile which is unique within the resource group.
-    :param endpoint_name: Name of the endpoint under the profile which is unique globally.
-    :param name: Name of the custom domain within an endpoint.
-    :param hostname: The host name of the custom domain. Must be a domain name.
-    :param location: Location of the profile. Defaults to the location of the resource group.
-    :param tags: Resource manager tags
-    :return: The newly created CDN profile
-    :rtype: Profile
-    """
     from azure.mgmt.cdn.models import (CustomDomain)
     custom_domain = CustomDomain(location, hostname, tags=tags)
     return client.custom_domains.create(resource_group_name,
@@ -139,18 +126,6 @@ def create_profile(client, resource_group_name, name,
                    sku=SkuName.standard_akamai.value,
                    location=None, tags=None):
     # pylint: disable=too-many-arguments
-    """
-    Creates a new CDN profile with a profile name under the specified resource group.
-    :param client: CdnManagementClint
-    :param resource_group_name: Name of resource group.
-    :param name: The name of the CDN profile
-    :param sku: The pricing tier (defines a CDN provider, feature list and rate) of the CDN profile.
-        Defaults to Standard_Akamai.
-    :param location: Location of the profile. Defaults to the location of the resource group.
-    :param tags: Resource manager tags
-    :return: The newly created CDN profile
-    :rtype: Profile
-    """
     from azure.mgmt.cdn.models import (Profile, Sku)
     profile = Profile(location, Sku(name=sku), tags=tags)
     return client.profiles.create(resource_group_name, name, profile)

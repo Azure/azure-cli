@@ -39,21 +39,24 @@ name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 register_cli_argument('cdn', 'name', name_arg_type, id_part='name')
 register_cli_argument('cdn', 'tags', tags_type)
 
+# Profile #
+
 register_cli_argument('cdn profile create',
                       'sku',
                       **enum_choice_list([item.value for item in list(SkuName)]))
 register_cli_argument('cdn profile create', 'location',
                       validator=get_default_location_from_resource_group)
-register_cli_argument('cdn profile', 'profile_name', name_arg_type, id_part='name')
+profile_name_help = 'Name of the CDN profile which is unique within the resource group.'
+register_cli_argument('cdn profile', 'profile_name', name_arg_type, id_part='name',
+                      help=profile_name_help)
+register_cli_argument('cdn profile create', 'name', name_arg_type, id_part='name',
+                      help=profile_name_help)
+# Endpoint #
 
-register_cli_argument('cdn custom-domain create', 'location',
-                      validator=get_default_location_from_resource_group)
-
-
-register_cli_argument('cdn endpoint', 'endpoint_name', name_arg_type, id_part='name')
-
-# Endpoint Create #
-
+register_cli_argument('cdn endpoint', 'endpoint_name', name_arg_type, id_part='name',
+                      help='Name of the CDN endpoint.')
+register_cli_argument('cdn endpoint create', 'name', name_arg_type, id_part='name',
+                      help='Name of the CDN endpoint.')
 cdn_endpoint = 'cdn endpoint'
 register_cli_argument(cdn_endpoint, 'location',
                       validator=get_default_location_from_resource_group)
@@ -88,18 +91,15 @@ register_cli_argument(cdn_endpoint,
                       options_list='--query-string-caching',
                       **enum_choice_list(caching_behavior))
 register_cli_argument(cdn_endpoint, 'content_types_to_compress', nargs='+')
-
-# Endpoint Load #
-
 register_cli_argument('cdn endpoint load', 'content_paths', nargs='+')
-
-# Endpoint Purge #
-
 register_cli_argument('cdn endpoint purge', 'content_paths', nargs='+')
 
 # Custom Domain #
 
-register_cli_argument('cdn custom-domain', 'custom_domain_name', name_arg_type, id_part='name')
+register_cli_argument('cdn custom-domain', 'name', name_arg_type, id_part=None,
+                      help='Name of the custom domain.')
+register_cli_argument('cdn custom-domain create', 'location',
+                      validator=get_default_location_from_resource_group)
 
 # Origin #
 

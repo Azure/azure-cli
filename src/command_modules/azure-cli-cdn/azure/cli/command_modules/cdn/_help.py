@@ -14,6 +14,13 @@ helps['cdn'] = """
 
 helps['cdn profile create'] = """
     type: command
+    short-summary: Creates a new CDN profile with a profile name under the specified resource group.
+    parameters:
+        - name: --sku
+          type: string
+          short-summary: >
+            The pricing tier (defines a CDN provider, feature list and rate) of the CDN profile.
+            Defaults to Standard_Akamai.
     examples:
         - name: Create a CDN profile using Verizon premium CDN
           text: >
@@ -132,15 +139,6 @@ helps['cdn endpoint load'] = """
                 '/index.html' '/scripts/app.js' '/styles/main.css'
 """
 
-helps['cdn custom-domain create'] = """
-    type: command
-    examples:
-        - name: Create a custom domain within an endpoint and profile
-          text: >
-            az cdn custom-domain create -g group --endpoint-name endpoint --profile-name profile \\
-                -n domain-name --host-name www.example.com
-"""
-
 helps['cdn custom-domain delete'] = """
     type: command
     examples:
@@ -157,4 +155,29 @@ helps['cdn custom-domain show'] = """
           text: >
             az cdn custom-domain show -g group --endpoint-name endpoint --profile-name profile \\
                 -n domain-name
+"""
+
+helps['cdn custom-domain create'] = """
+    type: command
+    short-description: Creates a new custom domain within an endpoint.
+    long-description: >
+        Creates a new custom domain which must point to the hostname of the endpoint.
+        For example, the custom domain hostname cdn.contoso.com would need to have a
+        CNAME record pointing to the hostname of the endpoint related to this custom
+        domain.
+    parameters:
+        - name: --profile-name
+          type: string
+          short-summary: Name of the CDN profile which is unique within the resource group.
+        - name: --endpoint-name
+          type: string
+          short-summary: Name of the endpoint under the profile which is unique globally.
+        - name: --hostname
+          type: string
+          short-summary: The host name of the custom domain. Must be a domain name.
+    examples:
+        - name: Create a custom domain within an endpoint and profile
+          text: >
+            az cdn custom-domain create -g group --endpoint-name endpoint --profile-name profile \\
+                -n domain-name --host-name www.example.com
 """
