@@ -127,6 +127,9 @@ class _MockProgresssController(object):
     def add(self, **kwargs):
         return
 
+    def stop(self):  # pylint: disable=no-self-use
+        return
+
     # pylint: disable=no-self-use
     def end(self):
         return
