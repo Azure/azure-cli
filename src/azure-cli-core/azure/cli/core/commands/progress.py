@@ -132,3 +132,11 @@ class DeterminateStandardOut(ProgressViewBase):
             percent = percent
             progress = _format_value(message, percent)
             self.out.write(progress)
+
+
+def get_progress_view(determinant=False, outstream=sys.stderr):
+    """ gets your view """
+    if determinant:
+        return DeterminateStandardOut(out=outstream)
+    else:
+        return IndeterminateStandardOut(out=outstream)

@@ -117,12 +117,20 @@ def _mock_operation_delay(_):
     return
 
 
-def _mock_progress_update(*args):  # pylint: disable=unused-argument
-    pass
+class _MockOutstream():
+    """ mock outstream for testing """
+    def __init__(self):
+        self.string = ''
 
-def _mock_progress_add(*args, **kwargs):  # pylint: disable=unused-argument
-    pass
+    def write(self, message):
+        self.string = message
 
+    def flush(self):
+        pass
+
+
+def _mock_get_progress_view(_):  # pylint: disable=unused-argument
+    return _MockOutstream()
 
 
 # TEST CHECKS
@@ -392,8 +400,7 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
     @mock.patch('azure.cli.core.commands.LongRunningOperation._delay', _mock_operation_delay)
     @mock.patch('azure.cli.core.commands.validators.generate_deployment_name',
                 _mock_generate_deployment_name)
-    @mock.patch('azure.cli.core.commands.progress.ProgressHook.add', _mock_progress_add)
-    @mock.patch('azure.cli.core.commands.progress.ProgressHook.update', _mock_progress_update)
+    @mock.patch('azure.cli.core.commands.progress.get_progress_view', _mock_get_progress_view)
     def _execute_playback(self):
         # pylint: disable=no-member
         with self.my_vcr.use_cassette(self.cassette_path):
