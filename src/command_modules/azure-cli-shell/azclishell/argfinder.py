@@ -29,11 +29,10 @@ class ArgsFinder(CompletionFinder):
 
         try:
             temp = self.outstream
-            self.outstream = os.fdopen(os.devnull, "w")
+            self.outstream = os.open(os.devnull, "w")
 
             active_parsers[0].parse_known_args(comp_words, namespace=parsed_args)
 
-            self.outstream.close()
             self.outstream = temp
         except BaseException:
             pass
