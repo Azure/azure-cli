@@ -4,7 +4,7 @@ Release History
 ===============
 2.0.5 (unreleased)
 ++++++++++++++++++
-* avail-set: make --platform-update-domain-count optional
+* avail-set: make UD&FD domain counts optional
 
 2.0.4 (2017-04-28)
 ++++++++++++++++++
