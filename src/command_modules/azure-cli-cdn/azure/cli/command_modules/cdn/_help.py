@@ -12,6 +12,11 @@ helps['cdn'] = """
     short-summary: Manage Azure Content Delivery Networks (CDN)
 """
 
+helps['cdn profile'] = """
+    type: group
+    short-summary: Manage Azure CDN Profiles which define which CDN provider for your edge network
+"""
+
 helps['cdn profile create'] = """
     type: command
     short-summary: Creates a new CDN profile with a profile name under the specified resource group.
@@ -47,6 +52,11 @@ helps['cdn profile list'] = """
         - name: List CDN profiles in a resource group
           text: >
             az cdn profile list -g group
+"""
+
+helps['cdn endpoint'] = """
+    type: group
+    short-summary: Manage Azure CDN Endpoints which define the hostname and endpoints
 """
 
 helps['cdn endpoint create'] = """
@@ -130,13 +140,9 @@ helps['cdn endpoint list'] = """
             az cdn endpoint list -g group --profile-name profile-name
 """
 
-helps['cdn endpoint load'] = """
-    type: command
-    examples:
-        - name: Stop a CDN endpoint
-          text: >
-            az cdn endpoint load -g group -n endpoint --profile-name profile-name --content-paths \\
-                '/index.html' '/scripts/app.js' '/styles/main.css'
+helps['cdn custom-domain'] = """
+    type: group
+    short-summary: Manage Azure CDN Custom Domains to provide custom host names for Endpoints
 """
 
 helps['cdn custom-domain delete'] = """
@@ -180,4 +186,14 @@ helps['cdn custom-domain create'] = """
           text: >
             az cdn custom-domain create -g group --endpoint-name endpoint --profile-name profile \\
                 -n domain-name --host-name www.example.com
+"""
+
+helps['cdn origin'] = """
+    type: group
+    short-summary: List or show existing origins related to CDN endpoints
+"""
+
+helps['cdn edge-node'] = """
+    type: group
+    short-summary: View all available edge nodes
 """
