@@ -76,7 +76,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
 
     def test_update_add_two_different_subscriptions(self):
         storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
 
         # add the first and verify
         consolidated = Profile._normalize_properties(self.user1,
@@ -127,7 +127,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
 
     def test_update_with_same_subscription_added_twice(self):
         storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
 
         # add one twice and verify we will have one but with new token
         consolidated = Profile._normalize_properties(self.user1,
@@ -149,7 +149,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
 
     def test_set_active_subscription(self):
         storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
 
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
@@ -169,7 +169,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
 
     def test_default_active_subscription_to_non_disabled_one(self):
         storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
 
         subscriptions = profile._normalize_properties(
             self.user2, [self.subscription2, self.subscription1], False)
@@ -182,7 +182,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
 
     def test_get_subscription(self):
         storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
 
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
@@ -200,7 +200,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
 
     def test_get_expanded_subscription_info(self):
         storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
 
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
@@ -236,7 +236,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
                                     lambda _: mock_arm_client)
 
         storage_mock = {'subscriptions': []}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
         profile._management_resource_uri = 'https://management.core.windows.net/'
         profile.find_subscriptions_on_login(False,
                                             '1234',
@@ -264,7 +264,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
                                     lambda _: mock_arm_client)
 
         storage_mock = {'subscriptions': []}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
         profile._management_resource_uri = 'https://management.core.windows.net/'
 
         # action
@@ -288,7 +288,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         finder = mock.MagicMock()
         finder.find_through_interactive_flow.return_value = []
         storage_mock = {'subscriptions': []}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
 
         # action
         result = profile.find_subscriptions_on_login(True,
@@ -308,7 +308,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         mock_read_cred_file.return_value = [Test_Profile.token_entry1]
 
         storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
                                                      False)
@@ -322,7 +322,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', return_value=None)
     def test_create_token_cache(self, mock_read_file):
         mock_read_file.return_value = []
-        profile = Profile()
+        profile = Profile(use_global_creds_cache=False)
         cache = profile._creds_cache.adal_token_cache
         self.assertFalse(cache.read_items())
         self.assertTrue(mock_read_file.called)
@@ -330,7 +330,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     def test_load_cached_tokens(self, mock_read_file):
         mock_read_file.return_value = [Test_Profile.token_entry1]
-        profile = Profile()
+        profile = Profile(use_global_creds_cache=False)
         cache = profile._creds_cache.adal_token_cache
         matched = cache.find({
             "_authority": "https://login.microsoftonline.com/common",
@@ -348,7 +348,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         mock_get_token.return_value = (some_token_type, Test_Profile.raw_token1)
         # setup
         storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
                                                      False)
@@ -375,7 +375,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         mock_get_token.return_value = (some_token_type, Test_Profile.raw_token1)
         # setup
         storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
         consolidated = Profile._normalize_properties(self.user1, [self.subscription1],
                                                      False)
         profile._set_subscriptions(consolidated)
@@ -395,7 +395,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         mock_read_cred_file.return_value = [Test_Profile.token_entry1]
 
         storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
                                                      False)
@@ -413,7 +413,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
     def test_logout_all(self, mock_delete_cred_file):
         # setup
         storage_mock = {'subscriptions': None}
-        profile = Profile(storage_mock)
+        profile = Profile(storage_mock, use_global_creds_cache=False)
         consolidated = Profile._normalize_properties(self.user1,
                                                      [self.subscription1],
                                                      False)
@@ -584,7 +584,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         mock_read_file.return_value = [self.token_entry1, test_sp]
 
         # action
-        creds_cache = CredsCache()
+        creds_cache = CredsCache(async_persist=False)
 
         # assert
         token_entries = [entry for _, entry in creds_cache.load_adal_token_cache().read_items()]
@@ -601,7 +601,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         mock_read_file.return_value = [test_sp]
 
         # action
-        creds_cache = CredsCache()
+        creds_cache = CredsCache(async_persist=False)
         creds_cache.load_adal_token_cache()
 
         # assert
@@ -623,7 +623,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         }
         mock_open_for_write.return_value = FileHandleStub()
         mock_read_file.return_value = [self.token_entry1, test_sp]
-        creds_cache = CredsCache()
+        creds_cache = CredsCache(async_persist=False)
 
         # action
         creds_cache.save_service_principal_cred(test_sp2)
@@ -645,7 +645,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         }
         mock_open_for_write.return_value = FileHandleStub()
         mock_read_file.return_value = [test_sp]
-        creds_cache = CredsCache()
+        creds_cache = CredsCache(async_persist=False)
 
         # action
         creds_cache.save_service_principal_cred(test_sp)
@@ -664,7 +664,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         }
         mock_open_for_write.return_value = FileHandleStub()
         mock_read_file.return_value = [self.token_entry1, test_sp]
-        creds_cache = CredsCache()
+        creds_cache = CredsCache(async_persist=False)
 
         # action #1, logout a user
         creds_cache.remove_cached_creds(self.user1)
@@ -704,7 +704,7 @@ class Test_Profile(unittest.TestCase):  # pylint: disable=too-many-public-method
         mock_adal_auth_context.acquire_token.side_effect = acquire_token_side_effect
         mock_open_for_write.return_value = FileHandleStub()
         mock_read_file.return_value = [self.token_entry1]
-        creds_cache = CredsCache(auth_ctx_factory=get_auth_context)
+        creds_cache = CredsCache(auth_ctx_factory=get_auth_context, async_persist=False)
 
         # action
         mgmt_resource = 'https://management.core.windows.net/'
