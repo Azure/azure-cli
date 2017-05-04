@@ -91,13 +91,14 @@ class ProgressHook(object):
 
     def add(self, **kwargs):
         """ adds a progress report """
-        self.reporter.add(**kwargs)
+        self.reporter.add(kwargs)
         self.update()
 
     def update(self):
         """ updates the view with the progress """
         for view in self.active_progress:
-            view.write(self.reporter.report())
+            args = self.reporter.report()
+            view.write(args)
             view.flush()
 
     def stop(self):
