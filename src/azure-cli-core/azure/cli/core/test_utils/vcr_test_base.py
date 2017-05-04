@@ -136,10 +136,12 @@ class _MockProgresssController(object):
 
 
 def _mock_controller_generator(_):
+    print("mock controller")
     return _MockProgresssController()
 
 
 def _mock_update_progress(current, total):  # pylint: disable=unused-argument
+    print('used')
     pass
 
 

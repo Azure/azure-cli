@@ -14,7 +14,7 @@ from azure.cli.core.profiles import get_sdk, ResourceType
 from azure.cli.command_modules.storage._factory import \
     (storage_client_factory, generic_data_service_factory)
 
-from azure.cli.core.commands.progress import ProgressType, ProgressHook, DeterminateStandardOut
+from azure.cli.core.commands.progress import ProgressHook, DeterminateStandardOut
 
 Logging, Metrics, CorsRule, \
     AccessPolicy, RetentionPolicy = get_sdk(ResourceType.DATA_STORAGE,
@@ -38,7 +38,8 @@ BlockBlobService, BaseBlobService, \
                            'table#TableService',
                            'queue#QueueService')
 
-HOOK = ProgressHook(ProgressType.Determinate)
+
+HOOK = ProgressHook()
 HOOK.init_progress(DeterminateStandardOut())
 
 

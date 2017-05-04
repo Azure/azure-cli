@@ -11,14 +11,6 @@ import humanfriendly
 BAR_LEN = 70
 
 
-class ProgressType(Enum):  # pylint: disable=too-few-public-methods
-    """ the types of progress """
-    Determinate = 0
-    Indeterminate = 1
-    # for views that want to accept both determinate and indeterminate progres
-    Both = 2
-
-
 class ProgressViewBase(object):
     """ a view base for progress reporting """
     def __init__(self, out, progress_type, format_percent=None):
@@ -26,68 +18,54 @@ class ProgressViewBase(object):
         self.progress_type = progress_type
         self.format_percent = format_percent
 
-    def write(self, kwargs):
+    def write(self, args):
         """ writes the progress """
-        pass
+        raise NotImplementedError
 
     def flush(self):
         """ flushes the message out the pipeline"""
         self.out.flush()
 
 
-class DetProgressReporter(object):
+class ProgressReporter(object):
     """ generic progress reporter """
-    def __init__(self, total_value=1):
-        self.message = ''
-        self.curr_val = 0 if total_value else None
+    def __init__(self, message='', value=None, total_value=None):
+        self.message = message
+        self.value = value
         self.total_val = total_value
+        self.closed = False
 
     def add(self, **kwargs):
         """
         adds a progress report
         :param kwargs: dictionary containing 'message', 'total_val', 'value'
         """
-        message = kwargs.get('message', '')
-        total_val = kwargs.get('total_val', 1.0)
-        value = kwargs.get('value', 0.0)
-        assert value >= 0 and value <= total_val and total_val >= 0
+        message = kwargs.get('message', self.message)
+        total_val = kwargs.get('total_val', self.total_val)
+        value = kwargs.get('value', self.value)
+        if value and total_val:
+            assert value >= 0 and value <= total_val and total_val >= 0
+            self.closed = value == total_val
         self.total_val = total_val
-        self.curr_val = value
+        self.value = value
         self.message = message
 
     def report(self):
         """ report the progress """
-        percent = self.curr_val / self.total_val
+        percent = self.value / self.total_val if self.value and self.total_val else None
         return {'message': self.message, 'percent': percent}
-
-
-class InDetProgressReporter(object):
-    """ generic progress reporter """
-    def __init__(self):
-        self.message = ''
-
-    def add(self, **kwargs):
-        """ adds a progress report """
-        self.message = kwargs.get('message', '')
-
-    def report(self):
-        """ report the progress """
-        return {'message': self.message}
 
 
 class ProgressHook(object):
     """ sends the progress to the view """
     def __init__(self, progress_type):
-        if progress_type == ProgressType.Determinate:
-            self.reporter = DetProgressReporter()
-        elif progress_type == ProgressType.Indeterminate:
-            self.reporter = InDetProgressReporter()  # pylint: disable=redefined-variable-type
+        self.reporter = ProgressReporter()
         self.progress_type = progress_type
-        self.active_progress = []
+        self.active_progress = None
 
     def init_progress(self, progress_view):
         """ activate a view """
-        self.active_progress.append(progress_view)
+        self.active_progress = progress_view
 
     def add(self, **kwargs):
         """ adds a progress report """
@@ -96,47 +74,36 @@ class ProgressHook(object):
 
     def update(self):
         """ updates the view with the progress """
-        for view in self.active_progress:
-            args = self.reporter.report()
-            view.write(args)
-            view.flush()
+        self.active_progress.write(self.reporter.report())
+        self.active_progress.flush()
 
     def stop(self):
         """ if there is an abupt stop before ending """
-        if self.progress_type == ProgressType.Determinate:
-            self.add(message='Interupted', value=0.0, total_val=1)
-        else:
-            self.add(message='Interupted')
+        self.add(message='Interupted')
 
-    def begin(self, msg='Starting'):
+    def begin(self, **kwargs):
         """ start reporting progress """
-        if self.progress_type == ProgressType.Determinate:
-            self.add(message=msg, value=0.0, total_val=1)
-        else:
-            self.add(message=msg)
+        self.add(**kwargs)
 
-    def end(self, msg='Finished'):
+    def end(self, **kwargs):
         """ ending reporting of progress """
-        if self.progress_type == ProgressType.Determinate:
-            self.add(message=msg, value=1.0, total_val=1)
-        else:
-            self.add(message=msg)
+        self.add(**kwargs)
 
 
 class IndeterminateStandardOut(ProgressViewBase):
     """ custom output for progress reporting """
     def __init__(self, out=None):
         super(IndeterminateStandardOut, self).__init__(
-            out if out else sys.stderr, ProgressType.Indeterminate, None)
+            out if out else sys.stderr, None)
         self.spinner = humanfriendly.Spinner(label='In Progress')
         self.spinner.hide_cursor = False
 
-    def write(self, kwargs):
+    def write(self, args):
         """
         writes the progress
-        :param kwargs: dictionary containing key 'message'
+        :param args: dictionary containing key 'message'
         """
-        msg = kwargs.get('message', 'In Progress')
+        msg = args.get('message', 'In Progress')
         self.spinner.step(label=msg)
 
 
@@ -144,8 +111,7 @@ class DeterminateStandardOut(ProgressViewBase):
     """ custom output for progress reporting """
     def __init__(self, out=None):
         super(DeterminateStandardOut, self).__init__(
-            out if out else sys.stderr,
-            ProgressType.Determinate, DeterminateStandardOut._format_value)
+            out if out else sys.stderr, DeterminateStandardOut._format_value)
 
     @staticmethod
     def _format_value(msg, percent):
@@ -157,13 +123,13 @@ class DeterminateStandardOut(ProgressViewBase):
         message += ']  {:.4%}'.format(percent)
         return message
 
-    def write(self, kwargs):
+    def write(self, args):
         """
         writes the progress
-        :param kwargs: kwargs is a dictionary containing 'percent', 'message'
+        :param args: args is a dictionary containing 'percent', 'message'
         """
-        percent = kwargs.get('percent', 0)
-        message = kwargs.get('message', '')
+        percent = args.get('percent', 0)
+        message = args.get('message', '')
 
         if percent:
             percent = percent
