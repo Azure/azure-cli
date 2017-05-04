@@ -6,6 +6,14 @@
 from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
 # pylint: disable=line-too-long, too-many-lines
+helps['managedapp'] = """
+    type: group
+    short-summary: Manage managed applications and managed application definitions.
+"""
+helps['managedapp definition'] = """
+    type: group
+    short-summary: Manage managed application definitions.
+"""
 helps['managedapp create'] = """
     type: command
     short-summary: Creates a managed application.
