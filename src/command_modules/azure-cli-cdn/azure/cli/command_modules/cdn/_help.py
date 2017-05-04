@@ -19,7 +19,7 @@ helps['cdn profile'] = """
 
 helps['cdn profile create'] = """
     type: command
-    short-summary: Creates a new CDN profile with a profile name under the specified resource group.
+    short-summary: Creates a new CDN profile
     parameters:
         - name: --sku
           type: string
@@ -34,7 +34,7 @@ helps['cdn profile create'] = """
 
 helps['cdn profile update'] = """
     type: command
-    short-summary: Updates a CDN profile with a profile name under the specified resource group.
+    short-summary: Update a CDN profile
 """
 
 helps['cdn profile delete'] = """
@@ -62,7 +62,7 @@ helps['cdn endpoint'] = """
 helps['cdn endpoint create'] = """
     type: command
     examples:
-        - name: Create an endpoint with a custom domain origin
+        - name: Create an endpoint to service content for hostname over http or https
           text: >
             az cdn endpoint create -g group -n endpoint --profile-name profile \\
                 --origin www.example.com
@@ -78,7 +78,7 @@ helps['cdn endpoint create'] = """
 
 helps['cdn endpoint update'] = """
     type: command
-    short-summary: Updates a CDN endpoint within a profile and resource group.
+    short-summary: Update a CDN endpoint to manage how content is delivered
     examples:
         - name: Turn off HTTP traffic for the endpoint
           text: >
@@ -148,7 +148,7 @@ helps['cdn custom-domain'] = """
 helps['cdn custom-domain delete'] = """
     type: command
     examples:
-        - name: Delete a custom domain within an endpoint and profile
+        - name: Delete a custom domain
           text: >
             az cdn custom-domain delete -g group --endpoint-name endpoint --profile-name profile \\
                 -n domain-name
@@ -157,7 +157,7 @@ helps['cdn custom-domain delete'] = """
 helps['cdn custom-domain show'] = """
     type: command
     examples:
-        - name: Show details of a custom domain within an endpoint and profile
+        - name: Show details of a custom domain
           text: >
             az cdn custom-domain show -g group --endpoint-name endpoint --profile-name profile \\
                 -n domain-name
@@ -165,7 +165,8 @@ helps['cdn custom-domain show'] = """
 
 helps['cdn custom-domain create'] = """
     type: command
-    short-summary: Creates a new custom domain within an endpoint.
+    short-summary: Creates a new custom domain which provides a custom hostname for an endpoint 
+        origin
     long-summary: >
         Creates a new custom domain which must point to the hostname of the endpoint.
         For example, the custom domain hostname cdn.contoso.com would need to have a
