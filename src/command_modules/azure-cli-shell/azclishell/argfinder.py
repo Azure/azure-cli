@@ -33,6 +33,7 @@ class ArgsFinder(CompletionFinder):
 
             active_parsers[0].parse_known_args(comp_words, namespace=parsed_args)
 
+            self.outstream.close()
             self.outstream = temp
         except BaseException:
             pass
