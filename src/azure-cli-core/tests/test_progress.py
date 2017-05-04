@@ -13,8 +13,8 @@ class MockOutstream(progress.ProgressViewBase):
         self.string = ''
         self.type = p_type
 
-    def write(self, kwargs):
-        self.string = kwargs.get('message', '')
+    def write(self, message):
+        self.string = message
 
     def flush(self):
         pass
@@ -26,8 +26,8 @@ class DetMockOutstream(progress.ProgressViewBase):
         self.string = ''
         self.progress_type = p_type
 
-    def write(self, kwargs):
-        self.string = kwargs.get('message', '')
+    def write(self, message):
+        self.string = message
 
     def flush(self):
         pass
