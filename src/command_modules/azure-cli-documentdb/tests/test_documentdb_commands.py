@@ -5,6 +5,7 @@
 
 from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer
 
+
 class DocumentDBTests(ScenarioTest):
     @ResourceGroupPreparer()
     def test_create_database_account(self, resource_group):
