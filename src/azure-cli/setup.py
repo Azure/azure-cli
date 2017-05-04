@@ -59,6 +59,8 @@ DEPENDENCIES = [
     'azure-cli-configure',
     'azure-cli-container',
     'azure-cli-core',
+    'azure-cli-dla',
+    'azure-cli-dls',
     'azure-cli-documentdb',
     'azure-cli-feedback',
     'azure-cli-find',
