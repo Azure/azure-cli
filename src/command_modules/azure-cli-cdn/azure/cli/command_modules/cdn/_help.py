@@ -159,8 +159,8 @@ helps['cdn custom-domain show'] = """
 
 helps['cdn custom-domain create'] = """
     type: command
-    short-description: Creates a new custom domain within an endpoint.
-    long-description: >
+    short-summary: Creates a new custom domain within an endpoint.
+    long-summary: >
         Creates a new custom domain which must point to the hostname of the endpoint.
         For example, the custom domain hostname cdn.contoso.com would need to have a
         CNAME record pointing to the hostname of the endpoint related to this custom

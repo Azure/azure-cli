@@ -14,6 +14,8 @@ import timeit
 import traceback
 from collections import OrderedDict, defaultdict
 from importlib import import_module
+
+import six
 from six import string_types, reraise
 
 import azure.cli.core.azlogging as azlogging
@@ -375,6 +377,8 @@ def get_op_handler(operation):
     # Patch the unversioned sdk path to include the appropriate API version for the
     # resource type in question.
     from azure.cli.core._profile import CLOUD
+    import types
+
     for rt in ResourceType:
         if operation.startswith(rt.import_prefix):
             operation = operation.replace(rt.import_prefix,
@@ -384,8 +388,11 @@ def get_op_handler(operation):
         op = import_module(mod_to_import)
         for part in attr_path.split('.'):
             op = getattr(op, part)
-        return op
-    except (ValueError, AttributeError):
+        if isinstance(op, types.FunctionType):
+            return op
+        else:
+            return six.get_method_function(op)
+    except (ValueError, AttributeError) as ex:
         raise ValueError("The operation '{}' is invalid.".format(operation))
 
 
