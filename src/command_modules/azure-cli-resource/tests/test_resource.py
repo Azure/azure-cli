@@ -559,7 +559,7 @@ class PolicyScenarioTest(ResourceGroupVCRTestBase):
 class ManagedAppDefinitionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_managedappdef(self, resource_group):
-        location = 'brazil'
+        location = 'eastus2euap'
         appdef_name = 'testappdefname'
         appdef_display_name = 'test_appdef_123'
         appdef_description = 'test_appdef_123'
@@ -584,7 +584,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         # list and show it
         list_cmd = 'managedapp definition list -g {}'
         self.cmd(list_cmd.format(resource_group), checks=[
-            JCheck('value[0].name', appdef_name)
+            JCheck('[0].name', appdef_name)
         ])
 
         show_cmd = 'managedapp definition show -g {} -n {}'
@@ -608,7 +608,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
 class ManagedAppScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_managedapp(self, resource_group):
-        location = 'brazil'
+        location = 'eastus2euap'
         appdef_name = 'testappdefname'
         appdef_display_name = 'test_appdef_123'
         appdef_description = 'test_appdef_123'
@@ -623,7 +623,7 @@ class ManagedAppScenarioTest(ScenarioTest):
 
         # create a managedapp
         managedapp_name = 'mymanagedapp'
-        managedapp_loc = 'westcentralus'
+        managedapp_loc = 'eastus2euap'
         managedapp_kind = 'servicecatalog'
         newrg = self.create_random_name('climanagedapp', 25)
         managedrg = '/subscriptions/{}/resourceGroups/{}'.format(managedappdef['id'].split("/")[2], newrg)
