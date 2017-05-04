@@ -5,7 +5,6 @@
 
 from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer
 
-
 class DocumentDBTests(ScenarioTest):
     @ResourceGroupPreparer()
     def test_create_database_account(self, resource_group):
@@ -15,12 +14,16 @@ class DocumentDBTests(ScenarioTest):
             '--enable-automatic-failover {} --default-consistency-level {}'
             .format(name, resource_group, 'true', 'ConsistentPrefix'))
         self.cmd('az documentdb show -n {} -g {}'.format(name, resource_group), checks=[
-            JMESPathCheck('properties.enableAutomaticFailover', 'true'),
-            JMESPathCheck('properties.consistencyPolicy.defaultConsistencyLevel',
+            JMESPathCheck('enableAutomaticFailover', True),
+            JMESPathCheck('consistencyPolicy.defaultConsistencyLevel',
                           'ConsistentPrefix'),
         ])
-        self.cmd('az documentdb list -g {}'.format(resource_group))
-        self.cmd('az documentdb list-keys -n {} -g {}'.format(name, resource_group))
-        self.cmd('az documentdb regenerate-key -n {} -g {} --key-kind {}'
-                 .format(name, resource_group, 'primary'))
-        self.cmd('az documentdb delete -n {} -g {}'.format(name, resource_group))
+        self.cmd(
+            'az documentdb update -n {} -g {} '
+            '--enable-automatic-failover {} --default-consistency-level {}'
+            .format(name, resource_group, 'false', 'Session'))
+        self.cmd('az documentdb show -n {} -g {}'.format(name, resource_group), checks=[
+            JMESPathCheck('enableAutomaticFailover', False),
+            JMESPathCheck('consistencyPolicy.defaultConsistencyLevel',
+                          'Session'),
+        ])
