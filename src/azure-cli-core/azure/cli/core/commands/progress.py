@@ -12,10 +12,8 @@ BAR_LEN = 70
 
 class ProgressViewBase(object):
     """ a view base for progress reporting """
-    def __init__(self, out, progress_type, format_percent=None):
+    def __init__(self, out):
         self.out = out
-        self.progress_type = progress_type
-        self.format_percent = format_percent
 
     def write(self, args):
         """ writes the progress """
@@ -94,7 +92,7 @@ class IndeterminateStandardOut(ProgressViewBase):
     """ custom output for progress reporting """
     def __init__(self, out=None):
         super(IndeterminateStandardOut, self).__init__(
-            out if out else sys.stderr, None)
+            out if out else sys.stderr)
         self.spinner = humanfriendly.Spinner(label='In Progress')
         self.spinner.hide_cursor = False
 
@@ -107,21 +105,20 @@ class IndeterminateStandardOut(ProgressViewBase):
         self.spinner.step(label=msg)
 
 
+def _format_value(msg, percent):
+    bar_len = BAR_LEN - len(msg) - 1
+    completed = int(bar_len * percent)
+
+    message = '\r{}['.format(msg)
+    message += ('#' * completed).ljust(bar_len)
+    message += ']  {:.4%}'.format(percent)
+    return message
+
+
 class DeterminateStandardOut(ProgressViewBase):
     """ custom output for progress reporting """
     def __init__(self, out=None):
-        super(DeterminateStandardOut, self).__init__(
-            out if out else sys.stderr, DeterminateStandardOut._format_value)
-
-    @staticmethod
-    def _format_value(msg, percent):
-        bar_len = BAR_LEN - len(msg) - 1
-        completed = int(bar_len * percent)
-
-        message = '\r{}['.format(msg)
-        message += ('#' * completed).ljust(bar_len)
-        message += ']  {:.4%}'.format(percent)
-        return message
+        super(DeterminateStandardOut, self).__init__(out if out else sys.stderr)
 
     def write(self, args):
         """
@@ -133,6 +130,5 @@ class DeterminateStandardOut(ProgressViewBase):
 
         if percent:
             percent = percent
-            progress = DeterminateStandardOut._format_value(
-                message, percent) if callable(DeterminateStandardOut._format_value) else percent
+            progress = _format_value(message, percent)
             self.out.write(progress)
