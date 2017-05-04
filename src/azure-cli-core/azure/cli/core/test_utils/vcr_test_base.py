@@ -120,19 +120,19 @@ def _mock_operation_delay(_):
 class _MockProgresssController(object):
 
     def begin(self):  # pylint: disable=no-self-use
-        return
+        pass
 
     # pylint: disable=no-self-use
     # pylint: disable=unused-argument
     def add(self, **kwargs):
-        return
+        pass
 
     def stop(self):  # pylint: disable=no-self-use
-        return
+        pass
 
     # pylint: disable=no-self-use
     def end(self):
-        return
+        pass
 
 
 def _mock_controller_generator(_):
