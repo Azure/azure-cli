@@ -44,9 +44,9 @@ helps['cdn profile list'] = """
     type: command
     short-summary: List your Azure Content Delivery Network (CDN) profiles
     examples:
-        - name: List CDN profiles
+        - name: List CDN profiles in a resource group
           text: >
-            az cdn profile list
+            az cdn profile list -g group
 """
 
 helps['cdn endpoint create'] = """
