@@ -392,7 +392,7 @@ def get_op_handler(operation):
             return op
         else:
             return six.get_method_function(op)
-    except (ValueError, AttributeError) as ex:
+    except (ValueError, AttributeError):
         raise ValueError("The operation '{}' is invalid.".format(operation))
 
 
