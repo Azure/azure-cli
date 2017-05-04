@@ -23,7 +23,6 @@ class ProgressViewBase(object):
     """ a view base for progress reporting """
     def __init__(self, out, progress_type, format_percent=None):
         self.out = out
-        assert isinstance(progress_type, ProgressType)
         self.progress_type = progress_type
         self.format_percent = format_percent
 
@@ -35,10 +34,6 @@ class ProgressViewBase(object):
         """ flushes the message out the pipeline"""
         self.out.flush()
 
-    def get_type(self):
-        """ returns the progress type """
-        return self.progress_type
-
 
 class DetProgressReporter(object):
     """ generic progress reporter """
@@ -47,7 +42,7 @@ class DetProgressReporter(object):
         self.curr_val = 0 if total_value else None
         self.total_val = total_value
 
-    def add(self, kwargs):
+    def add(self, **kwargs):
         """
         adds a progress report
         :param kwargs: dictionary containing 'message', 'total_val', 'value'
@@ -71,7 +66,7 @@ class InDetProgressReporter(object):
     def __init__(self):
         self.message = ''
 
-    def add(self, kwargs):
+    def add(self, **kwargs):
         """ adds a progress report """
         self.message = kwargs.get('message', '')
 
@@ -96,7 +91,7 @@ class ProgressHook(object):
 
     def add(self, **kwargs):
         """ adds a progress report """
-        self.reporter.add(kwargs)
+        self.reporter.add(**kwargs)
         self.update()
 
     def update(self):
@@ -135,7 +130,7 @@ class IndeterminateStandardOut(ProgressViewBase):
         self.spinner = humanfriendly.Spinner(label='In Progress')
         self.spinner.hide_cursor = False
 
-    def write(self, kwargs):
+    def write(self, **kwargs):
         """
         writes the progress
         :param kwargs: dictionary containing key 'message'
@@ -161,7 +156,7 @@ class DeterminateStandardOut(ProgressViewBase):
         message += ']  {:.4%}'.format(percent)
         return message
 
-    def write(self, kwargs):
+    def write(self, **kwargs):
         """
         writes the progress
         :param kwargs: kwargs is a dictionary containing 'percent', 'message'
