@@ -128,9 +128,10 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms
-        self.progress_controller = self._get_controller(progress_controller)
+        self.progress_controller = LongRunningOperation._get_controller(progress_controller)
 
-    def _get_controller(self, controller=None):
+    @staticmethod
+    def _get_controller(controller=None):
         from azure.cli.core.application import APPLICATION
         return controller or APPLICATION.progress_controller
 

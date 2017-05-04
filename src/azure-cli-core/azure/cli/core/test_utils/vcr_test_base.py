@@ -409,7 +409,6 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
                 _mock_generate_deployment_name)
     def _execute_playback(self):
         # pylint: disable=no-member
-        raise Exception
         with self.my_vcr.use_cassette(self.cassette_path):
             self.body()
         self.success = True
