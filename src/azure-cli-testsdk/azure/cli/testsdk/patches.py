@@ -7,6 +7,14 @@ from .exceptions import CliExecutionError, CliTestError
 from .const import MOCKED_SUBSCRIPTION_ID, MOCKED_TENANT_ID
 
 
+def patch_my(unit_test):
+    def _handle_progress_update(*args):
+        pass
+
+    _mock_in_unit_test(
+        unit_test, 'azure.cli.core.commands.progress.ProgressHook.update', _handle_progress_update)
+
+
 def patch_main_exception_handler(unit_test):
     from vcr.errors import CannotOverwriteExistingCassetteException
 
