@@ -129,7 +129,7 @@ class _MockOutstream(object):
         pass
 
 
-def _mock_get_progress_view(_):  # pylint: disable=unused-argument
+def _mock_get_progress_view(det, out):  # pylint: disable=unused-argument
     return _MockOutstream()
 
 
