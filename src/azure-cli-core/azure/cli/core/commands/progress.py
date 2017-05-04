@@ -58,9 +58,8 @@ class ProgressReporter(object):
 
 class ProgressHook(object):
     """ sends the progress to the view """
-    def __init__(self, progress_type):
+    def __init__(self):
         self.reporter = ProgressReporter()
-        self.progress_type = progress_type
         self.active_progress = None
 
     def init_progress(self, progress_view):
