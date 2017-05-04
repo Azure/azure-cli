@@ -20,6 +20,7 @@ class RbacSPSecretScenarioTest(LiveTest):
 
     @ResourceGroupPreparer(name_prefix='cli_create_rbac_sp_minimal')
     def test_create_for_rbac_with_secret(self, resource_group):
+
         subscription_id = self.cmd('account list --query "[?isDefault].id"').get_output_in_json()
         scope = '/subscriptions/{}'.format(subscription_id[0])
         sp_name = 'http://{}'.format(resource_group)
@@ -29,6 +30,7 @@ class RbacSPSecretScenarioTest(LiveTest):
 
     @ResourceGroupPreparer(name_prefix='cli_create_rbac_sp_with_password')
     def test_create_for_rbac_with_secret(self, resource_group):
+
         subscription_id = self.cmd('account list --query "[?isDefault].id"').get_output_in_json()
         scope = '/subscriptions/{}'.format(subscription_id[0])
         sp_name = 'http://{}'.format(resource_group)
@@ -68,27 +70,27 @@ class RbacSPCertScenarioTest(LiveTest):
 
 class RbacSPKeyVaultScenarioTest(LiveTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
-    @KeyVaultPreparer()
-    def test_create_for_rbac_with_new_kv_cert(self, resource_group, key_vault):
-        import time
-        sp_name = 'http://{}'.format(resource_group)
+    #@ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
+    #@KeyVaultPreparer()
+    #def test_create_for_rbac_with_new_kv_cert(self, resource_group, key_vault):
+    #    import time
+    #    sp_name = 'http://{}'.format(resource_group)
 
-        subscription_id = self.cmd('account list --query "[?isDefault].id"').get_output_in_json()
-        scope = '/subscriptions/{}'.format(subscription_id[0])
-        cert_name = 'cert1'
-        time.sleep(5)
+    #    subscription_id = self.cmd('account list --query "[?isDefault].id"').get_output_in_json()
+    #    scope = '/subscriptions/{}'.format(subscription_id[0])
+    #    cert_name = 'cert1'
+    #    time.sleep(5)
 
-        result = self.cmd('ad sp create-for-rbac --scopes {0} {0}/resourceGroups/{1} --create-cert --key-vault {2} --cert-name {3} -n {4}'.format(
-            scope, resource_group, key_vault, cert_name, sp_name)).get_output_in_json()
-        self.cmd('ad sp reset-credentials -n {0} --create-cert --key-vault {1} --cert-name {2}'.format(sp_name, key_vault, cert_name))
-        self.cmd('ad app delete --id {}'.format(sp_name))
+    #    result = self.cmd('ad sp create-for-rbac --scopes {0} {0}/resourceGroups/{1} --create-cert --key-vault {2} --cert-name {3} -n {4}'.format(
+    #        scope, resource_group, key_vault, cert_name, sp_name)).get_output_in_json()
+    #    self.cmd('ad sp reset-credentials -n {0} --create-cert --key-vault {1} --cert-name {2}'.format(sp_name, key_vault, cert_name))
+    #    self.cmd('ad app delete --id {}'.format(sp_name))
 
-    @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
+    @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_existing_cert')
     @KeyVaultPreparer()
     def test_create_for_rbac_with_existing_kv_cert(self, resource_group, key_vault):
-        import time
         self.diagnose = True
+        import time
         sp_name = 'http://{}'.format(resource_group)
 
         subscription_id = self.cmd('account list --query "[?isDefault].id"').get_output_in_json()
@@ -96,8 +98,17 @@ class RbacSPKeyVaultScenarioTest(LiveTest):
         cert_name = 'cert1'
         time.sleep(5)
 
+        # test with valid length cert
         policy = self.cmd('keyvault certificate get-default-policy').get_output_in_json()
-        self.cmd('keyvault certificate create --vault-name {} -n {} -p "{}"'.format(key_vault, cert_name, policy))
+        self.cmd('keyvault certificate create --vault-name {} -n {} -p "{}" --validity 24'.format(key_vault, cert_name, policy))
+        result = self.cmd('ad sp create-for-rbac --scopes {0} {0}/resourceGroups/{1} --key-vault {2} --cert-name {3} -n {4}'.format(
+            scope, resource_group, key_vault, cert_name, sp_name)).get_output_in_json()
+        self.cmd('ad sp reset-credentials -n {0} --key-vault {1} --cert-name {2}'.format(sp_name, key_vault, cert_name))
+        self.cmd('ad app delete --id {}'.format(sp_name))
+
+        # test with cert that has too short a validity
+        sp_name = '{}2'.format(sp_name)
+        self.cmd('keyvault certificate create --vault-name {} -n {} -p "{}" --validity 6'.format(key_vault, cert_name, policy))
         result = self.cmd('ad sp create-for-rbac --scopes {0} {0}/resourceGroups/{1} --key-vault {2} --cert-name {3} -n {4}'.format(
             scope, resource_group, key_vault, cert_name, sp_name)).get_output_in_json()
         self.cmd('ad sp reset-credentials -n {0} --key-vault {1} --cert-name {2}'.format(sp_name, key_vault, cert_name))

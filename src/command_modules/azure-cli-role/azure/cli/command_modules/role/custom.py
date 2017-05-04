@@ -505,50 +505,87 @@ def _resolve_service_principal(client, identifier):
         raise CLIError("service principal '{}' doesn't exist".format(identifier))
 
 
-def _process_service_principal_creds(years, cert, create_cert, password, key_vault, cert_name,  # pylint: disable=too-many-arguments
-                                     start_date):
-    # pylint: disable=protected-access
-    public_cert_string = None
-    cert_file = None
-    end_date = None
-
+def _process_service_principal_creds(years, app_start_date, app_end_date, cert, create_cert,  # pylint: disable=too-many-arguments
+                                     password, key_vault, cert_name):
     cred_usage_error = CLIError('Usage error: --cert | --create-cert [--key-vault --cert-name] | '
                                 '--password | --key-vault --cert-name')
+
+    if not any((cert, create_cert, password, key_vault, cert_name)):
+        # 1 - Simplest scenario. Use random password
+        return str(uuid.uuid4()), None, None, None, None
+
+    if password:
+        # 2 - Password supplied -- no certs
+        if any((create_cert, key_vault, cert_name, cert)):
+            raise cred_usage_error
+        return password, None, None, None, None
+
+    # The rest of the scenarios involve certificates
+    public_cert_string = None
+    cert_file = None
+
     if cert:
-        # 1 - User-supplied public cert data
-        if any(create_cert, password, key_vault, cert_name):
+        # 3 - User-supplied public cert data
+        if any((create_cert, password, key_vault, cert_name)):
             raise cred_usage_error
-        public_cert_string, end_date = _normalize_cert(cert)
-        if years:
-            if start_date.replace(tzinfo=tzutc()) + relativedelta(years=years) > end_date:
-                logger.warning("Use cert's expiration date as supplied '--years' exceeds it")
-            else:
-                end_date = None  # we will pick up --years
-    elif create_cert:
-        if password or cert or (key_vault and not cert_name):
+        
+
+        logger.debug("normalizing x509 certificate with fingerprint %s", cert.digest("sha1"))
+        cert_start_date = dateutil.parser.parse(cert.get_notBefore().decode())
+        cert_end_date = dateutil.parser.parse(cert.get_notAfter().decode())
+        public_cert_string = _get_public(cert)
+
+    elif create_cert and not (key_vault or cert_name):
+        # 4 - Create local self-signed cert
+        if any((password, cert, key_vault, cert_name)):
             raise cred_usage_error
-        # 2 - Create self-signed cert (with or without KeyVault)
-        public_cert_string, cert_file = \
-            _create_self_signed_cert(years, key_vault, cert_name)
+
+        public_cert_string, cert_file, cert_start_date, cert_end_date = \
+            _create_self_signed_cert(app_start_date, app_end_date)
+    elif create_cert and key_vault and cert_name:
+        # 5 - Create self-signed cert in KeyVault
+        if any((password, cert)):
+            raise cred_usage_error
+
+        public_cert_string, cert_file, cert_start_date, cert_end_date = \
+            _create_self_signed_cert_with_keyvault(
+                years, key_vault, cert_name)
     elif key_vault:
         import base64
-
-        if password or cert or not cert_name:
+        from azure.cli.core._profile import CLOUD
+        # 6 - Use existing cert from KeyVault
+        if any((password, cert, not cert_name)):
             raise cred_usage_error
-        # 3 - Use existing cert from KeyVault
+
         kv_client = _get_keyvault_client()
-        cert_id = \
-            'https://{}.vault.azure.net/certificates/{}'.format(key_vault, cert_name)
+        cert_id = 'https://{}{}/certificates/{}'.format(
+            key_vault, CLOUD.suffixes.keyvault_dns, cert_name)
         cert_obj = kv_client.get_certificate(cert_id)
         public_cert_string = base64.b64encode(cert_obj.cer).decode('utf-8')  # pylint: disable=no-member
-        cert_file = None
+        cert_start_date = cert_obj.attributes.not_before
+        cert_end_date = cert_obj.attributes.expires
     else:
-        # 4 - Nothing supplied or user-supplied password
-        password = password or str(uuid.uuid4())
+        raise cred_usage_error
 
-    end_date = end_date or start_date + relativedelta(years=years or 1)
-    return password, public_cert_string, cert_file, end_date
+    return (password, public_cert_string, cert_file, cert_start_date, cert_end_date)
 
+
+def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_date):
+
+    if not cert_start_date and not cert_end_date:
+        return app_start_date, app_end_date, None, None
+
+    if cert_start_date > app_start_date:
+        logger.warning('Certificate is not valid until %s. Adjusting SP start date to match.',
+                       cert_start_date)
+        app_start_date = cert_start_date + datetime.timedelta(seconds=1)
+
+    if cert_end_date < app_end_date:
+        logger.warning('Certificate expires %s. Adjusting SP end date to match.',
+                       cert_end_date)
+        app_end_date = cert_end_date - datetime.timedelta(seconds=1)
+
+    return (app_start_date, app_end_date, cert_start_date, cert_end_date)
 
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-arguments,too-many-statements,too-many-locals, too-many-branches
@@ -568,9 +605,12 @@ def create_service_principal_for_rbac(
     '''
     from azure.graphrbac.models import GraphErrorException
     import time
+    import pytz
+
     graph_client = _graph_client_factory()
     role_client = _auth_client_factory().role_assignments
     scopes = scopes or ['/subscriptions/' + role_client.config.subscription_id]
+    years = years or 1
     sp_oid = None
     _RETRY_TIMES = 36
 
@@ -585,32 +625,31 @@ def create_service_principal_for_rbac(
         if aad_sps:
             raise CLIError("'{}' already exists.".format(name))
 
-    start_date = datetime.datetime.utcnow()
+    app_start_date = datetime.datetime.now(pytz.utc)
+    app_end_date = app_start_date + relativedelta(years=years or 1)
+
     app_display_name = app_display_name or ('azure-cli-' +
-                                            start_date.strftime('%Y-%m-%d-%H-%M-%S'))
+                                            app_start_date.strftime('%Y-%m-%d-%H-%M-%S'))
     if name is None:
         name = 'http://' + app_display_name  # just a valid uri, no need to exist
 
-    password, public_cert_string, cert_file, end_date = \
-        _process_service_principal_creds(years, cert, create_cert, password, key_vault, cert_name,
-                                         start_date)
-    print('START: {}'.format(start_date))
-    print('END: {}'.format(end_date))
-    try:
-        aad_application = create_application(graph_client.applications,
-                                             display_name=app_display_name,
-                                             # pylint: disable=too-many-function-args
-                                             homepage='http://' + app_display_name,
-                                             identifier_uris=[name],
-                                             available_to_other_tenants=False,
-                                             password=password,
-                                             key_value=public_cert_string,
-                                             start_date=start_date,
-                                             end_date=end_date)
-    except GraphErrorException as ex:
-        if 'date is invalid' in str(ex):
-            raise CLIError('{}\nStart: {}\nEnd: {}'.format(ex, start_date, end_date))
-        raise ex
+    password, public_cert_string, cert_file, cert_start_date, cert_end_date = \
+        _process_service_principal_creds(years, app_start_date, app_end_date, cert, create_cert, password,
+                                         key_vault, cert_name)
+
+    app_start_date, app_end_date, cert_start_date, cert_end_date = \
+        _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_date)
+
+    aad_application = create_application(graph_client.applications,
+                                            display_name=app_display_name,
+                                            # pylint: disable=too-many-function-args
+                                            homepage='http://' + app_display_name,
+                                            identifier_uris=[name],
+                                            available_to_other_tenants=False,
+                                            password=password,
+                                            key_value=public_cert_string,
+                                            start_date=app_start_date,
+                                            end_date=app_end_date)
     # pylint: disable=no-member
     app_id = aad_application.app_id
     # retry till server replication is done
@@ -686,7 +725,7 @@ def _get_keyvault_client():
     return KeyVaultClient(KeyVaultAuthentication(_get_token))
 
 
-def _create_self_signed_cert(years, key_vault, key_vault_cert_name):  # pylint: disable=too-many-locals
+def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-locals
     import base64
     from os import path
     import tempfile
@@ -694,98 +733,106 @@ def _create_self_signed_cert(years, key_vault, key_vault_cert_name):  # pylint: 
     from OpenSSL import crypto, SSL
     from datetime import timedelta
 
-    years = years or 1
+    _, cert_file = tempfile.mkstemp()
+    _, key_file = tempfile.mkstemp()
 
-    if not key_vault and not key_vault_cert_name:
-        _, cert_file = tempfile.mkstemp()
-        _, key_file = tempfile.mkstemp()
+    # create a file with both cert & key so users can use to login
+    # leverage tempfile ot produce a random file name
+    _, temp_file = tempfile.mkstemp()
+    creds_file = path.join(path.expanduser("~"), path.basename(temp_file) + '.pem')
 
-        # create a file with both cert & key so users can use to login
-        # leverage tempfile ot produce a random file name
-        _, temp_file = tempfile.mkstemp()
-        creds_file = path.join(path.expanduser("~"), path.basename(temp_file) + '.pem')
+    # create a key pair
+    k = crypto.PKey()
+    k.generate_key(crypto.TYPE_RSA, 2048)
 
-        # create a key pair
-        k = crypto.PKey()
-        k.generate_key(crypto.TYPE_RSA, 2048)
+    # create a self-signed cert
+    cert = crypto.X509()
+    subject = cert.get_subject()
+    # as long it works, we skip fileds C, ST, L, O, OU, which we have no reasonable defaults for
+    subject.CN = 'CLI-Login'
+    cert.set_serial_number(1000)
+    asn1_format = '%Y%m%d%H%M%SZ'
+    cert_start_date = start_date - timedelta(seconds=1)
+    cert_end_date = end_date + timedelta(seconds=1)
+    cert.set_notBefore(cert_start_date.strftime(asn1_format).encode('utf-8'))
+    cert.set_notAfter(cert_end_date.strftime(asn1_format).encode('utf-8'))
+    cert.set_issuer(cert.get_subject())
+    cert.set_pubkey(k)
+    cert.sign(k, 'sha1')
 
-        # create a self-signed cert
-        cert = crypto.X509()
-        subject = cert.get_subject()
-        # as long it works, we skip fileds C, ST, L, O, OU, which we have no reasonable defaults for
-        subject.CN = 'CLI-Login'
-        cert.set_serial_number(1000)
-        cert.gmtime_adj_notBefore(0)
-        cert.gmtime_adj_notAfter(int(timedelta(days=366 * years, hours=1).total_seconds()))
-        cert.set_issuer(cert.get_subject())
-        cert.set_pubkey(k)
-        cert.sign(k, 'sha1')
+    with open(cert_file, "wt") as f:
+        f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode())
+    with open(key_file, "wt") as f:
+        f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k).decode())
 
-        with open(cert_file, "wt") as f:
-            f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode())
-        with open(key_file, "wt") as f:
-            f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k).decode())
+    cert_string = None
+    with open(creds_file, 'wt') as cf:
+        with open(key_file, 'rt') as f:
+            cf.write(f.read())
+        with open(cert_file, "rt") as f:
+            cert_string = f.read()
+            cf.write(cert_string)
 
-        cert_string = None
-        with open(creds_file, 'wt') as cf:
-            with open(key_file, 'rt') as f:
-                cf.write(f.read())
-            with open(cert_file, "rt") as f:
-                cert_string = f.read()
-                cf.write(cert_string)
+    # get rid of the header and tails for upload to AAD: ----BEGIN CERT....----
+    cert_string = re.sub(r'\-+[A-z\s]+\-+', '', cert_string).strip()
+    return (cert_string, creds_file, cert_start_date, cert_end_date)
 
-        # get rid of the header and tails for upload to AAD: ----BEGIN CERT....----
-        cert_string = re.sub(r'\-+[A-z\s]+\-+', '', cert_string).strip()
-    elif key_vault and key_vault_cert_name:
+def _create_self_signed_cert_with_keyvault(years, key_vault, key_vault_cert_name):  # pylint: disable=too-many-locals
+    import base64
+    from os import path
+    import tempfile
+    import time
+    from OpenSSL import crypto, SSL
+    from datetime import timedelta
 
-        kv_client = _get_keyvault_client()
-        cert_policy = {
-            'issuer_parameters': {
-                'name': 'Self'
+    kv_client = _get_keyvault_client()
+    cert_policy = {
+        'issuer_parameters': {
+            'name': 'Self'
+        },
+        'key_properties': {
+            'exportable': True,
+            'key_size': 2048,
+            'key_type': 'RSA',
+            'reuse_key': True
+        },
+        'lifetime_actions': [{
+            'action': {
+                'action_type': 'AutoRenew'
             },
-            'key_properties': {
-                'exportable': True,
-                'key_size': 2048,
-                'key_type': 'RSA',
-                'reuse_key': True
-            },
-            'lifetime_actions': [{
-                'action': {
-                    'action_type': 'AutoRenew'
-                },
-                'trigger': {
-                    'days_before_expiry': 90
-                }
-            }],
-            'secret_properties': {
-                'content_type': 'application/x-pkcs12'
-            },
-            'x509_certificate_properties': {
-                'key_usage': [
-                    'cRLSign',
-                    'dataEncipherment',
-                    'digitalSignature',
-                    'keyEncipherment',
-                    'keyAgreement',
-                    'keyCertSign'
-                ],
-                'subject': 'CN=KeyVault Generated',
-                'validity_in_months': ((years * 12) + 1)
+            'trigger': {
+                'days_before_expiry': 90
             }
+        }],
+        'secret_properties': {
+            'content_type': 'application/x-pkcs12'
+        },
+        'x509_certificate_properties': {
+            'key_usage': [
+                'cRLSign',
+                'dataEncipherment',
+                'digitalSignature',
+                'keyEncipherment',
+                'keyAgreement',
+                'keyCertSign'
+            ],
+            'subject': 'CN=KeyVault Generated',
+            'validity_in_months': ((years * 12) + 1)
         }
-        vault_base_url = 'https://{}.vault.azure.net/'.format(key_vault)
-        kv_client.create_certificate(vault_base_url, key_vault_cert_name, cert_policy)
-        while kv_client.get_certificate_operation(vault_base_url, key_vault_cert_name).status != 'completed':  # pylint: disable=no-member, line-too-long
-            time.sleep(10)
+    }
+    vault_base_url = 'https://{}.vault.azure.net/'.format(key_vault)
+    kv_client.create_certificate(vault_base_url, key_vault_cert_name, cert_policy)
+    while kv_client.get_certificate_operation(vault_base_url, key_vault_cert_name).status != 'completed':  # pylint: disable=no-member, line-too-long
+        time.sleep(5)
 
-        cert_id = \
-            'https://{}.vault.azure.net/certificates/{}'.format(key_vault, key_vault_cert_name)
-        cert = kv_client.get_certificate(cert_id)
-        cert_string = base64.b64encode(cert.cer).decode('utf-8')  # pylint: disable=no-member
-        creds_file = None
-    else:
-        raise CLIError('Usage error: --create-cert | --create-cert --key-vault --cert-name')
-    return (cert_string, creds_file)
+    cert_id = \
+        'https://{}.vault.azure.net/certificates/{}'.format(key_vault, key_vault_cert_name)
+    cert = kv_client.get_certificate(cert_id)
+    cert_string = base64.b64encode(cert.cer).decode('utf-8')  # pylint: disable=no-member
+    cert_start_date = cert.attributes.not_before
+    cert_end_date = cert.attributes.expires
+    creds_file = None
+    return (cert_string, creds_file, cert_start_date, cert_end_date)
 
 
 def _try_x509_pem(cert):
@@ -826,13 +873,6 @@ def _get_public(x509):
     return stripped
 
 
-def _normalize_cert(x509):
-    logger.debug("normalizing x509 certificate with fingerprint %s", x509.digest("sha1"))
-    pkey = x509.get_notAfter().decode()
-    end_date = dateutil.parser.parse(pkey)
-    return _get_public(x509), end_date
-
-
 # pylint: disable=too-many-arguments
 def reset_service_principal_credential(name, password=None, create_cert=False,
                                        cert=None, years=None, key_vault=None, cert_name=None):
@@ -843,9 +883,12 @@ def reset_service_principal_credential(name, password=None, create_cert=False,
     :param str cert: PEM formatted public certificate. Do not include private key info.
     :param str years: Years the password will be valid. Default: 1 year
     '''
+    import pytz
     client = _graph_client_factory()
 
     # pylint: disable=no-member
+
+    years = years or 1
 
     # look for the existing application
     query_exp = "servicePrincipalNames/any(x:x eq \'{0}\') or displayName eq '{0}'".format(name)
@@ -858,21 +901,44 @@ def reset_service_principal_credential(name, password=None, create_cert=False,
             'app id guid, or app id uri')
     app = show_application(client.applications, aad_sps[0].app_id)
 
-    start_date = datetime.datetime.utcnow()
+    app_start_date = datetime.datetime.now(pytz.utc)
+    app_end_date = app_start_date + relativedelta(years=years or 1)
+
     # build a new password/cert credential and patch it
     public_cert_string = None
     cert_file = None
-    end_date = None
 
-    password, public_cert_string, cert_file, end_date = \
-        _process_service_principal_creds(years, cert, create_cert, password, key_vault, cert_name,
-                                         start_date)
+    password, public_cert_string, cert_file, cert_start_date, cert_end_date = \
+        _process_service_principal_creds(years, app_start_date, app_end_date, cert, create_cert, password,
+                                         key_vault, cert_name)
 
-    app_creds = [PasswordCredential(start_date, end_date, str(uuid.uuid4()), password)] \
-        if password else None
-    cert_creds = [KeyCredential(start_date, end_date, public_cert_string, str(uuid.uuid4()),
-                                usage='Verify',
-                                type='AsymmetricX509Cert')] if public_cert_string else None
+    app_start_date, app_end_date, cert_start_date, cert_end_date = \
+        _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_date)
+
+    app_creds = None
+    cert_creds = None
+
+    if password:
+        app_creds = [
+            PasswordCredential(
+                start_date=app_start_date,
+                end_date=app_end_date,
+                key_id=str(uuid.uuid4()),
+                value=password
+            )
+        ]
+
+    if public_cert_string:
+        cert_creds = [
+            KeyCredential(
+                start_date=app_start_date,
+                end_date=app_end_date,
+                value=public_cert_string,
+                key_id=str(uuid.uuid4()),
+                usage='Verify',
+                type='AsymmetricX509Cert'
+            )
+        ]
 
     app_create_param = ApplicationUpdateParameters(password_credentials=app_creds,
                                                    key_credentials=cert_creds)
