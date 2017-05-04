@@ -358,25 +358,32 @@ def get_resource_types_completion_list(prefix, **kwargs):  # pylint: disable=unu
     return types
 
 
-def register_provider(resource_provider_namespace):
-    _update_provider(resource_provider_namespace, registering=True)
+def register_provider(resource_provider_namespace, wait=False):
+    _update_provider(resource_provider_namespace, registering=True, wait=wait)
 
 
-def unregister_provider(resource_provider_namespace):
-    _update_provider(resource_provider_namespace, registering=False)
+def unregister_provider(resource_provider_namespace, wait=False):
+    _update_provider(resource_provider_namespace, registering=False, wait=wait)
 
 
-def _update_provider(namespace, registering):
+def _update_provider(namespace, registering, wait):
+    import time
     rcf = _resource_client_factory()
     if registering:
         rcf.providers.register(namespace)
     else:
         rcf.providers.unregister(namespace)
 
-    # timeout'd, normal for resources with many regions, but let users know.
-    action = 'Registering' if registering else 'Unregistering'
-    msg_template = '%s is still on-going. You can monitor using \'az provider show -n %s\''
-    logger.warning(msg_template, action, namespace)
+    if wait:
+        while True:
+            time.sleep(10)
+            rp_info = rcf.providers.get(namespace)
+            if rp_info.registration_state == ('Registered' if registering else 'Unregistered'):
+                break
+    else:
+        action = 'Registering' if registering else 'Unregistering'
+        msg_template = '%s is still on-going. You can monitor using \'az provider show -n %s\''
+        logger.warning(msg_template, action, namespace)
 
 
 def list_provider_operations(api_version=None):
@@ -579,8 +586,8 @@ def list_locks(resource_group_name=None,  # pylint: disable=too-many-arguments
     :type filter_string: str
     """
     lock_client = _resource_lock_client_factory()
-    lock_resource = _validate_lock_params(resource_group_name, resource_provider_namespace,
-                                          parent_resource_path, resource_type, resource_name)
+    lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
+                                         resource_type, resource_name)
     resource_group_name = lock_resource[0]
     resource_name = lock_resource[1]
     resource_provider_namespace = lock_resource[2]
@@ -680,8 +687,8 @@ def delete_lock(name,  # pylint: disable=too-many-arguments
     :type resource_name: str
     """
     lock_client = _resource_lock_client_factory()
-    lock_resource = _validate_lock_params(resource_group_name, resource_provider_namespace,
-                                          parent_resource_path, resource_type, resource_name)
+    lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
+                                         resource_type, resource_name)
     _validate_lock_params_match_lock(lock_client, name, resource_group_name,
                                      resource_provider_namespace, parent_resource_path,
                                      resource_type, resource_name)
@@ -701,41 +708,18 @@ def delete_lock(name,  # pylint: disable=too-many-arguments
         resource_name, name)
 
 
-def _validate_lock_params(resource_group_name, resource_provider_namespace, parent_resource_path,
-                          resource_type, resource_name):
+def _extract_lock_params(resource_group_name, resource_provider_namespace,
+                         resource_type, resource_name):
     if resource_group_name is None:
-        if resource_name is not None:
-            raise CLIError('--resource-name is ignored if --resource-group is not given.')
-        if resource_type is not None:
-            raise CLIError('--resource-type is ignored if --resource-group is not given.')
-        if resource_provider_namespace is not None:
-            raise CLIError('--namespace is ignored if --resource-group is not given.')
-        if parent_resource_path is not None:
-            raise CLIError('--parent is ignored if --resource-group is not given.')
         return (None, None, None, None)
 
     if resource_name is None:
-        if resource_type is not None:
-            raise CLIError('--resource-type is ignored if --resource-name is not given.')
-        if resource_provider_namespace is not None:
-            raise CLIError('--namespace is ignored if --resource-name is not given.')
-        if parent_resource_path is not None:
-            raise CLIError('--parent is ignored if --resource-name is not given.')
         return (resource_group_name, None, None, None)
-
-    if resource_type is None or len(resource_type) == 0:
-        raise CLIError('--resource-type is required if --resource-name is present')
 
     parts = resource_type.split('/')
     if resource_provider_namespace is None:
-        if len(parts) == 1:
-            raise CLIError('A resource namespace is required if --resource-name is present.'
-                           'Expected <namespace>/<type> or --namespace=<namespace>')
-        else:
-            resource_provider_namespace = parts[0]
-            resource_type = parts[1]
-    elif len(parts) != 1:
-        raise CLIError('Resource namespace specified in both --resource-type and --namespace')
+        resource_provider_namespace = parts[0]
+        resource_type = parts[1]
     return (resource_group_name, resource_name, resource_provider_namespace, resource_type)
 
 
@@ -761,8 +745,8 @@ def create_lock(name,  # pylint: disable=too-many-arguments
     parameters = ManagementLockObject(level=level, notes=notes, name=name)
 
     lock_client = _resource_lock_client_factory()
-    lock_resource = _validate_lock_params(resource_group_name, resource_provider_namespace,
-                                          parent_resource_path, resource_type, resource_name)
+    lock_resource = _extract_lock_params(resource_group_name, resource_provider_namespace,
+                                         resource_type, resource_name)
     resource_group_name = lock_resource[0]
     resource_name = lock_resource[1]
     resource_provider_namespace = lock_resource[2]

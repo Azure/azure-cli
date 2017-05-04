@@ -106,5 +106,5 @@ Only clears the appended suggestion when you restart the shell
 
 .. code-block:: console
 
-   $ clear
+   $ clear-history
 

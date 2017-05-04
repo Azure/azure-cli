@@ -8,11 +8,11 @@ import argparse
 from argcomplete.completers import FilesCompleter
 
 from azure.cli.core.commands import \
-    (CliArgumentType, register_cli_argument, register_extra_cli_argument)
+    (VersionConstraint, CliArgumentType, register_cli_argument, register_extra_cli_argument)
 from azure.cli.core.commands.parameters import (location_type, get_resource_name_completion_list,
                                                 enum_choice_list, tags_type, ignore_type,
                                                 file_type, get_resource_group_completion_list,
-                                                three_state_flag)
+                                                three_state_flag, model_choice_list)
 from azure.cli.core.commands.validators import \
     (MarkSpecifiedAction, get_default_location_from_resource_group)
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
@@ -35,9 +35,10 @@ from azure.cli.command_modules.network._validators import \
      validate_auth_cert, validate_cert, validate_inbound_nat_rule_id_list,
      validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
      validate_address_pool_name_or_id, validate_servers, load_cert_file, validate_metadata,
-     validate_peering_type, validate_dns_record_type,
+     validate_peering_type, validate_dns_record_type, validate_route_filter,
      get_public_ip_validator, get_nsg_validator, get_subnet_validator,
      get_network_watcher_from_vm, get_network_watcher_from_location)
+from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
 from azure.cli.core.profiles import ResourceType, get_sdk
 
@@ -165,6 +166,10 @@ register_cli_argument('network application-gateway create', 'capacity', help='Th
 register_cli_argument('network application-gateway create', 'cert_password', help='The certificate password', arg_group='Gateway')
 register_cli_argument('network application-gateway create', 'http_settings_port', help='The HTTP settings port.', arg_group='Gateway')
 
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-12-01') as c:
+    for item in ['create', 'http-settings']:
+        c.register_cli_argument('network application-gateway {}'.format(item), 'connection_draining_timeout', type=int, help='The time in seconds after a backend server is removed during which on open connection remains active. Range: 0 (disabled) to 3600', arg_group='Gateway' if item == 'create' else None)
+
 register_cli_argument('network application-gateway update', 'sku', arg_group=None)
 
 public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, allow_new=True, default_none=True)
@@ -256,6 +261,10 @@ register_cli_argument('network application-gateway waf-config', 'firewall_mode',
 for item in ['ssl-policy', 'waf-config']:
     register_cli_argument('network application-gateway {}'.format(item), 'application_gateway_name', options_list=('--gateway-name',), help='The name of the application gateway.')
 
+register_cli_argument('network application-gateway waf-config', 'disabled_rule_groups', nargs='+')
+register_cli_argument('network application-gateway waf-config', 'disabled_rules', nargs='+')
+register_cli_argument('network application-gateway waf-config list-rule-sets', '_type', options_list=['--type'])
+
 # ExpressRoutes
 register_cli_argument('network express-route', 'circuit_name', circuit_name_type, options_list=('--name', '-n'))
 register_cli_argument('network express-route', 'sku_family', help='Chosen SKU family of ExpressRoute circuit.', **enum_choice_list(ExpressRouteCircuitSkuFamily))
@@ -282,6 +291,9 @@ register_cli_argument('network express-route peering', 'primary_peer_address_pre
 register_cli_argument('network express-route peering', 'secondary_peer_address_prefix', options_list=('--secondary-peer-subnet',))
 register_cli_argument('network express-route peering', 'customer_asn', arg_group='Microsoft Peering')
 register_cli_argument('network express-route peering', 'routing_registry_name', arg_group='Microsoft Peering', **enum_choice_list(routing_registry_values))
+
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-12-01') as c:
+    c.register_cli_argument('network express-route peering', 'route_filter', help='Name or ID of a route filter to apply to the peering settings.', validator=validate_route_filter, arg_group='Microsoft Peering')
 
 # Local Gateway
 register_cli_argument('network local-gateway', 'local_network_gateway_name', name_arg_type, help='Name of the local network gateway.', completer=get_resource_name_completion_list('Microsoft.Network/localNetworkGateways'), id_part='name')
@@ -397,6 +409,19 @@ register_cli_argument('network route-table route', 'route_table_name', options_l
 register_cli_argument('network route-table route', 'next_hop_type', help='The type of Azure hop the packet should be sent to.', **enum_choice_list(RouteNextHopType))
 register_cli_argument('network route-table route', 'next_hop_ip_address', help='The IP address packets should be forwarded to when using the VirtualAppliance hop type.')
 register_cli_argument('network route-table route', 'address_prefix', help='The destination CIDR to which the route applies.')
+
+# Route Filter
+register_cli_argument('network route-filter', 'route_filter_name', name_arg_type, help='Name of the route filter.')
+register_cli_argument('network route-filter', 'expand', **enum_choice_list(['peerings']))
+
+register_cli_argument('network route-filter create', 'location', location_type, validator=get_default_location_from_resource_group)
+
+register_cli_argument('network route-filter rule', 'route_filter_name', options_list=['--filter-name'], help='Name of the route filter.', id_part='name')
+register_cli_argument('network route-filter rule', 'rule_name', name_arg_type, help='Name of the route filter rule.', id_part='child_name')
+register_cli_argument('network route-filter rule', 'access', help='The access type of the rule.', **model_choice_list(ResourceType.MGMT_NETWORK, 'Access'))
+register_cli_argument('network route-filter rule', 'communities', nargs='+')
+
+register_cli_argument('network route-filter rule create', 'location', location_type, validator=get_default_location_from_resource_group)
 
 # VNET
 register_cli_argument('network vnet', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), id_part='name')
@@ -515,6 +540,10 @@ register_extra_cli_argument('network vnet-gateway update', 'address_prefixes', o
 # VPN connection
 register_cli_argument('network vpn-connection', 'virtual_network_gateway_connection_name', options_list=('--name', '-n'), metavar='NAME', id_part='name', help='Connection name.')
 register_cli_argument('network vpn-connection', 'shared_key', help='Shared IPSec key.')
+register_cli_argument('network vpn-connection', 'connection_name', help='Connection name.')
+
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-03-01') as c:
+    c.register_cli_argument('network vpn-connection', 'use_policy_based_traffic_selectors', help='Enable policy-based traffic selectors.', **three_state_flag())
 
 register_cli_argument('network vpn-connection create', 'connection_name', options_list=('--name', '-n'), metavar='NAME', help='Connection name.')
 register_cli_argument('network vpn-connection create', 'vnet_gateway1', validator=process_vpn_connection_create_namespace)
@@ -531,6 +560,20 @@ register_cli_argument('network vpn-connection shared-key', 'connection_shared_ke
 register_cli_argument('network vpn-connection shared-key', 'virtual_network_gateway_connection_name', options_list=('--connection-name',), metavar='NAME', id_part='name')
 register_cli_argument('network vpn-connection shared-key', 'key_length', type=int)
 
+# VPN connection IPSec policy
+param_map = {
+    'dh_group': 'DhGroup',
+    'ike_encryption': 'IkeEncryption',
+    'ike_integrity': 'IkeIntegrity',
+    'ipsec_encryption': 'IpsecEncryption',
+    'ipsec_integrity': 'IpsecIntegrity',
+    'pfs_group': 'PfsGroup'
+}
+for dest, model_name in param_map.items():
+    register_cli_argument('network vpn-connection ipsec-policy', dest, **model_choice_list(ResourceType.MGMT_NETWORK, model_name))
+register_cli_argument('network vpn-connection ipsec-policy', 'sa_data_size_kilobytes', options_list=['--sa-max-size'], type=int)
+register_cli_argument('network vpn-connection ipsec-policy', 'sa_life_time_seconds', options_list=['--sa-lifetime'], type=int)
+
 # Traffic manager profiles
 register_cli_argument('network traffic-manager profile', 'traffic_manager_profile_name', name_arg_type, id_part='name', help='Traffic manager profile name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
 register_cli_argument('network traffic-manager profile', 'profile_name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
@@ -538,7 +581,7 @@ register_cli_argument('network traffic-manager profile', 'monitor_path', help='P
 register_cli_argument('network traffic-manager profile', 'monitor_port', help='Port to monitor.', type=int)
 register_cli_argument('network traffic-manager profile', 'monitor_protocol', help='Monitor protocol.')
 register_cli_argument('network traffic-manager profile', 'profile_status', options_list=('--status',), help='Status of the Traffic Manager profile.', **enum_choice_list(['Enabled', 'Disabled']))
-register_cli_argument('network traffic-manager profile', 'routing_method', help='Routing method.', **enum_choice_list(['Performance', 'Weighted', 'Priority']))
+register_cli_argument('network traffic-manager profile', 'routing_method', help='Routing method.', **enum_choice_list(['Performance', 'Weighted', 'Priority', 'Geographic']))
 register_cli_argument('network traffic-manager profile', 'unique_dns_name', help="Relative DNS name for the traffic manager profile. Resulting FQDN will be `<unique-dns-name>.trafficmanager.net` and must be globally unique.")
 register_cli_argument('network traffic-manager profile', 'ttl', help='DNS config time-to-live in seconds.', type=int)
 
@@ -560,6 +603,7 @@ register_cli_argument('network traffic-manager endpoint', 'priority', help="Prio
 register_cli_argument('network traffic-manager endpoint', 'target', help='Fully-qualified DNS name of the endpoint.')
 register_cli_argument('network traffic-manager endpoint', 'target_resource_id', help="The Azure Resource URI of the endpoint. Not applicable for endpoints of type 'ExternalEndpoints'.")
 register_cli_argument('network traffic-manager endpoint', 'weight', help="Weight of the endpoint when using the 'Weighted' traffic routing method. Values range from 1 to 1000.", type=int)
+register_cli_argument('network traffic-manager endpoint', 'geo_mapping', nargs='+')
 
 register_cli_argument('network traffic-manager endpoint create', 'target', help='Fully-qualified DNS name of the endpoint.', validator=process_tm_endpoint_create_namespace)
 

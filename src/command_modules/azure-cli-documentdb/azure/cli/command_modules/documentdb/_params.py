@@ -11,8 +11,7 @@ from azure.cli.core.commands.parameters import (
     enum_choice_list,
     name_type,
     ignore_type,
-    file_type
-    )
+    file_type)
 
 from azure.cli.core.util import shell_safe_json_parse
 
@@ -25,16 +24,18 @@ from azure.mgmt.documentdb.models.failover_policy import FailoverPolicy
 from azure.mgmt.documentdb.models.location import Location
 from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
 
+
 def validate_failover_policies(ns):
-    ''' Extracts multiple space-separated failoverPolicies in regionName=failoverPriority format '''
+    """ Extracts multiple space-separated failoverPolicies in regionName=failoverPriority format """
     fp_dict = []
     for item in ns.failover_policies:
         comps = item.split('=', 1)
         fp_dict.append(FailoverPolicy(comps[0], int(comps[1])))
     ns.failover_policies = fp_dict
 
+
 def validate_locations(ns):
-    ''' Extracts multiple space-separated locations in regionName=failoverPriority format '''
+    """ Extracts multiple space-separated locations in regionName=failoverPriority format """
     if ns.locations is None:
         ns.locations = []
         return
@@ -44,9 +45,11 @@ def validate_locations(ns):
         loc_dict.append(Location(location_name=comps[0], failover_priority=int(comps[1])))
     ns.locations = loc_dict
 
+
 def validate_ip_range_filter(ns):
     if ns.ip_range_filter:
         ns.ip_range_filter = ",".join(ns.ip_range_filter)
+
 
 register_cli_argument('documentdb', 'account_name', arg_type=name_type, help='Name of the DocumentDB database account', completer=get_resource_name_completion_list('Microsoft.DocumentDb/databaseAccounts'), id_part="name")
 
@@ -76,7 +79,7 @@ register_cli_argument('documentdb database', 'database_id', database_id)
 register_cli_argument('documentdb collection', 'database_id', database_id)
 
 register_cli_argument('documentdb collection', 'collection_id',
-                      options_list=('--coll-name', '-c'), help='Collection Name')
+                      options_list=('--collection-name', '-c'), help='Collection Name')
 
 register_cli_argument('documentdb collection', 'throughput',
                       options_list=('--throughput'), help='Offer Throughput', type=int)

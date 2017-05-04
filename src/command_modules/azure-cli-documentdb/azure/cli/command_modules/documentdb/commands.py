@@ -13,8 +13,10 @@ from ._command_type import cli_documentdb_data_plane_command
 mgmt_path = 'azure.mgmt.documentdb.operations.database_accounts_operations#'
 custome_path = 'azure.cli.command_modules.documentdb.custom#'
 
+
 def db_accounts_factory(_):
     return cf_documentdb().database_accounts
+
 
 cli_command(__name__, 'documentdb show', mgmt_path + 'DatabaseAccountsOperations.get', db_accounts_factory)
 cli_command(__name__, 'documentdb list-keys', mgmt_path + 'DatabaseAccountsOperations.list_keys', db_accounts_factory)
@@ -43,4 +45,3 @@ cli_documentdb_data_plane_command('documentdb collection exists', custome_path +
 cli_documentdb_data_plane_command('documentdb collection create', custome_path + 'cli_documentdb_collection_create', get_document_client_factory)
 cli_documentdb_data_plane_command('documentdb collection delete', custome_path + 'cli_documentdb_collection_delete', get_document_client_factory)
 cli_documentdb_data_plane_command('documentdb collection update', custome_path + 'cli_documentdb_collection_update', get_document_client_factory)
-

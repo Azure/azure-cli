@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.0.4 (2017-05-01)
+++++++++++++++++++
+
+* Update the version of the underlying filesystem SDK, which gives better support for handling server side throttling scenarios.
 
 0.0.3 (2017-04-28)
 ++++++++++++++++++

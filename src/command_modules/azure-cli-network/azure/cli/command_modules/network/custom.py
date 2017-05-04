@@ -138,7 +138,9 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
                                public_ip_address_allocation=IPAllocationMethod.dynamic.value,
                                subnet='default', subnet_address_prefix='10.0.0.0/24',
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
-                               public_ip_address_type=None, subnet_type=None, validate=False):
+                               public_ip_address_type=None, subnet_type=None, validate=False,
+                               connection_draining_timeout=0):
+    from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.util import random_string
     from azure.cli.command_modules.network._template_builder import \
         (ArmTemplateBuilder, build_application_gateway_resource, build_public_ip_resource,
@@ -188,7 +190,8 @@ def create_application_gateway(application_gateway_name, resource_group_name, lo
         application_gateway_name, location, tags, sku, sku_tier, capacity, servers, frontend_port,
         private_ip_address, private_ip_allocation, cert_data, cert_password,
         http_settings_cookie_based_affinity, http_settings_protocol, http_settings_port,
-        http_listener_protocol, routing_rule_type, public_ip_id, subnet_id)
+        http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
+        connection_draining_timeout)
     app_gateway_resource['dependsOn'] = ag_dependencies
     master_template.add_variable(
         'appGwID',
@@ -219,6 +222,7 @@ def update_application_gateway(instance, sku=None, capacity=None, tags=None):
     if tags is not None:
         instance.tags = tags
     return instance
+
 
 def create_ag_authentication_certificate(resource_group_name, application_gateway_name, item_name,
                                          cert_data, no_wait=False):
@@ -350,7 +354,7 @@ def update_ag_http_listener(instance, parent, item_name, frontend_ip=None, front
 def create_ag_backend_http_settings_collection(resource_group_name, application_gateway_name,
                                                item_name, port, probe=None, protocol='http',
                                                cookie_based_affinity=None, timeout=None,
-                                               no_wait=False):
+                                               no_wait=False, connection_draining_timeout=0):
     ApplicationGatewayBackendHttpSettings = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayBackendHttpSettings',
@@ -364,13 +368,19 @@ def create_ag_backend_http_settings_collection(resource_group_name, application_
         request_timeout=timeout,
         probe=SubResource(probe) if probe else None,
         name=item_name)
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01'):
+        ApplicationGatewayConnectionDraining = \
+            get_sdk(ResourceType.MGMT_NETWORK, 'ApplicationGatewayConnectionDraining', mod='models')
+        new_settings.connection_draining = \
+            ApplicationGatewayConnectionDraining(
+                bool(connection_draining_timeout), connection_draining_timeout or 1)
     _upsert(ag, 'backend_http_settings_collection', new_settings, 'name')
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag, raw=no_wait)
 
 def update_ag_backend_http_settings_collection(instance, parent, item_name, port=None, probe=None, # pylint: disable=unused-argument
                                                protocol=None, cookie_based_affinity=None,
-                                               timeout=None):
+                                               timeout=None, connection_draining_timeout=None):
     if port is not None:
         instance.port = port
     if probe is not None:
@@ -381,6 +391,9 @@ def update_ag_backend_http_settings_collection(instance, parent, item_name, port
         instance.cookie_based_affinity = cookie_based_affinity
     if timeout is not None:
         instance.request_timeout = timeout
+    if connection_draining_timeout is not None:
+        instance.connection_draining.enabled = bool(connection_draining_timeout)
+        instance.connection_draining.drain_timeout_in_sec = connection_draining_timeout
     return parent
 
 def create_ag_probe(resource_group_name, application_gateway_name, item_name, protocol, host,
@@ -556,20 +569,92 @@ def delete_ag_url_path_map_rule(resource_group_name, application_gateway_name, u
     return ncf.application_gateways.create_or_update(
         resource_group_name, application_gateway_name, ag)
 
-def set_ag_waf_config(resource_group_name, application_gateway_name, enabled,
-                      firewall_mode=ApplicationGatewayFirewallMode.detection.value, no_wait=False):
+
+def set_ag_waf_config_2016_09_01(resource_group_name, application_gateway_name, enabled,
+                                 firewall_mode=ApplicationGatewayFirewallMode.detection.value,
+                                 no_wait=False):
     ApplicationGatewayWebApplicationFirewallConfiguration = get_sdk(
         ResourceType.MGMT_NETWORK,
         'ApplicationGatewayWebApplicationFirewallConfiguration', mod='models')
     ncf = _network_client_factory().application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     ag.web_application_firewall_configuration = \
-        ApplicationGatewayWebApplicationFirewallConfiguration(enabled == 'true', firewall_mode)
+        ApplicationGatewayWebApplicationFirewallConfiguration(
+            enabled == 'true', firewall_mode)
+
     return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
+
+def set_ag_waf_config_2017_03_01(resource_group_name, application_gateway_name, enabled,
+                                 firewall_mode=ApplicationGatewayFirewallMode.detection.value,
+                                 rule_set_type='OWASP', rule_set_version=None,
+                                 disabled_rule_groups=None,
+                                 disabled_rules=None, no_wait=False):
+    ApplicationGatewayWebApplicationFirewallConfiguration = get_sdk(
+        ResourceType.MGMT_NETWORK,
+        'ApplicationGatewayWebApplicationFirewallConfiguration', mod='models')
+    ncf = _network_client_factory().application_gateways
+    ag = ncf.get(resource_group_name, application_gateway_name)
+    ag.web_application_firewall_configuration = \
+        ApplicationGatewayWebApplicationFirewallConfiguration(
+            enabled == 'true', firewall_mode, rule_set_type, rule_set_version)
+    if disabled_rule_groups or disabled_rules:  # pylint: disable=too-many-nested-blocks
+        ApplicationGatewayFirewallDisabledRuleGroup = get_sdk(
+            ResourceType.MGMT_NETWORK,
+            'ApplicationGatewayFirewallDisabledRuleGroup', mod='models')
+
+        disabled_groups = []
+
+        # disabled groups can be added directly
+        for group in disabled_rule_groups or []:
+            disabled_groups.append(ApplicationGatewayFirewallDisabledRuleGroup(group))
+
+        # for disabled rules, we have to look up the IDs
+        if disabled_rules:
+            results = list_ag_waf_rule_sets(
+                ncf, _type=rule_set_type, version=rule_set_version, group='*')
+            for item in results:
+                for group in item.rule_groups:
+                    disabled_group = ApplicationGatewayFirewallDisabledRuleGroup(
+                        group.rule_group_name, [])
+
+                    for rule in group.rules:
+                        if str(rule.rule_id) in disabled_rules:
+                            disabled_group.rules.append(rule.rule_id)
+                    if disabled_group.rules:
+                        disabled_groups.append(disabled_group)
+        ag.web_application_firewall_configuration.disabled_rule_groups = disabled_groups
+
+    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
+
 
 def show_ag_waf_config(resource_group_name, application_gateway_name):
     return _network_client_factory().application_gateways.get(
         resource_group_name, application_gateway_name).web_application_firewall_configuration
+
+
+def list_ag_waf_rule_sets(client, _type=None, version=None, group=None):
+    results = client.list_available_waf_rule_sets().value
+    filtered_results = []
+    # filter by rule set name or version
+    for rule_set in results:
+        if _type and _type.lower() != rule_set.rule_set_type.lower():
+            continue
+        if version and version.lower() != rule_set.rule_set_version.lower():
+            continue
+
+        filtered_groups = []
+        for rule_group in rule_set.rule_groups:
+            if not group:
+                rule_group.rules = None
+                filtered_groups.append(rule_group)
+            elif group.lower() == rule_group.rule_group_name.lower() or group == '*':
+                filtered_groups.append(rule_group)
+
+        if filtered_groups:
+            rule_set.rule_groups = filtered_groups
+            filtered_results.append(rule_set)
+
+    return filtered_results
 
 #endregion
 
@@ -1238,7 +1323,8 @@ def create_vpn_connection(client, resource_group_name, connection_name, vnet_gat
                           location=None, tags=None, no_wait=False, validate=False,
                           vnet_gateway2=None, express_route_circuit2=None, local_gateway2=None,
                           authorization_key=None, enable_bgp=False, routing_weight=10,
-                          connection_type=None, shared_key=None):
+                          connection_type=None, shared_key=None,
+                          use_policy_based_traffic_selectors=False):
     """
     :param str vnet_gateway1: Name or ID of the source virtual network gateway.
     :param str vnet_gateway2: Name or ID of the destination virtual network gateway to connect to
@@ -1265,7 +1351,8 @@ def create_vpn_connection(client, resource_group_name, connection_name, vnet_gat
     vpn_connection_resource = build_vpn_connection_resource(
         connection_name, location, tags, vnet_gateway1,
         vnet_gateway2 or local_gateway2 or express_route_circuit2,
-        connection_type, authorization_key, enable_bgp, routing_weight, shared_key)
+        connection_type, authorization_key, enable_bgp, routing_weight, shared_key,
+        use_policy_based_traffic_selectors)
     master_template.add_resource(vpn_connection_resource)
     master_template.add_output('resource', connection_name, output_type='object')
 
@@ -1284,7 +1371,7 @@ def create_vpn_connection(client, resource_group_name, connection_name, vnet_gat
 
 
 def update_vpn_connection(instance, routing_weight=None, shared_key=None, tags=None,
-                          enable_bgp=None):
+                          enable_bgp=None, use_policy_based_traffic_selectors=None):
     ncf = _network_client_factory()
 
     if routing_weight is not None:
@@ -1298,6 +1385,9 @@ def update_vpn_connection(instance, routing_weight=None, shared_key=None, tags=N
 
     if enable_bgp is not None:
         instance.enable_bgp = enable_bgp
+
+    if use_policy_based_traffic_selectors is not None:
+        instance.use_policy_based_traffic_selectors = use_policy_based_traffic_selectors
 
     # TODO: Remove these when issue #1615 is fixed
     gateway1_id = parse_resource_id(instance.virtual_network_gateway1.id)
@@ -1315,6 +1405,42 @@ def update_vpn_connection(instance, routing_weight=None, shared_key=None, tags=N
             gateway2_id['resource_group'], gateway2_id['name'])
 
     return instance
+
+def add_vpn_conn_ipsec_policy(resource_group_name, connection_name,
+                              sa_life_time_seconds, sa_data_size_kilobytes,
+                              ipsec_encryption, ipsec_integrity,
+                              ike_encryption, ike_integrity, dh_group, pfs_group, no_wait=False):
+    ncf = _network_client_factory().virtual_network_gateway_connections
+    conn = ncf.get(resource_group_name, connection_name)
+    new_policy = IpsecPolicy(sa_life_time_seconds, sa_data_size_kilobytes,
+                             ipsec_encryption, ipsec_integrity,
+                             ike_encryption, ike_integrity, dh_group, pfs_group)
+    if conn.ipsec_policies:
+        conn.ipsec_policies.append(new_policy)
+    else:
+        conn.ipsec_policies = [new_policy]
+    return ncf.create_or_update(resource_group_name, connection_name, conn, raw=no_wait)
+
+if supported_api_version(ResourceType.MGMT_NETWORK, '2017-03-01'):
+    IpsecPolicy = get_sdk(ResourceType.MGMT_NETWORK, 'IpsecPolicy', mod='models')
+    add_vpn_conn_ipsec_policy.__doc__ = IpsecPolicy.__doc__
+def list_vpn_conn_ipsec_policies(resource_group_name, connection_name):
+    ncf = _network_client_factory().virtual_network_gateway_connections
+    return ncf.get(resource_group_name, connection_name).ipsec_policies
+
+
+def clear_vpn_conn_ipsec_policies(resource_group_name, connection_name, no_wait=False):
+    ncf = _network_client_factory().virtual_network_gateway_connections
+    conn = ncf.get(resource_group_name, connection_name)
+    conn.ipsec_policies = None
+    conn.use_policy_based_traffic_selectors = False
+    if no_wait:
+        return ncf.create_or_update(resource_group_name, connection_name, conn, raw=no_wait)
+    else:
+        from azure.cli.core.commands import LongRunningOperation
+        poller = ncf.create_or_update(resource_group_name, connection_name, conn, raw=no_wait)
+        return LongRunningOperation()(poller).ipsec_policies
+
 
 def _validate_bgp_peering(instance, asn, bgp_peering_address, peer_weight):
     if any([asn, bgp_peering_address, peer_weight]):
@@ -1421,13 +1547,15 @@ def create_vnet_gateway(resource_group_name, virtual_network_gateway_name, publi
     subnet = virtual_network + '/subnets/GatewaySubnet'
     active_active = len(public_ip_address) == 2
     vnet_gateway = VirtualNetworkGateway(
-        [], gateway_type, vpn_type, location=location, tags=tags,
-        sku=VirtualNetworkGatewaySku(sku, sku), active_active=active_active)
+        gateway_type=gateway_type, vpn_type=vpn_type, location=location, tags=tags,
+        sku=VirtualNetworkGatewaySku(sku, sku), active_active=active_active, ip_configurations=[])
     for i, public_ip in enumerate(public_ip_address):
         ip_configuration = VirtualNetworkGatewayIPConfiguration(
-            SubResource(subnet),
-            SubResource(public_ip),
-            private_ip_allocation_method='Dynamic', name='vnetGatewayConfig{}'.format(i))
+            subnet=SubResource(subnet),
+            public_ip_address=SubResource(public_ip),
+            private_ip_allocation_method='Dynamic',
+            name='vnetGatewayConfig{}'.format(i)
+        )
         vnet_gateway.ip_configurations.append(ip_configuration)
     if asn or bgp_peering_address or peer_weight:
         vnet_gateway.enable_bgp = True
@@ -1551,7 +1679,8 @@ def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None
 def create_express_route_peering(
         client, resource_group_name, circuit_name, peering_type, peer_asn, vlan_id,
         primary_peer_address_prefix, secondary_peer_address_prefix, shared_key=None,
-        advertised_public_prefixes=None, customer_asn=None, routing_registry_name=None):
+        advertised_public_prefixes=None, customer_asn=None, routing_registry_name=None,
+        route_filter=None):
     """
     :param str peer_asn: Autonomous system number of the customer/connectivity provider.
     :param str vlan_id: Identifier used to identify the customer.
@@ -1598,7 +1727,9 @@ def create_express_route_peering(
         secondary_peer_address_prefix=secondary_peer_address_prefix,
         shared_key=shared_key,
         microsoft_peering_config=peering_config)
-
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-12-01'):
+        RouteFilter = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilter', mod='models')
+        peering.route_filter = RouteFilter(id=route_filter)
     return client.create_or_update(
         resource_group_name, circuit_name, peering_type, peering)
 
@@ -1672,6 +1803,29 @@ update_route.__doc__ = Route.__doc__
 
 #endregion
 
+#region RouteFilter Commands
+
+def create_route_filter(client, resource_group_name, route_filter_name, location=None, tags=None):
+    RouteFilter = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilter', mod='models')
+    return client.create_or_update(resource_group_name, route_filter_name,
+                                   RouteFilter(location=location, tags=tags))
+
+def list_route_filters(client, resource_group_name=None):
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+    else:
+        return client.list()
+
+def create_route_filter_rule(client, resource_group_name, route_filter_name, rule_name, access,
+                             communities, location=None, tags=None):
+    RouteFilterRule = get_sdk(ResourceType.MGMT_NETWORK, 'RouteFilterRule', mod='models')
+    return client.create_or_update(resource_group_name, route_filter_name, rule_name,
+                                   RouteFilterRule(access, communities,
+                                                   location=location, tags=tags))
+
+#endregion
+
+
 #region Local Gateway commands
 
 def create_local_gateway(resource_group_name, local_network_gateway_name, gateway_ip_address,
@@ -1712,7 +1866,7 @@ def list_traffic_manager_profiles(resource_group_name=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     client = get_mgmt_service_client(TrafficManagerManagementClient).profiles
     if resource_group_name:
-        return client.list_all_in_resource_group(resource_group_name)
+        return client.list_by_in_resource_group(resource_group_name)
     else:
         return client.list_all()
 
@@ -1757,7 +1911,7 @@ def create_traffic_manager_endpoint(resource_group_name, profile_name, endpoint_
                                     target_resource_id=None, target=None,
                                     endpoint_status=None, weight=None, priority=None,
                                     endpoint_location=None, endpoint_monitor_status=None,
-                                    min_child_endpoints=None):
+                                    min_child_endpoints=None, geo_mapping=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     from azure.mgmt.trafficmanager.models import Endpoint
     ncf = get_mgmt_service_client(TrafficManagerManagementClient).endpoints
@@ -1766,7 +1920,8 @@ def create_traffic_manager_endpoint(resource_group_name, profile_name, endpoint_
                         endpoint_status=endpoint_status, weight=weight, priority=priority,
                         endpoint_location=endpoint_location,
                         endpoint_monitor_status=endpoint_monitor_status,
-                        min_child_endpoints=min_child_endpoints)
+                        min_child_endpoints=min_child_endpoints,
+                        geo_mapping=geo_mapping)
 
     return ncf.create_or_update(resource_group_name, profile_name, endpoint_type, endpoint_name,
                                 endpoint)
@@ -1774,7 +1929,7 @@ def create_traffic_manager_endpoint(resource_group_name, profile_name, endpoint_
 def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_location=None,
                                     endpoint_status=None, endpoint_monitor_status=None,
                                     priority=None, target=None, target_resource_id=None,
-                                    weight=None, min_child_endpoints=None):
+                                    weight=None, min_child_endpoints=None, geo_mapping=None):
     if endpoint_location is not None:
         instance.endpoint_location = endpoint_location
     if endpoint_status is not None:
@@ -1791,6 +1946,8 @@ def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_locat
         instance.weight = weight
     if min_child_endpoints is not None:
         instance.min_child_endpoints = min_child_endpoints
+    if geo_mapping is not None:
+        instance.geo_mapping = geo_mapping
 
     return instance
 

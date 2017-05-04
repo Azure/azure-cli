@@ -16,7 +16,7 @@ import azure.cli.core.azlogging as azlogging
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import CLIError, get_file_json
-from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
+from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription, init_known_clouds
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -63,6 +63,7 @@ def _authentication_context_factory(authority, cache):
 
 _AUTH_CTX_FACTORY = _authentication_context_factory
 
+init_known_clouds(force=True)
 CLOUD = get_active_cloud()
 
 logger.debug('Current cloud config:\n%s', str(CLOUD))
@@ -144,6 +145,8 @@ class Profile(object):
             t_list = [s.tenant_id for s in subscriptions]
             bare_tenants = [t for t in subscription_finder.tenants if t not in t_list]
             subscriptions = Profile._build_tenant_level_accounts(bare_tenants)
+            if not subscriptions:
+                return []
 
         consolidated = Profile._normalize_properties(subscription_finder.user_id,
                                                      subscriptions,
