@@ -12,20 +12,8 @@ class MockOutstream(progress.ProgressViewBase):
     def __init__(self):
         self.string = ''
 
-    def write(self, kwargs):
-        self.string = kwargs.get('message', '')
-
-    def flush(self):
-        pass
-
-
-class DetMockOutstream(progress.ProgressViewBase):
-    """ mock outstream for testing """
-    def __init__(self):
-        self.string = ''
-
-    def write(self, kwargs):
-        self.string = kwargs.get('message', '')
+    def write(self, message):
+        self.string = message
 
     def flush(self):
         pass
@@ -43,7 +31,7 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
 
         reporter.add(message='Progress', total_val=10, value=0)
         self.assertEqual(reporter.message, 'Progress')
-        self.assertEqual(reporter.curr_val, 0)
+        self.assertEqual(reporter.value, 0)
         self.assertEqual(reporter.total_val, 10)
         args = reporter.report()
         self.assertEqual(args['message'], 'Progress')
@@ -96,26 +84,15 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         view = MockOutstream()
 
         controller.init_progress(view)
-        self.assertTrue(view in controller.active_progress)
+        self.assertTrue(view == controller.active_progress)
 
         controller.begin()
-        self.assertEqual(controller.active_progress[0].string, 'Starting')
+        self.assertEqual(controller.active_progress.string['message'], 'Starting')
 
         controller.end()
-        self.assertEqual(controller.active_progress[0].string, 'Finished')
+        self.assertEqual(controller.active_progress.string['message'], 'Finished')
 
         controller = progress.ProgressHook()
-        view = DetMockOutstream()
-
-        controller.init_progress(view)
-        self.assertTrue(view in controller.active_progress)
-
-        controller.begin()
-        self.assertEqual(controller.active_progress[0].string, 'Starting')
-
-        controller.end()
-        self.assertEqual(controller.active_progress[0].string, 'Finished')
-
 
 if __name__ == '__main__':
     unittest.main()

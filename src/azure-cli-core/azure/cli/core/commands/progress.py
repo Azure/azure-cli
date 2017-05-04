@@ -52,7 +52,7 @@ class ProgressReporter(object):
 
     def report(self):
         """ report the progress """
-        percent = self.value / self.total_val if self.value and self.total_val else None
+        percent = self.value / self.total_val if self.value is not None and self.total_val else None
         return {'message': self.message, 'percent': percent}
 
 
@@ -82,10 +82,12 @@ class ProgressHook(object):
 
     def begin(self, **kwargs):
         """ start reporting progress """
+        kwargs['message'] = kwargs.get('message', 'Starting')
         self.add(**kwargs)
 
     def end(self, **kwargs):
         """ ending reporting of progress """
+        kwargs['message'] = kwargs.get('message', 'Finished')
         self.add(**kwargs)
 
 

@@ -129,8 +129,11 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms
+        self.progress_controller = self._get_controller(progress_controller)
+
+    def _get_controller(self, controller=None):
         from azure.cli.core.application import APPLICATION
-        self.progress_controller = progress_controller or APPLICATION.progress_controller
+        return controller or APPLICATION.progress_controller
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
