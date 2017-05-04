@@ -34,7 +34,7 @@ class ArgsFinder(CompletionFinder):
 
             sys.stderr.close()
             sys.stderr = stderr
-        except Exception:  # pylint: disable=broad-except
+        except BaseException:
             pass
 
         self.completing = False

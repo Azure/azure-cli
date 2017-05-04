@@ -222,9 +222,7 @@ class AzCompleter(Completer):
 
         except CLIError:  # if the user isn't logged in
             pass
-        except AttributeError:  # service client throws
-            pass
-        except ValueError:  # service client throws
+        except (AttributeError, ValueError):  # service client throws
             pass
 
     def gen_cmd_completions(self, text):
