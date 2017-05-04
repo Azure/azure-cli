@@ -14,7 +14,7 @@ class MockOutstream(progress.ProgressViewBase):
         self.type = p_type
 
     def write(self, kwargs):
-        self.string = kwargs.get('message')
+        self.string = kwargs.get('message', '')
 
     def flush(self):
         pass
@@ -27,7 +27,7 @@ class DetMockOutstream(progress.ProgressViewBase):
         self.progress_type = p_type
 
     def write(self, kwargs):
-        self.string = kwargs.get('message')
+        self.string = kwargs.get('message', '')
 
     def flush(self):
         pass
@@ -76,7 +76,7 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         self.assertEqual(view.progress_type.value, progress.ProgressType.Indeterminate.value)
         before = view.spinner.total
         self.assertEqual(view.spinner.label, 'In Progress')
-        view.write()
+        view.write({})
         after = view.spinner.total
         self.assertTrue(after >= before)
         view.write({'message': 'TESTING'})
@@ -105,10 +105,10 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         self.assertTrue(view in controller.active_progress)
 
         controller.begin()
-        self.assertEqual(controller.active_progress[0].string['message'], 'Starting')
+        self.assertEqual(controller.active_progress[0].string, 'Starting')
 
         controller.end()
-        self.assertEqual(controller.active_progress[0].string['message'], 'Finished')
+        self.assertEqual(controller.active_progress[0].string, 'Finished')
 
         controller = progress.ProgressHook(progress.ProgressType.Determinate)
         view = DetMockOutstream()
@@ -117,10 +117,10 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         self.assertTrue(view in controller.active_progress)
 
         controller.begin()
-        self.assertEqual(controller.active_progress[0].string['message'], 'Starting')
+        self.assertEqual(controller.active_progress[0].string, 'Starting')
 
         controller.end()
-        self.assertEqual(controller.active_progress[0].string['message'], 'Finished')
+        self.assertEqual(controller.active_progress[0].string, 'Finished')
 
 
 if __name__ == '__main__':
