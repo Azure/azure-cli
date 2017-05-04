@@ -16,6 +16,10 @@ from ._validators import validate_origin
 # pylint:disable=too-few-public-methods
 class OriginType(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
+        deep_created_origin = self.get_origin(values, option_string)
+        super(OriginType, self).__call__(parser, namespace, deep_created_origin, option_string)
+
+    def get_origin(self, values, option_string):
         from azure.mgmt.cdn.models import DeepCreatedOrigin
 
         if not 1 <= len(values) <= 3:
@@ -24,10 +28,10 @@ class OriginType(argparse._AppendAction):
 
         deep_created_origin = DeepCreatedOrigin('origin', values[0], http_port=80, https_port=443)
         if len(values) > 1:
-            deep_created_origin.http_port = int(values[2])
+            deep_created_origin.http_port = int(values[1])
         if len(values) > 2:
-            deep_created_origin.https_port = int(values[3])
-        super(OriginType, self).__call__(parser, namespace, deep_created_origin, option_string)
+            deep_created_origin.https_port = int(values[2])
+        return deep_created_origin
 
 
 name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')

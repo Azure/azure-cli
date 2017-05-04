@@ -1495,7 +1495,7 @@ class NetworkWatcherScenarioTest(ResourceGroupVCRTestBase):
         vm = 'vm1'
         # create VM with NetworkWatcher extension
         self.cmd('storage account create -g {} -l westus --sku Standard_LRS -n {}'.format(resource_group, storage_account))
-        self.cmd('vm create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-password PassPass10!)'.format(resource_group, vm))
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!)'.format(resource_group, vm))
         self.cmd('vm extension set -g {} --vm-name {} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher'.format(resource_group, vm))
 
         self.cmd('network watcher show-topology -g {} -l westus'.format(resource_group))
