@@ -66,24 +66,25 @@ register_cli_argument(cdn_endpoint,
                       nargs='+',
                       action=OriginType,
                       validator=validate_origin,
-                      help='Endpoint origin specified by the following space delimited 3 \
-tuple: `www.example.com http_port https_port`. The HTTP and HTTPs ports are \
-optional and will default to 80 and 443 respectively.')
+                      help='Endpoint origin specified by the following space delimited 3 '
+                           'tuple: `www.example.com http_port https_port`. The HTTP and HTTPs'
+                           'ports are optional and will default to 80 and 443 respectively.')
 register_cli_argument(cdn_endpoint, 'is_http_allowed',
                       options_list='--no-http',
-                      help='Indicates whether HTTP traffic is not allowed on the endpoint. \
-Default is to allow HTTP traffic.',
+                      help='Indicates whether HTTP traffic is not allowed on the endpoint. '
+                           'Default is to allow HTTP traffic.',
                       **three_state_flag(invert=True))
 register_cli_argument(cdn_endpoint, 'is_https_allowed',
                       options_list='--no-https',
-                      help='Indicates whether HTTPS traffic is not allowed on the endpoint. \
-Default is to allow HTTPS traffic.',
+                      help='Indicates whether HTTPS traffic is not allowed on the endpoint. '
+                           'Default is to allow HTTPS traffic.',
                       **three_state_flag(invert=True))
 register_cli_argument(cdn_endpoint, 'is_compression_enabled',
                       options_list='--enable-compression',
-                      help='If compression is enabled, content will be served as compressed if \
-user requests for a compressed version. Content won\'t be compressed on CDN when requested content \
-is smaller than 1 byte or larger than 1 MB.',
+                      help='If compression is enabled, content will be served as compressed if '
+                           'user requests for a compressed version. Content won\'t be compressed '
+                           'on CDN when requested content is smaller than 1 byte or larger than 1 '
+                           'MB.',
                       **three_state_flag())
 caching_behavior = [item.value for item in list(QueryStringCachingBehavior)]
 register_cli_argument(cdn_endpoint,
