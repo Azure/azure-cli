@@ -92,7 +92,9 @@ class CredentialType(Enum):  # pylint: disable=too-few-public-methods
     management = CLOUD.endpoints.management
     rbac = CLOUD.endpoints.active_directory_graph_resource_id
 
+
 _GLOBAL_CREDS_CACHE = None
+
 
 class Profile(object):
     def __init__(self, storage=None, auth_ctx_factory=None):
