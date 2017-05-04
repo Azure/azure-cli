@@ -35,7 +35,7 @@ logger = azlogging.get_az_logger(__name__)
 
 CONFIRM_PARAM_NAME = 'yes'
 
-BLACKLISTED_MODS = ['context']
+BLACKLISTED_MODS = ['context', 'container']
 
 
 class VersionConstraint(object):
@@ -215,7 +215,7 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
 
     def __init__(self, name, handler, description=None, table_transformer=None,
                  arguments_loader=None, description_loader=None,
-                 formatter_class=None):
+                 formatter_class=None, deprecate_info=None):
         self.name = name
         self.handler = handler
         self.help = None
@@ -226,6 +226,7 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
         self.arguments_loader = arguments_loader
         self.table_transformer = table_transformer
         self.formatter_class = formatter_class
+        self.deprecate_info = deprecate_info
 
     @staticmethod
     def _should_load_description():
@@ -267,6 +268,11 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
         return self(**kwargs)
 
     def __call__(self, *args, **kwargs):
+        if self.deprecate_info is not None:
+            text = 'This command is deprecating and will be removed in future releases.'
+            if self.deprecate_info:
+                text += " Use '{}' instead.".format(self.deprecate_info)
+            logger.warning(text)
         return self.handler(*args, **kwargs)
 
 
@@ -355,12 +361,13 @@ def register_extra_cli_argument(command, dest, **kwargs):
 def cli_command(module_name, name, operation,
                 client_factory=None, transform=None, table_transformer=None,
                 no_wait_param=None, confirmation=None, exception_handler=None,
-                formatter_class=None):
+                formatter_class=None, deprecate_info=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
     command_table[name] = create_command(module_name, name, operation, transform, table_transformer,
                                          client_factory, no_wait_param, confirmation=confirmation,
                                          exception_handler=exception_handler,
-                                         formatter_class=formatter_class)
+                                         formatter_class=formatter_class,
+                                         deprecate_info=deprecate_info)
 
 
 def get_op_handler(operation):
@@ -416,7 +423,7 @@ def _is_poller(obj):
 def create_command(module_name, name, operation,
                    transform_result, table_transformer, client_factory,
                    no_wait_param=None, confirmation=None, exception_handler=None,
-                   formatter_class=None):
+                   formatter_class=None, deprecate_info=None):
     if not isinstance(operation, string_types):
         raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
@@ -489,7 +496,7 @@ def create_command(module_name, name, operation,
 
     cmd = CliCommand(name, _execute_command, table_transformer=table_transformer,
                      arguments_loader=arguments_loader, description_loader=description_loader,
-                     formatter_class=formatter_class)
+                     formatter_class=formatter_class, deprecate_info=deprecate_info)
     if confirmation:
         cmd.add_argument(CONFIRM_PARAM_NAME, '--yes', '-y',
                          action='store_true',
