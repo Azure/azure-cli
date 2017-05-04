@@ -97,13 +97,16 @@ _GLOBAL_CREDS_CACHE = None
 
 
 class Profile(object):
-    def __init__(self, storage=None, auth_ctx_factory=None):
+    def __init__(self, storage=None, auth_ctx_factory=None, use_global_creds_cache=True):
         self._storage = storage or ACCOUNT
         self.auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
-        global _GLOBAL_CREDS_CACHE  # pylint: disable=global-statement
-        if _GLOBAL_CREDS_CACHE is None:
-            _GLOBAL_CREDS_CACHE = CredsCache(self.auth_ctx_factory)
-        self._creds_cache = _GLOBAL_CREDS_CACHE
+        if use_global_creds_cache:
+            global _GLOBAL_CREDS_CACHE  # pylint: disable=global-statement
+            if _GLOBAL_CREDS_CACHE is None:
+                _GLOBAL_CREDS_CACHE = CredsCache(self.auth_ctx_factory, async_persist=True)
+            self._creds_cache = _GLOBAL_CREDS_CACHE
+        else:
+            self._creds_cache = CredsCache(self.auth_ctx_factory, async_persist=False)
         self._management_resource_uri = CLOUD.endpoints.management
         self._ad_resource_uri = CLOUD.endpoints.active_directory_resource_id
 
@@ -476,7 +479,7 @@ class CredsCache(object):
     also be handled
     '''
 
-    def __init__(self, auth_ctx_factory=None):
+    def __init__(self, auth_ctx_factory=None, async_persist=True):
         # AZURE_ACCESS_TOKEN_FILE is used by Cloud Console and not meant to be user configured
         self._token_file = (os.environ.get('AZURE_ACCESS_TOKEN_FILE', None) or
                             os.path.join(get_config_dir(), 'accessTokens.json'))
@@ -484,11 +487,15 @@ class CredsCache(object):
         self._auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
         self._adal_token_cache_attr = None
         self._should_flush_to_disk = False
-        import atexit
-        atexit.register(self.flush_to_disk)
+        self._async_persist = async_persist
+        if async_persist:
+            import atexit
+            atexit.register(self.flush_to_disk)
 
     def persist_cached_creds(self):
         self._should_flush_to_disk = True
+        if not self._async_persist:
+            self.flush_to_disk()
         self.adal_token_cache.has_state_changed = False
 
     def flush_to_disk(self):
