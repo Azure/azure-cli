@@ -11,7 +11,7 @@ def patch_progress_controller(unit_test):
     def _handle_progress_update(*args):  # pylint: disable=unused-argument
         pass
 
-    def _handle_progress_add(**kwargs):  # pylint: disable=unused-argument
+    def _handle_progress_add(*args, **kwargs):  # pylint: disable=unused-argument
         pass
 
     _mock_in_unit_test(
