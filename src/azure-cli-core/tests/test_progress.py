@@ -87,12 +87,11 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         self.assertTrue(view == controller.active_progress)
 
         controller.begin()
+
         self.assertEqual(controller.active_progress.string['message'], 'Starting')
 
         controller.end()
         self.assertEqual(controller.active_progress.string['message'], 'Finished')
-
-        controller = progress.ProgressHook()
 
 
 if __name__ == '__main__':

@@ -141,9 +141,9 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         from msrest.exceptions import ClientException
         logger.info("Starting long running operation '%s'", self.start_msg)
         correlation_message = ''
-        self.progress_controller.begin()
+        # self.progress_controller.begin()
         while not poller.done():
-            self.progress_controller.add(message='Running')
+            # self.progress_controller.add(message='Running')
             try:
                 # pylint: disable=protected-access
                 correlation_id = json.loads(
@@ -156,7 +156,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             try:
                 self._delay()
             except KeyboardInterrupt:
-                self.progress_controller.stop()
+                # self.progress_controller.stop()
                 logger.error('Long running operation wait cancelled.  %s', correlation_message)
                 raise
 
@@ -168,7 +168,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                 fault_type='failed-long-running-operation',
                 summary='Unexpected client exception in {}.'.format(LongRunningOperation.__name__))
             message = getattr(client_exception, 'message', client_exception)
-            self.progress_controller.stop()
+            # self.progress_controller.stop()
 
             try:
                 message = '{} {}'.format(
@@ -184,7 +184,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
         logger.info("Long running operation '%s' completed with result %s",
                     self.start_msg, result)
-        self.progress_controller.end()
+        # self.progress_controller.end()
         return result
 
 
