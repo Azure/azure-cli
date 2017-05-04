@@ -26,7 +26,7 @@ class ProgressViewBase(object):
         self.progress_type = progress_type
         self.format_percent = format_percent
 
-    def write(self, **args):
+    def write(self, kwargs):
         """ writes the progress """
         pass
 
@@ -91,7 +91,7 @@ class ProgressHook(object):
 
     def add(self, **kwargs):
         """ adds a progress report """
-        self.reporter.add(kwargs)
+        self.reporter.add(**kwargs)
         self.update()
 
     def update(self):
@@ -131,7 +131,7 @@ class IndeterminateStandardOut(ProgressViewBase):
         self.spinner = humanfriendly.Spinner(label='In Progress')
         self.spinner.hide_cursor = False
 
-    def write(self, **kwargs):
+    def write(self, kwargs):
         """
         writes the progress
         :param kwargs: dictionary containing key 'message'
@@ -157,7 +157,7 @@ class DeterminateStandardOut(ProgressViewBase):
         message += ']  {:.4%}'.format(percent)
         return message
 
-    def write(self, **kwargs):
+    def write(self, kwargs):
         """
         writes the progress
         :param kwargs: kwargs is a dictionary containing 'percent', 'message'
