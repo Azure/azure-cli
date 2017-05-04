@@ -186,9 +186,10 @@ def list_appliances(resource_group_name=None):
     racf = _resource_managedapps_client_factory()
 
     if resource_group_name:
-        return racf.appliances.list_by_resource_group(resource_group_name)
+        appliances = racf.appliances.list_by_resource_group(resource_group_name)
     else:
-        return racf.appliances.list_by_subscription()
+        appliances = racf.appliances.list_by_subscription()
+    return list(appliances)
 
 
 def export_group_as_template(
