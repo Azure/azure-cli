@@ -661,9 +661,38 @@ def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
     return _validator
 
 
-def process_nw_flow_log_set_namespace(namespace):
+def process_nw_test_connectivity_namespace(namespace):
 
     from azure.cli.core.commands.arm import parse_resource_id
+
+    compute_client = get_mgmt_service_client(ResourceType.MGMT_COMPUTE).virtual_machines
+    vm_name = parse_resource_id(namespace.source_resource)['name']
+    rg = namespace.resource_group_name or \
+        parse_resource_id(namespace.source_resource).get('resource_group', None)
+    if not rg:
+        raise CLIError('usage error: --source-resource ID | '
+                       '--source-resource NAME --resource-group NAME')
+    vm = compute_client.get(rg, vm_name)
+    namespace.location = vm.location  # pylint: disable=no-member
+    get_network_watcher_from_location(remove=True)(namespace)
+
+    if namespace.source_resource and not is_valid_resource_id(namespace.source_resource):
+        namespace.source_resource = resource_id(
+            subscription=get_subscription_id(),
+            resource_group=rg,
+            namespace='Microsoft.Compute',
+            type='virtualMachines',
+            name=namespace.source_resource)
+
+    if namespace.dest_resource and not is_valid_resource_id(namespace.dest_resource):
+        namespace.dest_resource = resource_id(
+            subscription=get_subscription_id(),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Compute',
+            type='virtualMachines',
+            name=namespace.dest_resource)
+
+def process_nw_flow_log_set_namespace(namespace):
 
     if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
         namespace.storage_account = resource_id(
