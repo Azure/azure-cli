@@ -117,7 +117,7 @@ def _mock_operation_delay(_):
     return
 
 
-class _MockOutstream():
+class _MockOutstream(object):
     """ mock outstream for testing """
     def __init__(self):
         self.string = ''
