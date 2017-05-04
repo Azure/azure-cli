@@ -3,6 +3,11 @@
 Release History
 ===============
 
+unreleased
+^^^^^^^^^^^^^^^^^^
+
+* Include Datalake Analytics and Datalake Store modules.
+
 2.0.4 (2017-04-28)
 ^^^^^^^^^^^^^^^^^^
 
