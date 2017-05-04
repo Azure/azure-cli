@@ -56,7 +56,8 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
 
     def test_progress_indicator_indet_stdview(self):
         """ tests the indeterminate progress standardout view """
-        view = progress.IndeterminateStandardOut()
+        outstream = MockOutstream()
+        view = progress.IndeterminateStandardOut(out=outstream)
         before = view.spinner.total
         self.assertEqual(view.spinner.label, 'In Progress')
         view.write({})

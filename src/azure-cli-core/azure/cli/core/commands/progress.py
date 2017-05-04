@@ -93,7 +93,7 @@ class IndeterminateStandardOut(ProgressViewBase):
     def __init__(self, out=None):
         super(IndeterminateStandardOut, self).__init__(
             out if out else sys.stderr)
-        self.spinner = humanfriendly.Spinner(label='In Progress')
+        self.spinner = humanfriendly.Spinner(label='In Progress', stream=self.out)
         self.spinner.hide_cursor = False
 
     def write(self, args):
