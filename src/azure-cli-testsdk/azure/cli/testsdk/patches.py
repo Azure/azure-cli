@@ -19,6 +19,7 @@ def patch_progress_controller(unit_test):
     _mock_in_unit_test(
         unit_test, 'azure.cli.core.commands.progress.ProgressHook.add', _handle_progress_add)
 
+
 def patch_main_exception_handler(unit_test):
     from vcr.errors import CannotOverwriteExistingCassetteException
 
