@@ -139,6 +139,10 @@ def _mock_controller_generator(_):
     return _MockProgresssController()
 
 
+def _mock_update_progress(current, total):  # pylint: disable=unused-argument
+    pass
+
+
 # TEST CHECKS
 
 
@@ -408,6 +412,8 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
                 _mock_generate_deployment_name)
     @mock.patch('azure.cli.core.commands.LongRunningOperation._init_progress',
                 _mock_controller_generator)
+    @mock.patch('azure.cli.command_modules.storage.custom._update_progress',
+                _mock_update_progress)
     def _execute_playback(self):
         # pylint: disable=no-member
         with self.my_vcr.use_cassette(self.cassette_path):

@@ -13,8 +13,8 @@ class MockOutstream(progress.ProgressViewBase):
         self.string = ''
         self.type = p_type
 
-    def write(self, message):
-        self.string = message
+    def write(self, **kwargs):
+        self.string = kwargs.get('message')
 
     def flush(self):
         pass
@@ -26,8 +26,8 @@ class DetMockOutstream(progress.ProgressViewBase):
         self.string = ''
         self.progress_type = p_type
 
-    def write(self, message):
-        self.string = message
+    def write(self, **kwargs):
+        self.string = kwargs.get('message')
 
     def flush(self):
         pass
@@ -76,7 +76,7 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         self.assertEqual(view.progress_type.value, progress.ProgressType.Indeterminate.value)
         before = view.spinner.total
         self.assertEqual(view.spinner.label, 'In Progress')
-        view.write({})
+        view.write()
         after = view.spinner.total
         self.assertTrue(after >= before)
         view.write(message='TESTING')
