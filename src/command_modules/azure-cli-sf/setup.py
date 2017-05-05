@@ -34,7 +34,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-servicefabric==5.6.130',
     'azure-cli-core',
-    'adal==0.4.3'
+    'adal>=0.4.3'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
