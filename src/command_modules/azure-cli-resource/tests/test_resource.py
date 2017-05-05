@@ -651,6 +651,10 @@ class ManagedAppScenarioTest(ScenarioTest):
             JCheck('applianceDefinitionId', managedappdef['id'])
         ])
 
+        # delete
+        self.cmd('managedapp delete -g {} -n {}'.format(resource_group, managedapp_name))
+        self.cmd('managedapp list -g {}'.format(resource_group), checks=NoneCheck())
+
 
 if __name__ == '__main__':
     unittest.main()
