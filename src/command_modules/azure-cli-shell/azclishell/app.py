@@ -175,16 +175,6 @@ class Shell(object):
 
         self._update_default_info()
 
-        delta = datetime.datetime.utcnow() - START_TIME
-        if self.user_feedback and delta.seconds < DISPLAY_TIME:
-            toolbar = [
-                ' Try out the \'feedback\' command',
-                'If refreshed disappear in: {}'.format(str(DISPLAY_TIME - delta.seconds))]
-        else:
-            toolbar = _toolbar_info()
-
-        settings, empty_space = space_toolbar(toolbar, cols, empty_space)
-
         cli.buffers['description'].reset(
             initial_document=Document(self.description_docs, cursor_position=0))
         cli.buffers['parameter'].reset(
@@ -206,10 +196,17 @@ class Shell(object):
         for _ in range(cols):
             empty_space += " "
 
-        settings = self._toolbar_info()
-        settings, empty_space = space_toolbar(settings, cols, empty_space)
+        delta = datetime.datetime.utcnow() - START_TIME
+        if self.user_feedback and delta.seconds < DISPLAY_TIME:
+            toolbar = [
+                ' Try out the \'feedback\' command',
+                'If refreshed disappear in: {}'.format(str(DISPLAY_TIME - delta.seconds))]
+        else:
+            toolbar = self._toolbar_info()
+
+        toolbar, empty_space = space_toolbar(toolbar, cols, empty_space)
         cli.buffers['bottom_toolbar'].reset(
-            initial_document=Document(u'{}{}{}'.format(NOTIFICATIONS, settings, empty_space)))
+            initial_document=Document(u'{}{}{}'.format(NOTIFICATIONS, toolbar, empty_space)))
 
     def _toolbar_info(self):
         sub_name = ""
@@ -227,7 +224,6 @@ class Shell(object):
             "[F3]Keys",
             "[Ctrl+D]Quit",
             tool_val
-            # tool_val2
         ]
         return settings_items
 
