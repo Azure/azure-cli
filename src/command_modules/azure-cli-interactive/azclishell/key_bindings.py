@@ -96,7 +96,7 @@ def config_settings(event):
         answer = ""
 
     PROMPTING = False
-    print("\nPlease restart shell for changes to take effect.\n\n")
+    print("\nPlease restart the interactive mode for changes to take effect.\n\n")
     event.cli.set_return_value(event.cli.current_buffer)
 
 

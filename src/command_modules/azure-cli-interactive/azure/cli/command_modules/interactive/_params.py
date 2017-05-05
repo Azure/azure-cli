@@ -3,12 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import azure.cli.command_modules.shell._help  # pylint: disable=unused-import
+# pylint: disable=line-too-long
 
+from azure.cli.core.commands import register_cli_argument
 
-def load_params(_):
-    import azure.cli.command_modules.shell._params  # pylint: disable=redefined-outer-name
+from azclishell.color_styles import get_options as style_options
 
-
-def load_commands():
-    import azure.cli.command_modules.shell.commands  # pylint: disable=redefined-outer-name
+register_cli_argument('interactive', 'style', options_list=('--style', '-s'),
+                      help='The colors of the shell.', choices=style_options())
