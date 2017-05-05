@@ -5,7 +5,6 @@
 
 # pylint: disable=no-self-use,too-many-arguments,too-many-lines
 from __future__ import print_function
-import json
 import threading
 try:
     from urllib.parse import urlparse
@@ -499,16 +498,8 @@ def sync_site_repo(resource_group_name, name, slot=None):
     try:
         return _generic_site_operation(resource_group_name, name, 'sync_repository', slot)
     except CloudError as ex:
-        raise _extract_real_error(ex)
-
-
-# webapp service's error payload doesn't follow ARM's error format, so we had to sniff out
-def _extract_real_error(ex):
-    try:
-        err = json.loads(ex.response.text)
-        return CLIError(err['Message'])
-    except Exception:  # pylint: disable=broad-except
-        return ex
+        if ex.status_code not in [200, 204]:
+            raise ex
 
 
 def list_app_service_plans(resource_group_name=None):
