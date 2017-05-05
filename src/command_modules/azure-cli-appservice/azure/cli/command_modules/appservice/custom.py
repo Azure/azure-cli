@@ -497,7 +497,7 @@ def enable_local_git(resource_group_name, name, slot=None):
 def sync_site_repo(resource_group_name, name, slot=None):
     try:
         return _generic_site_operation(resource_group_name, name, 'sync_repository', slot)
-    except CloudError as ex:
+    except CloudError as ex:  # Because of bad spec, sdk throws on 200. We capture it here
         if ex.status_code not in [200, 204]:
             raise ex
 
