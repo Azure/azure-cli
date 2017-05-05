@@ -9,7 +9,6 @@ Release History
 * Integrate interactive into az
 * Colors Options
 * Rename 'shell' => 'interactive'
-* Integrate shell into az
 
 0.2.1
 ++++++++++++++++++

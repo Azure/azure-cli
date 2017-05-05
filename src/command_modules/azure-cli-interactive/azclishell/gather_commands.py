@@ -40,8 +40,7 @@ def add_random_new_lines(long_phrase, line_min=LINE_MINIMUM, tolerance=TOLERANCE
     skip = False
     index = 0
     if len(long_phrase) > line_min:
-        # pylint: disable=unused-variable
-        for num in range(int(math.floor(len(long_phrase) / line_min))):
+        for _ in range(int(math.floor(len(long_phrase) / line_min))):
             previous = index
             index += line_min
             if skip:
