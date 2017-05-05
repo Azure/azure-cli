@@ -36,7 +36,7 @@ with ServiceGroup(__name__, cf_sf_client, cluster_operations,
         app_group.custom_command("report-health", "sf_report_app_health")
         app_group.custom_command("upgrade", "sf_upgrade_app")
         app_group.command("health", "get_application_health")
-        app_group.command("manifest", "get_application_health")
+        app_group.command("manifest", "get_application_manifest")
         app_group.command("provision", "provision_application_type")
         app_group.command("delete", "delete_application")
         app_group.command("unprovision", "unprovision_application_type")
