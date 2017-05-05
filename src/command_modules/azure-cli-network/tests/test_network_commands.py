@@ -14,21 +14,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.commands.arm import resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
-from azure.cli.testsdk.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
-                                             NoneCheck, MOCKED_SUBSCRIPTION_ID)
-from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
-# pylint: disable=method-hidden
-# pylint: disable=line-too-long
-# pylint: disable=bad-continuation
-# pylint: disable=too-many-lines
-import os
-import unittest
 
-from azure.cli.core.commands.arm import resource_id
-from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.cli.core.profiles import supported_api_version, ResourceType
-from azure.cli.core.util import CLIError
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
