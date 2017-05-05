@@ -3,9 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps
+import azure.cli.command_modules.interactive._help  # pylint: disable=unused-import
 
-helps['shell'] = """
-            type: command
-            short-summary: Start the interactive shell for Microsoft Azure CLI (preview)
-            """
+
+def load_params(_):
+    import azure.cli.command_modules.interactive._params  # pylint: disable=redefined-outer-name
+
+
+def load_commands():
+    import azure.cli.command_modules.interactive.commands  # pylint: disable=redefined-outer-name

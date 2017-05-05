@@ -22,7 +22,7 @@
 To start the application
 
 ```bash
-   $ az shell
+   $ az interactive
 ```
 
 Then type your commands and hit [Enter]
@@ -78,7 +78,7 @@ Pick the example you want with:
    $ clear-history
 ```
 
-Only clears the appended suggestion when you restart the shell
+Only clears the appended suggestion when you restart the interactive shell
 
 
 ## Clear Screen
@@ -91,7 +91,7 @@ Only clears the appended suggestion when you restart the shell
 ## Change colors
 
 ```bash
-   $ az shell --styles [option]
+   $ az interactive --styles [option]
 ```
 
 The color option will be saved.

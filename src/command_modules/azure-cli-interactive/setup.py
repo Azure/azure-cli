@@ -46,7 +46,7 @@ with open('HISTORY.rst', 'r', encoding='utf-8') as f:
     HISTORY = f.read()
 
 setup(
-    name='azure-cli-shell',
+    name='azure-cli-interactive',
     version=VERSION,
     description='Microsoft Azure Command-Line Interactive Shell',
     long_description=README + '\n\n' + HISTORY,
@@ -60,7 +60,7 @@ setup(
          'azure',
          'azure.cli',
          'azure.cli.command_modules',
-         'azure.cli.command_modules.shell',
+         'azure.cli.command_modules.interactive',
     ],
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass
