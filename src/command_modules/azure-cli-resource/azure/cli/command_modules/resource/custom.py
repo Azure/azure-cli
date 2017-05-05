@@ -381,15 +381,16 @@ def _prompt_for_parameters(missing_parameters, fail_on_no_tty=True):  # pylint: 
     return result
 
 
-def _get_missing_parameters(parameters, template, prompt_fn):
-    missing = _find_missing_parameters(parameters, template)
-    if missing:
-        prompt_parameters = prompt_fn(missing)
-        for param_name in prompt_parameters:
-            parameters[param_name] = {
-                "value": prompt_parameters[param_name]
-            }
-    return parameters
+def _merge_parameters(parameter_list):
+    if not parameter_list:
+        return {}
+
+    result = {}
+    for params in parameter_list[0]:
+        obj = shell_safe_json_parse(params)
+        for key in obj:
+            result[key] = obj[key]
+    return result
 
 
 def _ssl_context():
@@ -404,14 +405,31 @@ def _urlretrieve(url):
     return req.read()
 
 
+def _get_missing_parameters(parameters, template, prompt_fn):
+    missing = _find_missing_parameters(parameters, template)
+    if missing:
+        prompt_parameters = prompt_fn(missing)
+        for param_name in prompt_parameters:
+            parameters[param_name] = {
+                "value": prompt_parameters[param_name]
+            }
+    return parameters
+
+
 def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-arguments
                               template_file=None, template_uri=None, deployment_name=None,
-                              parameters=None, mode='incremental', validate_only=False,
+                              parameter_list=None, mode='incremental', validate_only=False,
                               no_wait=False):
     DeploymentProperties, TemplateLink = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES,
                                                  'DeploymentProperties',
                                                  'TemplateLink',
                                                  mod='models')
+    if bool(template_uri) == bool(template_file):
+        raise CLIError('please provide either template file path or uri, but not both')
+
+    parameters = _merge_parameters(parameter_list)
+    if parameters is None:
+        parameters = {}
     template = None
     template_link = None
     template_obj = None

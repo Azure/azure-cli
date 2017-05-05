@@ -16,9 +16,15 @@ except ImportError:
     import mock
 
 from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
-from azure.cli.command_modules.resource.custom import \
-    (_get_missing_parameters, _extract_lock_params, _process_parameters, _find_missing_parameters,
-     _prompt_for_parameters, _load_file_string_or_uri)
+from azure.cli.command_modules.resource.custom import (
+    _get_missing_parameters,
+    _extract_lock_params,
+    _find_missing_parameters,
+    _load_file_string_or_uri
+    _merge_parameters,
+    _process_parameters,
+    _prompt_for_parameters,
+)
 
 
 def _simulate_no_tty():
@@ -300,6 +306,30 @@ class TestCustom(unittest.TestCase):
                              "['arrayParam', 'boolParam', 'enumParam', 'objectParam', 'secureParam']"]
         results = _prompt_for_parameters(dict(missing_parameters), fail_on_no_tty=False)
         self.assertTrue(str(list(results.keys())) in param_alpha_order)
+
+    def test_resource_merge_parameters(self):
+        tests = [
+            {
+                "parameter_list": [],
+                "expected": {},
+            },
+            {
+                "parameter_list": [['{"foo": "bar"}']],
+                "expected": {"foo": "bar"},
+            },
+            {
+                "parameter_list": [['{"foo": "bar"}', '{"baz": "blat"}']],
+                "expected": {"foo": "bar", "baz": "blat"},
+            },
+            {
+                "parameter_list": [['{"foo": "bar"}', '{"foo": "baz"}']],
+                "expected": {"foo": "baz"},
+            }
+        ]
+
+        for test in tests:
+            output = _merge_parameters(test['parameter_list'])
+            self.assertEqual(output, test['expected'])
 
 
 if __name__ == '__main__':
