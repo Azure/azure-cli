@@ -10,9 +10,9 @@ For example:
 
 First copy the build scripts onto the build machine.
 ```
-$ > debian_build.sh; editor debian_build.sh
-$ > debian_dir_creator.sh; editor debian_dir_creator.sh
-$ chmod +x debian_build.sh debian_dir_creator.sh
+$ > ~/debian_build.sh; editor ~/debian_build.sh
+$ > ~/debian_dir_creator.sh; editor ~/debian_dir_creator.sh
+$ chmod +x ~/debian_build.sh ~/debian_dir_creator.sh
 ```
 
 Then execute it with the appropriate environment variable values.
