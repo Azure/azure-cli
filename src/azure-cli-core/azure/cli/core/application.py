@@ -15,7 +15,6 @@ import azure.cli.core._help as _help
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import todict, truncate_text, CLIError, read_file_content
 from azure.cli.core._config import az_config
-import azure.cli.core.commands.progress as progress
 
 import azure.cli.core.telemetry as telemetry
 
@@ -128,11 +127,6 @@ class Application(object):
 
         self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
         self.configuration = configuration
-        self.progress_controller = progress.ProgressHook()
-
-    def get_progress_controller(self):
-        self.progress_controller.init_progress(progress.get_progress_view())
-        return self.progress_controller
 
     def initialize(self, configuration):
         self.configuration = configuration
