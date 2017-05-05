@@ -6,4 +6,4 @@
 from azure.cli.core.commands import cli_command
 
 cli_command(__name__,
-            'launch-interactive', 'azure.cli.command_modules.interactive.custom#start_shell')
+            'interactive', 'azure.cli.command_modules.interactive.custom#start_shell')

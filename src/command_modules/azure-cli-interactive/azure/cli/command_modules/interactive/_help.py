@@ -5,7 +5,7 @@
 
 from azure.cli.core.help_files import helps
 
-helps['launch-interactive'] = """
+helps['interactive'] = """
             type: command
             short-summary: Start the interactive shell for Microsoft Azure CLI (preview)
             """
