@@ -3,117 +3,61 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
-
-from azure.cli.core.commands import cli_command
-from azure.cli.core.commands.arm import cli_generic_update_command
+from azure.cli.core.sdk.util import ServiceGroup, create_service_adapter
 from ._client_factory import cf_cdn
 
+custom_operations = 'azure.cli.command_modules.cdn.custom#{}'
 
-def custom(sub_path):
-    return'azure.cli.command_modules.cdn.custom#{}'.format(sub_path)
+mgmt_operations = create_service_adapter('azure.mgmt.cdn', 'CdnManagementClient')
+with ServiceGroup(__name__, cf_cdn, mgmt_operations, custom_operations) as s:
+    with s.group('cdn') as c:
+        c.command('name-exists', 'check_name_availability')
+        c.command('usage', 'check_resource_usage')
 
+endpoint_operations = create_service_adapter('azure.mgmt.cdn.operations.endpoints_operations',
+                                             'EndpointsOperations')
+with ServiceGroup(__name__, cf_cdn, endpoint_operations, custom_operations) as s:
+    with s.group('cdn endpoint') as c:
+        for name in ['start', 'stop', 'delete']:
+            c.command(name, name)
+        c.command('show', 'get')
+        c.command('list', 'list_by_profile')
+        c.command('load', 'load_content')
+        c.command('purge', 'purge_content')
+        c.command('validate-custom-domain', 'validate_custom_domain')
+        c.custom_command('create', 'create_endpoint')
+        c.generic_update_command('update', 'get', 'update', custom_func_name='update_endpoint',
+                                 setter_arg_name='endpoint_update_properties')
 
-def mgmt(sub_path):
-    return 'azure.mgmt.cdn#CdnManagementClient.{}'.format(sub_path)
+profile_operations = create_service_adapter('azure.mgmt.cdn.operations.profiles_operations',
+                                            'ProfilesOperations')
+with ServiceGroup(__name__, cf_cdn, profile_operations, custom_operations) as s:
+    with s.group('cdn profile') as c:
+        c.command('show', 'get')
+        c.command('usage', 'list_resource_usage')
+        c.command('delete', 'delete')
+        c.custom_command('list', 'list_profiles')
+        c.custom_command('create', 'create_profile')
+        c.generic_update_command('update', 'get', 'update', custom_func_name='update_profile')
 
+domain_operations = create_service_adapter('azure.mgmt.cdn.operations.custom_domains_operations',
+                                           'CustomDomainsOperations')
+with ServiceGroup(__name__, cf_cdn, domain_operations, custom_operations) as s:
+    with s.group('cdn custom-domain') as c:
+        c.command('show', 'get')
+        c.command('delete', 'delete')
+        c.command('list', 'list_by_endpoint')
+        c.custom_command('create', 'create_custom_domain')
 
-def endpoint(sub_path):
-    return 'azure.mgmt.cdn.operations.endpoints_operations#EndpointsOperations.{}'.format(sub_path)
+origin_operations = create_service_adapter('azure.mgmt.cdn.operations.origins_operations',
+                                           'OriginsOperations')
+with ServiceGroup(__name__, cf_cdn, origin_operations, custom_operations) as s:
+    with s.group('cdn origin') as c:
+        c.command('show', 'get')
+        c.command('list', 'list_by_endpoint')
 
-
-def profile(sub_path):
-    return 'azure.mgmt.cdn.operations.profiles_operations#ProfilesOperations.{}'.format(sub_path)
-
-
-def domain(sub_path):
-    path = 'azure.mgmt.cdn.operations.custom_domains_operations#CustomDomainsOperations.{}'
-    return path.format(sub_path)
-
-
-def origin(sub_path):
-    return 'azure.mgmt.cdn.operations.origins_operations#OriginsOperations.{}'.format(sub_path)
-
-
-def edge(sub_path):
-    return 'azure.mgmt.cdn.operations.edge_nodes_operations#EdgeNodesOperations.{}'.format(sub_path)
-
-
-def command(cmd, method, formatter=custom):
-    cli_command(__name__, cmd, formatter(method), cf_cdn)
-
-
-def endpoint_command(name, method=None, use_custom=False):
-    formatter = custom if use_custom else endpoint
-    command('cdn endpoint {}'.format(name), method or name, formatter)
-
-
-def generic_endpoint_command(name, custom_handler):
-    cli_generic_update_command(__name__,
-                               'cdn endpoint {}'.format(name),
-                               endpoint('get'),
-                               endpoint('update'),
-                               cf_cdn,
-                               setter_arg_name='endpoint_update_properties',
-                               custom_function_op=custom(custom_handler))
-
-
-def generic_profile_command(name, custom_handler):
-    cli_generic_update_command(__name__,
-                               'cdn profile {}'.format(name),
-                               profile('get'),
-                               profile('update'),
-                               cf_cdn,
-                               setter_arg_name='profile_update_properties',
-                               custom_function_op=custom(custom_handler))
-
-
-def profile_command(name, method=None, use_custom=False):
-    formatter = custom if use_custom else profile
-    command('cdn profile {}'.format(name), method or name, formatter)
-
-
-def domain_command(name, method=None, use_custom=False):
-    formatter = custom if use_custom else domain
-    command('cdn custom-domain {}'.format(name), method or name, formatter)
-
-
-def origin_command(name, method=None, use_custom=False):
-    formatter = custom if use_custom else origin
-    command('cdn origin {}'.format(name), method or name, formatter)
-
-
-def edge_command(name, method=None, use_custom=False):
-    formatter = custom if use_custom else edge
-    command('cdn edge-node {}'.format(name), method or name, formatter)
-
-
-cli_command(__name__, 'cdn name-exists', mgmt('check_name_availability'), cf_cdn)
-cli_command(__name__, 'cdn usage', mgmt('check_resource_usage'), cf_cdn)
-
-endpoint_command('show', 'get')
-for c in ['start', 'stop', 'delete']:
-    endpoint_command(c)
-endpoint_command('list', 'list_by_profile')
-endpoint_command('load', 'load_content')
-endpoint_command('purge', 'purge_content')
-endpoint_command('validate-custom-domain', 'validate_custom_domain')
-endpoint_command('create', 'create_endpoint', use_custom=True)
-generic_endpoint_command('update', 'update_endpoint')
-
-profile_command('show', 'get')
-profile_command('usage', 'list_resource_usage')
-profile_command('delete')
-profile_command('list', 'list_profiles', use_custom=True)
-profile_command('create', 'create_profile', use_custom=True)
-generic_profile_command('update', 'update_profile')
-
-domain_command('show', 'get')
-domain_command('list', 'list_by_endpoint')
-domain_command('delete')
-domain_command('create', 'create_custom_domain', use_custom=True)
-
-origin_command('show', 'get')
-origin_command('list', 'list_by_endpoint')
-
-edge_command('list')
+edge_operations = create_service_adapter('azure.mgmt.cdn.operations.edge_nodes_operations',
+                                         'EdgeNodesOperations')
+with ServiceGroup(__name__, cf_cdn, edge_operations, custom_operations) as s:
+    with s.group('cdn edge-node') as c:
+        c.command('list', 'list')
