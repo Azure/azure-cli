@@ -2,7 +2,8 @@
 
 Release History
 ===============
-unreleased
+
+0.0.5 (2017-05-05)
 ++++++++++++++++++
 
 * Fix a bug where filtering on result and state for job lists would throw an error.
