@@ -76,9 +76,6 @@ register_cli_argument('webapp', 'name', configured_default='web',
                       arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
                       help="name of the web. You can configure the default using 'az configure --defaults web=<name>'")
 register_cli_argument('webapp create', 'name', options_list=('--name', '-n'), help='name of the new webapp')
-register_cli_argument('webapp create', 'deployment_local_git', action='store_true', options_list=('--deployment-local-git', '-l'), help='enable local git')
-register_cli_argument('webapp create', 'deployment_source_url', options_list=('--deployment-source-url', '-u'), help='Git repository URL to link with manual integration')
-register_cli_argument('webapp create', 'deployment_source_branch', options_list=('--deployment-source-branch', '-b'), help='the branch to deploy')
 register_cli_argument('webapp create', 'deployment_container_image_name', options_list=('--deployment-container-image-name', '-i'),
                       help='Linux only. Container image name from Docker Hub, e.g. publisher/image-name:version')
 register_cli_argument('webapp create', 'startup_file', help="Linux only. The web's startup file")
@@ -109,6 +106,9 @@ for scope in ['webapp', 'functionapp']:
     register_cli_argument(scope + ' deployment source', 'cd_account_must_exist', arg_group='VSTS CD Provider', help='specifies that the account must already exist. If not specified, the account will be created if it does not already exist (existing accounts are updated)', action='store_true')
     register_cli_argument(scope + ' deployment source', 'repository_type', help='repository type', default='git', **enum_choice_list(['git', 'mercurial']))
     register_cli_argument(scope + ' deployment source', 'git_token', help='git access token required for auto sync')
+    register_cli_argument(scope + ' create', 'deployment_local_git', action='store_true', options_list=('--deployment-local-git', '-l'), help='enable local git')
+    register_cli_argument(scope + ' create', 'deployment_source_url', options_list=('--deployment-source-url', '-u'), help='Git repository URL to link with manual integration')
+    register_cli_argument(scope + ' create', 'deployment_source_branch', options_list=('--deployment-source-branch', '-b'), help='the branch to deploy')
 
 register_cli_argument('webapp config hostname', 'webapp_name', help="webapp name. You can configure the default using 'az configure --defaults web=<name>'", configured_default='web',
                       completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
@@ -121,6 +121,8 @@ register_cli_argument('webapp deployment slot', 'auto_swap_slot', help='target s
 register_cli_argument('webapp deployment slot', 'disable', help='disable auto swap', action='store_true')
 register_cli_argument('webapp deployment slot', 'target_slot', help="target slot to swap, default to 'production'")
 register_cli_argument('webapp deployment slot create', 'configuration_source', help="source slot to clone configurations from. Use webapp's name to refer to the production slot")
+register_cli_argument('webapp deployment slot swap', 'action', help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
+                      **enum_choice_list(['swap', 'preview', 'reset']))
 
 
 two_states_switch = ['true', 'false']
@@ -211,7 +213,8 @@ register_cli_argument('appservice web deployment slot', 'auto_swap_slot', help='
 register_cli_argument('appservice web deployment slot', 'disable', help='disable auto swap', action='store_true')
 register_cli_argument('appservice web deployment slot', 'target_slot', help="target slot to swap, default to 'production'")
 register_cli_argument('appservice web deployment slot create', 'configuration_source', help="source slot to clone configurations from. Use webapp's name to refer to the production slot")
-
+register_cli_argument('appservice web deployment slot swap', 'action', help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
+                      **enum_choice_list(['swap', 'preview', 'reset']))
 register_cli_argument('appservice web log config', 'application_logging', help='configure application logging to file system', **enum_choice_list(two_states_switch))
 register_cli_argument('appservice web log config', 'detailed_error_messages', help='configure detailed error messages', **enum_choice_list(two_states_switch))
 register_cli_argument('appservice web log config', 'failed_request_tracing', help='configure failed request tracing', **enum_choice_list(two_states_switch))

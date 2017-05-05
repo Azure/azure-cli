@@ -14,12 +14,13 @@ import timeit
 import traceback
 from collections import OrderedDict, defaultdict
 from importlib import import_module
+
+import six
 from six import string_types, reraise
 
 import azure.cli.core.azlogging as azlogging
 import azure.cli.core.telemetry as telemetry
 from azure.cli.core.util import CLIError
-from azure.cli.core.application import APPLICATION
 from azure.cli.core.prompting import prompt_y_n, NoTTYException
 from azure.cli.core._config import az_config, DEFAULTS_SECTION
 from azure.cli.core.profiles import ResourceType, supported_api_version
@@ -35,7 +36,7 @@ logger = azlogging.get_az_logger(__name__)
 
 CONFIRM_PARAM_NAME = 'yes'
 
-BLACKLISTED_MODS = ['context']
+BLACKLISTED_MODS = ['context', 'container']
 
 
 class VersionConstraint(object):
@@ -124,10 +125,13 @@ class CliCommandArgument(object):
 
 class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, start_msg='', finish_msg='', poller_done_interval_ms=1000.0):
+    def __init__(self, start_msg='', finish_msg='',
+                 poller_done_interval_ms=1000.0, progress_controller=None):
         self.start_msg = start_msg
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms
+        from azure.cli.core.application import APPLICATION
+        self.progress_controller = progress_controller or APPLICATION.get_progress_controller()
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
@@ -136,7 +140,9 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         from msrest.exceptions import ClientException
         logger.info("Starting long running operation '%s'", self.start_msg)
         correlation_message = ''
+        self.progress_controller.begin()
         while not poller.done():
+            self.progress_controller.add(message='Running')
             try:
                 # pylint: disable=protected-access
                 correlation_id = json.loads(
@@ -149,8 +155,10 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             try:
                 self._delay()
             except KeyboardInterrupt:
+                self.progress_controller.stop()
                 logger.error('Long running operation wait cancelled.  %s', correlation_message)
                 raise
+
         try:
             result = poller.result()
         except ClientException as client_exception:
@@ -159,6 +167,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                 fault_type='failed-long-running-operation',
                 summary='Unexpected client exception in {}.'.format(LongRunningOperation.__name__))
             message = getattr(client_exception, 'message', client_exception)
+            self.progress_controller.stop()
 
             try:
                 message = '{} {}'.format(
@@ -174,6 +183,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
         logger.info("Long running operation '%s' completed with result %s",
                     self.start_msg, result)
+        self.progress_controller.end()
         return result
 
 
@@ -215,7 +225,7 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
 
     def __init__(self, name, handler, description=None, table_transformer=None,
                  arguments_loader=None, description_loader=None,
-                 formatter_class=None):
+                 formatter_class=None, deprecate_info=None):
         self.name = name
         self.handler = handler
         self.help = None
@@ -226,9 +236,12 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
         self.arguments_loader = arguments_loader
         self.table_transformer = table_transformer
         self.formatter_class = formatter_class
+        self.deprecate_info = deprecate_info
 
     @staticmethod
     def _should_load_description():
+        from azure.cli.core.application import APPLICATION
+
         return not APPLICATION.session['completer_active']
 
     def load_arguments(self):
@@ -247,8 +260,12 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
         arg.type.update(other=argtype)
 
     def _resolve_default_value_from_cfg_file(self, arg, overrides):
+        if not hasattr(arg.type, 'required_tooling'):
+            required = arg.type.settings.get('required', False)
+            setattr(arg.type, 'required_tooling', required)
         if 'configured_default' in overrides.settings:
             def_config = overrides.settings.pop('configured_default', None)
+            setattr(arg.type, 'default_name_tooling', def_config)
             # same blunt mechanism like we handled id-parts, for create command, no name default
             if (self.name.split()[-1] == 'create' and
                     overrides.settings.get('metavar', None) == 'NAME'):
@@ -260,7 +277,15 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
                 overrides.settings['required'] = False
 
     def execute(self, **kwargs):
-        return self.handler(**kwargs)
+        return self(**kwargs)
+
+    def __call__(self, *args, **kwargs):
+        if self.deprecate_info is not None:
+            text = 'This command is deprecating and will be removed in future releases.'
+            if self.deprecate_info:
+                text += " Use '{}' instead.".format(self.deprecate_info)
+            logger.warning(text)
+        return self.handler(*args, **kwargs)
 
 
 command_table = CommandTable()
@@ -348,12 +373,13 @@ def register_extra_cli_argument(command, dest, **kwargs):
 def cli_command(module_name, name, operation,
                 client_factory=None, transform=None, table_transformer=None,
                 no_wait_param=None, confirmation=None, exception_handler=None,
-                formatter_class=None):
+                formatter_class=None, deprecate_info=None):
     """ Registers a default Azure CLI command. These commands require no special parameters. """
     command_table[name] = create_command(module_name, name, operation, transform, table_transformer,
                                          client_factory, no_wait_param, confirmation=confirmation,
                                          exception_handler=exception_handler,
-                                         formatter_class=formatter_class)
+                                         formatter_class=formatter_class,
+                                         deprecate_info=deprecate_info)
 
 
 def get_op_handler(operation):
@@ -361,6 +387,8 @@ def get_op_handler(operation):
     # Patch the unversioned sdk path to include the appropriate API version for the
     # resource type in question.
     from azure.cli.core._profile import CLOUD
+    import types
+
     for rt in ResourceType:
         if operation.startswith(rt.import_prefix):
             operation = operation.replace(rt.import_prefix,
@@ -370,7 +398,10 @@ def get_op_handler(operation):
         op = import_module(mod_to_import)
         for part in attr_path.split('.'):
             op = getattr(op, part)
-        return op
+        if isinstance(op, types.FunctionType):
+            return op
+        else:
+            return six.get_method_function(op)
     except (ValueError, AttributeError):
         raise ValueError("The operation '{}' is invalid.".format(operation))
 
@@ -409,7 +440,7 @@ def _is_poller(obj):
 def create_command(module_name, name, operation,
                    transform_result, table_transformer, client_factory,
                    no_wait_param=None, confirmation=None, exception_handler=None,
-                   formatter_class=None):
+                   formatter_class=None, deprecate_info=None):
     if not isinstance(operation, string_types):
         raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
@@ -482,7 +513,7 @@ def create_command(module_name, name, operation,
 
     cmd = CliCommand(name, _execute_command, table_transformer=table_transformer,
                      arguments_loader=arguments_loader, description_loader=description_loader,
-                     formatter_class=formatter_class)
+                     formatter_class=formatter_class, deprecate_info=deprecate_info)
     if confirmation:
         cmd.add_argument(CONFIRM_PARAM_NAME, '--yes', '-y',
                          action='store_true',

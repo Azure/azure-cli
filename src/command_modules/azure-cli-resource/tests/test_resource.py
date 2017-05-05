@@ -12,6 +12,8 @@ from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase, JMESPathCheck,
                                                      ResourceGroupVCRTestBase,
                                                      MOCKED_SUBSCRIPTION_ID)
 
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck as JCheck)
+
 
 # pylint: disable=method-hidden
 class ResourceGroupScenarioTest(VCRTestBase):
@@ -552,6 +554,106 @@ class PolicyScenarioTest(ResourceGroupVCRTestBase):
         time.sleep(10)  # ensure the policy is gone when run live.
         self.cmd('policy definition list', checks=[
             JMESPathCheck("length([?name=='{}'])".format(policy_name), 0)])
+
+
+class ManagedAppDefinitionScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_managedappdef(self, resource_group):
+        location = 'eastus2euap'
+        appdef_name = 'testappdefname'
+        appdef_display_name = 'test_appdef_123'
+        appdef_description = 'test_appdef_123'
+        packageUri = 'https:\/\/wud.blob.core.windows.net\/appliance\/SingleStorageAccount.zip'
+        auth = '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635'
+        lock = 'None'
+
+        # create a managedapp definition
+        create_cmd = 'managedapp definition create -n {} --package-file-uri {} --display-name {} --description {} -l {} -a {} --lock-level {} -g {}'
+        self.cmd(create_cmd.format(appdef_name, packageUri, appdef_display_name, appdef_description, location, auth, lock, resource_group), checks=[
+            JCheck('name', appdef_name),
+            JCheck('displayName', appdef_display_name),
+            JCheck('description', appdef_description),
+            JCheck('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
+            JCheck('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
+            JCheck('artifacts[0].name', 'ApplianceResourceTemplate'),
+            JCheck('artifacts[0].type', 'Template'),
+            JCheck('artifacts[1].name', 'CreateUiDefinition'),
+            JCheck('artifacts[1].type', 'Custom')
+        ])
+
+        # list and show it
+        list_cmd = 'managedapp definition list -g {}'
+        self.cmd(list_cmd.format(resource_group), checks=[
+            JCheck('[0].name', appdef_name)
+        ])
+
+        show_cmd = 'managedapp definition show -g {} -n {}'
+        self.cmd(show_cmd.format(resource_group, appdef_name), checks=[
+            JCheck('name', appdef_name),
+            JCheck('displayName', appdef_display_name),
+            JCheck('description', appdef_description),
+            JCheck('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
+            JCheck('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
+            JCheck('artifacts[0].name', 'ApplianceResourceTemplate'),
+            JCheck('artifacts[0].type', 'Template'),
+            JCheck('artifacts[1].name', 'CreateUiDefinition'),
+            JCheck('artifacts[1].type', 'Custom')
+        ])
+
+        # delete
+        self.cmd('managedapp definition delete -g {} -n {}'.format(resource_group, appdef_name))
+        self.cmd('managedapp definition list -g {}'.format(resource_group), checks=NoneCheck())
+
+
+class ManagedAppScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_managedapp(self, resource_group):
+        location = 'eastus2euap'
+        appdef_name = 'testappdefname'
+        appdef_display_name = 'test_appdef_123'
+        appdef_description = 'test_appdef_123'
+        packageUri = 'https:\/\/wud.blob.core.windows.net\/appliance\/SingleStorageAccount.zip'
+        auth = '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635'
+        lock = 'None'
+
+        # create a managedapp definition
+        create_cmd = 'managedapp definition create -n {} --package-file-uri {} --display-name {} --description {} -l {} -a {} --lock-level {} -g {}'
+        managedappdef = self.cmd(create_cmd.format(appdef_name, packageUri, appdef_display_name,
+                                                   appdef_description, location, auth, lock, resource_group)).get_output_in_json()
+
+        # create a managedapp
+        managedapp_name = 'mymanagedapp'
+        managedapp_loc = 'eastus2euap'
+        managedapp_kind = 'servicecatalog'
+        newrg = self.create_random_name('climanagedapp', 25)
+        managedrg = '/subscriptions/{}/resourceGroups/{}'.format(managedappdef['id'].split("/")[2], newrg)
+        create_cmd = 'managedapp create -n {} -g {} -l {} --kind {} -m {} -d {}'
+        self.cmd(create_cmd.format(managedapp_name, resource_group, managedapp_loc, managedapp_kind, managedrg, managedappdef['id']), checks=[
+            JCheck('name', managedapp_name),
+            JCheck('type', 'Microsoft.Solutions/appliances'),
+            JCheck('kind', 'servicecatalog'),
+            JCheck('managedResourceGroupId', managedrg),
+            JCheck('applianceDefinitionId', managedappdef['id'])
+        ])
+
+        # list and show
+        list_byrg_cmd = 'managedapp list -g {}'
+        self.cmd(list_byrg_cmd.format(resource_group), checks=[
+            JCheck('[0].name', managedapp_name)
+        ])
+
+        show_cmd = 'managedapp show -g {} -n {}'
+        self.cmd(show_cmd.format(resource_group, managedapp_name), checks=[
+            JCheck('name', managedapp_name),
+            JCheck('type', 'Microsoft.Solutions/appliances'),
+            JCheck('kind', 'servicecatalog'),
+            JCheck('managedResourceGroupId', managedrg),
+            JCheck('applianceDefinitionId', managedappdef['id'])
+        ])
+
+        # delete
+        self.cmd('managedapp delete -g {} -n {}'.format(resource_group, managedapp_name))
+        self.cmd('managedapp list -g {}'.format(resource_group), checks=NoneCheck())
 
 
 if __name__ == '__main__':
