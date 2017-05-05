@@ -3,7 +3,7 @@
 Release History
 ===============
 
-0.2.3 (unreleased)
+0.3.0 (2017-05-05)
 ++++++++++++++++++
 
 * Integrate interactive into az
