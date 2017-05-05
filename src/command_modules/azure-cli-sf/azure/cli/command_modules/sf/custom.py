@@ -1,8 +1,7 @@
-# -----------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License. See License.txt in the project root for
-# license information.
-# -----------------------------------------------------------------------------
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-lines
 
 import os
@@ -233,7 +232,8 @@ def sf_upload_app(path, show_progress=False):
     def print_progress(size, rel_file_path):
         current_files_size["size"] += size
         if show_progress:
-            print("[{}/{}] files, [{}/{}] bytes, {}".format(
+            print(
+                "[{}/{}] files, [{}/{}] bytes, {}".format(
                 current_files_count,
                 total_files_count,
                 current_files_size["size"],
