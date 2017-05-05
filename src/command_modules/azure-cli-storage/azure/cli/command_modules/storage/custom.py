@@ -15,7 +15,7 @@ from azure.cli.command_modules.storage._factory import \
     (storage_client_factory, generic_data_service_factory)
 from azure.cli.core.application import APPLICATION
 
-from azure.cli.core.commands.progress import DeterminateStandardOut
+from azure.cli.core.commands.progress import get_progress_view
 
 Logging, Metrics, CorsRule, \
     AccessPolicy, RetentionPolicy = get_sdk(ResourceType.DATA_STORAGE,
@@ -41,7 +41,7 @@ BlockBlobService, BaseBlobService, \
 
 
 HOOK = APPLICATION.progress_controller
-HOOK.init_progress(DeterminateStandardOut())
+HOOK.init_progress(get_progress_view(determinant=True))
 
 
 def _update_progress(current, total):

@@ -129,7 +129,7 @@ class _MockOutstream(object):
         pass
 
 
-def _mock_get_progress_view(det, out):  # pylint: disable=unused-argument
+def _mock_get_progress_view(determinant=False, out=None):  # pylint: disable=unused-argument
     return _MockOutstream()
 
 
@@ -389,6 +389,7 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
             if callable(tear_down) and not self.skip_teardown:
                 self.tear_down()
 
+    @mock.patch('azure.cli.core.commands.progress.get_progress_view', _mock_get_progress_view)
     @mock.patch('azure.cli.core._profile.Profile.load_cached_subscriptions', _mock_subscriptions)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user',
                 _mock_user_access_token)  # pylint: disable=line-too-long
@@ -400,7 +401,6 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
     @mock.patch('azure.cli.core.commands.LongRunningOperation._delay', _mock_operation_delay)
     @mock.patch('azure.cli.core.commands.validators.generate_deployment_name',
                 _mock_generate_deployment_name)
-    @mock.patch('azure.cli.core.commands.progress.get_progress_view', _mock_get_progress_view)
     def _execute_playback(self):
         # pylint: disable=no-member
         with self.my_vcr.use_cassette(self.cassette_path):
