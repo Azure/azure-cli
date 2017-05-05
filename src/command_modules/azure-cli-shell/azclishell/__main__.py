@@ -54,8 +54,7 @@ def main(style=None):
         config.firsttime()
 
     ask_feedback = False
-    # if not config.has_feedback() and frequent_user:
-    if True:
+    if not config.has_feedback() and frequent_user:
         print("\n\nAny comments or concerns? You can use the \'feedback\' command!" +
               " We would greatly appreciate it.\n")
         ask_feedback = True

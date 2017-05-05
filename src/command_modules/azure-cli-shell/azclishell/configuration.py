@@ -113,12 +113,11 @@ class Configuration(object):
 
     def has_feedback(self):
         """ returns whether user has given feedback """
-        return self.BOOLEAN_STATES[self.config.get('DEFAULT', 'given feedback')]
+        return az_config.getboolean('core', 'given feedback')
 
     def set_feedback(self, value):
         """ sets the feedback in the config """
-        self.config.set('DEFAULT', 'given feedback', value)
-        self.update()
+        set_global_config_value('core', 'given feedback', value)
 
     def set_style(self, val):
         """ sets the style they used """
@@ -156,3 +155,6 @@ def ask_user_for_telemetry():
 
 
 CONFIGURATION = Configuration()
+
+if not az_config.has_option('core', 'given feedback'):
+    set_global_config_value('core', 'given feedback', 'no')
