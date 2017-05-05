@@ -7,8 +7,8 @@ import tempfile
 import os
 import mock
 
-from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck,
-                                                     NoneCheck)
+from azure.cli.testsdk.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck,
+                                             NoneCheck)
 from azure.cli.core._config import az_config, CONFIG_FILE_NAME
 
 
