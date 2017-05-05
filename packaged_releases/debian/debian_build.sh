@@ -19,48 +19,8 @@ sudo apt-get update
 
 debian_directory_creator=$1
 
-# Modify dh-virtualenv/debian/control to not include the virtualenv or python-virtualenv
-# dependencies as we don't use python-virtualenv but our own.
-dh_virtualenv_debian_control=$(mktemp)
-cat > $dh_virtualenv_debian_control <<- EOM
-Source: dh-virtualenv
-Section: python
-Priority: extra
-Maintainer: Jyrki Pulliainen <jyrki@spotify.com>
-Build-Depends: debhelper (>= 9), python(>= 2.6.6-3~),
- python-setuptools, python-sphinx, python-mock
-Standards-Version: 3.9.8
-Homepage: http://www.github.com/spotify/dh-virtualenv
-X-Python-Version: >= 2.6
-
-Package: dh-virtualenv
-Architecture: all
-Depends: \${python:Depends}, \${misc:Depends},  \${sphinxdoc:Depends}
-Description: wrap and build python packages using virtualenv
- This package provides a dh sequencer that helps you to deploy your
- virtualenv wrapped installation inside a Debian package.
-EOM
-
-# Install latest versions of pip and virtualenv
-sudo apt-get install -y curl
-get_pip_py=$(mktemp)
-curl "https://bootstrap.pypa.io/get-pip.py" -o $get_pip_py
-sudo python $get_pip_py
-sudo pip install virtualenvwrapper
-# Install dh-virtualenv by building from GitHub repo
-sudo apt-get install -y devscripts git equivs
-dh_virtualenv_git_dir=$(mktemp -d)
-git clone https://github.com/spotify/dh-virtualenv.git $dh_virtualenv_git_dir
-cd $dh_virtualenv_git_dir
-git checkout tags/1.0
-echo "y\n" | sudo mk-build-deps -ri
-# Apply dh-virtualenv debian/control patch
-mv $dh_virtualenv_debian_control $dh_virtualenv_git_dir/debian/control
-# Build dh-virtualenv
-dpkg-buildpackage -us -uc -b
-sudo dpkg -i ../dh-virtualenv_1.0-1_all.deb
 # Install dependencies for the build
-sudo apt-get install -y libssl-dev libffi-dev python-dev
+sudo apt-get install -y libssl-dev libffi-dev python3-dev debhelper
 # Download, Extract, Patch, Build CLI
 working_dir=$(mktemp -d)
 source_archive=$working_dir/azure-cli-${CLI_VERSION}.tar.gz
@@ -73,11 +33,33 @@ mkdir $source_dir
 archive_extract_dir=$(mktemp -d)
 tar -xvzf $source_archive -C $archive_extract_dir
 cp -r $archive_extract_dir/azure-cli_packaged_${CLI_VERSION}/* $source_dir
+# Build Python from source and include
+python_dir=$(mktemp -d)
+python_archive=$(mktemp)
+wget https://www.python.org/ftp/python/3.6.1/Python-3.6.1.tgz -qO $python_archive
+tar -xvzf $python_archive -C $python_dir
+echo "Python dir is $python_dir"
+#  clean any previous make files
+make clean || echo "Nothing to clean"
+$python_dir/*/configure --srcdir $python_dir/* --prefix $source_dir/python_env
+make
+#  required to run the 'make install'
+sudo apt-get install -y zlib1g-dev
+make install
+tmp_pkg_dir=$(mktemp -d)
+
+# note: This installation step could happen in debian/rules but was unable to escape $ char.
+# It does not affect the built .deb file though.
+$source_dir/python_env/bin/pip3 install wheel
+for d in $source_dir/src/azure-cli $source_dir/src/azure-cli-core $source_dir/src/azure-cli-nspkg $source_dir/src/azure-cli-command_modules-nspkg $source_dir/src/command_modules/azure-cli-*/; do cd $d; $source_dir/python_env/bin/python3 setup.py bdist_wheel -d $tmp_pkg_dir; cd -; done;
+$source_dir/python_env/bin/pip3 install azure-cli --find-links $tmp_pkg_dir
+$source_dir/python_env/bin/pip3 install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
 # Add the debian files
 mkdir $source_dir/debian
 # Create temp dir for the debian/ directory used for CLI build.
 cli_debian_dir_tmp=$(mktemp -d)
-$debian_directory_creator $cli_debian_dir_tmp $source_dir/az.completion
+
+$debian_directory_creator $cli_debian_dir_tmp $source_dir/az.completion $source_dir
 cp -r $cli_debian_dir_tmp/* $source_dir/debian
 cd $source_dir
 dpkg-buildpackage -us -uc
