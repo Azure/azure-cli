@@ -95,7 +95,7 @@ cli_command(__name__, 'webapp config backup restore', custom_path + 'restore_bac
 
 cli_command(__name__, 'webapp deployment source config-local-git', custom_path + 'enable_local_git')
 cli_command(__name__, 'webapp deployment source config', custom_path + 'config_source_control', exception_handler=ex_handler_factory())
-cli_command(__name__, 'webapp deployment source sync', custom_path + 'sync_site_repo')
+cli_command(__name__, 'webapp deployment source sync', custom_path + 'sync_site_repo', exception_handler=ex_handler_factory())
 cli_command(__name__, 'webapp deployment source show', custom_path + 'show_source_control', exception_handler=empty_on_404)
 cli_command(__name__, 'webapp deployment source delete', custom_path + 'delete_source_control')
 cli_command(__name__, 'webapp deployment source update-token', custom_path + 'update_git_token', exception_handler=ex_handler_factory())
