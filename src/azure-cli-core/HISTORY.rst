@@ -2,7 +2,8 @@
 
 Release History
 ===============
-2.0.5 (Unreleased)
+
+2.0.5 (2017-05-05)
 ^^^^^^^^^^^^^^^^^^
 * core: capture exceptions caused by unregistered provider and auto-register it   
 * login: avoid the bad exception when the user account has no subscription and no tenants
