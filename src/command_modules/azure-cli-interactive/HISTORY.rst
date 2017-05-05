@@ -6,7 +6,9 @@ Release History
 0.2.3 (unreleased)
 ++++++++++++++++++
 
-* Integrate shell into az
+* Integrate interactive into az
+* Colors Options
+* Rename 'shell' => 'interactive'
 
 
 0.2.1
