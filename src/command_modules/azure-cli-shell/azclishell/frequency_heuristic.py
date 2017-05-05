@@ -17,11 +17,6 @@ ACTIVE_STATUS = 5
 DISPLAY_TIME = 20
 
 
-def today_format(now):
-    """ returns the date format """
-    return now.strftime("%Y-%m-%d")
-
-
 def update_frequency():
     """ updates the frequency from files """
     with open(os.path.join(shell_config(), SHELL_CONFIG.get_frequency()), 'r') as freq:
@@ -31,8 +26,7 @@ def update_frequency():
             frequency = {}
 
     with open(os.path.join(shell_config(), SHELL_CONFIG.get_frequency()), 'w') as freq:
-        now = datetime.datetime.now()
-        now = today_format(now)
+        now = datetime.datetime.utcnow()
         val = frequency.get(now)
         frequency[now] = val + 1 if val else 1
         json.dump(frequency, freq)
@@ -44,10 +38,10 @@ def frequency_measurement():
     """ measures how many times a user has used this program in the last calendar week """
     freq = update_frequency()
     count = 0
-    base = datetime.datetime.now()
+    base = datetime.datetime.utcnow()
     date_list = [base - datetime.timedelta(days=x) for x in range(1, DAYS_AGO)]
     for day in date_list:
-        count += 1 if freq.get(today_format(day), 0) > 0 else 0
+        count += 1 if freq.get(day, 0) > 0 else 0
     return count
 
 

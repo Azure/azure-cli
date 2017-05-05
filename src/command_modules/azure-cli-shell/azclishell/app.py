@@ -51,7 +51,7 @@ NOTIFICATIONS = ""
 PROFILE = Profile()
 SELECT_SYMBOL = azclishell.configuration.SELECT_SYMBOL
 PART_SCREEN_EXAMPLE = .3
-START_TIME = datetime.datetime.now()
+START_TIME = datetime.datetime.utcnow()
 CLEAR_WORD = get_os_clear_screen_word()
 
 
@@ -193,7 +193,7 @@ class Shell(object):
 
         self._update_default_info()
 
-        delta = datetime.datetime.now() - START_TIME
+        delta = datetime.datetime.utcnow() - START_TIME
         if self.user_feedback and delta.seconds < DISPLAY_TIME:
             toolbar = [
                 ' Try out the \'feedback\' command',
