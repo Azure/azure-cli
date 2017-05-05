@@ -597,11 +597,16 @@ class Shell(object):
         except SystemExit as ex:
             self.last_exit = int(ex.code)
 
+    def progress_patch(self):
+        from azclishell.progress import ShellProgressView
+        self.app.progress_controller.init_progress(ShellProgressView())
+        return self.app.progress_controller
+
     def run(self):
         """ starts the REPL """
         telemetry.start()
-        from azclishell.progress import ShellProgressView
-        self.app.progress_controller.init_progress(ShellProgressView())
+        self.app.get_progress_controller = self.progress_patch
+
         from azclishell.configuration import SHELL_HELP
         self.cli.buffers['symbols'].reset(
             initial_document=Document(u'{}'.format(SHELL_HELP)))

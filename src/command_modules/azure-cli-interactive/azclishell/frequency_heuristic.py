@@ -26,7 +26,7 @@ def update_frequency():
             frequency = {}
 
     with open(os.path.join(shell_config(), SHELL_CONFIG.get_frequency()), 'w') as freq:
-        now = datetime.datetime.utcnow()
+        now = str(datetime.datetime.utcnow())
         val = frequency.get(now)
         frequency[now] = val + 1 if val else 1
         json.dump(frequency, freq)
