@@ -58,8 +58,7 @@ class Configuration(object):
     def __init__(self):
         self.config = configparser.ConfigParser({
             'firsttime': 'yes',
-            'style': 'default',
-            'given feedback': 'no'
+            'style': 'default'
         })
         self.config.add_section('Help Files')
         self.config.add_section('Layout')
