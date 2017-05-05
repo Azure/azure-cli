@@ -19,11 +19,15 @@ DISPLAY_TIME = 20
 
 def update_frequency():
     """ updates the frequency from files """
-    with open(os.path.join(shell_config(), SHELL_CONFIG.get_frequency()), 'r') as freq:
-        try:
-            frequency = json.load(freq)
-        except ValueError:
-            frequency = {}
+    try:
+        with open(os.path.join(shell_config(), SHELL_CONFIG.get_frequency()), 'r') as freq:
+            try:
+                frequency = json.load(freq)
+            except ValueError:
+                frequency = {}
+    except FileNotFoundError:
+        open(os.path.join(shell_config(), SHELL_CONFIG.get_frequency()), 'w')
+        frequency = {}
 
     with open(os.path.join(shell_config(), SHELL_CONFIG.get_frequency()), 'w') as freq:
         now = str(datetime.datetime.utcnow())
