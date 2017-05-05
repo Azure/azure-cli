@@ -20,6 +20,10 @@ from azure.cli.core.util import CLIError
 SELECT_SYMBOL = azclishell.configuration.SELECT_SYMBOL
 
 
+def error_pass(_, message):  # pylint: disable=unused-argument
+    return
+
+
 def dynamic_param_logic(text):
     """ validates parameter values for dynamic completion """
     is_param = False
@@ -110,6 +114,7 @@ class AzCompleter(Completer):
         self.output_options = commands.output_options if global_params else []
         self.global_param_descriptions = commands.global_param_descriptions if global_params else []
 
+        AzCliCommandParser.error = error_pass  # mutes the parsing
         self.global_parser = AzCliCommandParser(add_help=False)
         self.global_parser.add_argument_group('global', 'Global Arguments')
         self.parser = AzCliCommandParser(parents=[self.global_parser])

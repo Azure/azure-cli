@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import argparse
-import os
 
 from argcomplete import CompletionFinder
 from argcomplete.compat import USING_PYTHON2, ensure_bytes
@@ -28,13 +27,8 @@ class ArgsFinder(CompletionFinder):
             comp_words = [ensure_bytes(word) for word in comp_words]
 
         try:
-            temp = self.outstream
-            self.outstream = os.fdopen(os.devnull, "w")
-
             active_parsers[0].parse_known_args(comp_words, namespace=parsed_args)
 
-            self.outstream.close()
-            self.outstream = temp
         except BaseException:
             pass
 
