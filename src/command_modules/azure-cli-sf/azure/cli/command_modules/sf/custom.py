@@ -4,11 +4,21 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-lines
 
+from __future__ import print_function
+
 import os
 import sys
-import urllib.parse
-import requests
 
+# Breaking py2 to py3 change
+try:
+    from urllib.parse import urlparse, urlencode, urlunparse
+except ImportError:
+    # pylint: disable=import-error
+    from urlparse import urlparse, urlunparse
+    # pylint: disable=no-name-in-module
+    from urllib import urlencode
+
+import requests
 import azure.cli.core.azlogging as azlogging
 
 from azure.cli.core._environment import get_config_dir
@@ -23,8 +33,8 @@ logger = azlogging.get_az_logger(__name__)
 
 
 def sf_create_compose_application(  # pylint: disable=too-many-arguments
-        file, application_id, repo_user=None, encrypted=False, repo_pass=None,
-        timeout=60):
+        compose_file, application_id, repo_user=None, encrypted=False,
+        repo_pass=None, timeout=60):
     # We need to read from a file which makes this a custom command
     # Encrypted param to indicate a password will be prompted
     """
@@ -33,7 +43,7 @@ def sf_create_compose_application(  # pylint: disable=too-many-arguments
     :param str application_id:  The id of application to create from
     Compose file. This is typically the full id of the application
     including "fabric:" URI scheme
-    :param str file: Path to the Compose file to use
+    :param str compose_file: Path to the Compose file to use
     :param str repo_user: Container repository user name if needed for
     authentication
     :param bool encrypted: If true, indicate to use an encrypted password
@@ -71,7 +81,7 @@ def sf_create_compose_application(  # pylint: disable=too-many-arguments
 
     repo_cred = RepositoryCredential(repo_user, repo_pass, encrypted)
 
-    file_contents = read_file_content(file)
+    file_contents = read_file_content(compose_file)
 
     model = CreateComposeApplicationDescription(application_id, file_contents,
                                                 repo_cred)
@@ -177,24 +187,6 @@ def sf_get_cert_info():
         raise CLIError("Cluster security type not set")
 
 
-class FileIter:  # pylint: disable=too-few-public-methods
-    def __init__(self, file, rel_file_path, print_progress):
-        self.file = file
-        self.rel_file_path = rel_file_path
-        self.print_progress = print_progress
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        chunk = self.file.read(100000)
-        if chunk == b'':
-            raise StopIteration
-        else:
-            self.print_progress(len(chunk), self.rel_file_path)
-            return chunk
-
-
 def sf_upload_app(path, show_progress=False):
     """
     Copies a Service Fabric application package to the image store.
@@ -225,8 +217,8 @@ def sf_upload_app(path, show_progress=False):
 
     for root, _, files in os.walk(abspath):
         total_files_count += (len(files) + 1)
-        for file in files:
-            t = os.stat(os.path.join(root, file))
+        for f in files:
+            t = os.stat(os.path.join(root, f))
             total_files_size += t.st_size
 
     def print_progress(size, rel_file_path):
@@ -234,43 +226,50 @@ def sf_upload_app(path, show_progress=False):
         if show_progress:
             print(
                 "[{}/{}] files, [{}/{}] bytes, {}".format(
-                current_files_count,
-                total_files_count,
-                current_files_size["size"],
-                total_files_size,
-                rel_file_path), file=sys.stderr)
+                    current_files_count,
+                    total_files_count,
+                    current_files_size["size"],
+                    total_files_size,
+                    rel_file_path), file=sys.stderr)
 
     for root, _, files in os.walk(abspath):
         rel_path = os.path.normpath(os.path.relpath(root, abspath))
-        for file in files:
+        for f in files:
             url_path = (
                 os.path.normpath(os.path.join("ImageStore", basename,
-                                              rel_path, file))
+                                              rel_path, f))
             ).replace("\\", "/")
-            fp = os.path.normpath(os.path.join(root, file))
+            fp = os.path.normpath(os.path.join(root, f))
             with open(fp, 'rb') as file_opened:
-                url_parsed = list(urllib.parse.urlparse(endpoint))
+                url_parsed = list(urlparse(endpoint))
                 url_parsed[2] = url_path
-                url_parsed[4] = urllib.parse.urlencode(
+                url_parsed[4] = urlencode(
                     {"api-version": "3.0-preview"})
-                url = urllib.parse.urlunparse(url_parsed)
-                file_iter = FileIter(file_opened, os.path.normpath(
-                    os.path.join(rel_path, file)
+                url = urlunparse(url_parsed)
+
+                def file_chunk(target_file, rel_path, print_progress):
+                    chunk = target_file.read(100000)
+                    if chunk != b'':
+                        print_progress(len(chunk), rel_path)
+                        yield chunk
+
+                fc = file_chunk(file_opened, os.path.normpath(
+                    os.path.join(rel_path, f)
                 ), print_progress)
-                requests.put(url, data=file_iter, cert=cert,
+                requests.put(url, data=fc, cert=cert,
                              verify=ca_cert)
                 current_files_count += 1
                 print_progress(0, os.path.normpath(
-                    os.path.join(rel_path, file)
+                    os.path.join(rel_path, f)
                 ))
         url_path = (
             os.path.normpath(os.path.join("ImageStore", basename,
                                           rel_path, "_.dir"))
         ).replace("\\", "/")
-        url_parsed = list(urllib.parse.urlparse(endpoint))
+        url_parsed = list(urlparse(endpoint))
         url_parsed[2] = url_path
-        url_parsed[4] = urllib.parse.urlencode({"api-version": "3.0-preview"})
-        url = urllib.parse.urlunparse(url_parsed)
+        url_parsed[4] = urlencode({"api-version": "3.0-preview"})
+        url = urlunparse(url_parsed)
         requests.put(url, cert=cert, verify=ca_cert)
         current_files_count += 1
         print_progress(0, os.path.normpath(os.path.join(rel_path, '_.dir')))
