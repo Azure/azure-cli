@@ -22,7 +22,7 @@
 To start the application
 
 ```bash
-   $ az launch-interactive
+   $ az interactive
 ```
 
 Then type your commands and hit [Enter]
@@ -91,7 +91,7 @@ Only clears the appended suggestion when you restart the interactive shell
 ## Change colors
 
 ```bash
-   $ az launch-interactive --styles [option]
+   $ az interactive --styles [option]
 ```
 
 The color option will be saved.
