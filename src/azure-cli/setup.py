@@ -57,7 +57,6 @@ DEPENDENCIES = [
     'azure-cli-cloud',
     'azure-cli-component',
     'azure-cli-configure',
-    'azure-cli-container',
     'azure-cli-core',
     'azure-cli-dla',
     'azure-cli-dls',
