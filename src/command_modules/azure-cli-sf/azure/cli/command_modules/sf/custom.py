@@ -644,6 +644,7 @@ def sup_service_update_flags(  # pylint: disable=too-many-arguments
         f += 512
     return f
 
+
 def sf_create_service(  # pylint: disable=too-many-arguments, too-many-locals
         app_id, name, service_type, stateful=False, stateless=False,
         singleton_scheme=False, named_scheme=False, int_scheme=False,
@@ -758,12 +759,14 @@ def sf_create_service(  # pylint: disable=too-many-arguments, too-many-locals
         part_schema = NamedPartitionSchemeDescription(len(named_scheme_list),
                                                       named_scheme_list)
     elif int_scheme:
+        # pylint: disable=redefined-variable-type
         part_schema = UniformInt64RangePartitionSchemeDescription(
             int_scheme_count,
             int_scheme_low,
             int_scheme_high
         )
     else:
+        # pylint: disable=redefined-variable-type
         part_schema = SingletonPartitionSchemeDescription()
     # correlation scheme
     correlation_desc = sup_correlation_scheme(correlated_service,
@@ -803,6 +806,7 @@ def sf_create_service(  # pylint: disable=too-many-arguments, too-many-locals
     if stateful:
         flags = sup_stateful_flags(replica_restart_wait, quorum_loss_wait,
                                    stand_by_replica_keep)
+        # pylint: disable=redefined-variable-type
         svc_desc = StatefulServiceDescription(name, service_type,
                                               part_schema,
                                               target_replica_set_size,
