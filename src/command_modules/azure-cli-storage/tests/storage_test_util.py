@@ -73,5 +73,3 @@ class StorageTestFilesPreparer(AbstractPreparer):
 
     def get_temp_dir(self):
         return getattr(self, '_temp_dir', None)
-
-
