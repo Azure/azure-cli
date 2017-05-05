@@ -12,8 +12,11 @@ import unittest
 
 from azure.cli.testsdk import \
     (LiveTest, ResourceGroupPreparer, KeyVaultPreparer, JMESPathCheck as JMESPathCheckV2)
+import azure.cli.core.azlogging as azlogging
 from azure.cli.testsdk.vcr_test_base import VCRTestBase, JMESPathCheck, \
     ResourceGroupVCRTestBase, NoneCheck, MOCKED_SUBSCRIPTION_ID
+
+logger = azlogging.get_az_logger(__name__)
 
 
 class RbacSPSecretScenarioTest(LiveTest):
@@ -117,6 +120,10 @@ class RoleCreateScenarioTest(VCRTestBase):
         super(RoleCreateScenarioTest, self).__init__(__file__, test_method)
 
     def test_role_create_scenario(self):
+        if self.playback:
+            logger.warning('Skipping RoleCreateScenarioTest due to bugs in role commands. '
+                           'See issue #3187.')
+            return
         self.execute()
 
     def body(self):
@@ -124,9 +131,9 @@ class RoleCreateScenarioTest(VCRTestBase):
             subscription_id = MOCKED_SUBSCRIPTION_ID
         else:
             subscription_id = self.cmd('account list --query "[?isDefault].id" -o tsv')
-        role_name = 'cli-test-role'
+        role_name = 'cli-test-role3'
         template = {
-            "Name": "Contoso On-call",
+            "Name": role_name,
             "Description": "Can monitor compute, network and storage, and restart virtual machines",
             "Actions": ["Microsoft.Compute/*/read",
                         "Microsoft.Compute/virtualMachines/start/action",
@@ -140,16 +147,15 @@ class RoleCreateScenarioTest(VCRTestBase):
                         "Microsoft.Support/*"],
             "AssignableScopes": ["/subscriptions/{}".format(subscription_id)]
         }
-        template['Name'] = role_name
         _, temp_file = tempfile.mkstemp()
         with open(temp_file, 'w') as f:
             json.dump(template, f)
 
-        self.cmd('role create --role-definition {}'.format(temp_file.replace('\\', '\\\\')), None)
-        self.cmd('role list -n {}'.format(role_name),
+        self.cmd('role definition create --role-definition {}'.format(temp_file.replace('\\', '\\\\')), None)
+        self.cmd('role definition list -n {}'.format(role_name),
                  checks=[JMESPathCheck('[0].properties.roleName', role_name)])
-        self.cmd('role delete -n {}'.format(role_name), None)
-        self.cmd('role list -n {}'.format(role_name), NoneCheck())
+        self.cmd('role definition delete -n {}'.format(role_name), None)
+        self.cmd('role definition list -n {}'.format(role_name), NoneCheck())
 
 
 class RoleAssignmentScenarioTest(ResourceGroupVCRTestBase):
