@@ -50,9 +50,9 @@ def list_adla_jobs(client,
     if name:
         odata_filter_list.append("name eq '{}'".format(name))
     if state:
-        odata_filter_list.append("({})".format(" or ".join(["state eq '{}'".format(f.value) for f in state])))
+        odata_filter_list.append("({})".format(" or ".join(["state eq '{}'".format(f) for f in state])))
     if result:
-        odata_filter_list.append("({})".format(" or ".join(["result eq '{}'".format(f.value) for f in result])))
+        odata_filter_list.append("({})".format(" or ".join(["result eq '{}'".format(f) for f in result])))
     if submitted_after:
         odata_filter_list.append("submitTime ge datetimeoffset'{}'".format(submitted_after.isoformat()))
     if submitted_before:

@@ -8,6 +8,7 @@ from argcomplete.completers import FilesCompleter
 
 from azure.mgmt.resource.resources.models import DeploymentMode
 from azure.mgmt.resource.locks.models import LockLevel
+from azure.mgmt.resource.managedapplications.models import ApplianceLockLevel
 from azure.cli.core.commands import register_cli_argument, CliArgumentType
 from azure.cli.core.commands.parameters import (ignore_type, resource_group_name_type, tag_type,
                                                 tags_type, get_resource_group_completion_list,
@@ -94,3 +95,17 @@ register_cli_argument('lock', 'resource_provider_namespace', resource_namespace_
 register_cli_argument('lock', 'resource_type', arg_type=resource_type_type,
                       completer=get_resource_types_completion_list,)
 register_cli_argument('lock', 'resource_name', options_list=('--resource-name'), help='The name of the resource this lock applies to.')
+
+register_cli_argument('managedapp', 'resource_group_name', arg_type=resource_group_name_type, help='the resource group of the managed application')
+register_cli_argument('managedapp', 'appliance_name', options_list=('--name', '-n'))
+register_cli_argument('managedapp', 'managedapp_id', options_list=('--id',), help='The managed application resource ID')
+register_cli_argument('managedapp definition', 'resource_group_name', arg_type=resource_group_name_type, help='the resource group of the managed application definition')
+register_cli_argument('managedapp definition', 'appliance_definition_name', options_list=('--name', '-n'))
+register_cli_argument('managedapp definition', 'managedapp_definition_id', options_list=('--id',), help='The managed application definition resource ID')
+register_cli_argument('managedapp create', 'name', options_list=('--name', '-n'), help='name of the new managed application', completer=None)
+register_cli_argument('managedapp create', 'location', help='the managed application location')
+register_cli_argument('managedapp create', 'managedapp_definition_id', options_list=('--managedapp-definition-id', '-d'), help='the full qualified managed application definition id')
+register_cli_argument('managedapp create', 'managedby_resource_group_id', options_list=('--managed-rg-id', '-m'), help='the resource group managed by the managed application')
+register_cli_argument('managedapp create', 'parameters', help='JSON formatted string or a path to a file with such content', type=file_type)
+register_cli_argument('managedapp definition create', 'lock_level', **enum_choice_list(ApplianceLockLevel))
+register_cli_argument('managedapp definition create', 'authorizations', options_list=('--authorizations', '-a'), nargs='+', help="space separated authorization pairs in a format of <principalId>:<roleDefinitionId>")

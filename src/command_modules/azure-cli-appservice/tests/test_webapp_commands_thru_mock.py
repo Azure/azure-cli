@@ -216,15 +216,14 @@ class Test_Webapp_Mocked(unittest.TestCase):
         log_mock.assert_called_with('myRG', 'myweb', None, None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
-    def test_sync_repository_with_error(self, site_op_mock):
-        resp = FakedResponse(400)
-        setattr(resp, 'text', '{"Message": "nice error"}')
-        site_op_mock.side_effect = CloudError(resp, error='error1')
+    def test_sync_repository_skip_bad_error(self, site_op_mock):
+        resp = FakedResponse(200)  # because of bad spec, sdk throws on 200.
+        setattr(resp, 'text', '{"Message": ""}')
+        site_op_mock.side_effect = CloudError(resp, error="bad error")
         # action
-        with self.assertRaises(CLIError) as ex:
-            sync_site_repo('myRG', 'myweb')
+        sync_site_repo('myRG', 'myweb')
         # assert
-        self.assertEqual("nice error", str(ex.exception))
+        pass  # if we are here, it means CLI has captured the bogus exception
 
     def test_match_host_names_from_cert(self):
         result = _match_host_names_from_cert(['*.mysite.com'], ['admin.mysite.com', 'log.mysite.com', 'mysite.com'])

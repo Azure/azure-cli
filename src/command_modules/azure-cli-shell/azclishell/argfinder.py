@@ -5,8 +5,6 @@
 
 import argparse
 import os
-import io
-import sys
 
 from argcomplete import CompletionFinder
 from argcomplete.compat import USING_PYTHON2, ensure_bytes
@@ -14,6 +12,9 @@ from argcomplete.compat import USING_PYTHON2, ensure_bytes
 
 class ArgsFinder(CompletionFinder):
     """ gets the parsed args """
+    def __init__(self, parser, outstream=None):
+        super(ArgsFinder, self).__init__(parser)
+        self.outstream = outstream
 
     def get_parsed_args(self, comp_words):
         """ gets the parsed args from a patched parser """
@@ -27,13 +28,13 @@ class ArgsFinder(CompletionFinder):
             comp_words = [ensure_bytes(word) for word in comp_words]
 
         try:
-            stderr = sys.stderr
-            sys.stderr = io.open(os.devnull, "w")
+            temp = self.outstream
+            self.outstream = os.fdopen(os.devnull, "w")
 
             active_parsers[0].parse_known_args(comp_words, namespace=parsed_args)
 
-            sys.stderr.close()
-            sys.stderr = stderr
+            self.outstream.close()
+            self.outstream = temp
         except BaseException:
             pass
 
