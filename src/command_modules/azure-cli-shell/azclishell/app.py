@@ -538,7 +538,7 @@ class Shell(object):
             args = parse_quotes(cmd)
             azlogging.configure_logging(args)
 
-            if 'feedback' in args:
+            if len(args) > 0 and args[0] == 'feedback':
                 SHELL_CONFIGURATION.set_feedback('yes')
                 self.user_feedback = False
 
