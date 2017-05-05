@@ -93,7 +93,8 @@ class IndeterminateStandardOut(ProgressViewBase):
     def __init__(self, out=None):
         super(IndeterminateStandardOut, self).__init__(
             out if out else sys.stderr)
-        self.spinner = None
+        self.spinner = humanfriendly.Spinner(label='In Progress', stream=self.out)
+        self.spinner.hide_cursor = False
 
     def write(self, args):
         """
@@ -101,11 +102,6 @@ class IndeterminateStandardOut(ProgressViewBase):
         :param args: dictionary containing key 'message'
         """
         msg = args.get('message', 'In Progress')
-
-        if not self.spinner:
-            self.spinner = humanfriendly.Spinner(label='msg', stream=self.out)
-            self.spinner.hide_cursor = False
-
         self.spinner.step(label=msg)
 
 
