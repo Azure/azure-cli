@@ -25,7 +25,7 @@ def update_frequency():
                 frequency = json.load(freq)
             except ValueError:
                 frequency = {}
-    except FileNotFoundError:
+    except IOError:
         open(os.path.join(shell_config(), SHELL_CONFIG.get_frequency()), 'w')
         frequency = {}
 
