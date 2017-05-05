@@ -7,7 +7,6 @@ import re
 import os
 import uuid
 from dateutil.relativedelta import relativedelta
-from dateutil.tz import tzutc
 import dateutil.parser
 
 from azure.cli.core.util import CLIError, todict, get_file_json, shell_safe_json_parse
@@ -528,7 +527,6 @@ def _process_service_principal_creds(years, app_start_date, app_end_date, cert, 
         # 3 - User-supplied public cert data
         if any((create_cert, password, key_vault, cert_name)):
             raise cred_usage_error
-        
 
         logger.debug("normalizing x509 certificate with fingerprint %s", cert.digest("sha1"))
         cert_start_date = dateutil.parser.parse(cert.get_notBefore().decode())
@@ -562,8 +560,8 @@ def _process_service_principal_creds(years, app_start_date, app_end_date, cert, 
             key_vault, CLOUD.suffixes.keyvault_dns, cert_name)
         cert_obj = kv_client.get_certificate(cert_id)
         public_cert_string = base64.b64encode(cert_obj.cer).decode('utf-8')  # pylint: disable=no-member
-        cert_start_date = cert_obj.attributes.not_before
-        cert_end_date = cert_obj.attributes.expires
+        cert_start_date = cert_obj.attributes.not_before  # pylint: disable=no-member
+        cert_end_date = cert_obj.attributes.expires  # pylint: disable=no-member
     else:
         raise cred_usage_error
 
@@ -586,6 +584,7 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
         app_end_date = cert_end_date - datetime.timedelta(seconds=1)
 
     return (app_start_date, app_end_date, cert_start_date, cert_end_date)
+
 
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-arguments,too-many-statements,too-many-locals, too-many-branches
@@ -634,22 +633,21 @@ def create_service_principal_for_rbac(
         name = 'http://' + app_display_name  # just a valid uri, no need to exist
 
     password, public_cert_string, cert_file, cert_start_date, cert_end_date = \
-        _process_service_principal_creds(years, app_start_date, app_end_date, cert, create_cert, password,
-                                         key_vault, cert_name)
+        _process_service_principal_creds(years, app_start_date, app_end_date, cert, create_cert,
+                                         password, key_vault, cert_name)
 
     app_start_date, app_end_date, cert_start_date, cert_end_date = \
         _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_date)
 
-    aad_application = create_application(graph_client.applications,
-                                            display_name=app_display_name,
-                                            # pylint: disable=too-many-function-args
-                                            homepage='http://' + app_display_name,
-                                            identifier_uris=[name],
-                                            available_to_other_tenants=False,
-                                            password=password,
-                                            key_value=public_cert_string,
-                                            start_date=app_start_date,
-                                            end_date=app_end_date)
+    aad_application = create_application(graph_client.applications,  # pylint: disable=too-many-function-args
+                                         display_name=app_display_name,
+                                         homepage='http://' + app_display_name,
+                                         identifier_uris=[name],
+                                         available_to_other_tenants=False,
+                                         password=password,
+                                         key_value=public_cert_string,
+                                         start_date=app_start_date,
+                                         end_date=app_end_date)
     # pylint: disable=no-member
     app_id = aad_application.app_id
     # retry till server replication is done
@@ -777,6 +775,7 @@ def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-
     cert_string = re.sub(r'\-+[A-z\s]+\-+', '', cert_string).strip()
     return (cert_string, creds_file, cert_start_date, cert_end_date)
 
+
 def _create_self_signed_cert_with_keyvault(years, key_vault, key_vault_cert_name):  # pylint: disable=too-many-locals
     import base64
     from os import path
@@ -829,8 +828,8 @@ def _create_self_signed_cert_with_keyvault(years, key_vault, key_vault_cert_name
         'https://{}.vault.azure.net/certificates/{}'.format(key_vault, key_vault_cert_name)
     cert = kv_client.get_certificate(cert_id)
     cert_string = base64.b64encode(cert.cer).decode('utf-8')  # pylint: disable=no-member
-    cert_start_date = cert.attributes.not_before
-    cert_end_date = cert.attributes.expires
+    cert_start_date = cert.attributes.not_before  # pylint: disable=no-member
+    cert_end_date = cert.attributes.expires  # pylint: disable=no-member
     creds_file = None
     return (cert_string, creds_file, cert_start_date, cert_end_date)
 
@@ -909,8 +908,8 @@ def reset_service_principal_credential(name, password=None, create_cert=False,
     cert_file = None
 
     password, public_cert_string, cert_file, cert_start_date, cert_end_date = \
-        _process_service_principal_creds(years, app_start_date, app_end_date, cert, create_cert, password,
-                                         key_vault, cert_name)
+        _process_service_principal_creds(years, app_start_date, app_end_date, cert, create_cert,
+                                         password, key_vault, cert_name)
 
     app_start_date, app_end_date, cert_start_date, cert_end_date = \
         _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_date)
