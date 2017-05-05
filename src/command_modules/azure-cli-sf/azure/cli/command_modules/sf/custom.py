@@ -510,7 +510,7 @@ def sup_correlation_scheme(correlated_service, correlation):
             not all([correlated_service, correlation])):
         raise CLIError("Must specify both a correlation service and "
                        "correlation scheme")
-    elif any([correlated_service, correlated_service]):
+    elif any([correlated_service, correlation]):
         return ServiceCorrelationDescription(correlation, correlated_service)
     else:
         return None
