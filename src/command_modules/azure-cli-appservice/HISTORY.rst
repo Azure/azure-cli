@@ -2,7 +2,8 @@
 
 Release History
 ===============
-0.1.5 (unreleased)
+
+0.1.5 (2017-05-05)
 ++++++++++++++++++++
 * functionapp: add full functionapp supports, including create, show, list, delete, hostname, ssl, etc
 * Adding Team Services (vsts) as a continuous delivery option to "appservice web source-control config"
