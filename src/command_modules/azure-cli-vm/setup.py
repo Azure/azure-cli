@@ -36,7 +36,7 @@ DEPENDENCIES = [
     'azure-mgmt-keyvault==0.31.0',
     'azure-keyvault==0.2.0',
     'azure-mgmt-network==1.0.0rc3',
-    'azure-mgmt-resource==1.0.0rc1',
+    'azure-mgmt-resource==1.0.0rc3',
     'azure-multiapi-storage==0.1.0',
     'azure-cli-core',
     'paramiko'
