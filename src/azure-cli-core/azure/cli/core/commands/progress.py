@@ -75,7 +75,7 @@ class ProgressHook(object):
 
     def stop(self):
         """ if there is an abupt stop before ending """
-        self.add(message='Interupted')
+        self.add(message='Interrupted')
 
     def begin(self, **kwargs):
         """ start reporting progress """
