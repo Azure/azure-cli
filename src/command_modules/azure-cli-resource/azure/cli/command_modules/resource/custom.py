@@ -272,6 +272,7 @@ def _prompt_for_parameters(missing_parameters):
                 break
             elif param_type == 'securestring':
                 value = prompt_pass(prompt_str, help_string=description)
+                result[param_name] = value
             elif param_type == 'int':
                 int_value = prompt_int(prompt_str, help_string=description)
                 result[param_name] = int_value
@@ -282,9 +283,10 @@ def _prompt_for_parameters(missing_parameters):
                 break
             else:
                 value = prompt(prompt_str, help_string=description)
+                result[param_name] = value
             if len(value) > 0:
                 break
-    return {}
+    return result
 
 
 def _merge_parameters(parameter_list):
@@ -300,7 +302,18 @@ def _merge_parameters(parameter_list):
     return parameters
 
 
-def _deploy_arm_template_core(resource_group_name,
+def _get_missing_parameters(parameters, template, prompt_fn):
+    missing = _find_missing_parameters(parameters, template)
+    if len(missing) > 0:
+        prompt_parameters = prompt_fn(missing)
+        for param_name in prompt_parameters:
+            parameters[param_name] = {
+                "value": prompt_parameters[param_name]
+            }
+    return parameters
+
+
+def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-arguments
                               template_file=None, template_uri=None, deployment_name=None,
                               parameter_list=None, mode='incremental', validate_only=False,
                               no_wait=False):
@@ -313,7 +326,8 @@ def _deploy_arm_template_core(resource_group_name,
         raise CLIError('please provide either template file path or uri, but not both')
 
     parameters = _merge_parameters(parameter_list)
-
+    if parameters is None:
+        parameters = {}
     template = None
     template_link = None
     if template_uri:
@@ -321,11 +335,7 @@ def _deploy_arm_template_core(resource_group_name,
     else:
         template = get_file_json(template_file)
 
-    missing = _find_missing_parameters(parameters, template)
-    if len(missing) > 0:
-        prompt_parameters = _prompt_for_parameters(missing)
-        for param_name in prompt_parameters:
-            parameters[param_name] = prompt_parameters[param_name]
+    parameters = _get_missing_parameters(parameters, template, _prompt_for_parameters)
 
     properties = DeploymentProperties(template=template, template_link=template_link,
                                       parameters=parameters, mode=mode)
