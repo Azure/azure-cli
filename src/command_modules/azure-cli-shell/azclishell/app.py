@@ -10,6 +10,7 @@ import math
 import os
 import subprocess
 import sys
+import datetime
 import threading
 
 import jmespath
@@ -27,6 +28,7 @@ from prompt_toolkit.shortcuts import create_eventloop
 import azclishell.configuration
 from azclishell.az_lexer import AzLexer, ExampleLexer, ToolbarLexer
 from azclishell.command_tree import in_tree
+from azclishell.frequency_heuristic import DISPLAY_TIME
 from azclishell.gather_commands import add_random_new_lines
 from azclishell.key_bindings import registry, get_section, sub_section
 from azclishell.layout import create_layout, create_tutorial_layout, set_scope
@@ -53,6 +55,7 @@ NOTIFICATIONS = ""
 PROFILE = Profile()
 SELECT_SYMBOL = azclishell.configuration.SELECT_SYMBOL
 PART_SCREEN_EXAMPLE = .3
+START_TIME = datetime.datetime.utcnow()
 CLEAR_WORD = get_os_clear_screen_word()
 
 
@@ -118,7 +121,8 @@ class Shell(object):
     # pylint: disable=too-many-arguments
     def __init__(self, completer=None, styles=None,
                  lexer=None, history=InMemoryHistory(),
-                 app=None, input_custom=sys.stdout, output_custom=None):
+                 app=None, input_custom=sys.stdout, output_custom=None,
+                 user_feedback=False):
         self.styles = styles
         if styles:
             self.lexer = lexer or AzLexer
@@ -136,6 +140,7 @@ class Shell(object):
         self._env = os.environ
         self.last = None
         self.last_exit = 0
+        self.user_feedback = user_feedback
         self.input = input_custom
         self.output = output_custom
         self.config_default = ""
@@ -169,6 +174,7 @@ class Shell(object):
         self.example_docs = u'{}'.format(example)
 
         self._update_default_info()
+
         cli.buffers['description'].reset(
             initial_document=Document(self.description_docs, cursor_position=0))
         cli.buffers['parameter'].reset(
@@ -190,10 +196,17 @@ class Shell(object):
         for _ in range(cols):
             empty_space += " "
 
-        settings = self._toolbar_info()
-        settings, empty_space = space_toolbar(settings, cols, empty_space)
+        delta = datetime.datetime.utcnow() - START_TIME
+        if self.user_feedback and delta.seconds < DISPLAY_TIME:
+            toolbar = [
+                ' Try out the \'feedback\' command',
+                'If refreshed disappear in: {}'.format(str(DISPLAY_TIME - delta.seconds))]
+        else:
+            toolbar = self._toolbar_info()
+
+        toolbar, empty_space = space_toolbar(toolbar, cols, empty_space)
         cli.buffers['bottom_toolbar'].reset(
-            initial_document=Document(u'{}{}{}'.format(NOTIFICATIONS, settings, empty_space)))
+            initial_document=Document(u'{}{}{}'.format(NOTIFICATIONS, toolbar, empty_space)))
 
     def _toolbar_info(self):
         sub_name = ""
@@ -211,7 +224,6 @@ class Shell(object):
             "[F3]Keys",
             "[Ctrl+D]Quit",
             tool_val
-            # tool_val2
         ]
         return settings_items
 
@@ -534,9 +546,14 @@ class Shell(object):
 
     def cli_execute(self, cmd):
         """ sends the command to the CLI to be executed """
+
         try:
             args = parse_quotes(cmd)
             azlogging.configure_logging(args)
+
+            if len(args) > 0 and args[0] == 'feedback':
+                SHELL_CONFIGURATION.set_feedback('yes')
+                self.user_feedback = False
 
             azure_folder = get_config_dir()
             if not os.path.exists(azure_folder):
