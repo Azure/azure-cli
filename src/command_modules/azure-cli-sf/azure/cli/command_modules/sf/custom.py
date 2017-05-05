@@ -510,8 +510,10 @@ def sup_correlation_scheme(correlated_service, correlation):
             not all([correlated_service, correlation])):
         raise CLIError("Must specify both a correlation service and "
                        "correlation scheme")
-
-    return ServiceCorrelationDescription(correlation, correlated_service)
+    elif any([correlated_service, correlated_service]):
+        return ServiceCorrelationDescription(correlation, correlated_service)
+    else:
+        return None
 
 
 def sup_load_metrics(formatted_metrics):
@@ -598,10 +600,8 @@ def sup_placement_policies(formatted_placement_policies):
 
 
 def sup_validate_move_cost(move_cost):
-
-    if move_cost is not None:
-        if move_cost not in ["Zero", "Low", "Medium", "High"]:
-            raise CLIError("Invalid move cost specified")
+    if move_cost not in [None, "Zero", "Low", "Medium", "High"]:
+        raise CLIError("Invalid move cost specified")
 
 
 def sup_stateful_flags(rep_restart_wait=None, quorum_loss_wait=None,
@@ -643,7 +643,6 @@ def sup_service_update_flags(  # pylint: disable=too-many-arguments
     if move_cost is not None:
         f += 512
     return f
-
 
 def sf_create_service(  # pylint: disable=too-many-arguments, too-many-locals
         app_id, name, service_type, stateful=False, stateless=False,
@@ -737,103 +736,89 @@ def sf_create_service(  # pylint: disable=too-many-arguments, too-many-locals
     )
     from azure.cli.command_modules.sf._factory import cf_sf_client
 
-    if sum([singleton_scheme, named_scheme, int_scheme]) is not 1:
-        raise CLIError("Specify exactly one partition scheme")
+    # Validate and parse input
 
-    part_schema = None
-    if singleton_scheme:
-        # pylint: disable=redefined-variable-type
-        part_schema = SingletonPartitionSchemeDescription()
-    elif named_scheme:
-        if not named_scheme_list:
-            raise CLIError(
-                "When specifying named partition scheme, must include list "
-                "of names"
-            )
-        # pylint: disable=redefined-variable-type
+    # stateful or stateless
+    if sum([stateful, stateless]) != 1:
+        raise CLIError("Specify either stateful or stateless for the "
+                       "service type")
+    # partition scheme
+    if stateful and sum([singleton_scheme, named_scheme, int_scheme]) != 1:
+        raise CLIError("Specify exactly one partition scheme")
+    if named_scheme and not named_scheme_list:
+        raise CLIError("When specifying named partition scheme, must include "
+                       "list of names")
+    if (int_scheme and
+            not all([int_scheme_low, int_scheme_high, int_scheme_count])):
+        raise CLIError("Must specify the full integer range and partition "
+                       "count when using an uniform integer partition scheme")
+    if stateless and any([int_scheme, named_scheme]):
+        raise CLIError("Stateless services cannot be partitioned")
+    if named_scheme:
         part_schema = NamedPartitionSchemeDescription(len(named_scheme_list),
                                                       named_scheme_list)
     elif int_scheme:
-        if not all([int_scheme_low, int_scheme_high, int_scheme_count]):
-            raise CLIError(
-                "Must specify the full integer range and partition count when "
-                "using an uniform integer partition scheme"
-            )
-
-        # pylint: disable=redefined-variable-type
         part_schema = UniformInt64RangePartitionSchemeDescription(
             int_scheme_count,
             int_scheme_low,
             int_scheme_high
         )
-
-    corre = sup_correlation_scheme(correlated_service, correlation)
+    else:
+        part_schema = SingletonPartitionSchemeDescription()
+    # correlation scheme
+    correlation_desc = sup_correlation_scheme(correlated_service,
+                                              correlation)
+    # load metrics
     load_list = sup_load_metrics(load_metrics)
+    # service placement policies
     place_policy = sup_placement_policies(placement_policy_list)
-    flags = sup_stateful_flags(replica_restart_wait, quorum_loss_wait,
-                               stand_by_replica_keep)
-
-    # API weirdness where we both have to specify a move cost, and a indicate
-    # the existence of a default move cost
-    move_cost_specified = None
-    if move_cost is not None:
-        sup_validate_move_cost(move_cost)
-        move_cost_specified = True
-
+    # default move cost
+    sup_validate_move_cost(move_cost)
+    # activation mode
     if activation_mode not in [None, "SharedProcess", "ExclusiveProcess"]:
-        raise CLIError("Invalid activation mode specified")
+        raise CLIError("Invalid activate mode specified")
 
-    sd = None
-    if stateful:
-        if instance_count is not None:
-            CLIError("Cannot specify instance count for a stateful service")
-        sd = StatefulServiceDescription(name, service_type, part_schema,
-                                        target_replica_set_size,
-                                        min_replica_set_size,
-                                        not no_persisted_state,
-                                        app_id, None, constraints,
-                                        corre, load_list, place_policy,
-                                        move_cost, move_cost_specified,
-                                        activation_mode, dns_name, flags,
-                                        replica_restart_wait, quorum_loss_wait,
-                                        stand_by_replica_keep)
-
+    # Stateless service
+    if stateful and instance_count:
+        raise CLIError("Cannot specify instance count for stateful services")
+    if stateless and not instance_count:
+        raise CLIError("Must specify instance count for stateless services")
     if stateless:
-        if target_replica_set_size is not None:
-            CLIError(
-                "Cannot specify target replica set size for stateless service"
-            )
-        if min_replica_set_size is not None:
-            CLIError(
-                "Cannot specify minimum replica set size for stateless service"
-            )
-        if replica_restart_wait is not None:
-            CLIError(
-                "Cannot specify replica restart wait duration for stateless "
-                "service"
-            )
-        if quorum_loss_wait is not None:
-            CLIError(
-                "Cannot specify quorum loss wait duration for stateless "
-                "service"
-            )
-        if stand_by_replica_keep is not None:
-            CLIError(
-                "Cannot specify standby replica keep duration for stateless "
-                "service"
-            )
-        # pylint: disable=redefined-variable-type
-        sd = StatelessServiceDescription(name, service_type, part_schema,
-                                         instance_count, app_id, None,
-                                         constraints, corre, load_list,
-                                         place_policy, move_cost,
-                                         move_cost_specified, activation_mode,
-                                         dns_name)
+        svc_desc = StatelessServiceDescription(name, service_type,
+                                               part_schema, instance_count,
+                                               app_id, None, constraints,
+                                               correlation_desc, load_list,
+                                               place_policy, move_cost,
+                                               bool(move_cost),
+                                               activation_mode,
+                                               dns_name)
+
+    # Stateful service
+    if stateful and not all([target_replica_set_size, min_replica_set_size]):
+        raise CLIError("Must specify minimum and replica set size for "
+                       "stateful services")
+    if stateless and any([target_replica_set_size, min_replica_set_size]):
+        raise CLIError("Cannot specify replica set sizes for statless "
+                       "services")
+    if stateful:
+        flags = sup_stateful_flags(replica_restart_wait, quorum_loss_wait,
+                                   stand_by_replica_keep)
+        svc_desc = StatefulServiceDescription(name, service_type,
+                                              part_schema,
+                                              target_replica_set_size,
+                                              min_replica_set_size,
+                                              not no_persisted_state,
+                                              app_id, None, constraints,
+                                              correlation_desc, load_list,
+                                              place_policy, move_cost,
+                                              bool(move_cost), activation_mode,
+                                              dns_name, flags,
+                                              replica_restart_wait,
+                                              quorum_loss_wait,
+                                              stand_by_replica_keep)
 
     sf_client = cf_sf_client(None)
-    sf_client.create_service(app_id, sd, timeout)
-    # TODO Improve parameter set usage display and also validation
-    # TODO Consider supporting initialization data for service create
+    sf_client.create_service(app_id, svc_desc, timeout)
 
 
 def sf_update_service(service_id,  # pylint: disable=too-many-arguments
