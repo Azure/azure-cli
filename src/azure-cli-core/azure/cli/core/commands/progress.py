@@ -4,10 +4,13 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import division
 import sys
+import platform
 
 import humanfriendly
-
 BAR_LEN = 70
+
+if platform.system() == 'Windows':
+    humanfriendly.erase_line_code = ''
 
 
 class ProgressViewBase(object):
