@@ -5,6 +5,15 @@
 from azure.cli.core.sdk.util import ParametersContext
 from azure.cli.core.util import get_json_object
 
+# Global settings
+with ParametersContext(command="sf") as c:
+    c.argument("timeout", options_list=("--timeout", "-t"),
+               type=int,
+               help=("The server timeout for performing the operation, "
+                     "specified in seconds. This is the maximum time a client "
+                     "can wait."),
+               default=60)
+
 # For some commands we take JSON strings as possible
 with ParametersContext(command="sf application create") as c:
     c.register("parameters", ("--parameters",), type=get_json_object,
