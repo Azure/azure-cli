@@ -1,6 +1,56 @@
 Release History
 ===============
 
+0.2.7 (2017-05-05)
+------------------
+
+* See the `HISTORY.rst` files in each module for a changelog.  
+
+Source download:  
+https://azurecliprod.blob.core.windows.net/releases/azure-cli_packaged_0.2.7.tar.gz
+sha256 66882e5ca6ae78aa4d99bc3440ceaf42e969df43374b0c223f66f79b69329bb8
+
+---
+
+<details>
+  <summary>List of component versions in this release (click to expand)</summary><p>
+$ az --version  
+azure-cli (2.0.5)  
+
+acr (2.0.3)  
+acs (2.0.5)  
+appservice (0.1.5)  
+batch (2.0.3)  
+cdn (0.0.1)  
+cloud (2.0.2)  
+cognitiveservices (0.1.1)  
+command-modules-nspkg (2.0.0)  
+component (2.0.3)  
+configure (2.0.5)  
+core (2.0.5)  
+dla (0.0.5)  
+dls (0.0.5)  
+documentdb (0.1.5)  
+feedback (2.0.2)  
+find (0.2.2)  
+interactive (0.3.0)  
+iot (0.1.5)  
+keyvault (2.0.3)  
+lab (0.0.4)  
+monitor (0.0.3)  
+network (2.0.5)  
+nspkg (3.0.0)  
+profile (2.0.4)  
+redis (0.2.2)  
+resource (2.0.5)  
+role (2.0.3)  
+sf (1.0.0)  
+sql (2.0.2)  
+storage (2.0.5)  
+vm (2.0.5)  
+</p></details>
+
+
 0.2.6 (2017-04-28)
 ------------------
 
