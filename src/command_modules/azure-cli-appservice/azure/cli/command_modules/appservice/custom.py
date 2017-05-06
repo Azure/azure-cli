@@ -82,7 +82,7 @@ def create_webapp(resource_group_name, name, plan, runtime=None,
 
 def show_webapp(resource_group_name, name, slot=None, app_instance=None):
     webapp = app_instance
-    if not app_instance:
+    if not app_instance:  # when the routine is invoked as a help method, not through commands
         webapp = _generic_site_operation(resource_group_name, name, 'get', slot)
     _rename_server_farm_props(webapp)
     _fill_ftp_publishing_url(webapp, resource_group_name, name, slot)
