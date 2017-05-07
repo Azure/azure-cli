@@ -5,7 +5,7 @@
 :: This re-builds partial WiX files for use in cloning the repo after install.
 :: heat.exe from the WiX toolset is used for this.
 ::
-set CLI_VERSION=0.2.3
+set CLI_VERSION=0.2.7
 
 set PYTHON_VERSION=3.6.1
 
@@ -19,6 +19,8 @@ set CLI_ARCHIVE_DOWNLOAD_URL=https://azurecliprod.blob.core.windows.net/releases
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
 
 set PYTHON_DOWNLOAD_URL=https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%.exe
+
+echo Downloading Python from %PYTHON_DOWNLOAD_URL%
 
 :: Set up the output directory and temp. directories
 echo Cleaning previous build artifacts...
@@ -114,6 +116,7 @@ for /D %%a in (*) do (
 echo Built CLI packages successfully.
 popd
 %BUILDING_DIR%\python.exe -m pip install azure-cli -f %SCRATCH_DIR%
+%BUILDING_DIR%\python.exe -m pip install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
 
 rmdir /s /q %BUILDING_DIR%\azure-cli_packaged_%CLI_VERSION%
 
@@ -123,6 +126,9 @@ copy .\scripts\az.cmd %BUILDING_DIR%\wbin\
 if %errorlevel% neq 0 goto ERROR
 copy .\resources\CLI_LICENSE.rtf %BUILDING_DIR%
 copy .\resources\ThirdPartyNotices.txt %BUILDING_DIR%
+del %BUILDING_DIR%\Scripts\pip.exe
+del %BUILDING_DIR%\Scripts\pip3.exe
+del %BUILDING_DIR%\Scripts\pip3.6.exe
 if %errorlevel% neq 0 goto ERROR
 
 echo.
