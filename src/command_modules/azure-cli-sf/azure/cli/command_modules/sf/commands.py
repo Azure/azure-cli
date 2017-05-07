@@ -18,8 +18,7 @@ cluster_operations = create_service_adapter("azure.servicefabric",
 # generating
 
 
-cli_command(__name__, "sf application report-health",
-            "azure.cli.command_modules.sf.custom#sf_report_app_health")
+
 cli_command(__name__, "sf application upgrade",
             "azure.cli.command_modules.sf.custom#sf_upgrade_app")
 cli_command(__name__, "sf node report-health",
@@ -55,6 +54,7 @@ with ServiceGroup(__name__, cf_sf_client, cluster_operations,
     # Application level commands
     with sg.group("sf application") as app_group:
         app_group.custom_command("create", "sf_create_app")
+        app_group.custom_command("report-health", "sf_report_app_health")
         app_group.command("health", "get_application_health")
         app_group.command("manifest", "get_application_manifest")
         app_group.command("provision", "provision_application_type")
