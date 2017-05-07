@@ -35,15 +35,13 @@ with ParametersContext(command="sf service update") as c:
     c.argument("target_replica_set_size", type=int, default=None)
     c.argument("min_replica_set_size", type=int, default=None)
 
-# For some commands we take JSON strings as possible
 with ParametersContext(command="sf application create") as c:
-    c.register("parameters", ("--parameters",), type=get_json_object,
-               help="JSON encoded list of application parameters.")
+    c.argument("parameters", type=get_json_object, default=None)
+    c.argument("min_node_count", type=int, default=None)
+    c.argument("max_node_count", type=int, default=None)
+    c.argument("metrics", type=get_json_object, default=None)
 
-with ParametersContext(command="sf application create") as c:
-    c.register("metrics", ("--metrics",), type=get_json_object,
-               help="JSON encoded list of application metrics and their \
-               descriptions.")
+# For some commands we take JSON strings as possible
 
 with ParametersContext(command="sf application upgrade") as c:
     c.register("parameters", ("--parameters",), type=get_json_object,

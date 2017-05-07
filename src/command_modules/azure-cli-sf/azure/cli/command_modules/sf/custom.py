@@ -282,27 +282,38 @@ def sf_upload_app(path, show_progress=False):
             total_files_size), file=sys.stderr)
 
 
-def sf_create_app(name,  # pylint: disable=too-many-locals,too-many-arguments
-                  app_type, version, parameters=None, min_node_count=0,
-                  max_node_count=0, metrics=None, timeout=60):
+def sf_create_app(client,  # pylint: disable=too-many-locals,too-many-arguments
+                  app_name, app_type, app_version, parameters=None,
+                  min_node_count=0, max_node_count=0, metrics=None,
+                  timeout=60):
     """
     Creates a Service Fabric application using the specified description.
 
-    :param str name: Application name
-    :param str app_type: Application type
-    :param str version: Application version
-    :param long min_node_count: The minimum number of nodes where Service
+    :param str app_name: The name of the application, including the 'fabric:'
+    URI scheme.
+
+    :param str app_type: The application type name found in the application
+    manifest.
+
+    :param str app_version: The version of the application type as defined in
+    the application manifest.
+
+    :param str parameters: A JSON encoded list of application parameter
+    overrides to be applied when creating the application.
+
+    :param int min_node_count: The minimum number of nodes where Service
     Fabric will reserve capacity for this application. Note that this does not
     mean that the services of this application will be placed on all of those
     nodes.
-    :param long max_node_count: The maximum number of nodes where Service
+
+    :param int max_node_count: The maximum number of nodes where Service
     Fabric will reserve capacity for this application. Note that this does not
     mean that the services of this application will be placed on all of those
     nodes.
-    :param long timeout: The server timeout for performing the operation in
-    seconds. This specifies the time duration that the client is willing to
-    wait for the requested operation to complete. The default value for this
-    parameter is 60 seconds.
+
+    :param str metrics: A JSON encoded list of application capacity metric
+    descriptions. A metric is defined as a name, associated with a set of
+    capacities for each node that the application exists on.
     """
     from azure.servicefabric.models.application_description import (
         ApplicationDescription
@@ -319,11 +330,11 @@ def sf_create_app(name,  # pylint: disable=too-many-locals,too-many-arguments
     from azure.cli.command_modules.sf._factory import cf_sf_client
 
     if min_node_count > max_node_count:
-        raise CLIError("Note, the minimum node reserve capacity count cannot "
-                       "be more than the maximum node count")
+        raise CLIError("The minimum node reserve capacity count cannot "
+                       "be greater than the maximum node count")
 
     app_params = None
-    if parameters:
+    if parameters is not None:
         app_params = []
         for k in parameters:
             # Create an application parameter for every of these
@@ -333,7 +344,7 @@ def sf_create_app(name,  # pylint: disable=too-many-locals,too-many-arguments
     # For simplicity, we assume user pass in valid key names in the list, or
     # ignore the input
     app_metrics = None
-    if metrics:
+    if metrics is not None:
         app_metrics = []
         for k in metrics:
             metric = metrics[k]
@@ -341,9 +352,9 @@ def sf_create_app(name,  # pylint: disable=too-many-locals,too-many-arguments
             if metric_name is None:
                 raise CLIError("Could not decode required application metric "
                                "name")
-            metric_max_cap = metric.get("maximum_capacity", 0)
-            metric_reserve_cap = metric.get("reservation_capacity", 0)
-            metric_total_cap = metric.get("total_application_capacity", 0)
+            metric_max_cap = metric.get("maximum_capacity", None)
+            metric_reserve_cap = metric.get("reservation_capacity", None)
+            metric_total_cap = metric.get("total_application_capacity", None)
             metric_desc = ApplicationMetricDescription(metric_name,
                                                        metric_max_cap,
                                                        metric_reserve_cap,
@@ -354,11 +365,10 @@ def sf_create_app(name,  # pylint: disable=too-many-locals,too-many-arguments
                                                   max_node_count,
                                                   app_metrics)
 
-    app_desc = ApplicationDescription(name, app_type, version, app_params,
-                                      app_cap_desc)
+    app_desc = ApplicationDescription(app_name, app_type, app_version,
+                                      app_params, app_cap_desc)
 
-    sf_client = cf_sf_client(None)
-    sf_client.create_application(app_desc, timeout)
+    client.create_application(app_desc, timeout)
 
 
 def sf_upgrade_app(  # pylint: disable=too-many-arguments,too-many-locals
