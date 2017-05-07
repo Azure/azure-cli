@@ -16,18 +16,7 @@ cluster_operations = create_service_adapter("azure.servicefabric",
 # Custom commands
 # TODO: Fix custom commands to accept client as additional argument instead of
 # generating
-cli_command(__name__, "sf cluster select",
-            "azure.cli.command_modules.sf.custom#sf_select")
-cli_command(__name__, "sf application upload",
-            "azure.cli.command_modules.sf.custom#sf_upload_app")
-cli_command(__name__, "sf compose create",
-            "azure.cli.command_modules.sf.custom#sf_create_compose_application")
-cli_command(__name__, "sf service create",
-            "azure.cli.command_modules.sf.custom#sf_create_service")
-cli_command(__name__, "sf service update",
-            "azure.cli.command_modules.sf.custom#sf_update_service")
-cli_command(__name__, "sf service report-health",
-            "azure.cli.command_modules.sf.custom#sf_report_svc_health")
+
 cli_command(__name__, "sf application create",
             "azure.cli.command_modules.sf.custom#sf_create_app")
 cli_command(__name__, "sf application report-health",
@@ -44,6 +33,13 @@ cli_command(__name__, "sf chaos start",
             "azure.cli.command_modules.sf.custom#sf_start_chaos")
 cli_command(__name__, "sf partition report-health",
             "azure.cli.command_modules.sf.custom#sf_report_partition_health")
+
+# No client commands
+with ServiceGroup(__name__, None, None, custom_path) as sg:
+    with sg.group("sf cluster") as g:
+        g.custom_command("select", "sf_select")
+    with sg.group("sf application") as g:
+        g.custom_command("upload", "sf_upload_app")
 
 # Standard commands
 with ServiceGroup(__name__, cf_sf_client, cluster_operations,
@@ -70,6 +66,9 @@ with ServiceGroup(__name__, cf_sf_client, cluster_operations,
 
     # Service level commands
     with sg.group("sf service") as svc_group:
+        svc_group.custom_command("create", "sf_create_service")
+        svc_group.custom_command("update", "sf_update_service")
+        svc_group.custom_command("report-health", "sf_report_svc_health")
         svc_group.command("list", "get_service_info_list")
         svc_group.command("manifest", "get_service_manifest")
         svc_group.command("application-name", "get_application_name_info")
@@ -110,6 +109,7 @@ with ServiceGroup(__name__, cf_sf_client, cluster_operations,
 
     # Docker Compose commands
     with sg.group("sf compose") as compose_group:
+        compose_group.custom_command("create", "sf_create_compose_application")
         compose_group.command("status", "get_compose_application_status")
         compose_group.command("list", "get_compose_application_status_list")
         compose_group.command("remove", "remove_compose_application")

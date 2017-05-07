@@ -615,7 +615,6 @@ def sup_stateful_flags(rep_restart_wait=None, quorum_loss_wait=None,
         f += 4
     return f
 
-
 def sup_service_update_flags(  # pylint: disable=too-many-arguments
         target_rep_size=None, instance_count=None, rep_restart_wait=None,
         quorum_loss_wait=None, standby_rep_keep=None, min_rep_size=None,
@@ -642,11 +641,11 @@ def sup_service_update_flags(  # pylint: disable=too-many-arguments
         f += 256
     if move_cost is not None:
         f += 512
-    return f
+    return str(f)
 
 
 def sf_create_service(  # pylint: disable=too-many-arguments, too-many-locals
-        app_id, name, service_type, stateful=False, stateless=False,
+        client, app_id, name, service_type, stateful=False, stateless=False,
         singleton_scheme=False, named_scheme=False, int_scheme=False,
         named_scheme_list=None, int_scheme_low=None, int_scheme_high=None,
         int_scheme_count=None, constraints=None, correlated_service=None,
@@ -659,64 +658,96 @@ def sf_create_service(  # pylint: disable=too-many-arguments, too-many-locals
     """
     Creates the specified Service Fabric service from the description.
 
+
     :param str app_id: The identity of the parent application. This is
     typically the full id of the application without the 'fabric:' URI scheme.
-    :param str name: Name of the service.
-    :param bool stateless: Indicates the service is a stateless service.
-    :param bool stateful: Indicates the service is a stateful service.
+
+    :param str name: Name of the service. This should be a child of the
+    application id. This is the full name including the `fabric:` URI.
+    For example service `fabric:/A/B` is a child of application
+    `fabric:/A`.
+
     :param str service_type: Name of the service type.
+
+    :param bool stateful: Indicates the service is a stateful service.
+
+    :param bool stateless: Indicates the service is a stateless service.
+
     :param bool singleton_scheme: Indicates the service should have a single
     partition or be a non-partitioned service.
+
     :param bool named_scheme: Indicates the service should have multiple named
     partitions.
-    :param list of str named_scheme_list: The list of names to partition the
-    service across, if using the named partition scheme.
+
+    :param list of str named_scheme_list: JSON encoded list of names to
+    partition the service across, if using the named partition scheme
+
     :param bool int_scheme: Indicates the service should be uniformly
     partitioned across a range of unsigned integers.
+
     :param str int_scheme_low: The start of the key integer range, if using an
     uniform integer partition scheme.
+
     :param str int_scheme_high: The end of the key integer range, if using an
     uniform integer partition scheme.
+
     :param str int_scheme_count: The number of partitions inside the integer
     key range to create, if using an uniform integer partition scheme.
+
     :param str constraints: The placement constraints as a string. Placement
     constraints are boolean expressions on node properties and allow for
     restricting a service to particular nodes based on the service
     requirements. For example, to place a service on nodes where NodeType
     is blue specify the following:"NodeColor == blue".
+
     :param str correlation: Correlate the service with an existing service
     using an alignment affinity. Possible values include: 'Invalid',
     'Affinity', 'AlignedAffinity', 'NonAlignedAffinity'.
+
+    :param str load_metrics: JSON encoded list of metrics used when load
+    balancing services across nodes.
+
+    :param str placement_policy_list: JSON encoded list of placement policies
+    for the service, and any associated domain names. Policies can be one or
+    more of: `NonPartiallyPlaceService`, `PreferPrimaryDomain`,
+    `RequireDomain`, `RequireDomainDistribution`.
+
     :param str correlated_service: Name of the target service to correlate
     with.
+
     :param str move_cost: Specifies the move cost for the service. Possible
     values are: 'Zero', 'Low', 'Medium', 'High'.
+
     :param str activation_mode: The activation mode for the service package.
     Possible values include: 'SharedProcess', 'ExclusiveProcess'.
+
     :param str dns_name: The DNS name of the service to be created. The Service
     Fabric DNS system service must be enabled for this setting.
+
     :param int target_replica_set_size: The target replica set size as a
     number. This applies to stateful services only.
+
     :param int min_replica_set_size: The minimum replica set size as a number.
     This applies to stateful services only.
+
     :param int replica_restart_wait: The duration, in seconds, between when a
     replica goes down and when a new replica is created. This applies to
     stateful services only.
+
     :param int quorum_loss_wait: The maximum duration, in seconds, for which a
     partition is allowed to be in a state of quorum loss. This applies to
     stateful services only.
+
     :param int stand_by_replica_keep: The maximum duration, in seconds,  for
     which StandBy replicas will be maintained before being removed. This
     applies to stateful services only.
+
     :param bool no_persisted_state: If true, this indicates the service has no
     persistent state stored on the local disk, or it only stores state in
     memory.
+
     :param int instance_count: The instance count. This applies to stateless
     services only.
-    :param long timeout: The server timeout for performing the operation in
-    seconds. This specifies the time duration that the client is willing to
-    wait for the requested operation to complete. The default value for this
-    parameter is 60 seconds.
     """
     from azure.servicefabric.models.stateless_service_description import (
         StatelessServiceDescription
@@ -782,14 +813,15 @@ def sf_create_service(  # pylint: disable=too-many-arguments, too-many-locals
         raise CLIError("Invalid activate mode specified")
 
     # Stateless service
-    if stateful and instance_count:
+    if stateful and instance_count is not None:
         raise CLIError("Cannot specify instance count for stateful services")
-    if stateless and not instance_count:
+    if stateless and instance_count is not None:
         raise CLIError("Must specify instance count for stateless services")
     if stateless:
         svc_desc = StatelessServiceDescription(name, service_type,
                                                part_schema, instance_count,
-                                               app_id, None, constraints,
+                                               "fabric:/" + app_id,
+                                               None, constraints,
                                                correlation_desc, load_list,
                                                place_policy, move_cost,
                                                bool(move_cost),
@@ -812,7 +844,8 @@ def sf_create_service(  # pylint: disable=too-many-arguments, too-many-locals
                                               target_replica_set_size,
                                               min_replica_set_size,
                                               not no_persisted_state,
-                                              app_id, None, constraints,
+                                              "fabric:/" + app_id,
+                                              None, constraints,
                                               correlation_desc, load_list,
                                               place_policy, move_cost,
                                               bool(move_cost), activation_mode,
@@ -821,133 +854,142 @@ def sf_create_service(  # pylint: disable=too-many-arguments, too-many-locals
                                               quorum_loss_wait,
                                               stand_by_replica_keep)
 
-    sf_client = cf_sf_client(None)
-    sf_client.create_service(app_id, svc_desc, timeout)
+    client.create_service(app_id, svc_desc, timeout)
 
 
-def sf_update_service(service_id,  # pylint: disable=too-many-arguments
-                      stateless=False, stateful=False,
-                      constraints=None,
+def sf_update_service(client, service_id,  # pylint: disable=too-many-arguments
+                      stateless=False, stateful=False, constraints=None,
                       correlation=None, correlated_service=None,
                       load_metrics=None, placement_policy_list=None,
-                      move_cost=None, target_replica_set_size=None,
-                      min_replica_set_size=None, replica_restart_wait=None,
-                      quorum_loss_wait=None, stand_by_replica_keep=None,
-                      instance_count=None, timeout=60):
+                      move_cost=None, instance_count=None,
+                      target_replica_set_size=None,
+                      min_replica_set_size=None,
+                      replica_restart_wait=None,
+                      quorum_loss_wait=None,
+                      stand_by_replica_keep=None,
+                      timeout=60):
     """
     Updates the specified service using the given update description.
 
+
     :param str service_id: Target service to update. This is typically the full
     id of the service without the 'fabric:' URI scheme.
+
     :param bool stateless: Indicates the target service is a stateless service.
+
     :param bool stateful: Indicates the target service is a stateful service.
+
     :param str constraints: The placement constraints as a string. Placement
     constraints are boolean expressions on node properties and allow for
     restricting a service to particular nodes based on the service
     requirements. For example, to place a service on nodes where NodeType is
-    blue specify the following:"NodeColor == blue".
+    blue specify the following: "NodeColor == blue".
+
     :param str correlation: Correlate the service with an existing service
     using an alignment affinity. Possible values include: 'Invalid',
     'Affinity', 'AlignedAffinity', 'NonAlignedAffinity'.
+
     :param str correlated_service: Name of the target service to correlate
     with.
+
+    :param str load_metrics: JSON encoded list of metrics
+    used when load balancing across nodes.
+
+    :param str placement_policy_list: JSON encoded list of placement policies
+    for the service, and any associated domain names. Policies can be one or
+    more of: `NonPartiallyPlaceService`, `PreferPrimaryDomain`,
+    `RequireDomain`, `RequireDomainDistribution`.
+
     :param str move_cost: Specifies the move cost for the service. Possible
     values are: 'Zero', 'Low', 'Medium', 'High'.
-    :param int target_replica_set_size: The target replica set size as a
-    number. This applies to stateful services only.
-    :param int min_replica_set_size: The minimum replica set size as a number.
-    This applies to stateful services only.
-    :param int replica_restart_wait: The duration, in seconds, between when a
-    replica goes down and when a new replica is created. This applies to
-    stateful services only.
-    :param int quorum_loss_wait: The maximum duration, in seconds, for which a
-    partition is allowed to be in a state of quorum loss. This applies to
-    stateful services only.
-    :param int stand_by_replica_keep: The maximum duration, in seconds,  for
-    which StandBy replicas will be maintained before being removed. This
-    applies to stateful services only.
+
     :param int instance_count: The instance count. This applies to stateless
     services only.
-    :param long timeout: The server timeout for performing the operation in
-    seconds. This specifies the time duration that the client is willing to
-    wait for the requested operation to complete. The default value for this
-    parameter is 60 seconds.
-    """
-    # TODO a few of these parameters are shared across commands, should be
-    # moved to not be bound to individual commands
-    # TODO Validation for replica numbers inputs
 
+    :param int target_replica_set_size: The target replica set size as a
+    number. This applies to stateful services only.
+
+    :param int min_replica_set_size: The minimum replica set size as a number.
+    This applies to stateful services only.
+
+    :param str replica_restart_wait: The duration, in seconds, between when a
+    replica goes down and when a new replica is created. This applies to
+    stateful services only.
+
+    :param str quorum_loss_wait: The maximum duration, in seconds, for which a
+    partition is allowed to be in a state of quorum loss. This applies to
+    stateful services only.
+
+    :param str stand_by_replica_keep: The maximum duration, in seconds,  for
+    which StandBy replicas will be maintained before being removed. This
+    applies to stateful services only.
+    """
     # pylint: disable=line-too-long
     from azure.servicefabric.models.stateful_service_update_description import (  # noqa: justification, no way to shorten
         StatefulServiceUpdateDescription
     )
-    from azure.servicefabric.models.stateless_service_description import (
-        StatelessServiceDescription
+    # pylint: disable=line-too-long
+    from azure.servicefabric.models.stateless_service_update_description import ( # noqa: justification, no way to shorten
+        StatelessServiceUpdateDescription
     )
     from azure.cli.command_modules.sf._factory import cf_sf_client
 
+    # validate parameters
     if sum([stateless, stateful]) != 1:
         raise CLIError("Must specify either stateful or stateless, not both")
 
-    corre = sup_correlation_scheme(correlated_service, correlation)
+    correlation_desc = sup_correlation_scheme(correlated_service, correlation)
     load_list = sup_load_metrics(load_metrics)
     place_policy = sup_placement_policies(placement_policy_list)
+    sup_validate_move_cost(move_cost)
 
-    if move_cost is not None:
-        sup_validate_move_cost(move_cost)
+
 
     flags = sup_service_update_flags(target_replica_set_size, instance_count,
                                      replica_restart_wait, quorum_loss_wait,
                                      stand_by_replica_keep,
                                      min_replica_set_size, constraints,
-                                     place_policy, corre, load_list,
+                                     place_policy, correlation_desc, load_list,
                                      move_cost)
 
-    sud = None
+    update_desc = None
     if stateful:
         if instance_count is not None:
-            CLIError("Cannot specify instance count for a stateful service")
-
-        sud = StatefulServiceUpdateDescription(flags, constraints, corre,
-                                               load_list, place_policy,
-                                               move_cost,
-                                               target_replica_set_size,
-                                               min_replica_set_size,
-                                               replica_restart_wait,
-                                               quorum_loss_wait,
-                                               stand_by_replica_keep)
+            CLIError("Cannot specify an instance count for a stateful service")
+        update_desc = StatefulServiceUpdateDescription(flags, constraints,
+                                                       correlation_desc,
+                                                       load_list, place_policy,
+                                                       move_cost,
+                                                       target_replica_set_size,
+                                                       min_replica_set_size,
+                                                       replica_restart_wait,
+                                                       quorum_loss_wait,
+                                                       stand_by_replica_keep)
 
     if stateless:
         if target_replica_set_size is not None:
-            CLIError(
-                "Cannot specify target replica set size for stateless service"
-            )
+            CLIError("Cannot specify target replica set size for "
+                     "stateless service")
         if min_replica_set_size is not None:
-            CLIError(
-                "Cannot specify minimum replica set size for stateless service"
-            )
+            CLIError("Cannot specify minimum replica set size for "
+                     "stateless service")
         if replica_restart_wait is not None:
-            CLIError(
-                "Cannot specify replica restart wait duration for stateless "
-                "service"
-            )
+            CLIError("Cannot specify replica restart wait duration for "
+                     "stateless service")
         if quorum_loss_wait is not None:
-            CLIError(
-                "Cannot specify quorum loss wait duration for stateless "
-                "service"
-            )
+            CLIError("Cannot specify quorum loss wait duration for "
+                     "stateless service")
         if stand_by_replica_keep is not None:
-            CLIError(
-                "Cannot specify standby replica keep duration for stateless "
-                "service"
-            )
-        # pylint: disable=redefined-variable-type
-        sud = StatelessServiceDescription(flags, constraints, corre, load_list,
-                                          place_policy, move_cost,
-                                          instance_count)
+            CLIError("Cannot specify standby replica keep duration for "
+                     "stateless service")
+        update_desc = StatelessServiceUpdateDescription(flags, constraints,
+                                                        correlation_desc,
+                                                        load_list,
+                                                        place_policy,
+                                                        move_cost,
+                                                        instance_count)
 
-    sf_client = cf_sf_client(None)
-    sf_client.update_service(service_id, sud, timeout)
+    client.update_service(service_id, update_desc, timeout)
 
 
 def sf_start_chaos(  # pylint: disable=too-many-arguments
