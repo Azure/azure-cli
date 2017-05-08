@@ -86,7 +86,7 @@ def transform_deployments_list(result):
 
 cli_command(__name__, 'group deployment create', 'azure.cli.command_modules.resource.custom#deploy_arm_template', no_wait_param='no_wait')
 cli_generic_wait_command(__name__, 'group deployment wait', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.get', cf_deployments)
-cli_command(__name__, 'group deployment list', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.list', cf_deployments, table_transformer=transform_deployments_list)
+cli_command(__name__, 'group deployment list', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.list_by_resource_group', cf_deployments, table_transformer=transform_deployments_list)
 cli_command(__name__, 'group deployment show', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.get', cf_deployments, exception_handler=empty_on_404)
 cli_command(__name__, 'group deployment delete', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.delete', cf_deployments)
 cli_command(__name__, 'group deployment validate', 'azure.cli.command_modules.resource.custom#validate_arm_template')
