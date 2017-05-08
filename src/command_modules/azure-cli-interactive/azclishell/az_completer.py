@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import absolute_import, division, print_function, unicode_literals
+import sys
 
 from prompt_toolkit.completion import Completer, Completion
 
@@ -86,7 +87,7 @@ def sort_completions(gen):
 class AzCompleter(Completer):
     """ Completes Azure CLI commands """
 
-    def __init__(self, commands, global_params=True):
+    def __init__(self, commands, global_params=True, outstream=sys.stderr):
         # dictionary of command to descriptions
         self.command_description = commands.descrip
         # from a command to a list of parameters
@@ -121,7 +122,7 @@ class AzCompleter(Completer):
         from azclishell._dump_commands import CMD_TABLE
         self.cmdtab = CMD_TABLE
         self.parser.load_command_table(CMD_TABLE)
-        self.argsfinder = ArgsFinder(self.parser)
+        self.argsfinder = ArgsFinder(self.parser, outstream)
 
     def validate_completion(self, param, words, text_before_cursor, double=True):
         """ validates that a param should be completed """
@@ -204,7 +205,6 @@ class AzCompleter(Completer):
                             for comp in gen_dyn_completion(
                                     comp, started_param, prefix, text):
                                 yield comp
-
                     except TypeError:
                         try:
                             for comp in self.cmdtab[self.curr_command].\
