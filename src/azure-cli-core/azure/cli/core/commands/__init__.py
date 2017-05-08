@@ -18,6 +18,7 @@ from importlib import import_module
 import six
 from six import string_types, reraise
 
+from azure.cli.core.application import APPLICATION
 import azure.cli.core.azlogging as azlogging
 import azure.cli.core.telemetry as telemetry
 from azure.cli.core.util import CLIError
@@ -233,8 +234,6 @@ class CliCommand(object):  # pylint:disable=too-many-instance-attributes
 
     @staticmethod
     def _should_load_description():
-        from azure.cli.core.application import APPLICATION
-
         return not APPLICATION.session['completer_active']
 
     def load_arguments(self):
