@@ -6,6 +6,7 @@
 # pylint: disable=no-self-use,too-many-arguments,line-too-long
 
 from __future__ import print_function
+from sys import stderr
 
 from azure.cli.core.decorators import transfer_doc
 from azure.cli.core.util import CLIError
