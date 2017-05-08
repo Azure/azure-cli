@@ -33,7 +33,7 @@ logger = azlogging.get_az_logger(__name__)
 
 
 def sf_create_compose_application(  # pylint: disable=too-many-arguments
-        compose_file, application_id, repo_user=None, encrypted=False,
+        client, compose_file, application_id, repo_user=None, encrypted=False,
         repo_pass=None, timeout=60):
     # We need to read from a file which makes this a custom command
     # Encrypted param to indicate a password will be prompted
@@ -43,19 +43,18 @@ def sf_create_compose_application(  # pylint: disable=too-many-arguments
     :param str application_id:  The id of application to create from
     Compose file. This is typically the full id of the application
     including "fabric:" URI scheme
+
     :param str compose_file: Path to the Compose file to use
+
     :param str repo_user: Container repository user name if needed for
     authentication
+
     :param bool encrypted: If true, indicate to use an encrypted password
     rather than prompting for a plaintext one
+
     :param str repo_pass: Encrypted container repository password
-    :param long timeout: The server timeout for performing the operation in
-    seconds. This specifies the time duration that the client is willing to
-    wait for the requested operation to complete. The default value for this
-    parameter is 60 seconds.
     """
     from azure.cli.core.util import read_file_content
-    from azure.cli.command_modules.sf._factory import cf_sf_client
     from azure.cli.core.prompting import prompt_pass
     # pylint: disable=line-too-long
     from azure.servicefabric.models.create_compose_application_description import (  # noqa: justification, no way to shorten
@@ -86,8 +85,7 @@ def sf_create_compose_application(  # pylint: disable=too-many-arguments
     model = CreateComposeApplicationDescription(application_id, file_contents,
                                                 repo_cred)
 
-    sf_client = cf_sf_client(None)
-    sf_client.create_compose_application(model, timeout)
+    client.create_compose_application(model, timeout)
 
 
 def sf_select(endpoint, cert=None,  # pylint: disable=too-many-arguments
@@ -327,7 +325,6 @@ def sf_create_app(client,  # pylint: disable=too-many-locals,too-many-arguments
     from azure.servicefabric.models.application_metric_description import (
         ApplicationMetricDescription
     )
-    from azure.cli.command_modules.sf._factory import cf_sf_client
 
     if min_node_count > max_node_count:
         raise CLIError("The minimum node reserve capacity count cannot "
@@ -463,7 +460,6 @@ def sf_upgrade_app(  # pylint: disable=too-many-arguments,too-many-locals
     from azure.servicefabric.models.service_type_health_policy_map_item import (  # noqa: justification, no way to shorten
         ServiceTypeHealthPolicyMapItem
     )
-    from azure.cli.command_modules.sf._factory import cf_sf_client
 
     monitoring_policy = MonitoringPolicyDescription(
         failure_action, health_check_wait_duration,
@@ -800,7 +796,6 @@ def sf_create_service(  # pylint: disable=too-many-arguments, too-many-locals
     from azure.servicefabric.models.uniform_int64_range_partition_scheme_description import (  # noqa: justification, no way to shorten
         UniformInt64RangePartitionSchemeDescription
     )
-    from azure.cli.command_modules.sf._factory import cf_sf_client
 
     # Validate and parse input
 
@@ -966,7 +961,6 @@ def sf_update_service(client, service_id,  # pylint: disable=too-many-arguments
     from azure.servicefabric.models.stateless_service_update_description import ( # noqa: justification, no way to shorten
         StatelessServiceUpdateDescription
     )
-    from azure.cli.command_modules.sf._factory import cf_sf_client
 
     # validate parameters
     if sum([stateless, stateful]) != 1:
@@ -1026,8 +1020,8 @@ def sf_update_service(client, service_id,  # pylint: disable=too-many-arguments
     client.update_service(service_id, update_desc, timeout)
 
 
-def sf_start_chaos(client,  # pylint: disable=too-many-arguments
-        time_to_run="4294967295", max_cluster_stabilization=60,
+def sf_start_chaos(  # pylint: disable=too-many-arguments
+        client, time_to_run="4294967295", max_cluster_stabilization=60,
         max_concurrent_faults=1, disable_move_replica_faults=False,
         wait_time_between_faults=20,
         wait_time_between_iterations=30, warning_as_error=False,
@@ -1082,7 +1076,6 @@ def sf_start_chaos(client,  # pylint: disable=too-many-arguments
     from azure.servicefabric.models.cluster_health_policy import (
         ClusterHealthPolicy
     )
-    from azure.cli.command_modules.sf._factory import cf_sf_client
 
     health_map = None
     if app_type_health_policy_map:
@@ -1509,7 +1502,6 @@ def sf_report_node_health(client,  # pylint: disable=too-many-arguments
     # TODO Move common HealthInformation params to _params
 
     from azure.servicefabric.models.health_information import HealthInformation
-    from azure.cli.command_modules.sf._factory import cf_sf_client
 
     info = HealthInformation(source_id, health_property, health_state, ttl,
                              description, sequence_number, remove_when_expired)
