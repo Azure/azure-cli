@@ -7,8 +7,8 @@ import os
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
-from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase,
-                                                     JMESPathCheck, NoneCheck)
+from azure.cli.testsdk.vcr_test_base import (ResourceGroupVCRTestBase,
+                                             JMESPathCheck, NoneCheck)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 

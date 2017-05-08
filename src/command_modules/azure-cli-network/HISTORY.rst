@@ -3,7 +3,7 @@
 Release History
 ===============
 
-unreleased
+2.0.5 (2017-05-05)
 ++++++++++++++++++
 
 * Add `network watcher test-connectivity` command.

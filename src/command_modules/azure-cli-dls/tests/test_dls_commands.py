@@ -8,13 +8,13 @@
 # pylint: disable=bad-continuation
 from __future__ import print_function
 
+import datetime
 import os
 import time
-import datetime
-
 from shutil import rmtree
+
 from azure.cli.core.util import CLIError
-from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck)
+from azure.cli.testsdk.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck)
 
 
 class DataLakeStoreFileAccessScenarioTest(ResourceGroupVCRTestBase):

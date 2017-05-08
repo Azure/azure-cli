@@ -6,13 +6,13 @@
 import os
 import time
 import unittest
-# AZURE CLI RESOURCE TEST DEFINITIONS
-from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase, JMESPathCheck, NoneCheck,
-                                                     BooleanCheck,
-                                                     ResourceGroupVCRTestBase,
-                                                     MOCKED_SUBSCRIPTION_ID)
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck as JCheck)
+# AZURE CLI RESOURCE TEST DEFINITIONS
+from azure.cli.testsdk.vcr_test_base import (VCRTestBase, JMESPathCheck, NoneCheck,
+                                             BooleanCheck,
+                                             ResourceGroupVCRTestBase,
+                                             MOCKED_SUBSCRIPTION_ID)
 
 
 # pylint: disable=method-hidden
