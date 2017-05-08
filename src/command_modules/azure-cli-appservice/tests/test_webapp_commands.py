@@ -124,12 +124,11 @@ class WebappQuickCreateTest(ScenarioTest):
         self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.1"'.format(resource_group, webapp_name, plan))
 
         import time
-        time.sleep(30) # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
+        time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         import requests
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name))
-        #verify the web page
+        # verify the web page
         self.assertTrue('Hello world' in str(r.content))
-
 
     @ResourceGroupPreparer(location='westus')
     def test_linux_webapp_quick_create(self, resource_group, resource_group_location):
