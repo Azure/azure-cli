@@ -92,7 +92,7 @@ def get_access_key_by_storage_account_name(storage_account_name, resource_group_
         0].value  # pylint: disable=no-member
 
 
-def arm_deploy_template_new_storage(resource_group_name,  # pylint: disable=too-many-arguments
+def arm_deploy_template_new_storage(resource_group_name,
                                     registry_name,
                                     location,
                                     sku,
@@ -127,7 +127,7 @@ def arm_deploy_template_new_storage(resource_group_name,  # pylint: disable=too-
         get_arm_service_client().deployments, resource_group_name, deployment_name, properties)
 
 
-def arm_deploy_template_existing_storage(resource_group_name,  # pylint: disable=too-many-arguments
+def arm_deploy_template_existing_storage(resource_group_name,
                                          registry_name,
                                          location,
                                          sku,
@@ -183,7 +183,7 @@ def _arm_deploy_template(deployments_client,
     return deployments_client.create_or_update(resource_group_name, deployment_name, properties)
 
 
-def _parameters(registry_name,  # pylint: disable=too-many-arguments
+def _parameters(registry_name,
                 location,
                 sku,
                 admin_user_enabled,

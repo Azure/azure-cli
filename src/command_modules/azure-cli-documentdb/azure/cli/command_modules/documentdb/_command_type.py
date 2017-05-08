@@ -6,7 +6,7 @@
 from azure.cli.core.commands import create_command, command_table
 
 
-def cli_documentdb_data_plane_command(name,  # pylint: disable=too-many-arguments
+def cli_documentdb_data_plane_command(name,
                                       operation, client_factory, transform=None,
                                       table_transformer=None, exception_handler=None):
     """Registers an Azure CLI DocumentDB Data Plane command. These commands always include the

@@ -21,7 +21,6 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
 BlobCopyResult = namedtuple('BlobCopyResult', ['name', 'copy_id'])
 
 
-# pylint: disable=too-many-arguments
 def storage_blob_copy_batch(client, source_client,
                             destination_container=None, source_container=None, source_share=None,
                             source_sas=None, pattern=None, dryrun=False):

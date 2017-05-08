@@ -13,7 +13,7 @@ class VstsContinuousDeliveryProvider(object):
     def __init__(self):
         self._progress_last_message = ''
 
-    def setup_continuous_delivery(self,  # pylint:disable=too-many-arguments
+    def setup_continuous_delivery(self,
                                   resource_group_name, name, repo_url, branch, git_token,
                                   slot, cd_app_type, cd_account, cd_create_account, location):
         """
