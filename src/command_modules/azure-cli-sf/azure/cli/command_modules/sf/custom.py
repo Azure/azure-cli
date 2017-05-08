@@ -650,6 +650,7 @@ def sup_stateful_flags(rep_restart_wait=None, quorum_loss_wait=None,
         f += 4
     return f
 
+
 def sup_service_update_flags(  # pylint: disable=too-many-arguments
         target_rep_size=None, instance_count=None, rep_restart_wait=None,
         quorum_loss_wait=None, standby_rep_keep=None, min_rep_size=None,
@@ -976,8 +977,6 @@ def sf_update_service(client, service_id,  # pylint: disable=too-many-arguments
     place_policy = sup_placement_policies(placement_policy_list)
     sup_validate_move_cost(move_cost)
 
-
-
     flags = sup_service_update_flags(target_replica_set_size, instance_count,
                                      replica_restart_wait, quorum_loss_wait,
                                      stand_by_replica_keep,
@@ -1015,6 +1014,7 @@ def sf_update_service(client, service_id,  # pylint: disable=too-many-arguments
         if stand_by_replica_keep is not None:
             CLIError("Cannot specify standby replica keep duration for "
                      "stateless service")
+        # pylint: disable=redefined-variable-type
         update_desc = StatelessServiceUpdateDescription(flags, constraints,
                                                         correlation_desc,
                                                         load_list,
