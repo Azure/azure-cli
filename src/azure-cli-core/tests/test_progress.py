@@ -61,7 +61,6 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         view.write({})
         self.assertEqual(view.spinner.label, 'In Progress')
         before = view.spinner.total
-
         view.write({})
         after = view.spinner.total
         self.assertTrue(after >= before)

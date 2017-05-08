@@ -1,7 +1,7 @@
 .. :changelog:
 
 Release History
-
+===============
 
 0.3.0 (2017-05-05)
 ++++++++++++++++++
@@ -9,8 +9,6 @@ Release History
 * Integrate interactive into az
 * Colors Options
 * Rename 'shell' => 'interactive'
-* --progress flag
-
 
 0.2.1
 ++++++++++++++++++
