@@ -12,18 +12,77 @@ helps['monitor'] = """
             short-summary: Commands to manage Azure Monitor service.
             """
 # MANAGEMENT COMMANDS HELPS
-helps['monitor alert-rules'] = """
-            type: group
-            short-summary: Commands to manage alerts assigned to Azure resources.
-            """
-helps['monitor alert-rules update'] = """
-            type: command
-            short-summary: Updates an alert rule.
-            """
-helps['monitor alert-rule-incidents'] = """
-            type: group
-            short-summary: Commands to manage alert rule incidents.
-            """
+
+# region Alerts
+
+helps['monitor alert'] = """
+    type: group
+    short-summary: Commands to manage alerts on Azure resources.
+    """
+
+helps['monitor alert rule'] = """
+    type: group
+    short-summary: Commands to manage alert rules.
+    """
+
+helps['monitor alert rule create'] = """
+    type: command
+    short-summary: Create an alert rule.
+    """
+
+helps['monitor alert rule update'] = """
+    type: command
+    short-summary: Update an alert rule.
+    """
+
+helps['monitor alert rule delete'] = """
+    type: command
+    short-summary: Delete an alert rule.
+    """
+
+helps['monitor alert rule list'] = """
+    type: command
+    short-summary: List alert rules in a resource group.
+    """
+
+helps['monitor alert rule show'] = """
+    type: command
+    short-summary: Show an alert rule.
+    """
+
+helps['monitor alert incident'] = """
+    type: group
+    short-summary: Get information on alert incidents.
+    """
+
+helps['monitor alert incident show'] = """
+    type: command
+    short-summary: Show details of an alert rule incident.
+    """
+
+helps['monitor alert incident list'] = """
+    type: command
+    short-summary: List all incidents for an alert rule.
+    """
+
+helps['monitor alert action'] = """
+    type: group
+    short-summary: Manage actions associated with alert rules.
+    """
+
+helps['monitor alert action add-email'] = """
+    type: command
+    short-summary: Send an email when an alert fires.
+    """
+
+helps['monitor alert action add-webhook'] = """
+    type: command
+    short-summary: Trigger a webhook when an alert fires.
+    """
+
+
+# endregion
+
 helps['monitor log-profiles'] = """
             type: group
             short-summary: Commands to manage the log profiles assigned to Azure subscription.

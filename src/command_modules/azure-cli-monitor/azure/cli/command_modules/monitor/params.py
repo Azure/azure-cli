@@ -5,38 +5,60 @@
 
 from azure.cli.core.sdk.util import ParametersContext
 from azure.cli.core.util import get_json_object
+
+from azure.cli.core.commands import \
+    (VersionConstraint, CliArgumentType, register_cli_argument, register_extra_cli_argument)
+from azure.cli.core.commands.parameters import (location_type, get_resource_name_completion_list,
+                                                enum_choice_list, tags_type, ignore_type,
+                                                file_type, get_resource_group_completion_list,
+                                                three_state_flag, model_choice_list)
 from azure.cli.command_modules.monitor.validators import (validate_diagnostic_settings)
+from azure.mgmt.monitor.models.monitor_management_client_enums import \
+    (MetricStatisticType, TimeAggregationType, ConditionOperator, TimeAggregationOperator) 
 
+name_arg_type = CliArgumentType(options_list=['--name', '-n'], metavar='NAME')
 
-with ParametersContext(command='monitor alert-rules') as c:
-    c.register_alias('name', ('--azure-resource-name',))
-    c.register_alias('rule_name', ('--name', '-n'))
+# region Alerts
 
-with ParametersContext(command='monitor alert-rules create') as c:
-    from azure.mgmt.monitor.models.alert_rule_resource import AlertRuleResource
+register_cli_argument('monitor alert', 'rule_name', name_arg_type, id_part='name')
 
-    c.expand('parameters', AlertRuleResource)
-    c.register('condition', ('--condition',),
-               type=get_json_object,
-               help='JSON encoded condition configuration. Use @{file} to load from a file.')
-    c.register('actions', ('--actions',),
-               type=get_json_object,
-               help='JSON encoded array of actions that are performed when the alert '
-                    'rule becomes active, and when an alert condition is resolved. '
-                    'Use @{file} to load from a file.')
+register_cli_argument('monitor alert incident', 'rule_name', options_list=['--rule-name'], id_part='name')
+register_cli_argument('monitor alert incident', 'incident_name', name_arg_type, id_part='child_name')
 
-with ParametersContext(command='monitor alert-rules show') as c:
-    c.argument('rule_name', id_part='name')
+register_cli_argument('monitor alert rule', 'operator', **enum_choice_list(ConditionOperator))
+register_cli_argument('monitor alert rule', 'time_aggregation', **enum_choice_list(TimeAggregationOperator))
 
-with ParametersContext(command='monitor alert-rules delete') as c:
-    c.argument('rule_name', id_part='name')
+#with ParametersContext(command='monitor alert-rule') as c:
+#    c.register_alias('name', ('--azure-resource-name',))
+#    c.register_alias('rule_name', ('--name', '-n'))
 
-#  https://github.com/Azure/azure-rest-api-specs/issues/1017
-with ParametersContext(command='monitor alert-rules list') as c:
-    c.ignore('filter')
+#with ParametersContext(command='monitor alert-rule create') as c:
+#    from azure.mgmt.monitor.models.alert_rule_resource import AlertRuleResource
 
-with ParametersContext(command='monitor alert-rule-incidents') as c:
-    c.register_alias('incident_name', ('--name', '-n'))
+#    c.expand('parameters', AlertRuleResource)
+#    c.register('condition', ('--condition',),
+#               type=get_json_object,
+#               help='JSON encoded condition configuration. Use @{file} to load from a file.')
+#    c.register('actions', ('--actions',),
+#               type=get_json_object,
+#               help='JSON encoded array of actions that are performed when the alert '
+#                    'rule becomes active, and when an alert condition is resolved. '
+#                    'Use @{file} to load from a file.')
+
+#with ParametersContext(command='monitor alert-rules show') as c:
+#    c.argument('rule_name', id_part='name')
+
+#with ParametersContext(command='monitor alert-rules delete') as c:
+#    c.argument('rule_name', id_part='name')
+
+##  https://github.com/Azure/azure-rest-api-specs/issues/1017
+#with ParametersContext(command='monitor alert-rules list') as c:
+#    c.ignore('filter')
+
+#with ParametersContext(command='monitor alert-rule-incidents') as c:
+#    c.register_alias('incident_name', ('--name', '-n'))
+
+# endregion
 
 with ParametersContext(command='monitor autoscale-settings') as c:
     c.register_alias('name', ('--azure-resource-name',))

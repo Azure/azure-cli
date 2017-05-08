@@ -13,6 +13,31 @@ DEFAULT_QUERY_TIME_RANGE = 3600000
 # ISO format with explicit indication of timezone
 DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
+# region Alerts
+
+def add_email_action(client, resource_group_name, rule_name, send_to_service_owners=None,
+                     custom_emails=None):
+    pass
+
+
+def add_webhook_action(client, resource_group_name, rule_name, service_uri, properties=None):
+    pass
+
+
+def create_metric_rule(client, resource_group_name, rule_name, target, metric_name,
+                       operator, threshold, window_size=None, time_aggregation=None,
+                       description=None, enabled=True, location=None, tags=None):
+    from azure.mgmt.monitor.models import \
+        (AlertRuleResource, ThresholdRuleCondition, RuleMetricDataSource)
+    metric = RuleMetricDataSource(target, metric_name)
+    condition = ThresholdRuleCondition(operator, threshold, metric, window_size, time_aggregation)
+    rule = AlertRuleResource(location, rule_name, enabled,
+                             condition, tags, description, None)
+    return client.alert_rules.create_or_update(resource_group_name, rule_name, rule)
+
+
+# endregion
+
 
 def list_metric_definitions(client, resource_id, metric_names=None):
     '''Commands to manage metric definitions.

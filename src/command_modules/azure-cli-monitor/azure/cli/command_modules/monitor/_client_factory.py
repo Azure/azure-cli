@@ -5,30 +5,22 @@
 
 
 # MANAGEMENT CLIENT FACTORIES
-def get_monitor_management_client(_):
+def cf_monitor(_):
     from azure.mgmt.monitor import MonitorManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(MonitorManagementClient)
 
 
 def get_monitor_autoscale_settings_operation(kwargs):
-    return get_monitor_management_client(kwargs).autoscale_settings
+    return cf_monitor(kwargs).autoscale_settings
 
 
 def get_monitor_diagnostic_settings_operation(kwargs):
-    return get_monitor_management_client(kwargs).service_diagnostic_settings
-
-
-def get_monitor_alert_rules_operation(kwargs):
-    return get_monitor_management_client(kwargs).alert_rules
-
-
-def get_monitor_alert_rule_incidents_operation(kwargs):
-    return get_monitor_management_client(kwargs).alert_rule_incidents
+    return cf_monitor(kwargs).service_diagnostic_settings
 
 
 def get_monitor_log_profiles_operation(kwargs):
-    return get_monitor_management_client(kwargs).log_profiles
+    return cf_monitor(kwargs).log_profiles
 
 
 # DATA CLIENT FACTORIES
