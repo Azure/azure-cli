@@ -326,7 +326,12 @@ def sf_create_app(client,  # pylint: disable=too-many-locals,too-many-arguments
         ApplicationMetricDescription
     )
 
-    if min_node_count > max_node_count:
+    if (any([min_node_count, max_node_count]) and
+            not all([min_node_count, max_node_count])):
+        raise CLIError("Must specify both maximum and minimum node count")
+
+    if (all([min_node_count, max_node_count]) and
+            min_node_count > max_node_count):
         raise CLIError("The minimum node reserve capacity count cannot "
                        "be greater than the maximum node count")
 
@@ -467,9 +472,9 @@ def sf_upgrade_app(  # pylint: disable=too-many-arguments,too-many-locals
         upgrade_timeout, upgrade_domain_timeout
     )
 
-    app_params = None
+    # Must always have empty list
+    app_params = []
     if parameters:
-        app_params = []
         for k in parameters:
             # Create an application parameter for every of these
             p = ApplicationParameter(k, parameters[k])

@@ -35,6 +35,13 @@ with ParametersContext(command="sf service update") as c:
     c.argument("target_replica_set_size", type=int, default=None)
     c.argument("min_replica_set_size", type=int, default=None)
 
+with ParametersContext(command="sf service resolve") as c:
+    c.argument("partition_key_type", type=int, default=None)
+
+with ParametersContext(command="sf service health") as c:
+    c.argument("events_health_state_filter", type=int, default=None)
+    c.argument("partitions_health_state_filter", type=int, default=None)
+
 # Application commands
 with ParametersContext(command="sf application create") as c:
     c.argument("parameters", type=get_json_object, default=None)
@@ -50,6 +57,24 @@ with ParametersContext(command="sf application upgrade") as c:
                default=None)
     c.argument("service_health_policy", type=get_json_object, default=None)
 
+with ParametersContext(command="sf application health") as c:
+    c.argument("events_health_state_filter", type=int, default=0)
+    c.argument("deployed_applications_health_state_filter", type=int,
+               default=0)
+    c.argument("services_health_state_filter", type=int, default=0)
+
+with ParametersContext(command="sf application type") as c:
+    c.argument("max_results", type=int, default=None)
+
+# Partition commands
+with ParametersContext(command="sf partition health") as c:
+    c.argument("events_health_state_filter", type=int, default=None)
+    c.argument("replicas_health_state_filter", type=int, default=None)
+
+# Replica commands
+with ParametersContext(command="sf replica health") as c:
+    c.argument("events_health_state_filter", type=int, default=None)
+
 # Chaos commands
 with ParametersContext(command="sf chaos start") as c:
     c.argument("max_cluster_stabilization", type=int, default=60)
@@ -64,3 +89,13 @@ with ParametersContext(command="sf chaos start") as c:
 # Node commands
 with ParametersContext(command="sf node service-package-upload") as c:
     c.argument("share_policy", type=get_json_object, default=None)
+
+# Cluster commands
+with ParametersContext(command="sf cluster health") as c:
+    c.argument("nodes_health_state_filter", type=int, default=0)
+    c.argument("applications_health_state_filter", type=int, default=0)
+    c.argument("events_health_state_filter", type=int, default=0)
+
+# Compose commands
+with ParametersContext(command="sf compose list") as c:
+    c.argument("max_results", type=int, default=None)
