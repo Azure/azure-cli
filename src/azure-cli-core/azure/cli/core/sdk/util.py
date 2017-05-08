@@ -40,7 +40,6 @@ class ServiceGroup(object):
 
 
 class CommandGroup(object):
-    # pylint: disable=too-many-arguments
     def __init__(self, scope, group_name, client_factory, service_adapter=None, custom_path=None):
         self._scope = scope
         self._group_name = group_name
@@ -70,7 +69,6 @@ class CommandGroup(object):
                     client_factory=self._client_factory,
                     confirmation=confirmation)
 
-    # pylint: disable=too-many-arguments
     def generic_update_command(self, name, getter_op, setter_op, custom_func_name=None,
                                setter_arg_name='parameters'):
         if custom_func_name:

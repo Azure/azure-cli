@@ -14,7 +14,7 @@ from ._client_factory import web_client_factory
 from ._validators import validate_existing_function_app, validate_existing_web_app
 
 
-def _generic_site_operation(resource_group_name, name, operation_name, slot=None,  # pylint: disable=too-many-arguments
+def _generic_site_operation(resource_group_name, name, operation_name, slot=None,
                             extra_parameter=None, client=None):
     client = client or web_client_factory()
     m = getattr(client.web_apps,

@@ -50,7 +50,7 @@ class CloudSuffixNotSetException(CLIError):
 
 class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many-instance-attributes
 
-    def __init__(self,  # pylint: disable=too-many-arguments
+    def __init__(self,
                  management=None,
                  resource_manager=None,
                  sql_management=None,
@@ -89,7 +89,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
 
 class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
 
-    def __init__(self,  # pylint: disable=too-many-arguments
+    def __init__(self,
                  storage_endpoint=None,
                  keyvault_dns=None,
                  sql_server_hostname=None,
@@ -113,7 +113,6 @@ class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
 class Cloud(object):  # pylint: disable=too-few-public-methods
     """ Represents an Azure Cloud instance """
 
-    # pylint: disable=too-many-arguments
     def __init__(self,
                  name,
                  endpoints=None,

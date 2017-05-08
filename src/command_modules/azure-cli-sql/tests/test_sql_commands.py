@@ -22,7 +22,6 @@ server_name_max_length = 63
 
 
 class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
-    # pylint: disable=too-many-arguments
     def __init__(self, name_prefix=server_name_prefix, parameter_name='server', location='westus',
                  admin_user='admin123', admin_password='SecretPassword123',
                  resource_group_parameter_name='resource_group', skip_delete=True):
@@ -649,7 +648,6 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
 class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
 
     # create 2 servers in the same resource group, and 1 server in a different resource group
-    # pylint: disable=too-many-arguments
     @ResourceGroupPreparer(parameter_name="resource_group_1",
                            parameter_name_for_location="resource_group_location_1")
     @ResourceGroupPreparer(parameter_name="resource_group_2",

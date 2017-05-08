@@ -5,7 +5,6 @@
 
 from __future__ import print_function
 
-# pylint: disable=too-many-arguments
 def get_nose_runner(report_folder, parallel=True, process_timeout=600, process_restart=True,
                     xunit_report=False, exclude_integration=True):
     """Create a nose execution method"""

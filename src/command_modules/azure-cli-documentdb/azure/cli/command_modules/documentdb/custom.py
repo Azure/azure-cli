@@ -37,7 +37,7 @@ DEFAULT_INDEXING_POLICY = """{
 }"""
 
 
-def cli_documentdb_create(client,  # pylint:disable=too-many-arguments
+def cli_documentdb_create(client,
                           resource_group_name,
                           account_name,
                           locations=None,
@@ -77,7 +77,7 @@ def cli_documentdb_create(client,  # pylint:disable=too-many-arguments
     return docdb_account
 
 
-def cli_documentdb_update(client,  # pylint: disable=too-many-arguments
+def cli_documentdb_update(client,
                           resource_group_name,
                           account_name,
                           locations=None,
@@ -234,7 +234,7 @@ def _populate_collection_definition(collection,
     return changed
 
 
-def cli_documentdb_collection_create(client,  # pylint: disable=too-many-arguments
+def cli_documentdb_collection_create(client,
                                      database_id,
                                      collection_id,
                                      throughput=None,
@@ -266,7 +266,7 @@ def _find_offer(client, collection_self_link):
     return None
 
 
-def cli_documentdb_collection_update(client,  # pylint: disable=too-many-arguments
+def cli_documentdb_collection_update(client,
                                      database_id,
                                      collection_id,
                                      throughput=None,

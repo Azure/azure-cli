@@ -352,7 +352,7 @@ class BatchArgumentTree(object):
             if kwargs[self._request_param['name']] is None:
                 raise ValueError(message.format(self._request_param['model']))
 
-    def queue_argument(self, name=None, path=None, root=None,  # pylint:disable=too-many-arguments
+    def queue_argument(self, name=None, path=None, root=None,
                        options=None, type=None,  # pylint: disable=redefined-builtin
                        dependencies=None):
         """Add pending command line argument
@@ -697,7 +697,7 @@ class AzureBatchDataPlaneCommand(object):
                 options['options_list'] = [arg_name(param)]
                 yield (param, CliCommandArgument(param, **options))
 
-    def _resolve_conflict(self,  # pylint:disable=too-many-arguments
+    def _resolve_conflict(self,
                           arg, param, path, options, typestr, dependencies, conflicting):
         """Resolve conflicting command line arguments.
         :param str arg: Name of the command line argument.
@@ -900,7 +900,7 @@ def validate_client_parameters(namespace):
         namespace.account_key = None
 
 
-def cli_batch_data_plane_command(name,  # pylint:disable=too-many-arguments
+def cli_batch_data_plane_command(name,
                                  operation, client_factory, transform=None, flatten=FLATTEN,
                                  ignore=None, validator=None, silent=None):
     """ Registers an Azure CLI Batch Data Plane command. These commands must respond to a

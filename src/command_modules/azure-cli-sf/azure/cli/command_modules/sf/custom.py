@@ -32,7 +32,7 @@ az_config = AzConfig()
 logger = azlogging.get_az_logger(__name__)
 
 
-def sf_create_compose_application(  # pylint: disable=too-many-arguments
+def sf_create_compose_application(
         compose_file, application_id, repo_user=None, encrypted=False,
         repo_pass=None, timeout=60):
     # We need to read from a file which makes this a custom command
@@ -90,7 +90,7 @@ def sf_create_compose_application(  # pylint: disable=too-many-arguments
     sf_client.create_compose_application(model, timeout)
 
 
-def sf_select(endpoint, cert=None,  # pylint: disable=too-many-arguments
+def sf_select(endpoint, cert=None,
               key=None, pem=None, ca=None, no_verify=False):
     """
     Connects to a Service Fabric cluster endpoint.
@@ -616,7 +616,7 @@ def sup_stateful_flags(rep_restart_wait=None, quorum_loss_wait=None,
     return f
 
 
-def sup_service_update_flags(  # pylint: disable=too-many-arguments
+def sup_service_update_flags(
         target_rep_size=None, instance_count=None, rep_restart_wait=None,
         quorum_loss_wait=None, standby_rep_keep=None, min_rep_size=None,
         placement_constraints=None, placement_policy=None, correlation=None,
@@ -825,7 +825,7 @@ def sf_create_service(  # pylint: disable=too-many-arguments, too-many-locals
     sf_client.create_service(app_id, svc_desc, timeout)
 
 
-def sf_update_service(service_id,  # pylint: disable=too-many-arguments
+def sf_update_service(service_id,
                       stateless=False, stateful=False,
                       constraints=None,
                       correlation=None, correlated_service=None,
@@ -950,7 +950,7 @@ def sf_update_service(service_id,  # pylint: disable=too-many-arguments
     sf_client.update_service(service_id, sud, timeout)
 
 
-def sf_start_chaos(  # pylint: disable=too-many-arguments
+def sf_start_chaos(
         time_to_run="4294967295", max_cluster_stabilization=60,
         max_concurrent_faults=1, disable_move_replica_faults=False,
         wait_time_between_faults=20,
@@ -1034,7 +1034,7 @@ def sf_start_chaos(  # pylint: disable=too-many-arguments
     sf_client.start_chaos(chaos_params, timeout)
 
 
-def sf_report_app_health(application_id,  # pylint: disable=too-many-arguments
+def sf_report_app_health(application_id,
                          source_id, health_property,
                          health_state, ttl=None, description=None,
                          sequence_number=None, remove_when_expired=None,
@@ -1111,7 +1111,7 @@ def sf_report_app_health(application_id,  # pylint: disable=too-many-arguments
     sf_client.report_application_health(application_id, info, timeout)
 
 
-def sf_report_svc_health(service_id,  # pylint: disable=too-many-arguments
+def sf_report_svc_health(service_id,
                          source_id, health_property, health_state,
                          ttl=None, description=None, sequence_number=None,
                          remove_when_expired=None, timeout=60):
@@ -1191,7 +1191,7 @@ def sf_report_svc_health(service_id,  # pylint: disable=too-many-arguments
     sf_client.report_service_health(service_id, info, timeout)
 
 
-def sf_report_partition_health(  # pylint: disable=too-many-arguments
+def sf_report_partition_health(
         partition_id, source_id, health_property, health_state, ttl=None,
         description=None, sequence_number=None, remove_when_expired=None,
         timeout=60):
@@ -1270,7 +1270,7 @@ def sf_report_partition_health(  # pylint: disable=too-many-arguments
     sf_client.report_partition_health(partition_id, info, timeout)
 
 
-def sf_report_replica_health(  # pylint: disable=too-many-arguments
+def sf_report_replica_health(
         partition_id, replica_id, source_id, health_state, health_property,
         service_kind="Stateful", ttl=None, description=None,
         sequence_number=None, remove_when_expired=None, timeout=60):
@@ -1358,7 +1358,7 @@ def sf_report_replica_health(  # pylint: disable=too-many-arguments
                                     service_kind, timeout)
 
 
-def sf_report_node_health(node_name,  # pylint: disable=too-many-arguments
+def sf_report_node_health(node_name,
                           source_id, health_property, health_state,
                           ttl=None, description=None, sequence_number=None,
                           remove_when_expired=None, timeout=60):
@@ -1437,7 +1437,7 @@ def sf_report_node_health(node_name,  # pylint: disable=too-many-arguments
     sf_client.report_node_health(node_name, info, timeout)
 
 
-def sf_service_package_upload(node_name,  # pylint: disable=too-many-arguments
+def sf_service_package_upload(node_name,
                               service_manifest_name,
                               application_type_name, application_type_version,
                               share_policy=None, timeout=60):
