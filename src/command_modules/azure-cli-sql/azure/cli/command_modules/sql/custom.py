@@ -125,7 +125,7 @@ def _db_create_special(
 
 
 # Copies a database. Wrapper function to make create mode more convenient.
-def db_copy(  # pylint: disable=too-many-arguments
+def db_copy(
         client,
         database_name,
         server_name,
@@ -150,7 +150,7 @@ def db_copy(  # pylint: disable=too-many-arguments
 
 
 # Copies a replica. Wrapper function to make create mode more convenient.
-def db_create_replica(  # pylint: disable=too-many-arguments
+def db_create_replica(
         client,
         database_name,
         server_name,
@@ -176,7 +176,7 @@ def db_create_replica(  # pylint: disable=too-many-arguments
 
 # Creates a database from a database point in time backup.
 # Wrapper function to make create mode more convenient.
-def db_restore(  # pylint: disable=too-many-arguments
+def db_restore(
         client,
         database_name,
         server_name,
@@ -236,7 +236,7 @@ def db_failover(
         link_id=primary_link.name)
 
 
-def db_delete_replica_link(  # pylint: disable=too-many-arguments
+def db_delete_replica_link(
         client,
         database_name,
         server_name,
@@ -273,7 +273,7 @@ def db_delete_replica_link(  # pylint: disable=too-many-arguments
         link_id=link.name)
 
 
-def db_export(  # pylint: disable=too-many-arguments
+def db_export(
         client,
         database_name,
         server_name,
@@ -295,7 +295,7 @@ def db_export(  # pylint: disable=too-many-arguments
         parameters=kwargs)
 
 
-def db_import(  # pylint: disable=too-many-arguments
+def db_import(
         client,
         database_name,
         server_name,
@@ -480,7 +480,7 @@ def _get_storage_key(
 
 
 # Common code for updating audit and threat detection policy
-def _db_security_policy_update(  # pylint: disable=too-many-arguments
+def _db_security_policy_update(
         instance,
         enabled,
         storage_account,
@@ -523,7 +523,7 @@ def _db_security_policy_update(  # pylint: disable=too-many-arguments
 
 
 # Update audit policy. Custom update function to apply parameters to instance.
-def db_audit_policy_update(  # pylint: disable=too-many-arguments
+def db_audit_policy_update(
         instance,
         state=None,
         storage_account=None,
@@ -558,7 +558,7 @@ def db_audit_policy_update(  # pylint: disable=too-many-arguments
 
 
 # Update threat detection policy. Custom update function to apply parameters to instance.
-def db_threat_detection_policy_update(  # pylint: disable=too-many-arguments
+def db_threat_detection_policy_update(
         instance,
         state=None,
         storage_account=None,
@@ -744,7 +744,7 @@ def firewall_rule_allow_all_azure_ips(
 
 # Update firewall rule. Custom update function is required,
 # see https://github.com/Azure/azure-cli/issues/2264
-def firewall_rule_update(  # pylint: disable=too-many-arguments
+def firewall_rule_update(
         client,
         firewall_rule_name,
         server_name,

@@ -5,6 +5,12 @@
 
 from azure.cli.core.help_files import helps
 
+
+helps['cognitiveservices'] = """
+    type: group
+    short-summary: Manage Cognitive Services accounts in Azure Resource Manager
+"""
+
 helps['cognitiveservices list'] = """
     type: command
     short-summary: list all the existing cognitive services accounts under a resource group or current azure subscription

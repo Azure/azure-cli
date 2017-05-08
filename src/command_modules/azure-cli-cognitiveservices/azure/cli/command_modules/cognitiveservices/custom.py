@@ -17,7 +17,6 @@ def listresources(client, resource_group_name=None):
         return client.list()
 
 
-# pylint: disable=too-many-arguments
 def create(
         client, resource_group_name, account_name, sku_name, kind, location, tags=None, yes=None):
 

@@ -110,7 +110,7 @@ class SingleValueReplacer(RecordingProcessor):
 # Resource Group Preparer and its shorthand decorator
 
 class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest.rg',  # pylint: disable=too-many-arguments
+    def __init__(self, name_prefix='clitest.rg',
                  parameter_name='resource_group',
                  parameter_name_for_location='resource_group_location', location='westus',
                  dev_setting_name='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME',
@@ -141,7 +141,7 @@ class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
 # Storage Account Preparer and its shorthand decorator
 
 class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self,  # pylint: disable=too-many-arguments
+    def __init__(self,
                  name_prefix='clitest', sku='Standard_LRS', location='westus',
                  parameter_name='storage_account', resource_group_parameter_name='resource_group',
                  skip_delete=True, dev_setting_name='AZURE_CLI_TEST_DEV_STORAGE_ACCOUNT_NAME'):
@@ -185,7 +185,7 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
 # Role based access control service principal preparer
 
 class RoleBasedServicePrincipalPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='http://clitest',  # pylint: disable=too-many-arguments
+    def __init__(self, name_prefix='http://clitest',
                  skip_assignment=True, parameter_name='sp_name', parameter_password='sp_password',
                  dev_setting_sp_name='AZURE_CLI_TEST_DEV_SP_NAME',
                  dev_setting_sp_password='AZURE_CLI_TEST_DEV_SP_PASSWORD'):
