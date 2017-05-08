@@ -504,7 +504,7 @@ def _resolve_service_principal(client, identifier):
         raise CLIError("service principal '{}' doesn't exist".format(identifier))
 
 
-def _process_service_principal_creds(years, app_start_date, app_end_date, cert, create_cert,  # pylint: disable=too-many-arguments
+def _process_service_principal_creds(years, app_start_date, app_end_date, cert, create_cert,
                                      password, key_vault, cert_name):
     cred_usage_error = CLIError('Usage error: --cert | --create-cert [--key-vault --cert-name] | '
                                 '--password | --key-vault --cert-name')
@@ -587,7 +587,7 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
 
 
 def create_service_principal_for_rbac(
-        # pylint:disable=too-many-arguments,too-many-statements,too-many-locals, too-many-branches
+        # pylint:disable=too-many-statements,too-many-locals, too-many-branches
         name=None, password=None, years=None,
         create_cert=False, cert=None,
         scopes=None, role='Contributor',
@@ -872,7 +872,6 @@ def _get_public(x509):
     return stripped
 
 
-# pylint: disable=too-many-arguments
 def reset_service_principal_credential(name, password=None, create_cert=False,
                                        cert=None, years=None, key_vault=None, cert_name=None):
     '''reset credential, on expiration or you forget it.
