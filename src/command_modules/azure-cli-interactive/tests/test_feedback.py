@@ -16,17 +16,17 @@ def _mock_update():
 def _mock_update2():
     return {
         fh.day_format(datetime.datetime.utcnow()): 2,
-        fh.day_format(datetime.datetime.utcnow() - datetime.timedelta(days=2)) : 1}
+        fh.day_format(datetime.datetime.utcnow() - datetime.timedelta(days=2)): 1}
 
 
 def _mock_update3():
     return {
         fh.day_format(datetime.datetime.utcnow()): 19,
-        fh.day_format(datetime.datetime.utcnow() - datetime.timedelta(days=18)) : 5,
-        fh.day_format(datetime.datetime.utcnow() - datetime.timedelta(days=27)) : 2,
-        fh.day_format(datetime.datetime.utcnow() - datetime.timedelta(days=28)) : 2,
-        fh.day_format(datetime.datetime.utcnow() - datetime.timedelta(days=100)) : 1,
-        fh.day_format(datetime.datetime.utcnow() - datetime.timedelta(days=200)) : 1}
+        fh.day_format(datetime.datetime.utcnow() - datetime.timedelta(days=18)): 5,
+        fh.day_format(datetime.datetime.utcnow() - datetime.timedelta(days=27)): 2,
+        fh.day_format(datetime.datetime.utcnow() - datetime.timedelta(days=28)): 2,
+        fh.day_format(datetime.datetime.utcnow() - datetime.timedelta(days=100)): 1,
+        fh.day_format(datetime.datetime.utcnow() - datetime.timedelta(days=200)): 1}
 
 
 class FeedbackTest(unittest.TestCase):
