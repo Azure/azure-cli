@@ -1515,25 +1515,25 @@ def sf_report_node_health(client,  # pylint: disable=too-many-arguments
     client.report_node_health(node_name, info, timeout)
 
 
-def sf_service_package_upload(node_name,  # pylint: disable=too-many-arguments
+def sf_service_package_upload(client,  # pylint: disable=too-many-arguments
+                              node_name,
                               service_manifest_name,
-                              application_type_name, application_type_version,
+                              app_type_name, app_type_version,
                               share_policy=None, timeout=60):
     """
     Downloads packages associated with specified service manifest to the image
     cache on specified node.
 
     :param str node_name: The name of the node.
+
     :param str service_manifest_name: The name of service manifest associated
     with the packages that will be downloaded.
-    :param str application_type_name: The name of the application manifest for
+
+    :param str app_type_name: The name of the application manifest for
     the corresponding requested service manifest.
-    :param str application_type_version: The version of the application
+
+    :param str app_type_version: The version of the application
     manifest for the corresponding requested service manifest.
-    :param long timeout: The server timeout for performing the operation in
-    seconds. This specifies the time duration that the client is willing
-    to wait for the requested operation to complete. The default value
-    for this parameter is 60 seconds.
     """
     # pylint: disable=line-too-long
     from azure.servicefabric.models.deploy_service_package_to_node_description import (  # noqa: justification, no way to shorten
@@ -1542,7 +1542,6 @@ def sf_service_package_upload(node_name,  # pylint: disable=too-many-arguments
     from azure.servicefabric.models.package_sharing_policy_info import (
         PackageSharingPolicyInfo
     )
-    from azure.cli.command_modules.sf._factory import cf_sf_client
 
     list_psps = None
     if share_policy:
@@ -1558,8 +1557,7 @@ def sf_service_package_upload(node_name,  # pylint: disable=too-many-arguments
                                                       policy_scope))
 
     desc = DeployServicePackageToNodeDescription(service_manifest_name,
-                                                 application_type_name,
-                                                 application_type_version,
+                                                 app_type_name,
+                                                 app_type_version,
                                                  node_name, list_psps)
-    sf_client = cf_sf_client(None)
-    sf_client.deployed_service_package_to_node(node_name, desc, timeout)
+    client.deployed_service_package_to_node(node_name, desc, timeout)
