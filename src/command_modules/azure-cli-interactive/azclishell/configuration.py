@@ -88,10 +88,6 @@ class Configuration(object):
         """ returns where the command table is cached """
         return self.config.get('Help Files', 'command')
 
-    def get_frequency(self):
-        """ returns the name of the frequency file """
-        return self.config.get('Help Files', 'frequency')
-
     def load(self, path):
         """ loads the configuration settings """
         self.config.read(path)
@@ -109,14 +105,6 @@ class Configuration(object):
     def get_style(self):
         """ gets the last style they used """
         return self.config.get('DEFAULT', 'style')
-
-    def has_feedback(self):
-        """ returns whether user has given feedback """
-        return az_config.getboolean('core', 'given feedback')
-
-    def set_feedback(self, value):
-        """ sets the feedback in the config """
-        set_global_config_value('core', 'given feedback', value)
 
     def set_style(self, val):
         """ sets the style they used """
@@ -154,6 +142,3 @@ def ask_user_for_telemetry():
 
 
 CONFIGURATION = Configuration()
-
-if not az_config.has_option('core', 'given feedback'):
-    set_global_config_value('core', 'given feedback', 'no')

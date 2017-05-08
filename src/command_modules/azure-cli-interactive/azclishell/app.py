@@ -28,11 +28,10 @@ from prompt_toolkit.shortcuts import create_eventloop
 import azclishell.configuration
 from azclishell.az_lexer import AzLexer, ExampleLexer, ToolbarLexer
 from azclishell.command_tree import in_tree
-from azclishell.frequency_heuristic import DISPLAY_TIME
 from azclishell.gather_commands import add_random_new_lines
 from azclishell.key_bindings import registry, get_section, sub_section
 from azclishell.layout import create_layout, create_tutorial_layout, set_scope
-from azclishell.progress import get_progress_message, DONE_STR, progress_view
+from azclishell.progress import get_progress_message, progress_view
 from azclishell.telemetry import TC as telemetry
 from azclishell.util import get_window_dim, parse_quotes, get_os_clear_screen_word
 
@@ -121,8 +120,7 @@ class Shell(object):
     # pylint: disable=too-many-arguments
     def __init__(self, completer=None, styles=None,
                  lexer=None, history=InMemoryHistory(),
-                 app=None, input_custom=sys.stdout, output_custom=None,
-                 user_feedback=False):
+                 app=None, input_custom=sys.stdout, output_custom=None):
         self.styles = styles
         if styles:
             self.lexer = lexer or AzLexer
@@ -140,7 +138,6 @@ class Shell(object):
         self._env = os.environ
         self.last = None
         self.last_exit = 0
-        self.user_feedback = user_feedback
         self.input = input_custom
         self.output = output_custom
         self.config_default = ""
@@ -196,13 +193,7 @@ class Shell(object):
         for _ in range(cols):
             empty_space += " "
 
-        delta = datetime.datetime.utcnow() - START_TIME
-        if self.user_feedback and delta.seconds < DISPLAY_TIME:
-            toolbar = [
-                ' Try out the \'feedback\' command',
-                'If refreshed disappear in: {}'.format(str(DISPLAY_TIME - delta.seconds))]
-        else:
-            toolbar = self._toolbar_info()
+        toolbar = self._toolbar_info()
 
         toolbar, empty_space = space_toolbar(toolbar, cols, empty_space)
         cli.buffers['bottom_toolbar'].reset(
@@ -550,10 +541,6 @@ class Shell(object):
         try:
             args = parse_quotes(cmd)
             azlogging.configure_logging(args)
-
-            if len(args) > 0 and args[0] == 'feedback':
-                SHELL_CONFIGURATION.set_feedback('yes')
-                self.user_feedback = False
 
             azure_folder = get_config_dir()
             if not os.path.exists(azure_folder):
