@@ -6,6 +6,7 @@ Release History
 0.1.6 (2017-05-09)
 ++++++++++++++++++++
 * webapp: fix broken log tail commands
+* webapp: add reliability fixes in configuring source control (#3245)
 
 0.1.5 (2017-05-05)
 ++++++++++++++++++++

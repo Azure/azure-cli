@@ -436,7 +436,7 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
     return result
 
 
-def config_source_control(resource_group_name, name, repo_url, repository_type=None, branch=None,
+def config_source_control(resource_group_name, name, repo_url, repository_type=None, branch=None,  # pylint: disable=too-many-locals
                           git_token=None, manual_integration=None, slot=None, cd_provider=None,
                           cd_app_type=None, cd_account=None, cd_account_must_exist=None):
     client = web_client_factory()
@@ -459,9 +459,22 @@ def config_source_control(resource_group_name, name, repo_url, repository_type=N
         source_control = SiteSourceControl(location, repo_url=repo_url, branch=branch,
                                            is_manual_integration=manual_integration,
                                            is_mercurial=(repository_type != 'git'))
-        return _generic_site_operation(resource_group_name, name,
-                                       'create_or_update_source_control',
-                                       slot, source_control)
+
+        # SCC config can fail if previous commands caused SCMSite shutdown, so retry here.
+        for i in range(5):
+            try:
+                poller = _generic_site_operation(resource_group_name, name,
+                                                 'create_or_update_source_control',
+                                                 slot, source_control)
+                return LongRunningOperation()(poller)
+            except Exception as ex:  # pylint: disable=broad-except
+                import re
+                import time
+                ex = ex_handler_factory(no_throw=True)(ex)
+                if i == 4 or not (re.findall(r'\(50\d\)', str(ex))):
+                    raise
+                logger.warning('retrying %s/4', i + 1)
+                time.sleep(5)   # retry in a moment
 
 
 def update_git_token(git_token=None):
