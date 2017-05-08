@@ -14,7 +14,6 @@ from azure.cli.core.profiles import get_sdk, ResourceType
 
 from azure.cli.command_modules.storage._factory import \
     (storage_client_factory, generic_data_service_factory)
-from azure.cli.core.application import APPLICATION
 
 Logging, Metrics, CorsRule, \
     AccessPolicy, RetentionPolicy = get_sdk(ResourceType.DATA_STORAGE,
