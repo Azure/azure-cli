@@ -1026,14 +1026,14 @@ def sf_update_service(client, service_id,  # pylint: disable=too-many-arguments
     client.update_service(service_id, update_desc, timeout)
 
 
-def sf_start_chaos(  # pylint: disable=too-many-arguments
+def sf_start_chaos(client,  # pylint: disable=too-many-arguments
         time_to_run="4294967295", max_cluster_stabilization=60,
         max_concurrent_faults=1, disable_move_replica_faults=False,
         wait_time_between_faults=20,
         wait_time_between_iterations=30, warning_as_error=False,
         max_percent_unhealthy_nodes=0,
         max_percent_unhealthy_applications=0,
-        application_type_health_policy_map=None, timeout=60):
+        app_type_health_policy_map=None, timeout=60):
     """
     If Chaos is not already running in the cluster, starts running Chaos with
     the specified in Chaos parameters.
@@ -1041,28 +1041,38 @@ def sf_start_chaos(  # pylint: disable=too-many-arguments
     :param str time_to_run: Total time (in seconds) for which Chaos will run
     before automatically stopping. The maximum allowed value is 4,294,967,295
     (System.UInt32.MaxValue).
-    :param long max_cluster_stabilization: The maximum amount of time to wait
+
+    :param int max_cluster_stabilization: The maximum amount of time to wait
     for all cluster entities to become stable and healthy.
-    :param long max_concurrent_faults: The maximum number of concurrent faults
+
+    :param int max_concurrent_faults: The maximum number of concurrent faults
     induced per iteration.
+
     :param bool disable_move_replica_faults: Disables the move primary and move
     secondary faults.
-    :param long wait_time_between_faults: Wait time (in seconds) between
+
+    :param int wait_time_between_faults: Wait time (in seconds) between
     consecutive faults within a single iteration.
-    :param long wait_time_between_iterations: Time-separation (in seconds)
+
+    :param int wait_time_between_iterations: Time-separation (in seconds)
     between two consecutive iterations of Chaos.
+
     :param bool warning_as_error: When evaluating cluster health during
     Chaos, treat warnings with the same severity as errors.
+
     :param int max_percent_unhealthy_nodes: When evaluating cluster health
     during Chaos, the maximum allowed percentage of unhealthy nodes before
     reporting an error.
+
     :param int max_percent_unhealthy_applications: When evaluating cluster
     health during Chaos, the maximum allowed percentage of unhealthy
     applications before reporting an error.
-    :param long timeout: The server timeout for performing the operation in
-    seconds. This specifies the time duration that the client is willing to
-    wait for the requested operation to complete. The default value for this
-    parameter is 60 seconds.
+
+    :param str app_type_health_policy_map: JSON encoded list with max
+    percentage unhealthy applications for specific application types. Each
+    entry specifies as a key the application type name and as  a value an
+    integer that represents the MaxPercentUnhealthyApplications percentage
+    used to evaluate the applications of the specified application type.
     """
     # pylint: disable=line-too-long
     from azure.servicefabric.models.application_type_health_policy_map_item import (  # noqa: justification, no way to shorten
@@ -1075,9 +1085,9 @@ def sf_start_chaos(  # pylint: disable=too-many-arguments
     from azure.cli.command_modules.sf._factory import cf_sf_client
 
     health_map = None
-    if application_type_health_policy_map:
+    if app_type_health_policy_map:
         health_map = []
-        for m in application_type_health_policy_map:
+        for m in app_type_health_policy_map:
             name = m.get("key", None)
             percent_unhealthy = m.get("value", None)
             if name is None:
@@ -1106,8 +1116,7 @@ def sf_start_chaos(  # pylint: disable=too-many-arguments
                                    health_policy,
                                    None)
 
-    sf_client = cf_sf_client(None)
-    sf_client.start_chaos(chaos_params, timeout)
+    client.start_chaos(chaos_params, timeout)
 
 
 def sf_report_app_health(client,  # pylint: disable=too-many-arguments
@@ -1269,28 +1278,27 @@ def sf_report_svc_health(client,  # pylint: disable=too-many-arguments
 
 
 def sf_report_partition_health(  # pylint: disable=too-many-arguments
-        partition_id, source_id, health_property, health_state, ttl=None,
-        description=None, sequence_number=None, remove_when_expired=None,
-        timeout=60):
+        client, partition_id, source_id, health_property, health_state,
+        ttl=None, description=None, sequence_number=None,
+        remove_when_expired=None, timeout=60):
     """
     Sends a health report on the Service Fabric partition.
 
     Reports health state of the specified Service Fabric partition. The
     report must contain the information about the source of the health
-    report and property on which it is reported.
-    The report is sent to a Service Fabric gateway Partition, which
-    forwards to the health store.
+    report and property on which it is reported. The report is sent to a
+    Service Fabric gateway Partition, which forwards to the health store.
     The report may be accepted by the gateway, but rejected by the health
-    store after extra validation.
-    For example, the health store may reject the report because of an
-    invalid parameter, like a stale sequence number.
-    To see whether the report was applied in the health store, run
-    GetPartitionHealth and check that the report appears in the
-    HealthEvents section.
+    store after extra validation. For example, the health store may reject
+    the report because of an invalid parameter, like a stale sequence number.
+    To see whether the report was applied in the health store, check that the
+    report appears in the events section.
 
     :param str partition_id: The identity of the partition.
+
     :param str source_id: The source name which identifies the
     client/watchdog/system component which generated the health information.
+
     :param str health_property: The property of the health information. An
     entity can have health reports for different properties. The property is a
     string and not a fixed enumeration to allow the reporter flexibility to
@@ -1302,12 +1310,15 @@ def sf_report_partition_health(  # pylint: disable=too-many-arguments
     these reports are treated as separate health events for the specified node.
     Together with the SourceId, the property uniquely identifies the health
     information.
+
     :param str health_state: Possible values include: 'Invalid', 'Ok',
     'Warning', 'Error', 'Unknown'
-    :param int ttl: The duration, in milliseconds, for which this health report
+
+    :param str ttl: The duration, in milliseconds, for which this health report
     is valid. When clients report periodically, they should send reports with
     higher frequency than time to live. If not specified, time to live defaults
     to infinite value.
+
     :param str description: The description of the health information. It
     represents free text used to add human readable information about the
     report. The maximum string length for the description is 4096 characters.
@@ -1317,10 +1328,12 @@ def sf_report_partition_health(  # pylint: disable=too-many-arguments
     the marker indicates to users that truncation occurred. Note that when
     truncated, the description has less than 4096 characters from the original
     string.
+
     :param str sequence_number: The sequence number for this health report as a
     numeric string. The report sequence number is used by the health store to
     detect stale reports. If not specified, a sequence number is auto-generated
     by the health client when a report is added.
+
     :param bool remove_when_expired: Value that indicates whether the report is
     removed from health store when it expires. If set to true, the report is
     removed from the health store after it expires. If set to false, the report
@@ -1329,22 +1342,16 @@ def sf_report_partition_health(  # pylint: disable=too-many-arguments
     false (default). This way, is the reporter has issues (eg. deadlock) and
     can't report, the entity is evaluated at error when the health report
     expires. This flags the entity as being in Error health state.
-    :param long timeout: The server timeout for performing the operation in
-    seconds. This specifies the time duration that the client is willing to
-    wait for the requested operation to complete. The default value
-    for this parameter is 60 seconds.
+
     """
 
     # TODO Move common HealthInformation params to _params
 
     from azure.servicefabric.models.health_information import HealthInformation
-    from azure.cli.command_modules.sf._factory import cf_sf_client
 
     info = HealthInformation(source_id, health_property, health_state, ttl,
                              description, sequence_number, remove_when_expired)
-
-    sf_client = cf_sf_client(None)
-    sf_client.report_partition_health(partition_id, info, timeout)
+    client.report_partition_health(partition_id, info, timeout)
 
 
 def sf_report_replica_health(  # pylint: disable=too-many-arguments
@@ -1534,6 +1541,12 @@ def sf_service_package_upload(client,  # pylint: disable=too-many-arguments
 
     :param str app_type_version: The version of the application
     manifest for the corresponding requested service manifest.
+
+    :param str share_policy: JSON encoded list of sharing policies. Each
+    sharing policy element is composed of a 'name' and 'scope'. The name
+    corresponds to the name of the code, configuration, or data package that
+    is to be shared. The scope can either 'None', 'All', 'Code', 'Config' or
+    'Data'.
     """
     # pylint: disable=line-too-long
     from azure.servicefabric.models.deploy_service_package_to_node_description import (  # noqa: justification, no way to shorten

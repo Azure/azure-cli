@@ -50,25 +50,17 @@ with ParametersContext(command="sf application upgrade") as c:
                default=None)
     c.argument("service_health_policy", type=get_json_object, default=None)
 
-# For some commands we take JSON strings as possible
-
+# Chaos commands
 with ParametersContext(command="sf chaos start") as c:
-    c.register("application_type_health_policy_map",
-               ("--application_type_health_policy_map",),
-               type=get_json_object,
-               help="JSON encoded list with max percentage unhealthy \
-               applications for specific application types. Each entry \
-               specifies as a key the application type name and as  a value \
-               an integer that represents the MaxPercentUnhealthyApplications \
-               percentage used to evaluate the applications of the specified \
-               application type.")
+    c.argument("max_cluster_stabilization", type=int, default=60)
+    c.argument("max_concurrent_faults", type=int, default=1)
+    c.argument("wait_time_between_faults", type=int, default=20)
+    c.argument("wait_time_between_iterations", type=int, default=30)
+    c.argument("max_percent_unhealthy_nodes", type=int, default=0)
+    c.argument("max_percent_unhealthy_applications", type=int, default=0)
+    c.argument("app_type_health_policy_map", type=get_json_object,
+               default=None)
 
+# Node commands
 with ParametersContext(command="sf node service-package-upload") as c:
-    c.register("share_policy",
-               ("--share_policy",),
-               type=get_json_object,
-               help="JSON encoded list of sharing policies. Each sharing \
-               policy element is composed of a 'name' and 'scope'. The name \
-               corresponds to the name of the code, configuration, or data \
-               package that is to be shared. The scope can either 'None', \
-               'All', 'Code', 'Config' or 'Data'.")
+    c.argument("share_policy", type=get_json_object, default=None)

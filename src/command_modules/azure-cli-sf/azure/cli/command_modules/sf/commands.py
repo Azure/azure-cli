@@ -17,14 +17,6 @@ cluster_operations = create_service_adapter("azure.servicefabric",
 # TODO: Fix custom commands to accept client as additional argument instead of
 # generating
 
-
-cli_command(__name__, "sf replica report-health",
-            "azure.cli.command_modules.sf.custom#sf_report_replica_health")
-cli_command(__name__, "sf chaos start",
-            "azure.cli.command_modules.sf.custom#sf_start_chaos")
-cli_command(__name__, "sf partition report-health",
-            "azure.cli.command_modules.sf.custom#sf_report_partition_health")
-
 # No client commands
 with ServiceGroup(__name__, None, None, custom_path) as sg:
     with sg.group("sf cluster") as g:
@@ -72,12 +64,15 @@ with ServiceGroup(__name__, cf_sf_client, cluster_operations,
 
     # Partition level commands
     with sg.group("sf partition") as partition_group:
+        partition_group.custom_command("report-health",
+                                       "sf_report_partition_health")
         partition_group.command("info", "get_partition_info")
         partition_group.command("service-name", "get_service_name_info")
         partition_group.command("health", "get_partition_health")
 
     # Replica level commands
     with sg.group("sf replica") as replica_group:
+        replica_group.custom_command("report-health", "sf_report_replica_health")
         replica_group.command("health", "get_replica_health")
 
     # Node level commands
@@ -110,3 +105,7 @@ with ServiceGroup(__name__, cf_sf_client, cluster_operations,
         compose_group.command("status", "get_compose_application_status")
         compose_group.command("list", "get_compose_application_status_list")
         compose_group.command("remove", "remove_compose_application")
+
+    # Chaos test commands
+    with sg.group("sf chaos") as chaos_group:
+        chaos_group.custom_command("start", "sf_start_chaos")
