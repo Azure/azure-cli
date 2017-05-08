@@ -73,6 +73,7 @@ DEPENDENCIES = [
     'azure-cli-network',
     'azure-cli-nspkg',
     'azure-cli-profile',
+    'azure-cli-rdbms',
     'azure-cli-redis',
     'azure-cli-resource',
     'azure-cli-role',
