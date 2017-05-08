@@ -10,6 +10,7 @@ import math
 import os
 import subprocess
 import sys
+import threading
 
 import jmespath
 from six.moves import configparser
@@ -29,11 +30,13 @@ from azclishell.command_tree import in_tree
 from azclishell.gather_commands import add_random_new_lines
 from azclishell.key_bindings import registry, get_section, sub_section
 from azclishell.layout import create_layout, create_tutorial_layout, set_scope
+from azclishell.progress import get_progress_message, DONE_STR, progress_view
 from azclishell.telemetry import TC as telemetry
 from azclishell.util import get_window_dim, parse_quotes, get_os_clear_screen_word
 
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.application import Configuration
+from azure.cli.core.commands import LongRunningOperation, get_op_handler
 from azure.cli.core.cloud import get_active_cloud_name
 from azure.cli.core._config import az_config, DEFAULTS_SECTION
 from azure.cli.core._environment import get_config_dir
@@ -95,26 +98,6 @@ def space_examples(list_examples, rows):
     return example + page_number
 
 
-def _toolbar_info():
-    sub_name = ""
-    try:
-        sub_name = PROFILE.get_subscription()[_SUBSCRIPTION_NAME]
-    except CLIError:
-        pass
-
-    curr_cloud = "Cloud: {}".format(get_active_cloud_name())
-    tool_val = '{}'.format('Subscription: {}'.format(sub_name) if sub_name else curr_cloud)
-
-    settings_items = [
-        " [F1]Layout",
-        "[F2]Defaults",
-        "[F3]Keys",
-        "[Ctrl+D]Quit",
-        tool_val
-    ]
-    return settings_items
-
-
 def space_toolbar(settings_items, cols, empty_space):
     """ formats the toolbar """
     counter = 0
@@ -157,6 +140,9 @@ class Shell(object):
         self.output = output_custom
         self.config_default = ""
         self.default_command = ""
+        self.threads = []
+        self.curr_thread = None
+        self.spin_val = -1
 
     @property
     def cli(self):
@@ -170,13 +156,8 @@ class Shell(object):
         """
         brings up the metadata for the command if there is a valid command already typed
         """
-        _, cols = get_window_dim()
-        cols = int(cols)
         document = cli.current_buffer.document
         text = document.text
-        empty_space = ""
-        for i in range(cols):  # pylint: disable=unused-variable
-            empty_space += " "
 
         text = text.replace('az', '')
         if self.default_command:
@@ -188,21 +169,51 @@ class Shell(object):
         self.example_docs = u'{}'.format(example)
 
         self._update_default_info()
-
-        settings, empty_space = space_toolbar(_toolbar_info(), cols, empty_space)
-
         cli.buffers['description'].reset(
             initial_document=Document(self.description_docs, cursor_position=0))
         cli.buffers['parameter'].reset(
             initial_document=Document(self.param_docs))
         cli.buffers['examples'].reset(
             initial_document=Document(self.example_docs))
-        cli.buffers['bottom_toolbar'].reset(
-            initial_document=Document(u'{}{}{}'.format(NOTIFICATIONS, settings, empty_space)))
         cli.buffers['default_values'].reset(
             initial_document=Document(
                 u'{}'.format(self.config_default if self.config_default else 'No Default Values')))
+        self._update_toolbar()
         cli.request_redraw()
+
+    def _update_toolbar(self):
+        cli = self.cli
+        _, cols = get_window_dim()
+        cols = int(cols)
+
+        empty_space = ""
+        for _ in range(cols):
+            empty_space += " "
+
+        settings = self._toolbar_info()
+        settings, empty_space = space_toolbar(settings, cols, empty_space)
+        cli.buffers['bottom_toolbar'].reset(
+            initial_document=Document(u'{}{}{}'.format(NOTIFICATIONS, settings, empty_space)))
+
+    def _toolbar_info(self):
+        sub_name = ""
+        try:
+            sub_name = PROFILE.get_subscription()[_SUBSCRIPTION_NAME]
+        except CLIError:
+            pass
+
+        curr_cloud = "Cloud: {}".format(get_active_cloud_name())
+        tool_val = '{}'.format('Subscription: {}'.format(sub_name) if sub_name else curr_cloud)
+
+        settings_items = [
+            " [F1]Layout",
+            "[F2]Defaults",
+            "[F3]Keys",
+            "[Ctrl+D]Quit",
+            tool_val
+            # tool_val2
+        ]
+        return settings_items
 
     def generate_help_text(self, text):
         """ generates the help text based on commands typed """
@@ -267,7 +278,8 @@ class Shell(object):
             'bottom_toolbar': Buffer(is_multiline=True),
             'example_line': Buffer(is_multiline=True),
             'default_values': Buffer(),
-            'symbols': Buffer()
+            'symbols': Buffer(),
+            'progress': Buffer(is_multiline=False)
         }
 
         writing_buffer = Buffer(
@@ -521,6 +533,7 @@ class Shell(object):
         return continue_flag, cmd
 
     def cli_execute(self, cmd):
+        """ sends the command to the CLI to be executed """
         try:
             args = parse_quotes(cmd)
             azlogging.configure_logging(args)
@@ -534,7 +547,23 @@ class Shell(object):
 
             config = Configuration()
             self.app.initialize(config)
-            result = self.app.execute(args)
+
+            if '--progress' in args:
+                args.remove('--progress')
+                thread = ExecuteThread(self.app.execute, args)
+                thread.daemon = True
+                thread.start()
+                self.threads.append(thread)
+                self.curr_thread = thread
+
+                thread = ProgressViewThread(progress_view, self)
+                thread.daemon = True
+                thread.start()
+                self.threads.append(thread)
+                result = None
+
+            else:
+                result = self.app.execute(args)
             self.last_exit = 0
             if result and result.result is not None:
                 from azure.cli.core._output import OutputProducer
@@ -557,7 +586,7 @@ class Shell(object):
         return self.app.progress_controller
 
     def run(self):
-
+        """ starts the REPL """
         telemetry.start()
         self.app.get_progress_controller = self.progress_patch
 
@@ -596,9 +625,40 @@ class Shell(object):
                         subprocess.Popen(cmd, shell=True).communicate()
                     else:
                         self.cli_execute(cmd)
+
             except KeyboardInterrupt:  # CTRL C
                 self.set_prompt()
                 continue
 
         print('Have a lovely day!!')
         telemetry.conclude()
+
+
+class ExecuteThread(threading.Thread):
+    """ thread for executing commands """
+    def __init__(self, func, args):
+        super(ExecuteThread, self).__init__()
+        self.args = args
+        self.func = func
+
+    def run(self):
+        self.func(self.args)
+
+
+class ProgressViewThread(threading.Thread):
+    """ thread to keep the toolbar spinner spinning """
+    def __init__(self, func, arg):
+        super(ProgressViewThread, self).__init__()
+        self.func = func
+        self.arg = arg
+
+    def run(self):
+        import time
+        try:
+            while True:
+                if self.func(self.arg):
+                    time.sleep(4)
+                    break
+                time.sleep(.25)
+        except KeyboardInterrupt:
+            pass
