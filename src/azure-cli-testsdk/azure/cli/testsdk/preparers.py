@@ -155,13 +155,17 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
         self.dev_setting_name = os.environ.get(dev_setting_name, None)
 
     def create_resource(self, name, **kwargs):
+        group = self._get_resource_group(**kwargs)
+
         if not self.dev_setting_name:
-            group = self._get_resource_group(**kwargs)
             template = 'az storage account create -n {} -g {} -l {} --sku {}'
             execute(template.format(name, group, self.location, self.sku))
-            return {self.parameter_name: name}
         else:
-            return {self.parameter_name: self.dev_setting_name}
+            name = self.dev_setting_name
+
+        account_key = execute('storage account keys list -n {} -g {} --query "[0].value" -otsv'
+                              .format(name, group)).output
+        return {self.parameter_name: name, self.parameter_name + '_info': (name, account_key)}
 
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete and not self.dev_setting_name:
@@ -195,8 +199,8 @@ class RoleBasedServicePrincipalPreparer(AbstractPreparer, SingleValueReplacer):
 
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_sp_name:
-            command = 'az ad sp create-for-rbac -n {}{}'\
-                      .format(name, ' --skip-assignment' if self.skip_assignment else '')
+            command = 'az ad sp create-for-rbac -n {}{}' \
+                .format(name, ' --skip-assignment' if self.skip_assignment else '')
             self.result = execute(command).get_output_in_json()
             return {self.parameter_name: name, self.parameter_password: self.result['password']}
         else:
