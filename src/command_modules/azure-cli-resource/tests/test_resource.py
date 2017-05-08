@@ -662,7 +662,7 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_file = os.path.join(curr_dir, 'crossrg_deploy.json').replace('\\', '\\\\')
         parameters_file = os.path.join(curr_dir, 'crossrg_deploy_parameters.json').replace('\\',
-                                                                                          '\\\\')
+                                                                                           '\\\\')
         deployment_name = 'azure-cli-crossrgdeployment'
 
         self.cmd('group deployment validate -g {} --template-file {} --parameters @{}'.format(
