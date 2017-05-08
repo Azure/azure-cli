@@ -15,8 +15,6 @@ from azure.cli.command_modules.storage._factory import \
     (storage_client_factory, generic_data_service_factory)
 from azure.cli.core.application import APPLICATION
 
-from azure.cli.core.commands.progress import get_progress_view
-
 Logging, Metrics, CorsRule, \
     AccessPolicy, RetentionPolicy = get_sdk(ResourceType.DATA_STORAGE,
                                             'Logging',
@@ -40,13 +38,15 @@ BlockBlobService, BaseBlobService, \
                            'queue#QueueService')
 
 
-HOOK = APPLICATION.progress_controller
-HOOK.init_progress(get_progress_view(determinant=True))
-
-
 def _update_progress(current, total):
     if total:
-        HOOK.add(message='Alive', value=current, total_val=total)
+        message = 'Percent complete: %'
+        percent_done = current * 100 / total
+        message += '{: >5.1f}'.format(percent_done)
+        print('\b' * len(message) + message, end='', file=stderr)
+        stderr.flush()
+        if current == total:
+            print('', file=stderr)
 
 
 # CUSTOM METHODS

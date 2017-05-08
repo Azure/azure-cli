@@ -32,7 +32,6 @@ from azclishell.frequency_heuristic import DISPLAY_TIME
 from azclishell.gather_commands import add_random_new_lines
 from azclishell.key_bindings import registry, get_section, sub_section
 from azclishell.layout import create_layout, create_tutorial_layout, set_scope
-from azclishell.progress import get_progress_message, DONE_STR, progress_view
 from azclishell.telemetry import TC as telemetry
 from azclishell.util import get_window_dim, parse_quotes, get_os_clear_screen_word
 
@@ -291,7 +290,6 @@ class Shell(object):
             'example_line': Buffer(is_multiline=True),
             'default_values': Buffer(),
             'symbols': Buffer(),
-            'progress': Buffer(is_multiline=False)
         }
 
         writing_buffer = Buffer(
@@ -565,22 +563,7 @@ class Shell(object):
             config = Configuration()
             self.app.initialize(config)
 
-            if '--progress' in args:
-                args.remove('--progress')
-                thread = ExecuteThread(self.app.execute, args)
-                thread.daemon = True
-                thread.start()
-                self.threads.append(thread)
-                self.curr_thread = thread
-
-                thread = ProgressViewThread(progress_view, self)
-                thread.daemon = True
-                thread.start()
-                self.threads.append(thread)
-                result = None
-
-            else:
-                result = self.app.execute(args)
+            result = self.app.execute(args)
             self.last_exit = 0
             if result and result.result is not None:
                 from azure.cli.core._output import OutputProducer
@@ -597,15 +580,9 @@ class Shell(object):
         except SystemExit as ex:
             self.last_exit = int(ex.code)
 
-    def progress_patch(self):
-        from azclishell.progress import ShellProgressView
-        self.app.progress_controller.init_progress(ShellProgressView())
-        return self.app.progress_controller
-
     def run(self):
         """ starts the REPL """
         telemetry.start()
-        self.app.get_progress_controller = self.progress_patch
 
         from azclishell.configuration import SHELL_HELP
         self.cli.buffers['symbols'].reset(
@@ -660,22 +637,3 @@ class ExecuteThread(threading.Thread):
 
     def run(self):
         self.func(self.args)
-
-
-class ProgressViewThread(threading.Thread):
-    """ thread to keep the toolbar spinner spinning """
-    def __init__(self, func, arg):
-        super(ProgressViewThread, self).__init__()
-        self.func = func
-        self.arg = arg
-
-    def run(self):
-        import time
-        try:
-            while True:
-                if self.func(self.arg):
-                    time.sleep(4)
-                    break
-                time.sleep(.25)
-        except KeyboardInterrupt:
-            pass
