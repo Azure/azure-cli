@@ -3,10 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import json
-from azure.cli.core.test_utils.vcr_test_base import VCRTestBase, JMESPathCheck, NoneCheck
-from azure.cli.testsdk import ScenarioTest
+
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheck2
 from azure.cli.testsdk import NoneCheck as NoneCheck2
+from azure.cli.testsdk import ScenarioTest
+from azure.cli.testsdk.vcr_test_base import VCRTestBase, JMESPathCheck, NoneCheck
 
 
 class ServicePrincipalExpressCreateScenarioTest(VCRTestBase):

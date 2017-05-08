@@ -14,8 +14,8 @@ from dateutil import tz
 from azure.cli.command_modules.keyvault.custom import _asn1_to_iso8601
 
 from azure.cli.core.util import CLIError
-from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck,
-                                                     NoneCheck)
+from azure.cli.testsdk.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck,
+                                             NoneCheck)
 
 from azure.cli.command_modules.keyvault._params import secret_encoding_values
 

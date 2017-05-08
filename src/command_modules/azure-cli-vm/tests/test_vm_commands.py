@@ -11,12 +11,11 @@ import tempfile
 import unittest
 
 import six
-
 from azure.cli.core.util import CLIError
-from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase,
-                                                     ResourceGroupVCRTestBase,
-                                                     JMESPathCheck,
-                                                     NoneCheck)
+from azure.cli.testsdk.vcr_test_base import (VCRTestBase,
+                                             ResourceGroupVCRTestBase,
+                                             JMESPathCheck,
+                                             NoneCheck)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
