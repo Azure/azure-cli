@@ -6,7 +6,6 @@
 # pylint: disable=no-self-use,too-many-arguments,line-too-long
 
 from __future__ import print_function
-from sys import stderr
 
 from azure.cli.core.decorators import transfer_doc
 from azure.cli.core.util import CLIError
@@ -14,7 +13,9 @@ from azure.cli.core.profiles import get_sdk, ResourceType
 
 from azure.cli.command_modules.storage._factory import \
     (storage_client_factory, generic_data_service_factory)
+from azure.cli.core.application import APPLICATION
 
+from azure.cli.core.commands.progress import get_progress_view
 
 Logging, Metrics, CorsRule, \
     AccessPolicy, RetentionPolicy = get_sdk(ResourceType.DATA_STORAGE,
@@ -39,15 +40,13 @@ BlockBlobService, BaseBlobService, \
                            'queue#QueueService')
 
 
+HOOK = APPLICATION.progress_controller
+HOOK.init_progress(get_progress_view(determinant=True))
+
+
 def _update_progress(current, total):
     if total:
-        message = 'Percent complete: %'
-        percent_done = current * 100 / total
-        message += '{: >5.1f}'.format(percent_done)
-        print('\b' * len(message) + message, end='', file=stderr)
-        stderr.flush()
-        if current == total:
-            print('', file=stderr)
+        HOOK.add(message='Alive', value=current, total_val=total)
 
 
 # CUSTOM METHODS

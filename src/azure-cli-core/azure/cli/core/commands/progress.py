@@ -106,6 +106,7 @@ class IndeterminateStandardOut(ProgressViewBase):
         if self.spinner is None:
             self.spinner = humanfriendly.Spinner(
                 label='In Progress', stream=self.out, hide_cursor=False)
+
         msg = args.get('message', 'In Progress')
         self.spinner.step(label=msg)
 
