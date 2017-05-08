@@ -964,7 +964,7 @@ def sf_update_service(client, service_id,  # pylint: disable=too-many-arguments
         StatefulServiceUpdateDescription
     )
     # pylint: disable=line-too-long
-    from azure.servicefabric.models.stateless_service_update_description import ( # noqa: justification, no way to shorten
+    from azure.servicefabric.models.stateless_service_update_description import (  # noqa: justification, no way to shorten
         StatelessServiceUpdateDescription
     )
 
@@ -987,7 +987,8 @@ def sf_update_service(client, service_id,  # pylint: disable=too-many-arguments
     update_desc = None
     if stateful:
         if instance_count is not None:
-            raise CLIError("Cannot specify an instance count for a stateful service")
+            raise CLIError("Cannot specify an instance count for a "
+                           "stateful service")
         update_desc = StatefulServiceUpdateDescription(flags, constraints,
                                                        correlation_desc,
                                                        load_list, place_policy,
@@ -1001,19 +1002,19 @@ def sf_update_service(client, service_id,  # pylint: disable=too-many-arguments
     if stateless:
         if target_replica_set_size is not None:
             raise CLIError("Cannot specify target replica set size for "
-                     "stateless service")
+                           "stateless service")
         if min_replica_set_size is not None:
             raise CLIError("Cannot specify minimum replica set size for "
-                     "stateless service")
+                           "stateless service")
         if replica_restart_wait is not None:
             raise CLIError("Cannot specify replica restart wait duration for "
-                     "stateless service")
+                           "stateless service")
         if quorum_loss_wait is not None:
             raise CLIError("Cannot specify quorum loss wait duration for "
-                     "stateless service")
+                           "stateless service")
         if stand_by_replica_keep is not None:
             raise CLIError("Cannot specify standby replica keep duration for "
-                     "stateless service")
+                           "stateless service")
         # pylint: disable=redefined-variable-type
         update_desc = StatelessServiceUpdateDescription(flags, constraints,
                                                         correlation_desc,
@@ -1354,7 +1355,8 @@ def sf_report_partition_health(  # pylint: disable=too-many-arguments
 def sf_report_replica_health(  # pylint: disable=too-many-arguments
         client, partition_id, replica_id, source_id, health_state,
         health_property, service_kind="Stateful", ttl=None,
-        description=None, sequence_number=None, remove_when_expired=None, timeout=60):
+        description=None, sequence_number=None, remove_when_expired=None,
+        timeout=60):
     """
     Sends a health report on the Service Fabric replica.
 

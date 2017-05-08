@@ -67,7 +67,8 @@ with ServiceGroup(__name__, cf_sf_client, cluster_operations,
 
     # Replica level commands
     with sg.group("sf replica") as replica_group:
-        replica_group.custom_command("report-health", "sf_report_replica_health")
+        replica_group.custom_command("report-health",
+                                     "sf_report_replica_health")
         replica_group.command("health", "get_replica_health")
 
     # Node level commands
