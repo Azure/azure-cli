@@ -9,7 +9,7 @@ from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
 helps['appservice'] = """
     type: group
-    short-summary: Manage your Azure Web apps and App Service plans.
+    short-summary: Manage your App Service plans.
 """
 
 helps['appservice web'] = """
@@ -377,13 +377,13 @@ helps['webapp create'] = """
     type: command
     short-summary: Create a web app.
     examples:
-        - name: Create a basic App Service plan.  Name must be unique to yield a unique FQDN;
+        - name: Create an empty webapp.  Name must be unique to yield a unique FQDN;
                 for example, MyUniqueApp.azurewebsites.net.
           text: >
-            az webapp create
-            -g MyResourceGroup
-            -p MyPlan
-            -n MyUniqueApp
+            az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueApp
+        - name: Create a webapp with node 6.2 stack runtime, and local git configured for web deployment
+          text: >
+            az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueApp --runtime "node|6.2" --deployment-local-git
 """
 
 helps['webapp list-runtimes'] = """
