@@ -13,10 +13,6 @@ custom_path = "azure.cli.command_modules.sf.custom#{}"
 cluster_operations = create_service_adapter("azure.servicefabric",
                                             "ServiceFabricClientAPIs")
 
-# Custom commands
-# TODO: Fix custom commands to accept client as additional argument instead of
-# generating
-
 # No client commands
 with ServiceGroup(__name__, None, None, custom_path) as sg:
     with sg.group("sf cluster") as g:
