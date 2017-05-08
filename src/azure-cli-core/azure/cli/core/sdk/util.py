@@ -53,14 +53,35 @@ class CommandGroup(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
-    def command(self, name, method_name, transform=None, table_transformer=None, confirmation=None):
+    def command(self, name, method_name, transform=None, table_transformer=None, confirmation=None,
+                exception_handler=None):
+        """
+        Register a CLI command
+        :param name: Name of the command as it will be called on the command line
+        :type name: str
+        :param method_name: Name of the method the command maps to on the service adapter
+        :type method_name: str
+        :param transform: Transform function for transforming the output of the command
+        :type transform: function
+        :param table_transformer: Transform function to be applied to table output to create a
+        better output format for tables.
+        :type table_transformer: function
+        :param confirmation: Prompt prior to the action being executed. This is useful if the action
+        would cause a loss of data.
+        :type confirmation: bool
+        :param exception_handler: Exception handler for handling non-standard exceptions
+        :type exception_handler: function
+        :return: None
+        :rtype: None
+        """
         cli_command(self._scope,
                     '{} {}'.format(self._group_name, name),
                     self._service_adapter(method_name),
                     client_factory=self._client_factory,
                     transform=transform,
                     table_transformer=table_transformer,
-                    confirmation=confirmation)
+                    confirmation=confirmation,
+                    exception_handler=exception_handler)
 
     def custom_command(self, name, custom_func_name, confirmation=None):
         cli_command(self._scope,

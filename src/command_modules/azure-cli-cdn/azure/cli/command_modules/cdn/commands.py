@@ -6,6 +6,18 @@
 from azure.cli.core.sdk.util import ServiceGroup, create_service_adapter
 from ._client_factory import cf_cdn
 
+
+def _profile_not_found(ex):
+    from azure.mgmt.cdn.models.error_response import ErrorResponseException
+    from azure.cli.core.util import CLIError
+
+    if isinstance(ex, ErrorResponseException) \
+            and ex.response is not None \
+            and ex.response.status_code == 404:
+        raise CLIError("Profile not found. Please verify the profile exists.")
+    raise ex
+
+
 custom_operations = 'azure.cli.command_modules.cdn.custom#{}'
 
 mgmt_operations = create_service_adapter('azure.mgmt.cdn', 'CdnManagementClient')
@@ -21,7 +33,7 @@ with ServiceGroup(__name__, cf_cdn, endpoint_operations, custom_operations) as s
         for name in ['start', 'stop', 'delete']:
             c.command(name, name)
         c.command('show', 'get')
-        c.command('list', 'list_by_profile')
+        c.command('list', 'list_by_profile', exception_handler=_profile_not_found)
         c.command('load', 'load_content')
         c.command('purge', 'purge_content')
         c.command('validate-custom-domain', 'validate_custom_domain')
