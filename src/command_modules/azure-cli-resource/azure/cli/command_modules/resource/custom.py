@@ -73,7 +73,7 @@ def create_resource_group(rg_name, location, tags=None):
     return rcf.resource_groups.create_or_update(rg_name, parameters)
 
 
-def create_appliance(resource_group_name,  # pylint: disable=too-many-arguments
+def create_appliance(resource_group_name,
                      appliance_name, managedby_resource_group_id,
                      location, kind, managedapp_definition_id=None,
                      plan_name=None, plan_publisher=None, plan_product=None,
@@ -150,7 +150,7 @@ def show_appliancedefinition(resource_group_name=None, appliance_definition_name
     return appliancedef
 
 
-def create_appliancedefinition(resource_group_name,  # pylint: disable=too-many-arguments
+def create_appliancedefinition(resource_group_name,
                                appliance_definition_name, location,
                                lock_level, package_file_uri, authorizations,
                                description, display_name, tags=None):
@@ -222,7 +222,7 @@ def export_group_as_template(
     print(json.dumps(result.template, indent=2))
 
 
-def deploy_arm_template(resource_group_name,  # pylint: disable=too-many-arguments
+def deploy_arm_template(resource_group_name,
                         template_file=None, template_uri=None, deployment_name=None,
                         parameters=None, mode='incremental', no_wait=False):
     return _deploy_arm_template_core(resource_group_name, template_file, template_uri,
@@ -300,7 +300,7 @@ def _merge_parameters(parameter_list):
     return parameters
 
 
-def _deploy_arm_template_core(resource_group_name,  # pylint: disable=too-many-arguments
+def _deploy_arm_template_core(resource_group_name,
                               template_file=None, template_uri=None, deployment_name=None,
                               parameter_list=None, mode='incremental', validate_only=False,
                               no_wait=False):
@@ -345,7 +345,7 @@ def export_deployment_as_template(resource_group_name, deployment_name):
     print(json.dumps(result.template, indent=2))  # pylint: disable=no-member
 
 
-def create_resource(properties,  # pylint: disable=too-many-arguments
+def create_resource(properties,
                     resource_group_name=None, resource_provider_namespace=None,
                     parent_resource_path=None, resource_type=None, resource_name=None,
                     resource_id=None, api_version=None, location=None, is_full_object=False):
@@ -355,7 +355,7 @@ def create_resource(properties,  # pylint: disable=too-many-arguments
     return res.create_resource(properties, location, is_full_object)
 
 
-def show_resource(resource_group_name=None,  # pylint: disable=too-many-arguments
+def show_resource(resource_group_name=None,
                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                   resource_name=None, resource_id=None, api_version=None):
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
@@ -364,7 +364,7 @@ def show_resource(resource_group_name=None,  # pylint: disable=too-many-argument
     return res.get_resource()
 
 
-def delete_resource(resource_group_name=None,  # pylint: disable=too-many-arguments
+def delete_resource(resource_group_name=None,
                     resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                     resource_name=None, resource_id=None, api_version=None):
     res = _ResourceUtils(resource_group_name, resource_provider_namespace,
@@ -373,7 +373,7 @@ def delete_resource(resource_group_name=None,  # pylint: disable=too-many-argume
     return res.delete()
 
 
-def update_resource(parameters,  # pylint: disable=too-many-arguments
+def update_resource(parameters,
                     resource_group_name=None, resource_provider_namespace=None,
                     parent_resource_path=None, resource_type=None, resource_name=None,
                     resource_id=None, api_version=None):
@@ -383,7 +383,7 @@ def update_resource(parameters,  # pylint: disable=too-many-arguments
     return res.update(parameters)
 
 
-def tag_resource(tags,  # pylint: disable=too-many-arguments
+def tag_resource(tags,
                  resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None,
                  resource_id=None, api_version=None):
@@ -405,7 +405,7 @@ def get_deployment_operations(client, resource_group_name, deployment_name, oper
     return result
 
 
-def list_resources(resource_group_name=None,  # pylint: disable=too-many-arguments
+def list_resources(resource_group_name=None,
                    resource_provider_namespace=None, resource_type=None, name=None, tag=None,
                    location=None):
     rcf = _resource_client_factory()
@@ -420,7 +420,7 @@ def list_resources(resource_group_name=None,  # pylint: disable=too-many-argumen
     return list(resources)
 
 
-def _list_resources_odata_filter_builder(resource_group_name=None,  # pylint: disable=too-many-arguments
+def _list_resources_odata_filter_builder(resource_group_name=None,
                                          resource_provider_namespace=None,
                                          resource_type=None, name=None, tag=None, location=None):
     """Build up OData filter string from parameters
@@ -695,7 +695,7 @@ def get_policy_assignment_completion_list(prefix, **kwargs):  # pylint: disable=
     return [i.name for i in result]
 
 
-def list_locks(resource_group_name=None,  # pylint: disable=too-many-arguments
+def list_locks(resource_group_name=None,
                resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                resource_name=None, filter_string=None):
     """
@@ -728,7 +728,7 @@ def list_locks(resource_group_name=None,  # pylint: disable=too-many-arguments
         resource_name, filter=filter_string)
 
 
-def _validate_lock_params_match_lock(  # pylint: disable=too-many-arguments
+def _validate_lock_params_match_lock(
         lock_client, name, resource_group_name, resource_provider_namespace, parent_resource_path,
         resource_type, resource_name):
     """
@@ -796,7 +796,7 @@ def get_lock(name, resource_group_name=None):
     return lock_client.management_locks.get_at_resource_group_level(resource_group_name, name)
 
 
-def delete_lock(name,  # pylint: disable=too-many-arguments
+def delete_lock(name,
                 resource_group_name=None, resource_provider_namespace=None,
                 parent_resource_path=None, resource_type=None, resource_name=None):
     """
@@ -848,7 +848,7 @@ def _extract_lock_params(resource_group_name, resource_provider_namespace,
     return (resource_group_name, resource_name, resource_provider_namespace, resource_type)
 
 
-def create_lock(name,  # pylint: disable=too-many-arguments
+def create_lock(name,
                 resource_group_name=None, resource_provider_namespace=None, notes=None,
                 parent_resource_path=None, resource_type=None, resource_name=None, level=None):
     """
@@ -966,7 +966,7 @@ def _validate_resource_inputs(resource_group_name, resource_provider_namespace,
 
 
 class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
-    def __init__(self,  # pylint: disable=too-many-arguments
+    def __init__(self,
                  resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None,
                  resource_id=None, api_version=None, rcf=None):

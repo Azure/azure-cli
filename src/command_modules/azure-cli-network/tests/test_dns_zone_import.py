@@ -12,7 +12,6 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 class TestDnsZoneImport(unittest.TestCase):
 
-    # pylint: disable=too-many-arguments
     def _check_soa(self, zone, zone_name, ttl, serial_number, refresh, retry, expire, min_ttl):
         record = zone[zone_name]['soa']
         self.assertEqual(record['ttl'], ttl)

@@ -866,7 +866,7 @@ def _resolve_service_principal(client, identifier):
         raise CLIError("service principal '{}' doesn't exist".format(identifier))
 
 
-def create_application(client, display_name, homepage, identifier_uris,  # pylint: disable=too-many-arguments
+def create_application(client, display_name, homepage, identifier_uris,
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None,
                        end_date=None):
@@ -883,7 +883,7 @@ def create_application(client, display_name, homepage, identifier_uris,  # pylin
     return client.create(app_create_param)
 
 
-def _build_application_creds(password=None, key_value=None, key_type=None,  # pylint: disable=too-many-arguments
+def _build_application_creds(password=None, key_value=None, key_type=None,
                              key_usage=None, start_date=None, end_date=None):
     if password and key_value:
         raise CLIError('specify either --password or --key-value, but not both.')
@@ -940,7 +940,7 @@ def create_role_assignment(role, assignee, resource_group_name=None, scope=None)
     return _create_role_assignment(role, assignee, resource_group_name, scope)
 
 
-def _create_role_assignment(role, assignee, resource_group_name=None, scope=None,  # pylint: disable=too-many-arguments
+def _create_role_assignment(role, assignee, resource_group_name=None, scope=None,
                             resolve_assignee=True):
     factory = _auth_client_factory(scope)
     assignments_client = factory.role_assignments

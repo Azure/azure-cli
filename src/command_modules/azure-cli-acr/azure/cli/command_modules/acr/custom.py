@@ -46,7 +46,7 @@ def acr_list(resource_group_name=None):
         return client.list()
 
 
-def acr_create(registry_name,  # pylint: disable=too-many-arguments
+def acr_create(registry_name,
                resource_group_name,
                sku,
                location=None,
