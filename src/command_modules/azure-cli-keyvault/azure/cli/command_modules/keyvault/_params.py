@@ -18,10 +18,8 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.util import get_json_object
 from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
 
-from azure.keyvault.generated.models.key_vault_client_enums import \
-    (JsonWebKeyOperation)
-from azure.keyvault.generated.models import \
-    (KeyAttributes, SecretAttributes, CertificateAttributes)
+from azure.keyvault.models import JsonWebKeyOperation
+from azure.keyvault.models import KeyAttributes, SecretAttributes, CertificateAttributes
 from azure.cli.command_modules.keyvault._validators import \
     (datetime_type, certificate_type,
      get_attribute_validator,
