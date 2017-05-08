@@ -987,7 +987,7 @@ def sf_update_service(client, service_id,  # pylint: disable=too-many-arguments
     update_desc = None
     if stateful:
         if instance_count is not None:
-            CLIError("Cannot specify an instance count for a stateful service")
+            raise CLIError("Cannot specify an instance count for a stateful service")
         update_desc = StatefulServiceUpdateDescription(flags, constraints,
                                                        correlation_desc,
                                                        load_list, place_policy,
@@ -1000,19 +1000,19 @@ def sf_update_service(client, service_id,  # pylint: disable=too-many-arguments
 
     if stateless:
         if target_replica_set_size is not None:
-            CLIError("Cannot specify target replica set size for "
+            raise CLIError("Cannot specify target replica set size for "
                      "stateless service")
         if min_replica_set_size is not None:
-            CLIError("Cannot specify minimum replica set size for "
+            raise CLIError("Cannot specify minimum replica set size for "
                      "stateless service")
         if replica_restart_wait is not None:
-            CLIError("Cannot specify replica restart wait duration for "
+            raise CLIError("Cannot specify replica restart wait duration for "
                      "stateless service")
         if quorum_loss_wait is not None:
-            CLIError("Cannot specify quorum loss wait duration for "
+            raise CLIError("Cannot specify quorum loss wait duration for "
                      "stateless service")
         if stand_by_replica_keep is not None:
-            CLIError("Cannot specify standby replica keep duration for "
+            raise CLIError("Cannot specify standby replica keep duration for "
                      "stateless service")
         # pylint: disable=redefined-variable-type
         update_desc = StatelessServiceUpdateDescription(flags, constraints,
