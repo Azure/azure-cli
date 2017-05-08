@@ -58,14 +58,9 @@ class TestProgress(unittest.TestCase):  # pylint: disable=too-many-public-method
         """ tests the indeterminate progress standardout view """
         outstream = MockOutstream()
         view = progress.IndeterminateStandardOut(out=outstream)
-<<<<<<< HEAD
         view.write({})
         self.assertEqual(view.spinner.label, 'In Progress')
         before = view.spinner.total
-=======
-        before = view.spinner.total
-        self.assertEqual(view.spinner.label, 'In Progress')
->>>>>>> parent of 39a8fcd... Revert shell feedback heuristics & progress (#3197)
         view.write({})
         after = view.spinner.total
         self.assertTrue(after >= before)
