@@ -17,8 +17,6 @@ cluster_operations = create_service_adapter("azure.servicefabric",
 # TODO: Fix custom commands to accept client as additional argument instead of
 # generating
 
-cli_command(__name__, "sf node report-health",
-            "azure.cli.command_modules.sf.custom#sf_report_node_health")
 cli_command(__name__, "sf node service-package-upload",
             "azure.cli.command_modules.sf.custom#sf_service_package_upload")
 cli_command(__name__, "sf replica report-health",
@@ -85,6 +83,7 @@ with ServiceGroup(__name__, cf_sf_client, cluster_operations,
 
     # Node level commands
     with sg.group("sf node") as node_group:
+        node_group.custom_command("report-health", "sf_report_node_health")
         node_group.command("list", "get_node_info_list")
         node_group.command("remove-state", "remove_node_state")
         node_group.command("stop", "stop_node")
