@@ -137,7 +137,7 @@ def verify_packages():
     # STEP 4:: Verify the wheels that get produced
     print_heading('Verifying wheels...')
     invalid_wheels = []
-    for wheel_path in glob.glob(built_packages_dir + '/*.whl'):
+    for wheel_path in glob.glob(os.path.join(built_packages_dir, '*.whl')):
         # Verify all non-nspkg wheels
         if 'nspkg' not in wheel_path and not _valid_wheel(wheel_path):
             invalid_wheels.append(wheel_path)
