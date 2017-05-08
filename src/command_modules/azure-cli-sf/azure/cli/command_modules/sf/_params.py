@@ -35,34 +35,22 @@ with ParametersContext(command="sf service update") as c:
     c.argument("target_replica_set_size", type=int, default=None)
     c.argument("min_replica_set_size", type=int, default=None)
 
+# Application commands
 with ParametersContext(command="sf application create") as c:
     c.argument("parameters", type=get_json_object, default=None)
     c.argument("min_node_count", type=int, default=None)
     c.argument("max_node_count", type=int, default=None)
     c.argument("metrics", type=get_json_object, default=None)
 
+with ParametersContext(command="sf application upgrade") as c:
+    c.argument("parameters", type=get_json_object, default=None)
+    c.argument("replica_set_check_timeout", type=int, default=42949672925)
+    c.argument("max_unhealthy_apps", type=int, default=0)
+    c.argument("default_service_health_policy", type=get_json_object,
+               default=None)
+    c.argument("service_health_policy", type=get_json_object, default=None)
+
 # For some commands we take JSON strings as possible
-
-with ParametersContext(command="sf application upgrade") as c:
-    c.register("parameters", ("--parameters",), type=get_json_object,
-               help="JSON encoded list of application parameter overrides to \
-               be applied when upgrading an application. Note, when starting \
-               an upgrade, be sure to include the existing application \
-               parameters, if any.")
-
-with ParametersContext(command="sf application upgrade") as c:
-    c.register("default_service_health_policy",
-               ("--default_service_health_policy",),
-               type=get_json_object,
-               help="JSON encoded specification of the health policy used by \
-               default to evaluate the health of a service type.")
-
-with ParametersContext(command="sf application upgrade") as c:
-    c.register("service_health_policy", ("--service_health_policy",),
-               type=get_json_object,
-               help="JSON encoded map with service type health policy per \
-               service type name. The map is empty be default.")
-
 
 with ParametersContext(command="sf chaos start") as c:
     c.register("application_type_health_policy_map",

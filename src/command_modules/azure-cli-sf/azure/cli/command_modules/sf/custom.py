@@ -372,53 +372,77 @@ def sf_create_app(client,  # pylint: disable=too-many-locals,too-many-arguments
 
 
 def sf_upgrade_app(  # pylint: disable=too-many-arguments,too-many-locals
-        name, version, parameters, mode="UnmonitoredAuto",
+        client, app_id, app_version, parameters, mode="UnmonitoredAuto",
         replica_set_check_timeout=None, force_restart=None,
-        failure_action=None, health_check_wait_duration=None,
-        health_check_stable_duration=None,
-        health_check_retry_timeout=None, upgrade_timeout=None,
-        upgrade_domain_timeout=None, warning_as_error=False,
+        failure_action=None, health_check_wait_duration="0",
+        health_check_stable_duration="PT0H2M0S",
+        health_check_retry_timeout="PT0H10M0S",
+        upgrade_timeout="P10675199DT02H48M05.4775807S",
+        upgrade_domain_timeout="P10675199DT02H48M05.4775807S",
+        warning_as_error=False,
         max_unhealthy_apps=0, default_service_health_policy=None,
         service_health_policy=None, timeout=60):
     """
     Starts upgrading an application in the Service Fabric cluster.
 
     Validates the supplied application upgrade parameters and starts upgrading
-    the application if the parameters are valid.
+    the application if the parameters are valid. Please note that upgrade
+    description replaces the existing application description. This means that
+    if the parameters are not specified, the existing parameters on the
+    applications will be overwritten with the empty parameters list. This
+    would results in application using the default value of the parameters
+    from the application manifest.
 
-    :param str name: Application name. The name of the target application,
-    including the 'fabric' URI scheme.
-    :param str version: The target application type version (found in the
+    :param str app_id: The identity of the application. This is typically the
+    full name of the application without the 'fabric:' URI scheme.
+
+    :param str app_version: The target application type version (found in the
     application manifest) for the application upgrade.
+
+    :param str parameters: A JSON encoded list of application parameter
+    overrides to be applied when upgrading the application.
+
     :param str mode: The mode used to monitor health during a rolling upgrade.
-    :param long replica_set_check_timeout: The maximum amount of time to block
+
+    :param int replica_set_check_timeout: The maximum amount of time to block
     processing of an upgrade domain and prevent loss of availability when
     there are unexpected issues. Measured in seconds.
+
     :param bool force_restart: Forcefully restart processes during upgrade even
     when the code version has not changed.
+
     :param str failure_action: The action to perform when a Monitored upgrade
     encounters monitoring policy or health policy violations.
-    :param int health_check_wait_duration: The amount of time to wait after
+
+    :param str health_check_wait_duration: The amount of time to wait after
     completing an upgrade domain before applying health policies. Measured in
     milliseconds.
-    :param int health_check_stable_duration: The amount of time that the
+
+    :param str health_check_stable_duration: The amount of time that the
     application or cluster must remain healthy before the upgrade proceeds
     to the next upgrade domain. Measured in milliseconds.
-    :param int health_check_retry_timeout: The amount of time to retry health
+
+    :param str health_check_retry_timeout: The amount of time to retry health
     evaluations when the application or cluster is unhealthy before the failure
     action is executed. Measured in milliseconds.
-    :param int upgrade_timeout: The amount of time the overall upgrade has to
+
+    :param str upgrade_timeout: The amount of time the overall upgrade has to
     complete before FailureAction is executed. Measured in milliseconds.
-    :param int upgrade_domain_timeout: The amount of time each upgrade domain
+
+    :param str upgrade_domain_timeout: The amount of time each upgrade domain
     has to complete before FailureAction is executed. Measured in milliseconds.
+
     :param bool warning_as_error: Treat health evaluation warnings with the
     same severity as errors.
+
     :param int max_unhealthy_apps: The maximum allowed percentage of unhealthy
     deployed applications. Represented as a number between 0 and 100.
-    :param long timeout: The server timeout for performing the operation in
-    seconds. This specifies the time duration that the client is willing to
-    wait for the requested operation to complete. The default value for this
-    parameter is 60 seconds.
+
+    :param str default_service_health_policy: JSON encoded specification of the
+    health policy used by default to evaluate the health of a service type.
+
+    :param str service_health_policy: JSON encoded map with service type health
+    policy per service type name. The map is empty be default.
     """
     from azure.servicefabric.models.application_upgrade_description import (
         ApplicationUpgradeDescription
@@ -500,13 +524,13 @@ def sf_upgrade_app(  # pylint: disable=too-many-arguments,too-many-locals
                                                 max_unhealthy_apps, def_shp,
                                                 map_shp)
 
-    desc = ApplicationUpgradeDescription(name, version, app_params, "Rolling",
-                                         mode, replica_set_check_timeout,
+    desc = ApplicationUpgradeDescription(app_id, app_version, app_params,
+                                         "Rolling", mode,
+                                         replica_set_check_timeout,
                                          force_restart, monitoring_policy,
                                          app_health_policy)
 
-    sf_client = cf_sf_client(None)
-    sf_client.start_application_upgrade(name, desc, timeout)
+    client.start_application_upgrade(app_id, desc, timeout)
     # TODO consider additional parameter validation here rather than allowing
     # the gateway to reject it and return failure response
 
