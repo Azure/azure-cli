@@ -3,7 +3,7 @@
 Release History
 ===============
 
-0.1.6 (unreleased)
+0.1.6 (2017-05-09)
 ++++++++++++++++++
 * Rename documentdb module to cosmosdb.
 
