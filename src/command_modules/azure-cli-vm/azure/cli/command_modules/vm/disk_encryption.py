@@ -295,7 +295,7 @@ def _get_keyvault_key_url(keyvault_name, key_name):
 
     from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
     client = KeyVaultClient(KeyVaultAuthentication(get_token))
-    result = client.keyvault.get_key(_get_key_vault_base_url(keyvault_name), key_name, '')
+    result = client.get_key(_get_key_vault_base_url(keyvault_name), key_name, '')
     return result.key.kid  # pylint: disable=no-member
 
 
