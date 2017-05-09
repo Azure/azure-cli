@@ -48,7 +48,7 @@ class ShellRun(ScenarioTest):
     def test_shell_run(self):
         """ tests whether the shell runs """
         PIPE.send('quit')
-        self.cmd(str('interactive'))
+        self.cmd('interactive')
 
 
 # class DynamicShellCompletionsTest(ScenarioTest):
