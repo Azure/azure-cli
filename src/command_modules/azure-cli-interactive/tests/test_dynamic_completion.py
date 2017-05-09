@@ -11,9 +11,10 @@ from prompt_toolkit.completion import Completion
 
 from azclishell.__main__ import AZCOMPLETER
 from azure.cli.testsdk import ScenarioTest
+from azure.cli.testsdk.vcr_test_base import ResourceGroupVCRTestBase
 
 
-class DynamicShellCompletionsTest(ScenarioTest):
+class DynamicShellCompletionsTest(ResourceGroupVCRTestBase):
 
     def init(self):
         self.completer = AZCOMPLETER
