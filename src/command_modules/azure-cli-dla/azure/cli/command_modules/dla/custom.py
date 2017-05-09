@@ -32,7 +32,6 @@ def list_adla_account(client, resource_group_name=None):
     return list(account_list)
 
 
-# pylint: disable=too-many-arguments
 def list_adla_jobs(client,
                    account_name,
                    top=500,
@@ -78,7 +77,6 @@ def list_adla_jobs(client,
     return to_return
 
 
-# pylint: disable=too-many-arguments
 def create_adla_account(client,
                         resource_group_name,
                         account_name,
@@ -104,7 +102,6 @@ def create_adla_account(client,
     return client.create(resource_group_name, account_name, create_params)
 
 
-# pylint: disable=too-many-arguments
 def update_adla_account(client,
                         account_name,
                         resource_group_name,
@@ -128,7 +125,6 @@ def update_adla_account(client,
 
 
 # firewall customizations
-# pylint: disable=too-many-arguments
 def add_adla_firewall_rule(client,
                            account_name,
                            firewall_rule_name,
@@ -143,7 +139,6 @@ def add_adla_firewall_rule(client,
 
 
 # catalog customizations
-# pylint: disable=too-many-arguments
 def create_adla_catalog_credential(client,
                                    account_name,
                                    database_name,
@@ -165,7 +160,6 @@ def create_adla_catalog_credential(client,
     client.create_credential(account_name, database_name, credential_name, create_params)
 
 
-# pylint: disable=too-many-arguments
 def update_adla_catalog_credential(client,
                                    account_name,
                                    database_name,
@@ -244,7 +238,6 @@ def list_catalog_table_statistics(client,
 
 
 # job customizations
-# pylint: disable=too-many-arguments
 def submit_adla_job(client,
                     account_name,
                     job_name,

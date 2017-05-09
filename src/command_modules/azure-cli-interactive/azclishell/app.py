@@ -132,7 +132,6 @@ def space_toolbar(settings_items, cols, empty_space):
 class Shell(object):
     """ represents the shell """
 
-    # pylint: disable=too-many-arguments
     def __init__(self, completer=None, styles=None,
                  lexer=None, history=InMemoryHistory(),
                  app=None, input_custom=sys.stdout, output_custom=None):

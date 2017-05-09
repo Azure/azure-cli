@@ -212,7 +212,7 @@ def get_default_policy(client, scaffold=False):  # pylint: disable=unused-argume
         return _default_certificate_profile()
 
 
-def create_keyvault(client,  # pylint:disable=too-many-arguments
+def create_keyvault(client,
                     resource_group_name, vault_name, location=None, sku=SkuName.standard.value,
                     enabled_for_deployment=None,
                     enabled_for_disk_encryption=None,
@@ -310,7 +310,7 @@ def _object_id_args_helper(object_id, spn, upn):
     return object_id
 
 
-def set_policy(client, resource_group_name, vault_name,  # pylint:disable=too-many-arguments
+def set_policy(client, resource_group_name, vault_name,
                object_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
                certificate_permissions=None):
     """ Update security policy settings for a Key Vault. """
@@ -346,7 +346,7 @@ def set_policy(client, resource_group_name, vault_name,  # pylint:disable=too-ma
                                        properties=vault.properties))
 
 
-def delete_policy(client,  # pylint:disable=too-many-arguments
+def delete_policy(client,
                   resource_group_name, vault_name, object_id=None, spn=None, upn=None):
     """ Delete security policy settings for a Key Vault. """
     from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
@@ -367,7 +367,6 @@ def delete_policy(client,  # pylint:disable=too-many-arguments
                                        properties=vault.properties))
 
 
-# pylint: disable=too-many-arguments
 def create_key(client, vault_base_url, key_name, destination, key_size=None, key_ops=None,
                disabled=False, expires=None, not_before=None, tags=None):
     from azure.keyvault.models import KeyAttributes
@@ -397,7 +396,7 @@ def restore_key(client, vault_base_url, file_path):
 restore_key.__doc__ = KeyVaultClient.restore_key.__doc__
 
 
-# pylint: disable=too-many-arguments,assignment-from-no-return,unused-variable
+# pylint: disable=assignment-from-no-return,unused-variable
 def import_key(client, vault_base_url, key_name, destination=None, key_ops=None, disabled=False,
                expires=None, not_before=None, tags=None, pem_file=None, pem_password=None,
                byok_file=None):

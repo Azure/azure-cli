@@ -22,7 +22,7 @@ from azure.cli.command_modules.keyvault._params import secret_encoding_values
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
-def _create_keyvault(test,  # pylint: disable=too-many-arguments
+def _create_keyvault(test,
                      vault_name, resource_group, location, retry_wait=30, max_retries=10):
     # need premium KeyVault to store keys in HSM
     test.cmd('keyvault create -g {} -n {} -l {} --sku premium'.format(resource_group, vault_name,

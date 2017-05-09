@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 
-  <?define ProductVersion="0.2.3" ?>
+  <?define ProductVersion="0.2.7" ?>
 
-  <?define ProductName = "CLI 2.0 for Azure" ?>
+  <?define ProductName = "Microsoft CLI 2.0 for Azure" ?>
   <?define ProductDescription = "Command-line tools for Azure." ?>
   <?define ProductAuthor = "Microsoft Corporation" ?>
   <?define ProductResources = ".\resources\" ?>
@@ -33,7 +33,7 @@
     <Property Id="WixAppFolder" Value="WixPerMachineFolder" />
 
     <Feature Id="ProductFeature"
-             Title="CLI 2.0 for Azure"
+             Title="Microsoft CLI 2.0 for Azure"
              Level="1"
              AllowAdvertise="no">
       <ComponentGroupRef Id="ProductComponents" />
@@ -95,7 +95,7 @@
                      Name="PATH"
                      Value="[DynamicCliDir]wbin"
                      Permanent="no"
-                     Part="last"
+                     Part="first"
                      Action="set"
                      System="yes" />
         <CreateFolder />

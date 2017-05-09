@@ -222,7 +222,6 @@ def _user_confirmed(confirmation, command_args):
         return False
 
 
-# pylint: disable=too-many-arguments
 def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=None,
                                setter_arg_name='parameters', table_transformer=None,
                                child_collection_prop_name=None, child_collection_key='name',

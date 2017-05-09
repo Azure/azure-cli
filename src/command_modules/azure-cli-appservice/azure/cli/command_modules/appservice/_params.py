@@ -14,7 +14,7 @@ from ._client_factory import web_client_factory
 from ._validators import validate_existing_function_app, validate_existing_web_app
 
 
-def _generic_site_operation(resource_group_name, name, operation_name, slot=None,  # pylint: disable=too-many-arguments
+def _generic_site_operation(resource_group_name, name, operation_name, slot=None,
                             extra_parameter=None, client=None):
     client = client or web_client_factory()
     m = getattr(client.web_apps,
@@ -79,7 +79,7 @@ register_cli_argument('webapp create', 'name', options_list=('--name', '-n'), he
 register_cli_argument('webapp create', 'deployment_container_image_name', options_list=('--deployment-container-image-name', '-i'),
                       help='Linux only. Container image name from Docker Hub, e.g. publisher/image-name:version')
 register_cli_argument('webapp create', 'startup_file', help="Linux only. The web's startup file")
-register_cli_argument('webapp create', 'runtime', options_list=('--runtime', '-r'), help='canonicalized web runtime in the format of Framework|Version. For example, PHP|5.6')  # TODO ADD completer
+register_cli_argument('webapp create', 'runtime', options_list=('--runtime', '-r'), help="canonicalized web runtime in the format of Framework|Version, e.g. PHP|5.6. Use 'az webapp list-runtimes' for available list")  # TODO ADD completer
 register_cli_argument('webapp list-runtimes', 'linux', action='store_true', help='list runtime stacks for linux based webapps')  # TODO ADD completer
 
 register_cli_argument('webapp create', 'plan', options_list=('--plan', '-p'), completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
