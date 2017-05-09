@@ -6,6 +6,7 @@
 import sys
 import mock
 
+
 from prompt_toolkit.interface import CommandLineInterface, Application
 from prompt_toolkit.shortcuts import create_eventloop
 from prompt_toolkit.input import PipeInput
@@ -13,7 +14,7 @@ from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.enums import DEFAULT_BUFFER
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
-
+import azclishell._dump_help
 
 PIPE = PipeInput()
 
