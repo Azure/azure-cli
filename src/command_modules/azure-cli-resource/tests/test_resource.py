@@ -689,6 +689,9 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
             JCheck('[0].resourceGroup', resource_group)
         ])
 
+    def tear_down(self):
+        self.cmd('group delete --name {} --no-wait --yes'.format('crossrg5'))
+
 
 if __name__ == '__main__':
     unittest.main()
