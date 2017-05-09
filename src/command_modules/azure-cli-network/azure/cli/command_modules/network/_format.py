@@ -98,10 +98,21 @@ def transform_vpn_connection(result):
                     delattr(prop_val, prop)
     return result
 
+
 def transform_vpn_connection_create_output(result):
     from azure.cli.core.commands import DeploymentOutputLongRunningOperation
-    result = DeploymentOutputLongRunningOperation('Starting network vpn-connection create')(result)
-    return result['resource']
+    from msrest.pipeline import ClientRawResponse
+    from msrestazure.azure_operation import AzureOperationPoller
+    if isinstance(result, AzureOperationPoller):
+        # normally returns a LRO poller
+        result = DeploymentOutputLongRunningOperation('Starting network vpn-connection create')(result)
+        return result['resource']
+    elif isinstance(result, ClientRawResponse):
+        # returns a raw response if --no-wait used
+        return
+    else:
+        # returns a plain response (not a poller) if --validate used
+        return result
 
 
 def transform_vnet_create_output(result):
@@ -126,3 +137,52 @@ def transform_nsg_create_output(result):
 
 def transform_vnet_gateway_create_output(result):
     return {'vnetGateway': result.result()}
+
+def transform_geographic_hierachy_table_output(result):
+    transformed = []
+
+    def _extract_values(obj):
+        obj = obj if isinstance(obj, list) else [obj]
+        for item in obj:
+            item_obj = OrderedDict()
+            item_obj['code'] = item['code']
+            item_obj['name'] = item['name']
+            transformed.append(item_obj)
+            _extract_values(item['regions'])
+    _extract_values(result['geographicHierarchy'])
+    return transformed
+
+def transform_service_community_table_output(result):
+    transformed = []
+    for item in result:
+        service_name = item['serviceName']
+        for community in item['bgpCommunities']:
+            item_obj = OrderedDict()
+            item_obj['serviceName'] = service_name
+            item_obj['communityValue'] = community['communityValue']
+            item_obj['supportedRegion'] = community['serviceSupportedRegion']
+            transformed.append(item_obj)
+    return transformed
+
+
+def transform_waf_rule_sets_table_output(result):
+    transformed = []
+    for item in result:
+        rule_set_name = item['name']
+        for group in item['ruleGroups']:
+            rule_group_name = group['ruleGroupName']
+            if group['rules']:
+                for rule in group['rules']:
+                    item_obj = OrderedDict()
+                    item_obj['ruleSet'] = rule_set_name
+                    item_obj['ruleGroup'] = rule_group_name
+                    item_obj['ruleId'] = rule['ruleId']
+                    item_obj['description'] = rule['description']
+                    transformed.append(item_obj)
+            else:
+                item_obj = OrderedDict()
+                item_obj['ruleSet'] = rule_set_name
+                item_obj['ruleGroup'] = rule_group_name
+                transformed.append(item_obj)
+    return transformed
+    

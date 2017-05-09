@@ -2,9 +2,11 @@
 
 Release History
 ===============
-2.0.4 (unreleased)
+
+2.0.4 (2017-04-28)
 ++++++++++++++++++
 * Support login when there are no subscriptions found (#2560)
+* Support short param name in az account set --subscription (#2980)
 
 2.0.3 (2017-04-17)
 ++++++++++++++++++

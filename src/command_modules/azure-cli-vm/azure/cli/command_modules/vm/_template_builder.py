@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=too-many-arguments
 
 from collections import OrderedDict
 import json
@@ -752,8 +751,12 @@ def build_av_set_resource(name, location, tags,
             'name': 'Classic' if unmanaged else 'Aligned'
         },
         "properties": {
-            'platformUpdateDomainCount': platform_update_domain_count,
             'platformFaultDomainCount': platform_fault_domain_count,
         }
     }
+
+    # server defaults the UD to 5 unless set otherwise
+    if platform_update_domain_count is not None:
+        av_set['properties']['platformUpdateDomainCount'] = platform_update_domain_count
+
     return av_set

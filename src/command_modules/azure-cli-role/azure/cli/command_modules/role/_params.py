@@ -7,10 +7,11 @@
 from azure.cli.core.commands import CliArgumentType
 from azure.cli.core.commands import register_cli_argument
 from azure.cli.core.commands.parameters import enum_choice_list
-from .custom import get_role_definition_name_completion_list
+from .custom import get_role_definition_name_completion_list, x509_type
+from ._validators import validate_group, validate_member_id, VARIANT_GROUP_ID_ARGS
 
 register_cli_argument('ad app', 'application_object_id', options_list=('--object-id',))
-register_cli_argument('ad app', 'display_name', help=' the display name of the application')
+register_cli_argument('ad app', 'display_name', help='the display name of the application')
 register_cli_argument('ad app', 'homepage', help='the url where users can sign in and use your app.')
 register_cli_argument('ad app', 'identifier', options_list=('--id',), help='identifier uri, application id, or object id')
 register_cli_argument('ad app', 'identifier_uris', nargs='+', help='space separated unique URIs that Azure AD can use for this app.')
@@ -29,14 +30,16 @@ register_cli_argument('ad sp', 'identifier', options_list=('--id',), help='servi
 register_cli_argument('ad sp create', 'identifier', options_list=('--id',), help='identifier uri, application id, or object id of the associated application')
 register_cli_argument('ad sp create-for-rbac', 'name', name_arg_type)
 register_cli_argument('ad sp create-for-rbac', 'password', options_list=('--password', '-p'))
-register_cli_argument('ad sp create-for-rbac', 'years', type=int)
+register_cli_argument('ad sp create-for-rbac', 'years', type=int, default=None)
 register_cli_argument('ad sp create-for-rbac', 'scopes', nargs='+')
 register_cli_argument('ad sp create-for-rbac', 'create_cert', action='store_true', help='create and upload self-signed certificate which you can use to login')
 register_cli_argument('ad sp create-for-rbac', 'role', completer=get_role_definition_name_completion_list)
 register_cli_argument('ad sp create-for-rbac', 'skip_assignment', action='store_true', help='do not create default assignment')
 register_cli_argument('ad sp create-for-rbac', 'expanded_view', action='store_true', help='Once created, display more information like subscription and cloud environments')
+register_cli_argument('ad sp create-for-rbac', 'cert', type=x509_type)
+
 register_cli_argument('ad sp reset-credentials', 'name', name_arg_type)
-register_cli_argument('ad sp reset-credentials', 'years', type=int)
+register_cli_argument('ad sp reset-credentials', 'years', type=int, default=None)
 register_cli_argument('ad sp reset-credentials', 'create_cert', action='store_true', help='re-create and upload self-signed certificate')
 
 register_cli_argument('ad', 'display_name', help='object\'s display name or its prefix')
@@ -46,6 +49,15 @@ register_cli_argument('ad', 'upn', help='user principal name, e.g. john.doe@cont
 register_cli_argument('ad', 'query_filter', options_list=('--filter',), help='OData filter')
 register_cli_argument('ad user', 'mail_nickname', help='mail alias. Defaults to user principal name')
 register_cli_argument('ad user', 'force_change_password_next_login', action='store_true')
+
+group_help_msg = "group's object id or display name(prefix also works if there is a unique match)"
+for arg in VARIANT_GROUP_ID_ARGS:
+    register_cli_argument('ad group', arg, options_list=('--group', '-g'), validator=validate_group, help=group_help_msg)
+
+register_cli_argument('ad group get-member-groups', 'security_enabled_only', action='store_true', default=False, required=False)
+member_id_help_msg = 'The object ID of the contact, group, user, or service principal'
+register_cli_argument('ad group member add', 'url', options_list='--member-id', validator=validate_member_id, help=member_id_help_msg)
+register_cli_argument('ad group member', 'member_object_id', options_list='--member-id', help=member_id_help_msg)
 
 register_cli_argument('role', 'scope', help='scope at which the role assignment or definition applies to, e.g., /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333, /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, or /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM')
 register_cli_argument('role assignment', 'role_assignment_name', options_list=('--name', '-n'))

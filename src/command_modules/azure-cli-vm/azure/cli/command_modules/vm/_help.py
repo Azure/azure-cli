@@ -386,7 +386,7 @@ helps['acs create'] = """
     examples:
         - name: Create a Kubernetes container service and generate keys.
           text: >
-            az acs create -g MyResourceGroup -n MyContainer_service --orchestrator-type kubernetes --generate-ssh-keys
+            az acs create -g MyResourceGroup -n MyContainerService --orchestrator-type kubernetes --generate-ssh-keys
 """
 
 helps['acs delete'] = """

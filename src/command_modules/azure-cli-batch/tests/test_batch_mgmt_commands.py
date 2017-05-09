@@ -7,8 +7,8 @@ import tempfile
 import os
 import mock
 
-from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck,
-                                                     NoneCheck)
+from azure.cli.testsdk.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck,
+                                             NoneCheck)
 from azure.cli.core._config import az_config, CONFIG_FILE_NAME
 
 
@@ -108,7 +108,7 @@ class BatchMgmtAccountScenarioTest(ResourceGroupVCRTestBase):  # pylint: disable
         self.assertTrue(keys['primary'] != keys2['primary'])
 
         with mock.patch('azure.cli.core._config.GLOBAL_CONFIG_DIR', self.config_dir), \
-        mock.patch('azure.cli.core._config.GLOBAL_CONFIG_PATH', self.config_path):
+             mock.patch('azure.cli.core._config.GLOBAL_CONFIG_PATH', self.config_path):  # noqa: F122
             self.cmd('batch account login -g {} -n {}'.
                      format(rg, name), checks=NoneCheck())
             self.assertEqual(az_config.config_parser.get('batch', 'auth_mode'), 'aad')

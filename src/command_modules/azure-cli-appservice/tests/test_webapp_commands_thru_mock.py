@@ -20,9 +20,12 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          sync_site_repo,
                                                          _match_host_names_from_cert,
                                                          bind_ssl_cert,
-                                                         list_publish_profiles)
+                                                         list_publish_profiles,
+                                                         config_source_control,
+                                                         show_webapp)
 
 # pylint: disable=line-too-long
+from vsts_cd_manager.continuous_delivery_manager import ContinuousDeliveryResult
 
 
 class Test_Webapp_Mocked(unittest.TestCase):
@@ -146,6 +149,35 @@ class Test_Webapp_Mocked(unittest.TestCase):
         # assert, we return the virtual ip from the ip based ssl binding
         resolve_hostname_mock.assert_called_with('myweb.com')
 
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.vsts_cd_provider.ContinuousDeliveryManager', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.vsts_cd_provider.Profile', autospec=True)
+    def test_config_source_control_vsts(self, profile_mock, cd_manager_mock, client_factory_mock):
+        # Mock the result of get auth token (avoiding REST call)
+        profile = mock.Mock()
+        profile.get_subscription.return_value = {'id': 'id1', 'name': 'sub1', 'tenantId': 'tenant1'}
+        profile.get_current_account_user.return_value = None
+        profile.get_login_credentials.return_value = None, None, None
+        profile.get_access_token_for_resource.return_value = None
+        profile_mock.return_value = profile
+
+        # Mock the cd manager class so no REST calls are made
+        cd_manager = mock.Mock()
+        status = ContinuousDeliveryResult(None, None, None, None, None, None, "message1", None, None, None)
+        cd_manager.setup_continuous_delivery.return_value = status
+        cd_manager_mock.return_value = cd_manager
+
+        # Mock the client and set the location
+        client = mock.Mock()
+        client_factory_mock.return_value = client
+        site = Site('antarctica')
+        site.default_host_name = 'myweb.com'
+        client.web_apps.get.return_value = site
+
+        config_source_control('group1', 'myweb', 'http://github.com/repo1', None, None,
+                              None, None, "slot1", 'vsts', 'ASPNetWap', 'account1', False)
+        cd_manager.setup_continuous_delivery.assert_called_with('slot1', 'ASPNetWap', 'account1', True, None)
+
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     def test_update_site_config(self, site_op_mock):
         site_config = SiteConfig('antarctica')
@@ -185,15 +217,27 @@ class Test_Webapp_Mocked(unittest.TestCase):
         log_mock.assert_called_with('myRG', 'myweb', None, None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
-    def test_sync_repository_with_error(self, site_op_mock):
-        resp = FakedResponse(400)
-        setattr(resp, 'text', '{"Message": "nice error"}')
-        site_op_mock.side_effect = CloudError(resp, error='error1')
+    @mock.patch('azure.cli.command_modules.appservice.custom._rename_server_farm_props', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._fill_ftp_publishing_url', autospec=True)
+    def test_show_webapp(self, file_ftp_mock, rename_mock, site_op_mock):
+        faked_web = mock.MagicMock()
+        site_op_mock.return_value = faked_web
         # action
-        with self.assertRaises(CLIError) as ex:
-            sync_site_repo('myRG', 'myweb')
+        result = show_webapp('myRG', 'myweb', slot=None, app_instance=None)
+        # assert (we invoke the site op)
+        self.assertEqual(faked_web, result)
+        self.assertTrue(rename_mock.called)
+        self.assertTrue(file_ftp_mock.called)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_sync_repository_skip_bad_error(self, site_op_mock):
+        resp = FakedResponse(200)  # because of bad spec, sdk throws on 200.
+        setattr(resp, 'text', '{"Message": ""}')
+        site_op_mock.side_effect = CloudError(resp, error="bad error")
+        # action
+        sync_site_repo('myRG', 'myweb')
         # assert
-        self.assertEqual("nice error", str(ex.exception))
+        pass  # if we are here, it means CLI has captured the bogus exception
 
     def test_match_host_names_from_cert(self):
         result = _match_host_names_from_cert(['*.mysite.com'], ['admin.mysite.com', 'log.mysite.com', 'mysite.com'])

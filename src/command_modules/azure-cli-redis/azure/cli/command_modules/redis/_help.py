@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps #pylint: disable=unused-import
+from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 
-#pylint: disable=line-too-long
+# pylint: disable=line-too-long
 
 helps['redis'] = """
     type: group
@@ -15,7 +15,7 @@ helps['redis'] = """
 
 helps['redis export'] = """
     type: command
-    short-summary: Export data stored in a redis cache. 
+    short-summary: Export data stored in a redis cache.
 """
 
 helps['redis import-method'] = """

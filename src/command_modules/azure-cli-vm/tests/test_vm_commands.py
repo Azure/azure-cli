@@ -11,12 +11,11 @@ import tempfile
 import unittest
 
 import six
-
 from azure.cli.core.util import CLIError
-from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase,
-                                                     ResourceGroupVCRTestBase,
-                                                     JMESPathCheck,
-                                                     NoneCheck)
+from azure.cli.testsdk.vcr_test_base import (VCRTestBase,
+                                             ResourceGroupVCRTestBase,
+                                             JMESPathCheck,
+                                             NoneCheck)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -520,13 +519,23 @@ class VMAvailSetScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
     def body(self):
-        self.cmd('vm availability-set create -g {} -n {} --platform-fault-domain-count 2 --platform-update-domain-count 2'.format(
+        self.cmd('vm availability-set create -g {} -n {}'.format(
             self.resource_group, self.name), checks=[
                 JMESPathCheck('name', self.name),
+                JMESPathCheck('platformFaultDomainCount', 2),
+                JMESPathCheck('platformUpdateDomainCount', 5),  # server defaults to 5
+                JMESPathCheck('sku.managed', True)
+        ])
+
+        # create with explict UD count
+        self.cmd('vm availability-set create -g {} -n avset2 --platform-fault-domain-count 2 --platform-update-domain-count 2'.format(
+            self.resource_group), checks=[
                 JMESPathCheck('platformFaultDomainCount', 2),
                 JMESPathCheck('platformUpdateDomainCount', 2),
                 JMESPathCheck('sku.managed', True)
         ])
+        self.cmd('vm availability-set delete -g {} -n avset2'.format(self.resource_group))
+
         self.cmd('vm availability-set update -g {} -n {} --set tags.test=success'.format(self.resource_group, self.name),
                  checks=JMESPathCheck('tags.test', 'success'))
         self.cmd('vm availability-set list -g {}'.format(self.resource_group), checks=[

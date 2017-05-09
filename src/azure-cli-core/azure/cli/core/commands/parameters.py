@@ -7,7 +7,8 @@
 import argparse
 import platform
 
-from azure.cli.core.commands import CliArgumentType, register_cli_argument
+from azure.cli.core.commands import \
+    (CliArgumentType, register_cli_argument)
 from azure.cli.core.commands.validators import validate_tag, validate_tags
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands.validators import generate_deployment_name
@@ -130,13 +131,14 @@ def enum_default(resource_type, enum_name, enum_val_name):
         return None
 
 
-def three_state_flag(positive_label='true', negative_label='false'):
+def three_state_flag(positive_label='true', negative_label='false', invert=False):
     """ Creates a flag-like argument that can also accept positive/negative values. This allows
     consistency between create commands that typically use flags and update commands that require
     positive/negative values without introducing breaking changes. Flag-like behavior always
-    implies the affirmative.
+    implies the affirmative unless invert=True then invert the logic.
     - positive_label: label for the positive value (ex: 'enabled')
     - negative_label: label for the negative value (ex: 'disabled')
+    - invert: invert the boolean logic for the flag
     """
     choices = [positive_label, negative_label]
 
@@ -144,7 +146,13 @@ def three_state_flag(positive_label='true', negative_label='false'):
     class ThreeStateAction(argparse.Action):
 
         def __call__(self, parser, namespace, values, option_string=None):
-            values = values or positive_label
+            if invert:
+                if values:
+                    values = positive_label if values == negative_label else negative_label
+                else:
+                    values = values or negative_label
+            else:
+                values = values or positive_label
             setattr(namespace, self.dest, values == positive_label)
 
     params = {
@@ -174,7 +182,7 @@ resource_group_name_type = CliArgumentType(
     options_list=('--resource-group', '-g'),
     completer=get_resource_group_completion_list,
     id_part='resource_group',
-    help="Name of resource group. You can configure the default group using 'az configure --defaults group=<name>'",
+    help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`",
     configured_default='group')
 
 name_type = CliArgumentType(options_list=('--name', '-n'), help='the primary resource name')
@@ -183,7 +191,7 @@ location_type = CliArgumentType(
     options_list=('--location', '-l'),
     completer=get_location_completion_list,
     type=location_name_type,
-    help="Location. You can configure the default location using 'az configure --defaults location=<location>'",
+    help="Location. You can configure the default location using `az configure --defaults location=<location>`",
     metavar='LOCATION',
     configured_default='location')
 

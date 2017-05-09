@@ -3,6 +3,19 @@
 Release History
 ===============
 
+2.0.5 (2017-05-05)
+^^^^^^^^^^^^^^^^^^
+* core: capture exceptions caused by unregistered provider and auto-register it   
+* login: avoid the bad exception when the user account has no subscription and no tenants
+* perf: persist adal token cache in memory till process exits (#2603)
+
+2.0.4 (2017-04-28)
+^^^^^^^^^^^^^^^^^^
+* Fix bytes returned from hex fingerprint -o tsv (#3053)
+* Enhanced Key Vault Certificate Download and AAD SP Integration (#3003)
+* Add Python location to ‘az —version’ (#2986)
+* login: support login when there are no subscriptions (#2929)
+
 2.0.3 (2017-04-17)
 ^^^^^^^^^^^^^^^^^^
 *core: fix a failure when login using a service principal twice (#2800)

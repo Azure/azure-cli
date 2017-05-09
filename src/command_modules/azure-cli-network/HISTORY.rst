@@ -3,8 +3,26 @@
 Release History
 ===============
 
+2.0.5 (2017-05-05)
+++++++++++++++++++
+
+* Add `network watcher test-connectivity` command.
+* Add support for `--filters` parameter for `network watcher packet-capture create`.
+
+2.0.4 (2017-04-28)
+++++++++++++++++++
+
+* Add support for Application Gateway connection draining.
+* Add support for Application Gateway WAF rule set configuration.
+* Add support for ExpressRoute route filters and rules.
+* Add support for TrafficManager geographic routing.
+* Add support for VPN connection policy-based traffic selectors.
+* Add support for VPN connection IPSec policies.
+* Fix bug with `vpn-connection create` when using the `--no-wait` or `--validate` parameters.
+
 2.0.3 (2017-04-17)
 ++++++++++++++++++
+
 * Add support for active-active VNet gateways
 * Remove nulls values from output of `network vpn-connection list/show` commands.
 * BC: Fix bug in the output of `vpn-connection create` 

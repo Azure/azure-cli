@@ -110,7 +110,7 @@ class SingleValueReplacer(RecordingProcessor):
 # Resource Group Preparer and its shorthand decorator
 
 class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest.rg',  # pylint: disable=too-many-arguments
+    def __init__(self, name_prefix='clitest.rg',
                  parameter_name='resource_group',
                  parameter_name_for_location='resource_group_location', location='westus',
                  dev_setting_name='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME',
@@ -141,7 +141,7 @@ class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
 # Storage Account Preparer and its shorthand decorator
 
 class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self,  # pylint: disable=too-many-arguments
+    def __init__(self,
                  name_prefix='clitest', sku='Standard_LRS', location='westus',
                  parameter_name='storage_account', resource_group_parameter_name='resource_group',
                  skip_delete=True, dev_setting_name='AZURE_CLI_TEST_DEV_STORAGE_ACCOUNT_NAME'):
@@ -155,13 +155,17 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
         self.dev_setting_name = os.environ.get(dev_setting_name, None)
 
     def create_resource(self, name, **kwargs):
+        group = self._get_resource_group(**kwargs)
+
         if not self.dev_setting_name:
-            group = self._get_resource_group(**kwargs)
             template = 'az storage account create -n {} -g {} -l {} --sku {}'
             execute(template.format(name, group, self.location, self.sku))
-            return {self.parameter_name: name}
         else:
-            return {self.parameter_name: self.dev_setting_name}
+            name = self.dev_setting_name
+
+        account_key = execute('storage account keys list -n {} -g {} --query "[0].value" -otsv'
+                              .format(name, group)).output
+        return {self.parameter_name: name, self.parameter_name + '_info': (name, account_key)}
 
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete and not self.dev_setting_name:
@@ -181,7 +185,7 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
 # Role based access control service principal preparer
 
 class RoleBasedServicePrincipalPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='http://clitest',  # pylint: disable=too-many-arguments
+    def __init__(self, name_prefix='http://clitest',
                  skip_assignment=True, parameter_name='sp_name', parameter_password='sp_password',
                  dev_setting_sp_name='AZURE_CLI_TEST_DEV_SP_NAME',
                  dev_setting_sp_password='AZURE_CLI_TEST_DEV_SP_PASSWORD'):
@@ -195,8 +199,8 @@ class RoleBasedServicePrincipalPreparer(AbstractPreparer, SingleValueReplacer):
 
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_sp_name:
-            command = 'az ad sp create-for-rbac -n {}{}'\
-                      .format(name, ' --skip-assignment' if self.skip_assignment else '')
+            command = 'az ad sp create-for-rbac -n {}{}' \
+                .format(name, ' --skip-assignment' if self.skip_assignment else '')
             self.result = execute(command).get_output_in_json()
             return {self.parameter_name: name, self.parameter_password: self.result['password']}
         else:

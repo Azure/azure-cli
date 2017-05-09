@@ -7,6 +7,7 @@ import re
 import os
 import uuid
 from dateutil.relativedelta import relativedelta
+from dateutil.tz import tzutc
 import dateutil.parser
 
 from azure.cli.core.util import CLIError, todict, get_file_json, shell_safe_json_parse
@@ -41,6 +42,13 @@ def list_role_definitions(name=None, resource_group_name=None, scope=None,
 def get_role_definition_name_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
     definitions = list_role_definitions()
     return [x.properties.role_name for x in list(definitions)]
+
+
+def x509_type(cert):
+    x509 = _try_x509_pem(cert) or _try_x509_der(cert)
+    if not x509:
+        raise CLIError("The value provided for --cert was not a PEM or a DER file.")
+    return x509
 
 
 def create_role_definition(role_definition):
@@ -123,7 +131,6 @@ def create_role_assignment(role, assignee, resource_group_name=None, scope=None)
 
 
 def _create_role_assignment(role, assignee, resource_group_name=None, scope=None,
-                            # pylint: disable=too-many-arguments
                             resolve_assignee=True):
     factory = _auth_client_factory(scope)
     assignments_client = factory.role_assignments
@@ -141,7 +148,7 @@ def _create_role_assignment(role, assignee, resource_group_name=None, scope=None
                                      custom_headers=custom_headers)
 
 
-def list_role_assignments(assignee=None, role=None, resource_group_name=None,  # pylint: disable=too-many-arguments
+def list_role_assignments(assignee=None, role=None, resource_group_name=None,
                           scope=None, include_inherited=False,
                           show_all=False, include_groups=False):
     '''
@@ -204,7 +211,7 @@ def _get_displayable_name(graph_object):
         return ''
 
 
-def delete_role_assignments(ids=None, assignee=None, role=None,  # pylint: disable=too-many-arguments
+def delete_role_assignments(ids=None, assignee=None, role=None,
                             resource_group_name=None, scope=None, include_inherited=False):
     factory = _auth_client_factory(scope)
     assignments_client = factory.role_assignments
@@ -230,7 +237,7 @@ def delete_role_assignments(ids=None, assignee=None, role=None,  # pylint: disab
         raise CLIError('No matched assignments were found to delete')
 
 
-def _search_role_assignments(assignments_client, definitions_client,  # pylint: disable=too-many-arguments
+def _search_role_assignments(assignments_client, definitions_client,
                              scope, assignee, role, include_inherited, include_groups):
     assignee_object_id = None
     if assignee:
@@ -338,7 +345,7 @@ def list_users(client, upn=None, display_name=None, query_filter=None):
     return client.list(filter=(' and ').join(sub_filters))
 
 
-def create_user(client, user_principal_name, display_name, password,  # pylint: disable=too-many-arguments
+def create_user(client, user_principal_name, display_name, password,
                 mail_nickname=None, immutable_id=None, force_change_password_next_login=False):
     '''
     :param mail_nickname: mail alias. default to user principal name
@@ -356,16 +363,18 @@ create_user.__doc__ = UserCreateParameters.__doc__
 
 
 def list_groups(client, display_name=None, query_filter=None):
+    '''
+    list groups in the directory
+    '''
     sub_filters = []
     if query_filter:
         sub_filters.append(query_filter)
     if display_name:
         sub_filters.append("startswith(displayName,'{}')".format(display_name))
-
     return client.list(filter=(' and ').join(sub_filters))
 
 
-def create_application(client, display_name, homepage, identifier_uris,  # pylint: disable=too-many-arguments
+def create_application(client, display_name, homepage, identifier_uris,
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None,
                        end_date=None):
@@ -382,7 +391,7 @@ def create_application(client, display_name, homepage, identifier_uris,  # pylin
     return client.create(app_create_param)
 
 
-def update_application(client, identifier, display_name=None, homepage=None,  # pylint: disable=too-many-arguments
+def update_application(client, identifier, display_name=None, homepage=None,
                        identifier_uris=None, password=None, reply_urls=None, key_value=None,
                        key_type=None, key_usage=None, start_date=None, end_date=None):
     object_id = _resolve_application(client, identifier)
@@ -421,7 +430,7 @@ def _resolve_application(client, identifier):
     return result[0].object_id if result else identifier
 
 
-def _build_application_creds(password=None, key_value=None, key_type=None,  # pylint: disable=too-many-arguments
+def _build_application_creds(password=None, key_value=None, key_type=None,
                              key_usage=None, start_date=None, end_date=None):
     if password and key_value:
         raise CLIError('specify either --password or --key-value, but not both.')
@@ -498,15 +507,16 @@ def _resolve_service_principal(client, identifier):
 
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-arguments,too-many-statements,too-many-locals, too-many-branches
-        name=None, password=None, years=1,
+        name=None, password=None, years=None,
         create_cert=False, cert=None,
         scopes=None, role='Contributor',
         expanded_view=None, skip_assignment=False):
     '''create a service principal and configure its access to Azure resources
     :param str name: a display name or an app id uri. Command will generate one if missing.
     :param str password: the password used to login. If missing, command will generate one.
-    :param str cert: PEM formatted public certificate. Do not include private key info.
-    :param str years: Years the password will be valid.
+    :param str cert: PEM or DER formatted public certificate using string or `@<file path>` to
+        load from a file. Do not include private key info.
+    :param str years: Years the password will be valid. Default: 1 year
     :param str scopes: space separated scopes the service principal's role assignment applies to.
            Defaults to the root of the current subscription.
     :param str role: role the service principal has on the resources.
@@ -529,26 +539,32 @@ def create_service_principal_for_rbac(
         if aad_sps:
             raise CLIError("'{}' already exists.".format(name))
 
-    # pylint: disable=protected-access
-    public_cert_string = None
-    cert_file = None
-
-    if len([x for x in [cert, create_cert, password] if x]) > 1:
-        raise CLIError('Usage error: --cert | --create-cert | --password')
-    if create_cert:
-        public_cert_string, cert_file = _create_self_signed_cert(years)
-    elif cert:
-        public_cert_string = cert
-    else:
-        password = password or str(uuid.uuid4())
-
     start_date = datetime.datetime.utcnow()
     app_display_name = app_display_name or ('azure-cli-' +
                                             start_date.strftime('%Y-%m-%d-%H-%M-%S'))
+
+    # pylint: disable=protected-access
+    public_cert_string = None
+    cert_file = None
+    end_date = None
+    if len([x for x in [cert, create_cert, password] if x]) > 1:
+        raise CLIError('Usage error: --cert | --create-cert | --password')
+    if create_cert:
+        public_cert_string, cert_file = _create_self_signed_cert(years or 1)
+    elif cert:
+        public_cert_string, end_date = _normalize_cert(cert)
+        if years:
+            if start_date.replace(tzinfo=tzutc()) + relativedelta(years=years) > end_date:
+                logger.warning("Use cert's expiration date as supplied '--years' exceeds it")
+            else:
+                end_date = None  # we will pick up --years
+    else:
+        password = password or str(uuid.uuid4())
+
     if name is None:
         name = 'http://' + app_display_name  # just a valid uri, no need to exist
 
-    end_date = start_date + relativedelta(years=years)
+    end_date = end_date or start_date + relativedelta(years=years or 1)
 
     aad_application = create_application(graph_client.applications,
                                          display_name=app_display_name,
@@ -673,13 +689,59 @@ def _create_self_signed_cert(years):
     return (cert_string, creds_file)
 
 
-def reset_service_principal_credential(name, password=None, create_cert=False, cert=None, years=1):
+def _try_x509_pem(cert):
+    import OpenSSL.crypto
+    try:
+        return OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, cert)
+    except OpenSSL.crypto.Error:
+        # could not load the pem, try with headers
+        try:
+            pem_with_headers = '-----BEGIN CERTIFICATE-----\n' \
+                               + cert + \
+                               '-----END CERTIFICATE-----\n'
+            return OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, pem_with_headers)
+        except OpenSSL.crypto.Error:
+            return None
+    except UnicodeEncodeError:
+        # this must be a binary encoding
+        return None
+
+
+def _try_x509_der(cert):
+    import OpenSSL.crypto
+    import base64
+    try:
+        cert = base64.b64decode(cert)
+        return OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_ASN1, cert)
+    except OpenSSL.crypto.Error:
+        return None
+
+
+def _get_public(x509):
+    import OpenSSL.crypto
+    pem = OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, x509)
+    if isinstance(pem, bytes):
+        pem = pem.decode("utf-8")
+    stripped = pem.replace('-----BEGIN CERTIFICATE-----\n', '')
+    stripped = stripped.replace('-----END CERTIFICATE-----\n', '')
+    return stripped
+
+
+def _normalize_cert(x509):
+    logger.debug("normalizing x509 certificate with fingerprint %s", x509.digest("sha1"))
+    pkey = x509.get_notAfter().decode()
+    end_date = dateutil.parser.parse(pkey)
+    return _get_public(x509), end_date
+
+
+def reset_service_principal_credential(name, password=None, create_cert=False,
+                                       cert=None, years=None):
     '''reset credential, on expiration or you forget it.
 
     :param str name: the name, can be the app id uri, app id guid, or display name
     :param str password: the password used to login. If missing, command will generate one.
     :param str cert: PEM formatted public certificate. Do not include private key info.
-    :param str years: Years the password will be valid.
+    :param str years: Years the password will be valid. Default: 1 year
     '''
     client = _graph_client_factory()
 
@@ -695,19 +757,25 @@ def reset_service_principal_credential(name, password=None, create_cert=False, c
             'more than one entry matches the name, please provide unique names like app id guid, or app id uri')  # pylint: disable=line-too-long
     app = show_application(client.applications, aad_sps[0].app_id)
 
+    start_date = datetime.datetime.utcnow()
     # build a new password/cert credential and patch it
     public_cert_string = None
     cert_file = None
+    end_date = None
     if len([x for x in [cert, create_cert, password] if x]) > 1:
         raise CLIError('Usage error: --cert | --create-cert | --password')
     if create_cert:
-        public_cert_string, cert_file = _create_self_signed_cert(years)
+        public_cert_string, cert_file = _create_self_signed_cert(years or 1)
     elif cert:
-        public_cert_string = cert
+        public_cert_string, end_date = _normalize_cert(cert)
+        if years:
+            if start_date.replace(tzinfo=tzutc()) + relativedelta(years=years) > end_date:
+                logger.warning("Use cert's expiration date as supplied '--years' exceeds it")
+            else:
+                end_date = None  # we will pick up --years
     else:
         password = password or str(uuid.uuid4())
-    start_date = datetime.datetime.utcnow()
-    end_date = start_date + relativedelta(years=years)
+    end_date = end_date or start_date + relativedelta(years=years or 1)
     key_id = str(uuid.uuid4())
     app_creds = [PasswordCredential(start_date, end_date, key_id, password)] if password else None
     cert_creds = [KeyCredential(start_date, end_date, public_cert_string, str(uuid.uuid4()),
