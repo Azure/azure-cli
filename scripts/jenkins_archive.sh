@@ -2,8 +2,18 @@
 
 # Archive build
 
-# Load command build variables
-. $(cd $(dirname $0); pwd)/jenkins_common.sh
+set -x
+
+if [ -z $BUILD_NUMBER ]; then
+    echo "Environment variable BUILD_NUMBER is missing."
+    exit 1
+fi
+
+export
+echo "build branch $BRANCH_NAME"
+
+version=$(printf '%.8d' $BUILD_NUMBER)
+echo "Version number: $version"
 
 if [ -d /var/build_share ]; then
     echo 'Directory /var/build_share is found. The artifacts will be archived there.'

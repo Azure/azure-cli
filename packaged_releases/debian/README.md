@@ -4,21 +4,24 @@ Debian Packaging
 Updating the Debian package
 ---------------------------
 
-On a build machine (e.g. new Ubuntu 14.04 VM), run the build script.
+Firstly, in `debian_dir_creator.sh`, modify debian/changelog with the new release information.
+Create a PR for this change so it is tracked in the repo for next time.
+
+Next, on a build machine (e.g. new Ubuntu 14.04 VM), run the build script.
 
 For example:
 
 First copy the build scripts onto the build machine.
 ```
-$ > ~/debian_build.sh; editor ~/debian_build.sh
-$ > ~/debian_dir_creator.sh; editor ~/debian_dir_creator.sh
-$ chmod +x ~/debian_build.sh ~/debian_dir_creator.sh
+$ > debian_build.sh; editor debian_build.sh
+$ > debian_dir_creator.sh; editor debian_dir_creator.sh
+$ chmod +x debian_build.sh debian_dir_creator.sh
 ```
 
 Then execute it with the appropriate environment variable values.
 ```
-$ export CLI_VERSION=0.2.7 \
-    && export CLI_DOWNLOAD_SHA256=66882e5ca6ae78aa4d99bc3440ceaf42e969df43374b0c223f66f79b69329bb8 \
+$ export CLI_VERSION=0.2.5 \
+    && export CLI_DOWNLOAD_SHA256=10d443edce3e61ef2123786e4c242ddf1c0a4ff46574742a37f8c1edd80e0914 \
     && ~/debian_build.sh ~/debian_dir_creator.sh
 ```
 

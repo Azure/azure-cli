@@ -25,17 +25,15 @@ RUN wget https://github.com/jmespath/jp/releases/download/0.1.2/jp-linux-amd64 -
 
 # 1. Build packages and store in tmp dir
 # 2. Install the cli and the other command modules that weren't included
-# 3. Temporary fix - install azure-nspkg to remove import of pkg_resources in azure/__init__.py (to improve performance)
 RUN /bin/bash -c 'TMP_PKG_DIR=$(mktemp -d); \
-    for d in src/azure-cli src/azure-cli-core src/azure-cli-nspkg src/azure-cli-command_modules-nspkg src/command_modules/azure-cli-*/; \
+    for d in src/azure-cli src/azure-cli-core src/azure-cli-nspkg src/command_modules/azure-cli-*/; \
     do cd $d; python setup.py bdist_wheel -d $TMP_PKG_DIR; cd -; \
     done; \
     MODULE_NAMES=""; \
     for f in $TMP_PKG_DIR/*; \
     do MODULE_NAMES="$MODULE_NAMES $f"; \
     done; \
-    pip install $MODULE_NAMES; \
-    pip install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg;'
+    pip install $MODULE_NAMES;'
 
 # Tab completion
 RUN echo -e "\

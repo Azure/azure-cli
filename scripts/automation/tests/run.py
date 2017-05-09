@@ -30,15 +30,13 @@ def run_tests(modules, parallel, run_live):
 
     # run tests
     overall_result = True
-    failed_tests = []
     for name, _, test_path in modules:
         print('\n\n==== Test module {} ===='.format(name))
-        result, test_result, module_failed_tests = run_nose([test_path])
-        failed_tests += module_failed_tests
+        result, test_result = run_nose([test_path])
         overall_result &= result
         print('==== Test module {} result ====\n{}\n==========\n'.format(name, test_result))
 
-    return overall_result, failed_tests
+    return overall_result
 
 
 if __name__ == '__main__':
@@ -63,13 +61,6 @@ if __name__ == '__main__':
         parse.print_help()
         sys.exit(1)
 
-    success, failed_tests = run_tests(selected_modules, not args.non_parallel, args.live)
-    if failed_tests or not success:
-        print('==== FAILED TESTS ====')
-        for test in failed_tests:
-            print(test)
-    else:
-        print('==== ALL TESTS PASSED! ====')
+    retval = run_tests(selected_modules, not args.non_parallel, args.live)
 
-
-    sys.exit(0 if success else 1)
+    sys.exit(0 if retval else 1)

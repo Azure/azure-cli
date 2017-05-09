@@ -5,8 +5,8 @@
 
 FROM python:3.5.2-alpine
 
-ENV CLI_VERSION 0.2.7
-ENV CLI_DOWNLOAD_SHA256 66882e5ca6ae78aa4d99bc3440ceaf42e969df43374b0c223f66f79b69329bb8
+ENV CLI_VERSION 0.2.5
+ENV CLI_DOWNLOAD_SHA256 10d443edce3e61ef2123786e4c242ddf1c0a4ff46574742a37f8c1edd80e0914
 
 # Metadata as defined at http://label-schema.org
 ARG BUILD_DATE
@@ -48,11 +48,10 @@ RUN src_zip=$(mktemp) \
         && rm $src_zip
 # Build and install
 RUN /bin/bash -c 'cd /cli-src/*; tmp_pkg_dir=$(mktemp -d); \
-    for d in src/azure-cli src/azure-cli-core src/azure-cli-nspkg src/azure-cli-command_modules-nspkg src/command_modules/azure-cli-*/; \
+    for d in src/azure-cli src/azure-cli-core src/azure-cli-nspkg src/command_modules/azure-cli-*/; \
     do cd $d; python setup.py bdist_wheel -d $tmp_pkg_dir; cd -; \
     done; \
-    pip install azure-cli -f $tmp_pkg_dir; \
-    pip install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg;'
+    pip install azure-cli -f $tmp_pkg_dir;'
 # Tab completion
 RUN cat /cli-src/*/az.completion >> ~/.bashrc
 
