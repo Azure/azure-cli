@@ -23,7 +23,7 @@ def create(
 
     terms = 'Notice\nMicrosoft will use data you send to the Cognitive'\
         'Services to improve Microsoft products and services.'\
-        'Where you send personal data to the Cognitive Services, you are responsible'\
+        'Where you send personal data to the Cognitive Services, you are responsible '\
         'for obtaining sufficient consent from the data subjects.'\
         'The General Privacy and Security Terms in the Online Services Terms '\
         'do not apply to the Cognitive Services.'\
