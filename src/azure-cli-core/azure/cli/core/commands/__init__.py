@@ -468,6 +468,7 @@ def create_command(module_name, name, operation,
                         continue  # retry
                     if exception_handler:
                         exception_handler(ex)
+                        return
                     else:
                         reraise(*sys.exc_info())
         except _load_client_exception_class() as client_exception:
