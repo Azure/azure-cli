@@ -47,7 +47,6 @@ class DynamicShellCompletionsTest(ScenarioTest):
         with self.assertRaises(StopIteration):
             six.next(gen)
 
-
         doc = Document(u'vm show -g group1 -n ')
         gen = self.completer.get_completions(doc, None)
 

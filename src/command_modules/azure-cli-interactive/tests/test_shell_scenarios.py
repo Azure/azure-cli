@@ -8,6 +8,7 @@ import unittest
 from azclishell.__main__ import AZCOMPLETER, AzLexer, APPLICATION
 from azclishell.app import Shell
 
+
 class ShellRun(unittest.TestCase):
     """ tests whether the shell runs """
 
@@ -21,6 +22,7 @@ class ShellRun(unittest.TestCase):
     def test_run(self):
         """ tests the running """
         self.init()
+
 
 if __name__ == '__main__':
     unittest.main()
