@@ -39,11 +39,7 @@ class ShellProgressView(ProgressViewBase):
 
         completed = int(bar_len * percent)
         message = '{}['.format(msg)
-        for i in range(bar_len):
-            if i < completed:
-                message += '#'
-            else:
-                message += ' '
+        message += ('#' * completed).ljust(bar_len)
         message += ']  {:.1%}'.format(percent)
         return message
 
