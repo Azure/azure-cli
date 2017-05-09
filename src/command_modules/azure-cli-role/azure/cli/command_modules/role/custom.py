@@ -43,13 +43,6 @@ def get_role_definition_name_completion_list(prefix, **kwargs):  # pylint: disab
     return [x.properties.role_name for x in list(definitions)]
 
 
-def x509_type(cert):
-    x509 = _try_x509_pem(cert) or _try_x509_der(cert)
-    if not x509:
-        raise CLIError("The value provided for --cert was not a PEM or a DER file.")
-    return x509
-
-
 def create_role_definition(role_definition):
     return _create_update_role_definition(role_definition, for_update=False)
 
@@ -505,65 +498,46 @@ def _resolve_service_principal(client, identifier):
 
 
 def _process_service_principal_creds(years, app_start_date, app_end_date, cert, create_cert,
-                                     password, key_vault, cert_name):
-    cred_usage_error = CLIError('Usage error: --cert | --create-cert [--key-vault --cert-name] | '
-                                '--password | --key-vault --cert-name')
+                                     password, keyvault):
 
-    if not any((cert, create_cert, password, key_vault, cert_name)):
+    if not any((cert, create_cert, password, keyvault)):
         # 1 - Simplest scenario. Use random password
         return str(uuid.uuid4()), None, None, None, None
 
     if password:
         # 2 - Password supplied -- no certs
-        if any((create_cert, key_vault, cert_name, cert)):
-            raise cred_usage_error
         return password, None, None, None, None
 
     # The rest of the scenarios involve certificates
     public_cert_string = None
     cert_file = None
 
-    if cert:
+    if cert and not keyvault:
         # 3 - User-supplied public cert data
-        if any((create_cert, password, key_vault, cert_name)):
-            raise cred_usage_error
-
         logger.debug("normalizing x509 certificate with fingerprint %s", cert.digest("sha1"))
         cert_start_date = dateutil.parser.parse(cert.get_notBefore().decode())
         cert_end_date = dateutil.parser.parse(cert.get_notAfter().decode())
         public_cert_string = _get_public(cert)
-
-    elif create_cert and not (key_vault or cert_name):
+    elif create_cert and not keyvault:
         # 4 - Create local self-signed cert
-        if any((password, cert, key_vault, cert_name)):
-            raise cred_usage_error
-
         public_cert_string, cert_file, cert_start_date, cert_end_date = \
             _create_self_signed_cert(app_start_date, app_end_date)
-    elif create_cert and key_vault and cert_name:
+    elif create_cert and keyvault:
         # 5 - Create self-signed cert in KeyVault
-        if any((password, cert)):
-            raise cred_usage_error
-
         public_cert_string, cert_file, cert_start_date, cert_end_date = \
             _create_self_signed_cert_with_keyvault(
-                years, key_vault, cert_name)
-    elif key_vault:
+                years, keyvault, cert)
+    elif keyvault:
         import base64
         from azure.cli.core._profile import CLOUD
         # 6 - Use existing cert from KeyVault
-        if any((password, cert, not cert_name)):
-            raise cred_usage_error
-
         kv_client = _get_keyvault_client()
         cert_id = 'https://{}{}/certificates/{}'.format(
-            key_vault, CLOUD.suffixes.keyvault_dns, cert_name)
+            keyvault, CLOUD.suffixes.keyvault_dns, cert)
         cert_obj = kv_client.get_certificate(cert_id)
         public_cert_string = base64.b64encode(cert_obj.cer).decode('utf-8')  # pylint: disable=no-member
         cert_start_date = cert_obj.attributes.not_before  # pylint: disable=no-member
         cert_end_date = cert_obj.attributes.expires  # pylint: disable=no-member
-    else:
-        raise cred_usage_error
 
     return (password, public_cert_string, cert_file, cert_start_date, cert_end_date)
 
@@ -591,17 +565,7 @@ def create_service_principal_for_rbac(
         name=None, password=None, years=None,
         create_cert=False, cert=None,
         scopes=None, role='Contributor',
-        expanded_view=None, skip_assignment=False, key_vault=None, cert_name=None):
-    '''create a service principal and configure its access to Azure resources
-    :param str name: a display name or an app id uri. Command will generate one if missing.
-    :param str password: the password used to login. If missing, command will generate one.
-    :param str cert: PEM or DER formatted public certificate using string or `@<file path>` to
-        load from a file. Do not include private key info.
-    :param str years: Years the password will be valid. Default: 1 year
-    :param str scopes: space separated scopes the service principal's role assignment applies to.
-           Defaults to the root of the current subscription.
-    :param str role: role the service principal has on the resources.
-    '''
+        expanded_view=None, skip_assignment=False, keyvault=None):
     from azure.graphrbac.models import GraphErrorException
     import time
     import pytz
@@ -634,7 +598,7 @@ def create_service_principal_for_rbac(
 
     password, public_cert_string, cert_file, cert_start_date, cert_end_date = \
         _process_service_principal_creds(years, app_start_date, app_end_date, cert, create_cert,
-                                         password, key_vault, cert_name)
+                                         password, keyvault)
 
     app_start_date, app_end_date, cert_start_date, cert_end_date = \
         _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_date)
@@ -776,7 +740,7 @@ def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-
     return (cert_string, creds_file, cert_start_date, cert_end_date)
 
 
-def _create_self_signed_cert_with_keyvault(years, key_vault, key_vault_cert_name):  # pylint: disable=too-many-locals
+def _create_self_signed_cert_with_keyvault(years, keyvault, keyvault_cert_name):  # pylint: disable=too-many-locals
     import base64
     from os import path
     import tempfile
@@ -819,13 +783,13 @@ def _create_self_signed_cert_with_keyvault(years, key_vault, key_vault_cert_name
             'validity_in_months': ((years * 12) + 1)
         }
     }
-    vault_base_url = 'https://{}.vault.azure.net/'.format(key_vault)
-    kv_client.create_certificate(vault_base_url, key_vault_cert_name, cert_policy)
-    while kv_client.get_certificate_operation(vault_base_url, key_vault_cert_name).status != 'completed':  # pylint: disable=no-member, line-too-long
+    vault_base_url = 'https://{}.vault.azure.net/'.format(keyvault)
+    kv_client.create_certificate(vault_base_url, keyvault_cert_name, cert_policy)
+    while kv_client.get_certificate_operation(vault_base_url, keyvault_cert_name).status != 'completed':  # pylint: disable=no-member, line-too-long
         time.sleep(5)
 
     cert_id = \
-        'https://{}.vault.azure.net/certificates/{}'.format(key_vault, key_vault_cert_name)
+        'https://{}.vault.azure.net/certificates/{}'.format(keyvault, keyvault_cert_name)
     cert = kv_client.get_certificate(cert_id)
     cert_string = base64.b64encode(cert.cer).decode('utf-8')  # pylint: disable=no-member
     cert_start_date = cert.attributes.not_before  # pylint: disable=no-member
@@ -873,14 +837,7 @@ def _get_public(x509):
 
 
 def reset_service_principal_credential(name, password=None, create_cert=False,
-                                       cert=None, years=None, key_vault=None, cert_name=None):
-    '''reset credential, on expiration or you forget it.
-
-    :param str name: the name, can be the app id uri, app id guid, or display name
-    :param str password: the password used to login. If missing, command will generate one.
-    :param str cert: PEM formatted public certificate. Do not include private key info.
-    :param str years: Years the password will be valid. Default: 1 year
-    '''
+                                       cert=None, years=None, keyvault=None):
     import pytz
     client = _graph_client_factory()
 
@@ -908,7 +865,7 @@ def reset_service_principal_credential(name, password=None, create_cert=False,
 
     password, public_cert_string, cert_file, cert_start_date, cert_end_date = \
         _process_service_principal_creds(years, app_start_date, app_end_date, cert, create_cert,
-                                         password, key_vault, cert_name)
+                                         password, keyvault)
 
     app_start_date, app_end_date, cert_start_date, cert_end_date = \
         _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_date)
