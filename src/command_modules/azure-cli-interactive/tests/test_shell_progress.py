@@ -30,5 +30,6 @@ class ShellProgressViewTest(unittest.TestCase):
         self.assertEqual(prog.get_progress_message(), 'Test2')
         self.assertTrue(prog.PROGRESS_BAR is not None)
 
+
 if __name__ == '__main__':
     unittest.main()
