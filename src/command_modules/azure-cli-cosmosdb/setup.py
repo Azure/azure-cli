@@ -16,7 +16,7 @@ except ImportError:
     cmdclass = {}
 
 
-VERSION = '0.1.5+dev'
+VERSION = '0.1.6+dev'
 
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -46,9 +46,9 @@ with open('HISTORY.rst', 'r', encoding='utf-8') as f:
     HISTORY = f.read()
 
 setup(
-    name='azure-cli-documentdb',
+    name='azure-cli-cosmosdb',
     version=VERSION,
-    description='Microsoft Azure Command-Line Tools DocumentDB Command Module',
+    description='Microsoft Azure Command-Line Tools Cosmos DB Command Module',
     long_description=README + '\n\n' + HISTORY,
     license='MIT',
     author='Microsoft Corporation',
@@ -59,7 +59,7 @@ setup(
         'azure',
         'azure.cli',
         'azure.cli.command_modules',
-        'azure.cli.command_modules.documentdb',
+        'azure.cli.command_modules.cosmosdb',
     ],
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass,

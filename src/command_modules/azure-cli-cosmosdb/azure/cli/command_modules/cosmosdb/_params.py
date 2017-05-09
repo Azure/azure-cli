@@ -51,46 +51,46 @@ def validate_ip_range_filter(ns):
         ns.ip_range_filter = ",".join(ns.ip_range_filter)
 
 
-register_cli_argument('documentdb', 'account_name', arg_type=name_type, help='Name of the DocumentDB database account', completer=get_resource_name_completion_list('Microsoft.DocumentDb/databaseAccounts'), id_part="name")
+register_cli_argument('cosmosdb', 'account_name', arg_type=name_type, help='Name of the Cosmos DB database account', completer=get_resource_name_completion_list('Microsoft.DocumentDb/databaseAccounts'), id_part="name")
 
-register_cli_argument('documentdb regenerate-key', 'key_kind', **enum_choice_list(KeyKind))
-register_cli_argument('documentdb failover-priority-change', 'failover_policies', validator=validate_failover_policies, help="space separated failover policies in 'regionName=failoverPriority' format. E.g \"East US\"=0 \"West US\"=1", nargs='+')
-register_cli_argument('documentdb create', 'account_name', completer=None)
-register_cli_argument('documentdb create', 'resource_group_name', help="name of the resource group")
-register_cli_argument('documentdb create', 'resource_group_location', ignore_type)
-register_cli_argument('documentdb create', 'locations', validator=validate_locations, help="space separated locations in 'regionName=failoverPriority' format. E.g \"East US\"=0 \"West US\"=1. Failover priority values are 0 for write regions and greater than 0 for read regions. A failover priority value must be unique and less than the total number of regions. Default: single region account in the location of the specified resource group.", nargs='+')
-register_cli_argument('documentdb create', 'default_consistency_level', help="default consistency level of the DocumentDB database account", **enum_choice_list(DefaultConsistencyLevel))
-register_cli_argument('documentdb create', 'max_staleness_prefix', help="when used with Bounded Staleness consistency, this value represents the number of stale requests tolerated. Accepted range for this value is 1 - 2,147,483,647", type=int)
-register_cli_argument('documentdb create', 'max_interval', help="when used with Bounded Staleness consistency, this value represents the time amount of staleness (in seconds) tolerated. Accepted range for this value is 1 - 100", type=int)
-register_cli_argument('documentdb create', 'ip_range_filter', validator=validate_ip_range_filter, help="firewall support. Specifies the set of IP addresses or IP address ranges in CIDR form to be included as the allowed list of client IPs for a given database account. IP addresses/ranges must be comma separated and must not contain any spaces", nargs='+')
-register_cli_argument('documentdb create', 'kind', help='The type of DocumentDB database account to create', **enum_choice_list(DatabaseAccountKind))
-register_cli_argument('documentdb create', 'enable_automatic_failover', help='Enables automatic failover of the write region in the rare event that the region is unavailable due to an outage. Automatic failover will result in a new write region for the account and is chosen based on the failover priorities configured for the account.', type=bool)
+register_cli_argument('cosmosdb regenerate-key', 'key_kind', **enum_choice_list(KeyKind))
+register_cli_argument('cosmosdb failover-priority-change', 'failover_policies', validator=validate_failover_policies, help="space separated failover policies in 'regionName=failoverPriority' format. E.g \"East US\"=0 \"West US\"=1", nargs='+')
+register_cli_argument('cosmosdb create', 'account_name', completer=None)
+register_cli_argument('cosmosdb create', 'resource_group_name', help="name of the resource group")
+register_cli_argument('cosmosdb create', 'resource_group_location', ignore_type)
+register_cli_argument('cosmosdb create', 'locations', validator=validate_locations, help="space separated locations in 'regionName=failoverPriority' format. E.g \"East US\"=0 \"West US\"=1. Failover priority values are 0 for write regions and greater than 0 for read regions. A failover priority value must be unique and less than the total number of regions. Default: single region account in the location of the specified resource group.", nargs='+')
+register_cli_argument('cosmosdb create', 'default_consistency_level', help="default consistency level of the Cosmos DB database account", **enum_choice_list(DefaultConsistencyLevel))
+register_cli_argument('cosmosdb create', 'max_staleness_prefix', help="when used with Bounded Staleness consistency, this value represents the number of stale requests tolerated. Accepted range for this value is 1 - 2,147,483,647", type=int)
+register_cli_argument('cosmosdb create', 'max_interval', help="when used with Bounded Staleness consistency, this value represents the time amount of staleness (in seconds) tolerated. Accepted range for this value is 1 - 100", type=int)
+register_cli_argument('cosmosdb create', 'ip_range_filter', validator=validate_ip_range_filter, help="firewall support. Specifies the set of IP addresses or IP address ranges in CIDR form to be included as the allowed list of client IPs for a given database account. IP addresses/ranges must be comma separated and must not contain any spaces", nargs='+')
+register_cli_argument('cosmosdb create', 'kind', help='The type of Cosmos DB database account to create', **enum_choice_list(DatabaseAccountKind))
+register_cli_argument('cosmosdb create', 'enable_automatic_failover', help='Enables automatic failover of the write region in the rare event that the region is unavailable due to an outage. Automatic failover will result in a new write region for the account and is chosen based on the failover priorities configured for the account.', type=bool)
 
-register_cli_argument('documentdb update', 'account_name', completer=None)
-register_cli_argument('documentdb update', 'resource_group_name', help="name of the resource group")
-register_cli_argument('documentdb update', 'locations', validator=validate_locations, help="space separated locations in 'regionName=failoverPriority' format. E.g \"East US\"=0. Failover priority values are 0 for write regions and greater than 0 for read regions. A failover priority value must be unique and less than the total number of regions.", nargs='+')
-register_cli_argument('documentdb update', 'default_consistency_level', help="default consistency level of the DocumentDB database account", **enum_choice_list(DefaultConsistencyLevel))
-register_cli_argument('documentdb update', 'max_staleness_prefix', help="when used with Bounded Staleness consistency, this value represents the number of stale requests tolerated. Accepted range for this value is 1 - 2,147,483,647", type=int)
-register_cli_argument('documentdb update', 'max_interval', help="when used with Bounded Staleness consistency, this value represents the time amount of staleness (in seconds) tolerated. Accepted range for this value is 1 - 100", type=int)
-register_cli_argument('documentdb update', 'ip_range_filter', validator=validate_ip_range_filter, help="firewall support. Specifies the set of IP addresses or IP address ranges in CIDR form to be included as the allowed list of client IPs for a given database account. IP addresses/ranges must be comma separated and must not contain any spaces", nargs='+')
-register_cli_argument('documentdb update', 'enable_automatic_failover', help='Enables automatic failover of the write region in the rare event that the region is unavailable due to an outage. Automatic failover will result in a new write region for the account and is chosen based on the failover priorities configured for the account.', type=bool)
+register_cli_argument('cosmosdb update', 'account_name', completer=None)
+register_cli_argument('cosmosdb update', 'resource_group_name', help="name of the resource group")
+register_cli_argument('cosmosdb update', 'locations', validator=validate_locations, help="space separated locations in 'regionName=failoverPriority' format. E.g \"East US\"=0. Failover priority values are 0 for write regions and greater than 0 for read regions. A failover priority value must be unique and less than the total number of regions.", nargs='+')
+register_cli_argument('cosmosdb update', 'default_consistency_level', help="default consistency level of the Cosmos DB database account", **enum_choice_list(DefaultConsistencyLevel))
+register_cli_argument('cosmosdb update', 'max_staleness_prefix', help="when used with Bounded Staleness consistency, this value represents the number of stale requests tolerated. Accepted range for this value is 1 - 2,147,483,647", type=int)
+register_cli_argument('cosmosdb update', 'max_interval', help="when used with Bounded Staleness consistency, this value represents the time amount of staleness (in seconds) tolerated. Accepted range for this value is 1 - 100", type=int)
+register_cli_argument('cosmosdb update', 'ip_range_filter', validator=validate_ip_range_filter, help="firewall support. Specifies the set of IP addresses or IP address ranges in CIDR form to be included as the allowed list of client IPs for a given database account. IP addresses/ranges must be comma separated and must not contain any spaces", nargs='+')
+register_cli_argument('cosmosdb update', 'enable_automatic_failover', help='Enables automatic failover of the write region in the rare event that the region is unavailable due to an outage. Automatic failover will result in a new write region for the account and is chosen based on the failover priorities configured for the account.', type=bool)
 
 # database id
 database_id = CliArgumentType(options_list=('--db-name', '-d'), help='Database Name')
-register_cli_argument('documentdb database', 'database_id', database_id)
-register_cli_argument('documentdb collection', 'database_id', database_id)
+register_cli_argument('cosmosdb database', 'database_id', database_id)
+register_cli_argument('cosmosdb collection', 'database_id', database_id)
 
-register_cli_argument('documentdb collection', 'collection_id',
+register_cli_argument('cosmosdb collection', 'collection_id',
                       options_list=('--collection-name', '-c'), help='Collection Name')
 
-register_cli_argument('documentdb collection', 'throughput',
+register_cli_argument('cosmosdb collection', 'throughput',
                       options_list=('--throughput'), help='Offer Throughput', type=int)
 
-register_cli_argument('documentdb collection', 'partition_key_path',
+register_cli_argument('cosmosdb collection', 'partition_key_path',
                       options_list=('--partition-key-path'),
                       help='Partition Key Path, e.g., \'/properties/name\'')
 
-register_cli_argument('documentdb collection', 'indexing_policy',
+register_cli_argument('cosmosdb collection', 'indexing_policy',
                       options_list=('--indexing-policy'),
                       help='Indexing Policy, you can enter it as a string or as a file, e.g., --indexing-policy @policy-file.json)',
                       type=shell_safe_json_parse, completer=FilesCompleter())
