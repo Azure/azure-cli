@@ -3,61 +3,24 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import sys
-import mock
+import unittest
 
+from azclishell.__main__ import AZCOMPLETER, AzLexer, APPLICATION
+from azclishell.app import Shell
 
-from prompt_toolkit.interface import CommandLineInterface, Application
-from prompt_toolkit.shortcuts import create_eventloop
-from prompt_toolkit.input import PipeInput
-from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.enums import DEFAULT_BUFFER
+class ShellRun(unittest.TestCase):
+    """ tests whether the shell runs """
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
-import azclishell._dump_help
+    def init(self):
+        self.shell_app = Shell(
+            completer=AZCOMPLETER,
+            lexer=AzLexer,
+            app=APPLICATION,
+        )
 
-PIPE = PipeInput()
+    def test_run(self):
+        """ tests the running """
+        self.init()
 
-
-def _mock_create_app():
-    buffers = {
-        DEFAULT_BUFFER: Buffer(is_multiline=True),
-        'description': Buffer(is_multiline=True, read_only=True),
-        'parameter': Buffer(is_multiline=True, read_only=True),
-        'examples': Buffer(is_multiline=True, read_only=True),
-        'bottom_toolbar': Buffer(is_multiline=True),
-        'example_line': Buffer(is_multiline=True),
-        'default_values': Buffer(),
-        'symbols': Buffer()
-    }
-    return Application(
-        mouse_support=False,
-        buffers=buffers
-    )
-
-
-def _mock_create_interface(_):
-    return CommandLineInterface(
-        application=_mock_create_app(),
-        eventloop=create_eventloop(),
-        input=PIPE)
-
-
-class ShellRun(ScenarioTest):
-
-    @mock.patch('azclishell.app.Shell.create_interface', _mock_create_interface)
-    def test_shell_run(self):
-        """ tests whether the shell runs """
-        PIPE.send('quit')
-        self.cmd('interactive')
-
-
-# class DynamicShellCompletionsTest(ScenarioTest):
-
-#     @mock.patch('azclishell.Shell.create_interface', _mock_create_interface)
-#     @ResourceGroupPreparer()
-#     def test_list_dynamic_completions(self, resource_group):
-#         """ tests dynamic completions """
-#         PIPE.send('vm show -g')
-#         PIPE.
-#         self.cmd('az interactive')
+if __name__ == '__main__':
+    unittest.main()

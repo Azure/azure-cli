@@ -593,5 +593,5 @@ class Shell(object):
                 self.set_prompt()
                 continue
 
-        print('Have a lovely day!!')
+        print('Have a lovely day!!', file=self.input)
         telemetry.conclude()
