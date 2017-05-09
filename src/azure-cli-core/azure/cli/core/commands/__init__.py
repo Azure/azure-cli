@@ -37,7 +37,7 @@ logger = azlogging.get_az_logger(__name__)
 
 CONFIRM_PARAM_NAME = 'yes'
 
-BLACKLISTED_MODS = ['context', 'container', 'shell']
+BLACKLISTED_MODS = ['context', 'container', 'shell', 'documentdb']
 
 
 class VersionConstraint(object):

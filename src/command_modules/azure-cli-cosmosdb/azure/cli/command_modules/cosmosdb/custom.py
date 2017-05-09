@@ -37,17 +37,17 @@ DEFAULT_INDEXING_POLICY = """{
 }"""
 
 
-def cli_documentdb_create(client,
-                          resource_group_name,
-                          account_name,
-                          locations=None,
-                          kind=DatabaseAccountKind.global_document_db.value,
-                          default_consistency_level=None,
-                          max_staleness_prefix=100,
-                          max_interval=5,
-                          ip_range_filter=None,
-                          enable_automatic_failover=None):
-    """Create a new Azure DocumentDB database account."""
+def cli_cosmosdb_create(client,
+                        resource_group_name,
+                        account_name,
+                        locations=None,
+                        kind=DatabaseAccountKind.global_document_db.value,
+                        default_consistency_level=None,
+                        max_staleness_prefix=100,
+                        max_interval=5,
+                        ip_range_filter=None,
+                        enable_automatic_failover=None):
+    """Create a new Azure Cosmos DB database account."""
 
     consistency_policy = None
     if default_consistency_level is not None:
@@ -77,16 +77,16 @@ def cli_documentdb_create(client,
     return docdb_account
 
 
-def cli_documentdb_update(client,
-                          resource_group_name,
-                          account_name,
-                          locations=None,
-                          default_consistency_level=None,
-                          max_staleness_prefix=None,
-                          max_interval=None,
-                          ip_range_filter=None,
-                          enable_automatic_failover=None):
-    """Update an existing Azure DocumentDB database account. """
+def cli_cosmosdb_update(client,
+                        resource_group_name,
+                        account_name,
+                        locations=None,
+                        default_consistency_level=None,
+                        max_staleness_prefix=None,
+                        max_interval=None,
+                        ip_range_filter=None,
+                        enable_automatic_failover=None):
+    """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
 
     update_consistency_policy = False
@@ -135,9 +135,9 @@ def cli_documentdb_update(client,
     return docdb_account
 
 
-def cli_documentdb_list(client, resource_group_name=None):
+def cli_cosmosdb_list(client, resource_group_name=None):
     """
-    Lists all Azure DocumentDB database accounts within a given resource group or subscription.
+    Lists all Azure Cosmos DB database accounts within a given resource group or subscription.
     """
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
@@ -163,36 +163,36 @@ def _get_offer_link(database_id, offer_id):
     return 'dbs/{}/colls/{}'.format(database_id, offer_id)
 
 
-def cli_documentdb_database_exists(client, database_id):
+def cli_cosmosdb_database_exists(client, database_id):
     """Returns a boolean indicating whether the database exists """
     return len(list(client.QueryDatabases(
         {'query': 'SELECT * FROM root r WHERE r.id=@id',
          'parameters': [{'name': '@id', 'value': database_id}]}))) > 0
 
 
-def cli_documentdb_database_show(client, database_id):
-    """Shows an Azure DocumentDB database """
+def cli_cosmosdb_database_show(client, database_id):
+    """Shows an Azure Cosmos DB database """
     return client.ReadDatabase(_get_database_link(database_id))
 
 
-def cli_documentdb_database_list(client):
-    """Lists all Azure DocumentDB databases """
+def cli_cosmosdb_database_list(client):
+    """Lists all Azure Cosmos DB databases """
     return list(client.ReadDatabases())
 
 
-def cli_documentdb_database_create(client, database_id):
-    """Creates an Azure DocumentDB database """
+def cli_cosmosdb_database_create(client, database_id):
+    """Creates an Azure Cosmos DB database """
     return client.CreateDatabase({'id': database_id})
 
 
-def cli_documentdb_database_delete(client, database_id):
-    """Deletes an Azure DocumentDB database """
+def cli_cosmosdb_database_delete(client, database_id):
+    """Deletes an Azure Cosmos DB database """
     client.DeleteDatabase(_get_database_link(database_id))
 
 
 # collection operations
 
-def cli_documentdb_collection_exists(client, database_id, collection_id):
+def cli_cosmosdb_collection_exists(client, database_id, collection_id):
     """Returns a boolean indicating whether the collection exists """
     return len(list(client.QueryCollections(
         _get_database_link(database_id),
@@ -200,20 +200,20 @@ def cli_documentdb_collection_exists(client, database_id, collection_id):
          'parameters': [{'name': '@id', 'value': collection_id}]}))) > 0
 
 
-def cli_documentdb_collection_show(client, database_id, collection_id):
-    """Shows an Azure DocumentDB collection and its offer """
+def cli_cosmosdb_collection_show(client, database_id, collection_id):
+    """Shows an Azure Cosmos DB collection and its offer """
     collection = client.ReadCollection(_get_collection_link(database_id, collection_id))
     offer = _find_offer(client, collection['_self'])
     return {'collection': collection, 'offer': offer}
 
 
-def cli_documentdb_collection_list(client, database_id):
-    """Lists all Azure DocumentDB collections """
+def cli_cosmosdb_collection_list(client, database_id):
+    """Lists all Azure Cosmos DB collections """
     return list(client.ReadCollections(_get_database_link(database_id)))
 
 
-def cli_documentdb_collection_delete(client, database_id, collection_id):
-    """Deletes an Azure DocumentDB collection """
+def cli_cosmosdb_collection_delete(client, database_id, collection_id):
+    """Deletes an Azure Cosmos DB collection """
     client.DeleteCollection(_get_collection_link(database_id, collection_id))
 
 
@@ -234,13 +234,13 @@ def _populate_collection_definition(collection,
     return changed
 
 
-def cli_documentdb_collection_create(client,
-                                     database_id,
-                                     collection_id,
-                                     throughput=None,
-                                     partition_key_path=None,
-                                     indexing_policy=DEFAULT_INDEXING_POLICY):
-    """Creates an Azure DocumentDB collection """
+def cli_cosmosdb_collection_create(client,
+                                   database_id,
+                                   collection_id,
+                                   throughput=None,
+                                   partition_key_path=None,
+                                   indexing_policy=DEFAULT_INDEXING_POLICY):
+    """Creates an Azure Cosmos DB collection """
     collection = {'id': collection_id}
 
     options = {}
@@ -266,12 +266,12 @@ def _find_offer(client, collection_self_link):
     return None
 
 
-def cli_documentdb_collection_update(client,
-                                     database_id,
-                                     collection_id,
-                                     throughput=None,
-                                     indexing_policy=None):
-    """Updates an Azure DocumentDB collection """
+def cli_cosmosdb_collection_update(client,
+                                   database_id,
+                                   collection_id,
+                                   throughput=None,
+                                   indexing_policy=None):
+    """Updates an Azure Cosmos DB collection """
     logger.debug('reading collection')
     collection = client.ReadCollection(_get_collection_link(database_id, collection_id))
     result = {}

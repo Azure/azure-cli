@@ -62,7 +62,7 @@ DEPENDENCIES = [
     'azure-cli-core',
     'azure-cli-dla',
     'azure-cli-dls',
-    'azure-cli-documentdb',
+    'azure-cli-cosmosdb',
     'azure-cli-feedback',
     'azure-cli-find',
     'azure-cli-interactive',
