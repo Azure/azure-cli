@@ -880,6 +880,7 @@ class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
 
         checks = [
             JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].name', "LinuxDiagnostic"),
+            JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].publisher', "Microsoft.Azure.Diagnostics"),
             JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].settings.StorageAccount', self.storage_account)
         ]
 

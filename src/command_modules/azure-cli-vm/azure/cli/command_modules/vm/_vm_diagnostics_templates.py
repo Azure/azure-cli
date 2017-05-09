@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# flake8: noqa
 # noqa
 # pylint: skip-file
 
@@ -277,8 +278,8 @@ def get_default_diag_config(is_windows):
         }
     else:
         return {
+            "StorageAccount": "__DIAGNOSTIC_STORAGE_ACCOUNT__",
             "ladCfg": {
-                "StorageAccount": "__DIAGNOSTIC_STORAGE_ACCOUNT__",
                 "diagnosticMonitorConfiguration": {
                     "eventVolume": "Medium", 
                     "metrics": {
