@@ -858,12 +858,12 @@ class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
         self.execute()
 
     def body(self):
-        storage_key = '123'  # use junk keys, do not retrieve real keys which will get into the recording
+        storage_sastoken = '123'  # use junk keys, do not retrieve real keys which will get into the recording
         _, protected_settings = tempfile.mkstemp()
         with open(protected_settings, 'w') as outfile:
             json.dump({
                 "storageAccountName": self.storage_account,
-                "storageAccountKey": storage_key,
+                "storageAccountSasToken": storage_sastoken,
                 "storageAccountEndPoint": "https://{}.blob.core.windows.net/".format(self.storage_account)
             }, outfile)
         protected_settings = protected_settings.replace('\\', '\\\\')
@@ -873,14 +873,14 @@ class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
         template_file = os.path.join(curr_dir, 'sample-public.json').replace('\\', '\\\\')
         with open(template_file) as data_file:
             data = json.load(data_file)
-        data["storageAccount"] = self.storage_account
+        data["StorageAccount"] = self.storage_account
         with open(public_settings, 'w') as outfile:
             json.dump(data, outfile)
         public_settings = public_settings.replace('\\', '\\\\')
 
         checks = [
             JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].name', "LinuxDiagnostic"),
-            JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].settings.storageAccount', self.storage_account)
+            JMESPathCheck('virtualMachineProfile.extensionProfile.extensions[0].settings.StorageAccount', self.storage_account)
         ]
 
         self.cmd("vmss diagnostics set -g {} --vmss-name {} --settings {} --protected-settings {}".format(
@@ -891,12 +891,14 @@ class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
         self.cmd("vm diagnostics set -g {} --vm-name {} --settings {} --protected-settings {}".format(
             self.resource_group, self.vm, public_settings, protected_settings), checks=[
                 JMESPathCheck('name', 'LinuxDiagnostic'),
-                JMESPathCheck('settings.storageAccount', self.storage_account)
+                JMESPathCheck('publisher', 'Microsoft.Azure.Diagnostics'),
+                JMESPathCheck('settings.StorageAccount', self.storage_account)
         ])
 
         self.cmd("vm show -g {} -n {}".format(self.resource_group, self.vm), checks=[
             JMESPathCheck('resources[0].name', 'LinuxDiagnostic'),
-            JMESPathCheck('resources[0].settings.storageAccount', self.storage_account)
+            JMESPathCheck('resources[0].publisher', 'Microsoft.Azure.Diagnostics'),
+            JMESPathCheck('resources[0].settings.StorageAccount', self.storage_account)
         ])
 
 

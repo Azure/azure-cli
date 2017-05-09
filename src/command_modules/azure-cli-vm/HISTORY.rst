@@ -1,5 +1,10 @@
 .. :changelog:
 
+unreleased
+----------
+
+* diagnostics: Fix incorrect Linux diagnostics default config with update for LAD v.3.0 extension
+
 Release History
 ===============
 2.0.5 (2017-05-05)

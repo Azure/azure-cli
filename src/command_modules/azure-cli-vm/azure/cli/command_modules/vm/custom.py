@@ -102,8 +102,8 @@ extension_mappings = {
         'publisher': 'Microsoft.Compute'
     },
     _LINUX_DIAG_EXT: {
-        'version': '2.3',
-        'publisher': 'Microsoft.OSTCExtensions'
+        'version': '3.0',
+        'publisher': 'Microsoft.Azure.Diagnostics'
     },
     _WINDOWS_DIAG_EXT: {
         'version': '1.5',
