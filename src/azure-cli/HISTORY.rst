@@ -3,6 +3,12 @@
 Release History
 ===============
 
+2.0.6 (2017-05-09)
+^^^^^^^^^^^^^^^^^^
+
+* documentdb renamed to cosmosdb
+* Add rdbms
+
 2.0.5 (2017-05-05)
 ^^^^^^^^^^^^^^^^^^
 
