@@ -4,20 +4,23 @@
 # --------------------------------------------------------------------------------------------
 
 import sys
+import mock
 
 from prompt_toolkit.interface import CommandLineInterface, Application
 from prompt_toolkit.shortcuts import create_eventloop
 from prompt_toolkit.input import PipeInput
 
 from azure.cli.testsdk import ScenarioTest
-from azclishell import Shell
+
 
 PIPE = PipeInput()
+
 
 def _mock_create_app():
     return Application(
         mouse_support=False,
     )
+
 
 def _mock_create_interface(_):
     return CommandLineInterface(
@@ -28,8 +31,9 @@ def _mock_create_interface(_):
 
 class ShellRun(ScenarioTest):
 
+    @mock.patch('azclishell.Shell.create_interface', _mock_create_interface)
     def test_shell_run(self):
         """ tests whether the shell runs """
-        Shell.create_interface = _mock_create_interface
+        # Shell.create_interface = _mock_create_interface
         PIPE.send('quit')
         self.cmd('az interactive')
