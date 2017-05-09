@@ -22,16 +22,17 @@ def create(
 
     terms = 'Notice\nMicrosoft will use data you send to the Cognitive'\
         'Services to improve Microsoft products and services.'\
-        'For example we may use content that you provide to the Cognitive'\
-        'Services to improve our underlying algorithms and models over time.'\
-        'Where you send personal data to the Cognitive Services, you are responsible'\
+        'Where you send personal data to the Cognitive Services, you are responsible '\
         'for obtaining sufficient consent from the data subjects.'\
         'The General Privacy and Security Terms in the Online Services Terms '\
-        '(https://www.microsoft.com/en-us/Licensing/product-licensing/products.aspx) '\
         'do not apply to the Cognitive Services.'\
-        'You must comply with use and display requirements for the Bing Search APIs.'\
-        '\n\nPlease refer to the Microsoft Cognitive Services section in the Online '\
-        'Services Terms for details.'
+        'Please refer to the Microsoft Cognitive Services section in the Online '\
+        'Services Terms'\
+        ' (https://www.microsoft.com/en-us/Licensing/product-licensing/products.aspx)'\
+        ' for details.'\
+        'Microsoft offers policy controls that may be used to disable new Cognitive'\
+        ' Services deployments (https://docs.microsoft.com/en-us/azure/cognitive-servic'\
+        'es/cognitive-services-apis-create-account).'
     hint = '\nPlease select'
     if yes:
         logger.warning(terms)

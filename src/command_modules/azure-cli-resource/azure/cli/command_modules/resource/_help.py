@@ -8,7 +8,7 @@ from azure.cli.core.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines
 helps['managedapp'] = """
     type: group
-    short-summary: Manage managed applications and managed application definitions.
+    short-summary: Manage template solutions provided and maintained by the ISV using managedapp and managedapp definitions.
 """
 helps['managedapp definition'] = """
     type: group
