@@ -2,7 +2,8 @@
 
 Release History
 ===============
-0.1.6 (unlreleased)
+
+0.1.6 (2017-05-09)
 ++++++++++++++++++++
 * webapp: fix broken log tail commands
 
