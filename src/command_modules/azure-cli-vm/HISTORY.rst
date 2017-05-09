@@ -2,11 +2,6 @@
 
 Release History
 ===============
-2.0.6 (2017-05-08)
-++++++++++++++++++
-
-* updating VM command module to use azure-keyvault SDK 0.3.0
-
 2.0.5 (2017-05-05)
 ++++++++++++++++++
 * avail-set: make UD&FD domain counts optional
