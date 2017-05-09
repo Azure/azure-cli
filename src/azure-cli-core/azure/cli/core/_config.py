@@ -5,15 +5,27 @@
 import os
 import stat
 from six.moves import configparser
+
 from azure.cli.core._environment import get_config_dir
 
 GLOBAL_CONFIG_DIR = get_config_dir()
 CONFIG_FILE_NAME = 'config'
 GLOBAL_CONFIG_PATH = os.path.join(GLOBAL_CONFIG_DIR, CONFIG_FILE_NAME)
 ENV_VAR_PREFIX = 'AZURE_'
+DEFAULTS_SECTION = 'defaults'
 
 _UNSET = object()
 _ENV_VAR_FORMAT = ENV_VAR_PREFIX + '{section}_{option}'
+
+
+def get_config_parser():
+    import sys
+
+    python_version = sys.version_info.major
+    if python_version == 3:
+        return configparser.ConfigParser()
+    else:
+        return configparser.SafeConfigParser()
 
 
 class AzConfig(object):
@@ -21,7 +33,7 @@ class AzConfig(object):
                        '0': False, 'no': False, 'false': False, 'off': False}
 
     def __init__(self):
-        self.config_parser = configparser.SafeConfigParser()
+        self.config_parser = get_config_parser()
 
     @staticmethod
     def env_var_name(section, option):
@@ -71,7 +83,7 @@ def set_global_config(config):
 
 
 def set_global_config_value(section, option, value):
-    config = configparser.SafeConfigParser()
+    config = get_config_parser()
     config.read(GLOBAL_CONFIG_PATH)
     try:
         config.add_section(section)

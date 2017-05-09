@@ -5,7 +5,7 @@
 
 # Each package management system should patch this file with their own implementations of these.
 
-from azure.cli.core._util import COMPONENT_PREFIX
+from azure.cli.core.util import COMPONENT_PREFIX
 import azure.cli.core.azlogging as azlogging
 
 logger = azlogging.get_az_logger(__name__)

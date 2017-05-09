@@ -10,21 +10,15 @@ from six import u as unicode_string
 
 from azure.cli.core._config import az_config
 from azure.cli.core.commands.parameters import \
-    (ignore_type, tags_type, file_type, get_resource_name_completion_list, enum_choice_list)
+    (ignore_type, tags_type, file_type, get_resource_name_completion_list, enum_choice_list,
+     model_choice_list, enum_default, location_type)
+from azure.cli.core.commands.validators import get_default_location_from_resource_group
 import azure.cli.core.commands.arm  # pylint: disable=unused-import
 from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument, CliArgumentType
 
 from azure.common import AzureMissingResourceHttpError
-from azure.mgmt.storage.models import SkuName, AccessTier, Kind, EncryptionServices
-from azure.storage.models import AccountPermissions
-from azure.storage.blob import DeleteSnapshot, BlockBlobService, PageBlobService, AppendBlobService
-from azure.storage.blob.baseblobservice import BaseBlobService
-from azure.storage.blob.models import ContentSettings as BlobContentSettings, ContainerPermissions, BlobPermissions
-from azure.storage.file import FileService
-from azure.storage.file.models import ContentSettings as FileContentSettings, SharePermissions, FilePermissions
-from azure.storage.table import TableService, TablePayloadFormat
-from azure.storage.queue import QueueService
-from azure.storage.queue.models import QueuePermissions
+
+from azure.cli.core.profiles import get_sdk, ResourceType
 
 from ._factory import get_storage_data_service_client
 from ._validators import \
@@ -32,16 +26,57 @@ from ._validators import \
      get_permission_validator, table_permission_validator, get_permission_help_string,
      resource_type_type, services_type, ipv4_range_type, validate_entity,
      validate_select, validate_source_uri, validate_blob_type, validate_included_datasets,
-     validate_custom_domain, validate_public_access, public_access_types,
+     validate_custom_domain, validate_public_access,
      process_blob_upload_batch_parameters, process_blob_download_batch_parameters,
      process_file_upload_batch_parameters, process_file_download_batch_parameters,
      get_content_setting_validator, validate_encryption, validate_accept,
      validate_key, storage_account_key_options,
      process_file_download_namespace, process_logging_update_namespace,
      process_metric_update_namespace, process_blob_copy_batch_namespace,
-     get_source_file_or_blob_service_client)
+     get_source_file_or_blob_service_client, process_blob_source_uri)
+
+
+DeleteSnapshot, BlockBlobService, \
+    PageBlobService, AppendBlobService = get_sdk(ResourceType.DATA_STORAGE,
+                                                 'DeleteSnapshot',
+                                                 'BlockBlobService',
+                                                 'PageBlobService',
+                                                 'AppendBlobService',
+                                                 mod='blob')
+
+
+BlobContentSettings, ContainerPermissions, \
+    BlobPermissions, PublicAccess = get_sdk(ResourceType.DATA_STORAGE,
+                                            'ContentSettings',
+                                            'ContainerPermissions',
+                                            'BlobPermissions',
+                                            'PublicAccess',
+                                            mod='blob.models')
+
+FileContentSettings, SharePermissions, \
+    FilePermissions = get_sdk(ResourceType.DATA_STORAGE,
+                              'ContentSettings',
+                              'SharePermissions',
+                              'FilePermissions',
+                              mod='file.models')
+
+TableService, TablePayloadFormat = get_sdk(ResourceType.DATA_STORAGE,
+                                           'TableService',
+                                           'TablePayloadFormat',
+                                           mod='table')
+
+AccountPermissions, BaseBlobService, \
+    FileService, QueueService, QueuePermissions = get_sdk(ResourceType.DATA_STORAGE,
+                                                          'models#AccountPermissions',
+                                                          'blob.baseblobservice#BaseBlobService',
+                                                          'file#FileService',
+                                                          'queue#QueueService',
+                                                          'queue.models#QueuePermissions')
+
 
 # UTILITY
+
+public_access_types = {'off': None, 'blob': PublicAccess.Blob, 'container': PublicAccess.Container}
 
 
 class CommandContext(object):
@@ -90,15 +125,12 @@ class ArgumentGroupContext(CommandContext):
 
 
 def _get_client(service, parsed_args):
-    account_name = parsed_args.account_name or az_config.get('storage', 'account', None)
-    account_key = parsed_args.account_key or az_config.get('storage', 'key', None)
-    connection_string = parsed_args.connection_string or az_config.get('storage', 'connection_string', None)
-    sas_token = parsed_args.sas_token or az_config.get('storage', 'sas_token', None)
-    return get_storage_data_service_client(service,
-                                           account_name,
-                                           account_key,
-                                           connection_string,
-                                           sas_token)
+    account_name = getattr(parsed_args, 'account_name', None) or az_config.get('storage', 'account', None)
+    account_key = getattr(parsed_args, 'account_key', None) or az_config.get('storage', 'key', None)
+    connection_string = getattr(parsed_args, 'connection_string', None) or az_config.get('storage', 'connection_string', None)
+    sas_token = getattr(parsed_args, 'sas_token', None) or az_config.get('storage', 'sas_token', None)
+    return get_storage_data_service_client(
+        service, account_name, account_key, connection_string, sas_token)
 
 
 def get_storage_name_completion_list(service, func, parent=None):
@@ -196,6 +228,16 @@ def register_source_uri_arguments(scope):
     register_extra_cli_argument(scope, 'source_account_key', default=None, help='The storage account key of the source blob.', arg_group='Copy Source')
 
 
+def register_blob_source_uri_arguments(scope):
+    register_cli_argument(scope, 'copy_source', options_list=('--source-uri', '-u'), validator=process_blob_source_uri, required=False, arg_group='Copy Source')
+    register_extra_cli_argument(scope, 'source_sas', default=None, help='The shared access signature for the source storage account.', arg_group='Copy Source')
+    register_extra_cli_argument(scope, 'source_container', default=None, help='The container name for the source storage account.', arg_group='Copy Source')
+    register_extra_cli_argument(scope, 'source_blob', default=None, help='The blob name for the source storage account.', arg_group='Copy Source')
+    register_extra_cli_argument(scope, 'source_snapshot', default=None, help='The blob snapshot for the source storage account.', arg_group='Copy Source')
+    register_extra_cli_argument(scope, 'source_account_name', default=None, help='The storage account name of the source blob.', arg_group='Copy Source')
+    register_extra_cli_argument(scope, 'source_account_key', default=None, help='The storage account key of the source blob.', arg_group='Copy Source')
+
+
 # CUSTOM CHOICE LISTS
 
 blob_types = {'block': BlockBlobService, 'page': PageBlobService, 'append': AppendBlobService}
@@ -239,17 +281,22 @@ register_cli_argument('storage account show-connection-string', 'key_name', opti
 for item in ['blob', 'file', 'queue', 'table']:
     register_cli_argument('storage account show-connection-string', '{}_endpoint'.format(item), help='Custom endpoint for {}s.'.format(item))
 
+register_cli_argument('storage account create', 'location', location_type, validator=get_default_location_from_resource_group)
+register_cli_argument('storage account create', 'account_type', help='The storage account type', **model_choice_list(ResourceType.MGMT_STORAGE, 'AccountType'))
+
 register_cli_argument('storage account create', 'account_name', account_name_type, options_list=('--name', '-n'), completer=None)
 
-register_cli_argument('storage account create', 'kind', help='Indicates the type of storage account.', **enum_choice_list(Kind))
+register_cli_argument('storage account create', 'kind', help='Indicates the type of storage account.', default=enum_default(ResourceType.MGMT_STORAGE, 'Kind', 'storage'), **model_choice_list(ResourceType.MGMT_STORAGE, 'Kind'))
 register_cli_argument('storage account create', 'tags', tags_type)
 
 for item in ['create', 'update']:
-    register_cli_argument('storage account {}'.format(item), 'sku', help='The storage account SKU.', **enum_choice_list(SkuName))
-    register_cli_argument('storage account {}'.format(item), 'encryption', nargs='+', help='Specifies which service(s) to encrypt.', validator=validate_encryption, **enum_choice_list(list(EncryptionServices._attribute_map.keys())))  # pylint: disable=protected-access
+    register_cli_argument('storage account {}'.format(item), 'sku', help='The storage account SKU.', **model_choice_list(ResourceType.MGMT_STORAGE, 'SkuName'))
+    es_model = get_sdk(ResourceType.MGMT_STORAGE, 'models#EncryptionServices')
+    if es_model:
+        register_cli_argument('storage account {}'.format(item), 'encryption', nargs='+', help='Specifies which service(s) to encrypt.', validator=validate_encryption, **enum_choice_list(list(es_model._attribute_map.keys())))  # pylint: disable=protected-access
 
-register_cli_argument('storage account create', 'access_tier', help='Required for StandardBlob accounts. The access tier used for billing. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types.', **enum_choice_list(AccessTier))
-register_cli_argument('storage account update', 'access_tier', help='The access tier used for billing StandardBlob accounts. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types.', **enum_choice_list(AccessTier))
+register_cli_argument('storage account create', 'access_tier', help='Required for StandardBlob accounts. The access tier used for billing. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types.', **model_choice_list(ResourceType.MGMT_STORAGE, 'AccessTier'))
+register_cli_argument('storage account update', 'access_tier', help='The access tier used for billing StandardBlob accounts. Cannot be set for StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types.', **model_choice_list(ResourceType.MGMT_STORAGE, 'AccessTier'))
 register_cli_argument('storage account create', 'custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.')
 register_cli_argument('storage account update', 'custom_domain', help='User domain assigned to the storage account. Name is the CNAME source. Use "" to clear existing value.', validator=validate_custom_domain)
 register_cli_argument('storage account update', 'use_subdomain', help='Specify whether to use indirect CNAME validation.', **enum_choice_list(['true', 'false']))
@@ -277,6 +324,15 @@ register_cli_argument('storage blob copy', 'container_name', container_name_type
 register_cli_argument('storage blob copy', 'blob_name', blob_name_type, options_list=('--destination-blob', '-b'), help='Name of the destination blob. If the exists, it will be overwritten.')
 register_cli_argument('storage blob copy', 'source_lease_id', arg_group='Copy Source')
 
+# BLOB INCREMENTAL COPY PARAMETERS
+register_blob_source_uri_arguments('storage blob incremental-copy start')
+register_cli_argument('storage blob incremental-copy start', 'destination_if_modified_since', arg_group='Pre-condition')
+register_cli_argument('storage blob incremental-copy start', 'destination_if_unmodified_since', arg_group='Pre-condition')
+register_cli_argument('storage blob incremental-copy start', 'destination_if_match', arg_group='Pre-condition')
+register_cli_argument('storage blob incremental-copy start', 'destination_if_none_match', arg_group='Pre-condition')
+register_cli_argument('storage blob incremental-copy start', 'container_name', container_name_type, options_list=('--destination-container', '-c'))
+register_cli_argument('storage blob incremental-copy start', 'blob_name', blob_name_type, options_list=('--destination-blob', '-b'), help='Name of the destination blob. If the exists, it will be overwritten.')
+register_cli_argument('storage blob incremental-copy start', 'source_lease_id', arg_group='Copy Source')
 
 register_cli_argument('storage blob delete', 'delete_snapshots', **enum_choice_list(list(delete_snapshot_types.keys())))
 
@@ -346,10 +402,6 @@ with CommandContext('storage blob copy start-batch') as c:
         group.reg_arg('source_container')
         group.reg_arg('source_share')
         group.reg_arg('prefix', validator=process_blob_copy_batch_namespace)
-
-# TODO: Remove workaround when Python storage SDK issue #190 is fixed.
-for item in ['upload', 'upload-batch']:
-    register_cli_argument('storage blob {}'.format(item), 'max_connections', type=int, help='Maximum number of parallel connections to use when the blob size exceeds 64MB.', default=1)
 
 # FILE UPLOAD-BATCH PARAMETERS
 with CommandContext('storage file upload-batch') as c:

@@ -3,22 +3,50 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os.path
 import socket
 import threading
 from time import sleep
 
 import paramiko
+import paramiko.agent
 from sshtunnel import SSHTunnelForwarder
 from scp import SCPClient
 
+from azure.cli.core.util import CLIError
+from azure.cli.core.prompting import prompt_pass
+
+
+def _load_key(key_filename):
+    pkey = None
+    try:
+        pkey = paramiko.RSAKey.from_private_key_file(key_filename, None)
+    except paramiko.PasswordRequiredException:
+        key_pass = prompt_pass('Password:')
+        pkey = paramiko.RSAKey.from_private_key_file(key_filename, key_pass)
+    if pkey is None:
+        raise CLIError('failed to load key: {}'.format(key_filename))
+    return pkey
+
 
 def SecureCopy(user, host, src, dest,
-               key_filename=os.path.join(os.path.expanduser("~"), '.ssh', 'id_rsa')):
+               key_filename=None,
+               allow_agent=True):
     ssh = paramiko.SSHClient()
     ssh.load_system_host_keys()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(host, username=user, key_filename=key_filename)
+
+    keys = []
+    pkey = None
+    if key_filename is not None:
+        key = _load_key(key_filename)
+        keys.append(key)
+    if allow_agent:
+        agent = paramiko.agent.Agent()
+        for key in agent.get_keys():
+            keys.append(key)
+    if keys:
+        pkey = keys[0]
+    ssh.connect(host, username=user, pkey=pkey)
 
     scp = SCPClient(ssh.get_transport())
 
@@ -44,7 +72,7 @@ class ACSClient(object):
             self.tunnel_server.close_tunnel()
 
     def connect(self, host, username, port=2200,
-                key_filename=os.path.join(os.path.expanduser("~"), '.ssh', 'id_rsa')):
+                key_filename=None):
         """
         Creates a connection to the remote server.
 
@@ -72,11 +100,15 @@ class ACSClient(object):
         if self.client is None:
             self.client = paramiko.SSHClient()
             self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+            pkey = None
+            if key_filename is not None:
+                pkey = _load_key(key_filename)
             self.client.connect(
                 hostname=host,
                 port=port,
                 username=username,
-                key_filename=key_filename)
+                pkey=pkey)
 
         self.transport = self.client.get_transport()
         return self.transport is not None

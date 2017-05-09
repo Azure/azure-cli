@@ -14,9 +14,11 @@ import automation.utilities.path as automation_path
 
 def run_pylint(modules):
     print('\n\nRun pylint')
-    print('Modules: {}'.format(', '.join(name for name, _ in modules)))
+    print(
+    'Modules: {}'.format(', '.join([name for name, _ in modules if not name.endswith('-nspkg')])))
 
-    modules_list = ' '.join(os.path.join(path, 'azure') for _, path in modules)
+    modules_list = ' '.join(
+        [os.path.join(path, 'azure') for name, path in modules if not name.endswith('-nspkg')])
     arguments = '{} --rcfile={} -j {} -r n -d I0013'.format(
         modules_list,
         os.path.join(automation_path.get_repo_root(), 'pylintrc'),
@@ -36,7 +38,7 @@ def run_pep8(modules):
     print('\n\nRun flake8 for PEP8 compliance')
     print('Modules: {}'.format(', '.join(name for name, _ in modules)))
 
-    command = 'flake8 --statistics --append-config={} {}'.format(
+    command = 'flake8 --statistics --exclude=azure_bdist_wheel.py --append-config={} {}'.format(
         os.path.join(automation_path.get_repo_root(), '.flake8'),
         ' '.join(path for _, path in modules))
 
@@ -58,7 +60,7 @@ if __name__ == '__main__':
                         help='Run pylint')
     parser.add_argument('--module', dest='modules', action='append',
                         help='The modules on which the style check should run. Accept short names, '
-                        'except azure-cli, azure-cli-core and azure-cli-nspkg')
+                             'except azure-cli, azure-cli-core and azure-cli-nspkg')
     args = parser.parse_args()
 
     if args.ci:
@@ -68,11 +70,8 @@ if __name__ == '__main__':
         # Run pylint on all modules
         return_code_sum = run_pylint(selected_modules)
 
-        # Run flake8 on white-listed modules
-        pep8_ready_modules = automation_path.filter_user_selected_modules(
-            ['azure-cli', 'azure-cli-core', 'azure-cli-nspkg', 'acs', 
-             'component', 'cloud', 'feedback', 'profile', 'sql', 'storage',
-             'vm'])
+        # Run flake8 on modules
+        pep8_ready_modules = automation_path.filter_blacklisted_modules('network')
 
         return_code_sum += run_pep8(pep8_ready_modules)
 

@@ -65,10 +65,12 @@ helps['storage account create'] = """
     type: command
     short-summary: Creates a storage account.
     examples:
-        - name: Create a storage account with minimal options.
+        - name: Create a storage account MyStorageAccount in resource group MyResourceGroup in the West US region with locally redundant storage.
           text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --sku Standard_LRS
-        - name: Create a storage account saccount1 in resource group rg1 in the West US region with locally redundant storage.
-          text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --sku Standard_LRS
+          min_profile: latest
+        - name: Create a storage account MyStorageAccount in resource group MyResourceGroup in the West US region with locally redundant storage.
+          text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --account-type Standard_LRS
+          max_profile: 2017-03-09-profile-preview
 """
 
 helps['storage container create'] = """
@@ -175,6 +177,12 @@ helps['storage blob copy'] = """
     type: group
     short-summary: Manage blob copy operations.
 """
+
+helps['storage blob incremental-copy'] = """
+    type: group
+    short-summary: Manage blob incremental copy operations.
+"""
+
 helps['storage blob lease'] = """
     type: group
     short-summary: Manage storage blob leases.

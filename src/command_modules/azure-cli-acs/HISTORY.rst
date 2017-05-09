@@ -3,6 +3,42 @@
 Release History
 ===============
 
+2.0.5 (2017-05-05)
+++++++++++++++++++
+
+* Fix to use one of the loaded keys.
+
+2.0.4 (2017-04-28)
+++++++++++++++++++
+
+* New packaging system.
+* fix the master and agent count to be integer instead of string
+
+2.0.3 (2017-04-17)
+++++++++++++++++++
+
+* expose 'az acs create --no-wait' and 'az acs wait' for async creation
+* expose 'az acs create --validate' for dry-run validations
+* remove windows profile before PUT call for scale command (#2755)
+
+2.0.2 (2017-04-03)
+++++++++++++++++++
+
+* Fix kubectl version, always use latest stable. (#2517)
+* [ACS] Adding support for configuring a default ACS cluster (#2554)
+* [ACS] Provide a short name alias for the orchestrator type flag (#2553)
+
+2.0.1 (2017-03-13)
+++++++++++++++++++
+
+* Add support for ssh key password prompting. (#2044)
+* Reduce the default number of masters. (#2430)
+* Add support for windows clusters. (#2211)
+* Switch from Owner to Contributor role. (#2321)
+* Remove acs - vm dependency (#2288)
+* On scale, clear the service principal profile so that it will update
+
+
 2.0.0 (2017-02-27)
 ++++++++++++++++++
 

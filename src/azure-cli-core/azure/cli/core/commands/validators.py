@@ -6,6 +6,7 @@
 import argparse
 import time
 import random
+from azure.cli.core.profiles import ResourceType
 
 
 def validate_tags(ns):
@@ -39,6 +40,25 @@ def generate_deployment_name(namespace):
     if not namespace.deployment_name:
         namespace.deployment_name = \
             'azurecli{}{}'.format(str(time.time()), str(random.randint(1, 100000)))
+
+
+def get_default_location_from_resource_group(namespace):
+    if not namespace.location:
+        from azure.cli.core.commands.client_factory import get_mgmt_service_client
+        resource_client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
+        rg = resource_client.resource_groups.get(namespace.resource_group_name)
+        namespace.location = rg.location  # pylint: disable=no-member
+
+
+def validate_file_or_dict(string):
+    import os
+    string = os.path.expanduser(string)
+    if os.path.exists(string):
+        from azure.cli.core.util import get_file_json
+        return get_file_json(string)
+    else:
+        from azure.cli.core.util import shell_safe_json_parse
+        return shell_safe_json_parse(string)
 
 
 SPECIFIED_SENTINEL = '__SET__'

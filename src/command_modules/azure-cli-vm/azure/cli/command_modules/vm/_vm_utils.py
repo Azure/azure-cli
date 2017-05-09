@@ -5,7 +5,7 @@
 
 import json
 import os
-from azure.cli.core._util import get_file_json, CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core.commands.arm import parse_resource_id
 
 
@@ -17,17 +17,10 @@ def read_content_if_is_file(string_or_file):
     return content
 
 
-def load_json(string_or_file_path):
-    if os.path.exists(string_or_file_path):
-        return get_file_json(string_or_file_path)
-    else:
-        return json.loads(string_or_file_path)
-
-
 def _resolve_api_version(provider_namespace, resource_type, parent_path):
-    from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    client = get_mgmt_service_client(ResourceManagementClient)
+    from azure.cli.core.profiles import ResourceType
+    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
     provider = client.providers.get(provider_namespace)
 
     # If available, we will use parent resource's api-version
@@ -55,14 +48,13 @@ def log_pprint_template(template):
     logger.info('==== END TEMPLATE ====')
 
 
-# pylint: disable=too-many-arguments
 def check_existence(value, resource_group, provider_namespace, resource_type,
                     parent_name=None, parent_type=None):
     # check for name or ID and set the type flags
-    from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from msrestazure.azure_exceptions import CloudError
-    resource_client = get_mgmt_service_client(ResourceManagementClient).resources
+    from azure.cli.core.profiles import ResourceType
+    resource_client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).resources
 
     id_parts = parse_resource_id(value)
 

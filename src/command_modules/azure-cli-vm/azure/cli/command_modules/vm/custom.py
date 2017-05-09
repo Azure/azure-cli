@@ -17,18 +17,16 @@ except ImportError:
 
 from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
+from azure.cli.core.commands.validators import validate_file_or_dict
 from azure.keyvault.key_vault_id import parse_secret_id
-from azure.mgmt.compute.models import (VirtualHardDisk,
-                                       VirtualMachineScaleSet,
-                                       VirtualMachineCaptureParameters,
-                                       VirtualMachineScaleSetExtension,
-                                       VirtualMachineScaleSetExtensionProfile)
+
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.arm import parse_resource_id, resource_id, is_valid_resource_id
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 import azure.cli.core.azlogging as azlogging
-from ._vm_utils import read_content_if_is_file, load_json
+from azure.cli.core.profiles import get_sdk, ResourceType
+from ._vm_utils import read_content_if_is_file
 from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc,
@@ -38,10 +36,20 @@ from ._client_factory import _compute_client_factory
 
 logger = azlogging.get_az_logger(__name__)
 
+VirtualHardDisk, VirtualMachineScaleSet, \
+    VirtualMachineCaptureParameters, VirtualMachineScaleSetExtension, \
+    VirtualMachineScaleSetExtensionProfile = get_sdk(
+        ResourceType.MGMT_COMPUTE,
+        'VirtualHardDisk',
+        'VirtualMachineScaleSet',
+        'VirtualMachineCaptureParameters',
+        'VirtualMachineScaleSetExtension',
+        'VirtualMachineScaleSetExtensionProfile',
+        mod='models')
+
 
 def get_resource_group_location(resource_group_name):
-    from azure.mgmt.resource.resources import ResourceManagementClient
-    client = get_mgmt_service_client(ResourceManagementClient)
+    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
     # pylint: disable=no-member
     return client.resource_groups.get(resource_group_name).location
 
@@ -54,7 +62,7 @@ def get_vm(resource_group_name, vm_name, expand=None):
                                        expand=expand)
 
 
-def set_vm(instance, lro_operation=None):
+def set_vm(instance, lro_operation=None, no_wait=False):
     '''Update the given Virtual Machine instance'''
     instance.resources = None  # Issue: https://github.com/Azure/autorest/issues/934
     client = _compute_client_factory()
@@ -62,7 +70,7 @@ def set_vm(instance, lro_operation=None):
     poller = client.virtual_machines.create_or_update(
         resource_group_name=parsed_id[0],
         vm_name=parsed_id[1],
-        parameters=instance)
+        parameters=instance, raw=no_wait)
     if lro_operation:
         return lro_operation(poller)
     else:
@@ -123,8 +131,7 @@ def _get_access_extension_upgrade_info(extensions, name):
 
 
 def _get_storage_management_client():
-    from azure.mgmt.storage import StorageManagementClient
-    return get_mgmt_service_client(StorageManagementClient)
+    return get_mgmt_service_client(ResourceType.MGMT_STORAGE)
 
 
 def _trim_away_build_number(version):
@@ -164,16 +171,16 @@ def show_vm(resource_group_name, vm_name, show_details=False):
 
 
 def get_vm_details(resource_group_name, vm_name):
-    from azure.mgmt.network import NetworkManagementClient
     result = get_instance_view(resource_group_name, vm_name)
-    network_client = get_mgmt_service_client(NetworkManagementClient)
+    network_client = get_mgmt_service_client(ResourceType.MGMT_NETWORK)
     public_ips = []
     fqdns = []
     private_ips = []
     mac_addresses = []
     # pylint: disable=line-too-long,no-member
     for nic_ref in result.network_profile.network_interfaces:
-        nic = network_client.network_interfaces.get(resource_group_name, nic_ref.id.split('/')[-1])
+        nic_parts = parse_resource_id(nic_ref.id)
+        nic = network_client.network_interfaces.get(nic_parts['resource_group'], nic_parts['name'])
         if nic.mac_address:
             mac_addresses.append(nic.mac_address)
         for ip_configuration in nic.ip_configurations:
@@ -237,15 +244,13 @@ def list_ip_addresses(resource_group_name=None, vm_name=None):
     :param str resource_group_name:Name of resource group.
     :param str vm_name:Name of virtual machine.
     '''
-    from azure.mgmt.network import NetworkManagementClient
-
     # We start by getting NICs as they are the smack in the middle of all data that we
     # want to collect for a VM (as long as we don't need any info on the VM than what
     # is available in the Id, we don't need to make any calls to the compute RP)
     #
     # Since there is no guarantee that a NIC is in the same resource group as a given
     # Virtual Machine, we can't constrain the lookup to only a single group...
-    network_client = get_mgmt_service_client(NetworkManagementClient)
+    network_client = get_mgmt_service_client(ResourceType.MGMT_NETWORK)
     nics = network_client.network_interfaces.list_all()
     public_ip_addresses = network_client.public_ip_addresses.list_all()
 
@@ -324,7 +329,7 @@ def update_managed_disk(instance, size_gb=None, sku=None):
 
 
 def attach_managed_data_disk(resource_group_name, vm_name, disk,
-                             new=False, sku=None, size_gb=None, lun=None):
+                             new=False, sku=None, size_gb=None, lun=None, caching=None):
     '''attach a managed disk'''
     vm = get_vm(resource_group_name, vm_name)
     from azure.mgmt.compute.models import (CreationData, DiskCreateOptionTypes,
@@ -339,7 +344,7 @@ def attach_managed_data_disk(resource_group_name, vm_name, disk,
             raise CLIError('usage error: --size-gb required to create an empty disk for attach')
         data_disk = DataDisk(lun, DiskCreateOptionTypes.empty,
                              name=parse_resource_id(disk)['name'],
-                             disk_size_gb=size_gb)
+                             disk_size_gb=size_gb, caching=caching)
     else:
         params = ManagedDiskParameters(id=disk,
                                        storage_account_type=sku)
@@ -360,7 +365,8 @@ def detach_data_disk(resource_group_name, vm_name, disk_name):
     set_vm(vm)
 
 
-def attach_managed_data_disk_to_vmss(resource_group_name, vmss_name, size_gb, lun=None):
+def attach_managed_data_disk_to_vmss(resource_group_name, vmss_name, size_gb, lun=None,
+                                     caching=None):
     from azure.mgmt.compute.models import (DiskCreateOptionTypes,
                                            VirtualMachineScaleSetDataDisk)
     client = _compute_client_factory()
@@ -372,7 +378,7 @@ def attach_managed_data_disk_to_vmss(resource_group_name, vmss_name, size_gb, lu
         luns = [d.lun for d in data_disks]
         lun = max(luns) + 1 if luns else 0
     data_disk = VirtualMachineScaleSetDataDisk(lun, DiskCreateOptionTypes.empty,
-                                               disk_size_gb=size_gb)
+                                               disk_size_gb=size_gb, caching=caching)
     data_disks.append(data_disk)
     vmss.virtual_machine_profile.storage_profile.data_disks = data_disks
     return client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
@@ -512,7 +518,7 @@ def create_image(resource_group_name, name, os_type=None, location=None,  # pyli
 def attach_unmanaged_data_disk(resource_group_name, vm_name, new=False, vhd_uri=None, lun=None,
                                disk_name=None, size_gb=1023, caching=None):
     ''' Attach an unmanaged disk'''
-    from azure.mgmt.compute.models.compute_management_client_enums import DiskCreateOptionTypes
+    from azure.mgmt.compute.models import DiskCreateOptionTypes
     from azure.mgmt.compute.models import DataDisk
     if not new and not disk_name:
         raise CLIError('Pleae provide the name of the existing disk to attach')
@@ -552,13 +558,13 @@ def _get_disk_lun(data_disks):
         return 0
 
 
-def resize_vm(resource_group_name, vm_name, size):
+def resize_vm(resource_group_name, vm_name, size, no_wait=False):
     '''Update vm size
     :param str size: sizes such as Standard_A4, Standard_F4s, etc
     '''
     vm = get_vm(resource_group_name, vm_name)
     vm.hardware_profile.vm_size = size  # pylint: disable=no-member
-    return set_vm(vm)
+    return set_vm(vm, no_wait)
 
 
 def get_instance_view(resource_group_name, vm_name):
@@ -586,51 +592,58 @@ def capture_vm(resource_group_name, vm_name, vhd_name_prefix,
     print(json.dumps(result.output, indent=2))  # pylint: disable=no-member
 
 
-def set_user(resource_group_name, vm_name, username, password=None, ssh_key_value=None):
+def set_user(resource_group_name, vm_name, username, password=None, ssh_key_value=None,
+             no_wait=False):
     '''Update or Add(only on Linux VM) users
     :param username: user name
     :param password: user password.
     :param ssh_key_value: SSH public key file value or public key file path
     '''
     vm = get_vm(resource_group_name, vm_name, 'instanceView')
-    if _is_linx_vm(vm):
-        return _set_linux_user(resource_group_name, vm_name, username, password, ssh_key_value)
+    if _is_linux_vm(vm):
+        return _set_linux_user(vm, resource_group_name, username, password, ssh_key_value, no_wait)
     else:
         if ssh_key_value:
             raise CLIError('SSH key is not appliable on a Windows VM')
-        return _reset_windows_admin(resource_group_name, vm, username, password)
+        return _reset_windows_admin(vm, resource_group_name, username, password, no_wait)
 
 
 def delete_user(
-        resource_group_name, vm_name, username):
+        resource_group_name, vm_name, username, no_wait=False):
     '''Remove a user(not supported on Windows VM)
     :param username: user name
     '''
     vm = get_vm(resource_group_name, vm_name, 'instanceView')
-    if not _is_linx_vm(vm):
+    if not _is_linux_vm(vm):
         raise CLIError('Deleting a user is not supported on Windows VM')
-    poller = _update_linux_access_extension(resource_group_name, vm_name,
+    if no_wait:
+        return _update_linux_access_extension(vm, resource_group_name,
+                                              {'remove_user': username}, no_wait)
+    poller = _update_linux_access_extension(vm, resource_group_name,
                                             {'remove_user': username})
     return ExtensionUpdateLongRunningOperation('deleting user', 'done')(poller)
 
 
-def reset_linux_ssh(resource_group_name, vm_name):
+def reset_linux_ssh(resource_group_name, vm_name, no_wait=False):
     '''Reset the SSH configuration In Linux VM'''
     vm = get_vm(resource_group_name, vm_name, 'instanceView')
-    if not _is_linx_vm(vm):
+    if not _is_linux_vm(vm):
         raise CLIError('Resetting SSH is not supported in Windows VM')
-    poller = _update_linux_access_extension(resource_group_name, vm_name,
+    if no_wait:
+        return _update_linux_access_extension(vm, resource_group_name,
+                                              {'reset_ssh': True}, no_wait)
+    poller = _update_linux_access_extension(vm, resource_group_name,
                                             {'reset_ssh': True})
     return ExtensionUpdateLongRunningOperation('resetting SSH', 'done')(poller)
 
 
-def _is_linx_vm(vm):
+def _is_linux_vm(vm):
     os_type = vm.storage_profile.os_disk.os_type.value
     return os_type.lower() == 'linux'
 
 
-def _set_linux_user(
-        resource_group_name, vm_name, username, password=None, ssh_key_value=None):
+def _set_linux_user(vm_instance, resource_group_name, username,
+                    password=None, ssh_key_value=None, no_wait=False):
     protected_settings = {}
     protected_settings['username'] = username
     if password:
@@ -641,58 +654,89 @@ def _set_linux_user(
     if ssh_key_value:
         protected_settings['ssh_key'] = read_content_if_is_file(ssh_key_value)
 
-    poller = _update_linux_access_extension(resource_group_name, vm_name,
+    if no_wait:
+        return _update_linux_access_extension(vm_instance, resource_group_name,
+                                              protected_settings, no_wait)
+    poller = _update_linux_access_extension(vm_instance, resource_group_name,
                                             protected_settings)
     return ExtensionUpdateLongRunningOperation('setting user', 'done')(poller)
 
 
-def _reset_windows_admin(
-        resource_group_name, vm, username, password):
+def _reset_windows_admin(vm_instance, resource_group_name, username, password, no_wait=False):
     '''Update the password.
     You can only change the password. Adding a new user is not supported.
     '''
     client = _compute_client_factory()
+    VirtualMachineExtension = get_sdk(ResourceType.MGMT_COMPUTE,
+                                      "VirtualMachineExtension",
+                                      mod='models')
 
-    from azure.mgmt.compute.models import VirtualMachineExtension
-
-    extension_name = _WINDOWS_ACCESS_EXT
     publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
-        vm.resources, extension_name)
+        vm_instance.resources, _WINDOWS_ACCESS_EXT)
+    # pylint: disable=no-member
+    instance_name = _get_extension_instance_name(vm_instance.instance_view,
+                                                 publisher,
+                                                 _WINDOWS_ACCESS_EXT,
+                                                 _ACCESS_EXT_HANDLER_NAME)
 
-    ext = VirtualMachineExtension(vm.location,  # pylint: disable=no-member
+    ext = VirtualMachineExtension(vm_instance.location,  # pylint: disable=no-member
                                   publisher=publisher,
-                                  virtual_machine_extension_type=extension_name,
+                                  virtual_machine_extension_type=_WINDOWS_ACCESS_EXT,
                                   protected_settings={'Password': password},
                                   type_handler_version=version,
                                   settings={'UserName': username},
                                   auto_upgrade_minor_version=auto_upgrade)
 
-    poller = client.virtual_machine_extensions.create_or_update(resource_group_name, vm.name,
-                                                                _ACCESS_EXT_HANDLER_NAME, ext)
+    if no_wait:
+        return client.virtual_machine_extensions.create_or_update(resource_group_name,
+                                                                  vm_instance.name,
+                                                                  instance_name, ext, raw=no_wait)
+    poller = client.virtual_machine_extensions.create_or_update(resource_group_name,
+                                                                vm_instance.name,
+                                                                instance_name, ext)
     return ExtensionUpdateLongRunningOperation('resetting admin', 'done')(poller)
 
 
-def _update_linux_access_extension(resource_group_name, vm_name, protected_settings):
-    vm = get_vm(resource_group_name, vm_name, 'instanceView')
+def _update_linux_access_extension(vm_instance, resource_group_name, protected_settings,
+                                   no_wait=False):
     client = _compute_client_factory()
 
-    from azure.mgmt.compute.models import VirtualMachineExtension
+    VirtualMachineExtension = get_sdk(ResourceType.MGMT_COMPUTE,
+                                      "VirtualMachineExtension",
+                                      mod='models')
 
-    extension_name = _LINUX_ACCESS_EXT
+    # pylint: disable=no-member
+    instance_name = _get_extension_instance_name(vm_instance.instance_view,
+                                                 extension_mappings[_LINUX_ACCESS_EXT]['publisher'],
+                                                 _LINUX_ACCESS_EXT,
+                                                 _ACCESS_EXT_HANDLER_NAME)
+
     publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
-        vm.resources, extension_name)
+        vm_instance.resources, _LINUX_ACCESS_EXT)
 
-    ext = VirtualMachineExtension(vm.location,  # pylint: disable=no-member
+    ext = VirtualMachineExtension(vm_instance.location,  # pylint: disable=no-member
                                   publisher=publisher,
-                                  virtual_machine_extension_type=extension_name,
+                                  virtual_machine_extension_type=_LINUX_ACCESS_EXT,
                                   protected_settings=protected_settings,
                                   type_handler_version=version,
                                   settings={},
                                   auto_upgrade_minor_version=auto_upgrade)
+    return client.virtual_machine_extensions.create_or_update(resource_group_name,
+                                                              vm_instance.name,
+                                                              instance_name, ext,
+                                                              raw=no_wait)
 
-    poller = client.virtual_machine_extensions.create_or_update(resource_group_name, vm_name,
-                                                                _ACCESS_EXT_HANDLER_NAME, ext)
-    return poller
+
+def _get_extension_instance_name(instance_view, publisher, extension_type_name,
+                                 suggested_name=None):
+    extension_instance_name = suggested_name or extension_type_name
+    full_type_name = '.'.join([publisher, extension_type_name])
+    if instance_view.extensions:
+        ext = next((x for x in instance_view.extensions
+                    if x.type.lower() == full_type_name.lower()), None)
+        if ext:
+            extension_instance_name = ext.name
+    return extension_instance_name
 
 
 def disable_boot_diagnostics(resource_group_name, vm_name):
@@ -734,7 +778,11 @@ def enable_boot_diagnostics(resource_group_name, vm_name, storage):
             vm.diagnostics_profile.boot_diagnostics.storage_uri.lower() == storage_uri.lower()):
         return
 
-    from azure.mgmt.compute.models import DiagnosticsProfile, BootDiagnostics
+    DiagnosticsProfile, BootDiagnostics = get_sdk(ResourceType.MGMT_COMPUTE,
+                                                  "DiagnosticsProfile",
+                                                  "BootDiagnostics",
+                                                  mod='models')
+
     boot_diag = BootDiagnostics(True, storage_uri)
     if vm.diagnostics_profile is None:
         vm.diagnostics_profile = DiagnosticsProfile(boot_diag)
@@ -749,7 +797,7 @@ def enable_boot_diagnostics(resource_group_name, vm_name, storage):
 def get_boot_log(resource_group_name, vm_name):
     import sys
     from azure.cli.core._profile import CLOUD
-    from azure.storage.blob import BlockBlobService
+    BlockBlobService = get_sdk(ResourceType.DATA_STORAGE, 'blob.blockblobservice#BlockBlobService')
 
     client = _compute_client_factory()
 
@@ -822,24 +870,23 @@ def set_extension(
     :param vm_extension_name: the name of the extension
     :param publisher: the name of extension publisher
     :param version: the version of extension.
-    :param settings: extension settings in json format. A json file path is also eccepted
+    :param settings: extension settings in json format. A json file path is also accepted
     :param protected_settings: protected settings in json format for sensitive information like
     credentials. A json file path is also accepted.
     :param no_auto_upgrade: by doing this, extension system will not pick the highest minor version
     for the specified version number, and will not auto update to the latest build/revision number
     on any VM updates in future.
     '''
-    vm = get_vm(resource_group_name, vm_name)
+    vm = get_vm(resource_group_name, vm_name, 'instanceView')
     client = _compute_client_factory()
 
-    from azure.mgmt.compute.models import VirtualMachineExtension
-
-    protected_settings = load_json(protected_settings) if protected_settings else {}
-    settings = load_json(settings) if settings else None
-
+    VirtualMachineExtension = get_sdk(ResourceType.MGMT_COMPUTE,
+                                      "VirtualMachineExtension",
+                                      mod='models')
+    # pylint: disable=no-member
+    instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name)
     # pylint: disable=no-member
     version = _normalize_extension_version(publisher, vm_extension_name, version, vm.location)
-
     ext = VirtualMachineExtension(vm.location,
                                   publisher=publisher,
                                   virtual_machine_extension_type=vm_extension_name,
@@ -848,7 +895,7 @@ def set_extension(
                                   settings=settings,
                                   auto_upgrade_minor_version=(not no_auto_upgrade))
     return client.virtual_machine_extensions.create_or_update(
-        resource_group_name, vm_name, vm_extension_name, ext)
+        resource_group_name, vm_name, instance_name, ext)
 
 
 def set_vmss_extension(
@@ -870,11 +917,13 @@ def set_vmss_extension(
     vmss = client.virtual_machine_scale_sets.get(resource_group_name,
                                                  vmss_name)
 
-    protected_settings = load_json(protected_settings) if protected_settings else {}
-    settings = load_json(settings) if settings else None
-
     # pylint: disable=no-member
     version = _normalize_extension_version(publisher, extension_name, version, vmss.location)
+    extension_profile = vmss.virtual_machine_profile.extension_profile
+    if extension_profile:
+        extensions = extension_profile.extensions
+        if extensions:
+            extension_profile.extensions = [x for x in extensions if x.type.lower() != extension_name.lower() or x.publisher.lower() != publisher.lower()]  # pylint: disable=line-too-long
 
     ext = VirtualMachineScaleSetExtension(name=extension_name,
                                           publisher=publisher,
@@ -1045,8 +1094,7 @@ def vm_show_nic(resource_group_name, vm_name, nic):
         (n for n in vm.network_profile.network_interfaces if nic.lower() == n.id.lower()), None  # pylint: disable=no-member
     )
     if found:
-        from azure.mgmt.network import NetworkManagementClient
-        network_client = get_mgmt_service_client(NetworkManagementClient)
+        network_client = get_mgmt_service_client(ResourceType.MGMT_NETWORK)
         nic_name = parse_resource_id(found.id)['name']
         return network_client.network_interfaces.get(resource_group_name, nic_name)
     else:
@@ -1113,8 +1161,7 @@ def vm_open_port(resource_group_name, vm_name, port, priority=900, network_secur
     will overwrite an existing rule with this name. For multi-NIC VMs, or for more fine
     grained control, use the appropriate network commands directly (nsg rule create, etc).
     """
-    from azure.mgmt.network import NetworkManagementClient
-    network = get_mgmt_service_client(NetworkManagementClient)
+    network = get_mgmt_service_client(ResourceType.MGMT_NETWORK)
 
     vm = get_vm(resource_group_name, vm_name)
     location = vm.location
@@ -1137,7 +1184,8 @@ def vm_open_port(resource_group_name, vm_name, port, priority=900, network_secur
         nsg = subnet.network_security_group
 
     if not nsg:
-        from azure.mgmt.network.models import NetworkSecurityGroup
+        NetworkSecurityGroup = \
+            get_sdk(ResourceType.MGMT_NETWORK, 'NetworkSecurityGroup', mod='models')
         nsg = LongRunningOperation('Creating network security group')(
             network.network_security_groups.create_or_update(
                 resource_group_name=resource_group_name,
@@ -1147,7 +1195,7 @@ def vm_open_port(resource_group_name, vm_name, port, priority=900, network_secur
         )
 
     # update the NSG with the new rule to allow inbound traffic
-    from azure.mgmt.network.models import SecurityRule
+    SecurityRule = get_sdk(ResourceType.MGMT_NETWORK, 'SecurityRule', mod='models')
     rule_name = 'open-port-all' if port == '*' else 'open-port-{}'.format(port)
     rule = SecurityRule(protocol='*', access='allow', direction='inbound', name=rule_name,
                         source_port_range='*', destination_port_range=port, priority=priority,
@@ -1178,12 +1226,11 @@ def vm_open_port(resource_group_name, vm_name, port, priority=900, network_secur
 
 
 def _build_nic_list(nic_ids):
-    from azure.mgmt.network import NetworkManagementClient
     from azure.mgmt.compute.models import NetworkInterfaceReference
     nic_list = []
     if nic_ids:
         # pylint: disable=no-member
-        network_client = get_mgmt_service_client(NetworkManagementClient)
+        network_client = get_mgmt_service_client(ResourceType.MGMT_NETWORK)
         for nic_id in nic_ids:
             rg, name = _parse_rg_name(nic_id)
             nic = network_client.network_interfaces.get(rg, name)
@@ -1229,7 +1276,7 @@ def _update_vm_nics(vm, nics, primary_nic):
     return set_vm(vm).network_profile.network_interfaces
 
 
-def scale_vmss(resource_group_name, vm_scale_set_name, new_capacity):
+def scale_vmss(resource_group_name, vm_scale_set_name, new_capacity, no_wait=False):
     '''change the number of VMs in an virtual machine scale set
 
     :param int new_capacity: number of virtual machines in a scale set
@@ -1244,15 +1291,17 @@ def scale_vmss(resource_group_name, vm_scale_set_name, new_capacity):
     vmss_new = VirtualMachineScaleSet(vmss.location, sku=vmss.sku)
     return client.virtual_machine_scale_sets.create_or_update(resource_group_name,
                                                               vm_scale_set_name,
-                                                              vmss_new)
+                                                              vmss_new,
+                                                              raw=no_wait)
 
 
-def update_vmss_instances(resource_group_name, vm_scale_set_name, instance_ids):
+def update_vmss_instances(resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
     '''upgrade virtual machines in a virtual machine scale set'''
     client = _compute_client_factory()
     return client.virtual_machine_scale_sets.update_instances(resource_group_name,
                                                               vm_scale_set_name,
-                                                              instance_ids)
+                                                              instance_ids,
+                                                              raw=no_wait)
 
 
 def get_vmss_instance_view(resource_group_name, vm_scale_set_name, instance_id=None):
@@ -1265,7 +1314,9 @@ def get_vmss_instance_view(resource_group_name, vm_scale_set_name, instance_id=N
     if instance_id:
         if instance_id == '*':
             return client.virtual_machine_scale_set_vms.list(resource_group_name,
-                                                             vm_scale_set_name)
+                                                             vm_scale_set_name,
+                                                             select='instanceView',
+                                                             expand='instanceView')
         else:
             return client.virtual_machine_scale_set_vms.get_instance_view(resource_group_name,
                                                                           vm_scale_set_name,
@@ -1299,46 +1350,52 @@ def list_vmss(resource_group_name=None):
         return client.virtual_machine_scale_sets.list_all()
 
 
-def deallocate_vmss(resource_group_name, vm_scale_set_name, instance_ids=None):
+def deallocate_vmss(resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     '''deallocate virtual machines in a scale set. '''
     client = _compute_client_factory()
     if instance_ids and len(instance_ids) == 1:
         return client.virtual_machine_scale_set_vms.deallocate(resource_group_name,
                                                                vm_scale_set_name,
-                                                               instance_ids[0])
+                                                               instance_ids[0],
+                                                               raw=no_wait)
     else:
         return client.virtual_machine_scale_sets.deallocate(resource_group_name,
                                                             vm_scale_set_name,
-                                                            instance_ids=instance_ids)
+                                                            instance_ids=instance_ids,
+                                                            raw=no_wait)
 
 
-def delete_vmss_instances(resource_group_name, vm_scale_set_name, instance_ids):
+def delete_vmss_instances(resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
     '''delete virtual machines in a scale set.'''
     client = _compute_client_factory()
     if len(instance_ids) == 1:
         return client.virtual_machine_scale_set_vms.delete(resource_group_name,
                                                            vm_scale_set_name,
-                                                           instance_ids[0])
+                                                           instance_ids[0],
+                                                           raw=no_wait)
     else:
         return client.virtual_machine_scale_sets.delete_instances(resource_group_name,
                                                                   vm_scale_set_name,
-                                                                  instance_ids)
+                                                                  instance_ids,
+                                                                  raw=no_wait)
 
 
-def stop_vmss(resource_group_name, vm_scale_set_name, instance_ids=None):
+def stop_vmss(resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     '''power off (stop) virtual machines in a virtual machine scale set.'''
     client = _compute_client_factory()
     if instance_ids and len(instance_ids) == 1:
         return client.virtual_machine_scale_set_vms.power_off(resource_group_name,
                                                               vm_scale_set_name,
-                                                              instance_ids[0])
+                                                              instance_ids[0],
+                                                              raw=no_wait)
     else:
         return client.virtual_machine_scale_sets.power_off(resource_group_name,
                                                            vm_scale_set_name,
-                                                           instance_ids=instance_ids)
+                                                           instance_ids=instance_ids,
+                                                           raw=no_wait)
 
 
-def reimage_vmss(resource_group_name, vm_scale_set_name, instance_id=None):
+def reimage_vmss(resource_group_name, vm_scale_set_name, instance_id=None, no_wait=False):
     '''reimage virtual machines in a virtual machine scale set.
 
     :param str instance_id: VM instance id. If missing, reimage all instances
@@ -1347,36 +1404,42 @@ def reimage_vmss(resource_group_name, vm_scale_set_name, instance_id=None):
     if instance_id:
         return client.virtual_machine_scale_set_vms.reimage(resource_group_name,
                                                             vm_scale_set_name,
-                                                            instance_id)
+                                                            instance_id,
+                                                            raw=no_wait)
     else:
         return client.virtual_machine_scale_sets.reimage(resource_group_name,
-                                                         vm_scale_set_name)
+                                                         vm_scale_set_name,
+                                                         raw=no_wait)
 
 
-def restart_vmss(resource_group_name, vm_scale_set_name, instance_ids=None):
+def restart_vmss(resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     '''restart virtual machines in a scale set.'''
     client = _compute_client_factory()
     if instance_ids and len(instance_ids) == 1:
         return client.virtual_machine_scale_set_vms.restart(resource_group_name,
                                                             vm_scale_set_name,
-                                                            instance_ids[0])
+                                                            instance_ids[0],
+                                                            raw=no_wait)
     else:
         return client.virtual_machine_scale_sets.restart(resource_group_name,
                                                          vm_scale_set_name,
-                                                         instance_ids=instance_ids)
+                                                         instance_ids=instance_ids,
+                                                         raw=no_wait)
 
 
-def start_vmss(resource_group_name, vm_scale_set_name, instance_ids=None):
+def start_vmss(resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     '''start virtual machines in a virtual machine scale set.'''
     client = _compute_client_factory()
     if instance_ids and len(instance_ids) == 1:
         return client.virtual_machine_scale_set_vms.start(resource_group_name,
                                                           vm_scale_set_name,
-                                                          instance_ids[0])
+                                                          instance_ids[0],
+                                                          raw=no_wait)
     else:
         return client.virtual_machine_scale_sets.start(resource_group_name,
                                                        vm_scale_set_name,
-                                                       instance_ids=instance_ids)
+                                                       instance_ids=instance_ids,
+                                                       raw=no_wait)
 
 
 def list_vmss_instance_connection_info(resource_group_name, vm_scale_set_name):
@@ -1385,7 +1448,7 @@ def list_vmss_instance_connection_info(resource_group_name, vm_scale_set_name):
                                                  vm_scale_set_name)
     # find the load balancer
     nic_configs = vmss.virtual_machine_profile.network_profile.network_interface_configurations
-    primary_nic_config = next(n for n in nic_configs if n.primary)
+    primary_nic_config = next((n for n in nic_configs if n.primary), None)
     if primary_nic_config is None:
         raise CLIError('could not find a primary nic which is needed to search to load balancer')
     ip_configs = primary_nic_config.ip_configurations
@@ -1398,8 +1461,7 @@ def list_vmss_instance_connection_info(resource_group_name, vm_scale_set_name):
     lb_rg = lb_info['resource_group']
 
     # get public ip
-    from azure.mgmt.network import NetworkManagementClient
-    network_client = get_mgmt_service_client(NetworkManagementClient)
+    network_client = get_mgmt_service_client(ResourceType.MGMT_NETWORK)
     lb = network_client.load_balancers.get(lb_rg, lb_name)
     res_id = lb.frontend_ip_configurations[0].public_ip_address.id  # TODO: will this always work?
     public_ip_info = parse_resource_id(res_id)
@@ -1420,16 +1482,18 @@ def availset_get(resource_group_name, name):
     return _compute_client_factory().availability_sets.get(resource_group_name, name)
 
 
-def availset_set(**kwargs):
-    return _compute_client_factory().availability_sets.create_or_update(**kwargs)
+def availset_set(resource_group_name, name, **kwargs):
+    return _compute_client_factory().availability_sets.create_or_update(resource_group_name, name,
+                                                                        **kwargs)
 
 
 def vmss_get(resource_group_name, name):
     return _compute_client_factory().virtual_machine_scale_sets.get(resource_group_name, name)
 
 
-def vmss_set(**kwargs):
-    return _compute_client_factory().virtual_machine_scale_sets.create_or_update(**kwargs)
+def vmss_set(resource_group_name, name, no_wait=False, **kwargs):
+    return _compute_client_factory().virtual_machine_scale_sets.create_or_update(
+        resource_group_name, name, raw=no_wait, **kwargs)
 
 
 def convert_av_set_to_managed_disk(resource_group_name, availability_set_name):
@@ -1451,24 +1515,23 @@ def create_vm(vm_name, resource_group_name, image=None,
               public_ip_address=None, public_ip_address_allocation='dynamic',
               public_ip_address_dns_name=None,
               os_disk_name=None, os_type=None, storage_account=None,
-              storage_caching=None, storage_container_name=None,
+              os_caching=None, data_caching=None, storage_container_name=None,
               storage_sku=None, use_unmanaged_disk=False,
               attach_os_disk=None, data_disk_sizes_gb=None, image_data_disks=None,
               vnet_name=None, vnet_address_prefix='10.0.0.0/16',
               subnet=None, subnet_address_prefix='10.0.0.0/24', storage_profile=None,
               os_publisher=None, os_offer=None, os_sku=None, os_version=None,
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_type=None,
-              nic_type=None, validate=False, custom_data=None, secrets=None):
+              nic_type=None, validate=False, custom_data=None, secrets=None,
+              plan_name=None, plan_product=None, plan_publisher=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.cli.core._util import random_string
+    from azure.cli.core.util import random_string
     from azure.cli.command_modules.vm._template_builder import (
         ArmTemplateBuilder, build_vm_resource, build_storage_account_resource, build_nic_resource,
         build_vnet_resource, build_nsg_resource, build_public_ip_resource,
         build_output_deployment_resource, build_deployment_resource, StorageProfile)
 
     from azure.cli.core._profile import CLOUD
-    from azure.mgmt.resource.resources import ResourceManagementClient
-    from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
 
     network_id_template = resource_id(
         subscription=get_subscription_id(), resource_group=resource_group_name,
@@ -1478,7 +1541,6 @@ def create_vm(vm_name, resource_group_name, image=None,
     tags = tags or {}
     os_disk_name = os_disk_name or 'osdisk_{}'.format(random_string(10))
     storage_container_name = storage_container_name or 'vhds'
-    storage_caching = storage_caching or 'ReadWrite'
 
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
@@ -1563,14 +1625,21 @@ def create_vm(vm_name, resource_group_name, image=None,
         custom_data = read_content_if_is_file(custom_data)
 
     if secrets:
-        secrets = _merge_secrets([load_json(secret) for secret in secrets])
+        secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
     vm_resource = build_vm_resource(
         vm_name, location, tags, size, storage_profile, nics, admin_username, availability_set,
         admin_password, ssh_key_value, ssh_dest_key_path, image, os_disk_name,
-        os_type, storage_caching, storage_sku, os_publisher, os_offer, os_sku, os_version,
+        os_type, os_caching, data_caching, storage_sku, os_publisher, os_offer, os_sku, os_version,
         os_vhd_uri, attach_os_disk, data_disk_sizes_gb, image_data_disks, custom_data, secrets)
     vm_resource['dependsOn'] = vm_dependencies
+
+    if plan_name:
+        vm_resource['plan'] = {
+            'name': plan_name,
+            'publisher': plan_publisher,
+            'product': plan_product
+        }
 
     master_template.add_resource(vm_resource)
 
@@ -1578,7 +1647,10 @@ def create_vm(vm_name, resource_group_name, image=None,
 
     # deploy ARM template
     deployment_name = 'vm_deploy_' + random_string(32)
-    client = get_mgmt_service_client(ResourceManagementClient).deployments
+    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+    DeploymentProperties = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES,
+                                   'DeploymentProperties',
+                                   mod='models')
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     if validate:
         from azure.cli.command_modules.vm._vm_utils import log_pprint_template
@@ -1602,54 +1674,80 @@ def create_vmss(vmss_name, resource_group_name, image,
                 admin_username=getpass.getuser(), admin_password=None, authentication_type=None,
                 vm_sku="Standard_D1_v2", no_wait=False,
                 ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
-                load_balancer=None, backend_pool_name=None, nat_pool_name=None, backend_port=None,
+                load_balancer=None, application_gateway=None,
+                app_gateway_subnet_address_prefix=None,
+                backend_pool_name=None, nat_pool_name=None, backend_port=None,
                 public_ip_address=None, public_ip_address_allocation='dynamic',
                 public_ip_address_dns_name=None,
-                storage_caching=None,
+                os_caching=None, data_caching=None,
                 storage_container_name=None, storage_sku=None,
                 os_type=None, os_disk_name=None,
                 use_unmanaged_disk=False, data_disk_sizes_gb=None, image_data_disks=None,
                 vnet_name=None, vnet_address_prefix='10.0.0.0/16',
                 subnet=None, subnet_address_prefix=None,
                 os_offer=None, os_publisher=None, os_sku=None, os_version=None,
-                load_balancer_type=None, vnet_type=None, public_ip_type=None, storage_profile=None,
-                single_placement_group=None, custom_data=None, secrets=None):
+                load_balancer_type=None, app_gateway_type=None, vnet_type=None,
+                public_ip_type=None, storage_profile=None,
+                single_placement_group=None, custom_data=None, secrets=None,
+                plan_name=None, plan_product=None, plan_publisher=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.cli.core._util import random_string
+    from azure.cli.core.util import random_string
     from azure.cli.command_modules.vm._template_builder import (
         ArmTemplateBuilder, StorageProfile, build_vmss_resource, build_storage_account_resource,
         build_vnet_resource, build_public_ip_resource, build_load_balancer_resource,
         build_output_deployment_resource, build_deployment_resource,
-        build_vmss_storage_account_pool_resource)
+        build_vmss_storage_account_pool_resource, build_application_gateway_resource)
 
     from azure.cli.core._profile import CLOUD
-    from azure.mgmt.resource.resources import ResourceManagementClient
-    from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
+    from azure.mgmt.compute.models import CachingTypes
 
     network_id_template = resource_id(
         subscription=get_subscription_id(), resource_group=resource_group_name,
         namespace='Microsoft.Network')
 
+    scrubbed_name = vmss_name.replace('-', '').lower()[:5]
+    naming_prefix = '{}{}'.format(scrubbed_name,
+                                  random_string(9 - len(scrubbed_name), force_lower=True))
+
     # determine final defaults and calculated values
     tags = tags or {}
     os_disk_name = os_disk_name or 'osdisk_{}'.format(random_string(10))
     storage_container_name = storage_container_name or 'vhds'
-    storage_caching = storage_caching or 'ReadOnly'
+    os_caching = os_caching or CachingTypes.read_write.value
 
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
 
     vmss_dependencies = []
+
+    # VNET will always be a dependency
     if vnet_type == 'new':
         vnet_name = vnet_name or '{}VNET'.format(vmss_name)
         subnet = subnet or '{}Subnet'.format(vmss_name)
         vmss_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
-        master_template.add_resource(build_vnet_resource(
-            vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix))
+        vnet = build_vnet_resource(
+            vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix)
+        if app_gateway_type:
+            vnet['properties']['subnets'].append({
+                'name': 'appGwSubnet',
+                'properties': {
+                    'addressPrefix': app_gateway_subnet_address_prefix
+                }
+            })
+        master_template.add_resource(vnet)
 
     subnet_id = subnet if is_valid_resource_id(subnet) else \
         '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
+    gateway_subnet_id = \
+        '{}/virtualNetworks/{}/subnets/appGwSubnet'.format(network_id_template, vnet_name) \
+        if app_gateway_type == 'new' else None
 
+    # public IP is used by either load balancer/application gateway
+    if public_ip_address:
+        public_ip_address_id = (public_ip_address if is_valid_resource_id(public_ip_address)
+                                else '{}/publicIPAddresses/{}'.format(network_id_template, public_ip_address))  # pylint: disable=line-too-long
+
+    # Handle load balancer creation
     if load_balancer_type == 'new':
         load_balancer = load_balancer or '{}LB'.format(vmss_name)
         vmss_dependencies.append('Microsoft.Network/loadBalancers/{}'.format(load_balancer))
@@ -1662,10 +1760,8 @@ def create_vmss(vmss_name, resource_group_name, image,
                                                                   tags,
                                                                   public_ip_address_allocation,
                                                                   public_ip_address_dns_name))
-        public_ip_address_id = None
-        if public_ip_address:
-            public_ip_address_id = public_ip_address if is_valid_resource_id(public_ip_address) \
-                else '{}/publicIPAddresses/{}'.format(network_id_template, public_ip_address)
+            public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
+                                                                    public_ip_address)
 
         # calculate default names if not provided
         backend_pool_name = backend_pool_name or '{}BEPool'.format(load_balancer)
@@ -1675,32 +1771,78 @@ def create_vmss(vmss_name, resource_group_name, image,
 
         lb_resource = build_load_balancer_resource(
             load_balancer, location, tags, backend_pool_name, nat_pool_name, backend_port,
-            'loadBalancerFrontEnd', public_ip_address_id, subnet_id)
+            'loadBalancerFrontEnd', public_ip_address_id, subnet_id,
+            private_ip_address='', private_ip_allocation='Dynamic')
         lb_resource['dependsOn'] = lb_dependencies
         master_template.add_resource(lb_resource)
 
+    # Or handle application gateway creation
+    app_gateway = application_gateway
+    if app_gateway_type == 'new':
+        app_gateway = application_gateway or '{}AG'.format(vmss_name)
+        vmss_dependencies.append('Microsoft.Network/applicationGateways/{}'.format(app_gateway))
+
+        ag_dependencies = []
+        if public_ip_type == 'new':
+            public_ip_address = public_ip_address or '{}PublicIP'.format(app_gateway)
+            ag_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))  # pylint: disable=line-too-long
+            master_template.add_resource(build_public_ip_resource(public_ip_address, location,
+                                                                  tags,
+                                                                  public_ip_address_allocation,
+                                                                  public_ip_address_dns_name))
+            public_ip_address_id = '{}/publicIPAddresses/{}'.format(network_id_template,
+                                                                    public_ip_address)
+
+        # calculate default names if not provided
+        backend_pool_name = backend_pool_name or '{}BEPool'.format(app_gateway)
+        backend_port = backend_port or 80
+
+        ag_resource = build_application_gateway_resource(
+            app_gateway, location, tags, backend_pool_name, backend_port, 'appGwFrontendIP',
+            public_ip_address_id, subnet_id, gateway_subnet_id, private_ip_address='',
+            private_ip_allocation='Dynamic')
+        ag_resource['dependsOn'] = ag_dependencies
+        master_template.add_variable(
+            'appGwID',
+            "[resourceId('Microsoft.Network/applicationGateways', '{}')]".format(app_gateway))
+        master_template.add_resource(ag_resource)
+
+    # create storage accounts if needed for unmanaged disk storage
     if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
         master_template.add_resource(build_vmss_storage_account_pool_resource(
             'storageLoop', location, tags, storage_sku))
+        master_template.add_variable('storageAccountNames', [
+            '{}{}'.format(naming_prefix, x) for x in range(5)
+        ])
+        master_template.add_variable('vhdContainers', [
+            "[concat('https://', variables('storageAccountNames')[{}], '.blob.{}/{}')]".format(
+                x, CLOUD.suffixes.storage_endpoint, storage_container_name) for x in range(5)
+        ])
         vmss_dependencies.append('storageLoop')
 
-    scrubbed_name = vmss_name.replace('-', '').lower()[:5]
-    naming_prefix = '{}{}'.format(scrubbed_name,
-                                  random_string(9 - len(scrubbed_name), force_lower=True))
     backend_address_pool_id = None
     inbound_nat_pool_id = None
-    if is_valid_resource_id(load_balancer):
-        backend_address_pool_id = \
-            '{}/backendAddressPools/{}'.format(load_balancer, backend_pool_name) \
-            if load_balancer_type else None
-        inbound_nat_pool_id = '{}/inboundNatPools/{}'.format(load_balancer, nat_pool_name) \
-            if load_balancer_type == 'new' else None
-    else:
-        backend_address_pool_id = '{}/loadBalancers/{}/backendAddressPools/{}'.format(
-            network_id_template, load_balancer, backend_pool_name) if load_balancer_type else None
-        inbound_nat_pool_id = '{}/loadBalancers/{}/inboundNatPools/{}'.format(
-            network_id_template, load_balancer, nat_pool_name) if load_balancer_type == 'new' \
-            else None
+    if load_balancer_type or app_gateway_type:
+        network_balancer = load_balancer or app_gateway
+        balancer_type = 'loadBalancers' if load_balancer_type else 'applicationGateways'
+
+        if is_valid_resource_id(network_balancer):
+            # backend address pool needed by load balancer or app gateway
+            backend_address_pool_id = \
+                '{}/backendAddressPools/{}'.format(network_balancer, backend_pool_name)
+
+            # nat pool only applies to new load balancers
+            inbound_nat_pool_id = '{}/inboundNatPools/{}'.format(load_balancer, nat_pool_name) \
+                if load_balancer_type == 'new' else None
+        else:
+            # backend address pool needed by load balancer or app gateway
+            backend_address_pool_id = '{}/{}/{}/backendAddressPools/{}'.format(
+                network_id_template, balancer_type, network_balancer, backend_pool_name)
+
+            # nat pool only applies to new load balancers
+            inbound_nat_pool_id = '{}/loadBalancers/{}/inboundNatPools/{}'.format(
+                network_id_template, load_balancer, nat_pool_name) if load_balancer_type == 'new' \
+                else None
 
     ip_config_name = '{}IPConfig'.format(naming_prefix)
     nic_name = '{}Nic'.format(naming_prefix)
@@ -1709,14 +1851,14 @@ def create_vmss(vmss_name, resource_group_name, image,
         custom_data = read_content_if_is_file(custom_data)
 
     if secrets:
-        secrets = _merge_secrets([load_json(secret) for secret in secrets])
+        secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
     vmss_resource = build_vmss_resource(vmss_name, naming_prefix, location, tags,
                                         not disable_overprovision, upgrade_policy_mode,
                                         vm_sku, instance_count,
                                         ip_config_name, nic_name, subnet_id, admin_username,
                                         authentication_type, storage_profile,
-                                        os_disk_name, storage_caching,
+                                        os_disk_name, os_caching, data_caching,
                                         storage_sku, data_disk_sizes_gb, image_data_disks,
                                         os_type, image, admin_password,
                                         ssh_key_value, ssh_dest_key_path,
@@ -1726,21 +1868,24 @@ def create_vmss(vmss_name, resource_group_name, image,
                                         custom_data=custom_data, secrets=secrets)
     vmss_resource['dependsOn'] = vmss_dependencies
 
+    if plan_name:
+        vmss_resource['plan'] = {
+            'name': plan_name,
+            'publisher': plan_publisher,
+            'product': plan_product
+        }
+
     master_template.add_resource(vmss_resource)
-    master_template.add_variable('storageAccountNames', [
-        '{}{}'.format(naming_prefix, x) for x in range(5)
-    ])
-    master_template.add_variable('vhdContainers', [
-        "[concat('https://', variables('storageAccountNames')[{}], '.blob.{}/{}')]".format(
-            x, CLOUD.suffixes.storage_endpoint, storage_container_name) for x in range(5)
-    ])
     master_template.add_output('VMSS', vmss_name, 'Microsoft.Compute', 'virtualMachineScaleSets',
                                output_type='object')
     template = master_template.build()
 
     # deploy ARM template
     deployment_name = 'vmss_deploy_' + random_string(32)
-    client = get_mgmt_service_client(ResourceManagementClient).deployments
+    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+    DeploymentProperties = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES,
+                                   'DeploymentProperties',
+                                   mod='models')
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     if validate:
         from azure.cli.command_modules.vm._vm_utils import log_pprint_template
@@ -1752,12 +1897,10 @@ def create_vmss(vmss_name, resource_group_name, image,
 
 
 def create_av_set(availability_set_name, resource_group_name,
-                  platform_update_domain_count, platform_fault_domain_count,
+                  platform_fault_domain_count=2, platform_update_domain_count=None,
                   location=None, no_wait=False,
                   unmanaged=False, tags=None, validate=False):
-    from azure.mgmt.resource.resources import ResourceManagementClient
-    from azure.mgmt.resource.resources.models import DeploymentProperties, TemplateLink
-    from azure.cli.core._util import random_string
+    from azure.cli.core.util import random_string
     from azure.cli.command_modules.vm._template_builder import (ArmTemplateBuilder,
                                                                 build_av_set_resource)
 
@@ -1775,7 +1918,10 @@ def create_av_set(availability_set_name, resource_group_name,
 
     # deploy ARM template
     deployment_name = 'av_set_deploy_' + random_string(32)
-    client = get_mgmt_service_client(ResourceManagementClient).deployments
+    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+    DeploymentProperties = get_sdk(ResourceType.MGMT_RESOURCE_RESOURCES,
+                                   'DeploymentProperties',
+                                   mod='models')
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
     if validate:
         return client.validate(resource_group_name, deployment_name, properties)

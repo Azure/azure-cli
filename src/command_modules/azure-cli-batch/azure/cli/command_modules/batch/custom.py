@@ -19,10 +19,9 @@ from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, 
                                 TaskAddParameter, TaskConstraints, PoolUpdatePropertiesParameter,
                                 StartTask, BatchErrorException)
 
-from azure.storage.blob import BlockBlobService
-
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.profiles import get_sdk, ResourceType
 import azure.cli.core.azlogging as azlogging
 
 logger = azlogging.get_az_logger(__name__)
@@ -34,6 +33,7 @@ def transfer_doc(source_func, *additional_source_funcs):
         for f in additional_source_funcs:
             func.__doc__ += "\n" + f.__doc__
         return func
+
     return _decorator
 
 
@@ -46,13 +46,17 @@ def list_accounts(client, resource_group_name=None):
 
 
 @transfer_doc(AutoStorageBaseProperties)
-def create_account(client, resource_group_name, account_name, location,  # pylint:disable=too-many-arguments
-                   tags=None, storage_account=None):
+def create_account(client,
+                   resource_group_name, account_name, location, tags=None, storage_account=None,
+                   keyvault=None, keyvault_url=None):
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
     parameters = BatchAccountCreateParameters(location=location,
                                               tags=tags,
                                               auto_storage=properties)
+    if keyvault:
+        parameters.key_vault_reference = {'id': keyvault, 'url': keyvault_url}
+        parameters.pool_allocation_mode = 'UserSubscription'
 
     return client.create(resource_group_name=resource_group_name,
                          account_name=account_name,
@@ -60,11 +64,10 @@ def create_account(client, resource_group_name, account_name, location,  # pylin
 
 
 @transfer_doc(AutoStorageBaseProperties)
-def update_account(client, resource_group_name, account_name,  # pylint:disable=too-many-arguments
+def update_account(client, resource_group_name, account_name,
                    tags=None, storage_account=None):
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
-
     return client.update(resource_group_name=resource_group_name,
                          account_name=account_name,
                          tags=tags,
@@ -96,8 +99,9 @@ def login_account(client, resource_group_name, account_name, shared_key_auth=Fal
 
 
 @transfer_doc(UpdateApplicationParameters)
-def update_application(client, resource_group_name, account_name, application_id,  # pylint:disable=too-many-arguments
-                       allow_updates=None, display_name=None, default_version=None):
+def update_application(client,
+                       resource_group_name, account_name, application_id, allow_updates=None,
+                       display_name=None, default_version=None):
     parameters = UpdateApplicationParameters(allow_updates=allow_updates,
                                              display_name=display_name,
                                              default_version=default_version)
@@ -109,6 +113,7 @@ def update_application(client, resource_group_name, account_name, application_id
 
 def _upload_package_blob(package_file, url):
     """Upload the location file to storage url provided by autostorage"""
+    BlockBlobService = get_sdk(ResourceType.DATA_STORAGE, 'blob#BlockBlobService')
 
     uri = urlsplit(url)
     # in uri path, it always start with '/', so container name is at second block
@@ -132,9 +137,9 @@ def _upload_package_blob(package_file, url):
 
 
 @transfer_doc(ApplicationPackageOperations.create)
-def create_application_package(client, resource_group_name, account_name,  # pylint:disable=too-many-arguments
-                               application_id, version, package_file):
-
+def create_application_package(client,
+                               resource_group_name, account_name, application_id, version,
+                               package_file):
     # create application if not exist
     mgmt_client = get_mgmt_service_client(BatchManagementClient)
     try:
@@ -202,7 +207,7 @@ def delete_certificate(client, thumbprint, abort=False):
 
 
 @transfer_doc(PoolResizeParameter)
-def resize_pool(client, pool_id, target_dedicated=None,  # pylint:disable=too-many-arguments
+def resize_pool(client, pool_id, target_dedicated=None,
                 resize_timeout=None, node_deallocation_option=None,
                 if_match=None, if_none_match=None, if_modified_since=None,
                 if_unmodified_since=None, abort=False):
@@ -227,10 +232,11 @@ def resize_pool(client, pool_id, target_dedicated=None,  # pylint:disable=too-ma
 
 
 @transfer_doc(PoolUpdatePropertiesParameter, StartTask)
-def update_pool(client, pool_id, json_file=None, start_task_command_line=None,  # pylint:disable=too-many-arguments
-                certificate_references=None, application_package_references=None, metadata=None,
-                start_task_run_elevated=None, start_task_environment_settings=None,
-                start_task_wait_for_success=None, start_task_max_task_retry_count=None):
+def update_pool(client,
+                pool_id, json_file=None, start_task_command_line=None, certificate_references=None,
+                application_package_references=None, metadata=None,
+                start_task_environment_settings=None, start_task_wait_for_success=None,
+                start_task_max_task_retry_count=None):
     def action():
         client.update_properties(pool_id=pool_id, pool_update_properties_parameter=param)
         return client.get(pool_id)
@@ -240,7 +246,8 @@ def update_pool(client, pool_id, json_file=None, start_task_command_line=None,  
             json_obj = json.load(f)
             param = None
             try:
-                param = client._deserialize('PoolUpdatePropertiesParameter', json_obj)  # pylint: disable=protected-access
+                param = client._deserialize(  # pylint: disable=protected-access
+                    'PoolUpdatePropertiesParameter', json_obj)
             except DeserializationError:
                 pass
             if not param:
@@ -266,13 +273,13 @@ def update_pool(client, pool_id, json_file=None, start_task_command_line=None,  
         if start_task_command_line:
             param.start_task = StartTask(start_task_command_line,
                                          environment_settings=start_task_environment_settings,
-                                         run_elevated=start_task_run_elevated,
                                          wait_for_success=start_task_wait_for_success,
                                          max_task_retry_count=start_task_max_task_retry_count)
     return _handle_batch_exception(action)
 
 
-def list_job(client, job_schedule_id=None, filter=None, select=None, expand=None):  # pylint: disable=redefined-builtin
+def list_job(client, job_schedule_id=None, filter=None,  # pylint: disable=redefined-builtin
+             select=None, expand=None):
     def action():
         if job_schedule_id:
             option1 = JobListFromJobScheduleOptions(filter=filter,
@@ -290,10 +297,11 @@ def list_job(client, job_schedule_id=None, filter=None, select=None, expand=None
 
 
 @transfer_doc(TaskAddParameter, TaskConstraints)
-def create_task(client, job_id, json_file=None, task_id=None, command_line=None,  # pylint:disable=too-many-arguments
-                resource_files=None, environment_settings=None, affinity_info=None,
-                max_wall_clock_time=None, retention_time=None, max_task_retry_count=None,
-                run_elevated=None, application_package_references=None):
+def create_task(client,
+                job_id, json_file=None, task_id=None, command_line=None, resource_files=None,
+                environment_settings=None, affinity_info=None, max_wall_clock_time=None,
+                retention_time=None, max_task_retry_count=None,
+                application_package_references=None):
     def action():
         if task is not None:
             client.add(job_id=job_id, task=task)
@@ -307,18 +315,22 @@ def create_task(client, job_id, json_file=None, task_id=None, command_line=None,
         with open(json_file) as f:
             json_obj = json.load(f)
             try:
-                task = client._deserialize('TaskAddParameter', json_obj)  # pylint: disable=protected-access
+                task = client._deserialize(  # pylint: disable=protected-access
+                    'TaskAddParameter', json_obj)
             except DeserializationError:
                 try:
-                    tasks = client._deserialize('[TaskAddParameter]', json_obj)  # pylint: disable=protected-access
+                    tasks = client._deserialize(  # pylint: disable=protected-access
+                        '[TaskAddParameter]', json_obj)
                 except DeserializationError:
                     raise ValueError("JSON file '{}' is not in reqired format.".format(json_file))
     else:
+        if command_line is None or task_id is None:
+            raise ValueError("Missing required arguments.\nEither --json-file, "
+                             "or both --task-id and --command-line must be specified.")
         task = TaskAddParameter(task_id, command_line,
                                 resource_files=resource_files,
                                 environment_settings=environment_settings,
                                 affinity_info=affinity_info,
-                                run_elevated=run_elevated,
                                 application_package_references=application_package_references)
         if max_wall_clock_time is not None or retention_time is not None \
                 or max_task_retry_count is not None:

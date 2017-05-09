@@ -3,10 +3,18 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
+
+MSG_TMPL = """
+az component and subcommands are not available with the current Azure CLI installation.
+If installed with apt-get, please use 'apt-get update' to update this installation.
+If installed with Docker, please use 'docker pull' to update this installation.
+If installed with Windows MSI, download the new MSI to update this installation.
+{}
+"""
 
 def _raise_error(msg):
-    raise CLIError("This operation is not available in this packaged version of the CLI.\n{}".format(msg))
+    raise CLIError(MSG_TMPL.format(msg))
 
 def list_components():
     """ List the installed components """

@@ -14,10 +14,21 @@ import sys
 import pip
 import imp
 import fileinput
+import glob
+import zipfile
 
 import automation.utilities.path as automation_path
 from automation.utilities.display import print_heading
 from automation.utilities.const import COMMAND_MODULE_PREFIX
+
+VALID_WHEEL_HELP = """
+A valid command module .whl for the CLI should:
+- Not contain any __init__.py files in directories above azure.cli.command_modules.
+
+Does the package have a azure_bdist_wheel.py file?
+Does the package have a setup.cfg file?
+Does setup.py include 'cmdclass=cmdclass'?
+"""
 
 
 def exec_command(command, cwd=None, stdout=None, env=None):
@@ -47,7 +58,7 @@ def build_package(path_to_package, dist_dir):
     print_heading('Building {}'.format(path_to_package))
     path_to_setup = os.path.join(path_to_package, 'setup.py')
     set_version(path_to_setup)
-    cmd_success = exec_command('python setup.py sdist -d {0} bdist_wheel -d {0}'.format(dist_dir), cwd=path_to_package)
+    cmd_success = exec_command('python setup.py bdist_wheel -d {0}'.format(dist_dir), cwd=path_to_package)
     if not cmd_success:
         print_heading('Error building {}!'.format(path_to_package), f=sys.stderr)
         sys.exit(1)
@@ -62,6 +73,17 @@ def install_package(path_to_package, package_name, dist_dir):
         print_heading('Error installing {}!'.format(path_to_package), f=sys.stderr)
         sys.exit(1)
     print_heading('Installed {}'.format(path_to_package))
+
+
+def _valid_wheel(wheel_path):
+    # these files shouldn't exist in the wheel
+    print('Verifying {}'.format(wheel_path))
+    bad_files = ['azure/__init__.py', 'azure/cli/__init__.py', 'azure/cli/command_modules/__init__.py']
+    wheel_zip=zipfile.ZipFile(wheel_path)
+    whl_file_list = wheel_zip.namelist()
+    if any(f in whl_file_list for f in bad_files):
+        return False
+    return True
 
 
 def verify_packages():
@@ -111,6 +133,20 @@ def verify_packages():
         print_heading('Error: The following modules were not installed successfully', f=sys.stderr)
         print(missing_modules, file=sys.stderr)
         sys.exit(1)
+
+    # STEP 4:: Verify the wheels that get produced
+    print_heading('Verifying wheels...')
+    invalid_wheels = []
+    for wheel_path in glob.glob(os.path.join(built_packages_dir, '*.whl')):
+        # Verify all non-nspkg wheels
+        if 'nspkg' not in wheel_path and not _valid_wheel(wheel_path):
+            invalid_wheels.append(wheel_path)
+    if invalid_wheels:
+        print_heading('Error: The following wheels are invalid', f=sys.stderr)
+        print(invalid_wheels, file=sys.stderr)
+        print(VALID_WHEEL_HELP, file=sys.stderr)
+        sys.exit(1)
+    print_heading('Verified wheels successfully.')
 
     print_heading('OK')
 

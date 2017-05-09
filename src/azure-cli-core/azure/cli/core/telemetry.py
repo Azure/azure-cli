@@ -53,7 +53,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         details = {
             'Reserved.DataModel.EntityType': 'Fault',
             'Reserved.DataModel.Fault.Description': description or fault_type,
-            'Reserved.DataModel.Correlation.1': self.correlation_id,
+            'Reserved.DataModel.Correlation.1': '{},UserTask,'.format(self.correlation_id),
             'Reserved.DataModel.Fault.TypeString': exception.__class__.__name__,
             'Reserved.DataModel.Fault.Exception.Message': _remove_cmd_chars(
                 message or str(exception)),
@@ -322,7 +322,7 @@ def _get_env_string():
 
 @decorators.suppress_all_exceptions(fallback_return=None)
 def _get_azure_subscription_id():
-    return _get_profile().get_login_credentials()[1]
+    return _get_profile().get_subscription_id()
 
 
 def _get_shell_type():

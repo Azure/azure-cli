@@ -4,11 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+from pprint import pformat
 from six.moves import configparser
 
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._config import GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH, set_global_config_value
-from azure.cli.core._util import CLIError
+from azure.cli.core._config import \
+    (GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH, set_global_config_value, get_config_parser)
+from azure.cli.core.util import CLIError
+from azure.cli.core.profiles import API_PROFILES
 
 CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
 
@@ -47,7 +50,7 @@ class CloudSuffixNotSetException(CLIError):
 
 class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many-instance-attributes
 
-    def __init__(self,  # pylint: disable=too-many-arguments
+    def __init__(self,
                  management=None,
                  resource_manager=None,
                  sql_management=None,
@@ -66,6 +69,16 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
         self.active_directory_resource_id = active_directory_resource_id
         self.active_directory_graph_resource_id = active_directory_graph_resource_id
 
+    def has_endpoint_set(self, endpoint_name):
+        try:
+            # Can't simply use hasattr here as we override __getattribute__ below.
+            # Python 3 hasattr() only returns False if an AttributeError is raised but we raise
+            # CloudEndpointNotSetException. This exception is not a subclass of AttributeError.
+            getattr(self, endpoint_name)
+            return True
+        except Exception:  # pylint: disable=broad-except
+            return False
+
     def __getattribute__(self, name):
         val = object.__getattribute__(self, name)
         if val is None:
@@ -76,7 +89,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
 
 class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
 
-    def __init__(self,  # pylint: disable=too-many-arguments
+    def __init__(self,
                  storage_endpoint=None,
                  keyvault_dns=None,
                  sql_server_hostname=None,
@@ -100,16 +113,27 @@ class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
 class Cloud(object):  # pylint: disable=too-few-public-methods
     """ Represents an Azure Cloud instance """
 
-    # pylint: disable=too-many-arguments
     def __init__(self,
                  name,
                  endpoints=None,
                  suffixes=None,
+                 profile=None,
                  is_active=False):
         self.name = name
         self.endpoints = endpoints or CloudEndpoints()
         self.suffixes = suffixes or CloudSuffixes()
+        self.profile = profile
         self.is_active = is_active
+
+    def __str__(self):
+        o = {
+            'profile': self.profile,
+            'name': self.name,
+            'is_active': self.is_active,
+            'endpoints': vars(self.endpoints),
+            'suffixes': vars(self.suffixes),
+        }
+        return pformat(o)
 
 
 AZURE_PUBLIC_CLOUD = Cloud(
@@ -187,7 +211,7 @@ def _set_active_cloud(cloud_name):
 
 
 def get_active_cloud_name():
-    global_config = configparser.SafeConfigParser()
+    global_config = get_config_parser()
     global_config.read(GLOBAL_CONFIG_PATH)
     try:
         return global_config.get('cloud', 'name')
@@ -205,29 +229,40 @@ def get_custom_clouds():
     return [c for c in get_clouds() if c.name not in known_cloud_names]
 
 
-def _init_known_clouds():
-    config = configparser.SafeConfigParser()
+def init_known_clouds(force=False):
+    config = get_config_parser()
     config.read(CLOUD_CONFIG_FILE)
     stored_cloud_names = config.sections()
     for c in KNOWN_CLOUDS:
-        if c.name not in stored_cloud_names:
-            _save_cloud(c)
+        if force or c.name not in stored_cloud_names:
+            _save_cloud(c, overwrite=force)
 
 
 def get_clouds():
     # ensure the known clouds are always in cloud config
-    _init_known_clouds()
+    init_known_clouds()
     clouds = []
     # load the config again as it may have changed
-    config = configparser.SafeConfigParser()
+    config = get_config_parser()
     config.read(CLOUD_CONFIG_FILE)
     for section in config.sections():
         c = Cloud(section)
         for option in config.options(section):
+            if option == 'profile':
+                c.profile = config.get(section, option)
             if option.startswith('endpoint_'):
                 setattr(c.endpoints, option.replace('endpoint_', ''), config.get(section, option))
             elif option.startswith('suffix_'):
                 setattr(c.suffixes, option.replace('suffix_', ''), config.get(section, option))
+        if c.profile is None:
+            # If profile isn't set, use latest
+            setattr(c, 'profile', 'latest')
+        if c.profile not in API_PROFILES:
+            raise CLIError('Profile {} does not exist or is not supported.'.format(c.profile))
+        if not c.endpoints.has_endpoint_set('management') and \
+                c.endpoints.has_endpoint_set('resource_manager'):
+            # If management endpoint not set, use resource manager endpoint
+            c.endpoints.management = c.endpoints.resource_manager
         clouds.append(c)
     active_cloud_name = get_active_cloud_name()
     for c in clouds:
@@ -249,7 +284,7 @@ def get_active_cloud():
 
 
 def get_cloud_subscription(cloud_name):
-    config = configparser.SafeConfigParser()
+    config = get_config_parser()
     config.read(CLOUD_CONFIG_FILE)
     try:
         return config.get(cloud_name, 'subscription')
@@ -260,7 +295,7 @@ def get_cloud_subscription(cloud_name):
 def set_cloud_subscription(cloud_name, subscription):
     if not _get_cloud(cloud_name):
         raise CloudNotRegisteredException(cloud_name)
-    config = configparser.SafeConfigParser()
+    config = get_config_parser()
     config.read(CLOUD_CONFIG_FILE)
     if subscription:
         config.set(cloud_name, 'subscription', subscription)
@@ -306,13 +341,15 @@ def switch_active_cloud(cloud_name):
 
 
 def _save_cloud(cloud, overwrite=False):
-    config = configparser.SafeConfigParser()
+    config = get_config_parser()
     config.read(CLOUD_CONFIG_FILE)
     try:
         config.add_section(cloud.name)
     except configparser.DuplicateSectionError:
         if not overwrite:
             raise CloudAlreadyRegisteredException(cloud.name)
+    if cloud.profile:
+        config.set(cloud.name, 'profile', cloud.profile)
     for k, v in cloud.endpoints.__dict__.items():
         if v is not None:
             config.set(cloud.name, 'endpoint_{}'.format(k), v)
@@ -347,7 +384,7 @@ def remove_cloud(cloud_name):
     if is_known_cloud:
         raise CannotUnregisterCloudException("The cloud '{}' cannot be unregistered "
                                              "as it's not a custom cloud.".format(cloud_name))
-    config = configparser.SafeConfigParser()
+    config = get_config_parser()
     config.read(CLOUD_CONFIG_FILE)
     config.remove_section(cloud_name)
     with open(CLOUD_CONFIG_FILE, 'w') as configfile:

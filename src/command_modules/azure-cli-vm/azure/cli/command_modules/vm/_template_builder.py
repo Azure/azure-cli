@@ -3,14 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=too-many-arguments
 
 from collections import OrderedDict
 import json
 
 from enum import Enum
 
-from azure.cli.core._util import b64encode
+from azure.cli.core.util import b64encode
+from azure.cli.core.profiles import get_api_version, supported_api_version, ResourceType
 
 
 class ArmTemplateBuilder(object):
@@ -77,7 +77,7 @@ class StorageProfile(Enum):
 
 
 def build_deployment_resource(name, template, dependencies=None):
-    from azure.cli.core._util import random_string
+    from azure.cli.core.util import random_string
     dependencies = dependencies or []
     deployment = {
         'name': name,
@@ -94,7 +94,7 @@ def build_deployment_resource(name, template, dependencies=None):
 
 def build_output_deployment_resource(key, property_name, property_provider, property_type,
                                      parent_name=None, output_type='object', path=None):
-    from azure.cli.core._util import random_string
+    from azure.cli.core.util import random_string
     output_tb = ArmTemplateBuilder()
     output_tb.add_output(key, property_name, property_provider, property_type,
                          output_type=output_type, path=path)
@@ -253,7 +253,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         name, location, tags, size, storage_profile, nics, admin_username,
         availability_set_id=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
         image_reference=None, os_disk_name=None, custom_image_os_type=None,
-        storage_caching=None, storage_sku=None,
+        os_caching=None, data_caching=None, storage_sku=None,
         os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
         attach_os_disk=None, data_disk_sizes_gb=None, image_data_disks=None,
         custom_data=None, secrets=None):
@@ -296,7 +296,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                 'osDisk': {
                     'createOption': 'fromImage',
                     'name': os_disk_name,
-                    'caching': storage_caching,
+                    'caching': os_caching,
                     'osType': custom_image_os_type,
                     'image': {'uri': image_reference},
                     'vhd': {'uri': os_vhd_uri}
@@ -306,7 +306,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                 'osDisk': {
                     'createOption': 'fromImage',
                     'name': os_disk_name,
-                    'caching': storage_caching,
+                    'caching': os_caching,
                     'vhd': {'uri': os_vhd_uri}
                 },
                 'imageReference': {
@@ -328,7 +328,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                 'osDisk': {
                     'createOption': 'fromImage',
                     'name': os_disk_name,
-                    'caching': storage_caching,
+                    'caching': os_caching,
                     'managedDisk': {'storageAccountType': storage_sku}
                 },
                 'imageReference': {
@@ -342,7 +342,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                 'osDisk': {
                     'createOption': 'fromImage',
                     'name': os_disk_name,
-                    'caching': storage_caching,
+                    'caching': os_caching,
                     'managedDisk': {'storageAccountType': storage_sku}
                 },
                 "imageReference": {
@@ -361,7 +361,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         }
         profile = storage_profiles[storage_profile.name]
         return _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
-                                 storage_caching, storage_sku)
+                                 data_caching, storage_sku)
 
     vm_properties = {
         'hardwareProfile': {'vmSize': size},
@@ -376,8 +376,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals
     if not attach_os_disk:
         vm_properties['osProfile'] = _build_os_profile()
 
+    vm_api_version = get_api_version(ResourceType.MGMT_COMPUTE)
     vm = {
-        'apiVersion': '2016-04-30-preview',
+        'apiVersion': vm_api_version,
         'type': 'Microsoft.Compute/virtualMachines',
         'name': name,
         'location': location,
@@ -389,13 +390,14 @@ def build_vm_resource(  # pylint: disable=too-many-locals
 
 
 def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
-                      storage_caching, storage_sku):
+                      data_caching, storage_sku):
     if data_disk_sizes_gb is not None:
         profile['dataDisks'] = []
         for image_data_disk in image_data_disks or []:
             profile['dataDisks'].append({
                 'lun': image_data_disk.lun,
                 'createOption': "fromImage",
+                'caching': data_caching
             })
         lun = max([d.lun for d in image_data_disks]) + 1 if image_data_disks else 0
         for size in data_disk_sizes_gb:
@@ -403,20 +405,17 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
                 'lun': lun,
                 'createOption': "empty",
                 'diskSizeGB': int(size),
-                'caching': storage_caching,
+                'caching': data_caching,
                 'managedDisk': {'storageAccountType': storage_sku}
             })
             lun = lun + 1
     return profile
 
 
-def build_load_balancer_resource(name, location, tags, backend_pool_name, nat_pool_name,
-                                 backend_port, frontend_ip_name, public_ip_id, subnet_id,
-                                 private_ip_address='', private_ip_allocation='dynamic'):
-    lb_id = "resourceId('Microsoft.Network/loadBalancers', '{}')".format(name)
-
+def _build_frontend_ip_config(name, public_ip_id=None, private_ip_address=None,
+                              private_ip_allocation=None, subnet_id=None):
     frontend_ip_config = {
-        'name': frontend_ip_name
+        'name': name
     }
 
     if public_ip_id:
@@ -437,6 +436,109 @@ def build_load_balancer_resource(name, location, tags, backend_pool_name, nat_po
                 }
             }
         })
+    return frontend_ip_config
+
+
+def build_application_gateway_resource(name, location, tags, backend_pool_name, backend_port,
+                                       frontend_ip_name, public_ip_id,
+                                       subnet_id, gateway_subnet_id,
+                                       private_ip_address, private_ip_allocation):
+    frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id,
+                                                   private_ip_address, private_ip_allocation,
+                                                   subnet_id)
+
+    def _ag_subresource_id(_type, name):
+        return "[concat(variables('appGwID'), '/{}/{}')]".format(_type, name)
+
+    frontend_ip_config_id = _ag_subresource_id('frontendIPConfigurations', frontend_ip_name)
+    frontend_port_id = _ag_subresource_id('frontendPorts', 'appGwFrontendPort')
+    http_listener_id = _ag_subresource_id('httpListeners', 'appGwHttpListener')
+    backend_address_pool_id = _ag_subresource_id('backendAddressPools', backend_pool_name)
+    backend_http_settings_id = _ag_subresource_id(
+        'backendHttpSettingsCollection', 'appGwBackendHttpSettings')
+
+    ag_properties = {
+        'backendAddressPools': [
+            {
+                'name': backend_pool_name
+            }
+        ],
+        'backendHttpSettingsCollection': [
+            {
+                'name': 'appGwBackendHttpSettings',
+                'properties': {
+                    'Port': backend_port,
+                    'Protocol': 'Http',
+                    'CookieBasedAffinity': 'Disabled'
+                }
+            }
+        ],
+        'frontendIPConfigurations': [frontend_ip_config],
+        'frontendPorts': [
+            {
+                'name': 'appGwFrontendPort',
+                'properties': {
+                    'Port': 80
+                }
+            }
+        ],
+        'gatewayIPConfigurations': [
+            {
+                'name': 'appGwIpConfig',
+                'properties': {
+                    'subnet': {'id': gateway_subnet_id}
+                }
+            }
+        ],
+        'httpListeners': [
+            {
+                'name': 'appGwHttpListener',
+                'properties': {
+                    'FrontendIPConfiguration': {'Id': frontend_ip_config_id},
+                    'FrontendPort': {'Id': frontend_port_id},
+                    'Protocol': 'Http',
+                    'SslCertificate': None
+                }
+            }
+        ],
+        'sku': {
+            'name': 'Standard_Large',
+            'tier': 'Standard',
+            'capacity': '10'
+        },
+        'requestRoutingRules': [
+            {
+                'Name': 'rule1',
+                'properties': {
+                    'RuleType': 'Basic',
+                    'httpListener': {'id': http_listener_id},
+                    'backendAddressPool': {'id': backend_address_pool_id},
+                    'backendHttpSettings': {'id': backend_http_settings_id}
+                }
+            }
+        ]
+    }
+
+    ag = {
+        'type': 'Microsoft.Network/applicationGateways',
+        'name': name,
+        'location': location,
+        'tags': tags,
+        'apiVersion': '2015-06-15',
+        'dependsOn': [],
+        'properties': ag_properties
+    }
+    return ag
+
+
+def build_load_balancer_resource(name, location, tags, backend_pool_name, nat_pool_name,
+                                 backend_port, frontend_ip_name, public_ip_id, subnet_id,
+                                 private_ip_address, private_ip_allocation):
+    lb_id = "resourceId('Microsoft.Network/loadBalancers', '{}')".format(name)
+
+    frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id,
+                                                   private_ip_address, private_ip_allocation,
+                                                   subnet_id)
 
     lb_properties = {
         'backendAddressPools': [
@@ -463,13 +565,13 @@ def build_load_balancer_resource(name, location, tags, backend_pool_name, nat_po
     }
 
     lb = {
-        "type": "Microsoft.Network/loadBalancers",
-        "name": name,
-        "location": location,
-        "tags": tags,
-        "apiVersion": "2015-06-15",
-        "dependsOn": [],
-        "properties": lb_properties
+        'type': 'Microsoft.Network/loadBalancers',
+        'name': name,
+        'location': location,
+        'tags': tags,
+        'apiVersion': '2015-06-15',
+        'dependsOn': [],
+        'properties': lb_properties
     }
     return lb
 
@@ -498,7 +600,8 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
                         vm_sku, instance_count, ip_config_name, nic_name, subnet_id,
                         admin_username, authentication_type,
                         storage_profile, os_disk_name,
-                        storage_caching, storage_sku, data_disk_sizes_gb, image_data_disks, os_type,
+                        os_caching, data_caching, storage_sku, data_disk_sizes_gb,
+                        image_data_disks, os_type,
                         image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
                         backend_address_pool_id=None, inbound_nat_pool_id=None,
@@ -511,8 +614,11 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
             'subnet': {'id': subnet_id}
         }
     }
+
     if backend_address_pool_id:
-        ip_configuration['properties']['loadBalancerBackendAddressPools'] = [
+        key = 'loadBalancerBackendAddressPools' if 'loadBalancers' in backend_address_pool_id \
+            else 'ApplicationGatewayBackendAddressPools'
+        ip_configuration['properties'][key] = [
             {'id': backend_address_pool_id}
         ]
 
@@ -526,7 +632,7 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
     if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
         storage_properties['osDisk'] = {
             'name': os_disk_name,
-            'caching': storage_caching,
+            'caching': os_caching,
             'createOption': 'FromImage',
         }
 
@@ -539,10 +645,10 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
             })
         else:
             storage_properties['osDisk']['vhdContainers'] = "[variables('vhdContainers')]"
-    elif storage_profile in [StorageProfile.ManagedPirImage, StorageProfile.ManagedPirImage]:
+    elif storage_profile in [StorageProfile.ManagedPirImage, StorageProfile.ManagedCustomImage]:
         storage_properties['osDisk'] = {
             'createOption': 'FromImage',
-            'caching': storage_caching,
+            'caching': os_caching,
             'managedDisk': {'storageAccountType': storage_sku}
         }
 
@@ -559,7 +665,7 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
         }
 
     storage_profile = _build_data_disks(storage_properties, data_disk_sizes_gb,
-                                        image_data_disks, storage_caching,
+                                        image_data_disks, data_caching,
                                         storage_sku)
 
     # Build OS Profile
@@ -593,7 +699,6 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
     # Build VMSS
     vmss_properties = {
         'overprovision': overprovision,
-        'singlePlacementGroup': single_placement_group,
         'upgradePolicy': {
             'mode': upgrade_policy_mode
         },
@@ -611,12 +716,17 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
             }
         }
     }
+
+    if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
+        vmss_properties['singlePlacementGroup'] = single_placement_group
+
+    vmss_api_version = get_api_version(ResourceType.MGMT_COMPUTE)
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': '2016-04-30-preview',
+        'apiVersion': vmss_api_version,
         'dependsOn': [],
         'sku': {
             'name': vm_sku,
@@ -630,18 +740,23 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
 
 def build_av_set_resource(name, location, tags,
                           platform_update_domain_count, platform_fault_domain_count, unmanaged):
+    av_set_api_version = get_api_version(ResourceType.MGMT_COMPUTE)
     av_set = {
         'type': 'Microsoft.Compute/availabilitySets',
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': '2016-04-30-preview',
+        'apiVersion': av_set_api_version,
         'sku': {
             'name': 'Classic' if unmanaged else 'Aligned'
         },
         "properties": {
-            'platformUpdateDomainCount': platform_update_domain_count,
             'platformFaultDomainCount': platform_fault_domain_count,
         }
     }
+
+    # server defaults the UD to 5 unless set otherwise
+    if platform_update_domain_count is not None:
+        av_set['properties']['platformUpdateDomainCount'] = platform_update_domain_count
+
     return av_set

@@ -3,6 +3,28 @@
 Release History
 ===============
 
+2.0.5 (2017-05-05)
+++++++++++++++++++
+
+* Minor fixes.
+
+2.0.4 (2017-04-28)
+++++++++++++++++++
+
+* Default location to resource group location for `storage account create`.
+
+2.0.3 (2017-04-17)
+++++++++++++++++++
+
+* Add support for incremental blob copy
+* Add support for large block blob upload
+* Change block size to 100MB when file to upload is larger than 200GB
+
+2.0.2 (2017-04-03)
+++++++++++++++++++
+
+* Update storage dependencies (#2654)
+
 2.0.1 (2017-03-02)
 ++++++++++++++++++
 * Fix issue with storage account custom domain setting and updating. (#2346)

@@ -6,25 +6,20 @@
 #pylint: disable=line-too-long
 
 def _network_client_factory(**_):
-    from azure.mgmt.network import NetworkManagementClient
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(NetworkManagementClient)
+    return get_mgmt_service_client(ResourceType.MGMT_NETWORK)
 
 
 def resource_client_factory(**_):
     from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(ResourceManagementClient)
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
 
 
 def cf_application_gateways(_):
     return _network_client_factory().application_gateways
-
-
-def cf_application_gateway_create(_):
-    from azure.cli.command_modules.network.mgmt_app_gateway.lib import AppGatewayCreationClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(AppGatewayCreationClient).app_gateway
 
 
 def cf_express_route_circuit_authorizations(_):
@@ -47,12 +42,6 @@ def cf_load_balancers(_):
     return _network_client_factory().load_balancers
 
 
-def cf_load_balancer_create(_):
-    from azure.cli.command_modules.network.mgmt_lb.lib import LbCreationClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(LbCreationClient).lb
-
-
 def cf_local_network_gateways(_):
     return _network_client_factory().local_network_gateways
 
@@ -63,6 +52,14 @@ def cf_network_interfaces(_):
 
 def cf_network_security_groups(_):
     return _network_client_factory().network_security_groups
+
+
+def cf_network_watcher(_):
+    return _network_client_factory().network_watchers
+
+
+def cf_packet_capture(_):
+    return _network_client_factory().packet_captures
 
 
 def cf_public_ip_addresses(_):
@@ -117,6 +114,12 @@ def cf_traffic_manager_mgmt_endpoints(_):
     return get_mgmt_service_client(TrafficManagerManagementClient).endpoints
 
 
+def cf_tm_geographic(_):
+    from azure.mgmt.trafficmanager import TrafficManagerManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(TrafficManagerManagementClient).geographic_hierarchies
+
+
 def cf_dns_mgmt_zones(_):
     from azure.mgmt.dns import DnsManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -127,3 +130,12 @@ def cf_dns_mgmt_record_sets(_):
     from azure.mgmt.dns import DnsManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(DnsManagementClient).record_sets
+
+def cf_route_filters(_):
+    return _network_client_factory().route_filters
+
+def cf_route_filter_rules(_):
+    return _network_client_factory().route_filter_rules
+
+def cf_service_community(_):
+    return _network_client_factory().bgp_service_communities

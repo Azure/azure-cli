@@ -5,12 +5,12 @@
 
 from __future__ import print_function
 import os
-from six.moves import configparser  # pylint: disable=redefined-builtin
-from adal.adal_error import AdalError
+from six.moves import configparser
 
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._config import (GLOBAL_CONFIG_PATH, ENV_VAR_PREFIX, set_global_config)
-from azure.cli.core._util import CLIError
+from azure.cli.core._config import (GLOBAL_CONFIG_PATH, ENV_VAR_PREFIX, set_global_config,
+                                    set_global_config_value, DEFAULTS_SECTION, get_config_parser)
+from azure.cli.core.util import CLIError
 from azure.cli.core.prompting import (prompt,
                                       prompt_y_n,
                                       prompt_choice_list,
@@ -34,6 +34,7 @@ logger = azlogging.get_az_logger(__name__)
 
 answers = {}
 
+
 def _print_cur_configuration(file_config):
     print(MSG_HEADING_CURRENT_CONFIG_INFO)
     for section in file_config.sections():
@@ -46,9 +47,11 @@ def _print_cur_configuration(file_config):
         print(MSG_HEADING_ENV_VARS)
         print('\n'.join(['{} = {}'.format(ev, os.environ[ev]) for ev in env_vars]))
 
+
 def _config_env_public_azure(_):
+    from adal.adal_error import AdalError
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core._profile import Profile
     # Determine if user logged in
     try:
@@ -66,17 +69,17 @@ def _config_env_public_azure(_):
             password = None
             service_principal = None
             tenant = None
-            if method_index == 0: # device auth
+            if method_index == 0:  # device auth
                 interactive = True
-            elif method_index == 1: # username and password
+            elif method_index == 1:  # username and password
                 username = prompt('Username: ')
                 password = prompt_pass(msg='Password: ')
-            elif method_index == 2: # service principal with secret
+            elif method_index == 2:  # service principal with secret
                 service_principal = True
                 username = prompt('Service principal: ')
                 tenant = prompt('Tenant: ')
                 password = prompt_pass(msg='Client secret: ')
-            elif method_index == 3: # skip
+            elif method_index == 3:  # skip
                 return
             try:
                 profile.find_subscriptions_on_login(
@@ -91,13 +94,14 @@ def _config_env_public_azure(_):
                 logger.error('Login error!')
                 logger.error(err)
 
+
 def _handle_global_configuration():
     # print location of global configuration
     print(MSG_GLOBAL_SETTINGS_LOCATION.format(GLOBAL_CONFIG_PATH))
     # set up the config parsers
-    file_config = configparser.SafeConfigParser()
+    file_config = get_config_parser()
     config_exists = file_config.read([GLOBAL_CONFIG_PATH])
-    global_config = configparser.SafeConfigParser()
+    global_config = get_config_parser()
     global_config.read(GLOBAL_CONFIG_PATH)
     should_modify_global_config = False
     if config_exists:
@@ -108,8 +112,9 @@ def _handle_global_configuration():
     if not config_exists or should_modify_global_config:
         # no config exists yet so configure global config or user wants to modify global config
         output_index = prompt_choice_list(MSG_PROMPT_GLOBAL_OUTPUT, OUTPUT_LIST,
-                                          default=get_default_from_config(global_config, \
-                                          'core', 'output', OUTPUT_LIST))
+                                          default=get_default_from_config(global_config,
+                                                                          'core', 'output',
+                                                                          OUTPUT_LIST))
         answers['output_type_prompt'] = output_index
         answers['output_type_options'] = str(OUTPUT_LIST)
         enable_file_logging = prompt_y_n(MSG_PROMPT_FILE_LOGGING, default='n')
@@ -129,7 +134,17 @@ def _handle_global_configuration():
         global_config.set('logging', 'enable_log_file', 'yes' if enable_file_logging else 'no')
         set_global_config(global_config)
 
-def handle_configure():
+
+def handle_configure(defaults=None):
+    if defaults:
+        for default in defaults:
+            parts = default.split('=', 1)
+            if len(parts) == 1:
+                raise CLIError('usage error: --defaults STRING=STRING STRING=STRING ...')
+            set_global_config_value(DEFAULTS_SECTION, parts[0], _normalize_config_value(parts[1]))
+        return
+
+    # if nothing supplied, we go interactively
     try:
         print(MSG_INTRO)
         _handle_global_configuration()
@@ -139,3 +154,9 @@ def handle_configure():
         raise CLIError('This command is interactive and no tty available.')
     except (EOFError, KeyboardInterrupt):
         print()
+
+
+def _normalize_config_value(value):
+    if value:
+        value = '' if value in ["''", '""'] else value
+    return value

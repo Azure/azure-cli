@@ -464,12 +464,55 @@ helps['network application-gateway waf-config'] = """
 helps['network application-gateway waf-config set'] = """
     type: command
     short-summary: Update the firewall configuration of a web application.
+    parameters:
+        - name: --rule-set-type
+          short-summary: Rule set type.
+          populator-commands:
+          - az application-gateway waf-config list-rule-sets
+        - name: --rule-set-version
+          short-summary: Rule set version.
+          populator-commands:
+          - az application-gateway waf-config list-rule-sets
+        - name: --disabled-rule-groups
+          short-summary: Space separated list of rule groups to disable. This disables the entire group.
+            To disable specifc rules, use '--disabled-rule-ids'.
+          populator-commands:
+          - az application-gateway waf-config list-rule-sets
+        - name: --disabled-rules
+          short-summary: Space separated list of rule IDs to disable.
+          populator-commands:
+          - az application-gateway waf-config list-rule-sets
 """
 
 helps['network application-gateway waf-config show'] = """
     type: command
     short-summary: Show the firewall configuration of a web application.
 """
+
+helps['network application-gateway waf-config list-rule-sets'] = """
+    type: command
+    short-summary: (PREVIEW) Lookup information on available WAF rule sets, rule groups, and rule IDs.
+    parameters:
+        - name: --group
+          short-summary:
+            List rules for the specified rule group. Use '*' to list rules for all groups.
+            Omit to suppress listing individual rules.
+        - name: --type
+          short-summary: Rule set type to list. Omit to list all types.
+        - name: --version
+          short-summary: Rule set version to list. Omit to list all versions.
+    examples:
+        - name: List available rule groups in OWASP type rule sets.
+          text: >
+            az network application-gateway waf-config list-rule-sets --type OWASP
+        - name: List available rules in the OWASP 3.0 rule set.
+          text: >
+            az network application-gateway waf-config list-rule-sets --group * --type OWASP --version 3.0
+        - name: List available rules in the 'crs_35_bad_robots' rule group.
+          text: >
+            az network application-gateway waf-config list-rule-sets --group crs_35_bad_robots
+"""
+
 # endregion
 
 # region DNS record-set
@@ -1099,7 +1142,7 @@ helps['network nic list'] = """
     examples:
         - name: List all NICs by internal DNS suffix.
           text: >
-            az network nic list --query "[?dnsSettings.internalDomainNameSuffix=='<dns_suffix>']"
+            az network nic list --query "[?dnsSettings.internalDomainNameSuffix==`<dns_suffix>`]"
 """
 
 helps['network nic show'] = """
@@ -1458,6 +1501,76 @@ helps['network route-table route update'] = """
 
 #endregion
 
+# region Route Filter
+
+helps['network route-filter'] = """
+    type: group
+    short-summary: (PREVIEW) Manage route filters.
+"""
+
+helps['network route-filter create'] = """
+    type: command
+    short-summary: Create a route filter.
+"""
+
+helps['network route-filter delete'] = """
+    type: command
+    short-summary: Delete a route filter.
+"""
+
+helps['network route-filter list'] = """
+    type: command
+    short-summary: List route filters.
+"""
+
+helps['network route-filter show'] = """
+    type: command
+    short-summary: Show details of a route filter.
+"""
+
+helps['network route-filter update'] = """
+    type: command
+    short-summary: Update a route filter.
+"""
+
+helps['network route-filter rule'] = """
+    type: group
+    short-summary: (PREVIEW) Manage rules in a route filter.
+"""
+
+helps['network route-filter rule create'] = """
+    type: command
+    short-summary: Create a rule in a route filter.
+    parameters:
+        - name: --communities
+          short-summary: |
+                Space separated list of BGP community values to filter on. (e.g.: 12076:5010)
+          populator-commands:
+            - az network route-filter rule list-service-communities
+"""
+
+helps['network route-filter rule delete'] = """
+    type: command
+    short-summary: Delete a rule from a route filter.
+"""
+
+helps['network route-filter rule list'] = """
+    type: command
+    short-summary: List rules in a route filter.
+"""
+
+helps['network route-filter rule show'] = """
+    type: command
+    short-summary: Show details of a rule in a route filter.
+"""
+
+helps['network route-filter rule update'] = """
+    type: command
+    short-summary: Update a rule in a route filter.
+"""
+
+#endregion
+
 # region Traffic Manager
 
 helps['network traffic-manager'] = """
@@ -1508,6 +1621,11 @@ helps['network traffic-manager profile update'] = """
 helps['network traffic-manager endpoint create'] = """
     type: command
     short-summary: Create an endpoint.
+    parameters:
+        - name: --geo-mapping
+          short-summary: Space separated list of country/region codes mapped to this endpoint when using the 'Geographic' routing method.
+          populator-commands:
+          - az network traffic-manager endpoint show-geographic-hierarchy
 """
 
 helps['network traffic-manager endpoint delete'] = """
@@ -1720,6 +1838,30 @@ helps['network vpn-connection shared-key update'] = """
 
 #endregion
 
+# region VPN Connection IPSec Policy
+
+helps['network vpn-connection ipsec-policy'] = """
+    type: group
+    short-summary: Manage VPN connection IPSec policies.
+"""
+
+helps['network vpn-connection ipsec-policy add'] = """
+    type: command
+    short-summary: Add a VPN connection IPSec policy.
+"""
+
+helps['network vpn-connection ipsec-policy list'] = """
+    type: command
+    short-summary: List IPSec policies associated with a VPN connection.
+"""
+
+helps['network vpn-connection ipsec-policy clear'] = """
+    type: command
+    short-summary: Delete all IPSec policies on a VPN connection.
+"""
+
+#endregion
+
 # region VNet Gateway
 
 helps['network vnet-gateway'] = """
@@ -1764,6 +1906,12 @@ helps['network vnet-gateway update'] = """
     type: command
     short-summary: Update a virtual network gateway.
 """
+
+helps['network vnet-gateway wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the virtual network gateway is met.
+"""
+
 #endregion
 
 # region VNet Gateway Revoke Cert
@@ -1788,7 +1936,7 @@ helps['network vnet-gateway revoked-cert delete'] = """
 # region VNet Gateway Root Cert
 helps['network vnet-gateway root-cert'] = """
     type: group
-    short-summary: Manage root certificates for a virtuak network gateway.
+    short-summary: Manage root certificates for a virtual network gateway.
 """
 
 helps['network vnet-gateway root-cert create'] = """
@@ -1802,3 +1950,169 @@ helps['network vnet-gateway root-cert delete'] = """
 """
 
 #endregion
+
+# region Network Watcher
+helps['network watcher'] = """
+    type: group
+    short-summary: (PREVIEW) Commands to manage Network Watcher.
+"""
+
+helps['network watcher list'] = """
+    type: command
+    short-summary: List Network Watchers.
+"""
+
+helps['network watcher configure'] = """
+    type: command
+    short-summary: Configure the Network Watcher service for different regions.
+    parameters:
+        - name: --enabled
+          short-summary: Enabled status of Network Watch in the specified regions.
+        - name: --locations -l
+          short-summary: Space separated list of locations to configure.
+        - name: --resource-group -g
+          short-summary: Name of resource group. Required when enabling new regions.
+          long-summary: When a previously disabled region is enabled to use Network Watcher, a
+            Network Watcher resource will be created in this resource group.
+"""
+
+helps['network watcher troubleshooting'] = """
+    type: group
+    short-summary: (PREVIEW) Commands to manage Network Watcher troubleshooting sessions.
+"""
+
+helps['network watcher troubleshooting start'] = """
+    type: command
+    short-summary: Troubleshoot issues with VPN connections or gateway connectivity.
+    parameters:
+        - name: --resource-type -t
+          short-summary: The type of target resource to troubleshoot, if resource ID is not specified.
+        - name: --storage-account
+          short-summary: Name or ID of the storage account in which to store the troubleshooting results.
+        - name: --storage-path
+          short-summary: Fully qualified URI to the storage blob container at which to store the troubleshooting results.
+"""
+
+helps['network watcher troubleshooting show'] = """
+    type: command
+    short-summary: Show results of the last troubleshooting operation.
+"""
+
+helps['network watcher test-ip-flow'] = """
+    type: command
+    short-summary: Test IP flow to/from a VM given the currently configured NSG rules.
+    long-summary: Requires that Network Watcher is enabled for the region in which the VM is located.
+    parameters:
+        - name: --local
+          short-summary: The private IPv4 address for the VM's NIC and the port of the packet in 
+            X.X.X.X:PORT format. '*' can be used for port when direction is outbound.
+        - name: --remote
+          short-summary: The IPv4 address and port for the remote side of the packet 
+            X.X.X.X:PORT format. '*' can be used for port when direction is inbound.
+        - name: --direction
+          short-summary: Direction of the packet relative to the VM.
+        - name: --protocol
+          short-summary: Protocol to test.
+"""
+
+helps['network watcher test-connectivity'] = """
+    type: command
+    short-summary: Test whether a direct TCP connection can be established between a Virtual
+        Machine and a given endpoint, such as another VM or an arbitrary remote server.
+    parameters:
+        - name: --source-resource
+          short-summary: Name or ID of the resource from which to originate traffic.
+          long-summary: Currently only Virtual Machines are supported.
+        - name: --source-port
+          short-summary: Port number from which to originate traffic.
+        - name: --dest-resource
+          short-summary: Name or ID of the resource to receive traffic.
+          long-summary: Currently only Virtual Machines are supported.
+        - name: --dest-port
+          short-summary: Port number on which to receive traffic.
+        - name: --dest-address
+          short-summary: The IP address or URI at which to receive traffic.
+"""
+
+helps['network watcher show-next-hop'] = """
+    type: command
+    short-summary: Show information on the 'next hop' for a VM.
+    long-summary: Requires that Network Watcher is enabled for the region in which the VM is located.
+"""
+
+helps['network watcher show-security-group-view'] = """
+    type: command
+    short-summary: Show detailed security information on a VM given the currently configured NSG.
+"""
+
+helps['network watcher show-topology'] = """
+    type: command
+    short-summary: Show the network topology for a resource group.
+    parameters:
+        - name: --resource-group -g
+          short-summary: The name of the target resource group to perform topology on.
+        - name: --location -l
+          short-summary: Location. Defaults to the location of the target resource group.
+          long-summary: Topology information is only shown for resources within the target
+            resource group that are within the specified region.
+"""
+
+helps['network watcher packet-capture'] = """
+    type: group
+    short-summary: (PREVIEW) Commands to manage packet capture sessions on VMs.
+    long-summary: |
+        Requires that Network Watcher is enabled for the region in which the VM is located
+        and that the AzureNetworkWatcherExtension is enabled on the VM.
+"""
+
+helps['network watcher packet-capture create'] = """
+    type: command
+    short-summary: Create and start a packet capture session.
+    parameters:
+        - name: --capture-limit
+          short-summary: The maximum size in bytes of the capture output.
+        - name: --capture-size
+          short-summary: Number of bytes captured per packet. Excess bytes are truncated.
+        - name: --time-limit
+          short-summary: Maximum duration of the capture session in seconds.
+        - name: --storage-account
+          short-summary: Name or ID of a storage account into which to save the packet capture.
+        - name: --storage-path
+          short-summary: Fully qualified URI to an existing storage container in which to store the capture file.
+          long-summary: If not specified, the container 'network-watcher-logs' will be
+            created if it does not exist and the capture file will be stored there.
+        - name: --file-path
+          short-summary:
+                Local path on the targeted VM at which to save the packet capture. For Linux VMs, the
+                path must start with /var/captures.
+        - name: --vm
+          short-summary: Name or ID of the VM to target.
+        - name: --filters
+          short-summary: JSON encoded list of packet filters. Use `@<file path>` to load from file.
+"""
+
+helps['network watcher flow-log'] = """
+    type: group
+    short-summary: (PREVIEW) Commands to manage NSG flow logging.
+"""
+
+helps['network watcher flow-log configure'] = """
+    type: command
+    short-summary: Configure flow logging on a Network Security Group (NSG).
+    parameters:
+        - name: --nsg
+          short-summary: Name or ID of the Network Security Group to target.
+        - name: --enabled
+          short-summary: Enable logging.
+        - name: --retention
+          short-summary: Number of days to retain logs.
+        - name: --storage-account
+          short-summary: Name or ID of the storage account in which to save the flow logs.
+"""
+
+helps['network watcher flow-log show'] = """
+    type: command
+    short-summary: Show flow log configuration for an NSG.
+"""
+
+# endregion

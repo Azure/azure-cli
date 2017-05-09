@@ -30,7 +30,7 @@ If you specify a default value in your function signature, this will flag the ar
 Before your command can be used in the CLI, it must be registered. Insert the following statement in your file:
 
 ```Python
-from azure.cli.commands import cli_command
+from azure.cli.core.commands import cli_command
 ```
 
 The signature of this method is 
@@ -53,7 +53,7 @@ See the following for guidance on writing a help entry: https://github.com/Azure
 
 **Customizing Arguments**
 
-There are a number of customizations that you can make to the arguments of a command that alter their behavior within the CLI. To modify/enhance your command arguments, use the `register_cli_argument` method from the `azure.cli.commands` package. For the standard modules, these entries are contained within a file called `_params.py`. 
+There are a number of customizations that you can make to the arguments of a command that alter their behavior within the CLI. To modify/enhance your command arguments, use the `register_cli_argument` method from the `azure.cli.core.commands` package. For the standard modules, these entries are contained within a file called `_params.py`. 
 
 The signature of this method is
 ```Python
@@ -75,7 +75,7 @@ Like CSS rules, modifications are applied in order from generic to specific.
 register_cli_argument('mypackage', 'my_param', ...)  # applies to both command1 and command2
 register_cli_argument('mypackage command2', 'my_param', ...)  # command2 inherits and build upon the previous changes
 ```
-- `arg_type` - An instance of the `azure.cli.commands.CliArgumentType` class. This essentially serves as a named, reusable packaging of the `kwargs` that modify your command's argument. It is useful when you want to reuse an argument definition, but is generally not required. It is most commonly used for name type parameters.
+- `arg_type` - An instance of the `azure.cli.core.commands.CliArgumentType` class. This essentially serves as a named, reusable packaging of the `kwargs` that modify your command's argument. It is useful when you want to reuse an argument definition, but is generally not required. It is most commonly used for name type parameters.
 - `kwargs` - Most likely, you will simply specify keyword arguments in `register_cli_argument` that will accomplish what you need.  Any `kwargs` specified will override or extended the definition in `arg_type`, if provided.
 
 The follow keyword arguments are supported:

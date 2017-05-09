@@ -5,7 +5,7 @@
 import uuid
 from azure.cli.core.commands.arm import parse_resource_id
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from .custom import set_vm, _compute_client_factory
 logger = azlogging.get_az_logger(__name__)
 
@@ -69,7 +69,9 @@ def enable(resource_group_name, vm_name,  # pylint: disable=too-many-arguments,t
     if is_linux:
         image_reference = getattr(vm.storage_profile, 'image_reference', None)
         if image_reference:
-            _check_encrypt_is_supported(image_reference, volume_type)
+            result, message = _check_encrypt_is_supported(image_reference, volume_type)
+            if not result:
+                logger.warning(message)
 
     # sequence_version should be unique
     sequence_version = uuid.uuid4()
@@ -169,7 +171,7 @@ def disable(resource_group_name, vm_name, volume_type=None, force=False):
                     status = show(resource_group_name, vm_name)
                     if status['osDisk'] == _STATUS_ENCRYPTED:
                         raise CLIError("VM's OS disk is encrypted. Disabling encryption on data "
-                                       "disk can still cause VM unbootable. Use '--force' "
+                                       "disk can render the VM unbootable. Use '--force' "
                                        "to continue")
                 else:
                     raise CLIError("Only data disk is supported to disable on Linux VM")
@@ -254,7 +256,7 @@ def show(resource_group_name, vm_name):
     if is_linux:
         try:
             message_object = json.loads(substatus_message)
-        except json.decoder.JSONDecodeError:
+        except Exception:  # pylint: disable=broad-except
             message_object = None  # might be from outdated extension
 
         if message_object and ('os' in message_object):
@@ -310,7 +312,7 @@ def _check_encrypt_is_supported(image_reference, volume_type):
 
     # custom image?
     if not offer or not publisher or not sku:
-        return True
+        return (True, None)
 
     supported = [
         {
@@ -347,11 +349,12 @@ def _check_encrypt_is_supported(image_reference, volume_type):
         },)
 
     for image in supported:
-        if (image['publisher'] == publisher and
-                image['sku'] == sku and
-                image['offer'].lower().startswith(offer.lower())):
-            return True
+        if (image['publisher'].lower() == publisher.lower() and
+                sku.lower().startswith(image['sku'].lower()) and
+                offer.lower().startswith(image['offer'].lower())):
+            return (True, None)
 
     sku_list = ['{} {}'.format(a['offer'], a['sku']) for a in supported]
-    message = "Encryption is not suppored for current VM. Supported are '{}'".format(sku_list)
-    raise CLIError(message)
+    # pylint: disable=line-too-long
+    message = "Encryption might fail as current VM uses a distro not in the known list, which are '{}'".format(sku_list)
+    return (False, message)

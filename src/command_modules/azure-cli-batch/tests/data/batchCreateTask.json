@@ -1,0 +1,32 @@
+{
+  "id": "xplatTask",
+  "displayName": "displayName",
+  "commandLine": "cmd /c dir /s",
+  "constraints": {
+    "maxWallClockTime": "P1D",
+    "maxTaskRetryCount": 2
+  },
+  "environmentSettings": [
+    {
+      "name": "env1",
+      "value": "value1"
+    },
+    {
+      "name": "env2",
+      "value": "value2"
+    }
+  ],
+  "multiInstanceSettings": {
+    "numberOfInstances": 3,
+    "coordinationCommandLine": "cmd /c echo hello"
+  },
+  "userIdentity": {
+    "autoUser": {
+      "scope": "pool",
+      "elevationLevel": "nonAdmin"
+    }
+  },
+  "authenticationTokenSettings": {
+    "access": ["job"]
+  }
+}

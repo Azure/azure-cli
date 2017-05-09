@@ -8,7 +8,7 @@ import argparse
 import platform
 
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core.commands import register_cli_argument
 from azure.cli.core.commands.arm import (
     is_valid_resource_id,
@@ -18,7 +18,7 @@ from azure.cli.core.commands.arm import (
     make_camel_case)
 
 
-def register_folded_cli_argument(scope, base_name, resource_type, parent_name=None,  # pylint: disable=too-many-arguments
+def register_folded_cli_argument(scope, base_name, resource_type, parent_name=None,
                                  parent_option_flag=None, parent_type=None, type_field=None,
                                  existing_id_flag_value='existingId', new_flag_value='new',
                                  none_flag_value='none', default_value_flag='new',
@@ -64,7 +64,7 @@ def register_folded_cli_argument(scope, base_name, resource_type, parent_name=No
     register_cli_argument(scope, type_field_name, help=argparse.SUPPRESS, default=None)
 
 
-def _name_id_fold(base_name, resource_type, type_field,  # pylint: disable=too-many-arguments
+def _name_id_fold(base_name, resource_type, type_field,
                   existing_id_flag_value, new_flag_value, none_flag_value,
                   parent_name=None, parent_option_flag=None, parent_type=None, base_required=True):
     def handle_folding(namespace):
@@ -188,7 +188,7 @@ def _validate_name_or_id(
     return (resource_id_parts, value_supplied_was_id)
 
 
-def get_folded_parameter_validator(  # pylint: disable=too-many-arguments
+def get_folded_parameter_validator(
         property_name, property_type, property_option,
         parent_name=None, parent_type=None, parent_option=None,
         allow_none=False, allow_new=False, default_none=False):

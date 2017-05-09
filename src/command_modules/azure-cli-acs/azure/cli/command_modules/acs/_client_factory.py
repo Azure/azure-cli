@@ -31,6 +31,6 @@ def _graph_client_factory(**_):
 
 
 def _acs_client_factory(_):
-    from azure.mgmt.compute import ComputeManagementClient
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(ComputeManagementClient).container_services
+    return get_mgmt_service_client(ResourceType.MGMT_CONTAINER_SERVICE).container_services

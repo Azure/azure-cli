@@ -7,8 +7,7 @@
 from __future__ import print_function
 from os.path import exists
 from enum import Enum
-from azure.cli.core._util import CLIError
-from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.util import CLIError
 from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku, AccessRights
 from azure.mgmt.iothub.models.iot_hub_description import IotHubDescription
 from azure.mgmt.iothub.models.iot_hub_sku_info import IotHubSkuInfo
@@ -78,19 +77,6 @@ def iot_hub_update(client, hub_name, parameters, resource_group_name=None):
 def iot_hub_delete(client, hub_name, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     return client.delete(resource_group_name, hub_name)
-
-
-# Deleting IoT Hub is a long running operation. Due to API implementation issue, 404 error will be thrown during
-# deletion of an IoT Hub.
-# This is a work around to suppress the 404 error. It should be removed after API is fixed.
-class HubDeleteResultTransform(LongRunningOperation):
-    def __call__(self, poller):
-        try:
-            super(HubDeleteResultTransform, self).__call__(poller)
-        except CLIError as e:
-            if 'not found' not in str(e):
-                raise e
-        return None
 
 
 def iot_hub_show_connection_string(client, hub_name=None, resource_group_name=None, policy_name='iothubowner',
@@ -177,12 +163,6 @@ def iot_hub_policy_delete(client, hub_name, policy_name, resource_group_name=Non
 def _is_policy_existed(policies, policy_name):
     policy_set = set([p.key_name.lower() for p in policies])
     return policy_name.lower() in policy_set
-
-
-class PolicyUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
-    def __call__(self, poller):
-        result = super(PolicyUpdateResultTransform, self).__call__(poller)
-        return result.properties.authorization_policies
 
 
 def iot_hub_job_list(client, hub_name, resource_group_name=None):

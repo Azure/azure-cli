@@ -8,9 +8,10 @@ from azure.cli.core import __version__ as core_version
 from azure.cli.core._profile import Profile, CLOUD
 import azure.cli.core._debug as _debug
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.cli.core.application import APPLICATION
-from azure.storage._error import _ERROR_STORAGE_MISSING_INFO
+from azure.cli.core.profiles._shared import get_client_class
+from azure.cli.core.profiles import get_api_version, get_sdk, ResourceType
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -18,9 +19,17 @@ UA_AGENT = "AZURECLI/{}".format(core_version)
 ENV_ADDITIONAL_USER_AGENT = 'AZURE_HTTP_USER_AGENT'
 
 
-def get_mgmt_service_client(client_type, subscription_id=None, api_version=None):
+def get_mgmt_service_client(client_or_resource_type, subscription_id=None, api_version=None,
+                            **kwargs):
+    if isinstance(client_or_resource_type, ResourceType):
+        # Get the versioned client
+        client_type = get_client_class(client_or_resource_type)
+        api_version = api_version or get_api_version(client_or_resource_type)
+    else:
+        # Get the non-versioned client
+        client_type = client_or_resource_type
     client, _ = _get_mgmt_service_client(client_type, subscription_id=subscription_id,
-                                         api_version=api_version)
+                                         api_version=api_version, **kwargs)
     return client
 
 
@@ -29,7 +38,7 @@ def get_subscription_service_client(client_type):
 
 
 def configure_common_settings(client):
-    client = _debug.allow_debug_connection(client)
+    client = _debug.change_ssl_cert_verification(client)
 
     client.config.add_user_agent(UA_AGENT)
     try:
@@ -51,13 +60,18 @@ def configure_common_settings(client):
 
 
 def _get_mgmt_service_client(client_type, subscription_bound=True, subscription_id=None,
-                             api_version=None):
+                             api_version=None, base_url_bound=True, **kwargs):
     logger.debug('Getting management service client client_type=%s', client_type.__name__)
     profile = Profile()
     cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id)
-    client_kwargs = {'base_url': CLOUD.endpoints.resource_manager}
+    client_kwargs = {}
+    if base_url_bound:
+        client_kwargs = {'base_url': CLOUD.endpoints.resource_manager}
     if api_version:
         client_kwargs['api_version'] = api_version
+    if kwargs:
+        client_kwargs.update(kwargs)
+
     if subscription_bound:
         client = client_type(cred, subscription_id, **client_kwargs)
     else:
@@ -68,7 +82,7 @@ def _get_mgmt_service_client(client_type, subscription_bound=True, subscription_
     return (client, subscription_id)
 
 
-def get_data_service_client(service_type, account_name, account_key, connection_string=None,  # pylint: disable=too-many-arguments
+def get_data_service_client(service_type, account_name, account_key, connection_string=None,
                             sas_token=None, endpoint_suffix=None):
     logger.debug('Getting data service client service_type=%s', service_type.__name__)
     try:
@@ -80,6 +94,8 @@ def get_data_service_client(service_type, account_name, account_key, connection_
             client_kwargs['endpoint_suffix'] = endpoint_suffix
         client = service_type(**client_kwargs)
     except ValueError as exc:
+        _ERROR_STORAGE_MISSING_INFO = \
+            get_sdk(ResourceType.DATA_STORAGE, '_error#_ERROR_STORAGE_MISSING_INFO')
         if _ERROR_STORAGE_MISSING_INFO in str(exc):
             raise ValueError(exc)
         else:

@@ -7,11 +7,10 @@
 Commands for storage file share operations
 """
 
-# pylint: disable=too-many-arguments
 
 import os.path
 from azure.cli.core.azlogging import get_az_logger
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 from azure.common import AzureException, AzureHttpError
 from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_files,
                                                     create_blob_service_from_storage_client,

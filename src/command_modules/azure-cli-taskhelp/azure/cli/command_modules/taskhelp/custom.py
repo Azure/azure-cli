@@ -6,8 +6,9 @@
 # pylint: disable=no-self-use,too-few-public-methods
 from __future__ import print_function
 
+
 def deploy_arm_template():
-    '''How to deploy an ARM template using Azure CLI.'''
+    """How to deploy an ARM template using Azure CLI."""
     print("""
 ***********************
 ARM Template Deployment

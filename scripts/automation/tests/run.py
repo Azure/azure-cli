@@ -29,12 +29,16 @@ def run_tests(modules, parallel, run_live):
                                parallel=parallel, process_timeout=3600 if run_live else 600)
 
     # run tests
-    test_folders = [test_path for _, _, test_path in modules]
-    result, test_result = run_nose(test_folders)
+    overall_result = True
+    failed_tests = []
+    for name, _, test_path in modules:
+        print('\n\n==== Test module {} ===='.format(name))
+        result, test_result, module_failed_tests = run_nose([test_path])
+        failed_tests += module_failed_tests
+        overall_result &= result
+        print('==== Test module {} result ====\n{}\n==========\n'.format(name, test_result))
 
-    print('Test report: {}'.format(test_result))
-
-    return result
+    return overall_result, failed_tests
 
 
 if __name__ == '__main__':
@@ -59,6 +63,13 @@ if __name__ == '__main__':
         parse.print_help()
         sys.exit(1)
 
-    retval = run_tests(selected_modules, not args.non_parallel, args.live)
+    success, failed_tests = run_tests(selected_modules, not args.non_parallel, args.live)
+    if failed_tests or not success:
+        print('==== FAILED TESTS ====')
+        for test in failed_tests:
+            print(test)
+    else:
+        print('==== ALL TESTS PASSED! ====')
 
-    sys.exit(0 if retval else 1)
+
+    sys.exit(0 if success else 1)

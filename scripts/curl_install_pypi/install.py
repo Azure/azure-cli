@@ -138,6 +138,10 @@ def install_cli(install_dir, tmp_dir):
     path_to_pip = os.path.join(install_dir, 'bin', 'pip')
     cmd = [path_to_pip, 'install', '--cache-dir', tmp_dir, 'azure-cli', '--upgrade']
     exec_command(cmd)
+    # Temporary fix to make sure that we have empty __init__.py files for the azure site-packages folder.
+    # (including the pkg_resources/declare namespace significantly impacts startup perf for the CLI)
+    fixupcmd = [path_to_pip, 'install', '--cache-dir', tmp_dir, '--upgrade', '--force-reinstall', 'azure-nspkg', 'azure-mgmt-nspkg']
+    exec_command(fixupcmd)
 
 def create_executable(exec_dir, install_dir):
     create_dir(exec_dir)
@@ -162,7 +166,6 @@ def get_install_dir():
             create_dir(install_dir)
             if os.listdir(install_dir):
                 print_status("'{}' is not empty and may contain a previous installation.".format(install_dir))
-                print_status("If you'd like to update the CLI, exit this script and run 'az component update'.")
                 ans_yes = prompt_y_n('Remove this directory?', 'n')
                 if ans_yes:
                     shutil.rmtree(install_dir)
@@ -203,6 +206,14 @@ def _get_default_rc_file():
         return USER_BASH_PROFILE
     return USER_BASH_RC if bashrc_exists else None
 
+def _default_rc_file_creation_step():
+    rcfile = USER_BASH_PROFILE if platform.system().lower() == 'darwin' else USER_BASH_RC
+    ans_yes = prompt_y_n('Could not automatically find a suitable file to use. Create {} now?'.format(rcfile), default='y')
+    if ans_yes:
+        open(rcfile, 'a').close()
+        return rcfile
+    return None
+
 def _find_line_in_file(file_path, search_pattern):
     try:
         with open(file_path, 'r') as search_file:
@@ -224,14 +235,17 @@ def create_tab_completion_file(filename):
     print_status("Created tab completion file at '{}'".format(filename))
 
 def get_rc_file_path():
-    rc_file_path = None
-    while not rc_file_path:
-        rc_file = prompt_input_with_default('Enter a path to an rc file to update', _get_default_rc_file())
+    rc_file = None
+    default_rc_file = _get_default_rc_file()
+    if not default_rc_file:
+        rc_file = _default_rc_file_creation_step()
+    rc_file = rc_file or prompt_input_with_default('Enter a path to an rc file to update', default_rc_file)
+    if rc_file:
         rc_file_path = os.path.realpath(os.path.expanduser(rc_file))
-        if not os.path.isfile(rc_file_path):
-            # Ask user again as it is not a file
-            rc_file_path = None
-    return rc_file_path
+        if os.path.isfile(rc_file_path):
+            return rc_file_path
+        print_status("The file '{}' could not be found.".format(rc_file_path))
+    return None
 
 def warn_other_azs_on_path(exec_dir, exec_filepath):
     env_path = os.environ.get('PATH')
@@ -251,6 +265,8 @@ def handle_path_and_tab_completion(completion_file_path, exec_filepath, exec_dir
     ans_yes = prompt_y_n('Modify profile to update your $PATH and enable shell/tab completion now?', 'y')
     if ans_yes:
         rc_file_path = get_rc_file_path()
+        if not rc_file_path:
+            raise CLIInstallError('No suitable profile file found.')
         _backup_rc(rc_file_path)
         line_to_add = "export PATH=$PATH:{}".format(exec_dir)
         _modify_rc(rc_file_path, line_to_add)
@@ -271,6 +287,9 @@ def verify_python_version():
     v = sys.version_info
     if v < (2, 7):
         raise CLIInstallError('The CLI does not support Python versions less than 2.7.')
+    if 'conda' in sys.version:
+        raise CLIInstallError("This script does not support the Python Anaconda environment. "
+                              "Create an Anaconda virtual environment and install with 'pip'")
     print_status('Python version {}.{}.{} okay.'.format(v.major, v.minor, v.micro))
 
 def _native_dependencies_for_dist(verify_cmd_args, install_cmd_args, dep_list):
@@ -282,7 +301,7 @@ def _native_dependencies_for_dist(verify_cmd_args, install_cmd_args, dep_list):
         err_msg = 'One or more of the following native dependencies are not currently installed and may be required.\n'
         err_msg += '"{}"'.format(' '.join(install_cmd_args + dep_list))
         print_status(err_msg)
-        ans_yes = prompt_y_n('Attempt to continue anyway?', 'n')
+        ans_yes = prompt_y_n('Missing native dependencies. Attempt to continue anyway?', 'n')
         if not ans_yes:
             raise CLIInstallError('Please install the native dependencies and try again.')
 
@@ -292,6 +311,7 @@ def verify_native_dependencies():
         # There's no distribution name so can't determine native dependencies required / or they may not be needed like on OS X
         return
     print_status('Verifying native dependencies.')
+    is_python3 = sys.version_info[0] == 3
     distname = distname.lower().strip()
     verify_cmd_args = None
     install_cmd_args = None
@@ -299,18 +319,22 @@ def verify_native_dependencies():
     if any(x in distname for x in ['ubuntu', 'debian']):
         verify_cmd_args = ['dpkg', '-s']
         install_cmd_args = ['apt-get', 'update', '&&', 'apt-get', 'install', '-y']
+        python_dep = 'python3-dev' if is_python3 else 'python-dev'
         if distname == 'ubuntu' and version in ['12.04', '14.04'] or distname == 'debian' and version.startswith('7'):
-            dep_list = ['libssl-dev', 'libffi-dev', 'python-dev']
+            dep_list = ['libssl-dev', 'libffi-dev', python_dep]
         elif distname == 'ubuntu' and version in ['15.10', '16.04']or distname == 'debian' and version.startswith('8'):
-            dep_list = ['libssl-dev', 'libffi-dev', 'python-dev', 'build-essential']
+            dep_list = ['libssl-dev', 'libffi-dev', python_dep, 'build-essential']
     elif any(x in distname for x in ['centos', 'rhel', 'red hat']):
         verify_cmd_args = ['rpm', '-q']
         install_cmd_args = ['yum', 'check-update', ';', 'yum', 'install', '-y']
-        dep_list = ['gcc', 'libffi-devel', 'python-devel', 'openssl-devel']
+        # python3-devel not available on yum but python3Xu-devel versions available.
+        python_dep = 'python3{}u-devel'.format(sys.version_info[1]) if is_python3 else 'python-devel'
+        dep_list = ['gcc', 'libffi-devel', python_dep, 'openssl-devel']
     elif any(x in distname for x in ['opensuse', 'suse']):
         verify_cmd_args = ['rpm', '-q']
         install_cmd_args = ['zypper', 'refresh', '&&', 'zypper', '--non-interactive', 'install']
-        dep_list = ['gcc', 'libffi-devel', 'python-devel', 'openssl-devel']
+        python_dep = 'python3-devel' if is_python3 else 'python-devel'
+        dep_list = ['gcc', 'libffi-devel', python_dep, 'openssl-devel']
     if verify_cmd_args and install_cmd_args and dep_list:
         _native_dependencies_for_dist(verify_cmd_args, install_cmd_args, dep_list)
     else:

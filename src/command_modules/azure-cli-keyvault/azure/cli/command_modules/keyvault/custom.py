@@ -22,8 +22,7 @@ from azure.keyvault.generated.models import (CertificateAttributes,
                                              Trigger,
                                              Action)
 from azure.keyvault.generated.models.key_vault_client_enums import ActionType, KeyUsageType
-from azure.mgmt.keyvault.models import (VaultCreateOrUpdateParameters,
-                                        VaultProperties,
+from azure.mgmt.keyvault.models import (VaultProperties,
                                         AccessPolicyEntry,
                                         Permissions,
                                         CertificatePermissions,
@@ -33,7 +32,7 @@ from azure.mgmt.keyvault.models import (VaultCreateOrUpdateParameters,
                                         SkuName)
 from azure.graphrbac import GraphRbacManagementClient
 import azure.cli.core.telemetry as telemetry
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 import azure.cli.core.azlogging as azlogging
 from azure.keyvault import KeyVaultClient
 from azure.cli.command_modules.keyvault._validators import secret_text_encoding_values
@@ -62,7 +61,7 @@ def _default_certificate_profile():
                 KeyUsageType.key_cert_sign
             ],
             subject='C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=www.contoso.com',
-            ekus=[]
+            validity_in_months=12
         ),
         lifetime_actions=[LifetimeAction(
             trigger=Trigger(
@@ -80,12 +79,10 @@ def _default_certificate_profile():
         )
     )
     del template.id
-    del template.attributes.created
-    del template.attributes.updated
+    del template.attributes
     del template.issuer_parameters.certificate_type
     del template.lifetime_actions[0].trigger.lifetime_percentage
     del template.x509_certificate_properties.subject_alternative_names
-    del template.x509_certificate_properties.validity_in_months
     del template.x509_certificate_properties.ekus
     return template
 
@@ -136,8 +133,7 @@ def _scaffold_certificate_profile():
         )
     )
     del template.id
-    del template.attributes.created
-    del template.attributes.updated
+    del template.attributes
     return template
 
 
@@ -150,8 +146,8 @@ def list_keyvault(client, resource_group_name=None):
 def _get_current_user_object_id(graph_client):
     try:
         current_user = graph_client.objects.get_current_user()
-        if current_user and current_user.object_id: #pylint:disable=no-member
-            return current_user.object_id #pylint:disable=no-member
+        if current_user and current_user.object_id:  # pylint:disable=no-member
+            return current_user.object_id  # pylint:disable=no-member
     except CloudError:
         pass
 
@@ -163,7 +159,7 @@ def _get_object_id_by_spn(graph_client, spn):
         logger.warning("Unable to find user with spn '%s'", spn)
         return
     if len(accounts) > 1:
-        logger.warning("Multiple service principals found with spn '%s'. "\
+        logger.warning("Multiple service principals found with spn '%s'. "
                        "You can avoid this by specifying object id.", spn)
         return
     return accounts[0].object_id
@@ -175,7 +171,7 @@ def _get_object_id_by_upn(graph_client, upn):
         logger.warning("Unable to find user with upn '%s'", upn)
         return
     if len(accounts) > 1:
-        logger.warning("Multiple users principals found with upn '%s'. "\
+        logger.warning("Multiple users principals found with upn '%s'. "
                        "You can avoid this by specifying object id.", upn)
         return
     return accounts[0].object_id
@@ -190,7 +186,7 @@ def _get_object_id_from_subscription(graph_client, subscription):
         else:
             logger.warning("Unknown user type '%s'", subscription['user']['type'])
     else:
-        logger.warning('Current credentials are not from a user or service principal. '\
+        logger.warning('Current credentials are not from a user or service principal. '
                        'Azure Key Vault does not work with certificate credentials.')
 
 
@@ -202,7 +198,7 @@ def _get_object_id(graph_client, subscription=None, spn=None, upn=None):
     return _get_object_id_from_subscription(graph_client, subscription)
 
 
-def get_default_policy(client, scaffold=False): #pylint: disable=unused-argument
+def get_default_policy(client, scaffold=False):  # pylint: disable=unused-argument
     """
     Get a default certificate policy to be used with `az keyvault certificate create`
     :param client:
@@ -216,20 +212,23 @@ def get_default_policy(client, scaffold=False): #pylint: disable=unused-argument
         return _default_certificate_profile()
 
 
-def create_keyvault(client, resource_group_name, vault_name, location, #pylint:disable=too-many-arguments
-                    sku=SkuName.standard.value,
+def create_keyvault(client,
+                    resource_group_name, vault_name, location=None, sku=SkuName.standard.value,
                     enabled_for_deployment=None,
                     enabled_for_disk_encryption=None,
                     enabled_for_template_deployment=None,
-                    no_self_perms=False,
+                    no_self_perms=None,
                     tags=None):
+    from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
     from azure.cli.core._profile import Profile, CLOUD
+    from azure.graphrbac.models import GraphErrorException
     profile = Profile()
     cred, _, tenant_id = profile.get_login_credentials(
         resource=CLOUD.endpoints.active_directory_graph_resource_id)
-    graph_client = GraphRbacManagementClient(cred,
-                                             tenant_id,
-                                             base_url=CLOUD.endpoints.active_directory_graph_resource_id) # pylint: disable=line-too-long
+    graph_client = GraphRbacManagementClient(
+        cred,
+        tenant_id,
+        base_url=CLOUD.endpoints.active_directory_graph_resource_id)
     subscription = profile.get_subscription()
     if no_self_perms:
         access_policies = []
@@ -244,15 +243,14 @@ def create_keyvault(client, resource_group_name, vault_name, location, #pylint:d
                                         KeyPermissions.restore],
                                   secrets=[SecretPermissions.all],
                                   certificates=[CertificatePermissions.all])
-        object_id = _get_current_user_object_id(graph_client)
-        if not object_id:
+        try:
+            object_id = _get_current_user_object_id(graph_client)
+        except GraphErrorException:
             object_id = _get_object_id(graph_client, subscription=subscription)
         if not object_id:
-            raise CLIError('Cannot create vault.\n'
-                           'Unable to query active directory for information '\
-                           'about the current user.\n'
-                           'You may try the --no-self-perms flag to create a vault'\
-                           ' without permissions.')
+            raise CLIError('Cannot create vault.\nUnable to query active directory for information '
+                           'about the current user.\nYou may try the --no-self-perms flag to '
+                           'create a vault without permissions.')
         access_policies = [AccessPolicyEntry(tenant_id=tenant_id,
                                              object_id=object_id,
                                              permissions=permissions)]
@@ -269,7 +267,32 @@ def create_keyvault(client, resource_group_name, vault_name, location, #pylint:d
     return client.create_or_update(resource_group_name=resource_group_name,
                                    vault_name=vault_name,
                                    parameters=parameters)
+
+
 create_keyvault.__doc__ = VaultProperties.__doc__
+
+
+def update_keyvault_setter(client, parameters, resource_group_name, vault_name):
+    from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   vault_name=vault_name,
+                                   parameters=VaultCreateOrUpdateParameters(
+                                       location=parameters.location,
+                                       properties=parameters.properties))
+
+
+def update_keyvault(instance, enabled_for_deployment=None, enabled_for_disk_encryption=None,
+                    enabled_for_template_deployment=None):
+    if enabled_for_deployment is not None:
+        instance.properties.enabled_for_deployment = enabled_for_deployment
+
+    if enabled_for_disk_encryption is not None:
+        instance.properties.enabled_for_disk_encryption = enabled_for_disk_encryption
+
+    if enabled_for_template_deployment is not None:
+        instance.properties.enabled_for_template_deployment = enabled_for_template_deployment
+
+    return instance
 
 
 def _object_id_args_helper(object_id, spn, upn):
@@ -280,24 +303,25 @@ def _object_id_args_helper(object_id, spn, upn):
             resource=CLOUD.endpoints.active_directory_graph_resource_id)
         graph_client = GraphRbacManagementClient(cred,
                                                  tenant_id,
-                                                 base_url=CLOUD.endpoints.active_directory_graph_resource_id) # pylint: disable=line-too-long
+                                                 base_url=CLOUD.endpoints.active_directory_graph_resource_id)  # pylint: disable=line-too-long
         object_id = _get_object_id(graph_client, spn=spn, upn=upn)
         if not object_id:
             raise CLIError('Unable to get object id from principal name.')
     return object_id
 
 
-def set_policy(client, resource_group_name, vault_name, #pylint:disable=too-many-arguments
+def set_policy(client, resource_group_name, vault_name,
                object_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
                certificate_permissions=None):
     """ Update security policy settings for a Key Vault. """
+    from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
     object_id = _object_id_args_helper(object_id, spn, upn)
     vault = client.get(resource_group_name=resource_group_name,
                        vault_name=vault_name)
     # Find the existing policy to set
-    policy = next((p for p in vault.properties.access_policies \
-             if object_id.lower() == p.object_id.lower() and \
-             vault.properties.tenant_id.lower() == p.tenant_id.lower()), None)
+    policy = next((p for p in vault.properties.access_policies
+                   if object_id.lower() == p.object_id.lower() and
+                   vault.properties.tenant_id.lower() == p.tenant_id.lower()), None)
     if not policy:
         # Add new policy as none found
         vault.properties.access_policies.append(AccessPolicyEntry(
@@ -322,15 +346,17 @@ def set_policy(client, resource_group_name, vault_name, #pylint:disable=too-many
                                        properties=vault.properties))
 
 
-def delete_policy(client, resource_group_name, vault_name, object_id=None, spn=None, upn=None): #pylint:disable=too-many-arguments
+def delete_policy(client,
+                  resource_group_name, vault_name, object_id=None, spn=None, upn=None):
     """ Delete security policy settings for a Key Vault. """
+    from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
     object_id = _object_id_args_helper(object_id, spn, upn)
     vault = client.get(resource_group_name=resource_group_name,
                        vault_name=vault_name)
     prev_policies_len = len(vault.properties.access_policies)
-    vault.properties.access_policies = [p for p in vault.properties.access_policies if \
-                                        vault.properties.tenant_id.lower() != p.tenant_id.lower() \
-                                        or object_id.lower() != p.object_id.lower()]
+    vault.properties.access_policies = [p for p in vault.properties.access_policies if
+                                        vault.properties.tenant_id.lower() != p.tenant_id.lower() or
+                                        object_id.lower() != p.object_id.lower()]
     if len(vault.properties.access_policies) == prev_policies_len:
         raise CLIError('No matching policies found')
     return client.create_or_update(resource_group_name=resource_group_name,
@@ -341,13 +367,14 @@ def delete_policy(client, resource_group_name, vault_name, object_id=None, spn=N
                                        properties=vault.properties))
 
 
-# pylint: disable=too-many-arguments
 def create_key(client, vault_base_url, key_name, destination, key_size=None, key_ops=None,
                disabled=False, expires=None, not_before=None, tags=None):
     from azure.keyvault.generated.models import KeyAttributes
     key_attrs = KeyAttributes(not disabled, not_before, expires)
     return client.create_key(
         vault_base_url, key_name, destination, key_size, key_ops, key_attrs, tags)
+
+
 create_key.__doc__ = KeyVaultClient.create_key.__doc__
 
 
@@ -355,6 +382,8 @@ def backup_key(client, vault_base_url, key_name, file_path):
     backup = client.backup_key(vault_base_url, key_name).value
     with open(file_path, 'wb') as output:
         output.write(backup)
+
+
 backup_key.__doc__ = KeyVaultClient.backup_key.__doc__
 
 
@@ -362,10 +391,12 @@ def restore_key(client, vault_base_url, file_path):
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
     return client.restore_key(vault_base_url, data)
+
+
 restore_key.__doc__ = KeyVaultClient.restore_key.__doc__
 
 
-# pylint: disable=too-many-arguments,assignment-from-no-return,unused-variable
+# pylint: disable=assignment-from-no-return,unused-variable
 def import_key(client, vault_base_url, key_name, destination=None, key_ops=None, disabled=False,
                expires=None, not_before=None, tags=None, pem_file=None, pem_password=None,
                byok_file=None):
@@ -410,7 +441,7 @@ def import_key(client, vault_base_url, key_name, destination=None, key_ops=None,
                 value = comps[1].replace(' ', '').replace('\n', '').replace(':', '')
                 try:
                     value = _to_bytes(value)
-                except Exception as ex: # pylint:disable=broad-except
+                except Exception:  # pylint:disable=broad-except
                     # if decoding fails it is because of an integer pattern. Extract the hex
                     # string and retry
                     value = _to_bytes(regex2.findall(value)[0])
@@ -429,10 +460,10 @@ def import_key(client, vault_base_url, key_name, destination=None, key_ops=None,
             # despite documentation saying password should be a string, it needs to actually
             # be UTF-8 encoded bytes
             pkey = crypto.load_privatekey(crypto.FILETYPE_PEM, pem_data, pem_password)
-        except crypto.Error as ex:
+        except crypto.Error:
             raise CLIError(
                 'Import failed: Unable to decrypt private key. --pem-password may be incorrect.')
-        except TypeError as ex:
+        except TypeError:
             raise CLIError('Invalid --pem-password.')
         logger.info('setting RSA parameters from PEM data')
         _set_rsa_parameters(key_obj, pkey)
@@ -470,16 +501,20 @@ def download_secret(client, vault_base_url, secret_name, file_path, encoding=Non
 
             with open(file_path, 'wb') as f:
                 f.write(decoded)
-    except Exception as ex: # pylint: disable=broad-except
+    except Exception as ex:  # pylint: disable=broad-except
         if os.path.isfile(file_path):
             os.remove(file_path)
         raise ex
 
 
 def create_certificate(client, vault_base_url, certificate_name, certificate_policy,
-                       disabled=False, expires=None, not_before=None, tags=None):
-    cert_attrs = CertificateAttributes(not disabled, not_before, expires)
+                       disabled=False, tags=None, validity=None):
+    cert_attrs = CertificateAttributes(not disabled)
     logger.info("Starting long running operation 'keyvault certificate create'")
+
+    if validity is not None:
+        certificate_policy['x509_certificate_properties']['validity_in_months'] = validity
+
     client.create_certificate(
         vault_base_url, certificate_name, certificate_policy, cert_attrs, tags)
 
@@ -491,7 +526,9 @@ def create_certificate(client, vault_base_url, certificate_name, certificate_pol
     while True:
         check = client.get_certificate_operation(vault_base_url, certificate_name)
         if check.status != 'inProgress':
-            logger.info("Long running operation 'keyvault certificate create' finished with result %s.", check) # pylint: disable=line-too-long
+            logger.info(
+                "Long running operation 'keyvault certificate create' finished with result %s.",
+                check)  # pylint: disable=line-too-long
             return check
         try:
             time.sleep(10)
@@ -504,18 +541,91 @@ def create_certificate(client, vault_base_url, certificate_name, certificate_pol
             message = getattr(client_exception, 'message', client_exception)
 
             try:
-                message = str(message) + ' ' + json.loads(client_exception.response.text) \
-                    ['error']['details'][0]['message']
-            except: #pylint: disable=bare-except
+                ex_message = json.loads(client_exception.response.text)
+                message = str(message) + ' ' + ex_message['error']['details'][0]['message']
+            except:  # pylint: disable=bare-except
                 pass
 
             raise CLIError('{}'.format(message))
 
+
 create_certificate.__doc__ = KeyVaultClient.create_certificate.__doc__
 
 
+def _asn1_to_iso8601(asn1_date):
+    import dateutil.parser
+    if isinstance(asn1_date, bytes):
+        asn1_date = asn1_date.decode('utf-8')
+    return dateutil.parser.parse(asn1_date)
+
+
+def import_certificate(client, vault_base_url, certificate_name, certificate_data,
+                       disabled=False, password=None, certificate_policy=None, tags=None):
+    import binascii
+
+    x509 = None
+    content_type = None
+    try:
+        x509 = crypto.load_certificate(crypto.FILETYPE_PEM, certificate_data)
+        # if we get here, we know it was a PEM file
+        content_type = 'application/x-pem-file'
+        try:
+            # for PEM files (including automatic endline conversion for Windows)
+            certificate_data = certificate_data.decode('utf-8').replace('\r\n', '\n')
+        except UnicodeDecodeError:
+            certificate_data = binascii.b2a_base64(certificate_data).decode('utf-8')
+    except (ValueError, crypto.Error):
+        pass
+
+    if not x509:
+        try:
+            if password:
+                x509 = crypto.load_pkcs12(certificate_data, password).get_certificate()
+            else:
+                x509 = crypto.load_pkcs12(certificate_data).get_certificate()
+            content_type = 'application/x-pkcs12'
+            certificate_data = binascii.b2a_base64(certificate_data).decode('utf-8')
+        except crypto.Error:
+            raise CLIError(
+                'We could not parse the provided certificate as .pem or .pfx. Please verify the certificate with OpenSSL.')  # pylint: disable=line-too-long
+
+    not_before, not_after = None, None
+
+    if x509.get_notBefore():
+        not_before = _asn1_to_iso8601(x509.get_notBefore())
+
+    if x509.get_notAfter():
+        not_after = _asn1_to_iso8601(x509.get_notAfter())
+
+    cert_attrs = CertificateAttributes(
+        enabled=not disabled,
+        not_before=not_before,
+        expires=not_after)
+
+    if certificate_policy:
+        secret_props = certificate_policy.get('secret_properties')
+        if secret_props:
+            secret_props['content_type'] = content_type
+        elif certificate_policy and not secret_props:
+            certificate_policy['secret_properties'] = SecretProperties(content_type=content_type)
+    else:
+        certificate_policy = CertificatePolicy(
+            secret_properties=SecretProperties(content_type=content_type))
+
+    logger.info("Starting 'keyvault certificate import'")
+    result = client.import_certificate(vault_base_url=vault_base_url,
+                                       certificate_name=certificate_name,
+                                       base64_encoded_certificate=certificate_data,
+                                       certificate_attributes=cert_attrs,
+                                       certificate_policy=certificate_policy,
+                                       tags=tags,
+                                       password=password)
+    logger.info("Finished 'keyvault certificate import'")
+    return result
+
+
 def download_certificate(client, vault_base_url, certificate_name, file_path,
-                         encoding='binary', certificate_version=''):
+                         encoding='PEM', certificate_version=''):
     """ Download a certificate from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
@@ -525,15 +635,16 @@ def download_certificate(client, vault_base_url, certificate_name, file_path,
 
     try:
         with open(file_path, 'wb') as f:
-            if encoding == 'binary':
+            if encoding == 'DER':
                 f.write(cert)
             else:
                 import base64
-                try:
-                    f.write(base64.encodebytes(cert))
-                except AttributeError:
-                    f.write(base64.encodestring(cert)) # pylint: disable=deprecated-method
-    except Exception as ex: # pylint: disable=broad-except
+                encoded = base64.encodestring(cert)  # pylint:disable=deprecated-method
+                if isinstance(encoded, bytes):
+                    encoded = encoded.decode("utf-8")  # pylint:disable=redefined-variable-type
+                encoded = '-----BEGIN CERTIFICATE-----\n' + encoded + '-----END CERTIFICATE-----\n'
+                f.write(encoded.encode("utf-8"))
+    except Exception as ex:  # pylint: disable=broad-except
         if os.path.isfile(file_path):
             os.remove(file_path)
         raise ex
@@ -570,7 +681,7 @@ def delete_certificate_contact(client, vault_base_url, contact_email):
 
 
 def create_certificate_issuer(client, vault_base_url, issuer_name, provider_name, account_id=None,
-                              password=None, disabled=False, organization_id=None):
+                              password=None, disabled=None, organization_id=None):
     """ Create a certificate issuer record.
     :param issuer_name: Unique identifier for the issuer settings.
     :param provider_name: The certificate provider name. Must be registered with your
@@ -582,12 +693,6 @@ def create_certificate_issuer(client, vault_base_url, issuer_name, provider_name
     from azure.keyvault.generated.models import \
         (CertificateIssuerSetParameters, IssuerCredentials, OrganizationDetails, IssuerAttributes,
          AdministratorDetails, KeyVaultErrorException)
-    try:
-        client.get_certificate_issuer(vault_base_url, issuer_name)
-        raise CLIError("issuer '{}' already exists".format(issuer_name))
-    except KeyVaultErrorException:
-        # ensure issuer does not already exist
-        pass
     credentials = IssuerCredentials(account_id, password)
     issuer_attrs = IssuerAttributes(not disabled)
     org_details = OrganizationDetails(organization_id, admin_details=[])
@@ -611,7 +716,7 @@ def update_certificate_issuer(client, vault_base_url, issuer_name, provider_name
 
     def update(obj, prop, value, nullable=False):
         set_value = value if value is not None else getattr(obj, prop, None)
-        if not set_value and not nullable:
+        if set_value is None and not nullable:
             raise CLIError("property '{}' cannot be cleared".format(prop))
         elif not set_value and nullable:
             set_value = None
@@ -651,8 +756,8 @@ def add_certificate_issuer_admin(client, vault_base_url, issuer_name, email, fir
     result = client.set_certificate_issuer(
         vault_base_url, issuer_name, issuer.provider, issuer.credentials, org_details,
         issuer.attributes)
-    created_admin = next(x for x in result.organization_details.admin_details \
-        if x.email_address == email)
+    created_admin = next(x for x in result.organization_details.admin_details
+                         if x.email_address == email)
     return created_admin
 
 

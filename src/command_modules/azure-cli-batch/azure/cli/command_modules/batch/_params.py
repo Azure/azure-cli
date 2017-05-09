@@ -12,14 +12,16 @@ from azure.batch.models.batch_service_client_enums import \
 from azure.cli.core.commands import \
     (register_cli_argument, CliArgumentType, register_extra_cli_argument)
 from azure.cli.core.commands.parameters import \
-    (tags_type, location_type, resource_group_name_type,
+    (tags_type, location_type, resource_group_name_type, ignore_type,
      get_resource_name_completion_list, enum_choice_list, file_type)
 
 from azure.cli.command_modules.batch._validators import \
     (application_enabled, datetime_format, storage_account_id, application_package_reference_format,
-     validate_client_parameters, validate_pool_resize_parameters, metadata_item_format,
-     certificate_reference_format, validate_json_file, validate_cert_file,
+     validate_pool_resize_parameters, metadata_item_format,
+     certificate_reference_format, validate_json_file, validate_cert_file, keyvault_id,
      environment_setting_format, validate_cert_settings, resource_file_format, load_node_agent_skus)
+
+from azure.cli.command_modules.batch._command_type import validate_client_parameters
 
 # pylint: disable=line-too-long
 # ARGUMENT DEFINITIONS
@@ -32,9 +34,11 @@ register_cli_argument('batch', 'resource_group_name', resource_group_name_type, 
 register_cli_argument('batch account', 'account_name', batch_name_type, options_list=('--name', '-n'))
 register_cli_argument('batch account create', 'location', location_type, help='The region in which to create the account.')
 register_cli_argument('batch account create', 'tags', tags_type, help="Space separated tags in 'key[=value]' format.")
-register_extra_cli_argument('batch account create', 'storage_account', help='The storage account name or resource ID to be used for auto storage.', validator=storage_account_id)
+register_cli_argument('batch account create', 'storage_account', help='The storage account name or resource ID to be used for auto storage.', validator=storage_account_id)
+register_cli_argument('batch account create', 'keyvault', help='The KeyVault name or resource ID to be used for an account with a pool allocation mode of \'User Subscription\'.', validator=keyvault_id)
+register_cli_argument('batch account create', 'keyvault_url', ignore_type)
 register_cli_argument('batch account set', 'tags', tags_type)
-register_extra_cli_argument('batch account set', 'storage_account', help='The storage account name or resource ID to be used for auto storage.', validator=storage_account_id)
+register_cli_argument('batch account set', 'storage_account', help='The storage account name or resource ID to be used for auto storage.', validator=storage_account_id)
 register_cli_argument('batch account keys renew', 'key_name', **enum_choice_list(AccountKeyType))
 register_cli_argument('batch account login', 'shared_key_auth', action='store_true', help='Using Shared Key authentication, if not specified, it will use Azure Active Directory authentication.')
 
@@ -66,8 +70,6 @@ register_cli_argument('batch pool reset', 'certificate_references', nargs='+', t
 register_cli_argument('batch pool reset', 'metadata', nargs='+', type=metadata_item_format, arg_group='Pool')
 register_cli_argument('batch pool reset', 'start_task_command_line', arg_group='Pool: Start Task',
                       help='The command line of the start task. The command line does not run under a shell, and therefore cannot take advantage of shell features such as environment variable expansion. If you want to take advantage of such features, you should invoke the shell in the command line, for example using "cmd /c MyCommand" in Windows or "/bin/sh -c MyCommand" in Linux.')
-register_cli_argument('batch pool reset', 'start_task_run_elevated', action='store_true', arg_group='Pool: Start Task',
-                      help='Whether to run the start task in elevated mode. The default value is false. True if flag present, otherwise defaults to False.')
 register_cli_argument('batch pool reset', 'start_task_wait_for_success', action='store_true', arg_group='Pool: Start Task',
                       help='Whether the Batch service should wait for the start task to complete successfully (that is, to exit with exit code 0) before scheduling any tasks on the compute node. True if flag present, otherwise defaults to False.')
 register_cli_argument('batch pool reset', 'start_task_max_task_retry_count', arg_group='Pool: Start Task',
@@ -83,6 +85,7 @@ for command in ['job create', 'job set', 'job reset', 'job-schedule create', 'jo
     register_cli_argument('batch {}'.format(command), 'pool_id', options_list=('--pool-id',), help='The id of an existing pool. All the tasks of the job will run on the specified pool.')
 
 register_cli_argument('batch pool create', 'os_family', **enum_choice_list(['2', '3', '4', '5']))
+register_cli_argument('batch pool create', 'auto_scale_formula', help='A formula for the desired number of compute nodes in the pool. The formula is checked for validity before the pool is created. If the formula is not valid, the Batch service rejects the request with detailed error information. For more information about specifying this formula, see https://azure.microsoft.com/documentation/articles/batch-automatic-scaling/.')
 register_extra_cli_argument('batch pool create', 'image', completer=load_node_agent_skus, arg_group="Pool: Virtual Machine Configuration",
                             help="OS image URN in 'publisher:offer:sku[:version]' format. Version is optional and if omitted latest will be used.\n\tValues from 'az batch pool node-agent-skus list'.\n\tExample: 'MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest'")
 
@@ -98,7 +101,6 @@ register_cli_argument('batch task create', 'job_id', help='The ID of the job con
 register_cli_argument('batch task create', 'task_id', help='The ID of the task.')
 register_cli_argument('batch task create', 'command_line', help='The command line of the task. The command line does not run under a shell, and therefore cannot take advantage of shell features such as environment variable expansion. If you want to take advantage of such features, you should invoke the shell in the command line, for example using "cmd /c MyCommand" in Windows or "/bin/sh -c MyCommand" in Linux.')
 register_cli_argument('batch task create', 'environment_settings', nargs='+', help='A list of environment variable settings for the task. Space separated values in \'key=value\' format.', type=environment_setting_format)
-register_cli_argument('batch task create', 'run_elevated', action='store_true', help='Whether to run the task in elevated mode. True if flag present, otherwise defaults to False.')
 register_cli_argument('batch task create', 'resource_files', nargs='+', help='A list of files that the Batch service will download to the compute node before running the command line. Space separated resource references in filename=blobsource format.', type=resource_file_format)
 
 for item in ['batch certificate delete', 'batch certificate create', 'batch pool resize', 'batch pool reset', 'batch job list', 'batch task create']:

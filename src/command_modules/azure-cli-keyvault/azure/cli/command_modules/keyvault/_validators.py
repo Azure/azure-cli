@@ -16,7 +16,7 @@ from azure.mgmt.keyvault.models.key_vault_management_client_enums import \
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.arm import parse_resource_id
 from azure.cli.core.commands.validators import validate_tags
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 from azure.keyvault.generated.models.key_vault_client_enums \
     import JsonWebKeyOperation
@@ -43,6 +43,7 @@ def _get_resource_group_from_vault_name(vault_name):
             return id_comps['resource_group']
     return None
 
+
 # COMMAND NAMESPACE VALIDATORS
 
 
@@ -51,7 +52,6 @@ def process_certificate_cancel_namespace(namespace):
 
 
 def process_secret_set_namespace(namespace):
-
     validate_tags(namespace)
 
     content = namespace.value
@@ -82,7 +82,7 @@ def process_secret_set_namespace(namespace):
                 try:
                     encoded = base64.encodebytes(content)
                 except AttributeError:
-                    encoded = base64.encodestring(content) # pylint: disable=deprecated-method
+                    encoded = base64.encodestring(content)  # pylint: disable=deprecated-method
                 encoded_str = encoded.decode('utf-8')
                 decoded = base64.b64decode(encoded_str)
         elif encoding == 'hex':
@@ -101,18 +101,18 @@ def process_secret_set_namespace(namespace):
     namespace.tags = tags
     namespace.value = content
 
+
 # PARAMETER NAMESPACE VALIDATORS
 
 
 def get_attribute_validator(name, attribute_class, create=False):
-
     def validator(ns):
         ns_dict = ns.__dict__
-        enabled = not ns_dict.pop('disabled') if create else ns_dict.pop('enabled') == 'true'
+        enabled = not ns_dict.pop('disabled') if create else ns_dict.pop('enabled')
         attributes = attribute_class(
             enabled,
-            ns_dict.pop('not_before'),
-            ns_dict.pop('expires'))
+            ns_dict.pop('not_before', None),
+            ns_dict.pop('expires', None))
         setattr(ns, '{}_attributes'.format(name), attributes)
 
     return validator
@@ -190,9 +190,8 @@ def validate_resource_group_name(ns):
         if group_name:
             ns.resource_group_name = group_name
         else:
-            raise CLIError(
-                "The Resource 'Microsoft.KeyVault/vaults/{}'".format(vault_name) + \
-                " not found within subscription")
+            msg = "The Resource 'Microsoft.KeyVault/vaults/{}' not found within subscription."
+            raise CLIError(msg.format(vault_name))
 
 
 def validate_x509_certificate_chain(ns):
@@ -207,18 +206,15 @@ def validate_x509_certificate_chain(ns):
 
     ns.x509_certificates = _load_certificate_as_bytes(ns.x509_certificates)
 
+
 # ARGUMENT TYPES
 
 
-def base64_encoded_certificate_type(string):
+def certificate_type(string):
     """ Loads file and outputs contents as base64 encoded string. """
-    with open(string, 'rb') as f:
+    import os
+    with open(os.path.expanduser(string), 'rb') as f:
         cert_data = f.read()
-    try:
-        # for PEM files (including automatic endline conversion for Windows)
-        cert_data = cert_data.decode('utf-8').replace('\r\n', '\n')
-    except UnicodeDecodeError:
-        cert_data = binascii.b2a_base64(cert_data).decode('utf-8')
     return cert_data
 
 
@@ -230,7 +226,7 @@ def datetime_type(string):
     for form in accepted_date_formats:
         try:
             return datetime.strptime(string, form)
-        except ValueError: # checks next format
+        except ValueError:  # checks next format
             pass
     raise ValueError("Input '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(string))
 

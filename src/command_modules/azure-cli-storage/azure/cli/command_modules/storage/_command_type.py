@@ -4,10 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import create_command, command_table
-from azure.cli.command_modules.storage._validators import validate_client_parameters
+from ._validators import validate_client_parameters
 
 
-def cli_storage_data_plane_command(name, operation, client_factory,  # pylint: disable=too-many-arguments
+def cli_storage_data_plane_command(name, operation, client_factory,
                                    transform=None, table_transformer=None, exception_handler=None):
     """ Registers an Azure CLI Storage Data Plane command. These commands always include the
     four parameters which can be used to obtain a storage client: account-name, account-key,

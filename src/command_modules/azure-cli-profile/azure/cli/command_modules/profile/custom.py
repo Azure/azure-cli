@@ -3,12 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import requests
-from adal.adal_error import AdalError
 from azure.cli.core.prompting import prompt_pass, NoTTYException
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core._profile import Profile
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -19,13 +17,18 @@ def load_subscriptions(all_clouds=False):
     return subscriptions
 
 
-def list_subscriptions(all_clouds=False):  # pylint: disable=redefined-builtin
+def list_subscriptions(all=False):  # pylint: disable=redefined-builtin
     """List the imported subscriptions."""
-    subscriptions = load_subscriptions(all_clouds)
+    subscriptions = load_subscriptions(all_clouds=all)
     if not subscriptions:
         logger.warning('Please run "az login" to access your accounts.')
     for sub in subscriptions:
         sub['cloudName'] = sub.pop('environmentName', None)
+    if not all:
+        enabled_ones = [s for s in subscriptions if s['state'] == 'Enabled']
+        if len(enabled_ones) != len(subscriptions):
+            logger.warning("A few accounts are skipped as they don't have 'Enabled' state. Use '--all' to display them.")  # pylint: disable=line-too-long
+            subscriptions = enabled_ones
     return subscriptions
 
 
@@ -51,8 +54,11 @@ def account_clear():
     profile.logout_all()
 
 
-def login(username=None, password=None, service_principal=None, tenant=None):
+def login(username=None, password=None, service_principal=None, tenant=None,
+          allow_no_subscriptions=False):
     """Log in to access Azure subscriptions"""
+    from adal.adal_error import AdalError
+    import requests
     interactive = False
 
     if username:
@@ -71,7 +77,8 @@ def login(username=None, password=None, service_principal=None, tenant=None):
             username,
             password,
             service_principal,
-            tenant)
+            tenant,
+            allow_no_subscriptions=allow_no_subscriptions)
     except AdalError as err:
         # try polish unfriendly server errors
         if username:

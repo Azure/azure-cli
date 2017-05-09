@@ -243,6 +243,8 @@ def _print_examples(help_file):
         indent = 2
         _print_indent('{0}'.format(e.text), indent)
 
+        print('')
+
 
 class HelpObject(object):  # pylint: disable=too-few-public-methods
 
@@ -278,7 +280,7 @@ class HelpFile(HelpObject):  # pylint: disable=too-few-public-methods,too-many-i
         self.type = ''
         self.short_summary = ''
         self.long_summary = ''
-        self.examples = ''
+        self.examples = []
 
     def load(self, options):
         description = getattr(options, 'description', None)
@@ -303,6 +305,20 @@ class HelpFile(HelpObject):  # pylint: disable=too-few-public-methods,too-many-i
         if file_data:
             self._load_from_data(file_data)
 
+    @staticmethod
+    def _should_include_example(ex):
+        min_profile = ex.get('min_profile')
+        max_profile = ex.get('max_profile')
+        if min_profile or max_profile:
+            from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
+            # yaml will load this as a datetime if it's a date, we need a string.
+            min_profile = str(min_profile) if min_profile else None
+            max_profile = str(max_profile) if max_profile else None
+            return supported_api_version(PROFILE_TYPE,
+                                         min_api=min_profile,
+                                         max_api=max_profile)
+        return True
+
     def _load_from_data(self, data):
         if not data:
             return
@@ -320,7 +336,10 @@ class HelpFile(HelpObject):  # pylint: disable=too-few-public-methods,too-many-i
         self.long_summary = data.get('long-summary')
 
         if 'examples' in data:
-            self.examples = [HelpExample(d) for d in data['examples']]
+            self.examples = []
+            for d in data['examples']:
+                if HelpFile._should_include_example(d):
+                    self.examples.append(HelpExample(d))
 
 
 class GroupHelpFile(HelpFile):  # pylint: disable=too-few-public-methods
@@ -372,17 +391,12 @@ class CommandHelpFile(HelpFile):  # pylint: disable=too-few-public-methods
                 param.update_from_data(loaded_param)
             loaded_params.append(param)
 
-        extra_param = next((p for p in data['parameters']
-                            if p['name'] not in [lp.name for lp in loaded_params]),
-                           None)
-        if extra_param:
-            raise HelpAuthoringException('Extra help param {0}'.format(extra_param['name']))
         self.parameters = loaded_params
 
 
 class HelpParameter(HelpObject):  # pylint: disable=too-few-public-methods, too-many-instance-attributes
 
-    def __init__(self, param_name, description, required, choices=None,  # pylint: disable=too-many-arguments
+    def __init__(self, param_name, description, required, choices=None,
                  default=None, group_name=None):
         super(HelpParameter, self).__init__()
         self.name = param_name

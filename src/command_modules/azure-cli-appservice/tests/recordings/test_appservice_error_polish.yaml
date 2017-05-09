@@ -1,0 +1,67 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.1+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [7a70ccc8-140d-11e7-8c65-64510658e3b3]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-error2/providers/Microsoft.Web/serverfarms/webapp-error-plan?api-version=2016-09-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-error2/providers/Microsoft.Web/serverfarms/webapp-error-plan","name":"webapp-error-plan","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
+        US","properties":{"serverFarmId":0,"name":"webapp-error-plan","workerSize":"Small","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Small","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest-error2-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"tags":null,"kind":"app","resourceGroup":"clitest-error2","reserved":false,"mdmId":"waws-prod-bay-075_4948","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json]
+      Date: ['Tue, 28 Mar 2017 23:22:57 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-IIS/8.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: [Accept-Encoding]
+      X-AspNet-Version: [4.0.30319]
+      X-Powered-By: [ASP.NET]
+      content-length: ['1129']
+    status: {code: 200, message: OK}
+- request:
+    body: '{"location": "West US", "properties": {"scmSiteAlsoStopped": false, "reserved":
+      false, "microService": "false", "serverFarmId": "webapp-error-plan"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['149']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.14393-SP0) requests/2.9.1 msrest/0.4.6
+          msrest_azure/0.4.7 websitemanagementclient/0.31.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.1+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [7ad8ce66-140d-11e7-9c72-64510658e3b3]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest-error2/providers/Microsoft.Web/sites/webapp-error-test123?api-version=2016-08-01
+  response:
+    body: {string: '{"Code":"Conflict","Message":"Website with given name webapp-error-test123
+        already exists.","Target":null,"Details":[{"Message":"Website with given name
+        webapp-error-test123 already exists."},{"Code":"Conflict"},{"ErrorEntity":{"ExtendedCode":"54001","MessageTemplate":"Website
+        with given name {0} already exists.","Parameters":["webapp-error-test123"],"Code":"Conflict","Message":"Website
+        with given name webapp-error-test123 already exists."}}],"Innererror":null}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['465']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Tue, 28 Mar 2017 23:22:59 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-IIS/8.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      X-AspNet-Version: [4.0.30319]
+      X-Powered-By: [ASP.NET]
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+    status: {code: 409, message: Conflict}
+version: 1

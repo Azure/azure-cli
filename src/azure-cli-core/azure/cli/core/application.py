@@ -13,7 +13,7 @@ from azure.cli.core._output import CommandResultItem
 import azure.cli.core.extensions
 import azure.cli.core._help as _help
 import azure.cli.core.azlogging as azlogging
-from azure.cli.core._util import todict, truncate_text, CLIError, read_file_content
+from azure.cli.core.util import todict, truncate_text, CLIError, read_file_content
 from azure.cli.core._config import az_config
 
 import azure.cli.core.telemetry as telemetry
@@ -28,23 +28,68 @@ class Configuration(object):  # pylint: disable=too-few-public-methods
     as output formats, available commands etc.
     """
 
-    def __init__(self, argv):
-        self.argv = argv or sys.argv[1:]
+    def __init__(self):
         self.output_format = None
 
-    def get_command_table(self):  # pylint: disable=no-self-use
+    def get_command_table(self, argv=None):  # pylint: disable=no-self-use
         import azure.cli.core.commands as commands
         # Find the first noun on the command line and only load commands from that
         # module to improve startup time.
-        for a in self.argv:
-            if not a.startswith('-'):
-                return commands.get_command_table(a)
-        # No noun found, so load all commands.
-        return commands.get_command_table()
+        result = commands.get_command_table(argv[0] if argv else None)
+
+        if argv is None:
+            return result
+
+        command_tree = Configuration.build_command_tree(result)
+        matches = Configuration.find_matches(argv, command_tree)
+        return dict(matches)
 
     def load_params(self, command):  # pylint: disable=no-self-use
         import azure.cli.core.commands as commands
         commands.load_params(command)
+
+    @staticmethod
+    def build_command_tree(command_table):
+        '''From the list of commands names, find the exact match or
+           set of potential matches that we are looking for
+        '''
+        result = {}
+        for command in command_table:
+            index = result
+            parts = command.split()
+            for part in parts[:-1]:
+                if part not in index:
+                    index[part] = {}
+                index = index[part]
+            index[parts[-1]] = command_table[command]
+
+        return result
+
+    @staticmethod
+    def find_matches(parts, commandtable):
+        from .commands import CliCommand
+
+        best_match = commandtable
+        command_so_far = ""
+        try:
+            for part in parts:
+                best_match = best_match[part]
+                command_so_far = ' '.join((command_so_far, part))
+                if isinstance(best_match, CliCommand):
+                    break
+        except KeyError:
+            pass
+
+        if isinstance(best_match, CliCommand):
+            yield (best_match.name, best_match)
+        else:
+            for part in best_match:
+                cmd = best_match[part]
+                if isinstance(cmd, CliCommand):
+                    yield (cmd.name, cmd)
+                else:
+                    dummy_cmdname = ' '.join((command_so_far, part))
+                    yield (dummy_cmdname, CliCommand(dummy_cmdname, None))
 
 
 class Application(object):
@@ -53,11 +98,12 @@ class Application(object):
     FILTER_RESULT = 'Application.FilterResults'
     GLOBAL_PARSER_CREATED = 'GlobalParser.Created'
     COMMAND_PARSER_LOADED = 'CommandParser.Loaded'
+    COMMAND_PARSER_PARSING = 'CommandParser.Parsing'
     COMMAND_PARSER_PARSED = 'CommandParser.Parsed'
     COMMAND_TABLE_LOADED = 'CommandTable.Loaded'
     COMMAND_TABLE_PARAMS_LOADED = 'CommandTableParams.Loaded'
 
-    def __init__(self, config=None):
+    def __init__(self, configuration=None):
         self._event_handlers = defaultdict(lambda: [])
         self.session = {
             'headers': {
@@ -80,15 +126,14 @@ class Application(object):
         self.raise_event(self.GLOBAL_PARSER_CREATED, global_group=global_group)
 
         self.parser = AzCliCommandParser(prog='az', parents=[self.global_parser])
-
-        self.initialize(config or Configuration([]))
+        self.configuration = configuration
 
     def initialize(self, configuration):
         self.configuration = configuration
 
     def execute(self, unexpanded_argv):  # pylint: disable=too-many-statements
         argv = Application._expand_file_prefixed_files(unexpanded_argv)
-        command_table = self.configuration.get_command_table()
+        command_table = self.configuration.get_command_table(argv)
         self.raise_event(self.COMMAND_TABLE_LOADED, command_table=command_table)
         self.parser.load_command_table(command_table)
         self.raise_event(self.COMMAND_PARSER_LOADED, parser=self.parser)
@@ -126,6 +171,7 @@ class Application(object):
         if self.session['completer_active']:
             enable_autocomplete(self.parser)
 
+        self.raise_event(self.COMMAND_PARSER_PARSING, argv=argv)
         args = self.parser.parse_args(argv)
 
         self.raise_event(self.COMMAND_PARSER_PARSED, command=args.command, args=args)

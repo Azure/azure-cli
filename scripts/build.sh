@@ -11,7 +11,10 @@ scripts_root=$(cd $(dirname $0); pwd)
 
 export PYTHONPATH=$PATHONPATH:./src
 
-python -m azure.cli -h
+python -m azure.cli -h --debug
+
+# Ensure tokens are erased from VCR recordings
+python -m automation.tests.check_vcr_recordings
 
 # PyLint does not yet support Python 3.6 https://github.com/PyCQA/pylint/issues/1241
 

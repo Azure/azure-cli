@@ -3,6 +3,33 @@
 Release History
 ===============
 
+
+2.0.3 (2017-05-05)
+^^^^^^^^^^^^^^^^^^
+
+* Minor fixes.
+
+2.0.2 (2017-04-28)
+^^^^^^^^^^^^^^^^^^
+
+* New packaging system.
+
+2.0.1 (2017-04-17)
+^^^^^^^^^^^^^^^^^^
+
+* Apply core changes required for API profile support (#2834) & JSON string parsing from shell (#2705)
+
+2.0.0 (2017-04-03)
+^^^^^^^^^^^^^^^^^^^^
+
+* Module is GA.
+* [ACR] Update to 2017-03-01 api-version (#2563)
+
+0.1.1b5 (2017-03-13)
+^^^^^^^^^^^^^^^^^^^^
+
+* --admin-enabled no longer requires an input value
+
 0.1.1b4 (2017-02-22)
 ^^^^^^^^^^^^^^^^^^^^
 

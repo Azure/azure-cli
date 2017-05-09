@@ -138,6 +138,12 @@ Install nightly builds with pip in a virtual environment.
 $ pip install --pre azure-cli --extra-index-url https://azureclinightly.blob.core.windows.net/packages
 ```
 
+To upgrade your current nightly build pass the `--upgrade` option.
+
+```bash
+$ pip install --upgrade --pre azure-cli --extra-index-url https://azureclinightly.blob.core.windows.net/packages
+```
+
 - Builds happen at 21:00:00 PDT each night. They are published shortly afterwards.
 - Whilst all command modules are built each night, not all are included on install.
 - Install additional components with:  
@@ -179,3 +185,7 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
+
+## Automation
+
+- [How to write scenario based VCR test](https://github.com/Azure/azure-cli/blob/master/doc/scenario_base_tests.md)

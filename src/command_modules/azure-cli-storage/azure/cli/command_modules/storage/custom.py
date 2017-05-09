@@ -8,20 +8,35 @@
 from __future__ import print_function
 from sys import stderr
 
-from azure.mgmt.storage.models import Kind
-from azure.storage.models import Logging, Metrics, CorsRule, RetentionPolicy
-from azure.storage.blob import BlockBlobService
-from azure.storage.blob.baseblobservice import BaseBlobService
-from azure.storage.file import FileService
-from azure.storage.file.models import FileProperties, DirectoryProperties
-from azure.storage.table import TableService
-from azure.storage.queue import QueueService
-
 from azure.cli.core.decorators import transfer_doc
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError
+from azure.cli.core.profiles import get_sdk, ResourceType
 
 from azure.cli.command_modules.storage._factory import \
     (storage_client_factory, generic_data_service_factory)
+
+
+Logging, Metrics, CorsRule, \
+    AccessPolicy, RetentionPolicy = get_sdk(ResourceType.DATA_STORAGE,
+                                            'Logging',
+                                            'Metrics',
+                                            'CorsRule',
+                                            'AccessPolicy',
+                                            'RetentionPolicy',
+                                            mod='models')
+
+
+BlockBlobService, BaseBlobService, \
+    FileService, FileProperties, \
+    DirectoryProperties, TableService, \
+    QueueService = get_sdk(ResourceType.DATA_STORAGE,
+                           'blob#BlockBlobService',
+                           'blob.baseblobservice#BaseBlobService',
+                           'file#FileService',
+                           'file.models#FileProperties',
+                           'file.models#DirectoryProperties',
+                           'table#TableService',
+                           'queue#QueueService')
 
 
 def _update_progress(current, total):
@@ -36,6 +51,66 @@ def _update_progress(current, total):
 
 
 # CUSTOM METHODS
+
+def create_storage_account(resource_group_name, account_name, sku, location=None,
+                           kind=None, tags=None, custom_domain=None,
+                           encryption=None, access_tier=None):
+    StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier = get_sdk(
+        ResourceType.MGMT_STORAGE,
+        'StorageAccountCreateParameters',
+        'Kind',
+        'Sku',
+        'CustomDomain',
+        'AccessTier',
+        mod='models')
+    scf = storage_client_factory()
+    params = StorageAccountCreateParameters(
+        sku=Sku(sku),
+        kind=Kind(kind),
+        location=location,
+        tags=tags,
+        custom_domain=CustomDomain(custom_domain, None) if custom_domain else None,
+        encryption=encryption,
+        access_tier=AccessTier(access_tier) if access_tier else None)
+    return scf.storage_accounts.create(resource_group_name, account_name, params)
+
+
+def create_storage_account_with_account_type(resource_group_name, account_name, account_type,
+                                             location=None, tags=None):
+    StorageAccountCreateParameters, AccountType = get_sdk(
+        ResourceType.MGMT_STORAGE,
+        'StorageAccountCreateParameters',
+        'AccountType',
+        mod='models')
+    scf = storage_client_factory()
+    params = StorageAccountCreateParameters(location, AccountType(account_type), tags)
+    return scf.storage_accounts.create(resource_group_name, account_name, params)
+
+
+def update_storage_account(instance, sku=None, tags=None, custom_domain=None,
+                           use_subdomain=None, encryption=None, access_tier=None):
+    StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier = get_sdk(
+        ResourceType.MGMT_STORAGE,
+        'StorageAccountUpdateParameters',
+        'Sku',
+        'CustomDomain',
+        'AccessTier',
+        mod='models')
+    domain = instance.custom_domain
+    if custom_domain is not None:
+        domain = CustomDomain(custom_domain)
+        if use_subdomain is not None:
+            domain.name = use_subdomain == 'true'
+
+    params = StorageAccountUpdateParameters(
+        sku=Sku(sku) if sku is not None else instance.sku,
+        tags=tags if tags is not None else instance.tags,
+        custom_domain=domain,
+        encryption=encryption if encryption is not None else instance.encryption,
+        access_tier=AccessTier(access_tier) if access_tier is not None else instance.access_tier
+    )
+    return params
+
 
 @transfer_doc(FileService.list_directories_and_files)
 def list_share_files(client, share_name, directory_name=None, timeout=None,
@@ -77,56 +152,24 @@ def show_storage_account_connection_string(
     """ Generate connection string for a storage account."""
     from azure.cli.core._profile import CLOUD
     scf = storage_client_factory()
-    keys = scf.storage_accounts.list_keys(resource_group_name, account_name).keys  # pylint: disable=no-member
+    obj = scf.storage_accounts.list_keys(resource_group_name, account_name)  # pylint: disable=no-member
+    try:
+        keys = [obj.keys[0].value, obj.keys[1].value]  # pylint: disable=no-member
+    except AttributeError:
+        # Older API versions have a slightly different structure
+        keys = [obj.key1, obj.key2]  # pylint: disable=no-member
+
     endpoint_suffix = CLOUD.suffixes.storage_endpoint
     connection_string = 'DefaultEndpointsProtocol={};EndpointSuffix={};AccountName={};AccountKey={}'.format(
         protocol,
         endpoint_suffix,
         account_name,
-        keys[0].value if key_name == 'primary' else keys[1].value)  # pylint: disable=no-member
+        keys[0] if key_name == 'primary' else keys[1])  # pylint: disable=no-member
     connection_string = '{}{}'.format(connection_string, ';BlobEndpoint={}'.format(blob_endpoint) if blob_endpoint else '')
     connection_string = '{}{}'.format(connection_string, ';FileEndpoint={}'.format(file_endpoint) if file_endpoint else '')
     connection_string = '{}{}'.format(connection_string, ';QueueEndpoint={}'.format(queue_endpoint) if queue_endpoint else '')
     connection_string = '{}{}'.format(connection_string, ';TableEndpoint={}'.format(table_endpoint) if table_endpoint else '')
     return {'connectionString': connection_string}
-
-
-def create_storage_account(resource_group_name, account_name, sku, location,
-                           kind=Kind.storage.value, tags=None, custom_domain=None,
-                           encryption=None, access_tier=None):
-    ''' Create a storage account. '''
-    from azure.mgmt.storage.models import \
-        (StorageAccountCreateParameters, Sku, CustomDomain, AccessTier)
-    scf = storage_client_factory()
-    params = StorageAccountCreateParameters(
-        sku=Sku(sku),
-        kind=Kind(kind),
-        location=location,
-        tags=tags,
-        custom_domain=CustomDomain(custom_domain, None) if custom_domain else None,
-        encryption=encryption,
-        access_tier=AccessTier(access_tier) if access_tier else None)
-    return scf.storage_accounts.create(resource_group_name, account_name, params)
-
-
-def update_storage_account(instance, sku=None, tags=None, custom_domain=None,
-                           use_subdomain=None, encryption=None, access_tier=None):
-    from azure.mgmt.storage.models import \
-        (StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier)
-    domain = instance.custom_domain
-    if custom_domain is not None:
-        domain = CustomDomain(custom_domain)
-        if use_subdomain is not None:
-            domain.name = use_subdomain == 'true'
-
-    params = StorageAccountUpdateParameters(
-        sku=Sku(sku) if sku is not None else instance.sku,
-        tags=tags if tags is not None else instance.tags,
-        custom_domain=domain,
-        encryption=encryption if encryption is not None else instance.encryption,
-        access_tier=AccessTier(access_tier) if access_tier is not None else instance.access_tier
-    )
-    return params
 
 
 @transfer_doc(BlockBlobService.create_blob_from_path)
@@ -159,6 +202,13 @@ def upload_blob(  # pylint: disable=too-many-locals
             timeout=timeout)
 
     def upload_block_blob():
+        import os
+
+        # increase the block size to 100MB when the file is larger than 200GB
+        if os.path.isfile(file_path) and os.stat(file_path).st_size > 200 * 1024 * 1024 * 1024:
+            client.MAX_BLOCK_SIZE = 100 * 1024 * 1024
+            client.MAX_SINGLE_PUT_SIZE = 256 * 1024 * 1024
+
         return client.create_blob_from_path(
             container_name=container_name,
             blob_name=blob_name,
@@ -221,7 +271,6 @@ def _set_acl(client, container_name, acl, **kwargs):
 def create_acl_policy(client, container_name, policy_name, start=None, expiry=None,
                       permission=None, **kwargs):
     """Create a stored access policy on the containing object"""
-    from azure.storage.models import AccessPolicy
     acl = _get_acl(client, container_name, **kwargs)
     acl[policy_name] = AccessPolicy(permission, expiry, start)
     if hasattr(acl, 'public_access'):

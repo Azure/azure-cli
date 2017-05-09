@@ -3,6 +3,36 @@
 Release History
 ===============
 
+2.0.2 (2017-04-28)
+++++++++++++++++++
+
+* Added az sql server list-usages and az sql db list-usages commands.
+
+2.0.1 (2017-04-17)
+++++++++++++++++++
+
+* SQL - ability to connect directly to resource provider (#2832)
+* Fix doc references to azure.cli.commands (#2740)
+* Apply core changes required for API profile support (#2834) & JSON string parsing from shell (#2705)
+
+2.0.0 (2017-04-03)
+++++++++++++++++++
+
+* Removed duplicate sql utils code (#2629)
+* Import/Export CLI changes for SAS key (#2584)
+* SQL database audit and threat detection commands (#2536)
+* Sql Import/Export CLI commands and test (#2538)
+* Require confirmation for destructive SQL commands. (#2509)
+
+0.1.1b6 (2017-03-13)
+++++++++++++++++++++
+
+* Design changes and tests for SQL DB replication commands (#2379)
+* Design tweaks and functional test for SQL db restore command (#2423)
+* Implemented and tested SQL Data Warehouse commands (#2351)
+* Removed service-objective commands. (#2380)
+* SQL core commands (server, db, and elastic pool) (#2253)
+
 0.1.1b5 (2017-02-27)
 ++++++++++++++++++++
 

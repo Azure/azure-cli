@@ -31,15 +31,13 @@ from msrestazure.azure_exceptions import CloudError
 import azure.cli.core.azlogging as azlogging
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._actions import _is_valid_ssh_rsa_public_key
-from azure.cli.command_modules.acs.mgmt_acs.lib import \
-    AcsCreationClient as ACSClient
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,line-too-long
-from azure.cli.core._util import CLIError
+from azure.cli.core.util import CLIError, shell_safe_json_parse
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core._environment import get_config_dir
-from azure.mgmt.compute import ComputeManagementClient
-from azure.mgmt.compute.models import ContainerServiceOchestratorTypes
+from azure.cli.core.profiles import ResourceType
+from azure.mgmt.compute.containerservice.models import ContainerServiceOchestratorTypes
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     PasswordCredential,
                                     KeyCredential,
@@ -49,6 +47,8 @@ from azure.mgmt.authorization.models import RoleAssignmentProperties
 from ._client_factory import (_auth_client_factory, _graph_client_factory)
 
 logger = azlogging.get_az_logger(__name__)
+
+# pylint:disable=too-many-lines
 
 
 def which(binary):
@@ -68,8 +68,7 @@ def which(binary):
 
 
 def _resource_client_factory():
-    from azure.mgmt.resource.resources import ResourceManagementClient
-    return get_mgmt_service_client(ResourceManagementClient)
+    return get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
 
 
 def cf_providers():
@@ -103,13 +102,15 @@ def wait_then_open(url):
 
 
 def wait_then_open_async(url):
+    """
+    Spawns a thread that waits for a bit then opens a URL.
+    """
     t = threading.Thread(target=wait_then_open, args=({url}))
     t.daemon = True
     t.start()
 
 
-def acs_browse(resource_group, name, disable_browser=False,
-               ssh_key_file=os.path.join(os.path.expanduser("~"), '.ssh', 'id_rsa')):
+def acs_browse(resource_group, name, disable_browser=False, ssh_key_file=None):
     """
     Opens a browser to the web interface for the cluster orchestrator
 
@@ -139,10 +140,9 @@ def _acs_browse_internal(acs_info, resource_group, name, disable_browser, ssh_ke
         raise CLIError('Unsupported orchestrator type {} for browse'.format(orchestrator_type))
 
 
-def k8s_browse(name, resource_group, disable_browser=False,
-               ssh_key_file=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa')):
+def k8s_browse(name, resource_group, disable_browser=False, ssh_key_file=None):
     """
-    Wrapper on the 'kubectl proxy' command, for consistency with 'az dcos browse'
+    Launch a proxy and browse the Kubernetes web UI.
     :param disable_browser: If true, don't launch a web browser after estabilishing the proxy
     :type disable_browser: bool
     """
@@ -166,8 +166,7 @@ def _k8s_browse_internal(name, acs_info, disable_browser, ssh_key_file):
     subprocess.call(["kubectl", "--kubeconfig", browse_path, "proxy"])
 
 
-def dcos_browse(name, resource_group, disable_browser=False,
-                ssh_key_file=os.path.join(os.path.expanduser("~"), '.ssh', 'id_rsa')):
+def dcos_browse(name, resource_group, disable_browser=False, ssh_key_file=None):
     """
     Creates an SSH tunnel to the Azure container service, and opens the Mesosphere DC/OS dashboard in the browser.
 
@@ -185,6 +184,9 @@ def dcos_browse(name, resource_group, disable_browser=False,
 
 
 def _dcos_browse_internal(acs_info, disable_browser, ssh_key_file):
+    if not os.path.isfile(ssh_key_file):
+        raise CLIError('Private key file {} does not exist'.format(ssh_key_file))
+
     acs = acs_client.ACSClient()
     if not acs.connect(_get_host_name(acs_info), _get_username(acs_info),
                        key_filename=ssh_key_file):
@@ -256,7 +258,7 @@ def dcos_install_cli(install_location=None, client_version='1.8'):
     else:
         raise CLIError('Proxy server ({}) does not exist on the cluster.'.format(system))
 
-    logger.info('Downloading client to %s', install_location)
+    logger.warning('Downloading client to %s', install_location)
     try:
         urlretrieve(file_url, install_location)
         os.chmod(install_location,
@@ -265,13 +267,18 @@ def dcos_install_cli(install_location=None, client_version='1.8'):
         raise CLIError('Connection error while attempting to download client ({})'.format(err))
 
 
-def k8s_install_cli(client_version="1.5.1", install_location=None):
+def k8s_install_cli(client_version='latest', install_location=None):
     """
     Downloads the kubectl command line from Kubernetes
     """
+
+    if client_version == 'latest':
+        version = urlopen('https://storage.googleapis.com/kubernetes-release/release/stable.txt').read()
+        client_version = version.decode('UTF-8').strip()
+
     file_url = ''
     system = platform.system()
-    base_url = 'https://storage.googleapis.com/kubernetes-release/release/v{}/bin/{}/amd64/{}'
+    base_url = 'https://storage.googleapis.com/kubernetes-release/release/{}/bin/{}/amd64/{}'
     if system == 'Windows':
         file_url = base_url.format(client_version, 'windows', 'kubectl.exe')
     elif system == 'Linux':
@@ -282,7 +289,7 @@ def k8s_install_cli(client_version="1.5.1", install_location=None):
     else:
         raise CLIError('Proxy server ({}) does not exist on the cluster.'.format(system))
 
-    logger.info('Downloading client to %s', install_location)
+    logger.warning('Downloading client to %s from %s', install_location, file_url)
     try:
         urlretrieve(file_url, install_location)
         os.chmod(install_location,
@@ -346,12 +353,12 @@ def _get_subscription_id():
     return sub_id
 
 
-def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None,
-               content_version=None, admin_username="azureuser", agent_count="3",
-               agent_vm_size="Standard_D2_v2", location=None, master_count="3",
+def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None,  # pylint: disable=too-many-locals
+               admin_username="azureuser", agent_count=3,
+               agent_vm_size="Standard_D2_v2", location=None, master_count=1,
                orchestrator_type="dcos", service_principal=None, client_secret=None, tags=None,
-               custom_headers=None, windows=False, admin_password="", raw=False,
-               **operation_config):  # pylint: disable=too-many-locals
+               windows=False, admin_password="", generate_ssh_keys=False,  # pylint: disable=unused-argument
+               validate=False, no_wait=False):
     """Create a new Acs.
     :param resource_group_name: The name of the resource group. The name
      is case insensitive.
@@ -377,13 +384,13 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     :param agent_count: The number of agents for the cluster.  Note, for
      DC/OS clusters you will also get 1 or 2 public agents in addition to
      these selected masters.
-    :type agent_count: str
+    :type agent_count: int
     :param agent_vm_size: The size of the Virtual Machine.
     :type agent_vm_size: str
     :param location: Location for VM resources.
     :type location: str
     :param master_count: The number of masters for the cluster.
-    :type master_count: str
+    :type master_count: int
     :param orchestrator_type: The type of orchestrator used to manage the
      applications on the cluster. Possible values include: 'dcos', 'swarm'
     :type orchestrator_type: str or :class:`orchestratorType
@@ -398,7 +405,6 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
      and stored in ${HOME}/.azure/ directory.
     :param tags: Tags object.
     :type tags: object
-    :param dict custom_headers: headers that will be added to the request
     :param windows: If true, the cluster will be built for running Windows container.
     :type windows: bool
     :param admin_password: The adminstration password for Windows nodes. Only available if --windows=true
@@ -424,7 +430,7 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     register_providers()
     groups = _resource_client_factory().resource_groups
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
-    groups.get(resource_group_name)
+    rg = groups.get(resource_group_name)
 
     if orchestrator_type == 'Kubernetes' or orchestrator_type == 'kubernetes':
         # TODO: This really needs to be broken out and unit tested.
@@ -455,23 +461,22 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
             if not client_secret:
                 raise CLIError('--client-secret is required if --service-principal is specified')
             _validate_service_principal(client, service_principal)
+
         return _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name,
                                   ssh_key_value, admin_username=admin_username,
                                   agent_count=agent_count, agent_vm_size=agent_vm_size,
                                   location=location, service_principal=service_principal,
                                   client_secret=client_secret, master_count=master_count,
-                                  windows=windows, admin_password=admin_password)
+                                  windows=windows, admin_password=admin_password,
+                                  validate=validate, no_wait=no_wait, tags=tags)
+
     if windows:
         raise CLIError('--windows is only supported for Kubernetes clusters')
-
-    ops = get_mgmt_service_client(ACSClient).acs
-    return ops.create_or_update(resource_group_name, deployment_name, dns_name_prefix, name,
-                                ssh_key_value, content_version=content_version,
-                                admin_username=admin_username, agent_count=agent_count,
-                                agent_vm_size=agent_vm_size, location=location,
-                                master_count=master_count, orchestrator_type=orchestrator_type,
-                                tags=tags, custom_headers=custom_headers, raw=raw,
-                                operation_config=operation_config)
+    if location is None:
+        location = rg.location  # pylint:disable=no-member
+    return _create_non_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name,
+                                  ssh_key_value, admin_username, agent_count, agent_vm_size, location,
+                                  orchestrator_type, master_count, tags, validate, no_wait)
 
 
 def store_acs_service_principal(subscription_id, client_secret, service_principal,
@@ -507,16 +512,15 @@ def load_acs_service_principals(config_path):
     fd = os.open(config_path, os.O_RDONLY)
     try:
         with os.fdopen(fd) as f:
-            return json.loads(f.read())
+            return shell_safe_json_parse(f.read())
     except:  # pylint: disable=bare-except
         return None
 
 
 def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name, ssh_key_value,
-                       admin_username="azureuser", agent_count="3", agent_vm_size="Standard_D2_v2",
-                       location=None, service_principal=None, client_secret=None, master_count="1",
-                       windows=False, admin_password=''):
-    from azure.mgmt.resource.resources.models import DeploymentProperties
+                       admin_username="azureuser", agent_count=3, agent_vm_size="Standard_D2_v2",
+                       location=None, service_principal=None, client_secret=None, master_count=1,
+                       windows=False, admin_password='', validate=False, no_wait=False, tags=None):
     if not location:
         location = '[resourceGroup().location]'
     windows_profile = None
@@ -549,6 +553,7 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
                 "location": location,
                 "type": "Microsoft.ContainerService/containerServices",
                 "name": name,
+                "tags": tags,
                 "properties": {
                     "orchestratorProfile": {
                         "orchestratorType": "kubernetes"
@@ -590,16 +595,88 @@ def _create_kubernetes(resource_group_name, deployment_name, dns_name_prefix, na
             "value": client_secret
         }
     }
-    properties = DeploymentProperties(template=template, template_link=None,
-                                      parameters=params, mode='incremental')
-    smc = _resource_client_factory()
-    return smc.deployments.create_or_update(resource_group_name, deployment_name, properties)
+
+    return _invoke_deployment(resource_group_name, deployment_name, template, params, validate, no_wait)
+
+
+def _create_non_kubernetes(resource_group_name, deployment_name, dns_name_prefix, name,
+                           ssh_key_value, admin_username, agent_count, agent_vm_size, location,
+                           orchestrator_type, master_count, tags, validate, no_wait):
+    template = {
+        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+        "contentVersion": "1.0.0.0",
+        "resources": [
+            {
+                "apiVersion": "2016-03-30",
+                "type": "Microsoft.ContainerService/containerServices",
+                "location": location,
+                "tags": tags,
+                "name": name,
+                "properties": {
+                    "orchestratorProfile": {
+                        "orchestratorType": orchestrator_type
+                    },
+                    "masterProfile": {
+                        "count": master_count,
+                        "dnsPrefix": dns_name_prefix + 'mgmt'
+                    },
+                    "agentPoolProfiles": [
+                        {
+                            "name": "agentpools",
+                            "count": agent_count,
+                            "vmSize": agent_vm_size,
+                            "dnsPrefix": dns_name_prefix + 'agents'
+                        }
+                    ],
+                    "linuxProfile": {
+                        "adminUsername": admin_username,
+                        "ssh": {
+                            "publicKeys": [
+                                {
+                                    "keyData": ssh_key_value
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        ],
+        "outputs": {
+            "masterFQDN": {
+                "type": "string",
+                "value": "[reference(concat('Microsoft.ContainerService/containerServices/', '{}')).masterProfile.fqdn]".format(name)
+            },
+            "sshMaster0": {
+                "type": "string",
+                "value": "[concat('ssh ', '{0}', '@', reference(concat('Microsoft.ContainerService/containerServices/', '{1}')).masterProfile.fqdn, ' -A -p 2200')]".format(admin_username, name)
+            },
+            "agentFQDN": {
+                "type": "string",
+                "value": "[reference(concat('Microsoft.ContainerService/containerServices/', '{}')).agentPoolProfiles[0].fqdn]".format(name)
+            }
+        }
+    }
+    return _invoke_deployment(resource_group_name, deployment_name, template, {}, validate, no_wait)
+
+
+def _invoke_deployment(resource_group_name, deployment_name, template, parameters, validate, no_wait):
+    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource.resources.models import DeploymentProperties
+
+    properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
+    smc = get_mgmt_service_client(ResourceManagementClient).deployments
+    if validate:
+        logger.info('==== BEGIN TEMPLATE ====')
+        logger.info(json.dumps(template, indent=2))
+        logger.info('==== END TEMPLATE ====')
+        return smc.validate(resource_group_name, deployment_name, properties)
+    return smc.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
 
 
 def k8s_get_credentials(name, resource_group_name,
                         path=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
-                        ssh_key_file=os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa')):
-    """Create a new Acs.
+                        ssh_key_file=None):
+    """Download and install kubectl credentials from the cluster master
     :param name: The name of the cluster.
     :type name: str
     :param resource_group_name: The name of the resource group.
@@ -614,6 +691,9 @@ def k8s_get_credentials(name, resource_group_name,
 
 
 def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file):
+    if ssh_key_file is not None and not os.path.isfile(ssh_key_file):
+        raise CLIError('Private key file {} does not exist'.format(ssh_key_file))
+
     dns_prefix = acs_info.master_profile.dns_prefix  # pylint: disable=no-member
     location = acs_info.location  # pylint: disable=no-member
     user = acs_info.linux_profile.admin_username  # pylint: disable=no-member
@@ -639,17 +719,49 @@ def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file):
             logger.warning('The credentials have been saved to %s', path_candidate)
 
 
+def _handle_merge(existing, addition, key):
+    if addition[key]:
+        if existing[key] is None:
+            existing[key] = addition[key]
+            return
+
+        for i in addition[key]:
+            if i not in existing[key]:
+                existing[key].append(i)
+
+
 def merge_kubernetes_configurations(existing_file, addition_file):
-    with open(existing_file) as stream:
-        existing = yaml.load(stream)
+    try:
+        with open(existing_file) as stream:
+            existing = yaml.safe_load(stream)
+    except (IOError, OSError) as ex:
+        if getattr(ex, 'errno', 0) == errno.ENOENT:
+            raise CLIError('{} does not exist'.format(existing_file))
+        else:
+            raise
+    except yaml.parser.ParserError as ex:
+        raise CLIError('Error parsing {} ({})'.format(existing_file, str(ex)))
 
-    with open(addition_file) as stream:
-        addition = yaml.load(stream)
+    if existing is None:
+        raise CLIError('failed to load existing configuration from {}'.format(existing_file))
 
-    # TODO: this will always add, we should only add if not present
-    existing['clusters'].extend(addition['clusters'])
-    existing['users'].extend(addition['users'])
-    existing['contexts'].extend(addition['contexts'])
+    try:
+        with open(addition_file) as stream:
+            addition = yaml.safe_load(stream)
+    except (IOError, OSError) as ex:
+        if getattr(ex, 'errno', 0) == errno.ENOENT:
+            raise CLIError('{} does not exist'.format(existing_file))
+        else:
+            raise
+    except yaml.parser.ParserError as ex:
+        raise CLIError('Error parsing {} ({})'.format(addition_file, str(ex)))
+
+    if addition is None:
+        raise CLIError('failed to load additional configuration from {}'.format(addition_file))
+
+    _handle_merge(existing, addition, 'clusters')
+    _handle_merge(existing, addition, 'users')
+    _handle_merge(existing, addition, 'contexts')
     existing['current-context'] = addition['current-context']
 
     with open(existing_file, 'w+') as stream:
@@ -693,7 +805,7 @@ def _get_acs_info(name, resource_group_name):
     :param resource_group_name: Resource group name
     :type resource_group_name: String
     """
-    mgmt_client = get_mgmt_service_client(ComputeManagementClient)
+    mgmt_client = get_mgmt_service_client(ResourceType.MGMT_CONTAINER_SERVICE)
     return mgmt_client.container_services.get(resource_group_name, name)
 
 
@@ -724,6 +836,9 @@ def update_acs(client, resource_group_name, container_service_name, new_agent_co
     if instance.orchestrator_profile.orchestrator_type == ContainerServiceOchestratorTypes.kubernetes:
         instance.service_principal_profile = None
 
+    # null out the windows profile so that validation doesn't complain about not having the admin password
+    instance.windows_profile = None
+
     return client.create_or_update(resource_group_name, container_service_name, instance)
 
 
@@ -751,7 +866,7 @@ def _resolve_service_principal(client, identifier):
         raise CLIError("service principal '{}' doesn't exist".format(identifier))
 
 
-def create_application(client, display_name, homepage, identifier_uris,  # pylint: disable=too-many-arguments
+def create_application(client, display_name, homepage, identifier_uris,
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None,
                        end_date=None):
@@ -768,7 +883,7 @@ def create_application(client, display_name, homepage, identifier_uris,  # pylin
     return client.create(app_create_param)
 
 
-def _build_application_creds(password=None, key_value=None, key_type=None,  # pylint: disable=too-many-arguments
+def _build_application_creds(password=None, key_value=None, key_type=None,
                              key_usage=None, start_date=None, end_date=None):
     if password and key_value:
         raise CLIError('specify either --password or --key-value, but not both.')
@@ -825,7 +940,7 @@ def create_role_assignment(role, assignee, resource_group_name=None, scope=None)
     return _create_role_assignment(role, assignee, resource_group_name, scope)
 
 
-def _create_role_assignment(role, assignee, resource_group_name=None, scope=None,  # pylint: disable=too-many-arguments
+def _create_role_assignment(role, assignee, resource_group_name=None, scope=None,
                             resolve_assignee=True):
     factory = _auth_client_factory(scope)
     assignments_client = factory.role_assignments

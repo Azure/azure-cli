@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps
+# pylint: disable=line-too-long, too-many-lines
 
-# pylint: disable=line-too-long
+from azure.cli.core.help_files import helps
 
 image_long_summary = """                      URN aliases: CentOS, CoreOS, Debian, openSUSE, RHEL, SLES, UbuntuLTS, Win2008R2SP1, Win2012Datacenter, Win2012R2Datacenter.
                       Example URN: MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest
@@ -146,7 +146,7 @@ helps['vm availability-set create'] = """
     long-summary: For more information, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-manage-availability.
     examples:
         - name: Create an availability set.
-          text: az vm availability-set create -n MyAvSet -g MyResourceGroup
+          text: az vm availability-set create -n MyAvSet -g MyResourceGroup --platform-fault-domain-count 2 --platform-update-domain-count 2
 """
 
 helps['vm availability-set update'] = """
@@ -239,11 +239,6 @@ helps['vm update'] = """
           text: az <command> -n name -g group --remove networkProfile.networkInterfaces 3
 """.format(generic_update_help)
 
-helps['vm show'] = """
-    type: command
-    short-summary: Get information about an Azure Virtual Machine.
-"""
-
 helps['vmss get-instance-view'] = """
     type: command
     parameters:
@@ -258,11 +253,31 @@ helps['vmss reimage'] = """
           short-summary: "One or more VM scale sets or specific VM instance IDs. If provided, no other 'Resource Id' arguments should be specified."
 """
 
+helps['vmss disk'] = """
+    type: group
+    short-summary: Manage the managed data disks associated with a virtual machine scale set.
+"""
+
+helps['vmss nic'] = """
+    type: group
+    short-summary: Manage the network interfaces associated with a virtual machine scale set.
+"""
+
 helps['vmss show'] = """
     type: command
     parameters:
         - name: --ids
           short-summary: "One or more VM scale sets or specific VM instance IDs. If provided, no other 'Resource Id' arguments should be specified."
+"""
+
+helps['vmss update'] = """
+    type: command
+    short-summary: Update a virtual machine scale set.
+"""
+
+helps['vmss wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the scale set is met.
 """
 
 helps['vm convert'] = """
@@ -371,7 +386,7 @@ helps['acs create'] = """
     examples:
         - name: Create a Kubernetes container service and generate keys.
           text: >
-            az acs create -g MyResourceGroup -n MyContainer_service --orchestrator-type kubernetes --generate-ssh-keys
+            az acs create -g MyResourceGroup -n MyContainerService --orchestrator-type kubernetes --generate-ssh-keys
 """
 
 helps['acs delete'] = """
@@ -445,7 +460,7 @@ disk_long_summary = """
 
 helps['vm disk'] = """
     type: group
-    short-summary: Manage the data disks attached to a VM.
+    short-summary: Manage the managed data disks attached to a VM.
     long-summary: >
 {0}
 """.format(disk_long_summary)
@@ -504,6 +519,11 @@ helps['vm disk attach'] = """
     examples:
         - name: Attach a new default sized (1023 GiB) data disk to a VM.
           text: az vm disk attach -g MyResourceGroup --vm-name MyVm --disk disk_name --new
+"""
+
+helps['vm encryption'] = """
+    type: group
+    short-summary: Manage encryption of VM disks.
 """
 
 helps['vm extension'] = """
@@ -752,7 +772,7 @@ helps['vm delete'] = """
     examples:
         - name: Delete a VM without a prompt for confirmation.
           text: >
-            az vm delete -g MyResourceGroup -n MyVm --force
+            az vm delete -g MyResourceGroup -n MyVm --yes
 {0}
 """.format(vm_ids_example.format('Delete a virtual machine by Ids', 'vm delete'))
 
@@ -842,6 +862,7 @@ helps['vm redeploy'] = """
 
 helps['vm resize'] = """
     type: command
+    short-summary: Update VM size.
     examples:
         - name: Resize a VM.
           text: az vm resize -g MyResourceGroup -n MyVm --size Standard_DS3_v2
@@ -858,6 +879,7 @@ helps['vm restart'] = """
 
 helps['vm show'] = """
     type: command
+    short-summary: Show details of a VM.
     examples:
         - name: Show information about a VM.
           text: az vm show -g MyResourceGroup -n MyVm -d

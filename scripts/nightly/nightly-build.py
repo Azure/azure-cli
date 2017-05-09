@@ -15,6 +15,7 @@ PATH_TO_COMMAND_MODULES = '/azure-cli/src/command_modules'
 PATH_TO_AZURE_CLI = '/azure-cli/src/azure-cli'
 PATH_TO_AZURE_CLI_CORE = '/azure-cli/src/azure-cli-core'
 PATH_TO_AZURE_CLI_NSPKG = '/azure-cli/src/azure-cli-nspkg'
+PATH_TO_AZURE_CLI_COMMAND_MODS_NSPKG = '/azure-cli/src/azure-cli-command_modules-nspkg'
 BLOB_SERVICE_CONNECTION_STRING = os.environ.get('AZURE_STORAGE_CONNECTION_STRING')
 CONTAINER_NAME = 'packages'
 PATTERN_PKG_NAME = re.compile(r"([a-z\-]*)-([0-9])")
@@ -34,7 +35,7 @@ def print_heading(heading, f=None):
 
 def build_package(path_to_package, dist_dir):
     print_heading('Building {}'.format(path_to_package))
-    check_call('python setup.py sdist -d {}'.format(dist_dir).split(), cwd=path_to_package)
+    check_call('python setup.py bdist_wheel -d {0} sdist -d {0}'.format(dist_dir).split(), cwd=path_to_package)
     print_heading('Built {}'.format(path_to_package))
 
 UPLOADED_PACKAGE_LINKS = []
@@ -68,7 +69,8 @@ def gen_pkg_index_html(service, pkg_name):
 def upload_package(service, file_path):
     print_heading('Uploading {}'.format(file_path))
     file_name = os.path.basename(file_path)
-    pkg_name = re.match(PATTERN_PKG_NAME, file_name).group(1)
+    norm_file_name = file_name.replace('_', '-') if file_name.endswith('.whl') else file_name
+    pkg_name = re.match(PATTERN_PKG_NAME, norm_file_name).group(1)
     blob_name = '{}/{}'.format(pkg_name, file_name)
     service.create_blob_from_path(
         container_name=CONTAINER_NAME,
@@ -86,6 +88,7 @@ pkg_dir = tempfile.mkdtemp()
 build_package(PATH_TO_AZURE_CLI, pkg_dir)
 build_package(PATH_TO_AZURE_CLI_CORE, pkg_dir)
 build_package(PATH_TO_AZURE_CLI_NSPKG, pkg_dir)
+build_package(PATH_TO_AZURE_CLI_COMMAND_MODS_NSPKG, pkg_dir)
 for name, fullpath in all_command_modules:
     build_package(fullpath, pkg_dir)
 

@@ -6,11 +6,6 @@
 import os
 import json
 
-from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
-
-from msrest.serialization import Deserializer
-from msrest.exceptions import DeserializationError
-
 
 def load_node_agent_skus(prefix, **kwargs):  # pylint: disable=unused-argument
     from msrest.exceptions import ClientRequestError
@@ -41,6 +36,8 @@ def load_node_agent_skus(prefix, **kwargs):  # pylint: disable=unused-argument
 
 def datetime_format(value):
     """Validate the correct format of a datetime string and deserialize."""
+    from msrest.serialization import Deserializer
+    from msrest.exceptions import DeserializationError
     try:
         datetime_obj = Deserializer.deserialize_iso(value)
     except DeserializationError:
@@ -51,6 +48,8 @@ def datetime_format(value):
 
 def duration_format(value):
     """Validate the correct format of a timespan string and deserilize."""
+    from msrest.serialization import Deserializer
+    from msrest.exceptions import DeserializationError
     try:
         duration_obj = Deserializer.deserialize_duration(value)
     except DeserializationError:
@@ -131,18 +130,44 @@ def validate_required_parameter(ns, parser):
 def storage_account_id(namespace):
     """Validate storage account name"""
     from azure.mgmt.storage import StorageManagementClient
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     if (namespace.storage_account and not
             ('/providers/Microsoft.ClassicStorage/storageAccounts/' in namespace.storage_account or
              '/providers/Microsoft.Storage/storageAccounts/' in namespace.storage_account)):
-        storage_client = get_mgmt_service_client(StorageManagementClient)
+        storage_client = get_mgmt_service_client(ResourceType.MGMT_STORAGE)
         acc = storage_client.storage_accounts.get_properties(namespace.resource_group_name,
                                                              namespace.storage_account)
         if not acc:
-            raise ValueError("Batch account named '{}' not found in the resource group '{}'.".
+            raise ValueError("Storage account named '{}' not found in the resource group '{}'.".
                              format(namespace.storage_account, namespace.resource_group_name))
         namespace.storage_account = acc.id  # pylint: disable=no-member
+
+
+def keyvault_id(namespace):
+    """Validate storage account name"""
+    from azure.mgmt.keyvault import KeyVaultManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    if not namespace.keyvault:
+        return
+    if '/providers/Microsoft.KeyVault/vaults/' in namespace.keyvault:
+        resource = namespace.keyvault.split('/')
+        kv_name = resource[resource.index('Microsoft.KeyVault') + 2]
+        kv_rg = resource[resource.index('resourceGroups') + 1]
+    else:
+        kv_name = namespace.keyvault
+        kv_rg = namespace.resource_group_name
+    try:
+        keyvault_client = get_mgmt_service_client(KeyVaultManagementClient)
+        vault = keyvault_client.vaults.get(kv_rg, kv_name)
+        if not vault:
+            raise ValueError("KeyVault named '{}' not found in the resource group '{}'.".
+                             format(kv_name, kv_rg))
+        namespace.keyvault = vault.id  # pylint: disable=no-member
+        namespace.keyvault_url = vault.properties.vault_uri
+    except Exception as exp:
+        raise ValueError('Invalid KeyVault reference: {}\n{}'.format(namespace.keyvault, exp))
 
 
 def application_enabled(namespace):
@@ -225,46 +250,6 @@ def validate_file_destination(namespace):
         if os.path.isfile(file_path):
             raise ValueError("File {} already exists.".format(file_path))
         namespace.destination = file_path
-
-
-def validate_client_parameters(namespace):
-    """Retrieves Batch connection parameters from environment variables"""
-    from azure.mgmt.batch import BatchManagementClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.core._config import az_config
-
-    # simply try to retrieve the remaining variables from environment variables
-    if not namespace.account_name:
-        namespace.account_name = az_config.get('batch', 'account', None)
-    if not namespace.account_key:
-        namespace.account_key = az_config.get('batch', 'access_key', None)
-    if not namespace.account_endpoint:
-        namespace.account_endpoint = az_config.get('batch', 'endpoint', None)
-
-    # if account name is specified but no key, attempt to query if we use shared key auth
-    if namespace.account_name and namespace.account_endpoint and not namespace.account_key:
-        if az_config.get('batch', 'auth_mode', 'shared_key') == 'shared_key':
-            endpoint = urlsplit(namespace.account_endpoint)
-            host = endpoint.netloc
-            client = get_mgmt_service_client(BatchManagementClient)
-            acc = next((x for x in client.batch_account.list()
-                        if x.name == namespace.account_name and x.account_endpoint == host), None)
-            if acc:
-                from azure.cli.core.commands.arm import parse_resource_id
-                rg = parse_resource_id(acc.id)['resource_group']
-                namespace.account_key = \
-                    client.batch_account.get_keys(rg, namespace.account_name).primary  # pylint: disable=no-member
-            else:
-                raise ValueError("Batch account '{}' not found.".format(namespace.account_name))
-    else:
-        if not namespace.account_name:
-            raise ValueError("Specify batch account in command line or enviroment variable.")
-        if not namespace.account_endpoint:
-            raise ValueError("Specify batch endpoint in command line or enviroment variable.")
-
-    if az_config.get('batch', 'auth_mode', 'shared_key') == 'aad':
-        namespace.account_key = None
-
 
 # CUSTOM REQUEST VALIDATORS
 
