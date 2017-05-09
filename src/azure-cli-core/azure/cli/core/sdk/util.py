@@ -22,11 +22,13 @@ def create_service_adapter(service_model, service_class=None):
 
 # pylint: disable=too-few-public-methods
 class ServiceGroup(object):
-    def __init__(self, scope, client_factory, service_adapter=None, custom_path=None):
+    def __init__(self, scope, client_factory, service_adapter=None, custom_path=None,
+                 exception_handler=None):
         self._scope = scope
         self._factory = client_factory
         self._service_adapter = service_adapter or (lambda name: name)
         self._custom_path = custom_path
+        self._exception_handler = exception_handler
 
     def __enter__(self):
         return self
@@ -34,18 +36,21 @@ class ServiceGroup(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
-    def group(self, group_name):
+    def group(self, group_name, exception_handler=None):
         return CommandGroup(self._scope, group_name, self._factory, self._service_adapter,
-                            self._custom_path)
+                            self._custom_path,
+                            exception_handler=exception_handler or self._exception_handler)
 
 
 class CommandGroup(object):
-    def __init__(self, scope, group_name, client_factory, service_adapter=None, custom_path=None):
+    def __init__(self, scope, group_name, client_factory, service_adapter=None, custom_path=None,
+                 exception_handler=None):
         self._scope = scope
         self._group_name = group_name
         self._client_factory = client_factory
         self._service_adapter = service_adapter or (lambda name: name)
         self._custom_path = custom_path
+        self._exception_handler = exception_handler
 
     def __enter__(self):
         return self
@@ -81,14 +86,16 @@ class CommandGroup(object):
                     transform=transform,
                     table_transformer=table_transformer,
                     confirmation=confirmation,
-                    exception_handler=exception_handler)
+                    exception_handler=exception_handler or self._exception_handler)
 
-    def custom_command(self, name, custom_func_name, confirmation=None):
+    def custom_command(self, name, custom_func_name, confirmation=None,
+                       exception_handler=None):
         cli_command(self._scope,
                     '{} {}'.format(self._group_name, name),
                     self._custom_path.format(custom_func_name),
                     client_factory=self._client_factory,
-                    confirmation=confirmation)
+                    confirmation=confirmation,
+                    exception_handler=exception_handler or self._exception_handler)
 
     def generic_update_command(self, name, getter_op, setter_op, custom_func_name=None,
                                setter_arg_name='parameters'):
