@@ -19,7 +19,10 @@ def deprecate(argv):
     if argv[0] == 'documentdb':
         from azure.cli.core.util import CLIError
         raise CLIError('All documentdb commands have been renamed to cosmosdb')
+
+
 APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSING, deprecate)
+
 
 def db_accounts_factory(_):
     return cf_documentdb().database_accounts
