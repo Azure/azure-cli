@@ -46,7 +46,7 @@ def cli_cosmosdb_create(client,
                         max_staleness_prefix=100,
                         max_interval=5,
                         ip_range_filter=None,
-			enable_automatic_failover=None):
+                        enable_automatic_failover=None):
     """Create a new Azure Cosmos DB database account."""
 
     consistency_policy = None
@@ -69,7 +69,7 @@ def cli_cosmosdb_create(client,
         kind=kind,
         consistency_policy=consistency_policy,
         ip_range_filter=ip_range_filter,
-	enable_automatic_failover=enable_automatic_failover)
+        enable_automatic_failover=enable_automatic_failover)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
@@ -85,7 +85,7 @@ def cli_cosmosdb_update(client,
                         max_staleness_prefix=None,
                         max_interval=None,
                         ip_range_filter=None,
-			enable_automatic_failover=None):
+                        enable_automatic_failover=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
 
@@ -235,11 +235,11 @@ def _populate_collection_definition(collection,
 
 
 def cli_cosmosdb_collection_create(client,
-                                     database_id,
-                                     collection_id,
-                                     throughput=None,
-                                     partition_key_path=None,
-                                     indexing_policy=DEFAULT_INDEXING_POLICY):
+                                   database_id,
+                                   collection_id,
+                                   throughput=None,
+                                   partition_key_path=None,
+                                   indexing_policy=DEFAULT_INDEXING_POLICY):
     """Creates an Azure Cosmos DB collection """
     collection = {'id': collection_id}
 
@@ -267,10 +267,10 @@ def _find_offer(client, collection_self_link):
 
 
 def cli_cosmosdb_collection_update(client,
-                                     database_id,
-                                     collection_id,
-                                     throughput=None,
-                                     indexing_policy=None):
+                                   database_id,
+                                   collection_id,
+                                   throughput=None,
+                                   indexing_policy=None):
     """Updates an Azure Cosmos DB collection """
     logger.debug('reading collection')
     collection = client.ReadCollection(_get_collection_link(database_id, collection_id))
