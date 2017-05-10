@@ -178,8 +178,7 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
         except KeyError:
             template = 'To create a storage account a resource group is required. Please add ' \
                        'decorator @{} in front of this storage account preparer.'
-            raise CliTestError(template.format(ResourceGroupPreparer.__name__,
-                                               self.resource_group_parameter_name))
+            raise CliTestError(template.format(ResourceGroupPreparer.__name__))
 
 
 # KeyVault Preparer and its shorthand decorator
@@ -218,8 +217,7 @@ class KeyVaultPreparer(AbstractPreparer, SingleValueReplacer):
         except KeyError:
             template = 'To create a KeyVault a resource group is required. Please add ' \
                        'decorator @{} in front of this KeyVault preparer.'
-            raise CliTestError(template.format(KeyVaultPreparer.__name__,
-                                               self.resource_group_parameter_name))
+            raise CliTestError(template.format(KeyVaultPreparer.__name__))
 
 
 # Role based access control service principal preparer

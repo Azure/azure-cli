@@ -26,7 +26,9 @@ class RbacSPSecretScenarioTest(LiveTest):
 
         sp_name = 'http://{}'.format(resource_group)
         self.cmd('ad sp create-for-rbac -n {}2'.format(sp_name))
-        self.cmd('ad app delete --id {}2'.format(sp_name))
+        self.cmd('ad app delete --id {}2'.format(sp_name), checks=[
+            JMESPathCheckV2('name', sp_name)
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_create_rbac_sp_with_password')
     def test_create_for_rbac_with_secret(self, resource_group):
@@ -84,7 +86,9 @@ class RbacSPKeyVaultScenarioTest(LiveTest):
 
         self.cmd('ad sp create-for-rbac --scopes {0} {0}/resourceGroups/{1} --create-cert --keyvault {2} --cert {3} -n {4}'.format(
             scope, resource_group, key_vault, cert_name, sp_name)).get_output_in_json()
+        self.cmd('keyvault certificate show --vault-name {0} -n {1}'.format(key_vault, cert_name))
         self.cmd('ad sp reset-credentials -n {0} --create-cert --keyvault {1} --cert {2}'.format(sp_name, key_vault, cert_name))
+        self.cmd('keyvault certificate show --vault-name {0} -n {1}'.format(key_vault, cert_name))
         self.cmd('ad app delete --id {}'.format(sp_name))
 
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_existing_cert')

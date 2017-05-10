@@ -25,7 +25,7 @@ helps['ad sp create-for-rbac'] = """
           short-summary: Create a self-signed certificate to use for the credential.
           long-summary: Use with --key-vault to create the certificate in Key Vault. Otherwise, a
             certificate will be created locally.
-        - name: --key-vault
+        - name: --keyvault
           short-summary: Name or ID of a KeyVault to use for creating or retrieving certificates.
         - name: --years
           short-summary: >
@@ -80,16 +80,11 @@ helps['ad sp reset-credentials'] = """
           short-summary: Create a self-signed certificate to use for the credential.
           long-summary: Use with --key-vault to create the certificate in Key Vault. Otherwise, a
             certificate will be created locally.
-        - name: --key-vault
+        - name: --keyvault
           short-summary: Name or ID of a KeyVault to use for creating or retrieving certificates.
         - name: --years
           short-summary: >
             Number of years for which the credentials will be valid. Default: 1 year
-        - name: --scopes
-          short-summary: Space-separated list of scopes the service principal's role assignment applies to.
-            Defaults to the root of the current subscription.
-        - name: --role
-          short-summary: Role the service principal has in regard to resources.
 """
 
 helps['role'] = """

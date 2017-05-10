@@ -741,6 +741,7 @@ def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-
 
 
 def _create_self_signed_cert_with_keyvault(years, keyvault, keyvault_cert_name):  # pylint: disable=too-many-locals
+    from azure.cli.core._profile import CLOUD
     import base64
     from os import path
     import tempfile
@@ -783,13 +784,13 @@ def _create_self_signed_cert_with_keyvault(years, keyvault, keyvault_cert_name):
             'validity_in_months': ((years * 12) + 1)
         }
     }
-    vault_base_url = 'https://{}.vault.azure.net/'.format(keyvault)
+    vault_base_url = 'https://{}{}/'.format(keyvault, CLOUD.suffixes.keyvault_dns)
     kv_client.create_certificate(vault_base_url, keyvault_cert_name, cert_policy)
     while kv_client.get_certificate_operation(vault_base_url, keyvault_cert_name).status != 'completed':  # pylint: disable=no-member, line-too-long
         time.sleep(5)
 
     cert_id = \
-        'https://{}.vault.azure.net/certificates/{}'.format(keyvault, keyvault_cert_name)
+        'https://{}{}/certificates/{}'.format(keyvault, CLOUD.suffixes.keyvault_dns, keyvault_cert_name)
     cert = kv_client.get_certificate(cert_id)
     cert_string = base64.b64encode(cert.cer).decode('utf-8')  # pylint: disable=no-member
     cert_start_date = cert.attributes.not_before  # pylint: disable=no-member
