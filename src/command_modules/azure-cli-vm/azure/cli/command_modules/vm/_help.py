@@ -434,12 +434,11 @@ helps['vm diagnostics set'] = """
         - name: Set up default diagnostics on a Linux VM for Azure Portal VM metrics graphs and syslog collection.
           text: >
             # Set the following 3 parameters correctly first.\n\r
-            my_resource_group=<Your Azure resource group name containing your Linux VM and the storage account>\n\r
+            my_resource_group=<Resource group name containing your Linux VM and the storage account>\n\r
             my_linux_vm=<Your Azure Linux VM name>\n\r
             my_diagnostic_storage_account=<Your Azure storage account for storing VM diagnostic data>\n\r
 
-            my_vm_resource_id=$(az vm show -g $my_resource_group -n $my_linux_vm --query id \\
-                | awk -F '"' '{ print $2 }')
+            my_vm_resource_id=$(az vm show -g $my_resource_group -n $my_linux_vm --query "id" -o tsv)\n\r
 
             default_config=$(az vm diagnostics get-default-config \\
                 | sed "s#__DIAGNOSTIC_STORAGE_ACCOUNT__#$my_diagnostic_storage_account#g" \\
@@ -447,8 +446,7 @@ helps['vm diagnostics set'] = """
 
             storage_sastoken=$(az storage account generate-sas \\
                 --account-name $my_diagnostic_storage_account --expiry 9999-12-31T23:59Z \\
-                --permissions wlacu --resource-types co --services bt \\
-                | awk -F '"' '{ print $2 }')
+                --permissions wlacu --resource-types co --services bt -o tsv)
 
             protected_settings="{'storageAccountName': '${my_diagnostic_storage_account}', \\
                 'storageAccountSasToken': '${storage_sastoken}'}"
