@@ -1623,7 +1623,8 @@ class VMSSVMsScenarioTest(ResourceGroupVCRTestBase):
     def _check_vms_power_state(self, *args):
         for iid in self.instance_ids:
             result = self.cmd('vmss get-instance-view --resource-group {} --name {} --instance-id {}'.format(self.resource_group, self.ss_name, iid))
-            self.assertTrue(result['statuses'][1]['code'] in args)
+            code = next((s['code'] for s in result['statuses'] if s['code'] in args), None)
+            self.assertTrue(code)
 
     def body(self):
         instance_list = self.cmd('vmss list-instances --resource-group {} --name {}'.format(self.resource_group, self.ss_name), checks=[
@@ -1641,7 +1642,7 @@ class VMSSVMsScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('vmss restart --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name))
         self._check_vms_power_state('PowerState/running', 'PowerState/starting')
         self.cmd('vmss stop --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name))
-        self._check_vms_power_state('PowerState/stopped')
+        self._check_vms_power_state('PowerState/stopped', 'PowerState/stopping')
         self.cmd('vmss start --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name))
         self._check_vms_power_state('PowerState/running', 'PowerState/starting')
         self.cmd('vmss deallocate --resource-group {} --name {} --instance-ids *'.format(self.resource_group, self.ss_name))
