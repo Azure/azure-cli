@@ -98,7 +98,7 @@ for scope in ['webapp', 'functionapp']:
     register_cli_argument(scope + ' deployment user', 'user_name', help='user name')
     register_cli_argument(scope + ' deployment user', 'password', help='password, will prompt if not specified')
     register_cli_argument(scope + ' deployment source', 'manual_integration', action='store_true', help='disable automatic sync between source control and web')
-    register_cli_argument(scope + ' deployment source', 'repo_url', help='repository url to pull the latest source from, e.g. https://github.com/foo/foo-web')
+    register_cli_argument(scope + ' deployment source', 'repo_url', options_list=('--repo-url', '-u'), help='repository url to pull the latest source from, e.g. https://github.com/foo/foo-web')
     register_cli_argument(scope + ' deployment source', 'branch', help='the branch name of the repository')
     register_cli_argument(scope + ' deployment source', 'cd_provider', help='type of CI/CD provider', default='kudu', **enum_choice_list(['kudu', 'vsts']))
     register_cli_argument(scope + ' deployment source', 'cd_app_type', arg_group='VSTS CD Provider', help='web application framework you used to develop your app', default='AspNetWap', **enum_choice_list(['AspNetWap', 'AspNetCore', 'NodeJSWithGulp', 'NodeJSWithGrunt']))
