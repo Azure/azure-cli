@@ -31,6 +31,7 @@ class Telemetry(TelemetryClient):
 
     start_time = None
     end_time = None
+    print('init')
 
     @_user_agrees_to_telemetry
     def track_ssg(self, gesture, cmd):
@@ -43,9 +44,10 @@ class Telemetry(TelemetryClient):
     def track_key(self, key):
         """ tracks the special key bindings """
         self.track_event('Key Press', {"key": key})
-        self.flush()
         TELTHREAD.daemon = True
+        print(TELTHREAD.is_alive)
         TELTHREAD.run()
+        print(TELTHREAD.is_alive)
 
     @_user_agrees_to_telemetry
     def start(self):
@@ -78,5 +80,7 @@ class TelThread(threading.Thread):
 TC = Telemetry(INSTRUMENTATION_KEY)
 enable(INSTRUMENTATION_KEY)
 my_context(TC)
+print('before')
 TELTHREAD = TelThread(TC.flush)
 TELTHREAD.start()
+print('after')
