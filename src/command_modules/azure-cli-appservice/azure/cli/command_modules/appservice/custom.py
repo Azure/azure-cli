@@ -471,6 +471,7 @@ def config_source_control(resource_group_name, name, repo_url, repository_type=N
                 import re
                 import time
                 ex = ex_handler_factory(no_throw=True)(ex)
+                # for non server errors(50x), just throw; otherwise retry 4 times
                 if i == 4 or not (re.findall(r'\(50\d\)', str(ex))):
                     raise
                 logger.warning('retrying %s/4', i + 1)
