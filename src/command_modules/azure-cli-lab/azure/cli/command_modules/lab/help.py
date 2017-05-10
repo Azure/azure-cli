@@ -130,6 +130,17 @@ helps['lab vm apply-artifacts'] = """
                 - name: --artifacts
                   short-summary: JSON encoded array of artifacts to be applied. Use @{file} to load from a file
             """
+helps['lab vm claim'] = """
+            type: command
+            short-summary: Take ownership of an existing virtual machine in Azure DevTest Lab.
+            parameters:
+                - name: --resource-group -g
+                  short-summary: Name of lab's resource group
+                - name: --lab-name
+                  short-summary: Name of the Lab
+                - name: --name -n
+                  short-summary: Name of the virtual machine
+            """
 helps['lab custom-image'] = """
             type: group
             short-summary: Commands to manage custom images of a DevTest Lab.

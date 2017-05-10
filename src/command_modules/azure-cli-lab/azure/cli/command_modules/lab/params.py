@@ -67,6 +67,10 @@ with ParametersContext(command='lab vm list') as c:
     c.register_alias('resource_group', ('--resource-group', '-g'), validator=validate_lab_vm_list)
 
 
+with ParametersContext(command='lab vm claim') as c:
+    c.register_alias('name', ('--name', '-n'))
+
+
 with ParametersContext(command='lab vm apply-artifacts') as c:
     c.register('artifacts', ('--artifacts',), type=get_json_object, validator=_validate_artifacts)
     c.register_alias('name', ('--name', '-n'))

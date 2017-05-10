@@ -1,28 +1,27 @@
 interactions:
 - request:
-    body: '{"properties": {"template": {"contentVersion": "1.0.0.0", "resources":
-      [{"name": "[parameters(''name'')]", "resources": [{"name": "LabVmsShutdown",
-      "location": "[parameters(''regionId'')]", "apiVersion": "2016-05-15", "type":
-      "schedules", "dependsOn": ["[resourceId(''Microsoft.DevTestLab/labs'', parameters(''name''))]"],
-      "properties": {"taskType": "LabVmsShutdownTask", "timeZoneId": "Pacific Standard
-      Time", "dailyRecurrence": {"time": "1900"}, "status": "Enabled", "notificationSettings":
-      {"timeInMinutes": 15, "status": "Disabled"}}}, {"name": "[concat(''Dtl'', parameters(''name''))]",
-      "apiVersion": "2016-05-15", "location": "[parameters(''regionId'')]", "type":
-      "virtualNetworks", "dependsOn": ["[resourceId(''Microsoft.DevTestLab/labs'',
-      parameters(''name''))]"]}, {"name": "[parameters(''artifactsources_privaterepo431_name'')]",
-      "type": "microsoft.devtestlab/labs/artifactsources", "properties": {"folderPath":
-      "/Artifacts", "securityToken": "token", "sourceType":
-      "GitHub", "branchRef": "master", "armTemplateFolderPath": "Templates", "displayName":
-      "azure-devtestlabdemo", "uri": "https://github.com/vishrutshah/azure-devtestlabsdemo.git",
-      "status": "Enabled", "uniqueIdentifier": "fbfc4a86-e247-4cb5-a37d-6145da8fdc77"},
-      "apiVersion": "2016-05-15", "dependsOn": ["[resourceId(''microsoft.devtestlab/labs'',
-      parameters(''name''))]"]}], "location": "[parameters(''regionId'')]", "apiVersion":
-      "2016-05-15", "type": "Microsoft.DevTestLab/labs", "properties": {"labStorageType":
-      "Premium"}}], "parameters": {"name": {"type": "string", "defaultValue": "cliautomationlab"},
-      "regionId": {"type": "string", "defaultValue": "westus"}, "artifactsources_privaterepo431_name":
-      {"type": "String", "defaultValue": "cliautomationlab/privaterepo431"}}, "$schema":
-      "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#"},
-      "mode": "Incremental"}}'
+    body: '{"properties": {"template": {"$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "resources": [{"name": "[parameters(''name'')]",
+      "type": "Microsoft.DevTestLab/labs", "location": "[parameters(''regionId'')]",
+      "properties": {"labStorageType": "Premium"}, "resources": [{"name": "LabVmsShutdown",
+      "type": "schedules", "dependsOn": ["[resourceId(''Microsoft.DevTestLab/labs'',
+      parameters(''name''))]"], "location": "[parameters(''regionId'')]", "apiVersion":
+      "2016-05-15", "properties": {"status": "Enabled", "dailyRecurrence": {"time":
+      "1900"}, "taskType": "LabVmsShutdownTask", "timeZoneId": "Pacific Standard Time",
+      "notificationSettings": {"status": "Disabled", "timeInMinutes": 15}}}, {"name":
+      "[concat(''Dtl'', parameters(''name''))]", "type": "virtualNetworks", "dependsOn":
+      ["[resourceId(''Microsoft.DevTestLab/labs'', parameters(''name''))]"], "location":
+      "[parameters(''regionId'')]", "apiVersion": "2016-05-15"}, {"name": "[parameters(''artifactsources_privaterepo431_name'')]",
+      "type": "microsoft.devtestlab/labs/artifactsources", "dependsOn": ["[resourceId(''microsoft.devtestlab/labs'',
+      parameters(''name''))]"], "apiVersion": "2016-05-15", "properties": {"uri":
+      "https://github.com/vishrutshah/azure-devtestlabsdemo.git", "status": "Enabled",
+      "branchRef": "master", "uniqueIdentifier": "fbfc4a86-e247-4cb5-a37d-6145da8fdc77",
+      "sourceType": "GitHub", "securityToken": "token",
+      "folderPath": "/Artifacts", "armTemplateFolderPath": "Templates", "displayName":
+      "azure-devtestlabdemo"}}], "apiVersion": "2016-05-15"}], "parameters": {"name":
+      {"type": "string", "defaultValue": "cliautomationlab"}, "artifactsources_privaterepo431_name":
+      {"type": "String", "defaultValue": "cliautomationlab/privaterepo431"}, "regionId":
+      {"type": "string", "defaultValue": "westus"}}}, "mode": "Incremental"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -30,20 +29,20 @@ interactions:
       Content-Length: ['1885']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 resourcemanagementclient/1.1.0rc1 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [21dbe5a2-2b7f-11e7-9a6f-f45c89b0bb23]
+      x-ms-client-request-id: [bb0ee242-35ca-11e7-9f1d-f45c89b0bb23]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Resources/deployments/lab_template","name":"lab_template","properties":{"templateHash":"18396139620452816231","parameters":{"name":{"type":"String","value":"cliautomationlab"},"regionId":{"type":"String","value":"westus"},"artifactsources_privaterepo431_name":{"type":"String","value":"cliautomationlab/privaterepo431"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-04-27T19:24:30.2190358Z","duration":"PT0.6662346S","correlationId":"3db1ce9f-81bd-4c69-842b-1340d82a47ca","providers":[{"namespace":"Microsoft.DevTestLab","resourceTypes":[{"resourceType":"labs","locations":["westus"]},{"resourceType":"labs/schedules","locations":["westus"]},{"resourceType":"labs/virtualNetworks","locations":["westus"]},{"resourceType":"labs/artifactsources","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab","resourceType":"Microsoft.DevTestLab/labs","resourceName":"cliautomationlab"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/schedules/LabVmsShutdown","resourceType":"Microsoft.DevTestLab/labs/schedules","resourceName":"cliautomationlab/LabVmsShutdown"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab","resourceType":"Microsoft.DevTestLab/labs","resourceName":"cliautomationlab"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualNetworks/Dtlcliautomationlab","resourceType":"Microsoft.DevTestLab/labs/virtualNetworks","resourceName":"cliautomationlab/Dtlcliautomationlab"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab","resourceType":"microsoft.devtestlab/labs","resourceName":"cliautomationlab"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab/artifactsources/privaterepo431","resourceType":"microsoft.devtestlab/labs/artifactsources","resourceName":"cliautomationlab/privaterepo431"}]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Resources/deployments/lab_template","name":"lab_template","properties":{"templateHash":"9864774741838065661","parameters":{"name":{"type":"String","value":"cliautomationlab"},"artifactsources_privaterepo431_name":{"type":"String","value":"cliautomationlab/privaterepo431"},"regionId":{"type":"String","value":"westus"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-05-10T21:50:50.8938232Z","duration":"PT0.4068706S","correlationId":"4c3e1308-7b88-4d78-9dcb-8f8bad62f192","providers":[{"namespace":"Microsoft.DevTestLab","resourceTypes":[{"resourceType":"labs","locations":["westus"]},{"resourceType":"labs/schedules","locations":["westus"]},{"resourceType":"labs/virtualNetworks","locations":["westus"]},{"resourceType":"labs/artifactsources","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab","resourceType":"Microsoft.DevTestLab/labs","resourceName":"cliautomationlab"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/schedules/LabVmsShutdown","resourceType":"Microsoft.DevTestLab/labs/schedules","resourceName":"cliautomationlab/LabVmsShutdown"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab","resourceType":"Microsoft.DevTestLab/labs","resourceName":"cliautomationlab"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualNetworks/Dtlcliautomationlab","resourceType":"Microsoft.DevTestLab/labs/virtualNetworks","resourceName":"cliautomationlab/Dtlcliautomationlab"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab","resourceType":"microsoft.devtestlab/labs","resourceName":"cliautomationlab"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab/artifactsources/privaterepo431","resourceType":"microsoft.devtestlab/labs/artifactsources","resourceName":"cliautomationlab/privaterepo431"}]}}'}
     headers:
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/resourcegroups/cliautomation/providers/Microsoft.Resources/deployments/lab_template/operationStatuses/08587082858159248185?api-version=2017-05-10']
+      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/resourcegroups/cliautomation/providers/Microsoft.Resources/deployments/lab_template/operationStatuses/08587071538349906674?api-version=2017-05-10']
       Cache-Control: [no-cache]
-      Content-Length: ['2506']
+      Content-Length: ['2505']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:24:30 GMT']
+      Date: ['Wed, 10 May 2017 21:50:50 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
@@ -57,18 +56,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 resourcemanagementclient/1.1.0rc1 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [21dbe5a2-2b7f-11e7-9a6f-f45c89b0bb23]
+      x-ms-client-request-id: [bb0ee242-35ca-11e7-9f1d-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587082858159248185?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587071538349906674?api-version=2017-05-10
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:25:00 GMT']
+      Date: ['Wed, 10 May 2017 21:51:21 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
@@ -83,18 +82,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 resourcemanagementclient/1.1.0rc1 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [21dbe5a2-2b7f-11e7-9a6f-f45c89b0bb23]
+      x-ms-client-request-id: [bb0ee242-35ca-11e7-9f1d-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587082858159248185?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587071538349906674?api-version=2017-05-10
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:25:31 GMT']
+      Date: ['Wed, 10 May 2017 21:51:52 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
@@ -109,18 +108,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 resourcemanagementclient/1.1.0rc1 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [21dbe5a2-2b7f-11e7-9a6f-f45c89b0bb23]
+      x-ms-client-request-id: [bb0ee242-35ca-11e7-9f1d-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587082858159248185?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587071538349906674?api-version=2017-05-10
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:26:01 GMT']
+      Date: ['Wed, 10 May 2017 21:52:22 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
@@ -135,18 +134,44 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 resourcemanagementclient/1.1.0rc1 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [21dbe5a2-2b7f-11e7-9a6f-f45c89b0bb23]
+      x-ms-client-request-id: [bb0ee242-35ca-11e7-9f1d-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587082858159248185?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587071538349906674?api-version=2017-05-10
+  response:
+    body: {string: '{"status":"Running"}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 10 May 2017 21:52:53 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Vary: [Accept-Encoding]
+      content-length: ['20']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 resourcemanagementclient/1.1.0rc1 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.6+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [bb0ee242-35ca-11e7-9f1d-f45c89b0bb23]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08587071538349906674?api-version=2017-05-10
   response:
     body: {string: '{"status":"Succeeded"}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:26:32 GMT']
+      Date: ['Wed, 10 May 2017 21:53:24 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
@@ -161,23 +186,23 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 resourcemanagementclient/1.0.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 resourcemanagementclient/1.1.0rc1 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [21dbe5a2-2b7f-11e7-9a6f-f45c89b0bb23]
+      x-ms-client-request-id: [bb0ee242-35ca-11e7-9f1d-f45c89b0bb23]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Resources/deployments/lab_template","name":"lab_template","properties":{"templateHash":"18396139620452816231","parameters":{"name":{"type":"String","value":"cliautomationlab"},"regionId":{"type":"String","value":"westus"},"artifactsources_privaterepo431_name":{"type":"String","value":"cliautomationlab/privaterepo431"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-04-27T19:26:13.8450377Z","duration":"PT1M44.2922365S","correlationId":"3db1ce9f-81bd-4c69-842b-1340d82a47ca","providers":[{"namespace":"Microsoft.DevTestLab","resourceTypes":[{"resourceType":"labs","locations":["westus"]},{"resourceType":"labs/schedules","locations":["westus"]},{"resourceType":"labs/virtualNetworks","locations":["westus"]},{"resourceType":"labs/artifactsources","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab","resourceType":"Microsoft.DevTestLab/labs","resourceName":"cliautomationlab"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/schedules/LabVmsShutdown","resourceType":"Microsoft.DevTestLab/labs/schedules","resourceName":"cliautomationlab/LabVmsShutdown"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab","resourceType":"Microsoft.DevTestLab/labs","resourceName":"cliautomationlab"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualNetworks/Dtlcliautomationlab","resourceType":"Microsoft.DevTestLab/labs/virtualNetworks","resourceName":"cliautomationlab/Dtlcliautomationlab"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab","resourceType":"microsoft.devtestlab/labs","resourceName":"cliautomationlab"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab/artifactsources/privaterepo431","resourceType":"microsoft.devtestlab/labs/artifactsources","resourceName":"cliautomationlab/privaterepo431"}],"outputResources":[{"id":"Microsoft.DevTestLab/labs/cliautomationlab"},{"id":"microsoft.devtestlab/labs/cliautomationlab/artifactsources/privaterepo431"},{"id":"Microsoft.DevTestLab/labs/cliautomationlab/schedules/LabVmsShutdown"},{"id":"Microsoft.DevTestLab/labs/cliautomationlab/virtualNetworks/Dtlcliautomationlab"}]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Resources/deployments/lab_template","name":"lab_template","properties":{"templateHash":"9864774741838065661","parameters":{"name":{"type":"String","value":"cliautomationlab"},"artifactsources_privaterepo431_name":{"type":"String","value":"cliautomationlab/privaterepo431"},"regionId":{"type":"String","value":"westus"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-05-10T21:53:04.5060236Z","duration":"PT2M14.019071S","correlationId":"4c3e1308-7b88-4d78-9dcb-8f8bad62f192","providers":[{"namespace":"Microsoft.DevTestLab","resourceTypes":[{"resourceType":"labs","locations":["westus"]},{"resourceType":"labs/schedules","locations":["westus"]},{"resourceType":"labs/virtualNetworks","locations":["westus"]},{"resourceType":"labs/artifactsources","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab","resourceType":"Microsoft.DevTestLab/labs","resourceName":"cliautomationlab"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/schedules/LabVmsShutdown","resourceType":"Microsoft.DevTestLab/labs/schedules","resourceName":"cliautomationlab/LabVmsShutdown"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab","resourceType":"Microsoft.DevTestLab/labs","resourceName":"cliautomationlab"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualNetworks/Dtlcliautomationlab","resourceType":"Microsoft.DevTestLab/labs/virtualNetworks","resourceName":"cliautomationlab/Dtlcliautomationlab"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab","resourceType":"microsoft.devtestlab/labs","resourceName":"cliautomationlab"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab/artifactsources/privaterepo431","resourceType":"microsoft.devtestlab/labs/artifactsources","resourceName":"cliautomationlab/privaterepo431"}],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab/artifactsources/privaterepo431"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/schedules/LabVmsShutdown"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualNetworks/Dtlcliautomationlab"}]}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:26:32 GMT']
+      Date: ['Wed, 10 May 2017 21:53:24 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Vary: [Accept-Encoding]
-      content-length: ['2830']
+      content-length: ['3216']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -187,18 +212,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [6cc219ba-2b7f-11e7-a5b7-f45c89b0bb23]
+      x-ms-client-request-id: [17e6e4ec-35cb-11e7-83ff-f45c89b0bb23]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab?api-version=2016-05-15
   response:
-    body: {string: '{"properties":{"defaultStorageAccount":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Storage/storageAccounts/acliautomationlab475","defaultPremiumStorageAccount":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Storage/storageAccounts/acliautomationlab475","artifactsStorageAccount":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Storage/storageAccounts/acliautomationlab475","premiumDataDiskStorageAccount":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Storage/storageAccounts/acliautomationlab475","vaultName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.KeyVault/vaults/cliautomationlab4049","labStorageType":"Premium","createdDate":"2017-04-27T19:24:34.75643+00:00","premiumDataDisks":"Disabled","provisioningState":"Succeeded","uniqueIdentifier":"528d67b4-f895-4984-b983-8c8849f9e876"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab","name":"cliautomationlab","type":"Microsoft.DevTestLab/labs","location":"westus"}'}
+    body: {string: '{"properties":{"defaultStorageAccount":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Storage/storageAccounts/acliautomationlab4126","defaultPremiumStorageAccount":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Storage/storageAccounts/acliautomationlab4126","artifactsStorageAccount":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Storage/storageAccounts/acliautomationlab4126","premiumDataDiskStorageAccount":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Storage/storageAccounts/acliautomationlab4126","vaultName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.KeyVault/vaults/cliautomationlab758","labStorageType":"Premium","createdDate":"2017-05-10T21:50:57.7042245+00:00","premiumDataDisks":"Disabled","provisioningState":"Succeeded","uniqueIdentifier":"271b584d-c47e-482f-885e-37a16c5163c3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab","name":"cliautomationlab","type":"Microsoft.DevTestLab/labs","location":"westus"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:26:35 GMT']
+      Date: ['Wed, 10 May 2017 21:53:25 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -206,7 +231,7 @@ interactions:
       Transfer-Encoding: [chunked]
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
-      content-length: ['1326']
+      content-length: ['1331']
       x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
@@ -217,9 +242,9 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [6d7e049a-2b7f-11e7-9e49-f45c89b0bb23]
+      x-ms-client-request-id: [185cd86e-35cb-11e7-9952-f45c89b0bb23]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/galleryimages?api-version=2016-05-15&$filter=name%20eq%20%27Ubuntu%20Server%2016.04%20LTS%27
   response:
@@ -242,7 +267,7 @@ interactions:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:26:37 GMT']
+      Date: ['Wed, 10 May 2017 21:53:28 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -262,18 +287,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [6f33b7be-2b7f-11e7-b28a-f45c89b0bb23]
+      x-ms-client-request-id: [1a322518-35cb-11e7-b928-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualnetworks?$top=1&api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualnetworks?api-version=2016-05-15&$top=1
   response:
-    body: {string: '{"value":[{"properties":{"allowedSubnets":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/subnets/DtlcliautomationlabSubnet","labSubnetName":"DtlcliautomationlabSubnet","allowPublicIp":"Allow"}],"externalProviderResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab","subnetOverrides":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/subnets/DtlcliautomationlabSubnet","labSubnetName":"DtlcliautomationlabSubnet","useInVmCreationPermission":"Allow","usePublicIpAddressPermission":"Allow","sharedPublicIpAddressConfiguration":{"allowedPorts":[{"transportProtocol":"Tcp","backendPort":3389},{"transportProtocol":"Tcp","backendPort":22}]}}],"createdDate":"2017-04-27T19:25:16.5787581+00:00","provisioningState":"Succeeded","uniqueIdentifier":"7d048667-2dc6-44bf-8d89-99017eece29f"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab/virtualnetworks/dtlcliautomationlab","name":"Dtlcliautomationlab","type":"Microsoft.DevTestLab/labs/virtualNetworks"}]}'}
+    body: {string: '{"value":[{"properties":{"allowedSubnets":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/subnets/DtlcliautomationlabSubnet","labSubnetName":"DtlcliautomationlabSubnet","allowPublicIp":"Allow"}],"externalProviderResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab","subnetOverrides":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/subnets/DtlcliautomationlabSubnet","labSubnetName":"DtlcliautomationlabSubnet","useInVmCreationPermission":"Allow","usePublicIpAddressPermission":"Allow","sharedPublicIpAddressConfiguration":{"allowedPorts":[{"transportProtocol":"Tcp","backendPort":3389},{"transportProtocol":"Tcp","backendPort":22}]}}],"createdDate":"2017-05-10T21:52:03.942116+00:00","provisioningState":"Succeeded","uniqueIdentifier":"5a0d1d57-c993-4d28-97ba-3a1160e93002"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab/virtualnetworks/dtlcliautomationlab","name":"Dtlcliautomationlab","type":"Microsoft.DevTestLab/labs/virtualNetworks"}]}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:26:39 GMT']
+      Date: ['Wed, 10 May 2017 21:53:30 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -281,44 +306,45 @@ interactions:
       Transfer-Encoding: [chunked]
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
-      content-length: ['1391']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualnetworks?$top=1&api-version=2016-05-15']
+      content-length: ['1390']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualnetworks?api-version=2016-05-15&$top=1']
     status: {code: 200, message: OK}
 - request:
-    body: '{"name": "ubuntuvm5367", "location": "westus", "properties": {"userName":
-      "vishrut", "allowClaim": false, "networkInterface": {"sharedPublicIpAddressConfiguration":
-      {"inboundNatRules": [{"transportProtocol": "Tcp", "backendPort": 22}]}}, "isAuthenticationWithSshKey":
-      false, "galleryImageReference": {"publisher": "Canonical", "version": "latest",
-      "offer": "UbuntuServer", "sku": "16.04-LTS", "osType": "Linux"}, "password":
-      "SecretPassword123", "size": "Standard_DS1_v2", "labSubnetName": "DtlcliautomationlabSubnet",
-      "disallowPublicIpAddress": true, "labVirtualNetworkId": "/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/resourcegroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab/virtualnetworks/dtlcliautomationlab"}}'
+    body: '{"name": "ubuntuvm5367", "location": "westus", "properties": {"labSubnetName":
+      "DtlcliautomationlabSubnet", "userName": "vishrut", "galleryImageReference":
+      {"offer": "UbuntuServer", "version": "latest", "sku": "16.04-LTS", "osType":
+      "Linux", "publisher": "Canonical"}, "allowClaim": true, "size": "Standard_DS1_v2",
+      "labVirtualNetworkId": "/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/resourcegroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab/virtualnetworks/dtlcliautomationlab",
+      "isAuthenticationWithSshKey": false, "password": "SecretPassword123", "disallowPublicIpAddress":
+      true, "networkInterface": {"sharedPublicIpAddressConfiguration": {"inboundNatRules":
+      [{"transportProtocol": "Tcp", "backendPort": 22}]}}}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Length: ['754']
+      Content-Length: ['753']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [704bf07e-2b7f-11e7-80d3-f45c89b0bb23]
+      x-ms-client-request-id: [1b5b0450-35cb-11e7-9856-f45c89b0bb23]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/createEnvironment?api-version=2016-05-15
   response:
     body: {string: ''}
     headers:
       Arr-Disable-Session-Affinity: ['True']
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-7449a896-b34a-45c6-a6d2-9d2a7330a30e?api-version=2016-05-15']
+      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15']
       Cache-Control: [no-cache]
       Content-Length: ['0']
-      Date: ['Thu, 27 Apr 2017 19:26:46 GMT']
+      Date: ['Wed, 10 May 2017 21:53:37 GMT']
       Expires: ['-1']
-      Location: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-7449a896-b34a-45c6-a6d2-9d2a7330a30e?monitor=true&api-version=2016-05-15']
+      Location: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?monitor=true&api-version=2016-05-15']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       X-Content-Type-Options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
       x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/createEnvironment?api-version=2016-05-15']
     status: {code: 202, message: Accepted}
 - request:
@@ -329,18 +355,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [704bf07e-2b7f-11e7-80d3-f45c89b0bb23]
+      x-ms-client-request-id: [1b5b0450-35cb-11e7-9856-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-7449a896-b34a-45c6-a6d2-9d2a7330a30e?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:27:16 GMT']
+      Date: ['Wed, 10 May 2017 21:54:08 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -349,7 +375,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-7449a896-b34a-45c6-a6d2-9d2a7330a30e?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -359,18 +385,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [704bf07e-2b7f-11e7-80d3-f45c89b0bb23]
+      x-ms-client-request-id: [1b5b0450-35cb-11e7-9856-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-7449a896-b34a-45c6-a6d2-9d2a7330a30e?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:27:47 GMT']
+      Date: ['Wed, 10 May 2017 21:54:38 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -379,7 +405,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-7449a896-b34a-45c6-a6d2-9d2a7330a30e?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -389,18 +415,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [704bf07e-2b7f-11e7-80d3-f45c89b0bb23]
+      x-ms-client-request-id: [1b5b0450-35cb-11e7-9856-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-7449a896-b34a-45c6-a6d2-9d2a7330a30e?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:28:18 GMT']
+      Date: ['Wed, 10 May 2017 21:55:10 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -409,7 +435,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-7449a896-b34a-45c6-a6d2-9d2a7330a30e?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -419,18 +445,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [704bf07e-2b7f-11e7-80d3-f45c89b0bb23]
+      x-ms-client-request-id: [1b5b0450-35cb-11e7-9856-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-7449a896-b34a-45c6-a6d2-9d2a7330a30e?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:28:48 GMT']
+      Date: ['Wed, 10 May 2017 21:55:40 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -439,7 +465,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-7449a896-b34a-45c6-a6d2-9d2a7330a30e?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -449,18 +475,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [704bf07e-2b7f-11e7-80d3-f45c89b0bb23]
+      x-ms-client-request-id: [1b5b0450-35cb-11e7-9856-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-7449a896-b34a-45c6-a6d2-9d2a7330a30e?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:29:18 GMT']
+      Date: ['Wed, 10 May 2017 21:56:11 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -469,7 +495,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-7449a896-b34a-45c6-a6d2-9d2a7330a30e?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -479,18 +505,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [704bf07e-2b7f-11e7-80d3-f45c89b0bb23]
+      x-ms-client-request-id: [1b5b0450-35cb-11e7-9856-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-7449a896-b34a-45c6-a6d2-9d2a7330a30e?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:29:49 GMT']
+      Date: ['Wed, 10 May 2017 21:56:41 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -499,7 +525,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-7449a896-b34a-45c6-a6d2-9d2a7330a30e?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -509,18 +535,168 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [704bf07e-2b7f-11e7-80d3-f45c89b0bb23]
+      x-ms-client-request-id: [1b5b0450-35cb-11e7-9856-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-7449a896-b34a-45c6-a6d2-9d2a7330a30e?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15
+  response:
+    body: {string: '{"status":"Running"}'}
+    headers:
+      Arr-Disable-Session-Affinity: ['True']
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 10 May 2017 21:57:12 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-IIS/8.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: ['Accept-Encoding,Accept-Encoding']
+      X-Content-Type-Options: [nosniff]
+      content-length: ['20']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [1b5b0450-35cb-11e7-9856-f45c89b0bb23]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15
+  response:
+    body: {string: '{"status":"Running"}'}
+    headers:
+      Arr-Disable-Session-Affinity: ['True']
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 10 May 2017 21:57:42 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-IIS/8.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: ['Accept-Encoding,Accept-Encoding']
+      X-Content-Type-Options: [nosniff]
+      content-length: ['20']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [1b5b0450-35cb-11e7-9856-f45c89b0bb23]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15
+  response:
+    body: {string: '{"status":"Running"}'}
+    headers:
+      Arr-Disable-Session-Affinity: ['True']
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 10 May 2017 21:58:13 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-IIS/8.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: ['Accept-Encoding,Accept-Encoding']
+      X-Content-Type-Options: [nosniff]
+      content-length: ['20']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [1b5b0450-35cb-11e7-9856-f45c89b0bb23]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15
+  response:
+    body: {string: '{"status":"Running"}'}
+    headers:
+      Arr-Disable-Session-Affinity: ['True']
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 10 May 2017 21:58:44 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-IIS/8.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: ['Accept-Encoding,Accept-Encoding']
+      X-Content-Type-Options: [nosniff]
+      content-length: ['20']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [1b5b0450-35cb-11e7-9856-f45c89b0bb23]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15
+  response:
+    body: {string: '{"status":"Running"}'}
+    headers:
+      Arr-Disable-Session-Affinity: ['True']
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 10 May 2017 21:59:15 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-IIS/8.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: ['Accept-Encoding,Accept-Encoding']
+      X-Content-Type-Options: [nosniff]
+      content-length: ['20']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [1b5b0450-35cb-11e7-9856-f45c89b0bb23]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15
   response:
     body: {string: '{"status":"Succeeded"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:30:19 GMT']
+      Date: ['Wed, 10 May 2017 21:59:46 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -529,7 +705,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['22']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-7449a896-b34a-45c6-a6d2-9d2a7330a30e?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-e19e8934-89eb-45cc-b7e2-a4d5114ce2d3?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -539,18 +715,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f3f2fa1c-2b7f-11e7-b5c6-f45c89b0bb23]
+      x-ms-client-request-id: [fbbd701e-35cb-11e7-8f51-f45c89b0bb23]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualmachines/ubuntuvm5367?api-version=2016-05-15
   response:
-    body: {string: '{"properties":{"ownerObjectId":"ed1bcce8-d1b1-42ed-8d6e-a34a51233efe","ownerUserPrincipalName":"vissha@microsoft.com","createdByUserId":"10033FFF8D9F178A","createdByUser":"vissha@microsoft.com","createdDate":"2017-04-27T19:26:47.8593557+00:00","computeId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomationlab873166830000/providers/Microsoft.Compute/virtualMachines/ubuntuvm5367","osType":"Linux","size":"Standard_DS1_v2","userName":"vishrut","disallowPublicIpAddress":true,"artifactDeploymentStatus":{"artifactsApplied":0,"totalArtifacts":0},"galleryImageReference":{"offer":"UbuntuServer","publisher":"Canonical","sku":"16.04-LTS","osType":"Linux","version":"latest"},"networkInterface":{},"allowClaim":false,"storageType":"Premium","virtualMachineCreationSource":"FromGalleryImage","provisioningState":"Succeeded","uniqueIdentifier":"875c91ca-85a5-4719-b03d-4f6aa57bf9e7"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab/virtualmachines/ubuntuvm5367","name":"ubuntuvm5367","type":"Microsoft.DevTestLab/labs/virtualMachines","location":"westus"}'}
+    body: {string: '{"properties":{"ownerObjectId":"","ownerUserPrincipalName":"","createdByUserId":"10033FFF8D9F178A","createdByUser":"vissha@microsoft.com","createdDate":"2017-05-10T21:53:40.6714124+00:00","computeId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomationlab595300813000/providers/Microsoft.Compute/virtualMachines/ubuntuvm5367","osType":"Linux","size":"Standard_DS1_v2","userName":"vishrut","disallowPublicIpAddress":true,"artifactDeploymentStatus":{"artifactsApplied":0,"totalArtifacts":0},"galleryImageReference":{"offer":"UbuntuServer","publisher":"Canonical","sku":"16.04-LTS","osType":"Linux","version":"latest"},"networkInterface":{},"allowClaim":true,"storageType":"Premium","virtualMachineCreationSource":"FromGalleryImage","provisioningState":"Succeeded","uniqueIdentifier":"52b132e2-c337-4a7a-bc72-467e02a96b3f"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab/virtualmachines/ubuntuvm5367","name":"ubuntuvm5367","type":"Microsoft.DevTestLab/labs/virtualMachines","location":"westus"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:30:20 GMT']
+      Date: ['Wed, 10 May 2017 21:59:47 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -558,8 +734,8 @@ interactions:
       Transfer-Encoding: [chunked]
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
-      content-length: ['1176']
-      x-ms-dtl-vm-put-operation-id: [20170427-803a7357-289d-43e7-a3c7-9d8e4987c0b4]
+      content-length: ['1119']
+      x-ms-dtl-vm-put-operation-id: [20170510-18014d5c-2f2b-43e5-844b-4ee24d5d2346]
       x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualmachines/ubuntuvm5367?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
@@ -570,18 +746,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f4129e26-2b7f-11e7-8b0b-f45c89b0bb23]
+      x-ms-client-request-id: [fc0ba3cc-35cb-11e7-a5ff-f45c89b0bb23]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab?api-version=2016-05-15
   response:
-    body: {string: '{"properties":{"defaultStorageAccount":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Storage/storageAccounts/acliautomationlab475","defaultPremiumStorageAccount":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Storage/storageAccounts/acliautomationlab475","artifactsStorageAccount":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Storage/storageAccounts/acliautomationlab475","premiumDataDiskStorageAccount":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Storage/storageAccounts/acliautomationlab475","vaultName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.KeyVault/vaults/cliautomationlab4049","labStorageType":"Premium","createdDate":"2017-04-27T19:24:34.75643+00:00","premiumDataDisks":"Disabled","provisioningState":"Succeeded","uniqueIdentifier":"528d67b4-f895-4984-b983-8c8849f9e876"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab","name":"cliautomationlab","type":"Microsoft.DevTestLab/labs","location":"westus"}'}
+    body: {string: '{"properties":{"defaultStorageAccount":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Storage/storageAccounts/acliautomationlab4126","defaultPremiumStorageAccount":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Storage/storageAccounts/acliautomationlab4126","artifactsStorageAccount":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Storage/storageAccounts/acliautomationlab4126","premiumDataDiskStorageAccount":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Storage/storageAccounts/acliautomationlab4126","vaultName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.KeyVault/vaults/cliautomationlab758","labStorageType":"Premium","createdDate":"2017-05-10T21:50:57.7042245+00:00","premiumDataDisks":"Disabled","provisioningState":"Succeeded","uniqueIdentifier":"271b584d-c47e-482f-885e-37a16c5163c3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab","name":"cliautomationlab","type":"Microsoft.DevTestLab/labs","location":"westus"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:30:20 GMT']
+      Date: ['Wed, 10 May 2017 21:59:48 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -589,7 +765,7 @@ interactions:
       Transfer-Encoding: [chunked]
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
-      content-length: ['1326']
+      content-length: ['1331']
       x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
@@ -600,9 +776,9 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f432002e-2b7f-11e7-92ad-f45c89b0bb23]
+      x-ms-client-request-id: [fcb253de-35cb-11e7-ba0c-f45c89b0bb23]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/galleryimages?api-version=2016-05-15&$filter=name%20eq%20%27Windows%20Server%202008%20R2%20SP1%27
   response:
@@ -622,7 +798,7 @@ interactions:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:30:22 GMT']
+      Date: ['Wed, 10 May 2017 21:59:52 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -642,18 +818,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f52f72e6-2b7f-11e7-9b01-f45c89b0bb23]
+      x-ms-client-request-id: [ff13d9b0-35cb-11e7-833d-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualnetworks?$top=1&api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualnetworks?api-version=2016-05-15&$top=1
   response:
-    body: {string: '{"value":[{"properties":{"allowedSubnets":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/subnets/DtlcliautomationlabSubnet","labSubnetName":"DtlcliautomationlabSubnet","allowPublicIp":"Allow"}],"externalProviderResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab","subnetOverrides":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/subnets/DtlcliautomationlabSubnet","labSubnetName":"DtlcliautomationlabSubnet","useInVmCreationPermission":"Allow","usePublicIpAddressPermission":"Allow","sharedPublicIpAddressConfiguration":{"allowedPorts":[{"transportProtocol":"Tcp","backendPort":3389},{"transportProtocol":"Tcp","backendPort":22}]}}],"createdDate":"2017-04-27T19:25:16.5787581+00:00","provisioningState":"Succeeded","uniqueIdentifier":"7d048667-2dc6-44bf-8d89-99017eece29f"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab/virtualnetworks/dtlcliautomationlab","name":"Dtlcliautomationlab","type":"Microsoft.DevTestLab/labs/virtualNetworks"}]}'}
+    body: {string: '{"value":[{"properties":{"allowedSubnets":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/subnets/DtlcliautomationlabSubnet","labSubnetName":"DtlcliautomationlabSubnet","allowPublicIp":"Allow"}],"externalProviderResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab","subnetOverrides":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.Network/virtualNetworks/Dtlcliautomationlab/subnets/DtlcliautomationlabSubnet","labSubnetName":"DtlcliautomationlabSubnet","useInVmCreationPermission":"Allow","usePublicIpAddressPermission":"Allow","sharedPublicIpAddressConfiguration":{"allowedPorts":[{"transportProtocol":"Tcp","backendPort":3389},{"transportProtocol":"Tcp","backendPort":22}]}}],"createdDate":"2017-05-10T21:52:03.942116+00:00","provisioningState":"Succeeded","uniqueIdentifier":"5a0d1d57-c993-4d28-97ba-3a1160e93002"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab/virtualnetworks/dtlcliautomationlab","name":"Dtlcliautomationlab","type":"Microsoft.DevTestLab/labs/virtualNetworks"}]}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:30:23 GMT']
+      Date: ['Wed, 10 May 2017 21:59:53 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -661,18 +837,18 @@ interactions:
       Transfer-Encoding: [chunked]
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
-      content-length: ['1391']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualnetworks?$top=1&api-version=2016-05-15']
+      content-length: ['1390']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualnetworks?api-version=2016-05-15&$top=1']
     status: {code: 200, message: OK}
 - request:
-    body: '{"name": "winvm5367", "location": "westus", "properties": {"userName":
-      "vishrut", "allowClaim": false, "networkInterface": {"sharedPublicIpAddressConfiguration":
-      {"inboundNatRules": [{"transportProtocol": "Tcp", "backendPort": 3389}]}}, "isAuthenticationWithSshKey":
-      false, "galleryImageReference": {"publisher": "MicrosoftWindowsServer", "version":
-      "latest", "offer": "WindowsServer", "sku": "2008-R2-SP1", "osType": "Windows"},
-      "password": "SecretPassword123", "size": "Standard_DS1_v2", "labSubnetName":
-      "DtlcliautomationlabSubnet", "disallowPublicIpAddress": true, "labVirtualNetworkId":
-      "/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/resourcegroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab/virtualnetworks/dtlcliautomationlab"}}'
+    body: '{"name": "winvm5367", "location": "westus", "properties": {"labSubnetName":
+      "DtlcliautomationlabSubnet", "userName": "vishrut", "galleryImageReference":
+      {"offer": "WindowsServer", "version": "latest", "sku": "2008-R2-SP1", "osType":
+      "Windows", "publisher": "MicrosoftWindowsServer"}, "allowClaim": false, "size":
+      "Standard_DS1_v2", "labVirtualNetworkId": "/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/resourcegroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab/virtualnetworks/dtlcliautomationlab",
+      "isAuthenticationWithSshKey": false, "password": "SecretPassword123", "disallowPublicIpAddress":
+      true, "networkInterface": {"sharedPublicIpAddressConfiguration": {"inboundNatRules":
+      [{"transportProtocol": "Tcp", "backendPort": 3389}]}}}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -680,26 +856,26 @@ interactions:
       Content-Length: ['771']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f6079376-2b7f-11e7-9b3b-f45c89b0bb23]
+      x-ms-client-request-id: [fffe1658-35cb-11e7-a264-f45c89b0bb23]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/createEnvironment?api-version=2016-05-15
   response:
     body: {string: ''}
     headers:
       Arr-Disable-Session-Affinity: ['True']
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15']
+      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15']
       Cache-Control: [no-cache]
       Content-Length: ['0']
-      Date: ['Thu, 27 Apr 2017 19:30:27 GMT']
+      Date: ['Wed, 10 May 2017 21:59:58 GMT']
       Expires: ['-1']
-      Location: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?monitor=true&api-version=2016-05-15']
+      Location: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?monitor=true&api-version=2016-05-15']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       X-Content-Type-Options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1194']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
       x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/createEnvironment?api-version=2016-05-15']
     status: {code: 202, message: Accepted}
 - request:
@@ -710,18 +886,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f6079376-2b7f-11e7-9b3b-f45c89b0bb23]
+      x-ms-client-request-id: [fffe1658-35cb-11e7-a264-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:30:57 GMT']
+      Date: ['Wed, 10 May 2017 22:00:28 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -730,7 +906,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -740,18 +916,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f6079376-2b7f-11e7-9b3b-f45c89b0bb23]
+      x-ms-client-request-id: [fffe1658-35cb-11e7-a264-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:31:27 GMT']
+      Date: ['Wed, 10 May 2017 22:00:59 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -760,7 +936,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -770,18 +946,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f6079376-2b7f-11e7-9b3b-f45c89b0bb23]
+      x-ms-client-request-id: [fffe1658-35cb-11e7-a264-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:31:59 GMT']
+      Date: ['Wed, 10 May 2017 22:01:30 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -790,7 +966,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -800,18 +976,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f6079376-2b7f-11e7-9b3b-f45c89b0bb23]
+      x-ms-client-request-id: [fffe1658-35cb-11e7-a264-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:32:28 GMT']
+      Date: ['Wed, 10 May 2017 22:02:00 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -820,7 +996,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -830,18 +1006,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f6079376-2b7f-11e7-9b3b-f45c89b0bb23]
+      x-ms-client-request-id: [fffe1658-35cb-11e7-a264-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:32:59 GMT']
+      Date: ['Wed, 10 May 2017 22:02:32 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -850,7 +1026,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -860,18 +1036,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f6079376-2b7f-11e7-9b3b-f45c89b0bb23]
+      x-ms-client-request-id: [fffe1658-35cb-11e7-a264-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:33:30 GMT']
+      Date: ['Wed, 10 May 2017 22:03:02 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -880,7 +1056,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -890,18 +1066,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f6079376-2b7f-11e7-9b3b-f45c89b0bb23]
+      x-ms-client-request-id: [fffe1658-35cb-11e7-a264-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:34:00 GMT']
+      Date: ['Wed, 10 May 2017 22:03:32 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -910,7 +1086,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -920,18 +1096,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f6079376-2b7f-11e7-9b3b-f45c89b0bb23]
+      x-ms-client-request-id: [fffe1658-35cb-11e7-a264-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:34:32 GMT']
+      Date: ['Wed, 10 May 2017 22:04:03 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -940,7 +1116,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -950,18 +1126,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f6079376-2b7f-11e7-9b3b-f45c89b0bb23]
+      x-ms-client-request-id: [fffe1658-35cb-11e7-a264-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:35:02 GMT']
+      Date: ['Wed, 10 May 2017 22:04:33 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -970,7 +1146,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -980,18 +1156,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f6079376-2b7f-11e7-9b3b-f45c89b0bb23]
+      x-ms-client-request-id: [fffe1658-35cb-11e7-a264-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:35:32 GMT']
+      Date: ['Wed, 10 May 2017 22:05:04 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1000,7 +1176,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1010,18 +1186,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f6079376-2b7f-11e7-9b3b-f45c89b0bb23]
+      x-ms-client-request-id: [fffe1658-35cb-11e7-a264-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:36:03 GMT']
+      Date: ['Wed, 10 May 2017 22:05:35 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1030,7 +1206,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1040,18 +1216,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f6079376-2b7f-11e7-9b3b-f45c89b0bb23]
+      x-ms-client-request-id: [fffe1658-35cb-11e7-a264-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:36:33 GMT']
+      Date: ['Wed, 10 May 2017 22:06:05 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1060,7 +1236,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1070,18 +1246,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f6079376-2b7f-11e7-9b3b-f45c89b0bb23]
+      x-ms-client-request-id: [fffe1658-35cb-11e7-a264-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:37:03 GMT']
+      Date: ['Wed, 10 May 2017 22:06:36 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1090,7 +1266,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1100,18 +1276,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f6079376-2b7f-11e7-9b3b-f45c89b0bb23]
+      x-ms-client-request-id: [fffe1658-35cb-11e7-a264-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:37:34 GMT']
+      Date: ['Wed, 10 May 2017 22:07:07 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1120,7 +1296,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1130,18 +1306,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f6079376-2b7f-11e7-9b3b-f45c89b0bb23]
+      x-ms-client-request-id: [fffe1658-35cb-11e7-a264-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:38:04 GMT']
+      Date: ['Wed, 10 May 2017 22:07:37 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1150,7 +1326,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1160,78 +1336,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [f6079376-2b7f-11e7-9b3b-f45c89b0bb23]
+      x-ms-client-request-id: [fffe1658-35cb-11e7-a264-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15
-  response:
-    body: {string: '{"status":"Running"}'}
-    headers:
-      Arr-Disable-Session-Affinity: ['True']
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:38:35 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: ['Accept-Encoding,Accept-Encoding']
-      X-Content-Type-Options: [nosniff]
-      content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [f6079376-2b7f-11e7-9b3b-f45c89b0bb23]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15
-  response:
-    body: {string: '{"status":"Running"}'}
-    headers:
-      Arr-Disable-Session-Affinity: ['True']
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:39:05 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-IIS/8.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: ['Accept-Encoding,Accept-Encoding']
-      X-Content-Type-Options: [nosniff]
-      content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [f6079376-2b7f-11e7-9b3b-f45c89b0bb23]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15
   response:
     body: {string: '{"status":"Succeeded"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:39:36 GMT']
+      Date: ['Wed, 10 May 2017 22:08:09 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1240,7 +1356,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['22']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-a1b80038-40be-4f96-86b7-045ee9ca349c?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-160ea84e-c38a-479e-8f3e-e020a77c5dce?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1250,18 +1366,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3f336dbe-2b81-11e7-aca9-f45c89b0bb23]
+      x-ms-client-request-id: [270c8c0c-35cd-11e7-a3ba-f45c89b0bb23]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualmachines/winvm5367?api-version=2016-05-15
   response:
-    body: {string: '{"properties":{"ownerObjectId":"ed1bcce8-d1b1-42ed-8d6e-a34a51233efe","ownerUserPrincipalName":"vissha@microsoft.com","createdByUserId":"10033FFF8D9F178A","createdByUser":"vissha@microsoft.com","createdDate":"2017-04-27T19:30:28.2633762+00:00","computeId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomationlab873166830000/providers/Microsoft.Compute/virtualMachines/winvm5367","osType":"Windows","size":"Standard_DS1_v2","userName":"vishrut","disallowPublicIpAddress":true,"artifactDeploymentStatus":{"artifactsApplied":0,"totalArtifacts":0},"galleryImageReference":{"offer":"WindowsServer","publisher":"MicrosoftWindowsServer","sku":"2008-R2-SP1","osType":"Windows","version":"latest"},"networkInterface":{},"allowClaim":false,"storageType":"Premium","virtualMachineCreationSource":"FromGalleryImage","provisioningState":"Succeeded","uniqueIdentifier":"aa6d0da7-5106-4e1f-ba4c-f998700809e3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab/virtualmachines/winvm5367","name":"winvm5367","type":"Microsoft.DevTestLab/labs/virtualMachines","location":"westus"}'}
+    body: {string: '{"properties":{"ownerObjectId":"ed1bcce8-d1b1-42ed-8d6e-a34a51233efe","ownerUserPrincipalName":"vissha@microsoft.com","createdByUserId":"10033FFF8D9F178A","createdByUser":"vissha@microsoft.com","createdDate":"2017-05-10T22:00:00.7611373+00:00","computeId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomationlab595300813000/providers/Microsoft.Compute/virtualMachines/winvm5367","osType":"Windows","size":"Standard_DS1_v2","userName":"vishrut","disallowPublicIpAddress":true,"artifactDeploymentStatus":{"artifactsApplied":0,"totalArtifacts":0},"galleryImageReference":{"offer":"WindowsServer","publisher":"MicrosoftWindowsServer","sku":"2008-R2-SP1","osType":"Windows","version":"latest"},"networkInterface":{},"allowClaim":false,"storageType":"Premium","virtualMachineCreationSource":"FromGalleryImage","provisioningState":"Succeeded","uniqueIdentifier":"f7653984-b1f4-49fe-8a8c-2763f0c140e9"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab/virtualmachines/winvm5367","name":"winvm5367","type":"Microsoft.DevTestLab/labs/virtualMachines","location":"westus"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:39:36 GMT']
+      Date: ['Wed, 10 May 2017 22:08:09 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1270,8 +1386,38 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['1187']
-      x-ms-dtl-vm-put-operation-id: [20170427-05a1e51e-b899-4d46-a002-d73a48fc2c5f]
+      x-ms-dtl-vm-put-operation-id: [20170510-1325c793-ba30-4002-ae34-3eb4f7bb51ab]
       x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualmachines/winvm5367?api-version=2016-05-15']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [275b82e4-35cd-11e7-852d-f45c89b0bb23]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualmachines?api-version=2016-05-15&$filter=properties%2FallowClaim
+  response:
+    body: {string: '{"value":[{"properties":{"ownerObjectId":"","ownerUserPrincipalName":"","createdByUserId":"10033FFF8D9F178A","createdByUser":"vissha@microsoft.com","createdDate":"2017-05-10T21:53:40.6714124+00:00","computeId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomationlab595300813000/providers/Microsoft.Compute/virtualMachines/ubuntuvm5367","osType":"Linux","size":"Standard_DS1_v2","userName":"vishrut","disallowPublicIpAddress":true,"artifactDeploymentStatus":{"artifactsApplied":0,"totalArtifacts":0},"galleryImageReference":{"offer":"UbuntuServer","publisher":"Canonical","sku":"16.04-LTS","osType":"Linux","version":"latest"},"networkInterface":{},"allowClaim":true,"storageType":"Premium","virtualMachineCreationSource":"FromGalleryImage","provisioningState":"Succeeded","uniqueIdentifier":"52b132e2-c337-4a7a-bc72-467e02a96b3f"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cliautomation/providers/microsoft.devtestlab/labs/cliautomationlab/virtualmachines/ubuntuvm5367","name":"ubuntuvm5367","type":"Microsoft.DevTestLab/labs/virtualMachines","location":"westus"}]}'}
+    headers:
+      Arr-Disable-Session-Affinity: ['True']
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 10 May 2017 22:08:10 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-IIS/8.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: ['Accept-Encoding,Accept-Encoding']
+      X-Content-Type-Options: [nosniff]
+      content-length: ['1131']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualmachines?api-version=2016-05-15&$filter=properties%2FallowClaim']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1282,26 +1428,147 @@ interactions:
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3f8e2c7a-2b81-11e7-ba0f-f45c89b0bb23]
+      x-ms-client-request-id: [2781edc8-35cd-11e7-8903-f45c89b0bb23]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualmachines/ubuntuvm5367/claim?api-version=2016-05-15
+  response:
+    body: {string: ''}
+    headers:
+      Arr-Disable-Session-Affinity: ['True']
+      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d6d98491-3c8b-4fa2-a32b-f6703449b6a9?api-version=2016-05-15']
+      Cache-Control: [no-cache]
+      Content-Length: ['0']
+      Date: ['Wed, 10 May 2017 22:08:15 GMT']
+      Expires: ['-1']
+      Location: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d6d98491-3c8b-4fa2-a32b-f6703449b6a9?monitor=true&api-version=2016-05-15']
+      Pragma: [no-cache]
+      Server: [Microsoft-IIS/8.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      X-Content-Type-Options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualmachines/ubuntuvm5367/claim?api-version=2016-05-15']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [2781edc8-35cd-11e7-8903-f45c89b0bb23]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d6d98491-3c8b-4fa2-a32b-f6703449b6a9?api-version=2016-05-15
+  response:
+    body: {string: '{"status":"Running"}'}
+    headers:
+      Arr-Disable-Session-Affinity: ['True']
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 10 May 2017 22:08:47 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-IIS/8.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: ['Accept-Encoding,Accept-Encoding']
+      X-Content-Type-Options: [nosniff]
+      content-length: ['20']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d6d98491-3c8b-4fa2-a32b-f6703449b6a9?api-version=2016-05-15']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [2781edc8-35cd-11e7-8903-f45c89b0bb23]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d6d98491-3c8b-4fa2-a32b-f6703449b6a9?api-version=2016-05-15
+  response:
+    body: {string: '{"status":"Running"}'}
+    headers:
+      Arr-Disable-Session-Affinity: ['True']
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 10 May 2017 22:09:16 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-IIS/8.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: ['Accept-Encoding,Accept-Encoding']
+      X-Content-Type-Options: [nosniff]
+      content-length: ['20']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d6d98491-3c8b-4fa2-a32b-f6703449b6a9?api-version=2016-05-15']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [2781edc8-35cd-11e7-8903-f45c89b0bb23]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d6d98491-3c8b-4fa2-a32b-f6703449b6a9?api-version=2016-05-15
+  response:
+    body: {string: '{"status":"Succeeded"}'}
+    headers:
+      Arr-Disable-Session-Affinity: ['True']
+      Cache-Control: [no-cache]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 10 May 2017 22:09:47 GMT']
+      Expires: ['-1']
+      Pragma: [no-cache]
+      Server: [Microsoft-IIS/8.0]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      Transfer-Encoding: [chunked]
+      Vary: ['Accept-Encoding,Accept-Encoding']
+      X-Content-Type-Options: [nosniff]
+      content-length: ['22']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d6d98491-3c8b-4fa2-a32b-f6703449b6a9?api-version=2016-05-15']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
+      accept-language: [en-US]
+      x-ms-client-request-id: [623a0d88-35cd-11e7-ad69-f45c89b0bb23]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualmachines/ubuntuvm5367?api-version=2016-05-15
   response:
     body: {string: ''}
     headers:
       Arr-Disable-Session-Affinity: ['True']
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-0b98a3a9-8488-485a-88ae-b09f7f32d1de?api-version=2016-05-15']
+      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-abbc80c8-0cb5-45ea-9768-8bfe476e9ac2?api-version=2016-05-15']
       Cache-Control: [no-cache]
       Content-Length: ['0']
-      Date: ['Thu, 27 Apr 2017 19:39:39 GMT']
+      Date: ['Wed, 10 May 2017 22:09:52 GMT']
       Expires: ['-1']
-      Location: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-0b98a3a9-8488-485a-88ae-b09f7f32d1de?monitor=true&api-version=2016-05-15']
+      Location: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-abbc80c8-0cb5-45ea-9768-8bfe476e9ac2?monitor=true&api-version=2016-05-15']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       X-Content-Type-Options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
       x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualmachines/ubuntuvm5367?api-version=2016-05-15']
     status: {code: 202, message: Accepted}
 - request:
@@ -1312,18 +1579,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3f8e2c7a-2b81-11e7-ba0f-f45c89b0bb23]
+      x-ms-client-request-id: [623a0d88-35cd-11e7-ad69-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-0b98a3a9-8488-485a-88ae-b09f7f32d1de?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-abbc80c8-0cb5-45ea-9768-8bfe476e9ac2?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:40:10 GMT']
+      Date: ['Wed, 10 May 2017 22:10:22 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1332,7 +1599,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-0b98a3a9-8488-485a-88ae-b09f7f32d1de?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-abbc80c8-0cb5-45ea-9768-8bfe476e9ac2?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1342,18 +1609,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3f8e2c7a-2b81-11e7-ba0f-f45c89b0bb23]
+      x-ms-client-request-id: [623a0d88-35cd-11e7-ad69-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-0b98a3a9-8488-485a-88ae-b09f7f32d1de?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-abbc80c8-0cb5-45ea-9768-8bfe476e9ac2?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:40:40 GMT']
+      Date: ['Wed, 10 May 2017 22:10:53 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1362,7 +1629,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-0b98a3a9-8488-485a-88ae-b09f7f32d1de?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-abbc80c8-0cb5-45ea-9768-8bfe476e9ac2?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1372,18 +1639,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3f8e2c7a-2b81-11e7-ba0f-f45c89b0bb23]
+      x-ms-client-request-id: [623a0d88-35cd-11e7-ad69-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-0b98a3a9-8488-485a-88ae-b09f7f32d1de?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-abbc80c8-0cb5-45ea-9768-8bfe476e9ac2?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:41:11 GMT']
+      Date: ['Wed, 10 May 2017 22:11:24 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1392,7 +1659,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-0b98a3a9-8488-485a-88ae-b09f7f32d1de?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-abbc80c8-0cb5-45ea-9768-8bfe476e9ac2?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1402,18 +1669,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3f8e2c7a-2b81-11e7-ba0f-f45c89b0bb23]
+      x-ms-client-request-id: [623a0d88-35cd-11e7-ad69-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-0b98a3a9-8488-485a-88ae-b09f7f32d1de?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-abbc80c8-0cb5-45ea-9768-8bfe476e9ac2?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:41:40 GMT']
+      Date: ['Wed, 10 May 2017 22:11:54 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1422,7 +1689,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-0b98a3a9-8488-485a-88ae-b09f7f32d1de?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-abbc80c8-0cb5-45ea-9768-8bfe476e9ac2?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1432,18 +1699,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3f8e2c7a-2b81-11e7-ba0f-f45c89b0bb23]
+      x-ms-client-request-id: [623a0d88-35cd-11e7-ad69-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-0b98a3a9-8488-485a-88ae-b09f7f32d1de?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-abbc80c8-0cb5-45ea-9768-8bfe476e9ac2?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:42:11 GMT']
+      Date: ['Wed, 10 May 2017 22:12:25 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1452,7 +1719,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-0b98a3a9-8488-485a-88ae-b09f7f32d1de?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-abbc80c8-0cb5-45ea-9768-8bfe476e9ac2?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1462,18 +1729,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [3f8e2c7a-2b81-11e7-ba0f-f45c89b0bb23]
+      x-ms-client-request-id: [623a0d88-35cd-11e7-ad69-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-0b98a3a9-8488-485a-88ae-b09f7f32d1de?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-abbc80c8-0cb5-45ea-9768-8bfe476e9ac2?api-version=2016-05-15
   response:
     body: {string: '{"status":"Succeeded"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:42:42 GMT']
+      Date: ['Wed, 10 May 2017 22:12:55 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1482,7 +1749,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['22']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-0b98a3a9-8488-485a-88ae-b09f7f32d1de?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-abbc80c8-0cb5-45ea-9768-8bfe476e9ac2?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1493,26 +1760,26 @@ interactions:
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [aea7fdde-2b81-11e7-b5f7-f45c89b0bb23]
+      x-ms-client-request-id: [d1b87190-35cd-11e7-b013-f45c89b0bb23]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualmachines/winvm5367?api-version=2016-05-15
   response:
     body: {string: ''}
     headers:
       Arr-Disable-Session-Affinity: ['True']
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-ef059fab-c881-4f32-8138-2d3b901d54ec?api-version=2016-05-15']
+      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d73b84c4-671e-44d3-8512-a3e0d89361b8?api-version=2016-05-15']
       Cache-Control: [no-cache]
       Content-Length: ['0']
-      Date: ['Thu, 27 Apr 2017 19:42:45 GMT']
+      Date: ['Wed, 10 May 2017 22:12:59 GMT']
       Expires: ['-1']
-      Location: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-ef059fab-c881-4f32-8138-2d3b901d54ec?monitor=true&api-version=2016-05-15']
+      Location: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d73b84c4-671e-44d3-8512-a3e0d89361b8?monitor=true&api-version=2016-05-15']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       X-Content-Type-Options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
       x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab/virtualmachines/winvm5367?api-version=2016-05-15']
     status: {code: 202, message: Accepted}
 - request:
@@ -1523,18 +1790,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [aea7fdde-2b81-11e7-b5f7-f45c89b0bb23]
+      x-ms-client-request-id: [d1b87190-35cd-11e7-b013-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-ef059fab-c881-4f32-8138-2d3b901d54ec?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d73b84c4-671e-44d3-8512-a3e0d89361b8?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:43:16 GMT']
+      Date: ['Wed, 10 May 2017 22:13:30 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1543,7 +1810,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-ef059fab-c881-4f32-8138-2d3b901d54ec?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d73b84c4-671e-44d3-8512-a3e0d89361b8?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1553,18 +1820,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [aea7fdde-2b81-11e7-b5f7-f45c89b0bb23]
+      x-ms-client-request-id: [d1b87190-35cd-11e7-b013-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-ef059fab-c881-4f32-8138-2d3b901d54ec?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d73b84c4-671e-44d3-8512-a3e0d89361b8?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:43:46 GMT']
+      Date: ['Wed, 10 May 2017 22:14:00 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1573,7 +1840,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-ef059fab-c881-4f32-8138-2d3b901d54ec?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d73b84c4-671e-44d3-8512-a3e0d89361b8?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1583,18 +1850,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [aea7fdde-2b81-11e7-b5f7-f45c89b0bb23]
+      x-ms-client-request-id: [d1b87190-35cd-11e7-b013-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-ef059fab-c881-4f32-8138-2d3b901d54ec?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d73b84c4-671e-44d3-8512-a3e0d89361b8?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:44:16 GMT']
+      Date: ['Wed, 10 May 2017 22:14:31 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1603,7 +1870,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-ef059fab-c881-4f32-8138-2d3b901d54ec?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d73b84c4-671e-44d3-8512-a3e0d89361b8?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1613,18 +1880,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [aea7fdde-2b81-11e7-b5f7-f45c89b0bb23]
+      x-ms-client-request-id: [d1b87190-35cd-11e7-b013-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-ef059fab-c881-4f32-8138-2d3b901d54ec?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d73b84c4-671e-44d3-8512-a3e0d89361b8?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:44:48 GMT']
+      Date: ['Wed, 10 May 2017 22:15:02 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1633,7 +1900,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-ef059fab-c881-4f32-8138-2d3b901d54ec?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d73b84c4-671e-44d3-8512-a3e0d89361b8?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1643,18 +1910,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [aea7fdde-2b81-11e7-b5f7-f45c89b0bb23]
+      x-ms-client-request-id: [d1b87190-35cd-11e7-b013-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-ef059fab-c881-4f32-8138-2d3b901d54ec?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d73b84c4-671e-44d3-8512-a3e0d89361b8?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:45:19 GMT']
+      Date: ['Wed, 10 May 2017 22:15:33 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1663,7 +1930,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-ef059fab-c881-4f32-8138-2d3b901d54ec?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d73b84c4-671e-44d3-8512-a3e0d89361b8?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1673,18 +1940,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [aea7fdde-2b81-11e7-b5f7-f45c89b0bb23]
+      x-ms-client-request-id: [d1b87190-35cd-11e7-b013-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-ef059fab-c881-4f32-8138-2d3b901d54ec?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d73b84c4-671e-44d3-8512-a3e0d89361b8?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:45:49 GMT']
+      Date: ['Wed, 10 May 2017 22:16:05 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1693,7 +1960,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-ef059fab-c881-4f32-8138-2d3b901d54ec?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d73b84c4-671e-44d3-8512-a3e0d89361b8?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1703,18 +1970,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [aea7fdde-2b81-11e7-b5f7-f45c89b0bb23]
+      x-ms-client-request-id: [d1b87190-35cd-11e7-b013-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-ef059fab-c881-4f32-8138-2d3b901d54ec?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d73b84c4-671e-44d3-8512-a3e0d89361b8?api-version=2016-05-15
   response:
     body: {string: '{"status":"Succeeded"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:46:19 GMT']
+      Date: ['Wed, 10 May 2017 22:16:36 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1723,7 +1990,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['22']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-ef059fab-c881-4f32-8138-2d3b901d54ec?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-d73b84c4-671e-44d3-8512-a3e0d89361b8?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1734,26 +2001,26 @@ interactions:
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [30500c3a-2b82-11e7-b413-f45c89b0bb23]
+      x-ms-client-request-id: [5570fe50-35ce-11e7-a8dc-f45c89b0bb23]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab?api-version=2016-05-15
   response:
     body: {string: ''}
     headers:
       Arr-Disable-Session-Affinity: ['True']
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-1f92c7df-a256-4dea-b04b-277a52745d56?api-version=2016-05-15']
+      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-437ec867-da54-46a8-a153-d6310949613d?api-version=2016-05-15']
       Cache-Control: [no-cache]
       Content-Length: ['0']
-      Date: ['Thu, 27 Apr 2017 19:46:23 GMT']
+      Date: ['Wed, 10 May 2017 22:16:40 GMT']
       Expires: ['-1']
-      Location: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-1f92c7df-a256-4dea-b04b-277a52745d56?monitor=true&api-version=2016-05-15']
+      Location: ['https://management.azure.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-437ec867-da54-46a8-a153-d6310949613d?monitor=true&api-version=2016-05-15']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       X-Content-Type-Options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
       x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/resourceGroups/cliautomation/providers/Microsoft.DevTestLab/labs/cliautomationlab?api-version=2016-05-15']
     status: {code: 202, message: Accepted}
 - request:
@@ -1764,18 +2031,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [30500c3a-2b82-11e7-b413-f45c89b0bb23]
+      x-ms-client-request-id: [5570fe50-35ce-11e7-a8dc-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-1f92c7df-a256-4dea-b04b-277a52745d56?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-437ec867-da54-46a8-a153-d6310949613d?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:46:55 GMT']
+      Date: ['Wed, 10 May 2017 22:17:11 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1784,7 +2051,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-1f92c7df-a256-4dea-b04b-277a52745d56?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-437ec867-da54-46a8-a153-d6310949613d?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1794,18 +2061,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [30500c3a-2b82-11e7-b413-f45c89b0bb23]
+      x-ms-client-request-id: [5570fe50-35ce-11e7-a8dc-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-1f92c7df-a256-4dea-b04b-277a52745d56?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-437ec867-da54-46a8-a153-d6310949613d?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:47:25 GMT']
+      Date: ['Wed, 10 May 2017 22:17:41 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1814,7 +2081,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-1f92c7df-a256-4dea-b04b-277a52745d56?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-437ec867-da54-46a8-a153-d6310949613d?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1824,18 +2091,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [30500c3a-2b82-11e7-b413-f45c89b0bb23]
+      x-ms-client-request-id: [5570fe50-35ce-11e7-a8dc-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-1f92c7df-a256-4dea-b04b-277a52745d56?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-437ec867-da54-46a8-a153-d6310949613d?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:47:55 GMT']
+      Date: ['Wed, 10 May 2017 22:18:12 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1844,7 +2111,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-1f92c7df-a256-4dea-b04b-277a52745d56?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-437ec867-da54-46a8-a153-d6310949613d?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1854,18 +2121,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [30500c3a-2b82-11e7-b413-f45c89b0bb23]
+      x-ms-client-request-id: [5570fe50-35ce-11e7-a8dc-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-1f92c7df-a256-4dea-b04b-277a52745d56?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-437ec867-da54-46a8-a153-d6310949613d?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:48:26 GMT']
+      Date: ['Wed, 10 May 2017 22:18:43 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1874,7 +2141,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-1f92c7df-a256-4dea-b04b-277a52745d56?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-437ec867-da54-46a8-a153-d6310949613d?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1884,18 +2151,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [30500c3a-2b82-11e7-b413-f45c89b0bb23]
+      x-ms-client-request-id: [5570fe50-35ce-11e7-a8dc-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-1f92c7df-a256-4dea-b04b-277a52745d56?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-437ec867-da54-46a8-a153-d6310949613d?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:48:57 GMT']
+      Date: ['Wed, 10 May 2017 22:19:13 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1904,7 +2171,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-1f92c7df-a256-4dea-b04b-277a52745d56?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-437ec867-da54-46a8-a153-d6310949613d?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1914,18 +2181,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [30500c3a-2b82-11e7-b413-f45c89b0bb23]
+      x-ms-client-request-id: [5570fe50-35ce-11e7-a8dc-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-1f92c7df-a256-4dea-b04b-277a52745d56?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-437ec867-da54-46a8-a153-d6310949613d?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:49:28 GMT']
+      Date: ['Wed, 10 May 2017 22:19:43 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1934,7 +2201,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-1f92c7df-a256-4dea-b04b-277a52745d56?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-437ec867-da54-46a8-a153-d6310949613d?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1944,18 +2211,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [30500c3a-2b82-11e7-b413-f45c89b0bb23]
+      x-ms-client-request-id: [5570fe50-35ce-11e7-a8dc-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-1f92c7df-a256-4dea-b04b-277a52745d56?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-437ec867-da54-46a8-a153-d6310949613d?api-version=2016-05-15
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:49:59 GMT']
+      Date: ['Wed, 10 May 2017 22:20:14 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1964,7 +2231,7 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['20']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-1f92c7df-a256-4dea-b04b-277a52745d56?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-437ec867-da54-46a8-a153-d6310949613d?api-version=2016-05-15']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1974,18 +2241,18 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.2 (Darwin-16.4.0-x86_64-i386-64bit) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 devtestlabs/0.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.3+dev]
+          msrest_azure/0.4.7 devtestlabsclient/2.0.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.6+dev]
       accept-language: [en-US]
-      x-ms-client-request-id: [30500c3a-2b82-11e7-b413-f45c89b0bb23]
+      x-ms-client-request-id: [5570fe50-35ce-11e7-a8dc-f45c89b0bb23]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-1f92c7df-a256-4dea-b04b-277a52745d56?api-version=2016-05-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-437ec867-da54-46a8-a153-d6310949613d?api-version=2016-05-15
   response:
     body: {string: '{"status":"Succeeded"}'}
     headers:
       Arr-Disable-Session-Affinity: ['True']
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Thu, 27 Apr 2017 19:50:29 GMT']
+      Date: ['Wed, 10 May 2017 22:20:45 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-IIS/8.0]
@@ -1994,6 +2261,6 @@ interactions:
       Vary: ['Accept-Encoding,Accept-Encoding']
       X-Content-Type-Options: [nosniff]
       content-length: ['22']
-      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170427-1f92c7df-a256-4dea-b04b-277a52745d56?api-version=2016-05-15']
+      x-rp-requesturi: ['https://dtl-highvol-rp.rp1.vsdth.visualstudio.com/subscriptions/88271ab0-9af4-442c-abb0-901d9fa06ca8/providers/Microsoft.DevTestLab/locations/westus/operations/20170510-437ec867-da54-46a8-a153-d6310949613d?api-version=2016-05-15']
     status: {code: 200, message: OK}
 version: 1
