@@ -841,10 +841,13 @@ def _write_config_file(user_name):
 
 
 class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
+    """
+    Note that this is currently only for a Linux VM. There's currently no test of this feature for a Windows VM.
+    """
 
     def __init__(self, test_method):
         super(DiagnosticsExtensionInstallTest, self).__init__(__file__, test_method, resource_group='cli_test_vm_vmss_diagnostics_extension')
-        self.storage_account = 'clitestdiagextsa20170227'
+        self.storage_account = 'clitestdiagextsa20170510'
         self.vm = 'testdiagvm'
         self.vmss = 'testdiagvmss'
 
@@ -863,8 +866,7 @@ class DiagnosticsExtensionInstallTest(ResourceGroupVCRTestBase):
         with open(protected_settings, 'w') as outfile:
             json.dump({
                 "storageAccountName": self.storage_account,
-                "storageAccountSasToken": storage_sastoken,
-                "storageAccountEndPoint": "https://{}.blob.core.windows.net/".format(self.storage_account)
+                "storageAccountSasToken": storage_sastoken
             }, outfile)
         protected_settings = protected_settings.replace('\\', '\\\\')
 
