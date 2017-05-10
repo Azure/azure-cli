@@ -5,6 +5,7 @@
 
 import json
 import requests
+from msrest.http_logger import log_request
 
 from azure.cli.core.prompting import prompt, prompt_pass, NoTTYException
 from azure.cli.core.util import CLIError
@@ -29,6 +30,8 @@ def _obtain_data_from_registry(login_server, path, resultIndex, username, passwo
                 password
             )
         )
+
+        log_request(None, response.request)
 
         if response.status_code == 200:
             resultList += response.json()[resultIndex]
