@@ -11,6 +11,10 @@ def cf_monitor(_):
     return get_mgmt_service_client(MonitorManagementClient)
 
 
+def cf_alert_rules(kwargs):
+    return cf_monitor(kwargs).alert_rules
+
+
 def get_monitor_autoscale_settings_operation(kwargs):
     return cf_monitor(kwargs).autoscale_settings
 
