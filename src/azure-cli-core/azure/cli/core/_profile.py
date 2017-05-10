@@ -110,7 +110,7 @@ class Profile(object):
         self._management_resource_uri = CLOUD.endpoints.management
         self._ad_resource_uri = CLOUD.endpoints.active_directory_resource_id
 
-    def find_subscriptions_on_login(self,  # pylint: disable=too-many-arguments
+    def find_subscriptions_on_login(self,
                                     interactive,
                                     username,
                                     password,

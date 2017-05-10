@@ -11,17 +11,17 @@ import time
 
 from OpenSSL import crypto
 from msrestazure.azure_exceptions import CloudError
-from azure.keyvault.generated.models import (CertificateAttributes,
-                                             CertificatePolicy,
-                                             IssuerParameters,
-                                             KeyProperties,
-                                             LifetimeAction,
-                                             SecretProperties,
-                                             X509CertificateProperties,
-                                             SubjectAlternativeNames,
-                                             Trigger,
-                                             Action)
-from azure.keyvault.generated.models.key_vault_client_enums import ActionType, KeyUsageType
+from azure.keyvault.models import (CertificateAttributes,
+                                   CertificatePolicy,
+                                   IssuerParameters,
+                                   KeyProperties,
+                                   LifetimeAction,
+                                   SecretProperties,
+                                   X509CertificateProperties,
+                                   SubjectAlternativeNames,
+                                   Trigger,
+                                   Action)
+from azure.keyvault.models import ActionType, KeyUsageType
 from azure.mgmt.keyvault.models import (VaultProperties,
                                         AccessPolicyEntry,
                                         Permissions,
@@ -212,7 +212,7 @@ def get_default_policy(client, scaffold=False):  # pylint: disable=unused-argume
         return _default_certificate_profile()
 
 
-def create_keyvault(client,  # pylint:disable=too-many-arguments
+def create_keyvault(client,
                     resource_group_name, vault_name, location=None, sku=SkuName.standard.value,
                     enabled_for_deployment=None,
                     enabled_for_disk_encryption=None,
@@ -310,7 +310,7 @@ def _object_id_args_helper(object_id, spn, upn):
     return object_id
 
 
-def set_policy(client, resource_group_name, vault_name,  # pylint:disable=too-many-arguments
+def set_policy(client, resource_group_name, vault_name,
                object_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
                certificate_permissions=None):
     """ Update security policy settings for a Key Vault. """
@@ -346,7 +346,7 @@ def set_policy(client, resource_group_name, vault_name,  # pylint:disable=too-ma
                                        properties=vault.properties))
 
 
-def delete_policy(client,  # pylint:disable=too-many-arguments
+def delete_policy(client,
                   resource_group_name, vault_name, object_id=None, spn=None, upn=None):
     """ Delete security policy settings for a Key Vault. """
     from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
@@ -367,10 +367,9 @@ def delete_policy(client,  # pylint:disable=too-many-arguments
                                        properties=vault.properties))
 
 
-# pylint: disable=too-many-arguments
 def create_key(client, vault_base_url, key_name, destination, key_size=None, key_ops=None,
                disabled=False, expires=None, not_before=None, tags=None):
-    from azure.keyvault.generated.models import KeyAttributes
+    from azure.keyvault.models import KeyAttributes
     key_attrs = KeyAttributes(not disabled, not_before, expires)
     return client.create_key(
         vault_base_url, key_name, destination, key_size, key_ops, key_attrs, tags)
@@ -397,13 +396,13 @@ def restore_key(client, vault_base_url, file_path):
 restore_key.__doc__ = KeyVaultClient.restore_key.__doc__
 
 
-# pylint: disable=too-many-arguments,assignment-from-no-return,unused-variable
+# pylint: disable=assignment-from-no-return,unused-variable
 def import_key(client, vault_base_url, key_name, destination=None, key_ops=None, disabled=False,
                expires=None, not_before=None, tags=None, pem_file=None, pem_password=None,
                byok_file=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files.
         Supports importing BYOK keys into HSM for premium KeyVaults. """
-    from azure.keyvault.generated.models import \
+    from azure.keyvault.models import \
         (KeyAttributes, JsonWebKey)
 
     def _to_bytes(hex_string):
@@ -484,7 +483,7 @@ def download_secret(client, vault_base_url, secret_name, file_path, encoding=Non
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
 
-    secret = client.keyvault.get_secret(vault_base_url, secret_name, secret_version)
+    secret = client.get_secret(vault_base_url, secret_name, secret_version)
     encoding = encoding or secret.tags.get('file-encoding', 'utf-8')
     secret_value = secret.value
 
@@ -631,7 +630,7 @@ def download_certificate(client, vault_base_url, certificate_name, file_path,
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
 
-    cert = client.keyvault.get_certificate(
+    cert = client.get_certificate(
         vault_base_url, certificate_name, certificate_version).cer
 
     try:
@@ -654,7 +653,7 @@ def download_certificate(client, vault_base_url, certificate_name, file_path,
 def add_certificate_contact(client, vault_base_url, contact_email, contact_name=None,
                             contact_phone=None):
     """ Add a contact to the specified vault to receive notifications of certificate operations. """
-    from azure.keyvault.generated.models import \
+    from azure.keyvault.models import \
         (Contact, Contacts, KeyVaultErrorException)
     try:
         contacts = client.get_certificate_contacts(vault_base_url)
@@ -669,7 +668,7 @@ def add_certificate_contact(client, vault_base_url, contact_email, contact_name=
 
 def delete_certificate_contact(client, vault_base_url, contact_email):
     """ Remove a certificate contact from the specified vault. """
-    from azure.keyvault.generated.models import \
+    from azure.keyvault.models import \
         (Contacts, KeyVaultErrorException)
     contacts = client.get_certificate_contacts(vault_base_url).contact_list
     remaining = Contacts([x for x in contacts if x.email_address != contact_email])
@@ -691,7 +690,7 @@ def create_certificate_issuer(client, vault_base_url, issuer_name, provider_name
     :param password: The issuer account password/secret/etc.
     :param organization_id: The organization id.
     """
-    from azure.keyvault.generated.models import \
+    from azure.keyvault.models import \
         (CertificateIssuerSetParameters, IssuerCredentials, OrganizationDetails, IssuerAttributes,
          AdministratorDetails, KeyVaultErrorException)
     credentials = IssuerCredentials(account_id, password)
@@ -711,7 +710,7 @@ def update_certificate_issuer(client, vault_base_url, issuer_name, provider_name
     :param password: The issuer account password/secret/etc.
     :param organization_id: The organization id.
     """
-    from azure.keyvault.generated.models import \
+    from azure.keyvault.models import \
         (CertificateIssuerSetParameters, IssuerCredentials, OrganizationDetails, IssuerAttributes,
          AdministratorDetails, KeyVaultErrorException)
 
@@ -743,7 +742,7 @@ def list_certificate_issuer_admins(client, vault_base_url, issuer_name):
 def add_certificate_issuer_admin(client, vault_base_url, issuer_name, email, first_name=None,
                                  last_name=None, phone=None):
     """ Add admin details for a specified certificate issuer. """
-    from azure.keyvault.generated.models import \
+    from azure.keyvault.models import \
         (AdministratorDetails, KeyVaultErrorException)
 
     issuer = client.get_certificate_issuer(vault_base_url, issuer_name)

@@ -1,16 +1,19 @@
 .. :changelog:
 
 Release History
+===============
 
+0.3.1 (2017-05-09)
+++++++++++++++++++
 
-0.2.3 (unreleased)
+* Add link to blog in ‘az interactive —help’ (#3252)
+
+0.3.0 (2017-05-05)
 ++++++++++++++++++
 
 * Integrate interactive into az
 * Colors Options
 * Rename 'shell' => 'interactive'
-* --progress flag
-
 
 0.2.1
 ++++++++++++++++++

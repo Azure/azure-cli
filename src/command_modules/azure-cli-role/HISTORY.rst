@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.4 (2017-05-09)
+++++++++++++++++++
+* Minor fixes.
+
 2.0.3 (2017-04-28)
 ++++++++++++++++++
 * create-for-rbac: ensure SP's end date will not exceed certificate's expiration date (#2989)

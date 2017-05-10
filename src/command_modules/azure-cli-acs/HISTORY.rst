@@ -3,8 +3,13 @@
 Release History
 ===============
 
-unreleased
-----------
+2.0.6 (2017-05-09)
+++++++++++++++++++
+
+* Minor fixes.
+
+2.0.5 (2017-05-05)
+++++++++++++++++++
 
 * Fix to use one of the loaded keys.
 

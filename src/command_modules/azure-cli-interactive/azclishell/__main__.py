@@ -16,7 +16,6 @@ from azclishell.app import Shell
 from azclishell.az_completer import AzCompleter
 from azclishell.az_lexer import AzLexer
 from azclishell.color_styles import style_factory
-from azclishell.frequency_heuristic import frequent_user
 
 from azure.cli.core.application import APPLICATION
 from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
@@ -53,19 +52,12 @@ def main(style=None):
         print("When in doubt, ask for 'help'")
         config.firsttime()
 
-    ask_feedback = False
-    if not config.has_feedback() and frequent_user:
-        print("\n\nAny comments or concerns? You can use the \'feedback\' command!" +
-              " We would greatly appreciate it.\n")
-        ask_feedback = True
-
     shell_app = Shell(
         completer=AZCOMPLETER,
         lexer=AzLexer,
         history=FileHistory(
             os.path.join(shell_config_dir(), config.get_history())),
         app=APPLICATION,
-        styles=style_obj,
-        user_feedback=ask_feedback
+        styles=style_obj
     )
     shell_app.run()
