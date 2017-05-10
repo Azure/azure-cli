@@ -17,18 +17,72 @@ helps['monitor'] = """
 
 helps['monitor alert'] = """
     type: group
-    short-summary: Commands to manage alerts on Azure resources.
+    short-summary: Commands to manage metric-based alerts.
     """
 
 helps['monitor alert rule'] = """
     type: group
-    short-summary: Commands to manage alert rules.
+    short-summary: Commands to manage the rules which trigger alerts.
     """
 
 helps['monitor alert rule create'] = """
     type: command
-    short-summary: Create an alert rule.
-    """
+    short-summary: Create a metric-based alert rule.
+    long-summary: |
+        To specify the condition:
+            --metric-name <METRIC> --operator <OPERATOR> --threshold <THRESHOLD> [--time-aggregation <AGGREGATOR> --window-size <TIMESPAN>]
+    parameters:
+        - name: --metric-name
+          short-summary: Name of the metric to base the rule on.
+          populator-commands:
+            - az monitor metric-definitions list
+        - name: --operator
+          short-summary: How to compare the metric against the threshold.
+        - name: --target
+          short-summary: ID of the resource to target for the alert rule.
+        - name: --threshold
+          short-summary: Numeric threshold at which to trigger the alert.
+        - name: --description
+          short-summary: Free-text description of the rule.
+        - name: --time-aggregation
+          short-summary: Type of aggregation to apply based on --window-size.
+        - name: --window-size
+          short-summary: >
+            Time span over which to apply --time-aggregation, in ISO 8601 format
+            (e.g.: PT5M for 5 minutes)
+    examples:
+        - name: Create a point-in-time metric-based alert on a VM.
+          text: >
+            az vm alert rule create -n rule1 -g <RG> --target <VM ID> --metric-name "Percentage CPU"
+            --operator GreaterThan --threshold 90
+        - name: Create a metric-based alert on a VM with time averaging.
+          text: >
+            az vm alert rule create -n rule1 -g <RG> --target <VM ID> --metric-name "Percentage CPU"
+            --operator GreaterThan --threshold 90 --time-aggregation Average --window-size PT5M
+"""
+
+helps['monitor alert rule create2'] = """
+    type: command
+    short-summary: Create a metric-based alert rule.
+    long-summary: |
+        To specify the condition:
+            --condtion <METRIC> <OPERATOR> <THRESHOLD> [<AGGREGATOR> <TIMESPAN>]
+    parameters:
+        - name: --target
+          short-summary: ID of the resource to target for the alert rule.
+        - name: --description
+          short-summary: Free-text description of the rule.
+        - name: --condition
+          short-summary: The condition upon which to trigger the rule.
+    examples:
+        - name: Create a point-in-time metric-based alert on a VM.
+          text: >
+            az vm alert rule create -n rule1 -g <RG> --target <VM ID> --condition Percentage CPU > 90
+        - name: Create a metric-based alert on a VM with time averaging.
+          text: >
+            az vm alert rule create -n rule1 -g <RG> --target <VM ID> --condition Percentage CPU > 90 AVG 5m
+"""
+
 
 helps['monitor alert rule update'] = """
     type: command
@@ -67,7 +121,7 @@ helps['monitor alert incident list'] = """
 
 helps['monitor alert action'] = """
     type: group
-    short-summary: Manage actions associated with alert rules.
+    short-summary: Manage actions that trigger when an alert is fired.
     """
 
 helps['monitor alert action add-email'] = """

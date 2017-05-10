@@ -20,7 +20,10 @@ name_arg_type = CliArgumentType(options_list=['--name', '-n'], metavar='NAME')
 
 # region Alerts
 
-register_cli_argument('monitor alert', 'rule_name', name_arg_type, id_part='name')
+register_cli_argument('monitor alert', 'rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
+
+for item in ['create', 'create2']:
+    register_cli_argument('monitor alert {}'.format(item), 'rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
 
 register_cli_argument('monitor alert incident', 'rule_name', options_list=['--rule-name'], id_part='name')
 register_cli_argument('monitor alert incident', 'incident_name', name_arg_type, id_part='child_name')

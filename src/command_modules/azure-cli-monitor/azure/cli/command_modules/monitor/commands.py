@@ -25,7 +25,8 @@ custom_operations = create_service_adapter('azure.cli.command_modules.monitor.cu
 
 ar_path = 'azure.mgmt.monitor.operations.alert_rules_operations#AlertRulesOperations.'
 
-cli_command(__name__, 'monitor alert rule create-metric', custom_path + 'create_metric_rule', cf_alert_rules)
+cli_command(__name__, 'monitor alert rule create', custom_path + 'create_metric_rule', cf_alert_rules)
+cli_command(__name__, 'monitor alert rule create2', custom_path + 'create_metric_rule_alt', cf_alert_rules)
 cli_command(__name__, 'monitor alert rule delete', ar_path + 'delete', cf_alert_rules)
 cli_command(__name__, 'monitor alert rule show', ar_path + 'get', cf_alert_rules)
 cli_command(__name__, 'monitor alert rule list', ar_path + 'list_by_resource_group', cf_alert_rules)

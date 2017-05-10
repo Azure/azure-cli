@@ -36,6 +36,10 @@ def create_metric_rule(client, resource_group_name, rule_name, target, metric_na
     return client.alert_rules.create_or_update(resource_group_name, rule_name, rule)
 
 
+def create_metric_rule_alt(client, resource_group_name, rule_name, target, condition,
+                           description=None, enabled=True, location=None, tags=None):
+    pass
+
 # endregion
 
 
