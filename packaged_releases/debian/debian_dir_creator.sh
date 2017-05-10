@@ -59,8 +59,8 @@ Homepage: https://github.com/azure/azure-cli
 Package: azure-cli
 Architecture: all
 Depends: \${misc:Depends}
-Description: Azure CLI 2.0 - Preview
- A great cloud needs great tools; we're excited to introduce Azure CLI 2.0 - Preview,
+Description: Azure CLI 2.0
+ A great cloud needs great tools; we're excited to introduce Azure CLI 2.0,
  our next generation multi-platform command line experience for Azure.
 
 EOM
@@ -100,7 +100,7 @@ override_dh_install:
 ${TAB}mkdir -p debian/azure-cli/opt/az
 ${TAB}cp -a python_env/* debian/azure-cli/opt/az
 ${TAB}mkdir -p debian/azure-cli/usr/bin/
-${TAB}echo "\043!/usr/bin/env bash\n/opt/az/bin/python3 -m azure.cli \"\044\100\"" > debian/azure-cli/usr/bin/az
+${TAB}echo "\043!/usr/bin/env bash\n/opt/az/bin/python3 -Im azure.cli \"\044\100\"" > debian/azure-cli/usr/bin/az
 ${TAB}chmod 0755 debian/azure-cli/usr/bin/az
 ${TAB}mkdir -p debian/azure-cli/etc/bash_completion.d/
 ${TAB}cat ${completion_script} > debian/azure-cli/etc/bash_completion.d/azure-cli

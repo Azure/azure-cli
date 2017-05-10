@@ -1,6 +1,6 @@
 pipeline {
   agent none
-  triggers { pollSCM('H/1 * * * *')}
+  triggers { cron('0 3 * * *') }
   stages {
     stage ('Build') {
       agent { label 'linux-build' } 
