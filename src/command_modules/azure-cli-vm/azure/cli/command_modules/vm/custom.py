@@ -18,7 +18,7 @@ except ImportError:
 from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
 from azure.cli.core.commands.validators import validate_file_or_dict
-from azure.keyvault.key_vault_id import parse_secret_id
+from azure.keyvault import KeyVaultId
 
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.arm import parse_resource_id, resource_id, is_valid_resource_id
@@ -102,8 +102,8 @@ extension_mappings = {
         'publisher': 'Microsoft.Compute'
     },
     _LINUX_DIAG_EXT: {
-        'version': '2.3',
-        'publisher': 'Microsoft.OSTCExtensions'
+        'version': '3.0',
+        'publisher': 'Microsoft.Azure.Diagnostics'
     },
     _WINDOWS_DIAG_EXT: {
         'version': '1.5',
@@ -1897,7 +1897,7 @@ def create_vmss(vmss_name, resource_group_name, image,
 
 
 def create_av_set(availability_set_name, resource_group_name,
-                  platform_fault_domain_count, platform_update_domain_count=None,
+                  platform_fault_domain_count=2, platform_update_domain_count=None,
                   location=None, no_wait=False,
                   unmanaged=False, tags=None, validate=False):
     from azure.cli.core.util import random_string
@@ -1952,7 +1952,7 @@ def get_vm_format_secret(secrets, certificate_store=None):
 
     # group secrets by source vault
     for secret in secrets:
-        parsed = parse_secret_id(secret)
+        parsed = KeyVaultId.parse_secret_id(secret)
         match = re.search('://(.+?)\\.', parsed.vault)
         vault_name = match.group(1)
         if vault_name not in grouped_secrets:

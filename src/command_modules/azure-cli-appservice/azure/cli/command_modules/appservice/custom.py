@@ -5,7 +5,6 @@
 
 # pylint: disable=no-self-use,too-many-arguments,too-many-lines
 from __future__ import print_function
-import json
 import threading
 try:
     from urllib.parse import urlparse
@@ -17,7 +16,7 @@ from msrestazure.azure_exceptions import CloudError
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteConfigResource,
-                                   SkuDescription, SslState, HostNameBinding,
+                                   SkuDescription, SslState, HostNameBinding, NameValuePair,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState)
 
@@ -44,26 +43,24 @@ def create_webapp(resource_group_name, name, plan, runtime=None,
                   deployment_local_git=None):
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
-
     client = web_client_factory()
     if is_valid_resource_id(plan):
         plan = parse_resource_id(plan)['name']
     plan_info = client.app_service_plans.get(resource_group_name, plan)
     is_linux = plan_info.reserved
     location = plan_info.location
-    webapp_def = Site(server_farm_id=plan, location=location)
-    poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
-    webapp = LongRunningOperation()(poller)
+    site_config = SiteConfig(app_settings=[])
+    webapp_def = Site(server_farm_id=plan, location=location, site_config=site_config)
 
     if is_linux:
         if runtime and deployment_container_image_name:
             raise CLIError('usage error: --runtime | --deployment-container-image-name')
         if startup_file or runtime:
-            update_site_configs(resource_group_name, name, app_command_line=startup_file,
-                                linux_fx_version=runtime)
+            site_config.app_command_line = startup_file
+            site_config.linux_fx_version = runtime
         if deployment_container_image_name:
-            update_container_settings(resource_group_name, name,
-                                      docker_custom_image_name=deployment_container_image_name)
+            site_config.app_settings.append(NameValuePair('DOCKER_CUSTOM_IMAGE_NAME',
+                                                          deployment_container_image_name))
     elif runtime:  # windows webapp
         if startup_file or deployment_container_image_name:
             raise CLIError("usage error: --startup-file or --deployment-container-image-name is "
@@ -72,34 +69,23 @@ def create_webapp(resource_group_name, name, plan, runtime=None,
         match = helper.resolve(runtime)
         if not match:
             raise CLIError("Runtime '{}' is not supported. Please invoke 'list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
+        match['setter'](match, site_config)
 
-        match['setter'](match, resource_group_name, name)
+    poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
+    webapp = LongRunningOperation()(poller)
 
-    if deployment_local_git and deployment_source_url:
-        raise CLIError('usage error: --deployment-local-git | --deployment-source-url')
-
-    if deployment_source_url:
-        logger.warning("Linking to git repository '%s'", deployment_source_url)
-        try:
-            poller = config_source_control(resource_group_name, name, deployment_source_url, 'git',
-                                           deployment_source_branch, manual_integration=True)
-            LongRunningOperation()(poller)
-        except Exception as ex:  # pylint: disable=broad-except
-            ex = ex_handler_factory(no_throw=True)(ex)
-            logger.warning("Link to git repository failed due to error '%s'", ex)
-
-    if deployment_local_git:
-        local_git_info = enable_local_git(resource_group_name, name)
-        logger.warning("Local git is configured with url of '%s'", local_git_info['url'])
-        setattr(webapp, 'deploymentLocalGitUrl', local_git_info['url'])
+    # Ensure SCC operations follow right after the 'create', no precedent appsetting update commands
+    _set_remote_or_local_git(webapp, resource_group_name, name, deployment_source_url,
+                             deployment_source_branch, deployment_local_git)
 
     _fill_ftp_publishing_url(webapp, resource_group_name, name)
     return webapp
 
 
 def show_webapp(resource_group_name, name, slot=None, app_instance=None):
-    webapp = (_generic_site_operation(resource_group_name, name, 'get', slot)
-              if slot else app_instance)
+    webapp = app_instance
+    if not app_instance:  # when the routine is invoked as a help method, not through commands
+        webapp = _generic_site_operation(resource_group_name, name, 'get', slot)
     _rename_server_farm_props(webapp)
     _fill_ftp_publishing_url(webapp, resource_group_name, name, slot)
     return webapp
@@ -450,7 +436,7 @@ def create_webapp_slot(resource_group_name, webapp, slot, configuration_source=N
     return result
 
 
-def config_source_control(resource_group_name, name, repo_url, repository_type=None, branch=None,
+def config_source_control(resource_group_name, name, repo_url, repository_type=None, branch=None,  # pylint: disable=too-many-locals
                           git_token=None, manual_integration=None, slot=None, cd_provider=None,
                           cd_app_type=None, cd_account=None, cd_account_must_exist=None):
     client = web_client_factory()
@@ -473,9 +459,23 @@ def config_source_control(resource_group_name, name, repo_url, repository_type=N
         source_control = SiteSourceControl(location, repo_url=repo_url, branch=branch,
                                            is_manual_integration=manual_integration,
                                            is_mercurial=(repository_type != 'git'))
-        return _generic_site_operation(resource_group_name, name,
-                                       'create_or_update_source_control',
-                                       slot, source_control)
+
+        # SCC config can fail if previous commands caused SCMSite shutdown, so retry here.
+        for i in range(5):
+            try:
+                poller = _generic_site_operation(resource_group_name, name,
+                                                 'create_or_update_source_control',
+                                                 slot, source_control)
+                return LongRunningOperation()(poller)
+            except Exception as ex:  # pylint: disable=broad-except
+                import re
+                import time
+                ex = ex_handler_factory(no_throw=True)(ex)
+                # for non server errors(50x), just throw; otherwise retry 4 times
+                if i == 4 or not (re.findall(r'\(50\d\)', str(ex))):
+                    raise
+                logger.warning('retrying %s/4', i + 1)
+                time.sleep(5)   # retry in a moment
 
 
 def update_git_token(git_token=None):
@@ -514,17 +514,9 @@ def enable_local_git(resource_group_name, name, slot=None):
 def sync_site_repo(resource_group_name, name, slot=None):
     try:
         return _generic_site_operation(resource_group_name, name, 'sync_repository', slot)
-    except CloudError as ex:
-        raise _extract_real_error(ex)
-
-
-# webapp service's error payload doesn't follow ARM's error format, so we had to sniff out
-def _extract_real_error(ex):
-    try:
-        err = json.loads(ex.response.text)
-        return CLIError(err['Message'])
-    except Exception:  # pylint: disable=broad-except
-        return ex
+    except CloudError as ex:  # Because of bad spec, sdk throws on 200. We capture it here
+        if ex.status_code not in [200, 204]:
+            raise ex
 
 
 def list_app_service_plans(resource_group_name=None):
@@ -888,13 +880,33 @@ def list_slots(resource_group_name, webapp):
     return slots
 
 
-def swap_slot(resource_group_name, webapp, slot, target_slot=None):
+def swap_slot(resource_group_name, webapp, slot, target_slot=None, action='swap'):
     client = web_client_factory()
-    if target_slot is None:
-        return client.web_apps.swap_slot_with_production(resource_group_name, webapp, slot, True)
-    else:
-        return client.web_apps.swap_slot_slot(resource_group_name, webapp,
-                                              slot, target_slot, True)
+    if action == 'swap':
+        if target_slot is None:
+            poller = client.web_apps.swap_slot_with_production(resource_group_name,
+                                                               webapp, slot, True)
+        else:
+            poller = client.web_apps.swap_slot_slot(resource_group_name, webapp,
+                                                    slot, target_slot, True)
+        return poller
+    elif action == 'preview':
+        if target_slot is None:
+            result = client.web_apps.apply_slot_config_to_production(resource_group_name,
+                                                                     webapp, slot, True)
+        else:
+            result = client.web_apps.apply_slot_configuration_slot(resource_group_name, webapp,
+                                                                   slot, target_slot, True)
+        return result
+    else:  # reset
+        # we will reset both source slot and target slot
+        if target_slot is None:
+            client.web_apps.reset_production_slot_config(resource_group_name, webapp)
+        else:
+            client.web_apps.reset_slot_configuration_slot(resource_group_name, webapp, target_slot)
+
+        client.web_apps.reset_slot_configuration_slot(resource_group_name, webapp, slot)
+        return None
 
 
 def delete_slot(resource_group_name, webapp, slot):
@@ -1092,17 +1104,15 @@ class _StackRuntimeHelper(object):
         return self._stacks
 
     @staticmethod
-    def update_site_config(stack, resource_group_name, webapp_name):
-        configs = get_site_configs(resource_group_name, webapp_name, None)
+    def update_site_config(stack, site_config):
         for k, v in stack['configs'].items():
-            setattr(configs, k, v)
-        _generic_site_operation(resource_group_name, webapp_name,
-                                'update_configuration', None, configs)
+            setattr(site_config, k, v)
+        return site_config
 
     @staticmethod
-    def update_site_appsettings(stack, resource_group_name, webapp_name):
-        settings = ['{}={}'.format(k, v) for k, v in stack['configs'].items()]
-        update_app_settings(resource_group_name, webapp_name, settings=settings)
+    def update_site_appsettings(stack, site_config):
+        site_config.app_settings += [NameValuePair(k, v) for k, v in stack['configs'].items()]
+        return site_config
 
     def _load_stacks(self):
         if self._stacks:
@@ -1155,12 +1165,15 @@ class _StackRuntimeHelper(object):
 
 
 def create_function(resource_group_name, name, storage_account, plan=None,
-                    consumption_plan_location=None):
-
+                    consumption_plan_location=None, deployment_source_url=None,
+                    deployment_source_branch='master', deployment_local_git=None):
+    if deployment_source_url and deployment_local_git:
+        raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if bool(plan) == bool(consumption_plan_location):
         raise CLIError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
 
-    functionapp_def = Site(location='')
+    site_config = SiteConfig(app_settings=[])
+    functionapp_def = Site(location=None, site_config=site_config)
     client = web_client_factory()
     if consumption_plan_location:
         locations = list_consumption_locations()
@@ -1177,27 +1190,50 @@ def create_function(resource_group_name, name, storage_account, plan=None,
         functionapp_def.location = location
 
     con_string = _validate_and_get_connection_string(resource_group_name, storage_account)
-
     functionapp_def.kind = 'functionapp'
+
+    # adding appsetting to site to make it a function
+    site_config.app_settings.append(NameValuePair('AzureWebJobsStorage', con_string))
+    site_config.app_settings.append(NameValuePair('AzureWebJobsDashboard', con_string))
+    site_config.app_settings.append(NameValuePair('WEBSITE_NODE_DEFAULT_VERSION', '6.5.0'))
+    site_config.app_settings.append(NameValuePair('FUNCTIONS_EXTENSION_VERSION', '~1'))
+
+    if consumption_plan_location is None:
+        site_config.always_on = True
+    else:
+        site_config.app_settings.append(NameValuePair('WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
+                                                      con_string))
+        site_config.app_settings.append(NameValuePair('WEBSITE_CONTENTSHARE', name.lower()))
+
     poller = client.web_apps.create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation()(poller)
 
-    # adding appsetting to site to make it a function
-    settings = ['AzureWebJobsStorage=' + con_string, 'AzureWebJobsDashboard=' + con_string,
-                'WEBSITE_NODE_DEFAULT_VERSION=6.5.0', 'FUNCTIONS_EXTENSION_VERSION=~1']
-
-    if consumption_plan_location is None:
-        update_site_configs(resource_group_name, name, always_on='true')
-    else:
-        settings.append('WEBSITE_CONTENTAZUREFILECONNECTIONSTRING=' + con_string)
-        settings.append('WEBSITE_CONTENTSHARE=' + name.lower())
-
-    update_app_settings(resource_group_name, name, settings, None)
+    _set_remote_or_local_git(functionapp, resource_group_name, name, deployment_source_url,
+                             deployment_source_branch, deployment_local_git)
 
     return functionapp
 
 
+def _set_remote_or_local_git(webapp, resource_group_name, name, deployment_source_url=None,
+                             deployment_source_branch='master', deployment_local_git=None):
+    if deployment_source_url:
+        logger.warning("Linking to git repository '%s'", deployment_source_url)
+        try:
+            poller = config_source_control(resource_group_name, name, deployment_source_url, 'git',
+                                           deployment_source_branch, manual_integration=True)
+            LongRunningOperation()(poller)
+        except Exception as ex:  # pylint: disable=broad-except
+            ex = ex_handler_factory(no_throw=True)(ex)
+            logger.warning("Link to git repository failed due to error '%s'", ex)
+
+    if deployment_local_git:
+        local_git_info = enable_local_git(resource_group_name, name)
+        logger.warning("Local git is configured with url of '%s'", local_git_info['url'])
+        setattr(webapp, 'deploymentLocalGitUrl', local_git_info['url'])
+
+
 def _validate_and_get_connection_string(resource_group_name, storage_account):
+    from azure.cli.core._profile import CLOUD
     sa_resource_group = resource_group_name
     if is_valid_resource_id(storage_account):
         sa_resource_group = parse_resource_id(storage_account)['resource_group']
@@ -1219,9 +1255,21 @@ def _validate_and_get_connection_string(resource_group_name, storage_account):
     if error_message:
         raise CLIError(error_message)
 
-    keys = storage_client.storage_accounts.list_keys(resource_group_name, storage_account).keys
-    conn_string = 'DefaultEndpointsProtocol=https;AccountName={};AccountKey={}'.format(storage_account, keys[0].value)  # pylint: disable=line-too-long
-    return conn_string
+    obj = storage_client.storage_accounts.list_keys(resource_group_name, storage_account)  # pylint: disable=no-member
+    try:
+        keys = [obj.keys[0].value, obj.keys[1].value]  # pylint: disable=no-member
+    except AttributeError:
+        # Older API versions have a slightly different structure
+        keys = [obj.key1, obj.key2]  # pylint: disable=no-member
+
+    endpoint_suffix = CLOUD.suffixes.storage_endpoint
+    connection_string = 'DefaultEndpointsProtocol={};EndpointSuffix={};AccountName={};AccountKey={}'.format(   # pylint: disable=line-too-long
+        "https",
+        endpoint_suffix,
+        storage_account,
+        keys[0])  # pylint: disable=no-member
+
+    return connection_string
 
 
 def list_consumption_locations():

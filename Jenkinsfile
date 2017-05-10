@@ -1,6 +1,6 @@
 pipeline {
   agent none
-  triggers { pollSCM('H/1 * * * *')}
+  triggers { cron('0 3 * * *') }
   stages {
     stage ('Build') {
       agent { label 'linux-build' } 
@@ -20,7 +20,7 @@ pipeline {
           def test_tasks = [:]
 
           // Add live test tasks
-          def modules = ['acs', 'keyvault', 'storage', 'sql']
+          def modules = ['acs', 'keyvault', 'storage', 'sql', 'role', 'vm', 'network']
           for (int i = 0; i < modules.size(); ++i) {
             def name = modules.get(i)
             test_tasks["Live Test: ${name}"] = {

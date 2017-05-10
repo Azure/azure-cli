@@ -5,7 +5,7 @@
 
 import os
 
-from azure.cli.core.test_utils.vcr_test_base import (JMESPathCheck)
+from azure.cli.testsdk.vcr_test_base import (JMESPathCheck)
 from .test_batch_data_plane_command_base import (BatchDataPlaneTestBase)
 
 

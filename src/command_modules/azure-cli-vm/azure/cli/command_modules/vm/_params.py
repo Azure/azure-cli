@@ -92,7 +92,7 @@ register_cli_argument('vm availability-set create', 'availability_set_name', nam
 register_cli_argument('vm availability-set create', 'unmanaged', action='store_true', help='contained VMs should use unmanaged disks')
 register_cli_argument('vm availability-set create', 'platform_update_domain_count', type=int,
                       help='Update Domain count. If unspecified, server picks the most optimal number like 5. For the latest defaults see https://docs.microsoft.com/en-us/rest/api/compute/availabilitysets/availabilitysets-create')
-register_cli_argument('vm availability-set create', 'platform_fault_domain_count', type=int, help='Fault Domain count. Example: 2')
+register_cli_argument('vm availability-set create', 'platform_fault_domain_count', type=int, help='Fault Domain count.')
 register_cli_argument('vm availability-set create', 'validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
 
 register_cli_argument('vm user', 'username', options_list=('--username', '-u'), help='The user name')

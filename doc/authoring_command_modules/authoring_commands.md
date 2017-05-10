@@ -100,7 +100,7 @@ Supporting the IDs Parameter
 
 Most ARM resources can be identified by an ID. In many cases, for example show and delete commands, it may be more useful to copy and paste an ID to identify the target resource instead of having to specify the names of the resource group, the resource, and the parent resource (if any).
 
-Azure CLI 2.0 Preview supports exposing an `--ids` parameter that will parse a resource ID into its constituent named parts so that this parsing need not be done as part of a client script. Additionally `--ids` will accept a _list_ of space separated IDs, allowing the client to loop the command over each ID.
+Azure CLI 2.0 supports exposing an `--ids` parameter that will parse a resource ID into its constituent named parts so that this parsing need not be done as part of a client script. Additionally `--ids` will accept a _list_ of space separated IDs, allowing the client to loop the command over each ID.
 
 Enabling this functionality only requires the command author specify the appropriate values for `id_part` in their calls to `register_cli_argument`.
 

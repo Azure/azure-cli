@@ -131,7 +131,6 @@ def create_role_assignment(role, assignee, resource_group_name=None, scope=None)
 
 
 def _create_role_assignment(role, assignee, resource_group_name=None, scope=None,
-                            # pylint: disable=too-many-arguments
                             resolve_assignee=True):
     factory = _auth_client_factory(scope)
     assignments_client = factory.role_assignments
@@ -149,7 +148,7 @@ def _create_role_assignment(role, assignee, resource_group_name=None, scope=None
                                      custom_headers=custom_headers)
 
 
-def list_role_assignments(assignee=None, role=None, resource_group_name=None,  # pylint: disable=too-many-arguments
+def list_role_assignments(assignee=None, role=None, resource_group_name=None,
                           scope=None, include_inherited=False,
                           show_all=False, include_groups=False):
     '''
@@ -212,7 +211,7 @@ def _get_displayable_name(graph_object):
         return ''
 
 
-def delete_role_assignments(ids=None, assignee=None, role=None,  # pylint: disable=too-many-arguments
+def delete_role_assignments(ids=None, assignee=None, role=None,
                             resource_group_name=None, scope=None, include_inherited=False):
     factory = _auth_client_factory(scope)
     assignments_client = factory.role_assignments
@@ -238,7 +237,7 @@ def delete_role_assignments(ids=None, assignee=None, role=None,  # pylint: disab
         raise CLIError('No matched assignments were found to delete')
 
 
-def _search_role_assignments(assignments_client, definitions_client,  # pylint: disable=too-many-arguments
+def _search_role_assignments(assignments_client, definitions_client,
                              scope, assignee, role, include_inherited, include_groups):
     assignee_object_id = None
     if assignee:
@@ -346,7 +345,7 @@ def list_users(client, upn=None, display_name=None, query_filter=None):
     return client.list(filter=(' and ').join(sub_filters))
 
 
-def create_user(client, user_principal_name, display_name, password,  # pylint: disable=too-many-arguments
+def create_user(client, user_principal_name, display_name, password,
                 mail_nickname=None, immutable_id=None, force_change_password_next_login=False):
     '''
     :param mail_nickname: mail alias. default to user principal name
@@ -375,7 +374,7 @@ def list_groups(client, display_name=None, query_filter=None):
     return client.list(filter=(' and ').join(sub_filters))
 
 
-def create_application(client, display_name, homepage, identifier_uris,  # pylint: disable=too-many-arguments
+def create_application(client, display_name, homepage, identifier_uris,
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None,
                        end_date=None):
@@ -392,7 +391,7 @@ def create_application(client, display_name, homepage, identifier_uris,  # pylin
     return client.create(app_create_param)
 
 
-def update_application(client, identifier, display_name=None, homepage=None,  # pylint: disable=too-many-arguments
+def update_application(client, identifier, display_name=None, homepage=None,
                        identifier_uris=None, password=None, reply_urls=None, key_value=None,
                        key_type=None, key_usage=None, start_date=None, end_date=None):
     object_id = _resolve_application(client, identifier)
@@ -431,7 +430,7 @@ def _resolve_application(client, identifier):
     return result[0].object_id if result else identifier
 
 
-def _build_application_creds(password=None, key_value=None, key_type=None,  # pylint: disable=too-many-arguments
+def _build_application_creds(password=None, key_value=None, key_type=None,
                              key_usage=None, start_date=None, end_date=None):
     if password and key_value:
         raise CLIError('specify either --password or --key-value, but not both.')

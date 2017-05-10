@@ -11,7 +11,6 @@ logger = azlogging.get_az_logger(__name__)
 
 
 def cli_redis_export(client, resource_group_name, name, prefix, container, file_format=None):
-    # pylint:disable=too-many-arguments
     from azure.mgmt.redis.models import ExportRDBParameters
     parameters = ExportRDBParameters(prefix, container, file_format)
     return client.export(resource_group_name, name, parameters)
@@ -86,7 +85,7 @@ def wrong_vmsize_argument_exception_handler(ex):
     raise ex
 
 
-def cli_redis_create(client,  # pylint:disable=too-many-arguments
+def cli_redis_create(client,
                      resource_group_name, name, location, sku, vm_size, tags=None,
                      redis_configuration=None, enable_non_ssl_port=None, tenant_settings=None,
                      shard_count=None, subnet_id=None, static_ip=None):

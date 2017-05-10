@@ -13,7 +13,7 @@ try:
 except ImportError:
     import mock
 
-from azure.cli.core.test_utils.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck)
+from azure.cli.testsdk.vcr_test_base import (ResourceGroupVCRTestBase, JMESPathCheck)
 
 
 def _mock_get_uuid_str():

@@ -21,7 +21,8 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          _match_host_names_from_cert,
                                                          bind_ssl_cert,
                                                          list_publish_profiles,
-                                                         config_source_control)
+                                                         config_source_control,
+                                                         show_webapp)
 
 # pylint: disable=line-too-long
 from vsts_cd_manager.continuous_delivery_manager import ContinuousDeliveryResult
@@ -216,15 +217,27 @@ class Test_Webapp_Mocked(unittest.TestCase):
         log_mock.assert_called_with('myRG', 'myweb', None, None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
-    def test_sync_repository_with_error(self, site_op_mock):
-        resp = FakedResponse(400)
-        setattr(resp, 'text', '{"Message": "nice error"}')
-        site_op_mock.side_effect = CloudError(resp, error='error1')
+    @mock.patch('azure.cli.command_modules.appservice.custom._rename_server_farm_props', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._fill_ftp_publishing_url', autospec=True)
+    def test_show_webapp(self, file_ftp_mock, rename_mock, site_op_mock):
+        faked_web = mock.MagicMock()
+        site_op_mock.return_value = faked_web
         # action
-        with self.assertRaises(CLIError) as ex:
-            sync_site_repo('myRG', 'myweb')
+        result = show_webapp('myRG', 'myweb', slot=None, app_instance=None)
+        # assert (we invoke the site op)
+        self.assertEqual(faked_web, result)
+        self.assertTrue(rename_mock.called)
+        self.assertTrue(file_ftp_mock.called)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_sync_repository_skip_bad_error(self, site_op_mock):
+        resp = FakedResponse(200)  # because of bad spec, sdk throws on 200.
+        setattr(resp, 'text', '{"Message": ""}')
+        site_op_mock.side_effect = CloudError(resp, error="bad error")
+        # action
+        sync_site_repo('myRG', 'myweb')
         # assert
-        self.assertEqual("nice error", str(ex.exception))
+        pass  # if we are here, it means CLI has captured the bogus exception
 
     def test_match_host_names_from_cert(self):
         result = _match_host_names_from_cert(['*.mysite.com'], ['admin.mysite.com', 'log.mysite.com', 'mysite.com'])

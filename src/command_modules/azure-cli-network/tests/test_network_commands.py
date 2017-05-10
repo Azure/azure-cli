@@ -14,10 +14,12 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.commands.arm import resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
-from azure.cli.core.test_utils.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
-                                                     NoneCheck, MOCKED_SUBSCRIPTION_ID)
+
 from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk.vcr_test_base import (VCRTestBase, ResourceGroupVCRTestBase, JMESPathCheck,
+                                             NoneCheck, MOCKED_SUBSCRIPTION_ID)
+
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 class NetworkMultiIdsShowScenarioTest(ResourceGroupVCRTestBase):
@@ -1495,7 +1497,7 @@ class NetworkWatcherScenarioTest(ResourceGroupVCRTestBase):
         vm = 'vm1'
         # create VM with NetworkWatcher extension
         self.cmd('storage account create -g {} -l westus --sku Standard_LRS -n {}'.format(resource_group, storage_account))
-        self.cmd('vm create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-password PassPass10!)'.format(resource_group, vm))
+        self.cmd('vm create -g {} -n {} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!)'.format(resource_group, vm))
         self.cmd('vm extension set -g {} --vm-name {} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher'.format(resource_group, vm))
 
         self.cmd('network watcher show-topology -g {} -l westus'.format(resource_group))

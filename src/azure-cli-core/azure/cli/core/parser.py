@@ -190,7 +190,8 @@ class AzCliCommandParser(argparse.ArgumentParser):
             or a command. Anything that has a func default is considered
             a group. This includes any dummy commands served up by the
             "filter out irrelevant commands based on argv" command filter """
-        return not self._defaults.get('func', None)
+        cmd = self._defaults.get('func', None)
+        return not (cmd and cmd.handler)
 
     def __getattribute__(self, name):
         """ Since getting the description can be expensive (require module loads), we defer

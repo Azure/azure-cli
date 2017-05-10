@@ -396,7 +396,7 @@ class CommandHelpFile(HelpFile):  # pylint: disable=too-few-public-methods
 
 class HelpParameter(HelpObject):  # pylint: disable=too-few-public-methods, too-many-instance-attributes
 
-    def __init__(self, param_name, description, required, choices=None,  # pylint: disable=too-many-arguments
+    def __init__(self, param_name, description, required, choices=None,
                  default=None, group_name=None):
         super(HelpParameter, self).__init__()
         self.name = param_name
