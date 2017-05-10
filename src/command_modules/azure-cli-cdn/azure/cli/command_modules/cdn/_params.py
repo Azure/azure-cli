@@ -97,7 +97,7 @@ register_cli_argument('cdn endpoint purge', 'content_paths', nargs='+')
 
 # Custom Domain #
 
-register_cli_argument('cdn custom-domain', 'name', name_arg_type, id_part=None,
+register_cli_argument('cdn custom-domain', 'custom_domain_name', name_arg_type, id_part=None,
                       help='Name of the custom domain.')
 register_cli_argument('cdn custom-domain create', 'location',
                       validator=get_default_location_from_resource_group)
