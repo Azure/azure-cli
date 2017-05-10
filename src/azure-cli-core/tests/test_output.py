@@ -14,16 +14,7 @@ from azure.cli.core._output import (OutputProducer, format_json, format_table,
 import azure.cli.core.util as util
 
 
-class TestOutput(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        pass
-
-    @classmethod
-    def tearDownClass(cls):
-        pass
-
+class TestCoreCLIOutput(unittest.TestCase):
     def setUp(self):
         self.io = StringIO()
 
@@ -85,9 +76,9 @@ class TestOutput(unittest.TestCase):
         obj['val'] = '0b1f6472'
         output_producer.out(CommandResultItem(obj))
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-            """  Active  Val
+            """Active    Val
 --------  --------
-       1  0b1f6472
+True      0b1f6472
 """))
 
     def test_out_table_list_of_lists(self):
@@ -122,9 +113,9 @@ qwerty  0b1f6472qwerty
         output_producer.out(result_item)
         # Should be alphabetical order as no table transformer and query is not active.
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-            """  Active  Name    Sub       Val
+            """Active    Name    Sub       Val
 --------  ------  --------  --------------
-       1  qwerty  0b1f6472  0b1f6472qwerty
+True      qwerty  0b1f6472  0b1f6472qwerty
 """))
 
     def test_out_table_no_query_yes_transformer_order(self):
@@ -139,9 +130,9 @@ qwerty  0b1f6472qwerty
         output_producer.out(result_item)
         # Should be table transformer order
         self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
-            """Name    Val               Active  Sub
+            """Name    Val             Active    Sub
 ------  --------------  --------  --------
-qwerty  0b1f6472qwerty         1  0b1f6472
+qwerty  0b1f6472qwerty  True      0b1f6472
 """))
 
     # TSV output tests
