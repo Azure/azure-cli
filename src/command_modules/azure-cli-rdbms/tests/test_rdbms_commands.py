@@ -57,13 +57,7 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
             execute('az {} server delete -g {} -n {} --yes'.format(self.engine_type, group, name))
 
     def _get_resource_group(self, **kwargs):
-        try:
-            return kwargs.get(self.resource_group_parameter_name)
-        except KeyError:
-            template = 'To create a rdbms server, resource group is required. Please add ' \
-                       'decorator @{} in front of this server preparer.'
-            raise CliTestError(template.format(ResourceGroupPreparer.__name__,
-                                               self.resource_group_parameter_name))
+        return kwargs.get(self.resource_group_parameter_name)
 
 
 class ServerMgmtScenarioTest(ScenarioTest):
