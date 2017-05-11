@@ -234,7 +234,7 @@ for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'os_caching', options_list=['--storage-caching', '--os-disk-caching'], arg_group='Storage', help='Storage caching type for the VM OS disk.', **enum_choice_list([CachingTypes.read_only.value, CachingTypes.read_write.value]))
     register_cli_argument(scope, 'data_caching', options_list=['--data-disk-caching'], arg_group='Storage', help='Storage caching type for the VM data disk(s).', **enum_choice_list(CachingTypes))
 
-    register_cli_argument(scope, 'license_type', help='The license type of the OS, e.g. Windows_Server, Windows_Client, etc')
+    register_cli_argument(scope, 'license_type', help='the license type if the Windows server image or disk being used was licensed on-premises')
 
 register_cli_argument('vm create', 'vm_name', name_arg_type, id_part=None, help='Name of the virtual machine.', validator=process_vm_create_namespace, completer=None)
 register_cli_argument('vm create', 'attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
