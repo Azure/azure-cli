@@ -11,7 +11,6 @@ helps['monitor'] = """
             type: group
             short-summary: Commands to manage Azure Monitor service.
             """
-# MANAGEMENT COMMANDS HELPS
 
 # region Alerts
 
@@ -35,7 +34,7 @@ helps['monitor alert rule create'] = """
         - name: --metric-name
           short-summary: Name of the metric to base the rule on.
           populator-commands:
-            - az monitor metric-definitions list
+            - az monitor metrics list-definitions
         - name: --operator
           short-summary: How to compare the metric against the threshold.
         - name: --target
@@ -137,6 +136,25 @@ helps['monitor alert action add-webhook'] = """
 
 # endregion
 
+# region Metrics
+
+helps['monitor metrics'] = """
+    type: group
+    short-summary: Commands to view Azure resource metrics.
+"""
+
+helps['monitor metrics list'] = """
+    type: command
+    short-summary: List metric values for a resource.
+"""
+
+helps['monitor metrics list-definitions'] = """
+    type: command
+    short-summary: List metric definitions for a resource.
+"""
+
+# endregion
+
 helps['monitor log-profiles'] = """
             type: group
             short-summary: Commands to manage the log profiles assigned to Azure subscription.
@@ -192,16 +210,8 @@ helps['monitor autoscale-settings update'] = """
             type: command
             short-summary: Updates an autoscale setting.
             """
-# DATA COMMANDS HELPS
+
 helps['monitor activity-log'] = """
-            type: group
-            short-summary: Commands to manage activity log.
-            """
-helps['monitor metrics'] = """
-            type: group
-            short-summary: Commands to manage metrics.
-            """
-helps['monitor metric-definitions'] = """
-            type: group
-            short-summary: Commands to manage metric definitions.
-            """
+    type: group
+    short-summary: Commands to manage activity log.
+"""

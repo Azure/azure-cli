@@ -4,13 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 from ._client_factory import (cf_monitor,
-                              cf_alert_rules,
+                              cf_alert_rules, cf_metrics, cf_metric_def,
                               get_monitor_log_profiles_operation,
                               get_monitor_autoscale_settings_operation,
                               get_monitor_diagnostic_settings_operation,
-                              get_monitor_activity_log_operation,
-                              get_monitor_metric_definitions_operation,
-                              get_monitor_metrics_operation)
+                              get_monitor_activity_log_operation)
 from azure.cli.core.commands import cli_command
 from azure.cli.core.commands.arm import cli_generic_update_command
 from azure.cli.core.sdk.util import (ServiceGroup, create_service_adapter)
@@ -41,6 +39,15 @@ cli_command(__name__, 'monitor alert incident list', ari_path + 'list_by_alert_r
 
 cli_command(__name__, 'monitor alert action add-email', custom_path + 'add_email_action', cf_monitor)
 cli_command(__name__, 'monitor alert action add-webhook', custom_path + 'add_webhook_action', cf_monitor)
+
+# endregion
+
+# region Metrics
+
+metrics_path = 'azure.monitor.operations.metrics_operations#MetricsOperations.'
+metric_def_path = 'azure.monitor.operations.metric_definitions_operations#MetricDefinitionsOperations.'
+cli_command(__name__, 'monitor metrics list', metrics_path + 'list', cf_metrics)
+cli_command(__name__, 'monitor metrics list-definitions', metric_def_path + 'list', cf_metric_def)
 
 # endregion
 
@@ -90,17 +97,7 @@ with ServiceGroup(__name__, get_monitor_autoscale_settings_operation,
         c.command('get-parameters-template', 'scaffold_autoscale_settings_parameters')
 
 
-# DATA COMMANDS
 with ServiceGroup(__name__, get_monitor_activity_log_operation,
                   custom_operations) as s:
     with s.group('monitor activity-log') as c:
         c.command('list', 'list_activity_log')
-
-with ServiceGroup(__name__, get_monitor_metric_definitions_operation,
-                  custom_operations) as s:
-    with s.group('monitor metric-definitions') as c:
-        c.command('list', 'list_metric_definitions')
-
-with ServiceGroup(__name__, get_monitor_metrics_operation, custom_operations) as s:
-    with s.group('monitor metrics') as c:
-        c.command('list', 'list_metrics')

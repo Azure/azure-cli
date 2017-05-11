@@ -16,6 +16,15 @@ from azure.cli.command_modules.monitor.validators import (validate_diagnostic_se
 from azure.mgmt.monitor.models.monitor_management_client_enums import \
     (MetricStatisticType, TimeAggregationType, ConditionOperator, TimeAggregationOperator) 
 
+def register_resource_parameter(command, dest, arg_group=None):
+    """ Helper method to add the extra parameters needed to support specifying name or ID
+        for target resources. """
+    register_cli_argument(command, dest, options_list=['--resource-id'], arg_group=arg_group)
+    register_extra_cli_argument(command, 'resource_name', arg_group=arg_group)
+    register_extra_cli_argument(command, 'namespace', arg_group=arg_group)
+    register_extra_cli_argument(command, 'parent', arg_group=arg_group)
+    register_extra_cli_argument(command, 'resource_type', arg_group=arg_group)
+
 name_arg_type = CliArgumentType(options_list=['--name', '-n'], metavar='NAME')
 
 # region Alerts
@@ -23,7 +32,8 @@ name_arg_type = CliArgumentType(options_list=['--name', '-n'], metavar='NAME')
 register_cli_argument('monitor alert', 'rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
 
 for item in ['create', 'create2']:
-    register_cli_argument('monitor alert {}'.format(item), 'rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
+    register_cli_argument('monitor alert rule {}'.format(item), 'rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
+    register_resource_parameter('monitor alert rule {}'.format(item), 'target', 'Target Resource')
 
 register_cli_argument('monitor alert incident', 'rule_name', options_list=['--rule-name'], id_part='name')
 register_cli_argument('monitor alert incident', 'incident_name', name_arg_type, id_part='child_name')
@@ -31,35 +41,9 @@ register_cli_argument('monitor alert incident', 'incident_name', name_arg_type, 
 register_cli_argument('monitor alert rule', 'operator', **enum_choice_list(ConditionOperator))
 register_cli_argument('monitor alert rule', 'time_aggregation', **enum_choice_list(TimeAggregationOperator))
 
-#with ParametersContext(command='monitor alert-rule') as c:
-#    c.register_alias('name', ('--azure-resource-name',))
-#    c.register_alias('rule_name', ('--name', '-n'))
-
-#with ParametersContext(command='monitor alert-rule create') as c:
-#    from azure.mgmt.monitor.models.alert_rule_resource import AlertRuleResource
-
-#    c.expand('parameters', AlertRuleResource)
-#    c.register('condition', ('--condition',),
-#               type=get_json_object,
-#               help='JSON encoded condition configuration. Use @{file} to load from a file.')
-#    c.register('actions', ('--actions',),
-#               type=get_json_object,
-#               help='JSON encoded array of actions that are performed when the alert '
-#                    'rule becomes active, and when an alert condition is resolved. '
-#                    'Use @{file} to load from a file.')
-
-#with ParametersContext(command='monitor alert-rules show') as c:
-#    c.argument('rule_name', id_part='name')
-
-#with ParametersContext(command='monitor alert-rules delete') as c:
-#    c.argument('rule_name', id_part='name')
-
 ##  https://github.com/Azure/azure-rest-api-specs/issues/1017
 #with ParametersContext(command='monitor alert-rules list') as c:
 #    c.ignore('filter')
-
-#with ParametersContext(command='monitor alert-rule-incidents') as c:
-#    c.register_alias('incident_name', ('--name', '-n'))
 
 # endregion
 
