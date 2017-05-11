@@ -286,10 +286,11 @@ register_cli_argument('image create', 'data_snapshots', ignore_type)
 
 for scope in ['disk', 'snapshot']:
     register_extra_cli_argument(scope + ' create', 'source', validator=process_disk_or_snapshot_create_namespace,
-                                help='source to create the disk from, including a sas uri to a blob, managed disk id or name, or snapshot id or name')
+                                help='source to create the disk from, including a sas blob uri to a blob, managed disk id or name, or snapshot id or name')
     register_cli_argument(scope, 'source_blob_uri', ignore_type)
     register_cli_argument(scope, 'source_disk', ignore_type)
     register_cli_argument(scope, 'source_snapshot', ignore_type)
+    register_cli_argument(scope, 'source_storage_account_id', help='used when source blob is in a different subscription')
     register_cli_argument(scope, 'size_gb', options_list=('--size-gb', '-z'), help='size in GB.')
     register_cli_argument(scope, 'duration_in_seconds', help='Time duration in seconds until the SAS access expires')
 

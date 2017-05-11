@@ -297,7 +297,8 @@ def create_managed_disk(resource_group_name, disk_name, location=None,
                         size_gb=None, sku='Premium_LRS',
                         source=None,  # pylint: disable=unused-argument
                         # below are generated internally from 'source'
-                        source_blob_uri=None, source_disk=None, source_snapshot=None):
+                        source_blob_uri=None, source_disk=None, source_snapshot=None,
+                        source_storage_account_id=None):
     from azure.mgmt.compute.models import Disk, CreationData, DiskCreateOption, ImageDiskReference
     location = location or get_resource_group_location(resource_group_name)
     if source_blob_uri:
@@ -309,7 +310,8 @@ def create_managed_disk(resource_group_name, disk_name, location=None,
 
     creation_data = CreationData(option, source_uri=source_blob_uri,
                                  image_reference=None,
-                                 source_resource_id=source_disk or source_snapshot)
+                                 source_resource_id=source_disk or source_snapshot,
+                                 storage_account_id=source_storage_account_id)
 
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('usage error: --size-gb required to create an empty disk')
