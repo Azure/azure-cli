@@ -17,13 +17,6 @@ HISTORY_FILENAME = 'HISTORY.rst'
 IGNORE_LINES = ['.. :changelog:', 'Release History']
 UNRELEASED = 'unreleased'
 
-def error_exit(msg):
-    print('ERROR: '+msg, file=sys.stderr)
-    sys.exit(1)
-
-def print_status(msg):
-    print('-- '+msg, file=sys.stderr)
-
 
 def _parse_date_on_line(line):
     try:
