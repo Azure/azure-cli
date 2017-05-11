@@ -408,7 +408,8 @@ def create_snapshot(resource_group_name, snapshot_name, location=None,
                     size_gb=None, sku='Standard_LRS',
                     source=None,  # pylint: disable=unused-argument
                     # below are generated internally from 'source'
-                    source_blob_uri=None, source_disk=None, source_snapshot=None):
+                    source_blob_uri=None, source_disk=None, source_snapshot=None,
+                    source_storage_account_id=None):
     from azure.mgmt.compute.models import (Snapshot, CreationData, DiskCreateOption,
                                            ImageDiskReference)
     location = location or get_resource_group_location(resource_group_name)
@@ -421,7 +422,8 @@ def create_snapshot(resource_group_name, snapshot_name, location=None,
 
     creation_data = CreationData(option, source_uri=source_blob_uri,
                                  image_reference=None,
-                                 source_resource_id=source_disk or source_snapshot)
+                                 source_resource_id=source_disk or source_snapshot,
+                                 storage_account_id=source_storage_account_id)
 
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('Please supply size for the snapshots')
