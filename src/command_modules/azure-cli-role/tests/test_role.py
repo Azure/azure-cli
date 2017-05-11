@@ -25,10 +25,12 @@ class RbacSPSecretScenarioTest(LiveTest):
     def test_create_for_rbac_with_secret(self, resource_group):
 
         sp_name = 'http://{}'.format(resource_group)
-        self.cmd('ad sp create-for-rbac -n {}2'.format(sp_name))
-        self.cmd('ad app delete --id {}2'.format(sp_name), checks=[
-            JMESPathCheckV2('name', sp_name)
-        ])
+        try:
+            self.cmd('ad sp create-for-rbac -n {}2'.format(sp_name), checks=[
+                JMESPathCheckV2('name', sp_name)
+            ])
+        finally:
+            self.cmd('ad app delete --id {}2'.format(sp_name))
 
     @ResourceGroupPreparer(name_prefix='cli_create_rbac_sp_with_password')
     def test_create_for_rbac_with_secret(self, resource_group):
@@ -37,17 +39,19 @@ class RbacSPSecretScenarioTest(LiveTest):
         scope = '/subscriptions/{}'.format(subscription_id[0])
         sp_name = 'http://{}'.format(resource_group)
 
-        self.cmd('ad sp create-for-rbac -n {0} --scopes {1} {1}/resourceGroups/{2}'.format(sp_name, scope, resource_group), checks=[
-            JMESPathCheckV2('name', sp_name)
-        ])
-        self.cmd('role assignment list --assignee {} --scope {}'.format(sp_name, scope),
-                 checks=[JMESPathCheckV2("length([])", 1)])
-        self.cmd('role assignment list --assignee {} -g {}'.format(sp_name, resource_group),
-                 checks=[JMESPathCheckV2("length([])", 1)])
-        self.cmd('role assignment delete --assignee {} -g {}'.format(sp_name, resource_group),
-                 checks=NoneCheck())
-        self.cmd('role assignment delete --assignee {}'.format(sp_name), checks=NoneCheck())
-        self.cmd('ad app delete --id {}'.format(sp_name))
+        try:
+            self.cmd('ad sp create-for-rbac -n {0} --scopes {1} {1}/resourceGroups/{2}'.format(sp_name, scope, resource_group), checks=[
+                JMESPathCheckV2('name', sp_name)
+            ])
+            self.cmd('role assignment list --assignee {} --scope {}'.format(sp_name, scope),
+                     checks=[JMESPathCheckV2("length([])", 1)])
+            self.cmd('role assignment list --assignee {} -g {}'.format(sp_name, resource_group),
+                     checks=[JMESPathCheckV2("length([])", 1)])
+            self.cmd('role assignment delete --assignee {} -g {}'.format(sp_name, resource_group),
+                     checks=NoneCheck())
+            self.cmd('role assignment delete --assignee {}'.format(sp_name), checks=NoneCheck())
+        finally:
+            self.cmd('ad app delete --id {}'.format(sp_name))
 
 
 class RbacSPCertScenarioTest(LiveTest):
@@ -59,15 +63,17 @@ class RbacSPCertScenarioTest(LiveTest):
         scope = '/subscriptions/{}'.format(subscription_id[0])
         sp_name = 'http://' + resource_group
 
-        result = self.cmd('ad sp create-for-rbac -n {0} --scopes {1} {1}/resourceGroups/{2} --create-cert'.format(sp_name, scope, resource_group)).get_output_in_json()
-        self.assertEqual(sp_name, result['name'])
-        self.assertTrue(result['fileWithCertAndPrivateKey'].endswith('.pem'))
-        os.remove(result['fileWithCertAndPrivateKey'])
-        result = self.cmd('ad sp reset-credentials -n {0} --create-cert'.format(sp_name)).get_output_in_json()
-        self.assertEqual(sp_name, result['name'])
-        self.assertTrue(result['fileWithCertAndPrivateKey'].endswith('.pem'))
-        os.remove(result['fileWithCertAndPrivateKey'])
-        self.cmd('ad app delete --id {}'.format(sp_name), checks=NoneCheck())
+        try:
+            result = self.cmd('ad sp create-for-rbac -n {0} --scopes {1} {1}/resourceGroups/{2} --create-cert'.format(sp_name, scope, resource_group)).get_output_in_json()
+            self.assertEqual(sp_name, result['name'])
+            self.assertTrue(result['fileWithCertAndPrivateKey'].endswith('.pem'))
+            os.remove(result['fileWithCertAndPrivateKey'])
+            result = self.cmd('ad sp reset-credentials -n {0} --create-cert'.format(sp_name)).get_output_in_json()
+            self.assertEqual(sp_name, result['name'])
+            self.assertTrue(result['fileWithCertAndPrivateKey'].endswith('.pem'))
+            os.remove(result['fileWithCertAndPrivateKey'])
+        finally:
+            self.cmd('ad app delete --id {}'.format(sp_name), checks=NoneCheck())
 
 
 class RbacSPKeyVaultScenarioTest(LiveTest):
@@ -84,13 +90,15 @@ class RbacSPKeyVaultScenarioTest(LiveTest):
         cert_name = 'cert1'
         time.sleep(5)
 
-        self.cmd('ad sp create-for-rbac --scopes {0} {0}/resourceGroups/{1} --create-cert --keyvault {2} --cert {3} -n {4}'.format(
-            scope, resource_group, key_vault, cert_name, sp_name)).get_output_in_json()
-        cer1 = self.cmd('keyvault certificate show --vault-name {0} -n {1}'.format(key_vault, cert_name)).get_output_in_json()['cer']
-        self.cmd('ad sp reset-credentials -n {0} --create-cert --keyvault {1} --cert {2}'.format(sp_name, key_vault, cert_name))
-        cer2 = self.cmd('keyvault certificate show --vault-name {0} -n {1}'.format(key_vault, cert_name)).get_output_in_json()['cer']
-        self.assertTrue(cer1 != cer2)
-        self.cmd('ad app delete --id {}'.format(sp_name))
+        try:
+            self.cmd('ad sp create-for-rbac --scopes {0} {0}/resourceGroups/{1} --create-cert --keyvault {2} --cert {3} -n {4}'.format(
+                scope, resource_group, key_vault, cert_name, sp_name)).get_output_in_json()
+            cer1 = self.cmd('keyvault certificate show --vault-name {0} -n {1}'.format(key_vault, cert_name)).get_output_in_json()['cer']
+            self.cmd('ad sp reset-credentials -n {0} --create-cert --keyvault {1} --cert {2}'.format(sp_name, key_vault, cert_name))
+            cer2 = self.cmd('keyvault certificate show --vault-name {0} -n {1}'.format(key_vault, cert_name)).get_output_in_json()['cer']
+            self.assertTrue(cer1 != cer2)
+        finally:
+            self.cmd('ad app delete --id {}'.format(sp_name))
 
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_existing_cert')
     @KeyVaultPreparer()
@@ -105,20 +113,24 @@ class RbacSPKeyVaultScenarioTest(LiveTest):
         time.sleep(5)
 
         # test with valid length cert
-        policy = self.cmd('keyvault certificate get-default-policy').get_output_in_json()
-        self.cmd('keyvault certificate create --vault-name {} -n {} -p "{}" --validity 24'.format(key_vault, cert_name, policy))
-        self.cmd('ad sp create-for-rbac --scopes {0} {0}/resourceGroups/{1} --keyvault {2} --cert {3} -n {4}'.format(
-            scope, resource_group, key_vault, cert_name, sp_name)).get_output_in_json()
-        self.cmd('ad sp reset-credentials -n {0} --keyvault {1} --cert {2}'.format(sp_name, key_vault, cert_name))
-        self.cmd('ad app delete --id {}'.format(sp_name))
+        try:
+            policy = self.cmd('keyvault certificate get-default-policy').get_output_in_json()
+            self.cmd('keyvault certificate create --vault-name {} -n {} -p "{}" --validity 24'.format(key_vault, cert_name, policy))
+            self.cmd('ad sp create-for-rbac --scopes {0} {0}/resourceGroups/{1} --keyvault {2} --cert {3} -n {4}'.format(
+                scope, resource_group, key_vault, cert_name, sp_name)).get_output_in_json()
+            self.cmd('ad sp reset-credentials -n {0} --keyvault {1} --cert {2}'.format(sp_name, key_vault, cert_name))
+        finally:
+            self.cmd('ad app delete --id {}'.format(sp_name))
 
         # test with cert that has too short a validity
-        sp_name = '{}2'.format(sp_name)
-        self.cmd('keyvault certificate create --vault-name {} -n {} -p "{}" --validity 6'.format(key_vault, cert_name, policy))
-        self.cmd('ad sp create-for-rbac --scopes {0} {0}/resourceGroups/{1} --keyvault {2} --cert {3} -n {4}'.format(
-            scope, resource_group, key_vault, cert_name, sp_name)).get_output_in_json()
-        self.cmd('ad sp reset-credentials -n {0} --keyvault {1} --cert {2}'.format(sp_name, key_vault, cert_name))
-        self.cmd('ad app delete --id {}'.format(sp_name))
+        try:
+            sp_name = '{}2'.format(sp_name)
+            self.cmd('keyvault certificate create --vault-name {} -n {} -p "{}" --validity 6'.format(key_vault, cert_name, policy))
+            self.cmd('ad sp create-for-rbac --scopes {0} {0}/resourceGroups/{1} --keyvault {2} --cert {3} -n {4}'.format(
+                scope, resource_group, key_vault, cert_name, sp_name)).get_output_in_json()
+            self.cmd('ad sp reset-credentials -n {0} --keyvault {1} --cert {2}'.format(sp_name, key_vault, cert_name))
+        finally:
+            self.cmd('ad app delete --id {}'.format(sp_name))
 
 
 class RoleCreateScenarioTest(VCRTestBase):
