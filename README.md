@@ -40,7 +40,7 @@ $ az vm create -h
 
 ### Highlights
 
-Here are a few features and concepts that can help you get the most out of the Azure CLI 2.0 Preview
+Here are a few features and concepts that can help you get the most out of the Azure CLI 2.0
 
 ![Azure CLI 2.0 Highlight Reel](doc/assets/AzBlogAnimation4.gif)
 

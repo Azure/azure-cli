@@ -8,10 +8,9 @@ import os
 import os.path
 import sys
 
-from azure.cli.core.test_utils.vcr_test_base import COMMAND_COVERAGE_CONTROL_ENV
-
 import automation.tests.nose_helper as automation_tests
 import automation.utilities.path as automation_path
+from azure.cli.testsdk.vcr_test_base import COMMAND_COVERAGE_CONTROL_ENV
 
 
 # pylint: disable=too-few-public-methods

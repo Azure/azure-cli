@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from azure.cli.core.commands import cli_command
 from azure.cli.command_modules.sf._factory import cf_sf_client
 from azure.cli.core.sdk.util import (
     create_service_adapter,
@@ -13,37 +12,12 @@ custom_path = "azure.cli.command_modules.sf.custom#{}"
 cluster_operations = create_service_adapter("azure.servicefabric",
                                             "ServiceFabricClientAPIs")
 
-# Custom commands
-# TODO: Fix custom commands to accept client as additional argument instead of
-# generating
-cli_command(__name__, "sf cluster select",
-            "azure.cli.command_modules.sf.custom#sf_select")
-cli_command(__name__, "sf application upload",
-            "azure.cli.command_modules.sf.custom#sf_upload_app")
-cli_command(__name__, "sf compose create",
-            "azure.cli.command_modules.sf.custom#sf_create_compose_application")
-cli_command(__name__, "sf service create",
-            "azure.cli.command_modules.sf.custom#sf_create_service")
-cli_command(__name__, "sf service update",
-            "azure.cli.command_modules.sf.custom#sf_update_service")
-cli_command(__name__, "sf service report-health",
-            "azure.cli.command_modules.sf.custom#sf_report_svc_health")
-cli_command(__name__, "sf application create",
-            "azure.cli.command_modules.sf.custom#sf_create_app")
-cli_command(__name__, "sf application report-health",
-            "azure.cli.command_modules.sf.custom#sf_report_app_health")
-cli_command(__name__, "sf application upgrade",
-            "azure.cli.command_modules.sf.custom#sf_upgrade_app")
-cli_command(__name__, "sf node report-health",
-            "azure.cli.command_modules.sf.custom#sf_report_node_health")
-cli_command(__name__, "sf node service-package-upload",
-            "azure.cli.command_modules.sf.custom#sf_service_package_upload")
-cli_command(__name__, "sf replica report-health",
-            "azure.cli.command_modules.sf.custom#sf_report_replica_health")
-cli_command(__name__, "sf chaos start",
-            "azure.cli.command_modules.sf.custom#sf_start_chaos")
-cli_command(__name__, "sf partition report-health",
-            "azure.cli.command_modules.sf.custom#sf_report_partition_health")
+# No client commands
+with ServiceGroup(__name__, None, None, custom_path) as sg:
+    with sg.group("sf cluster") as g:
+        g.custom_command("select", "sf_select")
+    with sg.group("sf application") as g:
+        g.custom_command("upload", "sf_upload_app")
 
 # Standard commands
 with ServiceGroup(__name__, cf_sf_client, cluster_operations,
@@ -59,6 +33,9 @@ with ServiceGroup(__name__, cf_sf_client, cluster_operations,
 
     # Application level commands
     with sg.group("sf application") as app_group:
+        app_group.custom_command("create", "sf_create_app")
+        app_group.custom_command("report-health", "sf_report_app_health")
+        app_group.custom_command("upgrade", "sf_upgrade_app")
         app_group.command("health", "get_application_health")
         app_group.command("manifest", "get_application_manifest")
         app_group.command("provision", "provision_application_type")
@@ -70,6 +47,9 @@ with ServiceGroup(__name__, cf_sf_client, cluster_operations,
 
     # Service level commands
     with sg.group("sf service") as svc_group:
+        svc_group.custom_command("create", "sf_create_service")
+        svc_group.custom_command("update", "sf_update_service")
+        svc_group.custom_command("report-health", "sf_report_svc_health")
         svc_group.command("list", "get_service_info_list")
         svc_group.command("manifest", "get_service_manifest")
         svc_group.command("application-name", "get_application_name_info")
@@ -79,16 +59,23 @@ with ServiceGroup(__name__, cf_sf_client, cluster_operations,
 
     # Partition level commands
     with sg.group("sf partition") as partition_group:
+        partition_group.custom_command("report-health",
+                                       "sf_report_partition_health")
         partition_group.command("info", "get_partition_info")
         partition_group.command("service-name", "get_service_name_info")
         partition_group.command("health", "get_partition_health")
 
     # Replica level commands
     with sg.group("sf replica") as replica_group:
+        replica_group.custom_command("report-health",
+                                     "sf_report_replica_health")
         replica_group.command("health", "get_replica_health")
 
     # Node level commands
     with sg.group("sf node") as node_group:
+        node_group.custom_command("report-health", "sf_report_node_health")
+        node_group.custom_command("service-package-upload",
+                                  "sf_service_package_upload")
         node_group.command("list", "get_node_info_list")
         node_group.command("remove-state", "remove_node_state")
         node_group.command("stop", "stop_node")
@@ -110,6 +97,11 @@ with ServiceGroup(__name__, cf_sf_client, cluster_operations,
 
     # Docker Compose commands
     with sg.group("sf compose") as compose_group:
+        compose_group.custom_command("create", "sf_create_compose_application")
         compose_group.command("status", "get_compose_application_status")
         compose_group.command("list", "get_compose_application_status_list")
         compose_group.command("remove", "remove_compose_application")
+
+    # Chaos test commands
+    with sg.group("sf chaos") as chaos_group:
+        chaos_group.custom_command("start", "sf_start_chaos")

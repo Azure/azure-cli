@@ -19,7 +19,7 @@ import vcr
 
 from .patches import (patch_load_cached_subscriptions, patch_main_exception_handler,
                       patch_retrieve_token_for_user, patch_long_run_operation_delay,
-                      patch_time_sleep_api, patch_progress_controller)
+                      patch_time_sleep_api)
 from .exceptions import CliExecutionError
 from .const import (ENV_LIVE_TEST, ENV_SKIP_ASSERT, ENV_TEST_DIAGNOSE, MOCKED_SUBSCRIPTION_ID)
 from .recording_processors import (SubscriptionRecordingProcessor, OAuthRequestResponsesFilter,
@@ -160,7 +160,6 @@ class ScenarioTest(IntegrationTestBase):  # pylint: disable=too-many-instance-at
             patch_long_run_operation_delay(self)
             patch_load_cached_subscriptions(self)
             patch_retrieve_token_for_user(self)
-            patch_progress_controller(self)
 
     def tearDown(self):
         os.environ = self.original_env

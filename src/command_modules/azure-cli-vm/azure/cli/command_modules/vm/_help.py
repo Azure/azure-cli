@@ -417,10 +417,11 @@ helps['vm diagnostics'] = """
 helps['vm diagnostics get-default-config'] = """
     type: command
     examples:
-        - name: Get the default diagnostics on a Linux VM and override the storage account key.
+        - name: Get the default diagnostics on a Linux VM and override the storage account name and the VM resource ID.
           text: >
             az vm diagnostics get-default-config \\
-                --query "merge(@, {storageAccount: 'MyStorageAccount'})"
+                | sed "s#__DIAGNOSTIC_STORAGE_ACCOUNT__#MyStorageAccount#g" \\
+                | sed "s#__VM_RESOURCE_ID__#MyVmResourceId#g"
         - name: Get the default diagnostics on a Windows VM.
           text: >
             az vm diagnostics get-default-config --is-windows-os
@@ -430,19 +431,29 @@ helps['vm diagnostics set'] = """
     type: command
     short-summary: Configure the Azure VM diagnostics extension.
     examples:
-        - name: Set up default diagnostics on a Linux VM.
+        - name: Set up default diagnostics on a Linux VM for Azure Portal VM metrics graphs and syslog collection.
           text: >
+            # Set the following 3 parameters correctly first.\n\r
+            my_resource_group=<Resource group name containing your Linux VM and the storage account>\n\r
+            my_linux_vm=<Your Azure Linux VM name>\n\r
+            my_diagnostic_storage_account=<Your Azure storage account for storing VM diagnostic data>\n\r
+
+            my_vm_resource_id=$(az vm show -g $my_resource_group -n $my_linux_vm --query "id" -o tsv)\n\r
+
             default_config=$(az vm diagnostics get-default-config \\
-                --query "merge(@, {storageAccount: 'MyStorageAccount'})")
+                | sed "s#__DIAGNOSTIC_STORAGE_ACCOUNT__#$my_diagnostic_storage_account#g" \\
+                | sed "s#__VM_RESOURCE_ID__#$my_vm_resource_id#g")
 
-            storage_key=$(az storage account keys list -g MyResourceGroup -n MyStorageAccount \\
-                --query "[?keyName=='key1'] | [0].value" -o tsv)
+            storage_sastoken=$(az storage account generate-sas \\
+                --account-name $my_diagnostic_storage_account --expiry 9999-12-31T23:59Z \\
+                --permissions wlacu --resource-types co --services bt -o tsv)
 
-            settings="{'storageAccountName': 'MyStorageAccount', 'storageAccountKey': \\
-                '${storage_key}'}"
+            protected_settings="{'storageAccountName': '${my_diagnostic_storage_account}', \\
+                'storageAccountSasToken': '${storage_sastoken}'}"
 
-            az vm diagnostics set --settings "${default_config}" --protected-settings "${settings}" \\
-                -n setting_name -g MyResourceGroup
+            az vm diagnostics set --settings "${default_config}" \\
+                --protected-settings "${protected_settings}" \\
+                --resource-group $my_resource_group --vm-name $my_linux_vm
 """
 
 disk_long_summary = """

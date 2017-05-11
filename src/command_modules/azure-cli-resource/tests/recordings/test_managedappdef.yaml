@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"use": "az-test"}}'
+    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -9,27 +9,27 @@ interactions:
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.4.3 (Windows-8-6.2.9200) requests/2.9.1 msrest/0.4.7 msrest_azure/0.4.7
-          resourcemanagementclient/1.0.0rc3 Azure-SDK-For-Python AZURECLI/2.0.4+dev]
+          resourcemanagementclient/1.1.0rc1 Azure-SDK-For-Python AZURECLI/2.0.5+dev]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2016-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 04 May 2017 21:50:42 GMT']
+      date: ['Tue, 09 May 2017 02:31:10 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
     status: {code: 201, message: Created}
 - request:
-    body: '{"location": "eastus2euap", "properties": {"description": "test_appdef_123",
-      "displayName": "test_appdef_123", "packageFileUri": "https://wud.blob.core.windows.net/appliance/SingleStorageAccount.zip",
-      "authorizations": [{"roleDefinitionId": "8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
-      "principalId": "5e91139a-c94b-462e-a6ff-1ee95e8aac07"}], "lockLevel": "None"}}'
+    body: '{"properties": {"description": "test_appdef_123", "authorizations": [{"roleDefinitionId":
+      "8e3af657-a8ff-443c-a75c-2fe8c4bcb635", "principalId": "5e91139a-c94b-462e-a6ff-1ee95e8aac07"}],
+      "lockLevel": "None", "displayName": "test_appdef_123", "packageFileUri": "https://wud.blob.core.windows.net/appliance/SingleStorageAccount.zip"},
+      "location": "eastus2euap"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -38,17 +38,17 @@ interactions:
       Content-Length: ['359']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.4.3 (Windows-8-6.2.9200) requests/2.9.1 msrest/0.4.7 msrest_azure/0.4.7
-          managedapplicationclient/2016-09-01-preview Azure-SDK-For-Python AZURECLI/2.0.4+dev]
+          managedapplicationclient/2016-09-01-preview Azure-SDK-For-Python AZURECLI/2.0.5+dev]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname?api-version=2016-09-01-preview
   response:
-    body: {string: '{"properties":{"isEnabled":true,"lockLevel":"None","displayName":"test_appdef_123","description":"test_appdef_123","authorizations":[{"principalId":"5e91139a-c94b-462e-a6ff-1ee95e8aac07","roleDefinitionId":"8e3af657-a8ff-443c-a75c-2fe8c4bcb635"}],"artifacts":[{"name":"ApplianceResourceTemplate","type":"Template","uri":"https://prdsapplianceprodbnep01.blob.core.windows.net/appliancedefinitions/001C5_72F988BF86F141AF91AB2D7CD011DB47_/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/mainTemplate.json?sv=2016-05-31&sr=b&sig=hVQZVIzczGfXbQxjGn0x%2B7P1dcYlDmTdRjGqkJ2XkNQ%3D&se=2117-05-04T21:50:45Z&sp=r"},{"name":"CreateUiDefinition","type":"Custom","uri":"https://prdsapplianceprodbnep01.blob.core.windows.net/appliancedefinitions/001C5_72F988BF86F141AF91AB2D7CD011DB47_/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/applianceCreateUiDefinition.json?sv=2016-05-31&sr=b&sig=4%2FOcmqANrhKgG1Ftju%2BAY5jDzBnL5UFgVlTSWHdKX0s%3D&se=2117-05-04T21:50:45Z&sp=r"}],"packageFileUri":"https://prdsapplianceprodbnep01.blob.core.windows.net/appliancedefinitions/001C5_72F988BF86F141AF91AB2D7CD011DB47_/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/6fa23a4c-6e2c-44ec-968f-90af5dd155d4.zip?sv=2016-05-31&sr=b&sig=CILhbYmwv%2B7nq5SxhQx6hWA13gGmkoxzO03Ryp3pAGc%3D&se=2117-05-04T21:50:44Z&sp=r"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname","name":"testappdefname","type":"Microsoft.Solutions/applianceDefinitions"}'}
+    body: {string: '{"properties":{"isEnabled":true,"lockLevel":"None","displayName":"test_appdef_123","description":"test_appdef_123","authorizations":[{"principalId":"5e91139a-c94b-462e-a6ff-1ee95e8aac07","roleDefinitionId":"8e3af657-a8ff-443c-a75c-2fe8c4bcb635"}],"artifacts":[{"name":"ApplianceResourceTemplate","type":"Template","uri":"https://prdsapplianceprodbnep01.blob.core.windows.net/appliancedefinitions/001C5_72F988BF86F141AF91AB2D7CD011DB47_/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/mainTemplate.json?sv=2016-05-31&sr=b&sig=s%2FqNaGpb9mGx4Jiz1nOnQvoVXoVDRhchsm%2BdhPzvpK8%3D&se=2117-05-09T02:31:12Z&sp=r"},{"name":"CreateUiDefinition","type":"Custom","uri":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/applianceArtifacts/CreateUiDefinition?api-version=2016-09-01-preview"}],"packageFileUri":"https://prdsapplianceprodbnep01.blob.core.windows.net/appliancedefinitions/001C5_72F988BF86F141AF91AB2D7CD011DB47_/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/3e8b91a0-1a8e-415e-81c7-9c3a84411505.zip?sv=2016-05-31&sr=b&sig=46CvqEWygDNACRqUV4Y4e7b%2BoswPMdbDA36ENjQvtKQ%3D&se=2117-05-09T02:31:12Z&sp=r"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname","name":"testappdefname","type":"Microsoft.Solutions/applianceDefinitions"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['2054']
+      content-length: ['1903']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 04 May 2017 21:50:45 GMT']
+      date: ['Tue, 09 May 2017 02:31:12 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -63,17 +63,17 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.4.3 (Windows-8-6.2.9200) requests/2.9.1 msrest/0.4.7 msrest_azure/0.4.7
-          managedapplicationclient/2016-09-01-preview Azure-SDK-For-Python AZURECLI/2.0.4+dev]
+          managedapplicationclient/2016-09-01-preview Azure-SDK-For-Python AZURECLI/2.0.5+dev]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname?api-version=2016-09-01-preview
   response:
-    body: {string: '{"properties":{"isEnabled":true,"lockLevel":"None","displayName":"test_appdef_123","description":"test_appdef_123","authorizations":[{"principalId":"5e91139a-c94b-462e-a6ff-1ee95e8aac07","roleDefinitionId":"8e3af657-a8ff-443c-a75c-2fe8c4bcb635"}],"artifacts":[{"name":"ApplianceResourceTemplate","type":"Template","uri":"https://prdsapplianceprodbnep01.blob.core.windows.net/appliancedefinitions/001C5_72F988BF86F141AF91AB2D7CD011DB47_/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/mainTemplate.json?sv=2016-05-31&sr=b&sig=hVQZVIzczGfXbQxjGn0x%2B7P1dcYlDmTdRjGqkJ2XkNQ%3D&se=2117-05-04T21:50:45Z&sp=r"},{"name":"CreateUiDefinition","type":"Custom","uri":"https://prdsapplianceprodbnep01.blob.core.windows.net/appliancedefinitions/001C5_72F988BF86F141AF91AB2D7CD011DB47_/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/applianceCreateUiDefinition.json?sv=2016-05-31&sr=b&sig=4%2FOcmqANrhKgG1Ftju%2BAY5jDzBnL5UFgVlTSWHdKX0s%3D&se=2117-05-04T21:50:45Z&sp=r"}],"packageFileUri":"https://prdsapplianceprodbnep01.blob.core.windows.net/appliancedefinitions/001C5_72F988BF86F141AF91AB2D7CD011DB47_/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/6fa23a4c-6e2c-44ec-968f-90af5dd155d4.zip?sv=2016-05-31&sr=b&sig=CILhbYmwv%2B7nq5SxhQx6hWA13gGmkoxzO03Ryp3pAGc%3D&se=2117-05-04T21:50:44Z&sp=r"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname","name":"testappdefname","type":"Microsoft.Solutions/applianceDefinitions"}'}
+    body: {string: '{"properties":{"isEnabled":true,"lockLevel":"None","displayName":"test_appdef_123","description":"test_appdef_123","authorizations":[{"principalId":"5e91139a-c94b-462e-a6ff-1ee95e8aac07","roleDefinitionId":"8e3af657-a8ff-443c-a75c-2fe8c4bcb635"}],"artifacts":[{"name":"ApplianceResourceTemplate","type":"Template","uri":"https://prdsapplianceprodbnep01.blob.core.windows.net/appliancedefinitions/001C5_72F988BF86F141AF91AB2D7CD011DB47_/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/mainTemplate.json?sv=2016-05-31&sr=b&sig=s%2FqNaGpb9mGx4Jiz1nOnQvoVXoVDRhchsm%2BdhPzvpK8%3D&se=2117-05-09T02:31:12Z&sp=r"},{"name":"CreateUiDefinition","type":"Custom","uri":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/applianceArtifacts/CreateUiDefinition?api-version=2016-09-01-preview"}],"packageFileUri":"https://prdsapplianceprodbnep01.blob.core.windows.net/appliancedefinitions/001C5_72F988BF86F141AF91AB2D7CD011DB47_/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/3e8b91a0-1a8e-415e-81c7-9c3a84411505.zip?sv=2016-05-31&sr=b&sig=46CvqEWygDNACRqUV4Y4e7b%2BoswPMdbDA36ENjQvtKQ%3D&se=2117-05-09T02:31:12Z&sp=r"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname","name":"testappdefname","type":"Microsoft.Solutions/applianceDefinitions"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['2054']
+      content-length: ['1903']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 04 May 2017 21:51:15 GMT']
+      date: ['Tue, 09 May 2017 02:31:42 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -89,17 +89,17 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.4.3 (Windows-8-6.2.9200) requests/2.9.1 msrest/0.4.7 msrest_azure/0.4.7
-          managedapplicationclient/2016-09-01-preview Azure-SDK-For-Python AZURECLI/2.0.4+dev]
+          managedapplicationclient/2016-09-01-preview Azure-SDK-For-Python AZURECLI/2.0.5+dev]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions?api-version=2016-09-01-preview
   response:
-    body: {string: '{"value":[{"properties":{"isEnabled":true,"lockLevel":"None","displayName":"test_appdef_123","description":"test_appdef_123","authorizations":[{"principalId":"5e91139a-c94b-462e-a6ff-1ee95e8aac07","roleDefinitionId":"8e3af657-a8ff-443c-a75c-2fe8c4bcb635"}],"artifacts":[{"name":"ApplianceResourceTemplate","type":"Template","uri":"https://prdsapplianceprodbnep01.blob.core.windows.net/appliancedefinitions/001C5_72F988BF86F141AF91AB2D7CD011DB47_/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/mainTemplate.json?sv=2016-05-31&sr=b&sig=hVQZVIzczGfXbQxjGn0x%2B7P1dcYlDmTdRjGqkJ2XkNQ%3D&se=2117-05-04T21:50:45Z&sp=r"},{"name":"CreateUiDefinition","type":"Custom","uri":"https://prdsapplianceprodbnep01.blob.core.windows.net/appliancedefinitions/001C5_72F988BF86F141AF91AB2D7CD011DB47_/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/applianceCreateUiDefinition.json?sv=2016-05-31&sr=b&sig=4%2FOcmqANrhKgG1Ftju%2BAY5jDzBnL5UFgVlTSWHdKX0s%3D&se=2117-05-04T21:50:45Z&sp=r"}],"packageFileUri":"https://prdsapplianceprodbnep01.blob.core.windows.net/appliancedefinitions/001C5_72F988BF86F141AF91AB2D7CD011DB47_/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/6fa23a4c-6e2c-44ec-968f-90af5dd155d4.zip?sv=2016-05-31&sr=b&sig=CILhbYmwv%2B7nq5SxhQx6hWA13gGmkoxzO03Ryp3pAGc%3D&se=2117-05-04T21:50:44Z&sp=r"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname","name":"testappdefname","type":"Microsoft.Solutions/applianceDefinitions"}]}'}
+    body: {string: '{"value":[{"properties":{"isEnabled":true,"lockLevel":"None","displayName":"test_appdef_123","description":"test_appdef_123","authorizations":[{"principalId":"5e91139a-c94b-462e-a6ff-1ee95e8aac07","roleDefinitionId":"8e3af657-a8ff-443c-a75c-2fe8c4bcb635"}],"artifacts":[{"name":"ApplianceResourceTemplate","type":"Template","uri":"https://prdsapplianceprodbnep01.blob.core.windows.net/appliancedefinitions/001C5_72F988BF86F141AF91AB2D7CD011DB47_/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/mainTemplate.json?sv=2016-05-31&sr=b&sig=s%2FqNaGpb9mGx4Jiz1nOnQvoVXoVDRhchsm%2BdhPzvpK8%3D&se=2117-05-09T02:31:12Z&sp=r"},{"name":"CreateUiDefinition","type":"Custom","uri":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/applianceArtifacts/CreateUiDefinition?api-version=2016-09-01-preview"}],"packageFileUri":"https://prdsapplianceprodbnep01.blob.core.windows.net/appliancedefinitions/001C5_72F988BF86F141AF91AB2D7CD011DB47_/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/3e8b91a0-1a8e-415e-81c7-9c3a84411505.zip?sv=2016-05-31&sr=b&sig=46CvqEWygDNACRqUV4Y4e7b%2BoswPMdbDA36ENjQvtKQ%3D&se=2117-05-09T02:31:12Z&sp=r"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname","name":"testappdefname","type":"Microsoft.Solutions/applianceDefinitions"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['2066']
+      content-length: ['1915']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 04 May 2017 21:51:17 GMT']
+      date: ['Tue, 09 May 2017 02:31:44 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -115,17 +115,17 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.4.3 (Windows-8-6.2.9200) requests/2.9.1 msrest/0.4.7 msrest_azure/0.4.7
-          managedapplicationclient/2016-09-01-preview Azure-SDK-For-Python AZURECLI/2.0.4+dev]
+          managedapplicationclient/2016-09-01-preview Azure-SDK-For-Python AZURECLI/2.0.5+dev]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname?api-version=2016-09-01-preview
   response:
-    body: {string: '{"properties":{"isEnabled":true,"lockLevel":"None","displayName":"test_appdef_123","description":"test_appdef_123","authorizations":[{"principalId":"5e91139a-c94b-462e-a6ff-1ee95e8aac07","roleDefinitionId":"8e3af657-a8ff-443c-a75c-2fe8c4bcb635"}],"artifacts":[{"name":"ApplianceResourceTemplate","type":"Template","uri":"https://prdsapplianceprodbnep01.blob.core.windows.net/appliancedefinitions/001C5_72F988BF86F141AF91AB2D7CD011DB47_/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/mainTemplate.json?sv=2016-05-31&sr=b&sig=hVQZVIzczGfXbQxjGn0x%2B7P1dcYlDmTdRjGqkJ2XkNQ%3D&se=2117-05-04T21:50:45Z&sp=r"},{"name":"CreateUiDefinition","type":"Custom","uri":"https://prdsapplianceprodbnep01.blob.core.windows.net/appliancedefinitions/001C5_72F988BF86F141AF91AB2D7CD011DB47_/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/applianceCreateUiDefinition.json?sv=2016-05-31&sr=b&sig=4%2FOcmqANrhKgG1Ftju%2BAY5jDzBnL5UFgVlTSWHdKX0s%3D&se=2117-05-04T21:50:45Z&sp=r"}],"packageFileUri":"https://prdsapplianceprodbnep01.blob.core.windows.net/appliancedefinitions/001C5_72F988BF86F141AF91AB2D7CD011DB47_/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/6fa23a4c-6e2c-44ec-968f-90af5dd155d4.zip?sv=2016-05-31&sr=b&sig=CILhbYmwv%2B7nq5SxhQx6hWA13gGmkoxzO03Ryp3pAGc%3D&se=2117-05-04T21:50:44Z&sp=r"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname","name":"testappdefname","type":"Microsoft.Solutions/applianceDefinitions"}'}
+    body: {string: '{"properties":{"isEnabled":true,"lockLevel":"None","displayName":"test_appdef_123","description":"test_appdef_123","authorizations":[{"principalId":"5e91139a-c94b-462e-a6ff-1ee95e8aac07","roleDefinitionId":"8e3af657-a8ff-443c-a75c-2fe8c4bcb635"}],"artifacts":[{"name":"ApplianceResourceTemplate","type":"Template","uri":"https://prdsapplianceprodbnep01.blob.core.windows.net/appliancedefinitions/001C5_72F988BF86F141AF91AB2D7CD011DB47_/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/mainTemplate.json?sv=2016-05-31&sr=b&sig=s%2FqNaGpb9mGx4Jiz1nOnQvoVXoVDRhchsm%2BdhPzvpK8%3D&se=2117-05-09T02:31:12Z&sp=r"},{"name":"CreateUiDefinition","type":"Custom","uri":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/applianceArtifacts/CreateUiDefinition?api-version=2016-09-01-preview"}],"packageFileUri":"https://prdsapplianceprodbnep01.blob.core.windows.net/appliancedefinitions/001C5_72F988BF86F141AF91AB2D7CD011DB47_/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname/3e8b91a0-1a8e-415e-81c7-9c3a84411505.zip?sv=2016-05-31&sr=b&sig=46CvqEWygDNACRqUV4Y4e7b%2BoswPMdbDA36ENjQvtKQ%3D&se=2117-05-09T02:31:12Z&sp=r"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname","name":"testappdefname","type":"Microsoft.Solutions/applianceDefinitions"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['2054']
+      content-length: ['1903']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 04 May 2017 21:51:17 GMT']
+      date: ['Tue, 09 May 2017 02:31:46 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -142,7 +142,7 @@ interactions:
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.4.3 (Windows-8-6.2.9200) requests/2.9.1 msrest/0.4.7 msrest_azure/0.4.7
-          managedapplicationclient/2016-09-01-preview Azure-SDK-For-Python AZURECLI/2.0.4+dev]
+          managedapplicationclient/2016-09-01-preview Azure-SDK-For-Python AZURECLI/2.0.5+dev]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions/testappdefname?api-version=2016-09-01-preview
@@ -151,11 +151,11 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Thu, 04 May 2017 21:51:19 GMT']
+      date: ['Tue, 09 May 2017 02:31:47 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -166,7 +166,7 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.4.3 (Windows-8-6.2.9200) requests/2.9.1 msrest/0.4.7 msrest_azure/0.4.7
-          managedapplicationclient/2016-09-01-preview Azure-SDK-For-Python AZURECLI/2.0.4+dev]
+          managedapplicationclient/2016-09-01-preview Azure-SDK-For-Python AZURECLI/2.0.5+dev]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applianceDefinitions?api-version=2016-09-01-preview
@@ -176,7 +176,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['12']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 04 May 2017 21:51:20 GMT']
+      date: ['Tue, 09 May 2017 02:31:49 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -192,18 +192,18 @@ interactions:
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.4.3 (Windows-8-6.2.9200) requests/2.9.1 msrest/0.4.7 msrest_azure/0.4.7
-          resourcemanagementclient/1.0.0rc3 Azure-SDK-For-Python AZURECLI/2.0.4+dev]
+          resourcemanagementclient/1.1.0rc1 Azure-SDK-For-Python AZURECLI/2.0.5+dev]
       accept-language: [en-US]
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2016-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
   response:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Thu, 04 May 2017 21:51:20 GMT']
+      date: ['Tue, 09 May 2017 02:31:49 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdVSzVBVTdMMzNBSExZQVBTR0pSNEhHSFVaWVpQT0dIWEtLTHxBMDg0QzM0RERCNDExQjI5LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2016-09-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdLSkpPWkFZQ0JXRk5OSERPQTRZVlRSRlpBVTRBQlNPRlBOQnw2RjYzRjdENUExNzQ0MEUxLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       retry-after: ['15']
       strict-transport-security: [max-age=31536000; includeSubDomains]

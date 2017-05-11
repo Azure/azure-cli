@@ -1,9 +1,16 @@
 .. :changelog:
 
 Release History
+===============
 
 
-0.2.3 (unreleased)
+0.3.1 (2017-05-09)
+++++++++++++++++++
+
+* Add link to blog in ‘az interactive —help’ (#3252)
+
+
+0.3.0 (2017-05-05)
 ++++++++++++++++++
 
 * Integrate interactive into az
