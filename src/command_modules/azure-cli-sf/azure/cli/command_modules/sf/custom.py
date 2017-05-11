@@ -287,6 +287,20 @@ def sf_upload_app(path, show_progress=False):
             total_files_size), file=sys.stderr)
 
 
+def parse_app_params(formatted_params):
+    from azure.servicefabric.models.application_parameter import ApplicationParameter
+
+    if formatted_params is None:
+        return None
+
+    res = []
+    for k in formatted_params:
+        p = ApplicationParameter(k, formatted_params[k])
+        res.append(p)
+
+    return res
+
+
 def sf_create_app(client,  # pylint: disable=too-many-locals,too-many-arguments
                   app_name, app_type, app_version, parameters=None,
                   min_node_count=0, max_node_count=0, metrics=None,
@@ -342,13 +356,7 @@ def sf_create_app(client,  # pylint: disable=too-many-locals,too-many-arguments
         raise CLIError("The minimum node reserve capacity count cannot "
                        "be greater than the maximum node count")
 
-    app_params = None
-    if parameters is not None:
-        app_params = []
-        for k in parameters:
-            # Create an application parameter for every of these
-            p = ApplicationParameter(k, parameters[k])
-            app_params.append(p)
+    app_params = parse_app_params(parameters)
 
     # For simplicity, we assume user pass in valid key names in the list, or
     # ignore the input

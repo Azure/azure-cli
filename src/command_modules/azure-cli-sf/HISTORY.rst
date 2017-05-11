@@ -12,4 +12,4 @@ Release History
 ++++++++++++++++++
 
 * Initial release of Service Fabric module. This corresponds to 5.6 Service
-Sabric product release.
+Fabric product release.
