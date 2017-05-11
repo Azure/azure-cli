@@ -7,6 +7,43 @@ from azure.cli.core.commands.arm import is_valid_resource_id, resource_id, parse
 from azure.cli.core.util import CLIError
 
 
+def get_target_resource_validator(dest):
+    def _validator(namespace):
+        from azure.cli.core.commands.arm import is_valid_resource_id, resource_id
+
+        id = getattr(namespace, dest)
+        rg = namespace.resource_group_name
+        name = namespace.resource_name
+        res_ns = namespace.namespace
+        parent = namespace.parent
+        res_type = namespace.resource_type
+
+        usage_error = CLIError('usage error: --resource-id ID | --resource-name NAME '
+                                '--resource-group NAME --namespace NAMESPACE [--parent PARENT] '
+                                '[--resource-type TYPE]')
+        if not name and not id:
+            raise usage_error
+
+        if id:
+            if any((name, res_ns, parent, res_type)) or not is_valid_resource_id(id):
+                raise usage_error
+        else:
+            from azure.cli.core.commands.client_factory import get_subscription_id
+            if '/' in res_type:
+                res_ns = res_ns or res_type.rsplit('/', 1)[0]
+                res_type = res_type.rsplit('/', 1)[1]
+            if not all((rg, res_ns, res_type, name)):
+                raise usage_error
+
+            setattr(namespace, dest, '/subscriptions/{}/resourceGroups/{}/providers/{}/{}{}/{}'.format(
+                get_subscription_id(), rg, res_ns, parent + '/' if parent else '', res_type, name))
+
+        del namespace.resource_name
+        del namespace.namespace
+        del namespace.parent
+        del namespace.resource_type
+    return _validator
+
 # pylint: disable=line-too-long
 def validate_diagnostic_settings(namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id

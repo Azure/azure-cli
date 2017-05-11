@@ -8,18 +8,21 @@ from azure.cli.core.util import get_json_object
 
 from azure.cli.core.commands import \
     (VersionConstraint, CliArgumentType, register_cli_argument, register_extra_cli_argument)
+from azure.cli.core.util import CLIError
 from azure.cli.core.commands.parameters import (location_type, get_resource_name_completion_list,
                                                 enum_choice_list, tags_type, ignore_type,
                                                 file_type, get_resource_group_completion_list,
                                                 three_state_flag, model_choice_list)
-from azure.cli.command_modules.monitor.validators import (validate_diagnostic_settings)
+from azure.cli.command_modules.monitor.validators import \
+    (validate_diagnostic_settings, get_target_resource_validator)
 from azure.mgmt.monitor.models.monitor_management_client_enums import \
     (MetricStatisticType, TimeAggregationType, ConditionOperator, TimeAggregationOperator) 
+
 
 def register_resource_parameter(command, dest, arg_group=None):
     """ Helper method to add the extra parameters needed to support specifying name or ID
         for target resources. """
-    register_cli_argument(command, dest, options_list=['--resource-id'], arg_group=arg_group)
+    register_cli_argument(command, dest, options_list=['--resource-id'], arg_group=arg_group, validator=get_target_resource_validator(dest))
     register_extra_cli_argument(command, 'resource_name', arg_group=arg_group)
     register_extra_cli_argument(command, 'namespace', arg_group=arg_group)
     register_extra_cli_argument(command, 'parent', arg_group=arg_group)
