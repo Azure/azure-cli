@@ -5,81 +5,97 @@
 from azure.cli.core.sdk.util import ParametersContext
 from azure.cli.core.util import get_json_object
 
-# For some commands we take JSON strings as possible
-with ParametersContext(command="sf application create") as c:
-    c.register("parameters", ("--parameters",), type=get_json_object,
-               help="JSON encoded list of application parameters.")
 
-with ParametersContext(command="sf application create") as c:
-    c.register("metrics", ("--metrics",), type=get_json_object,
-               help="JSON encoded list of application metrics and their \
-               descriptions.")
+# Global parameters
+# Documentation here can be omitted from command specification
+with ParametersContext(command="sf") as c:
+    c.argument("timeout", options_list=("--timeout", "-t"),
+               type=int,
+               help=("The server timeout for performing the operation, "
+                     "specified in seconds. This is the maximum time a client "
+                     "can wait."),
+               default=60)
 
-with ParametersContext(command="sf application upgrade") as c:
-    c.register("parameters", ("--parameters",), type=get_json_object,
-               help="JSON encoded list of application parameter overrides to \
-               be applied when upgrading an application. Note, when starting \
-               an upgrade, be sure to include the existing application \
-               parameters, if any.")
-
-with ParametersContext(command="sf application upgrade") as c:
-    c.register("default_service_health_policy",
-               ("--default_service_health_policy",),
-               type=get_json_object,
-               help="JSON encoded specification of the health policy used by \
-               default to evaluate the health of a service type.")
-
-with ParametersContext(command="sf application upgrade") as c:
-    c.register("service_health_policy", ("--service_health_policy",),
-               type=get_json_object,
-               help="JSON encoded map with service type health policy per \
-               service type name. The map is empty be default.")
-
+# Service commands
 with ParametersContext(command="sf service create") as c:
-    c.register("load_metrics", ("--load_metrics",),
-               type=get_json_object,
-               help="JSON encoded list of metrics used when load balancing \
-               services across nodes.")
-
-with ParametersContext(command="sf service create") as c:
-    c.register("placement_policy_list", ("--placement_policy_list",),
-               type=get_json_object,
-               help="JSON encoded list of placement policies for the service, \
-               and any associated domain names. Policies can be one or more \
-               of: `NonPartiallyPlaceService`, `PreferPrimaryDomain`, \
-               `RequireDomain`, `requireDomainDistribution`")
+    c.argument("named_scheme_list", type=get_json_object, default=None)
+    c.argument("load_metrics", type=get_json_object, default=None)
+    c.argument("placement_policy_list", type=get_json_object, default=None)
+    c.argument("target_replica_set_size", type=int, default=None)
+    c.argument("min_replica_set_size", type=int, default=None)
+    c.argument("replica_restart_wait", type=int, default=None)
+    c.argument("quorum_loss_wait", type=int, default=None)
+    c.argument("stand_by_replica_keep", type=int, default=None)
+    c.argument("instance_count", type=int, default=None)
 
 with ParametersContext(command="sf service update") as c:
-    c.register("load_metrics", ("--load_metrics",),
-               type=get_json_object,
-               help="JSON encoded list of metrics used when load balancing \
-               services across nodes.")
+    c.argument("load_metrics", type=get_json_object, default=None)
+    c.argument("placement_policy_list", type=get_json_object, default=None)
+    c.argument("instance_count", type=int, default=None)
+    c.argument("target_replica_set_size", type=int, default=None)
+    c.argument("min_replica_set_size", type=int, default=None)
 
-with ParametersContext(command="sf service update") as c:
-    c.register("placement_policy_list", ("--placement_policy_list",),
-               type=get_json_object,
-               help="JSON encoded list of placement policies for the service, \
-               and any associated domain names. Policies can be one or more \
-               of: `NonPartiallyPlaceService`, `PreferPrimaryDomain`, \
-               `RequireDomain`, `requireDomainDistribution`")
+with ParametersContext(command="sf service resolve") as c:
+    c.argument("partition_key_type", type=int, default=None)
 
+with ParametersContext(command="sf service health") as c:
+    c.argument("events_health_state_filter", type=int, default=None)
+    c.argument("partitions_health_state_filter", type=int, default=None)
+
+# Application commands
+with ParametersContext(command="sf application create") as c:
+    c.argument("parameters", type=get_json_object, default=None)
+    c.argument("min_node_count", type=int, default=None)
+    c.argument("max_node_count", type=int, default=None)
+    c.argument("metrics", type=get_json_object, default=None)
+
+with ParametersContext(command="sf application upgrade") as c:
+    c.argument("parameters", type=get_json_object, default=None)
+    c.argument("replica_set_check_timeout", type=int, default=42949672925)
+    c.argument("max_unhealthy_apps", type=int, default=0)
+    c.argument("default_service_health_policy", type=get_json_object,
+               default=None)
+    c.argument("service_health_policy", type=get_json_object, default=None)
+
+with ParametersContext(command="sf application health") as c:
+    c.argument("events_health_state_filter", type=int, default=0)
+    c.argument("deployed_applications_health_state_filter", type=int,
+               default=0)
+    c.argument("services_health_state_filter", type=int, default=0)
+
+with ParametersContext(command="sf application type") as c:
+    c.argument("max_results", type=int, default=None)
+
+# Partition commands
+with ParametersContext(command="sf partition health") as c:
+    c.argument("events_health_state_filter", type=int, default=None)
+    c.argument("replicas_health_state_filter", type=int, default=None)
+
+# Replica commands
+with ParametersContext(command="sf replica health") as c:
+    c.argument("events_health_state_filter", type=int, default=None)
+
+# Chaos commands
 with ParametersContext(command="sf chaos start") as c:
-    c.register("application_type_health_policy_map",
-               ("--application_type_health_policy_map",),
-               type=get_json_object,
-               help="JSON encoded list with max percentage unhealthy \
-               applications for specific application types. Each entry \
-               specifies as a key the application type name and as  a value \
-               an integer that represents the MaxPercentUnhealthyApplications \
-               percentage used to evaluate the applications of the specified \
-               application type.")
+    c.argument("max_cluster_stabilization", type=int, default=60)
+    c.argument("max_concurrent_faults", type=int, default=1)
+    c.argument("wait_time_between_faults", type=int, default=20)
+    c.argument("wait_time_between_iterations", type=int, default=30)
+    c.argument("max_percent_unhealthy_nodes", type=int, default=0)
+    c.argument("max_percent_unhealthy_applications", type=int, default=0)
+    c.argument("app_type_health_policy_map", type=get_json_object,
+               default=None)
 
+# Node commands
 with ParametersContext(command="sf node service-package-upload") as c:
-    c.register("share_policy",
-               ("--share_policy",),
-               type=get_json_object,
-               help="JSON encoded list of sharing policies. Each sharing \
-               policy element is composed of a 'name' and 'scope'. The name \
-               corresponds to the name of the code, configuration, or data \
-               package that is to be shared. The scope can either 'None', \
-               'All', 'Code', 'Config' or 'Data'.")
+    c.argument("share_policy", type=get_json_object, default=None)
+
+# Cluster commands
+with ParametersContext(command="sf cluster health") as c:
+    c.argument("nodes_health_state_filter", type=int, default=0)
+    c.argument("applications_health_state_filter", type=int, default=0)
+    c.argument("events_health_state_filter", type=int, default=0)
+
+# Compose commands
+with ParametersContext(command="sf compose list") as c:
+    c.argument("max_results", type=int, default=None)
