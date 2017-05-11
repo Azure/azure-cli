@@ -131,7 +131,7 @@ class AzCompleter(Completer):
         self.branch = self.command_tree
         self.curr_command = ''
         self._is_command = True
-
+        print('fuck that')
         text = reformat_cmd(text)
         if text.split():
 
@@ -174,11 +174,15 @@ class AzCompleter(Completer):
     # pylint: disable=too-many-branches
     def gen_dynamic_completions(self, text):
         """ generates the dynamic values, like the names of resource groups """
+        print(text)
         try:  # pylint: disable=too-many-nested-blocks
             is_param, started_param, prefix, param = dynamic_param_logic(text)
 
             # command table specific name
             arg_name = self.get_arg_name(is_param, param)
+            print(arg_name)
+            print(is_param)
+            print(param)
 
             if arg_name and ((text.split()[-1].startswith('-') and text[-1].isspace()) or
                              text.split()[-2].startswith('-')):

@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+from __future__ import print_function
 import argparse
 import os
 import io
@@ -14,6 +14,10 @@ from argcomplete.compat import USING_PYTHON2, ensure_bytes
 
 class ArgsFinder(CompletionFinder):
     """ gets the parsed args """
+    outstream = sys.stderr
+
+    def set_outstream(self, outstream):
+        self.outstream = outstream
 
     def get_parsed_args(self, comp_words):
         """ gets the parsed args from a patched parser """
@@ -27,13 +31,14 @@ class ArgsFinder(CompletionFinder):
             comp_words = [ensure_bytes(word) for word in comp_words]
 
         try:
-            stderr = sys.stderr
-            sys.stderr = os.open(os.devnull, "w")
+            print('boo', file=self.outstream)
+            stderr = self.outstream
+            self.outstream = os.open(os.devnull, "w")
 
             active_parsers[0].parse_known_args(comp_words, namespace=parsed_args)
 
-            sys.stderr.close()
-            sys.stderr = stderr
+            self.outstream.close()
+            self.outstream = stderr
         except BaseException:
             pass
 

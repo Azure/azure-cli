@@ -11,10 +11,10 @@ from prompt_toolkit.document import Document
 from prompt_toolkit.completion import Completion
 
 from azclishell.__main__ import AZCOMPLETER
-from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
-from azure.cli.testsdk.vcr_test_base import (ResourceGroupVCRTestBase,
-                                             JMESPathCheck, NoneCheck)
+# from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
+# from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+# from azure.cli.testsdk.vcr_test_base import (ResourceGroupVCRTestBase,
+#                                              JMESPathCheck, NoneCheck)
 
 
 class DynamicShellCompletionsTest(unittest.TestCase):
@@ -29,12 +29,13 @@ class DynamicShellCompletionsTest(unittest.TestCase):
 
         stream = six.StringIO()
         sys.stderr = stream
+        completer.argsfinder.set_outstream(stream)
         gen = completer.get_completions(doc, None)
-        stream.write('words')
-        stream.flush()
-        self.assertTrue(sys.stderr.getvalue() == '')
+        # args = completer.argsfinder.get_parsed_args(['this', 'is', 'world'])
+        print(stream.getvalue())
+        self.assertTrue(stream.getvalue() == '')
 
-        # self.assertEqual(six.next(gen), Completion(self.group1))
+        # self.assertEqual(six.next(gen), Completion(''))
         # self.assertEqual(six.next(gen), Completion(self.group2))
 
         # doc = Document(u'vm show -g group2 -n ')
