@@ -3,6 +3,11 @@
 Release History
 ===============
 
+unreleased
+++++++++++++++++++
+* Add Key Vault integration to the create-for-rbac and reset-credentials commands.
+
+
 2.0.4 (2017-05-09)
 ++++++++++++++++++
 * Minor fixes.
