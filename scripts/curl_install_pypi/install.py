@@ -119,7 +119,7 @@ def create_virtualenv(tmp_dir, install_dir):
     download_location = os.path.join(tmp_dir, VIRTUALENV_ARCHIVE)
     print_status('Downloading virtualenv package from {}.'.format(VIRTUALENV_DOWNLOAD_URL))
     response = urlopen(VIRTUALENV_DOWNLOAD_URL)
-    with open(download_location, 'w') as f: f.write(response.read())
+    with open(download_location, 'wb') as f: f.write(response.read())
     print_status("Downloaded virtualenv package to {}.".format(download_location))
     if is_valid_sha256sum(download_location, VIRTUALENV_ARCHIVE_SHA256):
         print_status("Checksum of {} OK.".format(download_location))
