@@ -301,6 +301,29 @@ def parse_app_params(formatted_params):
     return res
 
 
+def parse_app_metrics(formatted_metrics):
+    from azure.servicefabric.models.application_metric_description import (
+        ApplicationMetricDescription
+    )
+
+    if formatted_metrics is None:
+        return None
+
+    res = []
+    for metric in formatted_metrics:
+        metric_name = metric.get("name", None)
+        if not metric_name:
+            raise CLIError("Could not find required application metric name")
+
+        metric_max_cap = metric.get("maximum_capacity", None)
+        metric_reserve_cap = metric.get("reservation_capacity", None)
+        metric_total_cap = metric.get("total_application_capacity", None)
+        metric_desc = ApplicationMetricDescription(metric_name, metric_max_cap, metric_reserve_cap,
+                                                   metric_total_cap)
+        res.append(metric_desc)
+    return res
+
+
 def sf_create_app(client,  # pylint: disable=too-many-locals,too-many-arguments
                   app_name, app_type, app_version, parameters=None,
                   min_node_count=0, max_node_count=0, metrics=None,
@@ -337,9 +360,6 @@ def sf_create_app(client,  # pylint: disable=too-many-locals,too-many-arguments
     from azure.servicefabric.models.application_description import (
         ApplicationDescription
     )
-    from azure.servicefabric.models.application_parameter import (
-        ApplicationParameter
-    )
     from azure.servicefabric.models.application_capacity_description import (
         ApplicationCapacityDescription
     )
@@ -358,25 +378,7 @@ def sf_create_app(client,  # pylint: disable=too-many-locals,too-many-arguments
 
     app_params = parse_app_params(parameters)
 
-    # For simplicity, we assume user pass in valid key names in the list, or
-    # ignore the input
-    app_metrics = None
-    if metrics is not None:
-        app_metrics = []
-        for k in metrics:
-            metric = metrics[k]
-            metric_name = metric.get("name", None)
-            if metric_name is None:
-                raise CLIError("Could not decode required application metric "
-                               "name")
-            metric_max_cap = metric.get("maximum_capacity", None)
-            metric_reserve_cap = metric.get("reservation_capacity", None)
-            metric_total_cap = metric.get("total_application_capacity", None)
-            metric_desc = ApplicationMetricDescription(metric_name,
-                                                       metric_max_cap,
-                                                       metric_reserve_cap,
-                                                       metric_total_cap)
-            app_metrics.append(metric_desc)
+    app_metrics = parse_app_metrics(metrics)
 
     app_cap_desc = ApplicationCapacityDescription(min_node_count,
                                                   max_node_count,
