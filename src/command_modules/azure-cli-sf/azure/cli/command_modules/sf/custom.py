@@ -88,7 +88,7 @@ def sf_create_compose_application(
     client.create_compose_application(model, timeout)
 
 
-def _sf_select_verify(endpoint, cert, key, pem, ca, no_verify):
+def sf_select_verify(endpoint, cert, key, pem, ca, no_verify):
     if not endpoint.startswith("http:"):
         raise CLIError("Endpoint must be HTTP or HTTPS")
 
@@ -135,7 +135,7 @@ def sf_select(endpoint, cert=None,
     """
     from azure.cli.core._config import set_global_config_value
 
-    _sf_select_verify(endpoint, cert, key, pem, ca, no_verify)
+    sf_select_verify(endpoint, cert, key, pem, ca, no_verify)
 
     if pem:
         set_global_config_value("servicefabric", "pem_path", pem)
