@@ -532,9 +532,8 @@ def _process_service_principal_creds(years, app_start_date, app_end_date, cert, 
         from azure.cli.core._profile import CLOUD
         # 6 - Use existing cert from KeyVault
         kv_client = _get_keyvault_client()
-        cert_id = 'https://{}{}/certificates/{}'.format(
-            keyvault, CLOUD.suffixes.keyvault_dns, cert)
-        cert_obj = kv_client.get_certificate(cert_id)
+        vault_base = 'https://{}{}/'.format(keyvault, CLOUD.suffixes.keyvault_dns)
+        cert_obj = kv_client.get_certificate(vault_base, cert, '')
         public_cert_string = base64.b64encode(cert_obj.cer).decode('utf-8')  # pylint: disable=no-member
         cert_start_date = cert_obj.attributes.not_before  # pylint: disable=no-member
         cert_end_date = cert_obj.attributes.expires  # pylint: disable=no-member
@@ -789,9 +788,7 @@ def _create_self_signed_cert_with_keyvault(years, keyvault, keyvault_cert_name):
     while kv_client.get_certificate_operation(vault_base_url, keyvault_cert_name).status != 'completed':  # pylint: disable=no-member, line-too-long
         time.sleep(5)
 
-    cert_id = \
-        'https://{}{}/certificates/{}'.format(keyvault, CLOUD.suffixes.keyvault_dns, keyvault_cert_name)
-    cert = kv_client.get_certificate(cert_id)
+    cert = kv_client.get_certificate(vault_base_url, keyvault_cert_name, '')
     cert_string = base64.b64encode(cert.cer).decode('utf-8')  # pylint: disable=no-member
     cert_start_date = cert.attributes.not_before  # pylint: disable=no-member
     cert_end_date = cert.attributes.expires  # pylint: disable=no-member

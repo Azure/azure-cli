@@ -86,9 +86,10 @@ class RbacSPKeyVaultScenarioTest(LiveTest):
 
         self.cmd('ad sp create-for-rbac --scopes {0} {0}/resourceGroups/{1} --create-cert --keyvault {2} --cert {3} -n {4}'.format(
             scope, resource_group, key_vault, cert_name, sp_name)).get_output_in_json()
-        self.cmd('keyvault certificate show --vault-name {0} -n {1}'.format(key_vault, cert_name))
+        cer1 = self.cmd('keyvault certificate show --vault-name {0} -n {1}'.format(key_vault, cert_name)).get_output_in_json()['cer']
         self.cmd('ad sp reset-credentials -n {0} --create-cert --keyvault {1} --cert {2}'.format(sp_name, key_vault, cert_name))
-        self.cmd('keyvault certificate show --vault-name {0} -n {1}'.format(key_vault, cert_name))
+        cer2 = self.cmd('keyvault certificate show --vault-name {0} -n {1}'.format(key_vault, cert_name)).get_output_in_json()['cer']
+        self.assertTrue(cer1 != cer2)
         self.cmd('ad app delete --id {}'.format(sp_name))
 
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_existing_cert')
