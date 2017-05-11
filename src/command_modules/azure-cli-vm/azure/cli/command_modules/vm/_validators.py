@@ -749,7 +749,7 @@ def process_vm_create_namespace(namespace):
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
     if namespace.license_type and namespace.os_type.lower() != 'windows':
-        raise CLIError('usage error: --license-type is only applicable on windows vm')
+        raise CLIError('usage error: --license-type is only applicable on Windows VM')
 
 # endregion
 
@@ -857,12 +857,13 @@ def validate_vm_disk(namespace):
 
 def process_disk_or_snapshot_create_namespace(namespace):
     if namespace.source:
+        usage_error = 'usage error: --source {SNAPSHOT | DISK} | --source VHD_BLOB_URI [--source-storage-account-id ID]'
         try:
             namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot = _figure_out_storage_source(namespace.resource_group_name, namespace.source)  # pylint: disable=line-too-long
             if not namespace.source_blob_uri and namespace.source_storage_account_id:
-                raise CLIError('usage error: --source_storage_account_id is only used with blob uri')
+                raise CLIError(usage_error)
         except CloudError:
-            raise CLIError("Incorrect '--source' usage: --source VHD_BLOB_URI | SNAPSHOT | DISK")
+            raise CLIError(usage_error)
 
 
 def process_image_create_namespace(namespace):
