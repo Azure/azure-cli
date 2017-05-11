@@ -44,4 +44,5 @@ exec_command('pip install -e src/azure-cli-testsdk')
 # Ensure that the site package's azure/__init__.py has the old style namespace
 # package declaration by installing the old namespace package
 exec_command('pip install --force-reinstall azure-nspkg==1.0.0')
+exec_command('pip install --force-reinstall azure-mgmt-nspkg==1.0.0')
 print('Finished dev setup.')

@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.0.4 (2017-05-09)
+++++++++++++++++++
+
+* Remove references to CLI being in preview (#3273)
+
 2.0.3 (2017-05-02)
 ++++++++++++++++++
 

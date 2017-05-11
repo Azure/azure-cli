@@ -545,7 +545,7 @@ class WebappBackupRestoreScenarioTestOld(ResourceGroupVCRTestBase):
         import time
         time.sleep(300)  # Allow plenty of time for a backup to finish -- database backup takes a while (skipped in playback)
 
-        self.cmd('appservice web config backup restore -g {} --webapp-name {} --container-url {} --backup-name {} --db-connection-string "{}" --db-name {} --db-type {} --ignore-hostname-conflict --overwrite --debug'
+        self.cmd('appservice web config backup restore -g {} --webapp-name {} --container-url {} --backup-name {} --db-connection-string "{}" --db-name {} --db-type {} --ignore-hostname-conflict --overwrite'
                  .format(self.resource_group, self.webapp_name, sas_url, backup_name, db_conn_str, database_name, database_type), checks=JMESPathCheck('name', self.webapp_name))
 
 

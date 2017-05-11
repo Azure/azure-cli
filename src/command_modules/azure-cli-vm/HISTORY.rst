@@ -1,7 +1,17 @@
 .. :changelog:
 
+unreleased
+----------
+
+* diagnostics: Fix incorrect Linux diagnostics default config with update for LAD v.3.0 extension
+
 Release History
 ===============
+
+2.0.6 (2017-05-09)
+++++++++++++++++++
+* Minor fixes.
+
 2.0.5 (2017-05-05)
 ++++++++++++++++++
 * avail-set: make UD&FD domain counts optional
