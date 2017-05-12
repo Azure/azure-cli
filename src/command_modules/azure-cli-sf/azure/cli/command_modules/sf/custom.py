@@ -504,7 +504,6 @@ def sf_upgrade_app(  # pylint: disable=too-many-arguments,too-many-locals
         ApplicationHealthPolicy
     )
 
-
     monitoring_policy = MonitoringPolicyDescription(
         failure_action, health_check_wait_duration,
         health_check_stable_duration, health_check_retry_timeout,
@@ -518,6 +517,7 @@ def sf_upgrade_app(  # pylint: disable=too-many-arguments,too-many-locals
 
     def_shp = parse_default_service_health_policy(default_service_health_policy)
 
+    map_shp = parse_service_health_policy_map(service_health_policy)
 
     app_health_policy = ApplicationHealthPolicy(warning_as_error,
                                                 max_unhealthy_apps, def_shp,
