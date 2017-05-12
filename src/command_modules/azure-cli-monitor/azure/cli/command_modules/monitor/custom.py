@@ -6,6 +6,7 @@ from __future__ import print_function
 import datetime
 import os
 from azure.cli.core.util import get_file_json, CLIError
+from azure.mgmt.monitor.models import ConditionOperator, TimeAggregationOperator
 
 # 1 hour in milliseconds
 DEFAULT_QUERY_TIME_RANGE = 3600000
@@ -15,30 +16,89 @@ DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
 # region Alerts
 
-def add_email_action(client, resource_group_name, rule_name, send_to_service_owners=None,
-                     custom_emails=None):
-    pass
+operator_map = {
+    '>': ConditionOperator.greater_than.value,
+    '>=': ConditionOperator.greater_than_or_equal.value,
+    '<': ConditionOperator.less_than,
+    '<=': ConditionOperator.less_than_or_equal
+}
 
 
-def add_webhook_action(client, resource_group_name, rule_name, service_uri, properties=None):
-    pass
+aggregation_map = {
+    'avg': TimeAggregationOperator.average.value,
+    'min': TimeAggregationOperator.minimum.value,
+    'max': TimeAggregationOperator.maximum.value,
+    'total': TimeAggregationOperator.total.value,
+    'last': TimeAggregationOperator.last.value
+}
 
 
-def create_metric_rule(client, resource_group_name, rule_name, target, metric_name,
-                       operator, threshold, window_size=None, time_aggregation=None,
-                       description=None, enabled=True, location=None, tags=None):
+def create_metric_rule_alt(client, resource_group_name, rule_name, target, metric_name,
+                           operator, threshold, time_aggregation, window_size,
+                           description=None, enabled=True, location=None, tags=None,
+                           email_service_owners=False, custom_emails=None, webhook=None):
     from azure.mgmt.monitor.models import \
         (AlertRuleResource, ThresholdRuleCondition, RuleMetricDataSource)
     metric = RuleMetricDataSource(target, metric_name)
     condition = ThresholdRuleCondition(operator, threshold, metric, window_size, time_aggregation)
     rule = AlertRuleResource(location, rule_name, enabled,
                              condition, tags, description, None)
-    return client.alert_rules.create_or_update(resource_group_name, rule_name, rule)
+    return client.create_or_update(resource_group_name, rule_name, rule)
 
 
-def create_metric_rule_alt(client, resource_group_name, rule_name, target, condition,
-                           description=None, enabled=True, location=None, tags=None):
-    pass
+def create_metric_rule(client, resource_group_name, rule_name, target, condition,
+                       description=None, enabled=True, location=None, tags=None,
+                       email_service_owners=False, custom_emails=None, webhook=None):
+    from azure.mgmt.monitor.models import AlertRuleResource, RuleEmailAction
+    condition.data_source.resource_uri = target
+    actions = [RuleEmailAction(email_service_owners, custom_emails)] + (webhook or [])
+    rule = AlertRuleResource(location, rule_name, enabled,
+                             condition, tags, description, actions)
+    return client.create_or_update(resource_group_name, rule_name, rule)
+
+def update_metric_rule(instance, target=None, condition=None, description=None, enabled=None,
+                       metric=None, operator=None, threshold=None, aggregation=None, period=None,
+                       tags=None, email_service_owners=None, add_emails=None, remove_emails=None,
+                       add_webhook=None, remove_webhooks=None):
+    # Update general properties
+    if description is not None:
+        instance.description = description
+    if enabled is not None:
+        instance.is_enabled = enabled
+    if tags is not None:
+        instance.tags = tags
+
+    # Update conditions
+    if condition is not None:
+        target = target or instance.condition.data_source.resource_uri
+        instance.condition = condition
+
+    if metric is not None:
+        instance.condition.data_source.metric_name = metric
+    if operator is not None:
+        instance.condition.operator = operator_map[operator]
+    if threshold is not None:
+        instance.condition.threshold = threshold
+    if aggregation is not None:
+        instance.condition.time_aggregation = aggregation_map[aggregation]
+    if period is not None:
+        instance.condition.window_size = period
+
+    if target is not None:
+        instance.condition.data_source.resource_uri = target
+
+    # Update actions
+    from azure.mgmt.monitor.models import RuleEmailAction
+    # ensure only a single email action (because more than one is STUPID)
+
+    # add emails
+    # remove emails
+    # update email-service-owners
+
+    # add webhooks
+    # remove webhooks
+
+    return instance
 
 # endregion
 

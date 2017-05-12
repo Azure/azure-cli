@@ -44,6 +44,7 @@ def get_target_resource_validator(dest):
         del namespace.resource_type
     return _validator
 
+
 # pylint: disable=line-too-long
 def validate_diagnostic_settings(namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id

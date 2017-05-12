@@ -15,7 +15,7 @@
     <InterpreterId>{54f4b6dc-0859-46dc-99bb-b275c9d0aca3}</InterpreterId>
     <InterpreterVersion>3.5</InterpreterVersion>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
-    <CommandLineArguments>monitor alert rule show -g tjp-vm -n rule1</CommandLineArguments>
+    <CommandLineArguments>monitor alert create2 -g tjp-vm -n rule1 --resource-id /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/tjp-vm/providers/Microsoft.Compute/virtualMachines/vm1 --condition "Percentage CPU" &gt; 90 AVG 1h30m --email-service-owners</CommandLineArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -502,6 +502,9 @@
     <Compile Include="command_modules\azure-cli-lab\azure\cli\command_modules\lab\__init__.py" />
     <Compile Include="command_modules\azure-cli-lab\azure_bdist_wheel.py" />
     <Compile Include="command_modules\azure-cli-lab\setup.py" />
+    <Compile Include="command_modules\azure-cli-monitor\azure\cli\command_modules\monitor\actions.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="command_modules\azure-cli-monitor\azure\cli\command_modules\monitor\commands.py" />
     <Compile Include="command_modules\azure-cli-monitor\azure\cli\command_modules\monitor\custom.py" />
     <Compile Include="command_modules\azure-cli-monitor\azure\cli\command_modules\monitor\help.py" />

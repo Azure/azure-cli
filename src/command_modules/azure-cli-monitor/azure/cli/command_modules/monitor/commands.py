@@ -23,22 +23,20 @@ custom_operations = create_service_adapter('azure.cli.command_modules.monitor.cu
 
 ar_path = 'azure.mgmt.monitor.operations.alert_rules_operations#AlertRulesOperations.'
 
-cli_command(__name__, 'monitor alert rule create', custom_path + 'create_metric_rule', cf_alert_rules)
-cli_command(__name__, 'monitor alert rule create2', custom_path + 'create_metric_rule_alt', cf_alert_rules)
-cli_command(__name__, 'monitor alert rule delete', ar_path + 'delete', cf_alert_rules)
-cli_command(__name__, 'monitor alert rule show', ar_path + 'get', cf_alert_rules)
-cli_command(__name__, 'monitor alert rule list', ar_path + 'list_by_resource_group', cf_alert_rules)
-cli_generic_update_command(__name__, 'monitor alert rule update',
+cli_command(__name__, 'monitor alert create', custom_path + 'create_metric_rule', cf_alert_rules)
+cli_command(__name__, 'monitor alert create2', custom_path + 'create_metric_rule_alt', cf_alert_rules)
+cli_command(__name__, 'monitor alert delete', ar_path + 'delete', cf_alert_rules)
+cli_command(__name__, 'monitor alert show', ar_path + 'get', cf_alert_rules)
+cli_command(__name__, 'monitor alert list', ar_path + 'list_by_resource_group', cf_alert_rules)
+cli_generic_update_command(__name__, 'monitor alert update',
                            ar_path + 'get',
                            ar_path + 'create_or_update',
-                           cf_alert_rules)
+                           cf_alert_rules,
+                           custom_function_op=custom_path + 'update_metric_rule')
 
 ari_path = 'azure.mgmt.monitor.operations.alert_rule_incidents_operations#AlertRuleIncidentsOperations.'
-cli_command(__name__, 'monitor alert incident show', ari_path + 'get', cf_monitor)
-cli_command(__name__, 'monitor alert incident list', ari_path + 'list_by_alert_rule', cf_monitor)
-
-cli_command(__name__, 'monitor alert action add-email', custom_path + 'add_email_action', cf_monitor)
-cli_command(__name__, 'monitor alert action add-webhook', custom_path + 'add_webhook_action', cf_monitor)
+cli_command(__name__, 'monitor alert show-incident', ari_path + 'get', cf_monitor)
+cli_command(__name__, 'monitor alert list-incidents', ari_path + 'list_by_alert_rule', cf_monitor)
 
 # endregion
 

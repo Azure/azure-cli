@@ -16,15 +16,10 @@ helps['monitor'] = """
 
 helps['monitor alert'] = """
     type: group
-    short-summary: Commands to manage metric-based alerts.
+    short-summary: Commands to manage metric-based alert rules.
     """
 
-helps['monitor alert rule'] = """
-    type: group
-    short-summary: Commands to manage the rules which trigger alerts.
-    """
-
-helps['monitor alert rule create'] = """
+helps['monitor alert create2'] = """
     type: command
     short-summary: Create a metric-based alert rule.
     long-summary: |
@@ -49,90 +44,113 @@ helps['monitor alert rule create'] = """
           short-summary: >
             Time span over which to apply --time-aggregation, in ISO 8601 format
             (e.g.: PT5M for 5 minutes)
+        - name: --custom-emails
+          short-summary: Space-separated list of addresses to email when the alert is triggered.
+        - name: --email-service-owners
+          short-summary: Email the service owners if an alert is triggered.
+        - name: --webhook
+          short-summary: >
+            Send a POST request to a web service when the alert is triggered. Usage: --webhook URI [KEY=VALUE ...]
+          long-summary: To add multiple webhook actions, use multiple --webhook entries.
     examples:
-        - name: Create a point-in-time metric-based alert on a VM.
-          text: >
-            az vm alert rule create -n rule1 -g <RG> --target <VM ID> --metric-name "Percentage CPU"
-            --operator GreaterThan --threshold 90
-        - name: Create a metric-based alert on a VM with time averaging.
+        - name: Create a High CPU-based alert on a VM.
           text: >
             az vm alert rule create -n rule1 -g <RG> --target <VM ID> --metric-name "Percentage CPU"
             --operator GreaterThan --threshold 90 --time-aggregation Average --window-size PT5M
 """
 
-helps['monitor alert rule create2'] = """
+helps['monitor alert create'] = """
     type: command
     short-summary: Create a metric-based alert rule.
     long-summary: |
         To specify the condition:
-            --condtion <METRIC> <OPERATOR> <THRESHOLD> [<AGGREGATOR> <TIMESPAN>]
+            --condition METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} PERIOD
     parameters:
         - name: --target
           short-summary: ID of the resource to target for the alert rule.
         - name: --description
           short-summary: Free-text description of the rule.
         - name: --condition
-          short-summary: The condition upon which to trigger the rule.
+          short-summary: The condition expression upon which to trigger the rule.
+        - name: --custom-emails
+          short-summary: Space-separated list of addresses to email when the alert is triggered.
+        - name: --email-service-owners
+          short-summary: Email the service owners if an alert is triggered.
+        - name: --webhook
+          short-summary: >
+            Send a POST request to a web service when the alert is triggered. Usage: --webhook URI [KEY=VALUE ...]
+          long-summary: To add multiple webhook actions, use multiple --webhook entries.
     examples:
-        - name: Create a point-in-time metric-based alert on a VM.
+        - name: Create a High CPU-based alert on a VM.
           text: >
-            az vm alert rule create -n rule1 -g <RG> --target <VM ID> --condition Percentage CPU > 90
-        - name: Create a metric-based alert on a VM with time averaging.
-          text: >
-            az vm alert rule create -n rule1 -g <RG> --target <VM ID> --condition Percentage CPU > 90 AVG 5m
+            az vm alert rule create -n rule1 -g <RG> --target <VM ID> --condition "Percentage CPU > 90 avg 5m"
 """
 
-
-helps['monitor alert rule update'] = """
+helps['monitor alert update'] = """
     type: command
-    short-summary: Update an alert rule.
-    """
+    short-summary: Update a metric-based alert rule.
+    long-summary: |
+        To specify the condition:
+            --condition METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} PERIOD
+    parameters:
+        - name: --target
+          short-summary: ID of the resource to target for the alert rule.
+        - name: --description
+          short-summary: Free-text description of the rule.
+        - name: --condition
+          short-summary: The condition expression upon which to trigger the rule. If used, do not specify
+            other 'Condition Arguments'.
+        - name: --add-emails
+          short-summary: Space-separated list of email addresses to add to the rule emails action.
+        - name: --remove-emails
+          short-summary: Space-separated list of email addresses to remove from the rule emails action.
+        - name: --email-service-owners
+          short-summary: Email the service owners if an alert is triggered.
+        - name: --add-webhook
+          short-summary: >
+            Send a POST request to a web service when the alert is triggered. Usage: --add-webhook URI [KEY=VALUE ...]
+          long-summary: To add multiple webhook actions, use multiple --add-webhook entries.
+        - name: --remove-webhooks
+          short-summary: Space-separated list of webhook URIs to remove from the alert action.
+        - name: --metric
+          short-summary: Name of the metric to base the rule on.
+          populator-commands:
+            - az monitor metrics list-definitions
+        - name: --operator
+          short-summary: How to compare the metric against the threshold.
+        - name: --threshold
+          short-summary: Numeric threshold at which to trigger the alert.
+        - name: --aggregation
+          short-summary: Type of aggregation to apply based on --period.
+        - name: --period
+          short-summary: >
+            Time span over which to apply --aggregation, in nDnHnMnS format or ISO8601 format.
+"""
 
-helps['monitor alert rule delete'] = """
+helps['monitor alert delete'] = """
     type: command
     short-summary: Delete an alert rule.
     """
 
-helps['monitor alert rule list'] = """
+helps['monitor alert list'] = """
     type: command
     short-summary: List alert rules in a resource group.
     """
 
-helps['monitor alert rule show'] = """
+helps['monitor alert show'] = """
     type: command
     short-summary: Show an alert rule.
     """
 
-helps['monitor alert incident'] = """
-    type: group
-    short-summary: Get information on alert incidents.
-    """
-
-helps['monitor alert incident show'] = """
+helps['monitor alert show-incident'] = """
     type: command
     short-summary: Show details of an alert rule incident.
     """
 
-helps['monitor alert incident list'] = """
+helps['monitor alert list-incidents'] = """
     type: command
     short-summary: List all incidents for an alert rule.
     """
-
-helps['monitor alert action'] = """
-    type: group
-    short-summary: Manage actions that trigger when an alert is fired.
-    """
-
-helps['monitor alert action add-email'] = """
-    type: command
-    short-summary: Send an email when an alert fires.
-    """
-
-helps['monitor alert action add-webhook'] = """
-    type: command
-    short-summary: Trigger a webhook when an alert fires.
-    """
-
 
 # endregion
 
