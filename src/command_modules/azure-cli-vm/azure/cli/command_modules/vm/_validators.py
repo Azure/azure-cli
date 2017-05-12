@@ -683,8 +683,7 @@ def validate_ssh_key(namespace):
             content = _generate_ssh_keys(private_key_filepath, public_key_filepath)
             logger.warning("SSH key files '%s' and '%s' have been generated under ~/.ssh to "
                            "allow SSH access to the VM. If using machines without "
-                           "permanent storage like Azure Cloud Shell without an attached "
-                           "file share, back up your keys to a safe location",
+                           "permanent storage, back up your keys to a safe location.",
                            private_key_filepath, public_key_filepath)
         else:
             raise CLIError('An RSA key file or key value must be supplied to SSH Key Value. '
