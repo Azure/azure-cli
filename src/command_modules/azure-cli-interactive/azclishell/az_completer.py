@@ -177,8 +177,9 @@ class AzCompleter(Completer):
                         return arg
 
     def mute_parse_args(self, text):
+        """ mutes the parser error when parsing, the puts it back """
         error = AzCliCommandParser.error
-        AzCliCommandParser.error = error_pass  # mutes the parsing
+        AzCliCommandParser.error = error_pass
 
         parse_args = self.argsfinder.get_parsed_args(
             parse_quotes(text, quotes=False, string=False))

@@ -78,6 +78,7 @@ class ProgressHook(object):
 
     def stop(self):
         """ if there is an abupt stop before ending """
+        self.reporter.closed = True
         self.add(message='Interrupted')
 
     def begin(self, **kwargs):
@@ -88,6 +89,7 @@ class ProgressHook(object):
     def end(self, **kwargs):
         """ ending reporting of progress """
         kwargs['message'] = kwargs.get('message', 'Finished')
+        self.reporter.closed = True
         self.add(**kwargs)
 
 
