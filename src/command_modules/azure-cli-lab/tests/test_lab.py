@@ -57,7 +57,7 @@ class LabGalleryVMMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # Create windows vm in the lab
         self.cmd('lab vm create -g {} --lab-name {} --name {} '
-                 '--image {} --image-type {} --size {} --admin-password {}'
+                 '--image {} --image-type {} --size {} --admin-password {} --allow-claim'
                  .format(rg, LAB_NAME, windows_vm_name, windows_image, image_type, size, password),
                  checks=[NoneCheck()])
 
@@ -76,11 +76,15 @@ class LabGalleryVMMgmtScenarioTest(ResourceGroupVCRTestBase):
 
         # List claimable vms
         self.cmd('lab vm list -g {} --lab-name {} --claimable'
-                 .format(rg, LAB_NAME), checks=[JMESPathCheck('length(@)', 1)])
+                 .format(rg, LAB_NAME), checks=[JMESPathCheck('length(@)', 2)])
 
         # claim a vm
         self.cmd('lab vm claim -g {} --lab-name {} --name {}'
                  .format(rg, LAB_NAME, linux_vm_name), checks=[NoneCheck()])
+
+        # List my vms - we have already claimed one VM
+        self.cmd('lab vm list -g {} --lab-name {}'
+                 .format(rg, LAB_NAME), checks=[JMESPathCheck('length(@)', 1)])
 
         # Delete all the vms
         self.cmd('lab vm delete -g {} --lab-name {} --name {}'
