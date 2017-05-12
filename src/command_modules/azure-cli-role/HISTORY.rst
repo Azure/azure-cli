@@ -2,9 +2,10 @@
 
 Release History
 ===============
-2.0.5 (unrelease)
+2.0.5 (unreleased)
 ++++++++++++++++++
 * ad: for 'app create' command, mention time format in the arg descriptions for --start-date/--end-date
+* output deprecating information on using '--expanded-view'
 
 unreleased
 ++++++++++++++++++
