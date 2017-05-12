@@ -31,7 +31,6 @@ class ArgsFinder(CompletionFinder):
             comp_words = [ensure_bytes(word) for word in comp_words]
 
         try:
-            print('boo', file=self.outstream)
             stderr = self.outstream
             self.outstream = os.open(os.devnull, "w")
 
