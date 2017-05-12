@@ -655,6 +655,8 @@ def create_service_principal_for_rbac(
                     raise
 
     if expanded_view:
+        logger.warning("'--expanded-view' is deprecating and will be removed in a future release. "
+                       "You can get the same information using 'az cloud show'")
         from azure.cli.core._profile import Profile
         profile = Profile()
         result = profile.get_expanded_subscription_info(scopes[0].split('/')[2] if scopes else None,
