@@ -20,7 +20,7 @@ class DynamicShellCompletionsTest(unittest.TestCase):
         stream = six.StringIO()
         sys.stderr = stream
         completer.argsfinder.set_outstream(stream)
-        args = completer.argsfinder.get_parsed_args(['this', 'is', 'world'])
+        completer.argsfinder.get_parsed_args(['this', 'is', 'world'])
         self.assertTrue(stream.getvalue() == '')
 
 
