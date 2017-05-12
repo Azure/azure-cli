@@ -8,9 +8,8 @@ import sys
 
 from prompt_toolkit.document import Document
 
-import azclishell
 from azclishell.__main__ import AZCOMPLETER
-
+from azclishell.configuration import CONFIGURATION
 
 def none():
     pass
@@ -21,7 +20,7 @@ class DynamicShellCompletionsTest(unittest.TestCase):
     def test_mute_parse(self):
         """ tests dynamic completions """
         completer = AZCOMPLETER
-        azclishell.configuration.CONFIGURATION.firsttime = none
+        CONFIGURATION.firsttime = none
         stream = six.StringIO()
 
         stderr = sys.stderr
