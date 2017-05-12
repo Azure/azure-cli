@@ -4,7 +4,7 @@ Release History
 ===============
 ++++++++++++++++++
 2.0.5 (unreleased)
-* Output deprecating information on using '--expeanded-view'
+* Output deprecating information on using '--expanded-view'
 
 2.0.4 (2017-04-28)
 ++++++++++++++++++
