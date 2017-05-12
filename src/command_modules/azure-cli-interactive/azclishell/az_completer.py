@@ -114,7 +114,6 @@ class AzCompleter(Completer):
         self.output_options = commands.output_options if global_params else []
         self.global_param_descriptions = commands.global_param_descriptions if global_params else []
 
-        AzCliCommandParser.error = error_pass  # mutes the parsing
         self.global_parser = AzCliCommandParser(add_help=False)
         self.global_parser.add_argument_group('global', 'Global Arguments')
         self.parser = AzCliCommandParser(parents=[self.global_parser])
@@ -177,6 +176,16 @@ class AzCompleter(Completer):
                     if name == param:
                         return arg
 
+    def mute_parse_args(self, text):
+        error = AzCliCommandParser.error
+        AzCliCommandParser.error = error_pass  # mutes the parsing
+
+        parse_args = self.argsfinder.get_parsed_args(
+            parse_quotes(text, quotes=False, string=False))
+
+        AzCliCommandParser.error = error
+        return parse_args
+
     # pylint: disable=too-many-branches
     def gen_dynamic_completions(self, text):
         """ generates the dynamic values, like the names of resource groups """
@@ -192,8 +201,7 @@ class AzCompleter(Completer):
                 for comp in self.gen_enum_completions(arg_name, text, started_param, prefix):
                     yield comp
 
-                parse_args = self.argsfinder.get_parsed_args(
-                    parse_quotes(text, quotes=False, string=False))
+                parse_args = self.mute_parse_args(text)
 
                 # there are 3 formats for completers the cli uses
                 # this try catches which format it is
