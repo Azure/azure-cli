@@ -68,7 +68,8 @@ with ParametersContext(command='lab vm list') as c:
 
 
 with ParametersContext(command='lab vm claim') as c:
-    c.register_alias('name', ('--name', '-n'))
+    c.register_alias('name', ('--name', '-n'), id_part='child_name')
+    c.argument('lab_name', id_part='name')
 
 
 with ParametersContext(command='lab vm apply-artifacts') as c:

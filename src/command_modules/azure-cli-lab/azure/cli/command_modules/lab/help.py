@@ -134,6 +134,8 @@ helps['lab vm claim'] = """
             type: command
             short-summary: Take ownership of an existing virtual machine in Azure DevTest Lab.
             parameters:
+                - name: --ids
+                  short-summary: One or more resource IDs (space delimited). If provided, no other arguments should be specified
                 - name: --resource-group -g
                   short-summary: Name of lab's resource group
                 - name: --lab-name
