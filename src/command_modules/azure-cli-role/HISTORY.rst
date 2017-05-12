@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.5 (unrelease)
+++++++++++++++++++
+* ad: for 'app create' command, mention time format in the arg descriptions for --start-date/--end-date
 
 unreleased
 ++++++++++++++++++
