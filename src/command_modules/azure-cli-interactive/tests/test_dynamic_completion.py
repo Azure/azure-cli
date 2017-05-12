@@ -18,10 +18,13 @@ class DynamicShellCompletionsTest(unittest.TestCase):
         completer = AZCOMPLETER
 
         stream = six.StringIO()
+
+        stderr = sys.stderr
         sys.stderr = stream
         completer.argsfinder.set_outstream(stream)
         completer.argsfinder.get_parsed_args(['this', 'is', 'world'])
         self.assertTrue(stream.getvalue() == '')
+        sys.stderr = stderr
 
 
 if __name__ == '__main__':
