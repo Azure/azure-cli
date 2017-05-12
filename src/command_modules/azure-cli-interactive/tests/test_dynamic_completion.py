@@ -11,6 +11,7 @@ from prompt_toolkit.document import Document
 from azclishell.__main__ import AZCOMPLETER
 from azclishell.configuration import CONFIGURATION
 
+
 def none():
     pass
 
