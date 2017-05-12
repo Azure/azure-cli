@@ -357,14 +357,9 @@ def sf_create_app(client,  # pylint: disable=too-many-locals,too-many-arguments
     descriptions. A metric is defined as a name, associated with a set of
     capacities for each node that the application exists on.
     """
-    from azure.servicefabric.models.application_description import (
-        ApplicationDescription
-    )
+    from azure.servicefabric.models.application_description import ApplicationDescription
     from azure.servicefabric.models.application_capacity_description import (
         ApplicationCapacityDescription
-    )
-    from azure.servicefabric.models.application_metric_description import (
-        ApplicationMetricDescription
     )
 
     if (any([min_node_count, max_node_count]) and
@@ -388,6 +383,42 @@ def sf_create_app(client,  # pylint: disable=too-many-locals,too-many-arguments
                                       app_params, app_cap_desc)
 
     client.create_application(app_desc, timeout)
+
+
+def parse_default_service_health_policy(policy):
+    from azure.servicefabric.models.service_type_health_policy import ServiceTypeHealthPolicy
+
+    if policy is None:
+        return None
+
+    uphp = policy.get("max_percent_unhealthy_partitions_per_service", 0)
+    rhp = policy.get("max_percent_unhealthy_replicas_per_partition", 0)
+    ushp = policy.get("max_percent_unhealthy_services", 0)
+    return ServiceTypeHealthPolicy(uphp, rhp, ushp)
+
+
+def parse_service_health_policy_map(formatted_policy):
+    from azure.servicefabric.models.service_type_health_policy_map_item import (
+        ServiceTypeHealthPolicyMapItem
+    )
+    from azure.servicefabric.models.service_type_health_policy import ServiceTypeHealthPolicy
+
+    if formatted_policy is None:
+        return None
+
+    map_shp = []
+    for st_desc in formatted_policy:
+        st_name = st_desc.get("Key", None)
+        if st_name is None:
+            raise CLIError("Could not find service type name in service health policy map")
+        st_policy = st_desc.get("Value", None)
+        if st_policy is None:
+            raise CLIError("Could not find service type policy in service health policy map")
+        p = parse_default_service_health_policy(st_policy)
+        std_list_item = ServiceTypeHealthPolicyMapItem(st_name, p)
+
+        map_shp.append(std_list_item)
+    return map_shp
 
 
 def sf_upgrade_app(  # pylint: disable=too-many-arguments,too-many-locals
@@ -466,22 +497,13 @@ def sf_upgrade_app(  # pylint: disable=too-many-arguments,too-many-locals
     from azure.servicefabric.models.application_upgrade_description import (
         ApplicationUpgradeDescription
     )
-    from azure.servicefabric.models.application_parameter import (
-        ApplicationParameter
-    )
     from azure.servicefabric.models.monitoring_policy_description import (
         MonitoringPolicyDescription
     )
     from azure.servicefabric.models.application_health_policy import (
         ApplicationHealthPolicy
     )
-    from azure.servicefabric.models.service_type_health_policy import (
-        ServiceTypeHealthPolicy
-    )
-    # pylint: disable=line-too-long
-    from azure.servicefabric.models.service_type_health_policy_map_item import (  # noqa: justification, no way to shorten
-        ServiceTypeHealthPolicyMapItem
-    )
+
 
     monitoring_policy = MonitoringPolicyDescription(
         failure_action, health_check_wait_duration,
@@ -490,53 +512,12 @@ def sf_upgrade_app(  # pylint: disable=too-many-arguments,too-many-locals
     )
 
     # Must always have empty list
-    app_params = []
-    if parameters:
-        for k in parameters:
-            # Create an application parameter for every of these
-            p = ApplicationParameter(k, parameters[k])
-            app_params.append(p)
+    app_params = parse_app_params(parameters)
+    if app_params is None:
+        app_params = []
 
-    def_shp = None
-    if default_service_health_policy:
-        # Extract properties from dict using previously defined names
-        shp = default_service_health_policy.get(
-            "max_percent_unhealthy_partitions_per_service", 0
-        )
-        rhp = default_service_health_policy.get(
-            "max_percent_unhealthy_replicas_per_partition", 0
-        )
-        ushp = default_service_health_policy.get(
-            "max_percent_unhealthy_services", 0
-        )
-        def_shp = ServiceTypeHealthPolicy(shp, rhp, ushp)
+    def_shp = parse_default_service_health_policy(default_service_health_policy)
 
-    map_shp = None
-    if service_health_policy:
-        map_shp = []
-        for st_desc in service_health_policy:
-            st_name = st_desc.get("Key", None)
-            if st_name is None:
-                raise CLIError("Could not find service type name in service "
-                               "health policy map")
-            st_policy = st_desc.get("Value", None)
-            if st_policy is None:
-                raise CLIError("Could not find service type policy in service "
-                               "health policy map")
-            st_shp = st_policy.get(
-                "max_percent_unhealthy_partitions_per_service", 0
-            )
-            st_rhp = st_policy.get(
-                "max_percent_unhealthy_replicas_per_partition", 0
-            )
-            st_ushp = st_policy.get(
-                "max_percent_unhealthy_services", 0
-            )
-
-            std_policy = ServiceTypeHealthPolicy(st_shp, st_rhp, st_ushp)
-            std_list_item = ServiceTypeHealthPolicyMapItem(st_name, std_policy)
-
-            map_shp.append(std_list_item)
 
     app_health_policy = ApplicationHealthPolicy(warning_as_error,
                                                 max_unhealthy_apps, def_shp,

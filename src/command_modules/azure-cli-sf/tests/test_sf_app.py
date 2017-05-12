@@ -39,3 +39,15 @@ class SfAppTests(unittest.TestCase):
         self.assertEqual(len(res), 1)
         self.assertIsInstance(res[0], ApplicationMetricDescription)
 
+    def empty_parse_service_health_policy_returns_zeros_test(self):
+        from azure.servicefabric.models.service_type_health_policy import ServiceTypeHealthPolicy
+
+        res = sf_c.parse_default_service_health_policy({})
+        self.assertIsInstance(res, ServiceTypeHealthPolicy)
+        self.assertEqual(res.max_percent_unhealthy_partitions_per_service, 0)
+        self.assertEqual(res.max_percent_unhealthy_replicas_per_partition, 0)
+        self.assertEqual(res.max_percent_unhealthy_services, 0)
+
+    def none_parse_service_health_policy_returns_none_test(self):
+        res = sf_c.parse_default_service_health_policy(None)
+        self.assertIs(res, None)
