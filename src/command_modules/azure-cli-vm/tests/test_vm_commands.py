@@ -16,6 +16,8 @@ from azure.cli.testsdk.vcr_test_base import (VCRTestBase,
                                              ResourceGroupVCRTestBase,
                                              JMESPathCheck,
                                              NoneCheck)
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import JMESPathCheck as JMESPathCheckV2
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -274,6 +276,17 @@ class VMGeneralizeScenarioTest(ResourceGroupVCRTestBase):
         self.execute()
 
 
+class VMWindowsLicenseTest(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    def test_windows_vm_license_type(self, resource_group):
+        vm_name = 'winvm'
+        self.cmd('vm create -g {} -n {} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server'.format(resource_group, vm_name))
+        self.cmd('vm show -g {} -n {}'.format(resource_group, vm_name), checks=[
+            JMESPathCheckV2('licenseType', 'Windows_Server')
+        ])
+
+
 class VMCreateFromUnmanagedDiskTest(ResourceGroupVCRTestBase):
 
     def __init__(self, test_method):
@@ -288,7 +301,10 @@ class VMCreateFromUnmanagedDiskTest(ResourceGroupVCRTestBase):
         vm1 = 'vm1'
         self.cmd('vm create -g {} -n {} --image debian --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password'.format(
             self.resource_group, vm1))
-        vm1_info = self.cmd('vm show -g {} -n {}'.format(self.resource_group, vm1))
+        vm1_info = self.cmd('vm show -g {} -n {}'.format(self.resource_group, vm1), checks=[
+            JMESPathCheck('name', vm1),
+            JMESPathCheck('licenseType', None)
+        ])
         self.cmd('vm stop -g {} -n {}'.format(self.resource_group, vm1))
 
         # import the unmanaged os disk into a specialized managed disk
