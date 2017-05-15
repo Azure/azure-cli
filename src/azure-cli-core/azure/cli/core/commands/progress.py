@@ -102,6 +102,7 @@ class ProgressHook(object):
         """ whether progress is continuing """
         return not self.reporter.closed
 
+
 class IndeterminateStandardOut(ProgressViewBase):
     """ custom output for progress reporting """
     def __init__(self, out=None):
@@ -122,6 +123,7 @@ class IndeterminateStandardOut(ProgressViewBase):
 
     def flush(self):
         self.out.flush()
+
 
 def _format_value(msg, percent):
     bar_len = BAR_LEN - len(msg) - 1

@@ -54,8 +54,10 @@ def get_progress_message():
     """ gets the progress message """
     return PROGRESS
 
+
 def get_done():
     return DONE
+
 
 def progress_view(shell):
     """ updates the view """
