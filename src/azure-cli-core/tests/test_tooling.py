@@ -23,6 +23,7 @@ TEST_ARGUMENT_WITH_CHOICES = 'sku'
 TEST_COMMAND_WITH_COMPLETER = 'account set'
 TEST_ARGUMENT_WITH_COMPLETER = 'subscription'
 
+
 class ToolingTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -118,6 +119,7 @@ class ToolingTest(unittest.TestCase):
     def test_configured_defaults(self):
         defaults = get_configured_defaults()
         self.assertTrue(isinstance(defaults, dict))
+
 
 if __name__ == '__main__':
     unittest.main()
