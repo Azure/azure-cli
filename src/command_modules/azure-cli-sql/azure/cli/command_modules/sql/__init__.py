@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import azure.cli.command_modules.sql.help  # pylint: disable=unused-import
+import azure.cli.command_modules.sql._help  # pylint: disable=unused-import
 
 __all__ = ['load_params', 'load_commands']
 
