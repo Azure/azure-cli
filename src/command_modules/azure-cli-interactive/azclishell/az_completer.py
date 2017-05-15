@@ -142,7 +142,6 @@ class AzCompleter(Completer):
         self.branch = self.command_tree
         self.curr_command = ''
         self._is_command = True
-
         text = reformat_cmd(text)
         if text.split():
 
@@ -196,6 +195,7 @@ class AzCompleter(Completer):
     # pylint: disable=too-many-branches
     def gen_dynamic_completions(self, text):
         """ generates the dynamic values, like the names of resource groups """
+
         try:  # pylint: disable=too-many-nested-blocks
             is_param, started_param, prefix, param = dynamic_param_logic(text)
 

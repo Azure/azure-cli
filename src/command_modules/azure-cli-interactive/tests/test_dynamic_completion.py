@@ -2,9 +2,10 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+from __future__ import print_function
 import unittest
-import six
 import sys
+import six
 
 from prompt_toolkit.document import Document
 
@@ -26,9 +27,10 @@ class DynamicShellCompletionsTest(unittest.TestCase):
 
         stderr = sys.stderr
         sys.stderr = stream
-        completer.argsfinder.set_outstream(stream)
-        completer.argsfinder.get_parsed_args(['this', 'is', 'world'])
+        completer.get_completions(
+            Document(u'vm create -g '), None)
         self.assertTrue(stream.getvalue() == '')
+
         sys.stderr = stderr
 
 
