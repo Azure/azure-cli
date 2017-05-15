@@ -11,7 +11,7 @@ from msrest.exceptions import DeserializationError, ValidationError, ClientReque
 from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.batch.models import (BatchAccountCreateParameters,
                                      AutoStorageBaseProperties,
-                                     UpdateApplicationParameters)
+                                     ApplicationUpdateParameters)
 from azure.mgmt.batch.operations import (ApplicationPackageOperations)
 
 from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, PoolResizeParameter,
