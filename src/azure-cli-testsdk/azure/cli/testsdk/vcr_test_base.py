@@ -128,6 +128,9 @@ class _MockOutstream(object):
     def flush(self):
         pass
 
+    def clear(self):
+        pass
+
 
 def _mock_get_progress_view(determinant=False, out=None):  # pylint: disable=unused-argument
     return _MockOutstream()
