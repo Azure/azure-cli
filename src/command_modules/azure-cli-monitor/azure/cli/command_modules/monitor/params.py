@@ -15,7 +15,7 @@ from azure.cli.core.commands.parameters import (location_type, get_resource_name
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.util import CLIError
 
-from azure.cli.command_modules.monitor.actions import WebhookAction, ConditionAction, period_type
+from azure.cli.command_modules.monitor.actions import AlertAction, ConditionAction, period_type
 from azure.cli.command_modules.monitor.custom import operator_map, aggregation_map
 from azure.cli.command_modules.monitor.validators import \
     (validate_diagnostic_settings, get_target_resource_validator)
@@ -26,11 +26,10 @@ from azure.mgmt.monitor.models.monitor_management_client_enums import \
 def register_resource_parameter(command, dest, arg_group=None):
     """ Helper method to add the extra parameters needed to support specifying name or ID
         for target resources. """
-    register_cli_argument(command, dest, options_list=['--resource-id'], arg_group=arg_group, required=False, validator=get_target_resource_validator(dest), help="ID of the target resource. If used, do not supply other 'Target Resource' arguments.")
-    register_extra_cli_argument(command, 'resource_name', arg_group=arg_group, help='Name of the target resource. (ex: myC)')
-    register_extra_cli_argument(command, 'namespace', arg_group=arg_group, help="Target resource provider namespace (ex: Microsoft.Provider)")
-    register_extra_cli_argument(command, 'parent', arg_group=arg_group, help="Target resource parent path, if applicable. (Ex: 'resA/myA/resB/myB')")
-    register_extra_cli_argument(command, 'resource_type', arg_group=arg_group, help="Target resource type (Ex: 'resC'). Can also accept namespace/type format (Ex: 'Microsoft.Provider/resC')")
+    register_cli_argument(command, dest, options_list=['--{}'.format(dest)], arg_group=arg_group, required=False, validator=get_target_resource_validator(dest), help="Name or ID of the target resource.")
+    register_extra_cli_argument(command, 'namespace', options_list=['--{}-namespace'.format(dest)], arg_group=arg_group, help="Target resource provider namespace.")
+    register_extra_cli_argument(command, 'parent', options_list=['--{}-parent'.format(dest)], arg_group=arg_group, help="Target resource parent path, if applicable.")
+    register_extra_cli_argument(command, 'resource_type', options_list=['--{}-type'.format(dest)], arg_group=arg_group, help="Target resource type. Can also accept namespace/type format (Ex: 'Microsoft.Compute/virtualMachines)')")
 
 
 name_arg_type = CliArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -42,28 +41,23 @@ register_cli_argument('monitor', 'tags', tags_type)
 
 register_cli_argument('monitor alert', 'rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
 
-for item in ['create', 'create2']:
-    register_cli_argument('monitor alert {}'.format(item), 'rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
+register_cli_argument('monitor alert create', 'rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
 
-    register_cli_argument('monitor alert {}'.format(item), 'custom_emails', nargs='+', arg_group='Action')
-    register_cli_argument('monitor alert {}'.format(item), 'email_service_owners', arg_group='Action', **three_state_flag())
-    register_cli_argument('monitor alert {}'.format(item), 'webhook', nargs='+', action=WebhookAction, arg_group='Action')
-
-    register_cli_argument('monitor alert {}'.format(item), 'condition', action=ConditionAction, nargs='+')
-    register_cli_argument('monitor alert {}'.format(item), 'metric_name', arg_group='Condition')
-    register_cli_argument('monitor alert {}'.format(item), 'operator', arg_group='Condition', **enum_choice_list(ConditionOperator))
-    register_cli_argument('monitor alert {}'.format(item), 'threshold', arg_group='Condition')
-    register_cli_argument('monitor alert {}'.format(item), 'time_aggregation', arg_group='Condition', **enum_choice_list(TimeAggregationOperator))
-    register_cli_argument('monitor alert {}'.format(item), 'window_size', arg_group='Condition')
-
-    register_resource_parameter('monitor alert {}'.format(item), 'target', 'Target Resource')
+register_cli_argument('monitor alert create', 'custom_emails', nargs='+', arg_group='Action')
+register_cli_argument('monitor alert create', 'email_service_owners', arg_group='Action', **three_state_flag())
+register_cli_argument('monitor alert create', 'actions', options_list=['--action', '-a'], action=AlertAction, nargs='+', arg_group='Action')
+register_cli_argument('monitor alert create', 'condition', action=ConditionAction, nargs='+')
+register_cli_argument('monitor alert create', 'metric_name', arg_group='Condition')
+register_cli_argument('monitor alert create', 'operator', arg_group='Condition', **enum_choice_list(ConditionOperator))
+register_cli_argument('monitor alert create', 'threshold', arg_group='Condition')
+register_cli_argument('monitor alert create', 'time_aggregation', arg_group='Condition', **enum_choice_list(TimeAggregationOperator))
+register_cli_argument('monitor alert create', 'window_size', arg_group='Condition')
+register_resource_parameter('monitor alert create', 'target', 'Target Resource')
 
 register_cli_argument('monitor alert update', 'rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
-register_cli_argument('monitor alert update', 'add_emails', nargs='+', arg_group='Action')
-register_cli_argument('monitor alert update', 'remove_emails', nargs='+', arg_group='Action')
 register_cli_argument('monitor alert update', 'email_service_owners', arg_group='Action', **three_state_flag())
-register_cli_argument('monitor alert update', 'add_webhook', nargs='+', action=WebhookAction, arg_group='Action')
-register_cli_argument('monitor alert update', 'remove_webhooks', nargs='+', arg_group='Action')
+register_cli_argument('monitor alert update', 'add_actions', options_list=['--add-action', '-a'], nargs='+', action=AlertAction, arg_group='Action')
+register_cli_argument('monitor alert update', 'remove_actions', options_list=['--remove-action', '-r'], nargs='+', arg_group='Action')
 register_cli_argument('monitor alert update', 'condition', action=ConditionAction, nargs='+', arg_group='Condition')
 register_cli_argument('monitor alert update', 'metric', arg_group='Condition')
 register_cli_argument('monitor alert update', 'operator', arg_group='Condition', **enum_choice_list(operator_map.keys()))

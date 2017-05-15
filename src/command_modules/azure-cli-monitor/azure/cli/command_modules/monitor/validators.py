@@ -13,32 +13,29 @@ def get_target_resource_validator(dest):
 
         id = getattr(namespace, dest)
         rg = namespace.resource_group_name
-        name = namespace.resource_name
         res_ns = namespace.namespace
         parent = namespace.parent
         res_type = namespace.resource_type
 
-        usage_error = CLIError('usage error: --resource-id ID | --resource-name NAME '
-                                '--resource-group NAME --namespace NAMESPACE [--parent PARENT] '
-                                '[--resource-type TYPE]')
-        if not name and not id:
+        usage_error = CLIError('usage error: --{0} ID | --{0} NAME --resource-group NAME '
+                               '--{0}-namespace NAMESPACE [--{0}-parent PARENT] '
+                               '[--{0}-type TYPE]'.format(dest))
+        if not id:
             raise usage_error
-
-        if id:
-            if any((name, res_ns, parent, res_type)) or not is_valid_resource_id(id):
-                raise usage_error
         else:
-            from azure.cli.core.commands.client_factory import get_subscription_id
-            if '/' in res_type:
-                res_ns = res_ns or res_type.rsplit('/', 1)[0]
-                res_type = res_type.rsplit('/', 1)[1]
-            if not all((rg, res_ns, res_type, name)):
+            if is_valid_resource_id(id) and any((res_ns, parent, res_type)):
                 raise usage_error
+            elif not is_valid_resource_id(id):
+                from azure.cli.core.commands.client_factory import get_subscription_id
+                if '/' in res_type:
+                    res_ns = res_ns or res_type.rsplit('/', 1)[0]
+                    res_type = res_type.rsplit('/', 1)[1]
+                if not all((rg, res_ns, res_type, id)):
+                    raise usage_error
 
-            setattr(namespace, dest, '/subscriptions/{}/resourceGroups/{}/providers/{}/{}{}/{}'.format(
-                get_subscription_id(), rg, res_ns, parent + '/' if parent else '', res_type, name))
+                setattr(namespace, dest, '/subscriptions/{}/resourceGroups/{}/providers/{}/{}{}/{}'.format(
+                    get_subscription_id(), rg, res_ns, parent + '/' if parent else '', res_type, id))
 
-        del namespace.resource_name
         del namespace.namespace
         del namespace.parent
         del namespace.resource_type

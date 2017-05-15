@@ -55,10 +55,10 @@ class ConditionAction(argparse.Action):
         namespace.condition = condition
 
 
-class WebhookAction(argparse._AppendAction):
+class AlertAction(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         webhook_action = self.get_webhook(values, option_string)
-        super(WebhookAction, self).__call__(parser, namespace, webhook_action, option_string)
+        super(AlertAction, self).__call__(parser, namespace, webhook_action, option_string)
 
     def get_webhook(self, values, option_string):
         from azure.mgmt.monitor.models import RuleWebhookAction

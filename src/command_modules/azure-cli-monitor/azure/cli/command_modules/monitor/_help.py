@@ -19,59 +19,23 @@ helps['monitor alert'] = """
     short-summary: Commands to manage metric-based alert rules.
     """
 
-helps['monitor alert create2'] = """
-    type: command
-    short-summary: Create a metric-based alert rule.
-    long-summary: |
-        To specify the condition:
-            --metric-name <METRIC> --operator <OPERATOR> --threshold <THRESHOLD> [--time-aggregation <AGGREGATOR> --window-size <TIMESPAN>]
-    parameters:
-        - name: --metric-name
-          short-summary: Name of the metric to base the rule on.
-          populator-commands:
-            - az monitor metrics list-definitions
-        - name: --operator
-          short-summary: How to compare the metric against the threshold.
-        - name: --target
-          short-summary: ID of the resource to target for the alert rule.
-        - name: --threshold
-          short-summary: Numeric threshold at which to trigger the alert.
-        - name: --description
-          short-summary: Free-text description of the rule.
-        - name: --time-aggregation
-          short-summary: Type of aggregation to apply based on --window-size.
-        - name: --window-size
-          short-summary: >
-            Time span over which to apply --time-aggregation, in ISO 8601 format
-            (e.g.: PT5M for 5 minutes)
-        - name: --custom-emails
-          short-summary: Space-separated list of addresses to email when the alert is triggered.
-        - name: --email-service-owners
-          short-summary: Email the service owners if an alert is triggered.
-        - name: --webhook
-          short-summary: >
-            Send a POST request to a web service when the alert is triggered. Usage: --webhook URI [KEY=VALUE ...]
-          long-summary: To add multiple webhook actions, use multiple --webhook entries.
-    examples:
-        - name: Create a High CPU-based alert on a VM.
-          text: >
-            az vm alert rule create -n rule1 -g <RG> --target <VM ID> --metric-name "Percentage CPU"
-            --operator GreaterThan --threshold 90 --time-aggregation Average --window-size PT5M
-"""
-
 helps['monitor alert create'] = """
     type: command
     short-summary: Create a metric-based alert rule.
-    long-summary: |
-        To specify the condition:
-            --condition METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} PERIOD
     parameters:
-        - name: --target
-          short-summary: ID of the resource to target for the alert rule.
+        - name: --action -a
+          short-summary: Add an action to fire when the alert is triggered.
+          long-summary: |
+            To specify multiple actions, add multiple --action ARGS entries.
+            Usage:   --action TYPE KEY [ARG ...]
+            Example: --action email bob@contoso.com
+            Example: --action webhook https://www.contoso.com/alert apiKey=value
+            Example: --action webhook https://www.contoso.com/alert?apiKey=value
         - name: --description
           short-summary: Free-text description of the rule.
         - name: --condition
           short-summary: The condition expression upon which to trigger the rule.
+          long-summary: --condition METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} PERIOD
         - name: --custom-emails
           short-summary: Space-separated list of addresses to email when the alert is triggered.
         - name: --email-service-owners
@@ -100,18 +64,18 @@ helps['monitor alert update'] = """
         - name: --condition
           short-summary: The condition expression upon which to trigger the rule. If used, do not specify
             other 'Condition Arguments'.
-        - name: --add-emails
-          short-summary: Space-separated list of email addresses to add to the rule emails action.
-        - name: --remove-emails
-          short-summary: Space-separated list of email addresses to remove from the rule emails action.
+        - name: --add-action -a
+          short-summary: Add an action to fire when the alert is triggered.
+          long-summary: |
+            To specify multiple actions, add multiple --add-action ARGS entries.
+            Usage:   --add-action TYPE KEY [ARG ...]
+            Example: --add-action email bob@contoso.com
+            Example: --add-action webhook https://www.contoso.com/alert apiKey=value
+            Example: --add-action webhook https://www.contoso.com/alert?apiKey=value
+        - name: --remove-action -r
+          short-summary: Remove one or more actions by key (address for emails or URI for webhooks).
         - name: --email-service-owners
           short-summary: Email the service owners if an alert is triggered.
-        - name: --add-webhook
-          short-summary: >
-            Send a POST request to a web service when the alert is triggered. Usage: --add-webhook URI [KEY=VALUE ...]
-          long-summary: To add multiple webhook actions, use multiple --add-webhook entries.
-        - name: --remove-webhooks
-          short-summary: Space-separated list of webhook URIs to remove from the alert action.
         - name: --metric
           short-summary: Name of the metric to base the rule on.
           populator-commands:

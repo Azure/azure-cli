@@ -33,22 +33,9 @@ aggregation_map = {
 }
 
 
-def create_metric_rule_alt(client, resource_group_name, rule_name, target, metric_name,
-                           operator, threshold, time_aggregation, window_size,
-                           description=None, enabled=True, location=None, tags=None,
-                           email_service_owners=False, custom_emails=None, webhook=None):
-    from azure.mgmt.monitor.models import \
-        (AlertRuleResource, ThresholdRuleCondition, RuleMetricDataSource)
-    metric = RuleMetricDataSource(target, metric_name)
-    condition = ThresholdRuleCondition(operator, threshold, metric, window_size, time_aggregation)
-    rule = AlertRuleResource(location, rule_name, enabled,
-                             condition, tags, description, None)
-    return client.create_or_update(resource_group_name, rule_name, rule)
-
-
 def create_metric_rule(client, resource_group_name, rule_name, target, condition,
                        description=None, enabled=True, location=None, tags=None,
-                       email_service_owners=False, custom_emails=None, webhook=None):
+                       email_service_owners=False, actions=None):
     from azure.mgmt.monitor.models import AlertRuleResource, RuleEmailAction
     condition.data_source.resource_uri = target
     actions = [RuleEmailAction(email_service_owners, custom_emails)] + (webhook or [])
@@ -58,8 +45,7 @@ def create_metric_rule(client, resource_group_name, rule_name, target, condition
 
 def update_metric_rule(instance, target=None, condition=None, description=None, enabled=None,
                        metric=None, operator=None, threshold=None, aggregation=None, period=None,
-                       tags=None, email_service_owners=None, add_emails=None, remove_emails=None,
-                       add_webhook=None, remove_webhooks=None):
+                       tags=None, email_service_owners=None, add_actions=None, remove_actions=None):
     # Update general properties
     if description is not None:
         instance.description = description
