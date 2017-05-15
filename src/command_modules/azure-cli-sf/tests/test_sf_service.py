@@ -8,6 +8,7 @@ import azure.cli.command_modules.sf.custom as sf_c
 from azure.cli.core.util import CLIError
 
 
+# pylint: disable=too-many-public-methods
 class SfServiceTests(unittest.TestCase):
 
     def none_correlation_scheme_returns_none_test(self):
@@ -70,7 +71,7 @@ class SfServiceTests(unittest.TestCase):
         with self.assertRaises(CLIError):
             sf_c.sup_validate_move_cost("Derp")
 
-    def none_move_cost_valid_test(self):
+    def none_move_cost_valid_test(self):  # pylint: disable=no-self-use
         sf_c.sup_validate_move_cost(None)
 
     def none_stateful_flags_returns_zero_test(self):
@@ -82,7 +83,60 @@ class SfServiceTests(unittest.TestCase):
     def none_service_update_flags_returns_zero_test(self):
         self.assertEqual(sf_c.sup_service_update_flags(), "0")
 
-    def either_instance_count_or_target_replica_set_size_are_considered_update_test(self):
+    def either_instance_count_or_target_replica_set_size_are_considered_update_flags_test(self):
         with_instance = sf_c.sup_service_update_flags(instance_count=-1)
         with_target = sf_c.sup_service_update_flags(target_rep_size=30)
         self.assertEqual(with_instance, with_target)
+
+    def service_create_missing_service_type_raises_cli_error_test(self):
+        with self.assertRaises(CLIError):
+            sf_c.validate_service_create_params(False, False, True, False, False, -1, None, None)
+
+    def service_create_missing_partition_scheme_raises_cli_error_test(self):
+        with self.assertRaises(CLIError):
+            sf_c.validate_service_create_params(True, False, False, False, False, None, 7, 5)
+
+    def service_create_missing_instance_count_raises_cli_error_test(self):
+        with self.assertRaises(CLIError):
+            sf_c.validate_service_create_params(False, True, True, False, False, None, None, None)
+
+    def service_create_partition_policy_none_returns_none_test(self):
+        self.assertIs(sf_c.parse_partition_policy(None, None, None, None, None, None, None), None)
+
+    def service_create_partition_policy_no_named_list_raises_cli_error_test(self):
+        with self.assertRaises(CLIError):
+            sf_c.parse_partition_policy(True, None, None, None, None, None, None)
+
+    def service_create_partition_policy_incomplete_int_scheme_raises_cli_error_test(self):
+        with self.assertRaises(CLIError):
+            sf_c.parse_partition_policy(None, None, True, 3, None, 100, None)
+
+    def invalid_activation_mode_raises_cli_error_test(self):
+        with self.assertRaises(CLIError):
+            sf_c.validate_activation_mode("derp")
+
+    def service_update_invalid_instance_count_raises_cli_error_test(self):
+        with self.assertRaises(CLIError):
+            sf_c.validate_update_service_params(False, True, None, None, None, None, None, 10)
+
+    def service_update_invalid_replica_restart_wait_raises_cli_error_test(self):
+        with self.assertRaises(CLIError):
+            sf_c.validate_update_service_params(True, False, None, None, 10, None, None, None)
+
+    def none_health_app_type_policy_returns_none_test(self):
+        self.assertIs(sf_c.parse_app_health_map(None), None)
+
+    def empty_health_app_type_policy_returns_none_test(self):
+        self.assertIs(sf_c.parse_app_health_map([]), None)
+
+    def single_health_app_type_policy_returns_single_test(self):
+        # pylint: disable=line-too-long
+        from azure.servicefabric.models.application_type_health_policy_map_item import (  # noqa: justification, no way to shorten
+            ApplicationTypeHealthPolicyMapItem
+        )
+
+        res = sf_c.parse_app_health_map([{"key": "derp_app", "value": 10}])
+        self.assertEqual(len(res), 1)
+        self.assertIsInstance(res[0], ApplicationTypeHealthPolicyMapItem)
+        self.assertEqual(res[0].key, "derp_app")
+        self.assertEqual(res[0].value, 10)

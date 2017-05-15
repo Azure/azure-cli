@@ -678,6 +678,59 @@ def sup_service_update_flags(
     return str(f)
 
 
+def validate_service_create_params(stateful, stateless, singleton_scheme, int_scheme,
+                                   named_scheme, instance_count, target_rep_set_size,
+                                   min_rep_set_size):
+    if sum([stateful, stateless]) != 1:
+        raise CLIError("Specify either stateful or stateless for the service type")
+    if sum([singleton_scheme, named_scheme, int_scheme]) != 1:
+        raise CLIError("Specify exactly one partition scheme")
+    if stateful and instance_count is not None:
+        raise CLIError("Cannot specify instance count for stateful services")
+    if stateless and instance_count is None:
+        raise CLIError("Must specify instance count for stateless services")
+    if stateful and not all([target_rep_set_size, min_rep_set_size]):
+        raise CLIError("Must specify minimum and replica set size for stateful services")
+    if stateless and any([target_rep_set_size, min_rep_set_size]):
+        raise CLIError("Cannot specify replica set sizes for statless services")
+
+
+def parse_partition_policy(named_scheme, named_scheme_list, int_scheme, int_scheme_low,
+                           int_scheme_high, int_scheme_count, singleton_scheme):
+    from azure.servicefabric.models.named_partition_scheme_description import (
+        NamedPartitionSchemeDescription
+    )
+    # pylint: disable=line-too-long
+    from azure.servicefabric.models.singleton_partition_scheme_description import (  # noqa: justification, no way to shorten
+        SingletonPartitionSchemeDescription
+    )
+    # pylint: disable=line-too-long
+    from azure.servicefabric.models.uniform_int64_range_partition_scheme_description import (  # noqa: justification, no way to shorten
+        UniformInt64RangePartitionSchemeDescription
+    )
+
+    if named_scheme and not named_scheme_list:
+        raise CLIError("When specifying named partition scheme, must include list of names")
+    if int_scheme and not all([int_scheme_low, int_scheme_high, int_scheme_count]):
+        raise CLIError("Must specify the full integer range and partition count when using an "
+                       "uniform integer partition scheme")
+
+    if named_scheme:
+        return NamedPartitionSchemeDescription(len(named_scheme_list), named_scheme_list)
+    elif int_scheme:
+        return UniformInt64RangePartitionSchemeDescription(int_scheme_count, int_scheme_low,
+                                                           int_scheme_high)
+    elif singleton_scheme:
+        return SingletonPartitionSchemeDescription()
+    else:
+        return None
+
+
+def validate_activation_mode(activation_mode):
+    if activation_mode not in [None, "SharedProcess", "ExclusiveProcess"]:
+        raise CLIError("Invalid activate mode specified")
+
+
 def sf_create_service(  # pylint: disable=too-many-arguments, too-many-locals
         client, app_id, name, service_type, stateful=False, stateless=False,
         singleton_scheme=False, named_scheme=False, int_scheme=False,
@@ -789,70 +842,29 @@ def sf_create_service(  # pylint: disable=too-many-arguments, too-many-locals
     from azure.servicefabric.models.stateful_service_description import (
         StatefulServiceDescription
     )
-    from azure.servicefabric.models.named_partition_scheme_description import (
-        NamedPartitionSchemeDescription
-    )
-    # pylint: disable=line-too-long
-    from azure.servicefabric.models.singleton_partition_scheme_description import (  # noqa: justification, no way to shorten
-        SingletonPartitionSchemeDescription
-    )
-    # pylint: disable=line-too-long
-    from azure.servicefabric.models.uniform_int64_range_partition_scheme_description import (  # noqa: justification, no way to shorten
-        UniformInt64RangePartitionSchemeDescription
-    )
 
-    # Validate and parse input
+    validate_service_create_params(stateful, stateless, singleton_scheme, int_scheme,
+                                   named_scheme, instance_count, target_replica_set_size,
+                                   min_replica_set_size)
 
-    # stateful or stateless
-    if sum([stateful, stateless]) != 1:
-        raise CLIError("Specify either stateful or stateless for the "
-                       "service type")
-    # partition scheme
-    if stateful and sum([singleton_scheme, named_scheme, int_scheme]) != 1:
-        raise CLIError("Specify exactly one partition scheme")
-    if named_scheme and not named_scheme_list:
-        raise CLIError("When specifying named partition scheme, must include "
-                       "list of names")
-    if (int_scheme and
-            not all([int_scheme_low, int_scheme_high, int_scheme_count])):
-        raise CLIError("Must specify the full integer range and partition "
-                       "count when using an uniform integer partition scheme")
-    if stateless and any([int_scheme, named_scheme]):
-        raise CLIError("Stateless services cannot be partitioned")
-    if named_scheme:
-        part_schema = NamedPartitionSchemeDescription(len(named_scheme_list),
-                                                      named_scheme_list)
-    elif int_scheme:
-        # pylint: disable=redefined-variable-type
-        part_schema = UniformInt64RangePartitionSchemeDescription(
-            int_scheme_count,
-            int_scheme_low,
-            int_scheme_high
-        )
-    else:
-        # pylint: disable=redefined-variable-type
-        part_schema = SingletonPartitionSchemeDescription()
-    # correlation scheme
+    partition_desc = parse_partition_policy(named_scheme, named_scheme_list, int_scheme,
+                                            int_scheme_low, int_scheme_high, int_scheme_count,
+                                            singleton_scheme)
+
     correlation_desc = sup_correlation_scheme(correlated_service,
                                               correlation)
-    # load metrics
-    load_list = sup_load_metrics(load_metrics)
-    # service placement policies
-    place_policy = sup_placement_policies(placement_policy_list)
-    # default move cost
-    sup_validate_move_cost(move_cost)
-    # activation mode
-    if activation_mode not in [None, "SharedProcess", "ExclusiveProcess"]:
-        raise CLIError("Invalid activate mode specified")
 
-    # Stateless service
-    if stateful and instance_count is not None:
-        raise CLIError("Cannot specify instance count for stateful services")
-    if stateless and instance_count is not None:
-        raise CLIError("Must specify instance count for stateless services")
+    load_list = sup_load_metrics(load_metrics)
+
+    place_policy = sup_placement_policies(placement_policy_list)
+
+    sup_validate_move_cost(move_cost)
+
+    validate_activation_mode(activation_mode)
+
     if stateless:
         svc_desc = StatelessServiceDescription(name, service_type,
-                                               part_schema, instance_count,
+                                               partition_desc, instance_count,
                                                "fabric:/" + app_id,
                                                None, constraints,
                                                correlation_desc, load_list,
@@ -861,19 +873,12 @@ def sf_create_service(  # pylint: disable=too-many-arguments, too-many-locals
                                                activation_mode,
                                                dns_name)
 
-    # Stateful service
-    if stateful and not all([target_replica_set_size, min_replica_set_size]):
-        raise CLIError("Must specify minimum and replica set size for "
-                       "stateful services")
-    if stateless and any([target_replica_set_size, min_replica_set_size]):
-        raise CLIError("Cannot specify replica set sizes for statless "
-                       "services")
     if stateful:
         flags = sup_stateful_flags(replica_restart_wait, quorum_loss_wait,
                                    stand_by_replica_keep)
         # pylint: disable=redefined-variable-type
         svc_desc = StatefulServiceDescription(name, service_type,
-                                              part_schema,
+                                              partition_desc,
                                               target_replica_set_size,
                                               min_replica_set_size,
                                               not no_persisted_state,
@@ -888,6 +893,28 @@ def sf_create_service(  # pylint: disable=too-many-arguments, too-many-locals
                                               stand_by_replica_keep)
 
     client.create_service(app_id, svc_desc, timeout)
+
+
+def validate_update_service_params(stateless, stateful, target_rep_set_size, min_rep_set_size,
+                                   rep_restart_wait, quorum_loss_wait, stand_by_replica_keep,
+                                   instance_count):
+    if sum([stateless, stateful]) != 1:
+        raise CLIError("Must specify either stateful or stateless, not both")
+
+    if stateless:
+        if target_rep_set_size is not None:
+            raise CLIError("Cannot specify target replica set size for stateless service")
+        if min_rep_set_size is not None:
+            raise CLIError("Cannot specify minimum replica set size for stateless service")
+        if rep_restart_wait is not None:
+            raise CLIError("Cannot specify replica restart wait duration for stateless service")
+        if quorum_loss_wait is not None:
+            raise CLIError("Cannot specify quorum loss wait duration for stateless service")
+        if stand_by_replica_keep is not None:
+            raise CLIError("Cannot specify standby replica keep duration for stateless service")
+    if stateful:
+        if instance_count is not None:
+            raise CLIError("Cannot specify an instance count for a stateful service")
 
 
 def sf_update_service(client, service_id,
@@ -967,9 +994,9 @@ def sf_update_service(client, service_id,
         StatelessServiceUpdateDescription
     )
 
-    # validate parameters
-    if sum([stateless, stateful]) != 1:
-        raise CLIError("Must specify either stateful or stateless, not both")
+    validate_update_service_params(stateless, stateful, target_replica_set_size,
+                                   min_replica_set_size, replica_restart_wait, quorum_loss_wait,
+                                   stand_by_replica_keep, instance_count)
 
     correlation_desc = sup_correlation_scheme(correlated_service, correlation)
     load_list = sup_load_metrics(load_metrics)
@@ -985,9 +1012,6 @@ def sf_update_service(client, service_id,
 
     update_desc = None
     if stateful:
-        if instance_count is not None:
-            raise CLIError("Cannot specify an instance count for a "
-                           "stateful service")
         update_desc = StatefulServiceUpdateDescription(flags, constraints,
                                                        correlation_desc,
                                                        load_list, place_policy,
@@ -999,21 +1023,6 @@ def sf_update_service(client, service_id,
                                                        stand_by_replica_keep)
 
     if stateless:
-        if target_replica_set_size is not None:
-            raise CLIError("Cannot specify target replica set size for "
-                           "stateless service")
-        if min_replica_set_size is not None:
-            raise CLIError("Cannot specify minimum replica set size for "
-                           "stateless service")
-        if replica_restart_wait is not None:
-            raise CLIError("Cannot specify replica restart wait duration for "
-                           "stateless service")
-        if quorum_loss_wait is not None:
-            raise CLIError("Cannot specify quorum loss wait duration for "
-                           "stateless service")
-        if stand_by_replica_keep is not None:
-            raise CLIError("Cannot specify standby replica keep duration for "
-                           "stateless service")
         # pylint: disable=redefined-variable-type
         update_desc = StatelessServiceUpdateDescription(flags, constraints,
                                                         correlation_desc,
@@ -1023,6 +1032,28 @@ def sf_update_service(client, service_id,
                                                         instance_count)
 
     client.update_service(service_id, update_desc, timeout)
+
+
+def parse_app_health_map(formatted_map):
+    # pylint: disable=line-too-long
+    from azure.servicefabric.models.application_type_health_policy_map_item import (  # noqa: justification, no way to shorten
+        ApplicationTypeHealthPolicyMapItem
+    )
+
+    if not formatted_map:
+        return None
+
+    health_map = []
+    for m in formatted_map:
+        name = m.get("key", None)
+        percent_unhealthy = m.get("value", None)
+        if name is None:
+            raise CLIError("Cannot find application type health policy map name")
+        if percent_unhealthy is None:
+            raise CLIError("Cannot find application type health policy map unhealthy percent")
+        r = ApplicationTypeHealthPolicyMapItem(name, percent_unhealthy)
+        health_map.append(r)
+    return health_map
 
 
 def sf_start_chaos(
@@ -1073,32 +1104,10 @@ def sf_start_chaos(
     integer that represents the MaxPercentUnhealthyApplications percentage
     used to evaluate the applications of the specified application type.
     """
-    # pylint: disable=line-too-long
-    from azure.servicefabric.models.application_type_health_policy_map_item import (  # noqa: justification, no way to shorten
-        ApplicationTypeHealthPolicyMapItem
-    )
     from azure.servicefabric.models.chaos_parameters import ChaosParameters
-    from azure.servicefabric.models.cluster_health_policy import (
-        ClusterHealthPolicy
-    )
+    from azure.servicefabric.models.cluster_health_policy import ClusterHealthPolicy
 
-    health_map = None
-    if app_type_health_policy_map:
-        health_map = []
-        for m in app_type_health_policy_map:
-            name = m.get("key", None)
-            percent_unhealthy = m.get("value", None)
-            if name is None:
-                raise CLIError(
-                    "Cannot find application type health policy map name"
-                )
-            if percent_unhealthy is None:
-                raise CLIError(
-                    "Cannot find application type health policy map unhealthy "
-                    "percent"
-                )
-            r = ApplicationTypeHealthPolicyMapItem(name, percent_unhealthy)
-            health_map.append(r)
+    health_map = parse_app_health_map(app_type_health_policy_map)
 
     health_policy = ClusterHealthPolicy(warning_as_error,
                                         max_percent_unhealthy_nodes,
@@ -1511,6 +1520,24 @@ def sf_report_node_health(client, node_name,
     client.report_node_health(node_name, info, timeout)
 
 
+def parse_package_sharing_policies(formatted_policies):
+    from azure.servicefabric.models.package_sharing_policy_info import PackageSharingPolicyInfo
+
+    if not formatted_policies:
+        return None
+
+    list_psps = []
+    for p in formatted_policies:
+        policy_name = p.get("name", None)
+        if policy_name is None:
+            raise CLIError("Could not find name of sharing policy element")
+        policy_scope = p.get("scope", None)
+        if policy_scope not in ["None", "All", "Code", "Config", "Data"]:
+            raise CLIError("Invalid policy scope specified")
+        list_psps.append(PackageSharingPolicyInfo(policy_name, policy_scope))
+    return list_psps
+
+
 def sf_service_package_upload(client, node_name,
                               service_manifest_name,
                               app_type_name, app_type_version,
@@ -1540,22 +1567,8 @@ def sf_service_package_upload(client, node_name,
     from azure.servicefabric.models.deploy_service_package_to_node_description import (  # noqa: justification, no way to shorten
         DeployServicePackageToNodeDescription
     )
-    from azure.servicefabric.models.package_sharing_policy_info import (
-        PackageSharingPolicyInfo
-    )
 
-    list_psps = None
-    if share_policy:
-        list_psps = []
-        for p in share_policy:
-            policy_name = p.get("name", None)
-            if policy_name is None:
-                raise CLIError("Could not find name of sharing policy element")
-            policy_scope = p.get("scope", None)
-            if policy_scope not in ["None", "All", "Code", "Config", "Data"]:
-                raise CLIError("Invalid policy scope specified")
-            list_psps.append(PackageSharingPolicyInfo(policy_name,
-                                                      policy_scope))
+    list_psps = parse_package_sharing_policies(share_policy)
 
     desc = DeployServicePackageToNodeDescription(service_manifest_name,
                                                  app_type_name,
