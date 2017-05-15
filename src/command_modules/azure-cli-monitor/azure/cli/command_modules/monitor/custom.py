@@ -34,7 +34,6 @@ def _metric_names_filter_builder(metric_names=None):
     return ' or '.join(filters)
 
 
-# pylint: disable=too-many-arguments
 def list_metrics(client, resource_id, time_grain,
                  start_time=None, end_time=None, metric_names=None):
     '''Lists the metric values for a resource.
@@ -103,7 +102,6 @@ def _validate_start_time(start_time, end_time):
     return result_time
 
 
-# pylint: disable=too-many-arguments
 def list_activity_log(client, filters=None, correlation_id=None, resource_group=None,
                       resource_id=None, resource_provider=None, start_time=None, end_time=None,
                       caller=None, status=None, max_events=50, select=None):
@@ -150,7 +148,6 @@ def _single(collection):
     return len([x for x in collection if x]) == 1
 
 
-# pylint: disable=too-many-arguments
 def _build_activity_log_odata_filter(correlation_id=None, resource_group=None, resource_id=None,
                                      resource_provider=None, start_time=None, end_time=None,
                                      caller=None, status=None):

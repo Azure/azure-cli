@@ -18,7 +18,7 @@ except ImportError:
 from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
 from azure.cli.core.commands.validators import validate_file_or_dict
-from azure.keyvault.key_vault_id import parse_secret_id
+from azure.keyvault import KeyVaultId
 
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.arm import parse_resource_id, resource_id, is_valid_resource_id
@@ -102,8 +102,8 @@ extension_mappings = {
         'publisher': 'Microsoft.Compute'
     },
     _LINUX_DIAG_EXT: {
-        'version': '2.3',
-        'publisher': 'Microsoft.OSTCExtensions'
+        'version': '3.0',
+        'publisher': 'Microsoft.Azure.Diagnostics'
     },
     _WINDOWS_DIAG_EXT: {
         'version': '1.5',
@@ -297,7 +297,8 @@ def create_managed_disk(resource_group_name, disk_name, location=None,
                         size_gb=None, sku='Premium_LRS',
                         source=None,  # pylint: disable=unused-argument
                         # below are generated internally from 'source'
-                        source_blob_uri=None, source_disk=None, source_snapshot=None):
+                        source_blob_uri=None, source_disk=None, source_snapshot=None,
+                        source_storage_account_id=None):
     from azure.mgmt.compute.models import Disk, CreationData, DiskCreateOption, ImageDiskReference
     location = location or get_resource_group_location(resource_group_name)
     if source_blob_uri:
@@ -309,7 +310,8 @@ def create_managed_disk(resource_group_name, disk_name, location=None,
 
     creation_data = CreationData(option, source_uri=source_blob_uri,
                                  image_reference=None,
-                                 source_resource_id=source_disk or source_snapshot)
+                                 source_resource_id=source_disk or source_snapshot,
+                                 storage_account_id=source_storage_account_id)
 
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('usage error: --size-gb required to create an empty disk')
@@ -406,7 +408,8 @@ def create_snapshot(resource_group_name, snapshot_name, location=None,
                     size_gb=None, sku='Standard_LRS',
                     source=None,  # pylint: disable=unused-argument
                     # below are generated internally from 'source'
-                    source_blob_uri=None, source_disk=None, source_snapshot=None):
+                    source_blob_uri=None, source_disk=None, source_snapshot=None,
+                    source_storage_account_id=None):
     from azure.mgmt.compute.models import (Snapshot, CreationData, DiskCreateOption,
                                            ImageDiskReference)
     location = location or get_resource_group_location(resource_group_name)
@@ -419,7 +422,8 @@ def create_snapshot(resource_group_name, snapshot_name, location=None,
 
     creation_data = CreationData(option, source_uri=source_blob_uri,
                                  image_reference=None,
-                                 source_resource_id=source_disk or source_snapshot)
+                                 source_resource_id=source_disk or source_snapshot,
+                                 storage_account_id=source_storage_account_id)
 
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('Please supply size for the snapshots')
@@ -1523,7 +1527,8 @@ def create_vm(vm_name, resource_group_name, image=None,
               os_publisher=None, os_offer=None, os_sku=None, os_version=None,
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_type=None,
               nic_type=None, validate=False, custom_data=None, secrets=None,
-              plan_name=None, plan_product=None, plan_publisher=None):
+              plan_name=None, plan_product=None, plan_publisher=None,
+              license_type=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string
     from azure.cli.command_modules.vm._template_builder import (
@@ -1631,7 +1636,8 @@ def create_vm(vm_name, resource_group_name, image=None,
         vm_name, location, tags, size, storage_profile, nics, admin_username, availability_set,
         admin_password, ssh_key_value, ssh_dest_key_path, image, os_disk_name,
         os_type, os_caching, data_caching, storage_sku, os_publisher, os_offer, os_sku, os_version,
-        os_vhd_uri, attach_os_disk, data_disk_sizes_gb, image_data_disks, custom_data, secrets)
+        os_vhd_uri, attach_os_disk, data_disk_sizes_gb, image_data_disks, custom_data, secrets,
+        license_type)
     vm_resource['dependsOn'] = vm_dependencies
 
     if plan_name:
@@ -1952,7 +1958,7 @@ def get_vm_format_secret(secrets, certificate_store=None):
 
     # group secrets by source vault
     for secret in secrets:
-        parsed = parse_secret_id(secret)
+        parsed = KeyVaultId.parse_secret_id(secret)
         match = re.search('://(.+?)\\.', parsed.vault)
         vault_name = match.group(1)
         if vault_name not in grouped_secrets:

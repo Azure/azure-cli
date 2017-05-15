@@ -18,8 +18,7 @@ from azure.cli.core.commands.arm import parse_resource_id
 from azure.cli.core.commands.validators import validate_tags
 from azure.cli.core.util import CLIError
 
-from azure.keyvault.generated.models.key_vault_client_enums \
-    import JsonWebKeyOperation
+from azure.keyvault.models import JsonWebKeyOperation
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
 secret_binary_encoding_values = ['base64', 'hex']

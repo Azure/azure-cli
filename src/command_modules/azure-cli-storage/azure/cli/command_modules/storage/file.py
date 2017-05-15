@@ -7,7 +7,6 @@
 Commands for storage file share operations
 """
 
-# pylint: disable=too-many-arguments
 
 import os.path
 from azure.cli.core.azlogging import get_az_logger

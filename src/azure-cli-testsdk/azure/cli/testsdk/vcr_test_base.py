@@ -279,7 +279,6 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
         'x-ms-served-by',
     ]
 
-    # pylint: disable=too-many-arguments
     def __init__(self, test_file, test_name, run_live=False, debug=False, debug_vcr=False,
                  skip_setup=False, skip_teardown=False):
         super(VCRTestBase, self).__init__(test_name)
@@ -505,7 +504,6 @@ class VCRTestBase(unittest.TestCase):  # pylint: disable=too-many-instance-attri
 
 
 class ResourceGroupVCRTestBase(VCRTestBase):
-    # pylint: disable=too-many-arguments
 
     def __init__(self, test_file, test_name, resource_group='vcr_resource_group', run_live=False,
                  debug=False, debug_vcr=False, skip_setup=False, skip_teardown=False,

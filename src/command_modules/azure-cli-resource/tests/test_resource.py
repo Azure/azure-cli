@@ -656,5 +656,42 @@ class ManagedAppScenarioTest(ScenarioTest):
         self.cmd('managedapp list -g {}'.format(resource_group), checks=NoneCheck())
 
 
+class CrossRGDeploymentScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_crossrgdeployment(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_file = os.path.join(curr_dir, 'crossrg_deploy.json').replace('\\', '\\\\')
+        parameters_file = os.path.join(curr_dir, 'crossrg_deploy_parameters.json').replace('\\',
+                                                                                           '\\\\')
+        deployment_name = 'azure-cli-crossrgdeployment'
+
+        self.cmd('group deployment validate -g {} --template-file {} --parameters @{}'.format(
+            resource_group, template_file, parameters_file), checks=[
+            JCheck('properties.provisioningState', 'Succeeded')
+        ])
+        self.cmd('group deployment create -g {} -n {} --template-file {} --parameters @{}'.format(
+            resource_group, deployment_name, template_file, parameters_file), checks=[
+            JCheck('properties.provisioningState', 'Succeeded'),
+            JCheck('resourceGroup', resource_group),
+        ])
+        self.cmd('group deployment list -g {}'.format(resource_group), checks=[
+            JCheck('[0].name', deployment_name),
+            JCheck('[0].resourceGroup', resource_group)
+        ])
+        self.cmd('group deployment show -g {} -n {}'.format(resource_group, deployment_name),
+                 checks=[
+                     JCheck('name', deployment_name),
+                     JCheck('resourceGroup', resource_group)
+                 ])
+        self.cmd('group deployment operation list -g {} -n {}'.format(resource_group,
+                                                                      deployment_name), checks=[
+            JCheck('length([])', 3),
+            JCheck('[0].resourceGroup', resource_group)
+        ])
+
+    def tear_down(self):
+        self.cmd('group delete --name {} --no-wait --yes'.format('crossrg5'))
+
+
 if __name__ == '__main__':
     unittest.main()

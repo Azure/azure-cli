@@ -110,7 +110,7 @@ class SingleValueReplacer(RecordingProcessor):
 # Resource Group Preparer and its shorthand decorator
 
 class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest.rg',  # pylint: disable=too-many-arguments
+    def __init__(self, name_prefix='clitest.rg',
                  parameter_name='resource_group',
                  parameter_name_for_location='resource_group_location', location='westus',
                  dev_setting_name='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME',
@@ -141,7 +141,7 @@ class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
 # Storage Account Preparer and its shorthand decorator
 
 class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self,  # pylint: disable=too-many-arguments
+    def __init__(self,
                  name_prefix='clitest', sku='Standard_LRS', location='westus',
                  parameter_name='storage_account', resource_group_parameter_name='resource_group',
                  skip_delete=True, dev_setting_name='AZURE_CLI_TEST_DEV_STORAGE_ACCOUNT_NAME'):
@@ -178,14 +178,52 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
         except KeyError:
             template = 'To create a storage account a resource group is required. Please add ' \
                        'decorator @{} in front of this storage account preparer.'
-            raise CliTestError(template.format(ResourceGroupPreparer.__name__,
-                                               self.resource_group_parameter_name))
+            raise CliTestError(template.format(ResourceGroupPreparer.__name__))
+
+
+# KeyVault Preparer and its shorthand decorator
+
+class KeyVaultPreparer(AbstractPreparer, SingleValueReplacer):
+    def __init__(self,  # pylint: disable=too-many-arguments
+                 name_prefix='clitest', sku='standard', location='westus',
+                 parameter_name='key_vault', resource_group_parameter_name='resource_group',
+                 skip_delete=True, dev_setting_name='AZURE_CLI_TEST_DEV_KEY_VAULT_NAME'):
+        super(KeyVaultPreparer, self).__init__(name_prefix, 24)
+        self.location = location
+        self.sku = sku
+        self.resource_group_parameter_name = resource_group_parameter_name
+        self.skip_delete = skip_delete
+        self.parameter_name = parameter_name
+
+        self.dev_setting_name = os.environ.get(dev_setting_name, None)
+
+    def create_resource(self, name, **kwargs):
+        if not self.dev_setting_name:
+            group = self._get_resource_group(**kwargs)
+            template = 'az keyvault create -n {} -g {} -l {} --sku {}'
+            execute(template.format(name, group, self.location, self.sku))
+            return {self.parameter_name: name}
+        else:
+            return {self.parameter_name: self.dev_setting_name}
+
+    def remove_resource(self, name, **kwargs):
+        if not self.skip_delete and not self.dev_setting_name:
+            group = self._get_resource_group(**kwargs)
+            execute('az keyvault delete -n {} -g {} --yes'.format(name, group))
+
+    def _get_resource_group(self, **kwargs):
+        try:
+            return kwargs.get(self.resource_group_parameter_name)
+        except KeyError:
+            template = 'To create a KeyVault a resource group is required. Please add ' \
+                       'decorator @{} in front of this KeyVault preparer.'
+            raise CliTestError(template.format(KeyVaultPreparer.__name__))
 
 
 # Role based access control service principal preparer
 
 class RoleBasedServicePrincipalPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='http://clitest',  # pylint: disable=too-many-arguments
+    def __init__(self, name_prefix='http://clitest',
                  skip_assignment=True, parameter_name='sp_name', parameter_password='sp_password',
                  dev_setting_sp_name='AZURE_CLI_TEST_DEV_SP_NAME',
                  dev_setting_sp_password='AZURE_CLI_TEST_DEV_SP_PASSWORD'):
