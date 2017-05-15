@@ -460,7 +460,7 @@ class TestBatchLoader(unittest.TestCase):
             'batch_tests_job',
             'azure.batch.operations.job_operations#JobOperations.add',
             get_client, None, 3,
-            ['job.job_manager_task', 'job.job_preparation_task',
+            ['job.job_manager_task', 'job.job_preparation_task', \
              'job.job_release_task'], None, None)
         self.command_task = _command_type.AzureBatchDataPlaneCommand(
             'batch_unit_tests',
@@ -558,7 +558,6 @@ class TestBatchLoader(unittest.TestCase):
         self.assertFalse(self.command_job._cancel_operation({}, config, user))
         self.assertFalse(self.command_job._cancel_operation({'yes': True}, config, user))
         self.assertFalse(self.command_delete._cancel_operation({'yes': True}, config, user))
-        self.assertTrue(self.command_delete._cancel_operation({'yes': None}, config, user))
 
     def test_batch_should_flatten(self):
         self.assertFalse(self.command_task._should_flatten('task.depends_on'))
@@ -641,7 +640,7 @@ class TestBatchLoader(unittest.TestCase):
         args = list(self.command_pool._load_transformed_arguments(handler))
         with mock.patch.object(_command_type, 'get_op_handler', get_op_handler):
             with self.assertRaises(CLIError):
-                self.command_pool.cmd(kwargs={'id': 'pool_test', 'vm_size': 'small'})
+                self.command_pool.cmd.execute(kwargs={'id': 'pool_test', 'vm_size': 'small'})
 
         def function_result(client, **kwargs):
             # pylint: disable=function-redefined,unused-argument
@@ -649,14 +648,14 @@ class TestBatchLoader(unittest.TestCase):
 
         with mock.patch.object(_command_type, 'get_op_handler', get_op_handler):
             with self.assertRaises(CLIError):
-                self.command_pool.cmd(kwargs={'id': 'pool_test', 'vm_size': 'small'})
+                self.command_pool.cmd.execute(kwargs={'id': 'pool_test', 'vm_size': 'small'})
 
         def function_result(client, **kwargs):
             # pylint: disable=function-redefined,unused-argument
             error = models.BatchError()
             error.code = 'InvalidHeaderValue'
             error.message = models.ErrorMessage('en-US', 'The value for one of the HTTP '
-                                                         'headers is not in the correct format')
+                                                'headers is not in the correct format')
             error.values = [
                 models.BatchErrorDetail('HeaderName', 'Content-Type'),
                 models.BatchErrorDetail('HeaderValue', 'application/json')
@@ -666,7 +665,7 @@ class TestBatchLoader(unittest.TestCase):
 
         with mock.patch.object(_command_type, 'get_op_handler', get_op_handler):
             with self.assertRaises(CLIError):
-                self.command_pool.cmd(kwargs={'id': 'pool_test', 'vm_size': 'small'})
+                self.command_pool.cmd.execute(kwargs={'id': 'pool_test', 'vm_size': 'small'})
 
         def function_result(client, **kwargs):
             # pylint: disable=function-redefined,unused-argument
@@ -681,5 +680,5 @@ class TestBatchLoader(unittest.TestCase):
         kwargs = {a: None for a, _ in args}
         kwargs['json_file'] = json_file
         with mock.patch.object(_command_type, 'get_op_handler', get_op_handler):
-            result = self.command_pool.cmd(kwargs=kwargs)
+            result = self.command_pool.cmd.execute(kwargs=kwargs)
             self.assertEqual(result, "Pool Created")
