@@ -12,8 +12,7 @@ from azclishell.util import get_window_dim
 
 PROGRESS = ''
 PROGRESS_BAR = ''
-DONE_STR = 'Finished'
-INTR_STR = 'Interrupted'
+DONE = False
 #  have 2 down beats to make the odds work out better
 HEART_BEAT_VALUES = {0: "__", 1: "/\\", 2: '/^\\', 3: "__"}
 HEART_BEAT = ''
@@ -44,14 +43,19 @@ class ShellProgressView(ProgressViewBase):
         return message
 
     def flush(self):
-        """ flushes the message"""
         pass
+
+    def clear(self):
+        global DONE
+        DONE = True
 
 
 def get_progress_message():
     """ gets the progress message """
     return PROGRESS
 
+def get_done():
+    return DONE
 
 def progress_view(shell):
     """ updates the view """
@@ -64,7 +68,7 @@ def progress_view(shell):
     if PROGRESS_BAR:
         doc = u'{}:{}'.format(progress, PROGRESS_BAR)
     else:
-        if progress and progress != DONE_STR:
+        if progress and not DONE:
             if shell.spin_val >= 0:
                 beat = HEART_BEAT_VALUES[_get_heart_frequency()]
                 HEART_BEAT += beat
@@ -84,7 +88,7 @@ def progress_view(shell):
     shell.cli.buffers['progress'].reset(
         initial_document=Document(doc))
     shell.cli.request_redraw()
-    if PROGRESS == 'Finished' or PROGRESS == 'Interrupted':
+    if DONE:
         return True
 
 

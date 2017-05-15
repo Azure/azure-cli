@@ -24,7 +24,11 @@ class ProgressViewBase(object):
 
     def flush(self):
         """ flushes the message out the pipeline"""
-        self.out.flush()
+        raise NotImplementedError
+
+    def clear(self):
+        """ resets the view to neutral """
+        pass
 
 
 class ProgressReporter(object):
@@ -80,6 +84,7 @@ class ProgressHook(object):
         """ if there is an abupt stop before ending """
         self.reporter.closed = True
         self.add(message='Interrupted')
+        self.active_progress.clear()
 
     def begin(self, **kwargs):
         """ start reporting progress """
@@ -91,7 +96,11 @@ class ProgressHook(object):
         kwargs['message'] = kwargs.get('message', 'Finished')
         self.reporter.closed = True
         self.add(**kwargs)
+        self.active_progress.clear()
 
+    def is_running(self):
+        """ whether progress is continuing """
+        return not self.reporter.closed
 
 class IndeterminateStandardOut(ProgressViewBase):
     """ custom output for progress reporting """
@@ -111,6 +120,8 @@ class IndeterminateStandardOut(ProgressViewBase):
         msg = args.get('message', 'In Progress')
         self.spinner.step(label=msg)
 
+    def flush(self):
+        self.out.flush()
 
 def _format_value(msg, percent):
     bar_len = BAR_LEN - len(msg) - 1
@@ -139,6 +150,9 @@ class DeterminateStandardOut(ProgressViewBase):
             percent = percent
             progress = _format_value(message, percent)
             self.out.write(progress)
+
+    def flush(self):
+        pass
 
 
 def get_progress_view(determinant=False, outstream=sys.stderr):
