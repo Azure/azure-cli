@@ -371,3 +371,8 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                               JMESPathCheck('type(@)', 'array')]).get_output_in_json()
 
         self.assertIsNotNone(result[0]['name'])
+
+
+if __name__ == '__main__':
+    import unittest
+    unittest.main()
