@@ -193,3 +193,6 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
             resource_group, account_name, application_name))
         self.cmd('batch application list -g {} -n {}'.format(
             resource_group, account_name)).assert_with_checks(NoneCheck())
+
+        self.cmd('storage account delete -g {} -n {} --yes'.format(
+            resource_group, storage_account_name))
