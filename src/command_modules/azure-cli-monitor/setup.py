@@ -55,6 +55,7 @@ setup(
         'azure.cli.command_modules',
         'azure.cli.command_modules.monitor'
     ],
+    package_data={'azure.cli.command_modules.monitor': ['autoscale-parameters-template.json']},
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass
 )
