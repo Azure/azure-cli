@@ -5,6 +5,7 @@ Release History
 (unreleased)
 ++++++++++++++++++++
 * webapp: add reliability fixes in configuring source control (#3245)
+* webapp: remove --node-version from 'webapp config update', as server has abandoned this setting long while ago
 
 0.1.6 (2017-05-09)
 ++++++++++++++++++++

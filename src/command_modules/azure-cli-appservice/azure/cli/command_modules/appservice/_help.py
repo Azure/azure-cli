@@ -35,6 +35,7 @@ helps['webapp config show'] = """
 helps['webapp config set'] = """
     type: command
     short-summary: create or update web app configurations.
+    long-summary: For Windows Node webapp, use appsetting of 'WEBSITE_NODE_DEFAULT_VERSION'. For Linux Node webapp, use '--linux-fx-version'
 """
 
 helps['webapp config appsettings'] = """
